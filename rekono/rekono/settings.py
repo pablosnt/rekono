@@ -98,6 +98,21 @@ DATABASES = {
     }
 }
 
+# Redis Queue
+
+RQ_QUEUES = {
+    'task-queue': {
+        'HOST': '127.0.0.1',
+        'PORT': 6379,
+        'DB': 0
+    },
+    'finding-queue': {
+        'HOST': '127.0.0.1',
+        'PORT': 6379,
+        'DB': 0
+    }
+}
+
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
