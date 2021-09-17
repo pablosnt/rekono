@@ -77,18 +77,6 @@ class BaseTool():
         }
         for i in self.inputs:
             try:
-                if i.type == FindingType.TARGET:
-                    command_arguments[i.name] = formatter.argument_with_target(
-                        i.argument,
-                        target.target
-                    )
-                    continue
-                elif i.type == FindingType.TARGET_PORT:
-                    command_arguments[i.name] = formatter.argument_with_target_ports(
-                        i.argument,
-                        target_ports
-                    )
-                    continue
                 if i.selection == Input.InputSelection.FOR_EACH:
                     for r in previous_findings:
                         if isinstance(r, getattr(sys.modules[__name__], i.type)):
@@ -119,6 +107,19 @@ class BaseTool():
                         i.argument,
                         findings
                     )
+                if i.name not in command_arguments:
+                    if i.type == FindingType.HOST:
+                        command_arguments[i.name] = formatter.argument_with_target(
+                            i.argument,
+                            target.target
+                        )
+                        continue
+                    elif i.type == FindingType.ENUMERATION:
+                        command_arguments[i.name] = formatter.argument_with_target_ports(
+                            i.argument,
+                            target_ports
+                        )
+                        continue
             except KeyError:
                 if i.required and i.name not in command_arguments:
                     raise InvalidToolParametersException(

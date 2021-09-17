@@ -12,8 +12,6 @@ class IntensityRank(models.IntegerChoices):
 
 
 class FindingType(models.TextChoices):
-    TARGET = 'projects.models.Target'
-    TARGET_PORT = 'projects.models.TargetPort'
     OSINT = 'findings.models.OSINT'
     HOST = 'findings.models.Host'
     ENUMERATION = 'findings.models.Enumeration'

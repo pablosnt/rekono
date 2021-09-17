@@ -70,7 +70,7 @@
         "fields": {
             "configuration_id": 1,
             "name": "target",
-            "type": "projects.models.Target",
+            "type": "findings.models.Host",
             "argument": "{target}",
             "selection": 2,
             "required": true
@@ -82,7 +82,7 @@
         "fields": {
             "configuration_id": 1,
             "name": "ports",
-            "type": "projects.models.TargetPorts",
+            "type": "findings.models.Enumeration",
             "argument": "-p {ports_commas}",
             "selection": 1,
             "required": false
