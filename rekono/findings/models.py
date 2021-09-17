@@ -136,13 +136,6 @@ class Vulnerability(models.Model):
         blank=True,
         null=True
     )
-    enumeration = models.ForeignKey(
-        Enumeration,
-        related_name='vulnerabilities',
-        on_delete=models.CASCADE,
-        blank=True,
-        null=True
-    )
     technology = models.ForeignKey(
         Technology,
         related_name='vulnerabilities',
@@ -152,7 +145,7 @@ class Vulnerability(models.Model):
     )
     name = models.TextField(max_length=50)
     description = models.TextField(blank=True, null=True)
-    severity = models.IntegerField(choices=Severity.choices)
+    severity = models.IntegerField(choices=Severity.choices, default=Severity.MEDIUM)
     cve = models.TextField(max_length=20, blank=True, null=True)
     reference = models.TextField(max_length=250, blank=True, null=True)
     creation = models.DateTimeField(auto_now_add=True)

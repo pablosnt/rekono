@@ -1,0 +1,12 @@
+[
+    {
+        "model": "tools.tool",
+        "pk": 1,
+        "fields": {
+            "name": "nmap",
+            "command": "nmap",
+            "stage": 2,
+            "reference": "https://nmap.org/"
+        }
+    }
+]

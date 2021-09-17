@@ -1,0 +1,338 @@
+[
+    {
+        "model": "tools.input",
+        "pk": 1,
+        "fields": {
+            "configuration_id": 1,
+            "name": "target",
+            "type": "findings.models.Host",
+            "argument": "{target}",
+            "selection": 2,
+            "required": true
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 2,
+        "fields": {
+            "configuration_id": 1,
+            "name": "ports",
+            "type": "findings.models.Enumeration",
+            "argument": "-p {ports_commas}",
+            "selection": 1,
+            "required": false
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 3,
+        "fields": {
+            "configuration_id": 2,
+            "name": "target",
+            "type": "findings.models.Host",
+            "argument": "{target}",
+            "selection": 2,
+            "required": true
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 4,
+        "fields": {
+            "configuration_id": 2,
+            "name": "ports",
+            "type": "findings.models.Enumeration",
+            "argument": "-p {ports_commas}",
+            "selection": 1,
+            "required": false
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 5,
+        "fields": {
+            "configuration_id": 3,
+            "name": "target",
+            "type": "findings.models.Host",
+            "argument": "{target}",
+            "selection": 2,
+            "required": true
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 6,
+        "fields": {
+            "configuration_id": 3,
+            "name": "ports",
+            "type": "findings.models.Enumeration",
+            "argument": "-p {ports_commas}",
+            "selection": 1,
+            "required": false
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 7,
+        "fields": {
+            "configuration_id": 4,
+            "name": "target",
+            "type": "findings.models.Host",
+            "argument": "{target}",
+            "selection": 2,
+            "required": true
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 8,
+        "fields": {
+            "configuration_id": 4,
+            "name": "ports",
+            "type": "findings.models.Enumeration",
+            "argument": "-p {ports_commas}",
+            "selection": 1,
+            "required": false
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 9,
+        "fields": {
+            "configuration_id": 5,
+            "name": "target",
+            "type": "findings.models.Host",
+            "argument": "{target}",
+            "selection": 2,
+            "required": true
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 10,
+        "fields": {
+            "configuration_id": 5,
+            "name": "ports",
+            "type": "findings.models.Enumeration",
+            "argument": "-p {ports_commas}",
+            "selection": 1,
+            "required": false
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 11,
+        "fields": {
+            "configuration_id": 6,
+            "name": "target",
+            "type": "findings.models.Host",
+            "argument": "{target}",
+            "selection": 2,
+            "required": true
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 12,
+        "fields": {
+            "configuration_id": 6,
+            "name": "ports",
+            "type": "findings.models.Enumeration",
+            "argument": "-p {ports_commas}",
+            "selection": 1,
+            "required": false
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 13,
+        "fields": {
+            "configuration_id": 7,
+            "name": "target",
+            "type": "findings.models.Host",
+            "argument": "{target}",
+            "selection": 2,
+            "required": true
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 14,
+        "fields": {
+            "configuration_id": 7,
+            "name": "ports",
+            "type": "findings.models.Enumeration",
+            "argument": "-p {ports_commas}",
+            "selection": 1,
+            "required": false
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 15,
+        "fields": {
+            "configuration_id": 8,
+            "name": "target",
+            "type": "findings.models.Host",
+            "argument": "{target}",
+            "selection": 2,
+            "required": true
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 16,
+        "fields": {
+            "configuration_id": 8,
+            "name": "ports",
+            "type": "findings.models.Enumeration",
+            "argument": "-p {ports_commas}",
+            "selection": 1,
+            "required": false
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 17,
+        "fields": {
+            "configuration_id": 9,
+            "name": "target",
+            "type": "findings.models.Host",
+            "argument": "{target}",
+            "selection": 2,
+            "required": true
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 18,
+        "fields": {
+            "configuration_id": 9,
+            "name": "ports",
+            "type": "findings.models.Enumeration",
+            "argument": "-p {ports_commas}",
+            "selection": 1,
+            "required": false
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 19,
+        "fields": {
+            "configuration_id": 10,
+            "name": "target",
+            "type": "findings.models.Host",
+            "argument": "{target}",
+            "selection": 2,
+            "required": true
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 20,
+        "fields": {
+            "configuration_id": 10,
+            "name": "ports",
+            "type": "findings.models.Enumeration",
+            "argument": "-p {ports_commas}",
+            "selection": 1,
+            "required": false
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 21,
+        "fields": {
+            "configuration_id": 11,
+            "name": "target",
+            "type": "findings.models.Host",
+            "argument": "{target}",
+            "selection": 2,
+            "required": true
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 22,
+        "fields": {
+            "configuration_id": 11,
+            "name": "ports",
+            "type": "findings.models.Enumeration",
+            "argument": "-p {ports_commas}",
+            "selection": 1,
+            "required": false
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 23,
+        "fields": {
+            "configuration_id": 12,
+            "name": "target",
+            "type": "findings.models.Host",
+            "argument": "{target}",
+            "selection": 2,
+            "required": true
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 24,
+        "fields": {
+            "configuration_id": 12,
+            "name": "ports",
+            "type": "findings.models.Enumeration",
+            "argument": "-p {ports_commas}",
+            "selection": 1,
+            "required": false
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 25,
+        "fields": {
+            "configuration_id": 13,
+            "name": "target",
+            "type": "findings.models.Host",
+            "argument": "{target}",
+            "selection": 2,
+            "required": true
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 26,
+        "fields": {
+            "configuration_id": 13,
+            "name": "ports",
+            "type": "findings.models.Enumeration",
+            "argument": "-p {ports_commas}",
+            "selection": 1,
+            "required": false
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 27,
+        "fields": {
+            "configuration_id": 14,
+            "name": "target",
+            "type": "findings.models.Host",
+            "argument": "{target}",
+            "selection": 2,
+            "required": true
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 28,
+        "fields": {
+            "configuration_id": 14,
+            "name": "ports",
+            "type": "findings.models.Enumeration",
+            "argument": "-p {ports_commas}",
+            "selection": 1,
+            "required": false
+        }
+    }
+]

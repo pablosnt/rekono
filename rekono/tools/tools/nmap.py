@@ -1,14 +1,70 @@
 import os
+import re
 
-from executions.models import Execution
+from findings.models import Enumeration, Host, Technology, Vulnerability
 from libnmap.parser import NmapParser
-from findings.models import Enumeration, Host, Technology
+from tools.constants import CVE_REGEX
 from tools.tools.base_tool import BaseTool
 
 
 class NmapTool(BaseTool):
 
     file_output_enabled = True
+
+    def parse_vulners_nse(self, output: str, technology: Technology) -> list:
+        cves = re.findall(CVE_REGEX, output)
+        findings = []
+        for cve in cves:
+            vulnerability = Vulnerability.objects.create(
+                technology=technology,
+                name=cve,
+                cve=cve
+            )
+            findings.append(vulnerability)
+        return findings
+
+    def parse_ftp_anon_nse(self, output: str, technology: Technology) -> list:
+        vulnerability = Vulnerability.objects.create(
+            technology=technology,
+            name='FTP anonymous',
+            description='FTP anonymous login is allowed',
+            severity=Vulnerability.Severity.CRITICAL,
+            reference='https://book.hacktricks.xyz/pentesting/pentesting-ftp#anonymous-login'
+        )
+        return [vulnerability]
+
+    def parse_ftp_proftpd_bd_nse(self, output: str, technology: Technology) -> list:
+        vulnerability = Vulnerability.objects.create(
+            technology=technology,
+            name='FTP Backdoor',
+            description='FTP ProFTPD 1.3.3c Backdoor',
+            severity=Vulnerability.Severity.CRITICAL
+        )
+        return [vulnerability]
+
+    def parse_ftp_vsftpd_bd_nse(self, output: str, technology: Technology) -> list:
+        vulnerability = Vulnerability.objects.create(
+            technology=technology,
+            name='CVE-2011-2523',
+            cve='CVE-2011-2523'
+        )
+        return [vulnerability]
+
+    def parse_ftp_libopie_nse(self, output: str, technology: Technology) -> list:
+        vulnerability = Vulnerability.objects.create(
+            technology=technology,
+            name='CVE-2010-1938',
+            cve='CVE-2010-1938'
+        )
+        return [vulnerability]
+
+    def parse_ftp_cve_2010_4221(self, output: str, technology: Technology) -> list:
+        vulnerability = Vulnerability.objects.create(
+            technology=technology,
+            name='CVE-2010-4221',
+            cve='CVE-2010-4221'
+        )
+        return [vulnerability]
 
     def parse_output(self, output: str) -> list:
         findings = []
@@ -57,4 +113,18 @@ class NmapTool(BaseTool):
                             version=s.service_dict.get('version')
                         )
                         findings.append(technology)
+                        if s.scripts_results:
+                            parsers = {
+                                'vulners': self.parse_vulners_nse,
+                                'ftp-anon': self.parse_ftp_anon_nse,
+                                'ftp-proftpd-backdoor': self.parse_ftp_proftpd_bd_nse,
+                                'ftp-vsftpd-backdoor': self.parse_ftp_vsftpd_bd_nse,
+                                'ftp-libopie': self.parse_ftp_libopie_nse,
+                                'ftp-vuln-cve2010-4221': self.parse_ftp_cve_2010_4221,
+                            }
+                            for script in s.scripts_results:
+                                if script.get('id', '') not in parsers:
+                                    continue
+                                new = parsers[script.get('id', '')](script.get('output', ''), technology)   # noqa: E501
+                                findings.extend(new)
         return findings

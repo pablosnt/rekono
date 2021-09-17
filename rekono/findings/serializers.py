@@ -27,7 +27,7 @@ class EnumerationSerializer(serializers.ModelSerializer):
         model = Enumeration
         fields = (
             'id', 'execution', 'host', 'port', 'port_status', 'protocol',
-            'service', 'creation', 'http_endpoints', 'technologies', 'vulnerabilities'
+            'service', 'creation', 'http_endpoints', 'technologies'
         )
 
 
@@ -54,9 +54,8 @@ class VulnerabilitySerializer(serializers.ModelSerializer):
     class Meta:
         model = Vulnerability
         fields = (
-            'id', 'execution', 'enumeration', 'technology', 'name',
-            'description', 'severity', 'cve', 'reference', 'creation',
-            'exploits'
+            'id', 'execution', 'technology', 'name', 'description',
+            'severity', 'cve', 'reference', 'creation', 'exploits'
         )
 
 

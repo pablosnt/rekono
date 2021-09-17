@@ -1,0 +1,142 @@
+[
+    {
+        "model": "tools.configuration",
+        "pk": 1,
+        "fields": {
+            "tool_id": 1,
+            "name": "TCP ports",
+            "arguments": "{target} {intensity} {ports} -sS -oX {output}",
+            "default": false
+        }
+    },
+    {
+        "model": "tools.configuration",
+        "pk": 2,
+        "fields": {
+            "tool_id": 1,
+            "name": "UDP ports",
+            "arguments": "{target} {intensity} {ports} -sU -oX {output}",
+            "default": false
+        }
+    },
+    {
+        "model": "tools.configuration",
+        "pk": 3,
+        "fields": {
+            "tool_id": 1,
+            "name": "TCP ports & service versions",
+            "arguments": "{target} {intensity} {ports} -sS -sV -A -oX {output}",
+            "default": true
+        }
+    },
+    {
+        "model": "tools.configuration",
+        "pk": 4,
+        "fields": {
+            "tool_id": 1,
+            "name": "UDP ports & service versions",
+            "arguments": "{target} {intensity} {ports} -sU -sV -A -oX {output}",
+            "default": false
+        }
+    },
+    {
+        "model": "tools.configuration",
+        "pk": 5,
+        "fields": {
+            "tool_id": 1,
+            "name": "TCP & UDP ports",
+            "arguments": "{target} {intensity} {ports} -sS -sU -oX {output}",
+            "default": false
+        }
+    },
+    {
+        "model": "tools.configuration",
+        "pk": 6,
+        "fields": {
+            "tool_id": 1,
+            "name": "TCP & UDP ports & service versions",
+            "arguments": "{target} {intensity} {ports} -sS -sU -sV -A -oX {output}",
+            "default": false
+        }
+    },
+    {
+        "model": "tools.configuration",
+        "pk": 7,
+        "fields": {
+            "tool_id": 1,
+            "name": "Fast TCP ports",
+            "arguments": "{target} {intensity} {ports} -F -sS -oX {output}",
+            "default": false
+        }
+    },
+    {
+        "model": "tools.configuration",
+        "pk": 8,
+        "fields": {
+            "tool_id": 1,
+            "name": "Fast UDP ports",
+            "arguments": "{target} {intensity} {ports} -F -sU -oX {output}",
+            "default": false
+        }
+    },
+    {
+        "model": "tools.configuration",
+        "pk": 9,
+        "fields": {
+            "tool_id": 1,
+            "name": "Fast TCP ports & service versions",
+            "arguments": "{target} {intensity} {ports} -F -sS -sV -A -oX {output}",
+            "default": false
+        }
+    },
+    {
+        "model": "tools.configuration",
+        "pk": 10,
+        "fields": {
+            "tool_id": 1,
+            "name": "Fast UDP ports & service versions",
+            "arguments": "{target} {intensity} {ports} -F -sU -sV -A -oX {output}",
+            "default": false
+        }
+    },
+    {
+        "model": "tools.configuration",
+        "pk": 11,
+        "fields": {
+            "tool_id": 1,
+            "name": "Fast TCP & UDP ports",
+            "arguments": "{target} {intensity} {ports} -F -sS -sU -oX {output}",
+            "default": false
+        }
+    },
+    {
+        "model": "tools.configuration",
+        "pk": 12,
+        "fields": {
+            "tool_id": 1,
+            "name": "Fast TCP & UDP ports & service versions",
+            "arguments": "{target} {intensity} {ports} -F -sS -sU -sV -A -oX {output}",
+            "default": false
+        }
+    },
+    {
+        "model": "tools.configuration",
+        "pk": 13,
+        "fields": {
+            "tool_id": 1,
+            "name": "Vulners",
+            "arguments": "{target} {intensity} {ports} -sS -sV -A --script vulners -oX {output}",
+            "default": false
+        }
+    },
+    {
+        "model": "tools.configuration",
+        "pk": 14,
+        "fields": {
+            "tool_id": 1,
+            "name": "FTP NSE scripts",
+            "arguments": "{target} {intensity} {ports} -sS -sV -A --script ftp-anon,ftp-proftpd-backdoor,ftp-vsftpd-backdoor,ftp-libopie,ftp-vuln-cve2010-4221 -oX {output}",
+            "default": false
+        }
+    }
+]

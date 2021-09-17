@@ -1,0 +1,47 @@
+[
+    {
+        "model": "tools.intensity",
+        "pk": 1,
+        "fields": {
+            "tool_id": 1,
+            "argument": "-T0",
+            "value": 1
+        }
+    },
+    {
+        "model": "tools.intensity",
+        "pk": 2,
+        "fields": {
+            "tool_id": 1,
+            "argument": "-T2",
+            "value": 2
+        }
+    },
+    {
+        "model": "tools.intensity",
+        "pk": 3,
+        "fields": {
+            "tool_id": 1,
+            "argument": "-T3",
+            "value": 3
+        }
+    },
+    {
+        "model": "tools.intensity",
+        "pk": 4,
+        "fields": {
+            "tool_id": 1,
+            "argument": "-T4",
+            "value": 4
+        }
+    },
+    {
+        "model": "tools.intensity",
+        "pk": 5,
+        "fields": {
+            "tool_id": 1,
+            "argument": "-T5",
+            "value": 5
+        }
+    }
+]

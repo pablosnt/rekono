@@ -1,0 +1,306 @@
+[
+    {
+        "model": "tools.output",
+        "pk": 1,
+        "fields": {
+            "configuration_id": 1,
+            "type": "findings.models.Host"
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 2,
+        "fields": {
+            "configuration_id": 1,
+            "type": "findings.models.Enumeration"
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 3,
+        "fields": {
+            "configuration_id": 2,
+            "type": "findings.models.Host"
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 4,
+        "fields": {
+            "configuration_id": 2,
+            "type": "findings.models.Enumeration"
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 5,
+        "fields": {
+            "configuration_id": 3,
+            "type": "findings.models.Host"
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 6,
+        "fields": {
+            "configuration_id": 3,
+            "type": "findings.models.Enumeration"
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 7,
+        "fields": {
+            "configuration_id": 3,
+            "type": "findings.models.Technology"
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 8,
+        "fields": {
+            "configuration_id": 4,
+            "type": "findings.models.Host"
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 9,
+        "fields": {
+            "configuration_id": 4,
+            "type": "findings.models.Enumeration"
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 10,
+        "fields": {
+            "configuration_id": 4,
+            "type": "findings.models.Technology"
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 11,
+        "fields": {
+            "configuration_id": 5,
+            "type": "findings.models.Host"
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 12,
+        "fields": {
+            "configuration_id": 5,
+            "type": "findings.models.Enumeration"
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 13,
+        "fields": {
+            "configuration_id": 6,
+            "type": "findings.models.Host"
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 14,
+        "fields": {
+            "configuration_id": 6,
+            "type": "findings.models.Enumeration"
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 15,
+        "fields": {
+            "configuration_id": 6,
+            "type": "findings.models.Technology"
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 16,
+        "fields": {
+            "configuration_id": 7,
+            "type": "findings.models.Host"
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 17,
+        "fields": {
+            "configuration_id": 7,
+            "type": "findings.models.Enumeration"
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 18,
+        "fields": {
+            "configuration_id": 8,
+            "type": "findings.models.Host"
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 19,
+        "fields": {
+            "configuration_id": 8,
+            "type": "findings.models.Enumeration"
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 20,
+        "fields": {
+            "configuration_id": 9,
+            "type": "findings.models.Host"
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 21,
+        "fields": {
+            "configuration_id": 9,
+            "type": "findings.models.Enumeration"
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 22,
+        "fields": {
+            "configuration_id": 9,
+            "type": "findings.models.Technology"
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 23,
+        "fields": {
+            "configuration_id": 10,
+            "type": "findings.models.Host"
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 24,
+        "fields": {
+            "configuration_id": 10,
+            "type": "findings.models.Enumeration"
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 25,
+        "fields": {
+            "configuration_id": 10,
+            "type": "findings.models.Technology"
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 26,
+        "fields": {
+            "configuration_id": 11,
+            "type": "findings.models.Host"
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 27,
+        "fields": {
+            "configuration_id": 11,
+            "type": "findings.models.Enumeration"
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 28,
+        "fields": {
+            "configuration_id": 12,
+            "type": "findings.models.Host"
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 29,
+        "fields": {
+            "configuration_id": 12,
+            "type": "findings.models.Enumeration"
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 30,
+        "fields": {
+            "configuration_id": 12,
+            "type": "findings.models.Technology"
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 31,
+        "fields": {
+            "configuration_id": 13,
+            "type": "findings.models.Host"
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 32,
+        "fields": {
+            "configuration_id": 13,
+            "type": "findings.models.Enumeration"
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 33,
+        "fields": {
+            "configuration_id": 13,
+            "type": "findings.models.Technology"
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 34,
+        "fields": {
+            "configuration_id": 13,
+            "type": "findings.models.Vulnerability"
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 35,
+        "fields": {
+            "configuration_id": 14,
+            "type": "findings.models.Host"
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 36,
+        "fields": {
+            "configuration_id": 14,
+            "type": "findings.models.Enumeration"
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 37,
+        "fields": {
+            "configuration_id": 14,
+            "type": "findings.models.Technology"
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 38,
+        "fields": {
+            "configuration_id": 14,
+            "type": "findings.models.Vulnerability"
+        }
+    }
+]
