@@ -21,7 +21,7 @@ class Step(models.Model):
         MEDIUM = 2
         HIGH = 3
 
-    process = models.ForeignKey(Process, on_delete=models.CASCADE)
+    process = models.ForeignKey(Process, related_name='steps', on_delete=models.CASCADE)
     tool = models.ForeignKey(Tool, on_delete=models.CASCADE)
     configuration = models.ForeignKey(
         Configuration,
