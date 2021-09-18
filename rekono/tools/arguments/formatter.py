@@ -1,8 +1,8 @@
+from tools import arguments
 from tools.arguments.url import Url
 from executions.enums import ParameterKey
 from findings.models import (OSINT, Enumeration, Exploit, Host, HttpEndpoint,
                             Technology, Vulnerability)
-from tools.arguments.checker import check_parameter
 from tools.arguments.constants import PORTS, PORTS_COMMAS, TARGET
 from tools.arguments import parser
 
@@ -39,7 +39,7 @@ def argument_with_finding(argument, finding) -> str:
 
 def argument_with_findings(argument, findings) -> str:
     parsers = {
-        Enumeration: parser.enumeration,
+        Enumeration: parser.enumeration
     }
     data = {}
     for result in findings:
@@ -48,7 +48,12 @@ def argument_with_findings(argument, findings) -> str:
 
 
 def argument_with_parameter(argument, parameter) -> str:
-    data = {
-        ParameterKey(parameter.key).name.lower(): check_parameter(parameter)
-    }
+    data = parser.parameter(parameter)
+    return argument.format(**data)
+
+
+def argument_with_parameters(argument, parameters) -> str:
+    data = {}
+    for parameter in parameters:
+        data = parser.parameter_multiple(parameter, data)
     return argument.format(**data)

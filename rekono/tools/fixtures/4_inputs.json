@@ -385,7 +385,7 @@
             "type": "executions.models.Parameter",
             "argument": "--wordlist={wordlist}",
             "filter": null,
-            "selection": 2,
+            "selection": 1,
             "required": false
         }
     },
@@ -411,7 +411,7 @@
             "type": "executions.models.Parameter",
             "argument": "--wordlist={wordlist}",
             "filter": null,
-            "selection": 2,
+            "selection": 1,
             "required": false
         }
     },
@@ -437,7 +437,7 @@
             "type": "executions.models.Parameter",
             "argument": "--wordlist={wordlist}",
             "filter": null,
-            "selection": 2,
+            "selection": 1,
             "required": false
         }
     },
@@ -463,7 +463,7 @@
             "type": "executions.models.Parameter",
             "argument": "--wordlist={wordlist}",
             "filter": null,
-            "selection": 2,
+            "selection": 1,
             "required": false
         }
     }

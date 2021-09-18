@@ -1,23 +1,28 @@
+import os
+import re
 from typing import Any
 
 from executions.enums import ParameterKey
 from findings.models import Enumeration, Host, HttpEndpoint, Vulnerability
-from projects.models import Target
-from tools.models import Input
 from projects import utils
+from projects.models import Target
+from tools.arguments.constants import (CVE_REGEX, WORDLIST_FILE_REGEX,
+                                       WORDLIST_PATH_REGEX)
+from tools.exceptions import InvalidParameterException
+from tools.models import Input
 
 
 def check_parameter(parameter) -> None:
     checkers = {
-        ParameterKey.TECHNOLOGY: '',
-        ParameterKey.VERSION: '',
-        ParameterKey.HTTP_ENDPOINT: '',
-        ParameterKey.CVE: '',
-        ParameterKey.EXPLOIT: '',
-        ParameterKey.WORDLIST: '',
+        ParameterKey.TECHNOLOGY: check_technology_param,
+        ParameterKey.VERSION: check_version_param,
+        ParameterKey.HTTP_ENDPOINT: check_http_endpoint_param,
+        ParameterKey.CVE: check_cve_param,
+        ParameterKey.EXPLOIT: check_exploit_param,
+        ParameterKey.WORDLIST: check_wordlist_param,
     }
-    checkers[parameter.key]
-    return parameter.value
+    if not checkers[parameter.key](parameter.value):
+        raise InvalidParameterException(f'Invalid value for {parameter.key} parameter')
 
 
 def check_input_condition(input: Input, finding: Any) -> bool:
@@ -68,3 +73,32 @@ def check_http_endpoint(input: Input, http_endpoint: HttpEndpoint) -> bool:
 
 def check_vulnerability(input: Input, vulnerability: Vulnerability) -> bool:
     return (input.filter.lower() == 'cve' and vulnerability.cve)
+
+
+def check_technology_param(technology: str) -> bool:
+    return True
+
+
+def check_version_param(technology: str) -> bool:
+    return True
+
+
+def check_http_endpoint_param(http_endpoint: str) -> bool:
+    return True
+
+
+def check_cve_param(cve: str) -> bool:
+    return bool(re.fullmatch(CVE_REGEX, cve))
+
+
+def check_exploit_param(exploit: str) -> bool:
+    return True
+
+
+def check_wordlist_param(wordlist: str) -> bool:
+    check = os.path.isfile(wordlist)
+    directory = os.path.dirname(os.path.abspath(wordlist))
+    check = check and bool(re.fullmatch(WORDLIST_PATH_REGEX, directory))
+    filename = os.path.basename(wordlist)
+    check = check and bool(re.fullmatch(WORDLIST_FILE_REGEX, filename))
+    return check

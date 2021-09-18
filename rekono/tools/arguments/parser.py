@@ -1,3 +1,4 @@
+from executions.models import Parameter
 from tools.arguments.constants import URL
 from tools.arguments.url import Url
 from executions.enums import ParameterKey
@@ -5,6 +6,7 @@ from findings.models import (OSINT, Enumeration, Exploit, Host, HttpEndpoint,
                              Technology, Vulnerability)
 from projects.models import Target
 from tools.arguments.constants import PORT, PORTS, PORTS_COMMAS, TARGET
+from tools.arguments import checker
 
 
 def osint(osint: OSINT) -> dict:
@@ -21,10 +23,7 @@ def host(host: Host) -> dict:
     }
 
 
-def enumeration(
-    enumeration: Enumeration,
-    accumulated: dict = {}
-) -> dict:
+def enumeration(enumeration: Enumeration, accumulated: dict = {}) -> dict:
     output = {
         TARGET: enumeration.host.address,
         PORT: enumeration.port,
@@ -72,3 +71,25 @@ def url(url: Url) -> dict:
     return {
         URL: url.value
     }
+
+
+def parameter(parameter: Parameter) -> dict:
+    checker.check_parameter(parameter)
+    return {
+        ParameterKey(parameter.key).name.lower(): parameter.value
+    }
+
+
+def parameter_multiple(parameter: Parameter, accumulated: dict = {}) -> dict:
+    checker.check_parameter(parameter)
+    output = {
+        ParameterKey(parameter.key).name.lower() + '_data': [parameter.value],
+        ParameterKey(parameter.key).name.lower(): parameter.value
+    }
+    if accumulated:
+        aux = accumulated[ParameterKey(parameter.key).name.lower() + '_data']
+        aux.append(parameter.value)
+        output = {
+            ParameterKey(parameter.key).name.lower(): ','.join(aux)
+        }
+    return output

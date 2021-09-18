@@ -106,28 +106,35 @@ class BaseTool():
                             break
                     if i.name not in command_arguments or i.type == FindingType.PARAMETER:
                         req_keys = utils.get_keys_from_argument(i.argument)
-                        done_keys = []
                         for p in parameters:
-                            if (
-                                ParameterKey(p.key).name.lower() in req_keys and
-                                p.key not in done_keys
-                            ):
+                            if ParameterKey(p.key).name.lower() in req_keys:
                                 command_arguments[i.name] = formatter.argument_with_parameter(
                                     i.argument,
                                     p
                                 )
-                                done_keys.append(p.key)
+                                break
                 else:
-                    findings = []
-                    for r in previous_findings:
-                        if isinstance(r, input_class):
-                            if not checker.check_input_condition(i, r):
-                                continue
-                            findings.append(r)
-                    command_arguments[i.name] = formatter.argument_with_findings(
-                        i.argument,
-                        findings
-                    )
+                    if i.type != FindingType.PARAMETER:
+                        findings = []
+                        for r in previous_findings:
+                            if isinstance(r, input_class) and checker.check_input_condition(i, r):
+                                findings.append(r)
+                        if findings:
+                            command_arguments[i.name] = formatter.argument_with_findings(
+                                i.argument,
+                                findings
+                            )
+                    elif i.type == FindingType.PARAMETER or i.name not in command_arguments:
+                        req_keys = utils.get_keys_from_argument(i.argument)
+                        params = []
+                        for p in parameters:
+                            if ParameterKey(p.key).name.lower() in req_keys:
+                                params.append(p)
+                        if params:
+                            command_arguments[i.name] = formatter.argument_with_parameters(
+                                i.argument,
+                                params
+                            )
                 if i.name not in command_arguments:
                     if i.type == FindingType.HOST:
                         if checker.check_input_condition(i, target):
