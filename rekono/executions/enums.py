@@ -18,3 +18,4 @@ class ParameterKey(models.IntegerChoices):
     HTTP_ENDPOINT = 3
     CVE = 4
     EXPLOIT = 5
+    WORDLIST = 6

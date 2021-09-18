@@ -35,7 +35,7 @@ class HttpEndpointSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = HttpEndpoint
-        fields = ('id', 'execution', 'enumeration', 'endpoint', 'creation')
+        fields = ('id', 'execution', 'enumeration', 'endpoint', 'status', 'creation')
 
 
 class TechnologySerializer(serializers.ModelSerializer):

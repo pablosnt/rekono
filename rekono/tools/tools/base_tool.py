@@ -1,15 +1,16 @@
+import importlib
 import os
 import shutil
 import subprocess
-import sys
 import uuid
 
 import django_rq
 from django.utils import timezone
 from executions.enums import ParameterKey, Status
 from executions.models import Execution, Target
+from findings import consumer
 from tools import utils
-from tools.arguments import formatter
+from tools.arguments import checker, formatter
 from tools.enums import FindingType
 from tools.exceptions import (InstallationNotFoundException,
                               InvalidToolParametersException,
@@ -17,12 +18,12 @@ from tools.exceptions import (InstallationNotFoundException,
 from tools.models import Configuration, Input, Intensity, Tool
 
 from rekono.settings import EXECUTION_OUTPUTS
-from findings import consumer
 
 
 class BaseTool():
 
     file_output_enabled = False
+    ignore_exit_code = False
      
     def __init__(
         self,
@@ -37,6 +38,7 @@ class BaseTool():
         self.intensity = intensity
         self.filename_output = str(uuid.uuid4())
         self.directory_output = EXECUTION_OUTPUTS
+        self.path_output = os.path.join(self.directory_output, self.filename_output)
 
     def check_installation(self) -> None:
         if self.tool.command and shutil.which(self.tool.command) is None:
@@ -53,12 +55,24 @@ class BaseTool():
     ) -> bool:
         return True
 
-    def clean_parameters(
+    def prepare_parameters(
         self,
+        target: Target,
         target_ports: list,
         parameters: list,
         previous_findings: list
     ) -> tuple:
+        expected_urls = [i for i in self.inputs if i.type == FindingType.URL]
+        if expected_urls:
+            url = utils.get_url_from_params(
+                expected_urls[0],
+                target,
+                target_ports,
+                previous_findings
+            )
+            if url:
+                self.url = url
+                previous_findings.append(url)
         return (target_ports, parameters, previous_findings)
     
     def get_arguments(
@@ -77,15 +91,20 @@ class BaseTool():
         }
         for i in self.inputs:
             try:
+                aux = i.type.rsplit('.', 1)
+                input_module = importlib.import_module(aux[0])
+                input_class = getattr(input_module, aux[1])
                 if i.selection == Input.InputSelection.FOR_EACH:
                     for r in previous_findings:
-                        if isinstance(r, getattr(sys.modules[__name__], i.type)):
-                            command_arguments[i.name] = formatter.argument_with_result(
+                        if isinstance(r, input_class):
+                            if not checker.check_input_condition(i, r):
+                                continue
+                            command_arguments[i.name] = formatter.argument_with_finding(
                                 i.argument,
                                 r
                             )
                             break
-                    if i.name not in command_arguments:
+                    if i.name not in command_arguments or i.type == FindingType.PARAMETER:
                         req_keys = utils.get_keys_from_argument(i.argument)
                         done_keys = []
                         for p in parameters:
@@ -101,7 +120,9 @@ class BaseTool():
                 else:
                     findings = []
                     for r in previous_findings:
-                        if isinstance(r, getattr(sys.modules[__name__], i.type)):
+                        if isinstance(r, input_class):
+                            if not checker.check_input_condition(i, r):
+                                continue
                             findings.append(r)
                     command_arguments[i.name] = formatter.argument_with_findings(
                         i.argument,
@@ -109,11 +130,12 @@ class BaseTool():
                     )
                 if i.name not in command_arguments:
                     if i.type == FindingType.HOST:
-                        command_arguments[i.name] = formatter.argument_with_target(
-                            i.argument,
-                            target.target
-                        )
-                        continue
+                        if checker.check_input_condition(i, target):
+                            command_arguments[i.name] = formatter.argument_with_target(
+                                i.argument,
+                                target.target
+                            )
+                            continue
                     elif i.type == FindingType.ENUMERATION:
                         command_arguments[i.name] = formatter.argument_with_target_ports(
                             i.argument,
@@ -131,6 +153,8 @@ class BaseTool():
                 raise InvalidToolParametersException(
                     f'Tool configuration requires {i.name} argument'
                 )
+            elif not i.required and i.name not in command_arguments:
+                command_arguments[i.name] = ''
         args = self.configuration.arguments.format(**command_arguments)
         if ' ' in args:
             args = args.split(' ')
@@ -148,12 +172,13 @@ class BaseTool():
         previous_findings: list
     ) -> tuple:
         args.insert(0, self.tool.command)
-        result = subprocess.run(args, capture_output=True)
-        if result.returncode > 0:
-            raise UnexpectedToolExitCodeException(
-                f'Exit code {result.returncode} during {self.tool.name} execution'
-            )
-        return result.stdout
+        exec = subprocess.run(args, capture_output=True)
+        if (
+            (not self.ignore_exit_code and exec.returncode > 0) or
+            (self.ignore_exit_code and exec.returncode > 0 and not exec.stderr)
+        ):
+            raise UnexpectedToolExitCodeException(exec.stderr)
+        return exec.stdout
 
     def parse_output(self, output: str) -> list:
         return []
@@ -175,7 +200,9 @@ class BaseTool():
         execution.status = Status.RUNNING
         execution.save()
 
-    def on_error(self, execution: Execution) -> None:
+    def on_error(self, execution: Execution, stderror: str = None) -> None:
+        if stderror:
+            execution.output_error = stderror
         execution.status = Status.ERROR
         execution.end = timezone.now()
         execution.save()
@@ -203,39 +230,29 @@ class BaseTool():
         except InstallationNotFoundException:
             self.on_error(execution)
             return
-        if not self.check_execution_condition(
-            target,
-            target_ports,
-            parameters,
-            previous_findings
-        ):
+        if not self.check_execution_condition(target, target_ports, parameters, previous_findings):
             self.on_skipped(execution)
             return
-        target_ports, parameters, previous_findings = self.clean_parameters(
+        target_ports, parameters, previous_findings = self.prepare_parameters(
+            target,
             target_ports,
             parameters,
             previous_findings
         )
         try:
-            args = self.get_arguments(
-                target,
-                target_ports,
-                parameters,
-                previous_findings
-            )
-        except InvalidToolParametersException:
+            args = self.get_arguments(target, target_ports, parameters, previous_findings)
+        except InvalidToolParametersException as ex:
+            print(ex)
             self.on_skipped(execution)
             return
         self.on_running(execution)
         try:
-            output = self.tool_execution(
-                target,
-                target_ports,
-                args,
-                parameters,
-                previous_findings
-            )
-        except Exception:
+            output = self.tool_execution(target, target_ports, args, parameters, previous_findings)
+        except UnexpectedToolExitCodeException as ex:
+            self.on_error(execution, stderror=str(ex))
+            return
+        except Exception as ex:
+            print(ex)
             self.on_error(execution)
             return
         self.on_completed(execution, output)

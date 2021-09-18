@@ -10,21 +10,9 @@ from tools.models import Configuration, Tool
 
 
 class Request(models.Model):
-    target = models.ForeignKey(
-        Target,
-        related_name='requests',
-        on_delete=models.CASCADE
-    )
-    process = models.ForeignKey(
-        Process,
-        on_delete=models.CASCADE,
-        blank=True,
-        null=True)
-    tool = models.ForeignKey(
-        Tool,
-        on_delete=models.CASCADE,
-        blank=True,
-        null=True)
+    target = models.ForeignKey(Target, related_name='requests', on_delete=models.CASCADE)
+    process = models.ForeignKey(Process, on_delete=models.CASCADE, blank=True, null=True)
+    tool = models.ForeignKey(Tool, on_delete=models.CASCADE, blank=True, null=True)
     configuration = models.ForeignKey(
         Configuration,
         on_delete=models.CASCADE,
@@ -38,10 +26,7 @@ class Request(models.Model):
         null=True
     )
     executor = models.ForeignKey(User, on_delete=models.CASCADE)
-    status = models.IntegerField(
-        choices=Status.choices,
-        default=Status.REQUESTED
-    )
+    status = models.IntegerField(choices=Status.choices, default=Status.REQUESTED)
     start = models.DateTimeField(blank=True, null=True)
     end = models.DateTimeField(blank=True, null=True)
 
@@ -57,43 +42,24 @@ class Request(models.Model):
 
 
 class Parameter(models.Model):
-    request = models.ForeignKey(
-        Request,
-        related_name='parameters',
-        on_delete=models.CASCADE
-    )
+    request = models.ForeignKey(Request, related_name='parameters', on_delete=models.CASCADE)
     key = models.IntegerField(choices=ParameterKey.choices)
     value = models.TextField(max_length=250)
 
 
 class Execution(models.Model):
-    request = models.ForeignKey(
-        Request,
-        related_name='executions',
-        on_delete=models.CASCADE
-    )
-    step = models.ForeignKey(
-        Step,
-        on_delete=models.CASCADE,
-        blank=True,
-        null=True
-    )
-    output_file = models.TextField(
-        max_length=50,
-        blank=True,
-        null=True
-    )
+    request = models.ForeignKey(Request, related_name='executions', on_delete=models.CASCADE)
+    step = models.ForeignKey(Step, on_delete=models.CASCADE, blank=True, null=True)
+    output_file = models.TextField(max_length=50, blank=True, null=True)
     output_plain = models.TextField(blank=True, null=True)
-    status = models.IntegerField(
-        choices=Status.choices,
-        default=Status.REQUESTED
-    )
+    output_error = models.TextField(blank=True, null=True)
+    status = models.IntegerField(choices=Status.choices, default=Status.REQUESTED)
     start = models.DateTimeField(blank=True, null=True)
     end = models.DateTimeField(blank=True, null=True)
 
     def __str__(self) -> str:
         if self.step:
             req = self.request.__str__()
-            return f'{req} - {self.step.tool.name} - {self.step.configuration.name}'    # noqa: E501
+            return f'{req} - {self.step.tool.name} - {self.step.configuration.name}'
         else:
             return self.request.__str__()

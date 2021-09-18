@@ -1,5 +1,11 @@
 import importlib
 
+from findings.models import Enumeration
+from projects.models import Target
+from tools.arguments import checker
+from tools.arguments.url import Url
+from tools.models import Input
+
 
 def get_tool_class_by_name(name):
     try:
@@ -19,3 +25,19 @@ def get_keys_from_argument(argument: str) -> list:
         aux = argument.split('{')
         return [k.split('}')[0] for k in aux if '}' in k]
     return []
+
+
+def get_url_from_params(input: Input, target: Target, target_ports: list, findings: list) -> Url:
+    for finding in findings:
+        if isinstance(finding, Enumeration) and checker.check_input_condition(input, finding):
+            url = Url(target, finding)
+            if url.value:
+                return url
+    for p in target_ports:
+        url = Url(target, p)
+        if url.value:
+            return url
+    url = Url(target, None)
+    if url.value:
+        return url
+    return None

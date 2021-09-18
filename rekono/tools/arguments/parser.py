@@ -1,7 +1,10 @@
+from tools.arguments.constants import URL
+from tools.arguments.url import Url
 from executions.enums import ParameterKey
 from findings.models import (OSINT, Enumeration, Exploit, Host, HttpEndpoint,
-                            Technology, Vulnerability)
-from tools.arguments.constants import PORTS, PORTS_COMMAS, TARGET, PORT
+                             Technology, Vulnerability)
+from projects.models import Target
+from tools.arguments.constants import PORT, PORTS, PORTS_COMMAS, TARGET
 
 
 def osint(osint: OSINT) -> dict:
@@ -34,7 +37,7 @@ def enumeration(
     return output
 
 
-def http_endpoint(http_endpoint):
+def http_endpoint(http_endpoint: HttpEndpoint):
     output = enumeration(http_endpoint.enumeration)
     output[ParameterKey.HTTP_ENDPOINT.name.lower()] = http_endpoint.endpoint
     return output
@@ -63,3 +66,9 @@ def exploit(exploit: Exploit) -> dict:
     output = vulnerability(exploit.vulnerability)
     output[ParameterKey.EXPLOIT.name.lower()] = exploit.name
     return output
+
+
+def url(url: Url) -> dict:
+    return {
+        URL: url.value
+    }

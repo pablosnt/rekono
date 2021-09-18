@@ -68,9 +68,8 @@ class NmapTool(BaseTool):
 
     def parse_output(self, output: str) -> list:
         findings = []
-        full_path = os.path.join(self.directory_output, self.filename_output)
-        if os.path.isfile(full_path):
-            report = NmapParser.parse_fromfile(full_path)
+        if os.path.isfile(self.path_output):
+            report = NmapParser.parse_fromfile(self.path_output)
             for h in report.hosts:
                 if not h.is_up():
                     continue

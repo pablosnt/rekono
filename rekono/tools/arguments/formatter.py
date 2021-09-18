@@ -1,3 +1,4 @@
+from tools.arguments.url import Url
 from executions.enums import ParameterKey
 from findings.models import (OSINT, Enumeration, Exploit, Host, HttpEndpoint,
                             Technology, Vulnerability)
@@ -30,6 +31,7 @@ def argument_with_finding(argument, finding) -> str:
         Technology: parser.technology,
         Vulnerability: parser.vulnerability,
         Exploit: parser.exploit,
+        Url: parser.url,
     }
     data = parsers[finding.__class__](finding)
     return argument.format(**data)
@@ -46,8 +48,7 @@ def argument_with_findings(argument, findings) -> str:
 
 
 def argument_with_parameter(argument, parameter) -> str:
-    check_parameter(parameter)
     data = {
-        ParameterKey(parameter.key).name.lower(): parameter.value
+        ParameterKey(parameter.key).name.lower(): check_parameter(parameter)
     }
     return argument.format(**data)

@@ -95,9 +95,12 @@ class HttpEndpoint(models.Model):
     enumeration = models.ForeignKey(
         Enumeration,
         related_name='http_endpoints',
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True
     )
     endpoint = models.TextField(max_length=500)
+    status = models.IntegerField()
     creation = models.DateTimeField(auto_now_add=True)
 
 

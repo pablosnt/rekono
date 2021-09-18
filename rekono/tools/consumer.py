@@ -33,7 +33,7 @@ def run(request: Request, parameters: list) -> None:
     request.save()
     tool.run(
         target=request.target,
-        target_ports=request.target.target_ports,
+        target_ports=request.target.target_ports.all(),
         execution=execution,
         parameters=parameters,
         previous_findings=[]

@@ -7,6 +7,7 @@
             "name": "target",
             "type": "findings.models.Host",
             "argument": "{target}",
+            "filter": null,
             "selection": 2,
             "required": true
         }
@@ -19,6 +20,7 @@
             "name": "ports",
             "type": "findings.models.Enumeration",
             "argument": "-p {ports_commas}",
+            "filter": null,
             "selection": 1,
             "required": false
         }
@@ -31,6 +33,7 @@
             "name": "target",
             "type": "findings.models.Host",
             "argument": "{target}",
+            "filter": null,
             "selection": 2,
             "required": true
         }
@@ -43,6 +46,7 @@
             "name": "ports",
             "type": "findings.models.Enumeration",
             "argument": "-p {ports_commas}",
+            "filter": null,
             "selection": 1,
             "required": false
         }
@@ -55,6 +59,7 @@
             "name": "target",
             "type": "findings.models.Host",
             "argument": "{target}",
+            "filter": null,
             "selection": 2,
             "required": true
         }
@@ -67,6 +72,7 @@
             "name": "ports",
             "type": "findings.models.Enumeration",
             "argument": "-p {ports_commas}",
+            "filter": null,
             "selection": 1,
             "required": false
         }
@@ -79,6 +85,7 @@
             "name": "target",
             "type": "findings.models.Host",
             "argument": "{target}",
+            "filter": null,
             "selection": 2,
             "required": true
         }
@@ -91,6 +98,7 @@
             "name": "ports",
             "type": "findings.models.Enumeration",
             "argument": "-p {ports_commas}",
+            "filter": null,
             "selection": 1,
             "required": false
         }
@@ -103,6 +111,7 @@
             "name": "target",
             "type": "findings.models.Host",
             "argument": "{target}",
+            "filter": null,
             "selection": 2,
             "required": true
         }
@@ -115,6 +124,7 @@
             "name": "ports",
             "type": "findings.models.Enumeration",
             "argument": "-p {ports_commas}",
+            "filter": null,
             "selection": 1,
             "required": false
         }
@@ -127,6 +137,7 @@
             "name": "target",
             "type": "findings.models.Host",
             "argument": "{target}",
+            "filter": null,
             "selection": 2,
             "required": true
         }
@@ -139,6 +150,7 @@
             "name": "ports",
             "type": "findings.models.Enumeration",
             "argument": "-p {ports_commas}",
+            "filter": null,
             "selection": 1,
             "required": false
         }
@@ -151,6 +163,7 @@
             "name": "target",
             "type": "findings.models.Host",
             "argument": "{target}",
+            "filter": null,
             "selection": 2,
             "required": true
         }
@@ -163,6 +176,7 @@
             "name": "ports",
             "type": "findings.models.Enumeration",
             "argument": "-p {ports_commas}",
+            "filter": null,
             "selection": 1,
             "required": false
         }
@@ -175,6 +189,7 @@
             "name": "target",
             "type": "findings.models.Host",
             "argument": "{target}",
+            "filter": null,
             "selection": 2,
             "required": true
         }
@@ -187,6 +202,7 @@
             "name": "ports",
             "type": "findings.models.Enumeration",
             "argument": "-p {ports_commas}",
+            "filter": null,
             "selection": 1,
             "required": false
         }
@@ -199,6 +215,7 @@
             "name": "target",
             "type": "findings.models.Host",
             "argument": "{target}",
+            "filter": null,
             "selection": 2,
             "required": true
         }
@@ -211,6 +228,7 @@
             "name": "ports",
             "type": "findings.models.Enumeration",
             "argument": "-p {ports_commas}",
+            "filter": null,
             "selection": 1,
             "required": false
         }
@@ -223,6 +241,7 @@
             "name": "target",
             "type": "findings.models.Host",
             "argument": "{target}",
+            "filter": null,
             "selection": 2,
             "required": true
         }
@@ -235,6 +254,7 @@
             "name": "ports",
             "type": "findings.models.Enumeration",
             "argument": "-p {ports_commas}",
+            "filter": null,
             "selection": 1,
             "required": false
         }
@@ -247,6 +267,7 @@
             "name": "target",
             "type": "findings.models.Host",
             "argument": "{target}",
+            "filter": null,
             "selection": 2,
             "required": true
         }
@@ -259,6 +280,7 @@
             "name": "ports",
             "type": "findings.models.Enumeration",
             "argument": "-p {ports_commas}",
+            "filter": null,
             "selection": 1,
             "required": false
         }
@@ -271,6 +293,7 @@
             "name": "target",
             "type": "findings.models.Host",
             "argument": "{target}",
+            "filter": null,
             "selection": 2,
             "required": true
         }
@@ -283,6 +306,7 @@
             "name": "ports",
             "type": "findings.models.Enumeration",
             "argument": "-p {ports_commas}",
+            "filter": null,
             "selection": 1,
             "required": false
         }
@@ -295,6 +319,7 @@
             "name": "target",
             "type": "findings.models.Host",
             "argument": "{target}",
+            "filter": null,
             "selection": 2,
             "required": true
         }
@@ -307,6 +332,7 @@
             "name": "ports",
             "type": "findings.models.Enumeration",
             "argument": "-p {ports_commas}",
+            "filter": null,
             "selection": 1,
             "required": false
         }
@@ -319,6 +345,7 @@
             "name": "target",
             "type": "findings.models.Host",
             "argument": "{target}",
+            "filter": null,
             "selection": 2,
             "required": true
         }
@@ -331,7 +358,112 @@
             "name": "ports",
             "type": "findings.models.Enumeration",
             "argument": "-p {ports_commas}",
+            "filter": "ftp",
             "selection": 1,
+            "required": false
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 29,
+        "fields": {
+            "configuration_id": 15,
+            "name": "url",
+            "type": "tools.arguments.url.Url",
+            "argument": "-u {url}",
+            "filter": "http",
+            "selection": 2,
+            "required": true
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 30,
+        "fields": {
+            "configuration_id": 15,
+            "name": "wordlist",
+            "type": "executions.models.Parameter",
+            "argument": "--wordlist={wordlist}",
+            "filter": null,
+            "selection": 2,
+            "required": false
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 31,
+        "fields": {
+            "configuration_id": 16,
+            "name": "url",
+            "type": "tools.arguments.url.Url",
+            "argument": "-u {url}",
+            "filter": "http",
+            "selection": 2,
+            "required": true
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 32,
+        "fields": {
+            "configuration_id": 16,
+            "name": "wordlist",
+            "type": "executions.models.Parameter",
+            "argument": "--wordlist={wordlist}",
+            "filter": null,
+            "selection": 2,
+            "required": false
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 33,
+        "fields": {
+            "configuration_id": 17,
+            "name": "url",
+            "type": "tools.arguments.url.Url",
+            "argument": "-u {url}",
+            "filter": "http",
+            "selection": 2,
+            "required": true
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 34,
+        "fields": {
+            "configuration_id": 17,
+            "name": "wordlist",
+            "type": "executions.models.Parameter",
+            "argument": "--wordlist={wordlist}",
+            "filter": null,
+            "selection": 2,
+            "required": false
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 35,
+        "fields": {
+            "configuration_id": 18,
+            "name": "url",
+            "type": "tools.arguments.url.Url",
+            "argument": "-u {url}",
+            "filter": "http",
+            "selection": 2,
+            "required": true
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 36,
+        "fields": {
+            "configuration_id": 18,
+            "name": "wordlist",
+            "type": "executions.models.Parameter",
+            "argument": "--wordlist={wordlist}",
+            "filter": null,
+            "selection": 2,
             "required": false
         }
     }

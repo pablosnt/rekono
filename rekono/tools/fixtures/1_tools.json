@@ -8,5 +8,15 @@
             "stage": 2,
             "reference": "https://nmap.org/"
         }
+    },
+    {
+        "model": "tools.tool",
+        "pk": 2,
+        "fields": {
+            "name": "dirsearch",
+            "command": "dirsearch",
+            "stage": 4,
+            "reference": "https://github.com/maurosoria/dirsearch"
+        }
     }
 ]

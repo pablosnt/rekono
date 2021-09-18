@@ -15,17 +15,9 @@ class Tool(models.Model):
         EXPLOITATION = 5
 
     name = models.TextField(max_length=30)
-    command = models.TextField(
-        max_length=30,
-        blank=True,
-        null=True
-    )
+    command = models.TextField(max_length=30, blank=True, null=True)
     stage = models.IntegerField(choices=Stage.choices)
-    reference = models.TextField(
-        max_length=250,
-        blank=True,
-        null=True
-    )
+    reference = models.TextField(max_length=250, blank=True, null=True)
 
     def __str__(self) -> str:
         return self.name
@@ -34,10 +26,7 @@ class Tool(models.Model):
 class Intensity(models.Model):
     tool = models.ForeignKey(Tool, related_name='intensities', on_delete=models.CASCADE)
     argument = models.TextField(max_length=50, default='', blank=True)
-    value = models.IntegerField(
-        choices=IntensityRank.choices,
-        default=IntensityRank.NORMAL
-    )
+    value = models.IntegerField(choices=IntensityRank.choices, default=IntensityRank.NORMAL)
 
     def __str__(self) -> str:
         return f'{self.tool.name} - {IntensityRank(self.value).name}'
@@ -46,11 +35,7 @@ class Intensity(models.Model):
 class Configuration(models.Model):
     name = models.TextField(max_length=30)
     tool = models.ForeignKey(Tool, related_name='configurations', on_delete=models.CASCADE)
-    arguments = models.TextField(
-        max_length=250,
-        blank=True,
-        null=True
-    )
+    arguments = models.TextField(max_length=250, blank=True, null=True)
     default = models.BooleanField(default=False)
 
     def __str__(self) -> str:
@@ -69,19 +54,10 @@ class Input(models.Model):
         on_delete=models.CASCADE
     )
     name = models.TextField(max_length=20)
-    type = models.CharField(
-        max_length=30,
-        choices=FindingType.choices
-    )
-    argument = models.TextField(
-        max_length=50,
-        blank=True,
-        null=True
-    )
-    selection = models.IntegerField(
-        choices=InputSelection.choices,
-        default=InputSelection.FOR_EACH
-    )
+    type = models.CharField(max_length=30, choices=FindingType.choices)
+    argument = models.TextField(max_length=50, blank=True, null=True)
+    filter = models.TextField(max_length=250, blank=True, null=True)
+    selection = models.IntegerField(choices=InputSelection.choices, default=InputSelection.FOR_EACH)
     required = models.BooleanField(default=False)
 
     def __str__(self) -> str:
@@ -95,10 +71,7 @@ class Output(models.Model):
         related_name='outputs',
         on_delete=models.CASCADE
     )
-    type = models.CharField(
-        max_length=30,
-        choices=FindingType.choices
-    )
+    type = models.CharField(max_length=30, choices=FindingType.choices)
 
     def __str__(self) -> str:
         fk = self.configuration.__str__()

@@ -8,7 +8,7 @@ class InputSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Input
-        fields = ('name', 'type', 'argument', 'selection', 'required')
+        fields = ('name', 'type', 'argument', 'filter', 'selection', 'required')
 
 
 class OutputSerializer(serializers.ModelSerializer):

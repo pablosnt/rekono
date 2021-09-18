@@ -138,5 +138,45 @@
             "arguments": "{target} {intensity} {ports} -sS -sV -A --script ftp-anon,ftp-proftpd-backdoor,ftp-vsftpd-backdoor,ftp-libopie,ftp-vuln-cve2010-4221 -oX {output}",
             "default": false
         }
+    },
+    {
+        "model": "tools.configuration",
+        "pk": 15,
+        "fields": {
+            "tool_id": 2,
+            "name": "Standard wordlist",
+            "arguments": "{url} {intensity} -o {output} --format=json {wordlist}",
+            "default": true
+        }
+    },
+    {
+        "model": "tools.configuration",
+        "pk": 16,
+        "fields": {
+            "tool_id": 2,
+            "name": "Wordlist with extensions",
+            "arguments": "{url} {intensity} -o {output} --format=json --force-extensions {wordlist}",
+            "default": true
+        }
+    },
+    {
+        "model": "tools.configuration",
+        "pk": 17,
+        "fields": {
+            "tool_id": 2,
+            "name": "Recursive",
+            "arguments": "{url} {intensity} -o {output} --format=json --force-recursive --recursion-depth=10 {wordlist}",
+            "default": true
+        }
+    },
+    {
+        "model": "tools.configuration",
+        "pk": 18,
+        "fields": {
+            "tool_id": 2,
+            "name": "Deep recursive",
+            "arguments": "{url} {intensity} -o {output} --format=json --force-recursive --depth-recursive --recursion-depth=10 {wordlist}",
+            "default": true
+        }
     }
 ]

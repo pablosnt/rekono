@@ -21,7 +21,7 @@ class ExecutionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Execution
         fields = (
-            'id', 'request', 'step', 'output_plain', 'status', 'start', 'end',
+            'id', 'request', 'step', 'output_plain', 'output_error', 'status', 'start', 'end',
             'osints', 'hosts', 'enumerations', 'http_endpoints', 'technologies',
             'vulnerabilities', 'exploits'
         )

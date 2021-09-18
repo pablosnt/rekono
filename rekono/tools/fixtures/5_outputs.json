@@ -302,5 +302,37 @@
             "configuration_id": 14,
             "type": "findings.models.Vulnerability"
         }
+    },
+    {
+        "model": "tools.output",
+        "pk": 39,
+        "fields": {
+            "configuration_id": 15,
+            "type": "findings.models.HttpEndpoint"
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 40,
+        "fields": {
+            "configuration_id": 16,
+            "type": "findings.models.HttpEndpoint"
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 41,
+        "fields": {
+            "configuration_id": 17,
+            "type": "findings.models.HttpEndpoint"
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 42,
+        "fields": {
+            "configuration_id": 18,
+            "type": "findings.models.HttpEndpoint"
+        }
     }
 ]

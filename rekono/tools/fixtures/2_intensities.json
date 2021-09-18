@@ -43,5 +43,50 @@
             "argument": "-T5",
             "value": 5
         }
+    },
+    {
+        "model": "tools.intensity",
+        "pk": 6,
+        "fields": {
+            "tool_id": 2,
+            "argument": "-t 1 -s 1",
+            "value": 1
+        }
+    },
+    {
+        "model": "tools.intensity",
+        "pk": 7,
+        "fields": {
+            "tool_id": 2,
+            "argument": "-t 10 -s 1",
+            "value": 2
+        }
+    },
+    {
+        "model": "tools.intensity",
+        "pk": 8,
+        "fields": {
+            "tool_id": 2,
+            "argument": "-t 30",
+            "value": 3
+        }
+    },
+    {
+        "model": "tools.intensity",
+        "pk": 9,
+        "fields": {
+            "tool_id": 2,
+            "argument": "-t 60",
+            "value": 4
+        }
+    },
+    {
+        "model": "tools.intensity",
+        "pk": 10,
+        "fields": {
+            "tool_id": 2,
+            "argument": "-t 100",
+            "value": 5
+        }
     }
 ]
