@@ -17,4 +17,16 @@ class UserDetail(models.Model):
         blank=True,
         null=True
     )
-    telegram_token = models.TextField(max_length=50, blank=True, null=True)
+    telegram_token = models.TextField(max_length=100, blank=True, null=True)
+    binaryedge_apikey = models.TextField(max_length=100, blank=True, null=True)
+    bing_apikey = models.TextField(max_length=100, blank=True, null=True)
+    censys_apikey = models.TextField(max_length=100, blank=True, null=True)
+    github_apikey = models.TextField(max_length=100, blank=True, null=True)
+    hunter_apikey = models.TextField(max_length=100, blank=True, null=True)
+    intelx_apikey = models.TextField(max_length=100, blank=True, null=True)
+    pentestTools_apikey = models.TextField(max_length=100, blank=True, null=True)
+    rocketreach_apikey = models.TextField(max_length=100, blank=True, null=True)
+    securityTrails_apikey = models.TextField(max_length=100, blank=True, null=True)
+    shodan_apikey = models.TextField(max_length=100, blank=True, null=True)
+    spyse_apikey = models.TextField(max_length=100, blank=True, null=True)
+    zoomeye_apikey = models.TextField(max_length=100, blank=True, null=True)

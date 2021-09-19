@@ -88,5 +88,14 @@
             "argument": "-t 100",
             "value": 5
         }
+    },
+    {
+        "model": "tools.intensity",
+        "pk": 11,
+        "fields": {
+            "tool_id": 3,
+            "argument": "",
+            "value": 1
+        }
     }
 ]

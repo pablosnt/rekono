@@ -18,5 +18,15 @@
             "stage": 4,
             "reference": "https://github.com/maurosoria/dirsearch"
         }
+    },
+    {
+        "model": "tools.tool",
+        "pk": 3,
+        "fields": {
+            "name": "theHarvester",
+            "command": "theHarvester",
+            "stage": 1,
+            "reference": "https://github.com/laramies/theHarvester"
+        }
     }
 ]

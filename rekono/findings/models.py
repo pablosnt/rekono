@@ -10,9 +10,12 @@ class OSINT(models.Model):
     class DataType(models.IntegerChoices):
         IP = 1
         DOMAIN = 2
-        USER = 3
+        URL = 3
         MAIL = 4
-        PASSWORD = 5
+        LINK = 5
+        ASN = 6
+        USER = 7
+        PASSWORD = 8
 
     execution = models.ForeignKey(
         Execution,

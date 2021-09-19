@@ -156,7 +156,7 @@
             "tool_id": 2,
             "name": "Wordlist with extensions",
             "arguments": "{url} {intensity} -o {output} --format=json --force-extensions {wordlist}",
-            "default": true
+            "default": false
         }
     },
     {
@@ -166,7 +166,7 @@
             "tool_id": 2,
             "name": "Recursive",
             "arguments": "{url} {intensity} -o {output} --format=json --force-recursive --recursion-depth=10 {wordlist}",
-            "default": true
+            "default": false
         }
     },
     {
@@ -176,7 +176,27 @@
             "tool_id": 2,
             "name": "Deep recursive",
             "arguments": "{url} {intensity} -o {output} --format=json --force-recursive --depth-recursive --recursion-depth=10 {wordlist}",
+            "default": false
+        }
+    },
+    {
+        "model": "tools.configuration",
+        "pk": 19,
+        "fields": {
+            "tool_id": 3,
+            "name": "All available sources",
+            "arguments": "{target} -b all -f {output}",
             "default": true
+        }
+    },
+    {
+        "model": "tools.configuration",
+        "pk": 20,
+        "fields": {
+            "tool_id": 3,
+            "name": "Google & Duckduckgo & Bing & Linkedin & Twitter",
+            "arguments": "{target} -b google,duckduckgo,bing,linkedin,linkedin_links,twitter -f {output}",
+            "default": false
         }
     }
 ]

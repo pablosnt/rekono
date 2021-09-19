@@ -334,5 +334,21 @@
             "configuration_id": 18,
             "type": "findings.models.HttpEndpoint"
         }
+    },
+    {
+        "model": "tools.output",
+        "pk": 43,
+        "fields": {
+            "configuration_id": 19,
+            "type": "findings.models.OSINT"
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 44,
+        "fields": {
+            "configuration_id": 20,
+            "type": "findings.models.OSINT"
+        }
     }
 ]

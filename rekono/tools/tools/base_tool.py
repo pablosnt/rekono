@@ -24,6 +24,7 @@ class BaseTool():
 
     file_output_enabled = False
     ignore_exit_code = False
+    file_output_extension = ''
      
     def __init__(
         self,
@@ -36,7 +37,7 @@ class BaseTool():
         self.configuration = configuration
         self.inputs = inputs
         self.intensity = intensity
-        self.filename_output = str(uuid.uuid4())
+        self.filename_output = str(uuid.uuid4()) + self.file_output_extension
         self.directory_output = EXECUTION_OUTPUTS
         self.path_output = os.path.join(self.directory_output, self.filename_output)
 
@@ -46,14 +47,11 @@ class BaseTool():
                 f'Tool {self.tool.name} is not installed in the system'
             )
 
-    def check_execution_condition(
-        self,
-        target: Target,
-        target_ports: list,
-        parameters: list,
-        previous_findings: list
-    ) -> bool:
-        return True
+    def prepare_environment(self, execution: Execution) -> None:
+        pass
+
+    def clean_environment(self, execution: Execution) -> None:
+        pass
 
     def prepare_parameters(
         self,
@@ -234,11 +232,8 @@ class BaseTool():
         self.on_start(execution)
         try:
             self.check_installation()
-        except InstallationNotFoundException:
-            self.on_error(execution)
-            return
-        if not self.check_execution_condition(target, target_ports, parameters, previous_findings):
-            self.on_skipped(execution)
+        except InstallationNotFoundException as ex:
+            self.on_error(execution, stderror=str(ex))
             return
         target_ports, parameters, previous_findings = self.prepare_parameters(
             target,
@@ -252,16 +247,20 @@ class BaseTool():
             print(ex)
             self.on_skipped(execution)
             return
+        self.prepare_environment(execution)
         self.on_running(execution)
         try:
             output = self.tool_execution(target, target_ports, args, parameters, previous_findings)
         except UnexpectedToolExitCodeException as ex:
             self.on_error(execution, stderror=str(ex))
+            self.clean_environment(execution)
             return
         except Exception as ex:
             print(ex)
             self.on_error(execution)
+            self.clean_environment(execution)
             return
+        self.clean_environment(execution)
         self.on_completed(execution, output)
         findings = self.parse_output(output)
         self.send_findings(execution, findings)

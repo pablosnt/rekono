@@ -466,5 +466,31 @@
             "selection": 1,
             "required": false
         }
+    },
+    {
+        "model": "tools.input",
+        "pk": 37,
+        "fields": {
+            "configuration_id": 19,
+            "name": "target",
+            "type": "findings.models.Host",
+            "argument": "-d {target}",
+            "filter": "4",
+            "selection": 2,
+            "required": true
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 38,
+        "fields": {
+            "configuration_id": 20,
+            "name": "target",
+            "type": "findings.models.Host",
+            "argument": "-d {target}",
+            "filter": "4",
+            "selection": 2,
+            "required": true
+        }
     }
 ]
