@@ -43,9 +43,7 @@ class RequestSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         if not attrs.get('process') and not attrs.get('tool'):
-            raise InvalidRequestException(
-                'Invalid request. Process or tool is required'
-            )
+            raise InvalidRequestException('Invalid request. Process or tool is required')
         if attrs.get('tool'):
             intensity = Intensity.objects.filter(
                 tool=attrs.get('tool'),
@@ -54,9 +52,7 @@ class RequestSerializer(serializers.ModelSerializer):
             if not intensity:
                 intensity = IntensityRank(attrs.get('get_intensity_display')).name
                 tool = attrs.get('tool').name
-                raise InvalidRequestException(
-                    f'Invalid intensity {intensity} for tool {tool}'
-                )
+                raise InvalidRequestException(f'Invalid intensity {intensity} for tool {tool}')
         return super().validate(attrs)
 
     def create(self, validated_data):
