@@ -28,5 +28,15 @@
             "stage": 1,
             "reference": "https://github.com/laramies/theHarvester"
         }
+    },
+    {
+        "model": "tools.tool",
+        "pk": 4,
+        "fields": {
+            "name": "nikto",
+            "command": "nikto",
+            "stage": 4,
+            "reference": "https://github.com/sullo/nikto"
+        }
     }
 ]

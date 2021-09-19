@@ -198,5 +198,15 @@
             "arguments": "{target} -b google,duckduckgo,bing,linkedin,linkedin_links,twitter -f {output}",
             "default": false
         }
+    },
+    {
+        "model": "tools.configuration",
+        "pk": 21,
+        "fields": {
+            "tool_id": 4,
+            "name": "Default nikto",
+            "arguments": "{url} -Format csv -output {output}",
+            "default": true
+        }
     }
 ]

@@ -350,5 +350,21 @@
             "configuration_id": 20,
             "type": "findings.models.OSINT"
         }
+    },
+    {
+        "model": "tools.output",
+        "pk": 45,
+        "fields": {
+            "configuration_id": 21,
+            "type": "findings.models.HttpEndpoint"
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 46,
+        "fields": {
+            "configuration_id": 21,
+            "type": "findings.models.Vulnerability"
+        }
     }
 ]

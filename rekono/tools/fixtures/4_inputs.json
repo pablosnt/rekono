@@ -492,5 +492,18 @@
             "selection": 2,
             "required": true
         }
+    },
+    {
+        "model": "tools.input",
+        "pk": 39,
+        "fields": {
+            "configuration_id": 21,
+            "name": "url",
+            "type": "tools.arguments.url.Url",
+            "argument": "-host {url}",
+            "filter": "http",
+            "selection": 2,
+            "required": true
+        }
     }
 ]

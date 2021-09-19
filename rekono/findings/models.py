@@ -103,7 +103,7 @@ class HttpEndpoint(models.Model):
         null=True
     )
     endpoint = models.TextField(max_length=500)
-    status = models.IntegerField()
+    status = models.IntegerField(blank=True, null=True)
     creation = models.DateTimeField(auto_now_add=True)
 
 
@@ -153,6 +153,7 @@ class Vulnerability(models.Model):
     description = models.TextField(blank=True, null=True)
     severity = models.IntegerField(choices=Severity.choices, default=Severity.MEDIUM)
     cve = models.TextField(max_length=20, blank=True, null=True)
+    osvdb = models.TextField(max_length=20, blank=True, null=True)
     reference = models.TextField(max_length=250, blank=True, null=True)
     creation = models.DateTimeField(auto_now_add=True)
 
