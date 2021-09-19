@@ -1,10 +1,11 @@
-from users.models import UserDetail
-from findings.models import OSINT
-from executions.models import Execution
-from tools.tools.base_tool import BaseTool
-import os
 import json
+import os
+
 import yaml
+from executions.models import Execution
+from findings.models import OSINT
+from tools.tools.base_tool import BaseTool
+from users.models import UserDetail
 
 
 class TheHarvesterTool(BaseTool):
@@ -49,9 +50,8 @@ class TheHarvesterTool(BaseTool):
             self.api_keys_config['apikeys'][api] = {
                 'key': apikey if apikey else None
             }
-        with open(self.configuration_file) as config_file:
+        with open(self.configuration_file, 'w') as config_file:
             yaml.dump(self.api_keys_config, config_file, default_flow_style=False)
-
 
     def clean_environment(self, execution: Execution) -> None:
         if os.path.isfile(self.configuration_file):
@@ -64,7 +64,7 @@ class TheHarvesterTool(BaseTool):
                 data = json.load(output_file)
         for key, dt in self.data_types:
             if key in data:
-                for item in data['key']:
+                for item in data[key]:
                     osint = OSINT.objects.create(
                         data=item,
                         data_type=dt

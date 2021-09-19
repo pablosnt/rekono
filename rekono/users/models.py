@@ -25,6 +25,7 @@ class UserDetail(models.Model):
     hunter_apikey = models.TextField(max_length=100, blank=True, null=True)
     intelx_apikey = models.TextField(max_length=100, blank=True, null=True)
     pentestTools_apikey = models.TextField(max_length=100, blank=True, null=True)
+    projectDiscovery_apikey = models.TextField(max_length=100, blank=True, null=True)
     rocketreach_apikey = models.TextField(max_length=100, blank=True, null=True)
     securityTrails_apikey = models.TextField(max_length=100, blank=True, null=True)
     shodan_apikey = models.TextField(max_length=100, blank=True, null=True)

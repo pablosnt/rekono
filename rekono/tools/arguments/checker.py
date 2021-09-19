@@ -33,7 +33,7 @@ def check_input_condition(input: Input, finding: Any) -> bool:
         HttpEndpoint: check_http_endpoint,
         Vulnerability: check_vulnerability
     }
-    if finding.__class__ in checkers and input.filters:
+    if finding.__class__ in checkers and input.filter:
         return checkers[finding.__class__](input, finding)
     else:
         return True
