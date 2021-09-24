@@ -4,8 +4,7 @@ from tools.models import Intensity
 from executions.exceptions import InvalidRequestException
 from executions.models import Parameter, Request
 from rest_framework import serializers
-from executions import consumer
-import django_rq
+from queues.tasks import producer
 
 
 class ParameterSerializer(serializers.ModelSerializer):
@@ -74,6 +73,5 @@ class RequestSerializer(serializers.ModelSerializer):
                         validated_data=parameter
                     )
                 )
-        task_queue = django_rq.get_queue('task-queue')
-        task_queue.enqueue(consumer.run_task, request=request, parameters=parameters)
+        producer.create_task(request, parameters)
         return request

@@ -4,8 +4,8 @@ from findings.models import Vulnerability
 from findings import cve_nist
 
 
-@job('finding-queue')
-def get_findings(execution: Execution = None, findings: list = []) -> None:
+@job('findings-queue')
+def process_findings(execution: Execution = None, findings: list = []) -> None:
     if execution:
         for finding in findings:
             setattr(finding, 'execution', execution)

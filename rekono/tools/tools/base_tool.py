@@ -4,11 +4,9 @@ import shutil
 import subprocess
 import uuid
 
-import django_rq
 from django.utils import timezone
 from executions.enums import ParameterKey, Status
 from executions.models import Execution, Target
-from findings import consumer
 from tools import utils
 from tools.arguments import checker, formatter
 from tools.enums import FindingType
@@ -16,6 +14,7 @@ from tools.exceptions import (InstallationNotFoundException,
                               InvalidToolParametersException,
                               UnexpectedToolExitCodeException)
 from tools.models import Configuration, Input, Intensity, Tool
+from queues.findings import producer
 
 from rekono.settings import EXECUTION_OUTPUTS
 
@@ -133,7 +132,7 @@ class BaseTool():
                                 i.argument,
                                 params
                             )
-                if i.name not in command_arguments:
+                if i.required and i.name not in command_arguments:
                     if i.type == FindingType.HOST:
                         if checker.check_input_condition(i, target):
                             command_arguments[i.name] = formatter.argument_with_target(
@@ -189,8 +188,7 @@ class BaseTool():
         return []
 
     def send_findings(self, execution: Execution, findings: list) -> None:
-        result_queue = django_rq.get_queue('finding-queue')
-        result_queue.enqueue(consumer.get_findings, execution=execution, findings=findings)
+        producer.create_findings(execution, findings)
 
     def on_start(self, execution: Execution) -> None:
         execution.start = timezone.now()

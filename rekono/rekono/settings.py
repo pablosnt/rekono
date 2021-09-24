@@ -101,15 +101,17 @@ DATABASES = {
 # Redis Queue
 
 RQ_QUEUES = {
-    'task-queue': {
+    'tasks-queue': {
         'HOST': '127.0.0.1',
         'PORT': 6379,
-        'DB': 0
+        'DB': 0,
+        'DEFAULT_TIMEOUT': 7200     # 2 hours
     },
-    'finding-queue': {
+    'findings-queue': {
         'HOST': '127.0.0.1',
         'PORT': 6379,
-        'DB': 0
+        'DB': 0,
+        'DEFAULT_TIMEOUT': 900      # 15 minutes
     }
 }
 
