@@ -5,11 +5,10 @@ from tools.models import Configuration
 
 
 class StepSerializer(serializers.ModelSerializer):
-    priority = serializers.CharField(source='get_priority_display')
 
     class Meta:
         model = Step
-        fields = ('id', 'process', 'tool', 'configuration', 'priority')
+        fields = ('id', 'process', 'tool', 'configuration')
 
     def validate(self, attrs):
         attrs = super().validate(attrs)
@@ -27,7 +26,6 @@ class StepSerializer(serializers.ModelSerializer):
                 default=True
             ).first()
         attrs['configuration'] = configuration
-        attrs['priority'] = attrs.pop('get_priority_display', Step.Priority.MEDIUM)
         steps = Step.objects.filter(
             process=attrs.get('process'),
             tool=attrs.get('tool'),

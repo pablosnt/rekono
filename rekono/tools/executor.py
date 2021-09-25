@@ -8,14 +8,16 @@ from queues.executions import producer
 def execute(request: Request, parameters: list) -> None:
     execution = Execution.objects.create(request=request)
     execution.save()
-    intensity = Intensity.objects.filter(
-        tool=request.tool,
-        value=request.intensity
-    ).first()
+    intensity = Intensity.objects.filter(tool=request.tool, value=request.intensity).first()
     request.status = Status.RUNNING
     request.start = timezone.now()
     request.save()
-    producer.execute(execution, intensity, parameters, [], success_callback)
+    producer.execute(
+        execution=execution,
+        intensity=intensity,
+        parameters=parameters,
+        callback=success_callback
+    )
 
 
 def success_callback(job, connection, result, *args, **kwargs):

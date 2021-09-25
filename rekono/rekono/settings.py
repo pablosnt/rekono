@@ -105,7 +105,7 @@ RQ_QUEUES = {
         'HOST': '127.0.0.1',
         'PORT': 6379,
         'DB': 0,
-        'DEFAULT_TIMEOUT': 7200     # 2 hours
+        'DEFAULT_TIMEOUT': 60       # 1 minute
     },
     'executions-queue': {
         'HOST': '127.0.0.1',
@@ -117,7 +117,7 @@ RQ_QUEUES = {
         'HOST': '127.0.0.1',
         'PORT': 6379,
         'DB': 0,
-        'DEFAULT_TIMEOUT': 900      # 15 minutes
+        'DEFAULT_TIMEOUT': 300      # 5 minutes
     }
 }
 
