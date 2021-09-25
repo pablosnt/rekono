@@ -29,10 +29,6 @@ class Step(models.Model):
         blank=True,
         null=True
     )
-    priority = models.IntegerField(
-        choices=Priority.choices,
-        default=Priority.MEDIUM
-    )
 
     def __str__(self) -> str:
         return self.process.__str__() + ' - ' + self.configuration.__str__()

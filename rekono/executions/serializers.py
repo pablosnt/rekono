@@ -4,7 +4,7 @@ from tools.models import Intensity
 from executions.exceptions import InvalidRequestException
 from executions.models import Parameter, Request
 from rest_framework import serializers
-from queues.tasks import producer
+from queues.requests import producer
 
 
 class ParameterSerializer(serializers.ModelSerializer):
@@ -73,5 +73,5 @@ class RequestSerializer(serializers.ModelSerializer):
                         validated_data=parameter
                     )
                 )
-        producer.create_task(request, parameters)
+        producer.process_request(request, parameters)
         return request

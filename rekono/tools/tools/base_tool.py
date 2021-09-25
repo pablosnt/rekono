@@ -27,15 +27,20 @@ class BaseTool():
      
     def __init__(
         self,
+        execution: Execution,
         tool: Tool,
         configuration: Configuration,
         inputs: list,
         intensity: Intensity
     ) -> None:
+        self.execution = execution
+        self.target = execution.request.target
+        self.target_ports = self.target.target_ports.all()
         self.tool = tool
         self.configuration = configuration
         self.inputs = inputs
         self.intensity = intensity
+        self.findings = []
         self.filename_output = str(uuid.uuid4()) + self.file_output_extension
         self.directory_output = EXECUTION_OUTPUTS
         self.path_output = os.path.join(self.directory_output, self.filename_output)
@@ -46,39 +51,27 @@ class BaseTool():
                 f'Tool {self.tool.name} is not installed in the system'
             )
 
-    def prepare_environment(self, execution: Execution) -> None:
+    def prepare_environment(self) -> None:
         pass
 
-    def clean_environment(self, execution: Execution) -> None:
+    def clean_environment(self) -> None:
         pass
 
-    def prepare_parameters(
-        self,
-        target: Target,
-        target_ports: list,
-        parameters: list,
-        previous_findings: list
-    ) -> tuple:
+    def prepare_parameters(self, parameters: list, previous_findings: list) -> tuple:
         expected_urls = [i for i in self.inputs if i.type == FindingType.URL]
         if expected_urls:
             url = utils.get_url_from_params(
                 expected_urls[0],
-                target,
-                target_ports,
+                self.target,
+                self.target_ports,
                 previous_findings
             )
             if url:
                 self.url = url
                 previous_findings.append(url)
-        return (target_ports, parameters, previous_findings)
+        return (parameters, previous_findings)
     
-    def get_arguments(
-        self,
-        target: Target,
-        target_ports: list,
-        parameters: list,
-        previous_findings: list
-    ) -> str:
+    def get_arguments(self, parameters: list, previous_findings: list) -> str:
         command_arguments = {
             'intensity': self.intensity.argument,
             'output': '' if not self.file_output_enabled else os.path.join(
@@ -132,18 +125,18 @@ class BaseTool():
                                 i.argument,
                                 params
                             )
-                if i.required and i.name not in command_arguments:
+                if i.name not in command_arguments:
                     if i.type == FindingType.HOST:
-                        if checker.check_input_condition(i, target):
+                        if checker.check_input_condition(i, self.target):
                             command_arguments[i.name] = formatter.argument_with_target(
                                 i.argument,
-                                target.target
+                                self.target.target
                             )
                             continue
-                    elif i.type == FindingType.ENUMERATION:
+                    elif i.type == FindingType.ENUMERATION and self.target_ports:
                         command_arguments[i.name] = formatter.argument_with_target_ports(
                             i.argument,
-                            target_ports
+                            self.target_ports
                         )
                         continue
             except KeyError:
@@ -167,14 +160,7 @@ class BaseTool():
             args = [args]
         return args
 
-    def tool_execution(
-        self,
-        target: Target,
-        target_ports: list,
-        args: list,
-        parameters: list,
-        previous_findings: list
-    ) -> tuple:
+    def tool_execution(self, args: list, parameters: list, previous_findings: list) -> str:
         args.insert(0, self.tool.command)
         exec = subprocess.run(args, capture_output=True)
         if (
@@ -187,78 +173,69 @@ class BaseTool():
     def parse_output(self, output: str) -> list:
         return []
 
-    def send_findings(self, execution: Execution, findings: list) -> None:
-        producer.create_findings(execution, findings)
+    def send_findings(self) -> None:
+        producer.process_findings(self.execution, self.findings)
 
-    def on_start(self, execution: Execution) -> None:
-        execution.start = timezone.now()
-        execution.save()
+    def on_start(self) -> None:
+        self.execution.start = timezone.now()
+        self.execution.save()
 
-    def on_skipped(self, execution: Execution) -> None:
-        execution.status = Status.SKIPPED
-        execution.end = timezone.now()
-        execution.save()
+    def on_skipped(self) -> None:
+        self.execution.status = Status.SKIPPED
+        self.execution.end = timezone.now()
+        self.execution.save()
 
-    def on_running(self, execution: Execution) -> None:
-        execution.status = Status.RUNNING
-        execution.save()
+    def on_running(self) -> None:
+        self.execution.status = Status.RUNNING
+        self.execution.save()
 
-    def on_error(self, execution: Execution, stderror: str = None) -> None:
+    def on_error(self, stderror: str = None) -> None:
         if stderror:
-            execution.output_error = stderror
-        execution.status = Status.ERROR
-        execution.end = timezone.now()
-        execution.save()
+            self.execution.output_error = stderror
+        self.execution.status = Status.ERROR
+        self.execution.end = timezone.now()
+        self.execution.save()
 
-    def on_completed(self, execution: Execution, output: str) -> None:
-        execution.status = Status.COMPLETED
-        execution.end = timezone.now()
+    def on_completed(self, output: str) -> None:
+        self.execution.status = Status.COMPLETED
+        self.execution.end = timezone.now()
         full_path = os.path.join(self.directory_output, self.filename_output)
         if self.file_output_enabled and os.path.isfile(full_path):
-            execution.output_file = full_path
-        execution.output_plain = output
-        execution.save()
+            self.execution.output_file = full_path
+        self.execution.output_plain = output
+        self.execution.save()
 
-    def run(
-        self,
-        target: Target,
-        target_ports: list,
-        execution: Execution,
-        parameters: list = [],
-        previous_findings: list = []
-    ) -> None:
-        self.on_start(execution)
+    def run(self, parameters: list = [], previous_findings: list = []) -> None:
+        self.on_start()
         try:
             self.check_installation()
         except InstallationNotFoundException as ex:
-            self.on_error(execution, stderror=str(ex))
+            self.on_error(stderror=str(ex))
             return
-        target_ports, parameters, previous_findings = self.prepare_parameters(
-            target,
-            target_ports,
+        parameters, previous_findings = self.prepare_parameters(
             parameters,
             previous_findings
         )
         try:
-            args = self.get_arguments(target, target_ports, parameters, previous_findings)
+            args = self.get_arguments(parameters, previous_findings)
         except InvalidToolParametersException as ex:
             print(ex)
-            self.on_skipped(execution)
+            self.on_skipped()
             return
-        self.prepare_environment(execution)
-        self.on_running(execution)
+        self.prepare_environment()
+        self.on_running()
         try:
-            output = self.tool_execution(target, target_ports, args, parameters, previous_findings)
+            output = self.tool_execution(args, parameters, previous_findings)
         except UnexpectedToolExitCodeException as ex:
-            self.on_error(execution, stderror=str(ex))
-            self.clean_environment(execution)
+            self.on_error(stderror=str(ex))
+            self.clean_environment()
             return
         except Exception as ex:
             print(ex)
-            self.on_error(execution)
-            self.clean_environment(execution)
+            self.on_error()
+            self.clean_environment()
             return
-        self.clean_environment(execution)
-        self.on_completed(execution, output)
-        findings = self.parse_output(output)
-        self.send_findings(execution, findings)
+        self.clean_environment()
+        self.on_completed(output)
+        self.findings = self.parse_output(output)
+        self.send_findings()
