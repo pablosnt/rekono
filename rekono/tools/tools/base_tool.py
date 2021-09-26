@@ -6,7 +6,7 @@ import uuid
 
 from django.utils import timezone
 from executions.enums import ParameterKey, Status
-from executions.models import Execution, Target
+from executions.models import Execution
 from tools import utils
 from tools.arguments import checker, formatter
 from tools.enums import FindingType
@@ -33,6 +33,8 @@ class BaseTool():
         inputs: list,
         intensity: Intensity
     ) -> None:
+        execution.rq_job_pid = os.getpid()
+        execution.save()
         self.execution = execution
         self.target = execution.request.target
         self.target_ports = self.target.target_ports.all()

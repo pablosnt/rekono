@@ -10,7 +10,7 @@ from tools.models import Configuration, Input, Intensity
 def execute(
     execution: Execution,
     intensity: Intensity,
-    inputs: list = [],
+    inputs: list,
     parameters: list = [],
     callback: Callable = None,
     dependencies: list = []
@@ -24,17 +24,15 @@ def execute(
     else:
         tool = execution.request.tool
         configuration = execution.request.configuration
-    executions_queue = django_rq.get_queue('executions-queue')
-    execution_job = executions_queue.enqueue(
+    execution_job = Job.create(
         consumer.execute,
-        execution=execution,
-        tool=tool,
-        configuration=configuration,
-        intensity=intensity,
-        inputs=inputs,
-        parameters=parameters,
+        args=[execution, tool, configuration, intensity, inputs, parameters],
         on_success=callback,
         depends_on=dependencies,
         result_ttl=3600 if dependencies else 500
     )
+    execution.rq_job_id = execution_job.id
+    execution.save()
+    executions_queue = django_rq.get_queue('executions-queue')
+    executions_queue.enqueue_job(execution_job)
     return execution_job

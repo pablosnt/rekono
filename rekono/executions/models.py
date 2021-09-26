@@ -49,6 +49,8 @@ class Parameter(models.Model):
 
 class Execution(models.Model):
     request = models.ForeignKey(Request, related_name='executions', on_delete=models.CASCADE)
+    rq_job_id = models.TextField(max_length=50, blank=True, null=True)
+    rq_job_pid = models.IntegerField(blank=True, null=True)
     step = models.ForeignKey(Step, on_delete=models.CASCADE, blank=True, null=True)
     output_file = models.TextField(max_length=50, blank=True, null=True)
     output_plain = models.TextField(blank=True, null=True)

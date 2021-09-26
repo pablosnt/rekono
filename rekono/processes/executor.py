@@ -48,7 +48,8 @@ def create_plan(request: Request) -> list:
 def execute(request: Request, parameters: list) -> None:
     execution_plan = create_plan(request)
     for job in execution_plan:
-        execution = Execution(request=request, step=job.step)
+        execution = Execution.objects.create(request=request, step=job.step)
+        execution.save()
         job.job = producer.execute(
             execution,
             job.intensity,
