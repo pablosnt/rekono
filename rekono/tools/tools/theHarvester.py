@@ -43,8 +43,8 @@ class TheHarvesterTool(BaseTool):
         ('linkedin_people', OSINT.DataType.USER)
     ]
 
-    def prepare_environment(self, execution: Execution) -> None:
-        details = UserDetail.objects.filter(user=execution.request.executor).first()
+    def prepare_environment(self) -> None:
+        details = UserDetail.objects.filter(user=self.execution.request.executor).first()
         for api in self.api_keys_config['apikeys'].keys():
             apikey = getattr(details, api + '_apikey')
             self.api_keys_config['apikeys'][api] = {
@@ -53,7 +53,7 @@ class TheHarvesterTool(BaseTool):
         with open(self.configuration_file, 'w') as config_file:
             yaml.dump(self.api_keys_config, config_file, default_flow_style=False)
 
-    def clean_environment(self, execution: Execution) -> None:
+    def clean_environment(self) -> None:
         if os.path.isfile(self.configuration_file):
             os.remove(self.configuration_file)
 

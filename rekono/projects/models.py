@@ -20,7 +20,8 @@ class Target(models.Model):
         PRIVATE_IP = 1
         PUBLIC_IP = 2
         NETWORK = 3
-        DOMAIN = 4
+        IP_RANGE = 4
+        DOMAIN = 5
 
     project = models.ForeignKey(
         Project,

@@ -54,7 +54,7 @@ class Input(models.Model):
         on_delete=models.CASCADE
     )
     name = models.TextField(max_length=20)
-    type = models.CharField(max_length=30, choices=FindingType.choices)
+    type = models.IntegerField(choices=FindingType.choices)
     argument = models.TextField(max_length=50, blank=True, null=True)
     filter = models.TextField(max_length=250, blank=True, null=True)
     selection = models.IntegerField(choices=InputSelection.choices, default=InputSelection.FOR_EACH)
@@ -71,7 +71,7 @@ class Output(models.Model):
         related_name='outputs',
         on_delete=models.CASCADE
     )
-    type = models.CharField(max_length=30, choices=FindingType.choices)
+    type = models.IntegerField(choices=FindingType.choices)
 
     def __str__(self) -> str:
         fk = self.configuration.__str__()

@@ -4,7 +4,7 @@
         "pk": 1,
         "fields": {
             "configuration_id": 1,
-            "type": "findings.models.Host"
+            "type": 2
         }
     },
     {
@@ -12,7 +12,7 @@
         "pk": 2,
         "fields": {
             "configuration_id": 1,
-            "type": "findings.models.Enumeration"
+            "type": 3
         }
     },
     {
@@ -20,7 +20,7 @@
         "pk": 3,
         "fields": {
             "configuration_id": 2,
-            "type": "findings.models.Host"
+            "type": 2
         }
     },
     {
@@ -28,7 +28,7 @@
         "pk": 4,
         "fields": {
             "configuration_id": 2,
-            "type": "findings.models.Enumeration"
+            "type": 3
         }
     },
     {
@@ -36,7 +36,7 @@
         "pk": 5,
         "fields": {
             "configuration_id": 3,
-            "type": "findings.models.Host"
+            "type": 2
         }
     },
     {
@@ -44,7 +44,7 @@
         "pk": 6,
         "fields": {
             "configuration_id": 3,
-            "type": "findings.models.Enumeration"
+            "type": 3
         }
     },
     {
@@ -52,7 +52,7 @@
         "pk": 7,
         "fields": {
             "configuration_id": 3,
-            "type": "findings.models.Technology"
+            "type": 6
         }
     },
     {
@@ -60,7 +60,7 @@
         "pk": 8,
         "fields": {
             "configuration_id": 4,
-            "type": "findings.models.Host"
+            "type": 2
         }
     },
     {
@@ -68,7 +68,7 @@
         "pk": 9,
         "fields": {
             "configuration_id": 4,
-            "type": "findings.models.Enumeration"
+            "type": 3
         }
     },
     {
@@ -76,7 +76,7 @@
         "pk": 10,
         "fields": {
             "configuration_id": 4,
-            "type": "findings.models.Technology"
+            "type": 6
         }
     },
     {
@@ -84,7 +84,7 @@
         "pk": 11,
         "fields": {
             "configuration_id": 5,
-            "type": "findings.models.Host"
+            "type": 2
         }
     },
     {
@@ -92,7 +92,7 @@
         "pk": 12,
         "fields": {
             "configuration_id": 5,
-            "type": "findings.models.Enumeration"
+            "type": 3
         }
     },
     {
@@ -100,7 +100,7 @@
         "pk": 13,
         "fields": {
             "configuration_id": 6,
-            "type": "findings.models.Host"
+            "type": 2
         }
     },
     {
@@ -108,7 +108,7 @@
         "pk": 14,
         "fields": {
             "configuration_id": 6,
-            "type": "findings.models.Enumeration"
+            "type": 3
         }
     },
     {
@@ -116,7 +116,7 @@
         "pk": 15,
         "fields": {
             "configuration_id": 6,
-            "type": "findings.models.Technology"
+            "type": 6
         }
     },
     {
@@ -124,7 +124,7 @@
         "pk": 16,
         "fields": {
             "configuration_id": 7,
-            "type": "findings.models.Host"
+            "type": 2
         }
     },
     {
@@ -132,7 +132,7 @@
         "pk": 17,
         "fields": {
             "configuration_id": 7,
-            "type": "findings.models.Enumeration"
+            "type": 3
         }
     },
     {
@@ -140,7 +140,7 @@
         "pk": 18,
         "fields": {
             "configuration_id": 8,
-            "type": "findings.models.Host"
+            "type": 2
         }
     },
     {
@@ -148,7 +148,7 @@
         "pk": 19,
         "fields": {
             "configuration_id": 8,
-            "type": "findings.models.Enumeration"
+            "type": 3
         }
     },
     {
@@ -156,7 +156,7 @@
         "pk": 20,
         "fields": {
             "configuration_id": 9,
-            "type": "findings.models.Host"
+            "type": 2
         }
     },
     {
@@ -164,7 +164,7 @@
         "pk": 21,
         "fields": {
             "configuration_id": 9,
-            "type": "findings.models.Enumeration"
+            "type": 3
         }
     },
     {
@@ -172,7 +172,7 @@
         "pk": 22,
         "fields": {
             "configuration_id": 9,
-            "type": "findings.models.Technology"
+            "type": 6
         }
     },
     {
@@ -180,7 +180,7 @@
         "pk": 23,
         "fields": {
             "configuration_id": 10,
-            "type": "findings.models.Host"
+            "type": 2
         }
     },
     {
@@ -188,7 +188,7 @@
         "pk": 24,
         "fields": {
             "configuration_id": 10,
-            "type": "findings.models.Enumeration"
+            "type": 3
         }
     },
     {
@@ -196,7 +196,7 @@
         "pk": 25,
         "fields": {
             "configuration_id": 10,
-            "type": "findings.models.Technology"
+            "type": 6
         }
     },
     {
@@ -204,7 +204,7 @@
         "pk": 26,
         "fields": {
             "configuration_id": 11,
-            "type": "findings.models.Host"
+            "type": 2
         }
     },
     {
@@ -212,7 +212,7 @@
         "pk": 27,
         "fields": {
             "configuration_id": 11,
-            "type": "findings.models.Enumeration"
+            "type": 3
         }
     },
     {
@@ -220,7 +220,7 @@
         "pk": 28,
         "fields": {
             "configuration_id": 12,
-            "type": "findings.models.Host"
+            "type": 2
         }
     },
     {
@@ -228,7 +228,7 @@
         "pk": 29,
         "fields": {
             "configuration_id": 12,
-            "type": "findings.models.Enumeration"
+            "type": 3
         }
     },
     {
@@ -236,7 +236,7 @@
         "pk": 30,
         "fields": {
             "configuration_id": 12,
-            "type": "findings.models.Technology"
+            "type": 6
         }
     },
     {
@@ -244,7 +244,7 @@
         "pk": 31,
         "fields": {
             "configuration_id": 13,
-            "type": "findings.models.Host"
+            "type": 2
         }
     },
     {
@@ -252,7 +252,7 @@
         "pk": 32,
         "fields": {
             "configuration_id": 13,
-            "type": "findings.models.Enumeration"
+            "type": 3
         }
     },
     {
@@ -260,7 +260,7 @@
         "pk": 33,
         "fields": {
             "configuration_id": 13,
-            "type": "findings.models.Technology"
+            "type": 6
         }
     },
     {
@@ -268,7 +268,7 @@
         "pk": 34,
         "fields": {
             "configuration_id": 13,
-            "type": "findings.models.Vulnerability"
+            "type": 7
         }
     },
     {
@@ -276,7 +276,7 @@
         "pk": 35,
         "fields": {
             "configuration_id": 14,
-            "type": "findings.models.Host"
+            "type": 2
         }
     },
     {
@@ -284,7 +284,7 @@
         "pk": 36,
         "fields": {
             "configuration_id": 14,
-            "type": "findings.models.Enumeration"
+            "type": 3
         }
     },
     {
@@ -292,7 +292,7 @@
         "pk": 37,
         "fields": {
             "configuration_id": 14,
-            "type": "findings.models.Technology"
+            "type": 6
         }
     },
     {
@@ -300,7 +300,7 @@
         "pk": 38,
         "fields": {
             "configuration_id": 14,
-            "type": "findings.models.Vulnerability"
+            "type": 7
         }
     },
     {
@@ -308,7 +308,7 @@
         "pk": 39,
         "fields": {
             "configuration_id": 15,
-            "type": "findings.models.HttpEndpoint"
+            "type": 5
         }
     },
     {
@@ -316,7 +316,7 @@
         "pk": 40,
         "fields": {
             "configuration_id": 16,
-            "type": "findings.models.HttpEndpoint"
+            "type": 5
         }
     },
     {
@@ -324,7 +324,7 @@
         "pk": 41,
         "fields": {
             "configuration_id": 17,
-            "type": "findings.models.HttpEndpoint"
+            "type": 5
         }
     },
     {
@@ -332,7 +332,7 @@
         "pk": 42,
         "fields": {
             "configuration_id": 18,
-            "type": "findings.models.HttpEndpoint"
+            "type": 5
         }
     },
     {
@@ -340,7 +340,7 @@
         "pk": 43,
         "fields": {
             "configuration_id": 19,
-            "type": "findings.models.OSINT"
+            "type": 1
         }
     },
     {
@@ -348,7 +348,7 @@
         "pk": 44,
         "fields": {
             "configuration_id": 20,
-            "type": "findings.models.OSINT"
+            "type": 1
         }
     },
     {
@@ -356,7 +356,7 @@
         "pk": 45,
         "fields": {
             "configuration_id": 21,
-            "type": "findings.models.HttpEndpoint"
+            "type": 5
         }
     },
     {
@@ -364,7 +364,7 @@
         "pk": 46,
         "fields": {
             "configuration_id": 21,
-            "type": "findings.models.Vulnerability"
+            "type": 7
         }
     }
 ]

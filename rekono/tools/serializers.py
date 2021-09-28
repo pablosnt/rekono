@@ -4,6 +4,7 @@ from tools.models import Configuration, Input, Output
 
 
 class InputSerializer(serializers.ModelSerializer):
+    type = serializers.CharField(source='get_type_display')
     selection = serializers.CharField(source='get_selection_display')
 
     class Meta:
@@ -12,6 +13,7 @@ class InputSerializer(serializers.ModelSerializer):
 
 
 class OutputSerializer(serializers.ModelSerializer):
+    type = serializers.CharField(source='get_type_display')
 
     class Meta:
         model = Output

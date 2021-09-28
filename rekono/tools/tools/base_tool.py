@@ -1,4 +1,3 @@
-import importlib
 import os
 import shutil
 import subprocess
@@ -83,9 +82,7 @@ class BaseTool():
         }
         for i in self.inputs:
             try:
-                aux = i.type.rsplit('.', 1)
-                input_module = importlib.import_module(aux[0])
-                input_class = getattr(input_module, aux[1])
+                input_class = utils.get_finding_class_by_type(i.type)
                 if i.selection == Input.InputSelection.FOR_EACH:
                     for r in previous_findings:
                         if isinstance(r, input_class):

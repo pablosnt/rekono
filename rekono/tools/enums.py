@@ -11,13 +11,13 @@ class IntensityRank(models.IntegerChoices):
     INSANE = 5
 
 
-class FindingType(models.TextChoices):
-    OSINT = 'findings.models.OSINT'
-    HOST = 'findings.models.Host'
-    ENUMERATION = 'findings.models.Enumeration'
-    URL = 'tools.arguments.url.Url'
-    HTTP_ENDPOINT = 'findings.models.HttpEndpoint'
-    TECHNOLOGY = 'findings.models.Technology'
-    VULNERABILITY = 'findings.models.Vulnerability'
-    EXPLOIT = 'findings.models.Exploit'
-    PARAMETER = 'executions.models.Parameter'
+class FindingType(models.IntegerChoices):
+    OSINT = 1
+    HOST = 2
+    ENUMERATION = 3
+    URL = 4
+    HTTP_ENDPOINT = 5
+    TECHNOLOGY = 6
+    VULNERABILITY = 7
+    EXPLOIT = 8
+    PARAMETER = 9

@@ -12,8 +12,10 @@ def execute(
     intensity: Intensity,
     inputs: list,
     parameters: list = [],
+    previous_findings: list = [],
     callback: Callable = None,
-    dependencies: list = []
+    dependencies: list = [],
+    at_front: bool = False
 ) -> None:
     if execution.step:
         tool = execution.step.tool
@@ -24,15 +26,19 @@ def execute(
     else:
         tool = execution.request.tool
         configuration = execution.request.configuration
-    execution_job = Job.create(
-        consumer.execute,
-        args=[execution, tool, configuration, intensity, inputs, parameters],
-        on_success=callback,
-        depends_on=dependencies,
-        result_ttl=3600 if dependencies else 500
-    )
-    execution.rq_job_id = execution_job.id
-    execution.save()
     executions_queue = django_rq.get_queue('executions-queue')
-    executions_queue.enqueue_job(execution_job)
+    execution_job = executions_queue.enqueue(
+        consumer.execute,
+        execution=execution,
+        tool=tool,
+        configuration=configuration,
+        intensity=intensity,
+        inputs=inputs,
+        parameters=parameters,
+        previous_findings=previous_findings,
+        on_success=callback,
+        result_ttl=None,
+        depends_on=dependencies,
+        at_front=at_front
+    )
     return execution_job

@@ -1,10 +1,13 @@
 import importlib
 
-from findings.models import Enumeration
+from executions.models import Parameter
+from findings.models import (OSINT, Enumeration, Exploit, Host, HttpEndpoint,
+                             Technology, Vulnerability)
 from projects.models import Target
 from tools.arguments import checker
 from tools.arguments.url import Url
 from tools.models import Input
+from tools.enums import FindingType
 
 
 def get_tool_class_by_name(name):
@@ -18,6 +21,21 @@ def get_tool_class_by_name(name):
         tools_module = importlib.import_module('tools.tools.base_tool')
         tool_class = getattr(tools_module, 'BaseTool')
     return tool_class
+
+
+def get_finding_class_by_type(type):
+    mapper = {
+        FindingType.OSINT: OSINT,
+        FindingType.HOST: Host,
+        FindingType.ENUMERATION: Enumeration,
+        FindingType.URL: Url,
+        FindingType.HTTP_ENDPOINT: HttpEndpoint,
+        FindingType.TECHNOLOGY: Technology,
+        FindingType.VULNERABILITY: Vulnerability,
+        FindingType.EXPLOIT: Exploit,
+        FindingType.PARAMETER: Parameter
+    }
+    return mapper[type]
 
 
 def get_keys_from_argument(argument: str) -> list:
