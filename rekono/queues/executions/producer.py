@@ -37,8 +37,14 @@ def execute(
         parameters=parameters,
         previous_findings=previous_findings,
         on_success=callback,
-        result_ttl=None,
+        result_ttl=7200,
         depends_on=dependencies,
         at_front=at_front
     )
+    execution_job.meta['execution'] = execution
+    execution_job.meta['intensity'] = intensity
+    execution_job.meta['inputs'] = inputs
+    execution_job.meta['callback'] = callback
+    execution_job.meta['parameters'] = parameters
+    execution_job.save_meta()
     return execution_job

@@ -16,7 +16,7 @@ def cancel_request(request):
         ).all()
         for execution in executions:
             if execution.rq_job_id:
-                utils.cancel_execution(execution.rq_job_id)
+                utils.cancel_job(execution.rq_job_id)
             if execution.rq_job_pid:
                 os.kill(execution.rq_job_pid, signal.SIGKILL)
             execution.status = Status.CANCELLED
