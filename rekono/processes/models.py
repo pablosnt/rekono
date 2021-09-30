@@ -17,12 +17,13 @@ class Process(models.Model):
 class Step(models.Model):
 
     class Priority(models.IntegerChoices):
-        LOW = 1
-        MEDIUM = 2
-        HIGH = 3
+        ASAP = 1
+        STANDARD = 2
+        LAST = 3
 
     process = models.ForeignKey(Process, related_name='steps', on_delete=models.CASCADE)
     tool = models.ForeignKey(Tool, on_delete=models.CASCADE)
+    priority = models.IntegerField(choices=Priority.choices, default=Priority.STANDARD)
     configuration = models.ForeignKey(
         Configuration,
         on_delete=models.CASCADE,

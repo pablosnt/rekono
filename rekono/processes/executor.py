@@ -1,11 +1,10 @@
+from django.utils import timezone
 from executions.enums import Status
-from executions.models import Execution
-from executions.models import Request
+from executions.models import Execution, Request
 from processes.models import Step
+from queues.executions import producer
 from tools.enums import FindingType
 from tools.models import Input, Intensity, Output
-from queues.executions import producer
-from django.utils import timezone
 
 
 class ExecutionJob():
@@ -23,7 +22,7 @@ class ExecutionJob():
 
 def create_plan(request: Request) -> list:
     execution_plan = []
-    steps = Step.objects.filter(process=request.process).order_by('tool__stage')
+    steps = Step.objects.filter(process=request.process).order_by('tool__stage', 'priority')
     for step in steps:
         intensity = Intensity.objects.filter(
             tool=step.tool,
