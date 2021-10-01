@@ -9,6 +9,8 @@ from rq.job import Job
 from tools import utils as tool_utils
 from tools.enums import FindingType
 from tools.models import Configuration, Input, Intensity, Tool
+from tools.tools.base_tool import BaseTool
+from tools.exceptions import InvalidToolParametersException
 
 
 @job('executions-queue')
@@ -24,15 +26,6 @@ def execute(
     current_job = rq.get_current_job()
     execution.rq_job_id = current_job.id
     execution.save()
-    if not previous_findings:
-        if current_job._dependency_ids:
-            previous_findings = process_dependencies(
-                execution,
-                intensity,
-                inputs,
-                parameters,
-                current_job
-            )
     tool_class = tool_utils.get_tool_class_by_name(tool.name)
     tool = tool_class(
         execution=execution,
@@ -41,6 +34,16 @@ def execute(
         inputs=inputs,
         intensity=intensity
     )
+    if not previous_findings:
+        if current_job._dependency_ids:
+            previous_findings = process_dependencies(
+                execution,
+                intensity,
+                inputs,
+                parameters,
+                current_job,
+                tool
+            )
     tool.run(parameters=parameters, previous_findings=previous_findings)
     return tool
 
@@ -50,27 +53,41 @@ def process_dependencies(
     intensity: Intensity,
     inputs: list,
     parameters: list,
-    current_job: Job
+    current_job: Job,
+    tool: BaseTool
 ) -> list:
     findings = queue_utils.get_findings_from_dependencies(current_job._dependency_ids)
     if not findings:
         return []
     new_jobs_ids = []
     all_params = get_new_jobs_from_findings(findings, inputs)
-    for param_set in list(all_params)[1:]:
+    all_params = [
+        list(param_set) for param_set in list(all_params)
+        if check_params_for_tool(tool, parameters, list(param_set))
+    ]
+    for param_set in all_params[1:]:
         execution = Execution.objects.create(request=execution.request, step=execution.step)
         job = producer.execute(
             execution,
             intensity,
             inputs,
             parameters=parameters,
-            previous_findings=list(param_set),
+            previous_findings=param_set,
             callback=success_callback,
             at_front=True
         )
         new_jobs_ids.append(job.id)
     queue_utils.update_new_dependencies(current_job.id, new_jobs_ids, parameters)
-    return list(next(iter(all_params)))
+    return next(iter(all_params), [])
+
+
+def check_params_for_tool(tool: BaseTool, parameters: list, findings: list) -> bool:
+    try:
+        parameters, findings = tool.prepare_parameters(parameters, findings)
+        tool.get_arguments(parameters, findings)
+        return True
+    except InvalidToolParametersException:
+        return False
 
 
 def get_new_jobs_from_findings(findings: dict, inputs: list) -> dict:
