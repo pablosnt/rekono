@@ -56,23 +56,21 @@ def process_dependencies(
     if not findings:
         return []
     new_jobs_ids = []
-    jobs = get_new_jobs_from_findings(findings, inputs)
-    for job_counter in jobs.keys():
-        if job_counter == 0:
-            continue
+    all_params = get_new_jobs_from_findings(findings, inputs)
+    for param_set in list(all_params)[1:]:
         execution = Execution.objects.create(request=execution.request, step=execution.step)
         job = producer.execute(
             execution,
             intensity,
             inputs,
             parameters=parameters,
-            previous_findings=jobs[job_counter],
+            previous_findings=list(param_set),
             callback=success_callback,
             at_front=True
         )
         new_jobs_ids.append(job.id)
     queue_utils.update_new_dependencies(current_job.id, new_jobs_ids, parameters)
-    return jobs[0]
+    return list(next(iter(all_params)))
 
 
 def get_new_jobs_from_findings(findings: dict, inputs: list) -> dict:
@@ -128,4 +126,4 @@ def get_new_jobs_from_findings(findings: dict, inputs: list) -> dict:
                         jobs[job_counter] = aux.copy()
                         jobs[job_counter].append(finding)
                         job_counter += 1
-    return jobs
+    return set(tuple(params) for params in jobs.values())

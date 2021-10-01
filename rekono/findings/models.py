@@ -30,6 +30,15 @@ class OSINT(models.Model):
     reference = models.TextField(max_length=250, blank=True, null=True)
     creation = models.DateTimeField(auto_now_add=True)
 
+    def __hash__(self) -> int:
+        req = self.execution.request if self.execution else None
+        return hash((req, self.data, self.data_type))
+    
+    def __eq__(self, o: object) -> bool:
+        if isinstance(o, self.__class__):
+            return o.execution.request == self.execution.request and o.data == self.data
+        return False
+
 
 class Host(models.Model):
 
@@ -59,6 +68,18 @@ class Host(models.Model):
     )
     creation = models.DateTimeField(auto_now_add=True)
 
+    def __hash__(self) -> int:
+        req = self.execution.request if self.execution else None
+        return hash((req, self.address))
+
+    def __eq__(self, o: object) -> bool:
+        if isinstance(o, self.__class__):
+            if o.execution and self.execution:
+                return o.execution.request == self.execution.request and o.address == self.address
+            else:
+                return o.address == self.address
+        return False
+
 
 class Enumeration(models.Model):
 
@@ -86,6 +107,14 @@ class Enumeration(models.Model):
     service = models.TextField(max_length=50)
     creation = models.DateTimeField(auto_now_add=True)
 
+    def __hash__(self) -> int:
+        return hash((self.host, self.port))
+
+    def __eq__(self, o: object) -> bool:
+        if isinstance(o, self.__class__):
+            return o.host == self.host and o.port == self.port
+        return False
+
 
 class HttpEndpoint(models.Model):
     execution = models.ForeignKey(
@@ -106,6 +135,14 @@ class HttpEndpoint(models.Model):
     status = models.IntegerField(blank=True, null=True)
     creation = models.DateTimeField(auto_now_add=True)
 
+    def __hash__(self) -> int:
+        return hash((self.enumeration, self.endpoint))
+    
+    def __eq__(self, o: object) -> bool:
+        if isinstance(o, self.__class__):
+            return o.enumeration == self.enumeration and o.endpoint == self.endpoint
+        return False
+
 
 class Technology(models.Model):
     execution = models.ForeignKey(
@@ -125,6 +162,18 @@ class Technology(models.Model):
     reference = models.TextField(max_length=250, blank=True, null=True)
     creation = models.DateTimeField(auto_now_add=True)
 
+    def __hash__(self) -> int:
+        return hash((self.enumeration, self.name, self.version))
+
+    def __eq__(self, o: object) -> bool:
+        if isinstance(o, self.__class__):
+            return (
+                o.enumeration == self.enumeration and
+                o.name == self.name and
+                o.version == self.version
+            )
+        return False
+    
 
 class Vulnerability(models.Model):
 
@@ -157,6 +206,14 @@ class Vulnerability(models.Model):
     reference = models.TextField(max_length=250, blank=True, null=True)
     creation = models.DateTimeField(auto_now_add=True)
 
+    def __hash__(self) -> int:
+        return hash((self.technology, self.name, self.cve))
+
+    def __eq__(self, o: object) -> bool:
+        if isinstance(o, self.__class__):
+            return o.technology == self.technology and o.name == self.name and o.cve == self.cve
+        return False
+    
 
 class Exploit(models.Model):
     execution = models.ForeignKey(
@@ -185,3 +242,14 @@ class Exploit(models.Model):
     reference = models.TextField(max_length=250)
     checked = models.BooleanField(default=False)
     creation = models.DateTimeField(auto_now_add=True)
+
+    def __hash__(self) -> int:
+        return hash(self.technology, self.vulnerability, self.name, self.reference)
+
+    def __eq__(self, o: object) -> bool:
+        if isinstance(o, self.__class__):
+            return (
+                (o.technology == self.technology or o.vulnerability == self.vulnerability) and 
+                o.name == self.name and o.reference == self.reference
+            )
+        return False
