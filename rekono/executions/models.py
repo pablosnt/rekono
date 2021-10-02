@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User
+from django.conf import settings
 from django.db import models
 from executions.enums import ParameterKey, Status
 from processes.models import Process, Step
@@ -25,7 +25,7 @@ class Request(models.Model):
         blank=True,
         null=True
     )
-    executor = models.ForeignKey(User, on_delete=models.CASCADE)
+    executor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     status = models.IntegerField(choices=Status.choices, default=Status.REQUESTED)
     start = models.DateTimeField(blank=True, null=True)
     end = models.DateTimeField(blank=True, null=True)

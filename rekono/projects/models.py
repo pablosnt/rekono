@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User
+from django.conf import settings
 from django.db import models
 from django.db.models.deletion import CASCADE
 
@@ -8,9 +8,9 @@ from django.db.models.deletion import CASCADE
 class Project(models.Model):
     name = models.TextField(max_length=50)
     description = models.TextField(max_length=250)
-    owner = models.ForeignKey(User, on_delete=CASCADE)
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=CASCADE)
     members = models.ManyToManyField(
-        User,
+        settings.AUTH_USER_MODEL,
         through='ProjectMember',
         related_name='members',
         blank=True
@@ -54,7 +54,7 @@ class TargetPort(models.Model):
 
 
 class ProjectMember(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
 
     def __str__(self) -> str:

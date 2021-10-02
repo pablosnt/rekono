@@ -2,10 +2,9 @@ import json
 import os
 
 import yaml
-from executions.models import Execution
 from findings.models import OSINT
 from tools.tools.base_tool import BaseTool
-from users.models import UserDetail
+from users.models import User
 
 
 class TheHarvesterTool(BaseTool):
@@ -44,7 +43,7 @@ class TheHarvesterTool(BaseTool):
     ]
 
     def prepare_environment(self) -> None:
-        details = UserDetail.objects.filter(user=self.execution.request.executor).first()
+        details = User.objects.filter(user=self.execution.request.executor).first()
         for api in self.api_keys_config['apikeys'].keys():
             apikey = getattr(details, api + '_apikey')
             self.api_keys_config['apikeys'][api] = {

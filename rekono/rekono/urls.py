@@ -23,7 +23,8 @@ urlpatterns = [
     path('api/', include('findings.urls')),
     path('api/', include('processes.urls')),
     path('api/', include('projects.urls')),
-    path('api/', include('tools.urls'))
+    path('api/', include('tools.urls')),
+    path('api/', include('users.urls'))
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

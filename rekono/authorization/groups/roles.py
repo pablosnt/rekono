@@ -1,10 +1,10 @@
-from enum import Enum
+from django.db import models
 
 
-class Role(Enum):
-    READER = 1
+class Role(models.IntegerChoices):
+    ADMIN = 1
     AUDITOR = 2
-    ADMIN = 3
+    READER = 3
 
 
 DEFAULT_GROUPS = {

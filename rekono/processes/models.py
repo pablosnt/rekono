@@ -1,5 +1,5 @@
+from django.conf import settings
 from django.db import models
-from django.contrib.auth.models import User
 from tools.models import Tool, Configuration
 
 # Create your models here.
@@ -8,7 +8,7 @@ from tools.models import Tool, Configuration
 class Process(models.Model):
     name = models.TextField(max_length=30)
     description = models.TextField(max_length=250)
-    creator = models.ForeignKey(User, on_delete=models.CASCADE)
+    creator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
     def __str__(self) -> str:
         return self.name
