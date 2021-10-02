@@ -9,6 +9,12 @@ class Project(models.Model):
     name = models.TextField(max_length=50)
     description = models.TextField(max_length=250)
     owner = models.ForeignKey(User, on_delete=CASCADE)
+    members = models.ManyToManyField(
+        User,
+        through='ProjectMember',
+        related_name='members',
+        blank=True
+    )
 
     def __str__(self) -> str:
         return self.name
@@ -47,7 +53,7 @@ class TargetPort(models.Model):
         return f'{self.target.target} - {self.port}'
 
 
-class Access(models.Model):
+class ProjectMember(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
 
