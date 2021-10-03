@@ -1,8 +1,11 @@
-from rest_framework.views import APIView
-from users.models import User
-from users.serializers import InviteUserSerializer, CreateUserSerializer
-from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.mixins import (ListModelMixin, RetrieveModelMixin,
+                                   UpdateModelMixin)
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework.viewsets import GenericViewSet
+from users.models import User
+from users.serializers import CreateUserSerializer, InviteUserSerializer, UserSerializer
 
 # Create your views here.
 
@@ -28,3 +31,8 @@ class CreateUserView(APIView):
             except User.DoesNotExist:
                 return Response(status=status.HTTP_404_NOT_FOUND)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserViewSet(GenericViewSet, ListModelMixin, RetrieveModelMixin, UpdateModelMixin):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
