@@ -39,7 +39,14 @@ class RekonoUserManager(UserManager):
         api_token.save()
         return user
 
-    def disable_user(self, user: Any) -> None:
+    def change_user_role(self, user: Any, role: Role) -> Any:
+        group = Group.objects.get(name=role.name.capitalize())
+        user.groups.clear()
+        user.groups.set([group])
+        user.save()
+        return user
+
+    def disable_user(self, user: Any) -> Any:
         user.is_active = False
         user.set_unusable_password()
         user.otp = None
@@ -50,6 +57,13 @@ class RekonoUserManager(UserManager):
             token.delete()
         except Token.DoesNotExist:
             pass
+        return user
+
+    def request_password_reset(self, user: Any, domain: str) -> Any:
+        user.otp = otp_generator.generate_otp()
+        user.save()
+        sender.send_password_reset(user, domain)
+        return user
 
 class User(AbstractUser):
     username = models.TextField(max_length=150, unique=True, blank=True, null=True)
@@ -62,7 +76,7 @@ class User(AbstractUser):
     REQUIRED_FIELDS = ['email']
     objects = RekonoUserManager()
 
-    otp = models.TextField(max_length=200, blank=True, null=True)
+    otp = models.TextField(max_length=200, unique=True, blank=True, null=True)
 
     class Notification(models.IntegerChoices):
         MAIL = 1

@@ -46,10 +46,7 @@ class ChangeUserRoleSerializer(serializers.Serializer):
 
     def update(self, instance, validated_data):
         role = Role(validated_data.get('role'))
-        group = Group.objects.get(name=role.name.capitalize())
-        instance.groups.clear()
-        instance.groups.set([group])
-        instance.save()
+        instance = User.objects.change_user_role(instance, role)
         return instance
 
 
@@ -75,6 +72,29 @@ class ChangeUserPasswordSerializer(serializers.ModelSerializer):
         instance.set_password(validated_data.get('password'))
         instance.save()
         return instance
+
+
+class RequestPasswordResetSerializer(serializers.Serializer):
+    email = serializers.EmailField(max_length=150, required=True)
+
+    def save(self, **kwargs):
+        user = User.objects.get(email=self.validated_data.get('email'), is_active=True)
+        request = self.context.get('request', None)
+        user = User.objects.request_password_reset(user, get_current_site(request))
+        return user
+
+
+class ResetPasswordSerializer(serializers.Serializer):
+    password = serializers.CharField(required=True)
+    otp = serializers.CharField(max_length=200, required=True)
+
+    def save(self, **kwargs):
+        user = User.objects.get(otp=self.validated_data.get('otp'), is_active=True)
+        user.set_password(self.validated_data.get('password'))
+        user.otp = None
+        user.save()
+        return user
+
 
 
 class UserSerializer(serializers.ModelSerializer):

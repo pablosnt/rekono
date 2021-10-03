@@ -7,7 +7,9 @@ from rest_framework.viewsets import GenericViewSet
 from users.models import User
 from users.serializers import (ChangeUserPasswordSerializer,
                                ChangeUserRoleSerializer, CreateUserSerializer,
-                               InviteUserSerializer, UserSerializer)
+                               InviteUserSerializer,
+                               RequestPasswordResetSerializer,
+                               ResetPasswordSerializer, UserSerializer)
 
 # Create your views here.
 
@@ -51,14 +53,36 @@ class ChangeUserRoleView(APIView):
 
 class ChangeUserPasswordView(APIView):
 
-    def put(self, request, pk, format=None):
-        try:
-            user = User.objects.get(pk=pk, is_active=True)
-        except User.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        serializer = ChangeUserPasswordSerializer(data=request.data, context={'user': user})
+    def put(self, request, format=None):
+        serializer = ChangeUserPasswordSerializer(
+            data=request.data,
+            context={'user': self.request.user}
+        )
         if serializer.is_valid():
-            serializer.update(user, serializer.validated_data)
+            serializer.update(self.request.user, serializer.validated_data)
+            return Response(status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ResetUserPasswordView(APIView):
+
+    def put(self, request, format=None):
+        serializer = ResetPasswordSerializer(data=request.data)
+        if serializer.is_valid():
+            try:
+                serializer.save()
+            except User.DoesNotExist:
+                return Response(status=status.HTTP_401_UNAUTHORIZED)
+            return Response(status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def post(self, request, format=None):
+        serializer = RequestPasswordResetSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            try:
+                serializer.save()
+            except User.DoesNotExist:
+                pass
             return Response(status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
