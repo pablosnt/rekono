@@ -1,6 +1,7 @@
-from users.views import CreateUserView
+from users.views import InviteUserView, CreateUserView
 from django.urls import path
 
 urlpatterns = [
-    path('users', CreateUserView.as_view())
+    path('users/invite', InviteUserView.as_view()),
+    path('users/<int:pk>', CreateUserView.as_view())
 ]

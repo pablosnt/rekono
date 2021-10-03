@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser, UserManager, Group
 from django.db import models
+from rest_framework.authtoken.models import Token
 from authorization.groups.roles import Role
 from users import otp_generator
 from typing import Any, Optional
@@ -11,13 +12,15 @@ from integrations.mail import sender
 class RekonoUserManager(UserManager):
 
     def create_user(self, email: str, role: Role, domain: str) -> Any:
-        user = User.objects.create(email=email, otp=otp_generator.generate_otp())
+        user = User.objects.create(email=email, otp=otp_generator.generate_otp(), is_active=False)
         group = Group.objects.get(name=role.name.capitalize())
         if not group:
             group = Group.objects.get(name=Role.READER.name.capitalize())
         user.groups.clear()
         user.groups.set([group])
         user.save()
+        api_token = Token.objects.create(user=user)
+        api_token.save()
         sender.send_invitation_to_new_user(user, domain)
         return user
 
@@ -32,6 +35,8 @@ class RekonoUserManager(UserManager):
         group = Group.objects.get(name=Role.ADMIN.name.capitalize())
         user.groups.set([group])
         user.save()
+        api_token = Token.objects.create(user=user)
+        api_token.save()
         return user
 
 
@@ -73,3 +78,6 @@ class User(AbstractUser):
     shodan_apikey = models.TextField(max_length=100, blank=True, null=True)
     spyse_apikey = models.TextField(max_length=100, blank=True, null=True)
     zoomeye_apikey = models.TextField(max_length=100, blank=True, null=True)
+
+    def __str__(self) -> str:
+        return self.email
