@@ -1,3 +1,4 @@
+from django.contrib.auth.models import Group
 from rest_framework import serializers
 from rest_framework.exceptions import ParseError
 from users.models import User
@@ -37,6 +38,18 @@ class CreateUserSerializer(serializers.Serializer):
         user.otp = None
         user.save()
         return user
+
+
+class ChangeUserRoleSerializer(serializers.Serializer):
+    role = serializers.ChoiceField(choices=Role.choices, required=True)
+
+    def update(self, instance, validated_data):
+        role = Role(validated_data.get('role'))
+        group = Group.objects.get(name=role.name.capitalize())
+        instance.groups.clear()
+        instance.groups.set([group])
+        instance.save()
+        return instance
 
 
 class UserSerializer(serializers.ModelSerializer):
