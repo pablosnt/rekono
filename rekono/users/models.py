@@ -39,6 +39,17 @@ class RekonoUserManager(UserManager):
         api_token.save()
         return user
 
+    def disable_user(self, user: Any) -> None:
+        user.is_active = False
+        user.set_unusable_password()
+        user.otp = None
+        user.groups.clear()
+        user.save()
+        try:
+            token = Token.objects.get(user=user)
+            token.delete()
+        except Token.DoesNotExist:
+            pass
 
 class User(AbstractUser):
     username = models.TextField(max_length=150, unique=True, blank=True, null=True)

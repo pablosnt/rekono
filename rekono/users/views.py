@@ -48,6 +48,17 @@ class ChangeUserRoleView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+class DisableUserView(APIView):
+
+    def post(self, request, pk, format=None):
+        try:
+            user = User.objects.get(pk=pk, is_active=True)
+        except User.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        User.objects.disable_user(user)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
 class UserViewSet(GenericViewSet, ListModelMixin, RetrieveModelMixin, UpdateModelMixin):
     queryset = User.objects.all()
     serializer_class = UserSerializer
