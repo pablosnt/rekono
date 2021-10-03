@@ -1,4 +1,3 @@
-from django.contrib.auth.models import Group
 from rest_framework import serializers
 from rest_framework.exceptions import ParseError, AuthenticationFailed
 from users.models import User

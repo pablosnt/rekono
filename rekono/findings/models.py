@@ -29,6 +29,7 @@ class OSINT(models.Model):
     source = models.TextField(max_length=50, blank=True, null=True)
     reference = models.TextField(max_length=250, blank=True, null=True)
     creation = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=True)
 
     def __hash__(self) -> int:
         req = self.execution.request if self.execution else None
@@ -67,6 +68,7 @@ class Host(models.Model):
         null=True
     )
     creation = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=True)
 
     def __hash__(self) -> int:
         req = self.execution.request if self.execution else None
@@ -106,6 +108,7 @@ class Enumeration(models.Model):
     protocol = models.IntegerField(choices=Protocol.choices)
     service = models.TextField(max_length=50)
     creation = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=True)
 
     def __hash__(self) -> int:
         return hash((self.host, self.port))
@@ -134,6 +137,7 @@ class HttpEndpoint(models.Model):
     endpoint = models.TextField(max_length=500)
     status = models.IntegerField(blank=True, null=True)
     creation = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=True)
 
     def __hash__(self) -> int:
         return hash((self.enumeration, self.endpoint))
@@ -161,6 +165,7 @@ class Technology(models.Model):
     version = models.TextField(max_length=100, blank=True, null=True)
     reference = models.TextField(max_length=250, blank=True, null=True)
     creation = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=True)
 
     def __hash__(self) -> int:
         return hash((self.enumeration, self.name, self.version))
@@ -205,6 +210,7 @@ class Vulnerability(models.Model):
     osvdb = models.TextField(max_length=20, blank=True, null=True)
     reference = models.TextField(max_length=250, blank=True, null=True)
     creation = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=True)
 
     def __hash__(self) -> int:
         return hash((self.technology, self.name, self.cve))
@@ -242,6 +248,7 @@ class Exploit(models.Model):
     reference = models.TextField(max_length=250)
     checked = models.BooleanField(default=False)
     creation = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=True)
 
     def __hash__(self) -> int:
         return hash(self.technology, self.vulnerability, self.name, self.reference)
@@ -249,7 +256,7 @@ class Exploit(models.Model):
     def __eq__(self, o: object) -> bool:
         if isinstance(o, self.__class__):
             return (
-                (o.technology == self.technology or o.vulnerability == self.vulnerability) and 
+                (o.technology == self.technology or o.vulnerability == self.vulnerability) and
                 o.name == self.name and o.reference == self.reference
             )
         return False
