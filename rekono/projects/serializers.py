@@ -2,14 +2,31 @@ from rest_framework import serializers
 from projects.models import Project, Target, TargetPort
 from django.db import transaction
 from projects import utils
+from users.models import User
 
 
 class ProjectSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Project
-        fields = ('id', 'name', 'description', 'owner', 'targets')
-        read_only_fields = ('owner', 'targets')
+        fields = ('id', 'name', 'description', 'owner', 'targets', 'members')
+        read_only_fields = ('owner', 'targets', 'members')
+
+    def create(self, validated_data):
+        project = super().create(validated_data)
+        project.members.add(validated_data.get('owner'))
+        project.save()
+        return project
+
+
+class AddProjectMemberSerializer(serializers.Serializer):
+    user = serializers.IntegerField(required=True)
+
+    def update(self, instance, validated_data):
+        user = User.objects.get(pk=validated_data.get('user'), is_active=True)
+        instance.members.add(user)
+        instance.save()
+        return instance
 
 
 class TargetPortSerializer(serializers.ModelSerializer):

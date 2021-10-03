@@ -11,7 +11,6 @@ class Project(models.Model):
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=CASCADE)
     members = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
-        through='ProjectMember',
         related_name='members',
         blank=True
     )
@@ -51,11 +50,3 @@ class TargetPort(models.Model):
 
     def __str__(self) -> str:
         return f'{self.target.target} - {self.port}'
-
-
-class ProjectMember(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    project = models.ForeignKey(Project, on_delete=models.CASCADE)
-
-    def __str__(self) -> str:
-        return f'{self.user.username} - {self.project.name}'
