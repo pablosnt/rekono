@@ -33,7 +33,7 @@ class TargetPortSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = TargetPort
-        fields = ('port',)
+        fields = ('id', 'port')
 
 
 class TargetSerializer(serializers.ModelSerializer):

@@ -1,12 +1,14 @@
-from projects.models import Project, Target
-from users.models import User
-from projects.serializers import ProjectSerializer, TargetSerializer, AddProjectMemberSerializer
+from projects.models import Project, Target, TargetPort
+from projects.serializers import (AddProjectMemberSerializer,
+                                  ProjectSerializer, TargetPortSerializer,
+                                  TargetSerializer)
+from rest_framework import status
 from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
                                    ListModelMixin, RetrieveModelMixin)
-from rest_framework.viewsets import GenericViewSet, ModelViewSet
-from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework.views import APIView
+from rest_framework.viewsets import GenericViewSet, ModelViewSet
+from users.models import User
 
 # Create your views here.
 
@@ -60,3 +62,30 @@ class TargetViewSet(
 ):
     queryset = Target.objects.all()
     serializer_class = TargetSerializer
+
+
+class AddTargetPortView(APIView):
+
+    def post(self, request, pk, format=None):
+        try:
+            target = Target.objects.get(pk=pk)
+        except Target.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        serializer = TargetPortSerializer(data=request.data)
+        if serializer.is_valid():
+            data = serializer.validated_data.copy()
+            data['target'] = target
+            serializer.create(validated_data=data)
+            return Response(status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class DeleteTargetPortView(APIView):
+
+    def delete(self, request, target_pk, port_pk, format=None):
+        try:
+            target_port = TargetPort.objects.get(pk=port_pk, target__pk=target_pk)
+            target_port.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except TargetPort.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
