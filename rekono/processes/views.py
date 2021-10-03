@@ -1,7 +1,9 @@
 from processes.models import Process, Step
-from processes.serializers import ProcessSerializer, StepSerializer
+from processes.serializers import (ProcessSerializer, StepPrioritySerializer,
+                                   StepSerializer)
 from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
-                                   ListModelMixin, RetrieveModelMixin)
+                                   ListModelMixin, RetrieveModelMixin,
+                                   UpdateModelMixin)
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
 
 # Create your views here.
@@ -24,3 +26,8 @@ class StepViewSet(
 ):
     queryset = Step.objects.all()
     serializer_class = StepSerializer
+
+
+class UpdateStepViewSet(GenericViewSet, UpdateModelMixin):
+    queryset = Step.objects.all()
+    serializer_class = StepPrioritySerializer

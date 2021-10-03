@@ -1,2 +1,0 @@
-class InvalidStepException(Exception):
-    pass

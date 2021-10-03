@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, include
 from findings.views import (EnumerationEnableView, EnumerationViewSet,
                             ExploitEnableView, ExploitViewSet, HostEnableView,
                             HostViewSet, HttpEndpointEnableView,
@@ -23,6 +23,6 @@ urlpatterns = [
     path('endpoints/<int:pk>/enable', HttpEndpointEnableView.as_view()),
     path('technologies/<int:pk>/enable', TechnologyEnableView.as_view()),
     path('vulnerabilities/<int:pk>/enable', VulnerabilityEnableView.as_view()),
-    path('exploits/<int:pk>/enable', ExploitEnableView.as_view())
+    path('exploits/<int:pk>/enable', ExploitEnableView.as_view()),
+    path('', include(router.urls))
 ]
-urlpatterns.extend(router.urls)

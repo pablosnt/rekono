@@ -1,7 +1,26 @@
-from processes.exceptions import InvalidStepException
+from django.db import models
+from rest_framework.exceptions import ParseError
 from processes.models import Process, Step
 from rest_framework import serializers
 from tools.models import Configuration
+
+
+class StepPrioritySerializer(serializers.ModelSerializer):
+    priority = serializers.CharField(source='get_priority_display')
+
+    class Meta:
+        model = Step
+        fields = ('id', 'process', 'tool', 'configuration', 'priority')
+        read_only_fields = ('id', 'process', 'tool', 'configuration')
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        priority = attrs.pop('get_priority_display')
+        try:
+            attrs['priority'] = Step.Priority(int(priority)).value
+        except ValueError:
+            raise ParseError(f'Invalid value {priority} for priority field')
+        return attrs
 
 
 class StepSerializer(serializers.ModelSerializer):
@@ -27,7 +46,11 @@ class StepSerializer(serializers.ModelSerializer):
                 default=True
             ).first()
         attrs['configuration'] = configuration
-        attrs['priority'] = attrs.pop('get_priority_display', Step.Priority.STANDARD)
+        priority = attrs.pop('get_priority_display')
+        try:
+            attrs['priority'] = Step.Priority(int(priority)).value
+        except ValueError:
+            raise ParseError(f'Invalid value {priority} for priority field')
         steps = Step.objects.filter(
             process=attrs.get('process'),
             tool=attrs.get('tool'),
@@ -35,7 +58,7 @@ class StepSerializer(serializers.ModelSerializer):
         ).count()
         if steps > 0:
             process = attrs.get('process').name
-            raise InvalidStepException(
+            raise ParseError(
                 f'Invalid request. Process {process} still has this step'
             )
         return attrs
