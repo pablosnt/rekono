@@ -5,7 +5,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet
 from users.models import User
-from users.serializers import (ChangeUserRoleSerializer, CreateUserSerializer,
+from users.serializers import (ChangeUserPasswordSerializer,
+                               ChangeUserRoleSerializer, CreateUserSerializer,
                                InviteUserSerializer, UserSerializer)
 
 # Create your views here.
@@ -45,6 +46,20 @@ class ChangeUserRoleView(APIView):
                 return Response(status=status.HTTP_200_OK)
             except User.DoesNotExist:
                 return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ChangeUserPasswordView(APIView):
+
+    def put(self, request, pk, format=None):
+        try:
+            user = User.objects.get(pk=pk, is_active=True)
+        except User.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        serializer = ChangeUserPasswordSerializer(data=request.data, context={'user': user})
+        if serializer.is_valid():
+            serializer.update(user, serializer.validated_data)
+            return Response(status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 

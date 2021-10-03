@@ -1,9 +1,10 @@
 from django.contrib.auth.models import Group
 from rest_framework import serializers
-from rest_framework.exceptions import ParseError
+from rest_framework.exceptions import ParseError, AuthenticationFailed
 from users.models import User
 from authorization.groups.roles import Role
 from django.contrib.sites.shortcuts import get_current_site
+from rest_framework import status
 
 
 class InviteUserSerializer(serializers.Serializer):
@@ -48,6 +49,30 @@ class ChangeUserRoleSerializer(serializers.Serializer):
         group = Group.objects.get(name=role.name.capitalize())
         instance.groups.clear()
         instance.groups.set([group])
+        instance.save()
+        return instance
+
+
+class ChangeUserPasswordSerializer(serializers.ModelSerializer):
+    old_password = serializers.CharField(max_length=150, required=True)
+    
+    class Meta:
+        model = User
+        fields = ('password', 'old_password')
+        extra_kwargs = {
+            'password': {'write_only': True},
+            'old_password': {'write_only': True},
+        }
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        user = self.context.get('user')
+        if not user.check_password(attrs.get('old_password')):
+            raise AuthenticationFailed('Invalid password', code=status.HTTP_401_UNAUTHORIZED)
+        return attrs
+
+    def update(self, instance, validated_data):
+        instance.set_password(validated_data.get('password'))
         instance.save()
         return instance
 
