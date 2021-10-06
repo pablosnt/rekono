@@ -2,7 +2,7 @@ from django.contrib.auth.models import AbstractUser, UserManager, Group
 from django.db import models
 from rest_framework.authtoken.models import Token
 from authorization.groups.roles import Role
-from users import otp_generator
+from users.crypto import generate_otp
 from typing import Any, Optional
 from integrations.mail import sender
 
@@ -12,7 +12,7 @@ from integrations.mail import sender
 class RekonoUserManager(UserManager):
 
     def create_user(self, email: str, role: Role, domain: str) -> Any:
-        user = User.objects.create(email=email, otp=otp_generator.generate_otp(), is_active=False)
+        user = User.objects.create(email=email, otp=generate_otp(), is_active=False)
         group = Group.objects.get(name=role.name.capitalize())
         if not group:
             group = Group.objects.get(name=Role.READER.name.capitalize())
@@ -60,10 +60,11 @@ class RekonoUserManager(UserManager):
         return user
 
     def request_password_reset(self, user: Any, domain: str) -> Any:
-        user.otp = otp_generator.generate_otp()
+        user.otp = generate_otp()
         user.save()
         sender.send_password_reset(user, domain)
         return user
+
 
 class User(AbstractUser):
     username = models.TextField(max_length=150, unique=True, blank=True, null=True)
