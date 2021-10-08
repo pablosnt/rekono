@@ -2,7 +2,7 @@ from django.contrib.auth.models import AbstractUser, UserManager, Group
 from django.db import models
 from rest_framework.authtoken.models import Token
 from authorization.groups.roles import Role
-from users.crypto import generate_otp
+from users.crypto import generate_otp, encrypt, decrypt
 from typing import Any, Optional
 from integrations.mail import sender
 
@@ -72,11 +72,6 @@ class User(AbstractUser):
     last_name = models.TextField(max_length=150, blank=True, null=True)
     email = models.EmailField(max_length=150, unique=True)
 
-    USERNAME_FIELD = 'username'
-    EMAIL_FIELD = 'email'
-    REQUIRED_FIELDS = ['email']
-    objects = RekonoUserManager()
-
     otp = models.TextField(max_length=200, unique=True, blank=True, null=True)
 
     class Notification(models.IntegerChoices):
@@ -90,7 +85,6 @@ class User(AbstractUser):
         null=True
     )
     telegram_token = models.TextField(max_length=100, blank=True, null=True)
-
     binaryedge_apikey = models.TextField(max_length=100, blank=True, null=True)
     bing_apikey = models.TextField(max_length=100, blank=True, null=True)
     censys_apikey = models.TextField(max_length=100, blank=True, null=True)
@@ -104,6 +98,28 @@ class User(AbstractUser):
     shodan_apikey = models.TextField(max_length=100, blank=True, null=True)
     spyse_apikey = models.TextField(max_length=100, blank=True, null=True)
     zoomeye_apikey = models.TextField(max_length=100, blank=True, null=True)
+
+    USERNAME_FIELD = 'username'
+    EMAIL_FIELD = 'email'
+    REQUIRED_FIELDS = ['email']
+    objects = RekonoUserManager()
+    API_KEYS = [
+        'telegram_token', 'binaryedge_apikey', 'bing_apikey', 'censys_apikey', 'github_apikey',
+        'hunter_apikey', 'intelx_apikey', 'pentestTools_apikey', 'projectDiscovery_apikey',
+        'rocketreach_apikey', 'securityTrails_apikey', 'shodan_apikey', 'spyse_apikey',
+        'zoomeye_apikey'
+    ]
+
+    def set_api_key(self, api_key: str, value: str) -> None:
+        if api_key in self.API_KEYS:
+            setattr(self, api_key, encrypt(value))
+    
+    def get_api_key(self, api_key: str) -> str:
+        if api_key in self.API_KEYS and hasattr(self, api_key):
+            encrypted = getattr(self, api_key)
+            if encrypted:
+                return decrypt(encrypted)
+        return None
 
     def __str__(self) -> str:
         return self.email

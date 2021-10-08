@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 
 import os
 from pathlib import Path
-from users.crypto import generate_random_value
+from users.crypto import generate_random_value, hash
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -27,7 +27,8 @@ if not os.path.isdir(EXECUTION_OUTPUTS):
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = generate_random_value(500)
+SECRET_KEY = generate_random_value(3000)
+ENCRYPTION_KEY = hash(os.getenv('ENCRYPTION_KEY', generate_random_value(3000)))
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -86,6 +87,13 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'rekono.wsgi.application'
+
+
+# API REST
+
+REST_FRAMEWORK = {
+    'DEFAULT_METADATA_CLASS': None
+}
 
 
 # Database

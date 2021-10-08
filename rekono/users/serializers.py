@@ -1,3 +1,4 @@
+from re import U
 from rest_framework import serializers
 from rest_framework.exceptions import ParseError, AuthenticationFailed
 from users.models import User
@@ -140,3 +141,11 @@ class UserSerializer(serializers.ModelSerializer):
                     f'Invalid {notification_preference} choice for notification_preference field'
                 )
         return attrs
+
+    def update(self, instance, validated_data):
+        instance = super().update(instance, validated_data)
+        for api_key in instance.API_KEYS:
+            if api_key in validated_data:
+                instance.set_api_key(api_key, validated_data.get(api_key))
+        instance.save()
+        return instance

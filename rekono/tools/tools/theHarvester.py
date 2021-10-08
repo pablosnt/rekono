@@ -43,11 +43,11 @@ class TheHarvesterTool(BaseTool):
     ]
 
     def prepare_environment(self) -> None:
-        details = User.objects.filter(user=self.execution.request.executor).first()
+        user = self.execution.request.executor
         for api in self.api_keys_config['apikeys'].keys():
-            apikey = getattr(details, api + '_apikey')
+            apikey = user.get_api_key(api + '_apikey')
             self.api_keys_config['apikeys'][api] = {
-                'key': apikey if apikey else None
+                'key': apikey
             }
         with open(self.configuration_file, 'w') as config_file:
             yaml.dump(self.api_keys_config, config_file, default_flow_style=False)
