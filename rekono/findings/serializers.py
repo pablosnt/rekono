@@ -79,6 +79,7 @@ class VulnerabilitySerializer(serializers.ModelSerializer):
                 )
         return attrs
 
+
 class ExploitSerializer(serializers.ModelSerializer):
     technology = TechnologySerializer(read_only=True, many=False, required=False)
 

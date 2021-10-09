@@ -47,10 +47,26 @@ class OSINTViewSet(
 ):
     queryset = OSINT.objects.all()
     serializer_class = OSINTSerializer
+    filtered_fields = {
+        'execution': ['exact'],
+        'execution__task': ['exact'],
+        'execution__task__target': ['exact'],
+        'execution__task__target__project': ['exact'],
+        'execution__task__tool': ['exact'],
+        'execution__step__tool': ['exact'],
+        'execution__task__executor': ['exact'],
+        'execution__start': ['gte', 'lte', 'exact'],
+        'execution__end': ['gte', 'lte', 'exact'],
+        'data_type': ['exact'],
+        'source': ['exact', 'contains'],
+        'creation': ['gte', 'lte', 'exact'],
+        'is_active': ['exact'],
+    }
 
 
 class OSINTEnableView(FindingEnableView):
     queryset = OSINT.objects.all()
+    serializer_class = OSINTSerializer
 
 
 class HostViewSet(
@@ -61,10 +77,26 @@ class HostViewSet(
 ):
     queryset = Host.objects.all()
     serializer_class = HostSerializer
+    filtered_fields = {
+        'execution': ['exact'],
+        'execution__task': ['exact'],
+        'execution__task__target': ['exact'],
+        'execution__task__target__project': ['exact'],
+        'execution__task__tool': ['exact'],
+        'execution__step__tool': ['exact'],
+        'execution__task__executor': ['exact'],
+        'execution__start': ['gte', 'lte', 'exact'],
+        'execution__end': ['gte', 'lte', 'exact'],
+        'address': ['exact', 'contains'],
+        'os_type': ['exact'],
+        'creation': ['gte', 'lte', 'exact'],
+        'is_active': ['exact'],
+    }
 
 
 class HostEnableView(FindingEnableView):
     queryset = Host.objects.all()
+    serializer_class = HostSerializer
 
 
 class EnumerationViewSet(
@@ -75,10 +107,31 @@ class EnumerationViewSet(
 ):
     queryset = Enumeration.objects.all()
     serializer_class = EnumerationSerializer
+    filtered_fields = {
+        'execution': ['exact'],
+        'execution__task': ['exact'],
+        'execution__task__target': ['exact'],
+        'execution__task__target__project': ['exact'],
+        'execution__task__tool': ['exact'],
+        'execution__step__tool': ['exact'],
+        'execution__task__executor': ['exact'],
+        'execution__start': ['gte', 'lte', 'exact'],
+        'execution__end': ['gte', 'lte', 'exact'],
+        'host': ['exact'],
+        'host__address': ['exact', 'contains'],
+        'host__os_type': ['exact'],
+        'port': ['exact'],
+        'port_status': ['exact'],
+        'protocol': ['exact'],
+        'service': ['exact', 'contains'],
+        'creation': ['gte', 'lte', 'exact'],
+        'is_active': ['exact'],
+    }
 
 
 class EnumerationEnableView(FindingEnableView):
     queryset = Enumeration.objects.all()
+    serializer_class = EnumerationSerializer
 
 
 class HttpEndpointViewSet(
@@ -89,10 +142,31 @@ class HttpEndpointViewSet(
 ):
     queryset = HttpEndpoint.objects.all()
     serializer_class = HttpEndpointSerializer
+    filtered_fields = {
+        'execution': ['exact'],
+        'execution__task': ['exact'],
+        'execution__task__target': ['exact'],
+        'execution__task__target__project': ['exact'],
+        'execution__task__tool': ['exact'],
+        'execution__step__tool': ['exact'],
+        'execution__task__executor': ['exact'],
+        'execution__start': ['gte', 'lte', 'exact'],
+        'execution__end': ['gte', 'lte', 'exact'],
+        'enumeration': ['exact'],
+        'enumeration__host': ['exact'],
+        'enumeration__host__address': ['exact', 'contains'],
+        'enumeration__host__os_type': ['exact'],
+        'enumeration__port': ['exact'],
+        'endpoint': ['exact', 'contains'],
+        'status': ['exact'],
+        'creation': ['gte', 'lte', 'exact'],
+        'is_active': ['exact'],
+    }
 
 
 class HttpEndpointEnableView(FindingEnableView):
     queryset = HttpEndpoint.objects.all()
+    serializer_class = HttpEndpointSerializer
 
 
 class TechnologyViewSet(
@@ -103,10 +177,31 @@ class TechnologyViewSet(
 ):
     queryset = Technology.objects.all()
     serializer_class = TechnologySerializer
+    filtered_fields = {
+        'execution': ['exact'],
+        'execution__task': ['exact'],
+        'execution__task__target': ['exact'],
+        'execution__task__target__project': ['exact'],
+        'execution__task__tool': ['exact'],
+        'execution__step__tool': ['exact'],
+        'execution__task__executor': ['exact'],
+        'execution__start': ['gte', 'lte', 'exact'],
+        'execution__end': ['gte', 'lte', 'exact'],
+        'enumeration': ['exact'],
+        'enumeration__host': ['exact'],
+        'enumeration__host__address': ['exact', 'contains'],
+        'enumeration__host__os_type': ['exact'],
+        'enumeration__port': ['exact'],
+        'name': ['exact', 'contains'],
+        'version': ['exact', 'contains'],
+        'creation': ['gte', 'lte', 'exact'],
+        'is_active': ['exact'],
+    }
 
 
 class TechnologyEnableView(FindingEnableView):
     queryset = Technology.objects.all()
+    serializer_class = TechnologySerializer
 
 
 class VulnerabilityViewSet(
@@ -118,10 +213,36 @@ class VulnerabilityViewSet(
 ):
     queryset = Vulnerability.objects.all()
     serializer_class = VulnerabilitySerializer
+    filtered_fields = {
+        'execution': ['exact'],
+        'execution__task': ['exact'],
+        'execution__task__target': ['exact'],
+        'execution__task__target__project': ['exact'],
+        'execution__task__tool': ['exact'],
+        'execution__step__tool': ['exact'],
+        'execution__task__executor': ['exact'],
+        'execution__start': ['gte', 'lte', 'exact'],
+        'execution__end': ['gte', 'lte', 'exact'],
+        'technology': ['exact'],
+        'technology__name': ['exact', 'contains'],
+        'technology__version': ['exact', 'contains'],
+        'technology__enumeration': ['exact'],
+        'technology__enumeration__host': ['exact'],
+        'technology__enumeration__host__address': ['exact', 'contains'],
+        'technology__enumeration__host__os_type': ['exact'],
+        'technology__enumeration__port': ['exact'],
+        'name': ['exact', 'contains'],
+        'description': ['exact', 'contains'],
+        'severity': ['exact'],
+        'cve': ['exact', 'contains'],
+        'creation': ['gte', 'lte', 'exact'],
+        'is_active': ['exact'],
+    }
 
 
 class VulnerabilityEnableView(FindingEnableView):
     queryset = Vulnerability.objects.all()
+    serializer_class = VulnerabilitySerializer
 
 
 class ExploitViewSet(
@@ -132,7 +253,41 @@ class ExploitViewSet(
 ):
     queryset = Exploit.objects.all()
     serializer_class = ExploitSerializer
+    filtered_fields = {
+        'execution': ['exact'],
+        'execution__task': ['exact'],
+        'execution__task__target': ['exact'],
+        'execution__task__target__project': ['exact'],
+        'execution__task__tool': ['exact'],
+        'execution__step__tool': ['exact'],
+        'execution__task__executor': ['exact'],
+        'execution__start': ['gte', 'lte', 'exact'],
+        'execution__end': ['gte', 'lte', 'exact'],
+        'vulnerability__technology': ['exact'],
+        'vulnerability__technology__name': ['exact', 'contains'],
+        'vulnerability__technology__version': ['exact', 'contains'],
+        'vulnerability__technology__enumeration': ['exact'],
+        'vulnerability__technology__enumeration__host': ['exact'],
+        'vulnerability__technology__enumeration__host__address': ['exact', 'contains'],
+        'vulnerability__technology__enumeration__host__os_type': ['exact'],
+        'vulnerability__technology__enumeration__port': ['exact'],
+        'technology': ['exact'],
+        'technology__name': ['exact', 'contains'],
+        'technology__version': ['exact', 'contains'],
+        'technology__enumeration': ['exact'],
+        'technology__enumeration__host': ['exact'],
+        'technology__enumeration__host__address': ['exact', 'contains'],
+        'technology__enumeration__host__os_type': ['exact'],
+        'technology__enumeration__port': ['exact'],
+        'name': ['exact', 'contains'],
+        'description': ['exact', 'contains'],
+        'reference': ['exact', 'contains'],
+        'checked': ['exact'],
+        'creation': ['gte', 'lte', 'exact'],
+        'is_active': ['exact'],
+    }
 
 
 class ExploitEnableView(FindingEnableView):
     queryset = Exploit.objects.all()
+    serializer_class = ExploitSerializer
