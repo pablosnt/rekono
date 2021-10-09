@@ -96,7 +96,6 @@ class ResetPasswordSerializer(serializers.Serializer):
         return user
 
 
-
 class UserSerializer(serializers.ModelSerializer):
     notification_preference = serializers.CharField(source='get_notification_preference_display')
 

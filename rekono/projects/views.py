@@ -20,6 +20,7 @@ class ProjectViewSet(ModelViewSet):
         'name': ['exact', 'contains'],
         'description': ['exact', 'contains'],
         'owner': ['exact'],
+        'members': ['exact'],
     }
     http_method_names = ['get', 'post', 'put', 'delete']
 
