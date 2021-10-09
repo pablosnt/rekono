@@ -6,3 +6,4 @@ python-libnmap==0.7.2
 requests==2.26.0
 pyyaml==5.4.1
 pycryptodome==3.11.0
+drf-spectacular==0.20.1

@@ -16,6 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework.urlpatterns import format_suffix_patterns
+from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -24,7 +25,10 @@ urlpatterns = [
     path('api/', include('processes.urls')),
     path('api/', include('projects.urls')),
     path('api/', include('tools.urls')),
-    path('api/', include('users.urls'))
+    path('api/', include('users.urls')),
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('api/schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),   # noqa: E501
+    path('api/schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc')
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)
