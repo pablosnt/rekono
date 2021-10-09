@@ -13,6 +13,13 @@ class ConfigurationViewSet(
 ):
     queryset = Configuration.objects.all()
     serializer_class = ConfigurationSerializer
+    filterset_fields = {
+        'tool': ['exact'],
+        'tool__name': ['exact', 'contains'],
+        'tool__command': ['exact', 'contains'],
+        'tool__stage': ['exact'],
+        'default': ['exact'],
+    }
 
 
 class ToolViewSet(
@@ -22,3 +29,8 @@ class ToolViewSet(
 ):
     queryset = Tool.objects.all()
     serializer_class = ToolSerializer
+    filterset_fields = {
+        'name': ['exact', 'contains'],
+        'command': ['exact', 'contains'],
+        'stage': ['exact'],
+    }
