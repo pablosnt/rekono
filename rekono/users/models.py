@@ -41,9 +41,23 @@ class RekonoUserManager(UserManager):
 
     def change_user_role(self, user: Any, role: Role) -> Any:
         group = Group.objects.get(name=role.name.capitalize())
+        if group:
+            user.groups.clear()
+            user.groups.set([group])
+            user.save()
+        return user
+
+    def enable_user(self, user: Any, role: Role, domain: str) -> Any:
+        user.otp = generate_otp()
+        group = Group.objects.get(name=role.name.capitalize())
+        if not group:
+            group = Group.objects.get(name=Role.READER.name.capitalize())
         user.groups.clear()
         user.groups.set([group])
         user.save()
+        api_token = Token.objects.create(user=user)
+        api_token.save()
+        sender.send_invitation_to_new_user(user, domain)
         return user
 
     def disable_user(self, user: Any) -> Any:

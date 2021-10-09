@@ -29,13 +29,14 @@ class ProjectViewSet(ModelViewSet):
 
 
 class AddProjectMemberView(APIView):
+    serializer_class = AddProjectMemberSerializer
 
     def post(self, request, pk):
         try:
             project = Project.objects.get(pk=pk)
         except Project.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
-        serializer = AddProjectMemberSerializer(data=request.data)
+        serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
             try:
                 serializer.update(project, serializer.validated_data)
@@ -46,6 +47,7 @@ class AddProjectMemberView(APIView):
 
     
 class DeleteProjectMemberView(APIView):
+    serializer_class = None
 
     def delete(self, request, pk, member_id):
         try:
@@ -79,13 +81,14 @@ class TargetViewSet(
 
 
 class AddTargetPortView(APIView):
+    serializer_class = TargetPortSerializer
 
     def post(self, request, pk):
         try:
             target = Target.objects.get(pk=pk)
         except Target.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
-        serializer = TargetPortSerializer(data=request.data)
+        serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
             data = serializer.validated_data.copy()
             data['target'] = target
@@ -95,6 +98,7 @@ class AddTargetPortView(APIView):
 
 
 class DeleteTargetPortView(APIView):
+    serializer_class = None
 
     def delete(self, request, pk, port_id):
         try:

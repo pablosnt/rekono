@@ -96,6 +96,16 @@ class ResetPasswordSerializer(serializers.Serializer):
         return user
 
 
+class EnableUserSerializer(serializers.Serializer):
+    role = serializers.ChoiceField(choices=Role.choices, required=True)
+
+    def update(self, instance, validated_data):
+        role = Role(validated_data.get('role'))
+        request = self.context.get('request', None)
+        user = User.objects.enable_user(instance, role, get_current_site(request).domain)
+        return user
+
+
 class UserSerializer(serializers.ModelSerializer):
     notification_preference = serializers.CharField(source='get_notification_preference_display')
 

@@ -1,5 +1,4 @@
 from executions.exceptions import InvalidTaskException
-from rest_framework.views import APIView
 from executions.models import Execution, Task
 from executions.serializers import ExecutionSerializer, TaskSerializer
 from rest_framework import status

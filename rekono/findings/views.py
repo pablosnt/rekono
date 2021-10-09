@@ -66,7 +66,7 @@ class OSINTViewSet(
 
 class OSINTEnableView(FindingEnableView):
     queryset = OSINT.objects.all()
-    serializer_class = OSINTSerializer
+    serializer_class = None
 
 
 class HostViewSet(
@@ -96,7 +96,7 @@ class HostViewSet(
 
 class HostEnableView(FindingEnableView):
     queryset = Host.objects.all()
-    serializer_class = HostSerializer
+    serializer_class = None
 
 
 class EnumerationViewSet(
@@ -131,7 +131,7 @@ class EnumerationViewSet(
 
 class EnumerationEnableView(FindingEnableView):
     queryset = Enumeration.objects.all()
-    serializer_class = EnumerationSerializer
+    serializer_class = None
 
 
 class HttpEndpointViewSet(
@@ -166,7 +166,7 @@ class HttpEndpointViewSet(
 
 class HttpEndpointEnableView(FindingEnableView):
     queryset = HttpEndpoint.objects.all()
-    serializer_class = HttpEndpointSerializer
+    serializer_class = None
 
 
 class TechnologyViewSet(
@@ -201,7 +201,7 @@ class TechnologyViewSet(
 
 class TechnologyEnableView(FindingEnableView):
     queryset = Technology.objects.all()
-    serializer_class = TechnologySerializer
+    serializer_class = None
 
 
 class VulnerabilityViewSet(
@@ -243,7 +243,7 @@ class VulnerabilityViewSet(
 
 class VulnerabilityEnableView(FindingEnableView):
     queryset = Vulnerability.objects.all()
-    serializer_class = VulnerabilitySerializer
+    serializer_class = None
 
 
 class ExploitViewSet(
@@ -291,4 +291,4 @@ class ExploitViewSet(
 
 class ExploitEnableView(FindingEnableView):
     queryset = Exploit.objects.all()
-    serializer_class = ExploitSerializer
+    serializer_class = None
