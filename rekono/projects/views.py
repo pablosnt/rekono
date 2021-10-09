@@ -16,6 +16,11 @@ from users.models import User
 class ProjectViewSet(ModelViewSet):
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
+    filterset_fields = {
+        'name': ['exact', 'contains'],
+        'description': ['exact', 'contains'],
+        'owner': ['exact'],
+    }
     http_method_names = ['get', 'post', 'put', 'delete']
 
     def perform_create(self, serializer):
@@ -41,13 +46,13 @@ class AddProjectMemberView(APIView):
     
 class DeleteProjectMemberView(APIView):
 
-    def delete(self, request, project_pk, member_pk):
+    def delete(self, request, pk, member_id):
         try:
-            project = Project.objects.get(pk=project_pk)
-            member = User.objects.get(pk=member_pk, is_active=True)
+            project = Project.objects.get(pk=pk)
+            member = User.objects.get(pk=member_id, is_active=True)
         except (Project.DoesNotExist, User.DoesNotExist):
             return Response(status=status.HTTP_404_NOT_FOUND)
-        if member in project.members.all() and member_pk != project.owner.id:
+        if member in project.members.all() and member_id != project.owner.id:
             project.members.remove(member)
             project.save()
             return Response(status=status.HTTP_204_NO_CONTENT)
@@ -63,6 +68,13 @@ class TargetViewSet(
 ):
     queryset = Target.objects.all()
     serializer_class = TargetSerializer
+    filterset_fields = {
+        'project__name': ['exact', 'contains'],
+        'project__description': ['exact', 'contains'],
+        'project__owner': ['exact'],
+        'target': ['exact', 'contains'],
+        'type': ['exact'],
+    }
 
 
 class AddTargetPortView(APIView):
@@ -83,9 +95,9 @@ class AddTargetPortView(APIView):
 
 class DeleteTargetPortView(APIView):
 
-    def delete(self, request, target_pk, port_pk):
+    def delete(self, request, pk, port_id):
         try:
-            target_port = TargetPort.objects.get(pk=port_pk, target__pk=target_pk)
+            target_port = TargetPort.objects.get(pk=port_id, target__pk=pk)
             target_port.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         except TargetPort.DoesNotExist:
