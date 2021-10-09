@@ -47,7 +47,7 @@ class OSINTViewSet(
 ):
     queryset = OSINT.objects.all()
     serializer_class = OSINTSerializer
-    filtered_fields = {
+    filterset_fields = {
         'execution': ['exact'],
         'execution__task': ['exact'],
         'execution__task__target': ['exact'],
@@ -62,6 +62,15 @@ class OSINTViewSet(
         'creation': ['gte', 'lte', 'exact'],
         'is_active': ['exact'],
     }
+    ordering_fields = (
+        ('task', 'execution__task'),
+        ('target', 'execution__task__target'),
+        ('project', 'execution__task__target__project'),
+        ('task__tool', 'execution__task__tool'),
+        ('step__tool', 'execution__step__tool'),
+        ('executor', 'execution__task__executor'),
+        'execution', 'data', 'data_type', 'source', 'creation', 'is_active'
+    )
 
 
 class OSINTEnableView(FindingEnableView):
@@ -77,7 +86,7 @@ class HostViewSet(
 ):
     queryset = Host.objects.all()
     serializer_class = HostSerializer
-    filtered_fields = {
+    filterset_fields = {
         'execution': ['exact'],
         'execution__task': ['exact'],
         'execution__task__target': ['exact'],
@@ -92,6 +101,15 @@ class HostViewSet(
         'creation': ['gte', 'lte', 'exact'],
         'is_active': ['exact'],
     }
+    ordering_fields = (
+        ('task', 'execution__task'),
+        ('target', 'execution__task__target'),
+        ('project', 'execution__task__target__project'),
+        ('task__tool', 'execution__task__tool'),
+        ('step__tool', 'execution__step__tool'),
+        ('executor', 'execution__task__executor'),
+        'execution', 'address', 'os_type', 'creation', 'is_active'
+    )
 
 
 class HostEnableView(FindingEnableView):
@@ -107,7 +125,7 @@ class EnumerationViewSet(
 ):
     queryset = Enumeration.objects.all()
     serializer_class = EnumerationSerializer
-    filtered_fields = {
+    filterset_fields = {
         'execution': ['exact'],
         'execution__task': ['exact'],
         'execution__task__target': ['exact'],
@@ -127,6 +145,16 @@ class EnumerationViewSet(
         'creation': ['gte', 'lte', 'exact'],
         'is_active': ['exact'],
     }
+    ordering_fields = (
+        ('task', 'execution__task'),
+        ('target', 'execution__task__target'),
+        ('project', 'execution__task__target__project'),
+        ('task__tool', 'execution__task__tool'),
+        ('step__tool', 'execution__step__tool'),
+        ('executor', 'execution__task__executor'),
+        ('os_type', 'host__os_type'),
+        'execution', 'host', 'port', 'protocol', 'service', 'creation', 'is_active'
+    )
 
 
 class EnumerationEnableView(FindingEnableView):
@@ -142,7 +170,7 @@ class HttpEndpointViewSet(
 ):
     queryset = HttpEndpoint.objects.all()
     serializer_class = HttpEndpointSerializer
-    filtered_fields = {
+    filterset_fields = {
         'execution': ['exact'],
         'execution__task': ['exact'],
         'execution__task__target': ['exact'],
@@ -162,6 +190,16 @@ class HttpEndpointViewSet(
         'creation': ['gte', 'lte', 'exact'],
         'is_active': ['exact'],
     }
+    ordering_fields = (
+        ('task', 'execution__task'),
+        ('target', 'execution__task__target'),
+        ('project', 'execution__task__target__project'),
+        ('task__tool', 'execution__task__tool'),
+        ('step__tool', 'execution__step__tool'),
+        ('executor', 'execution__task__executor'),
+        ('host', 'enumeration__host'),
+        'execution', 'enumeration', 'endpoint', 'status', 'creation', 'is_active'
+    )
 
 
 class HttpEndpointEnableView(FindingEnableView):
@@ -177,7 +215,7 @@ class TechnologyViewSet(
 ):
     queryset = Technology.objects.all()
     serializer_class = TechnologySerializer
-    filtered_fields = {
+    filterset_fields = {
         'execution': ['exact'],
         'execution__task': ['exact'],
         'execution__task__target': ['exact'],
@@ -197,6 +235,16 @@ class TechnologyViewSet(
         'creation': ['gte', 'lte', 'exact'],
         'is_active': ['exact'],
     }
+    ordering_fields = (
+        ('task', 'execution__task'),
+        ('target', 'execution__task__target'),
+        ('project', 'execution__task__target__project'),
+        ('task__tool', 'execution__task__tool'),
+        ('step__tool', 'execution__step__tool'),
+        ('executor', 'execution__task__executor'),
+        ('host', 'enumeration__host'),
+        'execution', 'enumeration', 'name', 'version', 'creation', 'is_active'
+    )
 
 
 class TechnologyEnableView(FindingEnableView):
@@ -213,7 +261,7 @@ class VulnerabilityViewSet(
 ):
     queryset = Vulnerability.objects.all()
     serializer_class = VulnerabilitySerializer
-    filtered_fields = {
+    filterset_fields = {
         'execution': ['exact'],
         'execution__task': ['exact'],
         'execution__task__target': ['exact'],
@@ -238,6 +286,16 @@ class VulnerabilityViewSet(
         'creation': ['gte', 'lte', 'exact'],
         'is_active': ['exact'],
     }
+    ordering_fields = (
+        ('task', 'execution__task'),
+        ('target', 'execution__task__target'),
+        ('project', 'execution__task__target__project'),
+        ('task__tool', 'execution__task__tool'),
+        ('step__tool', 'execution__step__tool'),
+        ('executor', 'execution__task__executor'),
+        ('host', 'enumeration__host'),
+        'execution', 'enumeration', 'technology', 'name', 'severity', 'cve', 'creation', 'is_active'
+    )
     http_method_names = ['get', 'put', 'delete']
 
 
@@ -254,7 +312,7 @@ class ExploitViewSet(
 ):
     queryset = Exploit.objects.all()
     serializer_class = ExploitSerializer
-    filtered_fields = {
+    filterset_fields = {
         'execution': ['exact'],
         'execution__task': ['exact'],
         'execution__task__target': ['exact'],
@@ -287,6 +345,16 @@ class ExploitViewSet(
         'creation': ['gte', 'lte', 'exact'],
         'is_active': ['exact'],
     }
+    ordering_fields = (
+        ('task', 'execution__task'),
+        ('target', 'execution__task__target'),
+        ('project', 'execution__task__target__project'),
+        ('task__tool', 'execution__task__tool'),
+        ('step__tool', 'execution__step__tool'),
+        ('executor', 'execution__task__executor'),
+        ('host', 'enumeration__host'),
+        'execution', 'enumeration', 'technology', 'name', 'creation', 'is_active'
+    )
 
 
 class ExploitEnableView(FindingEnableView):

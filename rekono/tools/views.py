@@ -18,8 +18,10 @@ class ConfigurationViewSet(
         'tool__name': ['exact', 'contains'],
         'tool__command': ['exact', 'contains'],
         'tool__stage': ['exact'],
+        'name': ['exact', 'contains'],
         'default': ['exact'],
     }
+    ordering_fields = ('tool', 'name')
 
 
 class ToolViewSet(
@@ -34,3 +36,4 @@ class ToolViewSet(
         'command': ['exact', 'contains'],
         'stage': ['exact'],
     }
+    ordering_fields = ('name', 'stage')

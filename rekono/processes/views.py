@@ -17,6 +17,7 @@ class ProcessViewSet(ModelViewSet):
         'description': ['exact', 'contains'],
         'creator': ['exact'],
     }
+    ordering_fields = ('name', 'creator')
     http_method_names = ['get', 'post', 'put', 'delete']
 
     def perform_create(self, serializer):
@@ -40,6 +41,7 @@ class StepViewSet(
         'configuration': ['exact'],
         'priority': ['exact'],
     }
+    ordering_fields = ('process', 'tool', 'configuration', 'priority')
 
 
 class UpdateStepViewSet(GenericViewSet, UpdateModelMixin):

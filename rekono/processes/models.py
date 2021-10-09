@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.db import models
 from tools.models import Tool, Configuration
+from processes.enums import StepPriority
 
 # Create your models here.
 
@@ -15,15 +16,9 @@ class Process(models.Model):
 
 
 class Step(models.Model):
-
-    class Priority(models.IntegerChoices):
-        ASAP = 1
-        STANDARD = 2
-        LAST = 3
-
     process = models.ForeignKey(Process, related_name='steps', on_delete=models.CASCADE)
     tool = models.ForeignKey(Tool, on_delete=models.CASCADE)
-    priority = models.IntegerField(choices=Priority.choices, default=Priority.STANDARD)
+    priority = models.IntegerField(choices=StepPriority.choices, default=StepPriority.STANDARD)
     configuration = models.ForeignKey(
         Configuration,
         on_delete=models.CASCADE,

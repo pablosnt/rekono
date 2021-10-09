@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 import os
 from pathlib import Path
 from users.crypto import generate_random_value, hash
+from executions.enums import Status
+from processes.enums import StepPriority
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -96,8 +98,12 @@ WSGI_APPLICATION = 'rekono.wsgi.application'
 REST_FRAMEWORK = {
     'DEFAULT_METADATA_CLASS': None,
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
-    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.OrderingFilter',
+    ],
     'DEFAULT_PAGINATION_CLASS': 'rekono.api.pagination.Pagination',
+    'ORDERING_PARAM': 'order',
 }
 
 # Documentation
@@ -108,7 +114,11 @@ SPECTACULAR_SETTINGS = {
     'VERSION': '1.0.0',
     'PREPROCESSING_HOOKS': [
         'drf_spectacular.hooks.preprocess_exclude_path_format'
-    ]
+    ],
+    'ENUM_NAME_OVERRIDES': {
+        'PriorityEnum': StepPriority.choices,
+        'StatusEnum': Status.choices,
+    }
 }
 
 

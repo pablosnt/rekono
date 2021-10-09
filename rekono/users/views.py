@@ -25,6 +25,7 @@ class UserViewSet(ModelViewSet):
         'date_joined': ['gte', 'lte', 'exact'],
         'groups': ['exact'],
     }
+    ordering_fields = ('username', 'first_name', 'last_name', 'email', 'is_active', 'date_joined')
     http_method_names = ['get', 'post', 'put', 'delete']
 
     def get_serializer_class(self):

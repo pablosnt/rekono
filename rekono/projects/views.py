@@ -22,6 +22,7 @@ class ProjectViewSet(ModelViewSet):
         'owner': ['exact'],
         'members': ['exact'],
     }
+    ordering_fields = ('name', 'owner')
     http_method_names = ['get', 'post', 'put', 'delete']
 
     def perform_create(self, serializer):
@@ -78,6 +79,7 @@ class TargetViewSet(
         'target': ['exact', 'contains'],
         'type': ['exact'],
     }
+    ordering_fields = ('project', 'target', 'type')
 
 
 class AddTargetPortView(APIView):

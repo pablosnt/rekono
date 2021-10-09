@@ -31,6 +31,10 @@ class TaskViewSet(
         'start': ['gte', 'lte', 'exact'],
         'end': ['gte', 'lte', 'exact']
     }
+    ordering_fields = (
+        'target', 'target__project', 'process', 'tool', 'intensity', 'executor',
+        'status', 'start', 'end'
+    )
 
     def perform_create(self, serializer):
         serializer.save(executor=self.request.user)
@@ -64,3 +68,12 @@ class ExecutionViewSet(
         'start': ['gte', 'lte', 'exact'],
         'end': ['gte', 'lte', 'exact']
     }
+    ordering_fields = (
+        ('target', 'task__target'),
+        ('project', 'task__target__project'),
+        ('process', 'task__process'),
+        ('intensity', 'task__intensity'),
+        ('executor', 'task__executor'),
+        'task__tool', 'step_tool',
+        'status', 'start', 'end'
+    )
