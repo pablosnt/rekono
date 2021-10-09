@@ -23,7 +23,7 @@ class ProjectViewSet(ModelViewSet):
 
 class AddProjectMemberView(APIView):
 
-    def post(self, request, pk, format=None):
+    def post(self, request, pk):
         try:
             project = Project.objects.get(pk=pk)
         except Project.DoesNotExist:
@@ -40,7 +40,7 @@ class AddProjectMemberView(APIView):
     
 class DeleteProjectMemberView(APIView):
 
-    def delete(self, request, project_pk, member_pk, format=None):
+    def delete(self, request, project_pk, member_pk):
         try:
             project = Project.objects.get(pk=project_pk)
             member = User.objects.get(pk=member_pk, is_active=True)
@@ -66,7 +66,7 @@ class TargetViewSet(
 
 class AddTargetPortView(APIView):
 
-    def post(self, request, pk, format=None):
+    def post(self, request, pk):
         try:
             target = Target.objects.get(pk=pk)
         except Target.DoesNotExist:
@@ -82,7 +82,7 @@ class AddTargetPortView(APIView):
 
 class DeleteTargetPortView(APIView):
 
-    def delete(self, request, target_pk, port_pk, format=None):
+    def delete(self, request, target_pk, port_pk):
         try:
             target_port = TargetPort.objects.get(pk=port_pk, target__pk=target_pk)
             target_port.delete()

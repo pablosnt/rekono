@@ -6,7 +6,7 @@ from django_rq import job
 
 
 @job('requests-queue')
-def process_request(task: Task = None, parameters: list = []) -> None:
+def process_task(task: Task = None, parameters: list = []) -> None:
     if task:
         if task.tool:
             tools.execute(task, parameters)

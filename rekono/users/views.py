@@ -16,7 +16,7 @@ from users.serializers import (ChangeUserPasswordSerializer,
 
 class InviteUserView(APIView):
 
-    def post(self, request, format=None):
+    def post(self, request):
         serializer = InviteUserSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
             serializer.save()
@@ -26,7 +26,7 @@ class InviteUserView(APIView):
 
 class CreateUserView(APIView):
 
-    def post(self, request, pk, format=None):
+    def post(self, request, pk):
         serializer = CreateUserSerializer(data=request.data, context={'pk': pk})
         if serializer.is_valid():
             try:
@@ -39,7 +39,7 @@ class CreateUserView(APIView):
 
 class ChangeUserRoleView(APIView):
 
-    def put(self, request, pk, format=None):
+    def put(self, request, pk):
         serializer = ChangeUserRoleSerializer(data=request.data)
         if serializer.is_valid():
             try:
@@ -53,7 +53,7 @@ class ChangeUserRoleView(APIView):
 
 class ChangeUserPasswordView(APIView):
 
-    def put(self, request, format=None):
+    def put(self, request):
         serializer = ChangeUserPasswordSerializer(
             data=request.data,
             context={'user': self.request.user}
@@ -66,7 +66,7 @@ class ChangeUserPasswordView(APIView):
 
 class ResetUserPasswordView(APIView):
 
-    def put(self, request, format=None):
+    def put(self, request):
         serializer = ResetPasswordSerializer(data=request.data)
         if serializer.is_valid():
             try:
@@ -76,7 +76,7 @@ class ResetUserPasswordView(APIView):
             return Response(status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def post(self, request, format=None):
+    def post(self, request):
         serializer = RequestPasswordResetSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
             try:
@@ -89,7 +89,7 @@ class ResetUserPasswordView(APIView):
 
 class DisableUserView(APIView):
 
-    def post(self, request, pk, format=None):
+    def post(self, request, pk):
         try:
             user = User.objects.get(pk=pk, is_active=True)
         except User.DoesNotExist:

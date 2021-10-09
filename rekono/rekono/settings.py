@@ -45,10 +45,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_filters',
+    'django_rq',
+    'drf_spectacular',
     'rest_framework',
     'rest_framework.authtoken',
-    'drf_spectacular',
-    'django_rq',
     'executions',
     'findings',
     'processes',
@@ -95,6 +96,8 @@ WSGI_APPLICATION = 'rekono.wsgi.application'
 REST_FRAMEWORK = {
     'DEFAULT_METADATA_CLASS': None,
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
+    'DEFAULT_PAGINATION_CLASS': 'rekono.api.pagination.Pagination',
 }
 
 # Documentation
@@ -103,6 +106,9 @@ SPECTACULAR_SETTINGS = {
     'TITLE': 'Rekono API Rest',
     'DESCRIPTION': 'Tool to automate recon tasks during pentesting processes',
     'VERSION': '1.0.0',
+    'PREPROCESSING_HOOKS': [
+        'drf_spectacular.hooks.preprocess_exclude_path_format'
+    ]
 }
 
 

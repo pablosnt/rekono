@@ -29,7 +29,7 @@ class FindingDisableMixin(DestroyModelMixin):
 
 class FindingEnableView(APIView):
 
-    def post(self, request, pk, format=None):
+    def post(self, request, pk):
         try:
             instance = self.queryset.get(pk=pk, is_active=False)
             instance.is_active = True

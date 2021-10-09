@@ -28,8 +28,6 @@ class ExecutionSerializer(serializers.ModelSerializer):
 
 class TaskSerializer(serializers.ModelSerializer):
     parameters = ParameterSerializer(read_only=False, many=True, required=False)
-    intensity = serializers.CharField(source='get_intensity_display')
-    status = serializers.CharField(source='get_status_display', read_only=True)
 
     class Meta:
         model = Task
@@ -46,10 +44,10 @@ class TaskSerializer(serializers.ModelSerializer):
         if attrs.get('tool'):
             intensity = Intensity.objects.filter(
                 tool=attrs.get('tool'),
-                value=attrs.get('get_intensity_display')
+                value=attrs.get('intensity')
             )
             if not intensity:
-                intensity = IntensityRank(attrs.get('get_intensity_display')).name
+                intensity = IntensityRank(attrs.get('intensity')).name
                 tool = attrs.get('tool').name
                 raise InvalidTaskException(f'Invalid intensity {intensity} for tool {tool}')
         return super().validate(attrs)
@@ -60,7 +58,7 @@ class TaskSerializer(serializers.ModelSerializer):
             process=validated_data.get('process'),
             tool=validated_data.get('tool'),
             configuration=validated_data.get('configuration'),
-            intensity=validated_data.get('get_intensity_display'),
+            intensity=validated_data.get('intensity'),
             executor=validated_data.get('executor')
         )
         parameters = []
