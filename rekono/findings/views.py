@@ -238,6 +238,7 @@ class VulnerabilityViewSet(
         'creation': ['gte', 'lte', 'exact'],
         'is_active': ['exact'],
     }
+    http_method_names = ['get', 'put', 'delete']
 
 
 class VulnerabilityEnableView(FindingEnableView):

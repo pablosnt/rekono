@@ -101,3 +101,4 @@ class DisableUserView(APIView):
 class UserViewSet(GenericViewSet, ListModelMixin, RetrieveModelMixin, UpdateModelMixin):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    http_method_names = ['get', 'put']

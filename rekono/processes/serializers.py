@@ -6,25 +6,14 @@ from tools.models import Configuration
 
 
 class StepPrioritySerializer(serializers.ModelSerializer):
-    priority = serializers.CharField(source='get_priority_display')
 
     class Meta:
         model = Step
         fields = ('id', 'process', 'tool', 'configuration', 'priority')
         read_only_fields = ('id', 'process', 'tool', 'configuration')
 
-    def validate(self, attrs):
-        attrs = super().validate(attrs)
-        priority = attrs.pop('get_priority_display')
-        try:
-            attrs['priority'] = Step.Priority(int(priority)).value
-        except ValueError:
-            raise ParseError(f'Invalid value {priority} for priority field')
-        return attrs
-
 
 class StepSerializer(serializers.ModelSerializer):
-    priority = serializers.CharField(source='get_priority_display')
 
     class Meta:
         model = Step
@@ -46,11 +35,6 @@ class StepSerializer(serializers.ModelSerializer):
                 default=True
             ).first()
         attrs['configuration'] = configuration
-        priority = attrs.pop('get_priority_display')
-        try:
-            attrs['priority'] = Step.Priority(int(priority)).value
-        except ValueError:
-            raise ParseError(f'Invalid value {priority} for priority field')
         steps = Step.objects.filter(
             process=attrs.get('process'),
             tool=attrs.get('tool'),

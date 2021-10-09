@@ -16,6 +16,7 @@ from users.models import User
 class ProjectViewSet(ModelViewSet):
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
+    http_method_names = ['get', 'post', 'put', 'delete']
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
