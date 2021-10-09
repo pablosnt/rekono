@@ -9,8 +9,8 @@ from tools.models import Configuration, Tool
 # Create your models here.
 
 
-class Request(models.Model):
-    target = models.ForeignKey(Target, related_name='requests', on_delete=models.CASCADE)
+class Task(models.Model):
+    target = models.ForeignKey(Target, related_name='tasks', on_delete=models.CASCADE)
     process = models.ForeignKey(Process, on_delete=models.CASCADE, blank=True, null=True)
     tool = models.ForeignKey(Tool, on_delete=models.CASCADE, blank=True, null=True)
     configuration = models.ForeignKey(
@@ -42,13 +42,13 @@ class Request(models.Model):
 
 
 class Parameter(models.Model):
-    request = models.ForeignKey(Request, related_name='parameters', on_delete=models.CASCADE)
+    task = models.ForeignKey(Task, related_name='parameters', on_delete=models.CASCADE)
     key = models.IntegerField(choices=ParameterKey.choices)
     value = models.TextField(max_length=250)
 
 
 class Execution(models.Model):
-    request = models.ForeignKey(Request, related_name='executions', on_delete=models.CASCADE)
+    task = models.ForeignKey(Task, related_name='executions', on_delete=models.CASCADE)
     rq_job_id = models.TextField(max_length=50, blank=True, null=True)
     rq_job_pid = models.IntegerField(blank=True, null=True)
     step = models.ForeignKey(Step, on_delete=models.CASCADE, blank=True, null=True)
@@ -61,7 +61,7 @@ class Execution(models.Model):
 
     def __str__(self) -> str:
         if self.step:
-            req = self.request.__str__()
+            req = self.task.__str__()
             return f'{req} - {self.step.tool.name} - {self.step.configuration.name}'
         else:
-            return self.request.__str__()
+            return self.task.__str__()

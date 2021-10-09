@@ -3,15 +3,15 @@ import signal
 
 from django.utils import timezone
 from executions.enums import Status
-from executions.exceptions import InvalidRequestException
+from executions.exceptions import InvalidTaskException
 from executions.models import Execution
 from queues.executions import utils
 
 
-def cancel_request(request):
-    if request.status in [Status.REQUESTED, Status.RUNNING]:
+def cancel_task(task):
+    if task.status in [Status.REQUESTED, Status.RUNNING]:
         executions = Execution.objects.filter(
-            request=request,
+            task=task,
             status__in=[Status.REQUESTED, Status.RUNNING]
         ).all()
         for execution in executions:
@@ -22,8 +22,8 @@ def cancel_request(request):
             execution.status = Status.CANCELLED
             execution.end = timezone.now()
             execution.save()
-        request.status = Status.CANCELLED
-        request.end = timezone.now()
-        request.save()
+        task.status = Status.CANCELLED
+        task.end = timezone.now()
+        task.save()
     else:
-        raise InvalidRequestException(f'Request {request.id} can not be cancelled')
+        raise InvalidTaskException(f'Task {task.id} can not be cancelled')

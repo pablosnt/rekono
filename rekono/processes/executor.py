@@ -1,6 +1,6 @@
 from django.utils import timezone
 from executions.enums import Status
-from executions.models import Execution, Request
+from executions.models import Execution, Task
 from processes.models import Step
 from queues.executions import producer
 from tools.enums import FindingType
@@ -20,13 +20,13 @@ class ExecutionJob():
         self.dependencies = set()
 
 
-def create_plan(request: Request) -> list:
+def create_plan(task: Task) -> list:
     execution_plan = []
-    steps = Step.objects.filter(process=request.process).order_by('tool__stage', 'priority')
+    steps = Step.objects.filter(process=task.process).order_by('tool__stage', 'priority')
     for step in steps:
         intensity = Intensity.objects.filter(
             tool=step.tool,
-            value__lte=request.intensity
+            value__lte=task.intensity
         ).order_by('-value').first()
         if intensity:
             j = ExecutionJob(step, intensity)
@@ -44,10 +44,10 @@ def create_plan(request: Request) -> list:
     return execution_plan
 
 
-def execute(request: Request, parameters: list) -> None:
-    execution_plan = create_plan(request)
+def execute(task: Task, parameters: list) -> None:
+    execution_plan = create_plan(task)
     for job in execution_plan:
-        execution = Execution.objects.create(request=request, step=job.step)
+        execution = Execution.objects.create(task=task, step=job.step)
         execution.save()
         job.job = producer.execute(
             execution,
@@ -60,12 +60,12 @@ def execute(request: Request, parameters: list) -> None:
 
 
 def success_callback(job, connection, result, *args, **kwargs):
-    request = result.execution.request
+    task = result.execution.task
     pending_executions = Execution.objects.filter(
-        request=request,
+        task=task,
         status__in=[Status.REQUESTED, Status.RUNNING]
     ).count()
     if pending_executions == 0:
-        request.status = result.execution.status
-        request.end = timezone.now()
-        request.save()
+        task.status = result.execution.status
+        task.end = timezone.now()
+        task.save()

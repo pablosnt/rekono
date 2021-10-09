@@ -43,7 +43,7 @@ class TheHarvesterTool(BaseTool):
     ]
 
     def prepare_environment(self) -> None:
-        user = self.execution.request.executor
+        user = self.execution.task.executor
         for api in self.api_keys_config['apikeys'].keys():
             apikey = user.get_api_key(api + '_apikey')
             self.api_keys_config['apikeys'][api] = {

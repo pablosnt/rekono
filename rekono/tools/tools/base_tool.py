@@ -35,7 +35,7 @@ class BaseTool():
         execution.rq_job_pid = os.getpid()
         execution.save()
         self.execution = execution
-        self.target = execution.request.target
+        self.target = execution.task.target
         self.target_ports = self.target.target_ports.all()
         self.tool = tool
         self.configuration = configuration

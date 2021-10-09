@@ -26,9 +26,9 @@ DEFAULT_GROUPS = {
         'delete_targetport',
         'view_targetport',
         # Executions
-        'add_request',
-        'delete_request',
-        'view_request',
+        'add_task',
+        'delete_task',
+        'view_task',
         'view_execution',
         # Findings
         'change_osint',
@@ -71,9 +71,9 @@ DEFAULT_GROUPS = {
         'delete_targetport',
         'view_targetport',
         # Executions
-        'add_request',
-        'delete_request',
-        'view_request',
+        'add_task',
+        'delete_task',
+        'view_task',
         'view_execution',
         # Findings
         'change_osint',
@@ -112,7 +112,7 @@ DEFAULT_GROUPS = {
         'view_target',
         'view_targetport',
         # Executions
-        'view_request',
+        'view_task',
         'view_execution',
         # Findings
         'view_osint',

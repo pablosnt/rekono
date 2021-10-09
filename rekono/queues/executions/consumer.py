@@ -66,7 +66,7 @@ def process_dependencies(
         if check_params_for_tool(tool, parameters, list(param_set))
     ]
     for param_set in all_params[1:]:
-        execution = Execution.objects.create(request=execution.request, step=execution.step)
+        execution = Execution.objects.create(task=execution.task, step=execution.step)
         job = producer.execute(
             execution,
             intensity,

@@ -32,12 +32,12 @@ class OSINT(models.Model):
     is_active = models.BooleanField(default=True)
 
     def __hash__(self) -> int:
-        req = self.execution.request if self.execution else None
+        req = self.execution.task if self.execution else None
         return hash((req, self.data, self.data_type))
     
     def __eq__(self, o: object) -> bool:
         if isinstance(o, self.__class__):
-            return o.execution.request == self.execution.request and o.data == self.data
+            return o.execution.task == self.execution.task and o.data == self.data
         return False
 
 
@@ -71,13 +71,13 @@ class Host(models.Model):
     is_active = models.BooleanField(default=True)
 
     def __hash__(self) -> int:
-        req = self.execution.request if self.execution else None
+        req = self.execution.task if self.execution else None
         return hash((req, self.address))
 
     def __eq__(self, o: object) -> bool:
         if isinstance(o, self.__class__):
             if o.execution and self.execution:
-                return o.execution.request == self.execution.request and o.address == self.address
+                return o.execution.task == self.execution.task and o.address == self.address
             else:
                 return o.address == self.address
         return False

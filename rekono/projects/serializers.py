@@ -43,9 +43,9 @@ class TargetSerializer(serializers.ModelSerializer):
     class Meta:
         model = Target
         fields = (
-            'id', 'project', 'target', 'type', 'target_ports', 'requests'
+            'id', 'project', 'target', 'type', 'target_ports', 'tasks'
         )
-        read_only_fields = ('type', 'requests')
+        read_only_fields = ('type', 'tasks')
 
     @transaction.atomic()
     def create(self, validated_data):

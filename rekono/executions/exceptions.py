@@ -1,2 +1,2 @@
-class InvalidRequestException(Exception):
+class InvalidTaskException(Exception):
     pass

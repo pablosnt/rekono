@@ -24,8 +24,8 @@ def execute(
             configuration = Configuration.objects.filter(tool=tool, default=True).first()
         inputs = Input.objects.filter(configuration=configuration)
     else:
-        tool = execution.request.tool
-        configuration = execution.request.configuration
+        tool = execution.task.tool
+        configuration = execution.task.configuration
     executions_queue = django_rq.get_queue('executions-queue')
     execution_job = executions_queue.enqueue(
         consumer.execute,
