@@ -4,13 +4,19 @@ from authorization.groups.roles import Role
 from processes.models import Process, Step
 
 
-class RekonoOwnerPermission(BasePermission):
+class ProjectMemberPermission(BasePermission):
 
     def has_object_permission(self, request, view, obj):
-        process = None
         project = obj.get_project()
         if project:
             return request.user in project.members.all()
+        return True
+
+
+class ProcessCreatorPermission(BasePermission):
+    
+    def has_object_permission(self, request, view, obj):
+        process = None
         if isinstance(obj, Process):
             process = obj
         elif isinstance(obj, Step):
@@ -24,3 +30,10 @@ class RekonoOwnerPermission(BasePermission):
             ):
                 return False
         return True
+
+
+class IsAdmin(BasePermission):
+
+    def has_permission(self, request, view):
+        admin_group = request.user.groups.filter(name=Role.ADMIN.name.capitalize()).exists()
+        return bool(admin_group)

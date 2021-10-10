@@ -33,7 +33,7 @@ class ProjectViewSet(ModelViewSet):
 
     @extend_schema(responses={200: UserSerializer})
     @action(detail=True, methods=['GET'], url_path='members', url_name='members')
-    def project_members(self, reuqest, pk):
+    def project_members(self, request, pk):
         project = self.get_object()
         serializer = UserSerializer(project.members.all(), many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)

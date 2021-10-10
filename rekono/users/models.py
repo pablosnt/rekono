@@ -5,6 +5,7 @@ from authorization.groups.roles import Role
 from users.crypto import generate_otp, encrypt, decrypt
 from typing import Any, Optional
 from integrations.mail import sender
+from users.enums import Notification
 
 # Create your models here.
 
@@ -87,10 +88,6 @@ class User(AbstractUser):
     email = models.EmailField(max_length=150, unique=True)
 
     otp = models.TextField(max_length=200, unique=True, blank=True, null=True)
-
-    class Notification(models.IntegerChoices):
-        MAIL = 1
-        TELEGRAM = 2
 
     notification_preference = models.IntegerField(
         choices=Notification.choices,

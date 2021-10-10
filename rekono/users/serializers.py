@@ -1,10 +1,48 @@
-from re import U
 from rest_framework import serializers
 from rest_framework.exceptions import ParseError, AuthenticationFailed
 from users.models import User
 from authorization.groups.roles import Role
 from django.contrib.sites.shortcuts import get_current_site
 from rest_framework import status
+
+
+class UserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = (
+            'id', 'username', 'first_name', 'last_name', 'email', 'is_active',
+            'date_joined', 'last_login', 'groups', 'notification_preference',
+            'telegram_token', 'binaryedge_apikey', 'bing_apikey', 'censys_apikey',
+            'github_apikey', 'hunter_apikey', 'intelx_apikey', 'pentestTools_apikey',
+            'projectDiscovery_apikey', 'rocketreach_apikey', 'securityTrails_apikey',
+            'shodan_apikey', 'spyse_apikey', 'zoomeye_apikey'
+        )
+        read_only_fields = ('username', 'email', 'is_active', 'date_joined', 'last_login', 'groups')
+        extra_kwargs = {
+            'telegram_token': {'write_only': True},
+            'binaryedge_apikey': {'write_only': True},
+            'bing_apikey': {'write_only': True},
+            'censys_apikey': {'write_only': True},
+            'github_apikey': {'write_only': True},
+            'hunter_apikey': {'write_only': True},
+            'intelx_apikey': {'write_only': True},
+            'pentestTools_apikey': {'write_only': True},
+            'projectDiscovery_apikey': {'write_only': True},
+            'rocketreach_apikey': {'write_only': True},
+            'securityTrails_apikey': {'write_only': True},
+            'shodan_apikey': {'write_only': True},
+            'spyse_apikey': {'write_only': True},
+            'zoomeye_apikey': {'write_only': True}
+        }
+
+    def update(self, instance, validated_data):
+        instance = super().update(instance, validated_data)
+        for api_key in instance.API_KEYS:
+            if api_key in validated_data and validated_data[api_key]:
+                instance.set_api_key(api_key, validated_data.get(api_key))
+        instance.save()
+        return instance
 
 
 class InviteUserSerializer(serializers.Serializer):
@@ -41,6 +79,16 @@ class CreateUserSerializer(serializers.Serializer):
         return user
 
 
+class EnableUserSerializer(serializers.Serializer):
+    role = serializers.ChoiceField(choices=Role.choices, required=True)
+
+    def update(self, instance, validated_data):
+        role = Role(validated_data.get('role'))
+        request = self.context.get('request', None)
+        user = User.objects.enable_user(instance, role, get_current_site(request).domain)
+        return user
+
+
 class ChangeUserRoleSerializer(serializers.Serializer):
     role = serializers.ChoiceField(choices=Role.choices, required=True)
 
@@ -63,7 +111,7 @@ class ChangeUserPasswordSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         attrs = super().validate(attrs)
-        user = self.context.get('user')
+        user = self.instance
         if not user.check_password(attrs.get('old_password')):
             raise AuthenticationFailed('Invalid password', code=status.HTTP_401_UNAUTHORIZED)
         return attrs
@@ -94,67 +142,3 @@ class ResetPasswordSerializer(serializers.Serializer):
         user.otp = None
         user.save()
         return user
-
-
-class EnableUserSerializer(serializers.Serializer):
-    role = serializers.ChoiceField(choices=Role.choices, required=True)
-
-    def update(self, instance, validated_data):
-        role = Role(validated_data.get('role'))
-        request = self.context.get('request', None)
-        user = User.objects.enable_user(instance, role, get_current_site(request).domain)
-        return user
-
-
-class UserSerializer(serializers.ModelSerializer):
-    notification_preference = serializers.CharField(source='get_notification_preference_display')
-
-    class Meta:
-        model = User
-        fields = (
-            'id', 'username', 'first_name', 'last_name', 'email', 'is_active',
-            'date_joined', 'last_login', 'groups', 'notification_preference',
-            'telegram_token', 'binaryedge_apikey', 'bing_apikey', 'censys_apikey',
-            'github_apikey', 'hunter_apikey', 'intelx_apikey', 'pentestTools_apikey',
-            'projectDiscovery_apikey', 'rocketreach_apikey', 'securityTrails_apikey',
-            'shodan_apikey', 'spyse_apikey', 'zoomeye_apikey'
-        )
-        read_only_fields = ('email', 'is_active', 'date_joined', 'last_login', 'groups')
-        extra_kwargs = {
-            'telegram_token': {'write_only': True},
-            'binaryedge_apikey': {'write_only': True},
-            'bing_apikey': {'write_only': True},
-            'censys_apikey': {'write_only': True},
-            'github_apikey': {'write_only': True},
-            'hunter_apikey': {'write_only': True},
-            'intelx_apikey': {'write_only': True},
-            'pentestTools_apikey': {'write_only': True},
-            'projectDiscovery_apikey': {'write_only': True},
-            'rocketreach_apikey': {'write_only': True},
-            'securityTrails_apikey': {'write_only': True},
-            'shodan_apikey': {'write_only': True},
-            'spyse_apikey': {'write_only': True},
-            'zoomeye_apikey': {'write_only': True}
-        }
-
-    def validate(self, attrs):
-        attrs = super().validate(attrs)
-        if 'get_notification_preference_display' in attrs:
-            notification_preference = attrs.get('get_notification_preference_display')
-            try:
-                notification = User.Notification(int(notification_preference))
-                attrs['notification_preference'] = notification.value
-                attrs['get_notification_preference_display'] = notification.name.capitalize()
-            except ValueError:
-                raise ParseError(
-                    f'Invalid {notification_preference} choice for notification_preference field'
-                )
-        return attrs
-
-    def update(self, instance, validated_data):
-        instance = super().update(instance, validated_data)
-        for api_key in instance.API_KEYS:
-            if api_key in validated_data:
-                instance.set_api_key(api_key, validated_data.get(api_key))
-        instance.save()
-        return instance

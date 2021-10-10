@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 
 import os
 from pathlib import Path
+from users.enums import Notification
 from users.crypto import generate_random_value, hash
 from executions.enums import Status
 from processes.enums import StepPriority
@@ -111,7 +112,8 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
         'rest_framework.permissions.DjangoModelPermissions',
-        'authorization.ownership.RekonoOwnerPermission',
+        'authorization.permissions.ProjectMemberPermission',
+        'authorization.permissions.ProcessCreatorPermission',
     ]
 }
 
@@ -127,6 +129,7 @@ SPECTACULAR_SETTINGS = {
     'ENUM_NAME_OVERRIDES': {
         'PriorityEnum': StepPriority.choices,
         'StatusEnum': Status.choices,
+        'NotificationPreferenceEnum': Notification.choices,
     }
 }
 
