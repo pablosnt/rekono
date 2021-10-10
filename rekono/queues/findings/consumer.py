@@ -1,6 +1,7 @@
 from django_rq import job
 from executions.models import Execution
 from findings.models import Vulnerability
+from findings.enums import Severity
 from findings import cve_nist
 
 
@@ -12,6 +13,6 @@ def process_findings(execution: Execution = None, findings: list = []) -> None:
             if isinstance(finding, Vulnerability) and finding.cve:
                 cve_info = cve_nist.get_information(finding.cve)
                 finding.description = cve_info.get('description', '')
-                finding.severity = cve_info.get('severity', Vulnerability.Severity.MEDIUM)
+                finding.severity = cve_info.get('severity', Severity.MEDIUM)
                 finding.reference = cve_info.get('reference', '')
             finding.save()

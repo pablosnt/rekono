@@ -1,7 +1,6 @@
-from findings.models import Enumeration, Exploit, HttpEndpoint, Technology, Vulnerability
-from findings.models import OSINT, Host
+from findings.models import (OSINT, Enumeration, Exploit, Host, HttpEndpoint,
+                             Technology, Vulnerability)
 from rest_framework import serializers
-from rest_framework.exceptions import ParseError
 
 
 class OSINTSerializer(serializers.ModelSerializer):
@@ -12,6 +11,7 @@ class OSINTSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'execution', 'data', 'data_type', 'source', 'reference', 'creation', 'is_active'
         )
+        ordering = ['-id']
 
 
 class HostSerializer(serializers.ModelSerializer):
@@ -22,6 +22,7 @@ class HostSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'execution', 'address', 'os', 'os_type', 'creation', 'is_active', 'enumerations'
         )
+        ordering = ['-id']
 
 
 class EnumerationSerializer(serializers.ModelSerializer):
@@ -33,6 +34,7 @@ class EnumerationSerializer(serializers.ModelSerializer):
             'id', 'execution', 'host', 'port', 'port_status', 'protocol',
             'service', 'creation', 'is_active', 'http_endpoints', 'technologies'
         )
+        ordering = ['-id']
 
 
 class HttpEndpointSerializer(serializers.ModelSerializer):
@@ -40,7 +42,7 @@ class HttpEndpointSerializer(serializers.ModelSerializer):
     class Meta:
         model = HttpEndpoint
         fields = ('id', 'execution', 'enumeration', 'endpoint', 'status', 'creation', 'is_active')
-
+        ordering = ['-id']
 
 class TechnologySerializer(serializers.ModelSerializer):
 
@@ -50,10 +52,10 @@ class TechnologySerializer(serializers.ModelSerializer):
             'id', 'execution', 'enumeration', 'name', 'version', 'reference',
             'creation', 'is_active', 'vulnerabilities', 'exploits'
         )
+        ordering = ['-id']
 
 
 class VulnerabilitySerializer(serializers.ModelSerializer):
-    severity = serializers.CharField(source='get_severity_display')
 
     class Meta:
         model = Vulnerability
@@ -64,20 +66,7 @@ class VulnerabilitySerializer(serializers.ModelSerializer):
         read_only_fields = (
             'id', 'execution', 'technology', 'cve', 'creation', 'is_active', 'exploits'
         )
-
-    def validate(self, attrs):
-        attrs = super().validate(attrs)
-        if 'get_severity_display' in attrs:
-            severity = attrs.get('get_severity_display')
-            try:
-                severity = Vulnerability.Severity(int(severity))
-                attrs['severity'] = severity.value
-                attrs['get_severity_display'] = severity.name.capitalize()
-            except ValueError:
-                raise ParseError(
-                    f'Invalid {severity} choice for severity field'
-                )
-        return attrs
+        ordering = ['-id']
 
 
 class ExploitSerializer(serializers.ModelSerializer):
@@ -89,3 +78,4 @@ class ExploitSerializer(serializers.ModelSerializer):
             'id', 'execution', 'vulnerability', 'technology', 'name',
             'description', 'reference', 'checked', 'creation', 'is_active'
         )
+        ordering = ['-id']

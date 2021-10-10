@@ -1,4 +1,3 @@
-from rest_framework.views import APIView
 from findings.models import (OSINT, Enumeration, Exploit, Host, HttpEndpoint,
                              Technology, Vulnerability)
 from findings.serializers import (EnumerationSerializer, ExploitSerializer,
@@ -10,7 +9,6 @@ from rest_framework.mixins import (DestroyModelMixin, ListModelMixin,
                                    RetrieveModelMixin, UpdateModelMixin)
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
-from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.decorators import action
 from drf_spectacular.utils import extend_schema
 
@@ -18,6 +16,10 @@ from drf_spectacular.utils import extend_schema
 
 
 class FindingBaseView(GenericViewSet, DestroyModelMixin):
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        return queryset.filter(execution__task__target__project__members=self.request.user)
 
     def destroy(self, request, *args, **kwargs):
         finding = self.get_object()
@@ -197,7 +199,7 @@ class TechnologyViewSet(FindingBaseView, ListModelMixin, RetrieveModelMixin):
     )
 
 
-class VulnerabilityViewSet(FindingBaseView, ListModelMixin, RetrieveModelMixin):
+class VulnerabilityViewSet(FindingBaseView, ListModelMixin, RetrieveModelMixin, UpdateModelMixin):
     queryset = Vulnerability.objects.all()
     serializer_class = VulnerabilitySerializer
     filterset_fields = {

@@ -12,6 +12,7 @@ class ParameterSerializer(serializers.ModelSerializer):
     class Meta:
         model = Parameter
         fields = ('key', 'value')
+        ordering = ['-id']
 
 
 class ExecutionSerializer(serializers.ModelSerializer):
@@ -24,7 +25,8 @@ class ExecutionSerializer(serializers.ModelSerializer):
             'osints', 'hosts', 'enumerations', 'http_endpoints', 'technologies',
             'vulnerabilities', 'exploits'
         )
-    
+        ordering = ['-id']
+
 
 class TaskSerializer(serializers.ModelSerializer):
     parameters = ParameterSerializer(read_only=False, many=True, required=False)
@@ -37,6 +39,7 @@ class TaskSerializer(serializers.ModelSerializer):
             'parameters', 'executions'
         )
         read_only_fields = ('executor', 'status', 'start', 'end', 'executions')
+        ordering = ['-id']
 
     def validate(self, attrs):
         if not attrs.get('process') and not attrs.get('tool'):

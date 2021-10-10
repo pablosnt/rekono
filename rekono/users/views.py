@@ -6,7 +6,6 @@ from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
                                    ListModelMixin, RetrieveModelMixin)
 from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet
 from users.models import User
 from users.serializers import (ChangeUserPasswordSerializer,
@@ -16,11 +15,6 @@ from users.serializers import (ChangeUserPasswordSerializer,
                                ResetPasswordSerializer, UserSerializer)
 
 # Create your views here.
-
-
-# Request reset password /reset-password -> "Public"
-# Reset password /reset-password -> "Public" based on OTP
-# Create POST /id/create -> "Public" based on OTP
 
 
 class UserAdminViewSet(
@@ -125,7 +119,7 @@ class UserInitViewSet(GenericViewSet):
             except User.DoesNotExist:
                 return Response(status=status.HTTP_404_NOT_FOUND)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
- 
+
 
 class ResetPasswordViewSet(GenericViewSet):
     serializer_class = UserSerializer

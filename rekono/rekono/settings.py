@@ -12,10 +12,12 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 
 import os
 from pathlib import Path
-from users.enums import Notification
-from users.crypto import generate_random_value, hash
+
 from executions.enums import Status
+from findings.enums import Severity
 from processes.enums import StepPriority
+from users.crypto import generate_random_value, hash
+from users.enums import Notification
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -130,6 +132,7 @@ SPECTACULAR_SETTINGS = {
         'PriorityEnum': StepPriority.choices,
         'StatusEnum': Status.choices,
         'NotificationPreferenceEnum': Notification.choices,
+        'SeverityEnum': Severity.choices,
     }
 }
 

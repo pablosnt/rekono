@@ -1,13 +1,14 @@
 import requests
 from findings.models import Vulnerability
+from findings.enums import Severity
 
 
 CVSS_RANGES = {
-    Vulnerability.Severity.CRITICAL: (9, 10),
-    Vulnerability.Severity.HIGH: (7, 9),
-    Vulnerability.Severity.MEDIUM: (4, 7),
-    Vulnerability.Severity.LOW: (2, 4),
-    Vulnerability.Severity.INFO: (0, 2)
+    Severity.CRITICAL: (9, 10),
+    Severity.HIGH: (7, 9),
+    Severity.MEDIUM: (4, 7),
+    Severity.LOW: (2, 4),
+    Severity.INFO: (0, 2)
 }
 
 
@@ -19,7 +20,7 @@ def get_description(data: str) -> str:
     return ''
 
 
-def get_severity(data: str) -> Vulnerability.Severity:
+def get_severity(data: str) -> Severity:
     cvss = data.get('impact')
     score = 5
     if 'baseMetricV3' in cvss:
@@ -30,7 +31,7 @@ def get_severity(data: str) -> Vulnerability.Severity:
         down, up = CVSS_RANGES[severity]
         if score >= down and score < up:
             return severity
-        if severity == Vulnerability.Severity.CRITICAL and score >= down and score <= up:
+        if severity == Severity.CRITICAL and score >= down and score <= up:
             return severity
 
 

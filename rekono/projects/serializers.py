@@ -11,6 +11,7 @@ class ProjectSerializer(serializers.ModelSerializer):
         model = Project
         fields = ('id', 'name', 'description', 'owner', 'targets', 'members')
         read_only_fields = ('owner', 'targets', 'members')
+        ordering = ['-id']
 
     def create(self, validated_data):
         project = super().create(validated_data)
@@ -33,8 +34,8 @@ class TargetPortSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = TargetPort
-        fields = ('id', 'target', 'port')
-        extra_kwargs = {'target': {'required': False}}
+        fields = ('id', 'port')
+        ordering = ['-id']
 
 
 class TargetSerializer(serializers.ModelSerializer):
@@ -47,6 +48,7 @@ class TargetSerializer(serializers.ModelSerializer):
             'id', 'project', 'target', 'type', 'target_ports', 'tasks'
         )
         read_only_fields = ('type', 'tasks')
+        ordering = ['-id']
 
     @transaction.atomic()
     def create(self, validated_data):

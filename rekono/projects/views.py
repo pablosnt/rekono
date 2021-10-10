@@ -1,4 +1,5 @@
 from rest_framework.generics import get_object_or_404
+from django.core.exceptions import PermissionDenied
 from projects.models import Project, Target
 from projects.serializers import (ProjectMemberSerializer,
                                   ProjectSerializer, TargetPortSerializer,
@@ -27,6 +28,10 @@ class ProjectViewSet(ModelViewSet):
     }
     ordering_fields = ('name', 'owner')
     http_method_names = ['get', 'post', 'put', 'delete']
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        return queryset.filter(members=self.request.user)
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
@@ -84,6 +89,18 @@ class TargetViewSet(
         'type': ['exact'],
     }
     ordering_fields = ('project', 'target', 'type')
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        return queryset.filter(project__members=self.request.user)
+
+    def perform_create(self, serializer):
+        project_check = bool(
+            self.request.user in serializer.validated_data.get('project').members.all()
+        )
+        if not project_check:
+            raise PermissionDenied()
+        super().perform_create(serializer)
 
     @extend_schema(responses={200: TargetPortSerializer})
     @action(detail=True, methods=['GET'], url_path='ports', url_name='ports')

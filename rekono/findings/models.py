@@ -2,6 +2,7 @@ from django.db import models
 from typing import Any
 
 from executions.models import Execution
+from findings.enums import Severity
 
 # Create your models here.
 
@@ -197,13 +198,6 @@ class Technology(models.Model):
 
 
 class Vulnerability(models.Model):
-
-    class Severity(models.IntegerChoices):
-        INFO = 1
-        LOW = 2
-        MEDIUM = 3
-        HIGH = 4
-        CRITICAL = 5
 
     execution = models.ForeignKey(
         Execution,

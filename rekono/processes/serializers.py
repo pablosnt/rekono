@@ -11,6 +11,7 @@ class StepPrioritySerializer(serializers.ModelSerializer):
         model = Step
         fields = ('id', 'process', 'tool', 'configuration', 'priority')
         read_only_fields = ('id', 'process', 'tool', 'configuration')
+        ordering = ['-id']
 
 
 class StepSerializer(serializers.ModelSerializer):
@@ -18,6 +19,7 @@ class StepSerializer(serializers.ModelSerializer):
     class Meta:
         model = Step
         fields = ('id', 'process', 'tool', 'configuration', 'priority')
+        ordering = ['-id']
 
     def validate(self, attrs):
         attrs = super().validate(attrs)
@@ -55,3 +57,4 @@ class ProcessSerializer(serializers.ModelSerializer):
         model = Process
         fields = ('id', 'name', 'description', 'creator', 'steps')
         read_only_fields = ('creator', 'steps')
+        ordering = ['-id']

@@ -4,6 +4,13 @@ from authorization.groups.roles import Role
 from processes.models import Process, Step
 
 
+class IsAdmin(BasePermission):
+
+    def has_permission(self, request, view):
+        admin_group = request.user.groups.filter(name=Role.ADMIN.name.capitalize()).exists()
+        return bool(admin_group)
+
+
 class ProjectMemberPermission(BasePermission):
 
     def has_object_permission(self, request, view, obj):
@@ -22,18 +29,10 @@ class ProcessCreatorPermission(BasePermission):
         elif isinstance(obj, Step):
             process = obj.process
         if process:
-            admin_group = request.user.groups.filter(name=Role.ADMIN.name.capitalize()).exists()
             if (
-                not admin_group and
+                not IsAdmin().has_permission(request, view) and
                 request.method in ['POST', 'PUT', 'DELETE'] and
                 process.creator != request.user
             ):
                 return False
         return True
-
-
-class IsAdmin(BasePermission):
-
-    def has_permission(self, request, view):
-        admin_group = request.user.groups.filter(name=Role.ADMIN.name.capitalize()).exists()
-        return bool(admin_group)

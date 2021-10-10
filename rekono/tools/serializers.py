@@ -10,6 +10,7 @@ class InputSerializer(serializers.ModelSerializer):
     class Meta:
         model = Input
         fields = ('name', 'type', 'argument', 'filter', 'selection', 'required')
+        ordering = ['-id']
 
 
 class OutputSerializer(serializers.ModelSerializer):
@@ -18,6 +19,7 @@ class OutputSerializer(serializers.ModelSerializer):
     class Meta:
         model = Output
         fields = ('type',)
+        ordering = ['-id']
 
 
 class ConfigurationSerializer(serializers.ModelSerializer):
@@ -27,6 +29,7 @@ class ConfigurationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Configuration
         fields = ('id', 'name', 'tool', 'arguments', 'default', 'inputs', 'outputs')
+        ordering = ['-id']
 
 
 class IntensitySerializer(serializers.ModelSerializer):
@@ -35,6 +38,7 @@ class IntensitySerializer(serializers.ModelSerializer):
     class Meta:
         model = Intensity
         fields = ('argument', 'value')
+        ordering = ['-id']
 
 
 class ToolSerializer(serializers.ModelSerializer):
@@ -45,3 +49,4 @@ class ToolSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tool
         fields = ('id', 'name', 'command', 'stage', 'reference', 'intensities', 'configurations')
+        ordering = ['-id']

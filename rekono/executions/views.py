@@ -1,3 +1,4 @@
+from django.core.exceptions import PermissionDenied
 from executions.exceptions import InvalidTaskException
 from executions.models import Execution, Task
 from executions.serializers import ExecutionSerializer, TaskSerializer
@@ -7,6 +8,7 @@ from rest_framework.mixins import (CreateModelMixin, ListModelMixin,
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 from executions import services
+from projects.models import Target
 
 # Create your views here.
 
@@ -36,7 +38,17 @@ class TaskViewSet(
         'status', 'start', 'end'
     )
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        return queryset.filter(target__project__members=self.request.user)
+
     def perform_create(self, serializer):
+        project_check = Target.objects.filter(
+            id=serializer.validated_data.get('target').id,
+            project__members=self.request.user
+        ).exists()
+        if not project_check:
+            raise PermissionDenied()
         serializer.save(executor=self.request.user)
 
     def destroy(self, request, *args, **kwargs):
@@ -77,3 +89,7 @@ class ExecutionViewSet(
         'task__tool', 'step_tool',
         'status', 'start', 'end'
     )
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        return queryset.filter(task__target__project__members=self.request.user)

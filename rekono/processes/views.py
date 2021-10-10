@@ -1,10 +1,9 @@
+from django.core.exceptions import PermissionDenied
 from processes.models import Process, Step
 from processes.serializers import (ProcessSerializer, StepPrioritySerializer,
                                    StepSerializer)
-from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
-                                   ListModelMixin, RetrieveModelMixin,
-                                   UpdateModelMixin)
-from rest_framework.viewsets import GenericViewSet, ModelViewSet
+from rest_framework.viewsets import ModelViewSet
+from authorization.permissions import IsAdmin
 
 # Create your views here.
 
@@ -24,13 +23,7 @@ class ProcessViewSet(ModelViewSet):
         serializer.save(creator=self.request.user)
 
 
-class StepViewSet(
-    GenericViewSet,
-    CreateModelMixin,
-    ListModelMixin,
-    RetrieveModelMixin,
-    DestroyModelMixin
-):
+class StepViewSet(ModelViewSet):
     queryset = Step.objects.all()
     serializer_class = StepSerializer
     filterset_fields = {
@@ -43,7 +36,16 @@ class StepViewSet(
     }
     ordering_fields = ('process', 'tool', 'configuration', 'priority')
 
+    def perform_create(self, serializer):
+        process_check = bool(
+            serializer.validated_data.get('process').creator == self.request.user or
+            IsAdmin().has_permission(self.request, self)
+        )
+        if not process_check:
+            raise PermissionDenied()
+        super().perform_create(serializer)
 
-class UpdateStepViewSet(GenericViewSet, UpdateModelMixin):
-    queryset = Step.objects.all()
-    serializer_class = StepPrioritySerializer
+    def get_serializer_class(self):
+        if self.request.method == 'PUT':
+            return StepPrioritySerializer
+        return super().get_serializer_class()

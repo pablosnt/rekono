@@ -3,6 +3,7 @@ import os
 
 from findings.models import HttpEndpoint, Vulnerability
 from tools.tools.base_tool import BaseTool
+from findings.enums import Severity
 
 
 class NiktoTool(BaseTool):
@@ -29,7 +30,7 @@ class NiktoTool(BaseTool):
                         vulnerability = Vulnerability.objects.create(
                             name=row[3],
                             description=f'[{row[4]} {row[5]}] {row[6]}',
-                            severity=Vulnerability.Severity.INFO,
+                            severity=Severity.INFO,
                             osvdb=row[3]
                         )
                         findings.append(vulnerability)

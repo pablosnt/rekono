@@ -35,6 +35,7 @@ class UserSerializer(serializers.ModelSerializer):
             'spyse_apikey': {'write_only': True},
             'zoomeye_apikey': {'write_only': True}
         }
+        ordering = ['-id']
 
     def update(self, instance, validated_data):
         instance = super().update(instance, validated_data)
@@ -108,6 +109,7 @@ class ChangeUserPasswordSerializer(serializers.ModelSerializer):
             'password': {'write_only': True},
             'old_password': {'write_only': True},
         }
+        ordering = ['-id']
 
     def validate(self, attrs):
         attrs = super().validate(attrs)
