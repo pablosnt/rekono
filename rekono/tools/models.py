@@ -1,6 +1,7 @@
 from django.db import models
 
 from tools.enums import IntensityRank, FindingType
+from typing import Any
 
 # Create your models here.
 
@@ -22,6 +23,9 @@ class Tool(models.Model):
     def __str__(self) -> str:
         return self.name
 
+    def get_project(self) -> Any:
+        return None
+
 
 class Intensity(models.Model):
     tool = models.ForeignKey(Tool, related_name='intensities', on_delete=models.CASCADE)
@@ -30,6 +34,9 @@ class Intensity(models.Model):
 
     def __str__(self) -> str:
         return f'{self.tool.name} - {IntensityRank(self.value).name}'
+
+    def get_project(self) -> Any:
+        return None
 
 
 class Configuration(models.Model):
@@ -40,6 +47,9 @@ class Configuration(models.Model):
 
     def __str__(self) -> str:
         return f'{self.tool.name} - {self.name}'
+
+    def get_project(self) -> Any:
+        return None
 
 
 class Input(models.Model):
@@ -64,6 +74,9 @@ class Input(models.Model):
         fk = self.configuration.__str__()
         return f'{fk} - {self.name}'
 
+    def get_project(self) -> Any:
+        return None
+
 
 class Output(models.Model):
     configuration = models.ForeignKey(
@@ -76,3 +89,6 @@ class Output(models.Model):
     def __str__(self) -> str:
         fk = self.configuration.__str__()
         return f'{fk} - {self.type}'
+
+    def get_project(self) -> Any:
+        return None

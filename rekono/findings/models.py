@@ -1,4 +1,5 @@
 from django.db import models
+from typing import Any
 
 from executions.models import Execution
 
@@ -39,6 +40,9 @@ class OSINT(models.Model):
         if isinstance(o, self.__class__):
             return o.execution.task == self.execution.task and o.data == self.data
         return False
+
+    def get_project(self) -> Any:
+        return self.execution.task.target.project
 
 
 class Host(models.Model):
@@ -81,6 +85,9 @@ class Host(models.Model):
             else:
                 return o.address == self.address
         return False
+    
+    def get_project(self) -> Any:
+        return self.execution.task.target.project
 
 
 class Enumeration(models.Model):
@@ -118,6 +125,9 @@ class Enumeration(models.Model):
             return o.host == self.host and o.port == self.port
         return False
 
+    def get_project(self) -> Any:
+        return self.execution.task.target.project
+
 
 class HttpEndpoint(models.Model):
     execution = models.ForeignKey(
@@ -146,6 +156,9 @@ class HttpEndpoint(models.Model):
         if isinstance(o, self.__class__):
             return o.enumeration == self.enumeration and o.endpoint == self.endpoint
         return False
+
+    def get_project(self) -> Any:
+        return self.execution.task.target.project
 
 
 class Technology(models.Model):
@@ -178,7 +191,10 @@ class Technology(models.Model):
                 o.version == self.version
             )
         return False
-    
+
+    def get_project(self) -> Any:
+        return self.execution.task.target.project
+
 
 class Vulnerability(models.Model):
 
@@ -219,7 +235,10 @@ class Vulnerability(models.Model):
         if isinstance(o, self.__class__):
             return o.technology == self.technology and o.name == self.name and o.cve == self.cve
         return False
-    
+
+    def get_project(self) -> Any:
+        return self.execution.task.target.project
+
 
 class Exploit(models.Model):
     execution = models.ForeignKey(
@@ -260,3 +279,6 @@ class Exploit(models.Model):
                 o.name == self.name and o.reference == self.reference
             )
         return False
+
+    def get_project(self) -> Any:
+        return self.execution.task.target.project

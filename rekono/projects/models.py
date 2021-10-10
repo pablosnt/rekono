@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.db import models
 from django.db.models.deletion import CASCADE
+from typing import Any
 
 # Create your models here.
 
@@ -17,6 +18,9 @@ class Project(models.Model):
 
     def __str__(self) -> str:
         return self.name
+
+    def get_project(self) -> Any:
+        return self
 
 
 class Target(models.Model):
@@ -39,6 +43,9 @@ class Target(models.Model):
     def __str__(self) -> str:
         return self.target
 
+    def get_project(self) -> Any:
+        return self.project
+
 
 class TargetPort(models.Model):
     target = models.ForeignKey(
@@ -50,3 +57,6 @@ class TargetPort(models.Model):
 
     def __str__(self) -> str:
         return f'{self.target.target} - {self.port}'
+
+    def get_project(self) -> Any:
+        return self.target.project

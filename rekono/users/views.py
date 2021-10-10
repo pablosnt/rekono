@@ -1,9 +1,7 @@
 from rest_framework import status
-from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin, ListModelMixin,
-                                   RetrieveModelMixin, UpdateModelMixin)
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.viewsets import GenericViewSet, ModelViewSet
+from rest_framework.viewsets import ModelViewSet
 from users.models import User
 from users.serializers import (ChangeUserPasswordSerializer,
                                ChangeUserRoleSerializer, CreateUserSerializer,

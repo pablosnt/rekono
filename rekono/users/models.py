@@ -137,3 +137,6 @@ class User(AbstractUser):
 
     def __str__(self) -> str:
         return self.email
+
+    def get_project(self) -> Any:
+        return None

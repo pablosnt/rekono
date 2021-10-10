@@ -1,3 +1,4 @@
+from typing import Any
 from django.conf import settings
 from django.db import models
 from executions.enums import ParameterKey, Status
@@ -40,11 +41,17 @@ class Task(models.Model):
                 value += f' - {self.configuration.name}'
         return value
 
+    def get_project(self) -> Any:
+        return self.target.project
+
 
 class Parameter(models.Model):
     task = models.ForeignKey(Task, related_name='parameters', on_delete=models.CASCADE)
     key = models.IntegerField(choices=ParameterKey.choices)
     value = models.TextField(max_length=250)
+
+    def get_project(self) -> Any:
+        return self.task.target.project
 
 
 class Execution(models.Model):
@@ -65,3 +72,6 @@ class Execution(models.Model):
             return f'{req} - {self.step.tool.name} - {self.step.configuration.name}'
         else:
             return self.task.__str__()
+
+    def get_project(self) -> Any:
+        return self.task.target.project

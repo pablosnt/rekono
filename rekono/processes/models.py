@@ -2,6 +2,7 @@ from django.conf import settings
 from django.db import models
 from tools.models import Tool, Configuration
 from processes.enums import StepPriority
+from typing import Any
 
 # Create your models here.
 
@@ -13,6 +14,9 @@ class Process(models.Model):
 
     def __str__(self) -> str:
         return self.name
+
+    def get_project(self) -> Any:
+        return None
 
 
 class Step(models.Model):
@@ -28,3 +32,6 @@ class Step(models.Model):
 
     def __str__(self) -> str:
         return self.process.__str__() + ' - ' + self.configuration.__str__()
+
+    def get_project(self) -> Any:
+        return None
