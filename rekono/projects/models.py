@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.db import models
+from django.db.models import constraints
 from django.db.models.deletion import CASCADE
 from typing import Any
 
@@ -7,9 +8,14 @@ from typing import Any
 
 
 class Project(models.Model):
-    name = models.TextField(max_length=50)
+    name = models.TextField(max_length=50, unique=True)
     description = models.TextField(max_length=250)
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=CASCADE)
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True
+    )
     members = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
         related_name='members',
@@ -40,6 +46,11 @@ class Target(models.Model):
     target = models.TextField(max_length=100)
     type = models.IntegerField(choices=TargetType.choices)
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['project', 'target'], name='unique target')
+        ]
+
     def __str__(self) -> str:
         return self.target
 
@@ -54,6 +65,11 @@ class TargetPort(models.Model):
         on_delete=models.CASCADE
     )
     port = models.IntegerField()
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['target', 'port'], name='unique target port')
+        ]
 
     def __str__(self) -> str:
         return f'{self.target.target} - {self.port}'

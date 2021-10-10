@@ -12,21 +12,21 @@ from tools.models import Configuration, Tool
 
 class Task(models.Model):
     target = models.ForeignKey(Target, related_name='tasks', on_delete=models.CASCADE)
-    process = models.ForeignKey(Process, on_delete=models.CASCADE, blank=True, null=True)
-    tool = models.ForeignKey(Tool, on_delete=models.CASCADE, blank=True, null=True)
+    process = models.ForeignKey(Process, blank=True, null=True, on_delete=models.SET_NULL)
+    tool = models.ForeignKey(Tool, blank=True, null=True, on_delete=models.SET_NULL)
     configuration = models.ForeignKey(
         Configuration,
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         blank=True,
         null=True
     )
-    intensity = models.IntegerField(
-        choices=IntensityRank.choices,
-        default=IntensityRank.NORMAL,
+    intensity = models.IntegerField(choices=IntensityRank.choices, default=IntensityRank.NORMAL)
+    executor = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
         blank=True,
         null=True
     )
-    executor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     status = models.IntegerField(choices=Status.choices, default=Status.REQUESTED)
     start = models.DateTimeField(blank=True, null=True)
     end = models.DateTimeField(blank=True, null=True)
@@ -58,7 +58,7 @@ class Execution(models.Model):
     task = models.ForeignKey(Task, related_name='executions', on_delete=models.CASCADE)
     rq_job_id = models.TextField(max_length=50, blank=True, null=True)
     rq_job_pid = models.IntegerField(blank=True, null=True)
-    step = models.ForeignKey(Step, on_delete=models.CASCADE, blank=True, null=True)
+    step = models.ForeignKey(Step, on_delete=models.SET_NULL, blank=True, null=True)
     output_file = models.TextField(max_length=50, blank=True, null=True)
     output_plain = models.TextField(blank=True, null=True)
     output_error = models.TextField(blank=True, null=True)

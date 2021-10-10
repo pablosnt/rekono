@@ -19,13 +19,7 @@ class OSINT(models.Model):
         USER = 7
         PASSWORD = 8
 
-    execution = models.ForeignKey(
-        Execution,
-        related_name='osints',
-        on_delete=models.CASCADE,
-        blank=True,
-        null=True
-    )
+    execution = models.ForeignKey(Execution, related_name='osints', on_delete=models.CASCADE)
     data = models.TextField(max_length=250)
     data_type = models.IntegerField(choices=DataType.choices)
     source = models.TextField(max_length=50, blank=True, null=True)
@@ -58,20 +52,10 @@ class Host(models.Model):
         FREEBSD = 7
         OTHER = 8
 
-    execution = models.ForeignKey(
-        Execution,
-        related_name='hosts',
-        on_delete=models.CASCADE,
-        blank=True,
-        null=True
-    )
+    execution = models.ForeignKey(Execution, related_name='hosts', on_delete=models.CASCADE)
     address = models.TextField(max_length=20)
     os = models.TextField(max_length=250, blank=True, null=True)
-    os_type = models.IntegerField(
-        choices=OSType.choices,
-        blank=True,
-        null=True
-    )
+    os_type = models.IntegerField(choices=OSType.choices, default=OSType.OTHER)
     creation = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=True)
 
@@ -103,18 +87,18 @@ class Enumeration(models.Model):
         UDP = 1
         TCP = 2
 
-    execution = models.ForeignKey(
-        Execution,
+    execution = models.ForeignKey(Execution, related_name='enumerations', on_delete=models.CASCADE)
+    host = models.ForeignKey(
+        Host,
         related_name='enumerations',
         on_delete=models.CASCADE,
         blank=True,
         null=True
     )
-    host = models.ForeignKey(Host, related_name='enumerations', on_delete=models.CASCADE)
     port = models.IntegerField()
-    port_status = models.IntegerField(choices=PortStatus.choices)
-    protocol = models.IntegerField(choices=Protocol.choices)
-    service = models.TextField(max_length=50)
+    port_status = models.IntegerField(choices=PortStatus.choices, default=PortStatus.OPEN)
+    protocol = models.IntegerField(choices=Protocol.choices, blank=True, null=True)
+    service = models.TextField(max_length=50, blank=True, null=True)
     creation = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=True)
 
@@ -134,9 +118,7 @@ class HttpEndpoint(models.Model):
     execution = models.ForeignKey(
         Execution,
         related_name='http_endpoints',
-        on_delete=models.CASCADE,
-        blank=True,
-        null=True
+        on_delete=models.CASCADE
     )
     enumeration = models.ForeignKey(
         Enumeration,
@@ -163,17 +145,13 @@ class HttpEndpoint(models.Model):
 
 
 class Technology(models.Model):
-    execution = models.ForeignKey(
-        Execution,
+    execution = models.ForeignKey(Execution, related_name='technologies', on_delete=models.CASCADE)
+    enumeration = models.ForeignKey(
+        Enumeration,
         related_name='technologies',
         on_delete=models.CASCADE,
         blank=True,
         null=True
-    )
-    enumeration = models.ForeignKey(
-        Enumeration,
-        related_name='technologies',
-        on_delete=models.CASCADE
     )
     name = models.TextField(max_length=100)
     version = models.TextField(max_length=100, blank=True, null=True)
@@ -198,13 +176,10 @@ class Technology(models.Model):
 
 
 class Vulnerability(models.Model):
-
     execution = models.ForeignKey(
         Execution,
         related_name='vulnerabilities',
-        on_delete=models.CASCADE,
-        blank=True,
-        null=True
+        on_delete=models.CASCADE
     )
     technology = models.ForeignKey(
         Technology,
@@ -235,13 +210,7 @@ class Vulnerability(models.Model):
 
 
 class Exploit(models.Model):
-    execution = models.ForeignKey(
-        Execution,
-        related_name='exploits',
-        on_delete=models.CASCADE,
-        blank=True,
-        null=True
-    )
+    execution = models.ForeignKey(Execution, related_name='exploits', on_delete=models.CASCADE)
     vulnerability = models.ForeignKey(
         Vulnerability,
         related_name='exploits',
@@ -258,7 +227,7 @@ class Exploit(models.Model):
     )
     name = models.TextField(max_length=100)
     description = models.TextField(blank=True, null=True)
-    reference = models.TextField(max_length=250)
+    reference = models.TextField(max_length=250, blank=True, null=True)
     checked = models.BooleanField(default=False)
     creation = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=True)

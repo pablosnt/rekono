@@ -15,7 +15,7 @@ class Tool(models.Model):
         SERVICES = 4
         EXPLOITATION = 5
 
-    name = models.TextField(max_length=30)
+    name = models.TextField(max_length=30, unique=True)
     command = models.TextField(max_length=30, blank=True, null=True)
     stage = models.IntegerField(choices=Stage.choices)
     reference = models.TextField(max_length=250, blank=True, null=True)
@@ -42,8 +42,13 @@ class Intensity(models.Model):
 class Configuration(models.Model):
     name = models.TextField(max_length=30)
     tool = models.ForeignKey(Tool, related_name='configurations', on_delete=models.CASCADE)
-    arguments = models.TextField(max_length=250, blank=True, null=True)
+    arguments = models.TextField(max_length=250, default='', blank=True)
     default = models.BooleanField(default=False)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['tool', 'name'], name='unique configuration')
+        ]
 
     def __str__(self) -> str:
         return f'{self.tool.name} - {self.name}'
@@ -65,10 +70,15 @@ class Input(models.Model):
     )
     name = models.TextField(max_length=20)
     type = models.IntegerField(choices=FindingType.choices)
-    argument = models.TextField(max_length=50, blank=True, null=True)
+    argument = models.TextField(max_length=50, default='', blank=True)
     filter = models.TextField(max_length=250, blank=True, null=True)
     selection = models.IntegerField(choices=InputSelection.choices, default=InputSelection.FOR_EACH)
     required = models.BooleanField(default=False)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['configuration', 'name'], name='unique input')
+        ]
 
     def __str__(self) -> str:
         fk = self.configuration.__str__()
@@ -85,6 +95,11 @@ class Output(models.Model):
         on_delete=models.CASCADE
     )
     type = models.IntegerField(choices=FindingType.choices)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['configuration', 'type'], name='unique output')
+        ]
 
     def __str__(self) -> str:
         fk = self.configuration.__str__()
