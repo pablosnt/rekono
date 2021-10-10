@@ -9,6 +9,7 @@ from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
 from users.models import User
+from users.serializers import UserSerializer
 from rest_framework.decorators import action
 from drf_spectacular.utils import extend_schema
 
@@ -30,15 +31,22 @@ class ProjectViewSet(ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
 
-    @extend_schema(request=ProjectMemberSerializer, responses={201: None})
-    @action(detail=True, methods=['POST'], url_path='members', url_name='add_member')
+    @extend_schema(responses={200: UserSerializer})
+    @action(detail=True, methods=['GET'], url_path='members', url_name='members')
+    def project_members(self, reuqest, pk):
+        project = self.get_object()
+        serializer = UserSerializer(project.members.all(), many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @extend_schema(request=ProjectMemberSerializer, responses={201: ProjectMemberSerializer})
+    @project_members.mapping.post
     def add_project_member(self, request, pk):
         project = self.get_object()
         serializer = ProjectMemberSerializer(data=request.data)
         if serializer.is_valid():
             try:
                 serializer.update(project, serializer.validated_data)
-                return Response(status=status.HTTP_201_CREATED)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
             except User.DoesNotExist:
                 return Response(status=status.HTTP_404_NOT_FOUND)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -77,8 +85,15 @@ class TargetViewSet(
     }
     ordering_fields = ('project', 'target', 'type')
 
-    @extend_schema(request=TargetPortSerializer, responses={201: None})
-    @action(detail=True, methods=['POST'], url_path='ports', url_name='add_port')
+    @extend_schema(responses={200: TargetPortSerializer})
+    @action(detail=True, methods=['GET'], url_path='ports', url_name='ports')
+    def target_ports(self, request, pk):
+        target = self.get_object()
+        serializer = TargetPortSerializer(target.target_ports.all(), many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @extend_schema(request=TargetPortSerializer, responses={201: TargetPortSerializer})
+    @target_ports.mapping.post
     def add_target_port(self, request, pk):
         target = self.get_object()
         serializer = TargetPortSerializer(data=request.data)
@@ -86,7 +101,7 @@ class TargetViewSet(
             data = serializer.validated_data.copy()
             data['target'] = target
             serializer.create(validated_data=data)
-            return Response(status=status.HTTP_201_CREATED)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @action(

@@ -19,7 +19,7 @@ class RekonoOwnerPermission(BasePermission):
             admin_group = request.user.groups.filter(name=Role.ADMIN.name.capitalize()).exists()
             if (
                 not admin_group and
-                request.http_method in ['POST', 'PUT', 'DELETE'] and
+                request.method in ['POST', 'PUT', 'DELETE'] and
                 process.creator != request.user
             ):
                 return False
