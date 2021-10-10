@@ -1,14 +1,16 @@
-from projects.models import Project, Target, TargetPort
-from projects.serializers import (AddProjectMemberSerializer,
+from rest_framework.generics import get_object_or_404
+from projects.models import Project, Target
+from projects.serializers import (ProjectMemberSerializer,
                                   ProjectSerializer, TargetPortSerializer,
                                   TargetSerializer)
 from rest_framework import status
 from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
                                    ListModelMixin, RetrieveModelMixin)
 from rest_framework.response import Response
-from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
 from users.models import User
+from rest_framework.decorators import action
+from drf_spectacular.utils import extend_schema
 
 # Create your views here.
 
@@ -28,16 +30,11 @@ class ProjectViewSet(ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
 
-
-class AddProjectMemberView(APIView):
-    serializer_class = AddProjectMemberSerializer
-
-    def post(self, request, pk):
-        try:
-            project = Project.objects.get(pk=pk)
-        except Project.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        serializer = self.serializer_class(data=request.data)
+    @extend_schema(request=ProjectMemberSerializer, responses={201: None})
+    @action(detail=True, methods=['POST'], url_path='members', url_name='add_member')
+    def add_project_member(self, request, pk):
+        project = self.get_object()
+        serializer = ProjectMemberSerializer(data=request.data)
         if serializer.is_valid():
             try:
                 serializer.update(project, serializer.validated_data)
@@ -46,16 +43,15 @@ class AddProjectMemberView(APIView):
                 return Response(status=status.HTTP_404_NOT_FOUND)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    
-class DeleteProjectMemberView(APIView):
-    serializer_class = None
-
-    def delete(self, request, pk, member_id):
-        try:
-            project = Project.objects.get(pk=pk)
-            member = User.objects.get(pk=member_id, is_active=True)
-        except (Project.DoesNotExist, User.DoesNotExist):
-            return Response(status=status.HTTP_404_NOT_FOUND)
+    @action(
+        detail=True,
+        methods=['DELETE'],
+        url_path='members/(?P<member_id>[0-9])',
+        url_name='delete_member'
+    )
+    def delete_project_member(self, request, member_id, pk):
+        project = self.get_object()
+        member = get_object_or_404(project.members, pk=member_id)
         if member in project.members.all() and member_id != project.owner.id:
             project.members.remove(member)
             project.save()
@@ -81,16 +77,11 @@ class TargetViewSet(
     }
     ordering_fields = ('project', 'target', 'type')
 
-
-class AddTargetPortView(APIView):
-    serializer_class = TargetPortSerializer
-
-    def post(self, request, pk):
-        try:
-            target = Target.objects.get(pk=pk)
-        except Target.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        serializer = self.serializer_class(data=request.data)
+    @extend_schema(request=TargetPortSerializer, responses={201: None})
+    @action(detail=True, methods=['POST'], url_path='ports', url_name='add_port')
+    def add_target_port(self, request, pk):
+        target = self.get_object()
+        serializer = TargetPortSerializer(data=request.data)
         if serializer.is_valid():
             data = serializer.validated_data.copy()
             data['target'] = target
@@ -98,14 +89,14 @@ class AddTargetPortView(APIView):
             return Response(status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
-class DeleteTargetPortView(APIView):
-    serializer_class = None
-
-    def delete(self, request, pk, port_id):
-        try:
-            target_port = TargetPort.objects.get(pk=port_id, target__pk=pk)
-            target_port.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        except TargetPort.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+    @action(
+        detail=True,
+        methods=['DELETE'],
+        url_path='ports/(?P<port_id>[0-9])',
+        url_name='delete_port'
+    )
+    def delete_target_port(self, request, port_id, pk):
+        target = self.get_object()
+        target_port = get_object_or_404(target.target_ports, pk=port_id)
+        target_port.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

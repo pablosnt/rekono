@@ -11,40 +11,30 @@ from rest_framework.mixins import (DestroyModelMixin, ListModelMixin,
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 from django.core.exceptions import ObjectDoesNotExist
+from rest_framework.decorators import action
+from drf_spectacular.utils import extend_schema
 
 # Create your views here.
 
 
-class FindingDisableMixin(DestroyModelMixin):
+class FindingBaseView(GenericViewSet, DestroyModelMixin):
 
     def destroy(self, request, *args, **kwargs):
-        try:
-            instance = self.queryset.get(pk=kwargs.get('pk'), is_active=True)
-            instance.is_active = False
-            instance.save()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        except ObjectDoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+        finding = self.get_object()
+        finding.is_active = False
+        finding.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @extend_schema(request=None, responses={201: None})
+    @action(detail=True, methods=['POST'], url_path='enable', url_name='enable')
+    def enable(self, request, pk):
+        finding = self.get_object()
+        finding.is_active = True
+        finding.save()
+        return Response(status=status.HTTP_201_CREATED)
 
 
-class FindingEnableView(APIView):
-
-    def post(self, request, pk):
-        try:
-            instance = self.queryset.get(pk=pk, is_active=False)
-            instance.is_active = True
-            instance.save()
-            return Response(status=status.HTTP_201_CREATED)
-        except ObjectDoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-
-
-class OSINTViewSet(
-    GenericViewSet,
-    ListModelMixin,
-    RetrieveModelMixin,
-    FindingDisableMixin
-):
+class OSINTViewSet(FindingBaseView, ListModelMixin, RetrieveModelMixin):
     queryset = OSINT.objects.all()
     serializer_class = OSINTSerializer
     filterset_fields = {
@@ -73,17 +63,7 @@ class OSINTViewSet(
     )
 
 
-class OSINTEnableView(FindingEnableView):
-    queryset = OSINT.objects.all()
-    serializer_class = None
-
-
-class HostViewSet(
-    GenericViewSet,
-    ListModelMixin,
-    RetrieveModelMixin,
-    FindingDisableMixin
-):
+class HostViewSet(FindingBaseView, ListModelMixin, RetrieveModelMixin):
     queryset = Host.objects.all()
     serializer_class = HostSerializer
     filterset_fields = {
@@ -112,17 +92,7 @@ class HostViewSet(
     )
 
 
-class HostEnableView(FindingEnableView):
-    queryset = Host.objects.all()
-    serializer_class = None
-
-
-class EnumerationViewSet(
-    GenericViewSet,
-    ListModelMixin,
-    RetrieveModelMixin,
-    FindingDisableMixin
-):
+class EnumerationViewSet(FindingBaseView, ListModelMixin, RetrieveModelMixin):
     queryset = Enumeration.objects.all()
     serializer_class = EnumerationSerializer
     filterset_fields = {
@@ -157,17 +127,7 @@ class EnumerationViewSet(
     )
 
 
-class EnumerationEnableView(FindingEnableView):
-    queryset = Enumeration.objects.all()
-    serializer_class = None
-
-
-class HttpEndpointViewSet(
-    GenericViewSet,
-    ListModelMixin,
-    RetrieveModelMixin,
-    FindingDisableMixin
-):
+class HttpEndpointViewSet(FindingBaseView, ListModelMixin, RetrieveModelMixin):
     queryset = HttpEndpoint.objects.all()
     serializer_class = HttpEndpointSerializer
     filterset_fields = {
@@ -202,17 +162,7 @@ class HttpEndpointViewSet(
     )
 
 
-class HttpEndpointEnableView(FindingEnableView):
-    queryset = HttpEndpoint.objects.all()
-    serializer_class = None
-
-
-class TechnologyViewSet(
-    GenericViewSet,
-    ListModelMixin,
-    RetrieveModelMixin,
-    FindingDisableMixin
-):
+class TechnologyViewSet(FindingBaseView, ListModelMixin, RetrieveModelMixin):
     queryset = Technology.objects.all()
     serializer_class = TechnologySerializer
     filterset_fields = {
@@ -247,18 +197,7 @@ class TechnologyViewSet(
     )
 
 
-class TechnologyEnableView(FindingEnableView):
-    queryset = Technology.objects.all()
-    serializer_class = None
-
-
-class VulnerabilityViewSet(
-    GenericViewSet,
-    ListModelMixin,
-    RetrieveModelMixin,
-    UpdateModelMixin,
-    FindingDisableMixin
-):
+class VulnerabilityViewSet(FindingBaseView, ListModelMixin, RetrieveModelMixin):
     queryset = Vulnerability.objects.all()
     serializer_class = VulnerabilitySerializer
     filterset_fields = {
@@ -299,17 +238,7 @@ class VulnerabilityViewSet(
     http_method_names = ['get', 'put', 'delete']
 
 
-class VulnerabilityEnableView(FindingEnableView):
-    queryset = Vulnerability.objects.all()
-    serializer_class = None
-
-
-class ExploitViewSet(
-    GenericViewSet,
-    ListModelMixin,
-    RetrieveModelMixin,
-    FindingDisableMixin
-):
+class ExploitViewSet(FindingBaseView, ListModelMixin, RetrieveModelMixin):
     queryset = Exploit.objects.all()
     serializer_class = ExploitSerializer
     filterset_fields = {
@@ -355,8 +284,3 @@ class ExploitViewSet(
         ('host', 'enumeration__host'),
         'execution', 'enumeration', 'technology', 'name', 'creation', 'is_active'
     )
-
-
-class ExploitEnableView(FindingEnableView):
-    queryset = Exploit.objects.all()
-    serializer_class = None

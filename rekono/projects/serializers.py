@@ -19,7 +19,7 @@ class ProjectSerializer(serializers.ModelSerializer):
         return project
 
 
-class AddProjectMemberSerializer(serializers.Serializer):
+class ProjectMemberSerializer(serializers.Serializer):
     user = serializers.IntegerField(required=True)
 
     def update(self, instance, validated_data):
@@ -33,7 +33,8 @@ class TargetPortSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = TargetPort
-        fields = ('id', 'port')
+        fields = ('id', 'target', 'port')
+        extra_kwargs = {'target': {'required': False}}
 
 
 class TargetSerializer(serializers.ModelSerializer):

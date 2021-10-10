@@ -7,6 +7,7 @@ from processes.models import Process, Step
 class RekonoOwnerPermission(BasePermission):
 
     def has_object_permission(self, request, view, obj):
+        process = None
         project = obj.get_project()
         if project:
             return request.user in project.members.all()
