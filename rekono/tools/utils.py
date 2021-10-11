@@ -46,11 +46,16 @@ def get_keys_from_argument(argument: str) -> list:
 
 
 def get_url_from_params(input: Input, target: Target, target_ports: list, findings: list) -> Url:
+    enumeration_found = False
     for finding in findings:
-        if isinstance(finding, Enumeration) and checker.check_input_condition(input, finding):
-            url = Url(target, finding)
-            if url.value:
-                return url
+        if isinstance(finding, Enumeration):
+            enumeration_found = True
+            if checker.check_input_condition(input, finding):
+                url = Url(target, finding)
+                if url.value:
+                    return url
+    if enumeration_found:
+        return None
     for p in target_ports:
         url = Url(target, p)
         if url.value:

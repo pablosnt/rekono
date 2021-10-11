@@ -22,6 +22,8 @@ class BaseTool():
 
     file_output_enabled = False
     ignore_exit_code = False
+    findings = []
+    findings_relations = {}
      
     def __init__(
         self,
@@ -40,7 +42,6 @@ class BaseTool():
         self.configuration = configuration
         self.inputs = inputs
         self.intensity = intensity
-        self.findings = []
         self.file_output_extension = self.tool.output_format or 'txt'
         self.filename_output = f'{str(uuid.uuid4())}.{self.file_output_extension}'
         self.directory_output = EXECUTION_OUTPUTS
@@ -68,6 +69,9 @@ class BaseTool():
                 previous_findings
             )
             if url:
+                if url.enumeration:
+                    self.findings_relations['host'] = url.enumeration.host
+                    self.findings_relations['enumeration'] = url.enumeration
                 self.url = url
                 previous_findings.append(url)
         return (parameters, previous_findings)
@@ -92,6 +96,7 @@ class BaseTool():
                                 i.argument,
                                 r
                             )
+                            self.findings_relations[input_class.__name__.lower()] = r
                             break
                     if i.name not in command_arguments or i.type == FindingType.PARAMETER:
                         req_keys = utils.get_keys_from_argument(i.argument)
@@ -172,6 +177,12 @@ class BaseTool():
     def parse_output(self, output: str) -> list:
         return []
 
+    def process_findings(self) -> None:
+        for finding in self.findings:
+            for key, value in self.findings_relations.items():
+                if hasattr(finding, key):
+                    setattr(finding, key, value)
+
     def send_findings(self) -> None:
         producer.process_findings(self.execution, self.findings)
 
@@ -241,4 +252,5 @@ class BaseTool():
         self.clean_environment()
         self.on_completed(output)
         self.findings = self.parse_output(output)
+        self.process_findings()
         self.send_findings()

@@ -66,7 +66,7 @@ def process_dependencies(
     for param_set in all_params[1:]:
         new_execution = Execution.objects.create(task=execution.task, step=execution.step)
         new_execution.save()
-        producer.execute(
+        job = producer.execute(
             new_execution,
             intensity,
             inputs,
