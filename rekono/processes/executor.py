@@ -49,7 +49,7 @@ def execute(task: Task, parameters: list) -> None:
     for job in execution_plan:
         execution = Execution.objects.create(task=task, step=job.step)
         execution.save()
-        job.job = producer.execute(
+        producer.execute(
             execution,
             job.intensity,
             job.inputs,

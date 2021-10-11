@@ -3,7 +3,6 @@ from typing import Callable
 import django_rq
 from executions.models import Execution
 from queues.executions import consumer
-from rq.job import Job
 from tools.models import Configuration, Input, Intensity
 
 
@@ -47,4 +46,6 @@ def execute(
     execution_job.meta['callback'] = callback
     execution_job.meta['parameters'] = parameters
     execution_job.save_meta()
+    execution.rq_job_id = execution_job.id
+    execution.save()
     return execution_job

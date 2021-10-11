@@ -1,21 +1,22 @@
 import django_rq
+from rq.job import Job
 from queues.executions import producer
 from queues.executions.constants import finding_relations
 from rq.registry import DeferredJobRegistry
 from tools import utils
 
 
-def cancel_job(job_id) -> None:
+def cancel_job(job_id: str) -> Job:
     executions_queue = django_rq.get_queue('executions-queue')
     execution = executions_queue.fetch_job(job_id)
     execution.cancel()
+    return execution
 
 
-def cancel_and_delete_job(job_id) -> None:
-    executions_queue = django_rq.get_queue('executions-queue')
-    execution = executions_queue.fetch_job(job_id)
-    execution.cancel()
+def cancel_and_delete_job(job_id: str) -> Job:
+    execution = cancel_job(job_id)
     execution.delete()
+    return execution
 
 
 def get_findings_from_dependencies(dependencies: list) -> dict:

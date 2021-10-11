@@ -24,8 +24,6 @@ def execute(
     previous_findings: list
 ) -> None:
     current_job = rq.get_current_job()
-    execution.rq_job_id = current_job.id
-    execution.save()
     tool_class = tool_utils.get_tool_class_by_name(tool.name)
     tool = tool_class(
         execution=execution,
@@ -66,9 +64,10 @@ def process_dependencies(
         if check_params_for_tool(tool, parameters, list(param_set))
     ]
     for param_set in all_params[1:]:
-        execution = Execution.objects.create(task=execution.task, step=execution.step)
-        job = producer.execute(
-            execution,
+        new_execution = Execution.objects.create(task=execution.task, step=execution.step)
+        new_execution.save()
+        producer.execute(
+            new_execution,
             intensity,
             inputs,
             parameters=parameters,
