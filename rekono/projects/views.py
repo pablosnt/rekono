@@ -1,18 +1,21 @@
-from rest_framework.generics import get_object_or_404
 from django.core.exceptions import PermissionDenied
+from drf_spectacular.utils import extend_schema
+from integrations.defect_dojo import executions as dd_uploader
+from integrations.defect_dojo.exceptions import (EngagementIdNotFoundException,
+                                                 ProductIdNotFoundException)
 from projects.models import Project, Target
-from projects.serializers import (ProjectMemberSerializer,
-                                  ProjectSerializer, TargetPortSerializer,
-                                  TargetSerializer)
+from projects.serializers import (ProjectMemberSerializer, ProjectSerializer,
+                                  TargetPortSerializer, TargetSerializer)
 from rest_framework import status
+from rest_framework.decorators import action
+from rest_framework.generics import get_object_or_404
 from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
                                    ListModelMixin, RetrieveModelMixin)
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
+from executions.models import Execution
 from users.models import User
 from users.serializers import UserSerializer
-from rest_framework.decorators import action
-from drf_spectacular.utils import extend_schema
 
 # Create your views here.
 
@@ -70,6 +73,17 @@ class ProjectViewSet(ModelViewSet):
             project.save()
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(status=status.HTTP_400_BAD_REQUEST)
+
+    @extend_schema(request=None, responses={200: None})
+    @action(detail=True, methods=['POST'], url_path='defect-dojo', url_name='defect-dojo')
+    def defect_dojo(self, request, pk):
+        project = self.get_object()
+        try:
+            executions = Execution.objects.filter(task__target__project=project).all()
+            dd_uploader.upload(executions)
+            return Response(status=status.HTTP_200_OK)
+        except (ProductIdNotFoundException, EngagementIdNotFoundException) as ex:
+            return Response(str(ex), status=status.HTTP_400_BAD_REQUEST)
 
 
 class TargetViewSet(

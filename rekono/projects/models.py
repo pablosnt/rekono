@@ -10,6 +10,7 @@ from typing import Any
 class Project(models.Model):
     name = models.TextField(max_length=50, unique=True)
     description = models.TextField(max_length=250)
+    defectdojo_product_id = models.IntegerField(blank=True, null=True)
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,

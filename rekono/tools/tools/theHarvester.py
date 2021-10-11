@@ -10,7 +10,6 @@ from users.models import User
 class TheHarvesterTool(BaseTool):
     
     file_output_enabled = True
-    file_output_extension = '.json'
     configuration_file = 'api-keys.yaml'
     api_keys_config = {
         'apikeys': {

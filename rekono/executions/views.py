@@ -1,14 +1,19 @@
 from django.core.exceptions import PermissionDenied
+from drf_spectacular.utils import extend_schema
+from executions import services
 from executions.exceptions import InvalidTaskException
 from executions.models import Execution, Task
 from executions.serializers import ExecutionSerializer, TaskSerializer
+from integrations.defect_dojo import executions as dd_uploader
+from integrations.defect_dojo.exceptions import (EngagementIdNotFoundException,
+                                                 ProductIdNotFoundException)
+from projects.models import Target
 from rest_framework import status
-from rest_framework.mixins import (CreateModelMixin, ListModelMixin,
-                                   RetrieveModelMixin, DestroyModelMixin)
+from rest_framework.decorators import action
+from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
+                                   ListModelMixin, RetrieveModelMixin)
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
-from executions import services
-from projects.models import Target
 
 # Create your views here.
 
@@ -58,7 +63,17 @@ class TaskViewSet(
             return Response(status=status.HTTP_204_NO_CONTENT)
         except InvalidTaskException:
             return Response(status=status.HTTP_400_BAD_REQUEST)
-        
+
+    @extend_schema(request=None, responses={200: None})
+    @action(detail=True, methods=['POST'], url_path='defect-dojo', url_name='defect-dojo')
+    def defect_dojo(self, request, pk):
+        task = self.get_object()
+        try:
+            dd_uploader.upload(task.executions.all())
+            return Response(status=status.HTTP_200_OK)
+        except (ProductIdNotFoundException, EngagementIdNotFoundException) as ex:
+            return Response(str(ex), status=status.HTTP_400_BAD_REQUEST)
+
 
 class ExecutionViewSet(
     GenericViewSet,
@@ -93,3 +108,13 @@ class ExecutionViewSet(
     def get_queryset(self):
         queryset = super().get_queryset()
         return queryset.filter(task__target__project__members=self.request.user).order_by('-id')
+
+    @extend_schema(request=None, responses={200: None})
+    @action(detail=True, methods=['POST'], url_path='defect-dojo', url_name='defect-dojo')
+    def defect_dojo(self, request, pk):
+        execution = self.get_object()
+        try:
+            dd_uploader.upload([execution])
+            return Response(status=status.HTTP_200_OK)
+        except (ProductIdNotFoundException, EngagementIdNotFoundException) as ex:
+            return Response(str(ex), status=status.HTTP_400_BAD_REQUEST)

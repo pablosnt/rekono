@@ -5,6 +5,8 @@
         "fields": {
             "name": "nmap",
             "command": "nmap",
+            "output_format": "xml",
+            "defectdojo_scan_type": "Nmap Scan",
             "stage": 2,
             "reference": "https://nmap.org/"
         }
@@ -15,6 +17,8 @@
         "fields": {
             "name": "dirsearch",
             "command": "dirsearch",
+            "output_format": "json",
+            "defectdojo_scan_type": null,
             "stage": 4,
             "reference": "https://github.com/maurosoria/dirsearch"
         }
@@ -25,6 +29,8 @@
         "fields": {
             "name": "theHarvester",
             "command": "theHarvester",
+            "output_format": "json",
+            "defectdojo_scan_type": null,
             "stage": 1,
             "reference": "https://github.com/laramies/theHarvester"
         }
@@ -35,6 +41,8 @@
         "fields": {
             "name": "nikto",
             "command": "nikto",
+            "output_format": "csv",
+            "defectdojo_scan_type": "Nikto Scan",
             "stage": 4,
             "reference": "https://github.com/sullo/nikto"
         }

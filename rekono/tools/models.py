@@ -17,6 +17,8 @@ class Tool(models.Model):
 
     name = models.TextField(max_length=30, unique=True)
     command = models.TextField(max_length=30, blank=True, null=True)
+    output_format = models.TextField(max_length=5, blank=True, null=True)
+    defectdojo_scan_type = models.TextField(max_length=50, blank=True, null=True)
     stage = models.IntegerField(choices=Stage.choices)
     reference = models.TextField(max_length=250, blank=True, null=True)
 

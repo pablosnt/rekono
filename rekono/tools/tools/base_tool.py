@@ -22,7 +22,6 @@ class BaseTool():
 
     file_output_enabled = False
     ignore_exit_code = False
-    file_output_extension = ''
      
     def __init__(
         self,
@@ -42,7 +41,8 @@ class BaseTool():
         self.inputs = inputs
         self.intensity = intensity
         self.findings = []
-        self.filename_output = str(uuid.uuid4()) + self.file_output_extension
+        self.file_output_extension = self.tool.output_format or 'txt'
+        self.filename_output = f'{str(uuid.uuid4())}.{self.file_output_extension}'
         self.directory_output = EXECUTION_OUTPUTS
         self.path_output = os.path.join(self.directory_output, self.filename_output)
 

@@ -184,6 +184,18 @@ EMAIL_HOST_PASSWORD = os.getenv('EMAIL_PASSWORD', '')
 EMAIL_USE_TLS = True
 
 
+# Defect-Dojo
+DEFECT_DOJO = {
+    'HOST': 'http://127.0.0.1:8080',
+    'API_KEY': os.getenv('DEFECTDOJO_KEY', ''),
+    'AUTO_CREATION': True,
+    'REKONO_TAGS': ['rekono'],
+    'REKONO_PROD_TYPE_ID': None,
+    'REKONO_PROD_TYPE': 'Rekono',
+    'REKONO_ENGAGEMENT': 'Rekono'
+}
+
+
 # Authentication
 
 AUTH_USER_MODEL = 'users.User'

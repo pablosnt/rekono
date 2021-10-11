@@ -9,7 +9,9 @@ class ProjectSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Project
-        fields = ('id', 'name', 'description', 'owner', 'targets', 'members')
+        fields = (
+            'id', 'name', 'description', 'defectdojo_product_id', 'owner', 'targets', 'members'
+        )
         read_only_fields = ('owner', 'targets', 'members')
         ordering = ['-id']
 

@@ -1,5 +1,4 @@
 import requests
-from findings.models import Vulnerability
 from findings.enums import Severity
 
 
