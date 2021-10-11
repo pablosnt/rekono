@@ -11,6 +11,7 @@ from tools.models import Configuration, Tool
 
 
 class Task(models.Model):
+    rq_job_id = models.TextField(max_length=50, blank=True, null=True)
     target = models.ForeignKey(Target, related_name='tasks', on_delete=models.CASCADE)
     process = models.ForeignKey(Process, blank=True, null=True, on_delete=models.SET_NULL)
     tool = models.ForeignKey(Tool, blank=True, null=True, on_delete=models.SET_NULL)

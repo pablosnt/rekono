@@ -9,7 +9,8 @@ from tools import utils
 def cancel_job(job_id: str) -> Job:
     executions_queue = django_rq.get_queue('executions-queue')
     execution = executions_queue.fetch_job(job_id)
-    execution.cancel()
+    if execution:
+        execution.cancel()
     return execution
 
 
