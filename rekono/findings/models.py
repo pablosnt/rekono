@@ -19,7 +19,13 @@ class OSINT(models.Model):
         USER = 7
         PASSWORD = 8
 
-    execution = models.ForeignKey(Execution, related_name='osints', on_delete=models.CASCADE)
+    execution = models.ForeignKey(
+        Execution,
+        related_name='osints',
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True
+    )
     data = models.TextField(max_length=250)
     data_type = models.IntegerField(choices=DataType.choices)
     source = models.TextField(max_length=50, blank=True, null=True)
@@ -52,7 +58,13 @@ class Host(models.Model):
         FREEBSD = 7
         OTHER = 8
 
-    execution = models.ForeignKey(Execution, related_name='hosts', on_delete=models.CASCADE)
+    execution = models.ForeignKey(
+        Execution,
+        related_name='hosts',
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True
+    )
     address = models.TextField(max_length=20)
     os = models.TextField(max_length=250, blank=True, null=True)
     os_type = models.IntegerField(choices=OSType.choices, default=OSType.OTHER)
@@ -87,7 +99,13 @@ class Enumeration(models.Model):
         UDP = 1
         TCP = 2
 
-    execution = models.ForeignKey(Execution, related_name='enumerations', on_delete=models.CASCADE)
+    execution = models.ForeignKey(
+        Execution,
+        related_name='enumerations',
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True
+    )
     host = models.ForeignKey(
         Host,
         related_name='enumerations',
@@ -118,7 +136,9 @@ class HttpEndpoint(models.Model):
     execution = models.ForeignKey(
         Execution,
         related_name='http_endpoints',
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True
     )
     enumeration = models.ForeignKey(
         Enumeration,
@@ -145,7 +165,13 @@ class HttpEndpoint(models.Model):
 
 
 class Technology(models.Model):
-    execution = models.ForeignKey(Execution, related_name='technologies', on_delete=models.CASCADE)
+    execution = models.ForeignKey(
+        Execution,
+        related_name='technologies',
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True
+    )
     enumeration = models.ForeignKey(
         Enumeration,
         related_name='technologies',
@@ -179,7 +205,9 @@ class Vulnerability(models.Model):
     execution = models.ForeignKey(
         Execution,
         related_name='vulnerabilities',
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True
     )
     technology = models.ForeignKey(
         Technology,
@@ -210,7 +238,13 @@ class Vulnerability(models.Model):
 
 
 class Exploit(models.Model):
-    execution = models.ForeignKey(Execution, related_name='exploits', on_delete=models.CASCADE)
+    execution = models.ForeignKey(
+        Execution,
+        related_name='exploits',
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True
+    )
     vulnerability = models.ForeignKey(
         Vulnerability,
         related_name='exploits',

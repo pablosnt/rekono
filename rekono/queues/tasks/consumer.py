@@ -5,7 +5,7 @@ from processes import executor as processes
 from django_rq import job
 
 
-@job('requests-queue')
+@job('tasks-queue')
 def process_task(task: Task = None, parameters: list = []) -> None:
     if task:
         if task.tool:
@@ -14,3 +14,4 @@ def process_task(task: Task = None, parameters: list = []) -> None:
             processes.execute(task, parameters)
         else:
             raise InvalidTaskException('Invalid task. Process or tool is required')
+        return task, parameters

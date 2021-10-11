@@ -1,7 +1,8 @@
 from typing import Any
+
 from django.conf import settings
 from django.db import models
-from executions.enums import ParameterKey, Status
+from executions.enums import ParameterKey, Status, TimeUnit
 from processes.models import Process, Step
 from projects.models import Target
 from tools.enums import IntensityRank
@@ -29,6 +30,11 @@ class Task(models.Model):
         null=True
     )
     status = models.IntegerField(choices=Status.choices, default=Status.REQUESTED)
+    scheduled_at = models.DateTimeField(blank=True, null=True)
+    scheduled_in = models.IntegerField(blank=True, null=True)
+    scheduled_time_unit = models.IntegerField(choices=TimeUnit.choices, blank=True, null=True)
+    repeat_in = models.IntegerField(blank=True, null=True)
+    repeat_time_unit = models.IntegerField(choices=TimeUnit.choices, blank=True, null=True)
     start = models.DateTimeField(blank=True, null=True)
     end = models.DateTimeField(blank=True, null=True)
 

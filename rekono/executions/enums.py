@@ -19,3 +19,10 @@ class ParameterKey(models.IntegerChoices):
     CVE = 4
     EXPLOIT = 5
     WORDLIST = 6
+
+
+class TimeUnit(models.IntegerChoices):
+    MINUTES = 1
+    HOURS = 2
+    DAYS = 3
+    WEEKS = 4

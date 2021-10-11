@@ -76,7 +76,7 @@ class NmapTool(BaseTool):
                     continue
                 os_detections = h.os_match_probabilities()
                 os_text = None
-                os_type = None
+                os_type = Host.OSType.OTHER
                 if os_detections:
                     selected_os = None
                     accuracy = 0

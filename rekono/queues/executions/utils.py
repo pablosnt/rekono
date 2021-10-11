@@ -16,7 +16,8 @@ def cancel_job(job_id: str) -> Job:
 
 def cancel_and_delete_job(job_id: str) -> Job:
     execution = cancel_job(job_id)
-    execution.delete()
+    if execution:
+        execution.delete()
     return execution
 
 

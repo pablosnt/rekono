@@ -40,7 +40,7 @@ class TaskViewSet(
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        return queryset.filter(target__project__members=self.request.user)
+        return queryset.filter(target__project__members=self.request.user).order_by('-id')
 
     def perform_create(self, serializer):
         project_check = Target.objects.filter(
@@ -92,4 +92,4 @@ class ExecutionViewSet(
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        return queryset.filter(task__target__project__members=self.request.user)
+        return queryset.filter(task__target__project__members=self.request.user).order_by('-id')

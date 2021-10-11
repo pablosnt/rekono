@@ -31,7 +31,7 @@ class ProjectViewSet(ModelViewSet):
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        return queryset.filter(members=self.request.user)
+        return queryset.filter(members=self.request.user).order_by('-id')
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
@@ -92,7 +92,7 @@ class TargetViewSet(
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        return queryset.filter(project__members=self.request.user)
+        return queryset.filter(project__members=self.request.user).order_by('-id')
 
     def perform_create(self, serializer):
         project_check = bool(

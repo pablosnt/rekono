@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from rest_framework.exceptions import ParseError, AuthenticationFailed
+from rest_framework.exceptions import AuthenticationFailed
 from users.models import User
 from authorization.groups.roles import Role
 from django.contrib.sites.shortcuts import get_current_site

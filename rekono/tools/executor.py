@@ -1,5 +1,4 @@
 from django.utils import timezone
-from executions.enums import Status
 from executions.models import Execution, Task
 from tools.models import Intensity, Input
 from queues.executions import producer
@@ -8,9 +7,6 @@ from queues.executions import producer
 def execute(task: Task, parameters: list) -> None:
     intensity = Intensity.objects.filter(tool=task.tool, value=task.intensity).first()
     inputs = Input.objects.filter(configuration=task.configuration).all()
-    task.status = Status.RUNNING
-    task.start = timezone.now()
-    task.save()
     execution = Execution.objects.create(task=task)
     execution.save()
     producer.execute(

@@ -10,9 +10,12 @@ from queues.tasks import utils as task_utils
 
 
 def cancel_task(task):
-    if task.status in [Status.REQUESTED, Status.RUNNING]:
+    if (
+        task.status in [Status.REQUESTED, Status.RUNNING] or
+        (task.repeat_in and task.repeat_time_unit)
+    ):
         if task.rq_job_id:
-            task_utils.cancel_job(task.rq_job_id)
+            task_utils.cancel_and_delete_job(task.rq_job_id)
         executions = Execution.objects.filter(
             task=task,
             status__in=[Status.REQUESTED, Status.RUNNING]

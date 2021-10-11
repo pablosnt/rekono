@@ -178,6 +178,10 @@ class BaseTool():
     def on_start(self) -> None:
         self.execution.start = timezone.now()
         self.execution.save()
+        if not self.execution.task.start:
+            self.execution.task.status = Status.RUNNING
+            self.execution.task.start = timezone.now()
+            self.execution.task.save()
 
     def on_skipped(self) -> None:
         self.execution.status = Status.SKIPPED
