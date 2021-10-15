@@ -12,6 +12,8 @@ metadata = {
 
 
 def send_notification(execution: Any, findings: list, domain: str) -> None:
+    if not findings:
+        return
     parameters = {
         'domain': domain,
         'execution': execution,
