@@ -4,7 +4,7 @@ from rest_framework.authtoken.models import Token
 from authorization.groups.roles import Role
 from users.crypto import generate_otp, encrypt, decrypt
 from typing import Any, Optional
-from integrations.mail import sender
+from integrations.mail import users as sender
 from users.enums import Notification
 
 # Create your models here.

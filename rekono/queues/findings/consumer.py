@@ -3,10 +3,12 @@ from executions.models import Execution
 from findings.models import Vulnerability
 from findings.enums import Severity
 from integrations.nist import cve
+from users.enums import Notification
+from integrations.mail.executions import send_notification
 
 
 @job('findings-queue')
-def process_findings(execution: Execution = None, findings: list = []) -> None:
+def process_findings(execution: Execution = None, findings: list = [], domain: str = None) -> None:
     if execution:
         for finding in findings:
             setattr(finding, 'execution', execution)
@@ -16,3 +18,7 @@ def process_findings(execution: Execution = None, findings: list = []) -> None:
                 finding.severity = cve_info.get('severity', Severity.MEDIUM)
                 finding.reference = cve_info.get('reference', '')
             finding.save()
+        if execution.task.executor.notification_preference == Notification.MAIL:
+            send_notification(execution, findings, domain)
+        elif execution.task.executor.notification_preference == Notification.TELEGRAM:
+            pass

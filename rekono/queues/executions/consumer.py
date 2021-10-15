@@ -1,3 +1,4 @@
+from typing import Any
 import rq
 from django_rq import job
 from executions.models import Execution
@@ -21,7 +22,8 @@ def execute(
     intensity: Intensity,
     inputs: list,
     parameters: list,
-    previous_findings: list
+    previous_findings: list,
+    domain: str,
 ) -> None:
     current_job = rq.get_current_job()
     tool_class = tool_utils.get_tool_class_by_name(tool.name)
@@ -39,10 +41,11 @@ def execute(
                 intensity,
                 inputs,
                 parameters,
+                domain,
                 current_job,
                 tool
             )
-    tool.run(parameters=parameters, previous_findings=previous_findings)
+    tool.run(parameters=parameters, previous_findings=previous_findings, domain=domain)
     return tool
 
 
@@ -51,6 +54,7 @@ def process_dependencies(
     intensity: Intensity,
     inputs: list,
     parameters: list,
+    domain: str,
     current_job: Job,
     tool: BaseTool
 ) -> list:
@@ -72,6 +76,7 @@ def process_dependencies(
             inputs,
             parameters=parameters,
             previous_findings=param_set,
+            domain=domain,
             callback=success_callback,
             at_front=True
         )

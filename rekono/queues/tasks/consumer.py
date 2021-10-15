@@ -6,12 +6,12 @@ from django_rq import job
 
 
 @job('tasks-queue')
-def process_task(task: Task = None, parameters: list = []) -> None:
+def process_task(task: Task = None, parameters: list = [], domain: str = None) -> None:
     if task:
         if task.tool:
-            tools.execute(task, parameters)
+            tools.execute(task, parameters, domain)
         elif task.process:
-            processes.execute(task, parameters)
+            processes.execute(task, parameters, domain)
         else:
             raise InvalidTaskException('Invalid task. Process or tool is required')
-        return task, parameters
+        return task, parameters, domain

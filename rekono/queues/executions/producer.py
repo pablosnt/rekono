@@ -12,6 +12,7 @@ def execute(
     inputs: list,
     parameters: list = [],
     previous_findings: list = [],
+    domain: str = None,
     callback: Callable = None,
     dependencies: list = [],
     at_front: bool = False
@@ -35,11 +36,13 @@ def execute(
         inputs=inputs,
         parameters=parameters,
         previous_findings=previous_findings,
+        domain=domain,
         on_success=callback,
         result_ttl=7200,
         depends_on=dependencies,
         at_front=at_front
     )
+    execution_job.meta['domain'] = domain
     execution_job.meta['execution'] = execution
     execution_job.meta['intensity'] = intensity
     execution_job.meta['inputs'] = inputs

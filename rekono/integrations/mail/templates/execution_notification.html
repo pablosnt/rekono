@@ -1,0 +1,185 @@
+<html>
+    <body>
+        <h1>{{ execution.task.target.project.name }}</h1>
+
+        <table>
+            <tr>
+                <th>Target</th>
+                <th>Task</th>
+                <th>Execution</th>
+                <th>Tool</th>
+                <th>Status</th>
+                <th>Start</th>
+                <th>End</th>
+            </tr>
+            <tr>
+                <th><a href="http://{{ domain }}/api/targets/{{ execution.task.target.id }}/">{{ execution.task.target.target }}</a></th>
+                <th><a href="http://{{ domain }}/api/tasks/{{ execution.task.id }}/">{{ execution.task.id }}</a></th>
+                <th><a href="http://{{ domain }}/api/executions/{{ execution.id }}/">{{ execution.id }}</a></th>
+                <th><a href="http://{{ domain }}/api/tools/{{ tool.id }}/">{{ tool.name }}</a></th>
+                <th>{{ execution.status }}</th>
+                <th>{{ execution.start }}</th>
+                <th>{{ execution.end }}</th>
+            </tr>
+        </table>
+
+        <br>
+
+        {% if osint %}
+            <h3>OSINT:</h3>
+            <table>
+                <tr>
+                    <th>Data</th>
+                    <th>Data Type</th>
+                    <th>Source</th>
+                </tr>
+                {% for o in osint %}
+                    <tr>
+                        <th><a href="http://{{ domain }}/api/osint/{{ h.id }}/">{{ o.data }}</a></th>
+                        <th>{{ o.data_type }}</th>
+                        <th>{{ o.source }}</th>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% endif %}
+
+        <br>
+
+        {% if host %}
+            <h3>Hosts:</h3>
+            <table>
+                <tr>
+                    <th>Address</th>
+                    <th>OS</th>
+                    <th>OS Type</th>
+                </tr>
+                {% for h in host %}
+                    <tr>
+                        <th><a href="http://{{ domain }}/api/hosts/{{ h.id }}/">{{ h.address }}</a></th>
+                        <th>{{ h.os }}</th>
+                        <th>{{ h.os_type }}</th>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% endif %}
+
+        <br>
+
+        {% if enumeration %}
+            <h3>Ports:</h3>
+            <table>
+                <tr>
+                    <th>Host</th>
+                    <th>Port</th>
+                    <th>Port Status</th>
+                    <th>Protocol</th>
+                    <th>Service</th>
+                </tr>
+                {% for e in enumeration %}
+                    <tr>
+                        <th><a href="http://{{ domain }}/api/hosts/{{ e.host.id }}/">{{ e.host.address }}</a></th>
+                        <th><a href="http://{{ domain }}/api/enumerations/{{ e.id }}/">{{ e.port }}</a></th>
+                        <th>{{ e.port_status }}</th>
+                        <th>{{ e.protocol }}</th>
+                        <th>{{ e.service }}</th>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% endif %}
+
+        <br>
+
+        {% if technology %}
+            <h3>Technologies:</h3>
+            <table>
+                <tr>
+                    <th>Host</th>
+                    <th>Port</th>
+                    <th>Technology</th>
+                    <th>Version</th>
+                </tr>
+                {% for t in technology %}
+                    <tr>
+                        <th><a href="http://{{ domain }}/api/hosts/{{ t.enumeration.host.id }}/">{{ t.enumeration.host.address }}</a></th>
+                        <th><a href="http://{{ domain }}/api/enumerations/{{ t.enumeration.id }}/">{{ t.enumeration.port }}</a></th>
+                        <th><a href="http://{{ domain }}/api/technologies/{{ t.id }}/">{{ t.name }}</a></th>
+                        <th>{{ t.version }}</th>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% endif %}
+
+        <br>
+
+        {% if httpendpoint %}
+            <h3>HTTP endpoints:</h3>
+            <table>
+                <tr>
+                    <th>Host</th>
+                    <th>Port</th>
+                    <th>Endpoint</th>
+                    <th>Status</th>
+                </tr>
+                {% for e in httpendpoint %}
+                    <tr>
+                        <th><a href="http://{{ domain }}/api/hosts/{{ e.enumeration.host.id }}/">{{ e.enumeration.host.address }}</a></th>
+                        <th><a href="http://{{ domain }}/api/enumerations/{{ e.enumeration.id }}/">{{ e.enumeration.port }}</a></th>
+                        <th><a href="http://{{ domain }}/api/endpoints/{{ e.id }}/">{{ e.endpoint }}</a></th>
+                        <th>{{ e.status }}</th>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% endif %}
+
+        <br>
+
+        {% if vulnerability %}
+            <h3>Vulnerabilities:</h3>
+            <table>
+                <tr>
+                    <th>Host</th>
+                    <th>Port</th>
+                    <th>Technology</th>
+                    <th>Vulnerability</th>
+                    <th>CVE</th>
+                    <th>Severity</th>
+                </tr>
+                {% for v in vulnerability %}
+                    <tr>
+                        <th><a href="http://{{ domain }}/api/hosts/{{ v.technology.enumeration.host.id }}/">{{ v.technology.enumeration.host.address }}</a></th>
+                        <th><a href="http://{{ domain }}/api/enumerations/{{ v.technology.enumeration.id }}/">{{ v.technology.enumeration.port }}</a></th>
+                        <th><a href="http://{{ domain }}/api/technologies/{{ v.technology.id }}/">{{ v.technology.name }}</a></th>
+                        <th><a href="http://{{ domain }}/api/vulnerabilities/{{ v.id }}/">{{ v.name }}</a></th>
+                        <th>{{ v.cve }}</th>
+                        <th>{{ v.severity }}</th>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% endif %}
+
+        {% if exploit %}
+            <h3>Exploits:</h3>
+            <table>
+                <tr>
+                    <th>Vulnerability</th>
+                    <th>Technology</th>
+                    <th>Name</th>
+                </tr>
+                {% for e in exploit %}
+                    <tr>
+                        {% if e.vulnability %}
+                            <th><a href="http://{{ domain }}/api/vulnerabilities/{{ v.vulnerability.id }}/">{{ e.vulnerability.name }}</a></th>
+                            <th>None</th>
+                        {% else %}
+                            <th>None</th>
+                            <th><a href="http://{{ domain }}/api/technologies/{{ e.technology.id }}/">{{ e.technology.name }}</a></th>
+                            {% endif %}
+                        <th><a href="http://{{ domain }}/api/exploits/{{ e.id }}/">{{ e.name }}</a></th>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% endif %}
+
+
+    </body>
+</html>

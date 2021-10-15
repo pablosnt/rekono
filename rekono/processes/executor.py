@@ -44,7 +44,7 @@ def create_plan(task: Task) -> list:
     return execution_plan
 
 
-def execute(task: Task, parameters: list) -> None:
+def execute(task: Task, parameters: list, domain: str) -> None:
     execution_plan = create_plan(task)
     for job in execution_plan:
         execution = Execution.objects.create(task=task, step=job.step)
@@ -54,6 +54,7 @@ def execute(task: Task, parameters: list) -> None:
             job.intensity,
             job.inputs,
             parameters,
+            domain=domain,
             callback=success_callback,
             dependencies=[j.job for j in job.dependencies]
         )

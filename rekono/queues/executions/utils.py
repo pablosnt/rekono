@@ -54,6 +54,7 @@ def update_new_dependencies(parent_job: str, new_jobs: list, parameters: list) -
                 meta['intensity'],
                 meta['inputs'],
                 parameters=meta['parameters'],
+                request=meta['domain'],
                 callback=meta['callback'],
                 dependencies=dependencies
             )

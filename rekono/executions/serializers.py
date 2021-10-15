@@ -7,6 +7,7 @@ from rest_framework import serializers
 from queues.tasks import producer
 from executions.enums import TimeUnit
 from django.utils import timezone
+from django.contrib.sites.shortcuts import get_current_site
 
 
 class ParameterSerializer(serializers.ModelSerializer):
@@ -95,5 +96,5 @@ class TaskSerializer(serializers.ModelSerializer):
                         validated_data=parameter
                     )
                 )
-        producer.process_task(task, parameters)
+        producer.process_task(task, parameters, get_current_site(self.context.get('request')).domain)
         return task

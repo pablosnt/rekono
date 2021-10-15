@@ -13,7 +13,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 import os
 from pathlib import Path
 
-from executions.enums import Status
+from executions.enums import Status, TimeUnit
 from findings.enums import Severity
 from processes.enums import StepPriority
 from users.crypto import generate_random_value, hash
@@ -133,6 +133,7 @@ SPECTACULAR_SETTINGS = {
         'StatusEnum': Status.choices,
         'NotificationPreferenceEnum': Notification.choices,
         'SeverityEnum': Severity.choices,
+        'TimeUnit': TimeUnit.choices,
     }
 }
 

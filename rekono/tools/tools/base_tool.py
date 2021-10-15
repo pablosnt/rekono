@@ -6,6 +6,7 @@ import uuid
 from django.utils import timezone
 from executions.enums import ParameterKey, Status
 from executions.models import Execution
+from queues.findings import producer
 from tools import utils
 from tools.arguments import checker, formatter
 from tools.enums import FindingType
@@ -13,7 +14,6 @@ from tools.exceptions import (InstallationNotFoundException,
                               InvalidToolParametersException,
                               UnexpectedToolExitCodeException)
 from tools.models import Configuration, Input, Intensity, Tool
-from queues.findings import producer
 
 from rekono.settings import EXECUTION_OUTPUTS
 
@@ -183,8 +183,8 @@ class BaseTool():
                 if hasattr(finding, key):
                     setattr(finding, key, value)
 
-    def send_findings(self) -> None:
-        producer.process_findings(self.execution, self.findings)
+    def send_findings(self, domain: str) -> None:
+        producer.process_findings(self.execution, self.findings, domain)
 
     def on_start(self) -> None:
         self.execution.start = timezone.now()
@@ -219,7 +219,7 @@ class BaseTool():
         self.execution.output_plain = output
         self.execution.save()
 
-    def run(self, parameters: list = [], previous_findings: list = []) -> None:
+    def run(self, parameters: list = [], previous_findings: list = [], domain: str = None) -> None:
         self.on_start()
         try:
             self.check_installation()
@@ -253,4 +253,4 @@ class BaseTool():
         self.on_completed(output)
         self.findings = self.parse_output(output)
         self.process_findings()
-        self.send_findings()
+        self.send_findings(domain)

@@ -4,7 +4,7 @@ from tools.models import Intensity, Input
 from queues.executions import producer
 
 
-def execute(task: Task, parameters: list) -> None:
+def execute(task: Task, parameters: list, domain: str) -> None:
     intensity = Intensity.objects.filter(tool=task.tool, value=task.intensity).first()
     inputs = Input.objects.filter(configuration=task.configuration).all()
     execution = Execution.objects.create(task=task)
@@ -14,6 +14,7 @@ def execute(task: Task, parameters: list) -> None:
         intensity=intensity,
         inputs=inputs,
         parameters=parameters,
+        domain=domain,
         callback=success_callback
     )
 

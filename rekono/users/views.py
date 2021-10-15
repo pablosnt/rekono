@@ -3,7 +3,7 @@ from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
-                                   ListModelMixin, RetrieveModelMixin)
+                                   ListModelMixin, RetrieveModelMixin, UpdateModelMixin)
 from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
@@ -38,6 +38,7 @@ class UserAdminViewSet(
     ordering_fields = ('username', 'first_name', 'last_name', 'email', 'is_active', 'date_joined')
     permission_classes = [IsAuthenticated, DjangoModelPermissions, IsAdmin]
 
+    @extend_schema(request=InviteUserSerializer, responses={201: UserSerializer})
     def create(self, request, *args, **kwargs):
         serializer = InviteUserSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
@@ -81,12 +82,12 @@ class UserProfileViewSet(GenericViewSet):
     http_method_names = ['get', 'put']
 
     @action(detail=False, methods=['GET'])
-    def get_profile(self, request):
-        serializer = self.serializer_class(request.user)
+    def get_profile(self, request, *args, **kwargs):
+        serializer = self.serializer_class(request.user, many=False)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['PUT'])
-    def update_profile(self, request):
+    def update_profile(self, request, *args, **kwargs):
         serializer = self.serializer_class(request.user, data=request.data)
         if serializer.is_valid():
             serializer.update(request.user, serializer.validated_data)

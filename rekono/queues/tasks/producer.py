@@ -4,7 +4,7 @@ from queues.tasks import consumer
 from datetime import timedelta
 
 
-def process_task(task: Task, parameters: list):
+def process_task(task: Task, parameters: list, domain: str):
     task_queue = django_rq.get_queue('tasks-queue')
     if task.scheduled_at:
         task_job = task_queue.enqueue_at(
@@ -12,6 +12,7 @@ def process_task(task: Task, parameters: list):
             consumer.process_task,
             task=task,
             parameters=parameters,
+            domain=domain,
             on_success=scheduled_callback
         )
     elif task.scheduled_in and task.scheduled_time_unit:
@@ -21,6 +22,7 @@ def process_task(task: Task, parameters: list):
             consumer.process_task,
             task=task,
             parameters=parameters,
+            domain=domain,
             on_success=scheduled_callback
         )
     else:
@@ -28,6 +30,7 @@ def process_task(task: Task, parameters: list):
             consumer.process_task,
             task=task,
             parameters=parameters,
+            domain=domain,
             on_success=scheduled_callback
         )
     task.rq_job_id = task_job.id
@@ -36,7 +39,7 @@ def process_task(task: Task, parameters: list):
 
 def scheduled_callback(job, connection, result, *args, **kwargs):
     if result:
-        task, parameters = result
+        task, parameters, domain = result
         if task.repeat_in and task.repeat_time_unit:
             frequency = {task.repeat_time_unit.name.lower(): task.repeat_in}
             task_queue = django_rq.get_queue('tasks-queue')
@@ -45,6 +48,7 @@ def scheduled_callback(job, connection, result, *args, **kwargs):
                 consumer.process_task,
                 task=task,
                 parameters=parameters,
+                domain=domain,
                 on_success=scheduled_callback
             )
             task.rq_job_id = task_job.id

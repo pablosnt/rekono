@@ -6,7 +6,19 @@ from users.views import (ResetPasswordViewSet, UserAdminViewSet,
 
 router = SimpleRouter()
 router.register('users', UserAdminViewSet)
-router.register('profile', UserProfileViewSet)
+
+profile = UserProfileViewSet.as_view(
+    {
+        'get': 'get_profile',
+        'put': 'update_profile',
+    }
+)
+
+change_password = UserProfileViewSet.as_view(
+    {
+        'put': 'change_password',
+    }
+)
 
 reset_password = ResetPasswordViewSet.as_view(
     {
@@ -19,5 +31,7 @@ urlpatterns = [
     path('api-token/', views.obtain_auth_token),
     path('users/<int:pk>/create/', UserInitViewSet.as_view({'post': 'create'})),
     path('reset-password/', reset_password),
+    path('profile/', profile),
+    path('profile/change_password/', change_password),
     path('', include(router.urls)),
 ]
