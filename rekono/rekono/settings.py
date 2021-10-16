@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     'findings',
     'processes',
     'projects',
+    'targets',
     'tasks',
     'tools',
     'users'

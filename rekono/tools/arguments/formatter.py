@@ -1,10 +1,8 @@
-from tools import arguments
-from tools.arguments.url import Url
-from executions.enums import ParameterKey
 from findings.models import (OSINT, Enumeration, Exploit, Host, HttpEndpoint,
-                            Technology, Vulnerability)
-from tools.arguments.constants import PORTS, PORTS_COMMAS, TARGET
+                             Technology, Vulnerability)
 from tools.arguments import parser
+from tools.arguments.constants import PORTS, PORTS_COMMAS, TARGET
+from tools.arguments.url import Url
 
 
 def argument_with_target(argument, target) -> str:
