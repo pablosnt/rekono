@@ -6,7 +6,7 @@ import uuid
 from django.utils import timezone
 from tasks.enums import ParameterKey, Status
 from executions.models import Execution
-from queues.findings import producer
+from findings.queue import producer
 from tools import utils
 from tools.arguments import checker, formatter
 from tools.enums import FindingType
@@ -184,7 +184,7 @@ class BaseTool():
                     setattr(finding, key, value)
 
     def send_findings(self, domain: str) -> None:
-        producer.process_findings(self.execution, self.findings, domain)
+        producer(self.execution, self.findings, domain)
 
     def on_start(self) -> None:
         self.execution.start = timezone.now()

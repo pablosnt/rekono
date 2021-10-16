@@ -1,3 +1,4 @@
+import django_rq
 from django_rq import job
 from executions.models import Execution
 from findings.models import Vulnerability
@@ -7,8 +8,18 @@ from users.enums import Notification
 from integrations.mail.executions import send_notification
 
 
+def producer(execution: Execution, findings: list, domain: str) -> None:
+    findings_queue = django_rq.get_queue('findings-queue')
+    findings_queue.enqueue(
+        consumer,
+        execution=execution,
+        findings=findings,
+        domain=domain
+    )
+
+
 @job('findings-queue')
-def process_findings(execution: Execution = None, findings: list = [], domain: str = None) -> None:
+def consumer(execution: Execution = None, findings: list = [], domain: str = None) -> None:
     if execution:
         for finding in findings:
             setattr(finding, 'execution', execution)
