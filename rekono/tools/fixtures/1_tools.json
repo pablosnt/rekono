@@ -41,7 +41,7 @@
         "fields": {
             "name": "nikto",
             "command": "nikto",
-            "output_format": "csv",
+            "output_format": "xml",
             "defectdojo_scan_type": "Nikto Scan",
             "stage": 4,
             "reference": "https://github.com/sullo/nikto"
