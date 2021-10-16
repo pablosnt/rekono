@@ -1,9 +1,9 @@
+from defectdojo import uploader
+from defectdojo.exceptions import (EngagementIdNotFoundException,
+                                   ProductIdNotFoundException)
 from drf_spectacular.utils import extend_schema
 from executions.models import Execution
 from executions.serializers import ExecutionSerializer
-from integrations.defect_dojo import executions as dd_uploader
-from integrations.defect_dojo.exceptions import (EngagementIdNotFoundException,
-                                                 ProductIdNotFoundException)
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
@@ -52,7 +52,7 @@ class ExecutionViewSet(
     def defect_dojo(self, request, pk):
         execution = self.get_object()
         try:
-            dd_uploader.upload([execution])
+            uploader.upload_executions([execution])
             return Response(status=status.HTTP_200_OK)
         except (ProductIdNotFoundException, EngagementIdNotFoundException) as ex:
             return Response(str(ex), status=status.HTTP_400_BAD_REQUEST)

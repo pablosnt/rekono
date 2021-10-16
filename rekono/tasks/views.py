@@ -1,7 +1,7 @@
 from django.core.exceptions import PermissionDenied
 from drf_spectacular.utils import extend_schema
-from integrations.defect_dojo import executions as dd_uploader
-from integrations.defect_dojo.exceptions import (EngagementIdNotFoundException,
+from defectdojo import uploader
+from defectdojo.exceptions import (EngagementIdNotFoundException,
                                                  ProductIdNotFoundException)
 from projects.models import Target
 from rest_framework import status
@@ -69,7 +69,7 @@ class TaskViewSet(
     def defect_dojo(self, request, pk):
         task = self.get_object()
         try:
-            dd_uploader.upload(task.executions.all())
+            uploader.upload_executions(task.executions.all())
             return Response(status=status.HTTP_200_OK)
         except (ProductIdNotFoundException, EngagementIdNotFoundException) as ex:
             return Response(str(ex), status=status.HTTP_400_BAD_REQUEST)

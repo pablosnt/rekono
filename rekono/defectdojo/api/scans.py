@@ -2,7 +2,7 @@ import requests
 from rekono.settings import DEFECT_DOJO as config
 from tools.models import Tool
 from executions.models import Execution
-from integrations.defect_dojo.api import utils
+from defectdojo.api import utils
 
 
 def import_scan(engagement: int, execution: Execution, tool: Tool) -> None:

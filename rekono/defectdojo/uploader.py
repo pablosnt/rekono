@@ -1,11 +1,11 @@
-from integrations.defect_dojo.api import engagements, products, scans
-from integrations.defect_dojo.exceptions import (EngagementIdNotFoundException,
-                                                 ProductIdNotFoundException)
+from defectdojo.api import engagements, products, scans
+from defectdojo.exceptions import (EngagementIdNotFoundException,
+                                   ProductIdNotFoundException)
 
 from rekono.settings import DEFECT_DOJO as config
 
 
-def upload(executions: list) -> None:
+def upload_executions(executions: list) -> None:
     project = executions[0].task.target.project
     if not project.defectdojo_product_id and config.get('AUTO_CREATION'):
         project = products.create_new_product(project)

@@ -1,6 +1,6 @@
 import requests
 from rekono.settings import DEFECT_DOJO as config
-from integrations.defect_dojo.api import utils
+from defectdojo.api import utils
 from datetime import datetime, timedelta
 
 

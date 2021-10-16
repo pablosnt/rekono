@@ -1,8 +1,9 @@
+from defectdojo import uploader
+from defectdojo.exceptions import (EngagementIdNotFoundException,
+                                   ProductIdNotFoundException)
 from django.core.exceptions import PermissionDenied
 from drf_spectacular.utils import extend_schema
-from integrations.defect_dojo import executions as dd_uploader
-from integrations.defect_dojo.exceptions import (EngagementIdNotFoundException,
-                                                 ProductIdNotFoundException)
+from executions.models import Execution
 from projects.models import Project, Target
 from projects.serializers import (ProjectMemberSerializer, ProjectSerializer,
                                   TargetPortSerializer, TargetSerializer)
@@ -13,7 +14,6 @@ from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
                                    ListModelMixin, RetrieveModelMixin)
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
-from executions.models import Execution
 from users.models import User
 from users.serializers import UserSerializer
 
@@ -80,7 +80,7 @@ class ProjectViewSet(ModelViewSet):
         project = self.get_object()
         try:
             executions = Execution.objects.filter(task__target__project=project).all()
-            dd_uploader.upload(executions)
+            uploader.upload_executions(executions)
             return Response(status=status.HTTP_200_OK)
         except (ProductIdNotFoundException, EngagementIdNotFoundException) as ex:
             return Response(str(ex), status=status.HTTP_400_BAD_REQUEST)
