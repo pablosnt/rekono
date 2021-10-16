@@ -267,7 +267,7 @@ class Exploit(models.Model):
     is_active = models.BooleanField(default=True)
 
     def __hash__(self) -> int:
-        return hash(self.technology, self.vulnerability, self.name, self.reference)
+        return hash((self.technology, self.vulnerability, self.name, self.reference))
 
     def __eq__(self, o: object) -> bool:
         if isinstance(o, self.__class__):

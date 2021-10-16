@@ -52,5 +52,5 @@ class Url():
         try:
             requests.get(url)
             return True
-        except Exception as ex:
+        except Exception:
             return False

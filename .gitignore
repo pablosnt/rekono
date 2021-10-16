@@ -131,4 +131,5 @@ dmypy.json
 # Envionment
 .DS_Store
 .vscode/
+.scannerwork/
 outputs/

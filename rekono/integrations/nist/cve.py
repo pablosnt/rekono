@@ -28,9 +28,10 @@ def get_severity(data: str) -> Severity:
         score = cvss.get('baseMetricV2').get('cvssV2').get('baseScore')
     for severity in CVSS_RANGES.keys():
         down, up = CVSS_RANGES[severity]
-        if score >= down and score < up:
-            return severity
-        if severity == Severity.CRITICAL and score >= down and score <= up:
+        if (
+            (score >= down and score < up) or
+            (severity == Severity.CRITICAL and score >= down and score <= up)
+        ):
             return severity
 
 

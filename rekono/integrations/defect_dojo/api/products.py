@@ -9,16 +9,15 @@ def get_rekono_prod_type_id() -> int:
     if prod_type_id:
         return prod_type_id
     prod_type_name = config.get('REKONO_PROD_TYPE')
-    if not prod_type_name:
-        return None
-    response = requests.get(
-        f'{utils.urls.get("prod_types")}?name={prod_type_name}',
-        headers=utils.headers,
-        verify=True
-    )
-    results = response.json().get('results')
-    if results:
-        return results[0].get('id')
+    if prod_type_name:
+        response = requests.get(
+            f'{utils.urls.get("prod_types")}?name={prod_type_name}',
+            headers=utils.headers,
+            verify=True
+        )
+        results = response.json().get('results')
+        if results:
+            return results[0].get('id')
 
 
 def create_rekono_prod_type() -> int:
@@ -26,16 +25,15 @@ def create_rekono_prod_type() -> int:
     if prod_type_id:
         return prod_type_id
     prod_type = config.get('REKONO_PROD_TYPE')
-    if not prod_type:
-        return None
-    data = {
-        'name': prod_type,
-        'description': prod_type,
-    }
-    response = requests.post(utils.urls.get('prod_types'), headers=utils.headers, data=data)
-    result = response.json()
-    if result:
-        return result.get('id')
+    if prod_type:
+        data = {
+            'name': prod_type,
+            'description': prod_type,
+        }
+        response = requests.post(utils.urls.get('prod_types'), headers=utils.headers, data=data)
+        result = response.json()
+        if result:
+            return result.get('id')
 
 
 def create_new_product(project: Project) -> Project:

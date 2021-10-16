@@ -30,8 +30,8 @@ def get_findings_from_dependencies(dependencies: list) -> dict:
             continue
         for input_type in finding_relations.keys():
             input_class = utils.get_finding_class_by_type(input_type)
-            filter = [f for f in dependency.result.findings if isinstance(f, input_class)]
-            for finding in filter:
+            input_findings = [f for f in dependency.result.findings if isinstance(f, input_class)]
+            for finding in input_findings:
                 if input_type in findings:
                     findings[input_type].append(finding)
                 else:

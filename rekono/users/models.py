@@ -130,7 +130,6 @@ class User(AbstractUser):
             encrypted = getattr(self, api_key)
             if encrypted:
                 return decrypt(encrypted)
-        return None
 
     def __str__(self) -> str:
         return self.email

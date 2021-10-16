@@ -25,13 +25,12 @@ def create_new_engagement(product_id: int) -> int:
 
 def get_rekono_engagement(product_id: int) -> int:
     engagement = config.get('REKONO_ENGAGEMENT')
-    if not engagement:
-        return None
-    response = requests.get(
-        f'{utils.urls.get("engagements")}?name={engagement}&product={product_id}',
-        headers=utils.headers
-    )
-    results = response.json().get('results')
-    if results:
-        return results[0].get('id')
-    return create_new_engagement(product_id)
+    if engagement:
+        response = requests.get(
+            f'{utils.urls.get("engagements")}?name={engagement}&product={product_id}',
+            headers=utils.headers
+        )
+        results = response.json().get('results')
+        if results:
+            return results[0].get('id')
+        return create_new_engagement(product_id)

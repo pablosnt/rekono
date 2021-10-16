@@ -28,11 +28,11 @@ class ProcessCreatorPermission(BasePermission):
             process = obj
         elif isinstance(obj, Step):
             process = obj.process
-        if process:
-            if (
-                not IsAdmin().has_permission(request, view) and
-                request.method in ['POST', 'PUT', 'DELETE'] and
-                process.creator != request.user
-            ):
-                return False
+        if (
+            process and
+            not IsAdmin().has_permission(request, view) and
+            request.method in ['POST', 'PUT', 'DELETE'] and
+            process.creator != request.user
+        ):
+            return False
         return True

@@ -46,9 +46,8 @@ class TaskSerializer(serializers.ModelSerializer):
         ordering = ['-id']
 
     def validate(self, attrs):
-        if attrs.get('scheduled_at'):
-            if attrs.get('scheduled_at') <= timezone.now():
-                raise ParseError('Scheduled datetime must be future')
+        if attrs.get('scheduled_at') and attrs.get('scheduled_at') <= timezone.now():
+            raise ParseError('Scheduled datetime must be future')
         if not attrs.get('scheduled_in'):
             attrs['scheduled_time_unit'] = None
         if not attrs.get('repeat_in'):

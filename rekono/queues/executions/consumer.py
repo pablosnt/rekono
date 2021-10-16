@@ -34,17 +34,16 @@ def execute(
         inputs=inputs,
         intensity=intensity
     )
-    if not previous_findings:
-        if current_job._dependency_ids:
-            previous_findings = process_dependencies(
-                execution,
-                intensity,
-                inputs,
-                parameters,
-                domain,
-                current_job,
-                tool
-            )
+    if not previous_findings and current_job._dependency_ids:
+        previous_findings = process_dependencies(
+            execution,
+            intensity,
+            inputs,
+            parameters,
+            domain,
+            current_job,
+            tool
+        )
     tool.run(parameters=parameters, previous_findings=previous_findings, domain=domain)
     return tool
 
@@ -94,22 +93,22 @@ def check_params_for_tool(tool: BaseTool, parameters: list, findings: list) -> b
         return False
 
 
-def get_new_jobs_from_findings(findings: dict, inputs: list) -> dict:
+def get_new_jobs_from_findings(findings: dict, inputs: list) -> set:
     job_counter = 0
     jobs = {
         job_counter: []
     }
     for input_type in finding_relations.keys():
         input_class = tool_utils.get_finding_class_by_type(input_type)
-        filter = [i for i in inputs if (
+        inputs = [i for i in inputs if (
             i.type == input_type or
             (
                 i.type == FindingType.URL and
                 input_type in [FindingType.HOST, FindingType.ENUMERATION]
             ))]
-        if not filter or input_type not in findings:
+        if not inputs or input_type not in findings:
             continue
-        for i in filter:
+        for i in inputs:
             if finding_relations[input_type]:
                 relations_found = False
                 for finding in findings[input_type]:

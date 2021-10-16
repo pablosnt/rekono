@@ -54,13 +54,11 @@ def get_url_from_params(input: Input, target: Target, target_ports: list, findin
                 url = Url(target, finding)
                 if url.value:
                     return url
-    if enumeration_found:
-        return None
-    for p in target_ports:
-        url = Url(target, p)
+    if not enumeration_found:
+        for p in target_ports:
+            url = Url(target, p)
+            if url.value:
+                return url
+        url = Url(target, None)
         if url.value:
             return url
-    url = Url(target, None)
-    if url.value:
-        return url
-    return None

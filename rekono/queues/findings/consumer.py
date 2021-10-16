@@ -20,5 +20,3 @@ def process_findings(execution: Execution = None, findings: list = [], domain: s
             finding.save()
         if execution.task.executor.notification_preference == Notification.MAIL:
             send_notification(execution, findings, domain)
-        elif execution.task.executor.notification_preference == Notification.TELEGRAM:
-            pass
