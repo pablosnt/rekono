@@ -6,6 +6,7 @@ from tasks.enums import ParameterKey
 from findings.models import Enumeration, Host, HttpEndpoint, Vulnerability
 from targets import utils
 from targets.models import Target
+from targets.enums import TargetType
 from tools.arguments.constants import (CVE_REGEX, WORDLIST_FILE_REGEX,
                                        WORDLIST_PATH_REGEX)
 from tools.exceptions import InvalidParameterException
@@ -42,17 +43,17 @@ def check_input_condition(input: Input, finding: Any) -> bool:
 def check_target(input: Input, target: Target) -> bool:
     try:
         to_check = int(input.filter)
-        return Target.TargetType(to_check) == target.type
+        return TargetType(to_check) == target.type
     except ValueError:
-        return Target.TargetType[input.filter.upper()] == target.type
+        return TargetType[input.filter.upper()] == target.type
 
 
 def check_host(input: Input, host: Host) -> bool:
     try:
         to_check = int(input.filter)
-        return Target.TargetType(to_check) == utils.get_target_type(host.address)
+        return TargetType(to_check) == utils.get_target_type(host.address)
     except ValueError:
-        return Target.TargetType[input.filter.upper()] == utils.get_target_type(host.address)
+        return TargetType[input.filter.upper()] == utils.get_target_type(host.address)
 
 
 def check_enumeration(input: Input, enumeration: Enumeration) -> bool:

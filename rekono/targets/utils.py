@@ -15,23 +15,23 @@ def get_target_type(target: str) -> TargetType:
     try:
         ip = ipaddress.ip_address(target)
         if ip.is_private:
-            return Target.TargetType.PRIVATE_IP
+            return TargetType.PRIVATE_IP
         else:
-            return Target.TargetType.PUBLIC_IP
+            return TargetType.PUBLIC_IP
     except ValueError:
         pass
     try:
         ipaddress.ip_network(target)
-        return Target.TargetType.NETWORK
+        return TargetType.NETWORK
     except ValueError:
         pass
     if bool(re.fullmatch(IP_NETWORK_REGEX, target)):
-        return Target.TargetType.NETWORK
+        return TargetType.NETWORK
     if bool(re.fullmatch(IP_RANGE_REGEX, target)):
-        return Target.TargetType.IP_RANGE
+        return TargetType.IP_RANGE
     try:
         socket.gethostbyname(target)
-        return Target.TargetType.DOMAIN
+        return TargetType.DOMAIN
     except socket.gaierror:
         pass
     raise InvalidTargetException(

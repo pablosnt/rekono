@@ -3,6 +3,7 @@ from typing import Any
 import requests
 from findings.models import Enumeration
 from targets.models import Target, TargetPort
+from targets.enums import TargetType
 
 HTTP_PORT = 'http://{host}:{port}/'
 HTTPS_PORT = 'https://{host}:{port}/'
@@ -24,7 +25,7 @@ class Url():
                     self.value = HTTPS_PORT.format(host=port.host.address, port=port.port)
                     self.enumeration = port
             elif isinstance(port, TargetPort):
-                if host.type == Target.TargetType.DOMAIN:
+                if host.type == TargetType.DOMAIN:
                     if self.check_connection(HTTPS_SIMPLE.format(host=host.target)):
                         self.value = HTTPS_SIMPLE.format(host=host.target)
                     elif self.check_connection(HTTP_SIMPLE.format(host=host.target)):
