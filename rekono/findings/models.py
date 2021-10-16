@@ -2,23 +2,12 @@ from django.db import models
 from typing import Any
 
 from executions.models import Execution
-from findings.enums import Severity
+from findings.enums import Severity, DataType, OSType, PortStatus, Protocol
 
 # Create your models here.
 
 
 class OSINT(models.Model):
-
-    class DataType(models.IntegerChoices):
-        IP = 1
-        DOMAIN = 2
-        URL = 3
-        MAIL = 4
-        LINK = 5
-        ASN = 6
-        USER = 7
-        PASSWORD = 8
-
     execution = models.ForeignKey(
         Execution,
         related_name='osints',
@@ -47,17 +36,6 @@ class OSINT(models.Model):
 
 
 class Host(models.Model):
-
-    class OSType(models.IntegerChoices):
-        LINUX = 1
-        WINDOWS = 2
-        MACOS = 3
-        IOS = 4
-        ANDROID = 5
-        SOLARIS = 6
-        FREEBSD = 7
-        OTHER = 8
-
     execution = models.ForeignKey(
         Execution,
         related_name='hosts',
@@ -88,17 +66,6 @@ class Host(models.Model):
 
 
 class Enumeration(models.Model):
-
-    class PortStatus(models.IntegerChoices):
-        OPEN = 1
-        OPEN_FILTERED = 2
-        FILTERED = 3
-        CLOSED = 4
-
-    class Protocol(models.IntegerChoices):
-        UDP = 1
-        TCP = 2
-
     execution = models.ForeignKey(
         Execution,
         related_name='enumerations',

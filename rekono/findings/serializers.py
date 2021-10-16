@@ -44,6 +44,7 @@ class HttpEndpointSerializer(serializers.ModelSerializer):
         fields = ('id', 'execution', 'enumeration', 'endpoint', 'status', 'creation', 'is_active')
         ordering = ['-id']
 
+
 class TechnologySerializer(serializers.ModelSerializer):
 
     class Meta:
