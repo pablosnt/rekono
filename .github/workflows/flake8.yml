@@ -11,7 +11,7 @@ jobs:
       - name: Checkout
         if: github.event_name == 'pull_request'
         uses: actions/checkout@v2
-        whith:
+        with:
           fetch-depth: 0
           refs: refs/pull/${{ github.event.pull_request.number }}/merge
       
