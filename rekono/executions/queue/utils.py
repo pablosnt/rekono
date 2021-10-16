@@ -1,12 +1,12 @@
 import django_rq
 from rq.job import Job
-from queues.executions import producer
-from queues.executions.constants import finding_relations
+from executions.queue import producer
+from executions.queue.constants import finding_relations
 from rq.registry import DeferredJobRegistry
 from tools import utils
 
 
-def cancel_job(job_id: str) -> Job:
+def cancel_execution(job_id: str) -> Job:
     executions_queue = django_rq.get_queue('executions-queue')
     execution = executions_queue.fetch_job(job_id)
     if execution:
@@ -14,8 +14,8 @@ def cancel_job(job_id: str) -> Job:
     return execution
 
 
-def cancel_and_delete_job(job_id: str) -> Job:
-    execution = cancel_job(job_id)
+def cancel_and_delete_execution(job_id: str) -> Job:
+    execution = cancel_execution(job_id)
     if execution:
         execution.delete()
     return execution
@@ -48,8 +48,8 @@ def update_new_dependencies(parent_job: str, new_jobs: list, parameters: list) -
             dependencies = job_on_hold._dependency_ids
             dependencies.extend(new_jobs)
             meta = job_on_hold.get_meta()
-            cancel_and_delete_job(job_id)
-            producer.execute(
+            cancel_and_delete_execution(job_id)
+            producer.producer(
                 meta['execution'],
                 meta['intensity'],
                 meta['inputs'],

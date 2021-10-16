@@ -1,21 +1,22 @@
 from typing import Any
+
 import rq
 from django_rq import job
 from executions.models import Execution
+from executions.queue import producer
+from executions.queue import utils as queue_utils
+from executions.queue.constants import finding_relations
 from processes.executor import success_callback
-from queues.executions import producer
-from queues.executions import utils as queue_utils
-from queues.executions.constants import finding_relations
 from rq.job import Job
 from tools import utils as tool_utils
 from tools.enums import FindingType
+from tools.exceptions import InvalidToolParametersException
 from tools.models import Configuration, Input, Intensity, Tool
 from tools.tools.base_tool import BaseTool
-from tools.exceptions import InvalidToolParametersException
 
 
 @job('executions-queue')
-def execute(
+def consumer(
     execution: Execution,
     tool: Tool,
     configuration: Configuration,
@@ -69,7 +70,7 @@ def process_dependencies(
     for param_set in all_params[1:]:
         new_execution = Execution.objects.create(task=execution.task, step=execution.step)
         new_execution.save()
-        job = producer.execute(
+        job = producer.producer(
             new_execution,
             intensity,
             inputs,

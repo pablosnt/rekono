@@ -3,7 +3,7 @@ from tasks.enums import Status
 from executions.models import Execution
 from tasks.models import Task
 from processes.models import Step
-from queues.executions import producer
+from executions.queue import producer
 from tools.enums import FindingType
 from tools.models import Input, Intensity, Output
 
@@ -50,7 +50,7 @@ def execute(task: Task, parameters: list, domain: str) -> None:
     for job in execution_plan:
         execution = Execution.objects.create(task=task, step=job.step)
         execution.save()
-        job.job = producer.execute(
+        job.job = producer.producer(
             execution,
             job.intensity,
             job.inputs,

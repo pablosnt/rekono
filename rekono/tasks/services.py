@@ -5,8 +5,8 @@ from django.utils import timezone
 from tasks.enums import Status
 from tasks.exceptions import InvalidTaskException
 from executions.models import Execution
-from queues.executions import utils as execution_utils
-from tasks.queue import cancel_and_delete_job
+from executions.queue.utils import cancel_execution
+from tasks.queue import cancel_and_delete_task
 
 
 def cancel_task(task):
@@ -15,14 +15,14 @@ def cancel_task(task):
         (task.repeat_in and task.repeat_time_unit)
     ):
         if task.rq_job_id:
-            cancel_and_delete_job(task.rq_job_id)
+            cancel_and_delete_task(task.rq_job_id)
         executions = Execution.objects.filter(
             task=task,
             status__in=[Status.REQUESTED, Status.RUNNING]
         ).all()
         for execution in executions:
             if execution.rq_job_id:
-                execution_utils.cancel_job(execution.rq_job_id)
+                cancel_execution(execution.rq_job_id)
             if execution.rq_job_pid:
                 os.kill(execution.rq_job_pid, signal.SIGKILL)
             execution.status = Status.CANCELLED

@@ -71,7 +71,7 @@ def consumer(task: Task = None, parameters: list = [], domain: str = None) -> tu
         return task, parameters, domain
 
 
-def cancel_and_delete_job(job_id: str) -> Job:
+def cancel_and_delete_task(job_id: str) -> Job:
     tasks_queue = django_rq.get_queue('tasks-queue')
     task = tasks_queue.fetch_job(job_id)
     if task:

@@ -2,11 +2,11 @@ from typing import Callable
 
 import django_rq
 from executions.models import Execution
-from queues.executions import consumer
+from executions.queue import consumer
 from tools.models import Configuration, Input, Intensity
 
 
-def execute(
+def producer(
     execution: Execution,
     intensity: Intensity,
     inputs: list,
@@ -28,7 +28,7 @@ def execute(
         configuration = execution.task.configuration
     executions_queue = django_rq.get_queue('executions-queue')
     execution_job = executions_queue.enqueue(
-        consumer.execute,
+        consumer.consumer,
         execution=execution,
         tool=tool,
         configuration=configuration,

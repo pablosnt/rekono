@@ -2,7 +2,7 @@ from django.utils import timezone
 from executions.models import Execution
 from tasks.models import Task
 from tools.models import Intensity, Input
-from queues.executions import producer
+from executions.queue import producer
 
 
 def execute(task: Task, parameters: list, domain: str) -> None:
@@ -10,7 +10,7 @@ def execute(task: Task, parameters: list, domain: str) -> None:
     inputs = Input.objects.filter(configuration=task.configuration).all()
     execution = Execution.objects.create(task=task)
     execution.save()
-    producer.execute(
+    producer.producer(
         execution=execution,
         intensity=intensity,
         inputs=inputs,
