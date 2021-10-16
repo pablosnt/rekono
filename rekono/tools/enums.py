@@ -21,3 +21,16 @@ class FindingType(models.IntegerChoices):
     VULNERABILITY = 7
     EXPLOIT = 8
     PARAMETER = 9
+
+
+class Stage(models.IntegerChoices):
+    OSINT = 1
+    ENUMERATION = 2
+    VULNERABILITIES = 3
+    SERVICES = 4
+    EXPLOITATION = 5
+
+
+class InputSelection(models.IntegerChoices):
+    ALL = 1
+    FOR_EACH = 2

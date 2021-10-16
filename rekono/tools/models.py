@@ -1,20 +1,12 @@
 from django.db import models
 
-from tools.enums import IntensityRank, FindingType
+from tools.enums import IntensityRank, FindingType, Stage, InputSelection
 from typing import Any
 
 # Create your models here.
 
 
 class Tool(models.Model):
-
-    class Stage(models.IntegerChoices):
-        OSINT = 1
-        ENUMERATION = 2
-        VULNERABILITIES = 3
-        SERVICES = 4
-        EXPLOITATION = 5
-
     name = models.TextField(max_length=30, unique=True)
     command = models.TextField(max_length=30, blank=True, null=True)
     output_format = models.TextField(max_length=5, blank=True, null=True)
@@ -60,11 +52,6 @@ class Configuration(models.Model):
 
 
 class Input(models.Model):
-
-    class InputSelection(models.IntegerChoices):
-        ALL = 1
-        FOR_EACH = 2
-
     configuration = models.ForeignKey(
         Configuration,
         related_name='inputs',
