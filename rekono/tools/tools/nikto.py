@@ -37,7 +37,7 @@ class NiktoTool(BaseTool):
                     )
                     findings.append(vulnerability)
                 if endpoint and endpoint not in http_endpoints:
-                    http_endpoints.append(endpoint)
+                    http_endpoints.add(endpoint)
                     http_endpoint = HttpEndpoint.objects.create(endpoint=endpoint)
                     findings.append(http_endpoint)
         return findings
