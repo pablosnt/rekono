@@ -6,7 +6,7 @@ from tasks.enums import Status
 from tasks.exceptions import InvalidTaskException
 from executions.models import Execution
 from queues.executions import utils as execution_utils
-from queues.tasks import utils as task_utils
+from tasks.queue import cancel_and_delete_job
 
 
 def cancel_task(task):
@@ -15,7 +15,7 @@ def cancel_task(task):
         (task.repeat_in and task.repeat_time_unit)
     ):
         if task.rq_job_id:
-            task_utils.cancel_and_delete_job(task.rq_job_id)
+            cancel_and_delete_job(task.rq_job_id)
         executions = Execution.objects.filter(
             task=task,
             status__in=[Status.REQUESTED, Status.RUNNING]

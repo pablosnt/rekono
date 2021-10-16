@@ -1,15 +1,19 @@
 import django_rq
 from tasks.models import Task
-from queues.tasks import consumer
 from datetime import timedelta
+from rq.job import Job
+from tasks.exceptions import InvalidTaskException
+from tools import executor as tools
+from processes import executor as processes
+from django_rq import job
 
 
-def process_task(task: Task, parameters: list, domain: str):
+def producer(task: Task, parameters: list, domain: str):
     task_queue = django_rq.get_queue('tasks-queue')
     if task.scheduled_at:
         task_job = task_queue.enqueue_at(
             task.scheduled_at,
-            consumer.process_task,
+            consumer,
             task=task,
             parameters=parameters,
             domain=domain,
@@ -19,7 +23,7 @@ def process_task(task: Task, parameters: list, domain: str):
         frequency = {task.scheduled_time_unit.name.lower(): task.scheduled_in}
         task_job = task_queue.enqueue_in(
             timedelta(**frequency),
-            consumer.process_task,
+            consumer,
             task=task,
             parameters=parameters,
             domain=domain,
@@ -27,7 +31,7 @@ def process_task(task: Task, parameters: list, domain: str):
         )
     else:
         task_job = task_queue.enqueue(
-            consumer.process_task,
+            consumer,
             task=task,
             parameters=parameters,
             domain=domain,
@@ -53,3 +57,24 @@ def scheduled_callback(job, connection, result, *args, **kwargs):
             )
             task.rq_job_id = task_job.id
             task.save()
+
+
+@job('tasks-queue')
+def consumer(task: Task = None, parameters: list = [], domain: str = None) -> tuple:
+    if task:
+        if task.tool:
+            tools.execute(task, parameters, domain)
+        elif task.process:
+            processes.execute(task, parameters, domain)
+        else:
+            raise InvalidTaskException('Invalid task. Process or tool is required')
+        return task, parameters, domain
+
+
+def cancel_and_delete_job(job_id: str) -> Job:
+    tasks_queue = django_rq.get_queue('tasks-queue')
+    task = tasks_queue.fetch_job(job_id)
+    if task:
+        task.cancel()
+        task.delete()
+    return task

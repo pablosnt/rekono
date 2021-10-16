@@ -3,7 +3,7 @@ from rest_framework.exceptions import ParseError
 from tools.enums import IntensityRank
 from tools.models import Intensity
 from rest_framework import serializers
-from queues.tasks import producer
+from tasks.queue import producer
 from tasks.enums import TimeUnit
 from django.utils import timezone
 from django.contrib.sites.shortcuts import get_current_site
@@ -81,5 +81,5 @@ class TaskSerializer(serializers.ModelSerializer):
                         validated_data=parameter
                     )
                 )
-        producer.process_task(task, parameters, get_current_site(self.context.get('request')).domain)
+        producer(task, parameters, get_current_site(self.context.get('request')).domain)
         return task
