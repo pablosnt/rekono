@@ -1,12 +1,10 @@
-from executions.models import Parameter
-from tools.arguments.constants import URL
-from tools.arguments.url import Url
-from executions.enums import ParameterKey
 from findings.models import (OSINT, Enumeration, Exploit, Host, HttpEndpoint,
                              Technology, Vulnerability)
-from projects.models import Target
-from tools.arguments.constants import PORT, PORTS, PORTS_COMMAS, TARGET
+from tasks.enums import ParameterKey
+from tasks.models import Parameter
 from tools.arguments import checker
+from tools.arguments.constants import PORT, PORTS, PORTS_COMMAS, TARGET, URL
+from tools.arguments.url import Url
 
 
 def osint(osint: OSINT) -> dict:

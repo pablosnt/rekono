@@ -4,7 +4,7 @@ import subprocess
 import uuid
 
 from django.utils import timezone
-from executions.enums import ParameterKey, Status
+from tasks.enums import ParameterKey, Status
 from executions.models import Execution
 from queues.findings import producer
 from tools import utils

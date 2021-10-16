@@ -2,7 +2,7 @@ import os
 import re
 from typing import Any
 
-from executions.enums import ParameterKey
+from tasks.enums import ParameterKey
 from findings.models import Enumeration, Host, HttpEndpoint, Vulnerability
 from projects import utils
 from projects.models import Target

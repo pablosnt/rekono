@@ -1,5 +1,6 @@
 from django.utils import timezone
-from executions.models import Execution, Task
+from executions.models import Execution
+from tasks.models import Task
 from tools.models import Intensity, Input
 from queues.executions import producer
 

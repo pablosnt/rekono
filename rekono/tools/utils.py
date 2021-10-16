@@ -1,6 +1,6 @@
 import importlib
 
-from executions.models import Parameter
+from tasks.models import Parameter
 from findings.models import (OSINT, Enumeration, Exploit, Host, HttpEndpoint,
                              Technology, Vulnerability)
 from projects.models import Target

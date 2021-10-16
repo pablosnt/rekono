@@ -2,8 +2,8 @@ import os
 import signal
 
 from django.utils import timezone
-from executions.enums import Status
-from executions.exceptions import InvalidTaskException
+from tasks.enums import Status
+from tasks.exceptions import InvalidTaskException
 from executions.models import Execution
 from queues.executions import utils as execution_utils
 from queues.tasks import utils as task_utils

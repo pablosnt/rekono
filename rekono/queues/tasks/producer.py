@@ -1,5 +1,5 @@
 import django_rq
-from executions.models import Task
+from tasks.models import Task
 from queues.tasks import consumer
 from datetime import timedelta
 

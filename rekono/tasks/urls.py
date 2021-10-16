@@ -1,7 +1,7 @@
-from executions.views import ExecutionViewSet
 from rest_framework.routers import SimpleRouter
+from tasks.views import TaskViewSet
 
 router = SimpleRouter()
-router.register('executions', ExecutionViewSet)
+router.register('tasks', TaskViewSet)
 
 urlpatterns = router.urls

@@ -1,6 +1,7 @@
 from django.utils import timezone
-from executions.enums import Status
-from executions.models import Execution, Task
+from tasks.enums import Status
+from executions.models import Execution
+from tasks.models import Task
 from processes.models import Step
 from queues.executions import producer
 from tools.enums import FindingType
