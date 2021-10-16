@@ -16,7 +16,7 @@ from pathlib import Path
 from executions.enums import Status, TimeUnit
 from findings.enums import Severity
 from processes.enums import StepPriority
-from users.crypto import generate_random_value, hash
+from security.crypto import generate_random_value, hash
 from users.enums import Notification
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -115,8 +115,8 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
         'rest_framework.permissions.DjangoModelPermissions',
-        'authorization.permissions.ProjectMemberPermission',
-        'authorization.permissions.ProcessCreatorPermission',
+        'security.authorization.permissions.ProjectMemberPermission',
+        'security.authorization.permissions.ProcessCreatorPermission',
     ]
 }
 
@@ -222,7 +222,7 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
     {
-        'NAME': 'users.password.PasswordComplexityValidator',
+        'NAME': 'security.passwords.PasswordComplexityValidator',
     }
 ]
 

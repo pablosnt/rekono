@@ -3,7 +3,7 @@ from processes.models import Process, Step
 from processes.serializers import (ProcessSerializer, StepPrioritySerializer,
                                    StepSerializer)
 from rest_framework.viewsets import ModelViewSet
-from authorization.permissions import IsAdmin
+from security.authorization.permissions import IsAdmin
 
 # Create your views here.
 

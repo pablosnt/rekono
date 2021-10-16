@@ -1,4 +1,4 @@
-from authorization.groups.roles import DEFAULT_GROUPS
+from security.authorization.roles import DEFAULT_GROUPS
 
 
 def initialize_user_groups(sender, **kwargs):

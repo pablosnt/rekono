@@ -1,8 +1,8 @@
 from django.contrib.auth.models import AbstractUser, UserManager, Group
 from django.db import models
 from rest_framework.authtoken.models import Token
-from authorization.groups.roles import Role
-from users.crypto import generate_otp, encrypt, decrypt
+from security.authorization.roles import Role
+from security.crypto import generate_otp, encrypt, decrypt
 from typing import Any, Optional
 from integrations.mail import users as sender
 from users.enums import Notification

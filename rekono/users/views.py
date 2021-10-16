@@ -1,4 +1,4 @@
-from authorization.permissions import IsAdmin
+from security.authorization.permissions import IsAdmin
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.decorators import action

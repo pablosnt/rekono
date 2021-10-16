@@ -1,5 +1,5 @@
 from rest_framework.permissions import BasePermission
-from authorization.groups.roles import Role
+from security.authorization.roles import Role
 
 from processes.models import Process, Step
 

@@ -1,5 +1,6 @@
-from django.core.exceptions import ValidationError
 import re
+
+from django.core.exceptions import ValidationError
 
 
 class PasswordComplexityValidator:
