@@ -1,19 +1,15 @@
 from typing import Any
 
-from integrations.mail.utils import send_html_message
-
-
-metadata = {
-    'execution': {
-        'template': 'execution_notification.html',
-        'subject': '[Rekono] Execution completed',
-    }
-}
+from mail.sender import send_html_message
 
 
 def send_notification(execution: Any, findings: list, domain: str) -> None:
     if not findings:
         return
+    metadata = {
+        'template': 'execution_notification.html',
+        'subject': '[Rekono] Execution completed',
+    }
     parameters = {
         'domain': domain,
         'execution': execution,
@@ -28,4 +24,4 @@ def send_notification(execution: Any, findings: list, domain: str) -> None:
     }
     for finding in findings:
         parameters[finding.__class__.__name__.lower()].append(finding)
-    send_html_message(execution.task.executor.email, metadata.get('execution'), parameters)
+    send_html_message(execution.task.executor.email, metadata, parameters)

@@ -3,9 +3,9 @@ from django_rq import job
 from executions.models import Execution
 from findings.models import Vulnerability
 from findings.enums import Severity
-from integrations.nist import cve
+from findings.nist import get_cve_information
 from users.enums import Notification
-from integrations.mail.executions import send_notification
+from findings.mail import send_notification
 
 
 def producer(execution: Execution, findings: list, domain: str) -> None:
@@ -24,7 +24,7 @@ def consumer(execution: Execution = None, findings: list = [], domain: str = Non
         for finding in findings:
             setattr(finding, 'execution', execution)
             if isinstance(finding, Vulnerability) and finding.cve:
-                cve_info = cve.get_information(finding.cve)
+                cve_info = get_cve_information(finding.cve)
                 finding.description = cve_info.get('description', '')
                 finding.severity = cve_info.get('severity', Severity.MEDIUM)
                 finding.reference = cve_info.get('reference', '')

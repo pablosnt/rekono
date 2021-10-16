@@ -4,7 +4,7 @@ from rest_framework.authtoken.models import Token
 from security.authorization.roles import Role
 from security.crypto import generate_otp, encrypt, decrypt
 from typing import Any, Optional
-from integrations.mail import users as sender
+from users.mail import send_invitation_to_new_user, send_password_reset
 from users.enums import Notification
 
 # Create your models here.
@@ -22,7 +22,7 @@ class RekonoUserManager(UserManager):
         user.save()
         api_token = Token.objects.create(user=user)
         api_token.save()
-        sender.send_invitation_to_new_user(user, domain)
+        send_invitation_to_new_user(user, domain)
         return user
 
     def create_superuser(
@@ -58,7 +58,7 @@ class RekonoUserManager(UserManager):
         user.save()
         api_token = Token.objects.create(user=user)
         api_token.save()
-        sender.send_invitation_to_new_user(user, domain)
+        send_invitation_to_new_user(user, domain)
         return user
 
     def disable_user(self, user: Any) -> Any:
@@ -77,7 +77,7 @@ class RekonoUserManager(UserManager):
     def request_password_reset(self, user: Any, domain: str) -> Any:
         user.otp = generate_otp()
         user.save()
-        sender.send_password_reset(user, domain)
+        send_password_reset(user, domain)
         return user
 
 

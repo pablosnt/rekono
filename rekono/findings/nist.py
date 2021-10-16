@@ -35,7 +35,7 @@ def get_severity(data: str) -> Severity:
             return severity
 
 
-def get_information(cve: str) -> dict:
+def get_cve_information(cve: str) -> dict:
     res = requests.get('https://services.nvd.nist.gov/rest/json/cve/1.0/{cve}'.format(cve=cve))
     if res.status_code == 200:
         data = res.json().get('result').get('CVE_Items')[0]
