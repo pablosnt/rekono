@@ -12,6 +12,7 @@ from tools import utils as tool_utils
 from tools.enums import FindingType
 from tools.exceptions import InvalidToolParametersException
 from tools.models import Configuration, Input, Intensity, Tool
+from tools.enums import InputSelection
 from tools.tools.base_tool import BaseTool
 
 
@@ -120,7 +121,7 @@ def get_new_jobs_from_findings(findings: dict, inputs: list) -> set:
                                 relations_found = True
                                 for jc in jobs.copy():
                                     if attribute in jobs[jc]:
-                                        if i.selection == Input.InputSelection.ALL:
+                                        if i.selection == InputSelection.ALL:
                                             jobs[jc].append(finding)
                                         else:
                                             related_items = [
@@ -138,7 +139,7 @@ def get_new_jobs_from_findings(findings: dict, inputs: list) -> set:
                         for jc in jobs.copy():
                             jobs[jc].append(finding)
             else:
-                if i.selection == Input.InputSelection.ALL:
+                if i.selection == InputSelection.ALL:
                     for jc in jobs.copy():
                         jobs[jc].extend(findings[input_type])
                 else:

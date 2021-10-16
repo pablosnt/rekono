@@ -14,6 +14,7 @@ from tools.exceptions import (InstallationNotFoundException,
                               InvalidToolParametersException,
                               UnexpectedToolExitCodeException)
 from tools.models import Configuration, Input, Intensity, Tool
+from tools.enums import InputSelection
 
 from rekono.settings import EXECUTION_OUTPUTS
 
@@ -87,7 +88,7 @@ class BaseTool():
         for i in self.inputs:
             try:
                 input_class = utils.get_finding_class_by_type(i.type)
-                if i.selection == Input.InputSelection.FOR_EACH:
+                if i.selection == InputSelection.FOR_EACH:
                     for r in previous_findings:
                         if isinstance(r, input_class):
                             if not checker.check_input_condition(i, r):
