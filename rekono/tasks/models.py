@@ -4,7 +4,7 @@ from django.conf import settings
 from django.db import models
 from tasks.enums import ParameterKey, Status, TimeUnit
 from processes.models import Process
-from projects.models import Target
+from targets.models import Target
 from tools.enums import IntensityRank
 from tools.models import Configuration, Tool
 

@@ -1,6 +1,5 @@
 from django.conf import settings
 from django.db import models
-from django.db.models import constraints
 from tools.models import Tool, Configuration
 from processes.enums import StepPriority
 from typing import Any

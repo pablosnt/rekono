@@ -1,15 +1,15 @@
-from django.core.exceptions import PermissionDenied
-from drf_spectacular.utils import extend_schema
 from defectdojo import uploader
 from defectdojo.exceptions import (EngagementIdNotFoundException,
-                                                 ProductIdNotFoundException)
-from projects.models import Target
+                                   ProductIdNotFoundException)
+from django.core.exceptions import PermissionDenied
+from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
                                    ListModelMixin, RetrieveModelMixin)
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
+from targets.models import Target
 from tasks import services
 from tasks.exceptions import InvalidTaskException
 from tasks.models import Task

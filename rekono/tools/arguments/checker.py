@@ -4,8 +4,8 @@ from typing import Any
 
 from tasks.enums import ParameterKey
 from findings.models import Enumeration, Host, HttpEndpoint, Vulnerability
-from projects import utils
-from projects.models import Target
+from targets import utils
+from targets.models import Target
 from tools.arguments.constants import (CVE_REGEX, WORDLIST_FILE_REGEX,
                                        WORDLIST_PATH_REGEX)
 from tools.exceptions import InvalidParameterException

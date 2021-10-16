@@ -2,8 +2,8 @@ import ipaddress
 import socket
 import re
 
-from projects.exceptions import InvalidTargetException
-from projects.models import Target
+from targets.exceptions import InvalidTargetException
+from targets.models import Target
 
 
 IP_NETWORK_REGEX = '[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}/[0-9]{1,2}'

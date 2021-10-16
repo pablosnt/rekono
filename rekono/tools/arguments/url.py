@@ -1,10 +1,8 @@
-from projects.models import TargetPort
-from findings.models import Enumeration
 from typing import Any
-from projects.models import Target
-from findings.models import Host
-import requests
 
+import requests
+from findings.models import Enumeration
+from targets.models import Target, TargetPort
 
 HTTP_PORT = 'http://{host}:{port}/'
 HTTPS_PORT = 'https://{host}:{port}/'

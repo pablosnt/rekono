@@ -3,7 +3,7 @@ import importlib
 from tasks.models import Parameter
 from findings.models import (OSINT, Enumeration, Exploit, Host, HttpEndpoint,
                              Technology, Vulnerability)
-from projects.models import Target
+from targets.models import Target
 from tools.arguments import checker
 from tools.arguments.url import Url
 from tools.models import Input
