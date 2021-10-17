@@ -102,12 +102,7 @@ def get_new_jobs_from_findings(findings: dict, inputs: list) -> set:
     }
     for input_type in finding_relations.keys():
         input_class = tool_utils.get_finding_class_by_type(input_type)
-        inputs = [i for i in inputs if (
-            i.type == input_type or
-            (
-                i.type == FindingType.URL and
-                input_type in [FindingType.HOST, FindingType.ENUMERATION]
-            ))]
+        inputs = [i for i in inputs if i.type == input_type]
         if not inputs or input_type not in findings:
             continue
         for i in inputs:

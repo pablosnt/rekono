@@ -106,5 +106,32 @@
             "argument": "",
             "value": 3
         }
+    },
+    {
+        "model": "tools.intensity",
+        "pk": 13,
+        "fields": {
+            "tool_id": 5,
+            "argument": "--sleep=100",
+            "value": 1
+        }
+    },
+    {
+        "model": "tools.intensity",
+        "pk": 14,
+        "fields": {
+            "tool_id": 5,
+            "argument": "--sleep=50",
+            "value": 2
+        }
+    },
+    {
+        "model": "tools.intensity",
+        "pk": 15,
+        "fields": {
+            "tool_id": 5,
+            "argument": "",
+            "value": 3
+        }
     }
 ]

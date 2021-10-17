@@ -9,7 +9,6 @@ import xml.etree.ElementTree as parser
 
 class NiktoTool(BaseTool):
 
-    file_output_enabled = True
     ignore_exit_code = True
 
     def parse_output(self, output: str) -> list:

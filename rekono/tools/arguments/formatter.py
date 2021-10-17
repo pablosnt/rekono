@@ -2,26 +2,13 @@ from findings.models import (OSINT, Enumeration, Exploit, Host, HttpEndpoint,
                              Technology, Vulnerability)
 from tools.arguments import parser
 from tools.arguments.constants import PORTS, PORTS_COMMAS, TARGET
-from tools.arguments.url import Url
+from targets.models import Target
+from tasks.models import Parameter
 
 
-def argument_with_target(argument, target) -> str:
-    data = {
-        TARGET: target
-    }
-    return argument.format(**data)
-
-
-def argument_with_target_ports(argument, target_ports) -> str:
-    data = {
-        PORTS: [tp.port for tp in target_ports],
-        PORTS_COMMAS: ','.join([str(tp.port) for tp in target_ports])
-    }
-    return argument.format(**data)
-
-
-def argument_with_finding(argument, finding) -> str:
+def argument_with_one(argument, finding) -> str:
     parsers = {
+        Target: parser.target,
         OSINT: parser.osint,
         Host: parser.host,
         Enumeration: parser.enumeration,
@@ -29,29 +16,31 @@ def argument_with_finding(argument, finding) -> str:
         Technology: parser.technology,
         Vulnerability: parser.vulnerability,
         Exploit: parser.exploit,
-        Url: parser.url,
+        Parameter: parser.parameter,
     }
     data = parsers[finding.__class__](finding)
-    return argument.format(**data)
+    return format_argument(argument, data)
 
 
-def argument_with_findings(argument, findings) -> str:
+def argument_with_multiple(argument, findings) -> str:
     parsers = {
-        Enumeration: parser.enumeration
+        Enumeration: parser.enumeration,
+        Parameter: parser.parameter_multiple,
     }
     data = {}
     for result in findings:
         data = parsers[result.__class__](result, data)
-    return argument.format(**data)
+    return format_argument(argument, data)
 
 
-def argument_with_parameter(argument, parameter) -> str:
-    data = parser.parameter(parameter)
-    return argument.format(**data)
+def argument_with_target_ports(argument, target_ports, target) -> str:
+    data = parser.target_port(target_ports, target)
+    return format_argument(argument, data)
 
 
-def argument_with_parameters(argument, parameters) -> str:
-    data = {}
-    for parameter in parameters:
-        data = parser.parameter_multiple(parameter, data)
-    return argument.format(**data)
+def format_argument(argument, data):
+    cleaned = {}
+    for key, value in data.items():
+        if value:
+            cleaned[key] = value
+    return argument.format(**cleaned)

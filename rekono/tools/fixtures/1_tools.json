@@ -3,7 +3,7 @@
         "model": "tools.tool",
         "pk": 1,
         "fields": {
-            "name": "nmap",
+            "name": "Nmap",
             "command": "nmap",
             "output_format": "xml",
             "defectdojo_scan_type": "Nmap Scan",
@@ -15,7 +15,7 @@
         "model": "tools.tool",
         "pk": 2,
         "fields": {
-            "name": "dirsearch",
+            "name": "Dirsearch",
             "command": "dirsearch",
             "output_format": "json",
             "defectdojo_scan_type": null,
@@ -39,12 +39,24 @@
         "model": "tools.tool",
         "pk": 4,
         "fields": {
-            "name": "nikto",
+            "name": "Nikto",
             "command": "nikto",
             "output_format": "xml",
             "defectdojo_scan_type": "Nikto Scan",
             "stage": 4,
             "reference": "https://github.com/sullo/nikto"
+        }
+    },
+    {
+        "model": "tools.tool",
+        "pk": 5,
+        "fields": {
+            "name": "Sslscan",
+            "command": "sslscan",
+            "output_format": "xml",
+            "defectdojo_scan_type": "Sslscan",
+            "stage": 4,
+            "reference": "https://github.com/rbsec/sslscan"
         }
     }
 ]

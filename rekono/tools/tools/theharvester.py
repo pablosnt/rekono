@@ -9,7 +9,6 @@ from users.models import User
 
 class TheHarvesterTool(BaseTool):
     
-    file_output_enabled = True
     configuration_file = 'api-keys.yaml'
     api_keys_config = {
         'apikeys': {

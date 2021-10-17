@@ -6,7 +6,6 @@ import os
 
 class DirsearchTool(BaseTool):
 
-    file_output_enabled = True
     ignore_exit_code = True
 
     def parse_output(self, output: str) -> list:

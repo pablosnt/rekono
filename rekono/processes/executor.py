@@ -33,13 +33,7 @@ def create_plan(task: Task) -> list:
             j = ExecutionJob(step, intensity)
             for job in execution_plan:
                 for output in job.output_types:
-                    if (
-                        output in j.input_types or
-                        FindingType.URL in j.input_types and output in [
-                            FindingType.HOST,
-                            FindingType.ENUMERATION
-                        ]
-                    ):
+                    if output in j.input_types:
                         j.dependencies.add(job)
         execution_plan.append(j)
     return execution_plan

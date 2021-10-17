@@ -15,12 +15,11 @@ class FindingType(models.IntegerChoices):
     OSINT = 1
     HOST = 2
     ENUMERATION = 3
-    URL = 4
-    HTTP_ENDPOINT = 5
-    TECHNOLOGY = 6
-    VULNERABILITY = 7
-    EXPLOIT = 8
-    PARAMETER = 9
+    HTTP_ENDPOINT = 4
+    TECHNOLOGY = 5
+    VULNERABILITY = 6
+    EXPLOIT = 7
+    PARAMETER = 8
 
 
 class Stage(models.IntegerChoices):

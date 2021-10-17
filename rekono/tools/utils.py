@@ -5,7 +5,6 @@ from findings.models import (OSINT, Enumeration, Exploit, Host, HttpEndpoint,
                              Technology, Vulnerability)
 from targets.models import Target
 from tools.arguments import checker
-from tools.arguments.url import Url
 from tools.models import Input
 from tools.enums import FindingType
 
@@ -13,7 +12,7 @@ from tools.enums import FindingType
 def get_tool_class_by_name(name):
     try:
         tools_module = importlib.import_module(
-            f'tools.tools.{name}'
+            f'tools.tools.{name.lower()}'
         )
         tool_class = name[0].upper() + name[1:] + 'Tool'
         tool_class = getattr(tools_module, tool_class)
@@ -28,7 +27,6 @@ def get_finding_class_by_type(type):
         FindingType.OSINT: OSINT,
         FindingType.HOST: Host,
         FindingType.ENUMERATION: Enumeration,
-        FindingType.URL: Url,
         FindingType.HTTP_ENDPOINT: HttpEndpoint,
         FindingType.TECHNOLOGY: Technology,
         FindingType.VULNERABILITY: Vulnerability,
@@ -43,22 +41,3 @@ def get_keys_from_argument(argument: str) -> list:
         aux = argument.split('{')
         return [k.split('}')[0] for k in aux if '}' in k]
     return []
-
-
-def get_url_from_params(input: Input, target: Target, target_ports: list, findings: list) -> Url:
-    enumeration_found = False
-    for finding in findings:
-        if isinstance(finding, Enumeration):
-            enumeration_found = True
-            if checker.check_input_condition(input, finding):
-                url = Url(target, finding)
-                if url.value:
-                    return url
-    if not enumeration_found:
-        for p in target_ports:
-            url = Url(target, p)
-            if url.value:
-                return url
-        url = Url(target, None)
-        if url.value:
-            return url

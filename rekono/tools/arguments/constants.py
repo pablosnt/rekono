@@ -1,4 +1,5 @@
 TARGET = 'target'
+HOST = 'host'
 PORT = 'port'
 PORTS = 'ports'
 PORTS_COMMAS = 'ports_commas'

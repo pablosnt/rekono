@@ -9,6 +9,7 @@ from executions.models import Execution
 from findings.queue import producer
 from tools import utils
 from tools.arguments import checker, formatter
+from tools.arguments.constants import TARGET
 from tools.enums import FindingType
 from tools.exceptions import (InstallationNotFoundException,
                               InvalidToolParametersException,
@@ -21,7 +22,6 @@ from rekono.settings import EXECUTION_OUTPUTS
 
 class BaseTool():
 
-    file_output_enabled = False
     ignore_exit_code = False
     findings = []
     findings_relations = {}
@@ -43,6 +43,7 @@ class BaseTool():
         self.configuration = configuration
         self.inputs = inputs
         self.intensity = intensity
+        self.file_output_enabled = self.tool.output_format != None
         self.file_output_extension = self.tool.output_format or 'txt'
         self.filename_output = f'{str(uuid.uuid4())}.{self.file_output_extension}'
         self.directory_output = EXECUTION_OUTPUTS
@@ -61,20 +62,6 @@ class BaseTool():
         pass
 
     def prepare_parameters(self, parameters: list, previous_findings: list) -> tuple:
-        expected_urls = [i for i in self.inputs if i.type == FindingType.URL]
-        if expected_urls:
-            url = utils.get_url_from_params(
-                expected_urls[0],
-                self.target,
-                self.target_ports,
-                previous_findings
-            )
-            if url:
-                if url.enumeration:
-                    self.findings_relations['host'] = url.enumeration.host
-                    self.findings_relations['enumeration'] = url.enumeration
-                self.url = url
-                previous_findings.append(url)
         return (parameters, previous_findings)
     
     def get_arguments(self, parameters: list, previous_findings: list) -> str:
@@ -87,23 +74,20 @@ class BaseTool():
         }
         for i in self.inputs:
             try:
+                req_keys = utils.get_keys_from_argument(i.argument)
                 input_class = utils.get_finding_class_by_type(i.type)
                 if i.selection == InputSelection.FOR_EACH:
                     for r in previous_findings:
                         if isinstance(r, input_class):
                             if not checker.check_input_condition(i, r):
                                 continue
-                            command_arguments[i.name] = formatter.argument_with_finding(
-                                i.argument,
-                                r
-                            )
+                            command_arguments[i.name] = formatter.argument_with_one(i.argument, r)
                             self.findings_relations[input_class.__name__.lower()] = r
                             break
                     if i.name not in command_arguments or i.type == FindingType.PARAMETER:
-                        req_keys = utils.get_keys_from_argument(i.argument)
                         for p in parameters:
                             if ParameterKey(p.key).name.lower() in req_keys:
-                                command_arguments[i.name] = formatter.argument_with_parameter(
+                                command_arguments[i.name] = formatter.argument_with_one(
                                     i.argument,
                                     p
                                 )
@@ -115,35 +99,43 @@ class BaseTool():
                             if isinstance(r, input_class) and checker.check_input_condition(i, r):
                                 findings.append(r)
                         if findings:
-                            command_arguments[i.name] = formatter.argument_with_findings(
+                            command_arguments[i.name] = formatter.argument_with_multiple(
                                 i.argument,
                                 findings
                             )
                     elif i.type == FindingType.PARAMETER or i.name not in command_arguments:
-                        req_keys = utils.get_keys_from_argument(i.argument)
                         params = []
                         for p in parameters:
                             if ParameterKey(p.key).name.lower() in req_keys:
                                 params.append(p)
                         if params:
-                            command_arguments[i.name] = formatter.argument_with_parameters(
+                            command_arguments[i.name] = formatter.argument_with_multiple(
                                 i.argument,
                                 params
                             )
-                if i.name not in command_arguments:
-                    if i.type == FindingType.HOST:
-                        if checker.check_input_condition(i, self.target):
-                            command_arguments[i.name] = formatter.argument_with_target(
-                                i.argument,
-                                self.target.target
-                            )
-                            continue
-                    elif i.type == FindingType.ENUMERATION and self.target_ports:
-                        command_arguments[i.name] = formatter.argument_with_target_ports(
-                            i.argument,
-                            self.target_ports
-                        )
-                        continue
+                if (
+                    i.name not in command_arguments and
+                    (
+                        i.type == FindingType.HOST or 
+                        (i.type == FindingType.ENUMERATION and i.name == TARGET)
+                    ) and
+                    checker.check_input_condition(i, self.target)
+                ):
+                    command_arguments[i.name] = formatter.argument_with_one(
+                        i.argument,
+                        self.target
+                    )
+                    continue
+                if (
+                    i.name not in command_arguments and
+                    i.type == FindingType.ENUMERATION and self.target_ports
+                ):
+                    command_arguments[i.name] = formatter.argument_with_target_ports(
+                        i.argument,
+                        self.target_ports,
+                        self.target
+                    )
+                    continue
             except KeyError:
                 if i.required and i.name not in command_arguments:
                     raise InvalidToolParametersException(

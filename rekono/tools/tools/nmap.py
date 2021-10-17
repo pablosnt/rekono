@@ -10,8 +10,6 @@ from findings.enums import Severity
 
 class NmapTool(BaseTool):
 
-    file_output_enabled = True
-
     def parse_vulners_nse(self, output: str, technology: Technology) -> list:
         cves = re.findall(CVE_REGEX, output)
         findings = []
