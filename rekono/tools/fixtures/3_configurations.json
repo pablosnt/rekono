@@ -204,7 +204,7 @@
         "pk": 21,
         "fields": {
             "tool_id": 4,
-            "name": "Default nikto",
+            "name": "Default Nikto",
             "arguments": "{url} -Format xml -output {output}",
             "default": true
         }
@@ -214,8 +214,18 @@
         "pk": 22,
         "fields": {
             "tool_id": 5,
-            "name": "Default sslscan",
+            "name": "Default Sslscan",
             "arguments": "--xml={output} {intensity} {target}",
+            "default": true
+        }
+    },
+    {
+        "model": "tools.configuration",
+        "pk": 23,
+        "fields": {
+            "tool_id": 6,
+            "name": "Default SSLyze",
+            "arguments": "--json_out={output} {target}",
             "default": true
         }
     }

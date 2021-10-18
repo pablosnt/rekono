@@ -39,7 +39,7 @@ class SslscanTool(BaseTool):
                                 technology=technology,
                                 name=f'Insecure {item.attrib["type"].upper()} version supported',
                                 description=f'{item.attrib["type"].upper()} {item.attrib["version"]} is supported',
-                                severity=Severity.LOW
+                                severity=Severity.LOW if item.attrib["type"] == 'tls' else Severity.MEDIUM
                             )
                             vulnerabilities.append(vulnerability)
                     elif (
@@ -50,7 +50,7 @@ class SslscanTool(BaseTool):
                         vulnerability = Vulnerability.objects.create(
                             name='Insecure SSL renegotiation supported',
                             description='Insecure SSL renegotiation supported',
-                            severity=Severity.LOW
+                            severity=Severity.MEDIUM
                         )
                         vulnerabilities.append(vulnerability)
                     elif item.tag == 'heartbleed' and item.attrib['vulnerable'] == '1':

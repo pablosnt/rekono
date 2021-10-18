@@ -518,5 +518,18 @@
             "selection": 2,
             "required": true
         }
+    },
+    {
+        "model": "tools.input",
+        "pk": 41,
+        "fields": {
+            "configuration_id": 23,
+            "name": "target",
+            "type": 3,
+            "argument": "{target}",
+            "filter": null,
+            "selection": 2,
+            "required": true
+        }
     }
 ]
