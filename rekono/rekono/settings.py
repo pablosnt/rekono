@@ -200,6 +200,14 @@ DEFECT_DOJO = {
 }
 
 
+# Tools configuration
+TOOLS = {
+    'cmseek': {
+        'directory': '/usr/share/cmseek'
+    }
+}
+
+
 # Authentication
 
 AUTH_USER_MODEL = 'users.User'

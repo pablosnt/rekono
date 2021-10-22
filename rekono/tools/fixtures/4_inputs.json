@@ -531,5 +531,31 @@
             "selection": 2,
             "required": true
         }
+    },
+    {
+        "model": "tools.input",
+        "pk": 42,
+        "fields": {
+            "configuration_id": 24,
+            "name": "url",
+            "type": 3,
+            "argument": "-u {url}",
+            "filter": "http",
+            "selection": 2,
+            "required": true
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 43,
+        "fields": {
+            "configuration_id": 24,
+            "name": "url",
+            "type": 4,
+            "argument": "-u {url}{http_endpoint}",
+            "filter": null,
+            "selection": 2,
+            "required": false
+        }
     }
 ]

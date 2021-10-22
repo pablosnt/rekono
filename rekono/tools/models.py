@@ -66,7 +66,7 @@ class Input(models.Model):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=['configuration', 'name'], name='unique input')
+            models.UniqueConstraint(fields=['configuration', 'type'], name='unique input')
         ]
 
     def __str__(self) -> str:

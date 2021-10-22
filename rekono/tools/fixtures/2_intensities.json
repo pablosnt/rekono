@@ -142,5 +142,23 @@
             "argument": "",
             "value": 3
         }
+    },
+    {
+        "model": "tools.intensity",
+        "pk": 17,
+        "fields": {
+            "tool_id": 7,
+            "argument": "--light-scan",
+            "value": 2
+        }
+    },
+    {
+        "model": "tools.intensity",
+        "pk": 18,
+        "fields": {
+            "tool_id": 7,
+            "argument": "",
+            "value": 3
+        }
     }
 ]

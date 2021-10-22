@@ -228,5 +228,15 @@
             "arguments": "--json_out={output} {target}",
             "default": true
         }
+    },
+    {
+        "model": "tools.configuration",
+        "pk": 24,
+        "fields": {
+            "tool_id": 7,
+            "name": "Default CMSeeK",
+            "arguments": "{url} {intensity}",
+            "default": true
+        }
     }
 ]

@@ -70,5 +70,17 @@
             "stage": 4,
             "reference": "https://nabla-c0d3.github.io/sslyze/documentation/"
         }
+    },
+    {
+        "model": "tools.tool",
+        "pk": 7,
+        "fields": {
+            "name": "CMSeeK",
+            "command": "cmseek",
+            "output_format": "json",
+            "defectdojo_scan_type": null,
+            "stage": 4,
+            "reference": "https://github.com/Tuhinshubhra/CMSeeK/"
+        }
     }
 ]

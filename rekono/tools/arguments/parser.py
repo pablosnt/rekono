@@ -20,9 +20,9 @@ def target_port(target_ports: list, target: Target) -> dict:
     urls = [get_url(target.target, tp) for tp in target_ports]
     urls = [url for url in urls if url]
     return {
-        PORT: target_ports[0].tp,
+        PORT: target_ports[0].port,
         PORTS: [tp.port for tp in target_ports],
-        PORT_COMMAS: ','.join([str(tp.port) for tp in target_ports]),
+        PORTS_COMMAS: ','.join([str(tp.port) for tp in target_ports]),
         URL: urls[0] if urls else None,
     }
 
