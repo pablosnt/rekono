@@ -1,7 +1,6 @@
 import requests
 from findings.enums import Severity
 
-
 CVSS_RANGES = {
     Severity.CRITICAL: (9, 10),
     Severity.HIGH: (7, 9),
@@ -17,6 +16,19 @@ def get_description(data: str) -> str:
         if o.get('lang') == 'en':
             return o.get('value')
     return ''
+
+
+def get_cwe(data: str) -> str:
+    items = data.get('cve').get('problemtype').get('problemtype_data')
+    for item in items:
+        descriptions = item.get('description')
+        if descriptions:
+            for desc in descriptions:
+                cwe = desc.get('value')
+                if not cwe:
+                    continue
+                if cwe.lower().startswith('cwe-'):
+                    return cwe
 
 
 def get_severity(data: str) -> Severity:
@@ -42,6 +54,7 @@ def get_cve_information(cve: str) -> dict:
         return {
             'description': get_description(data),
             'severity': get_severity(data),
+            'cwe': get_cwe(data),
             'reference': 'https://nvd.nist.gov/vuln/detail/{cve}'.format(cve=cve)
         }
     return {}

@@ -1,11 +1,11 @@
 import os
 import re
 
+from findings.enums import Severity
 from findings.models import Enumeration, Host, Technology, Vulnerability
 from libnmap.parser import NmapParser
 from tools.arguments.constants import CVE_REGEX
 from tools.tools.base_tool import BaseTool
-from findings.enums import Severity
 
 
 class NmapTool(BaseTool):
@@ -28,6 +28,7 @@ class NmapTool(BaseTool):
             name='FTP anonymous',
             description='FTP anonymous login is allowed',
             severity=Severity.CRITICAL,
+            cwe='CWE-287',
             reference='https://book.hacktricks.xyz/pentesting/pentesting-ftp#anonymous-login'
         )
         return [vulnerability]
@@ -37,7 +38,9 @@ class NmapTool(BaseTool):
             technology=technology,
             name='FTP Backdoor',
             description='FTP ProFTPD 1.3.3c Backdoor',
-            severity=Severity.CRITICAL
+            severity=Severity.CRITICAL,
+            cwe='CWE-78',
+            osvdb='OSVDB-69562'
         )
         return [vulnerability]
 

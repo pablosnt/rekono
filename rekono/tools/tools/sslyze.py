@@ -76,7 +76,8 @@ class SslyzeTool(BaseTool):
                         technology=generic_tech,
                         name='ROBOT',
                         description='Return Of the Bleichenbacher Oracle Threat',
-                        severity=Severity.MEDIUM,
+                        severity=Severity.HIGH,
+                        cwe='CWE-203',
                         reference='https://www.robotattack.org/'
                     )
                     vulnerabilities.append(vulnerability)
@@ -100,17 +101,17 @@ class SslyzeTool(BaseTool):
                 ):
                     vulnerability = Vulnerability.objects.create(
                         technology=generic_tech,
-                        name='Insecure SSL renegotiation supported',
-                        description='Insecure SSL renegotiation supported',
-                        severity=Severity.MEDIUM
+                        name='Insecure TLS renegotiation supported',
+                        description='Insecure TLS renegotiation supported',
+                        severity=Severity.MEDIUM,
+                        cwe='CWE-264'
                     )
                     vulnerabilities.append(vulnerability)
                 if self.check_true(r, 'tls_compression', 'supports_compression'):
                     vulnerability = Vulnerability.objects.create(
                         technology=generic_tech,
                         name='CRIME',
-                        description='Compression Ratio Info-leak Made Easy',
-                        severity=Severity.MEDIUM
+                        cve='CVE-2012-4929'
                     )
                     vulnerabilities.append(vulnerability)
                 for protocol, versions in self.tls_versions.items():
@@ -133,7 +134,8 @@ class SslyzeTool(BaseTool):
                                         technology=technology,
                                         name='Insecure cipher suite supported',
                                         description=f'TLS {version} {rc4}',
-                                        severity=Severity.LOW
+                                        severity=Severity.LOW,
+                                        cwe='CWE-326'
                                     )
                                     vulnerabilities.append(vulnerability)
                             else:
@@ -141,7 +143,8 @@ class SslyzeTool(BaseTool):
                                     technology=technology,
                                     name=f'Insecure {protocol.upper()} version supported',
                                     description=f'{protocol.upper()} {version} is supported',
-                                    severity=Severity.LOW if protocol.lower() == 'tls' else Severity.MEDIUM
+                                    severity=Severity.MEDIUM,
+                                    cwe='CWE-326'
                                 )
                                 vulnerabilities.append(vulnerability)
                 if 'certificate_info' in r and 'certificate_deployments' in r['certificate_info']:
@@ -154,7 +157,8 @@ class SslyzeTool(BaseTool):
                                 technology=generic_tech,
                                 name='Certificate subject error',
                                 description="Certificate subject doesn't match hostname",
-                                severity=Severity.LOW
+                                severity=Severity.LOW,
+                                cwe='CWE-295'
                             )
                             vulnerabilities.append(vulnerability)
         return technologies + vulnerabilities

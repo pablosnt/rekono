@@ -228,6 +228,7 @@ class VulnerabilityViewSet(FindingBaseView, UpdateModelMixin):
         'description': ['exact', 'contains'],
         'severity': ['exact'],
         'cve': ['exact', 'contains'],
+        'cwe': ['exact', 'contains'],
         'creation': ['gte', 'lte', 'exact'],
         'is_active': ['exact'],
     }

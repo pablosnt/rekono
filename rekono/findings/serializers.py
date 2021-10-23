@@ -62,7 +62,7 @@ class VulnerabilitySerializer(serializers.ModelSerializer):
         model = Vulnerability
         fields = (
             'id', 'execution', 'technology', 'name', 'description', 'severity',
-            'cve', 'reference', 'creation', 'is_active', 'exploits'
+            'cve', 'cwe', 'reference', 'creation', 'is_active', 'exploits'
         )
         read_only_fields = (
             'id', 'execution', 'technology', 'cve', 'creation', 'is_active', 'exploits'

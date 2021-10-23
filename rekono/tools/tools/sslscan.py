@@ -1,8 +1,9 @@
-from tools.tools.base_tool import BaseTool
-import xml.etree.ElementTree as parser
-from findings.models import Vulnerability, Technology
-from findings.enums import Severity
 import os
+import xml.etree.ElementTree as parser
+
+from findings.enums import Severity
+from findings.models import Technology, Vulnerability
+from tools.tools.base_tool import BaseTool
 
 
 class SslscanTool(BaseTool):
@@ -31,7 +32,7 @@ class SslscanTool(BaseTool):
                                 (
                                     item.attrib['type'] == 'tls' and
                                     item.attrib['version'] not in ['1.2', '1.3']
-                                ) or 
+                                ) or
                                 item.attrib['type'] == 'ssl'
                             ) and item.attrib['enabled'] == '1'
                         ):
@@ -39,7 +40,8 @@ class SslscanTool(BaseTool):
                                 technology=technology,
                                 name=f'Insecure {item.attrib["type"].upper()} version supported',
                                 description=f'{item.attrib["type"].upper()} {item.attrib["version"]} is supported',
-                                severity=Severity.LOW if item.attrib["type"] == 'tls' else Severity.MEDIUM
+                                severity=Severity.MEDIUM,
+                                cwe='CWE-326'
                             )
                             vulnerabilities.append(vulnerability)
                     elif (
@@ -48,9 +50,10 @@ class SslscanTool(BaseTool):
                         item.attrib['secure'] != '1'
                     ):
                         vulnerability = Vulnerability.objects.create(
-                            name='Insecure SSL renegotiation supported',
-                            description='Insecure SSL renegotiation supported',
-                            severity=Severity.MEDIUM
+                            name='Insecure TLS renegotiation supported',
+                            description='Insecure TLS renegotiation supported',
+                            severity=Severity.MEDIUM,
+                            cwe='CWE-264'
                         )
                         vulnerabilities.append(vulnerability)
                     elif item.tag == 'heartbleed' and item.attrib['vulnerable'] == '1':
@@ -68,7 +71,8 @@ class SslscanTool(BaseTool):
                             technology=self.get_technology(technologies, item.attrib['sslversion']),
                             name='Insecure cipher suite supported',
                             description=f'{item.attrib["sslversion"]} {item.attrib["cipher"]} status={item.attrib["status"]} strength={item.attrib["strength"]}',
-                            severity=Severity.LOW
+                            severity=Severity.LOW,
+                            cwe='CWE-326'
                         )
                         vulnerabilities.append(vulnerability)
         return technologies + vulnerabilities

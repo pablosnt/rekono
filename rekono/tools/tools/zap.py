@@ -1,9 +1,10 @@
-from tools.tools.base_tool import BaseTool
+import os
 import xml.etree.ElementTree as parser
 from html import unescape
+
 from findings.enums import Severity
-from findings.models import Vulnerability, HttpEndpoint
-import os
+from findings.models import HttpEndpoint, Vulnerability
+from tools.tools.base_tool import BaseTool
 
 
 class ZapTool(BaseTool):
@@ -27,11 +28,11 @@ class ZapTool(BaseTool):
             for site in root:
                 url_base = site.attrib['name']
                 for alert in site.findall('alerts/alertitem'):
-                    # TODO: add <cweid>1275</cweid> field to vulnerability
                     vulnerability = Vulnerability.objects.create(
                         name=self.clean_value(alert.findtext('alert')),
                         description=self.clean_value(alert.findtext('desc')),
                         severity=self.severity_mapping[int(alert.findtext('riskcode'))],
+                        cwe=f'CWE-{alert.findtext("cweid")}',
                         reference=self.clean_value(alert.findtext('reference'))
                     )
                     findings.append(vulnerability)

@@ -89,14 +89,16 @@ class CmseekTool(BaseTool):
                             vulnerability = Vulnerability.objects.create(
                                 name=f'{cms_name} backup files found',
                                 description=', '.join(paths),
-                                severity=Severity.MEDIUM
+                                severity=Severity.MEDIUM,
+                                cwe='CWE-530'
                             )
                             findings.append(vulnerability)
                         elif 'config_file' in key:
                             vulnerability = Vulnerability.objects.create(
                                 name=f'{cms_name} configuration files found',
                                 description=', '.join(paths),
-                                severity=Severity.MEDIUM
+                                severity=Severity.MEDIUM,
+                                cwe='CWE-497'
                             )
                             findings.append(vulnerability)
                     elif '_users' in key:
@@ -108,7 +110,8 @@ class CmseekTool(BaseTool):
                         vulnerability = Vulnerability.objects.create(
                             name=f'{cms_name} debug mode enabled',
                             description=f'{cms_name} debug mode enabled',
-                            severity=Severity.LOW
+                            severity=Severity.LOW,
+                            cwe='CWE-489'
                         )
                         findings.append(vulnerability)
                     elif '_vulns' in key and 'vulnerabilities' in value:
