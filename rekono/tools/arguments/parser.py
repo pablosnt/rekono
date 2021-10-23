@@ -1,9 +1,9 @@
 from findings.models import (OSINT, Enumeration, Exploit, Host, HttpEndpoint,
-                             Technology, Vulnerability)
+                             Technology, Vulnerability, Credential)
 from tasks.enums import ParameterKey
 from tasks.models import Parameter
 from tools.arguments import checker
-from tools.arguments.constants import HOST, PORT, PORTS, PORTS_COMMAS, TARGET, URL
+from tools.arguments.constants import HOST, PORT, PORTS, PORTS_COMMAS, TARGET, URL, USERNAME, EMAIL, SECRET
 from tools.arguments.url import get_url
 from targets.models import Target, TargetPort
 
@@ -83,6 +83,14 @@ def vulnerability(vulnerability: Vulnerability) -> dict:
     if vulnerability.cve:
         output[ParameterKey.CVE.name.lower()] = vulnerability.cve
     return output
+
+
+def credential(credential: Credential) -> dict:
+    return {
+        EMAIL: credential.email,
+        USERNAME: credential.username,
+        SECRET: credential.secret,
+    }
 
 
 def exploit(exploit: Exploit) -> dict:

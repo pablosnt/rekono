@@ -4,6 +4,9 @@ PORT = 'port'
 PORTS = 'ports'
 PORTS_COMMAS = 'ports_commas'
 URL = 'url'
+EMAIL = 'email'
+USERNAME = 'username'
+SECRET = 'secret'
 
 
 CVE_REGEX = 'CVE-[0-9]{4}-[0-9]{1,7}'

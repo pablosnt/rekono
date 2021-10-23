@@ -1,5 +1,5 @@
 from findings.models import (OSINT, Enumeration, Exploit, Host, HttpEndpoint,
-                             Technology, Vulnerability)
+                             Technology, Vulnerability, Credential)
 from tools.arguments import parser
 from tools.arguments.constants import PORTS, PORTS_COMMAS, TARGET
 from targets.models import Target
@@ -15,6 +15,7 @@ def argument_with_one(argument, finding) -> str:
         HttpEndpoint: parser.http_endpoint,
         Technology: parser.technology,
         Vulnerability: parser.vulnerability,
+        Credential: parser.credential,
         Exploit: parser.exploit,
         Parameter: parser.parameter,
     }

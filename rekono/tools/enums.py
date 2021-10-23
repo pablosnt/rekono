@@ -20,6 +20,7 @@ class FindingType(models.IntegerChoices):
     VULNERABILITY = 6
     EXPLOIT = 7
     PARAMETER = 8
+    CREDENTIAL = 9
 
 
 class Stage(models.IntegerChoices):
