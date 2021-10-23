@@ -1,5 +1,5 @@
-from findings.models import (OSINT, Enumeration, Exploit, Host, HttpEndpoint,
-                             Technology, Vulnerability, Credential)
+from findings.models import (OSINT, Credential, Enumeration, Exploit, Host,
+                             HttpEndpoint, Technology, Vulnerability)
 from rest_framework import serializers
 
 
@@ -50,8 +50,8 @@ class TechnologySerializer(serializers.ModelSerializer):
     class Meta:
         model = Technology
         fields = (
-            'id', 'execution', 'enumeration', 'name', 'version', 'reference',
-            'creation', 'is_active', 'vulnerabilitys', 'exploits'
+            'id', 'execution', 'enumeration', 'name', 'version', 'description',
+            'reference', 'related_to', 'related_technologies', 'creation', 'is_active', 'vulnerabilitys', 'exploits'
         )
         ordering = ['-id']
 

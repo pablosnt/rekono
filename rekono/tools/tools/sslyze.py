@@ -1,8 +1,9 @@
-from tools.tools.base_tool import BaseTool
 import json
-from findings.models import Vulnerability, Technology
-from findings.enums import Severity
 import os
+
+from findings.enums import Severity
+from findings.models import Technology, Vulnerability
+from tools.tools.base_tool import BaseTool
 
 
 class SslyzeTool(BaseTool):
@@ -121,7 +122,8 @@ class SslyzeTool(BaseTool):
                         ):
                             technology = Technology.objects.create(
                                 name=protocol.upper(),
-                                version=version
+                                version=version,
+                                related_to=generic_tech
                             )
                             technologies.append(technology)
                             if protocol.lower() == 'tls' and version in ['1.2', '1.3']:
@@ -156,4 +158,3 @@ class SslyzeTool(BaseTool):
                             )
                             vulnerabilities.append(vulnerability)
         return technologies + vulnerabilities
-            

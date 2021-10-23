@@ -1,16 +1,17 @@
-from findings.models import (OSINT, Enumeration, Exploit, Host, HttpEndpoint,
-                             Technology, Vulnerability, Credential)
-from findings.serializers import (EnumerationSerializer, ExploitSerializer,
-                                  HostSerializer, HttpEndpointSerializer,
-                                  OSINTSerializer, TechnologySerializer,
-                                  VulnerabilitySerializer, CredentialSerializer)
+from drf_spectacular.utils import extend_schema
+from findings.models import (OSINT, Credential, Enumeration, Exploit, Host,
+                             HttpEndpoint, Technology, Vulnerability)
+from findings.serializers import (CredentialSerializer, EnumerationSerializer,
+                                  ExploitSerializer, HostSerializer,
+                                  HttpEndpointSerializer, OSINTSerializer,
+                                  TechnologySerializer,
+                                  VulnerabilitySerializer)
 from rest_framework import status
+from rest_framework.decorators import action
 from rest_framework.mixins import (DestroyModelMixin, ListModelMixin,
                                    RetrieveModelMixin, UpdateModelMixin)
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
-from rest_framework.decorators import action
-from drf_spectacular.utils import extend_schema
 
 # Create your views here.
 
@@ -186,6 +187,7 @@ class TechnologyViewSet(FindingBaseView):
         'enumeration__port': ['exact'],
         'name': ['exact', 'contains'],
         'version': ['exact', 'contains'],
+        'related_to': ['exact'],
         'creation': ['gte', 'lte', 'exact'],
         'is_active': ['exact'],
     }

@@ -1,11 +1,13 @@
-from findings.models import HttpEndpoint, Technology, Vulnerability, Credential
-from tools.tools.base_tool import BaseTool
 import json
 import os
-from rekono.settings import TOOLS
-from tools.arguments import formatter
-from findings.enums import Severity
 import shutil
+
+from findings.enums import Severity
+from findings.models import Credential, HttpEndpoint, Technology, Vulnerability
+from tools.arguments import formatter
+from tools.tools.base_tool import BaseTool
+
+from rekono.settings import TOOLS
 
 
 class CmseekTool(BaseTool):
@@ -51,7 +53,6 @@ class CmseekTool(BaseTool):
 
     def parse_output(self, output: str) -> list:
         findings = []
-        print(self.path_output)
         if os.path.isfile(self.path_output):
             with open(self.path_output, 'r') as output:
                 report = json.load(output)
@@ -120,17 +121,19 @@ class CmseekTool(BaseTool):
                     elif 'Version' in value and ',' in value:
                         for item in value.split(','):
                             aux = item.split('Version', 1)
-                            name = cms_name
+                            name = None
                             if cms_name in key:
-                                name = f'{name} ' + key.replace(f'{cms_name}_', '')
+                                name = key.replace(f'{cms_name}_', '')
                             elif cms_id in key:
-                                name = f'{name} ' + key.replace(f'{cms_id}_', '')
+                                name = key.replace(f'{cms_id}_', '')
                             tech = aux[0].strip() if len(aux) > 0 else None
                             vers = aux[1].strip() if len(aux) > 1 else None
                             if tech:
                                 technology = Technology.objects.create(
-                                    name=f'{name}: {tech}',
-                                    version=vers
+                                    name=tech,
+                                    version=vers,
+                                    related_to=cms,
+                                    description=f'{cms_name} {name}'
                                 )
                                 findings.append(technology)
         return findings

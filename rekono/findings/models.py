@@ -1,8 +1,8 @@
-from django.db import models
 from typing import Any
 
+from django.db import models
 from executions.models import Execution
-from findings.enums import Severity, DataType, OSType, PortStatus, Protocol
+from findings.enums import DataType, OSType, PortStatus, Protocol, Severity
 
 # Create your models here.
 
@@ -102,6 +102,14 @@ class Technology(Finding):
     )
     name = models.TextField(max_length=100)
     version = models.TextField(max_length=100, blank=True, null=True)
+    description = models.TextField(max_length=200, blank=True, null=True)
+    related_to = models.ForeignKey(
+        'Technology',
+        related_name='related_technologies',
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True
+    )
     reference = models.TextField(max_length=250, blank=True, null=True)
 
     KEY_FIELDS = ('enumeration', 'name', 'version')
