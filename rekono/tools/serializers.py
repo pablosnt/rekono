@@ -48,5 +48,7 @@ class ToolSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Tool
-        fields = ('id', 'name', 'command', 'stage', 'reference', 'intensities', 'configurations')
+        fields = (
+            'id', 'name', 'command', 'stage', 'reference', 'icon', 'intensities', 'configurations'
+        )
         ordering = ['-id']

@@ -8,7 +8,8 @@
             "output_format": "xml",
             "defectdojo_scan_type": "Nmap Scan",
             "stage": 2,
-            "reference": "https://nmap.org/"
+            "reference": "https://nmap.org/",
+            "icon": "https://www.kali.org/tools/nmap/images/nmap-logo.svg"
         }
     },
     {
@@ -20,7 +21,8 @@
             "output_format": "json",
             "defectdojo_scan_type": null,
             "stage": 4,
-            "reference": "https://github.com/maurosoria/dirsearch"
+            "reference": "https://github.com/maurosoria/dirsearch",
+            "icon": "https://raw.githubusercontent.com/maurosoria/dirsearch/master/static/logo.png"
         }
     },
     {
@@ -32,7 +34,8 @@
             "output_format": "json",
             "defectdojo_scan_type": null,
             "stage": 1,
-            "reference": "https://github.com/laramies/theHarvester"
+            "reference": "https://github.com/laramies/theHarvester",
+            "icon": "https://www.kali.org/tools/theharvester/images/theharvester-logo.svg"
         }
     },
     {
@@ -44,7 +47,8 @@
             "output_format": "xml",
             "defectdojo_scan_type": "Nikto Scan",
             "stage": 4,
-            "reference": "https://github.com/sullo/nikto"
+            "reference": "https://github.com/sullo/nikto",
+            "icon": "https://www.kali.org/tools/nikto/images/nikto-logo.svg"
         }
     },
     {
@@ -56,7 +60,8 @@
             "output_format": "xml",
             "defectdojo_scan_type": "Sslscan",
             "stage": 4,
-            "reference": "https://github.com/rbsec/sslscan"
+            "reference": "https://github.com/rbsec/sslscan",
+            "icon": "https://www.kali.org/tools/sslscan/images/sslscan-logo.svg"
         }
     },
     {
@@ -68,7 +73,8 @@
             "output_format": "json",
             "defectdojo_scan_type": "SSLyze 3 Scan (JSON)",
             "stage": 4,
-            "reference": "https://nabla-c0d3.github.io/sslyze/documentation/"
+            "reference": "https://nabla-c0d3.github.io/sslyze/documentation/",
+            "icon": "https://www.kali.org/tools/sslyze/images/sslyze-logo.svg"
         }
     },
     {
@@ -80,7 +86,8 @@
             "output_format": "json",
             "defectdojo_scan_type": null,
             "stage": 4,
-            "reference": "https://github.com/Tuhinshubhra/CMSeeK/"
+            "reference": "https://github.com/Tuhinshubhra/CMSeeK/",
+            "icon": "https://camo.githubusercontent.com/b1864e58e861aa4e938d17d4a50ae1a4bedec9cdb9e8b7ce7ac80a1b5cc711ed/68747470733a2f2f692e696d6775722e636f6d2f35565973316d322e706e67"
         }
     },
     {
@@ -92,7 +99,8 @@
             "output_format": "xml",
             "defectdojo_scan_type": "ZAP Scan",
             "stage": 4,
-            "reference": "https://www.zaproxy.org/"
+            "reference": "https://www.zaproxy.org/",
+            "icon": "https://www.kali.org/tools/zaproxy/images/zaproxy-logo.svg"
         }
     }
 ]

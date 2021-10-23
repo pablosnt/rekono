@@ -13,6 +13,7 @@ class Tool(models.Model):
     defectdojo_scan_type = models.TextField(max_length=50, blank=True, null=True)
     stage = models.IntegerField(choices=Stage.choices)
     reference = models.TextField(max_length=250, blank=True, null=True)
+    icon = models.TextField(max_length=250, blank=True, null=True)
 
     def __str__(self) -> str:
         return self.name
