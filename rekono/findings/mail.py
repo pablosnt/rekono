@@ -20,6 +20,7 @@ def send_notification(execution: Any, findings: list, domain: str) -> None:
         'technology': [],
         'httpendpoint': [],
         'vulnerability': [],
+        'credential': [],
         'exploit': [],
     }
     for finding in findings:

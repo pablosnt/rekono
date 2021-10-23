@@ -50,6 +50,9 @@ DEFAULT_GROUPS = {
         'change_vulnerability',
         'delete_vulnerability',
         'view_vulnerability',
+        'add_credential',
+        'delete_credential',
+        'view_credential',
         'add_exploit',
         'delete_exploit',
         'view_exploit',
@@ -103,6 +106,9 @@ DEFAULT_GROUPS = {
         'change_vulnerability',
         'delete_vulnerability',
         'view_vulnerability',
+        'add_credential',
+        'delete_credential',
+        'view_credential',
         'add_exploit',
         'delete_exploit',
         'view_exploit',
@@ -137,6 +143,7 @@ DEFAULT_GROUPS = {
         'view_httpendpoint',
         'view_technology',
         'view_vulnerability',
+        'view_credential',
         'view_exploit',
     ]
 }

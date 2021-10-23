@@ -157,6 +157,28 @@
             </table>
         {% endif %}
 
+        <br>
+
+        {% if credential %}
+            <h3>Credentials:</h3>
+            <table>
+                <tr>
+                    <th>Email</th>
+                    <th>Username</th>
+                    <th>Secret</th>
+                </tr>
+                {% for c in credential %}
+                    <tr>
+                        <th>{{ c.email }}</th>
+                        <th>{{ c.username }}</th>
+                        <th>{{ c.secret }}</th>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% endif %}
+
+        <br>
+
         {% if exploit %}
             <h3>Exploits:</h3>
             <table>

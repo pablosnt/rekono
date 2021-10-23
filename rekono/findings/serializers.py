@@ -32,7 +32,7 @@ class EnumerationSerializer(serializers.ModelSerializer):
         model = Enumeration
         fields = (
             'id', 'execution', 'host', 'port', 'port_status', 'protocol',
-            'service', 'creation', 'is_active', 'http_endpoints', 'technologies'
+            'service', 'creation', 'is_active', 'httpendpoints', 'technologys'
         )
         ordering = ['-id']
 
@@ -51,7 +51,7 @@ class TechnologySerializer(serializers.ModelSerializer):
         model = Technology
         fields = (
             'id', 'execution', 'enumeration', 'name', 'version', 'reference',
-            'creation', 'is_active', 'vulnerabilities', 'exploits'
+            'creation', 'is_active', 'vulnerabilitys', 'exploits'
         )
         ordering = ['-id']
 

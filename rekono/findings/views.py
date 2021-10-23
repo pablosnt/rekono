@@ -239,7 +239,7 @@ class VulnerabilityViewSet(FindingBaseView, ListModelMixin, RetrieveModelMixin, 
         ('host', 'enumeration__host'),
         'execution', 'enumeration', 'technology', 'name', 'severity', 'cve', 'creation', 'is_active'
     )
-    http_method_names = ['get', 'put', 'delete']
+    http_method_names = ['get', 'put', 'post', 'delete']
 
 
 class ExploitViewSet(FindingBaseView, ListModelMixin, RetrieveModelMixin):

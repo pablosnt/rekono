@@ -9,7 +9,7 @@ class ExecutionSerializer(serializers.ModelSerializer):
         model = Execution
         fields = (
             'id', 'task', 'step', 'output_plain', 'output_error', 'status', 'start', 'end',
-            'osints', 'hosts', 'enumerations', 'http_endpoints', 'technologies',
-            'vulnerabilities', 'exploits'
+            'osints', 'hosts', 'enumerations', 'httpendpoints', 'technologys',
+            'vulnerabilitys', 'exploits'
         )
         ordering = ['-id']
