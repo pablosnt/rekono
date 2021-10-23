@@ -9,10 +9,9 @@ from executions.queue.constants import finding_relations
 from processes.executor import success_callback
 from rq.job import Job
 from tools import utils as tool_utils
-from tools.enums import FindingType
+from tools.enums import FindingType, InputSelection
 from tools.exceptions import InvalidToolParametersException
 from tools.models import Configuration, Input, Intensity, Tool
-from tools.enums import InputSelection
 from tools.tools.base_tool import BaseTool
 
 
@@ -23,6 +22,7 @@ def consumer(
     configuration: Configuration,
     intensity: Intensity,
     inputs: list,
+    target_ports: list,
     parameters: list,
     previous_findings: list,
     domain: str,
@@ -34,7 +34,8 @@ def consumer(
         tool=tool,
         configuration=configuration,
         inputs=inputs,
-        intensity=intensity
+        intensity=intensity,
+        target_ports=target_ports,
     )
     if not previous_findings and current_job._dependency_ids:
         previous_findings = process_dependencies(
@@ -77,6 +78,7 @@ def process_dependencies(
             inputs,
             parameters=parameters,
             previous_findings=param_set,
+            target_ports=tool.target_ports,
             domain=domain,
             callback=success_callback,
             at_front=True

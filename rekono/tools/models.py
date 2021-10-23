@@ -1,7 +1,7 @@
-from django.db import models
-
-from tools.enums import IntensityRank, FindingType, Stage, InputSelection
 from typing import Any
+
+from django.db import models
+from tools.enums import FindingType, InputSelection, IntensityRank, Stage
 
 # Create your models here.
 
@@ -14,6 +14,7 @@ class Tool(models.Model):
     stage = models.IntegerField(choices=Stage.choices)
     reference = models.TextField(max_length=250, blank=True, null=True)
     icon = models.TextField(max_length=250, blank=True, null=True)
+    for_each_target_port = models.BooleanField(default=False)
 
     def __str__(self) -> str:
         return self.name

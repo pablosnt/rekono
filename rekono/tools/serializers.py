@@ -1,6 +1,5 @@
-from tools.models import Intensity, Tool
 from rest_framework import serializers
-from tools.models import Configuration, Input, Output
+from tools.models import Configuration, Input, Intensity, Output, Tool
 
 
 class InputSerializer(serializers.ModelSerializer):
@@ -49,6 +48,7 @@ class ToolSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tool
         fields = (
-            'id', 'name', 'command', 'stage', 'reference', 'icon', 'intensities', 'configurations'
+            'id', 'name', 'command', 'stage', 'reference', 'icon',
+            'for_each_target_port', 'intensities', 'configurations'
         )
         ordering = ['-id']

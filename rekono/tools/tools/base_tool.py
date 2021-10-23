@@ -4,18 +4,17 @@ import subprocess
 import uuid
 
 from django.utils import timezone
-from tasks.enums import ParameterKey, Status
 from executions.models import Execution
 from findings.queue import producer
+from tasks.enums import ParameterKey, Status
 from tools import utils
 from tools.arguments import checker, formatter
 from tools.arguments.constants import TARGET
-from tools.enums import FindingType
+from tools.enums import FindingType, InputSelection
 from tools.exceptions import (InstallationNotFoundException,
                               InvalidToolParametersException,
                               UnexpectedToolExitCodeException)
 from tools.models import Configuration, Input, Intensity, Tool
-from tools.enums import InputSelection
 
 from rekono.settings import EXECUTION_OUTPUTS
 
@@ -32,18 +31,19 @@ class BaseTool():
         tool: Tool,
         configuration: Configuration,
         inputs: list,
-        intensity: Intensity
+        intensity: Intensity,
+        target_ports: list
     ) -> None:
         execution.rq_job_pid = os.getpid()
         execution.save()
         self.execution = execution
         self.target = execution.task.target
-        self.target_ports = self.target.target_ports.all()
+        self.target_ports = target_ports if target_ports else self.target.target_ports.all()
         self.tool = tool
         self.configuration = configuration
         self.inputs = inputs
         self.intensity = intensity
-        self.file_output_enabled = self.tool.output_format != None
+        self.file_output_enabled = self.tool.output_format is not None
         self.file_output_extension = self.tool.output_format or 'txt'
         self.filename_output = f'{str(uuid.uuid4())}.{self.file_output_extension}'
         self.directory_output = EXECUTION_OUTPUTS
