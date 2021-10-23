@@ -1,7 +1,7 @@
 from findings.models import (OSINT, Enumeration, Exploit, Host, HttpEndpoint,
                              Technology, Vulnerability, Credential)
-from tools.arguments import parser
-from tools.arguments.constants import PORTS, PORTS_COMMAS, TARGET
+from arguments import parser
+from arguments.constants import PORTS, PORTS_COMMAS, TARGET
 from targets.models import Target
 from tasks.models import Parameter
 

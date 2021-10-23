@@ -4,7 +4,7 @@ from tasks.models import Parameter
 from findings.models import (OSINT, Enumeration, Exploit, Host, HttpEndpoint,
                              Technology, Vulnerability, Credential)
 from targets.models import Target
-from tools.arguments import checker
+from arguments import checker
 from tools.models import Input
 from tools.enums import FindingType
 

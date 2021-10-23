@@ -4,7 +4,7 @@ import shutil
 
 from findings.enums import Severity
 from findings.models import Credential, HttpEndpoint, Technology, Vulnerability
-from tools.arguments import formatter
+from arguments import formatter
 from tools.tools.base_tool import BaseTool
 
 from rekono.settings import TOOLS

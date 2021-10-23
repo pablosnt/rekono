@@ -4,7 +4,7 @@ import re
 from findings.enums import Severity
 from findings.models import Enumeration, Host, Technology, Vulnerability
 from libnmap.parser import NmapParser
-from tools.arguments.constants import CVE_REGEX
+from arguments.constants import CVE_REGEX
 from tools.tools.base_tool import BaseTool
 
 

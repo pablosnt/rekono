@@ -8,8 +8,8 @@ from executions.models import Execution
 from findings.queue import producer
 from tasks.enums import ParameterKey, Status
 from tools import utils
-from tools.arguments import checker, formatter
-from tools.arguments.constants import TARGET
+from arguments import checker, formatter
+from arguments.constants import TARGET
 from tools.enums import FindingType, InputSelection
 from tools.exceptions import (InstallationNotFoundException,
                               InvalidToolParametersException,

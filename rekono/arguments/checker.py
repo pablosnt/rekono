@@ -7,7 +7,7 @@ from findings.models import Enumeration, Host, HttpEndpoint, Vulnerability
 from targets import utils
 from targets.models import Target
 from targets.enums import TargetType
-from tools.arguments.constants import (CVE_REGEX, WORDLIST_FILE_REGEX,
+from arguments.constants import (CVE_REGEX, WORDLIST_FILE_REGEX,
                                        WORDLIST_PATH_REGEX)
 from tools.exceptions import InvalidParameterException
 from tools.models import Input

@@ -2,9 +2,9 @@ from findings.models import (OSINT, Enumeration, Exploit, Host, HttpEndpoint,
                              Technology, Vulnerability, Credential)
 from tasks.enums import ParameterKey
 from tasks.models import Parameter
-from tools.arguments import checker
-from tools.arguments.constants import HOST, PORT, PORTS, PORTS_COMMAS, TARGET, URL, USERNAME, EMAIL, SECRET
-from tools.arguments.url import get_url
+from arguments import checker
+from arguments.constants import HOST, PORT, PORTS, PORTS_COMMAS, TARGET, URL, USERNAME, EMAIL, SECRET
+from arguments.url import get_url
 from targets.models import Target, TargetPort
 
 
