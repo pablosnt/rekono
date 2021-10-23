@@ -1,4 +1,4 @@
-from findings.models import HttpEndpoint, Technology, Vulnerability
+from findings.models import HttpEndpoint, Technology, Vulnerability, Credential
 from tools.tools.base_tool import BaseTool
 import json
 import os
@@ -99,12 +99,10 @@ class CmseekTool(BaseTool):
                             )
                             findings.append(vulnerability)
                     elif '_users' in key:
-                        vulnerability = Vulnerability.objects.create(
-                            name='Exposed {cms_name} users',
-                            description=value,
-                            severity=Severity.MEDIUM
-                        )
-                        findings.append(vulnerability)
+                        if ',' in value:
+                            for user in value.split(','):
+                                credential = Credential.objects.create(username=user)
+                                findings.append(credential)
                     elif '_debug_mode' in key and value != 'disabled':
                         vulnerability = Vulnerability.objects.create(
                             name=f'{cms_name} debug mode enabled',
