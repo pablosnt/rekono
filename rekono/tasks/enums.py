@@ -15,7 +15,7 @@ class Status(models.IntegerChoices):
 class ParameterKey(models.IntegerChoices):
     TECHNOLOGY = 1
     VERSION = 2
-    HTTP_ENDPOINT = 3
+    ENDPOINT = 3
     CVE = 4
     EXPLOIT = 5
     WORDLIST = 6

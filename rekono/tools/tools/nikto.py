@@ -1,10 +1,10 @@
 import csv
 import os
-
-from findings.models import HttpEndpoint, Vulnerability
-from tools.tools.base_tool import BaseTool
-from findings.enums import Severity
 import xml.etree.ElementTree as parser
+
+from findings.enums import Severity
+from findings.models import Endpoint, Vulnerability
+from tools.tools.base_tool import BaseTool
 
 
 class NiktoTool(BaseTool):
@@ -37,6 +37,6 @@ class NiktoTool(BaseTool):
                     findings.append(vulnerability)
                 if endpoint and endpoint not in http_endpoints:
                     http_endpoints.add(endpoint)
-                    http_endpoint = HttpEndpoint.objects.create(endpoint=endpoint)
+                    http_endpoint = Endpoint.objects.create(endpoint=endpoint)
                     findings.append(http_endpoint)
         return findings

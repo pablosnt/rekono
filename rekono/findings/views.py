@@ -1,9 +1,9 @@
 from drf_spectacular.utils import extend_schema
-from findings.models import (OSINT, Credential, Enumeration, Exploit, Host,
-                             HttpEndpoint, Technology, Vulnerability)
-from findings.serializers import (CredentialSerializer, EnumerationSerializer,
-                                  ExploitSerializer, HostSerializer,
-                                  HttpEndpointSerializer, OSINTSerializer,
+from findings.models import (OSINT, Credential, Endpoint, Enumeration, Exploit,
+                             Host, Technology, Vulnerability)
+from findings.serializers import (CredentialSerializer, EndpointSerializer,
+                                  EnumerationSerializer, ExploitSerializer,
+                                  HostSerializer, OSINTSerializer,
                                   TechnologySerializer,
                                   VulnerabilitySerializer)
 from rest_framework import status
@@ -132,9 +132,9 @@ class EnumerationViewSet(FindingBaseView):
     )
 
 
-class HttpEndpointViewSet(FindingBaseView):
-    queryset = HttpEndpoint.objects.all()
-    serializer_class = HttpEndpointSerializer
+class EndpointViewSet(FindingBaseView):
+    queryset = Endpoint.objects.all()
+    serializer_class = EndpointSerializer
     filterset_fields = {
         'execution': ['exact'],
         'execution__task': ['exact'],
@@ -228,7 +228,6 @@ class VulnerabilityViewSet(FindingBaseView, UpdateModelMixin):
         'description': ['exact', 'contains'],
         'severity': ['exact'],
         'cve': ['exact', 'contains'],
-        'cwe': ['exact', 'contains'],
         'creation': ['gte', 'lte', 'exact'],
         'is_active': ['exact'],
     }

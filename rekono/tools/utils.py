@@ -1,12 +1,12 @@
 import importlib
 
-from tasks.models import Parameter
-from findings.models import (OSINT, Enumeration, Exploit, Host, HttpEndpoint,
-                             Technology, Vulnerability, Credential)
-from targets.models import Target
 from arguments import checker
-from tools.models import Input
+from findings.models import (OSINT, Credential, Enumeration, Exploit, Host,
+                             Endpoint, Technology, Vulnerability)
+from targets.models import Target
+from tasks.models import Parameter
 from tools.enums import FindingType
+from tools.models import Input
 
 
 def get_tool_class_by_name(name):
@@ -27,7 +27,7 @@ def get_finding_class_by_type(type):
         FindingType.OSINT: OSINT,
         FindingType.HOST: Host,
         FindingType.ENUMERATION: Enumeration,
-        FindingType.HTTP_ENDPOINT: HttpEndpoint,
+        FindingType.ENDPOINT: Endpoint,
         FindingType.TECHNOLOGY: Technology,
         FindingType.VULNERABILITY: Vulnerability,
         FindingType.CREDENTIAL: Credential,

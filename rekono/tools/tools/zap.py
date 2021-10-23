@@ -3,7 +3,7 @@ import xml.etree.ElementTree as parser
 from html import unescape
 
 from findings.enums import Severity
-from findings.models import HttpEndpoint, Vulnerability
+from findings.models import Endpoint, Vulnerability
 from tools.tools.base_tool import BaseTool
 
 
@@ -46,7 +46,7 @@ class ZapTool(BaseTool):
                             if http_endpoint[-1] != '/':
                                 http_endpoint += '/'
                             if http_endpoint not in endpoints:
-                                endpoint = HttpEndpoint.objects.create(endpoint=http_endpoint)
+                                endpoint = Endpoint.objects.create(endpoint=http_endpoint)
                                 findings.append(endpoint)
                                 endpoints.add(http_endpoint)
         return findings

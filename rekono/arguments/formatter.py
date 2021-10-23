@@ -1,7 +1,7 @@
-from findings.models import (OSINT, Enumeration, Exploit, Host, HttpEndpoint,
-                             Technology, Vulnerability, Credential)
 from arguments import parser
 from arguments.constants import PORTS, PORTS_COMMAS, TARGET
+from findings.models import (OSINT, Credential, Endpoint, Enumeration, Exploit,
+                             Host, Technology, Vulnerability)
 from targets.models import Target
 from tasks.models import Parameter
 
@@ -12,7 +12,7 @@ def argument_with_one(argument, finding) -> str:
         OSINT: parser.osint,
         Host: parser.host,
         Enumeration: parser.enumeration,
-        HttpEndpoint: parser.http_endpoint,
+        Endpoint: parser.endpoint,
         Technology: parser.technology,
         Vulnerability: parser.vulnerability,
         Credential: parser.credential,

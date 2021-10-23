@@ -78,10 +78,10 @@ class Enumeration(Finding):
     KEY_FIELDS = ('host', 'port')
 
 
-class HttpEndpoint(Finding):
+class Endpoint(Finding):
     enumeration = models.ForeignKey(
         Enumeration,
-        related_name='httpendpoints',
+        related_name='endpoints',
         on_delete=models.CASCADE,
         blank=True,
         null=True

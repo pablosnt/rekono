@@ -1,11 +1,12 @@
-from findings.models import (OSINT, Enumeration, Exploit, Host, HttpEndpoint,
-                             Technology, Vulnerability, Credential)
+from arguments import checker
+from arguments.constants import (EMAIL, HOST, PORT, PORTS, PORTS_COMMAS,
+                                 SECRET, TARGET, URL, USERNAME)
+from arguments.url import get_url
+from findings.models import (OSINT, Credential, Endpoint, Enumeration, Exploit,
+                             Host, Technology, Vulnerability)
+from targets.models import Target
 from tasks.enums import ParameterKey
 from tasks.models import Parameter
-from arguments import checker
-from arguments.constants import HOST, PORT, PORTS, PORTS_COMMAS, TARGET, URL, USERNAME, EMAIL, SECRET
-from arguments.url import get_url
-from targets.models import Target, TargetPort
 
 
 def target(target: Target) -> dict:
@@ -60,9 +61,9 @@ def enumeration(enumeration: Enumeration, accumulated: dict = {}) -> dict:
     return output
 
 
-def http_endpoint(http_endpoint: HttpEndpoint):
-    output = enumeration(http_endpoint.enumeration)
-    output[ParameterKey.HTTP_ENDPOINT.name.lower()] = http_endpoint.endpoint
+def ednpoint(endpoint: Endpoint):
+    output = enumeration(endpoint.enumeration)
+    output[ParameterKey.ENDPOINT.name.lower()] = endpoint.endpoint
     return output
 
 

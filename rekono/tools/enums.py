@@ -15,7 +15,7 @@ class FindingType(models.IntegerChoices):
     OSINT = 1
     HOST = 2
     ENUMERATION = 3
-    HTTP_ENDPOINT = 4
+    ENDPOINT = 4
     TECHNOLOGY = 5
     VULNERABILITY = 6
     EXPLOIT = 7

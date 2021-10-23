@@ -2,13 +2,13 @@ import os
 import re
 from typing import Any
 
-from tasks.enums import ParameterKey
-from findings.models import Enumeration, Host, HttpEndpoint, Vulnerability
-from targets import utils
-from targets.models import Target
-from targets.enums import TargetType
 from arguments.constants import (CVE_REGEX, WORDLIST_FILE_REGEX,
-                                       WORDLIST_PATH_REGEX)
+                                 WORDLIST_PATH_REGEX)
+from findings.models import Endpoint, Enumeration, Host, Vulnerability
+from targets import utils
+from targets.enums import TargetType
+from targets.models import Target
+from tasks.enums import ParameterKey
 from tools.exceptions import InvalidParameterException
 from tools.models import Input
 
@@ -17,7 +17,7 @@ def check_parameter(parameter) -> None:
     checkers = {
         ParameterKey.TECHNOLOGY: check_technology_param,
         ParameterKey.VERSION: check_version_param,
-        ParameterKey.HTTP_ENDPOINT: check_http_endpoint_param,
+        ParameterKey.ENDPOINT: check_endpoint_param,
         ParameterKey.CVE: check_cve_param,
         ParameterKey.EXPLOIT: check_exploit_param,
         ParameterKey.WORDLIST: check_wordlist_param,
@@ -31,7 +31,7 @@ def check_input_condition(input: Input, finding: Any) -> bool:
         Target: check_target,
         Host: check_host,
         Enumeration: check_enumeration,
-        HttpEndpoint: check_http_endpoint,
+        Endpoint: check_endpoint,
         Vulnerability: check_vulnerability
     }
     if finding.__class__ in checkers and input.filter:
@@ -64,12 +64,15 @@ def check_enumeration(input: Input, enumeration: Enumeration) -> bool:
         return input.filter in enumeration.service
 
 
-def check_http_endpoint(input: Input, http_endpoint: HttpEndpoint) -> bool:
+def check_endpoint(input: Input, endpoint: Endpoint) -> bool:
     try:
         status_code = int(input.filter)
-        return status_code == http_endpoint.status
+        return status_code == endpoint.status
     except ValueError:
-        return http_endpoint.endpoint.startswith(input.filter)
+        return (
+            endpoint.endpoint.startswith(input.filter) or
+            (endpoint.enumeration and input.filter in endpoint.enumeration.service)
+        )
 
 
 def check_vulnerability(input: Input, vulnerability: Vulnerability) -> bool:
@@ -84,7 +87,7 @@ def check_version_param(technology: str) -> bool:
     return True
 
 
-def check_http_endpoint_param(http_endpoint: str) -> bool:
+def check_endpoint_param(endpoint: str) -> bool:
     return True
 
 

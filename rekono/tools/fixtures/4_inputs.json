@@ -552,8 +552,8 @@
             "configuration_id": 24,
             "name": "url",
             "type": 4,
-            "argument": "-u {url}{http_endpoint}",
-            "filter": null,
+            "argument": "-u {url}{endpoint}",
+            "filter": "http",
             "selection": 2,
             "required": false
         }
@@ -578,8 +578,8 @@
             "configuration_id": 25,
             "name": "url",
             "type": 4,
-            "argument": "-quickurl {url}{http_endpoint}",
-            "filter": null,
+            "argument": "-quickurl {url}{endpoint}",
+            "filter": "http",
             "selection": 2,
             "required": false
         }

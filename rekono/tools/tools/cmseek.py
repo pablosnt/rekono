@@ -2,9 +2,9 @@ import json
 import os
 import shutil
 
-from findings.enums import Severity
-from findings.models import Credential, HttpEndpoint, Technology, Vulnerability
 from arguments import formatter
+from findings.enums import Severity
+from findings.models import Credential, Endpoint, Technology, Vulnerability
 from tools.tools.base_tool import BaseTool
 
 from rekono.settings import TOOLS
@@ -83,7 +83,7 @@ class CmseekTool(BaseTool):
                             paths = value
                         paths = [p.replace(url, '/') for p in paths]
                         for path in paths:
-                            endpoint = HttpEndpoint.objects.create(endpoint=path)
+                            endpoint = Endpoint.objects.create(endpoint=path)
                             findings.append(endpoint)
                         if 'backup_file' in key:
                             vulnerability = Vulnerability.objects.create(

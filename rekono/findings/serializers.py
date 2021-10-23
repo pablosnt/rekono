@@ -1,5 +1,5 @@
-from findings.models import (OSINT, Credential, Enumeration, Exploit, Host,
-                             HttpEndpoint, Technology, Vulnerability)
+from findings.models import (OSINT, Credential, Endpoint, Enumeration, Exploit,
+                             Host, Technology, Vulnerability)
 from rest_framework import serializers
 
 
@@ -32,15 +32,15 @@ class EnumerationSerializer(serializers.ModelSerializer):
         model = Enumeration
         fields = (
             'id', 'execution', 'host', 'port', 'port_status', 'protocol',
-            'service', 'creation', 'is_active', 'httpendpoints', 'technologys'
+            'service', 'creation', 'is_active', 'endpoints', 'technologys'
         )
         ordering = ['-id']
 
 
-class HttpEndpointSerializer(serializers.ModelSerializer):
+class EndpointSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = HttpEndpoint
+        model = Endpoint
         fields = ('id', 'execution', 'enumeration', 'endpoint', 'status', 'creation', 'is_active')
         ordering = ['-id']
 
