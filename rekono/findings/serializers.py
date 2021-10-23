@@ -1,5 +1,5 @@
 from findings.models import (OSINT, Enumeration, Exploit, Host, HttpEndpoint,
-                             Technology, Vulnerability)
+                             Technology, Vulnerability, Credential)
 from rest_framework import serializers
 
 
@@ -67,6 +67,14 @@ class VulnerabilitySerializer(serializers.ModelSerializer):
         read_only_fields = (
             'id', 'execution', 'technology', 'cve', 'creation', 'is_active', 'exploits'
         )
+        ordering = ['-id']
+
+
+class CredentialSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Credential
+        fields = ('id', 'email','username', 'secret')
         ordering = ['-id']
 
 

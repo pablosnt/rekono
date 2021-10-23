@@ -7,9 +7,5 @@ class ExecutionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Execution
-        fields = (
-            'id', 'task', 'step', 'output_plain', 'output_error', 'status', 'start', 'end',
-            'osints', 'hosts', 'enumerations', 'httpendpoints', 'technologys',
-            'vulnerabilitys', 'exploits'
-        )
+        fields = ('id', 'task', 'step', 'output_plain', 'output_error', 'status', 'start', 'end')
         ordering = ['-id']
