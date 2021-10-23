@@ -238,5 +238,15 @@
             "arguments": "{url} {intensity}",
             "default": true
         }
+    },
+    {
+        "model": "tools.configuration",
+        "pk": 25,
+        "fields": {
+            "tool_id": 8,
+            "name": "Active scan",
+            "arguments": "-cmd {url} -quickprogress -quickout {output}",
+            "default": true
+        }
     }
 ]

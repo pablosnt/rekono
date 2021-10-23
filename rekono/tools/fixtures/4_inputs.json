@@ -542,7 +542,7 @@
             "argument": "-u {url}",
             "filter": "http",
             "selection": 2,
-            "required": true
+            "required": false
         }
     },
     {
@@ -553,6 +553,32 @@
             "name": "url",
             "type": 4,
             "argument": "-u {url}{http_endpoint}",
+            "filter": null,
+            "selection": 2,
+            "required": false
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 44,
+        "fields": {
+            "configuration_id": 25,
+            "name": "url",
+            "type": 3,
+            "argument": "-quickurl {url}",
+            "filter": "http",
+            "selection": 2,
+            "required": false
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 45,
+        "fields": {
+            "configuration_id": 25,
+            "name": "url",
+            "type": 4,
+            "argument": "-quickurl {url}{http_endpoint}",
             "filter": null,
             "selection": 2,
             "required": false

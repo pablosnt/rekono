@@ -82,5 +82,17 @@
             "stage": 4,
             "reference": "https://github.com/Tuhinshubhra/CMSeeK/"
         }
+    },
+    {
+        "model": "tools.tool",
+        "pk": 8,
+        "fields": {
+            "name": "ZAP",
+            "command": "zaproxy",
+            "output_format": "xml",
+            "defectdojo_scan_type": "ZAP Scan",
+            "stage": 4,
+            "reference": "https://www.zaproxy.org/"
+        }
     }
 ]

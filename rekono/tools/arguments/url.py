@@ -4,10 +4,10 @@ import requests
 from findings.models import Enumeration
 from targets.models import TargetPort
 
-HTTP_PORT = 'http://{host}:{port}/'
-HTTPS_PORT = 'https://{host}:{port}/'
-HTTP_SIMPLE = 'http://{host}/'
-HTTPS_SIMPLE = 'https://{host}/'
+HTTP_PORT = 'http://{host}:{port}'
+HTTPS_PORT = 'https://{host}:{port}'
+HTTP_SIMPLE = 'http://{host}'
+HTTPS_SIMPLE = 'https://{host}'
 
 
 def get_url(host: str, port: Any) -> str:

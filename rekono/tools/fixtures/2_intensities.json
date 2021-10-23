@@ -160,5 +160,14 @@
             "argument": "",
             "value": 3
         }
+    },
+    {
+        "model": "tools.intensity",
+        "pk": 19,
+        "fields": {
+            "tool_id": 8,
+            "argument": "",
+            "value": 4
+        }
     }
 ]
