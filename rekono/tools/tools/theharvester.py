@@ -9,24 +9,6 @@ from users.models import User
 
 class TheHarvesterTool(BaseTool):
     
-    configuration_file = 'api-keys.yaml'
-    api_keys_config = {
-        'apikeys': {
-            'binaryedge': {},
-            'bing': {},
-            'censys': {},
-            'github': {},
-            'hunter': {},
-            'intelx': {},
-            'pentestTools': {},
-            'projectDiscovery': {},
-            'rocketreach': {},
-            'securityTrails': {},
-            'shodan': {},
-            'spyse': {},
-            'zoomeye': {}
-        }
-    }
     data_types = [
         ('ips', OSINT.DataType.IP),
         ('hosts', OSINT.DataType.DOMAIN),
@@ -39,20 +21,6 @@ class TheHarvesterTool(BaseTool):
         ('twitter_people', OSINT.DataType.USER),
         ('linkedin_people', OSINT.DataType.USER)
     ]
-
-    def prepare_environment(self) -> None:
-        user = self.execution.task.executor
-        for api in self.api_keys_config['apikeys'].keys():
-            apikey = user.get_api_key(api + '_apikey')
-            self.api_keys_config['apikeys'][api] = {
-                'key': apikey
-            }
-        with open(self.configuration_file, 'w') as config_file:
-            yaml.dump(self.api_keys_config, config_file, default_flow_style=False)
-
-    def clean_environment(self) -> None:
-        if os.path.isfile(self.configuration_file):
-            os.remove(self.configuration_file)
 
     def parse_output(self, output: str) -> list:
         osint_data = []

@@ -1,9 +1,8 @@
-from rest_framework import serializers
-from rest_framework.exceptions import AuthenticationFailed
-from users.models import User
-from security.authorization.roles import Role
 from django.contrib.sites.shortcuts import get_current_site
-from rest_framework import status
+from rest_framework import serializers, status
+from rest_framework.exceptions import AuthenticationFailed
+from security.authorization.roles import Role
+from users.models import User
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -13,27 +12,11 @@ class UserSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'username', 'first_name', 'last_name', 'email', 'is_active',
             'date_joined', 'last_login', 'groups', 'notification_preference',
-            'telegram_token', 'binaryedge_apikey', 'bing_apikey', 'censys_apikey',
-            'github_apikey', 'hunter_apikey', 'intelx_apikey', 'pentestTools_apikey',
-            'projectDiscovery_apikey', 'rocketreach_apikey', 'securityTrails_apikey',
-            'shodan_apikey', 'spyse_apikey', 'zoomeye_apikey'
+            'telegram_token'
         )
         read_only_fields = ('username', 'email', 'is_active', 'date_joined', 'last_login', 'groups')
         extra_kwargs = {
             'telegram_token': {'write_only': True},
-            'binaryedge_apikey': {'write_only': True},
-            'bing_apikey': {'write_only': True},
-            'censys_apikey': {'write_only': True},
-            'github_apikey': {'write_only': True},
-            'hunter_apikey': {'write_only': True},
-            'intelx_apikey': {'write_only': True},
-            'pentestTools_apikey': {'write_only': True},
-            'projectDiscovery_apikey': {'write_only': True},
-            'rocketreach_apikey': {'write_only': True},
-            'securityTrails_apikey': {'write_only': True},
-            'shodan_apikey': {'write_only': True},
-            'spyse_apikey': {'write_only': True},
-            'zoomeye_apikey': {'write_only': True}
         }
         ordering = ['-id']
 

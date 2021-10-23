@@ -1,11 +1,12 @@
-from django.contrib.auth.models import AbstractUser, UserManager, Group
+from typing import Any, Optional
+
+from django.contrib.auth.models import AbstractUser, Group, UserManager
 from django.db import models
 from rest_framework.authtoken.models import Token
 from security.authorization.roles import Role
-from security.crypto import generate_otp, encrypt, decrypt
-from typing import Any, Optional
-from users.mail import send_invitation_to_new_user, send_password_reset
+from security.crypto import decrypt, encrypt, generate_otp
 from users.enums import Notification
+from users.mail import send_invitation_to_new_user, send_password_reset
 
 # Create your models here.
 
@@ -96,29 +97,13 @@ class User(AbstractUser):
         null=True
     )
     telegram_token = models.TextField(max_length=100, blank=True, null=True)
-    binaryedge_apikey = models.TextField(max_length=100, blank=True, null=True)
-    bing_apikey = models.TextField(max_length=100, blank=True, null=True)
-    censys_apikey = models.TextField(max_length=100, blank=True, null=True)
-    github_apikey = models.TextField(max_length=100, blank=True, null=True)
-    hunter_apikey = models.TextField(max_length=100, blank=True, null=True)
-    intelx_apikey = models.TextField(max_length=100, blank=True, null=True)
-    pentestTools_apikey = models.TextField(max_length=100, blank=True, null=True)
-    projectDiscovery_apikey = models.TextField(max_length=100, blank=True, null=True)
-    rocketreach_apikey = models.TextField(max_length=100, blank=True, null=True)
-    securityTrails_apikey = models.TextField(max_length=100, blank=True, null=True)
-    shodan_apikey = models.TextField(max_length=100, blank=True, null=True)
-    spyse_apikey = models.TextField(max_length=100, blank=True, null=True)
-    zoomeye_apikey = models.TextField(max_length=100, blank=True, null=True)
 
     USERNAME_FIELD = 'username'
     EMAIL_FIELD = 'email'
     REQUIRED_FIELDS = ['email']
     objects = RekonoUserManager()
     API_KEYS = [
-        'telegram_token', 'binaryedge_apikey', 'bing_apikey', 'censys_apikey', 'github_apikey',
-        'hunter_apikey', 'intelx_apikey', 'pentestTools_apikey', 'projectDiscovery_apikey',
-        'rocketreach_apikey', 'securityTrails_apikey', 'shodan_apikey', 'spyse_apikey',
-        'zoomeye_apikey'
+        'telegram_token'
     ]
 
     def set_api_key(self, api_key: str, value: str) -> None:
