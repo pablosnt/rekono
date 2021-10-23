@@ -57,7 +57,7 @@ def execute(task: Task, parameters: list, domain: str) -> None:
                         target_ports=[tp],
                         domain=domain,
                         callback=success_callback,
-                        dependencies=[j.job for j in job.dependencies]
+                        dependencies=[job_id for j in job.dependencies for job_id in j.jobs]
                     )
                 )
         else:
@@ -72,7 +72,7 @@ def execute(task: Task, parameters: list, domain: str) -> None:
                     target_ports=target_ports,
                     domain=domain,
                     callback=success_callback,
-                    dependencies=[j.job for j in job.dependencies]
+                    dependencies=[job_id for j in job.dependencies for job_id in j.jobs]
                 )
             )
         if FindingType.ENUMERATION in job.output_types:
