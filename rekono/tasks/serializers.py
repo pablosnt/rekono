@@ -1,12 +1,11 @@
 from django.contrib.sites.shortcuts import get_current_site
 from django.utils import timezone
 from rest_framework import serializers
-from rest_framework.exceptions import ParseError
 from tasks.enums import TimeUnit
 from tasks.models import Parameter, Task
 from tasks.queue import producer
 from tools.enums import IntensityRank
-from tools.models import Intensity
+from tools.models import Configuration, Intensity
 
 
 class ParameterSerializer(serializers.ModelSerializer):
@@ -52,6 +51,11 @@ class TaskSerializer(serializers.ModelSerializer):
         if not attrs.get('intensity'):
             attrs['intensity'] = IntensityRank.NORMAL
         if attrs.get('tool'):
+            if not attrs.get('configuration'):
+                attrs['configuration'] = Configuration.objects.filter(
+                    tool=attrs.get('tool'),
+                    default=True
+                ).first()
             intensity = Intensity.objects.filter(
                 tool=attrs.get('tool'),
                 value=attrs.get('intensity')
