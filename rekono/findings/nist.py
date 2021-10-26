@@ -41,8 +41,8 @@ def get_severity(data: str) -> Severity:
     for severity in CVSS_RANGES.keys():
         down, up = CVSS_RANGES[severity]
         if (
-            (score >= down and score < up) or
-            (severity == Severity.CRITICAL and score >= down and score <= up)
+            (score >= down and score < up)
+            or (severity == Severity.CRITICAL and score >= down and score <= up)
         ):
             return severity
 

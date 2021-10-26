@@ -37,10 +37,14 @@ class SslscanTool(BaseTool):
                             )
                             and item.attrib['enabled'] == '1'
                         ):
+                            desc = '{protocol} {version} is supported'.format(
+                                protocol=item.attrib["type"].upper(),
+                                version=item.attrib["version"]
+                            )
                             vulnerability = Vulnerability.objects.create(
                                 technology=technology,
                                 name=f'Insecure {item.attrib["type"].upper()} version supported',
-                                description=f'{item.attrib["type"].upper()} {item.attrib["version"]} is supported',
+                                description=desc,
                                 severity=Severity.MEDIUM,
                                 cwe='CWE-326'
                             )
