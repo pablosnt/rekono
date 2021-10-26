@@ -73,7 +73,9 @@ class CmseekTool(BaseTool):
                 )
                 findings.append(cms)
                 for key, value in report.items():
-                    if key in ['cms_id', 'cms_name', 'cms_url', f'{cms_id}_version', f'{cms_name}_version']:
+                    if key in [
+                        'cms_id', 'cms_name', 'cms_url', f'{cms_id}_version', f'{cms_name}_version'
+                    ]:
                         continue
                     if 'file' in key or 'directory' in key:
                         paths = []

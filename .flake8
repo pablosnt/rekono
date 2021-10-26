@@ -1,7 +1,5 @@
 [flake8]
-exclude =
-    .git,
-    __pycache__,
-    */migrations/*
+ignore = C901
+exclude = .git,__pycache__,*/migrations/*
 max-line-length = 100
 max-complexity = 10

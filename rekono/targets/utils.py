@@ -1,11 +1,9 @@
 import ipaddress
-import socket
 import re
+import socket
 
-from targets.exceptions import InvalidTargetException
-from targets.models import Target
 from targets.enums import TargetType
-
+from targets.exceptions import InvalidTargetException
 
 IP_NETWORK_REGEX = '[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}/[0-9]{1,2}'
 IP_RANGE_REGEX = '[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}-[0-9]{1,3}'

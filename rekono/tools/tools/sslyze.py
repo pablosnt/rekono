@@ -45,7 +45,7 @@ class SslyzeTool(BaseTool):
         if os.path.isfile(self.path_output):
             with open(self.path_output, 'r') as output:
                 report = json.load(output)
-            if not 'server_scan_results' in report:
+            if 'server_scan_results' not in report:
                 return []
             report = report['server_scan_results']
             generic_tech = Technology.objects.create(name='Generic TLS')
@@ -69,7 +69,7 @@ class SslyzeTool(BaseTool):
                 if self.checker(
                     r,
                     'robot',
-                    'robot_result', 
+                    'robot_result',
                     ['VULNERABLE_STRONG_ORACLE', 'VULNERABLE_WEAK_ORACLE']
                 ):
                     vulnerability = Vulnerability.objects.create(

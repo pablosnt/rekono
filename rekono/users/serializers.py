@@ -49,7 +49,7 @@ class CreateUserSerializer(serializers.Serializer):
     last_name = serializers.CharField(max_length=150, required=True)
     password = serializers.CharField(max_length=150, required=True)
     otp = serializers.CharField(max_length=200, required=True)
-    
+
     def create(self, validated_data):
         pk = self.context.get('pk', None)
         user = User.objects.get(pk=pk, is_active=False, otp=validated_data.get('otp'))
@@ -84,7 +84,7 @@ class ChangeUserRoleSerializer(serializers.Serializer):
 
 class ChangeUserPasswordSerializer(serializers.ModelSerializer):
     old_password = serializers.CharField(max_length=150, required=True)
-    
+
     class Meta:
         model = User
         fields = ('password', 'old_password')

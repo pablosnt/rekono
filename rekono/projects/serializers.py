@@ -22,7 +22,7 @@ class ProjectSerializer(serializers.ModelSerializer):
         ):
             raise serializers.ValidationError(
                 {
-                    'defectdojo_product_id': f'Product ID {attrs.get("defectdojo_product_id")} not found in Defect-Dojo'
+                    'defectdojo_product_id': f'Product ID {attrs.get("defectdojo_product_id")} not found in Defect-Dojo'    # noqa: E501
                 }
             )
         return attrs

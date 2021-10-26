@@ -69,8 +69,12 @@ class TaskSerializer(serializers.ModelSerializer):
         return super().validate(attrs)
 
     def create(self, validated_data):
-        scheduled_time_unit = TimeUnit(validated_data.get('scheduled_time_unit')) if validated_data.get('scheduled_time_unit') else None
-        repeat_time_unit = TimeUnit(validated_data.get('repeat_time_unit')) if validated_data.get('repeat_time_unit') else None
+        scheduled_time_unit = None
+        if validated_data.get('scheduled_time_unit'):
+            scheduled_time_unit = TimeUnit(validated_data.get('scheduled_time_unit'))
+        repeat_time_unit = None
+        if validated_data.get('repeat_time_unit'):
+            repeat_time_unit = TimeUnit(validated_data.get('repeat_time_unit'))
         task = Task.objects.create(
             target=validated_data.get('target'),
             process=validated_data.get('process'),

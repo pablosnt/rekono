@@ -3,18 +3,18 @@ import shutil
 import subprocess
 import uuid
 
+from arguments import checker, formatter
+from arguments.constants import TARGET
 from django.utils import timezone
 from executions.models import Execution
 from findings.queue import producer
 from tasks.enums import ParameterKey, Status
 from tools import utils
-from arguments import checker, formatter
-from arguments.constants import TARGET
 from tools.enums import FindingType, InputSelection
 from tools.exceptions import (InstallationNotFoundException,
                               InvalidToolParametersException,
                               UnexpectedToolExitCodeException)
-from tools.models import Configuration, Input, Intensity, Tool
+from tools.models import Configuration, Intensity, Tool
 
 from rekono.settings import EXECUTION_OUTPUTS
 
@@ -24,7 +24,7 @@ class BaseTool():
     ignore_exit_code = False
     findings = []
     findings_relations = {}
-     
+
     def __init__(
         self,
         execution: Execution,
@@ -63,7 +63,7 @@ class BaseTool():
 
     def prepare_parameters(self, parameters: list, previous_findings: list) -> tuple:
         return (parameters, previous_findings)
-    
+
     def get_arguments(self, parameters: list, previous_findings: list) -> str:
         command_arguments = {
             'intensity': self.intensity.argument,
@@ -116,7 +116,7 @@ class BaseTool():
                 if (
                     i.name not in command_arguments and
                     (
-                        i.type == FindingType.HOST or 
+                        i.type == FindingType.HOST or
                         (i.type == FindingType.ENUMERATION and i.name == TARGET)
                     ) and
                     checker.check_input_condition(i, self.target)

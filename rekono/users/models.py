@@ -109,7 +109,7 @@ class User(AbstractUser):
     def set_api_key(self, api_key: str, value: str) -> None:
         if api_key in self.API_KEYS:
             setattr(self, api_key, encrypt(value))
-    
+
     def get_api_key(self, api_key: str) -> str:
         if api_key in self.API_KEYS and hasattr(self, api_key):
             encrypted = getattr(self, api_key)

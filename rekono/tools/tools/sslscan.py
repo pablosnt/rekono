@@ -67,10 +67,16 @@ class SslscanTool(BaseTool):
                         item.tag == 'cipher' and
                         item.attrib['strength'] not in ['acceptable', 'strong']
                     ):
+                        desc = '{version} {cipher} status={status} strength={strength}'.format(
+                            version=item.attrib["sslversion"],
+                            cipher=item.attrib["cipher"],
+                            status=item.attrib["status"],
+                            strength=item.attrib["strength"]
+                        )
                         vulnerability = Vulnerability.objects.create(
                             technology=self.get_technology(technologies, item.attrib['sslversion']),
                             name='Insecure cipher suite supported',
-                            description=f'{item.attrib["sslversion"]} {item.attrib["cipher"]} status={item.attrib["status"]} strength={item.attrib["strength"]}',
+                            description=desc,
                             severity=Severity.LOW,
                             cwe='CWE-326'
                         )

@@ -32,7 +32,7 @@ class Finding(models.Model):
                 hash_fields.append(getattr(self, field))
         return hash(hash_fields)
 
-    def __eq__(slef, o: object) -> bool:
+    def __eq__(self, o: object) -> bool:
         if isinstance(o, self.__class__):
             equals = True
             for field in self.KEY_FIELDS:
@@ -50,7 +50,7 @@ class OSINT(Finding):
     data_type = models.IntegerField(choices=DataType.choices)
     source = models.TextField(max_length=50, blank=True, null=True)
     reference = models.TextField(max_length=250, blank=True, null=True)
-    
+
     KEY_FIELDS = ('task', 'data', 'data_type')    
 
 
@@ -58,7 +58,7 @@ class Host(Finding):
     address = models.TextField(max_length=20)
     os = models.TextField(max_length=250, blank=True, null=True)
     os_type = models.IntegerField(choices=OSType.choices, default=OSType.OTHER)
-    
+
     KEY_FIELDS = ('task', 'address')
 
 
@@ -74,7 +74,7 @@ class Enumeration(Finding):
     port_status = models.IntegerField(choices=PortStatus.choices, default=PortStatus.OPEN)
     protocol = models.IntegerField(choices=Protocol.choices, blank=True, null=True)
     service = models.TextField(max_length=50, blank=True, null=True)
-    
+
     KEY_FIELDS = ('host', 'port')
 
 
@@ -88,7 +88,7 @@ class Endpoint(Finding):
     )
     endpoint = models.TextField(max_length=500)
     status = models.IntegerField(blank=True, null=True)
-    
+
     KEY_FIELDS = ('enumeration', 'endpoint')
 
 
@@ -130,7 +130,7 @@ class Vulnerability(Finding):
     cwe = models.TextField(max_length=20, blank=True, null=True)
     osvdb = models.TextField(max_length=20, blank=True, null=True)
     reference = models.TextField(max_length=250, blank=True, null=True)
-    
+
     KEY_FIELDS = ('technology', 'name', 'cve')
 
 
@@ -161,5 +161,5 @@ class Exploit(Finding):
     description = models.TextField(blank=True, null=True)
     reference = models.TextField(max_length=250, blank=True, null=True)
     checked = models.BooleanField(default=False)
-    
+
     KEY_FIELDS = ('technology', 'vulnerability', 'name', 'reference')
