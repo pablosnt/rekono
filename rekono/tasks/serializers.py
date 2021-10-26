@@ -49,6 +49,8 @@ class TaskSerializer(serializers.ModelSerializer):
                     'process': 'Invalid task. Process or tool is required'
                 }
             )
+        if not attrs.get('intensity'):
+            attrs['intensity'] = IntensityRank.NORMAL
         if attrs.get('tool'):
             intensity = Intensity.objects.filter(
                 tool=attrs.get('tool'),
