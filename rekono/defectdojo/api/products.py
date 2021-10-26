@@ -31,14 +31,20 @@ def create_rekono_prod_type() -> int:
             'name': prod_type,
             'description': prod_type,
         }
-        response = requests.post(utils.urls.get('prod_types'), headers=utils.headers, data=data)
+        response = requests.post(
+            utils.urls.get('prod_types'),
+            headers=utils.headers, data=data
+        )
         result = response.json()
         if result:
             return result.get('id')
 
 
 def check_product_id(id: int) -> bool:
-    response = requests.get(utils.urls.get('products') + f'{id}/', headers=utils.headers)
+    response = requests.get(
+        utils.urls.get('products') + f'{id}/',
+        headers=utils.headers
+    )
     return response.status_code == 200
 
 
@@ -52,7 +58,11 @@ def create_new_product(project: Project) -> Project:
         'description': project.description,
         'prod_type': prod_type_id,
     }
-    response = requests.post(utils.urls.get('products'), headers=utils.headers, data=data)
+    response = requests.post(
+        utils.urls.get('products'),
+        headers=utils.headers,
+        data=data
+    )
     result = response.json()
     if result:
         project.defectdojo_product_id = result.get('id')

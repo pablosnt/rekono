@@ -1,5 +1,3 @@
-from typing import Any
-
 import rq
 from django_rq import job
 from executions.models import Execution
@@ -9,9 +7,9 @@ from executions.queue.constants import finding_relations
 from processes.executor import success_callback
 from rq.job import Job
 from tools import utils as tool_utils
-from tools.enums import FindingType, InputSelection
+from tools.enums import InputSelection
 from tools.exceptions import InvalidToolParametersException
-from tools.models import Configuration, Input, Intensity, Tool
+from tools.models import Configuration, Intensity, Tool
 from tools.tools.base_tool import BaseTool
 
 

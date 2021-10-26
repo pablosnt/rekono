@@ -1,5 +1,4 @@
 from arguments import parser
-from arguments.constants import PORTS, PORTS_COMMAS, TARGET
 from findings.models import (OSINT, Credential, Endpoint, Enumeration, Exploit,
                              Host, Technology, Vulnerability)
 from targets.models import Target
