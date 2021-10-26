@@ -111,19 +111,21 @@
 
         <br>
 
-        {% if httpendpoint %}
-            <h3>HTTP endpoints:</h3>
+        {% if endpoint %}
+            <h3>Endpoints:</h3>
             <table>
                 <tr>
                     <th>Host</th>
                     <th>Port</th>
+                    <th>Service</th>
                     <th>Endpoint</th>
                     <th>Status</th>
                 </tr>
-                {% for e in httpendpoint %}
+                {% for e in endpoint %}
                     <tr>
                         <th><a href="http://{{ domain }}/api/hosts/{{ e.enumeration.host.id }}/">{{ e.enumeration.host.address }}</a></th>
                         <th><a href="http://{{ domain }}/api/enumerations/{{ e.enumeration.id }}/">{{ e.enumeration.port }}</a></th>
+                        <th>{{ e.enumeration.service }}</th>
                         <th><a href="http://{{ domain }}/api/endpoints/{{ e.id }}/">{{ e.endpoint }}</a></th>
                         <th>{{ e.status }}</th>
                     </tr>
@@ -156,6 +158,28 @@
                 {% endfor %}
             </table>
         {% endif %}
+
+        <br>
+
+        {% if credential %}
+            <h3>Credentials:</h3>
+            <table>
+                <tr>
+                    <th>Email</th>
+                    <th>Username</th>
+                    <th>Secret</th>
+                </tr>
+                {% for c in credential %}
+                    <tr>
+                        <th>{{ c.email }}</th>
+                        <th>{{ c.username }}</th>
+                        <th>{{ c.secret }}</th>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% endif %}
+
+        <br>
 
         {% if exploit %}
             <h3>Exploits:</h3>

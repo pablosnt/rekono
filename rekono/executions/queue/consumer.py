@@ -1,5 +1,3 @@
-from typing import Any
-
 import rq
 from django_rq import job
 from executions.models import Execution
@@ -9,9 +7,9 @@ from executions.queue.constants import finding_relations
 from processes.executor import success_callback
 from rq.job import Job
 from tools import utils as tool_utils
-from tools.enums import FindingType
+from tools.enums import InputSelection
 from tools.exceptions import InvalidToolParametersException
-from tools.models import Configuration, Input, Intensity, Tool
+from tools.models import Configuration, Intensity, Tool
 from tools.tools.base_tool import BaseTool
 
 
@@ -22,6 +20,7 @@ def consumer(
     configuration: Configuration,
     intensity: Intensity,
     inputs: list,
+    target_ports: list,
     parameters: list,
     previous_findings: list,
     domain: str,
@@ -33,7 +32,8 @@ def consumer(
         tool=tool,
         configuration=configuration,
         inputs=inputs,
-        intensity=intensity
+        intensity=intensity,
+        target_ports=target_ports,
     )
     if not previous_findings and current_job._dependency_ids:
         previous_findings = process_dependencies(
@@ -76,6 +76,7 @@ def process_dependencies(
             inputs,
             parameters=parameters,
             previous_findings=param_set,
+            target_ports=tool.target_ports,
             domain=domain,
             callback=success_callback,
             at_front=True
@@ -101,12 +102,7 @@ def get_new_jobs_from_findings(findings: dict, inputs: list) -> set:
     }
     for input_type in finding_relations.keys():
         input_class = tool_utils.get_finding_class_by_type(input_type)
-        inputs = [i for i in inputs if (
-            i.type == input_type or
-            (
-                i.type == FindingType.URL and
-                input_type in [FindingType.HOST, FindingType.ENUMERATION]
-            ))]
+        inputs = [i for i in inputs if i.type == input_type]
         if not inputs or input_type not in findings:
             continue
         for i in inputs:
@@ -120,7 +116,7 @@ def get_new_jobs_from_findings(findings: dict, inputs: list) -> set:
                                 relations_found = True
                                 for jc in jobs.copy():
                                     if attribute in jobs[jc]:
-                                        if i.selection == Input.InputSelection.ALL:
+                                        if i.selection == InputSelection.ALL:
                                             jobs[jc].append(finding)
                                         else:
                                             related_items = [
@@ -138,7 +134,7 @@ def get_new_jobs_from_findings(findings: dict, inputs: list) -> set:
                         for jc in jobs.copy():
                             jobs[jc].append(finding)
             else:
-                if i.selection == Input.InputSelection.ALL:
+                if i.selection == InputSelection.ALL:
                     for jc in jobs.copy():
                         jobs[jc].extend(findings[input_type])
                 else:

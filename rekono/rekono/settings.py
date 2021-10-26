@@ -82,7 +82,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            os.path.join(BASE_DIR, 'integrations', 'mail', 'templates')
+            os.path.join(BASE_DIR, 'mail', 'templates')
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -197,6 +197,14 @@ DEFECT_DOJO = {
     'REKONO_PROD_TYPE_ID': None,
     'REKONO_PROD_TYPE': 'Rekono',
     'REKONO_ENGAGEMENT': 'Rekono'
+}
+
+
+# Tools configuration
+TOOLS = {
+    'cmseek': {
+        'directory': '/usr/share/cmseek'
+    }
 }
 
 

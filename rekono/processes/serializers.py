@@ -1,4 +1,3 @@
-from rest_framework.exceptions import ParseError
 from processes.models import Process, Step
 from rest_framework import serializers
 from tools.models import Configuration
@@ -43,8 +42,8 @@ class StepSerializer(serializers.ModelSerializer):
         ).count()
         if steps > 0:
             process = attrs.get('process').name
-            raise ParseError(
-                f'Invalid request. Process {process} still has this step'
+            raise serializers.ValidationError(
+                {'process': f'Invalid request. Process {process} still has this step'}
             )
         return attrs
 

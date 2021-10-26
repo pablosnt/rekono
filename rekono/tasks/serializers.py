@@ -1,12 +1,11 @@
-from tasks.models import Parameter, Task
-from rest_framework.exceptions import ParseError
-from tools.enums import IntensityRank
-from tools.models import Intensity
-from rest_framework import serializers
-from tasks.queue import producer
-from tasks.enums import TimeUnit
-from django.utils import timezone
 from django.contrib.sites.shortcuts import get_current_site
+from django.utils import timezone
+from rest_framework import serializers
+from tasks.enums import TimeUnit
+from tasks.models import Parameter, Task
+from tasks.queue import producer
+from tools.enums import IntensityRank
+from tools.models import Configuration, Intensity
 
 
 class ParameterSerializer(serializers.ModelSerializer):
@@ -33,7 +32,7 @@ class TaskSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         if attrs.get('scheduled_at') and attrs.get('scheduled_at') <= timezone.now():
-            raise ParseError('Scheduled datetime must be future')
+            raise serializers.ValidationError({'scheduled_at': 'Scheduled datetime must be future'})
         if not attrs.get('scheduled_in'):
             attrs['scheduled_time_unit'] = None
         if not attrs.get('repeat_in'):
@@ -43,8 +42,20 @@ class TaskSerializer(serializers.ModelSerializer):
         if attrs.get('repeat_in') and not attrs.get('repeat_time_unit'):
             attrs['repeat_in'] = None
         if not attrs.get('process') and not attrs.get('tool'):
-            raise ParseError('Invalid task. Process or tool is required')
+            raise serializers.ValidationError(
+                {
+                    'tool': 'Invalid task. Process or tool is required',
+                    'process': 'Invalid task. Process or tool is required'
+                }
+            )
+        if not attrs.get('intensity'):
+            attrs['intensity'] = IntensityRank.NORMAL
         if attrs.get('tool'):
+            if not attrs.get('configuration'):
+                attrs['configuration'] = Configuration.objects.filter(
+                    tool=attrs.get('tool'),
+                    default=True
+                ).first()
             intensity = Intensity.objects.filter(
                 tool=attrs.get('tool'),
                 value=attrs.get('intensity')
@@ -52,12 +63,18 @@ class TaskSerializer(serializers.ModelSerializer):
             if not intensity:
                 intensity = IntensityRank(attrs.get('intensity')).name
                 tool = attrs.get('tool').name
-                raise ParseError(f'Invalid intensity {intensity} for tool {tool}')
+                raise serializers.ValidationError(
+                    {'intensity': f'Invalid intensity {intensity} for tool {tool}'}
+                )
         return super().validate(attrs)
 
     def create(self, validated_data):
-        scheduled_time_unit = TimeUnit(validated_data.get('scheduled_time_unit')) if validated_data.get('scheduled_time_unit') else None
-        repeat_time_unit = TimeUnit(validated_data.get('repeat_time_unit')) if validated_data.get('repeat_time_unit') else None
+        scheduled_time_unit = None
+        if validated_data.get('scheduled_time_unit'):
+            scheduled_time_unit = TimeUnit(validated_data.get('scheduled_time_unit'))
+        repeat_time_unit = None
+        if validated_data.get('repeat_time_unit'):
+            repeat_time_unit = TimeUnit(validated_data.get('repeat_time_unit'))
         task = Task.objects.create(
             target=validated_data.get('target'),
             process=validated_data.get('process'),

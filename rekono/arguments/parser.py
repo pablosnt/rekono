@@ -1,31 +1,58 @@
-from findings.models import (OSINT, Enumeration, Exploit, Host, HttpEndpoint,
-                             Technology, Vulnerability)
+from arguments import checker
+from arguments.constants import (EMAIL, HOST, PORT, PORTS, PORTS_COMMAS,
+                                 SECRET, TARGET, URL, USERNAME)
+from arguments.url import get_url
+from findings.models import (OSINT, Credential, Endpoint, Enumeration, Exploit,
+                             Host, Technology, Vulnerability)
+from targets.models import Target
 from tasks.enums import ParameterKey
 from tasks.models import Parameter
-from tools.arguments import checker
-from tools.arguments.constants import PORT, PORTS, PORTS_COMMAS, TARGET, URL
-from tools.arguments.url import Url
+
+
+def target(target: Target) -> dict:
+    return {
+        TARGET: target.target,
+        HOST: target.target,
+        URL: get_url(target.target, None)
+    }
+
+
+def target_port(target_ports: list, target: Target) -> dict:
+    urls = [get_url(target.target, tp) for tp in target_ports]
+    urls = [url for url in urls if url]
+    return {
+        PORT: target_ports[0].port,
+        PORTS: [tp.port for tp in target_ports],
+        PORTS_COMMAS: ','.join([str(tp.port) for tp in target_ports]),
+        URL: urls[0] if urls else None,
+    }
 
 
 def osint(osint: OSINT) -> dict:
     if osint.data_type in [OSINT.DataType.IP, OSINT.DataType.DOMAIN]:
         return {
             TARGET: osint.data,
+            HOST: osint.data,
+            URL: get_url(osint.data, None)
         }
     return {}
 
 
 def host(host: Host) -> dict:
     return {
-        TARGET: host.address
+        TARGET: host.address,
+        HOST: host.address,
+        URL: get_url(host.address, None),
     }
 
 
 def enumeration(enumeration: Enumeration, accumulated: dict = {}) -> dict:
     output = {
-        TARGET: enumeration.host.address,
+        TARGET: f'{enumeration.host.address}:{enumeration.port}',
+        HOST: enumeration.host.address,
         PORT: enumeration.port,
-        PORTS: [enumeration.port]
+        PORTS: [enumeration.port],
+        URL: get_url(None, enumeration),
     }
     if accumulated and PORTS in accumulated:
         output[PORTS] = accumulated[PORTS]
@@ -34,9 +61,9 @@ def enumeration(enumeration: Enumeration, accumulated: dict = {}) -> dict:
     return output
 
 
-def http_endpoint(http_endpoint: HttpEndpoint):
-    output = enumeration(http_endpoint.enumeration)
-    output[ParameterKey.HTTP_ENDPOINT.name.lower()] = http_endpoint.endpoint
+def ednpoint(endpoint: Endpoint):
+    output = enumeration(endpoint.enumeration)
+    output[ParameterKey.ENDPOINT.name.lower()] = endpoint.endpoint
     return output
 
 
@@ -59,16 +86,18 @@ def vulnerability(vulnerability: Vulnerability) -> dict:
     return output
 
 
+def credential(credential: Credential) -> dict:
+    return {
+        EMAIL: credential.email,
+        USERNAME: credential.username,
+        SECRET: credential.secret,
+    }
+
+
 def exploit(exploit: Exploit) -> dict:
     output = vulnerability(exploit.vulnerability)
     output[ParameterKey.EXPLOIT.name.lower()] = exploit.name
     return output
-
-
-def url(url: Url) -> dict:
-    return {
-        URL: url.value
-    }
 
 
 def parameter(parameter: Parameter) -> dict:

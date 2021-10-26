@@ -204,8 +204,48 @@
         "pk": 21,
         "fields": {
             "tool_id": 4,
-            "name": "Default nikto",
-            "arguments": "{url} -Format csv -output {output}",
+            "name": "Default Nikto",
+            "arguments": "{url} -Format xml -output {output}",
+            "default": true
+        }
+    },
+    {
+        "model": "tools.configuration",
+        "pk": 22,
+        "fields": {
+            "tool_id": 5,
+            "name": "Default Sslscan",
+            "arguments": "--xml={output} {intensity} {target}",
+            "default": true
+        }
+    },
+    {
+        "model": "tools.configuration",
+        "pk": 23,
+        "fields": {
+            "tool_id": 6,
+            "name": "Default SSLyze",
+            "arguments": "--json_out={output} {target}",
+            "default": true
+        }
+    },
+    {
+        "model": "tools.configuration",
+        "pk": 24,
+        "fields": {
+            "tool_id": 7,
+            "name": "Default CMSeeK",
+            "arguments": "{url} {intensity}",
+            "default": true
+        }
+    },
+    {
+        "model": "tools.configuration",
+        "pk": 25,
+        "fields": {
+            "tool_id": 8,
+            "name": "Active scan",
+            "arguments": "-cmd {url} -quickprogress -quickout {output}",
             "default": true
         }
     }

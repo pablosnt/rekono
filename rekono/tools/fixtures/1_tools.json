@@ -3,24 +3,28 @@
         "model": "tools.tool",
         "pk": 1,
         "fields": {
-            "name": "nmap",
+            "name": "Nmap",
             "command": "nmap",
             "output_format": "xml",
             "defectdojo_scan_type": "Nmap Scan",
             "stage": 2,
-            "reference": "https://nmap.org/"
+            "reference": "https://nmap.org/",
+            "icon": "https://www.kali.org/tools/nmap/images/nmap-logo.svg",
+            "for_each_target_port": false
         }
     },
     {
         "model": "tools.tool",
         "pk": 2,
         "fields": {
-            "name": "dirsearch",
+            "name": "Dirsearch",
             "command": "dirsearch",
             "output_format": "json",
             "defectdojo_scan_type": null,
             "stage": 4,
-            "reference": "https://github.com/maurosoria/dirsearch"
+            "reference": "https://github.com/maurosoria/dirsearch",
+            "icon": "https://raw.githubusercontent.com/maurosoria/dirsearch/master/static/logo.png",
+            "for_each_target_port": true
         }
     },
     {
@@ -32,19 +36,79 @@
             "output_format": "json",
             "defectdojo_scan_type": null,
             "stage": 1,
-            "reference": "https://github.com/laramies/theHarvester"
+            "reference": "https://github.com/laramies/theHarvester",
+            "icon": "https://www.kali.org/tools/theharvester/images/theharvester-logo.svg",
+            "for_each_target_port": false
         }
     },
     {
         "model": "tools.tool",
         "pk": 4,
         "fields": {
-            "name": "nikto",
+            "name": "Nikto",
             "command": "nikto",
-            "output_format": "csv",
+            "output_format": "xml",
             "defectdojo_scan_type": "Nikto Scan",
             "stage": 4,
-            "reference": "https://github.com/sullo/nikto"
+            "reference": "https://github.com/sullo/nikto",
+            "icon": "https://www.kali.org/tools/nikto/images/nikto-logo.svg",
+            "for_each_target_port": true
+        }
+    },
+    {
+        "model": "tools.tool",
+        "pk": 5,
+        "fields": {
+            "name": "Sslscan",
+            "command": "sslscan",
+            "output_format": "xml",
+            "defectdojo_scan_type": "Sslscan",
+            "stage": 4,
+            "reference": "https://github.com/rbsec/sslscan",
+            "icon": "https://www.kali.org/tools/sslscan/images/sslscan-logo.svg",
+            "for_each_target_port": true
+        }
+    },
+    {
+        "model": "tools.tool",
+        "pk": 6,
+        "fields": {
+            "name": "SSLyze",
+            "command": "sslyze",
+            "output_format": "json",
+            "defectdojo_scan_type": "SSLyze 3 Scan (JSON)",
+            "stage": 4,
+            "reference": "https://nabla-c0d3.github.io/sslyze/documentation/",
+            "icon": "https://www.kali.org/tools/sslyze/images/sslyze-logo.svg",
+            "for_each_target_port": true
+        }
+    },
+    {
+        "model": "tools.tool",
+        "pk": 7,
+        "fields": {
+            "name": "CMSeeK",
+            "command": "cmseek",
+            "output_format": "json",
+            "defectdojo_scan_type": null,
+            "stage": 4,
+            "reference": "https://github.com/Tuhinshubhra/CMSeeK/",
+            "icon": "https://camo.githubusercontent.com/b1864e58e861aa4e938d17d4a50ae1a4bedec9cdb9e8b7ce7ac80a1b5cc711ed/68747470733a2f2f692e696d6775722e636f6d2f35565973316d322e706e67",
+            "for_each_target_port": true
+        }
+    },
+    {
+        "model": "tools.tool",
+        "pk": 8,
+        "fields": {
+            "name": "ZAP",
+            "command": "zaproxy",
+            "output_format": "xml",
+            "defectdojo_scan_type": "ZAP Scan",
+            "stage": 4,
+            "reference": "https://www.zaproxy.org/",
+            "icon": "https://www.kali.org/tools/zaproxy/images/zaproxy-logo.svg",
+            "for_each_target_port": true
         }
     }
 ]

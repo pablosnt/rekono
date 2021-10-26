@@ -1,3 +1,4 @@
+from defectdojo.api import products
 from projects.models import Project
 from rest_framework import serializers
 from users.models import User
@@ -12,6 +13,19 @@ class ProjectSerializer(serializers.ModelSerializer):
         )
         read_only_fields = ('owner', 'targets', 'members')
         ordering = ['-id']
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        if (
+            attrs.get('defectdojo_product_id')
+            and not products.check_product_id(attrs.get('defectdojo_product_id'))
+        ):
+            raise serializers.ValidationError(
+                {
+                    'defectdojo_product_id': f'Product ID {attrs.get("defectdojo_product_id")} not found in Defect-Dojo'    # noqa: E501
+                }
+            )
+        return attrs
 
     def create(self, validated_data):
         project = super().create(validated_data)

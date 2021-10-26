@@ -369,7 +369,7 @@
         "fields": {
             "configuration_id": 15,
             "name": "url",
-            "type": 4,
+            "type": 3,
             "argument": "-u {url}",
             "filter": "http",
             "selection": 2,
@@ -382,7 +382,7 @@
         "fields": {
             "configuration_id": 15,
             "name": "wordlist",
-            "type": 9,
+            "type": 8,
             "argument": "--wordlist={wordlist}",
             "filter": null,
             "selection": 1,
@@ -395,7 +395,7 @@
         "fields": {
             "configuration_id": 16,
             "name": "url",
-            "type": 4,
+            "type": 3,
             "argument": "-u {url}",
             "filter": "http",
             "selection": 2,
@@ -408,7 +408,7 @@
         "fields": {
             "configuration_id": 16,
             "name": "wordlist",
-            "type": 9,
+            "type": 8,
             "argument": "--wordlist={wordlist}",
             "filter": null,
             "selection": 1,
@@ -421,7 +421,7 @@
         "fields": {
             "configuration_id": 17,
             "name": "url",
-            "type": 4,
+            "type": 3,
             "argument": "-u {url}",
             "filter": "http",
             "selection": 2,
@@ -434,7 +434,7 @@
         "fields": {
             "configuration_id": 17,
             "name": "wordlist",
-            "type": 9,
+            "type": 8,
             "argument": "--wordlist={wordlist}",
             "filter": null,
             "selection": 1,
@@ -447,7 +447,7 @@
         "fields": {
             "configuration_id": 18,
             "name": "url",
-            "type": 4,
+            "type": 3,
             "argument": "-u {url}",
             "filter": "http",
             "selection": 2,
@@ -499,11 +499,89 @@
         "fields": {
             "configuration_id": 21,
             "name": "url",
-            "type": 4,
+            "type": 3,
             "argument": "-host {url}",
             "filter": "http",
             "selection": 2,
             "required": true
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 40,
+        "fields": {
+            "configuration_id": 22,
+            "name": "target",
+            "type": 3,
+            "argument": "{target}",
+            "filter": null,
+            "selection": 2,
+            "required": true
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 41,
+        "fields": {
+            "configuration_id": 23,
+            "name": "target",
+            "type": 3,
+            "argument": "{target}",
+            "filter": null,
+            "selection": 2,
+            "required": true
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 42,
+        "fields": {
+            "configuration_id": 24,
+            "name": "url",
+            "type": 3,
+            "argument": "-u {url}",
+            "filter": "http",
+            "selection": 2,
+            "required": false
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 43,
+        "fields": {
+            "configuration_id": 24,
+            "name": "url",
+            "type": 4,
+            "argument": "-u {url}{endpoint}",
+            "filter": "http",
+            "selection": 2,
+            "required": false
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 44,
+        "fields": {
+            "configuration_id": 25,
+            "name": "url",
+            "type": 3,
+            "argument": "-quickurl {url}",
+            "filter": "http",
+            "selection": 2,
+            "required": false
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 45,
+        "fields": {
+            "configuration_id": 25,
+            "name": "url",
+            "type": 4,
+            "argument": "-quickurl {url}{endpoint}",
+            "filter": "http",
+            "selection": 2,
+            "required": false
         }
     }
 ]
