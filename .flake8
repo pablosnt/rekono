@@ -2,6 +2,6 @@
 exclude =
     .git,
     __pycache__,
-    migrations
+    */migrations/*
 max-line-length = 100
 max-complexity = 10
