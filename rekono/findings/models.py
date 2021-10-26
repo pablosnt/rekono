@@ -51,7 +51,7 @@ class OSINT(Finding):
     source = models.TextField(max_length=50, blank=True, null=True)
     reference = models.TextField(max_length=250, blank=True, null=True)
 
-    KEY_FIELDS = ('task', 'data', 'data_type')    
+    KEY_FIELDS = ('task', 'data', 'data_type')
 
 
 class Host(Finding):

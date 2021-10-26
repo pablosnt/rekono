@@ -81,7 +81,7 @@ class CredentialSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Credential
-        fields = ('id', 'email','username', 'secret')
+        fields = ('id', 'email', 'username', 'secret')
         ordering = ['-id']
 
 

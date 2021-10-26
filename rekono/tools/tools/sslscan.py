@@ -30,11 +30,12 @@ class SslscanTool(BaseTool):
                         if (
                             (
                                 (
-                                    item.attrib['type'] == 'tls' and
-                                    item.attrib['version'] not in ['1.2', '1.3']
-                                ) or
-                                item.attrib['type'] == 'ssl'
-                            ) and item.attrib['enabled'] == '1'
+                                    item.attrib['type'] == 'tls'
+                                    and item.attrib['version'] not in ['1.2', '1.3']
+                                )
+                                or item.attrib['type'] == 'ssl'
+                            )
+                            and item.attrib['enabled'] == '1'
                         ):
                             vulnerability = Vulnerability.objects.create(
                                 technology=technology,
@@ -45,9 +46,9 @@ class SslscanTool(BaseTool):
                             )
                             vulnerabilities.append(vulnerability)
                     elif (
-                        item.tag == 'renegotiation' and
-                        item.attrib['supported'] == '1' and
-                        item.attrib['secure'] != '1'
+                        item.tag == 'renegotiation'
+                        and item.attrib['supported'] == '1'
+                        and item.attrib['secure'] != '1'
                     ):
                         vulnerability = Vulnerability.objects.create(
                             name='Insecure TLS renegotiation supported',
@@ -64,8 +65,8 @@ class SslscanTool(BaseTool):
                         )
                         vulnerabilities.append(vulnerability)
                     elif (
-                        item.tag == 'cipher' and
-                        item.attrib['strength'] not in ['acceptable', 'strong']
+                        item.tag == 'cipher'
+                        and item.attrib['strength'] not in ['acceptable', 'strong']
                     ):
                         desc = '{version} {cipher} status={status} strength={strength}'.format(
                             version=item.attrib["sslversion"],

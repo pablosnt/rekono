@@ -1,6 +1,5 @@
 from processes.models import Process, Step
 from rest_framework import serializers
-from rest_framework.exceptions import ParseError
 from tools.models import Configuration
 
 

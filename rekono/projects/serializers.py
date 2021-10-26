@@ -17,8 +17,8 @@ class ProjectSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         attrs = super().validate(attrs)
         if (
-            attrs.get('defectdojo_product_id') and
-            not products.check_product_id(attrs.get('defectdojo_product_id'))
+            attrs.get('defectdojo_product_id')
+            and not products.check_product_id(attrs.get('defectdojo_product_id'))
         ):
             raise serializers.ValidationError(
                 {

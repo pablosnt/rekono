@@ -15,16 +15,16 @@ class SslyzeTool(BaseTool):
 
     def checker(self, item: dict, parent: str, child: str, expected: list) -> bool:
         return (
-            parent in item and
-            child in item[parent] and
-            item[parent][child] in expected
+            parent in item
+            and child in item[parent]
+            and item[parent][child] in expected
         )
 
     def check_true(self, item: dict, parent: str, child: str) -> bool:
         return (
-            parent in item and
-            child in item[parent] and
-            item[parent][child]
+            parent in item
+            and child in item[parent]
+            and item[parent][child]
         )
 
     def get_rc4s(self, item: dict, field: str) -> list:
@@ -32,9 +32,9 @@ class SslyzeTool(BaseTool):
         if field in item and 'accepted_cipher_suites' in item[field]:
             for cs in item[field]['accepted_cipher_suites']:
                 if (
-                    'cipher_suite' in cs and
-                    'name' in cs['cipher_suite'] and
-                    '_RC4_' in cs['cipher_suite']['name']
+                    'cipher_suite' in cs
+                    and 'name' in cs['cipher_suite']
+                    and '_RC4_' in cs['cipher_suite']['name']
                 ):
                     rc4s.append(cs['cipher_suite']['name'])
         return rc4s
@@ -87,13 +87,13 @@ class SslyzeTool(BaseTool):
                         'session_renegotiation',
                         'supports_secure_renegotiation',
                         [False]
-                    ) or
-                    self.check_true(
+                    )
+                    or self.check_true(
                         r,
                         'session_renegotiation',
                         'is_vulnerable_to_client_renegotiation_dos'
-                    ) or
-                    self.check_true(
+                    )
+                    or self.check_true(
                         r,
                         'session_renegotiation',
                         'accepts_client_renegotiation'
@@ -150,8 +150,8 @@ class SslyzeTool(BaseTool):
                 if 'certificate_info' in r and 'certificate_deployments' in r['certificate_info']:
                     for deploy in r['certificate_info']['certificate_deployments']:
                         if (
-                            'leaf_certificate_subject_matches_hostname' in deploy and
-                            not deploy['leaf_certificate_subject_matches_hostname']
+                            'leaf_certificate_subject_matches_hostname' in deploy
+                            and not deploy['leaf_certificate_subject_matches_hostname']
                         ):
                             vulnerability = Vulnerability.objects.create(
                                 technology=generic_tech,

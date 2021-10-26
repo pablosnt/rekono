@@ -114,12 +114,12 @@ class BaseTool():
                                 params
                             )
                 if (
-                    i.name not in command_arguments and
-                    (
-                        i.type == FindingType.HOST or
-                        (i.type == FindingType.ENUMERATION and i.name == TARGET)
-                    ) and
-                    checker.check_input_condition(i, self.target)
+                    i.name not in command_arguments
+                    and (
+                        i.type == FindingType.HOST
+                        or (i.type == FindingType.ENUMERATION and i.name == TARGET)
+                    )
+                    and checker.check_input_condition(i, self.target)
                 ):
                     command_arguments[i.name] = formatter.argument_with_one(
                         i.argument,
@@ -127,8 +127,9 @@ class BaseTool():
                     )
                     continue
                 if (
-                    i.name not in command_arguments and
-                    i.type == FindingType.ENUMERATION and self.target_ports
+                    i.name not in command_arguments
+                    and i.type == FindingType.ENUMERATION
+                    and self.target_ports
                 ):
                     command_arguments[i.name] = formatter.argument_with_target_ports(
                         i.argument,
@@ -161,8 +162,8 @@ class BaseTool():
         args.insert(0, self.tool.command)
         exec = subprocess.run(args, capture_output=True)
         if (
-            (not self.ignore_exit_code and exec.returncode > 0) or
-            (self.ignore_exit_code and exec.returncode > 0 and not exec.stderr)
+            (not self.ignore_exit_code and exec.returncode > 0)
+            or (self.ignore_exit_code and exec.returncode > 0 and not exec.stderr)
         ):
             raise UnexpectedToolExitCodeException(exec.stderr)
         return exec.stdout
