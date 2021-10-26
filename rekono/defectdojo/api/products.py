@@ -1,7 +1,8 @@
 import requests
-from rekono.settings import DEFECT_DOJO as config
 from defectdojo.api import utils
 from projects.models import Project
+
+from rekono.settings import DEFECT_DOJO as config
 
 
 def get_rekono_prod_type_id() -> int:
@@ -34,6 +35,11 @@ def create_rekono_prod_type() -> int:
         result = response.json()
         if result:
             return result.get('id')
+
+
+def check_product_id(id: int) -> bool:
+    response = requests.get(utils.urls.get('products') + f'{id}/', headers=utils.headers)
+    return response.status_code == 200
 
 
 def create_new_product(project: Project) -> Project:
