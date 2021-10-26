@@ -76,7 +76,7 @@ class SslyzeTool(BaseTool):
                         technology=generic_tech,
                         name='ROBOT',
                         description='Return Of the Bleichenbacher Oracle Threat',
-                        severity=Severity.HIGH,
+                        severity=Severity.MEDIUM,
                         cwe='CWE-203',
                         reference='https://www.robotattack.org/'
                     )
@@ -103,7 +103,7 @@ class SslyzeTool(BaseTool):
                         technology=generic_tech,
                         name='Insecure TLS renegotiation supported',
                         description='Insecure TLS renegotiation supported',
-                        severity=Severity.MEDIUM,
+                        severity=Severity.HIGH,
                         cwe='CWE-264'
                     )
                     vulnerabilities.append(vulnerability)

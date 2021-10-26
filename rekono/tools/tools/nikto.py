@@ -31,7 +31,7 @@ class NiktoTool(BaseTool):
                     vulnerability = Vulnerability.objects.create(
                         name=name,
                         description=f'[{method} {endpoint}] {description}',
-                        severity=Severity.LOW,
+                        severity=Severity.MEDIUM,
                         osvdb=osvdb
                     )
                     findings.append(vulnerability)

@@ -89,7 +89,7 @@ class CmseekTool(BaseTool):
                             vulnerability = Vulnerability.objects.create(
                                 name=f'{cms_name} backup files found',
                                 description=', '.join(paths),
-                                severity=Severity.MEDIUM,
+                                severity=Severity.HIGH,
                                 cwe='CWE-530'
                             )
                             findings.append(vulnerability)
