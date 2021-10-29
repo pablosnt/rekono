@@ -2,7 +2,8 @@ import os
 import re
 from typing import Any
 
-from arguments.constants import (CVE_REGEX, WORDLIST_FILE_REGEX,
+from arguments.constants import (CVE_REGEX, DIGITS_REGEX, ENDPOINT_REGEX,
+                                 TECHNOLOGY_REGEX, WORDLIST_FILE_REGEX,
                                  WORDLIST_PATH_REGEX)
 from findings.models import Endpoint, Enumeration, Host, Vulnerability
 from targets import utils
@@ -70,8 +71,8 @@ def check_endpoint(input: Input, endpoint: Endpoint) -> bool:
         return status_code == endpoint.status
     except ValueError:
         return (
-            endpoint.endpoint.startswith(input.filter) or
-            (endpoint.enumeration and input.filter in endpoint.enumeration.service)
+            endpoint.endpoint.startswith(input.filter)
+            or (endpoint.enumeration and input.filter in endpoint.enumeration.service)
         )
 
 
@@ -80,15 +81,19 @@ def check_vulnerability(input: Input, vulnerability: Vulnerability) -> bool:
 
 
 def check_technology_param(technology: str) -> bool:
-    return True
+    return bool(re.fullmatch(TECHNOLOGY_REGEX, technology))
 
 
-def check_version_param(technology: str) -> bool:
-    return True
+def check_version_param(version: str) -> bool:
+    return (
+        bool(re.fullmatch(TECHNOLOGY_REGEX, version))
+        and bool(re.findall(DIGITS_REGEX, version))
+        and '.' in version
+    )
 
 
 def check_endpoint_param(endpoint: str) -> bool:
-    return True
+    return bool(re.fullmatch(ENDPOINT_REGEX, endpoint))
 
 
 def check_cve_param(cve: str) -> bool:
@@ -96,6 +101,7 @@ def check_cve_param(cve: str) -> bool:
 
 
 def check_exploit_param(exploit: str) -> bool:
+    # TODO: To implement after add some exploitation tool
     return True
 
 
