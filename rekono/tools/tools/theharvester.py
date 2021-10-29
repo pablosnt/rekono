@@ -4,7 +4,6 @@ import os
 import yaml
 from findings.models import OSINT
 from tools.tools.base_tool import BaseTool
-from users.models import User
 
 
 class TheHarvesterTool(BaseTool):
@@ -15,7 +14,7 @@ class TheHarvesterTool(BaseTool):
         ('vhosts', OSINT.DataType.DOMAIN),
         ('urls', OSINT.DataType.URL),
         ('trello_urls', OSINT.DataType.URL),
-        ('emails', OSINT.DataType.MAIL),
+        ('emails', OSINT.DataType.EMAIL),
         ('linkedin_links', OSINT.DataType.LINK),
         ('asns', OSINT.DataType.ASN),
         ('twitter_people', OSINT.DataType.USER),

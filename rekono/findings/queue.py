@@ -1,11 +1,11 @@
 import django_rq
 from django_rq import job
 from executions.models import Execution
-from findings.models import Vulnerability
 from findings.enums import Severity
+from findings.mail import send_notification
+from findings.models import Vulnerability
 from findings.nist import get_cve_information
 from users.enums import Notification
-from findings.mail import send_notification
 
 
 def producer(execution: Execution, findings: list, domain: str) -> None:
@@ -29,5 +29,5 @@ def consumer(execution: Execution = None, findings: list = [], domain: str = Non
                 finding.severity = cve_info.get('severity', Severity.MEDIUM)
                 finding.reference = cve_info.get('reference', '')
             finding.save()
-        if execution.task.executor.notification_preference == Notification.MAIL:
+        if execution.task.executor.notification_preference == Notification.EMAIL:
             send_notification(execution, findings, domain)

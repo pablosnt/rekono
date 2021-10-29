@@ -2,9 +2,9 @@ from typing import Any
 
 from django.conf import settings
 from django.db import models
-from tasks.enums import ParameterKey, Status, TimeUnit
 from processes.models import Process
 from targets.models import Target
+from tasks.enums import ParameterKey, Status, TimeUnit
 from tools.enums import IntensityRank
 from tools.models import Configuration, Tool
 
@@ -29,12 +29,12 @@ class Task(models.Model):
         blank=True,
         null=True
     )
-    status = models.IntegerField(choices=Status.choices, default=Status.REQUESTED)
+    status = models.TextField(max_length=10, choices=Status.choices, default=Status.REQUESTED)
     scheduled_at = models.DateTimeField(blank=True, null=True)
     scheduled_in = models.IntegerField(blank=True, null=True)
-    scheduled_time_unit = models.IntegerField(choices=TimeUnit.choices, blank=True, null=True)
+    scheduled_time_unit = models.TextField(max_length=10, choices=TimeUnit.choices, blank=True, null=True)
     repeat_in = models.IntegerField(blank=True, null=True)
-    repeat_time_unit = models.IntegerField(choices=TimeUnit.choices, blank=True, null=True)
+    repeat_time_unit = models.TextField(max_length=10, choices=TimeUnit.choices, blank=True, null=True)
     start = models.DateTimeField(blank=True, null=True)
     end = models.DateTimeField(blank=True, null=True)
 
@@ -54,7 +54,7 @@ class Task(models.Model):
 
 class Parameter(models.Model):
     task = models.ForeignKey(Task, related_name='parameters', on_delete=models.CASCADE)
-    key = models.IntegerField(choices=ParameterKey.choices)
+    key = models.TextField(max_length=10, choices=ParameterKey.choices)
     value = models.TextField(max_length=250)
 
     def get_project(self) -> Any:

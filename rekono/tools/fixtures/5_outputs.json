@@ -4,7 +4,7 @@
         "pk": 1,
         "fields": {
             "configuration_id": 1,
-            "type": 2
+            "type": "Host"
         }
     },
     {
@@ -12,7 +12,7 @@
         "pk": 2,
         "fields": {
             "configuration_id": 1,
-            "type": 3
+            "type": "Enumeration"
         }
     },
     {
@@ -20,7 +20,7 @@
         "pk": 3,
         "fields": {
             "configuration_id": 2,
-            "type": 2
+            "type": "Host"
         }
     },
     {
@@ -28,7 +28,7 @@
         "pk": 4,
         "fields": {
             "configuration_id": 2,
-            "type": 3
+            "type": "Enumeration"
         }
     },
     {
@@ -36,7 +36,7 @@
         "pk": 5,
         "fields": {
             "configuration_id": 3,
-            "type": 2
+            "type": "Host"
         }
     },
     {
@@ -44,7 +44,7 @@
         "pk": 6,
         "fields": {
             "configuration_id": 3,
-            "type": 3
+            "type": "Enumeration"
         }
     },
     {
@@ -52,7 +52,7 @@
         "pk": 7,
         "fields": {
             "configuration_id": 3,
-            "type": 5
+            "type": "Technology"
         }
     },
     {
@@ -60,7 +60,7 @@
         "pk": 8,
         "fields": {
             "configuration_id": 4,
-            "type": 2
+            "type": "Host"
         }
     },
     {
@@ -68,7 +68,7 @@
         "pk": 9,
         "fields": {
             "configuration_id": 4,
-            "type": 3
+            "type": "Enumeration"
         }
     },
     {
@@ -76,7 +76,7 @@
         "pk": 10,
         "fields": {
             "configuration_id": 4,
-            "type": 5
+            "type": "Technology"
         }
     },
     {
@@ -84,7 +84,7 @@
         "pk": 11,
         "fields": {
             "configuration_id": 5,
-            "type": 2
+            "type": "Host"
         }
     },
     {
@@ -92,7 +92,7 @@
         "pk": 12,
         "fields": {
             "configuration_id": 5,
-            "type": 3
+            "type": "Enumeration"
         }
     },
     {
@@ -100,7 +100,7 @@
         "pk": 13,
         "fields": {
             "configuration_id": 6,
-            "type": 2
+            "type": "Host"
         }
     },
     {
@@ -108,7 +108,7 @@
         "pk": 14,
         "fields": {
             "configuration_id": 6,
-            "type": 3
+            "type": "Enumeration"
         }
     },
     {
@@ -116,7 +116,7 @@
         "pk": 15,
         "fields": {
             "configuration_id": 6,
-            "type": 5
+            "type": "Technology"
         }
     },
     {
@@ -124,7 +124,7 @@
         "pk": 16,
         "fields": {
             "configuration_id": 7,
-            "type": 2
+            "type": "Host"
         }
     },
     {
@@ -132,7 +132,7 @@
         "pk": 17,
         "fields": {
             "configuration_id": 7,
-            "type": 3
+            "type": "Enumeration"
         }
     },
     {
@@ -140,7 +140,7 @@
         "pk": 18,
         "fields": {
             "configuration_id": 8,
-            "type": 2
+            "type": "Host"
         }
     },
     {
@@ -148,7 +148,7 @@
         "pk": 19,
         "fields": {
             "configuration_id": 8,
-            "type": 3
+            "type": "Enumeration"
         }
     },
     {
@@ -156,7 +156,7 @@
         "pk": 20,
         "fields": {
             "configuration_id": 9,
-            "type": 2
+            "type": "Host"
         }
     },
     {
@@ -164,7 +164,7 @@
         "pk": 21,
         "fields": {
             "configuration_id": 9,
-            "type": 3
+            "type": "Enumeration"
         }
     },
     {
@@ -172,7 +172,7 @@
         "pk": 22,
         "fields": {
             "configuration_id": 9,
-            "type": 5
+            "type": "Technology"
         }
     },
     {
@@ -180,7 +180,7 @@
         "pk": 23,
         "fields": {
             "configuration_id": 10,
-            "type": 2
+            "type": "Host"
         }
     },
     {
@@ -188,7 +188,7 @@
         "pk": 24,
         "fields": {
             "configuration_id": 10,
-            "type": 3
+            "type": "Enumeration"
         }
     },
     {
@@ -196,7 +196,7 @@
         "pk": 25,
         "fields": {
             "configuration_id": 10,
-            "type": 5
+            "type": "Technology"
         }
     },
     {
@@ -204,7 +204,7 @@
         "pk": 26,
         "fields": {
             "configuration_id": 11,
-            "type": 2
+            "type": "Host"
         }
     },
     {
@@ -212,7 +212,7 @@
         "pk": 27,
         "fields": {
             "configuration_id": 11,
-            "type": 3
+            "type": "Enumeration"
         }
     },
     {
@@ -220,7 +220,7 @@
         "pk": 28,
         "fields": {
             "configuration_id": 12,
-            "type": 2
+            "type": "Host"
         }
     },
     {
@@ -228,7 +228,7 @@
         "pk": 29,
         "fields": {
             "configuration_id": 12,
-            "type": 3
+            "type": "Enumeration"
         }
     },
     {
@@ -236,7 +236,7 @@
         "pk": 30,
         "fields": {
             "configuration_id": 12,
-            "type": 5
+            "type": "Technology"
         }
     },
     {
@@ -244,7 +244,7 @@
         "pk": 31,
         "fields": {
             "configuration_id": 13,
-            "type": 2
+            "type": "Host"
         }
     },
     {
@@ -252,7 +252,7 @@
         "pk": 32,
         "fields": {
             "configuration_id": 13,
-            "type": 3
+            "type": "Enumeration"
         }
     },
     {
@@ -260,7 +260,7 @@
         "pk": 33,
         "fields": {
             "configuration_id": 13,
-            "type": 5
+            "type": "Technology"
         }
     },
     {
@@ -268,7 +268,7 @@
         "pk": 34,
         "fields": {
             "configuration_id": 13,
-            "type": 6
+            "type": "Vulnerability"
         }
     },
     {
@@ -276,7 +276,7 @@
         "pk": 35,
         "fields": {
             "configuration_id": 14,
-            "type": 2
+            "type": "Host"
         }
     },
     {
@@ -284,7 +284,7 @@
         "pk": 36,
         "fields": {
             "configuration_id": 14,
-            "type": 3
+            "type": "Enumeration"
         }
     },
     {
@@ -292,7 +292,7 @@
         "pk": 37,
         "fields": {
             "configuration_id": 14,
-            "type": 5
+            "type": "Technology"
         }
     },
     {
@@ -300,7 +300,7 @@
         "pk": 38,
         "fields": {
             "configuration_id": 14,
-            "type": 6
+            "type": "Vulnerability"
         }
     },
     {
@@ -308,7 +308,7 @@
         "pk": 39,
         "fields": {
             "configuration_id": 15,
-            "type": 4
+            "type": "Endpoint"
         }
     },
     {
@@ -316,7 +316,7 @@
         "pk": 40,
         "fields": {
             "configuration_id": 16,
-            "type": 4
+            "type": "Endpoint"
         }
     },
     {
@@ -324,7 +324,7 @@
         "pk": 41,
         "fields": {
             "configuration_id": 17,
-            "type": 4
+            "type": "Endpoint"
         }
     },
     {
@@ -332,7 +332,7 @@
         "pk": 42,
         "fields": {
             "configuration_id": 18,
-            "type": 4
+            "type": "Endpoint"
         }
     },
     {
@@ -340,7 +340,7 @@
         "pk": 43,
         "fields": {
             "configuration_id": 19,
-            "type": 1
+            "type": "OSINT"
         }
     },
     {
@@ -348,7 +348,7 @@
         "pk": 44,
         "fields": {
             "configuration_id": 20,
-            "type": 1
+            "type": "OSINT"
         }
     },
     {
@@ -356,7 +356,7 @@
         "pk": 45,
         "fields": {
             "configuration_id": 21,
-            "type": 4
+            "type": "Endpoint"
         }
     },
     {
@@ -364,7 +364,7 @@
         "pk": 46,
         "fields": {
             "configuration_id": 21,
-            "type": 6
+            "type": "Vulnerability"
         }
     },
     {
@@ -372,7 +372,7 @@
         "pk": 47,
         "fields": {
             "configuration_id": 22,
-            "type": 5
+            "type": "Technology"
         }
     },
     {
@@ -380,7 +380,7 @@
         "pk": 48,
         "fields": {
             "configuration_id": 22,
-            "type": 6
+            "type": "Vulnerability"
         }
     },
     {
@@ -388,7 +388,7 @@
         "pk": 49,
         "fields": {
             "configuration_id": 23,
-            "type": 5
+            "type": "Technology"
         }
     },
     {
@@ -396,7 +396,7 @@
         "pk": 50,
         "fields": {
             "configuration_id": 23,
-            "type": 6
+            "type": "Vulnerability"
         }
     },
     {
@@ -404,7 +404,7 @@
         "pk": 51,
         "fields": {
             "configuration_id": 24,
-            "type": 4
+            "type": "Endpoint"
         }
     },
     {
@@ -412,7 +412,7 @@
         "pk": 52,
         "fields": {
             "configuration_id": 24,
-            "type": 5
+            "type": "Technology"
         }
     },
     {
@@ -420,7 +420,7 @@
         "pk": 53,
         "fields": {
             "configuration_id": 24,
-            "type": 6
+            "type": "Vulnerability"
         }
     },
     {
@@ -428,7 +428,7 @@
         "pk": 54,
         "fields": {
             "configuration_id": 24,
-            "type": 9
+            "type": "Credential"
         }
     },
     {
@@ -436,7 +436,7 @@
         "pk": 55,
         "fields": {
             "configuration_id": 25,
-            "type": 4
+            "type": "Endpoint"
         }
     },
     {
@@ -444,7 +444,7 @@
         "pk": 56,
         "fields": {
             "configuration_id": 25,
-            "type": 6
+            "type": "Vulnerability"
         }
     }
 ]

@@ -1,8 +1,8 @@
 from typing import Any
 
 from django.db import models
-from tasks.enums import Status
 from processes.models import Step
+from tasks.enums import Status
 from tasks.models import Task
 
 # Create your models here.
@@ -16,7 +16,7 @@ class Execution(models.Model):
     output_file = models.TextField(max_length=50, blank=True, null=True)
     output_plain = models.TextField(blank=True, null=True)
     output_error = models.TextField(blank=True, null=True)
-    status = models.IntegerField(choices=Status.choices, default=Status.REQUESTED)
+    status = models.TextField(max_length=10, choices=Status.choices, default=Status.REQUESTED)
     start = models.DateTimeField(blank=True, null=True)
     end = models.DateTimeField(blank=True, null=True)
 

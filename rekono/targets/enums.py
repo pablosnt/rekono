@@ -1,9 +1,9 @@
 from django.db import models
 
 
-class TargetType(models.IntegerChoices):
-    PRIVATE_IP = 1
-    PUBLIC_IP = 2
-    NETWORK = 3
-    IP_RANGE = 4
-    DOMAIN = 5
+class TargetType(models.TextChoices):
+    PRIVATE_IP = 'Private IP'
+    PUBLIC_IP = 'Public IP'
+    NETWORK = 'Network'
+    IP_RANGE = 'IP range'
+    DOMAIN = 'Domain'

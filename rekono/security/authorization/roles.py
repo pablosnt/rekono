@@ -1,10 +1,10 @@
 from django.db import models
 
 
-class Role(models.IntegerChoices):
-    ADMIN = 1
-    AUDITOR = 2
-    READER = 3
+class Role(models.TextChoices):
+    ADMIN = 'Admin'
+    AUDITOR = 'Auditor'
+    READER = 'Reader'
 
 
 DEFAULT_GROUPS = {

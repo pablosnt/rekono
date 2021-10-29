@@ -1,8 +1,9 @@
+from typing import Any
+
 from django.conf import settings
 from django.db import models
-from tools.models import Tool, Configuration
 from processes.enums import StepPriority
-from typing import Any
+from tools.models import Configuration, Tool
 
 # Create your models here.
 
@@ -27,7 +28,7 @@ class Process(models.Model):
 class Step(models.Model):
     process = models.ForeignKey(Process, related_name='steps', on_delete=models.CASCADE)
     tool = models.ForeignKey(Tool, on_delete=models.CASCADE)
-    priority = models.IntegerField(choices=StepPriority.choices, default=StepPriority.STANDARD)
+    priority = models.TextField(max_length=10, choices=StepPriority.choices, default=StepPriority.MEDIUM)
     configuration = models.ForeignKey(
         Configuration,
         on_delete=models.CASCADE,

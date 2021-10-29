@@ -14,7 +14,6 @@ class TargetPortSerializer(serializers.ModelSerializer):
 
 class TargetSerializer(serializers.ModelSerializer):
     target_ports = TargetPortSerializer(read_only=False, many=True, required=False)
-    type = serializers.CharField(source='get_type_display', read_only=True)
 
     class Meta:
         model = Target

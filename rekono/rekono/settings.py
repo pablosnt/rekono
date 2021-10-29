@@ -13,10 +13,10 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 import os
 from pathlib import Path
 
-from tasks.enums import Status, TimeUnit
 from findings.enums import Severity
 from processes.enums import StepPriority
 from security.crypto import generate_random_value, hash
+from tasks.enums import Status, TimeUnit
 from users.enums import Notification
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.

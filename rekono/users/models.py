@@ -90,9 +90,10 @@ class User(AbstractUser):
 
     otp = models.TextField(max_length=200, unique=True, blank=True, null=True)
 
-    notification_preference = models.IntegerField(
+    notification_preference = models.TextField(
+        max_length=10,
         choices=Notification.choices,
-        default=Notification.MAIL,
+        default=Notification.EMAIL,
         blank=True,
         null=True
     )

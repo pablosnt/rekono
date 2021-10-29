@@ -4,7 +4,6 @@ from rest_framework import serializers
 
 
 class OSINTSerializer(serializers.ModelSerializer):
-    data_type = serializers.CharField(source='get_data_type_display')
 
     class Meta:
         model = OSINT
@@ -16,7 +15,6 @@ class OSINTSerializer(serializers.ModelSerializer):
 
 
 class HostSerializer(serializers.ModelSerializer):
-    os_type = serializers.CharField(source='get_os_type_display')
 
     class Meta:
         model = Host
@@ -28,7 +26,6 @@ class HostSerializer(serializers.ModelSerializer):
 
 
 class EnumerationSerializer(serializers.ModelSerializer):
-    port_status = serializers.CharField(source='get_port_status_display')
 
     class Meta:
         model = Enumeration

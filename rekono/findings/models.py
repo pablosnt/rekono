@@ -47,7 +47,7 @@ class Finding(models.Model):
 
 class OSINT(Finding):
     data = models.TextField(max_length=250)
-    data_type = models.IntegerField(choices=DataType.choices)
+    data_type = models.TextField(max_length=10, choices=DataType.choices)
     source = models.TextField(max_length=50, blank=True, null=True)
     reference = models.TextField(max_length=250, blank=True, null=True)
 
@@ -57,7 +57,7 @@ class OSINT(Finding):
 class Host(Finding):
     address = models.TextField(max_length=20)
     os = models.TextField(max_length=250, blank=True, null=True)
-    os_type = models.IntegerField(choices=OSType.choices, default=OSType.OTHER)
+    os_type = models.TextField(max_length=10, choices=OSType.choices, default=OSType.OTHER)
 
     KEY_FIELDS = ('task', 'address')
 
@@ -71,8 +71,8 @@ class Enumeration(Finding):
         null=True
     )
     port = models.IntegerField()
-    port_status = models.IntegerField(choices=PortStatus.choices, default=PortStatus.OPEN)
-    protocol = models.IntegerField(choices=Protocol.choices, blank=True, null=True)
+    port_status = models.TextField(max_length=15, choices=PortStatus.choices, default=PortStatus.OPEN)
+    protocol = models.TextField(max_length=5, choices=Protocol.choices, blank=True, null=True)
     service = models.TextField(max_length=50, blank=True, null=True)
 
     KEY_FIELDS = ('host', 'port')
