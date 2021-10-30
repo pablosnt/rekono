@@ -1,7 +1,10 @@
+from datetime import datetime
+
 from django.contrib.sites.shortcuts import get_current_site
 from rest_framework import serializers, status
 from rest_framework.exceptions import AuthenticationFailed
 from security.authorization.roles import Role
+from telegram_bot.models import TelegramChat
 from users.models import User
 
 
@@ -11,13 +14,10 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = (
             'id', 'username', 'first_name', 'last_name', 'email', 'is_active',
-            'date_joined', 'last_login', 'groups', 'notification_preference',
-            'telegram_token'
+            'date_joined', 'last_login', 'groups', 'notification_preference'
         )
         read_only_fields = ('username', 'email', 'is_active', 'date_joined', 'last_login', 'groups')
-        extra_kwargs = {
-            'telegram_token': {'write_only': True},
-        }
+
         ordering = ['-id']
 
     def update(self, instance, validated_data):
@@ -127,3 +127,21 @@ class ResetPasswordSerializer(serializers.Serializer):
         user.otp = None
         user.save()
         return user
+
+
+class TelegramTokenSerializer(serializers.Serializer):
+    token = serializers.CharField(max_length=200, required=True)
+
+    def update(self, instance, validated_data):
+        try:
+            telegram_chat = TelegramChat.objects.get(
+                start_token=self.validated_data.get('token'),
+                expiration__gt=datetime.now()
+            )
+        except TelegramChat.DoesNotExist:
+            raise AuthenticationFailed('Invalid Telegram token', code=status.HTTP_401_UNAUTHORIZED)
+        if User.objects.filter(telegram_id=telegram_chat.chat_id).exists():
+            raise AuthenticationFailed('Invalid Telegram token', code=status.HTTP_401_UNAUTHORIZED)
+        instance.telegram_id = telegram_chat.chat_id
+        instance.save()
+        return instance

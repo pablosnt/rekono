@@ -63,6 +63,7 @@ INSTALLED_APPS = [
     'projects',
     'targets',
     'tasks',
+    'telegram_bot',
     'tools',
     'users'
 ]
@@ -191,6 +192,11 @@ EMAIL_PORT = 587
 EMAIL_HOST_USER = os.getenv('EMAIL_USER', '')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_PASSWORD', '')
 EMAIL_USE_TLS = True
+
+
+# Telegram
+TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN', '')
+TELEGRAM_TOKEN_EXPIRATION_HOURS = 24
 
 
 # Defect-Dojo

@@ -97,15 +97,13 @@ class User(AbstractUser):
         blank=True,
         null=True
     )
-    telegram_token = models.TextField(max_length=100, blank=True, null=True)
+    telegram_id = models.IntegerField(blank=True, null=True)
 
     USERNAME_FIELD = 'username'
     EMAIL_FIELD = 'email'
     REQUIRED_FIELDS = ['email']
     objects = RekonoUserManager()
-    API_KEYS = [
-        'telegram_token'
-    ]
+    API_KEYS = []
 
     def set_api_key(self, api_key: str, value: str) -> None:
         if api_key in self.API_KEYS:
