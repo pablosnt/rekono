@@ -3,9 +3,9 @@ from django.core.exceptions import ValidationError
 from django_rq import job
 from executions.models import Execution
 from findings.enums import Severity
-from findings.mail import send_notification
 from findings.models import Vulnerability
 from findings.nist import get_cve_information
+from findings.notification import send_email, send_telegram_message
 from users.enums import Notification
 
 
@@ -29,4 +29,9 @@ def consumer(execution: Execution = None, findings: list = [], domain: str = Non
             except ValidationError:
                 finding.delete()
         if execution.task.executor.notification_preference == Notification.EMAIL:
-            send_notification(execution, [f for f in findings if f.id], domain)
+            send_email(execution, [f for f in findings if f.id], domain)
+        elif (
+            execution.task.executor.notification_preference == Notification.TELEGRAM
+            and execution.task.executor.telegram_id
+        ):
+            send_telegram_message(execution, [f for f in findings if f.id], domain)

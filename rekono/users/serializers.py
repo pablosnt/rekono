@@ -20,14 +20,6 @@ class UserSerializer(serializers.ModelSerializer):
 
         ordering = ['-id']
 
-    def update(self, instance, validated_data):
-        instance = super().update(instance, validated_data)
-        for api_key in instance.API_KEYS:
-            if api_key in validated_data and validated_data[api_key]:
-                instance.set_api_key(api_key, validated_data.get(api_key))
-        instance.save()
-        return instance
-
 
 class InviteUserSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)

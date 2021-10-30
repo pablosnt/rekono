@@ -1,14 +1,17 @@
 from typing import Any
 
+from telegram import ParseMode
 from telegram.ext import CommandHandler, Updater
 from telegram_bot.commands import help, logout, start
+from telegram_bot.utils import build_execution_notification_message
 
 from rekono.settings import TELEGRAM_TOKEN
 
 
-def send_notification(execution: Any, findings: list) -> None:
+def send_html_message(chat_id: int, parameters: dict) -> None:
     updater = Updater(token=TELEGRAM_TOKEN)
-    updater.bot.send_message(execution.task.executor.telegram_id, text='Finding notification!')
+    text = build_execution_notification_message(parameters)
+    updater.bot.send_message(chat_id, text=text, parse_mode=ParseMode.HTML)
 
 
 def execute():

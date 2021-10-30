@@ -2,6 +2,7 @@ from arguments import checker
 from arguments.constants import (EMAIL, HOST, PORT, PORTS, PORTS_COMMAS,
                                  SECRET, TARGET, URL, USERNAME)
 from arguments.url import get_url
+from findings.enums import DataType
 from findings.models import (OSINT, Credential, Endpoint, Enumeration, Exploit,
                              Host, Technology, Vulnerability)
 from targets.models import Target
@@ -29,7 +30,7 @@ def target_port(target_ports: list, target: Target) -> dict:
 
 
 def osint(osint: OSINT) -> dict:
-    if osint.data_type in [OSINT.DataType.IP, OSINT.DataType.DOMAIN]:
+    if osint.data_type in [DataType.IP, DataType.DOMAIN]:
         return {
             TARGET: osint.data,
             HOST: osint.data,
@@ -61,7 +62,7 @@ def enumeration(enumeration: Enumeration, accumulated: dict = {}) -> dict:
     return output
 
 
-def ednpoint(endpoint: Endpoint):
+def endpoint(endpoint: Endpoint):
     output = enumeration(endpoint.enumeration)
     output[ParameterKey.ENDPOINT.name.lower()] = endpoint.endpoint
     return output

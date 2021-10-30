@@ -96,5 +96,6 @@ class TaskSerializer(serializers.ModelSerializer):
                         validated_data=parameter
                     )
                 )
-        producer(task, parameters, get_current_site(self.context.get('request')).domain)
+        domain = get_current_site(self.context.get('request')).domain if self.context.get('request') else None
+        producer(task, parameters, domain)
         return task

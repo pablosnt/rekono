@@ -1,7 +1,7 @@
 import json
 import os
 
-import yaml
+from findings.enums import DataType
 from findings.models import OSINT
 from tools.tools.base_tool import BaseTool
 
@@ -9,16 +9,16 @@ from tools.tools.base_tool import BaseTool
 class TheHarvesterTool(BaseTool):
     
     data_types = [
-        ('ips', OSINT.DataType.IP),
-        ('hosts', OSINT.DataType.DOMAIN),
-        ('vhosts', OSINT.DataType.DOMAIN),
-        ('urls', OSINT.DataType.URL),
-        ('trello_urls', OSINT.DataType.URL),
-        ('emails', OSINT.DataType.EMAIL),
-        ('linkedin_links', OSINT.DataType.LINK),
-        ('asns', OSINT.DataType.ASN),
-        ('twitter_people', OSINT.DataType.USER),
-        ('linkedin_people', OSINT.DataType.USER)
+        ('ips', DataType.IP),
+        ('hosts', DataType.DOMAIN),
+        ('vhosts', DataType.DOMAIN),
+        ('urls', DataType.URL),
+        ('trello_urls', DataType.URL),
+        ('emails', DataType.EMAIL),
+        ('linkedin_links', DataType.LINK),
+        ('asns', DataType.ASN),
+        ('twitter_people', DataType.USER),
+        ('linkedin_people', DataType.USER)
     ]
 
     def parse_output(self, output: str) -> list:

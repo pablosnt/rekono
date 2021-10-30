@@ -1,10 +1,10 @@
 import os
 import re
 
-from findings.enums import Severity
+from arguments.constants import CVE_REGEX
+from findings.enums import OSType, PortStatus, Protocol, Severity
 from findings.models import Enumeration, Host, Technology, Vulnerability
 from libnmap.parser import NmapParser
-from arguments.constants import CVE_REGEX
 from tools.tools.base_tool import BaseTool
 
 
@@ -77,7 +77,7 @@ class NmapTool(BaseTool):
                     continue
                 os_detections = h.os_match_probabilities()
                 os_text = None
-                os_type = Host.OSType.OTHER
+                os_type = OSType.OTHER
                 if os_detections:
                     selected_os = None
                     accuracy = 0
@@ -89,9 +89,9 @@ class NmapTool(BaseTool):
                     for c in selected_os.osclasses:
                         if c.accuracy > accuracy:
                             try:
-                                os_type = Host.OSType[c.osfamily.upper()]
+                                os_type = OSType[c.osfamily.upper()]
                             except KeyError:
-                                os_type = Host.OSType.OTHER
+                                os_type = OSType.OTHER
                 host = Host.objects.create(
                     address=h.address,
                     os=os_text,
@@ -102,8 +102,8 @@ class NmapTool(BaseTool):
                     enumeration = Enumeration.objects.create(
                         host=host,
                         port=s.port,
-                        port_status=Enumeration.PortStatus[s.state.upper()],
-                        protocol=Enumeration.Protocol[s.protocol.upper()],
+                        port_status=PortStatus[s.state.upper()],
+                        protocol=Protocol[s.protocol.upper()],
                         service=s.service
                     )
                     findings.append(enumeration)
