@@ -35,7 +35,6 @@ if not os.path.isdir(EXECUTION_OUTPUTS):
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = generate_random_value(3000)
-ENCRYPTION_KEY = hash(os.getenv('ENCRYPTION_KEY', generate_random_value(3000)))
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
