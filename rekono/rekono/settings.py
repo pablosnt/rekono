@@ -16,7 +16,9 @@ from pathlib import Path
 from findings.enums import Severity
 from processes.enums import StepPriority
 from security.crypto import generate_random_value, hash
+from targets.enums import TargetType
 from tasks.enums import Status, TimeUnit
+from tools.enums import FindingType, IntensityRank
 from users.enums import Notification
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -136,7 +138,10 @@ SPECTACULAR_SETTINGS = {
         'StatusEnum': Status.choices,
         'NotificationPreferenceEnum': Notification.choices,
         'SeverityEnum': Severity.choices,
-        'TimeUnit': TimeUnit.choices,
+        'TimeUnitEnum': TimeUnit.choices,
+        'IntensityEnum': IntensityRank.choices,
+        'FindingTypeEnum': FindingType.choices,
+        'TargetTypeEnum': TargetType.choices,
     }
 }
 

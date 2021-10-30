@@ -1,4 +1,5 @@
 from drf_spectacular.utils import extend_schema
+from findings.enums import DataType
 from findings.models import (OSINT, Credential, Endpoint, Enumeration, Exploit,
                              Host, Technology, Vulnerability)
 from findings.serializers import (CredentialSerializer, EndpointSerializer,
@@ -6,12 +7,13 @@ from findings.serializers import (CredentialSerializer, EndpointSerializer,
                                   HostSerializer, OSINTSerializer,
                                   TechnologySerializer,
                                   VulnerabilitySerializer)
-from rest_framework import status
+from rest_framework import serializers, status
 from rest_framework.decorators import action
 from rest_framework.mixins import (DestroyModelMixin, ListModelMixin,
                                    RetrieveModelMixin, UpdateModelMixin)
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
+from targets.serializers import TargetSerializer
 
 # Create your views here.
 
@@ -66,6 +68,23 @@ class OSINTViewSet(FindingBaseView):
         ('executor', 'execution__task__executor'),
         'execution', 'data', 'data_type', 'source', 'creation', 'is_active'
     )
+
+    @extend_schema(request=None, responses={201: TargetSerializer})
+    @action(detail=True, methods=['POST'], url_path='target', url_name='target')
+    def enable(self, request, pk):
+        osint = self.get_object()
+        if osint.data_type in [DataType.IP, DataType.DOMAIN]:
+            serializer = TargetSerializer(data={
+                'project': osint.execution.task.target.project.id,
+                'target': osint.data
+            })
+            if serializer.is_valid():
+                target = serializer.create(serializer.validated_data)
+                return Response(TargetSerializer(target).data, status=status.HTTP_201_CREATED)
+        return Response(
+            {'data_type': 'Unsupported option for this OSINT data type'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
 
 class HostViewSet(FindingBaseView):
