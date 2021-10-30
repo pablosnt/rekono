@@ -20,7 +20,7 @@ class HostSerializer(serializers.ModelSerializer):
         model = Host
         fields = (
             'id', 'execution', 'address', 'os', 'os_type', 'creation',
-            'is_active', 'enumerations'
+            'is_active', 'enumeration'
         )
         ordering = ['-id']
 
@@ -31,7 +31,7 @@ class EnumerationSerializer(serializers.ModelSerializer):
         model = Enumeration
         fields = (
             'id', 'execution', 'host', 'port', 'port_status', 'protocol',
-            'service', 'creation', 'is_active', 'endpoints', 'technologys'
+            'service', 'creation', 'is_active', 'endpoint', 'technology'
         )
         ordering = ['-id']
 
@@ -54,7 +54,7 @@ class TechnologySerializer(serializers.ModelSerializer):
         fields = (
             'id', 'execution', 'enumeration', 'name', 'version', 'description',
             'reference', 'related_to', 'related_technologies', 'creation',
-            'is_active', 'vulnerabilitys', 'exploits'
+            'is_active', 'vulnerability', 'exploit'
         )
         ordering = ['-id']
 
@@ -65,7 +65,7 @@ class VulnerabilitySerializer(serializers.ModelSerializer):
         model = Vulnerability
         fields = (
             'id', 'execution', 'technology', 'name', 'description', 'severity',
-            'cve', 'cwe', 'reference', 'creation', 'is_active', 'exploits'
+            'cve', 'cwe', 'reference', 'creation', 'is_active', 'exploit'
         )
         read_only_fields = (
             'id', 'execution', 'technology', 'cve', 'creation', 'is_active',

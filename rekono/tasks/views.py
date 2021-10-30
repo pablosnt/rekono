@@ -1,6 +1,7 @@
 from defectdojo import uploader
 from defectdojo.exceptions import (EngagementIdNotFoundException,
                                    ProductIdNotFoundException)
+from django.contrib.sites.shortcuts import get_current_site
 from django.core.exceptions import PermissionDenied
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
@@ -13,6 +14,7 @@ from targets.models import Target
 from tasks import services
 from tasks.exceptions import InvalidTaskException
 from tasks.models import Task
+from tasks.queue import producer
 from tasks.serializers import TaskSerializer
 
 # Create your views here.
@@ -73,3 +75,10 @@ class TaskViewSet(
             return Response(status=status.HTTP_200_OK)
         except (ProductIdNotFoundException, EngagementIdNotFoundException) as ex:
             return Response(str(ex), status=status.HTTP_400_BAD_REQUEST)
+
+    @extend_schema(request=None, responses={200: None})
+    @action(detail=True, methods=['POST'], url_path='repeat', url_name='repeat')
+    def execute_again(self, request, pk):
+        task = self.get_object()
+        producer(task, task.parameters.all(), get_current_site(request).domain)
+        return Response(status=status.HTTP_200_OK)

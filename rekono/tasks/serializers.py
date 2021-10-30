@@ -41,6 +41,10 @@ class TaskSerializer(serializers.ModelSerializer):
             attrs['scheduled_in'] = None
         if attrs.get('repeat_in') and not attrs.get('repeat_time_unit'):
             attrs['repeat_in'] = None
+        if attrs.get('scheduled_time_unit'):
+            attrs['scheduled_time_unit'] = TimeUnit(attrs.get('scheduled_time_unit'))
+        if attrs.get('repeat_time_unit'):
+            attrs['repeat_time_unit'] = TimeUnit(attrs.get('repeat_time_unit'))
         if not attrs.get('process') and not attrs.get('tool'):
             raise serializers.ValidationError(
                 {
@@ -69,12 +73,6 @@ class TaskSerializer(serializers.ModelSerializer):
         return super().validate(attrs)
 
     def create(self, validated_data):
-        scheduled_time_unit = None
-        if validated_data.get('scheduled_time_unit'):
-            scheduled_time_unit = TimeUnit(validated_data.get('scheduled_time_unit'))
-        repeat_time_unit = None
-        if validated_data.get('repeat_time_unit'):
-            repeat_time_unit = TimeUnit(validated_data.get('repeat_time_unit'))
         task = Task.objects.create(
             target=validated_data.get('target'),
             process=validated_data.get('process'),
@@ -84,9 +82,9 @@ class TaskSerializer(serializers.ModelSerializer):
             executor=validated_data.get('executor'),
             scheduled_at=validated_data.get('scheduled_at'),
             scheduled_in=validated_data.get('scheduled_in'),
-            scheduled_time_unit=scheduled_time_unit,
+            scheduled_time_unit=validated_data.get('scheduled_time_unit'),
             repeat_in=validated_data.get('repeat_in'),
-            repeat_time_unit=repeat_time_unit
+            repeat_time_unit=validated_data.get('scheduledrepeat_time_unit_time_unit'),
         )
         parameters = []
         if 'parameters' in validated_data:

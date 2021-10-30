@@ -1,4 +1,5 @@
 import django_rq
+from django.core.exceptions import ValidationError
 from django_rq import job
 from executions.models import Execution
 from findings.enums import Severity
@@ -10,12 +11,7 @@ from users.enums import Notification
 
 def producer(execution: Execution, findings: list, domain: str) -> None:
     findings_queue = django_rq.get_queue('findings-queue')
-    findings_queue.enqueue(
-        consumer,
-        execution=execution,
-        findings=findings,
-        domain=domain
-    )
+    findings_queue.enqueue(consumer, execution=execution, findings=findings, domain=domain)
 
 
 @job('findings-queue')
@@ -28,6 +24,9 @@ def consumer(execution: Execution = None, findings: list = [], domain: str = Non
                 finding.description = cve_info.get('description', '')
                 finding.severity = cve_info.get('severity', Severity.MEDIUM)
                 finding.reference = cve_info.get('reference', '')
-            finding.save()
+            try:
+                finding.save()
+            except ValidationError:
+                finding.delete()
         if execution.task.executor.notification_preference == Notification.EMAIL:
-            send_notification(execution, findings, domain)
+            send_notification(execution, [f for f in findings if f.id], domain)
