@@ -15,7 +15,7 @@ from pathlib import Path
 
 from findings.enums import Severity
 from processes.enums import StepPriority
-from security.crypto import generate_random_value, hash
+from security.crypto import generate_random_value
 from targets.enums import TargetType
 from tasks.enums import Status, TimeUnit
 from tools.enums import FindingType, IntensityRank
@@ -152,11 +152,11 @@ SPECTACULAR_SETTINGS = {
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'rekono',
+        'NAME': os.getenv('DB_NAME', 'rekono'),
         'USER': os.getenv('DB_USER', ''),
         'PASSWORD': os.getenv('DB_PASSWORD', ''),
-        'HOST': '127.0.0.1',
-        'PORT': '5432',
+        'HOST': os.getenv('DB_HOST', '127.0.0.1'),
+        'PORT': os.getenv('DB_PORT', '5432'),
     }
 }
 
@@ -165,20 +165,20 @@ DATABASES = {
 
 RQ_QUEUES = {
     'tasks-queue': {
-        'HOST': '127.0.0.1',
-        'PORT': 6379,
+        'HOST': os.getenv('RQ_HOST', '127.0.0.1'),
+        'PORT': os.getenv('RQ_PORT', 6379),
         'DB': 0,
         'DEFAULT_TIMEOUT': 60       # 1 minute
     },
     'executions-queue': {
-        'HOST': '127.0.0.1',
-        'PORT': 6379,
+        'HOST': os.getenv('RQ_HOST', '127.0.0.1'),
+        'PORT': os.getenv('RQ_PORT', 6379),
         'DB': 0,
         'DEFAULT_TIMEOUT': 7200     # 2 hours
     },
     'findings-queue': {
-        'HOST': '127.0.0.1',
-        'PORT': 6379,
+        'HOST': os.getenv('RQ_HOST', '127.0.0.1'),
+        'PORT': os.getenv('RQ_PORT', 6379),
         'DB': 0,
         'DEFAULT_TIMEOUT': 300      # 5 minutes
     }
@@ -186,8 +186,8 @@ RQ_QUEUES = {
 
 
 # Email
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
+EMAIL_HOST = os.getenv('EMAIL_SMTP_HOST', '')
+EMAIL_PORT = os.getenv('EMAIL_SMTP_PORT', 587)
 EMAIL_HOST_USER = os.getenv('EMAIL_USER', '')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_PASSWORD', '')
 EMAIL_USE_TLS = True
@@ -200,7 +200,7 @@ TELEGRAM_TOKEN_EXPIRATION_HOURS = 24
 
 # Defect-Dojo
 DEFECT_DOJO = {
-    'HOST': 'http://127.0.0.1:8080',
+    'HOST': os.getenv('DEFECTDOJO_HOST', ''),
     'API_KEY': os.getenv('DEFECTDOJO_KEY', ''),
     'AUTO_CREATION': True,
     'REKONO_TAGS': ['rekono'],
