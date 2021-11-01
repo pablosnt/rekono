@@ -71,6 +71,14 @@ class OSINT(Finding):
 
     key_fields = ['execution__task', 'data', 'data_type']
 
+    def defect_dojo(self):
+        return {
+            'title': '{self.data_type.value} found using OSINT techniques',
+            'description': self.data,
+            'severity': Severity.MEDIUM.value,
+            'date': self.creation
+        }
+
 
 class Host(Finding):
     address = models.TextField(max_length=20)
@@ -78,6 +86,17 @@ class Host(Finding):
     os_type = models.TextField(max_length=10, choices=OSType.choices, default=OSType.OTHER)
 
     key_fields = ['execution__task', 'address']
+
+    def defect_dojo(self):
+        description = self.address
+        if self.os:
+            description += '- {self.os} ({self.os_type.value})'
+        return {
+            'title': 'Host discovered',
+            'description': description,
+            'severity': Severity.INFO.value,
+            'date': self.creation
+        }
 
 
 class Enumeration(Finding):
@@ -99,6 +118,15 @@ class Enumeration(Finding):
 
     key_fields = ['execution__task', 'host', 'port']
 
+    def defect_dojo(self):
+        description = f'{self.port} - {self.port_status.value} - {self.protocol} - {self.service}'
+        return {
+            'title': 'Port discovered',
+            'description': description,
+            'severity': Severity.INFO.value,
+            'date': self.creation
+        }
+
 
 class Endpoint(Finding):
     enumeration = models.ForeignKey(
@@ -112,6 +140,14 @@ class Endpoint(Finding):
     status = models.IntegerField(blank=True, null=True)
 
     key_fields = ['execution__task', 'enumeration', 'endpoint']
+
+    def defect_dojo(self):
+        return {
+            'protocol': self.enumeration.service,
+            'host': self.enumeration.host.address,
+            'port': self.enumeration.port,
+            'path': self.endpoint
+        }
 
 
 class Technology(Finding):
@@ -136,6 +172,16 @@ class Technology(Finding):
 
     key_fields = ['execution__task', 'enumeration', 'name', 'version']
 
+    def defect_dojo(self):
+        return {
+            'title': f'Technology {self.name} detected',
+            'description': self.description if self.description else f'{self.name} {self.version}',
+            'severity': Severity.LOW.value,
+            'cwe': 200,     # CWE-200: Exposure of Sensitive Information to Unauthorized Actor
+            'references': self.reference,
+            'date': self.creation
+        }
+
 
 class Vulnerability(Finding):
     technology = models.ForeignKey(
@@ -155,6 +201,17 @@ class Vulnerability(Finding):
 
     key_fields = ['execution__task', 'technology', 'name', 'description', 'cve']
 
+    def defect_dojo(self):
+        return {
+            'title': self.name,
+            'description': self.description,
+            'severity': self.severity.value,
+            'cve': self.cve,
+            'cwe': int(self.cwe.split('-', 1)[1]) if self.cwe else None,
+            'references': self.reference,
+            'date': self.creation
+        }
+
 
 class Credential(Finding):
     email = models.TextField(max_length=100, blank=True, null=True)
@@ -162,6 +219,21 @@ class Credential(Finding):
     secret = models.TextField(max_length=300, blank=True, null=True)
 
     key_fields = ['execution__task', 'email', 'username', 'secret']
+
+    def defect_dojo(self):
+        description = ''
+        for field in ['email', 'username', 'secret']:
+            if getattr(self, field):
+                if description:
+                    description += ' - '
+                description += getattr(self, field)
+        return {
+            'title': 'Credentials exposure',
+            'description': description,
+            'cwe': 200,     # CWE-200: Exposure of Sensitive Information to Unauthorized Actor
+            'severity': Severity.HIGH.value,
+            'date': self.creation
+        }
 
 
 class Exploit(Finding):
@@ -185,3 +257,12 @@ class Exploit(Finding):
     checked = models.BooleanField(default=False)
 
     key_fields = ['execution__task', 'technology', 'vulnerability', 'name', 'reference']
+
+    def defect_dojo(self):
+        return {
+            'title': f'Exploit {self.name} found',
+            'description': self.description,
+            'severity': self.vulnerability.severity.value if self.vulnerability else Severity.MEDIUM.value,
+            'reference': self.reference,
+            'date': self.creation
+        }

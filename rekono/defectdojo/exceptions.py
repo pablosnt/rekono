@@ -4,3 +4,7 @@ class ProductIdNotFoundException(Exception):
 
 class EngagementIdNotFoundException(Exception):
     pass
+
+
+class InvalidEngagementIdException(Exception):
+    pass

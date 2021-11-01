@@ -1,6 +1,8 @@
 from defectdojo import uploader
 from defectdojo.exceptions import (EngagementIdNotFoundException,
+                                   InvalidEngagementIdException,
                                    ProductIdNotFoundException)
+from defectdojo.serializers import EngagementSerializer
 from drf_spectacular.utils import extend_schema
 from executions.models import Execution
 from projects.filters import ProjectFilter
@@ -65,13 +67,30 @@ class ProjectViewSet(ModelViewSet):
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
-    @extend_schema(request=None, responses={200: None})
-    @action(detail=True, methods=['POST'], url_path='defect-dojo', url_name='defect-dojo')
+    @extend_schema(request=EngagementSerializer, responses={200: None})
+    @action(
+        detail=True,
+        methods=['POST'],
+        url_path='defect-dojo-scans',
+        url_name='defect-dojo-scans'
+    )
     def defect_dojo(self, request, pk):
         project = self.get_object()
-        try:
-            executions = Execution.objects.filter(task__target__project=project).all()
-            uploader.upload_executions(executions)
-            return Response(status=status.HTTP_200_OK)
-        except (ProductIdNotFoundException, EngagementIdNotFoundException) as ex:
-            return Response(str(ex), status=status.HTTP_400_BAD_REQUEST)
+        serializer = EngagementSerializer(data=request.data)
+        if serializer.is_valid():
+            try:
+                executions = Execution.objects.filter(task__target__project=project).all()
+                uploader.upload_executions(
+                    executions,
+                    serializer.validated_data.get('engagement_id'),
+                    serializer.validated_data.get('engagement_name'),
+                    serializer.validated_data.get('engagement_description')
+                )
+                return Response(status=status.HTTP_200_OK)
+            except (
+                ProductIdNotFoundException,
+                EngagementIdNotFoundException,
+                InvalidEngagementIdException
+            ) as ex:
+                return Response(str(ex), status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

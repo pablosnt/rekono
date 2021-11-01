@@ -2,11 +2,11 @@ from django.db import models
 
 
 class Severity(models.TextChoices):
-    INFO = 1, 'Info'
-    LOW = 2, 'Low'
-    MEDIUM = 3, 'Medium'
-    HIGH = 4, 'High'
-    CRITICAL = 5, 'Critical'
+    INFO = 'Info'
+    LOW = 'Low'
+    MEDIUM = 'Medium'
+    HIGH = 'High'
+    CRITICAL = 'Critical'
 
 
 class DataType(models.TextChoices):

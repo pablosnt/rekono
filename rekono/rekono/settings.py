@@ -202,11 +202,11 @@ TELEGRAM_TOKEN_EXPIRATION_HOURS = 24
 DEFECT_DOJO = {
     'HOST': os.getenv('DEFECTDOJO_HOST', ''),
     'API_KEY': os.getenv('DEFECTDOJO_KEY', ''),
-    'AUTO_CREATION': True,
-    'REKONO_TAGS': ['rekono'],
-    'REKONO_PROD_TYPE_ID': None,
-    'REKONO_PROD_TYPE': 'Rekono',
-    'REKONO_ENGAGEMENT': 'Rekono'
+    'TAGS': ['rekono'],
+    'PROD_AUTO_CREATION': True,
+    'PROD_TYPE': 'Rekono Project',
+    'TEST_TYPE': 'Rekono Findings Import',
+    'TEST': 'Rekono Test'
 }
 
 
