@@ -5,6 +5,8 @@ from defectdojo.exceptions import (EngagementIdNotFoundException,
 from defectdojo.serializers import EngagementSerializer
 from drf_spectacular.utils import extend_schema
 from executions.models import Execution
+from findings.models import (OSINT, Credential, Endpoint, Enumeration, Exploit,
+                             Host, Technology, Vulnerability)
 from projects.filters import ProjectFilter
 from projects.models import Project
 from projects.serializers import ProjectMemberSerializer, ProjectSerializer
@@ -82,6 +84,42 @@ class ProjectViewSet(ModelViewSet):
                 executions = Execution.objects.filter(task__target__project=project).all()
                 uploader.upload_executions(
                     executions,
+                    serializer.validated_data.get('engagement_id'),
+                    serializer.validated_data.get('engagement_name'),
+                    serializer.validated_data.get('engagement_description')
+                )
+                return Response(status=status.HTTP_200_OK)
+            except (
+                ProductIdNotFoundException,
+                EngagementIdNotFoundException,
+                InvalidEngagementIdException
+            ) as ex:
+                return Response(str(ex), status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @extend_schema(request=EngagementSerializer, responses={200: None})
+    @action(
+        detail=True,
+        methods=['POST'],
+        url_path='defect-dojo-findings',
+        url_name='defect-dojo-findingss'
+    )
+    def defect_dojo_findings(self, request, pk):
+        project = self.get_object()
+        serializer = EngagementSerializer(data=request.data)
+        if serializer.is_valid():
+            try:
+                findings = []
+                for find_model in [
+                    OSINT, Host, Enumeration, Technology,
+                    Endpoint, Vulnerability, Credential, Exploit
+                ]:
+                    findings.extend(find_model.objects.filter(
+                        execution__task__target__project=project,
+                        is_active=True
+                    ).all())
+                uploader.upload_findings(
+                    findings,
                     serializer.validated_data.get('engagement_id'),
                     serializer.validated_data.get('engagement_name'),
                     serializer.validated_data.get('engagement_description')

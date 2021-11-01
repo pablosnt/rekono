@@ -43,7 +43,13 @@ def get_engagement_id(
             raise EngagementIdNotFoundException(f'Engagement {engagement_id} not found')
     elif engagement_name and engagement_description:
         prod_id = get_product_id(project)
-        eng_id = engagements.create_new_engagement(prod_id, engagement_name, engagement_description)
+        eng_id = engagements.get_last_engagement(prod_id, engagement_name)
+        if not eng_id:
+            eng_id = engagements.create_new_engagement(
+                prod_id,
+                engagement_name,
+                engagement_description
+            )
         return prod_id, eng_id
 
 
@@ -72,7 +78,7 @@ def upload_findings(
     engagement_description: str = None
 ) -> None:
     product, engagement = get_engagement_id(
-        findings[0].execution.task.target.project,
+        rekono_findings[0].execution.task.target.project,
         engagement_id,
         engagement_name,
         engagement_description

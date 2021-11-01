@@ -6,6 +6,16 @@ from defectdojo.api import utils
 from rekono.settings import DEFECT_DOJO as config
 
 
+def get_last_engagement(product_id: str, name: str) -> int:
+    response = requests.get(
+        f'{utils.urls.get("engagements")}?name={name}&o=-created&product={product_id}',
+        headers=utils.headers
+    )
+    result = response.json()
+    if result and len(result.get('results')) > 0:
+        return result.get('results')[0].get('id')
+
+
 def create_new_engagement(product_id: int, name: str, description: str) -> int:
     start = datetime.now()
     end = start + timedelta(days=7)
@@ -42,5 +52,5 @@ def check_engagement(engagement_id: int, product_id: int = None) -> tuple:
         if response.status_code == 200:
             result = response.json()
             if result:
-                return result.get('product')
+                return result.get('product'), engagement_id
     return None, None

@@ -73,10 +73,10 @@ class OSINT(Finding):
 
     def defect_dojo(self):
         return {
-            'title': '{self.data_type.value} found using OSINT techniques',
+            'title': f'{self.data_type} found using OSINT techniques',
             'description': self.data,
             'severity': Severity.MEDIUM.value,
-            'date': self.creation
+            'date': self.creation.strftime('%Y-%m-%d')
         }
 
 
@@ -90,12 +90,12 @@ class Host(Finding):
     def defect_dojo(self):
         description = self.address
         if self.os:
-            description += '- {self.os} ({self.os_type.value})'
+            description += '- {self.os} ({self.os_type})'
         return {
             'title': 'Host discovered',
             'description': description,
             'severity': Severity.INFO.value,
-            'date': self.creation
+            'date': self.creation.strftime('%Y-%m-%d')
         }
 
 
@@ -119,12 +119,12 @@ class Enumeration(Finding):
     key_fields = ['execution__task', 'host', 'port']
 
     def defect_dojo(self):
-        description = f'{self.port} - {self.port_status.value} - {self.protocol} - {self.service}'
+        description = f'{self.port} - {self.port_status} - {self.protocol} - {self.service}'
         return {
             'title': 'Port discovered',
             'description': description,
             'severity': Severity.INFO.value,
-            'date': self.creation
+            'date': self.creation.strftime('%Y-%m-%d')
         }
 
 
@@ -179,7 +179,7 @@ class Technology(Finding):
             'severity': Severity.LOW.value,
             'cwe': 200,     # CWE-200: Exposure of Sensitive Information to Unauthorized Actor
             'references': self.reference,
-            'date': self.creation
+            'date': self.creation.strftime('%Y-%m-%d')
         }
 
 
@@ -193,7 +193,7 @@ class Vulnerability(Finding):
     )
     name = models.TextField(max_length=50)
     description = models.TextField(blank=True, null=True)
-    severity = models.IntegerField(choices=Severity.choices, default=Severity.MEDIUM)
+    severity = models.TextField(choices=Severity.choices, default=Severity.MEDIUM)
     cve = models.TextField(max_length=20, blank=True, null=True)
     cwe = models.TextField(max_length=20, blank=True, null=True)
     osvdb = models.TextField(max_length=20, blank=True, null=True)
@@ -205,11 +205,11 @@ class Vulnerability(Finding):
         return {
             'title': self.name,
             'description': self.description,
-            'severity': self.severity.value,
+            'severity': Severity(self.severity).value,
             'cve': self.cve,
             'cwe': int(self.cwe.split('-', 1)[1]) if self.cwe else None,
             'references': self.reference,
-            'date': self.creation
+            'date': self.creation.strftime('%Y-%m-%d')
         }
 
 
@@ -232,7 +232,7 @@ class Credential(Finding):
             'description': description,
             'cwe': 200,     # CWE-200: Exposure of Sensitive Information to Unauthorized Actor
             'severity': Severity.HIGH.value,
-            'date': self.creation
+            'date': self.creation.strftime('%Y-%m-%d')
         }
 
 
@@ -262,7 +262,7 @@ class Exploit(Finding):
         return {
             'title': f'Exploit {self.name} found',
             'description': self.description,
-            'severity': self.vulnerability.severity.value if self.vulnerability else Severity.MEDIUM.value,
+            'severity': Severity(self.vulnerability.severity).value if self.vulnerability else Severity.MEDIUM.value,
             'reference': self.reference,
-            'date': self.creation
+            'date': self.creation.strftime('%Y-%m-%d')
         }

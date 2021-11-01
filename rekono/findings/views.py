@@ -1,3 +1,8 @@
+from defectdojo import uploader
+from defectdojo.exceptions import (EngagementIdNotFoundException,
+                                   InvalidEngagementIdException,
+                                   ProductIdNotFoundException)
+from defectdojo.serializers import EngagementSerializer
 from drf_spectacular.utils import extend_schema
 from findings.enums import DataType
 from findings.filters import (CredentialFilter, EndpointFilter,
@@ -41,6 +46,33 @@ class FindingBaseView(GenericViewSet, ListModelMixin, RetrieveModelMixin, Destro
         finding.is_active = True
         finding.save()
         return Response(status=status.HTTP_201_CREATED)
+
+    @extend_schema(request=EngagementSerializer, responses={200: None})
+    @action(detail=True, methods=['POST'], url_path='defect-dojo', url_name='defect-dojo')
+    def defect_dojo(self, request, pk):
+        finding = self.get_object()
+        if not finding.is_active:
+            return Response(
+                {'finding': 'Finding is not active'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        serializer = EngagementSerializer(data=request.data)
+        if serializer.is_valid():
+            try:
+                uploader.upload_findings(
+                    [finding],
+                    serializer.validated_data.get('engagement_id'),
+                    serializer.validated_data.get('engagement_name'),
+                    serializer.validated_data.get('engagement_description')
+                )
+                return Response(status=status.HTTP_200_OK)
+            except (
+                ProductIdNotFoundException,
+                EngagementIdNotFoundException,
+                InvalidEngagementIdException
+            ) as ex:
+                return Response(str(ex), status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class OSINTViewSet(FindingBaseView):

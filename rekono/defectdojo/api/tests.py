@@ -37,8 +37,8 @@ def create_rekono_test(engagement_id: int) -> int:
         'tags': config.get('TAGS'),
         'title': config.get("TEST"),
         'description': config.get("TEST"),
-        'target_start': datetime.now().strftime('%Y-%m-%d'),
-        'target_end': datetime.now().strftime('%Y-%m-%d'),
+        'target_start': datetime.now().strftime('%Y-%m-%dT%H:%M'),
+        'target_end': datetime.now().strftime('%Y-%m-%dT%H:%M'),
         'test_type': test_type_id
     }
     response = requests.post(f'{utils.urls.get("tests")}', headers=utils.headers, data=data)
