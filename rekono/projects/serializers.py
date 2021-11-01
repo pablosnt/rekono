@@ -12,7 +12,6 @@ class ProjectSerializer(serializers.ModelSerializer):
             'id', 'name', 'description', 'defectdojo_product_id', 'owner', 'targets', 'members'
         )
         read_only_fields = ('owner', 'targets', 'members')
-        ordering = ['-id']
 
     def validate(self, attrs):
         attrs = super().validate(attrs)

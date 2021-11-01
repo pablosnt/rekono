@@ -11,4 +11,3 @@ class ExecutionSerializer(serializers.ModelSerializer):
             'osint', 'host', 'enumeration', 'endpoint', 'technology', 'vulnerability',
             'credential', 'exploit'
         )
-        ordering = ['-id']

@@ -1,4 +1,5 @@
 from django.core.exceptions import PermissionDenied
+from processes.filters import ProcessFilter, StepFilter
 from processes.models import Process, Step
 from processes.serializers import (ProcessSerializer, StepPrioritySerializer,
                                    StepSerializer)
@@ -11,12 +12,7 @@ from security.authorization.permissions import IsAdmin
 class ProcessViewSet(ModelViewSet):
     queryset = Process.objects.all()
     serializer_class = ProcessSerializer
-    filterset_fields = {
-        'name': ['exact', 'contains'],
-        'description': ['exact', 'contains'],
-        'creator': ['exact'],
-    }
-    ordering_fields = ('name', 'creator')
+    filterset_class = ProcessFilter
     http_method_names = ['get', 'post', 'put', 'delete']
 
     def perform_create(self, serializer):
@@ -26,15 +22,7 @@ class ProcessViewSet(ModelViewSet):
 class StepViewSet(ModelViewSet):
     queryset = Step.objects.all()
     serializer_class = StepSerializer
-    filterset_fields = {
-        'process__name': ['exact', 'contains'],
-        'process__description': ['exact', 'contains'],
-        'process__creator': ['exact'],
-        'tool': ['exact'],
-        'configuration': ['exact'],
-        'priority': ['exact'],
-    }
-    ordering_fields = ('process', 'tool', 'configuration', 'priority')
+    filterset_class = StepFilter
 
     def perform_create(self, serializer):
         process_check = bool(

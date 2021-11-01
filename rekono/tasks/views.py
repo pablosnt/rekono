@@ -13,6 +13,7 @@ from rest_framework.viewsets import GenericViewSet
 from targets.models import Target
 from tasks import services
 from tasks.exceptions import InvalidTaskException
+from tasks.filters import TaskFilter
 from tasks.models import Task
 from tasks.queue import producer
 from tasks.serializers import TaskSerializer
@@ -29,25 +30,11 @@ class TaskViewSet(
 ):
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
-    filterset_fields = {
-        'target': ['exact'],
-        'target__project': ['exact'],
-        'process': ['exact'],
-        'tool': ['exact'],
-        'intensity': ['exact'],
-        'executor': ['exact'],
-        'status': ['exact'],
-        'start': ['gte', 'lte', 'exact'],
-        'end': ['gte', 'lte', 'exact']
-    }
-    ordering_fields = (
-        'target', 'target__project', 'process', 'tool', 'intensity', 'executor',
-        'status', 'start', 'end'
-    )
+    filterset_class = TaskFilter
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        return queryset.filter(target__project__members=self.request.user).order_by('-id')
+        return queryset.filter(target__project__members=self.request.user)
 
     def perform_create(self, serializer):
         project_check = Target.objects.filter(

@@ -42,6 +42,9 @@ class Task(models.Model):
     start = models.DateTimeField(blank=True, null=True)
     end = models.DateTimeField(blank=True, null=True)
 
+    class Meta:
+        ordering = ['-id']
+
     def __str__(self) -> str:
         value = f'{self.target.project.name} - {self.target.target} - '
         if self.process:
@@ -60,6 +63,9 @@ class Parameter(models.Model):
     task = models.ForeignKey(Task, related_name='parameters', on_delete=models.CASCADE)
     key = models.TextField(max_length=10, choices=ParameterKey.choices)
     value = models.TextField(max_length=250)
+
+    class Meta:
+        ordering = ['-id']
 
     def get_project(self) -> Any:
         return self.task.target.project

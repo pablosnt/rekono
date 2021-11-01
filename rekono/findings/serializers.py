@@ -11,7 +11,6 @@ class OSINTSerializer(serializers.ModelSerializer):
             'id', 'execution', 'data', 'data_type', 'source', 'reference',
             'creation', 'is_active'
         )
-        ordering = ['-id']
 
 
 class HostSerializer(serializers.ModelSerializer):
@@ -22,7 +21,6 @@ class HostSerializer(serializers.ModelSerializer):
             'id', 'execution', 'address', 'os', 'os_type', 'creation',
             'is_active', 'enumeration'
         )
-        ordering = ['-id']
 
 
 class EnumerationSerializer(serializers.ModelSerializer):
@@ -33,7 +31,6 @@ class EnumerationSerializer(serializers.ModelSerializer):
             'id', 'execution', 'host', 'port', 'port_status', 'protocol',
             'service', 'creation', 'is_active', 'endpoint', 'technology'
         )
-        ordering = ['-id']
 
 
 class EndpointSerializer(serializers.ModelSerializer):
@@ -44,7 +41,6 @@ class EndpointSerializer(serializers.ModelSerializer):
             'id', 'execution', 'enumeration', 'endpoint', 'status',
             'creation', 'is_active'
         )
-        ordering = ['-id']
 
 
 class TechnologySerializer(serializers.ModelSerializer):
@@ -56,7 +52,6 @@ class TechnologySerializer(serializers.ModelSerializer):
             'reference', 'related_to', 'related_technologies', 'creation',
             'is_active', 'vulnerability', 'exploit'
         )
-        ordering = ['-id']
 
 
 class VulnerabilitySerializer(serializers.ModelSerializer):
@@ -71,7 +66,6 @@ class VulnerabilitySerializer(serializers.ModelSerializer):
             'id', 'execution', 'technology', 'cve', 'creation', 'is_active',
             'exploits'
         )
-        ordering = ['-id']
 
 
 class CredentialSerializer(serializers.ModelSerializer):
@@ -79,7 +73,6 @@ class CredentialSerializer(serializers.ModelSerializer):
     class Meta:
         model = Credential
         fields = ('id', 'email', 'username', 'secret')
-        ordering = ['-id']
 
 
 class ExploitSerializer(serializers.ModelSerializer):
@@ -91,4 +84,3 @@ class ExploitSerializer(serializers.ModelSerializer):
             'id', 'execution', 'vulnerability', 'technology', 'name',
             'description', 'reference', 'checked', 'creation', 'is_active'
         )
-        ordering = ['-id']

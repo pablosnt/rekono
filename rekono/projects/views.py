@@ -3,6 +3,7 @@ from defectdojo.exceptions import (EngagementIdNotFoundException,
                                    ProductIdNotFoundException)
 from drf_spectacular.utils import extend_schema
 from executions.models import Execution
+from projects.filters import ProjectFilter
 from projects.models import Project
 from projects.serializers import ProjectMemberSerializer, ProjectSerializer
 from rest_framework import status
@@ -19,18 +20,12 @@ from users.serializers import UserSerializer
 class ProjectViewSet(ModelViewSet):
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
-    filterset_fields = {
-        'name': ['exact', 'contains'],
-        'description': ['exact', 'contains'],
-        'owner': ['exact'],
-        'members': ['exact'],
-    }
-    ordering_fields = ('name', 'owner')
+    filterset_class = ProjectFilter
     http_method_names = ['get', 'post', 'put', 'delete']
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        return queryset.filter(members=self.request.user).order_by('-id')
+        return queryset.filter(members=self.request.user)
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)

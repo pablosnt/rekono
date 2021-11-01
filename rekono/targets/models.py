@@ -17,6 +17,7 @@ class Target(models.Model):
     type = models.TextField(max_length=10, choices=TargetType.choices)
 
     class Meta:
+        ordering = ['-id']
         constraints = [
             models.UniqueConstraint(fields=['project', 'target'], name='unique target')
         ]
@@ -37,6 +38,7 @@ class TargetPort(models.Model):
     port = models.IntegerField()
 
     class Meta:
+        ordering = ['-id']
         constraints = [
             models.UniqueConstraint(fields=['target', 'port'], name='unique target port')
         ]

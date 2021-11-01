@@ -18,8 +18,6 @@ class UserSerializer(serializers.ModelSerializer):
         )
         read_only_fields = ('username', 'email', 'is_active', 'date_joined', 'last_login', 'groups')
 
-        ordering = ['-id']
-
 
 class InviteUserSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)
@@ -84,7 +82,6 @@ class ChangeUserPasswordSerializer(serializers.ModelSerializer):
             'password': {'write_only': True},
             'old_password': {'write_only': True},
         }
-        ordering = ['-id']
 
     def validate(self, attrs):
         attrs = super().validate(attrs)

@@ -7,6 +7,7 @@ from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
                                    ListModelMixin, RetrieveModelMixin)
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
+from targets.filters import TargetFilter
 from targets.models import Target
 from targets.serializers import TargetPortSerializer, TargetSerializer
 
@@ -22,18 +23,11 @@ class TargetViewSet(
 ):
     queryset = Target.objects.all()
     serializer_class = TargetSerializer
-    filterset_fields = {
-        'project__name': ['exact', 'contains'],
-        'project__description': ['exact', 'contains'],
-        'project__owner': ['exact'],
-        'target': ['exact', 'contains'],
-        'type': ['exact'],
-    }
-    ordering_fields = ('project', 'target', 'type')
+    filterset_class = TargetFilter
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        return queryset.filter(project__members=self.request.user).order_by('-id')
+        return queryset.filter(project__members=self.request.user)
 
     def perform_create(self, serializer):
         project_check = bool(

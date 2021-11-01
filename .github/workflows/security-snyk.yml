@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - develop
+  push:
     paths:
       - 'requirements.txt'
 

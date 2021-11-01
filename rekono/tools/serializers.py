@@ -46,4 +46,3 @@ class ToolSerializer(serializers.ModelSerializer):
             'id', 'name', 'command', 'stage', 'reference', 'icon',
             'for_each_target_port', 'intensities', 'configurations'
         )
-        ordering = ['-id']

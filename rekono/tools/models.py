@@ -16,6 +16,9 @@ class Tool(models.Model):
     icon = models.TextField(max_length=250, blank=True, null=True)
     for_each_target_port = models.BooleanField(default=False)
 
+    class Meta:
+        ordering = ['-id']
+
     def __str__(self) -> str:
         return self.name
 
@@ -32,6 +35,9 @@ class Intensity(models.Model):
         default=IntensityRank.NORMAL
     )
 
+    class Meta:
+        ordering = ['-id']
+
     def __str__(self) -> str:
         return f'{self.tool.name} - {IntensityRank(self.value).name}'
 
@@ -46,6 +52,7 @@ class Configuration(models.Model):
     default = models.BooleanField(default=False)
 
     class Meta:
+        ordering = ['-id']
         constraints = [
             models.UniqueConstraint(fields=['tool', 'name'], name='unique configuration')
         ]
@@ -75,6 +82,7 @@ class Input(models.Model):
     required = models.BooleanField(default=False)
 
     class Meta:
+        ordering = ['-id']
         constraints = [
             models.UniqueConstraint(fields=['configuration', 'type'], name='unique input')
         ]
@@ -96,6 +104,7 @@ class Output(models.Model):
     type = models.TextField(max_length=15, choices=FindingType.choices)
 
     class Meta:
+        ordering = ['-id']
         constraints = [
             models.UniqueConstraint(fields=['configuration', 'type'], name='unique output')
         ]

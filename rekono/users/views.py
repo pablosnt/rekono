@@ -7,7 +7,7 @@ from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 from security.authorization.permissions import IsAdmin
-from telegram_bot.models import TelegramChat
+from users.filters import UserFilter
 from users.models import User
 from users.serializers import (ChangeUserPasswordSerializer,
                                ChangeUserRoleSerializer, CreateUserSerializer,
@@ -28,16 +28,7 @@ class UserAdminViewSet(
 ):
     serializer_class = UserSerializer
     queryset = User.objects.all()
-    filterset_fields = {
-        'username': ['exact', 'contains'],
-        'first_name': ['exact', 'contains'],
-        'last_name': ['exact', 'contains'],
-        'email': ['exact', 'contains'],
-        'is_active': ['exact'],
-        'date_joined': ['gte', 'lte', 'exact'],
-        'groups': ['exact'],
-    }
-    ordering_fields = ('username', 'first_name', 'last_name', 'email', 'is_active', 'date_joined')
+    filterset_class = UserFilter
     permission_classes = [IsAuthenticated, DjangoModelPermissions, IsAdmin]
 
     @extend_schema(request=InviteUserSerializer, responses={201: UserSerializer})

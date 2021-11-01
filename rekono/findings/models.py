@@ -1,4 +1,4 @@
-from typing import Any, Collection, Iterable, Optional
+from typing import Any, Collection, Optional
 
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -23,6 +23,7 @@ class Finding(models.Model):
 
     class Meta:
         abstract = True
+        ordering = ['-id']
 
     def validate_unique(self, exclude: Optional[Collection[str]] = ...) -> None:
         if not self.execution:

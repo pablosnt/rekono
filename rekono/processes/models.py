@@ -18,6 +18,9 @@ class Process(models.Model):
         null=True
     )
 
+    class Meta:
+        ordering = ['-id']
+
     def __str__(self) -> str:
         return self.name
 
@@ -37,6 +40,7 @@ class Step(models.Model):
     )
 
     class Meta:
+        ordering = ['-id']
         constraints = [
             models.UniqueConstraint(fields=['process', 'tool', 'configuration'], name='unique step')
         ]

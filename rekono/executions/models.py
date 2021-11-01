@@ -20,6 +20,9 @@ class Execution(models.Model):
     start = models.DateTimeField(blank=True, null=True)
     end = models.DateTimeField(blank=True, null=True)
 
+    class Meta:
+        ordering = ['-id']
+
     def __str__(self) -> str:
         if self.step:
             req = self.task.__str__()

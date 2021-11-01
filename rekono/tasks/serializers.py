@@ -13,7 +13,6 @@ class ParameterSerializer(serializers.ModelSerializer):
     class Meta:
         model = Parameter
         fields = ('key', 'value')
-        ordering = ['-id']
 
 
 class TaskSerializer(serializers.ModelSerializer):
@@ -28,7 +27,6 @@ class TaskSerializer(serializers.ModelSerializer):
             'repeat_time_unit', 'start', 'end', 'parameters', 'executions'
         )
         read_only_fields = ('executor', 'status', 'start', 'end', 'executions')
-        ordering = ['-id']
 
     def validate(self, attrs):
         if attrs.get('scheduled_at') and attrs.get('scheduled_at') <= timezone.now():
