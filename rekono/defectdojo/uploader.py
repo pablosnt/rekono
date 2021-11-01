@@ -69,6 +69,8 @@ def upload_executions(
         tool = execution.step.tool if execution.step else execution.task.tool
         if tool.defectdojo_scan_type:
             scans.import_scan(engagement, execution, tool)
+            execution.reported_to_defectdojo = True
+            execution.save()
 
 
 def upload_findings(
@@ -89,3 +91,5 @@ def upload_findings(
             findings.create_endpoint(product, finding)
         else:
             findings.create_finding(test, finding)
+        finding.reported_to_defectdojo = True
+        finding.save()

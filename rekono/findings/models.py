@@ -18,6 +18,7 @@ class Finding(models.Model):
     )
     creation = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=True)
+    reported_to_defectdojo = models.BooleanField(default=False)
 
     key_fields = ['execution__task']
 
@@ -34,9 +35,9 @@ class Finding(models.Model):
         if self._meta.model.objects.filter(**filter).exists():
             raise ValidationError('Unique constraint violation')
 
-    def save(self, *args, **kwargs):
+    def set_execution(self, execution: Any) -> None:
+        self.execution = execution
         self.validate_unique()
-        return super().save(*args, **kwargs)
 
     def __hash__(self) -> int:
         hash_fields = []

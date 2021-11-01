@@ -19,6 +19,7 @@ class Execution(models.Model):
     status = models.TextField(max_length=10, choices=Status.choices, default=Status.REQUESTED)
     start = models.DateTimeField(blank=True, null=True)
     end = models.DateTimeField(blank=True, null=True)
+    reported_to_defectdojo = models.BooleanField(default=False)
 
     class Meta:
         ordering = ['-id']

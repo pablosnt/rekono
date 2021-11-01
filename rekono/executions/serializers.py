@@ -8,6 +8,6 @@ class ExecutionSerializer(serializers.ModelSerializer):
         model = Execution
         fields = (
             'id', 'task', 'step', 'output_plain', 'output_error', 'status', 'start', 'end',
-            'osint', 'host', 'enumeration', 'endpoint', 'technology', 'vulnerability',
-            'credential', 'exploit'
+            'reported_to_defectdojo', 'osint', 'host', 'enumeration', 'endpoint', 'technology',
+            'vulnerability', 'credential', 'exploit'
         )

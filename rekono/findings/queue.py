@@ -18,13 +18,13 @@ def producer(execution: Execution, findings: list, domain: str) -> None:
 def consumer(execution: Execution = None, findings: list = [], domain: str = None) -> None:
     if execution:
         for finding in findings:
-            setattr(finding, 'execution', execution)
             if isinstance(finding, Vulnerability) and finding.cve:
                 cve_info = get_cve_information(finding.cve)
                 finding.description = cve_info.get('description', '')
                 finding.severity = cve_info.get('severity', Severity.MEDIUM)
                 finding.reference = cve_info.get('reference', '')
             try:
+                finding.set_execution(execution)
                 finding.save()
             except ValidationError:
                 finding.delete()
