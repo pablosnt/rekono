@@ -1,7 +1,7 @@
+from processes.models import Process, Step
+from resources.models import Wordlist
 from rest_framework.permissions import BasePermission
 from security.authorization.roles import Role
-
-from processes.models import Process, Step
 
 
 class IsAdmin(BasePermission):
@@ -20,19 +20,35 @@ class ProjectMemberPermission(BasePermission):
         return True
 
 
-class ProcessCreatorPermission(BasePermission):
-    
+class BaseCreatorPermission(BasePermission):
+    model = None
+
+    def get_instance(self, obj):
+        if self.model and isinstance(obj, self.model):
+            return obj
+
     def has_object_permission(self, request, view, obj):
+        instance = self.get_instance(obj)
+        if (
+            instance
+            and not IsAdmin().has_permission(request, view)
+            and request.method in ['POST', 'PUT', 'DELETE']
+            and instance.creator != request.user
+        ):
+            return False
+        return True
+
+
+class ProcessCreatorPermission(BaseCreatorPermission):
+
+    def get_instance(self, obj):
         process = None
         if isinstance(obj, Process):
             process = obj
         elif isinstance(obj, Step):
             process = obj.process
-        if (
-            process and
-            not IsAdmin().has_permission(request, view) and
-            request.method in ['POST', 'PUT', 'DELETE'] and
-            process.creator != request.user
-        ):
-            return False
-        return True
+        return process
+
+
+class WordlistCreatorPermission(BaseCreatorPermission):
+    model = Wordlist

@@ -26,8 +26,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Path to save execution outputs
 EXECUTION_OUTPUTS = os.path.join(BASE_DIR.parent, 'outputs')
-if not os.path.isdir(EXECUTION_OUTPUTS):
-    os.mkdir(EXECUTION_OUTPUTS)
+# Path to save uploaded wordlists files
+WORDLIST_DIR = os.path.join(BASE_DIR.parent, 'wordlists')
+
+for dir in [EXECUTION_OUTPUTS, WORDLIST_DIR]:
+    if not os.path.isdir(dir):
+        os.mkdir(dir)
+
+# Max allowed size in MB for uploadeded files
+FILE_UPLOAD_MAX_SIZE = 500
 
 
 # Quick-start development settings - unsuitable for production
@@ -121,7 +128,6 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
         'rest_framework.permissions.DjangoModelPermissions',
         'security.authorization.permissions.ProjectMemberPermission',
-        'security.authorization.permissions.ProcessCreatorPermission',
     ]
 }
 

@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 from resources.enums import WordlistType
 
@@ -8,6 +9,13 @@ class Wordlist(models.Model):
     name = models.TextField(max_length=50, unique=True)
     type = models.TextField(max_length=10, choices=WordlistType.choices)
     path = models.TextField(max_length=100, unique=True)
+    checksum = models.TextField(max_length=128, blank=True, null=True)
+    creator = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True
+    )
 
     class Meta:
         ordering = ['-id']

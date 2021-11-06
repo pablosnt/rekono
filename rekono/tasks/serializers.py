@@ -24,7 +24,8 @@ class TaskSerializer(serializers.ModelSerializer):
             'id', 'target', 'process', 'tool', 'configuration',
             'intensity', 'executor', 'status', 'scheduled_at',
             'scheduled_in', 'scheduled_time_unit', 'repeat_in',
-            'repeat_time_unit', 'start', 'end', 'parameters', 'executions'
+            'repeat_time_unit', 'start', 'end', 'wordlists',
+            'parameters', 'executions'
         )
         read_only_fields = ('executor', 'status', 'start', 'end', 'executions')
 
@@ -53,6 +54,7 @@ class TaskSerializer(serializers.ModelSerializer):
         if not attrs.get('intensity'):
             attrs['intensity'] = IntensityRank.NORMAL
         if attrs.get('tool'):
+            attrs['process'] = None
             if not attrs.get('configuration'):
                 attrs['configuration'] = Configuration.objects.filter(
                     tool=attrs.get('tool'),
@@ -82,8 +84,12 @@ class TaskSerializer(serializers.ModelSerializer):
             scheduled_in=validated_data.get('scheduled_in'),
             scheduled_time_unit=validated_data.get('scheduled_time_unit'),
             repeat_in=validated_data.get('repeat_in'),
-            repeat_time_unit=validated_data.get('scheduledrepeat_time_unit_time_unit'),
+            repeat_time_unit=validated_data.get('scheduledrepeat_time_unit_time_unit')
         )
+        if validated_data.get('wordlists'):
+            for wordlist in validated_data.get('wordlists'):
+                task.wordlists.add(wordlist)
+            task.save()
         parameters = []
         if 'parameters' in validated_data:
             parameters_data = validated_data.pop('parameters')
@@ -94,6 +100,8 @@ class TaskSerializer(serializers.ModelSerializer):
                         validated_data=parameter
                     )
                 )
-        domain = get_current_site(self.context.get('request')).domain if self.context.get('request') else None
+        domain = None
+        if self.context.get('request'):
+            domain = get_current_site(self.context.get('request')).domain
         producer(task, parameters, domain)
         return task

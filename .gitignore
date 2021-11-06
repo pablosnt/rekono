@@ -133,3 +133,4 @@ dmypy.json
 .vscode/
 .scannerwork/
 outputs/
+wordlists/
