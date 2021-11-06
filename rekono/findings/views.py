@@ -1,8 +1,5 @@
-from defectdojo import uploader
-from defectdojo.exceptions import (EngagementIdNotFoundException,
-                                   InvalidEngagementIdException,
-                                   ProductIdNotFoundException)
 from defectdojo.serializers import EngagementSerializer
+from defectdojo.views import DDFindingsViewSet
 from drf_spectacular.utils import extend_schema
 from findings.enums import DataType
 from findings.filters import (CredentialFilter, EndpointFilter,
@@ -21,13 +18,12 @@ from rest_framework.decorators import action
 from rest_framework.mixins import (DestroyModelMixin, ListModelMixin,
                                    RetrieveModelMixin, UpdateModelMixin)
 from rest_framework.response import Response
-from rest_framework.viewsets import GenericViewSet
 from targets.serializers import TargetSerializer
 
 # Create your views here.
 
 
-class FindingBaseView(GenericViewSet, ListModelMixin, RetrieveModelMixin, DestroyModelMixin):
+class FindingBaseView(DDFindingsViewSet, ListModelMixin, RetrieveModelMixin, DestroyModelMixin):
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -35,6 +31,9 @@ class FindingBaseView(GenericViewSet, ListModelMixin, RetrieveModelMixin, Destro
             execution__task__target__project__members=self.request.user,
             is_manual=False
         )
+
+    def get_findings(self):
+        return [self.get_object()]
 
     def destroy(self, request, *args, **kwargs):
         finding = self.get_object()
@@ -52,30 +51,14 @@ class FindingBaseView(GenericViewSet, ListModelMixin, RetrieveModelMixin, Destro
 
     @extend_schema(request=EngagementSerializer, responses={200: None})
     @action(detail=True, methods=['POST'], url_path='defect-dojo', url_name='defect-dojo')
-    def defect_dojo(self, request, pk):
+    def defect_dojo_findings(self, request, pk):
         finding = self.get_object()
         if not finding.is_active:
             return Response(
                 {'finding': 'Finding is not active'},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        serializer = EngagementSerializer(data=request.data)
-        if serializer.is_valid():
-            try:
-                uploader.upload_findings(
-                    [finding],
-                    serializer.validated_data.get('engagement_id'),
-                    serializer.validated_data.get('engagement_name'),
-                    serializer.validated_data.get('engagement_description')
-                )
-                return Response(status=status.HTTP_200_OK)
-            except (
-                ProductIdNotFoundException,
-                EngagementIdNotFoundException,
-                InvalidEngagementIdException
-            ) as ex:
-                return Response(str(ex), status=status.HTTP_400_BAD_REQUEST)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return super().defect_dojo_findings(request, pk)
 
 
 class OSINTViewSet(FindingBaseView):

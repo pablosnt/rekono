@@ -1,6 +1,7 @@
 import json
 import os
 import shutil
+from typing import Any
 
 from arguments import formatter
 from findings.enums import Severity
@@ -51,94 +52,94 @@ class CmseekTool(BaseTool):
             shutil.move(report, self.path_output)
             shutil.rmtree(results)
 
+    def analyze_endpoints(self, url: str, cms_name: str, key: str, value: Any) -> list:
+        paths = []
+        findings = []
+        if isinstance(value, str) and ',' in value:
+            paths = value.split(',')
+        elif isinstance(value, list):
+            paths = value
+        paths = [p.replace(url, '/') for p in paths]
+        for path in paths:
+            endpoint = Endpoint.objects.create(endpoint=path)
+            findings.append(endpoint)
+        if 'backup_file' in key:
+            vulnerability = Vulnerability.objects.create(
+                name=f'{cms_name} backup files found',
+                description=', '.join(paths),
+                severity=Severity.HIGH,
+                cwe='CWE-530'
+            )
+            findings.append(vulnerability)
+        elif 'config_file' in key:
+            vulnerability = Vulnerability.objects.create(
+                name=f'{cms_name} configuration files found',
+                description=', '.join(paths),
+                severity=Severity.MEDIUM,
+                cwe='CWE-497'
+            )
+            findings.append(vulnerability)
+        return findings
+
     def parse_output(self, output: str) -> list:
         findings = []
-        if os.path.isfile(self.path_output):
-            with open(self.path_output, 'r') as output:
-                report = json.load(output)
-            if 'cms_name' in report and report['cms_name']:
-                cms_id = report.get('cms_id')
-                cms_name = report.get('cms_name')
-                cms_reference = report.get('cms_url')
-                cms_version = None
-                if f'{cms_id}_version' in report:
-                    cms_version = report.get(f'{cms_id}_version')
-                elif f'{cms_name}_version' in report:
-                    cms_version = report.get(f'{cms_name}_version')
-                url = report.get('url')
-                cms = Technology.objects.create(
-                    name=cms_name,
-                    version=cms_version,
-                    reference=cms_reference
-                )
-                findings.append(cms)
-                for key, value in report.items():
-                    if key in [
-                        'cms_id', 'cms_name', 'cms_url', f'{cms_id}_version', f'{cms_name}_version'
-                    ]:
-                        continue
-                    if 'file' in key or 'directory' in key:
-                        paths = []
-                        if isinstance(value, str) and ',' in value:
-                            paths = value.split(',')
-                        elif isinstance(value, list):
-                            paths = value
-                        paths = [p.replace(url, '/') for p in paths]
-                        for path in paths:
-                            endpoint = Endpoint.objects.create(endpoint=path)
-                            findings.append(endpoint)
-                        if 'backup_file' in key:
-                            vulnerability = Vulnerability.objects.create(
-                                name=f'{cms_name} backup files found',
-                                description=', '.join(paths),
-                                severity=Severity.HIGH,
-                                cwe='CWE-530'
-                            )
-                            findings.append(vulnerability)
-                        elif 'config_file' in key:
-                            vulnerability = Vulnerability.objects.create(
-                                name=f'{cms_name} configuration files found',
-                                description=', '.join(paths),
-                                severity=Severity.MEDIUM,
-                                cwe='CWE-497'
-                            )
-                            findings.append(vulnerability)
-                    elif '_users' in key:
-                        if ',' in value:
-                            for user in value.split(','):
-                                credential = Credential.objects.create(username=user)
-                                findings.append(credential)
-                    elif '_debug_mode' in key and value != 'disabled':
+        with open(self.path_output, 'r') as output_file:
+            report = json.load(output_file)
+        if report.get('cms_name'):
+            cms_id = report.get('cms_id')
+            cms_name = report.get('cms_name')
+            cms_version = None
+            if f'{cms_id}_version' in report:
+                cms_version = report.get(f'{cms_id}_version')
+            elif f'{cms_name}_version' in report:
+                cms_version = report.get(f'{cms_name}_version')
+            url = report.get('url')
+            cms = Technology.objects.create(
+                name=cms_name,
+                version=cms_version,
+                reference=report.get('cms_url')
+            )
+            findings.append(cms)
+            for key, value in [(k, v) for k, v in report.items() if k not in [
+                'cms_id', 'cms_name', 'cms_url', f'{cms_id}_version', f'{cms_name}_version'
+            ]]:
+                if 'file' in key or 'directory' in key:
+                    findings.extend(self.analyze_endpoints(url, cms_name, key, value))
+                elif '_users' in key and ',' in value:
+                    for user in value.split(','):
+                        credential = Credential.objects.create(username=user)
+                        findings.append(credential)
+                elif '_debug_mode' in key and value != 'disabled':
+                    vulnerability = Vulnerability.objects.create(
+                        name=f'{cms_name} debug mode enabled',
+                        description=f'{cms_name} debug mode enabled',
+                        severity=Severity.LOW,
+                        cwe='CWE-489'
+                    )
+                    findings.append(vulnerability)
+                elif '_vulns' in key and 'vulnerabilities' in value:
+                    for vuln in value['vulnerabilities']:
                         vulnerability = Vulnerability.objects.create(
-                            name=f'{cms_name} debug mode enabled',
-                            description=f'{cms_name} debug mode enabled',
-                            severity=Severity.LOW,
-                            cwe='CWE-489'
+                            name=vuln.get('name'),
+                            cve=vuln.get('cve')
                         )
                         findings.append(vulnerability)
-                    elif '_vulns' in key and 'vulnerabilities' in value:
-                        for vuln in value['vulnerabilities']:
-                            vulnerability = Vulnerability.objects.create(
-                                name=vuln.get('name'),
-                                cve=vuln.get('cve')
+                elif 'Version' in value and ',' in value:
+                    for item in value.split(','):
+                        aux = item.split('Version', 1)
+                        name = None
+                        if cms_name in key:
+                            name = key.replace(f'{cms_name}_', '')
+                        elif cms_id in key:
+                            name = key.replace(f'{cms_id}_', '')
+                        tech = aux[0].strip() if len(aux) > 0 else None
+                        vers = aux[1].strip() if len(aux) > 1 else None
+                        if tech:
+                            technology = Technology.objects.create(
+                                name=tech,
+                                version=vers,
+                                related_to=cms,
+                                description=f'{cms_name} {name}'
                             )
-                            findings.append(vulnerability)
-                    elif 'Version' in value and ',' in value:
-                        for item in value.split(','):
-                            aux = item.split('Version', 1)
-                            name = None
-                            if cms_name in key:
-                                name = key.replace(f'{cms_name}_', '')
-                            elif cms_id in key:
-                                name = key.replace(f'{cms_id}_', '')
-                            tech = aux[0].strip() if len(aux) > 0 else None
-                            vers = aux[1].strip() if len(aux) > 1 else None
-                            if tech:
-                                technology = Technology.objects.create(
-                                    name=tech,
-                                    version=vers,
-                                    related_to=cms,
-                                    description=f'{cms_name} {name}'
-                                )
-                                findings.append(technology)
+                            findings.append(technology)
         return findings

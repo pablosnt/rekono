@@ -4,7 +4,7 @@ import string
 
 
 def generate_random_value(size: int) -> str:
-    return ''.join(secrets.choice(string.printable) for i in range(size))
+    return ''.join(secrets.choice(string.printable) for _ in range(size))
 
 
 def hash(value: str) -> str:

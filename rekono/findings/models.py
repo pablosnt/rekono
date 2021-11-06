@@ -1,5 +1,6 @@
 from typing import Any, Collection, Optional
 
+from defectdojo.api.constants import DD_FINDING_DATE_FORMAT
 from django.core.exceptions import ValidationError
 from django.db import models
 from executions.models import Execution
@@ -40,10 +41,10 @@ class Finding(models.Model):
     def validate_unique(self, exclude: Optional[Collection[str]] = ...) -> None:
         if not self.execution:
             return
-        filter = {}
+        findings_filter = {}
         for field in self.key_fields:
-            filter[field] = self.get_field(field)
-        if self._meta.model.objects.filter(**filter).exists():
+            findings_filter[field] = self.get_field(field)
+        if self._meta.model.objects.filter(**findings_filter).exists():
             raise ValidationError('Unique constraint violation')
 
     def set_execution(self, execution: Any) -> None:
@@ -88,7 +89,7 @@ class OSINT(Finding):
             'title': f'{self.data_type} found using OSINT techniques',
             'description': self.data,
             'severity': Severity.MEDIUM.value,
-            'date': self.creation.strftime('%Y-%m-%d')
+            'date': self.creation.strftime(DD_FINDING_DATE_FORMAT)
         }
 
 
@@ -107,7 +108,7 @@ class Host(Finding):
             'title': 'Host discovered',
             'description': description,
             'severity': Severity.INFO.value,
-            'date': self.creation.strftime('%Y-%m-%d')
+            'date': self.creation.strftime(DD_FINDING_DATE_FORMAT)
         }
 
 
@@ -136,7 +137,7 @@ class Enumeration(Finding):
             'title': 'Port discovered',
             'description': description,
             'severity': Severity.INFO.value,
-            'date': self.creation.strftime('%Y-%m-%d')
+            'date': self.creation.strftime(DD_FINDING_DATE_FORMAT)
         }
 
 
@@ -191,7 +192,7 @@ class Technology(Finding):
             'severity': Severity.LOW.value,
             'cwe': 200,     # CWE-200: Exposure of Sensitive Information to Unauthorized Actor
             'references': self.reference,
-            'date': self.creation.strftime('%Y-%m-%d')
+            'date': self.creation.strftime(DD_FINDING_DATE_FORMAT)
         }
 
 
@@ -221,7 +222,7 @@ class Vulnerability(Finding):
             'cve': self.cve,
             'cwe': int(self.cwe.split('-', 1)[1]) if self.cwe else None,
             'references': self.reference,
-            'date': self.creation.strftime('%Y-%m-%d')
+            'date': self.creation.strftime(DD_FINDING_DATE_FORMAT)
         }
 
 
@@ -244,7 +245,7 @@ class Credential(Finding):
             'description': description,
             'cwe': 200,     # CWE-200: Exposure of Sensitive Information to Unauthorized Actor
             'severity': Severity.HIGH.value,
-            'date': self.creation.strftime('%Y-%m-%d')
+            'date': self.creation.strftime(DD_FINDING_DATE_FORMAT)
         }
 
 
@@ -276,5 +277,5 @@ class Exploit(Finding):
             'description': self.description,
             'severity': Severity(self.vulnerability.severity).value if self.vulnerability else Severity.MEDIUM.value,
             'reference': self.reference,
-            'date': self.creation.strftime('%Y-%m-%d')
+            'date': self.creation.strftime(DD_FINDING_DATE_FORMAT)
         }

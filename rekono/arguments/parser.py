@@ -50,7 +50,7 @@ def enumeration(enumeration: Enumeration, accumulated: dict = {}) -> dict:
         Keyword.HOST.name.lower(): enumeration.host.address,
         Keyword.PORT.name.lower(): enumeration.port,
         Keyword.PORTS.name.lower(): [enumeration.port],
-        Keyword.URL.name.lower(): get_url(None, enumeration),
+        Keyword.URL.name.lower(): get_url(enumeration.host.address, enumeration),
     }
     if accumulated and Keyword.PORTS.name.lower() in accumulated:
         output[Keyword.PORTS.name.lower()] = accumulated[Keyword.PORTS.name.lower()]

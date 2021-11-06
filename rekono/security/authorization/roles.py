@@ -71,6 +71,11 @@ DEFAULT_GROUPS = {
         'view_configuration',
         'view_input',
         'view_output',
+        # Wordlist
+        'add_wordlist',
+        'change_wordlist',
+        'delete_wordlist',
+        'view_wordlist',
     ],
     Role.AUDITOR: [
         # Projects
@@ -127,6 +132,11 @@ DEFAULT_GROUPS = {
         'view_configuration',
         'view_input',
         'view_output',
+        # Wordlist
+        'add_wordlist',
+        'change_wordlist',
+        'delete_wordlist',
+        'view_wordlist',
     ],
     Role.READER: [
         # Projects

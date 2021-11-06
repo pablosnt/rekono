@@ -11,17 +11,13 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('processes', '0001_initial'),
+        ('resources', '0001_initial'),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='process',
+            model_name='wordlist',
             name='creator',
             field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL),
-        ),
-        migrations.AddConstraint(
-            model_name='step',
-            constraint=models.UniqueConstraint(fields=('process', 'tool', 'configuration'), name='unique step'),
         ),
     ]

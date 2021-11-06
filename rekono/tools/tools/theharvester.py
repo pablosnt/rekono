@@ -23,9 +23,8 @@ class TheHarvesterTool(BaseTool):
 
     def parse_output(self, output: str) -> list:
         osint_data = []
-        if os.path.isfile(self.path_output):
-            with open(self.path_output) as output_file:
-                data = json.load(output_file)
+        with open(self.path_output) as output_file:
+            data = json.load(output_file)
         for key, dt in self.data_types:
             if key in data:
                 for item in data[key]:

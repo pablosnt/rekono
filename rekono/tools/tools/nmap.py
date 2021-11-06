@@ -1,5 +1,6 @@
 import os
 import re
+from typing import Any
 
 from arguments.constants import CVE_REGEX
 from findings.enums import OSType, PortStatus, Protocol, Severity
@@ -68,64 +69,71 @@ class NmapTool(BaseTool):
         )
         return [vulnerability]
 
+    def parse_nse_scripts(self, scripts_results: Any, technology: Technology) -> list:
+        findings = []
+        parsers = {
+            'vulners': self.parse_vulners_nse,
+            'ftp-anon': self.parse_ftp_anon_nse,
+            'ftp-proftpd-backdoor': self.parse_ftp_proftpd_bd_nse,
+            'ftp-vsftpd-backdoor': self.parse_ftp_vsftpd_bd_nse,
+            'ftp-libopie': self.parse_ftp_libopie_nse,
+            'ftp-vuln-cve2010-4221': self.parse_ftp_cve_2010_4221,
+        }
+        for script in scripts_results:
+            if script.get('id') not in parsers:
+                continue
+            new = parsers[script.get('id')](script.get('output'), technology)
+            findings.extend(new)
+        return findings
+
+    def select_os_detection(self, os_detection: Any) -> tuple:
+        os_text = None
+        os_type = OSType.OTHER
+        if os_detection:
+            selected_os = None
+            accuracy = 0
+            for o in os_detection:
+                if o.accuracy > accuracy:
+                    selected_os = o
+                    os_text = o.name
+            accuracy = 0
+            for c in selected_os.osclasses:
+                if c.accuracy > accuracy:
+                    try:
+                        os_type = OSType[c.osfamily.upper()]
+                    except KeyError:
+                        os_type = OSType.OTHER
+        return os_text, os_type
+
     def parse_output(self, output: str) -> list:
         findings = []
-        if os.path.isfile(self.path_output):
-            report = NmapParser.parse_fromfile(self.path_output)
-            for h in report.hosts:
-                if not h.is_up():
-                    continue
-                os_detections = h.os_match_probabilities()
-                os_text = None
-                os_type = OSType.OTHER
-                if os_detections:
-                    selected_os = None
-                    accuracy = 0
-                    for o in os_detections:
-                        if o.accuracy > accuracy:
-                            selected_os = o
-                            os_text = o.name
-                    accuracy = 0
-                    for c in selected_os.osclasses:
-                        if c.accuracy > accuracy:
-                            try:
-                                os_type = OSType[c.osfamily.upper()]
-                            except KeyError:
-                                os_type = OSType.OTHER
-                host = Host.objects.create(
-                    address=h.address,
-                    os=os_text,
-                    os_type=os_type
+        report = NmapParser.parse_fromfile(self.path_output)
+        for h in report.hosts:
+            if not h.is_up():
+                continue
+            os_text, os_type = self.select_os_detection(h.os_match_probabilities())
+            host = Host.objects.create(
+                address=h.address,
+                os=os_text,
+                os_type=os_type
+            )
+            findings.append(host)
+            for s in h.services:
+                enumeration = Enumeration.objects.create(
+                    host=host,
+                    port=s.port,
+                    port_status=PortStatus[s.state.upper()],
+                    protocol=Protocol[s.protocol.upper()],
+                    service=s.service
                 )
-                findings.append(host)
-                for s in h.services:
-                    enumeration = Enumeration.objects.create(
-                        host=host,
-                        port=s.port,
-                        port_status=PortStatus[s.state.upper()],
-                        protocol=Protocol[s.protocol.upper()],
-                        service=s.service
+                findings.append(enumeration)
+                if 'product' in s.service_dict and 'version' in s.service_dict:
+                    technology = Technology.objects.create(
+                        enumeration=enumeration,
+                        name=s.service_dict.get('product'),
+                        version=s.service_dict.get('version')
                     )
-                    findings.append(enumeration)
-                    if 'product' in s.service_dict and 'version' in s.service_dict:
-                        technology = Technology.objects.create(
-                            enumeration=enumeration,
-                            name=s.service_dict.get('product'),
-                            version=s.service_dict.get('version')
-                        )
-                        findings.append(technology)
-                        if s.scripts_results:
-                            parsers = {
-                                'vulners': self.parse_vulners_nse,
-                                'ftp-anon': self.parse_ftp_anon_nse,
-                                'ftp-proftpd-backdoor': self.parse_ftp_proftpd_bd_nse,
-                                'ftp-vsftpd-backdoor': self.parse_ftp_vsftpd_bd_nse,
-                                'ftp-libopie': self.parse_ftp_libopie_nse,
-                                'ftp-vuln-cve2010-4221': self.parse_ftp_cve_2010_4221,
-                            }
-                            for script in s.scripts_results:
-                                if script.get('id', '') not in parsers:
-                                    continue
-                                new = parsers[script.get('id', '')](script.get('output', ''), technology)   # noqa: E501
-                                findings.extend(new)
+                    findings.append(technology)
+                    if s.scripts_results:
+                        findings.extend(self.parse_nse_scripts(s.scripts_results, technology))
         return findings

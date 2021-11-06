@@ -101,35 +101,32 @@ def get_new_jobs_from_findings(findings: dict, inputs: list) -> set:
         job_counter: []
     }
     for input_type in finding_relations.keys():
-        input_class = tool_utils.get_finding_class_by_type(input_type)
-        inputs = [i for i in inputs if i.type == input_type]
-        if not inputs or input_type not in findings:
+        if input_type not in findings:
             continue
-        for i in inputs:
+        input_class = tool_utils.get_finding_class_by_type(input_type)
+        for i in [i for i in inputs if i.type == input_type]:
             if finding_relations[input_type]:
                 relations_found = False
                 for finding in findings[input_type]:
                     for relation in finding_relations[input_type]:
-                        if hasattr(finding, relation.name.lower()):
-                            attribute = getattr(finding, relation.name.lower(), None)
-                            if attribute:
-                                relations_found = True
-                                for jc in jobs.copy():
-                                    if attribute in jobs[jc]:
-                                        if i.selection == InputSelection.ALL:
-                                            jobs[jc].append(finding)
+                        attribute = getattr(finding, relation.name.lower(), None)
+                        if attribute:
+                            relations_found = True
+                            for jc in jobs.copy():
+                                if attribute in jobs[jc]:
+                                    if i.selection == InputSelection.ALL:
+                                        jobs[jc].append(finding)
+                                    else:
+                                        related_items = [
+                                            f for f in jobs[jc] if not isinstance(f, input_class)
+                                        ]
+                                        if len(related_items) < len(jobs[jc]):
+                                            jobs[job_counter] = related_items.copy()
+                                            jobs[job_counter].append(finding)
+                                            job_counter += 1
                                         else:
-                                            related_items = [
-                                                f for f in jobs[jc]
-                                                if not isinstance(f, input_class)
-                                            ]
-                                            if len(related_items) < len(jobs[jc]):
-                                                jobs[job_counter] = related_items.copy()
-                                                jobs[job_counter].append(finding)
-                                                job_counter += 1
-                                            else:
-                                                jobs[jc].append(finding)
-                                break
+                                            jobs[jc].append(finding)
+                            break
                     if not relations_found:
                         for jc in jobs.copy():
                             jobs[jc].append(finding)
