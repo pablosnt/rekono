@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     'findings',
     'processes',
     'projects',
+    'resources',
     'targets',
     'tasks',
     'telegram_bot',

@@ -3,6 +3,7 @@ from typing import Any
 from django.conf import settings
 from django.db import models
 from processes.models import Process
+from resources.models import Wordlist
 from targets.models import Target
 from tasks.enums import ParameterKey, Status, TimeUnit
 from tools.enums import IntensityRank
@@ -36,11 +37,22 @@ class Task(models.Model):
     status = models.TextField(max_length=10, choices=Status.choices, default=Status.REQUESTED)
     scheduled_at = models.DateTimeField(blank=True, null=True)
     scheduled_in = models.IntegerField(blank=True, null=True)
-    scheduled_time_unit = models.TextField(max_length=10, choices=TimeUnit.choices, blank=True, null=True)
+    scheduled_time_unit = models.TextField(
+        max_length=10,
+        choices=TimeUnit.choices,
+        blank=True,
+        null=True
+    )
     repeat_in = models.IntegerField(blank=True, null=True)
-    repeat_time_unit = models.TextField(max_length=10, choices=TimeUnit.choices, blank=True, null=True)
+    repeat_time_unit = models.TextField(
+        max_length=10,
+        choices=TimeUnit.choices,
+        blank=True,
+        null=True
+    )
     start = models.DateTimeField(blank=True, null=True)
     end = models.DateTimeField(blank=True, null=True)
+    wordlists = models.ManyToManyField(Wordlist, related_name='wordlists', blank=True)
 
     class Meta:
         ordering = ['-id']
