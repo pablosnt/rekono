@@ -270,6 +270,8 @@ class TaskSerializer(serializers.ModelSerializer):
                     field_data['task'] = task
                     finding = serializer().create(validated_data=field_data)
                     manual_findings.extend(serializer().get_findings(finding))
+        # Resources are included as manual findings to make executions simply
+        manual_findings.extend(list(task.wordlists.all()))
         domain = None
         if self.context.get('request'):
             domain = get_current_site(self.context.get('request')).domain

@@ -382,7 +382,7 @@
         "fields": {
             "configuration_id": 15,
             "name": "wordlist",
-            "type": "Parameter",
+            "type": "Wordlist",
             "argument": "--wordlist={wordlist}",
             "filter": null,
             "selection": "All",
@@ -408,7 +408,7 @@
         "fields": {
             "configuration_id": 16,
             "name": "wordlist",
-            "type": "Parameter",
+            "type": "Wordlist",
             "argument": "--wordlist={wordlist}",
             "filter": null,
             "selection": "All",
@@ -434,7 +434,7 @@
         "fields": {
             "configuration_id": 17,
             "name": "wordlist",
-            "type": "Parameter",
+            "type": "Wordlist",
             "argument": "--wordlist={wordlist}",
             "filter": null,
             "selection": "All",
@@ -460,7 +460,7 @@
         "fields": {
             "configuration_id": 18,
             "name": "wordlist",
-            "type": "Parameter",
+            "type": "Wordlist",
             "argument": "--wordlist={wordlist}",
             "filter": null,
             "selection": "All",

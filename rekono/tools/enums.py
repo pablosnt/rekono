@@ -19,8 +19,8 @@ class FindingType(models.TextChoices):
     TECHNOLOGY = 'Technology'
     VULNERABILITY = 'Vulnerability'
     EXPLOIT = 'Exploit'
-    PARAMETER = 'Parameter'
     CREDENTIAL = 'Credential'
+    WORDLIST = 'Wordlist'
 
 
 class Stage(models.TextChoices):
