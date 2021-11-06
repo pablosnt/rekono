@@ -1,0 +1,68 @@
+[
+    {
+        "model": "resources.wordlist",
+        "pk": 1,
+        "fields": {
+            "name": "Rockyou",
+            "type": "Password",
+            "path": "/usr/share/wordlists/rockyou.txt",
+            "checksum": null,
+            "creator": null
+        }
+    },
+    {
+        "model": "resources.wordlist",
+        "pk": 2,
+        "fields": {
+            "name": "Most used passwords 2020",
+            "type": "Password",
+            "path": "/usr/share/wordlists/seclists/Passwords/2020-200_most_used_passwords.txt",
+            "checksum": null,
+            "creator": null
+        }
+    },
+    {
+        "model": "resources.wordlist",
+        "pk": 3,
+        "fields": {
+            "name": "Most 10k common passwords",
+            "type": "Password",
+            "path": "/usr/share/wordlists/seclists/Passwords/Common-Credentials/10k-most-common.txt",
+            "checksum": null,
+            "creator": null
+        }
+    },
+    {
+        "model": "resources.wordlist",
+        "pk": 4,
+        "fields": {
+            "name": "500 worst passwords",
+            "type": "Password",
+            "path": "/usr/share/wordlists/seclists/Passwords/Common-Credentials/500-worst-passwords.txt",
+            "checksum": null,
+            "creator": null
+        }
+    },
+    {
+        "model": "resources.wordlist",
+        "pk": 5,
+        "fields": {
+            "name": "Common endpoints",
+            "type": "Endpoint",
+            "path": "/usr/share/wordlists/dirb/common.txt",
+            "checksum": null,
+            "creator": null
+        }
+    },
+    {
+        "model": "resources.wordlist",
+        "pk": 6,
+        "fields": {
+            "name": "Big endpoints list",
+            "type": "Endpoint",
+            "path": "/usr/share/wordlists/dirb/big.txt",
+            "checksum": null,
+            "creator": null
+        }
+    }
+]

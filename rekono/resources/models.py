@@ -8,7 +8,7 @@ from resources.enums import WordlistType
 class Wordlist(models.Model):
     name = models.TextField(max_length=50, unique=True)
     type = models.TextField(max_length=10, choices=WordlistType.choices)
-    path = models.TextField(max_length=100, unique=True)
+    path = models.TextField(max_length=200, unique=True)
     checksum = models.TextField(max_length=128, blank=True, null=True)
     creator = models.ForeignKey(
         settings.AUTH_USER_MODEL,

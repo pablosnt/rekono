@@ -1,6 +1,7 @@
 from typing import Any
 
 from findings.models import Endpoint, Enumeration, Host, Vulnerability
+from resources.models import Wordlist
 from targets import utils
 from targets.enums import TargetType
 from targets.models import Target
@@ -13,7 +14,8 @@ def check_input_condition(input: Input, finding: Any) -> bool:
         Host: check_host,
         Enumeration: check_enumeration,
         Endpoint: check_endpoint,
-        Vulnerability: check_vulnerability
+        Vulnerability: check_vulnerability,
+        Wordlist: check_wordlist,
     }
     if finding.__class__ in checkers and input.filter:
         return checkers[finding.__class__](input, finding)
@@ -58,3 +60,7 @@ def check_endpoint(input: Input, endpoint: Endpoint) -> bool:
 
 def check_vulnerability(input: Input, vulnerability: Vulnerability) -> bool:
     return (input.filter.lower() == 'cve' and vulnerability.cve)
+
+
+def check_wordlist(input: Input, wordlist: Wordlist) -> bool:
+    return True

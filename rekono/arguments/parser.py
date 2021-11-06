@@ -3,6 +3,7 @@ from arguments.url import get_url
 from findings.enums import DataType
 from findings.models import (OSINT, Credential, Endpoint, Enumeration, Exploit,
                              Host, Technology, Vulnerability)
+from resources.models import Wordlist
 from targets.models import Target
 
 
@@ -95,3 +96,9 @@ def exploit(exploit: Exploit) -> dict:
     output = vulnerability(exploit.vulnerability)
     output[Keyword.EXPLOIT.name.lower()] = exploit.name
     return output
+
+
+def wordlist(wordlist: Wordlist) -> dict:
+    return {
+        Keyword.WORDLIST: wordlist.path
+    }
