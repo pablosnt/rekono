@@ -75,9 +75,7 @@ class BaseTool():
                 if i.selection == InputSelection.FOR_EACH:
                     for source in [previous_findings, manual_findings]:
                         for r in source:
-                            if isinstance(r, input_class):
-                                if not checker.check_input_condition(i, r):
-                                    continue
+                            if isinstance(r, input_class) and checker.check_finding(i, r):
                                 command_arguments[i.name] = formatter.argument_with_one(i.argument, r)  # noqa: E501
                                 self.findings_relations[input_class.__name__.lower()] = r
                                 break
@@ -87,7 +85,7 @@ class BaseTool():
                     findings = []
                     for source in [previous_findings, manual_findings]:
                         for r in source:
-                            if isinstance(r, input_class) and checker.check_input_condition(i, r):
+                            if isinstance(r, input_class) and checker.check_finding(i, r):
                                 findings.append(r)
                         if findings:
                             command_arguments[i.name] = formatter.argument_with_multiple(
@@ -104,7 +102,7 @@ class BaseTool():
                             and i.name == Keyword.TARGET.name.lower()
                         )
                     )
-                    and checker.check_input_condition(i, self.target)
+                    and checker.check_finding(i, self.target)
                 ):
                     command_arguments[i.name] = formatter.argument_with_one(
                         i.argument,
