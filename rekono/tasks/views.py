@@ -103,7 +103,8 @@ class TaskViewSet(
                 ]:
                     findings.extend(find_model.objects.filter(
                         execution__task=task,
-                        is_active=True
+                        is_active=True,
+                        is_manual=False
                     ).all())
                 uploader.upload_findings(
                     findings,

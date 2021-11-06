@@ -77,7 +77,8 @@ class ExecutionViewSet(
                 ]:
                     findings.extend(find_model.objects.filter(
                         execution=execution,
-                        is_active=True
+                        is_active=True,
+                        is_manual=False
                     ).all())
                 uploader.upload_findings(
                     findings,

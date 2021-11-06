@@ -1,21 +1,22 @@
-import django_rq
-from tasks.models import Task
 from datetime import timedelta
+
+import django_rq
+from django_rq import job
+from processes import executor as processes
 from rq.job import Job
 from tasks.exceptions import InvalidTaskException
+from tasks.models import Task
 from tools import executor as tools
-from processes import executor as processes
-from django_rq import job
 
 
-def producer(task: Task, parameters: list, domain: str):
+def producer(task: Task, manual_findings: list, domain: str):
     task_queue = django_rq.get_queue('tasks-queue')
     if task.scheduled_at:
         task_job = task_queue.enqueue_at(
             task.scheduled_at,
             consumer,
             task=task,
-            parameters=parameters,
+            manual_findings=manual_findings,
             domain=domain,
             on_success=scheduled_callback
         )
@@ -25,7 +26,7 @@ def producer(task: Task, parameters: list, domain: str):
             timedelta(**frequency),
             consumer,
             task=task,
-            parameters=parameters,
+            manual_findings=manual_findings,
             domain=domain,
             on_success=scheduled_callback
         )
@@ -33,7 +34,7 @@ def producer(task: Task, parameters: list, domain: str):
         task_job = task_queue.enqueue(
             consumer,
             task=task,
-            parameters=parameters,
+            manual_findings=manual_findings,
             domain=domain,
             on_success=scheduled_callback
         )
@@ -43,7 +44,7 @@ def producer(task: Task, parameters: list, domain: str):
 
 def scheduled_callback(job, connection, result, *args, **kwargs):
     if result:
-        task, parameters, domain = result
+        task, manual_findings, domain = result
         if task.repeat_in and task.repeat_time_unit:
             frequency = {task.repeat_time_unit.name.lower(): task.repeat_in}
             task_queue = django_rq.get_queue('tasks-queue')
@@ -51,7 +52,7 @@ def scheduled_callback(job, connection, result, *args, **kwargs):
                 timedelta(**frequency),
                 consumer.process_task,
                 task=task,
-                parameters=parameters,
+                manual_findings=manual_findings,
                 domain=domain,
                 on_success=scheduled_callback
             )
@@ -60,15 +61,15 @@ def scheduled_callback(job, connection, result, *args, **kwargs):
 
 
 @job('tasks-queue')
-def consumer(task: Task = None, parameters: list = [], domain: str = None) -> tuple:
+def consumer(task: Task = None, manual_findings: list = [], domain: str = None) -> tuple:
     if task:
         if task.tool:
-            tools.execute(task, parameters, domain)
+            tools.execute(task, manual_findings, domain)
         elif task.process:
-            processes.execute(task, parameters, domain)
+            processes.execute(task, manual_findings, domain)
         else:
             raise InvalidTaskException('Invalid task. Process or tool is required')
-        return task, parameters, domain
+        return task, manual_findings, domain
 
 
 def cancel_and_delete_task(job_id: str) -> Job:

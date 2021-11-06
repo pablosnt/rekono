@@ -21,7 +21,7 @@ def consumer(
     intensity: Intensity,
     inputs: list,
     target_ports: list,
-    parameters: list,
+    manual_findings: list,
     previous_findings: list,
     domain: str,
 ) -> None:
@@ -40,12 +40,12 @@ def consumer(
             execution,
             intensity,
             inputs,
-            parameters,
+            manual_findings,
             domain,
             current_job,
             tool
         )
-    tool.run(parameters=parameters, previous_findings=previous_findings, domain=domain)
+    tool.run(manual_findings=manual_findings, previous_findings=previous_findings, domain=domain)
     return tool
 
 
@@ -53,7 +53,7 @@ def process_dependencies(
     execution: Execution,
     intensity: Intensity,
     inputs: list,
-    parameters: list,
+    manual_findings: list,
     domain: str,
     current_job: Job,
     tool: BaseTool
@@ -65,7 +65,7 @@ def process_dependencies(
     all_params = get_new_jobs_from_findings(findings, inputs)
     all_params = [
         list(param_set) for param_set in list(all_params)
-        if check_params_for_tool(tool, parameters, list(param_set))
+        if check_params_for_tool(tool, manual_findings, list(param_set))
     ]
     for param_set in all_params[1:]:
         new_execution = Execution.objects.create(task=execution.task, step=execution.step)
@@ -74,7 +74,7 @@ def process_dependencies(
             new_execution,
             intensity,
             inputs,
-            parameters=parameters,
+            manual_findings=manual_findings,
             previous_findings=param_set,
             target_ports=tool.target_ports,
             domain=domain,
@@ -82,14 +82,14 @@ def process_dependencies(
             at_front=True
         )
         new_jobs_ids.append(job.id)
-    queue_utils.update_new_dependencies(current_job.id, new_jobs_ids, parameters)
+    queue_utils.update_new_dependencies(current_job.id, new_jobs_ids, manual_findings)
     return next(iter(all_params), [])
 
 
-def check_params_for_tool(tool: BaseTool, parameters: list, findings: list) -> bool:
+def check_params_for_tool(tool: BaseTool, manual_findings: list, findings: list) -> bool:
     try:
-        parameters, findings = tool.prepare_parameters(parameters, findings)
-        tool.get_arguments(parameters, findings)
+        manual_findings, findings = tool.prepare_findings(manual_findings, findings)
+        tool.get_arguments(manual_findings, findings)
         return True
     except InvalidToolParametersException:
         return False

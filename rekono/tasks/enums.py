@@ -11,16 +11,6 @@ class Status(models.TextChoices):
     ERROR = 'Error'
     COMPLETED = 'Completed'
 
-
-class ParameterKey(models.TextChoices):
-    TECHNOLOGY = 'Technology'
-    VERSION = 'Version'
-    ENDPOINT = 'Endpoint'
-    CVE = 'CVE'
-    EXPLOIT = 'Exploit'
-    WORDLIST = 'Wordlist'
-
-
 class TimeUnit(models.TextChoices):
     MINUTES = 'Minutes'
     HOURS = 'Hours'

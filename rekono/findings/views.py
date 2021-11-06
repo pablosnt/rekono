@@ -31,7 +31,10 @@ class FindingBaseView(GenericViewSet, ListModelMixin, RetrieveModelMixin, Destro
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        return queryset.filter(execution__task__target__project__members=self.request.user)
+        return queryset.filter(
+            execution__task__target__project__members=self.request.user,
+            is_manual=False
+        )
 
     def destroy(self, request, *args, **kwargs):
         finding = self.get_object()

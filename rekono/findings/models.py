@@ -4,11 +4,21 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from executions.models import Execution
 from findings.enums import DataType, OSType, PortStatus, Protocol, Severity
+from tasks.models import Task
 
 # Create your models here.
 
 
 class Finding(models.Model):
+    # Only for manual findings
+    task = models.ForeignKey(
+        Task,
+        related_name='%(class)s',
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True
+    )
+    # Only for automatic findings
     execution = models.ForeignKey(
         Execution,
         related_name='%(class)s',
@@ -18,6 +28,7 @@ class Finding(models.Model):
     )
     creation = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=True)
+    is_manual = models.BooleanField(default=False)
     reported_to_defectdojo = models.BooleanField(default=False)
 
     key_fields = ['execution__task']

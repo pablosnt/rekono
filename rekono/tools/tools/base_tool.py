@@ -4,11 +4,11 @@ import subprocess
 import uuid
 
 from arguments import checker, formatter
-from arguments.constants import TARGET
+from arguments.enums import Keyword
 from django.utils import timezone
 from executions.models import Execution
 from findings.queue import producer
-from tasks.enums import ParameterKey, Status
+from tasks.enums import Status
 from tools import utils
 from tools.enums import FindingType, InputSelection
 from tools.exceptions import (InstallationNotFoundException,
@@ -61,41 +61,32 @@ class BaseTool():
     def clean_environment(self) -> None:
         pass
 
-    def prepare_parameters(self, parameters: list, previous_findings: list) -> tuple:
-        return (parameters, previous_findings)
+    def prepare_findings(self, manual_findings: list, previous_findings: list) -> tuple:
+        return (manual_findings, previous_findings)
 
-    def get_arguments(self, parameters: list, previous_findings: list) -> str:
+    def get_arguments(self, manual_findings: list, previous_findings: list) -> str:
         command_arguments = {
             'intensity': self.intensity.argument,
-            'output': '' if not self.file_output_enabled else os.path.join(
-                self.directory_output,
-                self.filename_output
-            )
+            'output': os.path.join(self.directory_output, self.filename_output) if self.file_output_enabled else ''     # noqa: E501
         }
         for i in self.inputs:
             try:
-                req_keys = utils.get_keys_from_argument(i.argument)
                 input_class = utils.get_finding_class_by_type(i.type)
                 if i.selection == InputSelection.FOR_EACH:
-                    for r in previous_findings:
-                        if isinstance(r, input_class):
-                            if not checker.check_input_condition(i, r):
-                                continue
-                            command_arguments[i.name] = formatter.argument_with_one(i.argument, r)
-                            self.findings_relations[input_class.__name__.lower()] = r
-                            break
-                    if i.name not in command_arguments or i.type == FindingType.PARAMETER:
-                        for p in parameters:
-                            if ParameterKey(p.key).name.lower() in req_keys:
-                                command_arguments[i.name] = formatter.argument_with_one(
-                                    i.argument,
-                                    p
-                                )
+                    for source in [previous_findings, manual_findings]:
+                        for r in source:
+                            if isinstance(r, input_class):
+                                if not checker.check_input_condition(i, r):
+                                    continue
+                                command_arguments[i.name] = formatter.argument_with_one(i.argument, r)  # noqa: E501
+                                self.findings_relations[input_class.__name__.lower()] = r
                                 break
+                        if i.name in command_arguments:
+                            break
                 else:
-                    if i.type != FindingType.PARAMETER:
-                        findings = []
-                        for r in previous_findings:
+                    findings = []
+                    for source in [previous_findings, manual_findings]:
+                        for r in source:
                             if isinstance(r, input_class) and checker.check_input_condition(i, r):
                                 findings.append(r)
                         if findings:
@@ -103,21 +94,15 @@ class BaseTool():
                                 i.argument,
                                 findings
                             )
-                    elif i.type == FindingType.PARAMETER or i.name not in command_arguments:
-                        params = []
-                        for p in parameters:
-                            if ParameterKey(p.key).name.lower() in req_keys:
-                                params.append(p)
-                        if params:
-                            command_arguments[i.name] = formatter.argument_with_multiple(
-                                i.argument,
-                                params
-                            )
+                            break
                 if (
                     i.name not in command_arguments
                     and (
                         i.type == FindingType.HOST
-                        or (i.type == FindingType.ENUMERATION and i.name == TARGET)
+                        or (
+                            i.type == FindingType.ENUMERATION
+                            and i.name == Keyword.TARGET.name.lower()
+                        )
                     )
                     and checker.check_input_condition(i, self.target)
                 ):
@@ -125,7 +110,6 @@ class BaseTool():
                         i.argument,
                         self.target
                     )
-                    continue
                 if (
                     i.name not in command_arguments
                     and i.type == FindingType.ENUMERATION
@@ -136,7 +120,6 @@ class BaseTool():
                         self.target_ports,
                         self.target
                     )
-                    continue
             except KeyError:
                 if i.required and i.name not in command_arguments:
                     raise InvalidToolParametersException(
@@ -151,14 +134,9 @@ class BaseTool():
             elif not i.required and i.name not in command_arguments:
                 command_arguments[i.name] = ''
         args = self.configuration.arguments.format(**command_arguments)
-        if ' ' in args:
-            args = args.split(' ')
-            args = [arg for arg in args if arg]
-        else:
-            args = [args]
-        return args
+        return [arg for arg in args.split(' ') if arg] if ' ' in args else [args]
 
-    def tool_execution(self, args: list, parameters: list, previous_findings: list) -> str:
+    def tool_execution(self, args: list, manual_findings: list, previous_findings: list) -> str:
         args.insert(0, self.tool.command)
         exec = subprocess.run(args, capture_output=True)
         if (
@@ -213,19 +191,19 @@ class BaseTool():
         self.execution.output_plain = output
         self.execution.save()
 
-    def run(self, parameters: list = [], previous_findings: list = [], domain: str = None) -> None:
+    def run(self, manual_findings: list = [], previous_findings: list = [], domain: str = None) -> None:
         self.on_start()
         try:
             self.check_installation()
         except InstallationNotFoundException as ex:
             self.on_error(stderror=str(ex))
             return
-        parameters, previous_findings = self.prepare_parameters(
-            parameters,
+        manual_findings, previous_findings = self.prepare_findings(
+            manual_findings,
             previous_findings
         )
         try:
-            args = self.get_arguments(parameters, previous_findings)
+            args = self.get_arguments(manual_findings, previous_findings)
         except InvalidToolParametersException as ex:
             print(ex)
             self.on_skipped()
@@ -233,7 +211,7 @@ class BaseTool():
         self.prepare_environment()
         self.on_running()
         try:
-            output = self.tool_execution(args, parameters, previous_findings)
+            output = self.tool_execution(args, manual_findings, previous_findings)
         except UnexpectedToolExitCodeException as ex:
             self.on_error(stderror=str(ex))
             self.clean_environment()

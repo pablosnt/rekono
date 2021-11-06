@@ -5,7 +5,7 @@ from django.db import models
 from processes.models import Process
 from resources.models import Wordlist
 from targets.models import Target
-from tasks.enums import ParameterKey, Status, TimeUnit
+from tasks.enums import Status, TimeUnit
 from tools.enums import IntensityRank
 from tools.models import Configuration, Tool
 
@@ -69,15 +69,3 @@ class Task(models.Model):
 
     def get_project(self) -> Any:
         return self.target.project
-
-
-class Parameter(models.Model):
-    task = models.ForeignKey(Task, related_name='parameters', on_delete=models.CASCADE)
-    key = models.TextField(max_length=10, choices=ParameterKey.choices)
-    value = models.TextField(max_length=250)
-
-    class Meta:
-        ordering = ['-id']
-
-    def get_project(self) -> Any:
-        return self.task.target.project

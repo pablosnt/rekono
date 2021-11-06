@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from django.contrib.sites.shortcuts import get_current_site
+from django.db import transaction
 from rest_framework import serializers, status
 from rest_framework.exceptions import AuthenticationFailed
 from security.authorization.roles import Role
@@ -23,6 +24,7 @@ class InviteUserSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)
     role = serializers.ChoiceField(choices=Role.choices, required=True)
 
+    @transaction.atomic()
     def create(self, validated_data):
         request = self.context.get('request', None)
         user = User.objects.create_user(
@@ -40,6 +42,7 @@ class CreateUserSerializer(serializers.Serializer):
     password = serializers.CharField(max_length=150, required=True)
     otp = serializers.CharField(max_length=200, required=True)
 
+    @transaction.atomic()
     def create(self, validated_data):
         pk = self.context.get('pk', None)
         user = User.objects.get(pk=pk, is_active=False, otp=validated_data.get('otp'))
@@ -56,6 +59,7 @@ class CreateUserSerializer(serializers.Serializer):
 class EnableUserSerializer(serializers.Serializer):
     role = serializers.ChoiceField(choices=Role.choices, required=True)
 
+    @transaction.atomic()
     def update(self, instance, validated_data):
         role = Role(validated_data.get('role'))
         request = self.context.get('request', None)
@@ -66,6 +70,7 @@ class EnableUserSerializer(serializers.Serializer):
 class ChangeUserRoleSerializer(serializers.Serializer):
     role = serializers.ChoiceField(choices=Role.choices, required=True)
 
+    @transaction.atomic()
     def update(self, instance, validated_data):
         role = Role(validated_data.get('role'))
         instance = User.objects.change_user_role(instance, role)
@@ -90,6 +95,7 @@ class ChangeUserPasswordSerializer(serializers.ModelSerializer):
             raise AuthenticationFailed('Invalid password', code=status.HTTP_401_UNAUTHORIZED)
         return attrs
 
+    @transaction.atomic()
     def update(self, instance, validated_data):
         instance.set_password(validated_data.get('password'))
         instance.save()
@@ -121,6 +127,7 @@ class ResetPasswordSerializer(serializers.Serializer):
 class TelegramTokenSerializer(serializers.Serializer):
     token = serializers.CharField(max_length=200, required=True)
 
+    @transaction.atomic()
     def update(self, instance, validated_data):
         try:
             telegram_chat = TelegramChat.objects.get(

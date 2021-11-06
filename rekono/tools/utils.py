@@ -2,7 +2,6 @@ import importlib
 
 from findings.models import (OSINT, Credential, Endpoint, Enumeration, Exploit,
                              Host, Technology, Vulnerability)
-from tasks.models import Parameter
 from tools.enums import FindingType
 
 
@@ -28,8 +27,7 @@ def get_finding_class_by_type(type):
         FindingType.TECHNOLOGY: Technology,
         FindingType.VULNERABILITY: Vulnerability,
         FindingType.CREDENTIAL: Credential,
-        FindingType.EXPLOIT: Exploit,
-        FindingType.PARAMETER: Parameter
+        FindingType.EXPLOIT: Exploit
     }
     return mapper[type]
 
