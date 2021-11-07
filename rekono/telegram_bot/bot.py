@@ -1,5 +1,3 @@
-from typing import Any
-
 from telegram import ParseMode
 from telegram.ext import CommandHandler, Updater
 from telegram_bot.commands import help, logout, start
