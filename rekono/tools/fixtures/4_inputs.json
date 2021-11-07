@@ -384,8 +384,8 @@
             "name": "wordlist",
             "type": "Wordlist",
             "argument": "--wordlist={wordlist}",
-            "filter": null,
-            "selection": "All",
+            "filter": "Endpoint",
+            "selection": "For Each",
             "required": false
         }
     },
@@ -410,8 +410,8 @@
             "name": "wordlist",
             "type": "Wordlist",
             "argument": "--wordlist={wordlist}",
-            "filter": null,
-            "selection": "All",
+            "filter": "Endpoint",
+            "selection": "For Each",
             "required": false
         }
     },
@@ -436,8 +436,8 @@
             "name": "wordlist",
             "type": "Wordlist",
             "argument": "--wordlist={wordlist}",
-            "filter": null,
-            "selection": "All",
+            "filter": "Endpoint",
+            "selection": "For Each",
             "required": false
         }
     },
@@ -462,8 +462,8 @@
             "name": "wordlist",
             "type": "Wordlist",
             "argument": "--wordlist={wordlist}",
-            "filter": null,
-            "selection": "All",
+            "filter": "Endpoint",
+            "selection": "For Each",
             "required": false
         }
     },

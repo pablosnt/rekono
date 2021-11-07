@@ -251,9 +251,12 @@ class TaskSerializer(serializers.ModelSerializer):
         for field in creation_fields:
             creation_data[field] = validated_data.get(field)
         task = Task.objects.create(**creation_data)
+        wordlist_types = set()
         if validated_data.get('wordlists'):
             for wordlist in validated_data.get('wordlists'):
-                task.wordlists.add(wordlist)
+                if wordlist.type not in wordlist_types:
+                    task.wordlists.add(wordlist)
+                    wordlist_types.add(wordlist.type)
             task.save()
         manual_findings = []
         finding_fields = [
