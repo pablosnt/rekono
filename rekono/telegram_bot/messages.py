@@ -4,7 +4,7 @@ HELP = ''' I'm working on it '''
 WELCOME = '''
 Welcome to Rekono Bot!
 
-To start hacking, you must add the following token to your Rekono account: {start_token} 
+To start hacking, you must add the following token to your Rekono account: {start_token}
 
 After that, you can see the available commands typing /help
 

@@ -11,6 +11,7 @@ class Status(models.TextChoices):
     ERROR = 'Error'
     COMPLETED = 'Completed'
 
+
 class TimeUnit(models.TextChoices):
     MINUTES = 'Minutes'
     HOURS = 'Hours'

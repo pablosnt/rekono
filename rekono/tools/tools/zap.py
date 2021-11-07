@@ -1,4 +1,3 @@
-import os
 import xml.etree.ElementTree as parser
 from html import unescape
 

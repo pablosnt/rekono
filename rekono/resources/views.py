@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from resources.filters import WordlistFilter
 from resources.models import Wordlist
 from resources.serializers import WordlistSerializer

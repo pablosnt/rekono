@@ -1,5 +1,4 @@
 import hashlib
-import os
 from pathlib import Path
 from typing import Any
 
@@ -12,7 +11,9 @@ from rekono.settings import FILE_UPLOAD_MAX_SIZE
 def validate(in_memory_file: Any, extensions: list, mime_types: list) -> None:
     size = in_memory_file.size / (1024 * 1024)
     if size > FILE_UPLOAD_MAX_SIZE:
-        raise ValidationError({'file': f'File size is greater than the max size allowed ({FILE_UPLOAD_MAX_SIZE} MB)'})
+        raise ValidationError(
+            {'file': f'File size is greater than the max size allowed ({FILE_UPLOAD_MAX_SIZE} MB)'}
+        )
     extension = Path(in_memory_file.name).suffix[1:].lower()
     if extension not in extensions:
         raise ValidationError({'file': f'Invalid extension {extension}'})

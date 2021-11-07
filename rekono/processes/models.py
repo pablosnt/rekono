@@ -31,7 +31,11 @@ class Process(models.Model):
 class Step(models.Model):
     process = models.ForeignKey(Process, related_name='steps', on_delete=models.CASCADE)
     tool = models.ForeignKey(Tool, on_delete=models.CASCADE)
-    priority = models.TextField(max_length=10, choices=StepPriority.choices, default=StepPriority.MEDIUM)
+    priority = models.TextField(
+        max_length=10,
+        choices=StepPriority.choices,
+        default=StepPriority.MEDIUM
+    )
     configuration = models.ForeignKey(
         Configuration,
         on_delete=models.CASCADE,

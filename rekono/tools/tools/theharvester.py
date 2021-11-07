@@ -1,5 +1,4 @@
 import json
-import os
 
 from findings.enums import DataType
 from findings.models import OSINT
@@ -7,7 +6,7 @@ from tools.tools.base_tool import BaseTool
 
 
 class TheHarvesterTool(BaseTool):
-    
+
     data_types = [
         ('ips', DataType.IP),
         ('hosts', DataType.DOMAIN),

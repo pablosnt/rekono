@@ -1,5 +1,4 @@
 import json
-import os
 
 from findings.models import Endpoint
 from tools.tools.base_tool import BaseTool

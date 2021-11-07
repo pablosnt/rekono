@@ -1,6 +1,5 @@
 from typing import Any
 
-from django.template.loader import get_template, render_to_string
 from mail import sender
 from telegram_bot import bot
 

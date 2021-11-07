@@ -275,7 +275,7 @@ class Exploit(Finding):
         return {
             'title': f'Exploit {self.name} found',
             'description': self.description,
-            'severity': Severity(self.vulnerability.severity).value if self.vulnerability else Severity.MEDIUM.value,
+            'severity': Severity(self.vulnerability.severity).value if self.vulnerability else Severity.MEDIUM.value,   # noqa: E501
             'reference': self.reference,
             'date': self.creation.strftime(DD_FINDING_DATE_FORMAT)
         }

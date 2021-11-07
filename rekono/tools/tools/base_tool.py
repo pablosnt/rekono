@@ -191,7 +191,12 @@ class BaseTool():
         self.execution.output_plain = output
         self.execution.save()
 
-    def run(self, manual_findings: list = [], previous_findings: list = [], domain: str = None) -> None:
+    def run(
+        self,
+        manual_findings: list = [],
+        previous_findings: list = [],
+        domain: str = None
+    ) -> None:
         self.on_start()
         try:
             self.check_installation()

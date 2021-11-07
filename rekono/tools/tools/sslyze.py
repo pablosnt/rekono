@@ -1,6 +1,4 @@
 import json
-import os
-from typing import Any
 
 from findings.enums import Severity
 from findings.models import Technology, Vulnerability

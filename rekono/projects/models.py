@@ -2,8 +2,6 @@ from typing import Any
 
 from django.conf import settings
 from django.db import models
-from django.db.models import constraints
-from django.db.models.deletion import CASCADE
 
 # Create your models here.
 
