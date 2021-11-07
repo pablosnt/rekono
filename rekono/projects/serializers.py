@@ -1,4 +1,5 @@
 from defectdojo.api import products
+from django.db import transaction
 from projects.models import Project
 from rest_framework import serializers
 from users.models import User
@@ -12,7 +13,6 @@ class ProjectSerializer(serializers.ModelSerializer):
             'id', 'name', 'description', 'defectdojo_product_id', 'owner', 'targets', 'members'
         )
         read_only_fields = ('owner', 'targets', 'members')
-        ordering = ['-id']
 
     def validate(self, attrs):
         attrs = super().validate(attrs)
@@ -27,6 +27,7 @@ class ProjectSerializer(serializers.ModelSerializer):
             )
         return attrs
 
+    @transaction.atomic()
     def create(self, validated_data):
         project = super().create(validated_data)
         project.members.add(validated_data.get('owner'))
@@ -37,6 +38,7 @@ class ProjectSerializer(serializers.ModelSerializer):
 class ProjectMemberSerializer(serializers.Serializer):
     user = serializers.IntegerField(required=True)
 
+    @transaction.atomic()
     def update(self, instance, validated_data):
         user = User.objects.get(pk=validated_data.get('user'), is_active=True)
         instance.members.add(user)

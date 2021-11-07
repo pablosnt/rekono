@@ -1,4 +1,11 @@
+from defectdojo.serializers import EngagementSerializer
+from defectdojo.views import DDFindingsViewSet
 from drf_spectacular.utils import extend_schema
+from findings.enums import DataType
+from findings.filters import (CredentialFilter, EndpointFilter,
+                              EnumerationFilter, ExploitFilter, HostFilter,
+                              OSINTFilter, TechnologyFilter,
+                              VulnerabilityFilter)
 from findings.models import (OSINT, Credential, Endpoint, Enumeration, Exploit,
                              Host, Technology, Vulnerability)
 from findings.serializers import (CredentialSerializer, EndpointSerializer,
@@ -11,18 +18,22 @@ from rest_framework.decorators import action
 from rest_framework.mixins import (DestroyModelMixin, ListModelMixin,
                                    RetrieveModelMixin, UpdateModelMixin)
 from rest_framework.response import Response
-from rest_framework.viewsets import GenericViewSet
+from targets.serializers import TargetSerializer
 
 # Create your views here.
 
 
-class FindingBaseView(GenericViewSet, ListModelMixin, RetrieveModelMixin, DestroyModelMixin):
+class FindingBaseView(DDFindingsViewSet, ListModelMixin, RetrieveModelMixin, DestroyModelMixin):
 
     def get_queryset(self):
         queryset = super().get_queryset()
         return queryset.filter(
-            execution__task__target__project__members=self.request.user
-        ).order_by('-id')
+            execution__task__target__project__members=self.request.user,
+            is_manual=False
+        )
+
+    def get_findings(self):
+        return [self.get_object()]
 
     def destroy(self, request, *args, **kwargs):
         finding = self.get_object()
@@ -38,284 +49,79 @@ class FindingBaseView(GenericViewSet, ListModelMixin, RetrieveModelMixin, Destro
         finding.save()
         return Response(status=status.HTTP_201_CREATED)
 
+    @extend_schema(request=EngagementSerializer, responses={200: None})
+    @action(detail=True, methods=['POST'], url_path='defect-dojo', url_name='defect-dojo')
+    def defect_dojo_findings(self, request, pk):
+        finding = self.get_object()
+        if not finding.is_active:
+            return Response(
+                {'finding': 'Finding is not active'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        return super().defect_dojo_findings(request, pk)
+
 
 class OSINTViewSet(FindingBaseView):
     queryset = OSINT.objects.all()
     serializer_class = OSINTSerializer
-    filterset_fields = {
-        'execution': ['exact'],
-        'execution__task': ['exact'],
-        'execution__task__target': ['exact'],
-        'execution__task__target__project': ['exact'],
-        'execution__task__tool': ['exact'],
-        'execution__step__tool': ['exact'],
-        'execution__task__executor': ['exact'],
-        'execution__start': ['gte', 'lte', 'exact'],
-        'execution__end': ['gte', 'lte', 'exact'],
-        'data_type': ['exact'],
-        'source': ['exact', 'contains'],
-        'creation': ['gte', 'lte', 'exact'],
-        'is_active': ['exact'],
-    }
-    ordering_fields = (
-        ('task', 'execution__task'),
-        ('target', 'execution__task__target'),
-        ('project', 'execution__task__target__project'),
-        ('task__tool', 'execution__task__tool'),
-        ('step__tool', 'execution__step__tool'),
-        ('executor', 'execution__task__executor'),
-        'execution', 'data', 'data_type', 'source', 'creation', 'is_active'
-    )
+    filterset_class = OSINTFilter
+
+    @extend_schema(request=None, responses={201: TargetSerializer})
+    @action(detail=True, methods=['POST'], url_path='target', url_name='target')
+    def target(self, request, pk):
+        osint = self.get_object()
+        if osint.data_type in [DataType.IP, DataType.DOMAIN]:
+            serializer = TargetSerializer(data={
+                'project': osint.execution.task.target.project.id,
+                'target': osint.data
+            })
+            if serializer.is_valid():
+                target = serializer.create(serializer.validated_data)
+                return Response(TargetSerializer(target).data, status=status.HTTP_201_CREATED)
+        return Response(
+            {'data_type': 'Unsupported option for this OSINT data type'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
 
 class HostViewSet(FindingBaseView):
     queryset = Host.objects.all()
     serializer_class = HostSerializer
-    filterset_fields = {
-        'execution': ['exact'],
-        'execution__task': ['exact'],
-        'execution__task__target': ['exact'],
-        'execution__task__target__project': ['exact'],
-        'execution__task__tool': ['exact'],
-        'execution__step__tool': ['exact'],
-        'execution__task__executor': ['exact'],
-        'execution__start': ['gte', 'lte', 'exact'],
-        'execution__end': ['gte', 'lte', 'exact'],
-        'address': ['exact', 'contains'],
-        'os_type': ['exact'],
-        'creation': ['gte', 'lte', 'exact'],
-        'is_active': ['exact'],
-    }
-    ordering_fields = (
-        ('task', 'execution__task'),
-        ('target', 'execution__task__target'),
-        ('project', 'execution__task__target__project'),
-        ('task__tool', 'execution__task__tool'),
-        ('step__tool', 'execution__step__tool'),
-        ('executor', 'execution__task__executor'),
-        'execution', 'address', 'os_type', 'creation', 'is_active'
-    )
+    filterset_class = HostFilter
 
 
 class EnumerationViewSet(FindingBaseView):
     queryset = Enumeration.objects.all()
     serializer_class = EnumerationSerializer
-    filterset_fields = {
-        'execution': ['exact'],
-        'execution__task': ['exact'],
-        'execution__task__target': ['exact'],
-        'execution__task__target__project': ['exact'],
-        'execution__task__tool': ['exact'],
-        'execution__step__tool': ['exact'],
-        'execution__task__executor': ['exact'],
-        'execution__start': ['gte', 'lte', 'exact'],
-        'execution__end': ['gte', 'lte', 'exact'],
-        'host': ['exact'],
-        'host__address': ['exact', 'contains'],
-        'host__os_type': ['exact'],
-        'port': ['exact'],
-        'port_status': ['exact'],
-        'protocol': ['exact'],
-        'service': ['exact', 'contains'],
-        'creation': ['gte', 'lte', 'exact'],
-        'is_active': ['exact'],
-    }
-    ordering_fields = (
-        ('task', 'execution__task'),
-        ('target', 'execution__task__target'),
-        ('project', 'execution__task__target__project'),
-        ('task__tool', 'execution__task__tool'),
-        ('step__tool', 'execution__step__tool'),
-        ('executor', 'execution__task__executor'),
-        ('os_type', 'host__os_type'),
-        'execution', 'host', 'port', 'protocol', 'service', 'creation', 'is_active'
-    )
+    filterset_class = EnumerationFilter
 
 
 class EndpointViewSet(FindingBaseView):
     queryset = Endpoint.objects.all()
     serializer_class = EndpointSerializer
-    filterset_fields = {
-        'execution': ['exact'],
-        'execution__task': ['exact'],
-        'execution__task__target': ['exact'],
-        'execution__task__target__project': ['exact'],
-        'execution__task__tool': ['exact'],
-        'execution__step__tool': ['exact'],
-        'execution__task__executor': ['exact'],
-        'execution__start': ['gte', 'lte', 'exact'],
-        'execution__end': ['gte', 'lte', 'exact'],
-        'enumeration': ['exact'],
-        'enumeration__host': ['exact'],
-        'enumeration__host__address': ['exact', 'contains'],
-        'enumeration__host__os_type': ['exact'],
-        'enumeration__port': ['exact'],
-        'endpoint': ['exact', 'contains'],
-        'status': ['exact'],
-        'creation': ['gte', 'lte', 'exact'],
-        'is_active': ['exact'],
-    }
-    ordering_fields = (
-        ('task', 'execution__task'),
-        ('target', 'execution__task__target'),
-        ('project', 'execution__task__target__project'),
-        ('task__tool', 'execution__task__tool'),
-        ('step__tool', 'execution__step__tool'),
-        ('executor', 'execution__task__executor'),
-        ('host', 'enumeration__host'),
-        'execution', 'enumeration', 'endpoint', 'status', 'creation', 'is_active'
-    )
+    filterset_class = EndpointFilter
 
 
 class TechnologyViewSet(FindingBaseView):
     queryset = Technology.objects.all()
     serializer_class = TechnologySerializer
-    filterset_fields = {
-        'execution': ['exact'],
-        'execution__task': ['exact'],
-        'execution__task__target': ['exact'],
-        'execution__task__target__project': ['exact'],
-        'execution__task__tool': ['exact'],
-        'execution__step__tool': ['exact'],
-        'execution__task__executor': ['exact'],
-        'execution__start': ['gte', 'lte', 'exact'],
-        'execution__end': ['gte', 'lte', 'exact'],
-        'enumeration': ['exact'],
-        'enumeration__host': ['exact'],
-        'enumeration__host__address': ['exact', 'contains'],
-        'enumeration__host__os_type': ['exact'],
-        'enumeration__port': ['exact'],
-        'name': ['exact', 'contains'],
-        'version': ['exact', 'contains'],
-        'related_to': ['exact'],
-        'creation': ['gte', 'lte', 'exact'],
-        'is_active': ['exact'],
-    }
-    ordering_fields = (
-        ('task', 'execution__task'),
-        ('target', 'execution__task__target'),
-        ('project', 'execution__task__target__project'),
-        ('task__tool', 'execution__task__tool'),
-        ('step__tool', 'execution__step__tool'),
-        ('executor', 'execution__task__executor'),
-        ('host', 'enumeration__host'),
-        'execution', 'enumeration', 'name', 'version', 'creation', 'is_active'
-    )
+    filterset_class = TechnologyFilter
 
 
 class VulnerabilityViewSet(FindingBaseView, UpdateModelMixin):
     queryset = Vulnerability.objects.all()
     serializer_class = VulnerabilitySerializer
-    filterset_fields = {
-        'execution': ['exact'],
-        'execution__task': ['exact'],
-        'execution__task__target': ['exact'],
-        'execution__task__target__project': ['exact'],
-        'execution__task__tool': ['exact'],
-        'execution__step__tool': ['exact'],
-        'execution__task__executor': ['exact'],
-        'execution__start': ['gte', 'lte', 'exact'],
-        'execution__end': ['gte', 'lte', 'exact'],
-        'technology': ['exact'],
-        'technology__name': ['exact', 'contains'],
-        'technology__version': ['exact', 'contains'],
-        'technology__enumeration': ['exact'],
-        'technology__enumeration__host': ['exact'],
-        'technology__enumeration__host__address': ['exact', 'contains'],
-        'technology__enumeration__host__os_type': ['exact'],
-        'technology__enumeration__port': ['exact'],
-        'name': ['exact', 'contains'],
-        'description': ['exact', 'contains'],
-        'severity': ['exact'],
-        'cve': ['exact', 'contains'],
-        'creation': ['gte', 'lte', 'exact'],
-        'is_active': ['exact'],
-    }
-    ordering_fields = (
-        ('task', 'execution__task'),
-        ('target', 'execution__task__target'),
-        ('project', 'execution__task__target__project'),
-        ('task__tool', 'execution__task__tool'),
-        ('step__tool', 'execution__step__tool'),
-        ('executor', 'execution__task__executor'),
-        ('host', 'enumeration__host'),
-        'execution', 'enumeration', 'technology', 'name', 'severity', 'cve', 'creation', 'is_active'
-    )
+    filterset_class = VulnerabilityFilter
     http_method_names = ['get', 'put', 'post', 'delete']
 
 
 class CredentialViewSet(FindingBaseView):
     queryset = Credential.objects.all()
     serializer_class = CredentialSerializer
-    filterset_fields = {
-        'execution': ['exact'],
-        'execution__task': ['exact'],
-        'execution__task__target': ['exact'],
-        'execution__task__target__project': ['exact'],
-        'execution__task__tool': ['exact'],
-        'execution__step__tool': ['exact'],
-        'execution__task__executor': ['exact'],
-        'execution__start': ['gte', 'lte', 'exact'],
-        'execution__end': ['gte', 'lte', 'exact'],
-        'email': ['exact', 'contains'],
-        'username': ['exact', 'contains'],
-        'creation': ['gte', 'lte', 'exact'],
-        'is_active': ['exact'],
-    }
-    ordering_fields = (
-        ('task', 'execution__task'),
-        ('target', 'execution__task__target'),
-        ('project', 'execution__task__target__project'),
-        ('task__tool', 'execution__task__tool'),
-        ('step__tool', 'execution__step__tool'),
-        ('executor', 'execution__task__executor'),
-        'email', 'username', 'creation', 'is_active'
-    )
+    filterset_class = CredentialFilter
 
 
 class ExploitViewSet(FindingBaseView):
     queryset = Exploit.objects.all()
     serializer_class = ExploitSerializer
-    filterset_fields = {
-        'execution': ['exact'],
-        'execution__task': ['exact'],
-        'execution__task__target': ['exact'],
-        'execution__task__target__project': ['exact'],
-        'execution__task__tool': ['exact'],
-        'execution__step__tool': ['exact'],
-        'execution__task__executor': ['exact'],
-        'execution__start': ['gte', 'lte', 'exact'],
-        'execution__end': ['gte', 'lte', 'exact'],
-        'vulnerability__technology': ['exact'],
-        'vulnerability__technology__name': ['exact', 'contains'],
-        'vulnerability__technology__version': ['exact', 'contains'],
-        'vulnerability__technology__enumeration': ['exact'],
-        'vulnerability__technology__enumeration__host': ['exact'],
-        'vulnerability__technology__enumeration__host__address': ['exact', 'contains'],
-        'vulnerability__technology__enumeration__host__os_type': ['exact'],
-        'vulnerability__technology__enumeration__port': ['exact'],
-        'technology': ['exact'],
-        'technology__name': ['exact', 'contains'],
-        'technology__version': ['exact', 'contains'],
-        'technology__enumeration': ['exact'],
-        'technology__enumeration__host': ['exact'],
-        'technology__enumeration__host__address': ['exact', 'contains'],
-        'technology__enumeration__host__os_type': ['exact'],
-        'technology__enumeration__port': ['exact'],
-        'name': ['exact', 'contains'],
-        'description': ['exact', 'contains'],
-        'reference': ['exact', 'contains'],
-        'checked': ['exact'],
-        'creation': ['gte', 'lte', 'exact'],
-        'is_active': ['exact'],
-    }
-    ordering_fields = (
-        ('task', 'execution__task'),
-        ('target', 'execution__task__target'),
-        ('project', 'execution__task__target__project'),
-        ('task__tool', 'execution__task__tool'),
-        ('step__tool', 'execution__step__tool'),
-        ('executor', 'execution__task__executor'),
-        ('host', 'enumeration__host'),
-        'execution', 'enumeration', 'technology', 'name', 'creation', 'is_active'
-    )
+    filterset_class = ExploitFilter

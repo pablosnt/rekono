@@ -11,10 +11,13 @@ class Tool(models.Model):
     command = models.TextField(max_length=30, blank=True, null=True)
     output_format = models.TextField(max_length=5, blank=True, null=True)
     defectdojo_scan_type = models.TextField(max_length=50, blank=True, null=True)
-    stage = models.IntegerField(choices=Stage.choices)
+    stage = models.TextField(max_length=25, choices=Stage.choices)
     reference = models.TextField(max_length=250, blank=True, null=True)
     icon = models.TextField(max_length=250, blank=True, null=True)
     for_each_target_port = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['-id']
 
     def __str__(self) -> str:
         return self.name
@@ -26,7 +29,14 @@ class Tool(models.Model):
 class Intensity(models.Model):
     tool = models.ForeignKey(Tool, related_name='intensities', on_delete=models.CASCADE)
     argument = models.TextField(max_length=50, default='', blank=True)
-    value = models.IntegerField(choices=IntensityRank.choices, default=IntensityRank.NORMAL)
+    value = models.TextField(
+        max_length=10,
+        choices=IntensityRank.choices,
+        default=IntensityRank.NORMAL
+    )
+
+    class Meta:
+        ordering = ['-id']
 
     def __str__(self) -> str:
         return f'{self.tool.name} - {IntensityRank(self.value).name}'
@@ -42,6 +52,7 @@ class Configuration(models.Model):
     default = models.BooleanField(default=False)
 
     class Meta:
+        ordering = ['-id']
         constraints = [
             models.UniqueConstraint(fields=['tool', 'name'], name='unique configuration')
         ]
@@ -60,13 +71,18 @@ class Input(models.Model):
         on_delete=models.CASCADE
     )
     name = models.TextField(max_length=20)
-    type = models.IntegerField(choices=FindingType.choices)
+    type = models.TextField(max_length=15, choices=FindingType.choices)
     argument = models.TextField(max_length=50, default='', blank=True)
     filter = models.TextField(max_length=250, blank=True, null=True)
-    selection = models.IntegerField(choices=InputSelection.choices, default=InputSelection.FOR_EACH)
+    selection = models.TextField(
+        max_length=10,
+        choices=InputSelection.choices,
+        default=InputSelection.FOR_EACH
+    )
     required = models.BooleanField(default=False)
 
     class Meta:
+        ordering = ['-id']
         constraints = [
             models.UniqueConstraint(fields=['configuration', 'type'], name='unique input')
         ]
@@ -85,9 +101,10 @@ class Output(models.Model):
         related_name='outputs',
         on_delete=models.CASCADE
     )
-    type = models.IntegerField(choices=FindingType.choices)
+    type = models.TextField(max_length=15, choices=FindingType.choices)
 
     class Meta:
+        ordering = ['-id']
         constraints = [
             models.UniqueConstraint(fields=['configuration', 'type'], name='unique output')
         ]

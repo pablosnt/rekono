@@ -1,38 +1,26 @@
 import os
-import re
 from typing import Any
 
-from arguments.constants import (CVE_REGEX, WORDLIST_FILE_REGEX,
-                                 WORDLIST_PATH_REGEX)
-from findings.models import Endpoint, Enumeration, Host, Vulnerability
+from findings.enums import Severity
+from findings.models import (Endpoint, Enumeration, Host, Technology,
+                             Vulnerability)
+from resources.models import Wordlist
+from security import file_upload
 from targets import utils
 from targets.enums import TargetType
 from targets.models import Target
-from tasks.enums import ParameterKey
-from tools.exceptions import InvalidParameterException
 from tools.models import Input
 
 
-def check_parameter(parameter) -> None:
+def check_finding(input: Input, finding: Any) -> bool:
     checkers = {
-        ParameterKey.TECHNOLOGY: check_technology_param,
-        ParameterKey.VERSION: check_version_param,
-        ParameterKey.ENDPOINT: check_endpoint_param,
-        ParameterKey.CVE: check_cve_param,
-        ParameterKey.EXPLOIT: check_exploit_param,
-        ParameterKey.WORDLIST: check_wordlist_param,
-    }
-    if not checkers[parameter.key](parameter.value):
-        raise InvalidParameterException(f'Invalid value for {parameter.key} parameter')
-
-
-def check_input_condition(input: Input, finding: Any) -> bool:
-    checkers = {
-        Target: check_target,
-        Host: check_host,
-        Enumeration: check_enumeration,
-        Endpoint: check_endpoint,
-        Vulnerability: check_vulnerability
+        Target: check_target,                   # By TargetType
+        Host: check_host,                       # By TargetType
+        Enumeration: check_enumeration,         # By Port or Service contains
+        Endpoint: check_endpoint,               # By StatusCode or Endpoint startswith
+        Technology: check_technology,           # By Name
+        Vulnerability: check_vulnerability,     # By Severity, CVE exists, exact CVE or exact CWE
+        Wordlist: check_wordlist,               # Check file checksum
     }
     if finding.__class__ in checkers and input.filter:
         return checkers[finding.__class__](input, finding)
@@ -42,18 +30,16 @@ def check_input_condition(input: Input, finding: Any) -> bool:
 
 def check_target(input: Input, target: Target) -> bool:
     try:
-        to_check = int(input.filter)
-        return TargetType(to_check) == target.type
-    except ValueError:
-        return TargetType[input.filter.upper()] == target.type
+        return TargetType(input.filter) == target.type
+    except KeyError:
+        return True
 
 
 def check_host(input: Input, host: Host) -> bool:
     try:
-        to_check = int(input.filter)
-        return TargetType(to_check) == utils.get_target_type(host.address)
-    except ValueError:
-        return TargetType[input.filter.upper()] == utils.get_target_type(host.address)
+        return TargetType(input.filter) == utils.get_target_type(host.address)
+    except KeyError:
+        return True
 
 
 def check_enumeration(input: Input, enumeration: Enumeration) -> bool:
@@ -69,40 +55,27 @@ def check_endpoint(input: Input, endpoint: Endpoint) -> bool:
         status_code = int(input.filter)
         return status_code == endpoint.status
     except ValueError:
-        return (
-            endpoint.endpoint.startswith(input.filter) or
-            (endpoint.enumeration and input.filter in endpoint.enumeration.service)
-        )
+        return endpoint.endpoint.startswith(input.filter)
+
+
+def check_technology(input: Input, technology: Technology) -> bool:
+    return input.filter in technology.name
 
 
 def check_vulnerability(input: Input, vulnerability: Vulnerability) -> bool:
-    return (input.filter.lower() == 'cve' and vulnerability.cve)
+    try:
+        return Severity(input.filter) == vulnerability.severity
+    except KeyError:
+        f = input.filter.lower()
+        return (
+            f == 'cve' and vulnerability.cve
+            or (f.startswith('cve-') and f == vulnerability.cve.lower())
+            or (f.startswith('cwe-') and f == vulnerability.cwe.lower())
+        )
 
 
-def check_technology_param(technology: str) -> bool:
-    return True
-
-
-def check_version_param(technology: str) -> bool:
-    return True
-
-
-def check_endpoint_param(endpoint: str) -> bool:
-    return True
-
-
-def check_cve_param(cve: str) -> bool:
-    return bool(re.fullmatch(CVE_REGEX, cve))
-
-
-def check_exploit_param(exploit: str) -> bool:
-    return True
-
-
-def check_wordlist_param(wordlist: str) -> bool:
-    check = os.path.isfile(wordlist)
-    directory = os.path.dirname(os.path.abspath(wordlist))
-    check = check and bool(re.fullmatch(WORDLIST_PATH_REGEX, directory))
-    filename = os.path.basename(wordlist)
-    check = check and bool(re.fullmatch(WORDLIST_FILE_REGEX, filename))
-    return check
+def check_wordlist(input: Input, wordlist: Wordlist) -> bool:
+    exist = os.path.isfile(wordlist.path)
+    if exist and wordlist.checksum:
+        return file_upload.check_checksum(wordlist.path, wordlist.checksum)
+    return exist

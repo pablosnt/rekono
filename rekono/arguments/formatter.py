@@ -1,8 +1,8 @@
 from arguments import parser
 from findings.models import (OSINT, Credential, Endpoint, Enumeration, Exploit,
                              Host, Technology, Vulnerability)
+from resources.models import Wordlist
 from targets.models import Target
-from tasks.models import Parameter
 
 
 def argument_with_one(argument, finding) -> str:
@@ -16,7 +16,7 @@ def argument_with_one(argument, finding) -> str:
         Vulnerability: parser.vulnerability,
         Credential: parser.credential,
         Exploit: parser.exploit,
-        Parameter: parser.parameter,
+        Wordlist: parser.wordlist,
     }
     data = parsers[finding.__class__](finding)
     return format_argument(argument, data)
@@ -25,7 +25,6 @@ def argument_with_one(argument, finding) -> str:
 def argument_with_multiple(argument, findings) -> str:
     parsers = {
         Enumeration: parser.enumeration,
-        Parameter: parser.parameter_multiple,
     }
     data = {}
     for result in findings:

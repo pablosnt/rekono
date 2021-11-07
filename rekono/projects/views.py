@@ -1,8 +1,9 @@
-from defectdojo import uploader
-from defectdojo.exceptions import (EngagementIdNotFoundException,
-                                   ProductIdNotFoundException)
+from defectdojo.views import DDFindingsViewSet, DDScansViewSet
 from drf_spectacular.utils import extend_schema
 from executions.models import Execution
+from findings.models import (OSINT, Credential, Endpoint, Enumeration, Exploit,
+                             Host, Technology, Vulnerability)
+from projects.filters import ProjectFilter
 from projects.models import Project
 from projects.serializers import ProjectMemberSerializer, ProjectSerializer
 from rest_framework import status
@@ -16,24 +17,35 @@ from users.serializers import UserSerializer
 # Create your views here.
 
 
-class ProjectViewSet(ModelViewSet):
+class ProjectViewSet(ModelViewSet, DDScansViewSet, DDFindingsViewSet):
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
-    filterset_fields = {
-        'name': ['exact', 'contains'],
-        'description': ['exact', 'contains'],
-        'owner': ['exact'],
-        'members': ['exact'],
-    }
-    ordering_fields = ('name', 'owner')
+    filterset_class = ProjectFilter
     http_method_names = ['get', 'post', 'put', 'delete']
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        return queryset.filter(members=self.request.user).order_by('-id')
+        return queryset.filter(members=self.request.user)
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
+
+    def get_executions(self):
+        return list(Execution.objects.filter(task__target__project=self.get_object()).all())
+
+    def get_findings(self):
+        project = self.get_object()
+        findings = []
+        for find_model in [
+            OSINT, Host, Enumeration, Technology,
+            Endpoint, Vulnerability, Credential, Exploit
+        ]:
+            findings.extend(find_model.objects.filter(
+                execution__task__target__project=project,
+                is_active=True,
+                is_manual=False
+            ).all())
+        return findings
 
     @extend_schema(responses={200: UserSerializer})
     @action(detail=True, methods=['GET'], url_path='members', url_name='members')
@@ -69,14 +81,3 @@ class ProjectViewSet(ModelViewSet):
             project.save()
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(status=status.HTTP_400_BAD_REQUEST)
-
-    @extend_schema(request=None, responses={200: None})
-    @action(detail=True, methods=['POST'], url_path='defect-dojo', url_name='defect-dojo')
-    def defect_dojo(self, request, pk):
-        project = self.get_object()
-        try:
-            executions = Execution.objects.filter(task__target__project=project).all()
-            uploader.upload_executions(executions)
-            return Response(status=status.HTTP_200_OK)
-        except (ProductIdNotFoundException, EngagementIdNotFoundException) as ex:
-            return Response(str(ex), status=status.HTTP_400_BAD_REQUEST)

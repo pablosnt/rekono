@@ -1,18 +1,20 @@
-from security.authorization.permissions import IsAdmin
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
-                                   ListModelMixin, RetrieveModelMixin, UpdateModelMixin)
+                                   ListModelMixin, RetrieveModelMixin)
 from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
+from security.authorization.permissions import IsAdmin
+from users.filters import UserFilter
 from users.models import User
 from users.serializers import (ChangeUserPasswordSerializer,
                                ChangeUserRoleSerializer, CreateUserSerializer,
                                EnableUserSerializer, InviteUserSerializer,
                                RequestPasswordResetSerializer,
-                               ResetPasswordSerializer, UserSerializer)
+                               ResetPasswordSerializer,
+                               TelegramTokenSerializer, UserSerializer)
 
 # Create your views here.
 
@@ -26,16 +28,7 @@ class UserAdminViewSet(
 ):
     serializer_class = UserSerializer
     queryset = User.objects.all()
-    filterset_fields = {
-        'username': ['exact', 'contains'],
-        'first_name': ['exact', 'contains'],
-        'last_name': ['exact', 'contains'],
-        'email': ['exact', 'contains'],
-        'is_active': ['exact'],
-        'date_joined': ['gte', 'lte', 'exact'],
-        'groups': ['exact'],
-    }
-    ordering_fields = ('username', 'first_name', 'last_name', 'email', 'is_active', 'date_joined')
+    filterset_class = UserFilter
     permission_classes = [IsAuthenticated, DjangoModelPermissions, IsAdmin]
 
     @extend_schema(request=InviteUserSerializer, responses={201: UserSerializer})
@@ -79,7 +72,7 @@ class UserProfileViewSet(GenericViewSet):
     serializer_class = UserSerializer
     queryset = User.objects.all()
     permission_classes = [IsAuthenticated]
-    http_method_names = ['get', 'put']
+    http_method_names = ['get', 'put', 'post']
 
     @action(detail=False, methods=['GET'])
     def get_profile(self, request, *args, **kwargs):
@@ -98,6 +91,15 @@ class UserProfileViewSet(GenericViewSet):
     @action(detail=False, methods=['PUT'], url_path='change-password', url_name='change-password')
     def change_password(self, request):
         serializer = ChangeUserPasswordSerializer(request.user, data=request.data)
+        if serializer.is_valid():
+            serializer.update(request.user, serializer.validated_data)
+            return Response(status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @extend_schema(request=TelegramTokenSerializer, responses={200: None})
+    @action(detail=False, methods=['POST'], url_path='telegram-token', url_name='telegram-token')
+    def telegram_token(self, request):
+        serializer = TelegramTokenSerializer(request.user, data=request.data)
         if serializer.is_valid():
             serializer.update(request.user, serializer.validated_data)
             return Response(status=status.HTTP_200_OK)

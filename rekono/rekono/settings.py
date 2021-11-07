@@ -13,10 +13,12 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 import os
 from pathlib import Path
 
-from tasks.enums import Status, TimeUnit
 from findings.enums import Severity
 from processes.enums import StepPriority
-from security.crypto import generate_random_value, hash
+from security.crypto import generate_random_value
+from targets.enums import TargetType
+from tasks.enums import Status, TimeUnit
+from tools.enums import FindingType, IntensityRank
 from users.enums import Notification
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -24,8 +26,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Path to save execution outputs
 EXECUTION_OUTPUTS = os.path.join(BASE_DIR.parent, 'outputs')
-if not os.path.isdir(EXECUTION_OUTPUTS):
-    os.mkdir(EXECUTION_OUTPUTS)
+# Path to save uploaded wordlists files
+WORDLIST_DIR = os.path.join(BASE_DIR.parent, 'wordlists')
+
+for dir in [EXECUTION_OUTPUTS, WORDLIST_DIR]:
+    if not os.path.isdir(dir):
+        os.mkdir(dir)
+
+# Max allowed size in MB for uploadeded files
+FILE_UPLOAD_MAX_SIZE = 500
 
 
 # Quick-start development settings - unsuitable for production
@@ -33,7 +42,6 @@ if not os.path.isdir(EXECUTION_OUTPUTS):
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = generate_random_value(3000)
-ENCRYPTION_KEY = hash(os.getenv('ENCRYPTION_KEY', generate_random_value(3000)))
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -59,8 +67,10 @@ INSTALLED_APPS = [
     'findings',
     'processes',
     'projects',
+    'resources',
     'targets',
     'tasks',
+    'telegram_bot',
     'tools',
     'users'
 ]
@@ -118,7 +128,6 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
         'rest_framework.permissions.DjangoModelPermissions',
         'security.authorization.permissions.ProjectMemberPermission',
-        'security.authorization.permissions.ProcessCreatorPermission',
     ]
 }
 
@@ -136,7 +145,10 @@ SPECTACULAR_SETTINGS = {
         'StatusEnum': Status.choices,
         'NotificationPreferenceEnum': Notification.choices,
         'SeverityEnum': Severity.choices,
-        'TimeUnit': TimeUnit.choices,
+        'TimeUnitEnum': TimeUnit.choices,
+        'IntensityEnum': IntensityRank.choices,
+        'FindingTypeEnum': FindingType.choices,
+        'TargetTypeEnum': TargetType.choices,
     }
 }
 
@@ -147,11 +159,11 @@ SPECTACULAR_SETTINGS = {
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'rekono',
+        'NAME': os.getenv('DB_NAME', 'rekono'),
         'USER': os.getenv('DB_USER', ''),
         'PASSWORD': os.getenv('DB_PASSWORD', ''),
-        'HOST': '127.0.0.1',
-        'PORT': '5432',
+        'HOST': os.getenv('DB_HOST', '127.0.0.1'),
+        'PORT': os.getenv('DB_PORT', '5432'),
     }
 }
 
@@ -160,20 +172,20 @@ DATABASES = {
 
 RQ_QUEUES = {
     'tasks-queue': {
-        'HOST': '127.0.0.1',
-        'PORT': 6379,
+        'HOST': os.getenv('RQ_HOST', '127.0.0.1'),
+        'PORT': os.getenv('RQ_PORT', 6379),
         'DB': 0,
         'DEFAULT_TIMEOUT': 60       # 1 minute
     },
     'executions-queue': {
-        'HOST': '127.0.0.1',
-        'PORT': 6379,
+        'HOST': os.getenv('RQ_HOST', '127.0.0.1'),
+        'PORT': os.getenv('RQ_PORT', 6379),
         'DB': 0,
         'DEFAULT_TIMEOUT': 7200     # 2 hours
     },
     'findings-queue': {
-        'HOST': '127.0.0.1',
-        'PORT': 6379,
+        'HOST': os.getenv('RQ_HOST', '127.0.0.1'),
+        'PORT': os.getenv('RQ_PORT', 6379),
         'DB': 0,
         'DEFAULT_TIMEOUT': 300      # 5 minutes
     }
@@ -181,22 +193,27 @@ RQ_QUEUES = {
 
 
 # Email
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
+EMAIL_HOST = os.getenv('EMAIL_SMTP_HOST', '')
+EMAIL_PORT = os.getenv('EMAIL_SMTP_PORT', 587)
 EMAIL_HOST_USER = os.getenv('EMAIL_USER', '')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_PASSWORD', '')
 EMAIL_USE_TLS = True
 
 
+# Telegram
+TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN', '')
+TELEGRAM_TOKEN_EXPIRATION_HOURS = 24
+
+
 # Defect-Dojo
 DEFECT_DOJO = {
-    'HOST': 'http://127.0.0.1:8080',
+    'HOST': os.getenv('DEFECTDOJO_HOST', ''),
     'API_KEY': os.getenv('DEFECTDOJO_KEY', ''),
-    'AUTO_CREATION': True,
-    'REKONO_TAGS': ['rekono'],
-    'REKONO_PROD_TYPE_ID': None,
-    'REKONO_PROD_TYPE': 'Rekono',
-    'REKONO_ENGAGEMENT': 'Rekono'
+    'TAGS': ['rekono'],
+    'PROD_AUTO_CREATION': True,
+    'PROD_TYPE': 'Rekono Project',
+    'TEST_TYPE': 'Rekono Findings Import',
+    'TEST': 'Rekono Test'
 }
 
 

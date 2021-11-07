@@ -3,26 +3,17 @@ from django.db import models
 # Create your enums here.
 
 
-class Status(models.IntegerChoices):
-    REQUESTED = 1
-    SKIPPED = 2
-    RUNNING = 3
-    CANCELLED = 4
-    ERROR = 5
-    COMPLETED = 6
+class Status(models.TextChoices):
+    REQUESTED = 'Requested'
+    SKIPPED = 'Skipped'
+    RUNNING = 'Running'
+    CANCELLED = 'Cancelled'
+    ERROR = 'Error'
+    COMPLETED = 'Completed'
 
 
-class ParameterKey(models.IntegerChoices):
-    TECHNOLOGY = 1
-    VERSION = 2
-    ENDPOINT = 3
-    CVE = 4
-    EXPLOIT = 5
-    WORDLIST = 6
-
-
-class TimeUnit(models.IntegerChoices):
-    MINUTES = 1
-    HOURS = 2
-    DAYS = 3
-    WEEKS = 4
+class TimeUnit(models.TextChoices):
+    MINUTES = 'Minutes'
+    HOURS = 'Hours'
+    DAYS = 'Days'
+    WEEKS = 'Weeks'

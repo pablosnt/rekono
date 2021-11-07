@@ -9,7 +9,7 @@ def import_scan(engagement: int, execution: Execution, tool: Tool) -> None:
     data = {
         'scan_type': tool.defectdojo_scan_type,
         'engagement': engagement,
-        'tags': config.get('REKONO_TAGS'),
+        'tags': config.get('TAGS'),
     }
     files = {
         'file': open(execution.output_file, 'r'),

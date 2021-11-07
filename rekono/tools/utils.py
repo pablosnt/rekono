@@ -2,7 +2,7 @@ import importlib
 
 from findings.models import (OSINT, Credential, Endpoint, Enumeration, Exploit,
                              Host, Technology, Vulnerability)
-from tasks.models import Parameter
+from resources.models import Wordlist
 from tools.enums import FindingType
 
 
@@ -29,7 +29,7 @@ def get_finding_class_by_type(type):
         FindingType.VULNERABILITY: Vulnerability,
         FindingType.CREDENTIAL: Credential,
         FindingType.EXPLOIT: Exploit,
-        FindingType.PARAMETER: Parameter
+        FindingType.WORDLIST: Wordlist,
     }
     return mapper[type]
 

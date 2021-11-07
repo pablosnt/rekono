@@ -1,9 +1,11 @@
-from django.core.exceptions import PermissionDenied
+from processes.filters import ProcessFilter, StepFilter
 from processes.models import Process, Step
 from processes.serializers import (ProcessSerializer, StepPrioritySerializer,
                                    StepSerializer)
+from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
-from security.authorization.permissions import IsAdmin
+from security.authorization.permissions import (ProcessCreatorPermission,
+                                                ProjectMemberPermission)
 
 # Create your views here.
 
@@ -11,13 +13,11 @@ from security.authorization.permissions import IsAdmin
 class ProcessViewSet(ModelViewSet):
     queryset = Process.objects.all()
     serializer_class = ProcessSerializer
-    filterset_fields = {
-        'name': ['exact', 'contains'],
-        'description': ['exact', 'contains'],
-        'creator': ['exact'],
-    }
-    ordering_fields = ('name', 'creator')
+    filterset_class = ProcessFilter
     http_method_names = ['get', 'post', 'put', 'delete']
+    permission_classes = [
+        IsAuthenticated, DjangoModelPermissions, ProjectMemberPermission, ProcessCreatorPermission
+    ]
 
     def perform_create(self, serializer):
         serializer.save(creator=self.request.user)
@@ -26,24 +26,10 @@ class ProcessViewSet(ModelViewSet):
 class StepViewSet(ModelViewSet):
     queryset = Step.objects.all()
     serializer_class = StepSerializer
-    filterset_fields = {
-        'process__name': ['exact', 'contains'],
-        'process__description': ['exact', 'contains'],
-        'process__creator': ['exact'],
-        'tool': ['exact'],
-        'configuration': ['exact'],
-        'priority': ['exact'],
-    }
-    ordering_fields = ('process', 'tool', 'configuration', 'priority')
-
-    def perform_create(self, serializer):
-        process_check = bool(
-            serializer.validated_data.get('process').creator == self.request.user or
-            IsAdmin().has_permission(self.request, self)
-        )
-        if not process_check:
-            raise PermissionDenied()
-        super().perform_create(serializer)
+    filterset_class = StepFilter
+    permission_classes = [
+        IsAuthenticated, DjangoModelPermissions, ProjectMemberPermission, ProcessCreatorPermission
+    ]
 
     def get_serializer_class(self):
         if self.request.method == 'PUT':

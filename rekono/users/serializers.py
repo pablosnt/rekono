@@ -1,7 +1,11 @@
+from datetime import datetime
+
 from django.contrib.sites.shortcuts import get_current_site
+from django.db import transaction
 from rest_framework import serializers, status
 from rest_framework.exceptions import AuthenticationFailed
 from security.authorization.roles import Role
+from telegram_bot.models import TelegramChat
 from users.models import User
 
 
@@ -11,28 +15,16 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = (
             'id', 'username', 'first_name', 'last_name', 'email', 'is_active',
-            'date_joined', 'last_login', 'groups', 'notification_preference',
-            'telegram_token'
+            'date_joined', 'last_login', 'groups', 'notification_preference'
         )
         read_only_fields = ('username', 'email', 'is_active', 'date_joined', 'last_login', 'groups')
-        extra_kwargs = {
-            'telegram_token': {'write_only': True},
-        }
-        ordering = ['-id']
-
-    def update(self, instance, validated_data):
-        instance = super().update(instance, validated_data)
-        for api_key in instance.API_KEYS:
-            if api_key in validated_data and validated_data[api_key]:
-                instance.set_api_key(api_key, validated_data.get(api_key))
-        instance.save()
-        return instance
 
 
 class InviteUserSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)
     role = serializers.ChoiceField(choices=Role.choices, required=True)
 
+    @transaction.atomic()
     def create(self, validated_data):
         request = self.context.get('request', None)
         user = User.objects.create_user(
@@ -50,6 +42,7 @@ class CreateUserSerializer(serializers.Serializer):
     password = serializers.CharField(max_length=150, required=True)
     otp = serializers.CharField(max_length=200, required=True)
 
+    @transaction.atomic()
     def create(self, validated_data):
         pk = self.context.get('pk', None)
         user = User.objects.get(pk=pk, is_active=False, otp=validated_data.get('otp'))
@@ -66,6 +59,7 @@ class CreateUserSerializer(serializers.Serializer):
 class EnableUserSerializer(serializers.Serializer):
     role = serializers.ChoiceField(choices=Role.choices, required=True)
 
+    @transaction.atomic()
     def update(self, instance, validated_data):
         role = Role(validated_data.get('role'))
         request = self.context.get('request', None)
@@ -76,6 +70,7 @@ class EnableUserSerializer(serializers.Serializer):
 class ChangeUserRoleSerializer(serializers.Serializer):
     role = serializers.ChoiceField(choices=Role.choices, required=True)
 
+    @transaction.atomic()
     def update(self, instance, validated_data):
         role = Role(validated_data.get('role'))
         instance = User.objects.change_user_role(instance, role)
@@ -92,7 +87,6 @@ class ChangeUserPasswordSerializer(serializers.ModelSerializer):
             'password': {'write_only': True},
             'old_password': {'write_only': True},
         }
-        ordering = ['-id']
 
     def validate(self, attrs):
         attrs = super().validate(attrs)
@@ -101,6 +95,7 @@ class ChangeUserPasswordSerializer(serializers.ModelSerializer):
             raise AuthenticationFailed('Invalid password', code=status.HTTP_401_UNAUTHORIZED)
         return attrs
 
+    @transaction.atomic()
     def update(self, instance, validated_data):
         instance.set_password(validated_data.get('password'))
         instance.save()
@@ -127,3 +122,22 @@ class ResetPasswordSerializer(serializers.Serializer):
         user.otp = None
         user.save()
         return user
+
+
+class TelegramTokenSerializer(serializers.Serializer):
+    token = serializers.CharField(max_length=200, required=True)
+
+    @transaction.atomic()
+    def update(self, instance, validated_data):
+        try:
+            telegram_chat = TelegramChat.objects.get(
+                start_token=self.validated_data.get('token'),
+                expiration__gt=datetime.now()
+            )
+        except TelegramChat.DoesNotExist:
+            raise AuthenticationFailed('Invalid Telegram token', code=status.HTTP_401_UNAUTHORIZED)
+        if User.objects.filter(telegram_id=telegram_chat.chat_id).exists():
+            raise AuthenticationFailed('Invalid Telegram token', code=status.HTTP_401_UNAUTHORIZED)
+        instance.telegram_id = telegram_chat.chat_id
+        instance.save()
+        return instance

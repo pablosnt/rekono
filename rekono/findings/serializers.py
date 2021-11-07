@@ -4,39 +4,33 @@ from rest_framework import serializers
 
 
 class OSINTSerializer(serializers.ModelSerializer):
-    data_type = serializers.CharField(source='get_data_type_display')
 
     class Meta:
         model = OSINT
         fields = (
             'id', 'execution', 'data', 'data_type', 'source', 'reference',
-            'creation', 'is_active'
+            'creation', 'is_active', 'reported_to_defectdojo'
         )
-        ordering = ['-id']
 
 
 class HostSerializer(serializers.ModelSerializer):
-    os_type = serializers.CharField(source='get_os_type_display')
 
     class Meta:
         model = Host
         fields = (
             'id', 'execution', 'address', 'os', 'os_type', 'creation',
-            'is_active', 'enumerations'
+            'is_active', 'enumeration', 'reported_to_defectdojo'
         )
-        ordering = ['-id']
 
 
 class EnumerationSerializer(serializers.ModelSerializer):
-    port_status = serializers.CharField(source='get_port_status_display')
 
     class Meta:
         model = Enumeration
         fields = (
             'id', 'execution', 'host', 'port', 'port_status', 'protocol',
-            'service', 'creation', 'is_active', 'endpoints', 'technologys'
+            'service', 'creation', 'is_active', 'endpoint', 'technology', 'reported_to_defectdojo'
         )
-        ordering = ['-id']
 
 
 class EndpointSerializer(serializers.ModelSerializer):
@@ -45,9 +39,8 @@ class EndpointSerializer(serializers.ModelSerializer):
         model = Endpoint
         fields = (
             'id', 'execution', 'enumeration', 'endpoint', 'status',
-            'creation', 'is_active'
+            'creation', 'is_active', 'reported_to_defectdojo'
         )
-        ordering = ['-id']
 
 
 class TechnologySerializer(serializers.ModelSerializer):
@@ -57,9 +50,8 @@ class TechnologySerializer(serializers.ModelSerializer):
         fields = (
             'id', 'execution', 'enumeration', 'name', 'version', 'description',
             'reference', 'related_to', 'related_technologies', 'creation',
-            'is_active', 'vulnerabilitys', 'exploits'
+            'is_active', 'vulnerability', 'exploit', 'reported_to_defectdojo'
         )
-        ordering = ['-id']
 
 
 class VulnerabilitySerializer(serializers.ModelSerializer):
@@ -68,21 +60,19 @@ class VulnerabilitySerializer(serializers.ModelSerializer):
         model = Vulnerability
         fields = (
             'id', 'execution', 'technology', 'name', 'description', 'severity',
-            'cve', 'cwe', 'reference', 'creation', 'is_active', 'exploits'
+            'cve', 'cwe', 'reference', 'creation', 'is_active', 'exploit', 'reported_to_defectdojo'
         )
         read_only_fields = (
             'id', 'execution', 'technology', 'cve', 'creation', 'is_active',
-            'exploits'
+            'exploits', 'reported_to_defectdojo'
         )
-        ordering = ['-id']
 
 
 class CredentialSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Credential
-        fields = ('id', 'email', 'username', 'secret')
-        ordering = ['-id']
+        fields = ('id', 'email', 'username', 'secret', 'reported_to_defectdojo')
 
 
 class ExploitSerializer(serializers.ModelSerializer):
@@ -92,6 +82,5 @@ class ExploitSerializer(serializers.ModelSerializer):
         model = Exploit
         fields = (
             'id', 'execution', 'vulnerability', 'technology', 'name',
-            'description', 'reference', 'checked', 'creation', 'is_active'
+            'description', 'reference', 'checked', 'creation', 'is_active', 'reported_to_defectdojo'
         )
-        ordering = ['-id']

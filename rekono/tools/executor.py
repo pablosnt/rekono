@@ -5,7 +5,7 @@ from tasks.models import Task
 from tools.models import Input, Intensity
 
 
-def execute(task: Task, parameters: list, domain: str) -> None:
+def execute(task: Task, manual_findings: list, domain: str) -> None:
     intensity = Intensity.objects.filter(tool=task.tool, value=task.intensity).first()
     inputs = Input.objects.filter(configuration=task.configuration).all()
     target_ports = task.target.target_ports.all()
@@ -17,7 +17,7 @@ def execute(task: Task, parameters: list, domain: str) -> None:
                 execution=execution,
                 intensity=intensity,
                 inputs=inputs,
-                parameters=parameters,
+                manual_findings=manual_findings,
                 target_ports=[tp],
                 domain=domain,
                 callback=success_callback
@@ -29,7 +29,7 @@ def execute(task: Task, parameters: list, domain: str) -> None:
             execution=execution,
             intensity=intensity,
             inputs=inputs,
-            parameters=parameters,
+            manual_findings=manual_findings,
             target_ports=target_ports,
             domain=domain,
             callback=success_callback

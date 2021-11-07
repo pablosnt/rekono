@@ -3,8 +3,6 @@ from tools.models import Configuration, Input, Intensity, Output, Tool
 
 
 class InputSerializer(serializers.ModelSerializer):
-    type = serializers.CharField(source='get_type_display')
-    selection = serializers.CharField(source='get_selection_display')
 
     class Meta:
         model = Input
@@ -13,7 +11,6 @@ class InputSerializer(serializers.ModelSerializer):
 
 
 class OutputSerializer(serializers.ModelSerializer):
-    type = serializers.CharField(source='get_type_display')
 
     class Meta:
         model = Output
@@ -32,7 +29,6 @@ class ConfigurationSerializer(serializers.ModelSerializer):
 
 
 class IntensitySerializer(serializers.ModelSerializer):
-    value = serializers.CharField(source='get_value_display')
 
     class Meta:
         model = Intensity
@@ -43,7 +39,6 @@ class IntensitySerializer(serializers.ModelSerializer):
 class ToolSerializer(serializers.ModelSerializer):
     intensities = IntensitySerializer(read_only=True, many=True, required=False)
     configurations = ConfigurationSerializer(read_only=True, many=True, required=False)
-    stage = serializers.CharField(source='get_stage_display')
 
     class Meta:
         model = Tool
@@ -51,4 +46,3 @@ class ToolSerializer(serializers.ModelSerializer):
             'id', 'name', 'command', 'stage', 'reference', 'icon',
             'for_each_target_port', 'intensities', 'configurations'
         )
-        ordering = ['-id']

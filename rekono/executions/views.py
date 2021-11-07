@@ -1,58 +1,36 @@
-from defectdojo import uploader
-from defectdojo.exceptions import (EngagementIdNotFoundException,
-                                   ProductIdNotFoundException)
-from drf_spectacular.utils import extend_schema
+from defectdojo.views import DDFindingsViewSet, DDScansViewSet
+from executions.filters import ExecutionFilter
 from executions.models import Execution
 from executions.serializers import ExecutionSerializer
-from rest_framework import status
-from rest_framework.decorators import action
+from findings.models import (OSINT, Credential, Endpoint, Enumeration, Exploit,
+                             Host, Technology, Vulnerability)
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
-from rest_framework.response import Response
-from rest_framework.viewsets import GenericViewSet
 
 # Create your views here.
 
 
-class ExecutionViewSet(
-    GenericViewSet,
-    ListModelMixin,
-    RetrieveModelMixin
-):
+class ExecutionViewSet(ListModelMixin, RetrieveModelMixin, DDScansViewSet, DDFindingsViewSet):
     queryset = Execution.objects.all()
     serializer_class = ExecutionSerializer
-    filterset_fields = {
-        'task': ['exact'],
-        'task__target': ['exact'],
-        'task__target__project': ['exact'],
-        'task__process': ['exact'],
-        'task__tool': ['exact'],
-        'task__intensity': ['exact'],
-        'task__executor': ['exact'],
-        'status': ['exact'],
-        'step__tool': ['exact'],
-        'start': ['gte', 'lte', 'exact'],
-        'end': ['gte', 'lte', 'exact']
-    }
-    ordering_fields = (
-        ('target', 'task__target'),
-        ('project', 'task__target__project'),
-        ('process', 'task__process'),
-        ('intensity', 'task__intensity'),
-        ('executor', 'task__executor'),
-        'task__tool', 'step_tool',
-        'status', 'start', 'end'
-    )
+    filterset_class = ExecutionFilter
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        return queryset.filter(task__target__project__members=self.request.user).order_by('-id')
+        return queryset.filter(task__target__project__members=self.request.user)
 
-    @extend_schema(request=None, responses={200: None})
-    @action(detail=True, methods=['POST'], url_path='defect-dojo', url_name='defect-dojo')
-    def defect_dojo(self, request, pk):
+    def get_executions(self):
+        return [self.get_object()]
+
+    def get_findings(self):
         execution = self.get_object()
-        try:
-            uploader.upload_executions([execution])
-            return Response(status=status.HTTP_200_OK)
-        except (ProductIdNotFoundException, EngagementIdNotFoundException) as ex:
-            return Response(str(ex), status=status.HTTP_400_BAD_REQUEST)
+        findings = []
+        for find_model in [
+            OSINT, Host, Enumeration, Technology,
+            Endpoint, Vulnerability, Credential, Exploit
+        ]:
+            findings.extend(find_model.objects.filter(
+                execution=execution,
+                is_active=True,
+                is_manual=False
+            ).all())
+        return findings

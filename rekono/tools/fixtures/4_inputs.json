@@ -5,10 +5,10 @@
         "fields": {
             "configuration_id": 1,
             "name": "target",
-            "type": 2,
+            "type": "Host",
             "argument": "{target}",
             "filter": null,
-            "selection": 2,
+            "selection": "For Each",
             "required": true
         }
     },
@@ -18,10 +18,10 @@
         "fields": {
             "configuration_id": 1,
             "name": "ports",
-            "type": 3,
+            "type": "Enumeration",
             "argument": "-p {ports_commas}",
             "filter": null,
-            "selection": 1,
+            "selection": "All",
             "required": false
         }
     },
@@ -31,10 +31,10 @@
         "fields": {
             "configuration_id": 2,
             "name": "target",
-            "type": 2,
+            "type": "Host",
             "argument": "{target}",
             "filter": null,
-            "selection": 2,
+            "selection": "For Each",
             "required": true
         }
     },
@@ -44,10 +44,10 @@
         "fields": {
             "configuration_id": 2,
             "name": "ports",
-            "type": 3,
+            "type": "Enumeration",
             "argument": "-p {ports_commas}",
             "filter": null,
-            "selection": 1,
+            "selection": "All",
             "required": false
         }
     },
@@ -57,10 +57,10 @@
         "fields": {
             "configuration_id": 3,
             "name": "target",
-            "type": 2,
+            "type": "Host",
             "argument": "{target}",
             "filter": null,
-            "selection": 2,
+            "selection": "For Each",
             "required": true
         }
     },
@@ -70,10 +70,10 @@
         "fields": {
             "configuration_id": 3,
             "name": "ports",
-            "type": 3,
+            "type": "Enumeration",
             "argument": "-p {ports_commas}",
             "filter": null,
-            "selection": 1,
+            "selection": "All",
             "required": false
         }
     },
@@ -83,10 +83,10 @@
         "fields": {
             "configuration_id": 4,
             "name": "target",
-            "type": 2,
+            "type": "Host",
             "argument": "{target}",
             "filter": null,
-            "selection": 2,
+            "selection": "For Each",
             "required": true
         }
     },
@@ -96,10 +96,10 @@
         "fields": {
             "configuration_id": 4,
             "name": "ports",
-            "type": 3,
+            "type": "Enumeration",
             "argument": "-p {ports_commas}",
             "filter": null,
-            "selection": 1,
+            "selection": "All",
             "required": false
         }
     },
@@ -109,10 +109,10 @@
         "fields": {
             "configuration_id": 5,
             "name": "target",
-            "type": 2,
+            "type": "Host",
             "argument": "{target}",
             "filter": null,
-            "selection": 2,
+            "selection": "For Each",
             "required": true
         }
     },
@@ -122,10 +122,10 @@
         "fields": {
             "configuration_id": 5,
             "name": "ports",
-            "type": 3,
+            "type": "Enumeration",
             "argument": "-p {ports_commas}",
             "filter": null,
-            "selection": 1,
+            "selection": "All",
             "required": false
         }
     },
@@ -135,10 +135,10 @@
         "fields": {
             "configuration_id": 6,
             "name": "target",
-            "type": 2,
+            "type": "Host",
             "argument": "{target}",
             "filter": null,
-            "selection": 2,
+            "selection": "For Each",
             "required": true
         }
     },
@@ -148,10 +148,10 @@
         "fields": {
             "configuration_id": 6,
             "name": "ports",
-            "type": 3,
+            "type": "Enumeration",
             "argument": "-p {ports_commas}",
             "filter": null,
-            "selection": 1,
+            "selection": "All",
             "required": false
         }
     },
@@ -161,10 +161,10 @@
         "fields": {
             "configuration_id": 7,
             "name": "target",
-            "type": 2,
+            "type": "Host",
             "argument": "{target}",
             "filter": null,
-            "selection": 2,
+            "selection": "For Each",
             "required": true
         }
     },
@@ -174,10 +174,10 @@
         "fields": {
             "configuration_id": 7,
             "name": "ports",
-            "type": 3,
+            "type": "Enumeration",
             "argument": "-p {ports_commas}",
             "filter": null,
-            "selection": 1,
+            "selection": "All",
             "required": false
         }
     },
@@ -187,10 +187,10 @@
         "fields": {
             "configuration_id": 8,
             "name": "target",
-            "type": 2,
+            "type": "Host",
             "argument": "{target}",
             "filter": null,
-            "selection": 2,
+            "selection": "For Each",
             "required": true
         }
     },
@@ -200,10 +200,10 @@
         "fields": {
             "configuration_id": 8,
             "name": "ports",
-            "type": 3,
+            "type": "Enumeration",
             "argument": "-p {ports_commas}",
             "filter": null,
-            "selection": 1,
+            "selection": "All",
             "required": false
         }
     },
@@ -213,10 +213,10 @@
         "fields": {
             "configuration_id": 9,
             "name": "target",
-            "type": 2,
+            "type": "Host",
             "argument": "{target}",
             "filter": null,
-            "selection": 2,
+            "selection": "For Each",
             "required": true
         }
     },
@@ -226,10 +226,10 @@
         "fields": {
             "configuration_id": 9,
             "name": "ports",
-            "type": 3,
+            "type": "Enumeration",
             "argument": "-p {ports_commas}",
             "filter": null,
-            "selection": 1,
+            "selection": "All",
             "required": false
         }
     },
@@ -239,10 +239,10 @@
         "fields": {
             "configuration_id": 10,
             "name": "target",
-            "type": 2,
+            "type": "Host",
             "argument": "{target}",
             "filter": null,
-            "selection": 2,
+            "selection": "For Each",
             "required": true
         }
     },
@@ -252,10 +252,10 @@
         "fields": {
             "configuration_id": 10,
             "name": "ports",
-            "type": 3,
+            "type": "Enumeration",
             "argument": "-p {ports_commas}",
             "filter": null,
-            "selection": 1,
+            "selection": "All",
             "required": false
         }
     },
@@ -265,10 +265,10 @@
         "fields": {
             "configuration_id": 11,
             "name": "target",
-            "type": 2,
+            "type": "Host",
             "argument": "{target}",
             "filter": null,
-            "selection": 2,
+            "selection": "For Each",
             "required": true
         }
     },
@@ -278,10 +278,10 @@
         "fields": {
             "configuration_id": 11,
             "name": "ports",
-            "type": 3,
+            "type": "Enumeration",
             "argument": "-p {ports_commas}",
             "filter": null,
-            "selection": 1,
+            "selection": "All",
             "required": false
         }
     },
@@ -291,10 +291,10 @@
         "fields": {
             "configuration_id": 12,
             "name": "target",
-            "type": 2,
+            "type": "Host",
             "argument": "{target}",
             "filter": null,
-            "selection": 2,
+            "selection": "For Each",
             "required": true
         }
     },
@@ -304,10 +304,10 @@
         "fields": {
             "configuration_id": 12,
             "name": "ports",
-            "type": 3,
+            "type": "Enumeration",
             "argument": "-p {ports_commas}",
             "filter": null,
-            "selection": 1,
+            "selection": "All",
             "required": false
         }
     },
@@ -317,10 +317,10 @@
         "fields": {
             "configuration_id": 13,
             "name": "target",
-            "type": 2,
+            "type": "Host",
             "argument": "{target}",
             "filter": null,
-            "selection": 2,
+            "selection": "For Each",
             "required": true
         }
     },
@@ -330,10 +330,10 @@
         "fields": {
             "configuration_id": 13,
             "name": "ports",
-            "type": 3,
+            "type": "Enumeration",
             "argument": "-p {ports_commas}",
             "filter": null,
-            "selection": 1,
+            "selection": "All",
             "required": false
         }
     },
@@ -343,10 +343,10 @@
         "fields": {
             "configuration_id": 14,
             "name": "target",
-            "type": 2,
+            "type": "Host",
             "argument": "{target}",
             "filter": null,
-            "selection": 2,
+            "selection": "For Each",
             "required": true
         }
     },
@@ -356,10 +356,10 @@
         "fields": {
             "configuration_id": 14,
             "name": "ports",
-            "type": 3,
+            "type": "Enumeration",
             "argument": "-p {ports_commas}",
             "filter": "ftp",
-            "selection": 1,
+            "selection": "All",
             "required": false
         }
     },
@@ -369,10 +369,10 @@
         "fields": {
             "configuration_id": 15,
             "name": "url",
-            "type": 3,
+            "type": "Enumeration",
             "argument": "-u {url}",
             "filter": "http",
-            "selection": 2,
+            "selection": "For Each",
             "required": true
         }
     },
@@ -382,10 +382,10 @@
         "fields": {
             "configuration_id": 15,
             "name": "wordlist",
-            "type": 8,
+            "type": "Wordlist",
             "argument": "--wordlist={wordlist}",
-            "filter": null,
-            "selection": 1,
+            "filter": "Endpoint",
+            "selection": "For Each",
             "required": false
         }
     },
@@ -395,10 +395,10 @@
         "fields": {
             "configuration_id": 16,
             "name": "url",
-            "type": 3,
+            "type": "Enumeration",
             "argument": "-u {url}",
             "filter": "http",
-            "selection": 2,
+            "selection": "For Each",
             "required": true
         }
     },
@@ -408,10 +408,10 @@
         "fields": {
             "configuration_id": 16,
             "name": "wordlist",
-            "type": 8,
+            "type": "Wordlist",
             "argument": "--wordlist={wordlist}",
-            "filter": null,
-            "selection": 1,
+            "filter": "Endpoint",
+            "selection": "For Each",
             "required": false
         }
     },
@@ -421,10 +421,10 @@
         "fields": {
             "configuration_id": 17,
             "name": "url",
-            "type": 3,
+            "type": "Enumeration",
             "argument": "-u {url}",
             "filter": "http",
-            "selection": 2,
+            "selection": "For Each",
             "required": true
         }
     },
@@ -434,10 +434,10 @@
         "fields": {
             "configuration_id": 17,
             "name": "wordlist",
-            "type": 8,
+            "type": "Wordlist",
             "argument": "--wordlist={wordlist}",
-            "filter": null,
-            "selection": 1,
+            "filter": "Endpoint",
+            "selection": "For Each",
             "required": false
         }
     },
@@ -447,10 +447,10 @@
         "fields": {
             "configuration_id": 18,
             "name": "url",
-            "type": 3,
+            "type": "Enumeration",
             "argument": "-u {url}",
             "filter": "http",
-            "selection": 2,
+            "selection": "For Each",
             "required": true
         }
     },
@@ -460,10 +460,10 @@
         "fields": {
             "configuration_id": 18,
             "name": "wordlist",
-            "type": 9,
+            "type": "Wordlist",
             "argument": "--wordlist={wordlist}",
-            "filter": null,
-            "selection": 1,
+            "filter": "Endpoint",
+            "selection": "For Each",
             "required": false
         }
     },
@@ -473,10 +473,10 @@
         "fields": {
             "configuration_id": 19,
             "name": "target",
-            "type": 2,
+            "type": "Host",
             "argument": "-d {target}",
             "filter": "5",
-            "selection": 2,
+            "selection": "For Each",
             "required": true
         }
     },
@@ -486,10 +486,10 @@
         "fields": {
             "configuration_id": 20,
             "name": "target",
-            "type": 2,
+            "type": "Host",
             "argument": "-d {target}",
             "filter": "5",
-            "selection": 2,
+            "selection": "For Each",
             "required": true
         }
     },
@@ -499,10 +499,10 @@
         "fields": {
             "configuration_id": 21,
             "name": "url",
-            "type": 3,
+            "type": "Enumeration",
             "argument": "-host {url}",
             "filter": "http",
-            "selection": 2,
+            "selection": "For Each",
             "required": true
         }
     },
@@ -512,10 +512,10 @@
         "fields": {
             "configuration_id": 22,
             "name": "target",
-            "type": 3,
+            "type": "Enumeration",
             "argument": "{target}",
             "filter": null,
-            "selection": 2,
+            "selection": "For Each",
             "required": true
         }
     },
@@ -525,10 +525,10 @@
         "fields": {
             "configuration_id": 23,
             "name": "target",
-            "type": 3,
+            "type": "Enumeration",
             "argument": "{target}",
             "filter": null,
-            "selection": 2,
+            "selection": "For Each",
             "required": true
         }
     },
@@ -538,10 +538,10 @@
         "fields": {
             "configuration_id": 24,
             "name": "url",
-            "type": 3,
+            "type": "Enumeration",
             "argument": "-u {url}",
             "filter": "http",
-            "selection": 2,
+            "selection": "For Each",
             "required": false
         }
     },
@@ -551,10 +551,10 @@
         "fields": {
             "configuration_id": 24,
             "name": "url",
-            "type": 4,
+            "type": "Endpoint",
             "argument": "-u {url}{endpoint}",
             "filter": "http",
-            "selection": 2,
+            "selection": "For Each",
             "required": false
         }
     },
@@ -564,10 +564,10 @@
         "fields": {
             "configuration_id": 25,
             "name": "url",
-            "type": 3,
+            "type": "Enumeration",
             "argument": "-quickurl {url}",
             "filter": "http",
-            "selection": 2,
+            "selection": "For Each",
             "required": false
         }
     },
@@ -577,10 +577,10 @@
         "fields": {
             "configuration_id": 25,
             "name": "url",
-            "type": 4,
+            "type": "Endpoint",
             "argument": "-quickurl {url}{endpoint}",
             "filter": "http",
-            "selection": 2,
+            "selection": "For Each",
             "required": false
         }
     }

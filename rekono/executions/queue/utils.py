@@ -1,7 +1,7 @@
 import django_rq
-from rq.job import Job
 from executions.queue import producer
 from executions.queue.constants import finding_relations
+from rq.job import Job
 from rq.registry import DeferredJobRegistry
 from tools import utils
 
@@ -39,7 +39,7 @@ def get_findings_from_dependencies(dependencies: list) -> dict:
     return findings
 
 
-def update_new_dependencies(parent_job: str, new_jobs: list, parameters: list) -> None:
+def update_new_dependencies(parent_job: str, new_jobs: list, manual_findings: list) -> None:
     executions_queue = django_rq.get_queue('executions-queue')
     registry = DeferredJobRegistry(queue=executions_queue)
     for job_id in registry.get_job_ids():
@@ -53,7 +53,7 @@ def update_new_dependencies(parent_job: str, new_jobs: list, parameters: list) -
                 meta['execution'],
                 meta['intensity'],
                 meta['inputs'],
-                parameters=meta['parameters'],
+                manual_findings=meta['manual_findings'],
                 request=meta['domain'],
                 callback=meta['callback'],
                 dependencies=dependencies

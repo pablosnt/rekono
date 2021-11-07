@@ -1,8 +1,7 @@
+from typing import Any
+
 from django.conf import settings
 from django.db import models
-from django.db.models import constraints
-from django.db.models.deletion import CASCADE
-from typing import Any
 
 # Create your models here.
 
@@ -22,6 +21,9 @@ class Project(models.Model):
         related_name='members',
         blank=True
     )
+
+    class Meta:
+        ordering = ['-id']
 
     def __str__(self) -> str:
         return self.name

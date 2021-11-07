@@ -39,7 +39,7 @@ def create_plan(task: Task) -> list:
     return execution_plan
 
 
-def execute(task: Task, parameters: list, domain: str) -> None:
+def execute(task: Task, manual_findings: list, domain: str) -> None:
     execution_plan = create_plan(task)
     target_ports = task.target.target_ports.all()
     enumerations = False
@@ -53,7 +53,7 @@ def execute(task: Task, parameters: list, domain: str) -> None:
                         execution,
                         job.intensity,
                         job.inputs,
-                        parameters,
+                        manual_findings,
                         target_ports=[tp],
                         domain=domain,
                         callback=success_callback,
@@ -68,7 +68,7 @@ def execute(task: Task, parameters: list, domain: str) -> None:
                     execution,
                     job.intensity,
                     job.inputs,
-                    parameters,
+                    manual_findings,
                     target_ports=target_ports,
                     domain=domain,
                     callback=success_callback,

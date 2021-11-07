@@ -9,12 +9,10 @@ class TargetPortSerializer(serializers.ModelSerializer):
     class Meta:
         model = TargetPort
         fields = ('id', 'port')
-        ordering = ['-id']
 
 
 class TargetSerializer(serializers.ModelSerializer):
     target_ports = TargetPortSerializer(read_only=False, many=True, required=False)
-    type = serializers.CharField(source='get_type_display', read_only=True)
 
     class Meta:
         model = Target
@@ -22,7 +20,6 @@ class TargetSerializer(serializers.ModelSerializer):
             'id', 'project', 'target', 'type', 'target_ports', 'tasks'
         )
         read_only_fields = ('type', 'tasks')
-        ordering = ['-id']
 
     @transaction.atomic()
     def create(self, validated_data):

@@ -1,25 +1,28 @@
-from defectdojo import uploader
-from defectdojo.exceptions import (EngagementIdNotFoundException,
-                                   ProductIdNotFoundException)
+from defectdojo.views import DDFindingsViewSet, DDScansViewSet
+from django.contrib.sites.shortcuts import get_current_site
 from django.core.exceptions import PermissionDenied
 from drf_spectacular.utils import extend_schema
+from findings.models import (OSINT, Credential, Endpoint, Enumeration, Exploit,
+                             Host, Technology, Vulnerability)
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
                                    ListModelMixin, RetrieveModelMixin)
 from rest_framework.response import Response
-from rest_framework.viewsets import GenericViewSet
 from targets.models import Target
 from tasks import services
 from tasks.exceptions import InvalidTaskException
+from tasks.filters import TaskFilter
 from tasks.models import Task
+from tasks.queue import producer
 from tasks.serializers import TaskSerializer
 
 # Create your views here.
 
 
 class TaskViewSet(
-    GenericViewSet,
+    DDScansViewSet,
+    DDFindingsViewSet,
     CreateModelMixin,
     ListModelMixin,
     RetrieveModelMixin,
@@ -27,25 +30,11 @@ class TaskViewSet(
 ):
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
-    filterset_fields = {
-        'target': ['exact'],
-        'target__project': ['exact'],
-        'process': ['exact'],
-        'tool': ['exact'],
-        'intensity': ['exact'],
-        'executor': ['exact'],
-        'status': ['exact'],
-        'start': ['gte', 'lte', 'exact'],
-        'end': ['gte', 'lte', 'exact']
-    }
-    ordering_fields = (
-        'target', 'target__project', 'process', 'tool', 'intensity', 'executor',
-        'status', 'start', 'end'
-    )
+    filterset_class = TaskFilter
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        return queryset.filter(target__project__members=self.request.user).order_by('-id')
+        return queryset.filter(target__project__members=self.request.user)
 
     def perform_create(self, serializer):
         project_check = Target.objects.filter(
@@ -56,6 +45,23 @@ class TaskViewSet(
             raise PermissionDenied()
         serializer.save(executor=self.request.user)
 
+    def get_executions(self):
+        return list(self.get_object().executions.all())
+
+    def get_findings(self):
+        task = self.get_object()
+        findings = []
+        for find_model in [
+            OSINT, Host, Enumeration, Technology,
+            Endpoint, Vulnerability, Credential, Exploit
+        ]:
+            findings.extend(find_model.objects.filter(
+                execution__task=task,
+                is_active=True,
+                is_manual=False
+            ).all())
+        return findings
+
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         try:
@@ -65,11 +71,8 @@ class TaskViewSet(
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
     @extend_schema(request=None, responses={200: None})
-    @action(detail=True, methods=['POST'], url_path='defect-dojo', url_name='defect-dojo')
-    def defect_dojo(self, request, pk):
+    @action(detail=True, methods=['POST'], url_path='repeat', url_name='repeat')
+    def execute_again(self, request, pk):
         task = self.get_object()
-        try:
-            uploader.upload_executions(task.executions.all())
-            return Response(status=status.HTTP_200_OK)
-        except (ProductIdNotFoundException, EngagementIdNotFoundException) as ex:
-            return Response(str(ex), status=status.HTTP_400_BAD_REQUEST)
+        producer(task, task.parameters.all(), get_current_site(request).domain)
+        return Response(status=status.HTTP_200_OK)

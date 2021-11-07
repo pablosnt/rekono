@@ -4,7 +4,7 @@ from django.contrib.auth.models import AbstractUser, Group, UserManager
 from django.db import models
 from rest_framework.authtoken.models import Token
 from security.authorization.roles import Role
-from security.crypto import decrypt, encrypt, generate_otp
+from security.crypto import generate_otp
 from users.enums import Notification
 from users.mail import send_invitation_to_new_user, send_password_reset
 
@@ -90,31 +90,22 @@ class User(AbstractUser):
 
     otp = models.TextField(max_length=200, unique=True, blank=True, null=True)
 
-    notification_preference = models.IntegerField(
+    notification_preference = models.TextField(
+        max_length=10,
         choices=Notification.choices,
-        default=Notification.MAIL,
+        default=Notification.EMAIL,
         blank=True,
         null=True
     )
-    telegram_token = models.TextField(max_length=100, blank=True, null=True)
+    telegram_id = models.IntegerField(blank=True, null=True)
 
     USERNAME_FIELD = 'username'
     EMAIL_FIELD = 'email'
     REQUIRED_FIELDS = ['email']
     objects = RekonoUserManager()
-    API_KEYS = [
-        'telegram_token'
-    ]
 
-    def set_api_key(self, api_key: str, value: str) -> None:
-        if api_key in self.API_KEYS:
-            setattr(self, api_key, encrypt(value))
-
-    def get_api_key(self, api_key: str) -> str:
-        if api_key in self.API_KEYS and hasattr(self, api_key):
-            encrypted = getattr(self, api_key)
-            if encrypted:
-                return decrypt(encrypted)
+    class Meta:
+        ordering = ['-id']
 
     def __str__(self) -> str:
         return self.email

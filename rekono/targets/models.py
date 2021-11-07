@@ -1,5 +1,6 @@
-from django.db import models
 from typing import Any
+
+from django.db import models
 from projects.models import Project
 from targets.enums import TargetType
 
@@ -13,9 +14,10 @@ class Target(models.Model):
         on_delete=models.CASCADE
     )
     target = models.TextField(max_length=100)
-    type = models.IntegerField(choices=TargetType.choices)
+    type = models.TextField(max_length=10, choices=TargetType.choices)
 
     class Meta:
+        ordering = ['-id']
         constraints = [
             models.UniqueConstraint(fields=['project', 'target'], name='unique target')
         ]
@@ -36,6 +38,7 @@ class TargetPort(models.Model):
     port = models.IntegerField()
 
     class Meta:
+        ordering = ['-id']
         constraints = [
             models.UniqueConstraint(fields=['target', 'port'], name='unique target port')
         ]

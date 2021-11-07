@@ -1,7 +1,7 @@
 from django.db import models
 
 
-class StepPriority(models.IntegerChoices):
-    ASAP = 1
-    STANDARD = 2
-    LAST = 3
+class StepPriority(models.TextChoices):
+    HIGH = 'High'
+    MEDIUM = 'Medium'
+    LOW = 'Low'
