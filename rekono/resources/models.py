@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.conf import settings
 from django.db import models
 from resources.enums import WordlistType
@@ -22,3 +24,6 @@ class Wordlist(models.Model):
 
     def __str__(self) -> str:
         return self.name
+
+    def get_project(self) -> Any:
+        return None

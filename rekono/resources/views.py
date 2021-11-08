@@ -20,4 +20,4 @@ class WordlistViewSet(ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.validated_data['creator'] = self.request.user
-        serializer.save(**serializer.validated_data)
+        serializer.save()

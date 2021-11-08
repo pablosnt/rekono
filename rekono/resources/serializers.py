@@ -27,6 +27,14 @@ class WordlistSerializer(serializers.ModelSerializer):
         return attrs
 
     def save(self, **kwargs):
-        kwargs['checksum'] = file_upload.store_file(kwargs.pop('file'), kwargs['path'])
-        self.validated_data.pop('file')
+        self.validated_data['checksum'] = file_upload.store_file(
+            self.validated_data.pop('file'),
+            self.validated_data['path']
+        )
         return super().save(**kwargs)
+
+    def update(self, instance, validated_data):
+        old_path = instance.path
+        updated_instance = super().update(instance, validated_data)
+        os.remove(old_path)
+        return updated_instance

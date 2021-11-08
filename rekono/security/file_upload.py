@@ -1,4 +1,5 @@
 import hashlib
+import os
 from pathlib import Path
 from typing import Any
 
@@ -28,7 +29,7 @@ def check_checksum(filepath: str, expected: str) -> bool:
         return value == expected
 
 
-def store_file(in_memory_file: Any, filename: str) -> None:
+def store_file(in_memory_file: Any, filename: str) -> str:
     checksum = hashlib.sha512()
     with open(filename, 'wb+') as storage:
         for chunk in in_memory_file.chunks():
