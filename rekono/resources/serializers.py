@@ -13,7 +13,7 @@ class WordlistSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Wordlist
-        fields = ('id', 'name', 'type', 'path', 'file', 'checksum', 'creator')
+        fields = ('id', 'name', 'type', 'path', 'file', 'checksum', 'size', 'creator')
         read_only_fields = ('creator',)
         extra_kwargs = {
             'path': {'write_only': True, 'required': False},
@@ -31,6 +31,8 @@ class WordlistSerializer(serializers.ModelSerializer):
             self.validated_data.pop('file'),
             self.validated_data['path']
         )
+        with open(self.validated_data['path'], 'rb+') as wordlist_file:
+            self.validated_data['size'] = len(wordlist_file.readlines())
         return super().save(**kwargs)
 
     def update(self, instance, validated_data):
