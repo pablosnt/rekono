@@ -35,7 +35,7 @@ def create_plan(task: Task) -> list:
                 for output in job.output_types:
                     if output in j.input_types:
                         j.dependencies.add(job)
-        execution_plan.append(j)
+            execution_plan.append(j)
     return execution_plan
 
 

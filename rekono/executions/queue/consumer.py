@@ -111,9 +111,9 @@ def get_new_jobs_from_findings(findings: dict, inputs: list) -> set:
                     for relation in finding_relations[input_type]:
                         attribute = getattr(finding, relation.name.lower(), None)
                         if attribute:
-                            relations_found = True
                             for jc in jobs.copy():
                                 if attribute in jobs[jc]:
+                                    relations_found = True
                                     if i.selection == InputSelection.ALL:
                                         jobs[jc].append(finding)
                                     else:

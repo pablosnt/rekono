@@ -31,14 +31,14 @@ def check_finding(input: Input, finding: Any) -> bool:
 def check_target(input: Input, target: Target) -> bool:
     try:
         return TargetType(input.filter) == target.type
-    except KeyError:
+    except ValueError:
         return True
 
 
 def check_host(input: Input, host: Host) -> bool:
     try:
         return TargetType(input.filter) == utils.get_target_type(host.address)
-    except KeyError:
+    except ValueError:
         return True
 
 
@@ -65,7 +65,7 @@ def check_technology(input: Input, technology: Technology) -> bool:
 def check_vulnerability(input: Input, vulnerability: Vulnerability) -> bool:
     try:
         return Severity(input.filter) == vulnerability.severity
-    except KeyError:
+    except ValueError:
         f = input.filter.lower()
         return (
             f == 'cve' and vulnerability.cve

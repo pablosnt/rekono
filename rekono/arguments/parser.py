@@ -100,5 +100,5 @@ def exploit(exploit: Exploit) -> dict:
 
 def wordlist(wordlist: Wordlist) -> dict:
     return {
-        Keyword.WORDLIST: wordlist.path
+        Keyword.WORDLIST.name.lower(): wordlist.path
     }
