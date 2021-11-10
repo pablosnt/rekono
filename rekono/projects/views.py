@@ -11,6 +11,7 @@ from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
+from tasks.enums import Status
 from users.models import User
 from users.serializers import UserSerializer
 
@@ -31,7 +32,10 @@ class ProjectViewSet(ModelViewSet, DDScansViewSet, DDFindingsViewSet):
         serializer.save(owner=self.request.user)
 
     def get_executions(self):
-        return list(Execution.objects.filter(task__target__project=self.get_object()).all())
+        return list(Execution.objects.filter(
+            task__target__project=self.get_object(),
+            status=Status.COMPLETED
+        ).all())
 
     def get_findings(self):
         project = self.get_object()

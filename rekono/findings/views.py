@@ -52,12 +52,6 @@ class FindingBaseView(DDFindingsViewSet, ListModelMixin, RetrieveModelMixin, Des
     @extend_schema(request=EngagementSerializer, responses={200: None})
     @action(detail=True, methods=['POST'], url_path='defect-dojo', url_name='defect-dojo')
     def defect_dojo_findings(self, request, pk):
-        finding = self.get_object()
-        if not finding.is_active:
-            return Response(
-                {'finding': 'Finding is not active'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
         return super().defect_dojo_findings(request, pk)
 
 
