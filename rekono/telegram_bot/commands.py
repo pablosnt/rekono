@@ -9,7 +9,7 @@ def start(update, context):
     for user in users:
         user.telegram_id = None
         user.save()
-    previous_chat = TelegramChat.objects.get(chat_id=update.effective_chat.id)
+    previous_chat = TelegramChat.objects.filter(chat_id=update.effective_chat.id).first()
     if previous_chat:
         previous_chat.delete()
     chat = TelegramChat.objects.create(chat_id=update.effective_chat.id, start_token=generate_otp())

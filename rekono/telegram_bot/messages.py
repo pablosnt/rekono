@@ -63,8 +63,7 @@ Status: {status}
 '''
 VULNERABILITY_ITEM = '''
 Id: {id}
-Enumeration: {enumeration_id}
-Technology: {technology}
+Technology: {technology_id}
 Name: {name}
 Description: {description}
 CVE: {cve}

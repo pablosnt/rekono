@@ -27,6 +27,7 @@ class StepViewSet(ModelViewSet):
     queryset = Step.objects.all()
     serializer_class = StepSerializer
     filterset_class = StepFilter
+    http_method_names = ['get', 'post', 'put', 'delete']
     permission_classes = [
         IsAuthenticated, DjangoModelPermissions, ProjectMemberPermission, ProcessCreatorPermission
     ]

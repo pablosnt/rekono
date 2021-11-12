@@ -8,6 +8,7 @@ from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
+from tasks.enums import Status
 
 
 class DDScansViewSet(GenericViewSet):
@@ -23,11 +24,17 @@ class DDScansViewSet(GenericViewSet):
         url_name='defect-dojo-scans'
     )
     def defect_dojo_scans(self, request, pk):
+        executions = [e for e in self.get_executions() if e.status == Status.COMPLETED]
+        if not executions:
+            return Response(
+                {'executions': 'Imcompleted executions cannot be reported to Defect-Dojo'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         serializer = EngagementSerializer(data=request.data)
-        if serializer.is_valid():
+        if serializer.is_valid() and executions:
             try:
                 uploader.upload_executions(
-                    self.get_executions(),
+                    executions,
                     serializer.validated_data.get('engagement_id'),
                     serializer.validated_data.get('engagement_name'),
                     serializer.validated_data.get('engagement_description')
@@ -55,11 +62,17 @@ class DDFindingsViewSet(GenericViewSet):
         url_name='defect-dojo-findings'
     )
     def defect_dojo_findings(self, request, pk):
+        findings = [f for f in self.get_findings() if f.is_active and not f.is_manual]
+        if not findings:
+            return Response(
+                {'findings': 'Invalid findings cannot be reported to Defect-Dojo'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         serializer = EngagementSerializer(data=request.data)
         if serializer.is_valid():
             try:
                 uploader.upload_findings(
-                    self.get_findings(),
+                    findings,
                     serializer.validated_data.get('engagement_id'),
                     serializer.validated_data.get('engagement_name'),
                     serializer.validated_data.get('engagement_description')
