@@ -1,0 +1,14 @@
+repos:
+-   repo: https://github.com/Yelp/detect-secrets
+    rev: v0.14.3
+    hooks:
+    -   id: detect-secrets
+        args: ['--baseline', '.secrets.baseline']
+-   repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v0.910-1
+    hooks:
+    -   id: mypy
+-   repo: https://github.com/PyCQA/flake8
+    rev: 4.0.1
+    hooks:
+    -   id: flake8
