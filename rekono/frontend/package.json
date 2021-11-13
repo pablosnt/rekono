@@ -1,7 +1,7 @@
 {
-  "name": "frontend",
+  "name": "rekono",
   "version": "1.0.0",
-  "description": "Rekono Frontend",
+  "description": "Rekono frontend",
   "author": "Pablo Santiago <pablosantiagolopez1@gmail.com>",
   "private": true,
   "scripts": {
@@ -11,8 +11,14 @@
     "build": "node build/build.js"
   },
   "dependencies": {
+    "axios": "^0.24.0",
+    "bootstrap": "^5.1.3",
+    "bootstrap-vue": "^2.21.2",
+    "jwt-decode": "^3.1.2",
     "vue": "^2.5.2",
-    "vue-router": "^3.0.1"
+    "vue-router": "^3.0.1",
+    "vuex": "^3.6.2",
+    "webpack": "^3.6.0"
   },
   "devDependencies": {
     "autoprefixer": "^7.1.2",
@@ -56,7 +62,6 @@
     "vue-loader": "^13.3.0",
     "vue-style-loader": "^3.0.1",
     "vue-template-compiler": "^2.5.2",
-    "webpack": "^3.6.0",
     "webpack-bundle-analyzer": "^2.9.0",
     "webpack-dev-server": "^2.9.1",
     "webpack-merge": "^4.1.0"

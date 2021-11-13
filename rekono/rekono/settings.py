@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 import os
+from datetime import timedelta
 from pathlib import Path
 
 from findings.enums import Severity
@@ -41,7 +42,7 @@ FILE_UPLOAD_MAX_SIZE = 500
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = generate_random_value(3000)
+SECRET_KEY = os.getenv('SECRET_KEY', generate_random_value(3000))
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -63,11 +64,14 @@ INSTALLED_APPS = [
     'drf_spectacular',
     'rest_framework',
     'rest_framework.authtoken',
+    'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
     'executions',
     'findings',
     'processes',
     'projects',
     'resources',
+    'security',
     'targets',
     'tasks',
     'telegram_bot',
@@ -122,13 +126,23 @@ REST_FRAMEWORK = {
     'ORDERING_PARAM': 'order',
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
         'rest_framework.permissions.DjangoModelPermissions',
         'security.authorization.permissions.ProjectMemberPermission',
     ]
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'UPDATE_LAST_LOGIN': True,
+    'ALGORITHM': 'HS512',
+    'SIGNING_KEY': os.getenv('SIGNING_KEY', generate_random_value(3000)),
 }
 
 # Documentation

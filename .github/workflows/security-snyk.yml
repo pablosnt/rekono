@@ -8,6 +8,7 @@ on:
   push:
     paths:
       - 'requirements.txt'
+      - 'rekono/frontend/package.json'
 
 jobs:
   snyk:
@@ -17,15 +18,28 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Test
+      - name: Test Django Project
         uses: snyk/actions/python@master
         continue-on-error: true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          args: --sarif-file-output=snyk.sarif
+          args: --sarif-file-output=snyk-django.sarif
       
-      # - name: Upload report to GitHub Code Scanning
+      # - name: Upload Django report to GitHub Code Scanning
       #  uses: github/codeql-action/upload-sarif@v1
       #  with:
-      #    sarif_file: snyk.sarif
+      #    sarif_file: snyk-django.sarif
+
+      - name: Test Vue.JS Project
+        uses: snyk/actions/node@master
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --file=rekono/frontend/package.json --sarif-file-output=snyk-vue.sarif
+      
+      # - name: Upload Vue.JS report to GitHub Code Scanning
+      #  uses: github/codeql-action/upload-sarif@v1
+      #  with:
+      #    sarif_file: snyk-vue.sarif
