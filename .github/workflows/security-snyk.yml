@@ -26,32 +26,23 @@ jobs:
         shell: bash
         run: python3 -m pip install -r requirements.txt
 
-      # - name: Test Django Project
-      #   uses: snyk/actions/python@master
-      #   continue-on-error: true
-      #   env:
-      #     SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-      #   with:
-      #     args: --sarif-file-output=snyk-django.sarif
-      
-      # - name: Upload Django report to GitHub Code Scanning
-      #  uses: github/codeql-action/upload-sarif@v1
-      #  with:
-      #    sarif_file: snyk-django.sarif
-
       - name: Install Node dependencies
         shell: bash
         run: |
           cd rekono/frontend
           npm install
 
-      - name: Snyk test
-        uses: snyk/actions@master
-        continue-on-error: true
+      - name: Install Snyk CLI
+        shell: bash
         env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          args: --all-projects --sarif-file-output=snyk.sarif
+            SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        run: |
+          npm install snyk@latest -g
+          snyk auth $SNYK_TOKEN
+
+      - name: Snyk test
+        shell: bash
+        run: snyk test --all-projects --sarif-file-output=snyk.sarif
       
       # - name: Upload Snyk report to GitHub Code Scanning
       #  uses: github/codeql-action/upload-sarif@v1
