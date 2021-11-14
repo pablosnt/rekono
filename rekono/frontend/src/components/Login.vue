@@ -1,8 +1,11 @@
 <template>
 <!-- TODO: Replace Vue.JS logo by Rekono logo -->
   <div class="fixed-top d-flex align-items-center justify-content-center" style="bottom: 0">
-    <b-card title="Welcome to Rekono!" img-src="https://vuejs.org/images/logo.png" img-top img-height="150" class="mb-3">
-      <b-alert v-model="loginError" variant="danger" dismissible @dismissed="loginError=false">Invalid credentials</b-alert>
+    <b-card id="login-form" title="Welcome to Rekono!" img-src="https://vuejs.org/images/logo.png" img-top img-height="150" class="mb-3">
+      <b-alert v-model="loginError" variant="danger">
+        <b-icon icon="exclamation-circle-fill" variant="danger"></b-icon>
+        Invalid credentials
+      </b-alert>
       <form v-on:submit.prevent="handleLogin">
         <b-input-group size="lg" class="mb-3">
           <b-input-group-prepend is-text>
@@ -46,6 +49,7 @@ export default {
       if (this.username !== '' && this.password !== '') {
         store.dispatch('loginAction', { username: this.username, password: this.password })
           .then(() => {
+            this.loginError = false
             alert('Loged In!')
           })
           .catch(() => {
@@ -64,6 +68,5 @@ body {
 }
 #login-form {
   background: white;
-  /* opacity: 0.7; */
 }
 </style>
