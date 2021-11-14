@@ -46,7 +46,7 @@ jobs:
           npm install
 
       - name: Snyk test
-        uses: snyk/actions/node@master
+        uses: snyk/actions@master
         continue-on-error: true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
