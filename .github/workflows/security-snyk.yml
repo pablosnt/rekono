@@ -40,7 +40,7 @@ jobs:
         shell: bash
         env:
             SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        run: snyk test --all-projects --sarif-file-output=snyk.sarif
+        run: ./node_modules/.bin/snyk test --all-projects --sarif-file-output=snyk.sarif
       
       # - name: Upload Snyk report to GitHub Code Scanning
       #  uses: github/codeql-action/upload-sarif@v1
