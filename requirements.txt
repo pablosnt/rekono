@@ -6,7 +6,7 @@ django-rq==2.4.1
 drf-spectacular==0.20.1
 pycryptodome==3.11.0
 psycopg2==2.9.1
-python-magic-bin==0.4.14
+python-magic==0.4.24
 python-libnmap==0.7.2
 python-telegram-bot==13.7
 pyyaml==5.4.1

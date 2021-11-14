@@ -24,7 +24,10 @@ jobs:
 
       - name: Install Python dependencies
         shell: bash
-        run: python3 -m pip install -r requirements.txt
+        run: |
+          apt-get update -y
+          apt-get install -y libmagic1 libmagic-dev
+          python3 -m pip install -r requirements.txt
 
       - name: Test Django Project
         uses: snyk/actions/python@master
