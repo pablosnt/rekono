@@ -18,6 +18,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.7'
+
+      - name: Install Python dependencies
+        shell: bash
+        run: python3 -m pip install -r requirements.txt
+
       - name: Test Django Project
         uses: snyk/actions/python@master
         continue-on-error: true
@@ -30,6 +38,12 @@ jobs:
       #  uses: github/codeql-action/upload-sarif@v1
       #  with:
       #    sarif_file: snyk-django.sarif
+
+      - name: Install Node dependencies
+        shell: bash
+        run: |
+          cd rekono/frontend
+          npm install
 
       - name: Test Vue.JS Project
         uses: snyk/actions/node@master
