@@ -34,7 +34,7 @@ jobs:
 
       - name: Install Snyk CLI
         shell: bash
-        run: npm install snyk@latest -g
+        run: npm install snyk@latest
 
       - name: Snyk test
         shell: bash
