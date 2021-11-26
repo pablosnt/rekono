@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import { decodeToken, login, logout } from '../backend/authentication'
-import { accessTokenKey } from '../backend/constants'
+import { login, logout } from '../backend/authentication'
+import { decodeToken, accessTokenKey } from '../backend/utils'
 
 Vue.use(Vuex)
 

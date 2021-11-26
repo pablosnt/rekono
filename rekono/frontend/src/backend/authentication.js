@@ -1,15 +1,5 @@
-import { headers } from './utils'
+import { accessTokenKey, refreshTokenKey, decodeToken, headers } from './utils'
 import axios from 'axios'
-import jwtDecode from 'jwt-decode'
-import { accessTokenKey, refreshTokenKey } from './constants'
-
-const decodeToken = (accessToken) => {
-  var decoded = jwtDecode(accessToken)
-  return {
-    user: decoded.user_id,
-    role: decoded.role
-  }
-}
 
 const processTokens = (tokens) => {
   localStorage.setItem(accessTokenKey, tokens.access)
@@ -55,5 +45,5 @@ const logout = () => {
 }
 
 export {
-  decodeToken, login, logout, refresh
+  login, logout, refresh
 }
