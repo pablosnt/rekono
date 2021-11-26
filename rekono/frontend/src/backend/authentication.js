@@ -1,15 +1,20 @@
 import { headers } from './utils'
 import axios from 'axios'
 import jwtDecode from 'jwt-decode'
+import { accessTokenKey, refreshTokenKey } from './constants'
 
-const processTokens = (tokens) => {
-  localStorage.setItem('access_token', tokens.access)
-  localStorage.setItem('refresh_token', tokens.refresh)
-  var decoded = jwtDecode(tokens.access)
+const decodeToken = (accessToken) => {
+  var decoded = jwtDecode(accessToken)
   return {
     user: decoded.user_id,
     role: decoded.role
   }
+}
+
+const processTokens = (tokens) => {
+  localStorage.setItem(accessTokenKey, tokens.access)
+  localStorage.setItem(refreshTokenKey, tokens.refresh)
+  return decodeToken(tokens.access)
 }
 
 const login = (username, password) => {
@@ -26,7 +31,7 @@ const login = (username, password) => {
 
 const refresh = () => {
   return axios
-    .post('/api/token/refresh/', { refresh: localStorage['refresh_token'] }, headers())
+    .post('/api/token/refresh/', { refresh: localStorage[refreshTokenKey] }, headers())
     .then(response => {
       var claims = processTokens(response.data)
       return Promise.resolve(claims)
@@ -38,10 +43,10 @@ const refresh = () => {
 
 const logout = () => {
   return axios
-    .$post('/api/logout/', { refresh: localStorage['refresh_token'] }, headers())
+    .$post('/api/logout/', { refresh: localStorage[refreshTokenKey] }, headers())
     .then(response => {
-      localStorage.removeItem('access_token')
-      localStorage.removeItem('refresh_token')
+      localStorage.removeItem(accessTokenKey)
+      localStorage.removeItem(refreshTokenKey)
       return Promise.resolve()
     })
     .catch(error => {
@@ -50,5 +55,5 @@ const logout = () => {
 }
 
 export {
-  login, logout, refresh
+  decodeToken, login, logout, refresh
 }

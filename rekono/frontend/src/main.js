@@ -17,7 +17,10 @@ Vue.use(BootstrapVueIcons)
 /* eslint-disable no-new */
 new Vue({
   el: '#app',
-  router,
-  store,
-  render: h => h(App)
+  router: router,
+  store: store,
+  render: h => h(App),
+  created () {
+    this.$store.dispatch('checkState')
+  }
 })

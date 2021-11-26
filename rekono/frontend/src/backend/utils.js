@@ -1,4 +1,5 @@
 import store from '../store/'
+import { accessTokenKey } from './constants'
 
 const headers = () => {
   var base = {
@@ -6,7 +7,7 @@ const headers = () => {
     'Accept': 'application/json'
   }
   if (store.state.user) {
-    var accessToken = localStorage['access_token']
+    var accessToken = localStorage[accessTokenKey]
     base['Authorization'] = 'Bearer ' + accessToken
   }
   return base

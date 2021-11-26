@@ -50,7 +50,7 @@ export default {
         store.dispatch('loginAction', { username: this.username, password: this.password })
           .then(() => {
             this.loginError = false
-            alert('Loged In!')
+            this.$router.push('/dashboard')
           })
           .catch(() => {
             this.loginError = true

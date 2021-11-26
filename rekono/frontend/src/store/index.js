@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import { login, logout } from '../backend/authentication'
+import { decodeToken, login, logout } from '../backend/authentication'
+import { accessTokenKey } from '../backend/constants'
 
 Vue.use(Vuex)
 
@@ -20,6 +21,12 @@ export default new Vuex.Store({
     }
   },
   actions: {
+    checkState ({ commit }) {
+      var accessToken = localStorage.getItem(accessTokenKey)
+      if (accessToken) {
+        commit('login', decodeToken(accessToken))
+      }
+    },
     loginAction ({ commit }, { username, password }) {
       return login(username, password)
         .then(data => {
