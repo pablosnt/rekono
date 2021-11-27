@@ -12,16 +12,16 @@ const decodeToken = (accessToken) => {
   }
 }
 
-const headers = () => {
-  var base = {
+const headers = (requiredAuth = true) => {
+  var requestHeaders = {
     'Content-Type': 'application/json',
     'Accept': 'application/json'
   }
-  if (store.state.user) {
+  if (store.state.user && requiredAuth) {
     var accessToken = localStorage[accessTokenKey]
-    base['Authorization'] = 'Bearer ' + accessToken
+    requestHeaders['Authorization'] = 'Bearer ' + accessToken
   }
-  return base
+  return requestHeaders
 }
 
 export {

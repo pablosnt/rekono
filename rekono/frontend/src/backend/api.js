@@ -4,7 +4,7 @@ import { refresh } from './authentication'
 
 const rekonoApiPost = (endpoint, data, retry = false) => {
   return axios
-    .post(endpoint, data, headers())
+    .post(endpoint, data, { headers: headers() })
     .then(response => {
       return Promise.resolve(response)
     })
@@ -23,7 +23,7 @@ const rekonoApiPost = (endpoint, data, retry = false) => {
 
 const rekonoApiGet = (endpoint, retry = false) => {
   return axios
-    .get(endpoint, headers())
+    .get(endpoint, { headers: headers() })
     .then(response => {
       return Promise.resolve(response)
     })

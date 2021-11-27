@@ -1,6 +1,11 @@
 import { accessTokenKey, refreshTokenKey, decodeToken, headers } from './utils'
 import axios from 'axios'
 
+const removeTokens = () => {
+  localStorage.removeItem(accessTokenKey)
+  localStorage.removeItem(refreshTokenKey)
+}
+
 const processTokens = (tokens) => {
   localStorage.setItem(accessTokenKey, tokens.access)
   localStorage.setItem(refreshTokenKey, tokens.refresh)
@@ -9,7 +14,7 @@ const processTokens = (tokens) => {
 
 const login = (username, password) => {
   return axios
-    .post('/api/token/', { username: username, password: password }, headers())
+    .post('/api/token/', { username: username, password: password }, { headers: headers(false) })
     .then(response => {
       var claims = processTokens(response.data)
       return Promise.resolve(claims)
@@ -21,7 +26,7 @@ const login = (username, password) => {
 
 const refresh = () => {
   return axios
-    .post('/api/token/refresh/', { refresh: localStorage[refreshTokenKey] }, headers())
+    .post('/api/token/refresh/', { refresh: localStorage[refreshTokenKey] }, { headers: headers() })
     .then(response => {
       var claims = processTokens(response.data)
       return Promise.resolve(claims)
@@ -33,13 +38,13 @@ const refresh = () => {
 
 const logout = () => {
   return axios
-    .$post('/api/logout/', { refresh: localStorage[refreshTokenKey] }, headers())
+    .post('/api/logout/', { refresh_token: localStorage[refreshTokenKey] }, { headers: headers() })
     .then(response => {
-      localStorage.removeItem(accessTokenKey)
-      localStorage.removeItem(refreshTokenKey)
+      removeTokens()
       return Promise.resolve()
     })
     .catch(error => {
+      removeTokens()
       return Promise.reject(error)
     })
 }
