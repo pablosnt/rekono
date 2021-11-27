@@ -1,6 +1,7 @@
 import axios from 'axios'
-import headers from './utils'
+import { headers } from './utils'
 import { refresh } from './authentication'
+import router from '../router'
 
 const rekonoApiPost = (endpoint, data, retry = false) => {
   return axios
@@ -9,9 +10,9 @@ const rekonoApiPost = (endpoint, data, retry = false) => {
       return Promise.resolve(response)
     })
     .catch(error => {
-      if (error.response && error.response.status == 401) {
+      if (error.response && error.response.status === 401) {
         if (retry) {
-          this.$router.push('/login')
+          router.push('/login')
         } else {
           refresh()
           return rekonoApiPost(endpoint, data, true)
@@ -28,14 +29,18 @@ const rekonoApiGet = (endpoint, retry = false) => {
       return Promise.resolve(response)
     })
     .catch(error => {
-      if (error.response && error.response.status == 401) {
+      if (error.response && error.response.status === 401) {
         if (retry) {
-            this.$router.push('/login')
+          router.push('/login')
         } else {
-            refresh()
-            return rekonoApiGet(endpoint, true)
+          refresh()
+          return rekonoApiGet(endpoint, true)
         }
       }
       return Promise.reject(error)
     })
+}
+
+export {
+  rekonoApiPost, rekonoApiGet
 }
