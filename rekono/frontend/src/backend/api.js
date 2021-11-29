@@ -14,8 +14,9 @@ const rekonoApiPost = (endpoint, data, retry = false) => {
         if (retry) {
           router.push('/login')
         } else {
-          refresh()
-          return rekonoApiPost(endpoint, data, true)
+          return refresh()
+            .then(() => { return rekonoApiGet(endpoint, true) })
+            .catch(() => { router.push('/login') })
         }
       }
       return Promise.reject(error)
@@ -33,8 +34,9 @@ const rekonoApiGet = (endpoint, retry = false) => {
         if (retry) {
           router.push('/login')
         } else {
-          refresh()
-          return rekonoApiGet(endpoint, true)
+          return refresh()
+            .then(() => { return rekonoApiGet(endpoint, true) })
+            .catch(() => { router.push('/login') })
         }
       }
       return Promise.reject(error)

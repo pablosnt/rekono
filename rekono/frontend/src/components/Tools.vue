@@ -14,7 +14,11 @@
       </template>
       <template #row-details="row">
         <b-card>
-          <b-table :fields="configFields" :items="row.item.configurations"/>
+          <b-table :fields="configFields" :items="row.item.configurations">
+            <template #cell(default)="config">
+              <b-icon v-if="config.item.default" icon="check-circle-fill" variant="success"/>
+            </template>
+          </b-table>
         </b-card>
       </template>
     </b-table>
@@ -66,7 +70,6 @@ export default {
           items.push(item)
         }
       })
-    // console.log(items)
     return {
       toolsItems: items,
       toolsFields: ['icon', 'name', 'command', 'stage', 'actions'],
