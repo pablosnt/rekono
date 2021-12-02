@@ -1,6 +1,6 @@
 <template>
   <div>
-    <b-table :fields="toolsFields" :items="toolsItems">
+    <b-table striped borderless head-variant="dark" :fields="toolsFields" :items="toolsItems">
       <template #cell(icon)="row">
         <b-link :href="row.item.reference" target="_blank">
           <b-img :src="row.item.icon" width="100" height="50"/>
@@ -14,7 +14,7 @@
       </template>
       <template #row-details="row">
         <b-card>
-          <b-table :fields="configFields" :items="row.item.configurations">
+          <b-table striped borderless small head-variant="light" :fields="configFields" :items="row.item.configurations">
             <template #cell(default)="config">
               <b-icon v-if="config.item.default" icon="check-circle-fill" variant="success"/>
             </template>
