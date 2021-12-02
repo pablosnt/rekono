@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 import os
 from datetime import timedelta
 from pathlib import Path
+from typing import List
 
 from findings.enums import Severity
 from processes.enums import StepPriority
@@ -47,7 +48,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', generate_random_value(3000))
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS: List[str] = []
 
 
 # Application definition

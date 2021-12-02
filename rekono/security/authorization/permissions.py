@@ -21,7 +21,6 @@ class ProjectMemberPermission(BasePermission):
 
 
 class BaseCreatorPermission(BasePermission):
-    model = None
 
     def get_instance(self, obj):
         if self.model and isinstance(obj, self.model):

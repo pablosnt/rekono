@@ -44,8 +44,7 @@ class CreateUserSerializer(serializers.Serializer):
 
     @transaction.atomic()
     def create(self, validated_data):
-        pk = self.context.get('pk', None)
-        user = User.objects.get(pk=pk, is_active=False, otp=validated_data.get('otp'))
+        user = User.objects.get(is_active=False, otp=validated_data.get('otp'))
         user.username = validated_data.get('username')
         user.first_name = validated_data.get('first_name')
         user.last_name = validated_data.get('last_name')

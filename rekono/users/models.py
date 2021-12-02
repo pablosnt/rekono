@@ -15,9 +15,9 @@ class RekonoUserManager(UserManager):
 
     def create_user(self, email: str, role: Role, domain: str) -> Any:
         user = User.objects.create(email=email, otp=generate_otp(), is_active=False)
-        group = Group.objects.get(name=role.name.capitalize())
+        group = Group.objects.get(name=role.value)
         if not group:
-            group = Group.objects.get(name=Role.READER.name.capitalize())
+            group = Group.objects.get(name=Role.READER)
         user.groups.clear()
         user.groups.set([group])
         user.save()
@@ -34,7 +34,7 @@ class RekonoUserManager(UserManager):
         **extra_fields: Any
     ) -> Any:
         user = super().create_superuser(username, email, password, **extra_fields)
-        group = Group.objects.get(name=Role.ADMIN.name.capitalize())
+        group = Group.objects.get(name=Role.ADMIN)
         user.groups.set([group])
         user.save()
         api_token = Token.objects.create(user=user)
@@ -42,7 +42,7 @@ class RekonoUserManager(UserManager):
         return user
 
     def change_user_role(self, user: Any, role: Role) -> Any:
-        group = Group.objects.get(name=role.name.capitalize())
+        group = Group.objects.get(name=role.value)
         if group:
             user.groups.clear()
             user.groups.set([group])
@@ -51,9 +51,9 @@ class RekonoUserManager(UserManager):
 
     def enable_user(self, user: Any, role: Role, domain: str) -> Any:
         user.otp = generate_otp()
-        group = Group.objects.get(name=role.name.capitalize())
+        group = Group.objects.get(name=role.value)
         if not group:
-            group = Group.objects.get(name=Role.READER.name.capitalize())
+            group = Group.objects.get(name=Role.READER)
         user.groups.clear()
         user.groups.set([group])
         user.save()

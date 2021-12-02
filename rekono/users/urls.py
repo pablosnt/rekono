@@ -14,7 +14,7 @@ reset_password = ResetPasswordViewSet.as_view({'post': 'create', 'put': 'reset_p
 
 urlpatterns = [
     path('api-token/', views.obtain_auth_token),
-    path('users/<int:pk>/create/', UserInitViewSet.as_view({'post': 'create'})),
+    path('users/create/', UserInitViewSet.as_view({'post': 'create'})),
     path('reset-password/', reset_password),
     path('profile/', profile),
     path('profile/change-password/', change_password),

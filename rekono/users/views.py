@@ -1,9 +1,12 @@
+from typing import List
+
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.decorators import action
-from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
-                                   ListModelMixin, RetrieveModelMixin)
-from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated
+from rest_framework.mixins import (DestroyModelMixin, ListModelMixin,
+                                   RetrieveModelMixin)
+from rest_framework.permissions import (BasePermission, DjangoModelPermissions,
+                                        IsAuthenticated)
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 from security.authorization.permissions import IsAdmin
@@ -21,7 +24,6 @@ from users.serializers import (ChangeUserPasswordSerializer,
 
 class UserAdminViewSet(
     GenericViewSet,
-    CreateModelMixin,
     ListModelMixin,
     RetrieveModelMixin,
     DestroyModelMixin
@@ -29,21 +31,22 @@ class UserAdminViewSet(
     serializer_class = UserSerializer
     queryset = User.objects.all()
     filterset_class = UserFilter
-    permission_classes = [IsAuthenticated, DjangoModelPermissions, IsAdmin]
+    permission_classes: List[BasePermission] = [IsAuthenticated, DjangoModelPermissions, IsAdmin]
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        User.objects.disable_user(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @extend_schema(request=InviteUserSerializer, responses={201: UserSerializer})
-    def create(self, request, *args, **kwargs):
+    @action(detail=False, methods=['POST'], url_path='invite', url_name='invite')
+    def invite(self, request, *args, **kwargs):
         serializer = InviteUserSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
             user = serializer.create(serializer.validated_data)
             response = UserSerializer(user)
             return Response(response.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
-        User.objects.disable_user(instance)
-        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @extend_schema(request=ChangeUserRoleSerializer, responses={200: UserSerializer})
     @action(detail=True, methods=['PUT'], url_path='role', url_name='role')
@@ -71,7 +74,7 @@ class UserAdminViewSet(
 class UserProfileViewSet(GenericViewSet):
     serializer_class = UserSerializer
     queryset = User.objects.all()
-    permission_classes = [IsAuthenticated]
+    permission_classes: List[BasePermission] = [IsAuthenticated]
     http_method_names = ['get', 'put', 'post']
 
     @action(detail=False, methods=['GET'])
@@ -109,12 +112,12 @@ class UserProfileViewSet(GenericViewSet):
 class UserInitViewSet(GenericViewSet):
     serializer_class = CreateUserSerializer
     queryset = User.objects.all()
-    permission_classes = []
+    permission_classes: List[BasePermission] = []
     http_method_names = ['post']
 
-    @action(detail=True, methods=['POST'])
-    def create(self, request, pk):
-        serializer = self.serializer_class(data=request.data, context={'pk': pk})
+    @action(detail=False, methods=['POST'])
+    def create(self, request):
+        serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
             try:
                 serializer.save()
@@ -127,7 +130,7 @@ class UserInitViewSet(GenericViewSet):
 class ResetPasswordViewSet(GenericViewSet):
     serializer_class = UserSerializer
     queryset = User.objects.all()
-    permission_classes = []
+    permission_classes: List[BasePermission] = []
     http_method_names = ['post', 'put']
 
     @extend_schema(request=RequestPasswordResetSerializer, responses={200: None})
