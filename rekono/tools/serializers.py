@@ -9,6 +9,11 @@ from rekono.api.serializers import IntegerChoicesField
 class StageField(IntegerChoicesField):
     model = Stage
 
+    def to_representation(self, value):
+        if value == 1:
+            return super().to_representation(value).upper()
+        return super().to_representation(value)
+
 
 class IntensityField(IntegerChoicesField):
     model = IntensityRank
@@ -64,7 +69,7 @@ class IntensitySerializer(serializers.ModelSerializer):
 
 
 class ToolSerializer(serializers.ModelSerializer):
-    stage_name = IntensityField(source='stage')
+    stage_name = StageField(source='stage')
     intensities = SerializerMethodField(
         method_name='get_intensities',
         read_only=True,

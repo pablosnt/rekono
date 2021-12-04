@@ -62,7 +62,7 @@ export default {
             id: results[i].id,
             name: results[i].name,
             command: results[i].command,
-            stage: results[i].stage,
+            stage: results[i].stage_name,
             icon: results[i].icon,
             reference: results[i].reference,
             configurations: configurations
