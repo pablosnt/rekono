@@ -23,7 +23,7 @@ class ExecutionJob():
 
 def create_plan(task: Task) -> list:
     execution_plan = []
-    steps = Step.objects.filter(process=task.process).order_by('tool__stage', 'priority')
+    steps = Step.objects.filter(process=task.process).order_by('tool__stage', '-priority')
     for step in steps:
         intensity = Intensity.objects.filter(
             tool=step.tool,

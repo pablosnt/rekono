@@ -1,4 +1,5 @@
 from datetime import timedelta
+from typing import Optional
 
 import django_rq
 from django_rq import job
@@ -61,7 +62,7 @@ def scheduled_callback(job, connection, result, *args, **kwargs):
 
 
 @job('tasks-queue')
-def consumer(task: Task = None, manual_findings: list = [], domain: str = None) -> tuple:
+def consumer(task: Task = None, manual_findings: list = [], domain: Optional[str] = None) -> tuple:
     if task:
         if task.tool:
             tools.execute(task, manual_findings, domain)

@@ -1,4 +1,4 @@
-from typing import Callable
+from typing import Any, Callable
 
 import django_rq
 from executions.models import Execution
@@ -17,7 +17,7 @@ def producer(
     callback: Callable = None,
     dependencies: list = [],
     at_front: bool = False
-) -> None:
+) -> Any:
     if execution.step:
         tool = execution.step.tool
         configuration = execution.step.configuration

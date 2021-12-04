@@ -24,7 +24,7 @@ def consumer(
     manual_findings: list,
     previous_findings: list,
     domain: str,
-) -> None:
+) -> BaseTool:
     current_job = rq.get_current_job()
     tool_class = tool_utils.get_tool_class_by_name(tool.name)
     tool = tool_class(

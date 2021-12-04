@@ -1,3 +1,5 @@
+from typing import Optional
+
 import django_rq
 from django.core.exceptions import ValidationError
 from django_rq import job
@@ -15,7 +17,11 @@ def producer(execution: Execution, findings: list, domain: str) -> None:
 
 
 @job('findings-queue')
-def consumer(execution: Execution = None, findings: list = [], domain: str = None) -> None:
+def consumer(
+    execution: Execution = None,
+    findings: list = [],
+    domain: Optional[str] = None
+) -> None:
     if execution:
         for finding in findings:
             if isinstance(finding, Vulnerability) and finding.cve:

@@ -8,6 +8,7 @@ from tasks.models import Task
 from tasks.queue import producer
 from tools.enums import IntensityRank
 from tools.models import Configuration, Intensity
+from tools.serializers import IntensityField
 
 
 class ManualFindingModelSerializer(serializers.ModelSerializer):
@@ -180,6 +181,7 @@ class ManualOSINTSerializer(ManualFindingModelSerializer):
 
 
 class TaskSerializer(serializers.ModelSerializer):
+    intensity_rank = IntensityField(source='intensity')
     osint = ManualOSINTSerializer(read_only=False, many=True, required=False)
     host = ManualHostSerializer(read_only=False, many=True, required=False)
     enumeration = ManualEnumerationSerializer(read_only=False, many=True, required=False)
@@ -193,7 +195,7 @@ class TaskSerializer(serializers.ModelSerializer):
         model = Task
         fields = (
             'id', 'target', 'process', 'tool', 'configuration',
-            'intensity', 'executor', 'status', 'scheduled_at',
+            'intensity_rank', 'executor', 'status', 'scheduled_at',
             'scheduled_in', 'scheduled_time_unit', 'repeat_in',
             'repeat_time_unit', 'start', 'end', 'wordlists',
             'osint', 'host', 'enumeration', 'endpoint', 'technology',
@@ -220,7 +222,7 @@ class TaskSerializer(serializers.ModelSerializer):
             elif attrs.get(field) and not attrs.get(unit):
                 attrs[field] = None
         if not attrs.get('intensity'):
-            attrs['intensity'] = IntensityRank.NORMAL
+            attrs['intensity'] = IntensityRank.NORMAL.value
         if attrs.get('tool'):
             attrs['process'] = None
             if not attrs.get('configuration'):
@@ -233,10 +235,8 @@ class TaskSerializer(serializers.ModelSerializer):
                 value=attrs.get('intensity')
             )
             if not intensity:
-                intensity = IntensityRank(attrs.get('intensity')).name
-                tool = attrs.get('tool').name
                 raise serializers.ValidationError(
-                    {'intensity': f'Invalid intensity {intensity} for tool {tool}'}
+                    {'intensity': f'Invalid intensity {attrs.get("intensity")} for tool {attrs.get("tool").name}'}      # noqa: E501
                 )
         return super().validate(attrs)
 
@@ -273,7 +273,7 @@ class TaskSerializer(serializers.ModelSerializer):
                     field_data['task'] = task
                     finding = serializer().create(validated_data=field_data)
                     manual_findings.extend(serializer().get_findings(finding))
-        # Resources are included as manual findings to make executions simply
+        # Resources are included as manual findings to make executions easier
         manual_findings.extend(list(task.wordlists.all()))
         domain = None
         if self.context.get('request'):

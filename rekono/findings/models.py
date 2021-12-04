@@ -62,6 +62,8 @@ class Finding(models.Model):
             equals = True
             for field in self.key_fields:
                 equals = equals and (self.get_field(field) == o.get_field(field))
+            return equals
+        return False
 
     def get_field(self, field: str) -> str:
         relations = field.split('__') if '__' in field else [field]

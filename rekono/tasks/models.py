@@ -23,8 +23,7 @@ class Task(models.Model):
         blank=True,
         null=True
     )
-    intensity = models.TextField(
-        max_length=10,
+    intensity = models.IntegerField(
         choices=IntensityRank.choices,
         default=IntensityRank.NORMAL
     )

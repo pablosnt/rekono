@@ -9,7 +9,7 @@ IP_NETWORK_REGEX = '[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}/[0-9]{1,2}'
 IP_RANGE_REGEX = '[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}-[0-9]{1,3}'
 
 
-def get_target_type(target: str) -> TargetType:
+def get_target_type(target: str) -> str:
     try:
         ip = ipaddress.ip_address(target)
         if ip.is_private:

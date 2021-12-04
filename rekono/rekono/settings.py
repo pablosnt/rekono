@@ -16,7 +16,6 @@ from pathlib import Path
 from typing import List
 
 from findings.enums import Severity
-from processes.enums import StepPriority
 from security.crypto import generate_random_value
 from targets.enums import TargetType
 from tasks.enums import Status, TimeUnit
@@ -156,7 +155,6 @@ SPECTACULAR_SETTINGS = {
         'drf_spectacular.hooks.preprocess_exclude_path_format'
     ],
     'ENUM_NAME_OVERRIDES': {
-        'PriorityEnum': StepPriority.choices,
         'StatusEnum': Status.choices,
         'NotificationPreferenceEnum': Notification.choices,
         'SeverityEnum': Severity.choices,

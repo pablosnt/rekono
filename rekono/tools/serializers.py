@@ -1,6 +1,17 @@
 from rest_framework import serializers
 from rest_framework.fields import SerializerMethodField
+from tools.enums import IntensityRank, Stage
 from tools.models import Configuration, Input, Intensity, Output, Tool
+
+from rekono.api.serializers import IntegerChoicesField
+
+
+class StageField(IntegerChoicesField):
+    model = Stage
+
+
+class IntensityField(IntegerChoicesField):
+    model = IntensityRank
 
 
 class InputSerializer(serializers.ModelSerializer):
@@ -44,14 +55,16 @@ class ConfigurationSerializer(serializers.ModelSerializer):
 
 
 class IntensitySerializer(serializers.ModelSerializer):
+    intensity_rank = IntensityField(source='value')
 
     class Meta:
         model = Intensity
-        fields = ('argument', 'value')
+        fields = ('argument', 'intensity_rank')
         ordering = ['-id']
 
 
 class ToolSerializer(serializers.ModelSerializer):
+    stage_name = IntensityField(source='stage')
     intensities = SerializerMethodField(
         method_name='get_intensities',
         read_only=True,
@@ -66,7 +79,7 @@ class ToolSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tool
         fields = (
-            'id', 'name', 'command', 'stage', 'reference', 'icon',
+            'id', 'name', 'command', 'stage_name', 'reference', 'icon',
             'for_each_target_port', 'intensities', 'configurations'
         )
 

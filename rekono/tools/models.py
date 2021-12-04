@@ -11,7 +11,7 @@ class Tool(models.Model):
     command = models.TextField(max_length=30, blank=True, null=True)
     output_format = models.TextField(max_length=5, blank=True, null=True)
     defectdojo_scan_type = models.TextField(max_length=50, blank=True, null=True)
-    stage = models.TextField(max_length=25, choices=Stage.choices)
+    stage = models.IntegerField(choices=Stage.choices)
     reference = models.TextField(max_length=250, blank=True, null=True)
     icon = models.TextField(max_length=250, blank=True, null=True)
     for_each_target_port = models.BooleanField(default=False)
@@ -29,11 +29,7 @@ class Tool(models.Model):
 class Intensity(models.Model):
     tool = models.ForeignKey(Tool, related_name='intensities', on_delete=models.CASCADE)
     argument = models.TextField(max_length=50, default='', blank=True)
-    value = models.TextField(
-        max_length=10,
-        choices=IntensityRank.choices,
-        default=IntensityRank.NORMAL
-    )
+    value = models.IntegerField(choices=IntensityRank.choices, default=IntensityRank.NORMAL)
 
     class Meta:
         ordering = ['-id']

@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Optional
 
 import requests
 from findings.models import Enumeration
@@ -10,7 +10,7 @@ HTTP_SIMPLE = 'http://{host}'
 HTTPS_SIMPLE = 'https://{host}'
 
 
-def get_url(host: str, port: Any) -> str:
+def get_url(host: str, port: Any) -> Optional[str]:
     if port and isinstance(port, Enumeration):
         if port.service == 'http':
             return HTTP_PORT.format(host=port.host.address, port=port.port)
@@ -25,6 +25,7 @@ def get_url(host: str, port: Any) -> str:
         return HTTPS_SIMPLE.format(host=host)
     elif check_connection(HTTP_SIMPLE.format(host=host)):
         return HTTP_SIMPLE.format(host=host)
+    return None
 
 
 def check_connection(url: str) -> bool:
