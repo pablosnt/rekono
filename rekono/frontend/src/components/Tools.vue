@@ -94,8 +94,20 @@ export default {
       })
     return {
       toolsItems: items,
-      toolsFields: ['icon', 'name', 'command', 'stage', 'intensities', 'actions'],
-      configFields: ['configuration', 'default', 'inputs', 'outputs']
+      toolsFields: [
+        {key: 'icon', sortable: false},
+        {key: 'name', sortable: true},
+        {key: 'command', sortable: true},
+        {key: 'stage', sortable: true},
+        {key: 'intensities', sortable: true},
+        {key: 'actions', sortable: false}
+      ],
+      configFields: [
+        {key: 'configuration', sortable: true},
+        {key: 'default', sortable: true},
+        {key: 'inputs', sortable: true},
+        {key: 'outputs', sortable: true}
+      ]
     }
   }
 }
