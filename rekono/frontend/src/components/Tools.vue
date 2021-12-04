@@ -12,6 +12,12 @@
           <b-icon v-if="row.detailsShowing" icon="eye-slash-fill"/>
         </b-button>
       </template>
+      <template #cell(intensities)="row">
+        <div v-for="item in row.item.intensities" v-bind:key="item.value" style="display: inline">
+          <b-badge :variant="item.variant" v-b-tooltip.hover :title="item.value">{{ item.summary }}</b-badge>
+          <span/>
+        </div>
+      </template>
       <template #row-details="row">
         <b-card>
           <b-table striped borderless small head-variant="light" :fields="configFields" :items="row.item.configurations">
@@ -51,12 +57,27 @@ export default {
               }
             }
             var config = {
-              name: results[i].configurations[c].name,
+              configuration: results[i].configurations[c].name,
+              default: results[i].configurations[c].default,
               inputs: inputs,
-              outputs: outputs,
-              default: results[i].configurations[c].default
+              outputs: outputs
             }
             configurations.push(config)
+          }
+          var intensities = []
+          for (j = 0; j < results[i].intensities.length; j++) {
+            var value = results[i].intensities[j].intensity_rank
+            var variant = 'secondary'
+            if (value === 'Sneaky') variant = 'info'
+            else if (value === 'Low') variant = 'success'
+            else if (value === 'Hard') variant = 'warning'
+            else if (value === 'Insane') variant = 'danger'
+            var intensity = {
+              variant: variant,
+              value: value,
+              summary: value.charAt(0).toUpperCase()
+            }
+            intensities.push(intensity)
           }
           var item = {
             id: results[i].id,
@@ -65,15 +86,16 @@ export default {
             stage: results[i].stage_name,
             icon: results[i].icon,
             reference: results[i].reference,
-            configurations: configurations
+            configurations: configurations,
+            intensities: intensities
           }
           items.push(item)
         }
       })
     return {
       toolsItems: items,
-      toolsFields: ['icon', 'name', 'command', 'stage', 'actions'],
-      configFields: ['name', 'default', 'inputs', 'outputs']
+      toolsFields: ['icon', 'name', 'command', 'stage', 'intensities', 'actions'],
+      configFields: ['configuration', 'default', 'inputs', 'outputs']
     }
   }
 }

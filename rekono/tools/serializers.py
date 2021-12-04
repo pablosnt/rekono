@@ -89,7 +89,7 @@ class ToolSerializer(serializers.ModelSerializer):
         )
 
     def get_intensities(self, instance):
-        return IntensitySerializer(instance.intensities.all().order_by('value'), many=True).data
+        return IntensitySerializer(instance.intensities.all().order_by('-value'), many=True).data
 
     def get_configurations(self, instance):
         return ConfigurationSerializer(
