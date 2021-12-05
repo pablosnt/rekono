@@ -148,9 +148,16 @@
                 </tr>
                 {% for v in vulnerability %}
                     <tr>
-                        <th><a href="http://{{ domain }}/api/hosts/{{ v.technology.enumeration.host.id }}/">{{ v.technology.enumeration.host.address }}</a></th>
-                        <th><a href="http://{{ domain }}/api/enumerations/{{ v.technology.enumeration.id }}/">{{ v.technology.enumeration.port }}</a></th>
-                        <th><a href="http://{{ domain }}/api/technologies/{{ v.technology.id }}/">{{ v.technology.name }}</a></th>
+                        {% if v.enumeration %}
+                            <th><a href="http://{{ domain }}/api/hosts/{{ v.enumeration.host.id }}/">{{ v.technology.enumeration.host.address }}</a></th>
+                            <th><a href="http://{{ domain }}/api/enumerations/{{ v.enumeration.id }}/">{{ v.technology.enumeration.port }}</a></th>
+                            <th></th>
+                        {% endif %}
+                        {% if v.technology %}
+                            <th><a href="http://{{ domain }}/api/hosts/{{ v.technology.enumeration.host.id }}/">{{ v.technology.enumeration.host.address }}</a></th>
+                            <th><a href="http://{{ domain }}/api/enumerations/{{ v.technology.enumeration.id }}/">{{ v.technology.enumeration.port }}</a></th>
+                            <th><a href="http://{{ domain }}/api/technologies/{{ v.technology.id }}/">{{ v.technology.name }}</a></th>
+                        {% endif %}
                         <th><a href="http://{{ domain }}/api/vulnerabilities/{{ v.id }}/">{{ v.name }}</a></th>
                         <th>{{ v.cve }}</th>
                         <th>{{ v.severity }}</th>

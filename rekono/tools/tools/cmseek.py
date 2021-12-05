@@ -52,7 +52,7 @@ class CmseekTool(BaseTool):
             shutil.move(report, self.path_output)
             shutil.rmtree(results)
 
-    def analyze_endpoints(self, url: str, cms_name: str, key: str, value: Any) -> list:
+    def analyze_endpoints(self, url: str, technology: Technology, key: str, value: Any) -> list:
         paths = []
         findings = []
         if isinstance(value, str) and ',' in value:
@@ -65,7 +65,8 @@ class CmseekTool(BaseTool):
             findings.append(endpoint)
         if 'backup_file' in key:
             vulnerability = Vulnerability.objects.create(
-                name=f'{cms_name} backup files found',
+                technology=technology,
+                name=f'{technology.name} backup files found',
                 description=', '.join(paths),
                 severity=Severity.HIGH,
                 cwe='CWE-530'
@@ -73,7 +74,8 @@ class CmseekTool(BaseTool):
             findings.append(vulnerability)
         elif 'config_file' in key:
             vulnerability = Vulnerability.objects.create(
-                name=f'{cms_name} configuration files found',
+                technology=technology,
+                name=f'{technology.name} configuration files found',
                 description=', '.join(paths),
                 severity=Severity.MEDIUM,
                 cwe='CWE-497'
@@ -104,13 +106,14 @@ class CmseekTool(BaseTool):
                 'cms_id', 'cms_name', 'cms_url', f'{cms_id}_version', f'{cms_name}_version'
             ]]:
                 if 'file' in key or 'directory' in key:
-                    findings.extend(self.analyze_endpoints(url, cms_name, key, value))
+                    findings.extend(self.analyze_endpoints(url, cms, key, value))
                 elif '_users' in key and ',' in value:
                     for user in value.split(','):
                         credential = Credential.objects.create(username=user)
                         findings.append(credential)
                 elif '_debug_mode' in key and value != 'disabled':
                     vulnerability = Vulnerability.objects.create(
+                        technology=cms,
                         name=f'{cms_name} debug mode enabled',
                         description=f'{cms_name} debug mode enabled',
                         severity=Severity.LOW,
@@ -120,6 +123,7 @@ class CmseekTool(BaseTool):
                 elif '_vulns' in key and 'vulnerabilities' in value:
                     for vuln in value['vulnerabilities']:
                         vulnerability = Vulnerability.objects.create(
+                            technology=cms,
                             name=vuln.get('name'),
                             cve=vuln.get('cve')
                         )

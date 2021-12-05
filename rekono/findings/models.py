@@ -206,6 +206,13 @@ class Vulnerability(Finding):
         blank=True,
         null=True
     )
+    enumeration = models.ForeignKey(
+        Enumeration,
+        related_name='vulnerability',
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True
+    )
     name = models.TextField(max_length=50)
     description = models.TextField(blank=True, null=True)
     severity = models.TextField(choices=Severity.choices, default=Severity.MEDIUM)

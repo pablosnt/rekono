@@ -7,6 +7,7 @@ from arguments import checker, formatter
 from arguments.enums import Keyword
 from django.utils import timezone
 from executions.models import Execution
+from findings.models import Vulnerability
 from findings.queue import producer
 from tasks.enums import Status
 from tools import utils
@@ -153,6 +154,18 @@ class BaseTool():
     def process_findings(self) -> None:
         for finding in self.findings:
             for key, value in self.findings_relations.items():
+                if (
+                    isinstance(finding, Vulnerability)
+                    and getattr(finding, 'technology')
+                    and key == 'enumeration'
+                ):
+                    continue
+                elif (
+                    isinstance(finding, Vulnerability)
+                    and getattr(finding, 'enumeration')
+                    and key == 'technology'
+                ):
+                    setattr(finding, 'enumeration', None)
                 if hasattr(finding, key):
                     setattr(finding, key, value)
 

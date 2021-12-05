@@ -53,6 +53,7 @@ class SslscanTool(BaseTool):
                     and item.attrib['secure'] != '1'
                 ):
                     vulnerability = Vulnerability.objects.create(
+                        technology=self.get_technology(technologies, item.attrib['sslversion']),
                         name='Insecure TLS renegotiation supported',
                         description='Insecure TLS renegotiation supported',
                         severity=Severity.MEDIUM,

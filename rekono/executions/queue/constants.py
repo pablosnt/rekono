@@ -6,7 +6,7 @@ finding_relations = {
     FindingType.ENUMERATION: [FindingType.HOST],
     FindingType.ENDPOINT: [FindingType.ENUMERATION],
     FindingType.TECHNOLOGY: [FindingType.ENUMERATION],
-    FindingType.VULNERABILITY: [FindingType.TECHNOLOGY],
+    FindingType.VULNERABILITY: [FindingType.TECHNOLOGY, FindingType.ENUMERATION],
     FindingType.CREDENTIAL: [],
     FindingType.EXPLOIT: [FindingType.TECHNOLOGY, FindingType.VULNERABILITY]
 }

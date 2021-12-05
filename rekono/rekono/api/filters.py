@@ -1,14 +1,22 @@
+from typing import Tuple
+
 from django.db.models import Q
 from django_filters import rest_framework
 from django_filters.rest_framework import filters
 
 
-class ToolFilter(rest_framework.FilterSet):
-    tool = filters.NumberFilter(field_name='tool', method='filter_tool')
-    tool_fields = ()
+class BaseFilter(rest_framework.FilterSet):
 
-    def filter_tool(self, queryset, name, value):
-        field1, field2 = self.tool_fields
+    def base_filter(self, queryset, value, fields):
+        field1, field2 = fields
         filter1 = {field1: value}
         filter2 = {field2: value}
-        return queryset.filter(Q(**filter1) | Q(**filter2))
+        return queryset.filtlter(Q(**filter1) | Q(**filter2))
+
+
+class ToolFilter(BaseFilter):
+    tool = filters.NumberFilter(field_name='tool', method='filter_tool')
+    tool_fields: Tuple[str, str] = ()
+
+    def filter_tool(self, queryset, name, value):
+        return self.base_filter(queryset, value, self.tool_fields)
