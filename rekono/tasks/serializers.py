@@ -1,6 +1,7 @@
 from django.contrib.sites.shortcuts import get_current_site
 from django.db import transaction
 from django.utils import timezone
+from findings.enums import PortStatus
 from findings.models import (OSINT, Credential, Endpoint, Enumeration, Exploit,
                              Host, Technology, Vulnerability)
 from rest_framework import serializers
@@ -21,83 +22,47 @@ class ManualFindingModelSerializer(serializers.ModelSerializer):
         return [finding]
 
 
-class ManualExploitSerializer(ManualFindingModelSerializer):
-    class Meta:
-        model = Exploit
-        fields = ('id', 'vulnerability', 'technology', 'name', 'reference', 'task')
-        extra_kwargs = {
-            'vulnerability': {'write_only': True},
-            'technology': {'write_only': True},
-            'task': {'write_only': True}
-        }
+# Disabled because currently there are no Inputs related to these types
+# class ManualVulnerabilitySerializer(ManualFindingModelSerializer):
+
+#     class Meta:
+#         model = Vulnerability
+#         fields = ('id', 'enumeration', 'technology', 'name', 'severity', 'cve', 'task')
+#         extra_kwargs = {
+#             'enumeration': {'write_only': True, 'required': False},
+#             'technology': {'write_only': True, 'required': False},
+#             'task': {'write_only': True}
+#         }
 
 
-class ManualVulnerabilitySerializer(ManualFindingModelSerializer):
-    exploit = ManualExploitSerializer(read_only=False, many=True, required=False)
+# Disabled because currently there are no Inputs related to these types
+# class ManualTechnologySerializer(ManualFindingModelSerializer):
+#     vulnerability = ManualVulnerabilitySerializer(read_only=False, many=True, required=False)
 
-    class Meta:
-        model = Vulnerability
-        fields = ('id', 'technology', 'name', 'severity', 'cve', 'task', 'exploit')
-        extra_kwargs = {
-            'technology': {'write_only': True},
-            'task': {'write_only': True}
-        }
+#     class Meta:
+#         model = Technology
+#         fields = ('id', 'enumeration', 'name', 'version', 'task', 'vulnerability')
+#         extra_kwargs = {
+#             'enumeration': {'write_only': True},
+#             'task': {'write_only': True}
+#         }
 
-    def create(self, validated_data):
-        creation_fields = ['technology', 'name', 'severity', 'cve', 'task']
-        creation_data = {'is_manual': True}
-        for field in creation_fields:
-            creation_data[field] = validated_data.get(field)
-        vulnerability = Vulnerability.objects.create(**creation_data)
-        if validated_data.get('exploit'):
-            for e in validated_data.get('exploit'):
-                field_data = e.copy()
-                field_data['vulnerability'] = vulnerability
-                ManualExploitSerializer().create(field_data)
-        return vulnerability
+#     def create(self, validated_data):
+#         vulnerability_data = validated_data.pop('vulnerability')
+#         technology = super().create(validated_data)
+#         for vulnerability in vulnerability_data:
+#             vulnerability['technology'] = technology
+#             ManualVulnerabilitySerializer().create(vulnerability)
+#         return technology
 
-    def get_findings(self, finding):
-        return [finding] + list(finding.exploit.all())
-
-
-class ManualTechnologySerializer(ManualFindingModelSerializer):
-    vulnerability = ManualVulnerabilitySerializer(read_only=False, many=True, required=False)
-    exploit = ManualExploitSerializer(read_only=False, many=True, required=False)
-
-    class Meta:
-        model = Technology
-        fields = ('id', 'enumeration', 'name', 'version', 'task', 'vulnerability', 'exploit')
-        extra_kwargs = {
-            'enumeration': {'write_only': True},
-            'task': {'write_only': True}
-        }
-
-    def create(self, validated_data):
-        creation_fields = ['enumeration', 'name', 'version', 'task']
-        creation_data = {'is_manual': True}
-        for field in creation_fields:
-            creation_data[field] = validated_data.get(field)
-        technology = Technology.objects.create(**creation_data)
-        for serializer, items in [
-            (ManualVulnerabilitySerializer, validated_data.get('vulnerability')),
-            (ManualExploitSerializer, validated_data.get('exploit'))
-        ]:
-            if not items:
-                continue
-            for item in items:
-                field_data = item.copy()
-                field_data['technology'] = technology
-                serializer().create(field_data)
-        return technology
-
-    def get_findings(self, finding):
-        return [finding] + list(finding.vulnerability.all()) + list(finding.exploit.all())
+#     def get_findings(self, finding):
+#         return [finding] + list(finding.vulnerability.all())
 
 
 class ManualEndpointSerializer(ManualFindingModelSerializer):
     class Meta:
         model = Endpoint
-        fields = ('id', 'enumeration', 'endpoint', 'status', 'task')
+        fields = ('id', 'enumeration', 'endpoint', 'task')
         extra_kwargs = {
             'enumeration': {'write_only': True},
             'task': {'write_only': True}
@@ -105,40 +70,40 @@ class ManualEndpointSerializer(ManualFindingModelSerializer):
 
 
 class ManualEnumerationSerializer(ManualFindingModelSerializer):
-    technology = ManualTechnologySerializer(read_only=False, many=True, required=False)
     endpoint = ManualEndpointSerializer(read_only=False, many=True, required=False)
+    # Disabled because currently there are no Inputs related to these types
+    # technology = ManualTechnologySerializer(read_only=False, many=True, required=False)
+    # vulnerability = ManualVulnerabilitySerializer(read_only=False, many=True, required=False)
 
     class Meta:
         model = Enumeration
         fields = (
-            'id', 'host', 'port', 'port_status', 'protocol', 'service', 'task',
-            'technology', 'endpoint'
+            'id', 'host', 'port', 'protocol', 'service', 'task', 'endpoint'
+            # 'technology', 'vulnerability'
         )
         extra_kwargs = {
             'host': {'write_only': True},
-            'task': {'write_only': True}
+            'port_status': {'required': False},
+            'task': {'write_only': True},
         }
 
     def create(self, validated_data):
-        creation_fields = ['host', 'port', 'port_status', 'protocol', 'service', 'task']
-        creation_data = {'is_manual': True}
-        for field in creation_fields:
-            creation_data[field] = validated_data.get(field)
-        enumeration = Enumeration.objects.create(**creation_data)
+        endpoint_data = validated_data.pop('endpoint')
+        # technology_data = validated_data.pop('technology')
+        # vulnerability_data = validated_data.pop('vulnerability')
+        enumeration = super().create(validated_data)
         for serializer, items in [
-            (ManualTechnologySerializer, validated_data.get('technology')),
-            (ManualEndpointSerializer, validated_data.get('endpoint'))
+            (ManualEndpointSerializer, endpoint_data or []),
+            # (ManualTechnologySerializer, technology_data or []),
+            # (ManualVulnerabilitySerializer, vulnerability_data or [])
         ]:
-            if not items:
-                continue
             for item in items:
-                field_data = item.copy()
-                field_data['enumeration'] = enumeration
-                serializer().create(field_data)
+                item['enumeration'] = enumeration
+                serializer().create(item)
         return enumeration
 
     def get_findings(self, finding):
-        return [finding] + list(finding.technology.all()) + list(finding.endpoint.all())
+        return [finding] + list(finding.endpoint.all())
 
 
 class ManualHostSerializer(ManualFindingModelSerializer):
@@ -150,46 +115,39 @@ class ManualHostSerializer(ManualFindingModelSerializer):
         extra_kwargs = {'task': {'write_only': True}}
 
     def create(self, validated_data):
-        creation_fields = ['address', 'os_type', 'task']
-        creation_data = {'is_manual': True}
-        for field in creation_fields:
-            creation_data[field] = validated_data.get(field)
-        host = Host.objects.create(**creation_data)
-        if validated_data.get('enumeration'):
-            for e in validated_data.get('enumeration'):
-                field_data = e.copy()
-                field_data['host'] = host
-                ManualEnumerationSerializer().create(field_data)
+        enumeration_data = validated_data.pop('enumeration')
+        host = super().create(validated_data)
+        for enumeration in enumeration_data:
+            enumeration['host'] = host
+            ManualEnumerationSerializer().create(enumeration)
         return host
 
     def get_findings(self, finding):
         return [finding] + list(finding.enumeration.all())
 
 
-class ManualCredentialSerializer(ManualFindingModelSerializer):
-    class Meta:
-        model = Credential
-        fields = ('id', 'email', 'username', 'secret', 'task')
-        extra_kwargs = {'task': {'write_only': True}}
+# Disabled because currently there are no Inputs related to these types
+# class ManualCredentialSerializer(ManualFindingModelSerializer):
+#     class Meta:
+#         model = Credential
+#         fields = ('id', 'email', 'username', 'secret', 'task')
+#         extra_kwargs = {'task': {'write_only': True}}
 
 
-class ManualOSINTSerializer(ManualFindingModelSerializer):
-    class Meta:
-        model = OSINT
-        fields = ('id', 'data', 'data_type', 'source', 'task')
-        extra_kwargs = {'task': {'write_only': True}}
+# Disabled because currently there are no Inputs related to these types
+# class ManualOSINTSerializer(ManualFindingModelSerializer):
+#     class Meta:
+#         model = OSINT
+#         fields = ('id', 'data', 'data_type', 'task')
+#         extra_kwargs = {'task': {'write_only': True}}
 
 
 class TaskSerializer(serializers.ModelSerializer):
     intensity_rank = IntensityField(source='intensity')
-    osint = ManualOSINTSerializer(read_only=False, many=True, required=False)
     host = ManualHostSerializer(read_only=False, many=True, required=False)
-    enumeration = ManualEnumerationSerializer(read_only=False, many=True, required=False)
-    endpoint = ManualEndpointSerializer(read_only=False, many=True, required=False)
-    technology = ManualTechnologySerializer(read_only=False, many=True, required=False)
-    vulnerability = ManualVulnerabilitySerializer(read_only=False, many=True, required=False)
-    credential = ManualCredentialSerializer(read_only=False, many=True, required=False)
-    exploit = ManualExploitSerializer(read_only=False, many=True, required=False)
+    # Disabled because currently there are no Inputs related to these types
+    # osint = ManualOSINTSerializer(read_only=False, many=True, required=False)
+    # credential = ManualCredentialSerializer(read_only=False, many=True, required=False)
 
     class Meta:
         model = Task
@@ -198,8 +156,8 @@ class TaskSerializer(serializers.ModelSerializer):
             'intensity_rank', 'executor', 'status', 'scheduled_at',
             'scheduled_in', 'scheduled_time_unit', 'repeat_in',
             'repeat_time_unit', 'start', 'end', 'wordlists',
-            'osint', 'host', 'enumeration', 'endpoint', 'technology',
-            'vulnerability', 'credential', 'exploit', 'executions'
+            # 'osint', 'credential'
+            'host', 'executions'
         )
         read_only_fields = ('executor', 'status', 'start', 'end', 'executions')
 
@@ -260,18 +218,15 @@ class TaskSerializer(serializers.ModelSerializer):
             task.save()
         manual_findings = []
         finding_fields = [
-            ('osint', ManualOSINTSerializer), ('host', ManualHostSerializer),
-            ('enumeration', ManualEnumerationSerializer), ('endpoint', ManualEndpointSerializer),
-            ('technology', ManualTechnologySerializer),
-            ('vulnerability', ManualVulnerabilitySerializer),
-            ('credential', ManualCredentialSerializer), ('exploit', ManualExploitSerializer)
+            # ('osint', ManualOSINTSerializer),
+            ('host', ManualHostSerializer),
+            # ('credential', ManualCredentialSerializer)
         ]
         for field, serializer in finding_fields:
             if validated_data.get(field):
                 for item in validated_data.get(field):
-                    field_data = item.copy()
-                    field_data['task'] = task
-                    finding = serializer().create(validated_data=field_data)
+                    item['task'] = task
+                    finding = serializer().create(item)
                     manual_findings.extend(serializer().get_findings(finding))
         # Resources are included as manual findings to make executions easier
         manual_findings.extend(list(task.wordlists.all()))

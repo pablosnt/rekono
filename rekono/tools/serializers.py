@@ -52,10 +52,10 @@ class ConfigurationSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'tool', 'arguments', 'default', 'inputs', 'outputs')
         ordering = ['-id']
 
-    def get_inputs(self, instance):
+    def get_inputs(self, instance) -> str:
         return InputSerializer(instance.inputs.all().order_by('id'), many=True).data
 
-    def get_outputs(self, instance):
+    def get_outputs(self, instance) -> str:
         return OutputSerializer(instance.outputs.all().order_by('id'), many=True).data
 
 
@@ -88,10 +88,10 @@ class ToolSerializer(serializers.ModelSerializer):
             'for_each_target_port', 'intensities', 'configurations'
         )
 
-    def get_intensities(self, instance):
+    def get_intensities(self, instance) -> list:
         return IntensitySerializer(instance.intensities.all().order_by('-value'), many=True).data
 
-    def get_configurations(self, instance):
+    def get_configurations(self, instance) -> list:
         return ConfigurationSerializer(
             instance.configurations.all().order_by('-default', 'name'),
             many=True
