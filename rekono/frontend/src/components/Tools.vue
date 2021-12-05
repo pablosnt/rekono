@@ -6,17 +6,17 @@
           <b-img :src="row.item.icon" width="100" height="50"/>
         </b-link>
       </template>
-      <template #cell(actions)="row">
-        <b-button @click="row.toggleDetails" variant="dark" class="mr-2">
-          <b-icon v-if="!row.detailsShowing" icon="eye-fill"/>
-          <b-icon v-if="row.detailsShowing" icon="eye-slash-fill"/>
-        </b-button>
-      </template>
       <template #cell(intensities)="row">
         <div v-for="item in row.item.intensities" v-bind:key="item.value" style="display: inline">
           <b-badge :variant="item.variant" v-b-tooltip.hover :title="item.value">{{ item.summary }}</b-badge>
           <span/>
         </div>
+      </template>
+      <template #cell(actions)="row">
+        <b-button @click="row.toggleDetails" variant="dark" class="mr-2">
+          <b-icon v-if="!row.detailsShowing" icon="eye-fill"/>
+          <b-icon v-if="row.detailsShowing" icon="eye-slash-fill"/>
+        </b-button>
       </template>
       <template #row-details="row">
         <b-card>
@@ -112,6 +112,3 @@ export default {
   }
 }
 </script>
-
-<style scoped>
-</style>

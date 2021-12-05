@@ -30,7 +30,7 @@ class Process(models.Model):
 class Step(models.Model):
     process = models.ForeignKey(Process, related_name='steps', on_delete=models.CASCADE)
     tool = models.ForeignKey(Tool, on_delete=models.CASCADE)
-    priority = models.IntegerField()
+    priority = models.IntegerField(default=1)
     configuration = models.ForeignKey(
         Configuration,
         on_delete=models.CASCADE,

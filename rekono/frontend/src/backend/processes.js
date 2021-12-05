@@ -1,7 +1,7 @@
 import { rekonoApiGet } from './api'
 
-const getTools = () => {
-  return rekonoApiGet('/api/tools/?o=stage')
+const getProcesses = () => {
+  return rekonoApiGet('/api/processes/?o=name')
     .then(response => {
       return Promise.resolve(response.data.results)
     })
@@ -10,4 +10,4 @@ const getTools = () => {
     })
 }
 
-export { getTools }
+export { getProcesses }

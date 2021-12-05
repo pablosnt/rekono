@@ -96,3 +96,11 @@ class ToolSerializer(serializers.ModelSerializer):
             instance.configurations.all().order_by('-default', 'name'),
             many=True
         ).data
+
+
+class SimplyToolSerializer(serializers.ModelSerializer):
+    stage_name = StageField(source='stage')
+
+    class Meta:
+        model = Tool
+        fields = ('id', 'name', 'command', 'stage_name', 'reference', 'icon')
