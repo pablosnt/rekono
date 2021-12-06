@@ -34,10 +34,10 @@
                 </b-link>
               </template>
               <template #cell(actions)="step">
-                <b-button variant="secondary" class="mr-2" @click="selectStep(step.item, true)" v-b-modal.step-modal v-b-tooltip.hover title="Edit" v-if="$store.state.role == 'Admin' || $store.state.user == row.item.creatorId">
+                <b-button variant="secondary" class="mr-2" @click="selectStep(row.item, step.item, true)" v-b-modal.step-modal v-b-tooltip.hover title="Edit" v-if="$store.state.role == 'Admin' || $store.state.user == row.item.creatorId">
                   <b-icon icon="pencil-square"/>
                 </b-button>
-                <b-button variant="danger" class="mr-2" @click="selectStep(step.item)" v-b-tooltip.hover title="Delete" v-if="$store.state.role == 'Admin' || $store.state.user == row.item.creatorId">
+                <b-button variant="danger" class="mr-2" @click="selectStep(row.item, step.item)" v-b-modal.delete-step-modal v-b-tooltip.hover title="Delete" v-if="$store.state.role == 'Admin' || $store.state.user == row.item.creatorId">
                   <b-icon icon="trash-fill"/>
                 </b-button>
               </template>
@@ -57,6 +57,9 @@
           <b-form-textarea v-model="processDescription" placeholder="Process description" :state="newProcessDescState" maxlength="350" required/>
         </b-form-group>
       </b-form>
+    </b-modal>
+    <b-modal id="delete-step-modal" @hidden="resetModal" @ok="deleteStep" title="Delete Step" ok-title="Delete Step" header-bg-variant="danger" header-text-variant="light" ok-variant="danger">
+      <p v-if="selectedStep != null">You will remove the <strong>{{ this.selectedTool.name }}</strong> step from <strong>{{ selectedProcess.process }}</strong> process. Are you sure?</p>
     </b-modal>
     <b-modal id="step-modal" @hidden="resetModal" @ok="handleStep" :title="stepModalTitle()" :ok-title="stepModalOkTitle()">
       <b-form ref="step_form" @submit.stop.prevent="createOrUpdateStep">
@@ -93,7 +96,7 @@
 
 <script>
 import { getTools } from '../backend/tools'
-import { getAllProcesses, createProcess, updateProcess, deleteProcess, createStep, updateStep } from '../backend/processes'
+import { getAllProcesses, createProcess, updateProcess, deleteProcess, createStep, updateStep, deleteStep } from '../backend/processes'
 export default {
   name: 'processesPage',
   data () {
@@ -352,6 +355,25 @@ export default {
       }
       return valid
     },
+    deleteStep () {
+      deleteStep(this.selectedStep.id)
+        .then(() => {
+          this.$bvModal.hide('delete-step-modal')
+          this.$bvToast.toast('Step deleted successfully', {
+            title: this.processName + ' - ' + this.selectedTool.name,
+            variant: 'success',
+            solid: true
+          })
+          this.processesItems = this.processes()
+        })
+        .catch(() => {
+          this.$bvToast.toast('Unexpected error in step deletion', {
+            title: this.processName,
+            variant: 'danger',
+            solid: true
+          })
+        })
+    },
     selectProcess (process, edit = false) {
       this.selectedProcess = process
       this.processName = process.process
@@ -360,7 +382,8 @@ export default {
       this.newProcessDescState = null
       this.edit = edit
     },
-    selectStep (step, edit = false) {
+    selectStep (process, step, edit = false) {
+      this.selectProcess(process, edit)
       this.selectedStep = step
       this.stepPriority = step.priority
       for (var t = 0; t < this.toolsItems.length; t++) {

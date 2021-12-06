@@ -87,4 +87,14 @@ const updateStep = (stepId, priority) => {
     })
 }
 
-export { getAllProcesses, getCurrentUserProcesses, createProcess, updateProcess, deleteProcess, createStep, updateStep }
+const deleteStep = (stepId) => {
+  return rekonoApiDelete('/api/steps/' + stepId + '/')
+    .then(response => {
+      return Promise.resolve(response.data)
+    })
+    .catch(error => {
+      return Promise.reject(error)
+    })
+}
+
+export { getAllProcesses, getCurrentUserProcesses, createProcess, updateProcess, deleteProcess, createStep, updateStep, deleteStep }
