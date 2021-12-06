@@ -14,15 +14,25 @@
           <b-button variant="success" class="mr-2" v-b-tooltip.hover title="Execute">
             <b-icon icon="play-fill"/>
           </b-button>
-          <b-button variant="outline-primary" class="mr-2" @click="selectProcess(row.item)" v-b-modal.step-modal v-b-tooltip.hover title="Add Step" v-if="$store.state.role == 'Admin' || $store.state.user == row.item.creatorId">
-            <b-icon icon="plus-square"/>
-          </b-button>
-          <b-button variant="secondary" class="mr-2" @click="selectProcess(row.item, true)" v-b-modal.process-modal v-b-tooltip.hover title="Edit" v-if="$store.state.role == 'Admin' || $store.state.user == row.item.creatorId">
-            <b-icon icon="pencil-square"/>
-          </b-button>
-          <b-button variant="danger" class="mr-2" @click="selectProcess(row.item)" v-b-modal.delete-process-modal v-b-tooltip.hover title="Delete" v-if="$store.state.role == 'Admin' || $store.state.user == row.item.creatorId">
-            <b-icon icon="trash-fill"/>
-          </b-button>
+          <b-dropdown variant="outline-primary" right>
+            <template #button-content>
+              <b-icon icon="three-dots-vertical"/>
+            </template>
+            <b-dropdown-item @click="selectProcess(row.item)" v-b-modal.step-modal :disabled="$store.state.role !== 'Admin' && $store.state.user !== row.item.creatorId">
+              <div style="display: inline">
+                <b-icon variant="success" icon="plus-square"/>
+                <label variant="dark">Add Step</label>
+              </div>
+            </b-dropdown-item>
+            <b-dropdown-item variant="dark" @click="selectProcess(row.item, true)" v-b-modal.process-modal :disabled="$store.state.role !== 'Admin' && $store.state.user !== row.item.creatorId">
+              <b-icon icon="pencil-square"/>
+              <label>Edit</label>
+            </b-dropdown-item>
+            <b-dropdown-item variant="danger" @click="selectProcess(row.item)" v-b-modal.delete-process-modal :disabled="$store.state.role !== 'Admin' && $store.state.user !== row.item.creatorId">
+              <b-icon icon="trash-fill"/>
+              <label>Delete</label>
+            </b-dropdown-item>
+          </b-dropdown>
         </template>
         <template #row-details="row">
           <b-card>
@@ -34,12 +44,19 @@
                 </b-link>
               </template>
               <template #cell(actions)="step">
-                <b-button variant="secondary" class="mr-2" @click="selectStep(row.item, step.item, true)" v-b-modal.step-modal v-b-tooltip.hover title="Edit" v-if="$store.state.role == 'Admin' || $store.state.user == row.item.creatorId">
-                  <b-icon icon="pencil-square"/>
-                </b-button>
-                <b-button variant="danger" class="mr-2" @click="selectStep(row.item, step.item)" v-b-modal.delete-step-modal v-b-tooltip.hover title="Delete" v-if="$store.state.role == 'Admin' || $store.state.user == row.item.creatorId">
-                  <b-icon icon="trash-fill"/>
-                </b-button>
+                <b-dropdown variant="outline-secondary" right>
+                  <template #button-content>
+                    <b-icon icon="three-dots-vertical"/>
+                  </template>
+                  <b-dropdown-item variant="dark" @click="selectStep(row.item, step.item, true)" v-b-modal.step-modal :disabled="$store.state.role !== 'Admin' && $store.state.user !== row.item.creatorId">
+                    <b-icon icon="pencil-square"/>
+                    <label>Edit</label>
+                  </b-dropdown-item>
+                  <b-dropdown-item variant="danger" @click="selectStep(row.item, step.item)" v-b-modal.delete-step-modal :disabled="$store.state.role !== 'Admin' && $store.state.user !== row.item.creatorId">
+                    <b-icon icon="trash-fill"/>
+                    <label>Delete</label>
+                  </b-dropdown-item>
+                </b-dropdown>
               </template>
             </b-table>
           </b-card>
