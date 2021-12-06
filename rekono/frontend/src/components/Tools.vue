@@ -13,10 +13,20 @@
         </div>
       </template>
       <template #cell(actions)="row">
-        <b-button @click="row.toggleDetails" variant="dark" class="mr-2">
+        <b-button @click="row.toggleDetails" variant="dark" class="mr-2" v-b-tooltip.hover title="Details">
           <b-icon v-if="!row.detailsShowing" icon="eye-fill"/>
           <b-icon v-if="row.detailsShowing" icon="eye-slash-fill"/>
         </b-button>
+        <b-button variant="success" class="mr-2" v-b-tooltip.hover title="Execute">
+          <b-icon icon="play-fill"/>
+        </b-button>
+        <b-dropdown variant="secondary" right v-b-tooltip.hover title="Add to Process">
+          <template #button-content>
+            <b-icon icon="plus-square"/>
+          </template>
+          <b-dropdown-item>New Process</b-dropdown-item>
+          <b-dropdown-item @click="selectTool(row.item)" v-b-modal.new-step-modal :disabled="processesItems.length == 0">New Step</b-dropdown-item>
+        </b-dropdown>
       </template>
       <template #row-details="row">
         <b-card>
@@ -28,72 +38,46 @@
         </b-card>
       </template>
     </b-table>
+    <b-modal id="new-step-modal" @hidden="resetModal" @ok="handleNewStep" ok-title="Create Step">
+      <template #modal-title>
+        New Step: {{ selectedTool.name }}
+      </template>
+      <b-form ref="new_step_form" @submit.stop.prevent="createNewStep">
+        <b-form-group description="Process" invalid-feedback="Process is required">
+          <b-form-select v-model="selectedProcess" :options="processesItems" value-field="id" text-field="name" :state="newStepState" required>
+            <template #first>
+              <b-form-select-option :value="null" disabled>Select your process</b-form-select-option>
+            </template>
+          </b-form-select>
+        </b-form-group>
+        <b-form-group description="Tool configuration" invalid-feedback="Configuration is required">
+          <b-form-select v-model="selectedConfiguration" :options="selectedConfigurations" value-field="id" text-field="configuration" required/>
+        </b-form-group>
+        <b-form-group>
+          <b-input-group :prepend="stepPriority.toString()">
+            <b-form-input v-model="stepPriority" type="range" min="1" max="50" required/>
+            <b-input-group-append is-text v-b-tooltip.hover title="The priority allows to run steps with greater value before other tools of the same stage. By default the priority is 1, so all the steps will be treated in the same way">
+              <b-icon icon="info-circle-fill" variant="info"/>
+            </b-input-group-append>
+          </b-input-group>
+          <small class="text-muted">Step priority</small>
+        </b-form-group>
+      </b-form>
+    </b-modal>
   </div>
 </template>
 
 <script>
 import { getTools } from '../backend/tools'
+import { getCurrentUserProcesses, createNewStep } from '../backend/processes'
 export default {
   name: 'toolsPage',
   data () {
-    var items = []
-    getTools()
-      .then(results => {
-        for (var i = 0; i < results.length; i++) {
-          var configurations = []
-          for (var c = 0; c < results[i].configurations.length; c++) {
-            var inputs = ''
-            for (var j = 0; j < results[i].configurations[c].inputs.length; j++) {
-              inputs += results[i].configurations[c].inputs[j].type
-              if (j + 1 < results[i].configurations[c].inputs.length) {
-                inputs += ', '
-              }
-            }
-            var outputs = ''
-            for (j = 0; j < results[i].configurations[c].outputs.length; j++) {
-              outputs += results[i].configurations[c].outputs[j].type
-              if (j + 1 < results[i].configurations[c].outputs.length) {
-                outputs += ', '
-              }
-            }
-            var config = {
-              configuration: results[i].configurations[c].name,
-              default: results[i].configurations[c].default,
-              inputs: inputs,
-              outputs: outputs
-            }
-            configurations.push(config)
-          }
-          var intensities = []
-          for (j = 0; j < results[i].intensities.length; j++) {
-            var value = results[i].intensities[j].intensity_rank
-            var variant = 'secondary'
-            if (value === 'Sneaky') variant = 'info'
-            else if (value === 'Low') variant = 'success'
-            else if (value === 'Hard') variant = 'warning'
-            else if (value === 'Insane') variant = 'danger'
-            var intensity = {
-              variant: variant,
-              value: value,
-              summary: value.charAt(0).toUpperCase()
-            }
-            intensities.push(intensity)
-          }
-          var item = {
-            id: results[i].id,
-            name: results[i].name,
-            command: results[i].command,
-            stage: results[i].stage_name,
-            icon: results[i].icon,
-            reference: results[i].reference,
-            configurations: configurations,
-            intensities: intensities
-          }
-          items.push(item)
-        }
-      })
+    var toolsItems = this.tools()
+    var processesItems = this.processes()
     return {
-      toolsItems: items,
+      auditor: ['Admin', 'Auditor'],
+      toolsItems: toolsItems,
       toolsFields: [
         {key: 'icon', sortable: false},
         {key: 'name', sortable: true},
@@ -107,7 +91,141 @@ export default {
         {key: 'default', sortable: true},
         {key: 'inputs', sortable: true},
         {key: 'outputs', sortable: true}
-      ]
+      ],
+      processesItems: processesItems,
+      selectedTool: null,
+      selectedProcess: null,
+      selectedConfigurations: [],
+      selectedConfiguration: null,
+      stepPriority: 1,
+      newStepState: null
+    }
+  },
+  methods: {
+    tools () {
+      var tools = []
+      getTools()
+        .then(results => {
+          for (var i = 0; i < results.length; i++) {
+            var configurations = []
+            for (var c = 0; c < results[i].configurations.length; c++) {
+              var inputs = ''
+              for (var j = 0; j < results[i].configurations[c].inputs.length; j++) {
+                inputs += results[i].configurations[c].inputs[j].type
+                if (j + 1 < results[i].configurations[c].inputs.length) {
+                  inputs += ', '
+                }
+              }
+              var outputs = ''
+              for (j = 0; j < results[i].configurations[c].outputs.length; j++) {
+                outputs += results[i].configurations[c].outputs[j].type
+                if (j + 1 < results[i].configurations[c].outputs.length) {
+                  outputs += ', '
+                }
+              }
+              var config = {
+                id: results[i].configurations[c].id,
+                configuration: results[i].configurations[c].name,
+                default: results[i].configurations[c].default,
+                inputs: inputs,
+                outputs: outputs
+              }
+              configurations.push(config)
+            }
+            var intensities = []
+            for (j = 0; j < results[i].intensities.length; j++) {
+              var value = results[i].intensities[j].intensity_rank
+              var variant = 'secondary'
+              if (value === 'Sneaky') variant = 'info'
+              else if (value === 'Low') variant = 'success'
+              else if (value === 'Hard') variant = 'warning'
+              else if (value === 'Insane') variant = 'danger'
+              var intensity = {
+                variant: variant,
+                value: value,
+                summary: value.charAt(0).toUpperCase()
+              }
+              intensities.push(intensity)
+            }
+            var item = {
+              id: results[i].id,
+              name: results[i].name,
+              command: results[i].command,
+              stage: results[i].stage_name,
+              icon: results[i].icon,
+              reference: results[i].reference,
+              configurations: configurations,
+              intensities: intensities
+            }
+            tools.push(item)
+          }
+        })
+      return tools
+    },
+    processes () {
+      var processes = []
+      getCurrentUserProcesses(this.$store.state.user)
+        .then(results => {
+          for (var i = 0; i < results.length; i++) {
+            var steps = []
+            for (var s = 0; s < results[i].steps.length; s++) {
+              var step = {
+                tool: results[i].steps[s].tool.id,
+                configuration: results[i].steps[s].configuration.id
+              }
+              steps.push(step)
+            }
+            var item = {
+              id: results[i].id,
+              name: results[i].name,
+              steps: steps
+            }
+            processes.push(item)
+          }
+        })
+      return processes
+    },
+    handleNewStep (bvModalEvt) {
+      bvModalEvt.preventDefault()
+      this.createNewStep()
+    },
+    createNewStep () {
+      if (!this.checkNewStepState()) {
+        return
+      }
+      createNewStep(this.selectedProcess, this.selectedTool.id, this.selectedConfiguration, this.stepPriority)
+        .then(() => {
+          this.$bvModal.hide('new-step-modal')
+          this.$bvToast.toast('New step created successfully', {
+            title: this.selectedTool.name,
+            variant: 'success',
+            solid: true
+          })
+        })
+        .catch(() => {
+          this.$bvToast.toast('Unexpected error in step creation', {
+            title: this.selectedTool.name,
+            variant: 'danger',
+            solid: true
+          })
+        })
+    },
+    checkNewStepState () {
+      const valid = this.$refs.new_step_form.checkValidity()
+      this.newStepState = valid
+      return valid
+    },
+    selectTool (tool) {
+      this.selectedTool = tool
+      this.selectedConfigurations = tool.configurations
+      this.selectedConfiguration = this.selectedConfigurations[0].id
+    },
+    resetModal () {
+      this.selectedTool = null
+      this.selectedProcess = null
+      this.selectedConfigurations = []
+      this.selectedConfiguration = null
+      this.stepPriority = 1
     }
   }
 }

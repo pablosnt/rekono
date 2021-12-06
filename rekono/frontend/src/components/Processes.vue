@@ -22,40 +22,12 @@
 </template>
 
 <script>
-import { getProcesses } from '../backend/processes'
+import { getAllProcesses } from '../backend/processes'
 export default {
   name: 'processesPage',
   data () {
-    var items = []
-    getProcesses()
-      .then(results => {
-        for (var i = 0; i < results.length; i++) {
-          var steps = []
-          for (var s = 0; s < results[i].steps.length; s++) {
-            var step = {
-              icon: results[i].steps[s].tool.icon,
-              reference: results[i].steps[s].tool.reference,
-              tool: results[i].steps[s].tool.name,
-              configuration: results[i].steps[s].configuration.name,
-              stage: results[i].steps[s].tool.stage_name,
-              priority: results[i].steps[s].priority
-            }
-            steps.push(step)
-          }
-          var item = {
-            process: results[i].name,
-            creator: results[i].creator,
-            steps: results[i].steps.length,
-            details: {
-              description: results[i].description,
-              steps: steps
-            }
-          }
-          items.push(item)
-        }
-      })
     return {
-      processesItems: items,
+      processesItems: this.processes(),
       processesFields: [
         {key: 'process', sortable: true},
         {key: 'steps', sortable: true},
@@ -69,6 +41,39 @@ export default {
         {key: 'stage', sortable: true},
         {key: 'priority', sortable: true}
       ]
+    }
+  },
+  methods: {
+    processes () {
+      var processes = []
+      getAllProcesses()
+        .then(results => {
+          for (var i = 0; i < results.length; i++) {
+            var steps = []
+            for (var s = 0; s < results[i].steps.length; s++) {
+              var step = {
+                icon: results[i].steps[s].tool.icon,
+                reference: results[i].steps[s].tool.reference,
+                tool: results[i].steps[s].tool.name,
+                configuration: results[i].steps[s].configuration.name,
+                stage: results[i].steps[s].tool.stage_name,
+                priority: results[i].steps[s].priority
+              }
+              steps.push(step)
+            }
+            var item = {
+              process: results[i].name,
+              creator: results[i].creator,
+              steps: results[i].steps.length,
+              details: {
+                description: results[i].description,
+                steps: steps
+              }
+            }
+            processes.push(item)
+          }
+        })
+      return processes
     }
   }
 }

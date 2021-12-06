@@ -17,14 +17,16 @@ class StepSerializer(serializers.ModelSerializer):
     tool = SimplyToolSerializer(read_only=True, many=False)
     tool_id = serializers.PrimaryKeyRelatedField(
         write_only=True,
+        required=True,
         source='tool',
         queryset=Tool.objects.all()
     )
     configuration = ConfigurationSerializer(read_only=True, many=False)
     configuration_id = serializers.PrimaryKeyRelatedField(
         write_only=True,
+        required=False,
         source='configuration',
-        queryset=Tool.objects.all()
+        queryset=Configuration.objects.all()
     )
 
     class Meta:
@@ -44,15 +46,14 @@ class StepSerializer(serializers.ModelSerializer):
             if check_configuration == 0:
                 configuration = None
         if not configuration:
-            configuration = Configuration.objects.filter(
+            attrs['configuration'] = Configuration.objects.filter(
                 tool=attrs.get('tool'),
                 default=True
             ).first()
-        attrs['configuration'] = configuration
         steps = Step.objects.filter(
             process=attrs.get('process'),
             tool=attrs.get('tool'),
-            configuration=configuration
+            configuration=attrs.get('configuration')
         ).count()
         if steps > 0:
             process = attrs.get('process').name
@@ -63,13 +64,22 @@ class StepSerializer(serializers.ModelSerializer):
 
 
 class ProcessSerializer(serializers.ModelSerializer):
-    steps = StepSerializer(read_only=True, many=True, required=False)
+    steps = SerializerMethodField(
+        method_name='get_steps',
+        read_only=True,
+        required=False
+    )
     creator = SerializerMethodField(method_name='get_creator', read_only=True, required=False)
 
     class Meta:
         model = Process
         fields = ('id', 'name', 'description', 'creator', 'steps')
-        read_only_fields = ('creator', 'steps')
 
     def get_creator(self, instance: Process) -> str:
         return instance.creator.username
+
+    def get_steps(self, instance) -> list:
+        return StepSerializer(
+            instance.steps.all().order_by('tool__stage', '-priority'),
+            many=True
+        ).data
