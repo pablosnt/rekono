@@ -1,4 +1,4 @@
-import { rekonoApiGet, rekonoApiPost } from './api'
+import { rekonoApiGet, rekonoApiPost, rekonoApiPut } from './api'
 
 const getAllProcesses = () => {
   return rekonoApiGet('/api/processes/?o=name')
@@ -20,7 +20,7 @@ const getCurrentUserProcesses = (userId) => {
     })
 }
 
-const createNewProcess = (name, description) => {
+const createProcess = (name, description) => {
   var data = {
     name: name,
     description: description
@@ -34,7 +34,21 @@ const createNewProcess = (name, description) => {
     })
 }
 
-const createNewStep = (processId, toolId, configurationId, priority) => {
+const updateProcess = (processId, name, description) => {
+  var data = {
+    name: name,
+    description: description
+  }
+  return rekonoApiPut('/api/processes/' + processId + '/', data)
+    .then(response => {
+      return Promise.resolve(response.data)
+    })
+    .catch(error => {
+      return Promise.reject(error)
+    })
+}
+
+const createStep = (processId, toolId, configurationId, priority) => {
   var data = {
     process: processId,
     tool_id: toolId,
@@ -50,4 +64,17 @@ const createNewStep = (processId, toolId, configurationId, priority) => {
     })
 }
 
-export { getAllProcesses, getCurrentUserProcesses, createNewProcess, createNewStep }
+const updateStep = (stepId, priority) => {
+  var data = {
+    priority: priority
+  }
+  return rekonoApiPut('/api/steps/' + stepId + '/', data)
+    .then(response => {
+      return Promise.resolve(response.data)
+    })
+    .catch(error => {
+      return Promise.reject(error)
+    })
+}
+
+export { getAllProcesses, getCurrentUserProcesses, createProcess, updateProcess, createStep, updateStep }

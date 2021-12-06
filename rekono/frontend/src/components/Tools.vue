@@ -94,7 +94,7 @@
 
 <script>
 import { getTools } from '../backend/tools'
-import { getAllProcesses, getCurrentUserProcesses, createNewProcess, createNewStep } from '../backend/processes'
+import { getAllProcesses, getCurrentUserProcesses, createProcess, createStep } from '../backend/processes'
 export default {
   name: 'toolsPage',
   data () {
@@ -232,7 +232,7 @@ export default {
       if (!this.checkNewStepState()) {
         return
       }
-      createNewStep(this.selectedProcess, this.selectedTool.id, this.selectedConfiguration, this.stepPriority)
+      createStep(this.selectedProcess, this.selectedTool.id, this.selectedConfiguration, this.stepPriority)
         .then(() => {
           this.$bvModal.hide('new-step-modal')
           this.$bvToast.toast('New step created successfully', {
@@ -262,9 +262,9 @@ export default {
       if (!this.checkNewProcessState()) {
         return
       }
-      createNewProcess(this.processName, this.processDescription)
+      createProcess(this.processName, this.processDescription)
         .then(data => {
-          createNewStep(data.id, this.selectedTool.id, this.selectedConfiguration, this.stepPriority)
+          createStep(data.id, this.selectedTool.id, this.selectedConfiguration, this.stepPriority)
             .then(() => {
               this.$bvModal.hide('new-process-modal')
               this.$bvToast.toast('New process created successfully', {

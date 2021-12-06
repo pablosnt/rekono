@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="text-right">
-      <b-button size="lg" variant="outline" v-b-modal.new-process-modal>
+      <b-button size="lg" variant="outline" v-b-modal.process-modal>
         <p class="h2 mb-2"><b-icon variant="success" icon="plus-square-fill"/></p>
       </b-button>
     </div>
@@ -14,10 +14,10 @@
           <b-button variant="success" class="mr-2" v-b-tooltip.hover title="Execute">
             <b-icon icon="play-fill"/>
           </b-button>
-          <b-button variant="outline-primary" class="mr-2" @click="selectProcess(row.item)" v-b-modal.new-step-modal v-b-tooltip.hover title="Add Step" v-if="$store.state.role == 'Admin' || $store.state.user == row.item.creatorId">
+          <b-button variant="outline-primary" class="mr-2" @click="selectProcess(row.item)" v-b-modal.step-modal v-b-tooltip.hover title="Add Step" v-if="$store.state.role == 'Admin' || $store.state.user == row.item.creatorId">
             <b-icon icon="plus-square"/>
           </b-button>
-          <b-button variant="secondary" class="mr-2" @click="selectProcess(row.item)" v-b-tooltip.hover title="Edit" v-if="$store.state.role == 'Admin' || $store.state.user == row.item.creatorId">
+          <b-button variant="secondary" class="mr-2" @click="selectProcess(row.item, true)" v-b-modal.process-modal v-b-tooltip.hover title="Edit" v-if="$store.state.role == 'Admin' || $store.state.user == row.item.creatorId">
             <b-icon icon="pencil-square"/>
           </b-button>
           <b-button variant="danger" class="mr-2" @click="selectProcess(row.item)" v-b-tooltip.hover title="Remove" v-if="$store.state.role == 'Admin' || $store.state.user == row.item.creatorId">
@@ -33,12 +33,20 @@
                   <b-img :src="step.item.icon" width="100" height="50"/>
                 </b-link>
               </template>
+              <template #cell(actions)="step">
+                <b-button variant="secondary" class="mr-2" @click="selectStep(step.item, true)" v-b-modal.step-modal v-b-tooltip.hover title="Edit" v-if="$store.state.role == 'Admin' || $store.state.user == row.item.creatorId">
+                  <b-icon icon="pencil-square"/>
+                </b-button>
+                <b-button variant="danger" class="mr-2" @click="selectStep(step.item)" v-b-tooltip.hover title="Remove" v-if="$store.state.role == 'Admin' || $store.state.user == row.item.creatorId">
+                  <b-icon icon="trash-fill"/>
+                </b-button>
+              </template>
             </b-table>
           </b-card>
         </template>
     </b-table>
-    <b-modal id="new-process-modal" @hidden="resetModal" @ok="handleNewProcess" title="New Process" ok-title="Create Process">
-      <b-form ref="new_process_form" @submit.stop.prevent="createNewProcess">
+    <b-modal id="process-modal" @hidden="resetModal" @ok="handleProcess" :title="processModalTitle()" :ok-title="processModalOkTitle()">
+      <b-form ref="process_form" @submit.stop.prevent="createOrUpdateProcess">
         <b-form-group description="Process name" invalid-feedback="Process name is required">
           <b-form-input v-model="processName" type="text" :state="newProcessNameState" maxlength="30" required/>
         </b-form-group>
@@ -47,11 +55,8 @@
         </b-form-group>
       </b-form>
     </b-modal>
-    <b-modal id="new-step-modal" @hidden="resetModal" @ok="handleNewStep" ok-title="Create Step">
-      <template #modal-title>
-        New step for {{ selectedProcess.process }}
-      </template>
-      <b-form ref="new_step_form" @submit.stop.prevent="createNewStep">
+    <b-modal id="step-modal" @hidden="resetModal" @ok="handleStep" :title="stepModalTitle()" :ok-title="stepModalOkTitle()">
+      <b-form ref="step_form" @submit.stop.prevent="createOrUpdateStep">
         <b-form-group description="Tool">
           <b-input-group>
             <b-input-group-prepend is-text v-if="selectedTool != null">
@@ -59,7 +64,7 @@
                 <b-img :src="selectedTool.icon" width="40" height="20"/>
               </b-link>
             </b-input-group-prepend>
-            <b-form-select v-model="selectedToolId" :options="toolsItems" @change="selectTool" value-field="id" text-field="name" :state="newStepToolState" required>
+            <b-form-select v-model="selectedToolId" :options="toolsItems" :disabled="edit" @change="selectTool" value-field="id" text-field="name" :state="newStepToolState" required>
               <template #first>
                 <b-form-select-option :value="null" disabled>Select tool</b-form-select-option>
               </template>
@@ -67,7 +72,7 @@
           </b-input-group>
         </b-form-group>
         <b-form-group description="Tool configuration" invalid-feedback="This step already exists in the process">
-          <b-form-select v-model="selectedConfiguration" :options="selectedConfigurations" :disabled="selectedConfiguration == null" value-field="id" text-field="configuration" :state="newStepConfigState" required/>
+          <b-form-select v-model="selectedConfiguration" :options="selectedConfigurations" :disabled="selectedConfiguration == null || edit" value-field="id" text-field="configuration" :state="newStepConfigState" required/>
         </b-form-group>
         <b-form-group>
           <b-input-group :prepend="stepPriority.toString()">
@@ -85,7 +90,7 @@
 
 <script>
 import { getTools } from '../backend/tools'
-import { getAllProcesses, createNewProcess, createNewStep } from '../backend/processes'
+import { getAllProcesses, createProcess, updateProcess, createStep, updateStep } from '../backend/processes'
 export default {
   name: 'processesPage',
   data () {
@@ -102,7 +107,8 @@ export default {
         {key: 'tool', sortable: true},
         {key: 'configuration', sortable: true},
         {key: 'stage', sortable: true},
-        {key: 'priority', sortable: true}
+        {key: 'priority', sortable: true},
+        {key: 'actions', sortable: false}
       ],
       toolsItems: this.tools(),
       processName: null,
@@ -129,6 +135,7 @@ export default {
             var steps = []
             for (var s = 0; s < results[i].steps.length; s++) {
               var step = {
+                id: results[i].steps[s].id,
                 icon: results[i].steps[s].tool.icon,
                 reference: results[i].steps[s].tool.reference,
                 tool: results[i].steps[s].tool.name,
@@ -183,82 +190,167 @@ export default {
         })
       return tools
     },
-    handleNewProcess (bvModalEvt) {
-      bvModalEvt.preventDefault()
-      this.createNewProcess()
+    processModalTitle () {
+      if (this.edit) {
+        return 'Edit Process'
+      } else {
+        return 'New Process'
+      }
     },
-    createNewProcess () {
-      if (!this.checkNewProcessState()) {
+    processModalOkTitle () {
+      if (this.edit) {
+        return 'Update Process'
+      } else {
+        return 'Create Process'
+      }
+    },
+    handleProcess (bvModalEvt) {
+      bvModalEvt.preventDefault()
+      this.createOrUpdateProcess()
+    },
+    createOrUpdateProcess () {
+      if (!this.checkProcessState()) {
         return
       }
-      createNewProcess(this.processName, this.processDescription)
-        .then(data => {
-          this.$bvModal.hide('new-process-modal')
-          this.$bvToast.toast('New process created successfully', {
-            title: this.processName,
-            variant: 'success',
-            solid: true
+      if (this.edit) {
+        updateProcess(this.selectedProcess.id, this.processName, this.processDescription)
+          .then(data => {
+            this.$bvModal.hide('process-modal')
+            this.$bvToast.toast('Process updated successfully', {
+              title: this.processName,
+              variant: 'success',
+              solid: true
+            })
+            this.processesItems = this.processes()
           })
-          this.processesItems = this.processes()
-        })
-        .catch(() => {
-          this.$bvToast.toast('Unexpected error in process creation', {
-            title: this.processName,
-            variant: 'danger',
-            solid: true
+          .catch(() => {
+            this.$bvToast.toast('Unexpected error in process update', {
+              title: this.processName,
+              variant: 'danger',
+              solid: true
+            })
           })
-        })
+      } else {
+        createProcess(this.processName, this.processDescription)
+          .then(data => {
+            this.$bvModal.hide('process-modal')
+            this.$bvToast.toast('New process created successfully', {
+              title: this.processName,
+              variant: 'success',
+              solid: true
+            })
+            this.processesItems = this.processes()
+          })
+          .catch(() => {
+            this.$bvToast.toast('Unexpected error in process creation', {
+              title: this.processName,
+              variant: 'danger',
+              solid: true
+            })
+          })
+      }
     },
-    checkNewProcessState () {
-      const valid = this.$refs.new_process_form.checkValidity()
-      this.newProcessNameState = (this.processDescription != null)
-      this.newProcessDescState = (this.processName != null)
+    checkProcessState () {
+      const valid = this.$refs.process_form.checkValidity()
+      this.newProcessNameState = (this.processDescription !== null && this.processDescription.length > 0)
+      this.newProcessDescState = (this.processName !== null && this.processName.length > 0)
       return valid
     },
-    handleNewStep (bvModalEvt) {
-      bvModalEvt.preventDefault()
-      this.createNewStep()
+    stepModalTitle () {
+      if (this.selectedProcess && this.edit) {
+        return 'Edit step from ' + this.selectedProcess.process
+      } else if (this.selectedProcess) {
+        return 'New step for ' + this.selectedProcess.process
+      }
+      return 'New Step'
     },
-    createNewStep () {
-      if (!this.checkNewStepState()) {
+    stepModalOkTitle () {
+      if (this.edit) {
+        return 'Update Step'
+      } else {
+        return 'Create Step'
+      }
+    },
+    handleStep (bvModalEvt) {
+      bvModalEvt.preventDefault()
+      this.createOrUpdateStep()
+    },
+    createOrUpdateStep () {
+      if (!this.checkStepState()) {
         return
       }
-      createNewStep(this.selectedProcess.id, this.selectedToolId, this.selectedConfiguration, this.stepPriority)
-        .then(() => {
-          this.$bvModal.hide('new-step-modal')
-          this.$bvToast.toast('New step created successfully', {
-            title: this.selectedTool.name,
-            variant: 'success',
-            solid: true
+      if (this.edit) {
+        updateStep(this.selectedStep.id, this.stepPriority)
+          .then(() => {
+            this.$bvModal.hide('step-modal')
+            this.$bvToast.toast('Step updated successfully', {
+              title: this.selectedTool.name,
+              variant: 'success',
+              solid: true
+            })
+            this.processesItems = this.processes()
           })
-          this.processesItems = this.processes()
-        })
-        .catch(() => {
-          this.$bvToast.toast('Unexpected error in step creation', {
-            title: this.selectedTool.name,
-            variant: 'danger',
-            solid: true
+          .catch(() => {
+            this.$bvToast.toast('Unexpected error in step update', {
+              title: this.selectedTool.name,
+              variant: 'danger',
+              solid: true
+            })
           })
-        })
+      } else {
+        createStep(this.selectedProcess.id, this.selectedToolId, this.selectedConfiguration, this.stepPriority)
+          .then(() => {
+            this.$bvModal.hide('step-modal')
+            this.$bvToast.toast('New step created successfully', {
+              title: this.selectedTool.name,
+              variant: 'success',
+              solid: true
+            })
+            this.processesItems = this.processes()
+          })
+          .catch(() => {
+            this.$bvToast.toast('Unexpected error in step creation', {
+              title: this.selectedTool.name,
+              variant: 'danger',
+              solid: true
+            })
+          })
+      }
     },
-    checkNewStepState () {
-      const valid = this.$refs.new_step_form.checkValidity()
-      this.newStepToolState = valid
-      for (var s = 0; s < this.selectedProcess.details.steps.length; s++) {
-        if (this.selectedProcess.details.steps[s].toolId === this.selectedToolId && this.selectedProcess.details.steps[s].configurationId === this.selectedConfiguration) {
-          this.newStepConfigState = false
-          return false
-          break
+    checkStepState () {
+      const valid = this.$refs.step_form.checkValidity()
+      if (!this.edit) {
+        this.newStepToolState = valid
+        for (var s = 0; s < this.selectedProcess.details.steps.length; s++) {
+          if (this.selectedProcess.details.steps[s].toolId === this.selectedToolId && this.selectedProcess.details.steps[s].configurationId === this.selectedConfiguration) {
+            this.newStepConfigState = false
+            return false
+          }
         }
       }
       return valid
     },
-    selectProcess (process) {
+    selectProcess (process, edit = false) {
       this.selectedProcess = process
-      this.processName = process.name
-      this.processDescription = process.description
+      this.processName = process.process
+      this.processDescription = process.details.description
       this.newProcessNameState = null
       this.newProcessDescState = null
+      this.edit = edit
+    },
+    selectStep (step, edit = false) {
+      this.selectedStep = step
+      this.stepPriority = step.priority
+      for (var t = 0; t < this.toolsItems.length; t++) {
+        if (this.toolsItems[t].id === step.toolId) {
+          this.selectedTool = this.toolsItems[t]
+          break
+        }
+      }
+      this.selectedToolId = step.toolId
+      this.selectedConfigurations = this.selectedTool.configurations
+      this.selectedConfiguration = step.configurationId
+      this.edit = edit
     },
     selectTool (toolId) {
       this.selectedToolId = toolId
@@ -283,6 +375,7 @@ export default {
       this.stepPriority = 1
       this.newStepToolState = null
       this.newStepConfigState = null
+      this.edit = false
     }
   }
 }
