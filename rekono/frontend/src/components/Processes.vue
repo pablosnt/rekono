@@ -52,22 +52,22 @@
         New step for {{ selectedProcess.process }}
       </template>
       <b-form ref="new_step_form" @submit.stop.prevent="createNewStep">
-        <b-form-group description="Tool" invalid-feedback="Tool is required">
+        <b-form-group description="Tool">
           <b-input-group>
             <b-input-group-prepend is-text v-if="selectedTool != null">
               <b-link :href="selectedTool.reference" target="_blank">
                 <b-img :src="selectedTool.icon" width="40" height="20"/>
               </b-link>
             </b-input-group-prepend>
-            <b-form-select v-model="selectedToolId" :options="toolsItems" @change="selectTool" value-field="id" text-field="name" required>
+            <b-form-select v-model="selectedToolId" :options="toolsItems" @change="selectTool" value-field="id" text-field="name" :state="newStepToolState" required>
               <template #first>
                 <b-form-select-option :value="null" disabled>Select tool</b-form-select-option>
               </template>
             </b-form-select>
           </b-input-group>
         </b-form-group>
-        <b-form-group description="Tool configuration" invalid-feedback="Tool configuration is required">
-          <b-form-select v-model="selectedConfiguration" :options="selectedConfigurations" :disabled="selectedConfiguration == null" value-field="id" text-field="configuration" required/>
+        <b-form-group description="Tool configuration" invalid-feedback="This step already exists in the process">
+          <b-form-select v-model="selectedConfiguration" :options="selectedConfigurations" :disabled="selectedConfiguration == null" value-field="id" text-field="configuration" :state="newStepConfigState" required/>
         </b-form-group>
         <b-form-group>
           <b-input-group :prepend="stepPriority.toString()">
@@ -115,6 +115,8 @@ export default {
       selectedConfigurations: [],
       selectedConfiguration: null,
       stepPriority: 1,
+      newStepToolState: null,
+      newStepConfigState: null,
       edit: false
     }
   },
@@ -130,7 +132,9 @@ export default {
                 icon: results[i].steps[s].tool.icon,
                 reference: results[i].steps[s].tool.reference,
                 tool: results[i].steps[s].tool.name,
+                toolId: results[i].steps[s].tool.id,
                 configuration: results[i].steps[s].configuration.name,
+                configurationId: results[i].steps[s].configuration.id,
                 stage: results[i].steps[s].tool.stage_name,
                 priority: results[i].steps[s].priority
               }
@@ -239,7 +243,14 @@ export default {
     },
     checkNewStepState () {
       const valid = this.$refs.new_step_form.checkValidity()
-      this.newStepState = valid
+      this.newStepToolState = valid
+      for (var s = 0; s < this.selectedProcess.details.steps.length; s++) {
+        if (this.selectedProcess.details.steps[s].toolId === this.selectedToolId && this.selectedProcess.details.steps[s].configurationId === this.selectedConfiguration) {
+          this.newStepConfigState = false
+          return false
+          break
+        }
+      }
       return valid
     },
     selectProcess (process) {
@@ -270,6 +281,8 @@ export default {
       this.selectedConfigurations = []
       this.selectedConfiguration = null
       this.stepPriority = 1
+      this.newStepToolState = null
+      this.newStepConfigState = null
     }
   }
 }
