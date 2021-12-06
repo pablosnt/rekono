@@ -20,6 +20,20 @@ const getCurrentUserProcesses = (userId) => {
     })
 }
 
+const createNewProcess = (name, description) => {
+  var data = {
+    name: name,
+    description: description
+  }
+  return rekonoApiPost('/api/processes/', data)
+    .then(response => {
+      return Promise.resolve(response.data)
+    })
+    .catch(error => {
+      return Promise.reject(error)
+    })
+}
+
 const createNewStep = (processId, toolId, configurationId, priority) => {
   var data = {
     process: processId,
@@ -36,4 +50,4 @@ const createNewStep = (processId, toolId, configurationId, priority) => {
     })
 }
 
-export { getAllProcesses, getCurrentUserProcesses, createNewStep }
+export { getAllProcesses, getCurrentUserProcesses, createNewProcess, createNewStep }

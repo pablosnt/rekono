@@ -24,7 +24,7 @@
           <template #button-content>
             <b-icon icon="plus-square"/>
           </template>
-          <b-dropdown-item>New Process</b-dropdown-item>
+          <b-dropdown-item @click="selectTool(row.item)" v-b-modal.new-process-modal >New Process</b-dropdown-item>
           <b-dropdown-item @click="selectTool(row.item)" v-b-modal.new-step-modal :disabled="processesItems.length == 0">New Step</b-dropdown-item>
         </b-dropdown>
       </template>
@@ -38,6 +38,31 @@
         </b-card>
       </template>
     </b-table>
+    <b-modal id="new-process-modal" @hidden="resetModal" @ok="handleNewProcess" ok-title="Create Process">
+      <template #modal-title>
+        New Process with {{ selectedTool.name }}
+      </template>
+      <b-form ref="new_process_form" @submit.stop.prevent="createNewProcess">
+        <b-form-group description="Process name" invalid-feedback="Process name is required">
+          <b-form-input v-model="processName" type="text" :state="newProcessNameState" maxlength="30" required/>
+        </b-form-group>
+        <b-form-group invalid-feedback="Process description is required">
+          <b-form-textarea v-model="processDescription" placeholder="Process description" :state="newProcessDescState" maxlength="350" required/>
+        </b-form-group>
+        <b-form-group description="Tool configuration">
+          <b-form-select v-model="selectedConfiguration" :options="selectedConfigurations" value-field="id" text-field="configuration" required/>
+        </b-form-group>
+        <b-form-group>
+          <b-input-group :prepend="stepPriority.toString()">
+            <b-form-input v-model="stepPriority" type="range" min="1" max="50" required/>
+            <b-input-group-append is-text v-b-tooltip.hover title="The priority allows to run steps with greater value before other tools of the same stage. By default the priority is 1, so all the steps will be treated in the same way">
+              <b-icon icon="info-circle-fill" variant="info"/>
+            </b-input-group-append>
+          </b-input-group>
+          <small class="text-muted">Step priority</small>
+        </b-form-group>
+      </b-form>
+    </b-modal>
     <b-modal id="new-step-modal" @hidden="resetModal" @ok="handleNewStep" ok-title="Create Step">
       <template #modal-title>
         New Step: {{ selectedTool.name }}
@@ -50,7 +75,7 @@
             </template>
           </b-form-select>
         </b-form-group>
-        <b-form-group description="Tool configuration" invalid-feedback="Configuration is required">
+        <b-form-group description="Tool configuration">
           <b-form-select v-model="selectedConfiguration" :options="selectedConfigurations" value-field="id" text-field="configuration" required/>
         </b-form-group>
         <b-form-group>
@@ -69,7 +94,7 @@
 
 <script>
 import { getTools } from '../backend/tools'
-import { getCurrentUserProcesses, createNewStep } from '../backend/processes'
+import { getCurrentUserProcesses, createNewProcess, createNewStep } from '../backend/processes'
 export default {
   name: 'toolsPage',
   data () {
@@ -98,7 +123,11 @@ export default {
       selectedConfigurations: [],
       selectedConfiguration: null,
       stepPriority: 1,
-      newStepState: null
+      processName: null,
+      processDescription: null,
+      newStepState: null,
+      newProcessNameState: null,
+      newProcessDescState: null
     }
   },
   methods: {
@@ -215,6 +244,40 @@ export default {
       this.newStepState = valid
       return valid
     },
+    handleNewProcess (bvModalEvt) {
+      bvModalEvt.preventDefault()
+      this.createNewProcess()
+    },
+    createNewProcess () {
+      if (!this.checkNewProcessState()) {
+        return
+      }
+      createNewProcess(this.processName, this.processDescription)
+        .then(data => {
+          createNewStep(data.id, this.selectedTool.id, this.selectedConfiguration, this.stepPriority)
+            .then(() => {
+              this.$bvModal.hide('new-process-modal')
+              this.$bvToast.toast('New process created successfully', {
+                title: this.processName,
+                variant: 'success',
+                solid: true
+              })
+            })
+            .catch(() => {
+              this.$bvToast.toast('Unexpected error in step creation', {
+                title: this.selectedTool.name,
+                variant: 'danger',
+                solid: true
+              })
+            })
+        })
+    },
+    checkNewProcessState () {
+      const valid = this.$refs.new_process_form.checkValidity()
+      this.newProcessNameState = (this.processDescription != null)
+      this.newProcessDescState = (this.processName != null)
+      return valid
+    },
     selectTool (tool) {
       this.selectedTool = tool
       this.selectedConfigurations = tool.configurations
@@ -226,6 +289,11 @@ export default {
       this.selectedConfigurations = []
       this.selectedConfiguration = null
       this.stepPriority = 1
+      this.processName = null
+      this.processDescription = null
+      this.newStepState = null
+      this.newProcessNameState = null
+      this.newProcessDescState = null
     }
   }
 }
