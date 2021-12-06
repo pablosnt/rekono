@@ -63,6 +63,26 @@ const rekonoApiPut = (endpoint, data, retry = false) => {
     })
 }
 
+const rekonoApiDelete = (endpoint, retry = false) => {
+  return axios
+    .delete(endpoint, { headers: headers() })
+    .then(response => {
+      return Promise.resolve(response)
+    })
+    .catch(error => {
+      if (error.response && error.response.status === 401) {
+        if (retry) {
+          router.push('/login')
+        } else {
+          return refresh()
+            .then(() => { return rekonoApiDelete(endpoint, true) })
+            .catch(() => { router.push('/login') })
+        }
+      }
+      return Promise.reject(error)
+    })
+}
+
 export {
-  rekonoApiGet, rekonoApiPost, rekonoApiPut
+  rekonoApiGet, rekonoApiPost, rekonoApiPut, rekonoApiDelete
 }

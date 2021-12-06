@@ -20,7 +20,7 @@
           <b-button variant="secondary" class="mr-2" @click="selectProcess(row.item, true)" v-b-modal.process-modal v-b-tooltip.hover title="Edit" v-if="$store.state.role == 'Admin' || $store.state.user == row.item.creatorId">
             <b-icon icon="pencil-square"/>
           </b-button>
-          <b-button variant="danger" class="mr-2" @click="selectProcess(row.item)" v-b-tooltip.hover title="Remove" v-if="$store.state.role == 'Admin' || $store.state.user == row.item.creatorId">
+          <b-button variant="danger" class="mr-2" @click="selectProcess(row.item)" v-b-modal.delete-process-modal v-b-tooltip.hover title="Delete" v-if="$store.state.role == 'Admin' || $store.state.user == row.item.creatorId">
             <b-icon icon="trash-fill"/>
           </b-button>
         </template>
@@ -37,7 +37,7 @@
                 <b-button variant="secondary" class="mr-2" @click="selectStep(step.item, true)" v-b-modal.step-modal v-b-tooltip.hover title="Edit" v-if="$store.state.role == 'Admin' || $store.state.user == row.item.creatorId">
                   <b-icon icon="pencil-square"/>
                 </b-button>
-                <b-button variant="danger" class="mr-2" @click="selectStep(step.item)" v-b-tooltip.hover title="Remove" v-if="$store.state.role == 'Admin' || $store.state.user == row.item.creatorId">
+                <b-button variant="danger" class="mr-2" @click="selectStep(step.item)" v-b-tooltip.hover title="Delete" v-if="$store.state.role == 'Admin' || $store.state.user == row.item.creatorId">
                   <b-icon icon="trash-fill"/>
                 </b-button>
               </template>
@@ -45,6 +45,9 @@
           </b-card>
         </template>
     </b-table>
+    <b-modal id="delete-process-modal" @hidden="resetModal" @ok="deleteProcess" title="Delete Process" ok-title="Delete Process" header-bg-variant="danger" header-text-variant="light" ok-variant="danger">
+      <p v-if="selectedProcess != null">You will remove the <strong>{{ selectedProcess.process }}</strong> process. Are you sure?</p>
+    </b-modal>
     <b-modal id="process-modal" @hidden="resetModal" @ok="handleProcess" :title="processModalTitle()" :ok-title="processModalOkTitle()">
       <b-form ref="process_form" @submit.stop.prevent="createOrUpdateProcess">
         <b-form-group description="Process name" invalid-feedback="Process name is required">
@@ -90,7 +93,7 @@
 
 <script>
 import { getTools } from '../backend/tools'
-import { getAllProcesses, createProcess, updateProcess, createStep, updateStep } from '../backend/processes'
+import { getAllProcesses, createProcess, updateProcess, deleteProcess, createStep, updateStep } from '../backend/processes'
 export default {
   name: 'processesPage',
   data () {
@@ -214,7 +217,7 @@ export default {
       }
       if (this.edit) {
         updateProcess(this.selectedProcess.id, this.processName, this.processDescription)
-          .then(data => {
+          .then(() => {
             this.$bvModal.hide('process-modal')
             this.$bvToast.toast('Process updated successfully', {
               title: this.processName,
@@ -232,7 +235,7 @@ export default {
           })
       } else {
         createProcess(this.processName, this.processDescription)
-          .then(data => {
+          .then(() => {
             this.$bvModal.hide('process-modal')
             this.$bvToast.toast('New process created successfully', {
               title: this.processName,
@@ -255,6 +258,25 @@ export default {
       this.newProcessNameState = (this.processDescription !== null && this.processDescription.length > 0)
       this.newProcessDescState = (this.processName !== null && this.processName.length > 0)
       return valid
+    },
+    deleteProcess () {
+      deleteProcess(this.selectedProcess.id)
+        .then(() => {
+          this.$bvModal.hide('delete-process-modal')
+          this.$bvToast.toast('Process deleted successfully', {
+            title: this.processName,
+            variant: 'success',
+            solid: true
+          })
+          this.processesItems = this.processes()
+        })
+        .catch(() => {
+          this.$bvToast.toast('Unexpected error in process deletion', {
+            title: this.processName,
+            variant: 'danger',
+            solid: true
+          })
+        })
     },
     stepModalTitle () {
       if (this.selectedProcess && this.edit) {

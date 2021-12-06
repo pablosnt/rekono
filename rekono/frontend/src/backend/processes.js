@@ -1,4 +1,4 @@
-import { rekonoApiGet, rekonoApiPost, rekonoApiPut } from './api'
+import { rekonoApiDelete, rekonoApiGet, rekonoApiPost, rekonoApiPut } from './api'
 
 const getAllProcesses = () => {
   return rekonoApiGet('/api/processes/?o=name')
@@ -48,6 +48,16 @@ const updateProcess = (processId, name, description) => {
     })
 }
 
+const deleteProcess = (processId) => {
+  return rekonoApiDelete('/api/processes/' + processId + '/')
+    .then(response => {
+      return Promise.resolve(response.data)
+    })
+    .catch(error => {
+      return Promise.reject(error)
+    })
+}
+
 const createStep = (processId, toolId, configurationId, priority) => {
   var data = {
     process: processId,
@@ -77,4 +87,4 @@ const updateStep = (stepId, priority) => {
     })
 }
 
-export { getAllProcesses, getCurrentUserProcesses, createProcess, updateProcess, createStep, updateStep }
+export { getAllProcesses, getCurrentUserProcesses, createProcess, updateProcess, deleteProcess, createStep, updateStep }
