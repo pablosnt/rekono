@@ -20,7 +20,7 @@
         <b-button variant="success" class="mr-2" v-b-tooltip.hover title="Execute">
           <b-icon icon="play-fill"/>
         </b-button>
-        <b-dropdown variant="secondary" right v-b-tooltip.hover title="Add to Process">
+        <b-dropdown variant="outline-primary" right v-b-tooltip.hover title="Add to Process">
           <template #button-content>
             <b-icon icon="plus-square"/>
           </template>
@@ -94,15 +94,13 @@
 
 <script>
 import { getTools } from '../backend/tools'
-import { getCurrentUserProcesses, createNewProcess, createNewStep } from '../backend/processes'
+import { getAllProcesses, getCurrentUserProcesses, createNewProcess, createNewStep } from '../backend/processes'
 export default {
   name: 'toolsPage',
   data () {
-    var toolsItems = this.tools()
-    var processesItems = this.processes()
     return {
       auditor: ['Admin', 'Auditor'],
-      toolsItems: toolsItems,
+      toolsItems: this.tools(),
       toolsFields: [
         {key: 'icon', sortable: false},
         {key: 'name', sortable: true},
@@ -117,7 +115,7 @@ export default {
         {key: 'inputs', sortable: true},
         {key: 'outputs', sortable: true}
       ],
-      processesItems: processesItems,
+      processesItems: this.processes(),
       selectedTool: null,
       selectedProcess: null,
       selectedConfigurations: [],
@@ -191,27 +189,39 @@ export default {
         })
       return tools
     },
-    processes () {
+    async processes () {
       var processes = []
-      getCurrentUserProcesses(this.$store.state.user)
-        .then(results => {
-          for (var i = 0; i < results.length; i++) {
-            var steps = []
-            for (var s = 0; s < results[i].steps.length; s++) {
-              var step = {
-                tool: results[i].steps[s].tool.id,
-                configuration: results[i].steps[s].configuration.id
-              }
-              steps.push(step)
-            }
-            var item = {
-              id: results[i].id,
-              name: results[i].name,
-              steps: steps
-            }
-            processes.push(item)
+      if (this.$store.state.role !== 'Admin') {
+        processes = await getCurrentUserProcesses(this.$store.state.user)
+          .then(results => {
+            return this.getProcesses(results)
+          })
+      } else {
+        processes = await getAllProcesses()
+          .then(results => {
+            return this.getProcesses(results)
+          })
+      }
+      return processes
+    },
+    getProcesses (apiData) {
+      var processes = []
+      for (var i = 0; i < apiData.length; i++) {
+        var steps = []
+        for (var s = 0; s < apiData[i].steps.length; s++) {
+          var step = {
+            tool: apiData[i].steps[s].tool.id,
+            configuration: apiData[i].steps[s].configuration.id
           }
-        })
+          steps.push(step)
+        }
+        var item = {
+          id: apiData[i].id,
+          name: apiData[i].name,
+          steps: steps
+        }
+        processes.push(item)
+      }
       return processes
     },
     handleNewStep (bvModalEvt) {

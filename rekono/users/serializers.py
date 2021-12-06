@@ -20,6 +20,14 @@ class UserSerializer(serializers.ModelSerializer):
         read_only_fields = ('username', 'email', 'is_active', 'date_joined', 'last_login', 'groups')
 
 
+class SimplyUserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = ('id', 'username')
+        read_only_fields = ('id', 'username')
+
+
 class InviteUserSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)
     role = serializers.ChoiceField(choices=Role.choices, required=True)

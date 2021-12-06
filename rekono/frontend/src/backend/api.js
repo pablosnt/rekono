@@ -15,7 +15,7 @@ const rekonoApiPost = (endpoint, data, retry = false) => {
           router.push('/login')
         } else {
           return refresh()
-            .then(() => { return rekonoApiGet(endpoint, true) })
+            .then(() => { return rekonoApiPost(endpoint, data, true) })
             .catch(() => { router.push('/login') })
         }
       }

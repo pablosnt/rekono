@@ -3,6 +3,7 @@ from rest_framework import serializers
 from rest_framework.fields import SerializerMethodField
 from tools.models import Configuration, Tool
 from tools.serializers import ConfigurationSerializer, SimplyToolSerializer
+from users.serializers import SimplyUserSerializer
 
 
 class StepPrioritySerializer(serializers.ModelSerializer):
@@ -75,8 +76,8 @@ class ProcessSerializer(serializers.ModelSerializer):
         model = Process
         fields = ('id', 'name', 'description', 'creator', 'steps')
 
-    def get_creator(self, instance: Process) -> str:
-        return instance.creator.username
+    def get_creator(self, instance: Process) -> SimplyUserSerializer:
+        return SimplyUserSerializer(instance.creator).data
 
     def get_steps(self, instance) -> list:
         return StepSerializer(
