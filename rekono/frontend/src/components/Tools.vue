@@ -271,6 +271,13 @@ export default {
               })
             })
         })
+        .catch(() => {
+          this.$bvToast.toast('Unexpected error in process creation', {
+            title: this.processName,
+            variant: 'danger',
+            solid: true
+          })
+        })
     },
     checkNewProcessState () {
       const valid = this.$refs.new_process_form.checkValidity()
