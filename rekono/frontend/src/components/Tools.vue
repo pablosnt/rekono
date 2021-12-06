@@ -17,7 +17,7 @@
           <b-icon v-if="!row.detailsShowing" icon="eye-fill"/>
           <b-icon v-if="row.detailsShowing" icon="eye-slash-fill"/>
         </b-button>
-        <b-button variant="success" class="mr-2" v-b-tooltip.hover title="Execute">
+        <b-button variant="success" class="mr-2" v-b-tooltip.hover title="Execute" @click="selectTool(row.item)" v-b-modal.execute-modal>
           <b-icon icon="play-fill"/>
         </b-button>
         <b-dropdown variant="outline-primary" right v-b-tooltip.hover title="Add to Process">
@@ -38,6 +38,44 @@
         </b-card>
       </template>
     </b-table>
+    <b-modal id="execute-modal" @hidden="resetModal" ok-title="Execute" header-bg-variant="success" header-text-variant="light" ok-variant="success">
+      <template #modal-title>
+        Execute {{ selectedTool.name }}
+      </template>
+      <b-form ref="execute_form">
+        <b-tabs fill card active-nav-item-class="text-success">
+          <b-tab title="Basic" title-link-class="text-secondary">
+            <b-form-group description="Project" invalid-feedback="Project is required">
+              <b-form-select v-model="selectedProjectId" :options="projectsItems" @change="selectProject" value-field="id" text-field="name" required>
+                <template #first>
+                  <b-form-select-option :value="null" disabled>Select project</b-form-select-option>
+                </template>
+              </b-form-select>
+            </b-form-group>
+            <b-form-group description="Target" invalid-feedback="Target is required">
+              <b-form-select v-model="selectedTarget" :disabled="selectedProjectId == null" :options="selectedTargets" value-field="id" text-field="name" required>
+                <template #first>
+                  <b-form-select-option :value="null" disabled>Select target</b-form-select-option>
+                </template>
+              </b-form-select>
+            </b-form-group>
+            <b-form-group description="Tool configuration">
+              <b-form-select v-model="selectedConfiguration" :options="selectedConfigurations" value-field="id" text-field="configuration" required/>
+            </b-form-group>
+            <b-form-group description="Execution intensity">
+              <b-form-select v-model="selectedIntensity" :options="selectedIntensities" value-field="value" text-field="value" required/>
+            </b-form-group>
+          </b-tab>
+          <b-tab title="Time" title-link-class="text-secondary">
+            <b-form-group>
+              <b-form-datepicker v-model="selectedScheduledAt"/>
+            </b-form-group>
+          </b-tab>
+          <b-tab title="Initial Data" title-link-class="text-secondary">
+          </b-tab>
+        </b-tabs>
+      </b-form>
+    </b-modal>
     <b-modal id="new-process-modal" @hidden="resetModal" @ok="handleNewProcess" ok-title="Create Process">
       <template #modal-title>
         New Process with {{ selectedTool.name }}
@@ -95,6 +133,7 @@
 <script>
 import { getTools } from '../backend/tools'
 import { getAllProcesses, getCurrentUserProcesses, createProcess, createStep } from '../backend/processes'
+import { getCurrentUserProjects } from '../backend/projects'
 export default {
   name: 'toolsPage',
   data () {
@@ -116,10 +155,18 @@ export default {
         {key: 'outputs', sortable: true}
       ],
       processesItems: this.processes(),
+      projectsItems: this.projects(),
       selectedTool: null,
       selectedProcess: null,
       selectedConfigurations: [],
       selectedConfiguration: null,
+      selectedProject: null,
+      selectedProjectId: null,
+      selectedTargets: [],
+      selectedTarget: null,
+      selectedIntensities: [],
+      selectedIntensity: null,
+      selectedScheduledAt: null,
       stepPriority: 1,
       processName: null,
       processDescription: null,
@@ -203,6 +250,29 @@ export default {
           })
       }
       return processes
+    },
+    projects () {
+      var projects = []
+      getCurrentUserProjects(this.$store.state.user)
+        .then(results => {
+          for (var p = 0; p < results.length; p++) {
+            var targets = []
+            for (var t = 0; t < results[p].targets.length; t++) {
+              var target = {
+                id: results[p].targets[t].id,
+                name: results[p].targets[t].target
+              }
+              targets.push(target)
+            }
+            var item = {
+              id: results[p].id,
+              name: results[p].name,
+              targets: targets
+            }
+            projects.push(item)
+          }
+        })
+      return projects
     },
     getProcesses (apiData) {
       var processes = []
@@ -299,12 +369,34 @@ export default {
       this.selectedTool = tool
       this.selectedConfigurations = tool.configurations
       this.selectedConfiguration = this.selectedConfigurations[0].id
+      this.selectedIntensities = tool.intensities
+      if (this.selectedIntensities.includes('Normal')) {
+        this.selectedIntensity = 'Normal'
+      } else {
+        this.selectedIntensity = this.selectedIntensities[this.selectedIntensities.length - 1].value
+      }
+    },
+    selectProject (projectId) {
+      this.selectedProjectId = projectId
+      for (var p = 0; p < this.projectsItems.length; p++) {
+        if (this.projectsItems[p].id === projectId) {
+          this.selectedProject = this.projectsItems[p]
+        }
+      }
+      this.selectedTargets = this.selectedProject.targets
     },
     resetModal () {
       this.selectedTool = null
       this.selectedProcess = null
       this.selectedConfigurations = []
       this.selectedConfiguration = null
+      this.selectedProject = null
+      this.selectedProjectId = null
+      this.selectedTargets = []
+      this.selectedTarget = null
+      this.selectedIntensities = []
+      this.selectedIntensity = null
+      this.selectedScheduledAt = null
       this.stepPriority = 1
       this.processName = null
       this.processDescription = null
