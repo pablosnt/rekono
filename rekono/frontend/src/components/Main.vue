@@ -1,22 +1,40 @@
 <template>
   <b-card fluid>
     <b-tabs id="main" pills card vertical>
-      <b-tab title="Dashboard" lazy @click="changeHref('dasboard')" active>
-          <dashboard/>
+      <b-tab lazy @click="changeHref('dasboard')" active>
+        <template #title>
+          <b-icon icon="bar-chart-line-fill"/> Dashboard
+        </template>
+        <dashboard/>
       </b-tab>
-      <b-tab title="Projects" lazy :active="activeTab === 'projects'" @click="changeHref('projects')">
+      <b-tab lazy :active="activeTab === 'projects'" @click="changeHref('projects')">
+        <template #title>
+          <b-icon icon="briefcase-fill"/> Projects
+        </template>
         <projects/>
       </b-tab>
-      <b-tab title="Tools" lazy :active="activeTab === 'tools'" @click="changeHref('tools')" v-if="auditor.includes($store.state.role)">
+      <b-tab lazy :active="activeTab === 'tools'" @click="changeHref('tools')" v-if="auditor.includes($store.state.role)">
+        <template #title>
+          <b-icon icon="tools"/> Tools
+        </template>
         <tools/>
       </b-tab>
-      <b-tab title="Processes" lazy :active="activeTab === 'processes'" @click="changeHref('processes')" v-if="auditor.includes($store.state.role)">
+      <b-tab lazy :active="activeTab === 'processes'" @click="changeHref('processes')" v-if="auditor.includes($store.state.role)">
+        <template #title>
+          <b-icon icon="nut-fill"/> Processes
+        </template>
         <processes/>
       </b-tab>
-      <b-tab title="Resources" lazy :active="activeTab === 'resources'" @click="changeHref('resources')" v-if="auditor.includes($store.state.role)">
-        <resources/>
+      <b-tab lazy :active="activeTab === 'wordlists'" @click="changeHref('wordlists')" v-if="auditor.includes($store.state.role)">
+        <template #title>
+          <b-icon icon="chat-left-dots-fill"/> Wordlists
+        </template>
+        <wordlists/>
       </b-tab>
-      <b-tab title="Users" lazy :active="activeTab === 'users'" @click="changeHref('users')" v-if="$store.state.role === 'Admin'">
+      <b-tab lazy :active="activeTab === 'users'" @click="changeHref('users')" v-if="$store.state.role === 'Admin'">
+        <template #title>
+          <b-icon icon="person-fill"/> Users
+        </template>
         <users/>
       </b-tab>
     </b-tabs>
@@ -28,7 +46,7 @@ import Dashboard from './Dashboard.vue'
 import Projects from './Projects.vue'
 import Tools from './Tools.vue'
 import Processes from './Processes.vue'
-import Resources from './Resources.vue'
+import Wordlists from './Wordlists.vue'
 import Users from './Users.vue'
 export default {
   name: 'mainPage',
@@ -43,7 +61,7 @@ export default {
     'projects': Projects,
     'tools': Tools,
     'processes': Processes,
-    'resources': Resources,
+    'wordlists': Wordlists,
     'users': Users
   },
   methods: {

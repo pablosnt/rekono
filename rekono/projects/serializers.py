@@ -2,12 +2,12 @@ from defectdojo.api import products
 from django.db import transaction
 from projects.models import Project
 from rest_framework import serializers
-from targets.serializers import SimplyTargetSerializer
+from targets.serializers import TargetSerializer
 from users.models import User
 
 
 class ProjectSerializer(serializers.ModelSerializer):
-    targets = SimplyTargetSerializer(read_only=True, many=True)
+    targets = TargetSerializer(read_only=True, many=True)
 
     class Meta:
         model = Project

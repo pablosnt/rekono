@@ -96,7 +96,7 @@ class OSINT(Finding):
 
 
 class Host(Finding):
-    address = models.TextField(max_length=20)
+    address = models.TextField(max_length=30)
     os = models.TextField(max_length=250, blank=True, null=True)
     os_type = models.TextField(max_length=10, choices=OSType.choices, default=OSType.OTHER)
 

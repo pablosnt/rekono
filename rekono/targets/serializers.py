@@ -36,13 +36,3 @@ class TargetSerializer(serializers.ModelSerializer):
                     validated_data=target_port
                 )
         return target
-
-
-class SimplyTargetSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Target
-        fields = (
-            'id', 'target', 'type'
-        )
-        read_only_fields = ('id', 'target', 'type')

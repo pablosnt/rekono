@@ -15,7 +15,7 @@ var router = new Router({
       component: Login
     },
     {
-      path: '/(dashboard|projects|tools|processes|resources|users|)',
+      path: '/(dashboard|projects|tools|processes|wordlists|users|)',
       name: 'main',
       component: Main
     }
