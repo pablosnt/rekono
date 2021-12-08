@@ -15,7 +15,6 @@ const createTask = (target, process, tool, configuration, intensity, scheduledAt
     wordlists: wordlists,
     host: hostsData
   }
-  console.log(data)
   return rekonoApiPost('/api/tasks/', data)
     .then(response => {
       return Promise.resolve(response.data)
