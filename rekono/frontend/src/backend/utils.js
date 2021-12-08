@@ -24,6 +24,15 @@ const headers = (requiredAuth = true) => {
   return requestHeaders
 }
 
+const findById = (data, id) => {
+  for (var i = 0; i < data.length; i++) {
+    if (data[i].id === id) {
+      return data[i]
+    }
+  }
+  return null
+}
+
 export {
-  accessTokenKey, refreshTokenKey, decodeToken, headers
+  accessTokenKey, refreshTokenKey, decodeToken, headers, findById
 }

@@ -1,5 +1,5 @@
 <template>
-  <b-modal :id="id" @hidden="cancel" @ok="confirm" :title="title" :ok-title="button">
+  <b-modal :id="id" @hidden="clean" @ok="confirm" :title="title" :ok-title="button">
     <template #modal-title v-if="tool !== null">
       <b-link :href="tool.reference" target="_blank">
         <b-img :src="tool.icon" width="100" height="50"/>
@@ -8,7 +8,7 @@
     </template>
     <b-form ref="step_form">
       <b-form-group description="Process" invalid-feedback="Process is required" v-if="process === null">
-        <b-form-select v-model="processId" :options="processes" value-field="id" text-field="name" :state="processState" :disabled="processes.length == 0" required>
+        <b-form-select v-model="processId" :options="processes" value-field="id" text-field="name" :state="processState" :disabled="processes.length == 0" @change="selectProcess" required>
           <template #first>
             <b-form-select-option :value="null" disabled>Select your process</b-form-select-option>
           </template>
@@ -47,6 +47,7 @@
 <script>
 import { getAllProcesses, getCurrentUserProcesses, createStep, updateStep } from '../../backend/processes'
 import { getTools } from '../../backend/tools'
+import { findById } from '../../backend/utils'
 export default {
   name: 'stepForm',
   props: {
@@ -79,22 +80,13 @@ export default {
     },
     button () {
       return this.step !== null ? 'Update Step' : 'Create Step'
-    },
-    tools () {
-      if (this.tool === null) {
-        return this.getTools()
-      }
-      return []
-    },
-    processes () {
-      if (this.process === null) {
-        return this.getProcesses()
-      }
-      return []
     }
   },
   data () {
     return {
+      initialized: false,
+      tools: [],
+      processes: [],
       processId: null,
       toolId: null,
       configurationId: null,
@@ -107,22 +99,39 @@ export default {
   },
   watch: {
     process (process) {
-      if (process) {
-        this.processId = process.id
+      if (process !== null) {
+        this.initialized = true
+        this.selectProcess(process.id, process)
       }
     },
     step (step) {
       if (step !== null) {
-        this.selectedTool = step.tool
+        this.initialized = true
+        step.tool.configurations = [step.configuration]
         this.selectTool(step.tool.id, step.tool)
-        this.configurationId = step.configuration.id
         this.priority = step.priority
       }
     },
     tool (tool) {
       if (tool !== null) {
-        this.selectedTool = tool
+        this.initialized = true
         this.selectTool(tool.id, tool)
+      }
+    },
+    initialized (initialized) {
+      if (initialized) {
+        if (this.step === null && this.tool === null) {
+          getTools().then(tools => { this.tools = tools })
+        } else if (this.step !== null && this.tool == null) {
+          this.tools = [this.selectedTool]
+        }
+        if (this.process === null) {
+          var method = getCurrentUserProcesses
+          if (this.$store.state.role === 'Admin') {
+            method = getAllProcesses
+          }
+          method(this.$store.state.user).then(processes => { this.processes = processes })
+        }
       }
     }
   },
@@ -131,9 +140,9 @@ export default {
       const valid = this.$refs.step_form.checkValidity()
       this.processState = (this.processId !== null)
       this.toolState = (this.toolId !== null)
-      if (!this.edit && this.process !== null) {
-        for (var s = 0; s < this.process.steps.length; s++) {
-          if (this.process.steps[s].tool.id === this.toolId && this.process.steps[s].configuration.id === this.configurationId) {
+      if (!this.edit && this.selectedProcess !== null) {
+        for (var s = 0; s < this.selectedProcess.steps.length; s++) {
+          if (this.selectedProcess.steps[s].tool.id === this.toolId && this.selectedProcess.steps[s].configuration.id === this.configurationId) {
             this.configState = false
             return false
           }
@@ -186,85 +195,35 @@ export default {
           return Promise.resolve(false)
         })
     },
-    cancel () {
+    clean () {
+      this.initialized = false
+      this.tools = []
       this.processId = null
       this.toolId = null
       this.configurationId = null
       this.priority = 1
       this.selectedTool = null
+      this.selectedProcess = null
       this.toolState = null
       this.configState = null
-      this.$emit('cancel')
+      this.$emit('clean')
+    },
+    selectProcess (processId, process = null) {
+      this.processId = processId
+      if (process !== null) {
+        this.selectedProcess = null
+      } else {
+        this.selectedProcess = findById(this.processes, processId)
+      }
     },
     selectTool (toolId, tool = null) {
       this.toolId = toolId
       if (tool !== null) {
         this.selectedTool = tool
       } else {
-        for (var t = 0; t < this.tools.length; t++) {
-          if (this.tools[t].id === toolId) {
-            this.selectedTool = this.tools[t]
-            break
-          }
-        }
+        this.selectedTool = findById(this.tools, toolId)
       }
       this.configurationId = this.selectedTool.configurations[0].id
-    },
-    getTools () {
-      var tools = []
-      getTools()
-        .then(results => {
-          for (var i = 0; i < results.length; i++) {
-            var configurations = []
-            for (var c = 0; c < results[i].configurations.length; c++) {
-              var config = {
-                id: results[i].configurations[c].id,
-                name: results[i].configurations[c].name,
-                default: results[i].configurations[c].default
-              }
-              configurations.push(config)
-            }
-            var item = {
-              id: results[i].id,
-              name: results[i].name,
-              stage: results[i].stage_name,
-              icon: results[i].icon,
-              reference: results[i].reference,
-              configurations: configurations
-            }
-            tools.push(item)
-          }
-        })
-      return tools
-    },
-    getProcesses () {
-      var processes = []
-      var method = null
-      if (this.$store.state.role !== 'Admin') {
-        method = getCurrentUserProcesses
-      } else {
-        method = getAllProcesses
-      }
-      method(this.$store.state.user)
-        .then(results => {
-          for (var i = 0; i < results.length; i++) {
-            var steps = []
-            for (var s = 0; s < results[i].steps.length; s++) {
-              var step = {
-                tool: results[i].steps[s].tool.id,
-                configuration: results[i].steps[s].configuration.id
-              }
-              steps.push(step)
-            }
-            var item = {
-              id: results[i].id,
-              name: results[i].name,
-              steps: steps
-            }
-            processes.push(item)
-          }
-        })
-      return processes
     }
   }
 }

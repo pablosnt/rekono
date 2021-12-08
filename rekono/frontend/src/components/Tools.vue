@@ -1,6 +1,6 @@
 <template>
   <div>
-    <b-table striped borderless head-variant="dark" :fields="toolsFields" :items="toolsItems">
+    <b-table striped borderless head-variant="dark" :fields="toolsFields" :items="tools">
       <template #cell(icon)="row">
         <b-link :href="row.item.reference" target="_blank">
           <b-img :src="row.item.icon" width="100" height="50"/>
@@ -41,15 +41,15 @@
     <ProcessForm id="new-process-modal"
       :tool="selectedTool"
       @confirm="confirm"
-      @cancel="cleanSelection"/>
+      @clean="cleanSelection"/>
     <StepForm id="new-step-modal"
       :tool="selectedTool"
       @confirm="confirm"
-      @cancel="cleanSelection"/>
+      @clean="cleanSelection"/>
     <TaskForm id="execute-modal"
       :tool="selectedTool"
       @confirm="confirm"
-      @cancel="cleanSelection"/>
+      @clean="cleanSelection"/>
   </div>
 </template>
 
@@ -63,20 +63,20 @@ export default {
   data () {
     return {
       auditor: ['Admin', 'Auditor'],
-      toolsItems: this.tools(),
+      tools: this.getTools(),
       toolsFields: [
         {key: 'icon', sortable: false},
         {key: 'name', label: 'Tool', sortable: true},
         {key: 'command', sortable: true},
-        {key: 'stage', sortable: true},
+        {key: 'stage_name', label: 'Stage', sortable: true},
         {key: 'intensities', sortable: true},
         {key: 'actions', sortable: false}
       ],
       configFields: [
         {key: 'name', label: 'Configuration', sortable: true},
         {key: 'default', sortable: true},
-        {key: 'inputs', sortable: true},
-        {key: 'outputs', sortable: true}
+        {key: 'inputs_text', label: 'Inputs', sortable: true},
+        {key: 'outputs_text', label: 'Outputs', sortable: true}
       ],
       selectedTool: null
     }
@@ -87,41 +87,13 @@ export default {
     TaskForm
   },
   methods: {
-    tools () {
-      var tools = []
+    getTools () {
       getTools()
-        .then(results => {
-          for (var i = 0; i < results.length; i++) {
-            var configurations = []
-            for (var c = 0; c < results[i].configurations.length; c++) {
-              var inputsText = ''
-              for (var j = 0; j < results[i].configurations[c].inputs.length; j++) {
-                inputsText += results[i].configurations[c].inputs[j].type
-                if (j + 1 < results[i].configurations[c].inputs.length) {
-                  inputsText += ', '
-                }
-              }
-              var outputsText = ''
-              for (j = 0; j < results[i].configurations[c].outputs.length; j++) {
-                outputsText += results[i].configurations[c].outputs[j].type
-                if (j + 1 < results[i].configurations[c].outputs.length) {
-                  outputsText += ', '
-                }
-              }
-              var config = {
-                id: results[i].configurations[c].id,
-                name: results[i].configurations[c].name,
-                default: results[i].configurations[c].default,
-                inputs: results[i].configurations[c].inputs,
-                inputs_text: inputsText,
-                outputs: results[i].configurations[c].outputs,
-                outputs_text: outputsText
-              }
-              configurations.push(config)
-            }
+        .then(tools => {
+          for (var t = 0; t < tools.length; t++) {
             var intensities = []
-            for (j = 0; j < results[i].intensities.length; j++) {
-              var value = results[i].intensities[j].intensity_rank
+            for (var i = 0; i < tools[t].intensities.length; i++) {
+              var value = tools[t].intensities[i].intensity_rank
               var variant = 'secondary'
               if (value === 'Sneaky') variant = 'info'
               else if (value === 'Low') variant = 'success'
@@ -134,20 +106,28 @@ export default {
               }
               intensities.push(intensity)
             }
-            var item = {
-              id: results[i].id,
-              name: results[i].name,
-              command: results[i].command,
-              stage: results[i].stage_name,
-              icon: results[i].icon,
-              reference: results[i].reference,
-              configurations: configurations,
-              intensities: intensities
+            tools[t].intensities = intensities
+            for (var c = 0; c < tools[t].configurations.length; c++) {
+              var inputsText = ''
+              for (i = 0; i < tools[t].configurations[c].inputs.length; i++) {
+                inputsText += tools[t].configurations[c].inputs[i].type
+                if (i + 1 < tools[t].configurations[c].inputs.length) {
+                  inputsText += ', '
+                }
+              }
+              var outputsText = ''
+              for (var o = 0; o < tools[t].configurations[c].outputs.length; o++) {
+                outputsText += tools[t].configurations[c].outputs[o].type
+                if (o + 1 < tools[t].configurations[c].outputs.length) {
+                  outputsText += ', '
+                }
+              }
+              tools[t].configurations[c].inputs_text = inputsText
+              tools[t].configurations[c].outputs_text = outputsText
             }
-            tools.push(item)
           }
+          this.tools = tools
         })
-      return tools
     },
     selectTool (tool) {
       this.selectedTool = tool
@@ -155,7 +135,7 @@ export default {
     confirm (operation) {
       if (operation.success) {
         this.$bvModal.hide(operation.id)
-        this.toolsItems = this.tools()
+        this.tools = this.getTools()
       }
     },
     cleanSelection () {

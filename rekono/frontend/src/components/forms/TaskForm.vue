@@ -1,5 +1,5 @@
 <template>
-  <b-modal id="execute-modal" @hidden="cancel" @ok="confirm" header-bg-variant="success" header-text-variant="light" ok-variant="success" size="lg">
+  <b-modal id="execute-modal" @hidden="clean" @ok="confirm" header-bg-variant="success" header-text-variant="light" ok-variant="success" size="lg">
     <template #modal-title>
       <b-link :href="tool.reference" target="_blank" v-if="tool !== null">
         <b-img :src="tool.icon" width="100" height="50"/>
@@ -83,11 +83,12 @@
 </template>
 
 <script>
+import { createTask } from '../../backend/tasks'
 import { getCurrentUserProjects } from '../../backend/projects'
 import { getAllWordlists } from '../../backend/resources'
-import { createTask } from '../../backend/tasks'
 import { getAllProcesses } from '../../backend/processes'
 import { getTools } from '../../backend/tools'
+import { findById } from '../../backend/utils'
 export default {
   name: 'taskForm',
   props: {
@@ -110,28 +111,16 @@ export default {
         title = 'Execute ' + this.tool.name
       }
       return title
-    },
-    projects () {
-      return this.getProjects()
-    },
-    processes () {
-      if (this.process === null) {
-        return this.getProcesses()
-      }
-      return []
-    },
-    tools () {
-      if (this.tools === null) {
-        return this.getTools()
-      }
-      return []
-    },
-    wordlists () {
-      return this.getWordlists()
     }
   },
   data () {
+    getCurrentUserProjects(this.$store.state.user).then(projects => { this.projects = projects })
     return {
+      initialized: false,
+      projects: [],
+      processes: [],
+      tools: [],
+      wordlists: [],
       intensities: ['Insane', 'Hard', 'Normal', 'Low', 'Sneaky'],
       timeUnits: ['Weeks', 'Days', 'Hours', 'Minutes'],
       selectedProject: null,
@@ -160,12 +149,20 @@ export default {
   watch: {
     process (process) {
       if (process !== null) {
+        this.initialized = true
         this.selectProcess(process.id, process)
       }
     },
     tool (tool) {
       if (tool !== null) {
+        this.initialized = true
         this.selectTool(tool.id, tool)
+      }
+    },
+    initialized (initialized) {
+      if (this.tool === null && this.process === null) {
+        getTools().then(tools => { this.tools = tools })
+        getAllProcesses().then(processes => { this.processes = processes })
       }
     }
   },
@@ -212,7 +209,11 @@ export default {
           return Promise.resolve(false)
         })
     },
-    cancel () {
+    clean () {
+      this.initialized = false
+      this.processes = []
+      this.tools = []
+      this.wordlists = []
       this.intensities = ['Insane', 'Hard', 'Normal', 'Low', 'Sneaky']
       this.timeUnits = ['Weeks', 'Days', 'Hours', 'Minutes']
       this.selectedProject = null
@@ -242,15 +243,34 @@ export default {
       date.setTime(today.getTime())
       return date < today
     },
+    checkInputType (inputType) {
+      var inputs = []
+      if (this.selectedConfiguration !== null) {
+        inputs = this.selectedConfiguration.inputs
+      } else if (this.selectedProcess !== null) {
+        for (var s = 0; s < this.selectedProcess.steps.length; s++) {
+          inputs = inputs.concat(this.selectedProcess.steps[s].configuration.inputs)
+        }
+      }
+      var check = false
+      for (var i = 0; i < inputs.length; i++) {
+        if (inputs[i].type === inputType) {
+          check = true
+          break
+        }
+      }
+      return check
+    },
     selectProject (projectId, project = null) {
       this.projectId = projectId
       if (project !== null) {
         this.selectedProject = project
       } else {
-        this.selectedProject = this.findById(this.projects, projectId)
+        this.selectedProject = findById(this.projects, projectId)
       }
     },
     selectProcess (processId, process = null) {
+      const isWordlist = this.checkInputType('Wordlist')
       this.processId = processId
       this.toolId = null
       this.configurationId = null
@@ -258,7 +278,10 @@ export default {
       if (process !== null) {
         this.selectedProcess = process
       } else {
-        this.selectedProcess = this.findById(this.processes, processId)
+        this.selectedProcess = findById(this.processes, processId)
+      }
+      if (!isWordlist && this.checkInputType('Wordlist')) {
+        this.updateWordlists()
       }
     },
     selectTool (toolId, tool = null) {
@@ -267,7 +290,7 @@ export default {
       if (tool !== null) {
         this.selectedTool = tool
       } else {
-        this.selectedTool = this.findById(this.tools, toolId)
+        this.selectedTool = findById(this.tools, toolId)
       }
       this.selectConfiguration(this.selectedTool.configurations[0].id, this.selectedTool.configurations[0])
       this.intensities = this.selectedTool.intensities
@@ -283,30 +306,19 @@ export default {
       }
     },
     selectConfiguration (configurationId, configuration = null) {
+      const isWordlist = this.checkInputType('Wordlist')
       this.configurationId = configurationId
       if (configuration !== null) {
         this.selectedConfiguration = configuration
       } else {
-        this.selectedConfiguration = this.findById(this.selectedTool.configurations, configurationId)
+        this.selectedConfiguration = findById(this.selectedTool.configurations, configurationId)
+      }
+      if (!isWordlist && this.checkInputType('Wordlist')) {
+        this.updateWordlists()
       }
     },
-    checkInputType (inputType) {
-      var inputs = []
-      if (this.selectedConfiguration !== null) {
-        inputs = this.selectedConfiguration.inputs
-      } else if (this.selectedProcess !== null) {
-        for (var s = 0; s < this.selectedProcess.steps.length; s++) {
-          inputs = inputs.concat(this.selectedProcess.steps[s].configuration.inputs)
-        }
-      }
-      var check = false
-      for (var i = 0; i < inputs; i++) {
-        if (inputType === inputs[i].type) {
-          check = true
-          break
-        }
-      }
-      return check
+    updateWordlists () {
+      getAllWordlists().then(wordlists => { this.wordlists = wordlists })
     },
     cleanScheduledIn () {
       this.scheduledIn = null
@@ -314,102 +326,6 @@ export default {
     cleanScheduledAt () {
       this.scheduledAtDate = null
       this.scheduledAtTime = null
-    },
-    findById (data, id) {
-      for (var i = 0; i < data.length; i++) {
-        if (data[i].id === id) {
-          return data[i]
-        }
-      }
-      return null
-    },
-    getProjects () {
-      var projects = []
-      getCurrentUserProjects(this.$store.state.user)
-        .then(results => {
-          for (var p = 0; p < results.length; p++) {
-            var targets = []
-            for (var t = 0; t < results[p].targets.length; t++) {
-              var target = {
-                id: results[p].targets[t].id,
-                target: results[p].targets[t].target,
-                type: results[p].targets[t].type
-              }
-              targets.push(target)
-            }
-            var item = {
-              id: results[p].id,
-              name: results[p].name,
-              targets: targets
-            }
-            projects.push(item)
-          }
-        })
-      return projects
-    },
-    getWordlists () {
-      var wordlists = []
-      getAllWordlists()
-        .then(results => {
-          for (var w = 0; w < results.length; w++) {
-            var item = {
-              id: results[w].id,
-              name: results[w].name
-            }
-            wordlists.push(item)
-          }
-        })
-      return wordlists
-    },
-    getTools () {
-      var tools = []
-      getTools()
-        .then(results => {
-          for (var i = 0; i < results.length; i++) {
-            var configurations = []
-            for (var c = 0; c < results[i].configurations.length; c++) {
-              var config = {
-                id: results[i].configurations[c].id,
-                name: results[i].configurations[c].name,
-                default: results[i].configurations[c].default
-              }
-              configurations.push(config)
-            }
-            var item = {
-              id: results[i].id,
-              name: results[i].name,
-              stage: results[i].stage_name,
-              icon: results[i].icon,
-              reference: results[i].reference,
-              configurations: configurations
-            }
-            tools.push(item)
-          }
-        })
-      return tools
-    },
-    getProcesses () {
-      var processes = []
-      getAllProcesses(this.$store.state.user)
-        .then(results => {
-          for (var i = 0; i < results.length; i++) {
-            var steps = []
-            for (var s = 0; s < results[i].steps.length; s++) {
-              var step = {
-                tool: results[i].steps[s].tool.id,
-                configuration: results[i].steps[s].configuration.id
-              }
-              steps.push(step)
-            }
-            var item = {
-              id: results[i].id,
-              name: results[i].name,
-              steps: steps
-            }
-            processes.push(item)
-          }
-        })
-      return processes
     }
   }
 }

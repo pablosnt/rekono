@@ -39,8 +39,8 @@
             <p>{{ row.item.description }}</p>
             <b-table striped borderless small head-variant="light" :fields="stepsFields" :items="row.item.steps">
               <template #cell(icon)="step">
-                <b-link :href="step.item.reference" target="_blank">
-                  <b-img :src="step.item.icon" width="100" height="50"/>
+                <b-link :href="step.item.tool.reference" target="_blank">
+                  <b-img :src="step.item.tool.icon" width="100" height="50"/>
                 </b-link>
               </template>
               <template #cell(actions)="step">
@@ -66,7 +66,7 @@
       title="Delete Process"
       button="Delete Process"
       @deletion="deleteProcess"
-      @cancel="cleanSelection"
+      @clean="cleanSelection"
       v-if="selectedProcess !== null">
       <span slot="body"><strong>{{ selectedProcess.name }}</strong> process</span>
     </DeleteConfirmation>
@@ -74,19 +74,19 @@
       title="Delete Step"
       button="Delete Step"
       @deletion="deleteStep"
-      @cancel="cleanSelection"
+      @clean="cleanSelection"
       v-if="selectedProcess !== null && selectedStep !== null">
       <span slot="body"><strong>{{ this.selectedStep.tool_name }}</strong> step from <strong>{{ selectedProcess.process }}</strong> process</span>
     </DeleteConfirmation>
     <ProcessForm id="process-modal"
       :process="selectedProcess"
       @confirm="confirm"
-      @cancel="cleanSelection"/>
+      @clean="cleanSelection"/>
     <StepForm id="step-modal"
       :process="selectedProcess"
       :step="selectedStep"
       @confirm="confirm"
-      @cancel="cleanSelection"/>
+      @clean="cleanSelection"/>
   </div>
 </template>
 
@@ -98,19 +98,20 @@ import StepForm from './forms/StepForm.vue'
 export default {
   name: 'processesPage',
   data () {
+    getAllProcesses().then(processes => { this.processes = processes })
     return {
-      processes: this.getAllProcesses(),
+      processes: [],
       processesFields: [
         {key: 'name', label: 'Process', sortable: true},
-        {key: 'steps_count', label: 'Steps', sortable: true},
-        {key: 'creator_username', label: 'Creator', sortable: true},
+        {key: 'steps.length', label: 'Steps', sortable: true},
+        {key: 'creator.username', label: 'Creator', sortable: true},
         {key: 'actions', sortable: false}
       ],
       stepsFields: [
         {key: 'icon', sortable: false},
-        {key: 'tool_name', label: 'Tool', sortable: true},
-        {key: 'configuration_name', label: 'Configuration', sortable: true},
-        {key: 'stage', sortable: true},
+        {key: 'tool.name', label: 'Tool', sortable: true},
+        {key: 'configuration.name', label: 'Configuration', sortable: true},
+        {key: 'tool.stage_name', label: 'Stage', sortable: true},
         {key: 'priority', sortable: true},
         {key: 'actions', sortable: false}
       ],
@@ -124,40 +125,6 @@ export default {
     StepForm
   },
   methods: {
-    getAllProcesses () {
-      var processes = []
-      getAllProcesses()
-        .then(results => {
-          for (var i = 0; i < results.length; i++) {
-            var steps = []
-            for (var s = 0; s < results[i].steps.length; s++) {
-              var step = {
-                id: results[i].steps[s].id,
-                icon: results[i].steps[s].tool.icon,
-                reference: results[i].steps[s].tool.reference,
-                tool: results[i].steps[s].tool,
-                tool_name: results[i].steps[s].tool.name,
-                configuration: results[i].steps[s].configuration,
-                configuration_name: results[i].steps[s].configuration.name,
-                stage: results[i].steps[s].tool.stage_name,
-                priority: results[i].steps[s].priority
-              }
-              steps.push(step)
-            }
-            var item = {
-              id: results[i].id,
-              name: results[i].name,
-              description: results[i].description,
-              creator_username: results[i].creator.username,
-              creator: results[i].creator.id,
-              steps_count: results[i].steps.length,
-              steps: steps
-            }
-            processes.push(item)
-          }
-        })
-      return processes
-    },
     deleteProcess () {
       deleteProcess(this.selectedProcess.id)
         .then(() => {

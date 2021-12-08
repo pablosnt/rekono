@@ -1,5 +1,5 @@
 <template>
-  <b-modal :id="id" @hidden="cancel" @ok="confirm" :title="title" :ok-title="button">
+  <b-modal :id="id" @hidden="clean" @ok="confirm" :title="title" :ok-title="button">
     <template #modal-title v-if="tool !== null">
       <b-link :href="tool.reference" target="_blank">
         <b-img :src="tool.icon" width="100" height="50"/>
@@ -155,14 +155,14 @@ export default {
           return Promise.resolve(false)
         })
     },
-    cancel () {
+    clean () {
       this.name = null
       this.description = null
       this.configuration = null
       this.priority = 1
       this.nameState = null
       this.descriptionState = null
-      this.$emit('cancel')
+      this.$emit('clean')
     }
   }
 }

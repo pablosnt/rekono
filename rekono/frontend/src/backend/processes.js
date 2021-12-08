@@ -3,20 +3,14 @@ import { rekonoApiDelete, rekonoApiGet, rekonoApiPost, rekonoApiPut } from './ap
 const getAllProcesses = () => {
   return rekonoApiGet('/api/processes/?o=name')
     .then(response => {
-      return Promise.resolve(response.data.results)
-    })
-    .catch(error => {
-      return Promise.reject(error)
+      return response.data.results
     })
 }
 
 const getCurrentUserProcesses = (userId) => {
   return rekonoApiGet('/api/processes/?o=name&creator=' + userId.toString())
     .then(response => {
-      return Promise.resolve(response.data.results)
-    })
-    .catch(error => {
-      return Promise.reject(error)
+      return response.data.results
     })
 }
 
