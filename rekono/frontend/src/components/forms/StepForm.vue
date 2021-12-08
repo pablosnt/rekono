@@ -114,7 +114,7 @@ export default {
     step (step) {
       if (step !== null) {
         this.selectedTool = step.tool
-        this.selectTool(step.tool.id)
+        this.selectTool(step.tool.id, step.tool)
         this.configurationId = step.configuration.id
         this.priority = step.priority
       }
@@ -122,7 +122,7 @@ export default {
     tool (tool) {
       if (tool !== null) {
         this.selectedTool = tool
-        this.selectTool(tool.id)
+        this.selectTool(tool.id, tool)
       }
     }
   },
@@ -196,12 +196,16 @@ export default {
       this.configState = null
       this.$emit('cancel')
     },
-    selectTool (toolId) {
+    selectTool (toolId, tool = null) {
       this.toolId = toolId
-      for (var t = 0; t < this.tools.length; t++) {
-        if (this.tools[t].id === toolId) {
-          this.selectedTool = this.tools[t]
-          break
+      if (tool !== null) {
+        this.selectedTool = tool
+      } else {
+        for (var t = 0; t < this.tools.length; t++) {
+          if (this.tools[t].id === toolId) {
+            this.selectedTool = this.tools[t]
+            break
+          }
         }
       }
       this.configurationId = this.selectedTool.configurations[0].id

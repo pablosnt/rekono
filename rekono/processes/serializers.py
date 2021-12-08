@@ -1,3 +1,5 @@
+from typing import List
+
 from processes.models import Process, Step
 from rest_framework import serializers
 from rest_framework.fields import SerializerMethodField
@@ -79,7 +81,7 @@ class ProcessSerializer(serializers.ModelSerializer):
     def get_creator(self, instance: Process) -> SimplyUserSerializer:
         return SimplyUserSerializer(instance.creator).data
 
-    def get_steps(self, instance) -> list:
+    def get_steps(self, instance) -> List[StepSerializer]:
         return StepSerializer(
             instance.steps.all().order_by('tool__stage', '-priority'),
             many=True

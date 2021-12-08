@@ -1,3 +1,5 @@
+from typing import List
+
 from rest_framework import serializers
 from rest_framework.fields import SerializerMethodField
 from tools.enums import IntensityRank, Stage
@@ -88,10 +90,10 @@ class ToolSerializer(serializers.ModelSerializer):
             'for_each_target_port', 'intensities', 'configurations'
         )
 
-    def get_intensities(self, instance) -> list:
+    def get_intensities(self, instance) -> List[IntensitySerializer]:
         return IntensitySerializer(instance.intensities.all().order_by('-value'), many=True).data
 
-    def get_configurations(self, instance) -> list:
+    def get_configurations(self, instance) -> List[ConfigurationSerializer]:
         return ConfigurationSerializer(
             instance.configurations.all().order_by('-default', 'name'),
             many=True

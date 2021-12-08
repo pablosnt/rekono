@@ -1,6 +1,6 @@
 import { rekonoApiPost } from './api'
 
-const createTask = (target, process, tool, configuration, intensity, scheduledAtDate, scheduledAtTime, scheduledIn, scheduledTimeUnit, repeatIn, repeatTimeUnit, wordlists, hostsData) => {
+const createTask = (target, process, tool, configuration, intensity, scheduledAtDate, scheduledAtTime, scheduledIn, scheduledTimeUnit, repeatIn, repeatTimeUnit, wordlists) => {
   var data = {
     target: target,
     process: process,
@@ -12,8 +12,7 @@ const createTask = (target, process, tool, configuration, intensity, scheduledAt
     schduled_time_unit: scheduledTimeUnit,
     repeat_in: repeatIn,
     repeat_time_unit: repeatTimeUnit,
-    wordlists: wordlists,
-    host: hostsData
+    wordlists: wordlists
   }
   return rekonoApiPost('/api/tasks/', data)
     .then(response => {
