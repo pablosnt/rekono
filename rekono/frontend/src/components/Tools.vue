@@ -135,7 +135,9 @@ export default {
     confirm (operation) {
       if (operation.success) {
         this.$bvModal.hide(operation.id)
-        this.tools = this.getTools()
+        if (operation.reload) {
+          this.tools = this.getTools()
+        }
       }
     },
     cleanSelection () {

@@ -1,9 +1,11 @@
 <template>
   <b-modal id="execute-modal" @hidden="clean" @ok="confirm" header-bg-variant="success" header-text-variant="light" ok-variant="success" size="lg">
     <template #modal-title>
-      <b-link :href="tool.reference" target="_blank" v-if="tool !== null">
-        <b-img :src="tool.icon" width="100" height="50"/>
-      </b-link>
+      <div v-if="tool !== null">
+        <b-link :href="tool.reference" target="_blank">
+          <b-img :src="tool.icon" width="100" height="50"/>
+        </b-link>
+      </div>
       {{ title }}
     </template>
     <b-form ref="execute_form">
@@ -26,9 +28,11 @@
               </template>
             </b-form-select>
           </b-form-group>
-          <b-form-group description="Tool configuration">
-            <b-form-select v-model="configurationId" :options="selectedTool !== null ? selectedTool.configurations : []" :disabled="configurationId == null" @change="selectConfiguration" value-field="id" text-field="name" required/>
-          </b-form-group>
+          <div v-if="tool !== null">
+            <b-form-group description="Tool configuration">
+              <b-form-select v-model="configurationId" :options="selectedTool !== null ? selectedTool.configurations : []" :disabled="configurationId == null" @change="selectConfiguration" value-field="id" text-field="name" required/>
+            </b-form-group>
+          </div>
           <b-form-group description="Execution intensity">
             <b-form-select v-model="intensity" :options="intensities" value-field="value" text-field="value" required/>
           </b-form-group>
@@ -47,10 +51,10 @@
           </template>
           <label>Execute at specific time</label>
           <b-form-group>
-            <b-form-datepicker v-model="scheduledAtDate" @input="cleanScheduledIn" :state="scheduledAtDateState" :date-disabled-fn="dateBeforeToday" today-button reset-button close-button/>
+            <b-form-datepicker v-model="scheduledAtDate" @input="cleanScheduledIn" :state="scheduledAtState" :min="minimumDate" today-button reset-button close-button/>
           </b-form-group>
           <b-form-group invalid-feedback="Time is required and must be future">
-            <b-form-timepicker v-model="scheduledAtTime" @input="cleanScheduledIn" :state="scheduledAtTimeState"/>
+            <b-form-timepicker v-model="scheduledAtTime" @input="cleanScheduledIn" :state="scheduledAtState"/>
           </b-form-group>
           <hr/>
           <label>Execute after some time</label>
@@ -132,7 +136,7 @@ export default {
       processId: null,
       toolId: null,
       configurationId: null,
-      intensity: null,
+      intensity: 'Normal',
       wordlistsItems: [],
       scheduledAtDate: null,
       scheduledAtTime: null,
@@ -142,8 +146,8 @@ export default {
       repeatTimeUnit: 'Days',
       projectState: null,
       targetState: null,
-      scheduledAtDateState: null,
-      scheduledAtTimeState: null
+      scheduledAtState: null,
+      minimumDate: new Date()
     }
   },
   watch: {
@@ -172,29 +176,29 @@ export default {
       this.projectState = (this.projectId !== null)
       this.targetState = (this.targetId !== null)
       if (this.scheduledAtDate !== null || this.scheduledAtTime !== null) {
-        this.scheduledAtDateState = (this.scheduledAtDate !== null)
-        if (this.scheduledAtDateState && this.scheduledAtTime !== null) {
-          var today = new Date()
-          var selected = Date.parse(this.scheduledAtDate + ' ' + this.scheduledAtTime)
-          this.scheduledAtTimeState = (this.scheduledAtTime !== null && selected > today)
-          return valid && this.scheduledAtDateState && this.scheduledAtTimeState
+        this.scheduledAtState = false
+        if (this.scheduledAtDate && this.scheduledAtTime !== null) {
+          this.scheduledAtState = (Date.parse(this.scheduledAtDate + ' ' + this.scheduledAtTime) > new Date())
         }
-        return false
+        return valid && this.scheduledAtState
       }
       return valid
     },
     confirm (event) {
       event.preventDefault()
       if (this.check()) {
-        this.create().then((success) => this.$emit('confirm', { id: this.id, success: success }))
+        this.create().then((success) => this.$emit('confirm', { id: this.id, success: success, reload: false }))
       }
     },
     create () {
-      return createTask(this.targetId, this.processId, this.toolId, this.configurationId, this.intensity, this.scheduledAtDate, this.scheduledAtTime, this.scheduledIn, this.scheduledTimeUnit, this.repeatIn, this.repeatTimeUnit, this.wordlists)
+      var notification = null
+      if (this.selectedTool !== null) notification = this.selectedTool.name
+      else if (this.selectedProcess !== null) notification = this.selectedProcess.name
+      return createTask(this.targetId, this.processId, this.toolId, this.configurationId, this.intensity, this.scheduledAtDate, this.scheduledAtTime, this.scheduledIn, this.scheduledTimeUnit, this.repeatIn, this.repeatTimeUnit, this.wordlistsItems)
         .then(() => {
           this.$bvModal.hide('execute-modal')
           this.$bvToast.toast('Execution requested successfully', {
-            title: this.selectedTool.name,
+            title: notification,
             variant: 'success',
             solid: true
           })
@@ -202,7 +206,7 @@ export default {
         })
         .catch(() => {
           this.$bvToast.toast('Unexpected error in execution request', {
-            title: this.selectedTool.name,
+            title: notification,
             variant: 'danger',
             solid: true
           })
@@ -225,7 +229,7 @@ export default {
       this.processId = null
       this.toolId = null
       this.configurationId = null
-      this.intensity = null
+      this.intensity = 'Normal'
       this.wordlistsItems = []
       this.scheduledAtDate = null
       this.scheduledAtTime = null
@@ -235,13 +239,7 @@ export default {
       this.repeatTimeUnit = 'Days'
       this.projectState = null
       this.targetState = null
-      this.scheduledAtDateState = null
-      this.scheduledAtTimeState = null
-    },
-    dateBeforeToday (value, date) {
-      var today = new Date()
-      date.setTime(today.getTime())
-      return date < today
+      this.scheduledAtState = null
     },
     checkInputType (inputType) {
       var inputs = []
@@ -275,6 +273,7 @@ export default {
       this.toolId = null
       this.configurationId = null
       this.intensities = ['Insane', 'Hard', 'Normal', 'Low', 'Sneaky']
+      this.intensity = 'Normal'
       if (process !== null) {
         this.selectedProcess = process
       } else {

@@ -95,7 +95,7 @@ export default {
       event.preventDefault()
       if (this.check()) {
         var operation = this.edit ? this.update() : this.create()
-        operation.then((success) => this.$emit('confirm', { id: this.id, success: success }))
+        operation.then((success) => this.$emit('confirm', { id: this.id, success: success, reload: true }))
       }
     },
     create () {

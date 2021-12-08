@@ -11,7 +11,7 @@
             <b-icon v-if="!row.detailsShowing" icon="eye-fill"/>
             <b-icon v-if="row.detailsShowing" icon="eye-slash-fill"/>
           </b-button>
-          <b-button variant="success" class="mr-2" v-b-tooltip.hover title="Execute">
+          <b-button variant="success" class="mr-2" v-b-tooltip.hover title="Execute" @click="selectProcess(row.item)" v-b-modal.execute-modal>
             <b-icon icon="play-fill"/>
           </b-button>
           <b-dropdown variant="outline-primary" right>
@@ -87,6 +87,10 @@
       :step="selectedStep"
       @confirm="confirm"
       @clean="cleanSelection"/>
+    <TaskForm id="execute-modal"
+      :process="selectedProcess"
+      @confirm="confirm"
+      @clean="cleanSelection"/>
   </div>
 </template>
 
@@ -95,10 +99,11 @@ import { getAllProcesses, deleteProcess, deleteStep } from '../backend/processes
 import DeleteConfirmation from './common/DeleteConfirmation.vue'
 import ProcessForm from './forms/ProcessForm.vue'
 import StepForm from './forms/StepForm.vue'
+import TaskForm from './forms/TaskForm.vue'
 export default {
   name: 'processesPage',
   data () {
-    getAllProcesses().then(processes => { this.processes = processes })
+    this.updateProcesses()
     return {
       processes: [],
       processesFields: [
@@ -122,7 +127,8 @@ export default {
   components: {
     DeleteConfirmation,
     ProcessForm,
-    StepForm
+    StepForm,
+    TaskForm
   },
   methods: {
     deleteProcess () {
@@ -134,7 +140,7 @@ export default {
             variant: 'warning',
             solid: true
           })
-          this.processes = this.getAllProcesses()
+          this.processes = this.updateProcesses()
         })
         .catch(() => {
           this.$bvToast.toast('Unexpected error in process deletion', {
@@ -153,7 +159,7 @@ export default {
             variant: 'warning',
             solid: true
           })
-          this.processes = this.getAllProcesses()
+          this.processes = this.updateProcesses()
         })
         .catch(() => {
           this.$bvToast.toast('Unexpected error in step deletion', {
@@ -173,12 +179,17 @@ export default {
     confirm (operation) {
       if (operation.success) {
         this.$bvModal.hide(operation.id)
-        this.processes = this.getAllProcesses()
+        if (operation.reload) {
+          this.processes = this.updateProcesses()
+        }
       }
     },
     cleanSelection () {
       this.selectedProcess = null
       this.selectedStep = null
+    },
+    updateProcesses () {
+      getAllProcesses().then(processes => { this.processes = processes })
     }
   }
 }
