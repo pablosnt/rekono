@@ -18,17 +18,17 @@
             <template #button-content>
               <b-icon icon="three-dots-vertical"/>
             </template>
-            <b-dropdown-item @click="selectProcess(row.item)" v-b-modal.step-modal :disabled="$store.state.role !== 'Admin' && $store.state.user !== row.item.creatorId">
+            <b-dropdown-item @click="selectProcess(row.item)" v-b-modal.step-modal :disabled="$store.state.role !== 'Admin' && $store.state.user !== row.item.creator.id">
               <div style="display: inline">
                 <b-icon variant="success" icon="plus-square"/>
                 <label variant="dark">Add Step</label>
               </div>
             </b-dropdown-item>
-            <b-dropdown-item variant="dark" @click="selectProcess(row.item)" v-b-modal.process-modal :disabled="$store.state.role !== 'Admin' && $store.state.user !== row.item.creatorId">
+            <b-dropdown-item variant="dark" @click="selectProcess(row.item)" v-b-modal.process-modal :disabled="$store.state.role !== 'Admin' && $store.state.user !== row.item.creator.id">
               <b-icon icon="pencil-square"/>
               <label>Edit</label>
             </b-dropdown-item>
-            <b-dropdown-item variant="danger" @click="selectProcess(row.item)" v-b-modal.delete-process-modal :disabled="$store.state.role !== 'Admin' && $store.state.user !== row.item.creatorId">
+            <b-dropdown-item variant="danger" @click="selectProcess(row.item)" v-b-modal.delete-process-modal :disabled="$store.state.role !== 'Admin' && $store.state.user !== row.item.creator.id">
               <b-icon icon="trash-fill"/>
               <label>Delete</label>
             </b-dropdown-item>
@@ -48,11 +48,11 @@
                   <template #button-content>
                     <b-icon icon="three-dots-vertical"/>
                   </template>
-                  <b-dropdown-item variant="dark" @click="selectStep(row.item, step.item)" v-b-modal.step-modal :disabled="$store.state.role !== 'Admin' && $store.state.user !== row.item.creatorId">
+                  <b-dropdown-item variant="dark" @click="selectStep(row.item, step.item)" v-b-modal.step-modal :disabled="$store.state.role !== 'Admin' && $store.state.user !== row.item.creator.id">
                     <b-icon icon="pencil-square"/>
                     <label>Edit</label>
                   </b-dropdown-item>
-                  <b-dropdown-item variant="danger" @click="selectStep(row.item, step.item)" v-b-modal.delete-step-modal :disabled="$store.state.role !== 'Admin' && $store.state.user !== row.item.creatorId">
+                  <b-dropdown-item variant="danger" @click="selectStep(row.item, step.item)" v-b-modal.delete-step-modal :disabled="$store.state.role !== 'Admin' && $store.state.user !== row.item.creator.id">
                     <b-icon icon="trash-fill"/>
                     <label>Delete</label>
                   </b-dropdown-item>
@@ -64,7 +64,6 @@
     </b-table>
     <DeleteConfirmation id="delete-process-modal"
       title="Delete Process"
-      button="Delete Process"
       @deletion="deleteProcess"
       @clean="cleanSelection"
       v-if="selectedProcess !== null">
@@ -72,11 +71,10 @@
     </DeleteConfirmation>
     <DeleteConfirmation id="delete-step-modal"
       title="Delete Step"
-      button="Delete Step"
       @deletion="deleteStep"
       @clean="cleanSelection"
       v-if="selectedProcess !== null && selectedStep !== null">
-      <span slot="body"><strong>{{ this.selectedStep.tool_name }}</strong> step from <strong>{{ selectedProcess.process }}</strong> process</span>
+      <span slot="body"><strong>{{ this.selectedStep.tool.name }}</strong> step from <strong>{{ selectedProcess.name }}</strong> process</span>
     </DeleteConfirmation>
     <ProcessForm id="process-modal"
       :process="selectedProcess"
@@ -140,7 +138,7 @@ export default {
             variant: 'warning',
             solid: true
           })
-          this.processes = this.updateProcesses()
+          this.updateProcesses()
         })
         .catch(() => {
           this.$bvToast.toast('Unexpected error in process deletion', {
@@ -159,7 +157,7 @@ export default {
             variant: 'warning',
             solid: true
           })
-          this.processes = this.updateProcesses()
+          this.updateProcesses()
         })
         .catch(() => {
           this.$bvToast.toast('Unexpected error in step deletion', {
@@ -180,7 +178,7 @@ export default {
       if (operation.success) {
         this.$bvModal.hide(operation.id)
         if (operation.reload) {
-          this.processes = this.updateProcesses()
+          this.updateProcesses()
         }
       }
     },

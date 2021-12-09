@@ -3,9 +3,9 @@ import { headers } from './utils'
 import { refresh } from './authentication'
 import router from '../router'
 
-const rekonoApiGet = (endpoint, retry = false) => {
+const rekonoApiGet = (endpoint, retry = false, extraHeaders = null) => {
   return axios
-    .get(endpoint, { headers: headers() })
+    .get(endpoint, { headers: headers(true, extraHeaders) })
     .then(response => {
       return Promise.resolve(response)
     })
@@ -15,7 +15,7 @@ const rekonoApiGet = (endpoint, retry = false) => {
           router.push('/login')
         } else {
           return refresh()
-            .then(() => { return rekonoApiGet(endpoint, true) })
+            .then(() => { return rekonoApiGet(endpoint, true, extraHeaders) })
             .catch(() => { router.push('/login') })
         }
       }
@@ -23,9 +23,9 @@ const rekonoApiGet = (endpoint, retry = false) => {
     })
 }
 
-const rekonoApiPost = (endpoint, data, retry = false) => {
+const rekonoApiPost = (endpoint, data, retry = false, extraHeaders = null) => {
   return axios
-    .post(endpoint, data, { headers: headers() })
+    .post(endpoint, data, { headers: headers(true, extraHeaders) })
     .then(response => {
       return Promise.resolve(response)
     })
@@ -35,7 +35,7 @@ const rekonoApiPost = (endpoint, data, retry = false) => {
           router.push('/login')
         } else {
           return refresh()
-            .then(() => { return rekonoApiPost(endpoint, data, true) })
+            .then(() => { return rekonoApiPost(endpoint, data, true, extraHeaders) })
             .catch(() => { router.push('/login') })
         }
       }
@@ -43,9 +43,9 @@ const rekonoApiPost = (endpoint, data, retry = false) => {
     })
 }
 
-const rekonoApiPut = (endpoint, data, retry = false) => {
+const rekonoApiPut = (endpoint, data, retry = false, extraHeaders = null) => {
   return axios
-    .put(endpoint, data, { headers: headers() })
+    .put(endpoint, data, { headers: headers(true, extraHeaders) })
     .then(response => {
       return Promise.resolve(response)
     })
@@ -55,7 +55,7 @@ const rekonoApiPut = (endpoint, data, retry = false) => {
           router.push('/login')
         } else {
           return refresh()
-            .then(() => { return rekonoApiPut(endpoint, data, true) })
+            .then(() => { return rekonoApiPut(endpoint, data, true, extraHeaders) })
             .catch(() => { router.push('/login') })
         }
       }
@@ -63,9 +63,9 @@ const rekonoApiPut = (endpoint, data, retry = false) => {
     })
 }
 
-const rekonoApiDelete = (endpoint, retry = false) => {
+const rekonoApiDelete = (endpoint, retry = false, extraHeaders = null) => {
   return axios
-    .delete(endpoint, { headers: headers() })
+    .delete(endpoint, { headers: headers(true, extraHeaders) })
     .then(response => {
       return Promise.resolve(response)
     })
@@ -75,7 +75,7 @@ const rekonoApiDelete = (endpoint, retry = false) => {
           router.push('/login')
         } else {
           return refresh()
-            .then(() => { return rekonoApiDelete(endpoint, true) })
+            .then(() => { return rekonoApiDelete(endpoint, true, extraHeaders) })
             .catch(() => { router.push('/login') })
         }
       }
