@@ -37,7 +37,7 @@
 </template>
 
 <script>
-import { getAllWordlists, deleteWordlist } from '../backend/resources'
+import WordlistApi from '../backend/resources'
 import DeleteConfirmation from './common/DeleteConfirmation.vue'
 import WordlistForm from './forms/WordlistForm.vue'
 export default {
@@ -62,7 +62,7 @@ export default {
   },
   methods: {
     deleteWordlist () {
-      deleteWordlist(this.selectedWordlist.id)
+      WordlistApi.deleteWordlist(this.selectedWordlist.id)
         .then(() => {
           this.$bvModal.hide('delete-wordlist-modal')
           this.$bvToast.toast('Wordlist deleted successfully', {
@@ -95,7 +95,7 @@ export default {
       this.selectedWordlist = null
     },
     updateWordlists () {
-      getAllWordlists().then(wordlists => { this.wordlists = wordlists })
+      WordlistApi.getAllWordlists().then(wordlists => { this.wordlists = wordlists })
     }
   }
 }

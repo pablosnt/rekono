@@ -1,10 +1,12 @@
-import { rekonoApiGet } from './api'
+import RekonoApi from './api'
 
-const getTools = () => {
-  return rekonoApiGet('/api/tools/?o=stage')
-    .then(response => {
-      return response.data.results
-    })
+class Tool extends RekonoApi {
+  getTools () {
+    return super.get('/api/tools/?o=stage')
+      .then(response => {
+        return response.data.results
+      })
+  }
 }
 
-export { getTools }
+export default new Tool()

@@ -15,7 +15,7 @@
 </template>
 
 <script>
-import { createWordlist, updateWordlist } from '../../backend/resources'
+import WordlistApi from '../../backend/resources'
 export default {
   name: 'wordlistForm',
   props: {
@@ -84,7 +84,7 @@ export default {
       }
     },
     create () {
-      return createWordlist(this.name, this.type, this.file)
+      return WordlistApi.createWordlist(this.name, this.type, this.file)
         .then(() => {
           this.$bvToast.toast('New wordlist created successfully', {
             title: this.name,
@@ -103,7 +103,7 @@ export default {
         })
     },
     update () {
-      return updateWordlist(this.wordlist.id, this.name, this.type, this.file)
+      return WordlistApi.updateWordlist(this.wordlist.id, this.name, this.type, this.file)
         .then(() => {
           this.$bvToast.toast('New wordlist updated successfully', {
             title: this.name,

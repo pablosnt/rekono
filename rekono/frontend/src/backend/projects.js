@@ -1,10 +1,12 @@
-import { rekonoApiGet } from './api'
+import RekonoApi from './api'
 
-const getCurrentUserProjects = (userId) => {
-  return rekonoApiGet('/api/projects/?members=' + userId + '&o=name')
-    .then(response => {
-      return response.data.results
-    })
+class Project extends RekonoApi {
+  getProjectsByUser (userId) {
+    return super.get('/api/projects/?members=' + userId + '&o=name')
+      .then(response => {
+        return response.data.results
+      })
+  }
 }
 
-export { getCurrentUserProjects }
+export default new Project()

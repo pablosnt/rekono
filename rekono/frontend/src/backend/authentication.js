@@ -1,54 +1,26 @@
-import { accessTokenKey, refreshTokenKey, decodeToken, headers } from './utils'
-import axios from 'axios'
+import RekonoApi from './api'
+import { refreshTokenKey } from './utils'
 
-const removeTokens = () => {
-  localStorage.removeItem(accessTokenKey)
-  localStorage.removeItem(refreshTokenKey)
+class Authentication extends RekonoApi {
+  login (username, password) {
+    return super.post('/api/token/', { username: username, password: password }, false)
+      .then(response => {
+        var claims = super.processTokens(response.data)
+        return Promise.resolve(claims)
+      })
+  }
+
+  logout () {
+    return super.post('/api/logout/', { refresh_token: localStorage[refreshTokenKey] })
+      .then(() => {
+        super.removeTokens()
+        return Promise.resolve()
+      })
+      .catch(error => {
+        super.removeTokens()
+        return Promise.reject(error)
+      })
+  }
 }
 
-const processTokens = (tokens) => {
-  localStorage.setItem(accessTokenKey, tokens.access)
-  localStorage.setItem(refreshTokenKey, tokens.refresh)
-  return decodeToken(tokens.access)
-}
-
-const login = (username, password) => {
-  return axios
-    .post('/api/token/', { username: username, password: password }, { headers: headers(false) })
-    .then(response => {
-      var claims = processTokens(response.data)
-      return Promise.resolve(claims)
-    })
-    .catch(error => {
-      return Promise.reject(error)
-    })
-}
-
-const refresh = () => {
-  return axios
-    .post('/api/token/refresh/', { refresh: localStorage[refreshTokenKey] }, { headers: headers() })
-    .then(response => {
-      var claims = processTokens(response.data)
-      return Promise.resolve(claims)
-    })
-    .catch(error => {
-      return Promise.reject(error)
-    })
-}
-
-const logout = () => {
-  return axios
-    .post('/api/logout/', { refresh_token: localStorage[refreshTokenKey] }, { headers: headers() })
-    .then(response => {
-      removeTokens()
-      return Promise.resolve()
-    })
-    .catch(error => {
-      removeTokens()
-      return Promise.reject(error)
-    })
-}
-
-export {
-  login, logout, refresh
-}
+export default new Authentication()

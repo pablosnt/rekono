@@ -19,14 +19,12 @@
 </template>
 
 <script>
-import store from '../store/'
+import store from '../../store'
 export default {
   name: 'commonHeader',
   methods: {
     handleLogout (event) {
-      store.dispatch('logoutAction').then(
-        this.$router.push('/login')
-      )
+      store.dispatch('logoutAction')
     }
   }
 }

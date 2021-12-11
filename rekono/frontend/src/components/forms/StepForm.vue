@@ -45,9 +45,11 @@
 </template>
 
 <script>
-import { getAllProcesses, getCurrentUserProcesses, createStep, updateStep } from '../../backend/processes'
-import { getTools } from '../../backend/tools'
+import { Process, Step } from '../../backend/processes'
+import ToolApi from '../../backend/tools'
 import { findById } from '../../backend/utils'
+var ProcessApi = new Process()
+var StepApi = new Step()
 export default {
   name: 'stepForm',
   props: {
@@ -121,16 +123,18 @@ export default {
     initialized (initialized) {
       if (initialized) {
         if (this.step === null && this.tool === null) {
-          getTools().then(tools => { this.tools = tools })
+          ToolApi.getTools().then(tools => { this.tools = tools })
         } else if (this.step !== null && this.tool == null) {
           this.tools = [this.selectedTool]
         }
         if (this.process === null) {
-          var method = getCurrentUserProcesses
+          var req = null
           if (this.$store.state.role === 'Admin') {
-            method = getAllProcesses
+            req = ProcessApi.getAllProcesses()
+          } else {
+            req = ProcessApi.getProcessesByUser(this.$store.state.user)
           }
-          method(this.$store.state.user).then(processes => { this.processes = processes })
+          req.then(processes => { this.processes = processes })
         }
       }
     }
@@ -158,7 +162,7 @@ export default {
       }
     },
     create () {
-      return createStep(this.processId, this.toolId, this.configurationId, this.priority)
+      return StepApi.createStep(this.processId, this.toolId, this.configurationId, this.priority)
         .then(() => {
           this.$bvToast.toast('New step created successfully', {
             title: this.selectedTool.name,
@@ -177,7 +181,7 @@ export default {
         })
     },
     update () {
-      return updateStep(this.step.id, this.priority)
+      return StepApi.updateStep(this.step.id, this.priority)
         .then(() => {
           this.$bvToast.toast('Step updated successfully', {
             title: this.selectedTool.name,

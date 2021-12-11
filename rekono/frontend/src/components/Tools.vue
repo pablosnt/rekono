@@ -54,7 +54,7 @@
 </template>
 
 <script>
-import { getTools } from '../backend/tools'
+import ToolApi from '../backend/tools'
 import ProcessForm from './forms/ProcessForm.vue'
 import StepForm from './forms/StepForm.vue'
 import TaskForm from './forms/TaskForm.vue'
@@ -88,7 +88,7 @@ export default {
   },
   methods: {
     getTools () {
-      getTools()
+      ToolApi.getTools()
         .then(tools => {
           for (var t = 0; t < tools.length; t++) {
             var intensities = []

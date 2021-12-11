@@ -93,11 +93,13 @@
 </template>
 
 <script>
-import { getAllProcesses, deleteProcess, deleteStep } from '../backend/processes'
+import { Process, Step } from '../backend/processes'
 import DeleteConfirmation from './common/DeleteConfirmation.vue'
 import ProcessForm from './forms/ProcessForm.vue'
 import StepForm from './forms/StepForm.vue'
 import TaskForm from './forms/TaskForm.vue'
+var ProcessApi = new Process()
+var StepApi = new Step()
 export default {
   name: 'processesPage',
   data () {
@@ -130,7 +132,7 @@ export default {
   },
   methods: {
     deleteProcess () {
-      deleteProcess(this.selectedProcess.id)
+      ProcessApi.deleteProcess(this.selectedProcess.id)
         .then(() => {
           this.$bvModal.hide('delete-process-modal')
           this.$bvToast.toast('Process deleted successfully', {
@@ -149,7 +151,7 @@ export default {
         })
     },
     deleteStep () {
-      deleteStep(this.selectedStep.id)
+      StepApi.deleteStep(this.selectedStep.id)
         .then(() => {
           this.$bvModal.hide('delete-step-modal')
           this.$bvToast.toast('Step deleted successfully', {
@@ -187,7 +189,7 @@ export default {
       this.selectedStep = null
     },
     updateProcesses () {
-      getAllProcesses().then(processes => { this.processes = processes })
+      ProcessApi.getAllProcesses().then(processes => { this.processes = processes })
     }
   }
 }

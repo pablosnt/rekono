@@ -87,12 +87,13 @@
 </template>
 
 <script>
-import { createTask } from '../../backend/tasks'
-import { getCurrentUserProjects } from '../../backend/projects'
-import { getAllWordlists } from '../../backend/resources'
-import { getAllProcesses } from '../../backend/processes'
-import { getTools } from '../../backend/tools'
+import { Process } from '../../backend/processes'
+import ProjectApi from '../../backend/projects'
+import TaskApi from '../../backend/tasks'
+import ToolApi from '../../backend/tools'
+import WordlistApi from '../../backend/resources'
 import { findById } from '../../backend/utils'
+var ProcessApi = new Process()
 export default {
   name: 'taskForm',
   props: {
@@ -118,7 +119,7 @@ export default {
     }
   },
   data () {
-    getCurrentUserProjects(this.$store.state.user).then(projects => { this.projects = projects })
+    ProjectApi.getProjectsByUser(this.$store.state.user).then(projects => { this.projects = projects })
     return {
       initialized: false,
       projects: [],
@@ -164,9 +165,9 @@ export default {
       }
     },
     initialized (initialized) {
-      if (this.tool === null && this.process === null) {
-        getTools().then(tools => { this.tools = tools })
-        getAllProcesses().then(processes => { this.processes = processes })
+      if (this.initialized && this.tool === null && this.process === null) {
+        ToolApi.getTools().then(tools => { this.tools = tools })
+        ProcessApi.getAllProcesses().then(processes => { this.processes = processes })
       }
     }
   },
@@ -194,7 +195,7 @@ export default {
       var notification = null
       if (this.selectedTool !== null) notification = this.selectedTool.name
       else if (this.selectedProcess !== null) notification = this.selectedProcess.name
-      return createTask(this.targetId, this.processId, this.toolId, this.configurationId, this.intensity, this.scheduledAtDate, this.scheduledAtTime, this.scheduledIn, this.scheduledTimeUnit, this.repeatIn, this.repeatTimeUnit, this.wordlistsItems)
+      return TaskApi.createTask(this.targetId, this.processId, this.toolId, this.configurationId, this.intensity, this.scheduledAtDate, this.scheduledAtTime, this.scheduledIn, this.scheduledTimeUnit, this.repeatIn, this.repeatTimeUnit, this.wordlistsItems)
         .then(() => {
           this.$bvModal.hide('execute-modal')
           this.$bvToast.toast('Execution requested successfully', {
@@ -317,7 +318,7 @@ export default {
       }
     },
     updateWordlists () {
-      getAllWordlists().then(wordlists => { this.wordlists = wordlists })
+      WordlistApi.getAllWordlists().then(wordlists => { this.wordlists = wordlists })
     },
     cleanScheduledIn () {
       this.scheduledIn = null

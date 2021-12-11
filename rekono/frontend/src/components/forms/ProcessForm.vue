@@ -32,7 +32,9 @@
 </template>
 
 <script>
-import { createProcess, updateProcess, createStep } from '../../backend/processes'
+import { Process, Step } from '../../backend/processes'
+var ProcessApi = new Process()
+var StepApi = new Step()
 export default {
   name: 'processForm',
   props: {
@@ -99,7 +101,7 @@ export default {
       }
     },
     create () {
-      return createProcess(this.name, this.description)
+      return ProcessApi.createProcess(this.name, this.description)
         .then((data) => {
           if (this.tool === null) {
             this.$bvToast.toast('New process created successfully', {
@@ -109,7 +111,7 @@ export default {
             })
             return Promise.resolve(true)
           } else {
-            return createStep(data.id, this.tool.id, this.configuration, this.priority)
+            return StepApi.createStep(data.id, this.tool.id, this.configuration, this.priority)
               .then(() => {
                 this.$bvToast.toast('New process created successfully', {
                   title: this.name + ' - ' + this.tool.name,
@@ -137,7 +139,7 @@ export default {
         })
     },
     update () {
-      return updateProcess(this.process.id, this.name, this.description)
+      return ProcessApi.updateProcess(this.process.id, this.name, this.description)
         .then(() => {
           this.$bvToast.toast('Process updated successfully', {
             title: this.name,
