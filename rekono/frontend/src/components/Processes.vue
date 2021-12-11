@@ -93,13 +93,13 @@
 </template>
 
 <script>
-import { Process, Step } from '../backend/processes'
+import Processes from '../backend/processes'
 import DeleteConfirmation from './common/DeleteConfirmation.vue'
 import ProcessForm from './forms/ProcessForm.vue'
 import StepForm from './forms/StepForm.vue'
 import TaskForm from './forms/TaskForm.vue'
-var ProcessApi = new Process()
-var StepApi = new Step()
+const ProcessApi = Processes.ProcessApi
+const StepApi = Processes.StepApi
 export default {
   name: 'processesPage',
   data () {

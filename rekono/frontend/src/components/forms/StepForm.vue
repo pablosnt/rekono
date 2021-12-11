@@ -45,11 +45,11 @@
 </template>
 
 <script>
-import { Process, Step } from '../../backend/processes'
+import Processes from '../../backend/processes'
 import ToolApi from '../../backend/tools'
 import { findById } from '../../backend/utils'
-var ProcessApi = new Process()
-var StepApi = new Step()
+const ProcessApi = Processes.ProcessApi
+const StepApi = Processes.StepApi
 export default {
   name: 'stepForm',
   props: {

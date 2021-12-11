@@ -77,4 +77,7 @@ class Step extends RekonoApi {
   }
 }
 
-export { Process, Step }
+export default {
+  ProcessApi: new Process(),
+  StepApi: new Step()
+}

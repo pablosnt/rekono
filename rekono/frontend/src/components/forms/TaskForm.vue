@@ -87,13 +87,13 @@
 </template>
 
 <script>
-import { Process } from '../../backend/processes'
+import Processes from '../../backend/processes'
 import ProjectApi from '../../backend/projects'
 import TaskApi from '../../backend/tasks'
 import ToolApi from '../../backend/tools'
 import WordlistApi from '../../backend/resources'
 import { findById } from '../../backend/utils'
-var ProcessApi = new Process()
+const ProcessApi = Processes.ProcessApi
 export default {
   name: 'taskForm',
   props: {

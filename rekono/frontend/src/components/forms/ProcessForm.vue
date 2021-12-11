@@ -32,9 +32,9 @@
 </template>
 
 <script>
-import { Process, Step } from '../../backend/processes'
-var ProcessApi = new Process()
-var StepApi = new Step()
+import Processes from '../../backend/processes'
+const ProcessApi = Processes.ProcessApi
+const StepApi = Processes.StepApi
 export default {
   name: 'processForm',
   props: {
