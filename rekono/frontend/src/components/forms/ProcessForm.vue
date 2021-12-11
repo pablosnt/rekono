@@ -1,5 +1,5 @@
 <template>
-  <b-modal :id="id" @hidden="clean" @ok="confirm" :title="title" :ok-title="button">
+  <b-modal :id="id" @hidden="clean" @ok="confirm" :title="title" :ok-title="button" header-bg-variant="secondary" header-text-variant="light" ok-variant="primary">
     <template #modal-title v-if="tool !== null">
       <b-link :href="tool.reference" target="_blank">
         <b-img :src="tool.icon" width="100" height="50"/>
@@ -20,7 +20,7 @@
       </b-form-group>
       <b-form-group>
         <b-input-group :prepend="priority.toString()">
-          <b-form-input v-model="priority" type="range" min="1" max="50" required/>
+          <b-form-input v-model="priority" type="range" min="1" max="50" required variant="dark"/>
           <b-input-group-append is-text v-b-tooltip.hover title="The priority allows to run steps with greater value before other tools of the same stage. By default the priority is 1, so all the steps will be treated in the same way">
             <b-icon icon="info-circle-fill" variant="info"/>
           </b-input-group-append>

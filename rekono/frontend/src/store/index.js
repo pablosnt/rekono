@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import router from '../router'
 import AuthenticationApi from '../backend/authentication'
 import { accessTokenKey } from '../backend/utils'
 
@@ -33,23 +34,17 @@ export default new Vuex.Store({
           commit('login', data)
           return Promise.resolve()
         })
-        .catch(error => {
-          return Promise.reject(error)
-        })
     },
-    logoutAction ({ commit }) {
+    logoutAction ({ commit, dispatch }) {
       return AuthenticationApi.logout()
         .then(() => {
           commit('logout')
-          this.redirectToLogin()
+          dispatch('redirectToLogin')
           return Promise.resolve()
-        })
-        .catch(error => {
-          return Promise.reject(error)
         })
     },
     redirectToLogin () {
-      this.$router.push('/login')
+      router.push({ name: 'login' })
     }
   }
 })

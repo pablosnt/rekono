@@ -1,11 +1,9 @@
 <template>
-  <b-modal id="execute-modal" @hidden="clean" @ok="confirm" header-bg-variant="success" header-text-variant="light" ok-variant="success" size="lg">
-    <template #modal-title>
-      <div v-if="tool !== null">
-        <b-link :href="tool.reference" target="_blank">
-          <b-img :src="tool.icon" width="100" height="50"/>
-        </b-link>
-      </div>
+  <b-modal id="execute-modal" @hidden="clean" @ok="confirm" :title="title" ok-title="Execute" header-bg-variant="success" header-text-variant="light" ok-variant="success" size="lg">
+    <template #modal-title v-if="tool !== null">
+      <b-link :href="tool.reference" target="_blank">
+        <b-img :src="tool.icon" width="100" height="50"/>
+      </b-link>
       {{ title }}
     </template>
     <b-form ref="execute_form">

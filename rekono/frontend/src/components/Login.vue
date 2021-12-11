@@ -1,7 +1,6 @@
 <template>
-<!-- TODO: Replace Vue.JS logo by Rekono logo -->
   <div id="login-page" class="fixed-top d-flex align-items-center justify-content-center" style="bottom: 0">
-    <b-card id="login-form" title="Welcome to Rekono!" img-src="/static/logo.png" img-top img-height="150" class="mb-3">
+    <b-card id="login-form" img-src="/static/logo-dark.png" img-top img-height="150" class="mb-3">
       <b-alert v-model="loginError" variant="danger">
         <b-icon icon="exclamation-circle-fill" variant="danger"></b-icon>
         Invalid credentials
@@ -11,15 +10,15 @@
           <b-input-group-prepend is-text>
             <b-icon icon="person-fill"/>
           </b-input-group-prepend>
-          <b-form-input type="text" v-model="username" required placeholder="Username" :state="usernameState" autofocus/>
+          <b-form-input type="text" v-model="username" placeholder="Username" :state="usernameState" autofocus required/>
         </b-input-group>
         <b-input-group size="lg" class="mb-3">
           <b-input-group-prepend is-text>
             <b-icon icon="key-fill"/>
           </b-input-group-prepend>
-          <b-form-input type="password" v-model="password" required placeholder="Password" :state="passwordState"/>
+          <b-form-input type="password" v-model="password" placeholder="Password" :state="passwordState" required/>
         </b-input-group>
-        <b-button type="submit" variant="dark">Login</b-button>
+        <b-button type="submit" variant="dark" size="lg">Login</b-button>
       </form>
     </b-card>
   </div>
@@ -29,24 +28,20 @@
 import store from '../store/'
 export default {
   name: 'loginForm',
-  computed: {
-    usernameState () {
-      return this.username.length > 0 ? true : null
-    },
-    passwordState () {
-      return this.password.length > 0 ? true : null
-    }
-  },
   data () {
     return {
-      username: '',
-      password: '',
+      username: null,
+      password: null,
+      usernameState: null,
+      passwordState: null,
       loginError: false
     }
   },
   methods: {
     handleLogin (event) {
-      if (this.username !== '' && this.password !== '') {
+      this.usernameState = (this.username !== null)
+      this.passwordState = (this.password !== null)
+      if (this.usernameState && this.passwordState) {
         store.dispatch('loginAction', { username: this.username, password: this.password })
           .then(() => {
             this.loginError = false
@@ -64,7 +59,7 @@ export default {
 <style>
 #login-page {
   height: 100%;
-  background-image: url('~@/assets/art.jpg');
+  background-image: url('/static/welcome.jpg');
   background-size: cover;
 }
 #login-form {

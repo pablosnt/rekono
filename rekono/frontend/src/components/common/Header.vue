@@ -2,13 +2,12 @@
   <div>
     <b-navbar type="dark" variant="dark">
       <b-navbar-brand href="/" style="margin-left: 15px">
-        <img src="/static/logo.png" width="30" height="30" class="d-inline-block align-top" alt="Rekono">
-        Rekono
+        <img src="/static/logo-white.png" width="120" height="30" class="d-inline-block align-top" alt="Rekono">
       </b-navbar-brand>
       <b-navbar-nav class="ml-auto">
         <b-nav-item-dropdown right>
           <template #button-content>
-            <b-icon style="width: 30px; height: 30px;" icon="person-fill"/>
+            <b-icon style="width: 20px; height: 20px;" icon="person-fill" variant="light"/>
           </template>
           <b-dropdown-item href="#">Profile</b-dropdown-item>
           <b-dropdown-item v-on:click.prevent="handleLogout">Logout</b-dropdown-item>

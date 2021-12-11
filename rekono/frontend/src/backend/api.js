@@ -41,6 +41,7 @@ class RekonoApi {
   refresh () {
     return this.post('/api/token/refresh/', { refresh: localStorage[refreshTokenKey] })
       .then(response => {
+        console.log(response.data)
         var claims = this.processTokens(response.data)
         return Promise.resolve(claims)
       })
