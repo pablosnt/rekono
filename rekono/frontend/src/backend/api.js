@@ -39,9 +39,9 @@ class RekonoApi {
   }
 
   refresh () {
-    return this.post('/api/token/refresh/', { refresh: localStorage[refreshTokenKey] })
+    return axios.post('/api/token/refresh/', { refresh: localStorage[refreshTokenKey] }, this.headers())
       .then(response => {
-        console.log(response.data)
+        this.removeTokens()
         var claims = this.processTokens(response.data)
         return Promise.resolve(claims)
       })
@@ -59,6 +59,7 @@ class RekonoApi {
       .catch(error => {
         if (error.response && error.response.status === 401) {
           if (retry) {
+            this.removeTokens()
             store.dispatch('redirectToLogin')
           } else {
             return this.refresh()
@@ -72,6 +73,13 @@ class RekonoApi {
 
   get (endpoint, requiredAuth = true, extraHeaders = null) {
     return this.request(axios.get, endpoint, this.headers(requiredAuth, extraHeaders))
+  }
+
+  paginatedGet (endpoint, page = null, size = null, requiredAuth = true, extraHeaders = null) {
+    if (page !== null && size !== null) {
+      endpoint += '&page=' + page + '&size=' + size
+    }
+    return this.get(endpoint, requiredAuth, extraHeaders)
   }
 
   post (endpoint, data, requiredAuth = true, extraHeaders = null) {

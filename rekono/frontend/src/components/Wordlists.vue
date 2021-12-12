@@ -22,6 +22,7 @@
         </b-dropdown>
       </template>
     </b-table>
+    <Pagination :page="page" :size="size" :sizes="sizes" :total="total" name="wordlists" @pagination="pagination"/>
     <DeleteConfirmation id="delete-wordlist-modal"
       title="Delete Wordlist"
       @deletion="deleteWordlist"
@@ -29,10 +30,7 @@
       v-if="selectedWordlist !== null && selectedWordlist !== null">
       <span slot="body"><strong>{{ this.selectedWordlist.name }}</strong> wordlist</span>
     </DeleteConfirmation>
-    <WordlistForm id="wordlist-modal"
-      :wordlist="selectedWordlist"
-      @confirm="confirm"
-      @clean="cleanSelection"/>
+    <WordlistForm id="wordlist-modal" :wordlist="selectedWordlist" @confirm="confirm" @clean="cleanSelection"/>
   </div>
 </template>
 
@@ -40,12 +38,14 @@
 import WordlistApi from '../backend/resources'
 import DeleteConfirmation from './common/DeleteConfirmation.vue'
 import WordlistForm from './forms/WordlistForm.vue'
+import Pagination from './common/Pagination.vue'
+import PaginationMixin from './common/PaginationMixin.vue'
 export default {
   name: 'wordlistsPage',
+  mixins: [PaginationMixin],
   data () {
-    this.updateWordlists()
     return {
-      wordlists: [],
+      wordlists: this.fetchData(1, 25),
       wordlistsFields: [
         {key: 'name', sortable: true},
         {key: 'type', sortable: true},
@@ -58,9 +58,13 @@ export default {
   },
   components: {
     DeleteConfirmation,
-    WordlistForm
+    WordlistForm,
+    Pagination
   },
   methods: {
+    fetchData (page = null, size = null) {
+      WordlistApi.getAllWordlists(page, size).then(wordlists => { this.wordlists = wordlists })
+    },
     deleteWordlist () {
       WordlistApi.deleteWordlist(this.selectedWordlist.id)
         .then(() => {
@@ -70,7 +74,7 @@ export default {
             variant: 'warning',
             solid: true
           })
-          this.updateWordlists()
+          this.fetchData(this.page, this.size)
         })
         .catch(() => {
           this.$bvToast.toast('Unexpected error in wordlist deletion', {
@@ -83,19 +87,8 @@ export default {
     selectWordlist (wordlist) {
       this.selectedWordlist = wordlist
     },
-    confirm (operation) {
-      if (operation.success) {
-        this.$bvModal.hide(operation.id)
-        if (operation.reload) {
-          this.updateWordlists()
-        }
-      }
-    },
     cleanSelection () {
       this.selectedWordlist = null
-    },
-    updateWordlists () {
-      WordlistApi.getAllWordlists().then(wordlists => { this.wordlists = wordlists })
     }
   }
 }

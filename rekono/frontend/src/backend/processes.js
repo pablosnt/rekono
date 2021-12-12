@@ -1,15 +1,15 @@
 import RekonoApi from './api'
 
 class Process extends RekonoApi {
-  getAllProcesses () {
-    return super.get('/api/processes/?o=name')
+  getAllProcesses (page = null, size = null) {
+    return super.paginatedGet('/api/processes/?o=name', page, size)
       .then(response => {
         return response.data.results
       })
   }
 
-  getProcessesByUser (userId) {
-    return super.get('/api/processes/?o=name&creator=' + userId.toString())
+  getProcessesByUser (userId, page = null, size = null) {
+    return super.paginatedGet('/api/processes/?o=name&creator=' + userId.toString(), page, size)
       .then(response => {
         return response.data.results
       })

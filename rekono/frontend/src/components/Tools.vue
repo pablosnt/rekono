@@ -38,18 +38,10 @@
         </b-card>
       </template>
     </b-table>
-    <ProcessForm id="new-process-modal"
-      :tool="selectedTool"
-      @confirm="confirm"
-      @clean="cleanSelection"/>
-    <StepForm id="new-step-modal"
-      :tool="selectedTool"
-      @confirm="confirm"
-      @clean="cleanSelection"/>
-    <TaskForm id="execute-modal"
-      :tool="selectedTool"
-      @confirm="confirm"
-      @clean="cleanSelection"/>
+    <Pagination :page="page" :size="size" :sizes="sizes" :total="total" name="tools" @pagination="pagination"/>
+    <ProcessForm id="new-process-modal" :tool="selectedTool" @confirm="confirm" @clean="cleanSelection"/>
+    <StepForm id="new-step-modal" :tool="selectedTool" @confirm="confirm" @clean="cleanSelection"/>
+    <TaskForm id="execute-modal" :tool="selectedTool" @confirm="confirm" @clean="cleanSelection"/>
   </div>
 </template>
 
@@ -58,12 +50,15 @@ import ToolApi from '../backend/tools'
 import ProcessForm from './forms/ProcessForm.vue'
 import StepForm from './forms/StepForm.vue'
 import TaskForm from './forms/TaskForm.vue'
+import Pagination from './common/Pagination.vue'
+import PaginationMixin from './common/PaginationMixin.vue'
 export default {
   name: 'toolsPage',
+  mixins: [PaginationMixin],
   data () {
     return {
       auditor: ['Admin', 'Auditor'],
-      tools: this.getTools(),
+      tools: this.fetchData(1, 25),
       toolsFields: [
         {key: 'icon', sortable: false},
         {key: 'name', label: 'Tool', sortable: true},
@@ -84,16 +79,18 @@ export default {
   components: {
     ProcessForm,
     StepForm,
-    TaskForm
+    TaskForm,
+    Pagination
   },
   methods: {
-    getTools () {
-      ToolApi.getTools()
-        .then(tools => {
-          for (var t = 0; t < tools.length; t++) {
+    fetchData (page = null, size = null) {
+      ToolApi.getTools(page, size)
+        .then(data => {
+          this.total = data.count
+          for (var t = 0; t < data.results.length; t++) {
             var intensities = []
-            for (var i = 0; i < tools[t].intensities.length; i++) {
-              var value = tools[t].intensities[i].intensity_rank
+            for (var i = 0; i < data.results[t].intensities.length; i++) {
+              var value = data.results[t].intensities[i].intensity_rank
               var variant = 'secondary'
               if (value === 'Sneaky') variant = 'info'
               else if (value === 'Low') variant = 'success'
@@ -106,39 +103,31 @@ export default {
               }
               intensities.push(intensity)
             }
-            tools[t].intensities = intensities
-            for (var c = 0; c < tools[t].configurations.length; c++) {
+            data.results[t].intensities = intensities
+            for (var c = 0; c < data.results[t].configurations.length; c++) {
               var inputsText = ''
-              for (i = 0; i < tools[t].configurations[c].inputs.length; i++) {
-                inputsText += tools[t].configurations[c].inputs[i].type
-                if (i + 1 < tools[t].configurations[c].inputs.length) {
+              for (i = 0; i < data.results[t].configurations[c].inputs.length; i++) {
+                inputsText += data.results[t].configurations[c].inputs[i].type
+                if (i + 1 < data.results[t].configurations[c].inputs.length) {
                   inputsText += ', '
                 }
               }
               var outputsText = ''
-              for (var o = 0; o < tools[t].configurations[c].outputs.length; o++) {
-                outputsText += tools[t].configurations[c].outputs[o].type
-                if (o + 1 < tools[t].configurations[c].outputs.length) {
+              for (var o = 0; o < data.results[t].configurations[c].outputs.length; o++) {
+                outputsText += data.results[t].configurations[c].outputs[o].type
+                if (o + 1 < data.results[t].configurations[c].outputs.length) {
                   outputsText += ', '
                 }
               }
-              tools[t].configurations[c].inputs_text = inputsText
-              tools[t].configurations[c].outputs_text = outputsText
+              data.results[t].configurations[c].inputs_text = inputsText
+              data.results[t].configurations[c].outputs_text = outputsText
             }
           }
-          this.tools = tools
+          this.tools = data.results
         })
     },
     selectTool (tool) {
       this.selectedTool = tool
-    },
-    confirm (operation) {
-      if (operation.success) {
-        this.$bvModal.hide(operation.id)
-        if (operation.reload) {
-          this.tools = this.getTools()
-        }
-      }
     },
     cleanSelection () {
       this.selectedTool = null

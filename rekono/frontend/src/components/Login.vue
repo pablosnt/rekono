@@ -25,7 +25,6 @@
 </template>
 
 <script>
-import store from '../store/'
 export default {
   name: 'loginForm',
   data () {
@@ -42,7 +41,7 @@ export default {
       this.usernameState = (this.username !== null)
       this.passwordState = (this.password !== null)
       if (this.usernameState && this.passwordState) {
-        store.dispatch('loginAction', { username: this.username, password: this.password })
+        this.$store.dispatch('loginAction', { username: this.username, password: this.password })
           .then(() => {
             this.loginError = false
             this.$router.push('/')
@@ -59,7 +58,7 @@ export default {
 <style>
 #login-page {
   height: 100%;
-  background-image: url('/static/welcome.jpg');
+  background-image: url('/static/background.jpg');
   background-size: cover;
 }
 #login-form {

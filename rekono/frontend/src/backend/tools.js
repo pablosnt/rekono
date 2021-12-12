@@ -1,10 +1,10 @@
 import RekonoApi from './api'
 
 class Tool extends RekonoApi {
-  getTools () {
-    return super.get('/api/tools/?o=stage')
+  getTools (page = null, size = null) {
+    return super.paginatedGet('/api/tools/?o=stage', page, size)
       .then(response => {
-        return response.data.results
+        return response.data
       })
   }
 }

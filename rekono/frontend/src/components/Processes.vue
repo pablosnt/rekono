@@ -62,6 +62,7 @@
           </b-card>
         </template>
     </b-table>
+    <Pagination :page="page" :size="size" :sizes="sizes" :total="total" name="processes" @pagination="pagination"/>
     <DeleteConfirmation id="delete-process-modal"
       title="Delete Process"
       @deletion="deleteProcess"
@@ -76,19 +77,9 @@
       v-if="selectedProcess !== null && selectedStep !== null">
       <span slot="body"><strong>{{ this.selectedStep.tool.name }}</strong> step from <strong>{{ selectedProcess.name }}</strong> process</span>
     </DeleteConfirmation>
-    <ProcessForm id="process-modal"
-      :process="selectedProcess"
-      @confirm="confirm"
-      @clean="cleanSelection"/>
-    <StepForm id="step-modal"
-      :process="selectedProcess"
-      :step="selectedStep"
-      @confirm="confirm"
-      @clean="cleanSelection"/>
-    <TaskForm id="execute-modal"
-      :process="selectedProcess"
-      @confirm="confirm"
-      @clean="cleanSelection"/>
+    <ProcessForm id="process-modal" :process="selectedProcess" @confirm="confirm" @clean="cleanSelection"/>
+    <StepForm id="step-modal" :process="selectedProcess" :step="selectedStep" @confirm="confirm" @clean="cleanSelection"/>
+    <TaskForm id="execute-modal" :process="selectedProcess" @confirm="confirm" @clean="cleanSelection"/>
   </div>
 </template>
 
@@ -98,14 +89,16 @@ import DeleteConfirmation from './common/DeleteConfirmation.vue'
 import ProcessForm from './forms/ProcessForm.vue'
 import StepForm from './forms/StepForm.vue'
 import TaskForm from './forms/TaskForm.vue'
+import Pagination from './common/Pagination.vue'
+import PaginationMixin from './common/PaginationMixin.vue'
 const ProcessApi = Processes.ProcessApi
 const StepApi = Processes.StepApi
 export default {
   name: 'processesPage',
+  mixins: [PaginationMixin],
   data () {
-    this.updateProcesses()
     return {
-      processes: [],
+      processes: this.fetchData(1, 25),
       processesFields: [
         {key: 'name', label: 'Process', sortable: true},
         {key: 'steps.length', label: 'Steps', sortable: true},
@@ -128,9 +121,13 @@ export default {
     DeleteConfirmation,
     ProcessForm,
     StepForm,
-    TaskForm
+    TaskForm,
+    Pagination
   },
   methods: {
+    fetchData (page = null, size = null) {
+      ProcessApi.getAllProcesses(page, size).then(processes => { this.processes = processes })
+    },
     deleteProcess () {
       ProcessApi.deleteProcess(this.selectedProcess.id)
         .then(() => {
@@ -140,7 +137,7 @@ export default {
             variant: 'warning',
             solid: true
           })
-          this.updateProcesses()
+          this.fetchData(this.page, this.size)
         })
         .catch(() => {
           this.$bvToast.toast('Unexpected error in process deletion', {
@@ -159,7 +156,7 @@ export default {
             variant: 'warning',
             solid: true
           })
-          this.updateProcesses()
+          this.fetchData(this.page, this.size)
         })
         .catch(() => {
           this.$bvToast.toast('Unexpected error in step deletion', {
@@ -176,20 +173,9 @@ export default {
       this.selectProcess(process)
       this.selectedStep = step
     },
-    confirm (operation) {
-      if (operation.success) {
-        this.$bvModal.hide(operation.id)
-        if (operation.reload) {
-          this.updateProcesses()
-        }
-      }
-    },
     cleanSelection () {
       this.selectedProcess = null
       this.selectedStep = null
-    },
-    updateProcesses () {
-      ProcessApi.getAllProcesses().then(processes => { this.processes = processes })
     }
   }
 }
