@@ -1,6 +1,6 @@
 import axios from 'axios'
 import jwtDecode from 'jwt-decode'
-import store from '../store'
+import store from '@/store'
 import { accessTokenKey, refreshTokenKey } from './utils'
 
 class RekonoApi {
@@ -10,7 +10,7 @@ class RekonoApi {
   }
 
   decodeToken (accessToken) {
-    var decoded = jwtDecode(accessToken)
+    const decoded = jwtDecode(accessToken)
     return {
       user: decoded.user_id,
       role: decoded.role
@@ -24,13 +24,12 @@ class RekonoApi {
   }
 
   headers (requiredAuth = true, extraHeaders = null) {
-    var requestHeaders = {
+    let requestHeaders = {
       'Content-Type': 'application/json',
-      'Accept': 'application/json'
+      Accept: 'application/json'
     }
     if (store.state.user !== null && requiredAuth) {
-      var accessToken = localStorage[accessTokenKey]
-      requestHeaders['Authorization'] = 'Bearer ' + accessToken
+      requestHeaders.Authorization = 'Bearer ' + localStorage[accessTokenKey]
     }
     if (extraHeaders !== null) {
       requestHeaders = Object.assign({}, requestHeaders, extraHeaders)
@@ -42,13 +41,12 @@ class RekonoApi {
     return axios.post('/api/token/refresh/', { refresh: localStorage[refreshTokenKey] }, this.headers())
       .then(response => {
         this.removeTokens()
-        var claims = this.processTokens(response.data)
-        return Promise.resolve(claims)
+        return Promise.resolve(this.processTokens(response.data))
       })
   }
 
   request (method, endpoint, data = null, requiredAuth = true, extraHeaders = null, retry = false) {
-    var req = null
+    let req = null
     if (data !== null) {
       req = method(endpoint, data, { headers: this.headers(requiredAuth, extraHeaders) })
     } else {

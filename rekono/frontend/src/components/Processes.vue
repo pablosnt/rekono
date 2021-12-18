@@ -21,16 +21,16 @@
             <b-dropdown-item @click="showStepForm(row.item)" v-b-modal.step-modal :disabled="$store.state.role !== 'Admin' && $store.state.user !== row.item.creator.id">
               <div style="display: inline">
                 <b-icon variant="success" icon="plus-square"/>
-                <label variant="dark">Add Step</label>
+                <label class="ml-1" variant="dark">Add Step</label>
               </div>
             </b-dropdown-item>
             <b-dropdown-item variant="dark" @click="showProcessForm(row.item)" v-b-modal.process-modal :disabled="$store.state.role !== 'Admin' && $store.state.user !== row.item.creator.id">
               <b-icon icon="pencil-square"/>
-              <label>Edit</label>
+              <label class="ml-1">Edit</label>
             </b-dropdown-item>
             <b-dropdown-item variant="danger" @click="selectProcess(row.item)" v-b-modal.delete-process-modal :disabled="$store.state.role !== 'Admin' && $store.state.user !== row.item.creator.id">
               <b-icon icon="trash-fill"/>
-              <label>Delete</label>
+              <label class="ml-1">Delete</label>
             </b-dropdown-item>
           </b-dropdown>
         </template>
@@ -50,11 +50,11 @@
                   </template>
                   <b-dropdown-item variant="dark" @click="showStepForm(row.item, step.item)" v-b-modal.step-modal :disabled="$store.state.role !== 'Admin' && $store.state.user !== row.item.creator.id">
                     <b-icon icon="pencil-square"/>
-                    <label>Edit</label>
+                    <label class="ml-1">Edit</label>
                   </b-dropdown-item>
                   <b-dropdown-item variant="danger" @click="selectStep(row.item, step.item)" v-b-modal.delete-step-modal :disabled="$store.state.role !== 'Admin' && $store.state.user !== row.item.creator.id">
                     <b-icon icon="trash-fill"/>
-                    <label>Delete</label>
+                    <label class="ml-1">Delete</label>
                   </b-dropdown-item>
                 </b-dropdown>
               </template>
@@ -63,20 +63,20 @@
         </template>
     </b-table>
     <Pagination :page="page" :size="size" :sizes="sizes" :total="total" name="processes" @pagination="pagination"/>
-    <DeleteConfirmation id="delete-process-modal"
+    <Deletion id="delete-process-modal"
       title="Delete Process"
       @deletion="deleteProcess"
       @clean="cleanSelection"
       v-if="selectedProcess !== null">
-      <span slot="body"><strong>{{ selectedProcess.name }}</strong> process</span>
-    </DeleteConfirmation>
-    <DeleteConfirmation id="delete-step-modal"
+      <span><strong>{{ selectedProcess.name }}</strong> process</span>
+    </Deletion>
+    <Deletion id="delete-step-modal"
       title="Delete Step"
       @deletion="deleteStep"
       @clean="cleanSelection"
       v-if="selectedProcess !== null && selectedStep !== null">
-      <span slot="body"><strong>{{ this.selectedStep.tool.name }}</strong> step from <strong>{{ selectedProcess.name }}</strong> process</span>
-    </DeleteConfirmation>
+      <span><strong>{{ this.selectedStep.tool.name }}</strong> step from <strong>{{ selectedProcess.name }}</strong> process</span>
+    </Deletion>
     <ProcessForm id="process-modal" :process="selectedProcess" :initialized="processForm" @confirm="confirm" @clean="cleanSelection"/>
     <StepForm id="step-modal" :process="selectedProcess" :step="selectedStep" :initialized="stepForm" @confirm="confirm" @clean="cleanSelection"/>
     <TaskForm id="execute-modal" :process="selectedProcess" :initialized="taskForm" @confirm="confirm" @clean="cleanSelection"/>
@@ -84,13 +84,13 @@
 </template>
 
 <script>
-import Processes from '../backend/processes'
-import DeleteConfirmation from './common/DeleteConfirmation.vue'
-import ProcessForm from './forms/ProcessForm.vue'
-import StepForm from './forms/StepForm.vue'
-import TaskForm from './forms/TaskForm.vue'
-import Pagination from './common/Pagination.vue'
-import PaginationMixin from './common/PaginationMixin.vue'
+import Processes from '@/backend/processes'
+import Deletion from '@/common/Deletion.vue'
+import Pagination from '@/common/Pagination.vue'
+import PaginationMixin from '@/common/PaginationMixin.vue'
+import ProcessForm from '@/forms/ProcessForm.vue'
+import StepForm from '@/forms/StepForm.vue'
+import TaskForm from '@/forms/TaskForm.vue'
 const ProcessApi = Processes.ProcessApi
 const StepApi = Processes.StepApi
 export default {
@@ -100,18 +100,18 @@ export default {
     return {
       processes: this.fetchData(1, 25),
       processesFields: [
-        {key: 'name', label: 'Process', sortable: true},
-        {key: 'steps.length', label: 'Steps', sortable: true},
-        {key: 'creator.username', label: 'Creator', sortable: true},
-        {key: 'actions', sortable: false}
+        { key: 'name', label: 'Process', sortable: true },
+        { key: 'steps.length', label: 'Steps', sortable: true },
+        { key: 'creator.username', label: 'Creator', sortable: true },
+        { key: 'actions', sortable: false }
       ],
       stepsFields: [
-        {key: 'icon', sortable: false},
-        {key: 'tool.name', label: 'Tool', sortable: true},
-        {key: 'configuration.name', label: 'Configuration', sortable: true},
-        {key: 'tool.stage_name', label: 'Stage', sortable: true},
-        {key: 'priority', sortable: true},
-        {key: 'actions', sortable: false}
+        { key: 'icon', sortable: false },
+        { key: 'tool.name', label: 'Tool', sortable: true },
+        { key: 'configuration.name', label: 'Configuration', sortable: true },
+        { key: 'tool.stage_name', label: 'Stage', sortable: true },
+        { key: 'priority', sortable: true },
+        { key: 'actions', sortable: false }
       ],
       taskForm: false,
       processForm: false,
@@ -121,11 +121,11 @@ export default {
     }
   },
   components: {
-    DeleteConfirmation,
+    Deletion,
+    Pagination,
     ProcessForm,
     StepForm,
-    TaskForm,
-    Pagination
+    TaskForm
   },
   methods: {
     fetchData (page = null, size = null) {

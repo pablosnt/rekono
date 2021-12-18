@@ -9,7 +9,7 @@ class Wordlist extends RekonoApi {
   }
 
   createWordlist (name, type, file) {
-    var data = new FormData()
+    const data = new FormData()
     data.append('name', name)
     data.append('type', type)
     data.append('file', file)
@@ -20,7 +20,7 @@ class Wordlist extends RekonoApi {
   }
 
   updateWordlist (wordlistId, name, type, file) {
-    var data = new FormData()
+    const data = new FormData()
     data.append('name', name)
     data.append('type', type)
     data.append('file', file)

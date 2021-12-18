@@ -7,10 +7,7 @@
         </b-link>
       </template>
       <template #cell(intensities)="row">
-        <div v-for="item in row.item.intensities" v-bind:key="item.value" style="display: inline">
-          <b-badge :variant="item.variant" v-b-tooltip.hover :title="item.value">{{ item.summary }}</b-badge>
-          <span/>
-        </div>
+        <b-form-tag v-for="item in row.item.intensities" v-bind:key="item.value" :variant="item.variant" v-b-tooltip.hover.top="item.value" no-remove>{{ item.summary }}</b-form-tag>
       </template>
       <template #cell(actions)="row">
         <b-button @click="row.toggleDetails" variant="dark" class="mr-2" v-b-tooltip.hover title="Details">
@@ -46,12 +43,12 @@
 </template>
 
 <script>
-import ToolApi from '../backend/tools'
-import ProcessForm from './forms/ProcessForm.vue'
-import StepForm from './forms/StepForm.vue'
-import TaskForm from './forms/TaskForm.vue'
-import Pagination from './common/Pagination.vue'
-import PaginationMixin from './common/PaginationMixin.vue'
+import ToolApi from '@/backend/tools'
+import Pagination from '@/common/Pagination.vue'
+import PaginationMixin from '@/common/PaginationMixin.vue'
+import ProcessForm from '@/forms/ProcessForm.vue'
+import StepForm from '@/forms/StepForm.vue'
+import TaskForm from '@/forms/TaskForm.vue'
 export default {
   name: 'toolsPage',
   mixins: [PaginationMixin],
@@ -60,18 +57,18 @@ export default {
       auditor: ['Admin', 'Auditor'],
       tools: this.fetchData(1, 25),
       toolsFields: [
-        {key: 'icon', sortable: false},
-        {key: 'name', label: 'Tool', sortable: true},
-        {key: 'command', sortable: true},
-        {key: 'stage_name', label: 'Stage', sortable: true},
-        {key: 'intensities', sortable: true},
-        {key: 'actions', sortable: false}
+        { key: 'icon', sortable: false },
+        { key: 'name', label: 'Tool', sortable: true },
+        { key: 'command', sortable: true },
+        { key: 'stage_name', label: 'Stage', sortable: true },
+        { key: 'intensities', sortable: true },
+        { key: 'actions', sortable: false }
       ],
       configFields: [
-        {key: 'name', label: 'Configuration', sortable: true},
-        {key: 'default', sortable: true},
-        {key: 'inputs_text', label: 'Inputs', sortable: true},
-        {key: 'outputs_text', label: 'Outputs', sortable: true}
+        { key: 'name', label: 'Configuration', sortable: true },
+        { key: 'default', sortable: true },
+        { key: 'inputs_text', label: 'Inputs', sortable: true },
+        { key: 'outputs_text', label: 'Outputs', sortable: true }
       ],
       taskForm: false,
       processForm: false,
@@ -90,16 +87,16 @@ export default {
       ToolApi.getTools(page, size)
         .then(data => {
           this.total = data.count
-          for (var t = 0; t < data.results.length; t++) {
-            var intensities = []
-            for (var i = 0; i < data.results[t].intensities.length; i++) {
-              var value = data.results[t].intensities[i].intensity_rank
-              var variant = 'secondary'
+          for (let t = 0; t < data.results.length; t++) {
+            const intensities = []
+            for (let i = 0; i < data.results[t].intensities.length; i++) {
+              const value = data.results[t].intensities[i].intensity_rank
+              let variant = 'secondary'
               if (value === 'Sneaky') variant = 'info'
               else if (value === 'Low') variant = 'success'
               else if (value === 'Hard') variant = 'warning'
               else if (value === 'Insane') variant = 'danger'
-              var intensity = {
+              const intensity = {
                 variant: variant,
                 value: value,
                 summary: value.charAt(0).toUpperCase()
@@ -107,16 +104,16 @@ export default {
               intensities.push(intensity)
             }
             data.results[t].intensities = intensities
-            for (var c = 0; c < data.results[t].configurations.length; c++) {
-              var inputsText = ''
-              for (i = 0; i < data.results[t].configurations[c].inputs.length; i++) {
+            for (let c = 0; c < data.results[t].configurations.length; c++) {
+              let inputsText = ''
+              for (let i = 0; i < data.results[t].configurations[c].inputs.length; i++) {
                 inputsText += data.results[t].configurations[c].inputs[i].type
                 if (i + 1 < data.results[t].configurations[c].inputs.length) {
                   inputsText += ', '
                 }
               }
-              var outputsText = ''
-              for (var o = 0; o < data.results[t].configurations[c].outputs.length; o++) {
+              let outputsText = ''
+              for (let o = 0; o < data.results[t].configurations[c].outputs.length; o++) {
                 outputsText += data.results[t].configurations[c].outputs[o].type
                 if (o + 1 < data.results[t].configurations[c].outputs.length) {
                   outputsText += ', '

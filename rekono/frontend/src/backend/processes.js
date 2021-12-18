@@ -15,8 +15,8 @@ class Process extends RekonoApi {
       })
   }
 
-  createProcess = (name, description) => {
-    var data = {
+  createProcess (name, description) {
+    const data = {
       name: name,
       description: description
     }
@@ -27,7 +27,7 @@ class Process extends RekonoApi {
   }
 
   updateProcess (processId, name, description) {
-    var data = {
+    const data = {
       name: name,
       description: description
     }
@@ -47,7 +47,7 @@ class Process extends RekonoApi {
 
 class Step extends RekonoApi {
   createStep (processId, toolId, configurationId, priority) {
-    var data = {
+    const data = {
       process: processId,
       tool_id: toolId,
       configuration_id: configurationId,
@@ -60,7 +60,7 @@ class Step extends RekonoApi {
   }
 
   updateStep (stepId, priority) {
-    var data = {
+    const data = {
       priority: priority
     }
     return super.put('/api/steps/' + stepId + '/', data)

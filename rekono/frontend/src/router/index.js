@@ -1,28 +1,26 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import store from '../store'
-
-import Login from '@/components/Login'
-import Main from '@/components/Main'
+import store from '@/store'
+import Login from '@/views/Login'
+import Main from '@/views/Main'
 
 Vue.use(Router)
 
-var router = new Router({
-  routes: [
-    {
-      path: '/login',
-      name: 'login',
-      component: Login
-    },
-    {
-      path: '/(dashboard|projects|tools|processes|wordlists|users|)',
-      name: 'main',
-      component: Main
-    }
-  ]
-})
-
 const publicRoutes = ['login']
+const routes = [
+  {
+    path: '/login',
+    name: 'login',
+    component: Login
+  },
+  {
+    path: '/(dashboard|projects|tools|processes|wordlists|users|)',
+    name: 'main',
+    component: Main
+  }
+]
+
+const router = new Router({ routes: routes })
 
 router.beforeEach((to, from, next) => {
   store.dispatch('checkState')

@@ -45,9 +45,9 @@
 </template>
 
 <script>
-import Processes from '../../backend/processes'
-import ToolApi from '../../backend/tools'
-import { findById } from '../../backend/utils'
+import Processes from '@/backend/processes'
+import ToolApi from '@/backend/tools'
+import { findById } from '@/backend/utils'
 const ProcessApi = Processes.ProcessApi
 const StepApi = Processes.StepApi
 export default {
@@ -76,7 +76,7 @@ export default {
       return (this.step !== null)
     },
     title () {
-      var start = this.edit ? 'Edit step from ' : 'New step for '
+      const start = this.edit ? 'Edit step from ' : 'New step for '
       if (this.process !== null) {
         return start + this.process.name
       } else if (this.tool !== null) {
@@ -128,7 +128,7 @@ export default {
           this.tools = [this.selectedTool]
         }
         if (this.process === null) {
-          var req = null
+          let req = null
           if (this.$store.state.role === 'Admin') {
             req = ProcessApi.getAllProcesses()
           } else {
@@ -145,7 +145,7 @@ export default {
       this.processState = (this.processId !== null)
       this.toolState = (this.toolId !== null)
       if (!this.edit && this.selectedProcess !== null) {
-        for (var s = 0; s < this.selectedProcess.steps.length; s++) {
+        for (let s = 0; s < this.selectedProcess.steps.length; s++) {
           if (this.selectedProcess.steps[s].tool.id === this.toolId && this.selectedProcess.steps[s].configuration.id === this.configurationId) {
             this.configState = false
             return false
@@ -157,7 +157,7 @@ export default {
     confirm (event) {
       event.preventDefault()
       if (this.check()) {
-        var operation = this.edit ? this.update() : this.create()
+        const operation = this.edit ? this.update() : this.create()
         operation.then((success) => this.$emit('confirm', { id: this.id, success: success, reload: true }))
       }
     },
@@ -231,3 +231,9 @@ export default {
   }
 }
 </script>
+
+// <style lang="scss" scoped>
+// $theme-colors: (
+//   "primary": red
+// );
+// </style>

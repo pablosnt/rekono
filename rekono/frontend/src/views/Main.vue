@@ -42,12 +42,12 @@
 </template>
 
 <script>
-import Dashboard from './Dashboard.vue'
-import Projects from './Projects.vue'
-import Tools from './Tools.vue'
-import Processes from './Processes.vue'
-import Wordlists from './Wordlists.vue'
-import Users from './Users.vue'
+import Dashboard from '@/components/Dashboard.vue'
+import Projects from '@/components/Projects.vue'
+import Tools from '@/components/Tools.vue'
+import Processes from '@/components/Processes.vue'
+import Wordlists from '@/components/Wordlists.vue'
+import Users from '@/components/Users.vue'
 export default {
   name: 'mainPage',
   data () {
@@ -57,12 +57,12 @@ export default {
     }
   },
   components: {
-    'dashboard': Dashboard,
-    'projects': Projects,
-    'tools': Tools,
-    'processes': Processes,
-    'wordlists': Wordlists,
-    'users': Users
+    dashboard: Dashboard,
+    projects: Projects,
+    tools: Tools,
+    processes: Processes,
+    wordlists: Wordlists,
+    users: Users
   },
   methods: {
     changeHref (href) {

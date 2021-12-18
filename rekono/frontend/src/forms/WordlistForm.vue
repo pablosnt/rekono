@@ -15,7 +15,7 @@
 </template>
 
 <script>
-import WordlistApi from '../../backend/resources'
+import WordlistApi from '@/backend/resources'
 export default {
   name: 'wordlistForm',
   initialized: {
@@ -83,7 +83,7 @@ export default {
     confirm (event) {
       event.preventDefault()
       if (this.check()) {
-        var operation = this.edit ? this.update() : this.create()
+        const operation = this.edit ? this.update() : this.create()
         operation.then((success) => this.$emit('confirm', { id: this.id, success: success, reload: true }))
       }
     },

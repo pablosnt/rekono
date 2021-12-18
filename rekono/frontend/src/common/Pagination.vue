@@ -25,8 +25,8 @@ export default {
   computed: {
     sizesItems () {
       if (this.total > 0) {
-        var items = [this.sizes[0]]
-        for (var s = 1; s < this.sizes.length; s++) {
+        const items = [this.sizes[0]]
+        for (let s = 1; s < this.sizes.length; s++) {
           if (this.sizes[s] < this.total) {
             items.push(this.sizes[s])
           }

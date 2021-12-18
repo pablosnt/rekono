@@ -13,33 +13,33 @@
           </template>
           <b-dropdown-item variant="dark" @click="selectWordlist(row.item)" v-b-modal.wordlist-modal :disabled="$store.state.role !== 'Admin' && $store.state.user !== row.item.creator.id">
             <b-icon icon="pencil-square"/>
-            <label>Edit</label>
+            <label class="ml-1">Edit</label>
           </b-dropdown-item>
           <b-dropdown-item variant="danger" @click="selectWordlist(row.item)" v-b-modal.delete-wordlist-modal :disabled="$store.state.role !== 'Admin' && $store.state.user !== row.item.creator.id">
             <b-icon icon="trash-fill"/>
-            <label>Delete</label>
+            <label class="ml-1">Delete</label>
           </b-dropdown-item>
         </b-dropdown>
       </template>
     </b-table>
     <Pagination :page="page" :size="size" :sizes="sizes" :total="total" name="wordlists" @pagination="pagination"/>
-    <DeleteConfirmation id="delete-wordlist-modal"
+    <Deletion id="delete-wordlist-modal"
       title="Delete Wordlist"
       @deletion="deleteWordlist"
       @clean="cleanSelection"
       v-if="selectedWordlist !== null && selectedWordlist !== null">
-      <span slot="body"><strong>{{ this.selectedWordlist.name }}</strong> wordlist</span>
-    </DeleteConfirmation>
+      <span><strong>{{ this.selectedWordlist.name }}</strong> wordlist</span>
+    </Deletion>
     <WordlistForm id="wordlist-modal" :wordlist="selectedWordlist" :initialized="selectedWordlist !== null" @confirm="confirm" @clean="cleanSelection"/>
   </div>
 </template>
 
 <script>
-import WordlistApi from '../backend/resources'
-import DeleteConfirmation from './common/DeleteConfirmation.vue'
-import WordlistForm from './forms/WordlistForm.vue'
-import Pagination from './common/Pagination.vue'
-import PaginationMixin from './common/PaginationMixin.vue'
+import WordlistApi from '@/backend/resources'
+import Deletion from '@/common/Deletion.vue'
+import Pagination from '@/common/Pagination.vue'
+import PaginationMixin from '@/common/PaginationMixin.vue'
+import WordlistForm from '@/forms/WordlistForm.vue'
 export default {
   name: 'wordlistsPage',
   mixins: [PaginationMixin],
@@ -47,19 +47,19 @@ export default {
     return {
       wordlists: this.fetchData(1, 25),
       wordlistsFields: [
-        {key: 'name', sortable: true},
-        {key: 'type', sortable: true},
-        {key: 'size', sortable: true},
-        {key: 'creator.username', label: 'Creator', sortable: true},
-        {key: 'actions', sortable: false}
+        { key: 'name', sortable: true },
+        { key: 'type', sortable: true },
+        { key: 'size', sortable: true },
+        { key: 'creator.username', label: 'Creator', sortable: true },
+        { key: 'actions', sortable: false }
       ],
       selectedWordlist: null
     }
   },
   components: {
-    DeleteConfirmation,
-    WordlistForm,
-    Pagination
+    Deletion,
+    Pagination,
+    WordlistForm
   },
   methods: {
     fetchData (page = null, size = null) {

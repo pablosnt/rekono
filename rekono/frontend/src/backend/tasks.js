@@ -2,7 +2,7 @@ import RekonoApi from './api'
 
 class Task extends RekonoApi {
   createTask (target, process, tool, configuration, intensity, scheduledAtDate, scheduledAtTime, scheduledIn, scheduledTimeUnit, repeatIn, repeatTimeUnit, wordlists) {
-    var data = {
+    const data = {
       target: target,
       process: process,
       tool: tool,

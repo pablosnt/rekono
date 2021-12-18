@@ -5,8 +5,7 @@ class Authentication extends RekonoApi {
   login (username, password) {
     return super.post('/api/token/', { username: username, password: password }, false)
       .then(response => {
-        var claims = super.processTokens(response.data)
-        return Promise.resolve(claims)
+        return Promise.resolve(super.processTokens(response.data))
       })
   }
 

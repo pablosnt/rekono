@@ -21,7 +21,7 @@
 export default {
   name: 'commonHeader',
   methods: {
-    handleLogout (event) {
+    handleLogout () {
       this.$store.dispatch('logoutAction')
     }
   }

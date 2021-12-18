@@ -85,12 +85,12 @@
 </template>
 
 <script>
-import Processes from '../../backend/processes'
-import ProjectApi from '../../backend/projects'
-import TaskApi from '../../backend/tasks'
-import ToolApi from '../../backend/tools'
-import WordlistApi from '../../backend/resources'
-import { findById } from '../../backend/utils'
+import Processes from '@/backend/processes'
+import ProjectApi from '@/backend/projects'
+import TaskApi from '@/backend/tasks'
+import ToolApi from '@/backend/tools'
+import WordlistApi from '@/backend/resources'
+import { findById } from '@/backend/utils'
 const ProcessApi = Processes.ProcessApi
 export default {
   name: 'taskForm',
@@ -111,7 +111,7 @@ export default {
   },
   computed: {
     title () {
-      var title = 'New Task'
+      let title = 'New Task'
       if (this.process !== null) {
         title = 'Execute ' + this.process.name
       } else if (this.tool !== null) {
@@ -193,7 +193,7 @@ export default {
       }
     },
     create () {
-      var notification = null
+      let notification = null
       if (this.selectedTool !== null) notification = this.selectedTool.name
       else if (this.selectedProcess !== null) notification = this.selectedProcess.name
       return TaskApi.createTask(this.targetId, this.processId, this.toolId, this.configurationId, this.intensity, this.scheduledAtDate, this.scheduledAtTime, this.scheduledIn, this.scheduledTimeUnit, this.repeatIn, this.repeatTimeUnit, this.wordlistsItems)
@@ -243,16 +243,16 @@ export default {
       this.scheduledAtState = null
     },
     checkInputType (inputType) {
-      var inputs = []
+      let inputs = []
       if (this.selectedConfiguration !== null) {
         inputs = this.selectedConfiguration.inputs
       } else if (this.selectedProcess !== null) {
-        for (var s = 0; s < this.selectedProcess.steps.length; s++) {
+        for (let s = 0; s < this.selectedProcess.steps.length; s++) {
           inputs = inputs.concat(this.selectedProcess.steps[s].configuration.inputs)
         }
       }
-      var check = false
-      for (var i = 0; i < inputs.length; i++) {
+      let check = false
+      for (let i = 0; i < inputs.length; i++) {
         if (inputs[i].type === inputType) {
           check = true
           break
@@ -295,7 +295,7 @@ export default {
       this.selectConfiguration(this.selectedTool.configurations[0].id, this.selectedTool.configurations[0])
       this.intensities = this.selectedTool.intensities
       this.intensity = null
-      for (var i = 0; i < this.intensities.length; i++) {
+      for (let i = 0; i < this.intensities.length; i++) {
         if (this.intensities[i].value === 'Normal') {
           this.intensity = 'Normal'
           break
