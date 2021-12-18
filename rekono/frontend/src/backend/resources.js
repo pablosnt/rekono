@@ -2,7 +2,7 @@ import RekonoApi from './api'
 
 class Wordlist extends RekonoApi {
   getAllWordlists (page = null, size = null) {
-    return super.get('/api/resources/wordlists/?o=type,name', page, size)
+    return super.paginatedGet('/api/resources/wordlists/?o=type,name', page, size)
       .then(response => {
         return response.data.results
       })
