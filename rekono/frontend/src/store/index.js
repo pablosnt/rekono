@@ -26,6 +26,8 @@ export default new Vuex.Store({
       var accessToken = localStorage.getItem(accessTokenKey)
       if (accessToken) {
         commit('login', AuthenticationApi.decodeToken(accessToken))
+      } else {
+        commit('login', { user: null, role: null })
       }
     },
     loginAction ({ commit }, { username, password }) {
@@ -43,7 +45,8 @@ export default new Vuex.Store({
           return Promise.resolve()
         })
     },
-    redirectToLogin () {
+    redirectToLogin ({ dispatch }) {
+      dispatch('checkState')
       router.push({ name: 'login' })
     }
   }
