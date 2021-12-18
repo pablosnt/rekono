@@ -1,5 +1,5 @@
 <template>
-  <b-modal :id="id" @hidden="clean" @ok="confirm" :title="title" :ok-title="button" header-bg-variant="secondary" header-text-variant="light" ok-variant="primary">
+  <b-modal :id="id" @hidden="clean" @ok="confirm" :title="title" :ok-title="button" header-bg-variant="dark" header-text-variant="light" ok-variant="dark">
     <b-form ref="wordlist_form">
       <b-form-group description="Name" invalid-feedback="Wordlist name is required">
         <b-form-input v-model="name" type="text" :state="nameState" maxlength="50" required/>

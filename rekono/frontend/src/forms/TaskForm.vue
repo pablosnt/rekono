@@ -32,7 +32,14 @@
             </b-form-group>
           </div>
           <b-form-group description="Execution intensity">
-            <b-form-select v-model="intensity" :options="intensities" value-field="value" text-field="value" required/>
+            <b-input-group>
+              <b-input-group-prepend is-text>
+                <div v-for="i in intensities" :key="i.value">
+                  <b-form-tag v-if="i.value === intensity" v-b-tooltip.hover.top="i.value" :variant="i.variant" no-remove>{{ i.value.charAt(0) }}</b-form-tag>
+                </div>
+              </b-input-group-prepend>
+              <b-form-select v-model="intensity" :options="intensities" value-field="value" text-field="value" required/>
+            </b-input-group>
           </b-form-group>
         </b-tab>
         <b-tab title-link-class="text-secondary" v-if="checkInputType('Wordlist')">
@@ -126,7 +133,7 @@ export default {
       processes: [],
       tools: [],
       wordlists: [],
-      intensities: ['Insane', 'Hard', 'Normal', 'Low', 'Sneaky'],
+      intensities: this.defaultIntensities(),
       timeUnits: ['Weeks', 'Days', 'Hours', 'Minutes'],
       selectedProject: null,
       selectedProcess: null,
@@ -173,6 +180,15 @@ export default {
     }
   },
   methods: {
+    defaultIntensities () {
+      return [
+        { value: 'Insane', variant: 'danger' },
+        { value: 'Hard', variant: 'warning' },
+        { value: 'Normal', variant: 'secondary' },
+        { value: 'Low', variant: 'success' },
+        { value: 'Sneaky', variant: 'info' }
+      ]
+    },
     check () {
       const valid = this.$refs.execute_form.checkValidity()
       this.projectState = (this.projectId !== null)
@@ -219,7 +235,7 @@ export default {
       this.processes = []
       this.tools = []
       this.wordlists = []
-      this.intensities = ['Insane', 'Hard', 'Normal', 'Low', 'Sneaky']
+      this.intensities = this.defaultIntensities()
       this.timeUnits = ['Weeks', 'Days', 'Hours', 'Minutes']
       this.selectedProject = null
       this.selectedProcess = null
@@ -273,7 +289,7 @@ export default {
       this.processId = processId
       this.toolId = null
       this.configurationId = null
-      this.intensities = ['Insane', 'Hard', 'Normal', 'Low', 'Sneaky']
+      this.intensities = this.defaultIntensities()
       this.intensity = 'Normal'
       if (process !== null) {
         this.selectedProcess = process
@@ -330,3 +346,9 @@ export default {
   }
 }
 </script>
+
+<style lang="scss" scoped>
+$component-active-bg: black;
+$custom-range-thumb-bg: green;
+@import 'bootstrap/scss/bootstrap';
+</style>

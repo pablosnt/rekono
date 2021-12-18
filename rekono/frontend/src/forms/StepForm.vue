@@ -1,5 +1,5 @@
 <template>
-  <b-modal :id="id" @hidden="clean" @ok="confirm" :title="title" :ok-title="button" header-bg-variant="secondary" header-text-variant="light" ok-variant="primary">
+  <b-modal :id="id" @hidden="clean" @ok="confirm" :title="title" :ok-title="button" header-bg-variant="dark" header-text-variant="light" ok-variant="dark">
     <template #modal-title v-if="tool !== null">
       <b-link :href="tool.reference" target="_blank">
         <b-img :src="tool.icon" width="100" height="50"/>
@@ -231,9 +231,3 @@ export default {
   }
 }
 </script>
-
-// <style lang="scss" scoped>
-// $theme-colors: (
-//   "primary": red
-// );
-// </style>

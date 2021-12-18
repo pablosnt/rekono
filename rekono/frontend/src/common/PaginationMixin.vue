@@ -5,8 +5,8 @@ export default {
   data () {
     return {
       page: 1,
-      size: 25,
-      sizes: [25, 50, 100],
+      size: 5,
+      sizes: [5, 25, 50, 100],
       total: 0
     }
   },
