@@ -11,20 +11,20 @@
             <b-icon v-if="!row.detailsShowing" icon="eye-fill"/>
             <b-icon v-if="row.detailsShowing" icon="eye-slash-fill"/>
           </b-button>
-          <b-button variant="success" class="mr-2" v-b-tooltip.hover title="Execute" @click="selectProcess(row.item)" v-b-modal.execute-modal>
+          <b-button variant="success" class="mr-2" v-b-tooltip.hover title="Execute" @click="showExecuteForm(row.item)" v-b-modal.execute-modal>
             <b-icon icon="play-fill"/>
           </b-button>
           <b-dropdown variant="outline-primary" right>
             <template #button-content>
               <b-icon icon="three-dots-vertical"/>
             </template>
-            <b-dropdown-item @click="selectProcess(row.item)" v-b-modal.step-modal :disabled="$store.state.role !== 'Admin' && $store.state.user !== row.item.creator.id">
+            <b-dropdown-item @click="showStepForm(row.item)" v-b-modal.step-modal :disabled="$store.state.role !== 'Admin' && $store.state.user !== row.item.creator.id">
               <div style="display: inline">
                 <b-icon variant="success" icon="plus-square"/>
                 <label variant="dark">Add Step</label>
               </div>
             </b-dropdown-item>
-            <b-dropdown-item variant="dark" @click="selectProcess(row.item)" v-b-modal.process-modal :disabled="$store.state.role !== 'Admin' && $store.state.user !== row.item.creator.id">
+            <b-dropdown-item variant="dark" @click="showProcessForm(row.item)" v-b-modal.process-modal :disabled="$store.state.role !== 'Admin' && $store.state.user !== row.item.creator.id">
               <b-icon icon="pencil-square"/>
               <label>Edit</label>
             </b-dropdown-item>
@@ -48,7 +48,7 @@
                   <template #button-content>
                     <b-icon icon="three-dots-vertical"/>
                   </template>
-                  <b-dropdown-item variant="dark" @click="selectStep(row.item, step.item)" v-b-modal.step-modal :disabled="$store.state.role !== 'Admin' && $store.state.user !== row.item.creator.id">
+                  <b-dropdown-item variant="dark" @click="showStepForm(row.item, step.item)" v-b-modal.step-modal :disabled="$store.state.role !== 'Admin' && $store.state.user !== row.item.creator.id">
                     <b-icon icon="pencil-square"/>
                     <label>Edit</label>
                   </b-dropdown-item>
@@ -77,9 +77,9 @@
       v-if="selectedProcess !== null && selectedStep !== null">
       <span slot="body"><strong>{{ this.selectedStep.tool.name }}</strong> step from <strong>{{ selectedProcess.name }}</strong> process</span>
     </DeleteConfirmation>
-    <ProcessForm id="process-modal" :process="selectedProcess" @confirm="confirm" @clean="cleanSelection"/>
-    <StepForm id="step-modal" :process="selectedProcess" :step="selectedStep" @confirm="confirm" @clean="cleanSelection"/>
-    <TaskForm id="execute-modal" :process="selectedProcess" @confirm="confirm" @clean="cleanSelection"/>
+    <ProcessForm id="process-modal" :process="selectedProcess" :initialized="processForm" @confirm="confirm" @clean="cleanSelection"/>
+    <StepForm id="step-modal" :process="selectedProcess" :step="selectedStep" :initialized="stepForm" @confirm="confirm" @clean="cleanSelection"/>
+    <TaskForm id="execute-modal" :process="selectedProcess" :initialized="taskForm" @confirm="confirm" @clean="cleanSelection"/>
   </div>
 </template>
 
@@ -113,6 +113,9 @@ export default {
         {key: 'priority', sortable: true},
         {key: 'actions', sortable: false}
       ],
+      taskForm: false,
+      processForm: false,
+      stepForm: false,
       selectedProcess: null,
       selectedStep: null
     }
@@ -166,6 +169,30 @@ export default {
           })
         })
     },
+    showExecuteForm (process, step = null) {
+      this.taskForm = true
+      if (step !== null) {
+        this.selectStep(process, step)
+      } else {
+        this.selectProcess(process)
+      }
+    },
+    showProcessForm (process, step = null) {
+      this.processForm = true
+      if (step !== null) {
+        this.selectStep(process, step)
+      } else {
+        this.selectProcess(process)
+      }
+    },
+    showStepForm (process, step = null) {
+      this.stepForm = true
+      if (step !== null) {
+        this.selectStep(process, step)
+      } else {
+        this.selectProcess(process)
+      }
+    },
     selectProcess (process) {
       this.selectedProcess = process
     },
@@ -174,6 +201,9 @@ export default {
       this.selectedStep = step
     },
     cleanSelection () {
+      this.taskForm = false
+      this.processForm = false
+      this.stepForm = false
       this.selectedProcess = null
       this.selectedStep = null
     }

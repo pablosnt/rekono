@@ -18,6 +18,10 @@
 import WordlistApi from '../../backend/resources'
 export default {
   name: 'wordlistForm',
+  initialized: {
+    type: Boolean,
+    default: false
+  },
   props: {
     id: String,
     wordlist: {
@@ -58,7 +62,7 @@ export default {
   },
   watch: {
     wordlist (wordlist) {
-      if (wordlist !== null) {
+      if (this.initialized && wordlist !== null) {
         this.name = wordlist.name
         this.type = wordlist.type
       }

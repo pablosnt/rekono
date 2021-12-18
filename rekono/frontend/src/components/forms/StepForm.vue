@@ -54,6 +54,10 @@ export default {
   name: 'stepForm',
   props: {
     id: String,
+    initialized: {
+      type: Boolean,
+      default: false
+    },
     process: {
       type: Object,
       default: null
@@ -86,7 +90,6 @@ export default {
   },
   data () {
     return {
-      initialized: false,
       tools: [],
       processes: [],
       processId: null,
@@ -101,22 +104,19 @@ export default {
   },
   watch: {
     process (process) {
-      if (process !== null) {
-        this.initialized = true
+      if (this.initialized && process !== null) {
         this.selectProcess(process.id, process)
       }
     },
     step (step) {
-      if (step !== null) {
-        this.initialized = true
+      if (this.initialized && step !== null) {
         step.tool.configurations = [step.configuration]
         this.selectTool(step.tool.id, step.tool)
         this.priority = step.priority
       }
     },
     tool (tool) {
-      if (tool !== null) {
-        this.initialized = true
+      if (this.initialized && tool !== null) {
         this.selectTool(tool.id, tool)
       }
     },
@@ -200,7 +200,6 @@ export default {
         })
     },
     clean () {
-      this.initialized = false
       this.tools = []
       this.processId = null
       this.toolId = null

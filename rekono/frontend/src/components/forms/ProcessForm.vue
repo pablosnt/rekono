@@ -39,6 +39,10 @@ export default {
   name: 'processForm',
   props: {
     id: String,
+    initialized: {
+      type: Boolean,
+      default: false
+    },
     process: {
       type: Object,
       default: null
@@ -75,13 +79,13 @@ export default {
   },
   watch: {
     process (process) {
-      if (process !== null) {
+      if (this.initialized && process !== null) {
         this.name = process.name
         this.description = process.description
       }
     },
     tool (tool) {
-      if (tool !== null) {
+      if (this.initialized && tool !== null) {
         this.configuration = tool.configurations[0].id
       }
     }

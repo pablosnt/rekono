@@ -30,7 +30,7 @@
       v-if="selectedWordlist !== null && selectedWordlist !== null">
       <span slot="body"><strong>{{ this.selectedWordlist.name }}</strong> wordlist</span>
     </DeleteConfirmation>
-    <WordlistForm id="wordlist-modal" :wordlist="selectedWordlist" @confirm="confirm" @clean="cleanSelection"/>
+    <WordlistForm id="wordlist-modal" :wordlist="selectedWordlist" :initialized="selectedWordlist !== null" @confirm="confirm" @clean="cleanSelection"/>
   </div>
 </template>
 

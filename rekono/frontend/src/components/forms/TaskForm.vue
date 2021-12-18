@@ -96,6 +96,10 @@ export default {
   name: 'taskForm',
   props: {
     id: String,
+    initialized: {
+      type: Boolean,
+      default: false
+    },
     process: {
       type: Object,
       default: null
@@ -117,9 +121,7 @@ export default {
     }
   },
   data () {
-    ProjectApi.getProjectsByUser(this.$store.state.user).then(projects => { this.projects = projects })
     return {
-      initialized: false,
       projects: [],
       processes: [],
       tools: [],
@@ -151,21 +153,22 @@ export default {
   },
   watch: {
     process (process) {
-      if (process !== null) {
-        this.initialized = true
+      if (this.initialized && process !== null) {
         this.selectProcess(process.id, process)
       }
     },
     tool (tool) {
-      if (tool !== null) {
-        this.initialized = true
+      if (this.initialized && tool !== null) {
         this.selectTool(tool.id, tool)
       }
     },
     initialized (initialized) {
-      if (this.initialized && this.tool === null && this.process === null) {
-        ToolApi.getTools().then(tools => { this.tools = tools })
-        ProcessApi.getAllProcesses().then(processes => { this.processes = processes })
+      if (initialized) {
+        if (this.tool === null && this.process === null) {
+          ToolApi.getTools().then(tools => { this.tools = tools })
+          ProcessApi.getAllProcesses().then(processes => { this.processes = processes })
+        }
+        ProjectApi.getProjectsByUser(this.$store.state.user).then(projects => { this.projects = projects })
       }
     }
   },
@@ -213,7 +216,6 @@ export default {
         })
     },
     clean () {
-      this.initialized = false
       this.processes = []
       this.tools = []
       this.wordlists = []

@@ -25,8 +25,8 @@ export default {
   computed: {
     sizesItems () {
       if (this.total > 0) {
-        var items = []
-        for (var s = 0; s < this.sizes.length; s++) {
+        var items = [this.sizes[0]]
+        for (var s = 1; s < this.sizes.length; s++) {
           if (this.sizes[s] < this.total) {
             items.push(this.sizes[s])
           }
@@ -48,17 +48,7 @@ export default {
       this.selectedPage = page
     },
     size (size) {
-      if (size > this.total) {
-        this.selectedSize = this.total
-      } else {
-        this.selectedSize = size
-      }
-    },
-    sizesItems (sizes) {
-      if (!sizes.includes(this.size)) {
-        if (this.size > this.total) this.selectedSize = this.total
-        else this.selectedSize = sizes[0]
-      }
+      this.selectedSize = size
     },
     selectedPage (page) {
       this.$emit('pagination', { page: page, size: this.selectedSize })

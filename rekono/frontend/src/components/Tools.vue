@@ -17,15 +17,15 @@
           <b-icon v-if="!row.detailsShowing" icon="eye-fill"/>
           <b-icon v-if="row.detailsShowing" icon="eye-slash-fill"/>
         </b-button>
-        <b-button variant="success" class="mr-2" v-b-tooltip.hover title="Execute" @click="selectTool(row.item)" v-b-modal.execute-modal>
+        <b-button variant="success" class="mr-2" v-b-tooltip.hover title="Execute" @click="showExecuteForm(row.item)" v-b-modal.execute-modal>
           <b-icon icon="play-fill"/>
         </b-button>
         <b-dropdown variant="outline-primary" right v-b-tooltip.hover title="Add to Process">
           <template #button-content>
             <b-icon icon="plus-square"/>
           </template>
-          <b-dropdown-item @click="selectTool(row.item)" v-b-modal.new-process-modal >New Process</b-dropdown-item>
-          <b-dropdown-item @click="selectTool(row.item)" v-b-modal.new-step-modal>New Step</b-dropdown-item>
+          <b-dropdown-item @click="showProcessForm(row.item)" v-b-modal.new-process-modal >New Process</b-dropdown-item>
+          <b-dropdown-item @click="showStepForm(row.item)" v-b-modal.new-step-modal>New Step</b-dropdown-item>
         </b-dropdown>
       </template>
       <template #row-details="row">
@@ -39,9 +39,9 @@
       </template>
     </b-table>
     <Pagination :page="page" :size="size" :sizes="sizes" :total="total" name="tools" @pagination="pagination"/>
-    <ProcessForm id="new-process-modal" :tool="selectedTool" @confirm="confirm" @clean="cleanSelection"/>
-    <StepForm id="new-step-modal" :tool="selectedTool" @confirm="confirm" @clean="cleanSelection"/>
-    <TaskForm id="execute-modal" :tool="selectedTool" @confirm="confirm" @clean="cleanSelection"/>
+    <ProcessForm id="new-process-modal" :tool="selectedTool" :initialized="processForm" @confirm="confirm" @clean="cleanSelection"/>
+    <StepForm id="new-step-modal" :tool="selectedTool" :initialized="stepForm" @confirm="confirm" @clean="cleanSelection"/>
+    <TaskForm id="execute-modal" :tool="selectedTool" :initialized="taskForm" @confirm="confirm" @clean="cleanSelection"/>
   </div>
 </template>
 
@@ -73,6 +73,9 @@ export default {
         {key: 'inputs_text', label: 'Inputs', sortable: true},
         {key: 'outputs_text', label: 'Outputs', sortable: true}
       ],
+      taskForm: false,
+      processForm: false,
+      stepForm: false,
       selectedTool: null
     }
   },
@@ -126,10 +129,25 @@ export default {
           this.tools = data.results
         })
     },
+    showExecuteForm (tool) {
+      this.taskForm = true
+      this.selectTool(tool)
+    },
+    showProcessForm (tool) {
+      this.processForm = true
+      this.selectTool(tool)
+    },
+    showStepForm (tool) {
+      this.stepForm = true
+      this.selectTool(tool)
+    },
     selectTool (tool) {
       this.selectedTool = tool
     },
     cleanSelection () {
+      this.taskForm = false
+      this.processForm = false
+      this.stepForm = false
       this.selectedTool = null
     }
   }
