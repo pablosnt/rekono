@@ -1,6 +1,3 @@
-const accessTokenKey = 'access-token'
-const refreshTokenKey = 'refresh-token'
-
 const findById = (data, id) => {
   for (let i = 0; i < data.length; i++) {
     if (data[i].id === id) {
@@ -10,6 +7,4 @@ const findById = (data, id) => {
   return null
 }
 
-export {
-  accessTokenKey, refreshTokenKey, findById
-}
+export { findById }

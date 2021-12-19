@@ -1,7 +1,7 @@
 <template>
-  <b-row v-if="total > sizesItems[0]">
+  <b-row v-if="total > limitItems[0]">
     <b-col cols="6">
-      <b-pagination v-model="selectedPage" :total-rows="total" :per-page="size" align="right" first-class="text-black" ellipsis-class="text-black" last-class="text-black" next-class="text-black" prev-class="text-black">
+      <b-pagination v-model="selectedPage" :total-rows="total" :per-page="limit" align="right" first-class="text-black" ellipsis-class="text-black" last-class="text-black" next-class="text-black" prev-class="text-black">
         <template #page="{ page, active }">
           <b v-if="active" class="text-light">{{ page }}</b>
           <i v-else class="text-dark">{{ page }}</i>
@@ -9,7 +9,7 @@
       </b-pagination>
     </b-col>
     <b-col cols="2">
-      <b-form-select v-model="selectedSize" :options="sizesItems">
+      <b-form-select v-model="selectedLimit" :options="limitItems">
         <template #first>
           <b-form-select-option :value="total">All {{ name }}</b-form-select-option>
         </template>
@@ -21,40 +21,40 @@
 <script>
 export default {
   name: 'pagination',
-  props: ['name', 'page', 'size', 'sizes', 'total'],
+  props: ['name', 'page', 'limit', 'limits', 'total'],
   computed: {
-    sizesItems () {
+    limitItems () {
       if (this.total > 0) {
-        const items = [this.sizes[0]]
-        for (let s = 1; s < this.sizes.length; s++) {
-          if (this.sizes[s] < this.total) {
-            items.push(this.sizes[s])
+        const items = [this.limits[0]]
+        for (let s = 1; s < this.limits.length; s++) {
+          if (this.limits[s] < this.total) {
+            items.push(this.limits[s])
           }
         }
         return items
       } else {
-        return this.sizes
+        return this.limits
       }
     }
   },
   data () {
     return {
       selectedPage: this.page,
-      selectedSize: this.size
+      selectedLimit: this.limit
     }
   },
   watch: {
     page (page) {
       this.selectedPage = page
     },
-    size (size) {
-      this.selectedSize = size
+    limit (limit) {
+      this.selectedLimit = limit
     },
     selectedPage (page) {
-      this.$emit('pagination', { page: page, size: this.selectedSize })
+      this.$emit('pagination', { page: page, limit: this.selectedLimit })
     },
-    selectedSize (size) {
-      this.$emit('pagination', { page: this.selectedPage, size: size })
+    selectedLimit (limit) {
+      this.$emit('pagination', { page: this.selectedPage, limit: limit })
     }
   }
 }

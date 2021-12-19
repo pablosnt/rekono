@@ -1,6 +1,6 @@
 <template>
   <div>
-    <TableHeader search="name" :filters="filters" add="wordlist-modal" @filter="fetchData"/>
+    <TableHeader search="name__icontains" :filters="filters" add="wordlist-modal" @filter="fetchData"/>
     <b-table striped borderless head-variant="dark" :fields="wordlistsFields" :items="wordlists">
       <template #cell(actions)="row">
         <b-dropdown variant="outline-primary" right>
@@ -18,7 +18,7 @@
         </b-dropdown>
       </template>
     </b-table>
-    <Pagination :page="page" :size="size" :sizes="sizes" :total="total" name="wordlists" @pagination="pagination"/>
+    <Pagination :page="page" :limit="limit" :limits="limits" :total="total" name="wordlists" @pagination="pagination"/>
     <Deletion id="delete-wordlist-modal"
       title="Delete Wordlist"
       @deletion="deleteWordlist"
@@ -72,13 +72,15 @@ export default {
       }
       this.filters = [
         { name: 'Type', values: ['Endpoint', 'Password'], valueField: 'value', textField: 'value', filterField: 'type' },
-        { name: 'Creator', values: creators, default: unique.includes(this.$store.state.user) ? this.$store.state.user : null, valueField: 'id', textField: 'username', filterField: 'creator' }
+        { name: 'Max. Size', filterField: 'size__lte', type: 'number' },
+        // { name: 'Creator', values: creators, default: unique.includes(this.$store.state.user) ? this.$store.state.user : null, valueField: 'id', textField: 'username', filterField: 'creator' }
+        { name: 'Creator', filterField: 'creator__username__icontains', type: 'text' }
       ] 
     }
   },
   methods: {
     fetchData (filter = null) {
-      WordlistApi.getAllWordlists(this.getPage(), this.getSize(), filter).then(wordlists => { this.wordlists = wordlists })
+      WordlistApi.getAllWordlists(this.getPage(), this.getLimit(), filter).then(wordlists => { this.wordlists = wordlists })
     },
     deleteWordlist () {
       WordlistApi.deleteWordlist(this.selectedWordlist.id)

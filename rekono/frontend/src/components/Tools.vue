@@ -36,7 +36,7 @@
         </b-card>
       </template>
     </b-table>
-    <Pagination :page="page" :size="size" :sizes="sizes" :total="total" name="tools" @pagination="pagination"/>
+    <Pagination :page="page" :limit="limit" :limits="limits" :total="total" name="tools" @pagination="pagination"/>
     <ProcessForm id="new-process-modal" :tool="selectedTool" :initialized="processForm" @confirm="confirm" @clean="cleanSelection"/>
     <StepForm id="new-step-modal" :tool="selectedTool" :initialized="stepForm" @confirm="confirm" @clean="cleanSelection"/>
     <TaskForm id="execute-modal" :tool="selectedTool" :initialized="taskForm" @confirm="confirm" @clean="cleanSelection"/>
@@ -45,6 +45,7 @@
 
 <script>
 import ToolApi from '@/backend/tools'
+import { stages, findingTypes } from '@/backend/constants'
 import Pagination from '@/common/Pagination.vue'
 import TableHeader from '@/common/TableHeader.vue'
 import PaginationMixin from '@/common/mixin/PaginationMixin.vue'
@@ -89,25 +90,16 @@ export default {
   watch: {
     tools () {
       this.filters = [
-        {
-          name: 'Stage',
-          values: [
-            { id: 1, value: 'OSINT' },
-            { id: 2, value: 'Enumeration' },
-            { id: 3, value: 'Vulnerabilities' },
-            { id: 4, value: 'Services' },
-            { id: 5, value: 'Exploitation' }
-          ],
-          valueField: 'id',
-          textField: 'value',
-          filterField: 'stage'
-        }
+        { name: 'Stage', values: stages, valueField: 'id', textField: 'value', filterField: 'stage' },
+        { name: 'Configuration', filterField: 'configuration__name__icontains', type: 'text'},
+        { name: 'Input', values: findingTypes, valueField: 'value', textField: 'value', filterField: 'input' },
+        { name: 'Output', values: findingTypes, valueField: 'value', textField: 'value', filterField: 'output' }
       ] 
     }
   },
   methods: {
     fetchData (filter = null) {
-      ToolApi.getTools(this.getPage(), this.getSize(), filter)
+      ToolApi.getTools(this.getPage(), this.getLimit(), filter)
         .then(data => {
           this.total = data.count
           for (let t = 0; t < data.results.length; t++) {

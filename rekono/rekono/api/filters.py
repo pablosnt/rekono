@@ -7,11 +7,15 @@ from django_filters.rest_framework import filters
 
 class BaseFilter(rest_framework.FilterSet):
 
-    def base_filter(self, queryset, value, fields):
+    def related_field_filter(self, queryset, name, value):
+        filter = {name: value}
+        return queryset.filter(**filter).all().distinct()
+
+    def multiple_field_filter(self, queryset, value, fields):
         field1, field2 = fields
         filter1 = {field1: value}
         filter2 = {field2: value}
-        return queryset.filtlter(Q(**filter1) | Q(**filter2))
+        return queryset.filter(Q(**filter1) | Q(**filter2))
 
 
 class ToolFilter(BaseFilter):
@@ -19,4 +23,4 @@ class ToolFilter(BaseFilter):
     tool_fields: Tuple[str, str] = ()
 
     def filter_tool(self, queryset, name, value):
-        return self.base_filter(queryset, value, self.tool_fields)
+        return self.multiple_field_filter(queryset, value, self.tool_fields)

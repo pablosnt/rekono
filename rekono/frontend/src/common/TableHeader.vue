@@ -27,7 +27,8 @@
     <b-row v-if="showFilters" class="mb-2">
       <b-col v-for="ft in filters" :key="ft.name">
         <b-form-group :description="ft.name">
-          <b-form-select :id="ft.filterField" v-if="ft.values !== null" :value="ft.default" :options="ft.values" :value-field="ft.valueField" :text-field="ft.textField" @change="filter">
+          <b-form-input :id="ft.filterField" v-if="!ft.values" :type="ft.type" @change="filter"/>
+          <b-form-select :id="ft.filterField" v-if="ft.values" :value="ft.default" :options="ft.values" :value-field="ft.valueField" :text-field="ft.textField" @change="filter">
             <template #first>
               <b-form-select-option :value="null">Select {{ ft.name.toLowerCase() }}</b-form-select-option>
             </template>
@@ -88,7 +89,6 @@ export default {
       this.filter()
     },
     filter () {
-      console.log('FILTER')
       this.$emit('filter', this.selectedFilters)
     }
   }

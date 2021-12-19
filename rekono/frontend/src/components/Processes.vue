@@ -1,11 +1,6 @@
 <template>
   <div>
-    <TableHeader search="name" :filters="filters" add="process-modal" @filter="fetchData"/>
-    <!-- <div class="text-right">
-      <b-button size="lg" variant="outline" v-b-modal.process-modal>
-        <p class="h2 mb-2"><b-icon variant="success" icon="plus-square-fill"/></p>
-      </b-button>
-    </div> -->
+    <TableHeader search="name__icontains" :filters="filters" add="process-modal" @filter="fetchData"/>
     <b-table striped borderless head-variant="dark" :fields="processesFields" :items="processes">
       <template #cell(actions)="row">
           <b-button @click="row.toggleDetails" variant="dark" class="mr-2" v-b-tooltip.hover title="Details">
@@ -63,7 +58,7 @@
           </b-card>
         </template>
     </b-table>
-    <Pagination :page="page" :size="size" :sizes="sizes" :total="total" name="processes" @pagination="pagination"/>
+    <Pagination :page="page" :limit="limit" :limits="limits" :total="total" name="processes" @pagination="pagination"/>
     <Deletion id="delete-process-modal"
       title="Delete Process"
       @deletion="deleteProcess"
@@ -86,6 +81,7 @@
 
 <script>
 import Processes from '@/backend/processes'
+import { stages } from '@/backend/constants'
 import Deletion from '@/common/Deletion.vue'
 import TableHeader from '@/common/TableHeader.vue'
 import Pagination from '@/common/Pagination.vue'
@@ -142,13 +138,16 @@ export default {
         }
       }
       this.filters = [
-        { name: 'Creator', values: creators, default: unique.includes(this.$store.state.user) ? this.$store.state.user : null, valueField: 'id', textField: 'username', filterField: 'creator' }
+        { name: 'Tool', filterField: 'tool__name__icontains', type: 'text' },
+        { name: 'Stage', values: stages, valueField: 'id', textField: 'value', filterField: 'tool__stage' },
+        // { name: 'Creator', values: creators, default: unique.includes(this.$store.state.user) ? this.$store.state.user : null, valueField: 'id', textField: 'username', filterField: 'creator' }
+        { name: 'Creator', filterField: 'creator__username__icontains', type: 'text' }
       ]
     }
   },
   methods: {
     fetchData (filter = null) {
-      ProcessApi.getAllProcesses(this.getPage(), this.getSize(), filter).then(processes => { this.processes = processes })
+      ProcessApi.getAllProcesses(this.getPage(), this.getLimit(), filter).then(processes => { this.processes = processes })
     },
     deleteProcess () {
       ProcessApi.deleteProcess(this.selectedProcess.id)

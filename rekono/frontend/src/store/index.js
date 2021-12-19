@@ -2,7 +2,7 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import router from '@/router'
 import AuthenticationApi from '@/backend/authentication'
-import { accessTokenKey } from '@/backend/utils'
+import { accessTokenKey } from '@/backend/constants'
 
 Vue.use(Vuex)
 

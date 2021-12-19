@@ -57,19 +57,19 @@ class BaseVulnerabilityFilter(FindingFilter):
     host_os_type_fields: Tuple[str, str] = ()
 
     def filter_enumeration(self, queryset, name, value):
-        return self.base_filter(queryset, value, self.enumeration_fields)
+        return self.multiple_field_filter(queryset, value, self.enumeration_fields)
 
     def filter_enumeration_port(self, queryset, name, value):
-        return self.base_filter(queryset, value, self.enumeration_port_fields)
+        return self.multiple_field_filter(queryset, value, self.enumeration_port_fields)
 
     def filter_host(self, queryset, name, value):
-        return self.base_filter(queryset, value, self.host_fields)
+        return self.multiple_field_filter(queryset, value, self.host_fields)
 
     def filter_host_address(self, queryset, name, value):
-        return self.base_filter(queryset, value, self.host_address_fields)
+        return self.multiple_field_filter(queryset, value, self.host_address_fields)
 
     def filter_host_os_type(self, queryset, name, value):
-        return self.base_filter(queryset, value, self.host_os_type_fields)
+        return self.multiple_field_filter(queryset, value, self.host_os_type_fields)
 
 
 class OSINTFilter(FindingFilter):

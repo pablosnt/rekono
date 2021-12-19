@@ -1,5 +1,5 @@
 import RekonoApi from './api'
-import { refreshTokenKey } from './utils'
+import { refreshTokenKey } from './constants'
 
 class Authentication extends RekonoApi {
   login (username, password) {

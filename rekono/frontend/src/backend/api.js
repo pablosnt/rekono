@@ -1,7 +1,7 @@
 import axios from 'axios'
 import jwtDecode from 'jwt-decode'
 import store from '@/store'
-import { accessTokenKey, refreshTokenKey } from './utils'
+import { accessTokenKey, refreshTokenKey } from './constants'
 
 class RekonoApi {
   removeTokens () {
@@ -76,9 +76,9 @@ class RekonoApi {
     return this.request(axios.get, endpoint, null, requiredAuth, extraHeaders)
   }
 
-  paginatedGet (endpoint, page = null, size = null, filter = null, requiredAuth = true, extraHeaders = null) {
-    if (page && size) {
-      endpoint += '&page=' + page + '&size=' + size
+  paginatedGet (endpoint, page = null, limit = null, filter = null, requiredAuth = true, extraHeaders = null) {
+    if (page && limit) {
+      endpoint += '&page=' + page + '&limit=' + limit
     }
     if (filter) {
       for (let key in filter) {

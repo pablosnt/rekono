@@ -57,7 +57,7 @@ export default {
       nameState: null,
       fileState: null,
       fileInvalidFeedback: 'Wordlist file is required',
-      fileMaxSize: 0.5
+      fileMaxSize: 500
     }
   },
   watch: {
