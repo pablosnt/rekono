@@ -24,8 +24,10 @@ FINDING_FILTERING = {
     'execution': ['exact'],
     'execution__task': ['exact'],
     'execution__task__target': ['exact'],
+    'execution__task__target__target': ['exact', 'iexact', 'contains', 'icontains'],
     'execution__task__target__project': ['exact'],
     'execution__task__executor': ['exact'],
+    'execution__task__executor__username': ['exact', 'iexact', 'contains', 'icontains'],
     'execution__start': ['gte', 'lte', 'exact'],
     'execution__end': ['gte', 'lte', 'exact'],
     'creation': ['gte', 'lte', 'exact'],
@@ -79,9 +81,9 @@ class OSINTFilter(FindingFilter):
         model = OSINT
         fields = FINDING_FILTERING.copy()
         fields.update({
-            'data': ['exact', 'contains'],
+            'data': ['exact', 'iexact', 'contains', 'icontains'],
             'data_type': ['exact'],
-            'source': ['exact', 'contains'],
+            'source': ['exact', 'iexact', 'contains', 'icontains'],
         })
 
 
@@ -92,7 +94,7 @@ class HostFilter(FindingFilter):
         model = Host
         fields = FINDING_FILTERING.copy()
         fields.update({
-            'address': ['exact', 'contains'],
+            'address': ['exact', 'iexact', 'contains', 'icontains'],
             'os_type': ['exact'],
         })
 
@@ -107,12 +109,12 @@ class EnumerationFilter(FindingFilter):
         fields = FINDING_FILTERING.copy()
         fields.update({
             'host': ['exact'],
-            'host__address': ['exact', 'contains'],
+            'host__address': ['exact', 'iexact', 'contains', 'icontains'],
             'host__os_type': ['exact'],
             'port': ['exact'],
             'port_status': ['exact'],
-            'protocol': ['exact'],
-            'service': ['exact', 'contains'],
+            'protocol': ['iexact'],
+            'service': ['exact', 'iexact', 'contains', 'icontains'],
         })
 
 
@@ -127,10 +129,10 @@ class EndpointFilter(FindingFilter):
         fields.update({
             'enumeration': ['exact'],
             'enumeration__host': ['exact'],
-            'enumeration__host__address': ['exact', 'contains'],
+            'enumeration__host__address': ['exact', 'iexact', 'contains', 'icontains'],
             'enumeration__host__os_type': ['exact'],
             'enumeration__port': ['exact'],
-            'endpoint': ['exact', 'contains'],
+            'endpoint': ['exact', 'iexact', 'contains', 'icontains'],
             'status': ['exact'],
         })
 
@@ -146,11 +148,11 @@ class TechnologyFilter(FindingFilter):
         fields.update({
             'enumeration': ['exact'],
             'enumeration__host': ['exact'],
-            'enumeration__host__address': ['exact', 'contains'],
+            'enumeration__host__address': ['exact', 'iexact', 'contains', 'icontains'],
             'enumeration__host__os_type': ['exact'],
             'enumeration__port': ['exact'],
-            'name': ['exact', 'contains'],
-            'version': ['exact', 'contains'],
+            'name': ['exact', 'iexact', 'contains', 'icontains'],
+            'version': ['exact', 'iexact', 'contains', 'icontains'],
             'related_to': ['exact'],
         })
 
@@ -176,10 +178,10 @@ class VulnerabilityFilter(BaseVulnerabilityFilter):
         fields = FINDING_FILTERING.copy()
         fields.update({
             'technology': ['exact'],
-            'technology__name': ['exact', 'contains'],
-            'technology__version': ['exact', 'contains'],
-            'name': ['exact', 'contains'],
-            'description': ['exact', 'contains'],
+            'technology__name': ['exact', 'iexact', 'contains', 'icontains'],
+            'technology__version': ['exact', 'iexact', 'contains', 'icontains'],
+            'name': ['exact', 'iexact', 'contains', 'icontains'],
+            'description': ['exact', 'iexact', 'contains', 'icontains'],
             'severity': ['exact'],
             'cve': ['exact', 'contains'],
         })
@@ -192,8 +194,8 @@ class CredentialFilter(FindingFilter):
         model = Credential
         fields = FINDING_FILTERING.copy()
         fields.update({
-            'email': ['exact', 'contains'],
-            'username': ['exact', 'contains'],
+            'email': ['exact', 'iexact', 'contains', 'icontains'],
+            'username': ['exact', 'iexact', 'contains', 'icontains'],
         })
 
 
@@ -224,18 +226,18 @@ class ExploitFilter(BaseVulnerabilityFilter):
         fields = FINDING_FILTERING.copy()
         fields.update({
             'vulnerability__technology': ['exact'],
-            'vulnerability__technology__name': ['exact', 'contains'],
-            'vulnerability__technology__version': ['exact', 'contains'],
+            'vulnerability__technology__name': ['exact', 'iexact', 'contains', 'icontains'],
+            'vulnerability__technology__version': ['exact', 'iexact', 'contains', 'icontains'],
             'technology': ['exact'],
-            'technology__name': ['exact', 'contains'],
-            'technology__version': ['exact', 'contains'],
+            'technology__name': ['exact', 'iexact', 'contains', 'icontains'],
+            'technology__version': ['exact', 'iexact', 'contains', 'icontains'],
             'technology__enumeration': ['exact'],
             'technology__enumeration__host': ['exact'],
-            'technology__enumeration__host__address': ['exact', 'contains'],
+            'technology__enumeration__host__address': ['exact', 'iexact', 'contains', 'icontains'],
             'technology__enumeration__host__os_type': ['exact'],
             'technology__enumeration__port': ['exact'],
-            'name': ['exact', 'contains'],
-            'description': ['exact', 'contains'],
-            'reference': ['exact', 'contains'],
+            'name': ['exact', 'iexact', 'contains', 'icontains'],
+            'description': ['exact', 'iexact', 'contains', 'icontains'],
+            'reference': ['exact', 'iexact', 'contains', 'icontains'],
             'checked': ['exact'],
         })

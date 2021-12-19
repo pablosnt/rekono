@@ -9,9 +9,10 @@ class TargetFilter(rest_framework.FilterSet):
     class Meta:
         model = Target
         fields = {
-            'project__name': ['exact', 'contains'],
-            'project__description': ['exact', 'contains'],
+            'project__name': ['exact', 'iexact', 'contains', 'icontains'],
+            'project__description': ['exact', 'iexact', 'contains', 'icontains'],
             'project__owner': ['exact'],
-            'target': ['exact', 'contains'],
+            'project__owner__username': ['exact', 'iexact', 'contains', 'icontains'],
+            'target': ['exact', 'iexact', 'contains', 'icontains'],
             'type': ['exact'],
         }

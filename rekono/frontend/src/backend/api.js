@@ -45,10 +45,12 @@ class RekonoApi {
       })
   }
 
-  request (method, endpoint, data = null, requiredAuth = true, extraHeaders = null, retry = false) {
+  request (method, endpoint, queryData = null, bodydata = null, requiredAuth = true, extraHeaders = null, retry = false) {
     let req = null
-    if (data !== null) {
-      req = method(endpoint, data, { headers: this.headers(requiredAuth, extraHeaders) })
+    if (bodydata) {
+      req = method(endpoint, bodydata, { headers: this.headers(requiredAuth, extraHeaders) })
+    } else if (queryData) {
+      req = method(endpoint, { params: queryData, headers: this.headers(requiredAuth, extraHeaders) })
     } else {
       req = method(endpoint, { headers: this.headers(requiredAuth, extraHeaders) })
     }
@@ -61,7 +63,7 @@ class RekonoApi {
             store.dispatch('redirectToLogin')
           } else {
             return this.refresh()
-              .then(() => { return this.request(method, endpoint, data, requiredAuth, extraHeaders, true) })
+              .then(() => { return this.request(method, endpoint, queryData, bodydata, requiredAuth, extraHeaders, true) })
               .catch(() => {
                 this.removeTokens()
                 store.dispatch('redirectToLogin')
@@ -73,33 +75,34 @@ class RekonoApi {
   }
 
   get (endpoint, requiredAuth = true, extraHeaders = null) {
-    return this.request(axios.get, endpoint, null, requiredAuth, extraHeaders)
+    return this.request(axios.get, endpoint, null, null, requiredAuth, extraHeaders)
   }
 
   paginatedGet (endpoint, page = null, limit = null, filter = null, requiredAuth = true, extraHeaders = null) {
-    if (page && limit) {
-      endpoint += '&page=' + page + '&limit=' + limit
+    let params = {
+      page: page,
+      limit: limit
     }
     if (filter) {
       for (let key in filter) {
         if (filter[key]) {
-          endpoint += '&' + key + '=' + filter[key]
+          params[key] = filter[key]
         }
       }
     }
-    return this.get(endpoint, requiredAuth, extraHeaders)
+    return this.request(axios.get, endpoint, params, null, requiredAuth, extraHeaders)
   }
 
   post (endpoint, data, requiredAuth = true, extraHeaders = null) {
-    return this.request(axios.post, endpoint, data, requiredAuth, extraHeaders)
+    return this.request(axios.post, endpoint, null, data, requiredAuth, extraHeaders)
   }
 
   put (endpoint, data, requiredAuth = true, extraHeaders = null) {
-    return this.request(axios.put, endpoint, data, requiredAuth, extraHeaders)
+    return this.request(axios.put, endpoint, null, data, requiredAuth, extraHeaders)
   }
 
   delete (endpoint, requiredAuth = true, extraHeaders = null) {
-    return this.request(axios.delete, endpoint, null, requiredAuth, extraHeaders)
+    return this.request(axios.delete, endpoint, null, null, requiredAuth, extraHeaders)
   }
 }
 

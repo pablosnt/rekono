@@ -9,8 +9,9 @@ class ProjectFilter(rest_framework.FilterSet):
     class Meta:
         model = Project
         fields = {
-            'name': ['exact', 'contains'],
-            'description': ['exact', 'contains'],
+            'name': ['exact', 'iexact', 'contains', 'icontains'],
+            'description': ['exact', 'iexact', 'contains', 'icontains'],
             'owner': ['exact'],
+            'owner__username': ['exact', 'iexact', 'contains', 'icontains'],
             'members': ['exact'],
         }

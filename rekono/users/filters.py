@@ -11,10 +11,10 @@ class UserFilter(rest_framework.FilterSet):
     class Meta:
         model = User
         fields = {
-            'username': ['exact', 'contains'],
-            'first_name': ['exact', 'contains'],
-            'last_name': ['exact', 'contains'],
-            'email': ['exact', 'contains'],
+            'username': ['exact', 'iexact', 'contains', 'icontains'],
+            'first_name': ['exact', 'iexact', 'contains', 'icontains'],
+            'last_name': ['exact', 'iexact', 'contains', 'icontains'],
+            'email': ['exact', 'iexact', 'contains', 'icontains'],
             'is_active': ['exact'],
             'date_joined': ['gte', 'lte', 'exact'],
             'groups': ['exact'],
