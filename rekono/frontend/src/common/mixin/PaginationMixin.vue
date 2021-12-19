@@ -5,12 +5,18 @@ export default {
   data () {
     return {
       page: 1,
-      size: 5,
-      sizes: [5, 25, 50, 100],
+      size: 25,
+      sizes: [25, 50, 100],
       total: 0
     }
   },
   methods: {
+    getPage () {
+      return this.page ? this.page : 1
+    },
+    getSize () {
+      return this.size ? this.size : 25
+    },
     pagination (pagination) {
       this.page = pagination.page
       this.size = pagination.size

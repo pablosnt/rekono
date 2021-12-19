@@ -33,9 +33,9 @@
           </div>
           <b-form-group description="Execution intensity">
             <b-input-group>
-              <b-input-group-prepend is-text>
+              <b-input-group-prepend>
                 <div v-for="i in intensities" :key="i.value">
-                  <b-form-tag v-if="i.value === intensity" v-b-tooltip.hover.top="i.value" :variant="i.variant" no-remove>{{ i.value.charAt(0) }}</b-form-tag>
+                  <b-button v-if="i.value === intensity" v-b-tooltip.hover.top="i.value" :variant="i.variant" no-remove>{{ i.value.charAt(0) }}</b-button>
                 </div>
               </b-input-group-prepend>
               <b-form-select v-model="intensity" :options="intensities" value-field="value" text-field="value" required/>
@@ -46,7 +46,7 @@
           <template #title>
             <b-icon icon="chat-left-dots-fill"/> Wordlists
           </template>
-          <b-form-group>
+          <b-form-group description="Select wordlists to use">
             <b-form-select v-model="wordlistsItems" :options="wordlists" multiple value-field="id" text-field="name"/>
           </b-form-group>
         </b-tab>

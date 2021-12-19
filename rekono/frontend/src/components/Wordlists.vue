@@ -1,10 +1,6 @@
 <template>
   <div>
-    <div class="text-right">
-      <b-button size="lg" variant="outline" v-b-modal.wordlist-modal>
-        <p class="h2 mb-2"><b-icon variant="success" icon="plus-square-fill"/></p>
-      </b-button>
-    </div>
+    <TableHeader search="name" :filters="filters" add="wordlist-modal" @filter="fetchData"/>
     <b-table striped borderless head-variant="dark" :fields="wordlistsFields" :items="wordlists">
       <template #cell(actions)="row">
         <b-dropdown variant="outline-primary" right>
@@ -37,33 +33,52 @@
 <script>
 import WordlistApi from '@/backend/resources'
 import Deletion from '@/common/Deletion.vue'
+import TableHeader from '@/common/TableHeader.vue'
 import Pagination from '@/common/Pagination.vue'
-import PaginationMixin from '@/common/PaginationMixin.vue'
+import PaginationMixin from '@/common/mixin/PaginationMixin.vue'
 import WordlistForm from '@/forms/WordlistForm.vue'
 export default {
   name: 'wordlistsPage',
   mixins: [PaginationMixin],
   data () {
     return {
-      wordlists: this.fetchData(1, 25),
+      wordlists: this.fetchData(),
       wordlistsFields: [
-        { key: 'name', sortable: true },
+        { key: 'name', label: 'Wordlist', sortable: true },
         { key: 'type', sortable: true },
         { key: 'size', sortable: true },
         { key: 'creator.username', label: 'Creator', sortable: true },
         { key: 'actions', sortable: false }
       ],
-      selectedWordlist: null
+      selectedWordlist: null,
+      filters: []
     }
   },
   components: {
     Deletion,
+    TableHeader,
     Pagination,
     WordlistForm
   },
+  watch: {
+    wordlists (wordlists) {
+      const creators = []
+      const unique = []
+      for (let i = 0; i < wordlists.length; i++) {
+        if (wordlists[i].creator.id && !unique.includes(wordlists[i].creator.id)) {
+          creators.push(wordlists[i].creator)
+          unique.push(wordlists[i].creator.id)
+        }
+      }
+      this.filters = [
+        { name: 'Type', values: ['Endpoint', 'Password'], valueField: 'value', textField: 'value', filterField: 'type' },
+        { name: 'Creator', values: creators, default: unique.includes(this.$store.state.user) ? this.$store.state.user : null, valueField: 'id', textField: 'username', filterField: 'creator' }
+      ] 
+    }
+  },
   methods: {
-    fetchData (page = null, size = null) {
-      WordlistApi.getAllWordlists(page, size).then(wordlists => { this.wordlists = wordlists })
+    fetchData (filter = null) {
+      WordlistApi.getAllWordlists(this.getPage(), this.getSize(), filter).then(wordlists => { this.wordlists = wordlists })
     },
     deleteWordlist () {
       WordlistApi.deleteWordlist(this.selectedWordlist.id)
@@ -74,7 +89,7 @@ export default {
             variant: 'warning',
             solid: true
           })
-          this.fetchData(this.page, this.size)
+          this.fetchData()
         })
         .catch(() => {
           this.$bvToast.toast('Unexpected error in wordlist deletion', {

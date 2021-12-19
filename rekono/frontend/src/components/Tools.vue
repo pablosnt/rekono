@@ -1,5 +1,6 @@
 <template>
   <div>
+    <TableHeader search="name" :filters="filters" @filter="fetchData"/>
     <b-table striped borderless head-variant="dark" :fields="toolsFields" :items="tools">
       <template #cell(icon)="row">
         <b-link :href="row.item.reference" target="_blank">
@@ -45,7 +46,8 @@
 <script>
 import ToolApi from '@/backend/tools'
 import Pagination from '@/common/Pagination.vue'
-import PaginationMixin from '@/common/PaginationMixin.vue'
+import TableHeader from '@/common/TableHeader.vue'
+import PaginationMixin from '@/common/mixin/PaginationMixin.vue'
 import ProcessForm from '@/forms/ProcessForm.vue'
 import StepForm from '@/forms/StepForm.vue'
 import TaskForm from '@/forms/TaskForm.vue'
@@ -55,7 +57,7 @@ export default {
   data () {
     return {
       auditor: ['Admin', 'Auditor'],
-      tools: this.fetchData(1, 25),
+      tools: this.fetchData(),
       toolsFields: [
         { key: 'icon', sortable: false },
         { key: 'name', label: 'Tool', sortable: true },
@@ -73,18 +75,39 @@ export default {
       taskForm: false,
       processForm: false,
       stepForm: false,
-      selectedTool: null
+      selectedTool: null,
+      filters: []
     }
   },
   components: {
+    Pagination,
     ProcessForm,
     StepForm,
-    TaskForm,
-    Pagination
+    TableHeader,
+    TaskForm
+  },
+  watch: {
+    tools () {
+      this.filters = [
+        {
+          name: 'Stage',
+          values: [
+            { id: 1, value: 'OSINT' },
+            { id: 2, value: 'Enumeration' },
+            { id: 3, value: 'Vulnerabilities' },
+            { id: 4, value: 'Services' },
+            { id: 5, value: 'Exploitation' }
+          ],
+          valueField: 'id',
+          textField: 'value',
+          filterField: 'stage'
+        }
+      ] 
+    }
   },
   methods: {
-    fetchData (page = null, size = null) {
-      ToolApi.getTools(page, size)
+    fetchData (filter = null) {
+      ToolApi.getTools(this.getPage(), this.getSize(), filter)
         .then(data => {
           this.total = data.count
           for (let t = 0; t < data.results.length; t++) {

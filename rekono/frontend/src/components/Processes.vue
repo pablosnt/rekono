@@ -1,10 +1,11 @@
 <template>
   <div>
-    <div class="text-right">
+    <TableHeader search="name" :filters="filters" add="process-modal" @filter="fetchData"/>
+    <!-- <div class="text-right">
       <b-button size="lg" variant="outline" v-b-modal.process-modal>
         <p class="h2 mb-2"><b-icon variant="success" icon="plus-square-fill"/></p>
       </b-button>
-    </div>
+    </div> -->
     <b-table striped borderless head-variant="dark" :fields="processesFields" :items="processes">
       <template #cell(actions)="row">
           <b-button @click="row.toggleDetails" variant="dark" class="mr-2" v-b-tooltip.hover title="Details">
@@ -86,8 +87,9 @@
 <script>
 import Processes from '@/backend/processes'
 import Deletion from '@/common/Deletion.vue'
+import TableHeader from '@/common/TableHeader.vue'
 import Pagination from '@/common/Pagination.vue'
-import PaginationMixin from '@/common/PaginationMixin.vue'
+import PaginationMixin from '@/common/mixin/PaginationMixin.vue'
 import ProcessForm from '@/forms/ProcessForm.vue'
 import StepForm from '@/forms/StepForm.vue'
 import TaskForm from '@/forms/TaskForm.vue'
@@ -98,7 +100,7 @@ export default {
   mixins: [PaginationMixin],
   data () {
     return {
-      processes: this.fetchData(1, 25),
+      processes: this.fetchData(),
       processesFields: [
         { key: 'name', label: 'Process', sortable: true },
         { key: 'steps.length', label: 'Steps', sortable: true },
@@ -117,19 +119,36 @@ export default {
       processForm: false,
       stepForm: false,
       selectedProcess: null,
-      selectedStep: null
+      selectedStep: null,
+      filters: []
     }
   },
   components: {
     Deletion,
+    TableHeader,
     Pagination,
     ProcessForm,
     StepForm,
     TaskForm
   },
+  watch: {
+    processes (processes) {
+      const creators = []
+      const unique = []
+      for (let i = 0; i < processes.length; i++) {
+        if (processes[i].creator.id && !unique.includes(processes[i].creator.id)) {
+          creators.push(processes[i].creator)
+          unique.push(processes[i].creator.id)
+        }
+      }
+      this.filters = [
+        { name: 'Creator', values: creators, default: unique.includes(this.$store.state.user) ? this.$store.state.user : null, valueField: 'id', textField: 'username', filterField: 'creator' }
+      ]
+    }
+  },
   methods: {
-    fetchData (page = null, size = null) {
-      ProcessApi.getAllProcesses(page, size).then(processes => { this.processes = processes })
+    fetchData (filter = null) {
+      ProcessApi.getAllProcesses(this.getPage(), this.getSize(), filter).then(processes => { this.processes = processes })
     },
     deleteProcess () {
       ProcessApi.deleteProcess(this.selectedProcess.id)
@@ -140,7 +159,7 @@ export default {
             variant: 'warning',
             solid: true
           })
-          this.fetchData(this.page, this.size)
+          this.fetchData()
         })
         .catch(() => {
           this.$bvToast.toast('Unexpected error in process deletion', {
@@ -159,7 +178,7 @@ export default {
             variant: 'warning',
             solid: true
           })
-          this.fetchData(this.page, this.size)
+          this.fetchData()
         })
         .catch(() => {
           this.$bvToast.toast('Unexpected error in step deletion', {
