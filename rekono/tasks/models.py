@@ -46,6 +46,8 @@ class Task(models.Model):
         blank=True,
         null=True
     )
+    creation = models.DateTimeField(auto_now_add=True)
+    enqueued_at = models.DateTimeField(blank=True, null=True)
     start = models.DateTimeField(blank=True, null=True)
     end = models.DateTimeField(blank=True, null=True)
     wordlists = models.ManyToManyField(Wordlist, related_name='wordlists', blank=True)

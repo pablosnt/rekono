@@ -4,7 +4,6 @@ import subprocess
 import uuid
 
 from arguments import checker, formatter
-from arguments.enums import Keyword
 from django.utils import timezone
 from executions.models import Execution
 from findings.models import Vulnerability
