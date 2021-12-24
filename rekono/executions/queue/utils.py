@@ -53,7 +53,7 @@ def update_new_dependencies(parent_job: str, new_jobs: list, targets: list) -> N
                 meta['intensity'],
                 meta['inputs'],
                 targets=meta['targets'],
-                request=meta['domain'],
+                request=meta['rekono_address'],
                 callback=meta['callback'],
                 dependencies=dependencies
             )

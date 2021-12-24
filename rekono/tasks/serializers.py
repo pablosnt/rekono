@@ -58,27 +58,10 @@ class TaskSerializer(serializers.ModelSerializer):
                 )
         return super().validate(attrs)
 
-    # @transaction.atomic()
     def create(self, validated_data):
-        # creation_fields = [
-        #     'target', 'process', 'tool', 'configuration', 'intensity', 'executor',
-        #     'scheduled_at', 'scheduled_in', 'scheduled_time_unit', 'repeat_in',
-        #     'repeat_time_unit'
-        # ]
-        # creation_data = {}
-        # for field in creation_fields:
-        #     creation_data[field] = validated_data.get(field)
-        # task = Task.objects.create(**creation_data)
-        # wordlist_types = set()
-        # if validated_data.get('wordlists'):
-        #     for wordlist in validated_data.get('wordlists'):
-        #         if wordlist.type not in wordlist_types:
-        #             task.wordlists.add(wordlist)
-        #             wordlist_types.add(wordlist.type)
-        #     task.save()
         task = super().create(validated_data)
-        domain = None
+        rekono_address = None
         if self.context.get('request'):
-            domain = get_current_site(self.context.get('request')).domain
-        producer(task, domain)
+            rekono_address = get_current_site(self.context.get('request')).domain
+        producer(task, rekono_address)
         return task

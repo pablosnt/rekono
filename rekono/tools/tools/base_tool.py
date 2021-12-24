@@ -131,8 +131,8 @@ class BaseTool():
                 if hasattr(finding, key):
                     setattr(finding, key, value)
 
-    def send_findings(self, domain: str) -> None:
-        producer(self.execution, self.findings, domain)
+    def send_findings(self, rekono_address: str) -> None:
+        producer(self.execution, self.findings, rekono_address)
 
     def on_start(self) -> None:
         self.execution.start = timezone.now()
@@ -166,7 +166,7 @@ class BaseTool():
         self.execution.output_plain = output
         self.execution.save()
 
-    def run(self, targets: list = [], previous_findings: list = [], domain: str = None) -> None:
+    def run(self, targets: list = [], previous_findings: list = [], rekono_address: str = None) -> None:
         self.on_start()
         try:
             self.check_installation()
@@ -197,4 +197,4 @@ class BaseTool():
         if self.file_output_enabled and os.path.isfile(self.path_output):
             self.findings = self.parse_output(output)
             self.process_findings()
-            self.send_findings(domain)
+            self.send_findings(rekono_address)

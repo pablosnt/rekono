@@ -43,7 +43,7 @@ def create_plan(task: Task) -> list:
     return execution_plan
 
 
-def execute(task: Task, domain: str) -> None:
+def execute(task: Task, rekono_address: str) -> None:
     execution_plan = create_plan(task)
     for job in execution_plan:
         inputs = [i for i in job.inputs if i.type not in job.dependencies_coverage]
@@ -65,7 +65,7 @@ def execute(task: Task, domain: str) -> None:
                     job.intensity,
                     job.inputs,
                     execution_targets,
-                    domain=domain,
+                    rekono_address=rekono_address,
                     callback=success_callback,
                     dependencies=[job_id for j in job.dependencies for job_id in j.jobs]
                 )

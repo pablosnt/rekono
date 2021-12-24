@@ -12,7 +12,7 @@ def producer(
     inputs: list,
     targets: list = [],
     previous_findings: list = [],
-    domain: str = None,
+    rekono_address: str = None,
     callback: Callable = None,
     dependencies: list = [],
     at_front: bool = False
@@ -36,13 +36,13 @@ def producer(
         inputs=inputs,
         targets=targets,
         previous_findings=previous_findings,
-        domain=domain,
+        rekono_address=rekono_address,
         on_success=callback,
         result_ttl=7200,
         depends_on=dependencies,
         at_front=at_front
     )
-    execution_job.meta['domain'] = domain
+    execution_job.meta['rekono_address'] = rekono_address
     execution_job.meta['execution'] = execution
     execution_job.meta['intensity'] = intensity
     execution_job.meta['inputs'] = inputs

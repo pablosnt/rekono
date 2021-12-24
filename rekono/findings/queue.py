@@ -11,16 +11,16 @@ from findings.notification import send_email, send_telegram_message
 from users.enums import Notification
 
 
-def producer(execution: Execution, findings: list, domain: str) -> None:
+def producer(execution: Execution, findings: list, rekono_address: str) -> None:
     findings_queue = django_rq.get_queue('findings-queue')
-    findings_queue.enqueue(consumer, execution=execution, findings=findings, domain=domain)
+    findings_queue.enqueue(consumer, execution=execution, findings=findings, rekono_address=rekono_address)
 
 
 @job('findings-queue')
 def consumer(
     execution: Execution = None,
     findings: list = [],
-    domain: Optional[str] = None
+    rekono_address: Optional[str] = None
 ) -> None:
     if execution:
         for finding in findings:
@@ -35,9 +35,9 @@ def consumer(
             except ValidationError:
                 finding.delete()
         if execution.task.executor.notification_preference == Notification.EMAIL:
-            send_email(execution, [f for f in findings if f.id], domain)
+            send_email(execution, [f for f in findings if f.id], rekono_address)
         elif (
             execution.task.executor.notification_preference == Notification.TELEGRAM
             and execution.task.executor.telegram_id
         ):
-            send_telegram_message(execution, [f for f in findings if f.id], domain)
+            send_telegram_message(execution, [f for f in findings if f.id], rekono_address)

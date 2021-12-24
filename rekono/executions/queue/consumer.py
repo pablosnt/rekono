@@ -21,7 +21,7 @@ def consumer(
     inputs: list,
     targets: list,
     previous_findings: list,
-    domain: str,
+    rekono_address: str,
 ) -> BaseTool:
     current_job = rq.get_current_job()
     tool_class = tool_utils.get_tool_class_by_name(tool.name)
@@ -38,11 +38,11 @@ def consumer(
             intensity,
             inputs,
             targets,
-            domain,
+            rekono_address,
             current_job,
             tool
         )
-    tool.run(targets=targets, previous_findings=previous_findings, domain=domain)
+    tool.run(targets=targets, previous_findings=previous_findings, rekono_address=rekono_address)
     return tool
 
 
@@ -51,7 +51,7 @@ def process_dependencies(
     intensity: Intensity,
     inputs: list,
     targets: list,
-    domain: str,
+    rekono_address: str,
     current_job: Job,
     tool: BaseTool
 ) -> list:
@@ -72,7 +72,7 @@ def process_dependencies(
             inputs,
             targets=targets,
             previous_findings=param_set,
-            domain=domain,
+            rekono_address=rekono_address,
             callback=success_callback,
             at_front=True
         )

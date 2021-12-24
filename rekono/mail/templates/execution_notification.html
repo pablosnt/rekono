@@ -13,10 +13,10 @@
                 <th>End</th>
             </tr>
             <tr>
-                <th><a href="http://{{ domain }}/api/targets/{{ execution.task.target.id }}/">{{ execution.task.target.target }}</a></th>
-                <th><a href="http://{{ domain }}/api/tasks/{{ execution.task.id }}/">{{ execution.task.id }}</a></th>
-                <th><a href="http://{{ domain }}/api/executions/{{ execution.id }}/">{{ execution.id }}</a></th>
-                <th><a href="http://{{ domain }}/api/tools/{{ tool.id }}/">{{ tool.name }}</a></th>
+                <th><a href="http://{{ rekono_address }}/api/targets/{{ execution.task.target.id }}/">{{ execution.task.target.target }}</a></th>
+                <th><a href="http://{{ rekono_address }}/api/tasks/{{ execution.task.id }}/">{{ execution.task.id }}</a></th>
+                <th><a href="http://{{ rekono_address }}/api/executions/{{ execution.id }}/">{{ execution.id }}</a></th>
+                <th><a href="http://{{ rekono_address }}/api/tools/{{ tool.id }}/">{{ tool.name }}</a></th>
                 <th>{{ execution.status }}</th>
                 <th>{{ execution.start }}</th>
                 <th>{{ execution.end }}</th>
@@ -35,7 +35,7 @@
                 </tr>
                 {% for o in osint %}
                     <tr>
-                        <th><a href="http://{{ domain }}/api/osint/{{ h.id }}/">{{ o.data }}</a></th>
+                        <th><a href="http://{{ rekono_address }}/api/osint/{{ h.id }}/">{{ o.data }}</a></th>
                         <th>{{ o.data_type }}</th>
                         <th>{{ o.source }}</th>
                     </tr>
@@ -55,7 +55,7 @@
                 </tr>
                 {% for h in host %}
                     <tr>
-                        <th><a href="http://{{ domain }}/api/hosts/{{ h.id }}/">{{ h.address }}</a></th>
+                        <th><a href="http://{{ rekono_address }}/api/hosts/{{ h.id }}/">{{ h.address }}</a></th>
                         <th>{{ h.os }}</th>
                         <th>{{ h.os_type }}</th>
                     </tr>
@@ -77,8 +77,8 @@
                 </tr>
                 {% for e in enumeration %}
                     <tr>
-                        <th><a href="http://{{ domain }}/api/hosts/{{ e.host.id }}/">{{ e.host.address }}</a></th>
-                        <th><a href="http://{{ domain }}/api/enumerations/{{ e.id }}/">{{ e.port }}</a></th>
+                        <th><a href="http://{{ rekono_address }}/api/hosts/{{ e.host.id }}/">{{ e.host.address }}</a></th>
+                        <th><a href="http://{{ rekono_address }}/api/enumerations/{{ e.id }}/">{{ e.port }}</a></th>
                         <th>{{ e.port_status }}</th>
                         <th>{{ e.protocol }}</th>
                         <th>{{ e.service }}</th>
@@ -100,9 +100,9 @@
                 </tr>
                 {% for t in technology %}
                     <tr>
-                        <th><a href="http://{{ domain }}/api/hosts/{{ t.enumeration.host.id }}/">{{ t.enumeration.host.address }}</a></th>
-                        <th><a href="http://{{ domain }}/api/enumerations/{{ t.enumeration.id }}/">{{ t.enumeration.port }}</a></th>
-                        <th><a href="http://{{ domain }}/api/technologies/{{ t.id }}/">{{ t.name }}</a></th>
+                        <th><a href="http://{{ rekono_address }}/api/hosts/{{ t.enumeration.host.id }}/">{{ t.enumeration.host.address }}</a></th>
+                        <th><a href="http://{{ rekono_address }}/api/enumerations/{{ t.enumeration.id }}/">{{ t.enumeration.port }}</a></th>
+                        <th><a href="http://{{ rekono_address }}/api/technologies/{{ t.id }}/">{{ t.name }}</a></th>
                         <th>{{ t.version }}</th>
                     </tr>
                 {% endfor %}
@@ -123,10 +123,10 @@
                 </tr>
                 {% for e in endpoint %}
                     <tr>
-                        <th><a href="http://{{ domain }}/api/hosts/{{ e.enumeration.host.id }}/">{{ e.enumeration.host.address }}</a></th>
-                        <th><a href="http://{{ domain }}/api/enumerations/{{ e.enumeration.id }}/">{{ e.enumeration.port }}</a></th>
+                        <th><a href="http://{{ rekono_address }}/api/hosts/{{ e.enumeration.host.id }}/">{{ e.enumeration.host.address }}</a></th>
+                        <th><a href="http://{{ rekono_address }}/api/enumerations/{{ e.enumeration.id }}/">{{ e.enumeration.port }}</a></th>
                         <th>{{ e.enumeration.service }}</th>
-                        <th><a href="http://{{ domain }}/api/endpoints/{{ e.id }}/">{{ e.endpoint }}</a></th>
+                        <th><a href="http://{{ rekono_address }}/api/endpoints/{{ e.id }}/">{{ e.endpoint }}</a></th>
                         <th>{{ e.status }}</th>
                     </tr>
                 {% endfor %}
@@ -149,16 +149,16 @@
                 {% for v in vulnerability %}
                     <tr>
                         {% if v.enumeration %}
-                            <th><a href="http://{{ domain }}/api/hosts/{{ v.enumeration.host.id }}/">{{ v.technology.enumeration.host.address }}</a></th>
-                            <th><a href="http://{{ domain }}/api/enumerations/{{ v.enumeration.id }}/">{{ v.technology.enumeration.port }}</a></th>
+                            <th><a href="http://{{ rekono_address }}/api/hosts/{{ v.enumeration.host.id }}/">{{ v.technology.enumeration.host.address }}</a></th>
+                            <th><a href="http://{{ rekono_address }}/api/enumerations/{{ v.enumeration.id }}/">{{ v.technology.enumeration.port }}</a></th>
                             <th></th>
                         {% endif %}
                         {% if v.technology %}
-                            <th><a href="http://{{ domain }}/api/hosts/{{ v.technology.enumeration.host.id }}/">{{ v.technology.enumeration.host.address }}</a></th>
-                            <th><a href="http://{{ domain }}/api/enumerations/{{ v.technology.enumeration.id }}/">{{ v.technology.enumeration.port }}</a></th>
-                            <th><a href="http://{{ domain }}/api/technologies/{{ v.technology.id }}/">{{ v.technology.name }}</a></th>
+                            <th><a href="http://{{ rekono_address }}/api/hosts/{{ v.technology.enumeration.host.id }}/">{{ v.technology.enumeration.host.address }}</a></th>
+                            <th><a href="http://{{ rekono_address }}/api/enumerations/{{ v.technology.enumeration.id }}/">{{ v.technology.enumeration.port }}</a></th>
+                            <th><a href="http://{{ rekono_address }}/api/technologies/{{ v.technology.id }}/">{{ v.technology.name }}</a></th>
                         {% endif %}
-                        <th><a href="http://{{ domain }}/api/vulnerabilities/{{ v.id }}/">{{ v.name }}</a></th>
+                        <th><a href="http://{{ rekono_address }}/api/vulnerabilities/{{ v.id }}/">{{ v.name }}</a></th>
                         <th>{{ v.cve }}</th>
                         <th>{{ v.severity }}</th>
                     </tr>
@@ -199,13 +199,13 @@
                 {% for e in exploit %}
                     <tr>
                         {% if e.vulnability %}
-                            <th><a href="http://{{ domain }}/api/vulnerabilities/{{ v.vulnerability.id }}/">{{ e.vulnerability.name }}</a></th>
+                            <th><a href="http://{{ rekono_address }}/api/vulnerabilities/{{ v.vulnerability.id }}/">{{ e.vulnerability.name }}</a></th>
                             <th>None</th>
                         {% else %}
                             <th>None</th>
-                            <th><a href="http://{{ domain }}/api/technologies/{{ e.technology.id }}/">{{ e.technology.name }}</a></th>
+                            <th><a href="http://{{ rekono_address }}/api/technologies/{{ e.technology.id }}/">{{ e.technology.name }}</a></th>
                             {% endif %}
-                        <th><a href="http://{{ domain }}/api/exploits/{{ e.id }}/">{{ e.name }}</a></th>
+                        <th><a href="http://{{ rekono_address }}/api/exploits/{{ e.id }}/">{{ e.name }}</a></th>
                     </tr>
                 {% endfor %}
             </table>

@@ -8,7 +8,7 @@ from tools.enums import FindingType
 from tools.models import Input, Intensity
 
 
-def execute(task: Task, domain: str) -> None:
+def execute(task: Task, rekono_address: str) -> None:
     intensity = Intensity.objects.filter(tool=task.tool, value=task.intensity).first()
     inputs = Input.objects.filter(configuration=task.configuration).all()
     targets = {
@@ -28,7 +28,7 @@ def execute(task: Task, domain: str) -> None:
             intensity=intensity,
             inputs=inputs,
             targets=execution_targets,
-            domain=domain,
+            rekono_address=rekono_address,
             callback=success_callback
         )
 
