@@ -5,7 +5,6 @@ import socket
 from targets.enums import TargetType
 from targets.exceptions import InvalidTargetException
 
-IP_NETWORK_REGEX = '[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}/[0-9]{1,2}'
 IP_RANGE_REGEX = '[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}-[0-9]{1,3}'
 
 
@@ -23,8 +22,6 @@ def get_target_type(target: str) -> str:
         return TargetType.NETWORK
     except ValueError:
         pass
-    if bool(re.fullmatch(IP_NETWORK_REGEX, target)):
-        return TargetType.NETWORK
     if bool(re.fullmatch(IP_RANGE_REGEX, target)):
         return TargetType.IP_RANGE
     try:
