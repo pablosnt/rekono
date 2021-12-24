@@ -35,11 +35,12 @@ import WordlistApi from '@/backend/resources'
 import Deletion from '@/common/Deletion.vue'
 import TableHeader from '@/common/TableHeader.vue'
 import Pagination from '@/common/Pagination.vue'
+import NotificationMixin from '@/common/mixin/NotificationMixin.vue'
 import PaginationMixin from '@/common/mixin/PaginationMixin.vue'
 import WordlistForm from '@/forms/WordlistForm.vue'
 export default {
   name: 'wordlistsPage',
-  mixins: [PaginationMixin],
+  mixins: [NotificationMixin, PaginationMixin],
   data () {
     return {
       wordlists: this.fetchData(),
@@ -77,19 +78,11 @@ export default {
       WordlistApi.deleteWordlist(this.selectedWordlist.id)
         .then(() => {
           this.$bvModal.hide('delete-wordlist-modal')
-          this.$bvToast.toast('Wordlist deleted successfully', {
-            title: this.selectedWordlist.name,
-            variant: 'warning',
-            solid: true
-          })
+          this.warning(this.selectedWordlist.name, 'Wordlist deleted successfully')
           this.fetchData()
         })
         .catch(() => {
-          this.$bvToast.toast('Unexpected error in wordlist deletion', {
-            title: this.selectedWordlist.name,
-            variant: 'danger',
-            solid: true
-          })
+          this.danger(this.selectedWordlist.name, 'Unexpected error in wordlist deletion')
         })
     },
     selectWordlist (wordlist) {

@@ -16,8 +16,10 @@
 
 <script>
 import WordlistApi from '@/backend/resources'
+import NotificationMixin from '@/common/mixin/NotificationMixin.vue'
 export default {
   name: 'wordlistForm',
+  mixins: [NotificationMixin],
   initialized: {
     type: Boolean,
     default: false
@@ -90,38 +92,22 @@ export default {
     create () {
       return WordlistApi.createWordlist(this.name, this.type, this.file)
         .then(() => {
-          this.$bvToast.toast('New wordlist created successfully', {
-            title: this.name,
-            variant: 'success',
-            solid: true
-          })
+          this.success(this.name, 'New wordlist created successfully')
           return Promise.resolve(true)
         })
         .catch(() => {
-          this.$bvToast.toast('Unexpected error in wordlist creation', {
-            title: this.name,
-            variant: 'danger',
-            solid: true
-          })
+          this.danger(this.name, 'Unexpected error in wordlist creation')
           return Promise.resolve(false)
         })
     },
     update () {
       return WordlistApi.updateWordlist(this.wordlist.id, this.name, this.type, this.file)
         .then(() => {
-          this.$bvToast.toast('New wordlist updated successfully', {
-            title: this.name,
-            variant: 'success',
-            solid: true
-          })
+          this.success(this.name, 'New wordlist updated successfully')
           return Promise.resolve(true)
         })
         .catch(() => {
-          this.$bvToast.toast('Unexpected error in wordlist update', {
-            title: this.name,
-            variant: 'danger',
-            solid: true
-          })
+          this.danger(this.name, 'Unexpected error in wordlist update')
           return Promise.resolve(false)
         })
     },

@@ -97,10 +97,12 @@ import ProjectApi from '@/backend/projects'
 import TaskApi from '@/backend/tasks'
 import ToolApi from '@/backend/tools'
 import WordlistApi from '@/backend/resources'
+import NotificationMixin from '@/common/mixin/NotificationMixin.vue'
 import { findById } from '@/backend/utils'
 const ProcessApi = Processes.ProcessApi
 export default {
   name: 'taskForm',
+  mixins: [NotificationMixin],
   props: {
     id: String,
     initialized: {
@@ -215,19 +217,11 @@ export default {
       return TaskApi.createTask(this.targetId, this.processId, this.toolId, this.configurationId, this.intensity, this.scheduledAtDate, this.scheduledAtTime, this.scheduledIn, this.scheduledTimeUnit, this.repeatIn, this.repeatTimeUnit, this.wordlistsItems)
         .then(() => {
           this.$bvModal.hide('execute-modal')
-          this.$bvToast.toast('Execution requested successfully', {
-            title: notification,
-            variant: 'success',
-            solid: true
-          })
+          this.success(notification, 'Execution requested successfully')
           return Promise.resolve(true)
         })
         .catch(() => {
-          this.$bvToast.toast('Unexpected error in execution request', {
-            title: notification,
-            variant: 'danger',
-            solid: true
-          })
+          this.danger(notification, 'Unexpected error in execution request')
           return Promise.resolve(false)
         })
     },

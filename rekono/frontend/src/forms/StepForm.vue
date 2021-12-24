@@ -48,10 +48,12 @@
 import Processes from '@/backend/processes'
 import ToolApi from '@/backend/tools'
 import { findById } from '@/backend/utils'
+import NotificationMixin from '@/common/mixin/NotificationMixin.vue'
 const ProcessApi = Processes.ProcessApi
 const StepApi = Processes.StepApi
 export default {
   name: 'stepForm',
+  mixins: [NotificationMixin],
   props: {
     id: String,
     initialized: {
@@ -164,38 +166,22 @@ export default {
     create () {
       return StepApi.createStep(this.processId, this.toolId, this.configurationId, this.priority)
         .then(() => {
-          this.$bvToast.toast('New step created successfully', {
-            title: this.selectedTool.name,
-            variant: 'success',
-            solid: true
-          })
+          this.success(this.selectedTool.name, 'New step created successfully')
           return Promise.resolve(true)
         })
         .catch(() => {
-          this.$bvToast.toast('Unexpected error in step creation', {
-            title: this.selectedTool.name,
-            variant: 'danger',
-            solid: true
-          })
+          this.danger(this.selectedTool.name, 'Unexpected error in step creation')
           return Promise.resolve(false)
         })
     },
     update () {
       return StepApi.updateStep(this.step.id, this.priority)
         .then(() => {
-          this.$bvToast.toast('Step updated successfully', {
-            title: this.selectedTool.name,
-            variant: 'success',
-            solid: true
-          })
+          this.success(this.selectedTool.name, 'Step updated successfully')
           return Promise.resolve(true)
         })
         .catch(() => {
-          this.$bvToast.toast('Unexpected error in step update', {
-            title: this.selectedTool.name,
-            variant: 'danger',
-            solid: true
-          })
+          this.danger(this.selectedTool.name, 'Unexpected error in step update')
           return Promise.resolve(false)
         })
     },

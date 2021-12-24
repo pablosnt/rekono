@@ -33,10 +33,12 @@
 
 <script>
 import Processes from '@/backend/processes'
+import NotificationMixin from '@/common/mixin/NotificationMixin.vue'
 const ProcessApi = Processes.ProcessApi
 const StepApi = Processes.StepApi
 export default {
   name: 'processForm',
+  mixins: [NotificationMixin],
   props: {
     id: String,
     initialized: {
@@ -108,56 +110,32 @@ export default {
       return ProcessApi.createProcess(this.name, this.description)
         .then((data) => {
           if (this.tool === null) {
-            this.$bvToast.toast('New process created successfully', {
-              title: this.name,
-              variant: 'success',
-              solid: true
-            })
+            this.success(this.name, 'New process created successfully')
             return Promise.resolve(true)
           } else {
             return StepApi.createStep(data.id, this.tool.id, this.configuration, this.priority)
               .then(() => {
-                this.$bvToast.toast('New process created successfully', {
-                  title: this.name + ' - ' + this.tool.name,
-                  variant: 'success',
-                  solid: true
-                })
+                this.success(this.name + ' - ' + this.tool.name, 'New process created successfully')
                 return Promise.resolve(true)
               })
               .catch(() => {
-                this.$bvToast.toast('Unexpected error in step creation', {
-                  title: this.tool.name,
-                  variant: 'danger',
-                  solid: true
-                })
+                this.danger(this.tool.name, 'Unexpected error in step creation')
               })
           }
         })
         .catch(() => {
-          this.$bvToast.toast('Unexpected error in process creation', {
-            title: this.name,
-            variant: 'danger',
-            solid: true
-          })
+          this.danger(this.name, 'Unexpected error in process creation')
           return Promise.resolve(false)
         })
     },
     update () {
       return ProcessApi.updateProcess(this.process.id, this.name, this.description)
         .then(() => {
-          this.$bvToast.toast('Process updated successfully', {
-            title: this.name,
-            variant: 'success',
-            solid: true
-          })
+          this.success(this.name, 'Process updated successfully')
           return Promise.resolve(true)
         })
         .catch(() => {
-          this.$bvToast.toast('Unexpected error in process update', {
-            title: this.name,
-            variant: 'danger',
-            solid: true
-          })
+          this.danger(this.name, 'Unexpected error in process update')
           return Promise.resolve(false)
         })
     },

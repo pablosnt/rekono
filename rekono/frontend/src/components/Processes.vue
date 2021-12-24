@@ -85,6 +85,7 @@ import { stages } from '@/backend/constants'
 import Deletion from '@/common/Deletion.vue'
 import TableHeader from '@/common/TableHeader.vue'
 import Pagination from '@/common/Pagination.vue'
+import NotificationMixin from '@/common/mixin/NotificationMixin.vue'
 import PaginationMixin from '@/common/mixin/PaginationMixin.vue'
 import ProcessForm from '@/forms/ProcessForm.vue'
 import StepForm from '@/forms/StepForm.vue'
@@ -93,7 +94,7 @@ const ProcessApi = Processes.ProcessApi
 const StepApi = Processes.StepApi
 export default {
   name: 'processesPage',
-  mixins: [PaginationMixin],
+  mixins: [NotificationMixin, PaginationMixin],
   data () {
     return {
       processes: this.fetchData(),
@@ -144,38 +145,22 @@ export default {
       ProcessApi.deleteProcess(this.selectedProcess.id)
         .then(() => {
           this.$bvModal.hide('delete-process-modal')
-          this.$bvToast.toast('Process deleted successfully', {
-            title: this.selectedProcess.name,
-            variant: 'warning',
-            solid: true
-          })
+          this.warning(this.selectedProcess.name, 'Process deleted successfully')
           this.fetchData()
         })
         .catch(() => {
-          this.$bvToast.toast('Unexpected error in process deletion', {
-            title: this.selectedProcess.name,
-            variant: 'danger',
-            solid: true
-          })
+          this.danger(this.selectedProcess.name, 'Unexpected error in process deletion')
         })
     },
     deleteStep () {
       StepApi.deleteStep(this.selectedStep.id)
         .then(() => {
           this.$bvModal.hide('delete-step-modal')
-          this.$bvToast.toast('Step deleted successfully', {
-            title: this.processName + ' - ' + this.selectedStep.name,
-            variant: 'warning',
-            solid: true
-          })
+          this.warning(this.processName + ' - ' + this.selectedStep.name, 'Step deleted successfully')
           this.fetchData()
         })
         .catch(() => {
-          this.$bvToast.toast('Unexpected error in step deletion', {
-            title: this.processName,
-            variant: 'danger',
-            solid: true
-          })
+          this.danger(this.processName, 'Unexpected error in step deletion')
         })
     },
     showExecuteForm (process, step = null) {
