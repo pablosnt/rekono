@@ -4,26 +4,41 @@ from findings.enums import DataType
 from findings.models import (OSINT, Credential, Endpoint, Enumeration, Exploit,
                              Host, Technology, Vulnerability)
 from resources.models import Wordlist
-from targets.models import Target
+from targets.models import Target, TargetEndpoint, TargetPort
 
 
 def target(target: Target) -> dict:
     return {
         Keyword.TARGET.name.lower(): target.target,
         Keyword.HOST.name.lower(): target.target,
-        Keyword.URL.name.lower(): get_url(target.target, None)
+        Keyword.URL.name.lower(): get_url(target.target)
     }
 
 
-def target_port(target_ports: list, target: Target) -> dict:
-    urls = [get_url(target.target, tp) for tp in target_ports]
-    urls = [url for url in urls if url]
-    return {
-        Keyword.PORT.name.lower(): target_ports[0].port,
-        Keyword.PORTS.name.lower(): [tp.port for tp in target_ports],
-        Keyword.PORTS_COMMAS.name.lower(): ','.join([str(tp.port) for tp in target_ports]),
-        Keyword.URL.name.lower(): urls[0] if urls else None,
+def target_port(target_port: TargetPort, accumulated: dict = {}) -> dict:
+    output = {
+        Keyword.TARGET.name.lower(): target_port.target.target,
+        Keyword.HOST.name.lower(): target_port.target.target,
+        Keyword.PORT.name.lower(): target_port.port,
+        Keyword.PORTS.name.lower(): [target_port.port],
+        Keyword.URL.name.lower(): get_url(target_port.target.target, target_port.port)
     }
+    if accumulated and Keyword.PORTS.name.lower() in accumulated:
+        output[Keyword.PORTS.name.lower()] = accumulated[Keyword.PORTS.name.lower()]
+        output[Keyword.PORTS.name.lower()].append(target_port.port)
+    output[Keyword.PORTS_COMMAS.name.lower()] = ','.join([str(port) for port in output[Keyword.PORTS.name.lower()]])    # noqa: E501
+    return output
+
+
+def target_endpoints(target_endpoint: TargetEndpoint) -> dict:
+    output = target_port([target_endpoint.target_port])
+    output[Keyword.URL.name.lower()] = get_url(
+        target_endpoint.target_port.target.target,
+        target_endpoint.target_port.port,
+        target_endpoint.endpoint
+    )
+    output[Keyword.ENDPOINT.name.lower()] = target_endpoint.endpoint
+    return output
 
 
 def osint(osint: OSINT) -> dict:
@@ -31,7 +46,7 @@ def osint(osint: OSINT) -> dict:
         return {
             Keyword.TARGET.name.lower(): osint.data,
             Keyword.HOST.name.lower(): osint.data,
-            Keyword.URL.name.lower(): get_url(osint.data, None)
+            Keyword.URL.name.lower(): get_url(osint.data)
         }
     return {}
 
@@ -40,7 +55,7 @@ def host(host: Host) -> dict:
     return {
         Keyword.TARGET.name.lower(): host.address,
         Keyword.HOST.name.lower(): host.address,
-        Keyword.URL.name.lower(): get_url(host.address, None),
+        Keyword.URL.name.lower(): get_url(host.address),
     }
 
 
@@ -50,7 +65,7 @@ def enumeration(enumeration: Enumeration, accumulated: dict = {}) -> dict:
         Keyword.HOST.name.lower(): enumeration.host.address,
         Keyword.PORT.name.lower(): enumeration.port,
         Keyword.PORTS.name.lower(): [enumeration.port],
-        Keyword.URL.name.lower(): get_url(enumeration.host.address, enumeration),
+        Keyword.URL.name.lower(): get_url(enumeration.host.address, enumeration.port),
     }
     if accumulated and Keyword.PORTS.name.lower() in accumulated:
         output[Keyword.PORTS.name.lower()] = accumulated[Keyword.PORTS.name.lower()]
@@ -61,6 +76,11 @@ def enumeration(enumeration: Enumeration, accumulated: dict = {}) -> dict:
 
 def endpoint(endpoint: Endpoint):
     output = enumeration(endpoint.enumeration)
+    output[Keyword.URL.name.lower()] = get_url(
+        endpoint.enumeration.host.address,
+        endpoint.enumeration.port,
+        endpoint.endpoint
+    )
     output[Keyword.ENDPOINT.name.lower()] = endpoint.endpoint
     return output
 

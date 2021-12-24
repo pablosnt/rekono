@@ -32,7 +32,7 @@ class CmseekTool(BaseTool):
             except KeyError:
                 pass
         try:
-            url = formatter.argument_with_target_ports('{url}', self.target_ports, self.target)
+            url = formatter.argument_with_multiple('{url}', self.target_ports)
             if url:
                 return self.clean_url(url)
         except KeyError:

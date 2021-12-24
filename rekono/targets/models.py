@@ -48,3 +48,21 @@ class TargetPort(models.Model):
 
     def get_project(self) -> Any:
         return self.target.project
+
+
+class TargetEndpoint(models.Model):
+    target_port = models.ForeignKey(
+        TargetPort,
+        related_name='target_endpoints',
+        on_delete=models.CASCADE
+    )
+    endpoint = models.TextField(max_length=500)
+
+    class Meta:
+        ordering = ['-id']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['target_port', 'endpoint'],
+                name='unique target endpoint'
+            )
+        ]

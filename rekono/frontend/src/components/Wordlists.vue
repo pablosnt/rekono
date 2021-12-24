@@ -61,19 +61,10 @@ export default {
     WordlistForm
   },
   watch: {
-    wordlists (wordlists) {
-      const creators = []
-      const unique = []
-      for (let i = 0; i < wordlists.length; i++) {
-        if (wordlists[i].creator.id && !unique.includes(wordlists[i].creator.id)) {
-          creators.push(wordlists[i].creator)
-          unique.push(wordlists[i].creator.id)
-        }
-      }
+    wordlists () {
       this.filters = [
         { name: 'Type', values: ['Endpoint', 'Password'], valueField: 'value', textField: 'value', filterField: 'type' },
         { name: 'Max. Size', filterField: 'size__lte', type: 'number' },
-        // { name: 'Creator', values: creators, default: unique.includes(this.$store.state.user) ? this.$store.state.user : null, valueField: 'id', textField: 'username', filterField: 'creator' }
         { name: 'Creator', filterField: 'creator__username__icontains', type: 'text' }
       ] 
     }

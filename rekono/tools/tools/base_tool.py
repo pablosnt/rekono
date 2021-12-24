@@ -89,9 +89,7 @@ class BaseTool():
 
     def evaluate_arguments_error(self, name: str, required: bool, arguments: dict):
         if required and name not in arguments:
-            raise InvalidToolParametersException(
-                f'Tool configuration requires {name} argument'
-            )
+            raise InvalidToolParametersException(f'Tool configuration requires {name} argument')
         return arguments[name] if name in arguments else ''
 
     def get_arguments(self, manual_findings: list, previous_findings: list) -> list:
@@ -119,10 +117,9 @@ class BaseTool():
                 if self.evaluate_use_of_target(i, command_arguments):
                     command_arguments[i.name] = formatter.argument_with_one(i.argument, self.target)
                 elif self.evaluate_use_of_target_ports(i, command_arguments):
-                    command_arguments[i.name] = formatter.argument_with_target_ports(
+                    command_arguments[i.name] = formatter.argument_with_multiple(
                         i.argument,
-                        self.target_ports,
-                        self.target
+                        self.target_ports
                     )
             except KeyError:
                 command_arguments[i.name] = self.evaluate_arguments_error(

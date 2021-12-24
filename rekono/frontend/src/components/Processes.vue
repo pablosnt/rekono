@@ -128,19 +128,10 @@ export default {
     TaskForm
   },
   watch: {
-    processes (processes) {
-      const creators = []
-      const unique = []
-      for (let i = 0; i < processes.length; i++) {
-        if (processes[i].creator.id && !unique.includes(processes[i].creator.id)) {
-          creators.push(processes[i].creator)
-          unique.push(processes[i].creator.id)
-        }
-      }
+    processes () {
       this.filters = [
         { name: 'Tool', filterField: 'tool__name__icontains', type: 'text' },
         { name: 'Stage', values: stages, valueField: 'id', textField: 'value', filterField: 'tool__stage' },
-        // { name: 'Creator', values: creators, default: unique.includes(this.$store.state.user) ? this.$store.state.user : null, valueField: 'id', textField: 'username', filterField: 'creator' }
         { name: 'Creator', filterField: 'creator__username__icontains', type: 'text' }
       ]
     }

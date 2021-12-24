@@ -2,7 +2,7 @@ from arguments import parser
 from findings.models import (OSINT, Credential, Endpoint, Enumeration, Exploit,
                              Host, Technology, Vulnerability)
 from resources.models import Wordlist
-from targets.models import Target
+from targets.models import Target, TargetPort
 
 
 def argument_with_one(argument, finding) -> str:
@@ -25,15 +25,11 @@ def argument_with_one(argument, finding) -> str:
 def argument_with_multiple(argument, findings) -> str:
     parsers = {
         Enumeration: parser.enumeration,
+        TargetPort: parser.target_port,
     }
     data = {}
     for result in findings:
         data = parsers[result.__class__](result, data)
-    return format_argument(argument, data)
-
-
-def argument_with_target_ports(argument, target_ports, target) -> str:
-    data = parser.target_port(target_ports, target)
     return format_argument(argument, data)
 
 

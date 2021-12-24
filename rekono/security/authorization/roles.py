@@ -25,6 +25,9 @@ DEFAULT_GROUPS = {
         'add_targetport',
         'delete_targetport',
         'view_targetport',
+        'add_targetendpoint',
+        'delete_targetendpoint',
+        'view_targetendpoint',
         # Executions
         'add_task',
         'delete_task',
@@ -86,6 +89,9 @@ DEFAULT_GROUPS = {
         'add_targetport',
         'delete_targetport',
         'view_targetport',
+        'add_targetendpoint',
+        'delete_targetendpoint',
+        'view_targetendpoint',
         # Executions
         'add_task',
         'delete_task',
@@ -143,6 +149,7 @@ DEFAULT_GROUPS = {
         'view_project',
         'view_target',
         'view_targetport',
+        'view_targetendpoint',
         # Executions
         'view_task',
         'view_execution',
