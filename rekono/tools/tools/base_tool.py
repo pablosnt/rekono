@@ -32,14 +32,11 @@ class BaseTool():
         tool: Tool,
         configuration: Configuration,
         inputs: list,
-        intensity: Intensity,
-        target_ports: list
+        intensity: Intensity
     ) -> None:
         execution.rq_job_pid = os.getpid()
         execution.save()
         self.execution = execution
-        self.target = execution.task.target
-        self.target_ports = target_ports if target_ports else self.target.target_ports.all()
         self.tool = tool
         self.configuration = configuration
         self.inputs = inputs
@@ -61,66 +58,34 @@ class BaseTool():
     def clean_environment(self) -> None:
         pass    # This method can be implemented by specific tools to run code after execution
 
-    def prepare_findings(self, manual_findings: list, previous_findings: list) -> tuple:
-        return (manual_findings, previous_findings)
-
-    def evaluate_use_of_target(self, input: Input, arguments: dict) -> bool:
-        return (
-            input.name not in arguments
-            and checker.check_finding(input, self.target)
-            and input.name in [
-                Keyword.TARGET.name.lower(),
-                Keyword.HOST.name.lower(),
-                Keyword.URL.name.lower()
-            ]
-        )
-
-    def evaluate_use_of_target_ports(self, input: Input, arguments: dict) -> bool:
-        return (
-            input.name not in arguments
-            and self.target_ports
-            and input.name in [
-                Keyword.PORT.name.lower(),
-                Keyword.PORTS.name.lower(),
-                Keyword.PORTS_COMMAS.name.lower(),
-                Keyword.URL.name.lower()
-            ]
-        )
-
     def evaluate_arguments_error(self, name: str, required: bool, arguments: dict):
         if required and name not in arguments:
             raise InvalidToolParametersException(f'Tool configuration requires {name} argument')
         return arguments[name] if name in arguments else ''
 
-    def get_arguments(self, manual_findings: list, previous_findings: list) -> list:
+    def get_arguments(self, targets: list, previous_findings: list) -> list:
         command_arguments = {
             'intensity': self.intensity.argument,
             'output': self.path_output if self.file_output_enabled else ''
         }
         for i in self.inputs:
             try:
-                input_class = utils.get_finding_class_by_type(i.type)
+                input_classes = utils.get_finding_class_by_input_type(i.type)
                 findings = []
-                for source in [previous_findings, manual_findings]:
+                for source in [previous_findings, targets]:
                     for r in source:
-                        if isinstance(r, input_class) and checker.check_finding(i, r):
-                            if i.selection == InputSelection.FOR_EACH:
-                                command_arguments[i.name] = formatter.argument_with_one(i.argument, r)      # noqa: E501
-                                self.findings_relations[input_class.__name__.lower()] = r
-                                break
-                            else:
-                                findings.append(r)
+                        for input_class in input_classes:
+                            if isinstance(r, input_class) and checker.check_finding(i, r):
+                                if i.selection == InputSelection.FOR_EACH:
+                                    command_arguments[i.name] = formatter.argument_with_one(i.argument, r)      # noqa: E501
+                                    self.findings_relations[input_class.__name__.lower()] = r
+                                    break
+                                else:
+                                    findings.append(r)
                     if findings:
                         command_arguments[i.name] = formatter.argument_with_multiple(i.argument, findings)  # noqa: E501
                     if i.name in command_arguments:
                         break
-                if self.evaluate_use_of_target(i, command_arguments):
-                    command_arguments[i.name] = formatter.argument_with_one(i.argument, self.target)
-                elif self.evaluate_use_of_target_ports(i, command_arguments):
-                    command_arguments[i.name] = formatter.argument_with_multiple(
-                        i.argument,
-                        self.target_ports
-                    )
             except KeyError:
                 command_arguments[i.name] = self.evaluate_arguments_error(
                     i.name,
@@ -135,7 +100,7 @@ class BaseTool():
         args = self.configuration.arguments.format(**command_arguments)
         return [arg for arg in args.split(' ') if arg] if ' ' in args else [args]
 
-    def tool_execution(self, args: list, manual_findings: list, previous_findings: list) -> str:
+    def tool_execution(self, args: list, targets: list, previous_findings: list) -> str:
         args.insert(0, self.tool.command)
         exec = subprocess.run(args, capture_output=True)
         if (
@@ -201,24 +166,15 @@ class BaseTool():
         self.execution.output_plain = output
         self.execution.save()
 
-    def run(
-        self,
-        manual_findings: list = [],
-        previous_findings: list = [],
-        domain: str = None
-    ) -> None:
+    def run(self, targets: list = [], previous_findings: list = [], domain: str = None) -> None:
         self.on_start()
         try:
             self.check_installation()
         except InstallationNotFoundException as ex:
             self.on_error(stderror=str(ex))
             return
-        manual_findings, previous_findings = self.prepare_findings(
-            manual_findings,
-            previous_findings
-        )
         try:
-            args = self.get_arguments(manual_findings, previous_findings)
+            args = self.get_arguments(targets, previous_findings)
         except InvalidToolParametersException as ex:
             print(ex)
             self.on_skipped()
@@ -226,7 +182,7 @@ class BaseTool():
         self.prepare_environment()
         self.on_running()
         try:
-            output = self.tool_execution(args, manual_findings, previous_findings)
+            output = self.tool_execution(args, targets, previous_findings)
         except UnexpectedToolExitCodeException as ex:
             self.on_error(stderror=str(ex))
             self.clean_environment()

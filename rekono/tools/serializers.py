@@ -87,7 +87,7 @@ class ToolSerializer(serializers.ModelSerializer):
         model = Tool
         fields = (
             'id', 'name', 'command', 'stage_name', 'reference', 'icon',
-            'for_each_target_port', 'intensities', 'configurations'
+            'intensities', 'configurations'
         )
 
     def get_intensities(self, instance) -> List[IntensitySerializer]:

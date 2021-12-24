@@ -10,9 +10,8 @@ def producer(
     execution: Execution,
     intensity: Intensity,
     inputs: list,
-    manual_findings: list = [],
+    targets: list = [],
     previous_findings: list = [],
-    target_ports: list = [],
     domain: str = None,
     callback: Callable = None,
     dependencies: list = [],
@@ -35,8 +34,7 @@ def producer(
         configuration=configuration,
         intensity=intensity,
         inputs=inputs,
-        target_ports=target_ports,
-        manual_findings=manual_findings,
+        targets=targets,
         previous_findings=previous_findings,
         domain=domain,
         on_success=callback,
@@ -49,7 +47,7 @@ def producer(
     execution_job.meta['intensity'] = intensity
     execution_job.meta['inputs'] = inputs
     execution_job.meta['callback'] = callback
-    execution_job.meta['manual_findings'] = manual_findings
+    execution_job.meta['targets'] = targets
     execution_job.save_meta()
     execution.rq_job_id = execution_job.id
     execution.save()

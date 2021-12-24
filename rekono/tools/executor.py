@@ -1,36 +1,33 @@
 from django.utils import timezone
+from executions import utils
 from executions.models import Execution
 from executions.queue import producer
+from targets.models import TargetEndpoint
 from tasks.models import Task
+from tools.enums import FindingType
 from tools.models import Input, Intensity
 
 
-def execute(task: Task, manual_findings: list, domain: str) -> None:
+def execute(task: Task, domain: str) -> None:
     intensity = Intensity.objects.filter(tool=task.tool, value=task.intensity).first()
     inputs = Input.objects.filter(configuration=task.configuration).all()
-    target_ports = task.target.target_ports.all()
-    if target_ports and task.tool.for_each_target_port:
-        for tp in target_ports:
-            execution = Execution.objects.create(task=task)
-            execution.save()
-            producer.producer(
-                execution=execution,
-                intensity=intensity,
-                inputs=inputs,
-                manual_findings=manual_findings,
-                target_ports=[tp],
-                domain=domain,
-                callback=success_callback
-            )
-    else:
+    targets = {
+        FindingType.HOST: [task.target],
+        FindingType.ENUMERATION: list(task.target.target_ports.all()),
+        FindingType.ENDPOINT: list(TargetEndpoint.objects.filter(
+            target_port__target=task.target
+        ).all()),
+        FindingType.WORDLIST: list(task.wordlists.all())
+    }
+    executions = utils.get_executions_from_findings(targets, inputs)
+    for execution_targets in executions:
         execution = Execution.objects.create(task=task)
         execution.save()
         producer.producer(
             execution=execution,
             intensity=intensity,
             inputs=inputs,
-            manual_findings=manual_findings,
-            target_ports=target_ports,
+            targets=execution_targets,
             domain=domain,
             callback=success_callback
         )

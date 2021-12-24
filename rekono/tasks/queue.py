@@ -10,14 +10,13 @@ from tasks.models import Task
 from tools import executor as tools
 
 
-def producer(task: Task, manual_findings: list, domain: str):
+def producer(task: Task, domain: str):
     task_queue = django_rq.get_queue('tasks-queue')
     if task.scheduled_at:
         task_job = task_queue.enqueue_at(
             task.scheduled_at,
             consumer,
             task=task,
-            manual_findings=manual_findings,
             domain=domain,
             on_success=scheduled_callback
         )
@@ -27,7 +26,6 @@ def producer(task: Task, manual_findings: list, domain: str):
             timedelta(**frequency),
             consumer,
             task=task,
-            manual_findings=manual_findings,
             domain=domain,
             on_success=scheduled_callback
         )
@@ -35,7 +33,6 @@ def producer(task: Task, manual_findings: list, domain: str):
         task_job = task_queue.enqueue(
             consumer,
             task=task,
-            manual_findings=manual_findings,
             domain=domain,
             on_success=scheduled_callback
         )
@@ -45,7 +42,7 @@ def producer(task: Task, manual_findings: list, domain: str):
 
 def scheduled_callback(job, connection, result, *args, **kwargs):
     if result:
-        task, manual_findings, domain = result
+        task, domain = result
         if task.repeat_in and task.repeat_time_unit:
             frequency = {task.repeat_time_unit.name.lower(): task.repeat_in}
             task_queue = django_rq.get_queue('tasks-queue')
@@ -53,7 +50,6 @@ def scheduled_callback(job, connection, result, *args, **kwargs):
                 timedelta(**frequency),
                 consumer.process_task,
                 task=task,
-                manual_findings=manual_findings,
                 domain=domain,
                 on_success=scheduled_callback
             )
@@ -62,15 +58,15 @@ def scheduled_callback(job, connection, result, *args, **kwargs):
 
 
 @job('tasks-queue')
-def consumer(task: Task = None, manual_findings: list = [], domain: Optional[str] = None) -> tuple:
+def consumer(task: Task = None, domain: Optional[str] = None) -> tuple:
     if task:
         if task.tool:
-            tools.execute(task, manual_findings, domain)
+            tools.execute(task, domain)
         elif task.process:
-            processes.execute(task, manual_findings, domain)
+            processes.execute(task, domain)
         else:
             raise InvalidTaskException('Invalid task. Process or tool is required')
-        return task, manual_findings, domain
+        return task, domain
 
 
 def cancel_and_delete_task(job_id: str) -> Job:

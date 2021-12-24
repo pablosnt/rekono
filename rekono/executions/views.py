@@ -30,7 +30,6 @@ class ExecutionViewSet(ListModelMixin, RetrieveModelMixin, DDScansViewSet, DDFin
         ]:
             findings.extend(find_model.objects.filter(
                 execution=execution,
-                is_active=True,
-                is_manual=False
+                is_active=True
             ).all())
         return findings

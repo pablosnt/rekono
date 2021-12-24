@@ -31,12 +31,6 @@ class CmseekTool(BaseTool):
                     return self.clean_url(url)
             except KeyError:
                 pass
-        try:
-            url = formatter.argument_with_multiple('{url}', self.target_ports)
-            if url:
-                return self.clean_url(url)
-        except KeyError:
-            pass
 
     def clean_environment(self) -> None:
         url_path = self.get_url_path()

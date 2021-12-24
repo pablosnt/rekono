@@ -28,7 +28,7 @@ class TargetViewSet(
 
     def get_queryset(self):
         project_filter = {self.project_members_field: self.request.user}
-        return super().get_queryset().filter(project_filter)
+        return super().get_queryset().filter(**project_filter)
 
     def perform_create(self, serializer):
         if self.request.user not in self.get_project_members(serializer.validated_data):

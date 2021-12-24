@@ -10,19 +10,18 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('projects', '0001_initial'),
+        ('processes', '0001_initial'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='project',
-            name='members',
-            field=models.ManyToManyField(blank=True, related_name='members', to=settings.AUTH_USER_MODEL),
-        ),
-        migrations.AddField(
-            model_name='project',
-            name='owner',
+            model_name='process',
+            name='creator',
             field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL),
+        ),
+        migrations.AddConstraint(
+            model_name='step',
+            constraint=models.UniqueConstraint(fields=('process', 'tool', 'configuration'), name='unique step'),
         ),
     ]

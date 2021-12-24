@@ -11,14 +11,6 @@ from tasks.models import Task
 
 
 class Finding(models.Model):
-    # Only for manual findings
-    task = models.ForeignKey(
-        Task,
-        related_name='%(class)s',
-        on_delete=models.CASCADE,
-        blank=True,
-        null=True
-    )
     # Only for automatic findings
     execution = models.ForeignKey(
         Execution,
@@ -29,7 +21,6 @@ class Finding(models.Model):
     )
     creation = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=True)
-    is_manual = models.BooleanField(default=False)
     reported_to_defectdojo = models.BooleanField(default=False)
 
     key_fields = ['execution__task']

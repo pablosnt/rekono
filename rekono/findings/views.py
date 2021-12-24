@@ -27,10 +27,7 @@ class FindingBaseView(DDFindingsViewSet, ListModelMixin, RetrieveModelMixin, Des
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        return queryset.filter(
-            execution__task__target__project__members=self.request.user,
-            is_manual=False
-        )
+        return queryset.filter(execution__task__target__project__members=self.request.user)
 
     def get_findings(self):
         return [self.get_object()]

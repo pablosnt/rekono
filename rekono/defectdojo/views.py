@@ -62,7 +62,7 @@ class DDFindingsViewSet(GenericViewSet):
         url_name='defect-dojo-findings'
     )
     def defect_dojo_findings(self, request, pk):
-        findings = [f for f in self.get_findings() if f.is_active and not f.is_manual]
+        findings = [f for f in self.get_findings() if f.is_active]
         if not findings:
             return Response(
                 {'findings': 'Invalid findings cannot be reported to Defect-Dojo'},

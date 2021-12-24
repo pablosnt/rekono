@@ -1,6 +1,5 @@
 import django_rq
 from executions.queue import producer
-from executions.queue.constants import finding_relations
 from rq.job import Job
 from rq.registry import DeferredJobRegistry
 from tools import utils
@@ -28,8 +27,8 @@ def get_findings_from_dependencies(dependencies: list) -> dict:
         dependency = executions_queue.fetch_job(dep_id)
         if not dependency or not dependency.result:
             continue
-        for input_type in finding_relations.keys():
-            input_class = utils.get_finding_class_by_type(input_type)
+        for input_type in utils.get_relations_between_input_types().keys():
+            input_class = utils.get_finding_class_by_input_type(input_type)
             input_findings = [f for f in dependency.result.findings if isinstance(f, input_class)]
             for finding in input_findings:
                 if input_type in findings:
@@ -39,7 +38,7 @@ def get_findings_from_dependencies(dependencies: list) -> dict:
     return findings
 
 
-def update_new_dependencies(parent_job: str, new_jobs: list, manual_findings: list) -> None:
+def update_new_dependencies(parent_job: str, new_jobs: list, targets: list) -> None:
     executions_queue = django_rq.get_queue('executions-queue')
     registry = DeferredJobRegistry(queue=executions_queue)
     for job_id in registry.get_job_ids():
@@ -53,7 +52,7 @@ def update_new_dependencies(parent_job: str, new_jobs: list, manual_findings: li
                 meta['execution'],
                 meta['intensity'],
                 meta['inputs'],
-                manual_findings=meta['manual_findings'],
+                targets=meta['targets'],
                 request=meta['domain'],
                 callback=meta['callback'],
                 dependencies=dependencies

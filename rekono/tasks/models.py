@@ -23,10 +23,7 @@ class Task(models.Model):
         blank=True,
         null=True
     )
-    intensity = models.IntegerField(
-        choices=IntensityRank.choices,
-        default=IntensityRank.NORMAL
-    )
+    intensity = models.IntegerField(choices=IntensityRank.choices, default=IntensityRank.NORMAL)
     executor = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,

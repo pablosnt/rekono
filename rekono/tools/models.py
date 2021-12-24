@@ -14,7 +14,6 @@ class Tool(models.Model):
     stage = models.IntegerField(choices=Stage.choices)
     reference = models.TextField(max_length=250, blank=True, null=True)
     icon = models.TextField(max_length=250, blank=True, null=True)
-    for_each_target_port = models.BooleanField(default=False)
 
     class Meta:
         ordering = ['-id']

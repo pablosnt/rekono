@@ -46,8 +46,7 @@ class ProjectViewSet(ModelViewSet, DDScansViewSet, DDFindingsViewSet):
         ]:
             findings.extend(find_model.objects.filter(
                 execution__task__target__project=project,
-                is_active=True,
-                is_manual=False
+                is_active=True
             ).all())
         return findings
 
