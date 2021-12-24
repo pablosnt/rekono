@@ -33,12 +33,12 @@
 
 <script>
 import Processes from '@/backend/processes'
-import NotificationMixin from '@/common/mixin/NotificationMixin.vue'
+import AlertMixin from '@/common/mixin/AlertMixin.vue'
 const ProcessApi = Processes.ProcessApi
 const StepApi = Processes.StepApi
 export default {
   name: 'processForm',
-  mixins: [NotificationMixin],
+  mixins: [AlertMixin],
   props: {
     id: String,
     initialized: {

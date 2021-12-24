@@ -16,10 +16,10 @@
 
 <script>
 import WordlistApi from '@/backend/resources'
-import NotificationMixin from '@/common/mixin/NotificationMixin.vue'
+import AlertMixin from '@/common/mixin/AlertMixin.vue'
 export default {
   name: 'wordlistForm',
-  mixins: [NotificationMixin],
+  mixins: [AlertMixin],
   initialized: {
     type: Boolean,
     default: false

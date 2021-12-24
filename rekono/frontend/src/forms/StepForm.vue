@@ -48,12 +48,12 @@
 import Processes from '@/backend/processes'
 import ToolApi from '@/backend/tools'
 import { findById } from '@/backend/utils'
-import NotificationMixin from '@/common/mixin/NotificationMixin.vue'
+import AlertMixin from '@/common/mixin/AlertMixin.vue'
 const ProcessApi = Processes.ProcessApi
 const StepApi = Processes.StepApi
 export default {
   name: 'stepForm',
-  mixins: [NotificationMixin],
+  mixins: [AlertMixin],
   props: {
     id: String,
     initialized: {

@@ -35,12 +35,12 @@ import WordlistApi from '@/backend/resources'
 import Deletion from '@/common/Deletion.vue'
 import TableHeader from '@/common/TableHeader.vue'
 import Pagination from '@/common/Pagination.vue'
-import NotificationMixin from '@/common/mixin/NotificationMixin.vue'
+import AlertMixin from '@/common/mixin/AlertMixin.vue'
 import PaginationMixin from '@/common/mixin/PaginationMixin.vue'
 import WordlistForm from '@/forms/WordlistForm.vue'
 export default {
   name: 'wordlistsPage',
-  mixins: [NotificationMixin, PaginationMixin],
+  mixins: [AlertMixin, PaginationMixin],
   data () {
     return {
       wordlists: this.fetchData(),

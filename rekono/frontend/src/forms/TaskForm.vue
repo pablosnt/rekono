@@ -97,12 +97,12 @@ import ProjectApi from '@/backend/projects'
 import TaskApi from '@/backend/tasks'
 import ToolApi from '@/backend/tools'
 import WordlistApi from '@/backend/resources'
-import NotificationMixin from '@/common/mixin/NotificationMixin.vue'
+import AlertMixin from '@/common/mixin/AlertMixin.vue'
 import { findById } from '@/backend/utils'
 const ProcessApi = Processes.ProcessApi
 export default {
   name: 'taskForm',
-  mixins: [NotificationMixin],
+  mixins: [AlertMixin],
   props: {
     id: String,
     initialized: {

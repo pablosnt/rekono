@@ -85,7 +85,7 @@ import { stages } from '@/backend/constants'
 import Deletion from '@/common/Deletion.vue'
 import TableHeader from '@/common/TableHeader.vue'
 import Pagination from '@/common/Pagination.vue'
-import NotificationMixin from '@/common/mixin/NotificationMixin.vue'
+import AlertMixin from '@/common/mixin/AlertMixin.vue'
 import PaginationMixin from '@/common/mixin/PaginationMixin.vue'
 import ProcessForm from '@/forms/ProcessForm.vue'
 import StepForm from '@/forms/StepForm.vue'
@@ -94,7 +94,7 @@ const ProcessApi = Processes.ProcessApi
 const StepApi = Processes.StepApi
 export default {
   name: 'processesPage',
-  mixins: [NotificationMixin, PaginationMixin],
+  mixins: [AlertMixin, PaginationMixin],
   data () {
     return {
       processes: this.fetchData(),
