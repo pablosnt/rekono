@@ -45,7 +45,7 @@ class Step(models.Model):
         ]
 
     def __str__(self) -> str:
-        return self.process.__str__() + ' - ' + self.configuration.__str__()
+        return f'{self.process.__str__()} - {self.configuration.__str__()}'
 
     def get_project(self) -> Any:
         return None

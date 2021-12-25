@@ -29,7 +29,7 @@ class RekonoApi {
       Accept: 'application/json'
     }
     if (store.state.user !== null && requiredAuth) {
-      requestHeaders.Authorization = 'Bearer ' + localStorage[accessTokenKey]
+      requestHeaders.Authorization = `Bearer ${localStorage[accessTokenKey]}`
     }
     if (extraHeaders !== null) {
       requestHeaders = Object.assign({}, requestHeaders, extraHeaders)

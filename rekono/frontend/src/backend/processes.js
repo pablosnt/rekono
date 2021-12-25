@@ -9,7 +9,7 @@ class Process extends RekonoApi {
   }
 
   getProcessesByUser (userId, page = null, limit = null, filter = null) {
-    return super.paginatedGet('/api/processes/?o=name&creator=' + userId.toString(), page, limit, filter)
+    return super.paginatedGet(`/api/processes/?o=name&creator=${userId}`, page, limit, filter)
       .then(response => {
         return response.data.results
       })
@@ -31,14 +31,14 @@ class Process extends RekonoApi {
       name: name,
       description: description
     }
-    return super.put('/api/processes/' + processId + '/', data)
+    return super.put(`/api/processes/${processId}/`, data)
       .then(response => {
         return Promise.resolve(response.data)
       })
   }
 
   deleteProcess (processId) {
-    return super.delete('/api/processes/' + processId + '/')
+    return super.delete(`/api/processes/${processId}/`)
       .then(response => {
         return Promise.resolve(response.data)
       })
@@ -63,14 +63,14 @@ class Step extends RekonoApi {
     const data = {
       priority: priority
     }
-    return super.put('/api/steps/' + stepId + '/', data)
+    return super.put(`/api/steps/${stepId}/`, data)
       .then(response => {
         return Promise.resolve(response.data)
       })
   }
 
   deleteStep (stepId) {
-    return super.delete('/api/steps/' + stepId + '/')
+    return super.delete(`/api/steps/${stepId}/`)
       .then(response => {
         return Promise.resolve(response.data)
       })

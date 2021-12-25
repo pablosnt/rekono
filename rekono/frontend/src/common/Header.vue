@@ -27,3 +27,8 @@ export default {
   }
 }
 </script>
+
+<style lang="scss" scoped>
+$dark: black;
+@import 'bootstrap/scss/bootstrap';
+</style>

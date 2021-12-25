@@ -82,7 +82,7 @@ export default {
       if (this.process !== null) {
         return start + this.process.name
       } else if (this.tool !== null) {
-        return 'New step ' + this.tool.name
+        return `New step ${this.tool.name}`
       }
       return start
     },

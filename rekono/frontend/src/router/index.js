@@ -3,6 +3,7 @@ import Router from 'vue-router'
 import store from '@/store'
 import Login from '@/views/Login'
 import Main from '@/views/Main'
+import Project from '@/views/Project'
 
 Vue.use(Router)
 
@@ -17,6 +18,12 @@ const routes = [
     path: '/(dashboard|projects|tools|processes|wordlists|users|)',
     name: 'main',
     component: Main
+  },
+  {
+    path: '/projects/:id',
+    name: 'project',
+    component: Project,
+    props: true
   }
 ]
 

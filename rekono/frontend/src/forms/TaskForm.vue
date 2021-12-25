@@ -122,9 +122,9 @@ export default {
     title () {
       let title = 'New Task'
       if (this.process !== null) {
-        title = 'Execute ' + this.process.name
+        title = `Execute ${this.process.name}`
       } else if (this.tool !== null) {
-        title = 'Execute ' + this.tool.name
+        title = `Execute ${this.tool.name}`
       }
       return title
     }
@@ -177,7 +177,7 @@ export default {
           ToolApi.getTools().then(tools => { this.tools = tools })
           ProcessApi.getAllProcesses().then(processes => { this.processes = processes })
         }
-        ProjectApi.getProjectsByUser(this.$store.state.user).then(projects => { this.projects = projects })
+        ProjectApi.getAllProjects().then(projects => { this.projects = projects })
       }
     }
   },
@@ -198,7 +198,7 @@ export default {
       if (this.scheduledAtDate !== null || this.scheduledAtTime !== null) {
         this.scheduledAtState = false
         if (this.scheduledAtDate && this.scheduledAtTime !== null) {
-          this.scheduledAtState = (Date.parse(this.scheduledAtDate + ' ' + this.scheduledAtTime) > new Date())
+          this.scheduledAtState = (Date.parse(`${this.scheduledAtDate} ${this.scheduledAtTime}`) > new Date())
         }
         return valid && this.scheduledAtState
       }

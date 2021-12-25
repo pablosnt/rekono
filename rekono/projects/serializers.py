@@ -2,12 +2,15 @@ from defectdojo.api import products
 from django.db import transaction
 from projects.models import Project
 from rest_framework import serializers
+from rest_framework.fields import SerializerMethodField
 from targets.serializers import TargetSerializer
 from users.models import User
+from users.serializers import SimplyUserSerializer
 
 
 class ProjectSerializer(serializers.ModelSerializer):
     targets = TargetSerializer(read_only=True, many=True)
+    owner = SerializerMethodField(method_name='get_owner', read_only=True, required=False)
 
     class Meta:
         model = Project
@@ -15,6 +18,9 @@ class ProjectSerializer(serializers.ModelSerializer):
             'id', 'name', 'description', 'defectdojo_product_id', 'owner', 'targets', 'members'
         )
         read_only_fields = ('owner', 'members')
+
+    def get_owner(self, instance: Project) -> SimplyUserSerializer:
+        return SimplyUserSerializer(instance.owner).data
 
     def validate(self, attrs):
         attrs = super().validate(attrs)

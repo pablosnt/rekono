@@ -8,7 +8,7 @@ class Task extends RekonoApi {
       tool: tool,
       configuration: configuration,
       intensity_rank: intensity,
-      scheduled_at: scheduledAtDate !== null && scheduledAtTime !== null ? scheduledAtDate + 'T' + scheduledAtTime + 'Z' : null,
+      scheduled_at: scheduledAtDate !== null && scheduledAtTime !== null ? `${scheduledAtDate}T${scheduledAtTime}Z` : null,
       scheduled_in: scheduledIn,
       schduled_time_unit: scheduledTimeUnit,
       repeat_in: repeatIn,

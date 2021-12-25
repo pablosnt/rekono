@@ -61,7 +61,7 @@ export default {
     title () {
       let title = this.process !== null ? 'Edit Process' : 'New Process'
       if (this.tool !== null) {
-        title = title + ' with ' + this.tool.name
+        title = `${title} with ${this.tool.name}`
       }
       return title
     },
@@ -95,8 +95,8 @@ export default {
   methods: {
     check () {
       const valid = this.$refs.process_form.checkValidity()
-      this.nameState = (this.description !== null && this.description.length > 0)
-      this.descriptionState = (this.name !== null && this.name.length > 0)
+      this.nameState = (this.name !== null && this.name.length > 0)
+      this.descriptionState = (this.description !== null && this.description.length > 0)
       return valid
     },
     confirm (event) {
@@ -115,7 +115,7 @@ export default {
           } else {
             return StepApi.createStep(data.id, this.tool.id, this.configuration, this.priority)
               .then(() => {
-                this.success(this.name + ' - ' + this.tool.name, 'New process created successfully')
+                this.success(`${this.name} - ${this.tool.name}`, 'New process created successfully')
                 return Promise.resolve(true)
               })
               .catch(() => {

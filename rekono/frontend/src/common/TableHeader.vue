@@ -18,7 +18,7 @@
             <p class="h3"><b-icon icon="dash-circle-fill"/></p>
           </b-button>
           <span/>
-          <b-button v-if="add !== null" variant="outline" v-b-tooltip.hover title="Add Wordlist" v-b-modal="add">
+          <b-button v-if="addAuth === true" variant="outline" v-b-tooltip.hover title="Add" v-b-modal="add">
             <p class="h3"><b-icon variant="success" icon="plus-square-fill"/></p>
           </b-button>
         </div>
@@ -53,6 +53,10 @@ export default {
     add: {
       type: String,
       default: null
+    },
+    addAuth: {
+      type: Boolean,
+      default: true
     }
   },
   computed: {

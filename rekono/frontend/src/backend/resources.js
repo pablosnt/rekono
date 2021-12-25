@@ -24,14 +24,14 @@ class Wordlist extends RekonoApi {
     data.append('name', name)
     data.append('type', type)
     data.append('file', file)
-    return super.put('/api/resources/wordlists/' + wordlistId + '/', data, false, { 'Content-Type': 'multipart/form-data' })
+    return super.put(`/api/resources/wordlists/${wordlistId}/`, data, false, { 'Content-Type': 'multipart/form-data' })
       .then(response => {
         return Promise.resolve(response.data)
       })
   }
 
   deleteWordlist (wordlistId) {
-    return super.delete('/api/resources/wordlists/' + wordlistId + '/')
+    return super.delete(`/api/resources/wordlists/${wordlistId}/`)
       .then(response => {
         return Promise.resolve(response.data)
       })

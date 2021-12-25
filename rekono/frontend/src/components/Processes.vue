@@ -156,7 +156,7 @@ export default {
       StepApi.deleteStep(this.selectedStep.id)
         .then(() => {
           this.$bvModal.hide('delete-step-modal')
-          this.warning(this.processName + ' - ' + this.selectedStep.name, 'Step deleted successfully')
+          this.warning(`${this.processName} - ${this.selectedStep.name}`, 'Step deleted successfully')
           this.fetchData()
         })
         .catch(() => {
