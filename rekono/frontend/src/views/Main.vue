@@ -1,24 +1,24 @@
 <template>
-  <tabs @click="changeTab">
+  <MainTabs @click="changeTab">
     <template v-slot:dashboard>
-      <dashboard/>
+      <Dashboard/>
     </template>
     <template v-slot:projects>
-      <projects/>
+      <Projects/>
     </template>
     <template v-slot:tools>
-      <tools/>
+      <Tools/>
     </template>
     <template v-slot:processes>
-      <processes/>
+      <Processes/>
     </template>
     <template v-slot:wordlists>
-      <wordlists/>
+      <Wordlists/>
     </template>
     <template v-slot:users>
-      <users/>
+      <Users/>
     </template>
-  </tabs>
+  </MainTabs>
 </template>
 
 <script>
@@ -32,13 +32,13 @@ import Users from '@/components/Users.vue'
 export default {
   name: 'mainPage',
   components: {
-    tabs: MainTabs,
-    dashboard: Dashboard,
-    projects: Projects,
-    tools: Tools,
-    processes: Processes,
-    wordlists: Wordlists,
-    users: Users
+    MainTabs,
+    Dashboard,
+    Projects,
+    Tools,
+    Processes,
+    Wordlists,
+    Users
   },
   methods: {
     changeTab (tab) {

@@ -12,7 +12,7 @@ import Header from '@/common/Header.vue'
 export default {
   name: 'App',
   components: {
-    'commonHeader': Header
+    commonHeader: Header
   }
 }
 </script>

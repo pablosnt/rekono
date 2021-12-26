@@ -4,21 +4,26 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.db import transaction
 from rest_framework import serializers, status
 from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.fields import SerializerMethodField
 from security.authorization.roles import Role
 from telegram_bot.models import TelegramChat
 from users.models import User
 
 
 class UserSerializer(serializers.ModelSerializer):
+    role = SerializerMethodField(method_name='get_role')
 
     class Meta:
         model = User
         fields = (
             'id', 'username', 'first_name', 'last_name', 'email', 'is_active',
-            'date_joined', 'last_login', 'groups', 'notification_preference'
+            'date_joined', 'last_login', 'role', 'notification_preference'
         )
         read_only_fields = ('username', 'email', 'is_active', 'date_joined', 'last_login', 'groups')
 
+    def get_role(self, instance: User) -> str:
+        role = instance.groups.first()
+        return role.name if role else None
 
 class SimplyUserSerializer(serializers.ModelSerializer):
 

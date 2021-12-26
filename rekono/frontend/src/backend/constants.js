@@ -11,9 +11,12 @@ const stages = [
 
 const findingTypes = ['OSINT', 'Host', 'Enumeration', 'Endpoint', 'Technology', 'Vulnerability', 'Exploit', 'Credential', 'Wordlist']
 
+const roles = ['Admin', 'Auditor', 'Reader']
+
 export {
   accessTokenKey,
   refreshTokenKey,
   stages,
-  findingTypes
+  findingTypes,
+  roles
 }

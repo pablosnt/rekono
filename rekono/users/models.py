@@ -50,6 +50,7 @@ class RekonoUserManager(UserManager):
         return user
 
     def enable_user(self, user: Any, role: Role, rekono_address: str) -> Any:
+        user.is_active = True
         user.otp = generate_otp()
         group = Group.objects.get(name=role.value)
         if not group:
@@ -59,7 +60,7 @@ class RekonoUserManager(UserManager):
         user.save()
         api_token = Token.objects.create(user=user)
         api_token.save()
-        send_invitation_to_new_user(user, rekono_address)
+        send_password_reset(user, rekono_address)
         return user
 
     def disable_user(self, user: Any) -> Any:

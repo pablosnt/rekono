@@ -43,9 +43,7 @@
 export default {
   name: 'tableHeader',
   props: {
-    search: {
-      type: String,
-    },
+    search: String,
     filters: {
       type: Array,
       default: null
