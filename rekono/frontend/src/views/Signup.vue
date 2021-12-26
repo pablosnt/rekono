@@ -1,6 +1,6 @@
 <template>
-  <div id="login-page" class="fixed-top d-flex align-items-center justify-content-center" style="bottom: 0">
-    <b-card id="signup-form" img-src="/static/logo-black.png" img-top img-height="150" class="mb-3">
+  <PublicForm>
+    <template>
       <b-form @submit="handleSignup">
         <b-form-group invalid-feedback="Username is required">
           <b-form-input type="text" v-model="username" :state="usernameState" placeholder="Username"/>
@@ -18,20 +18,21 @@
           <b-form-input type="password" v-model="passwordConfirm" :state="passwordState" placeholder="Confirm password"/>
         </b-form-group>
         <b-row>
-          <b-col cols="7">
+          <b-col cols="6">
             <b-link @click="$store.dispatch('redirectToLogin')">Already have an account?</b-link>
           </b-col>
-          <b-col cols="4">
+          <b-col cols="6">
             <b-button type="submit" variant="dark" size="lg">Signup</b-button>
           </b-col>
         </b-row>
       </b-form>
-    </b-card>
-  </div>
+    </template>
+  </PublicForm>
 </template>
 
 <script>
 import UsersApi from '@/backend/users'
+import PublicForm from '@/common/PublicForm.vue'
 import AlertMixin from '@/common/mixin/AlertMixin.vue'
 export default {
   name: 'signupForm',
@@ -49,6 +50,9 @@ export default {
       lastNameState: null,
       passwordState: null
     }
+  },
+  components: {
+    PublicForm
   },
   watch: {
     otp (otp) {
@@ -88,14 +92,3 @@ export default {
   }
 }
 </script>
-
-<style>
-#signup-page {
-  height: 100%;
-  background-image: url('/static/background.jpg');
-  background-size: cover;
-}
-#login-form {
-  background: white;
-}
-</style>

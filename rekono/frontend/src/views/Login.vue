@@ -1,6 +1,6 @@
 <template>
-  <div id="login-page" class="fixed-top d-flex align-items-center justify-content-center" style="bottom: 0">
-    <b-card id="login-form" img-src="/static/logo-black.png" img-top img-height="150" class="mb-3">
+  <PublicForm>
+    <template>
       <b-alert v-model="loginError" variant="danger">
         <b-icon icon="exclamation-circle-fill" variant="danger"></b-icon>
         Invalid credentials
@@ -19,19 +19,20 @@
           <b-form-input type="password" v-model="password" placeholder="Password" :state="passwordState"/>
         </b-input-group>
         <b-row>
-          <b-col cols="7">
-            <b-link @click="$router.push('resetPassword')">Forget your password?</b-link>
+          <b-col cols="6">
+            <b-link @click="$router.push('/reset-password')">Forgot your password?</b-link>
           </b-col>
-          <b-col cols="4">
+          <b-col cols="6">
             <b-button type="submit" variant="dark" size="lg">Login</b-button>
           </b-col>
         </b-row>
       </b-form>
-    </b-card>
-  </div>
+    </template>
+  </PublicForm>
 </template>
 
 <script>
+import PublicForm from '@/common/PublicForm.vue'
 export default {
   name: 'loginForm',
   data () {
@@ -42,6 +43,9 @@ export default {
       passwordState: null,
       loginError: false
     }
+  },
+  components: {
+    PublicForm
   },
   methods: {
     handleLogin (event) {
@@ -65,14 +69,3 @@ export default {
   }
 }
 </script>
-
-<style>
-#login-page {
-  height: 100%;
-  background-image: url('/static/background.jpg');
-  background-size: cover;
-}
-#login-form {
-  background: white;
-}
-</style>

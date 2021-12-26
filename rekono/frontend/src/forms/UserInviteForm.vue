@@ -2,7 +2,10 @@
    <b-modal :id="id" @hidden="clean" @ok="confirm" title="New User" ok-title="Invite User" header-bg-variant="dark" header-text-variant="light" ok-variant="dark">
     <b-form ref="invite_user_form">
       <b-form-group invalid-feedback="User email is required">
-        <b-input-group prepend="@">
+        <b-input-group>
+          <b-input-group-prepend is-text>
+              <b-icon icon="at"/>
+            </b-input-group-prepend>
           <b-form-input type="email" v-model="email" placeholder="Email" :state="emailState" max-length="150" autofocus required/>
         </b-input-group>
       </b-form-group>

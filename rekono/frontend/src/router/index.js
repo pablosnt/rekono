@@ -5,10 +5,11 @@ import Login from '@/views/Login'
 import Main from '@/views/Main'
 import Project from '@/views/Project'
 import Signup from '@/views/Signup'
+import ResetPassword from '@/views/ResetPassword'
 
 Vue.use(Router)
 
-const publicRoutes = ['login', 'signup']
+const publicRoutes = ['login', 'signup', 'resetPassword']
 const routes = [
   {
     path: '/login',
@@ -30,6 +31,12 @@ const routes = [
     path: '/signup',
     name: 'signup',
     component: Signup,
+    props: route => ({ otp: route.query.token })
+  },
+  {
+    path: '/reset-password',
+    name: 'resetPassword',
+    component: ResetPassword,
     props: route => ({ otp: route.query.token })
   }
 ]
