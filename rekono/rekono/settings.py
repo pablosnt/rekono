@@ -20,7 +20,6 @@ from security.crypto import generate_random_value
 from targets.enums import TargetType
 from tasks.enums import Status, TimeUnit
 from tools.enums import FindingType, IntensityRank
-from users.enums import Notification
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -156,7 +155,6 @@ SPECTACULAR_SETTINGS = {
     ],
     'ENUM_NAME_OVERRIDES': {
         'StatusEnum': Status.choices,
-        'NotificationPreferenceEnum': Notification.choices,
         'SeverityEnum': Severity.choices,
         'TimeUnitEnum': TimeUnit.choices,
         'IntensityEnum': IntensityRank.choices,

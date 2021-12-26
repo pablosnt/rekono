@@ -2,6 +2,7 @@ from typing import Any
 
 from mail import sender
 from telegram_bot import bot
+from users.models import User
 
 
 def get_parameters(execution: Any, findings: list, rekono_address: str) -> dict:
@@ -23,7 +24,7 @@ def get_parameters(execution: Any, findings: list, rekono_address: str) -> dict:
     return parameters
 
 
-def send_email(execution: Any, findings: list, rekono_address: str) -> None:
+def send_email(user: User, execution: Any, findings: list, rekono_address: str) -> None:
     if not findings:
         return
     metadata = {
@@ -31,14 +32,14 @@ def send_email(execution: Any, findings: list, rekono_address: str) -> None:
         'subject': '[Rekono] Execution completed',
     }
     sender.send_html_message(
-        execution.task.executor.email,
+        user.email,
         metadata,
         get_parameters(execution, findings, rekono_address)
     )
 
 
-def send_telegram_message(execution: Any, findings: list, rekono_address: str) -> None:
+def send_telegram_message(user: User, execution: Any, findings: list, rekono_address: str) -> None:
     if not findings:
         return
     parameters = get_parameters(execution, findings, rekono_address)
-    bot.send_html_message(execution.task.executor.telegram_id, parameters)
+    bot.send_html_message(user.telegram_id, parameters)

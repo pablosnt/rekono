@@ -8,7 +8,6 @@ from findings.enums import Severity
 from findings.models import Vulnerability
 from findings.nist import get_cve_information
 from findings.notification import send_email, send_telegram_message
-from users.enums import Notification
 
 
 def producer(execution: Execution, findings: list, rekono_address: str) -> None:
@@ -34,10 +33,16 @@ def consumer(
                 finding.save()
             except ValidationError:
                 finding.delete()
-        if execution.task.executor.notification_preference == Notification.EMAIL:
-            send_email(execution, [f for f in findings if f.id], rekono_address)
-        elif (
-            execution.task.executor.notification_preference == Notification.TELEGRAM
-            and execution.task.executor.telegram_id
-        ):
-            send_telegram_message(execution, [f for f in findings if f.id], rekono_address)
+        findings = [f for f in findings if f.id]
+        users_to_notify = []
+        if execution.task.executor.own_executions_notification:
+            users_to_notify.append(execution.task.executor)
+        users_to_notify.extend(list(execution.task.project.members.filter(
+            all_executions_notification=True,
+            id__ne=execution.task.executor.id
+        ).all()))
+        for user in users_to_notify:
+            if user.email_notification:
+                send_email(user, execution, findings, rekono_address)
+            elif user.telegram_notification:
+                send_telegram_message(user, execution, findings, rekono_address)
