@@ -6,6 +6,7 @@ from rest_framework.authtoken.models import Token
 from security.authorization.roles import Role
 from security.crypto import generate_otp
 from users.mail import send_invitation_to_new_user, send_password_reset
+from users.utils import get_token_expiration
 
 # Create your models here.
 
@@ -51,6 +52,7 @@ class RekonoUserManager(UserManager):
     def enable_user(self, user: Any, role: Role, rekono_address: str) -> Any:
         user.is_active = True
         user.otp = generate_otp()
+        user.otp_expiration = get_token_expiration()
         group = Group.objects.get(name=role.value)
         if not group:
             group = Group.objects.get(name=Role.READER)
@@ -77,6 +79,7 @@ class RekonoUserManager(UserManager):
 
     def request_password_reset(self, user: Any, rekono_address: str) -> Any:
         user.otp = generate_otp()
+        user.otp_expiration = get_token_expiration()
         user.save()
         send_password_reset(user, rekono_address)
         return user
@@ -89,6 +92,7 @@ class User(AbstractUser):
     email = models.EmailField(max_length=150, unique=True)
 
     otp = models.TextField(max_length=200, unique=True, blank=True, null=True)
+    otp_expiration = models.DateTimeField(default=get_token_expiration)
 
     own_executions_notification = models.BooleanField(default=True)
     all_executions_notification = models.BooleanField(default=False)

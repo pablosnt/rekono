@@ -1,15 +1,6 @@
-from datetime import timedelta
-
-from django.utils import timezone
 from executions.models import Execution
 from telegram_bot import messages
 from tools.models import Tool
-
-from rekono.settings import TELEGRAM_TOKEN_EXPIRATION_HOURS
-
-
-def get_token_expiration():
-    return timezone.now() + timedelta(hours=TELEGRAM_TOKEN_EXPIRATION_HOURS)
 
 
 def build_execution_notification_message(parameters: dict) -> str:

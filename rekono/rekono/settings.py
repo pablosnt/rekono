@@ -239,6 +239,7 @@ TOOLS = {
 # Authentication
 
 AUTH_USER_MODEL = 'users.User'
+OTP_TOKEN_EXPIRATION_HOUR = 24
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators

@@ -57,13 +57,18 @@ class CreateUserSerializer(serializers.Serializer):
 
     @transaction.atomic()
     def create(self, validated_data):
-        user = User.objects.get(is_active=False, otp=validated_data.get('otp'))
+        user = User.objects.get(
+            is_active=False,
+            otp=validated_data.get('otp'),
+            otp_expiration__gt=datetime.now()
+        )
         user.username = validated_data.get('username')
         user.first_name = validated_data.get('first_name')
         user.last_name = validated_data.get('last_name')
         user.set_password(validated_data.get('password'))
         user.is_active = True
         user.otp = None
+        user.otp_expiration = None
         user.save()
         return user
 
@@ -129,7 +134,11 @@ class ResetPasswordSerializer(serializers.Serializer):
     otp = serializers.CharField(max_length=200, required=True)
 
     def save(self, **kwargs):
-        user = User.objects.get(otp=self.validated_data.get('otp'), is_active=True)
+        user = User.objects.get(
+            is_active=True,
+            otp=self.validated_data.get('otp'),
+            otp_expiration__gt=datetime.now()
+        )
         user.set_password(self.validated_data.get('password'))
         user.otp = None
         user.save()
