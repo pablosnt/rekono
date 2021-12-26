@@ -3,7 +3,7 @@
     <b-form ref="invite_user_form">
       <b-form-group invalid-feedback="User email is required">
         <b-input-group prepend="@">
-          <b-form-input type="email" v-model="email" placeholder="Email" :state="emailState" autofocus required/>
+          <b-form-input type="email" v-model="email" placeholder="Email" :state="emailState" max-length="150" autofocus required/>
         </b-input-group>
       </b-form-group>
       <b-form-group description="User role" invalid-feedback="User role is required">

@@ -4,10 +4,11 @@ import store from '@/store'
 import Login from '@/views/Login'
 import Main from '@/views/Main'
 import Project from '@/views/Project'
+import Signup from '@/views/Signup'
 
 Vue.use(Router)
 
-const publicRoutes = ['login']
+const publicRoutes = ['login', 'signup']
 const routes = [
   {
     path: '/login',
@@ -24,6 +25,12 @@ const routes = [
     name: 'project',
     component: Project,
     props: true
+  },
+  {
+    path: '/signup',
+    name: 'signup',
+    component: Signup,
+    props: route => ({ otp: route.query.token })
   }
 ]
 
@@ -31,7 +38,7 @@ const router = new Router({ routes: routes })
 
 router.beforeEach((to, from, next) => {
   store.dispatch('checkState')
-  if (to.name === 'login' && store.state.user !== null) {
+  if (publicRoutes.includes(to.name) && store.state.user !== null) {
     next({ name: 'main' })
   } else if (!publicRoutes.includes(to.name) && store.state.user === null) {
     next({ name: 'login' })

@@ -35,6 +35,20 @@ class Users extends RekonoApi {
         return response.data
       })
   }
+
+  createUser (username, firstName, lastName, password, otp) {
+    let data = {
+      username: username,
+      first_name: firstName,
+      last_name: lastName,
+      password: password,
+      otp: otp
+    }
+    return super.post('/api/users/create/', data)
+      .then(response => {
+        return response.data
+      })
+  }
 }
 
 export default new Users()

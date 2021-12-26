@@ -5,21 +5,28 @@
         <b-icon icon="exclamation-circle-fill" variant="danger"></b-icon>
         Invalid credentials
       </b-alert>
-      <form v-on:submit.prevent="handleLogin">
+      <b-form @submit="handleLogin">
         <b-input-group size="lg" class="mb-3">
           <b-input-group-prepend is-text>
             <b-icon icon="person-fill"/>
           </b-input-group-prepend>
-          <b-form-input type="text" v-model="username" placeholder="Username" :state="usernameState" autofocus required/>
+          <b-form-input type="text" v-model="username" placeholder="Username" :state="usernameState" autofocus/>
         </b-input-group>
         <b-input-group size="lg" class="mb-3">
           <b-input-group-prepend is-text>
             <b-icon icon="key-fill"/>
           </b-input-group-prepend>
-          <b-form-input type="password" v-model="password" placeholder="Password" :state="passwordState" required/>
+          <b-form-input type="password" v-model="password" placeholder="Password" :state="passwordState"/>
         </b-input-group>
-        <b-button type="submit" variant="dark" size="lg">Login</b-button>
-      </form>
+        <b-row>
+          <b-col cols="7">
+            <b-link @click="$router.push('resetPassword')">Forget your password?</b-link>
+          </b-col>
+          <b-col cols="4">
+            <b-button type="submit" variant="dark" size="lg">Login</b-button>
+          </b-col>
+        </b-row>
+      </b-form>
     </b-card>
   </div>
 </template>
@@ -37,10 +44,9 @@ export default {
     }
   },
   methods: {
-    handleLogin () {
-      this.usernameState = (this.username !== null)
-      this.passwordState = (this.password !== null)
-      if (this.usernameState && this.passwordState) {
+    handleLogin (event) {
+      event.preventDefault()
+      if (this.check()) {
         this.$store.dispatch('loginAction', { username: this.username, password: this.password })
           .then(() => {
             this.loginError = false
@@ -50,6 +56,11 @@ export default {
             this.loginError = true
           })
       }
+    },
+    check () {
+      this.usernameState = (this.username !== null)
+      this.passwordState = (this.password !== null)
+      return this.usernameState && this.passwordState
     }
   }
 }
