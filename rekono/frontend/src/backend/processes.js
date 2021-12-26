@@ -4,14 +4,14 @@ class Process extends RekonoApi {
   getAllProcesses (page = null, limit = null, filter = null) {
     return super.paginatedGet('/api/processes/?o=name', page, limit, filter)
       .then(response => {
-        return response.data.results
+        return response.data
       })
   }
 
   getProcessesByUser (userId, page = null, limit = null, filter = null) {
     return super.paginatedGet(`/api/processes/?o=name&creator=${userId}`, page, limit, filter)
       .then(response => {
-        return response.data.results
+        return response.data
       })
   }
 

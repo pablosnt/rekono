@@ -139,7 +139,10 @@ export default {
   },
   methods: {
     fetchData (filter = null) {
-      ProcessApi.getAllProcesses(this.getPage(), this.getLimit(), filter).then(processes => { this.processes = processes })
+      ProcessApi.getAllProcesses(this.getPage(), this.getLimit(), filter).then(data => {
+        this.total = data.count
+        this.processes = data.results
+      })
     },
     deleteProcess () {
       ProcessApi.deleteProcess(this.selectedProcess.id)

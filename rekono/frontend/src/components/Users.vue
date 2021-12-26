@@ -78,7 +78,10 @@ export default {
   },
   methods: {
     fetchData (filters = null) {
-      UsersApi.getAllUsers(this.getPage(), this.getLimit(), filters).then(users => { this.users = users })
+      UsersApi.getAllUsers(this.getPage(), this.getLimit(), filters).then(data => {
+        this.total = data.count
+        this.users = data.results
+      })
     },
     updateRole (role) {
       UsersApi.updateRole(this.selectedUser.id, role)

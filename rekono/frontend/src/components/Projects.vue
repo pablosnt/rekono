@@ -76,7 +76,10 @@ export default {
   },
   methods: {
     fetchData (filter = null) {
-      ProjectApi.getPaginatedProjects(this.getPage(), this.getLimit(), filter).then(projects => { this.projects = projects })
+      ProjectApi.getPaginatedProjects(this.getPage(), this.getLimit(), filter).then(data => {
+        this.total = data.count
+        this.projects = data.results
+      })
     },
     deleteProject () {
       ProjectApi.deleteProject(this.selectedProject.id)

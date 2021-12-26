@@ -4,14 +4,14 @@ class Project extends RekonoApi {
   getAllProjects () {
     return super.get('/api/projects/?o=name')
       .then(response => {
-        return response.data.results
+        return response.data
       })
   }
 
   getPaginatedProjects (page = null, limit = null, filter = null) {
     return super.paginatedGet('/api/projects/?o=name', page, limit, filter)
       .then(response => {
-        return response.data.results
+        return response.data
       })
   }
 

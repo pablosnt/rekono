@@ -174,10 +174,10 @@ export default {
     initialized (initialized) {
       if (initialized) {
         if (this.tool === null && this.process === null) {
-          ToolApi.getTools().then(tools => { this.tools = tools })
-          ProcessApi.getAllProcesses().then(processes => { this.processes = processes })
+          ToolApi.getTools().then(data => { this.tools = data.results })
+          ProcessApi.getAllProcesses().then(data => { this.processes = data.results })
         }
-        ProjectApi.getAllProjects().then(projects => { this.projects = projects })
+        ProjectApi.getAllProjects().then(data => { this.projects = data.results })
       }
     }
   },
@@ -328,7 +328,7 @@ export default {
       }
     },
     updateWordlists () {
-      WordlistApi.getAllWordlists().then(wordlists => { this.wordlists = wordlists })
+      WordlistApi.getAllWordlists().then(data => { this.wordlists = data.results })
     },
     cleanScheduledIn () {
       this.scheduledIn = null

@@ -125,7 +125,7 @@ export default {
     initialized (initialized) {
       if (initialized) {
         if (this.step === null && this.tool === null) {
-          ToolApi.getTools().then(tools => { this.tools = tools })
+          ToolApi.getTools().then(tools => { this.tools = tools.results })
         } else if (this.step !== null && this.tool == null) {
           this.tools = [this.selectedTool]
         }
@@ -136,7 +136,7 @@ export default {
           } else {
             req = ProcessApi.getProcessesByUser(this.$store.state.user)
           }
-          req.then(processes => { this.processes = processes })
+          req.then(data => { this.processes = data.results })
         }
       }
     }

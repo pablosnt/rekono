@@ -4,7 +4,7 @@ class Users extends RekonoApi {
   getAllUsers (page = null, limit = null, filter = null) {
     return super.paginatedGet('/api/users/?o=username', page, limit, filter)
       .then(response => {
-        return response.data.results
+        return response.data
       })
   }
 
@@ -18,7 +18,7 @@ class Users extends RekonoApi {
   disableUser (userId) {
     return super.delete(`/api/users/${userId}/`)
       .then(response => {
-        return Promise.resolve(response.data)
+        return response.data
       })
   }
 

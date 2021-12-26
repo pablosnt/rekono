@@ -72,7 +72,10 @@ export default {
   },
   methods: {
     fetchData (filter = null) {
-      WordlistApi.getAllWordlists(this.getPage(), this.getLimit(), filter).then(wordlists => { this.wordlists = wordlists })
+      WordlistApi.getAllWordlists(this.getPage(), this.getLimit(), filter).then(data => {
+        this.total = data.count
+        this.wordlists = data.results
+      })
     },
     deleteWordlist () {
       WordlistApi.deleteWordlist(this.selectedWordlist.id)

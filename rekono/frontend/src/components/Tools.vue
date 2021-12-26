@@ -1,6 +1,6 @@
 <template>
   <div>
-    <TableHeader search="name" :filters="filters" @filter="fetchData"/>
+    <TableHeader search="name__icontains" :filters="filters" @filter="fetchData"/>
     <b-table striped borderless head-variant="dark" :fields="toolsFields" :items="tools">
       <template #cell(icon)="row">
         <b-link :href="row.item.reference" target="_blank">
