@@ -8,6 +8,7 @@ from findings.enums import Severity
 from findings.models import Vulnerability
 from findings.nist import get_cve_information
 from findings.notification import send_email, send_telegram_message
+from users.enums import Notification
 
 
 def producer(execution: Execution, findings: list, rekono_address: str) -> None:
@@ -35,10 +36,10 @@ def consumer(
                 finding.delete()
         findings = [f for f in findings if f.id]
         users_to_notify = []
-        if execution.task.executor.own_executions_notification:
+        if execution.task.executor.notification_scope == Notification.OWN_EXECUTIONS:
             users_to_notify.append(execution.task.executor)
         users_to_notify.extend(list(execution.task.project.members.filter(
-            all_executions_notification=True,
+            notification_scope=Notification.ALL_EXECUTIONS,
             id__ne=execution.task.executor.id
         ).all()))
         for user in users_to_notify:

@@ -76,7 +76,7 @@ export default {
       this.usernameState = (this.username !== null && this.username.length > 0)
       this.firstNameState = (this.firstName !== null && this.firstName.length > 0)
       this.lastNameState = (this.lastName !== null && this.lastName.length > 0)
-      this.passwordState = (this.password !== null && this.password === this.passwordConfirm)
+      this.passwordState = (this.password && this.password.length > 0 && this.password === this.passwordConfirm)
       return this.usernameState && this.firstNameState && this.lastNameState && this.passwordState
     },
     signup () {

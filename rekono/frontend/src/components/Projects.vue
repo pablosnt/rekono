@@ -42,7 +42,7 @@ import TableHeader from '@/common/TableHeader.vue'
 import Pagination from '@/common/Pagination.vue'
 import AlertMixin from '@/common/mixin/AlertMixin.vue'
 import PaginationMixin from '@/common/mixin/PaginationMixin.vue'
-import ProjectForm from '@/forms/ProjectForm.vue'
+import ProjectForm from '@/modals/ProjectForm.vue'
 export default {
   name: 'projectsPage',
   mixins: [AlertMixin, PaginationMixin],

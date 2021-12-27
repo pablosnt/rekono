@@ -9,8 +9,8 @@
           <template #button-content>
             <b-icon style="width: 20px; height: 20px;" icon="person-fill" variant="light"/>
           </template>
-          <b-dropdown-item href="#">Profile</b-dropdown-item>
-          <b-dropdown-item v-on:click.prevent="handleLogout">Logout</b-dropdown-item>
+          <b-dropdown-item @click="$router.push('/profile')">Profile</b-dropdown-item>
+          <b-dropdown-item @click="handleLogout">Logout</b-dropdown-item>
         </b-nav-item-dropdown>
       </b-navbar-nav>
     </b-navbar>
@@ -21,7 +21,8 @@
 export default {
   name: 'commonHeader',
   methods: {
-    handleLogout () {
+    handleLogout (event) {
+      event.preventDefault()
       this.$store.dispatch('logoutAction')
     }
   }

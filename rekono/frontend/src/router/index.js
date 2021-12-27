@@ -6,6 +6,7 @@ import Main from '@/views/Main'
 import Project from '@/views/Project'
 import Signup from '@/views/Signup'
 import ResetPassword from '@/views/ResetPassword'
+import Profile from '@/views/Profile'
 
 Vue.use(Router)
 
@@ -38,6 +39,11 @@ const routes = [
     name: 'resetPassword',
     component: ResetPassword,
     props: route => ({ otp: route.query.token })
+  },
+  {
+    path: '/profile',
+    name: 'profile',
+    component: Profile
   }
 ]
 

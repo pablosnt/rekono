@@ -87,9 +87,9 @@ import TableHeader from '@/common/TableHeader.vue'
 import Pagination from '@/common/Pagination.vue'
 import AlertMixin from '@/common/mixin/AlertMixin.vue'
 import PaginationMixin from '@/common/mixin/PaginationMixin.vue'
-import ProcessForm from '@/forms/ProcessForm.vue'
-import StepForm from '@/forms/StepForm.vue'
-import TaskForm from '@/forms/TaskForm.vue'
+import ProcessForm from '@/modals/ProcessForm.vue'
+import StepForm from '@/modals/StepForm.vue'
+import TaskForm from '@/modals/TaskForm.vue'
 const ProcessApi = Processes.ProcessApi
 const StepApi = Processes.StepApi
 export default {

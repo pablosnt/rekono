@@ -39,7 +39,7 @@ import TableHeader from '@/common/TableHeader.vue'
 import Pagination from '@/common/Pagination.vue'
 import AlertMixin from '@/common/mixin/AlertMixin.vue'
 import PaginationMixin from '@/common/mixin/PaginationMixin.vue'
-import UserInviteForm from '@/forms/UserInviteForm.vue'
+import UserInviteForm from '@/modals/UserInviteForm.vue'
 export default {
   name: 'usersPage',
   mixins: [AlertMixin, PaginationMixin],

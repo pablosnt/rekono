@@ -17,7 +17,8 @@ from users.serializers import (ChangeUserPasswordSerializer,
                                EnableUserSerializer, InviteUserSerializer,
                                RequestPasswordResetSerializer,
                                ResetPasswordSerializer,
-                               TelegramTokenSerializer, UserSerializer)
+                               TelegramTokenSerializer, UserProfileSerializer,
+                               UserSerializer)
 
 # Create your views here.
 
@@ -72,7 +73,7 @@ class UserAdminViewSet(
 
 
 class UserProfileViewSet(GenericViewSet):
-    serializer_class = UserSerializer
+    serializer_class = UserProfileSerializer
     queryset = User.objects.all()
     permission_classes: List[BasePermission] = [IsAuthenticated]
     http_method_names = ['get', 'put', 'post']

@@ -45,7 +45,7 @@ class RekonoApi {
       })
   }
 
-  request (method, endpoint, queryData = null, bodydata = null, requiredAuth = true, extraHeaders = null, retry = false) {
+  request (method, endpoint, queryData = null, bodydata = null, requiredAuth = true, extraHeaders = null, allowUnauth = false, retry = false) {
     let req = null
     if (bodydata) {
       req = method(endpoint, bodydata, { headers: this.headers(requiredAuth, extraHeaders) })
@@ -57,28 +57,27 @@ class RekonoApi {
     return req
       .then(response => { return Promise.resolve(response) })
       .catch(error => {
-        if (error.response && error.response.status === 401) {
-          if (retry) {
-            this.removeTokens()
-            store.dispatch('redirectToLogin')
-          } else {
-            return this.refresh()
-              .then(() => { return this.request(method, endpoint, queryData, bodydata, requiredAuth, extraHeaders, true) })
-              .catch(() => {
+        if (requiredAuth && error.response && error.response.status === 401 && !retry) {
+          return this.refresh()
+            .then(() => { return this.request(method, endpoint, queryData, bodydata, requiredAuth, extraHeaders, allowUnauth, true) })
+            .catch(error => {
+              if (requiredAuth && !allowUnauth) {
                 this.removeTokens()
                 store.dispatch('redirectToLogin')
-              })
-          }
+              } else {
+                return Promise.reject(error)
+              }
+            })
         }
         return Promise.reject(error)
       })
   }
 
-  get (endpoint, requiredAuth = true, extraHeaders = null) {
-    return this.request(axios.get, endpoint, null, null, requiredAuth, extraHeaders)
+  get (endpoint, requiredAuth = true, extraHeaders = null, allowUnauth = false) {
+    return this.request(axios.get, endpoint, null, null, requiredAuth, extraHeaders, allowUnauth)
   }
 
-  paginatedGet (endpoint, page = null, limit = null, filter = null, requiredAuth = true, extraHeaders = null) {
+  paginatedGet (endpoint, page = null, limit = null, filter = null, requiredAuth = true, extraHeaders = null, allowUnauth = false) {
     let params = {
       page: page,
       limit: limit
@@ -90,19 +89,19 @@ class RekonoApi {
         }
       }
     }
-    return this.request(axios.get, endpoint, params, null, requiredAuth, extraHeaders)
+    return this.request(axios.get, endpoint, params, null, requiredAuth, extraHeaders, allowUnauth)
   }
 
-  post (endpoint, data, requiredAuth = true, extraHeaders = null) {
-    return this.request(axios.post, endpoint, null, data, requiredAuth, extraHeaders)
+  post (endpoint, data, requiredAuth = true, extraHeaders = null, allowUnauth = false) {
+    return this.request(axios.post, endpoint, null, data, requiredAuth, extraHeaders, allowUnauth)
   }
 
-  put (endpoint, data, requiredAuth = true, extraHeaders = null) {
-    return this.request(axios.put, endpoint, null, data, requiredAuth, extraHeaders)
+  put (endpoint, data, requiredAuth = true, extraHeaders = null, allowUnauth = false) {
+    return this.request(axios.put, endpoint, null, data, requiredAuth, extraHeaders, allowUnauth)
   }
 
-  delete (endpoint, requiredAuth = true, extraHeaders = null) {
-    return this.request(axios.delete, endpoint, null, null, requiredAuth, extraHeaders)
+  delete (endpoint, requiredAuth = true, extraHeaders = null, allowUnauth = false) {
+    return this.request(axios.delete, endpoint, null, null, requiredAuth, extraHeaders, allowUnauth)
   }
 }
 

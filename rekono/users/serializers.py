@@ -10,6 +10,29 @@ from telegram_bot.models import TelegramChat
 from users.models import User
 
 
+class UserProfileSerializer(serializers.ModelSerializer):
+    role = SerializerMethodField(method_name='get_role')
+    telegram_configured = SerializerMethodField(method_name='get_telegram_configured')
+
+    class Meta:
+        model = User
+        fields = (
+            'id', 'username', 'first_name', 'last_name', 'email',
+            'date_joined', 'last_login', 'role', 'telegram_configured',
+            'notification_scope', 'email_notification', 'telegram_notification'
+        )
+        read_only_fields = (
+            'username', 'email', 'date_joined', 'last_login', 'role', 'telegram_configured'
+        )
+
+    def get_role(self, instance: User) -> str:
+        role = instance.groups.first()
+        return role.name if role else None
+
+    def get_telegram_configured(self, instance: User) -> bool:
+        return instance.telegram_id is not None
+ 
+
 class UserSerializer(serializers.ModelSerializer):
     role = SerializerMethodField(method_name='get_role')
 
@@ -19,7 +42,7 @@ class UserSerializer(serializers.ModelSerializer):
             'id', 'username', 'first_name', 'last_name', 'email', 'is_active',
             'date_joined', 'last_login', 'role'
         )
-        read_only_fields = ('username', 'email', 'is_active', 'date_joined', 'last_login', 'groups')
+        read_only_fields = ('username', 'email', 'is_active', 'date_joined', 'last_login', 'role')
 
     def get_role(self, instance: User) -> str:
         role = instance.groups.first()

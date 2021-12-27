@@ -5,6 +5,7 @@ from django.db import models
 from rest_framework.authtoken.models import Token
 from security.authorization.roles import Role
 from security.crypto import generate_otp
+from users.enums import Notification
 from users.mail import send_invitation_to_new_user, send_password_reset
 from users.utils import get_token_expiration
 
@@ -94,8 +95,11 @@ class User(AbstractUser):
     otp = models.TextField(max_length=200, unique=True, blank=True, null=True)
     otp_expiration = models.DateTimeField(default=get_token_expiration)
 
-    own_executions_notification = models.BooleanField(default=True)
-    all_executions_notification = models.BooleanField(default=False)
+    notification_scope = models.TextField(
+        max_length=18,
+        choices=Notification.choices,
+        default=Notification.OWN_EXECUTIONS
+    )
     email_notification = models.BooleanField(default=True)
     telegram_notification = models.BooleanField(default=False)
     telegram_id = models.IntegerField(blank=True, null=True)

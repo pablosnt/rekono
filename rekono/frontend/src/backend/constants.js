@@ -13,10 +13,13 @@ const findingTypes = ['OSINT', 'Host', 'Enumeration', 'Endpoint', 'Technology', 
 
 const roles = ['Admin', 'Auditor', 'Reader']
 
+const notificationScopes = ['Disabled', 'Only my executions', 'All executions']
+
 export {
   accessTokenKey,
   refreshTokenKey,
   stages,
   findingTypes,
-  roles
+  roles,
+  notificationScopes
 }

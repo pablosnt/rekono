@@ -37,7 +37,7 @@ import TableHeader from '@/common/TableHeader.vue'
 import Pagination from '@/common/Pagination.vue'
 import AlertMixin from '@/common/mixin/AlertMixin.vue'
 import PaginationMixin from '@/common/mixin/PaginationMixin.vue'
-import WordlistForm from '@/forms/WordlistForm.vue'
+import WordlistForm from '@/modals/WordlistForm.vue'
 export default {
   name: 'wordlistsPage',
   mixins: [AlertMixin, PaginationMixin],
