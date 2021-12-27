@@ -52,8 +52,6 @@ export default {
           this.success(this.username, 'Password changed successfully')
         })
         .catch(error => {
-          console.log(typeof error)
-          console.log(error.response.status)
           if (error.response.status === 401) {
             this.danger(this.username, 'Invalid password')
           } else {
