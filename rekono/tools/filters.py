@@ -4,47 +4,19 @@ from django_filters.rest_framework.filters import OrderingFilter
 from tools.enums import FindingType
 from tools.models import Configuration, Tool
 
-from rekono.api.filters import BaseFilter
 
-
-class ToolFilter(BaseFilter):
+class ToolFilter(rest_framework.FilterSet):
     o = OrderingFilter(fields=('name', 'stage'))
-    configuration = filters.NumberFilter(
-        field_name='configurations',
-        method='related_field_filter'
-    )
-    configuration__name = filters.CharFilter(
-        field_name='configurations__name',
-        method='related_field_filter'
-    )
-    configuration__name__iexact = filters.CharFilter(
-        field_name='configurations__name__iexact',
-        method='related_field_filter'
-    )
-    configuration__name__contains = filters.CharFilter(
-        field_name='configurations__name__contains',
-        method='related_field_filter'
-    )
-    configuration__name__icontains = filters.CharFilter(
-        field_name='configurations__name__icontains',
-        method='related_field_filter'
-    )
-    input = filters.ChoiceFilter(
-        field_name='configurations__inputs__type',
-        method='related_field_filter',
-        choices=FindingType.choices
-    )
-    output = filters.ChoiceFilter(
-        field_name='configurations__outputs__type',
-        method='related_field_filter',
-        choices=FindingType.choices
-    )
 
     class Meta:
         model = Tool
         fields = {
-            'name': ['exact', 'iexact', 'contains', 'icontains'],
-            'command': ['exact', 'iexact', 'contains', 'icontains'],
+            'name': ['exact', 'icontains'],
+            'command': ['exact', 'icontains'],
+            'configurations': ['exact'],
+            'configurations__name': ['exact', 'icontains'],
+            'configurations__inputs__type': ['exact'],
+            'configurations__outputs__type': ['exact'],
             'stage': ['exact']
         }
 
@@ -56,9 +28,11 @@ class ConfigurationFilter(rest_framework.FilterSet):
         model = Configuration
         fields = {
             'tool': ['exact'],
-            'tool__name': ['exact', 'iexact', 'contains', 'icontains'],
-            'tool__command': ['exact', 'iexact', 'contains', 'icontains'],
+            'tool__name': ['exact', 'icontains'],
+            'tool__command': ['exact', 'icontains'],
             'tool__stage': ['exact'],
-            'name': ['exact', 'iexact', 'contains', 'icontains'],
+            'name': ['exact', 'icontains'],
             'default': ['exact'],
+            'inputs__type': ['exact'],
+            'outputs__type': ['exact'],
         }

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <TableHeader search="username__icontains" :filters="filters" add="invite-modal" @filter="fetchData"/>
+    <TableHeader :filters="filters" add="invite-modal" @filter="fetchData"/>
     <b-table striped borderless head-variant="dark" :fields="usersFields" :items="users">
       <template #cell(role)="row">
         <b-form-select v-if="row.item.is_active" v-model="row.item.role" :options="roles" value-field="value" text-field="value" :disabled="row.item.id === $store.state.user" @input="selectUser(row.item)" @change="updateRole"/>
@@ -70,9 +70,7 @@ export default {
   watch: {
     users () {
       this.filters = [
-        { name: 'First Name', filterField: 'first_name__icontains', type: 'text' },
-        { name: 'Last Name', filterField: 'last_name__icontains', type: 'text' },
-        { name: 'Email', filterField: 'email__icontains', type: 'email' }
+        { name: 'Role', values: roles, valueField: 'value', textField: 'value', filterField: 'role' }
       ]
     }
   },

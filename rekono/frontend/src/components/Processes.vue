@@ -1,6 +1,6 @@
 <template>
   <div>
-    <TableHeader search="name__icontains" :filters="filters" add="process-modal" @filter="fetchData"/>
+    <TableHeader :filters="filters" add="process-modal" @filter="fetchData"/>
     <b-table striped borderless head-variant="dark" :fields="processesFields" :items="processes">
       <template #cell(actions)="row">
           <b-button @click="row.toggleDetails" variant="dark" class="mr-2" v-b-tooltip.hover title="Details">
@@ -131,8 +131,7 @@ export default {
   watch: {
     processes () {
       this.filters = [
-        { name: 'Tool', filterField: 'tool__name__icontains', type: 'text' },
-        { name: 'Stage', values: stages, valueField: 'id', textField: 'value', filterField: 'tool__stage' },
+        { name: 'Stage', values: stages, valueField: 'id', textField: 'value', filterField: 'steps__tool__stage' },
         { name: 'Creator', filterField: 'creator__username__icontains', type: 'text' }
       ]
     }

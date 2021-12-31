@@ -11,7 +11,6 @@ from tasks.models import Task
 
 
 class Finding(models.Model):
-    # Only for automatic findings
     execution = models.ForeignKey(
         Execution,
         related_name='%(class)s',

@@ -7,10 +7,6 @@ from django_filters.rest_framework import filters
 
 class BaseFilter(rest_framework.FilterSet):
 
-    def related_field_filter(self, queryset, name, value):
-        filter = {name: value}
-        return queryset.filter(**filter).all().distinct()
-
     def multiple_field_filter(self, queryset, value, fields):
         field1, field2 = fields
         filter1 = {field1: value}

@@ -9,9 +9,9 @@ class WordlistFilter(rest_framework.FilterSet):
     class Meta:
         model = Wordlist
         fields = {
-            'name': ['exact', 'contains', 'icontains'],
+            'name': ['exact', 'icontains'],
             'type': ['exact'],
             'creator': ['exact'],
-            'creator__username': ['exact', 'iexact', 'contains', 'icontains'],
+            'creator__username': ['exact', 'icontains'],
             'size': ['gte', 'lte', 'exact'],
         }

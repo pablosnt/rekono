@@ -26,13 +26,13 @@ class ExecutionFilter(ToolFilter):
         fields = {
             'task': ['exact'],
             'task__target': ['exact'],
-            'task__target__target': ['exact', 'iexact', 'contains', 'icontains'],
+            'task__target__target': ['exact', 'icontains'],
             'task__target__project': ['exact'],
-            'task__target__project__name': ['exact', 'iexact', 'contains', 'icontains'],
+            'task__target__project__name': ['exact', 'icontains'],
             'task__process': ['exact'],
             'task__intensity': ['exact'],
             'task__executor': ['exact'],
-            'task__executor__username': ['exact', 'iexact', 'contains', 'icontains'],
+            'task__executor__username': ['exact', 'icontains'],
             'status': ['exact'],
             'start': ['gte', 'lte', 'exact'],
             'end': ['gte', 'lte', 'exact']

@@ -1,3 +1,5 @@
+from re import search
+
 from defectdojo.serializers import EngagementSerializer
 from defectdojo.views import DDFindingsViewSet
 from drf_spectacular.utils import extend_schema
@@ -56,6 +58,7 @@ class OSINTViewSet(FindingBaseView):
     queryset = OSINT.objects.all()
     serializer_class = OSINTSerializer
     filterset_class = OSINTFilter
+    search_fields = ['data', 'source']
 
     @extend_schema(request=None, responses={201: TargetSerializer})
     @action(detail=True, methods=['POST'], url_path='target', url_name='target')
@@ -79,24 +82,28 @@ class HostViewSet(FindingBaseView):
     queryset = Host.objects.all()
     serializer_class = HostSerializer
     filterset_class = HostFilter
+    search_fields = ['address', 'enumeration__service', 'enumeration__technology__name']
 
 
 class EnumerationViewSet(FindingBaseView):
     queryset = Enumeration.objects.all()
     serializer_class = EnumerationSerializer
     filterset_class = EnumerationFilter
+    search_fields = ['host__address', 'port', 'service']
 
 
 class EndpointViewSet(FindingBaseView):
     queryset = Endpoint.objects.all()
     serializer_class = EndpointSerializer
     filterset_class = EndpointFilter
+    search_fields = ['enumeration__host__address', 'endpoint']
 
 
 class TechnologyViewSet(FindingBaseView):
     queryset = Technology.objects.all()
     serializer_class = TechnologySerializer
     filterset_class = TechnologyFilter
+    search_fields = ['enumeration__host__address', 'name', 'version', 'description']
 
 
 class VulnerabilityViewSet(FindingBaseView, UpdateModelMixin):
@@ -104,15 +111,27 @@ class VulnerabilityViewSet(FindingBaseView, UpdateModelMixin):
     serializer_class = VulnerabilitySerializer
     filterset_class = VulnerabilityFilter
     http_method_names = ['get', 'put', 'post', 'delete']
+    search_fields = [
+        'technology__name', 'enumeration__technology__name',
+        'technology__enumeration__service', 'enumeration__service',
+        'name', 'description', 'cve', 'cwe'
+    ]
 
 
 class CredentialViewSet(FindingBaseView):
     queryset = Credential.objects.all()
     serializer_class = CredentialSerializer
     filterset_class = CredentialFilter
+    search_fields = ['email', 'username']
 
 
 class ExploitViewSet(FindingBaseView):
     queryset = Exploit.objects.all()
     serializer_class = ExploitSerializer
     filterset_class = ExploitFilter
+    search_fields = [
+        'vulnerability__name', 'vulnerability__cve', 'vulnerability__cwe',
+        'vulnerability__enumeration__service', 'technology__vulnerability__name',
+        'technology__vulnerability__cve', 'technology__vulnerability__cwe',
+        'technology__enumeration__service', 'name', 'description', 'reference'
+    ]

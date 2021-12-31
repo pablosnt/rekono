@@ -1,6 +1,6 @@
 <template>
   <div>
-    <TableHeader search="name__icontains" :filters="filters" @filter="fetchData"/>
+    <TableHeader :filters="filters" @filter="fetchData"/>
     <b-table striped borderless head-variant="dark" :fields="toolsFields" :items="tools">
       <template #cell(icon)="row">
         <b-link :href="row.item.reference" target="_blank">
@@ -91,9 +91,8 @@ export default {
     tools () {
       this.filters = [
         { name: 'Stage', values: stages, valueField: 'id', textField: 'value', filterField: 'stage' },
-        { name: 'Configuration', filterField: 'configuration__name__icontains', type: 'text'},
-        { name: 'Input', values: findingTypes, valueField: 'value', textField: 'value', filterField: 'input' },
-        { name: 'Output', values: findingTypes, valueField: 'value', textField: 'value', filterField: 'output' }
+        { name: 'Input', values: findingTypes, valueField: 'value', textField: 'value', filterField: 'configurations__inputs__type' },
+        { name: 'Output', values: findingTypes, valueField: 'value', textField: 'value', filterField: 'configurations__outputs__type' }
       ] 
     }
   },

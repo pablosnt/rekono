@@ -32,6 +32,7 @@ class UserAdminViewSet(
     serializer_class = UserSerializer
     queryset = User.objects.all()
     filterset_class = UserFilter
+    search_fields = ['username', 'first_name', 'last_name', 'username', 'email']
     permission_classes: List[BasePermission] = [IsAuthenticated, DjangoModelPermissions, IsAdmin]
 
     def destroy(self, request, *args, **kwargs):

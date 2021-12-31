@@ -21,6 +21,7 @@ class TargetViewSet(
     queryset = Target.objects.all()
     serializer_class = TargetSerializer
     filterset_class = TargetFilter
+    search_fields = ['target', 'target_ports__port', 'target_ports__target_endpoints__endpoint']
     project_members_field = 'project__members'
 
     def get_project_members(self, data):
@@ -40,6 +41,7 @@ class TargetPortViewSet(TargetViewSet):
     queryset = TargetPort.objects.all()
     serializer_class = TargetPortSerializer
     filterset_class = TargetPortFilter
+    search_fields = ['target__target', 'port', 'target_endpoints__endpoint']
     project_members_field = 'target__project__members'
     
     def get_project_members(self, data):
@@ -50,6 +52,7 @@ class TargetEndpointViewSet(TargetViewSet):
     queryset = TargetEndpoint.objects.all()
     serializer_class = TargetEndpointSerializer
     filterset_class = TargetEndpointFilter
+    search_fields = ['target_port__target__target', 'target_port__port', 'endpoint']
     project_members_field = 'target_port__target__project__members'
 
     def get_project_members(self, data):

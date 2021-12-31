@@ -13,6 +13,7 @@ class WordlistViewSet(ModelViewSet):
     queryset = Wordlist.objects.all()
     serializer_class = WordlistSerializer
     filterset_class = WordlistFilter
+    search_fields = ['name']
     http_method_names = ['get', 'post', 'put', 'delete']
     permission_classes = [
         IsAuthenticated, DjangoModelPermissions, ProjectMemberPermission, WordlistCreatorPermission

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <TableHeader search="name__icontains" :filters="filters" add="project-modal" :addAuth="$store.state.role === 'Admin'" @filter="fetchData"/>
+    <TableHeader :filters="filters" add="project-modal" :addAuth="$store.state.role === 'Admin'" @filter="fetchData"/>
     <b-table striped borderless head-variant="dark" :fields="projectsFields" :items="projects" @row-clicked="navigateToProjectDetails">
       <template #cell(defectdojo_product_id)="row">
         <b-link v-if="row.item.defectdojo_product_id !== null" :href="defectDojoUrl(row.item.defectdojo_product_id)" target="_blank">

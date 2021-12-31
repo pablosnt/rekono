@@ -10,11 +10,12 @@ class TargetFilter(rest_framework.FilterSet):
         model = Target
         fields = {
             'project': ['exact'],
-            'project__name': ['exact', 'iexact', 'contains', 'icontains'],
-            'project__description': ['exact', 'iexact', 'contains', 'icontains'],
+            'project__name': ['exact', 'icontains'],
             'project__owner': ['exact'],
-            'project__owner__username': ['exact', 'iexact', 'contains', 'icontains'],
-            'target': ['exact', 'iexact', 'contains', 'icontains'],
+            'project__owner__username': ['exact', 'icontains'],
+            'target': ['exact', 'icontains'],
+            'target_ports__port': ['exact'],
+            'target_ports__target_endpoints__endpoint': ['exact', 'icontains'],
             'type': ['exact'],
         }
 
@@ -27,11 +28,11 @@ class TargetPortFilter(rest_framework.FilterSet):
         fields = {
             'target': ['exact'],
             'target__project': ['exact'],
-            'target__project__name': ['exact', 'iexact', 'contains', 'icontains'],
-            'target__project__description': ['exact', 'iexact', 'contains', 'icontains'],
+            'target__project__name': ['exact', 'icontains'],
             'target__project__owner': ['exact'],
-            'target__project__owner__username': ['exact', 'iexact', 'contains', 'icontains'],
-            'target__target': ['exact', 'iexact', 'contains', 'icontains'],
+            'target__project__owner__username': ['exact', 'icontains'],
+            'target__target': ['exact', 'icontains'],
+            'target_endpoints__endpoint': ['exact', 'icontains'],
             'target__type': ['exact'],
             'port': ['exact']
         }
@@ -47,11 +48,10 @@ class TargetEndpointFilter(rest_framework.FilterSet):
             'target_port__port': ['exact'],
             'target_port__target': ['exact'],
             'target_port__target__project': ['exact'],
-            'target_port__target__project__name': ['exact', 'iexact', 'contains', 'icontains'],
-            'target_port__target__project__description': ['exact', 'iexact', 'contains', 'icontains'],
+            'target_port__target__project__name': ['exact', 'icontains'],
             'target_port__target__project__owner': ['exact'],
-            'target_port__target__project__owner__username': ['exact', 'iexact', 'contains', 'icontains'],
-            'target_port__target__target': ['exact', 'iexact', 'contains', 'icontains'],
+            'target_port__target__project__owner__username': ['exact', 'icontains'],
+            'target_port__target__target': ['exact', 'icontains'],
             'target_port__target__type': ['exact'],
-            'endpoint': ['exact', 'iexact', 'contains', 'icontains']
+            'endpoint': ['exact', 'icontains']
         }

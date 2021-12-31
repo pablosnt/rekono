@@ -1,6 +1,6 @@
 <template>
   <div>
-    <TableHeader search="username__icontains" :filters="filters" add="add-member-modal" @filter="fetchData"/>
+    <TableHeader :filters="filters" add="add-member-modal" @filter="fetchData"/>
     <b-table striped borderless head-variant="dark" :fields="usersFields" :items="users">
       <template #cell(role)="row">
         <b-badge :variant="roles[row.item.role.toLowerCase()]"><strong>{{ row.item.role.toUpperCase() }}</strong></b-badge>
@@ -30,6 +30,7 @@
 <script>
 import UsersApi from '@/backend/users'
 import ProjectsApi from '@/backend/projects'
+import { roles } from '@/backend/constants'
 import Deletion from '@/common/Deletion.vue'
 import TableHeader from '@/common/TableHeader.vue'
 import Pagination from '@/common/Pagination.vue'
@@ -73,9 +74,7 @@ export default {
   watch: {
     users () {
       this.filters = [
-        { name: 'First Name', filterField: 'first_name__icontains', type: 'text' },
-        { name: 'Last Name', filterField: 'last_name__icontains', type: 'text' },
-        { name: 'Email', filterField: 'email__icontains', type: 'email' }
+        { name: 'Role', values: roles, valueField: 'value', textField: 'value', filterField: 'role' }
       ]
     }
   },

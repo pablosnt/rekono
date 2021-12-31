@@ -43,7 +43,6 @@
 export default {
   name: 'tableHeader',
   props: {
-    search: String,
     filters: {
       type: Array,
       default: null
@@ -60,7 +59,7 @@ export default {
   computed: {
     selectedFilters () {
       let data = {}
-      data[this.search] = this.searchInput
+      data.search = this.searchInput
       for (let i=0; i < this.filters.length; i++) {
         const input = document.getElementById(this.filters[i].filterField)
         if (input && input.value && input.value.length > 0) {

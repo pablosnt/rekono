@@ -31,6 +31,7 @@ class TaskViewSet(
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
     filterset_class = TaskFilter
+    search_fields = ['target__target', 'process__name', 'process__steps__tool__name', 'tool__name']
 
     def get_queryset(self):
         queryset = super().get_queryset()

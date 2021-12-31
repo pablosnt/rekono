@@ -1,6 +1,6 @@
 <template>
   <div>
-    <TableHeader search="name__icontains" :filters="filters" add="wordlist-modal" @filter="fetchData"/>
+    <TableHeader :filters="filters" add="wordlist-modal" @filter="fetchData"/>
     <b-table striped borderless head-variant="dark" :fields="wordlistsFields" :items="wordlists">
       <template #cell(actions)="row">
         <b-dropdown variant="outline-primary" right>

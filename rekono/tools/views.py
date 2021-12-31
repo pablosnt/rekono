@@ -15,6 +15,7 @@ class ToolViewSet(
     queryset = Tool.objects.all()
     serializer_class = ToolSerializer
     filterset_class = ToolFilter
+    search_fields = ['name', 'command', 'configuration__name']
 
 
 class ConfigurationViewSet(
@@ -25,3 +26,4 @@ class ConfigurationViewSet(
     queryset = Configuration.objects.all()
     serializer_class = ConfigurationSerializer
     filterset_class = ConfigurationFilter
+    search_fields = ['name', 'tool__command', 'tool__name']
