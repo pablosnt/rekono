@@ -1,6 +1,13 @@
 import RekonoApi from './api'
 
 class Project extends RekonoApi {
+  getProject (projectId) {
+    return super.get(`/api/projects/${projectId}/`)
+      .then(response => {
+        return response.data
+      })
+  }
+
   getAllProjects () {
     return super.get('/api/projects/?o=name')
       .then(response => {
@@ -41,6 +48,20 @@ class Project extends RekonoApi {
 
   deleteProject (projectId) {
     return super.delete(`/api/projects/${projectId}/`)
+      .then(response => {
+        return Promise.resolve(response.data)
+      })
+  }
+
+  addMember (projectId, userId) {
+    return super.post(`/api/projects/${projectId}/members/`, { user: userId })
+      .then(response => {
+        return Promise.resolve(response.data)
+      })
+  }
+
+  deleteMember (projectId, userId) {
+    return super.delete(`/api/projects/${projectId}/members/${userId}`)
       .then(response => {
         return Promise.resolve(response.data)
       })

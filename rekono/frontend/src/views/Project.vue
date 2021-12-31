@@ -6,31 +6,31 @@
           <template #title>
             <b-icon icon="bar-chart-line-fill"/> Details
           </template>
-          <projectSummary/>
+          <projectSummary :project="project"/>
         </b-tab>
         <b-tab lazy :active="path.includes('targets')" @click="changeSubTab('targets')" title-link-class="text-secondary">
           <template #title>
             <b-icon icon="geo-fill"/> Targets
           </template>
-          <targets/>
+          <targets :project="project"/>
         </b-tab>
          <b-tab lazy :active="path.includes('tasks')" @click="changeSubTab('tasks')" title-link-class="text-secondary">
           <template #title>
             <b-icon icon="collection-play-fill"/> Tasks
           </template>
-          <tasks/>
+          <tasks :project="project"/>
         </b-tab>
          <b-tab lazy :active="path.includes('findings')" @click="changeSubTab('findings')" title-link-class="text-secondary">
           <template #title>
             <b-icon icon="flag-fill"/> Findings
           </template>
-          <findings/>
+          <findings :project="project"/>
         </b-tab>
          <b-tab lazy :active="path.includes('members')" @click="changeSubTab('members')" title-link-class="text-secondary" v-if="$store.state.role === 'Admin'">
           <template #title>
             <b-icon icon="people-fill"/> Members
           </template>
-          <members/>
+          <members :project="project"/>
         </b-tab>
       </b-tabs>
     </template>

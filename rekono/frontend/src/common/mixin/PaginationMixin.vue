@@ -26,7 +26,7 @@ export default {
       if (operation.success) {
         this.$bvModal.hide(operation.id)
         if (operation.reload) {
-          this.fetchData(this.page, this.limit)
+          this.fetchData()
         }
       }
     }

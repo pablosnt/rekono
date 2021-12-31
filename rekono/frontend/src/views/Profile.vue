@@ -68,7 +68,7 @@
             <h4 v-if="telegramConfigured">
               <b-badge variant="outline">
                 <b-icon variant="success" icon="patch-check-fill"/>
-                {{ telegramBot }} Bot linked!
+                {{ telegramBot }} Bot is linked!
               </b-badge>
             </h4>
             <b-card align="center" v-if="!telegramConfigured">

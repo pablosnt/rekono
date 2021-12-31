@@ -50,6 +50,7 @@ export default {
       ProfileApi.changePassword(this.newPassword, this.oldPassword)
         .then(() => {
           this.success(this.username, 'Password changed successfully')
+          this.$bvModal.hide(this.id)
         })
         .catch(error => {
           if (error.response.status === 401) {

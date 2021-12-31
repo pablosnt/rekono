@@ -23,7 +23,7 @@ const routes = [
     component: Main
   },
   {
-    path: '/projects/:id',
+    path: '/projects/:id/(details|targets|tasks|findings|members)?',
     name: 'project',
     component: Project,
     props: true

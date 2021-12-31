@@ -27,7 +27,7 @@
       v-if="selectedUser !== null">
       <span><strong>{{ selectedUser.username }}</strong> user</span>
     </Deletion>
-    <UserInviteForm id="invite-modal" @confirm="confirm" @clean="cleanSelection"/>
+    <UserInviteForm id="invite-modal" @confirm="confirm"/>
   </div>
 </template>
 
@@ -78,10 +78,11 @@ export default {
   },
   methods: {
     fetchData (filters = null) {
-      UsersApi.getAllUsers(this.getPage(), this.getLimit(), filters).then(data => {
-        this.total = data.count
-        this.users = data.results
-      })
+      UsersApi.getAllUsers(this.getPage(), this.getLimit(), filters)
+        .then(data => {
+          this.total = data.count
+          this.users = data.results
+        })
     },
     updateRole (role) {
       UsersApi.updateRole(this.selectedUser.id, role)

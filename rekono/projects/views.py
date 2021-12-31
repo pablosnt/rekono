@@ -50,15 +50,16 @@ class ProjectViewSet(ModelViewSet, DDScansViewSet, DDFindingsViewSet):
             ).all())
         return findings
 
-    @extend_schema(responses={200: UserSerializer})
-    @action(detail=True, methods=['GET'], url_path='members', url_name='members')
-    def project_members(self, request, pk):
-        project = self.get_object()
-        serializer = UserSerializer(project.members.all(), many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    # @extend_schema(responses={200: UserSerializer(many=True)})
+    # @action(detail=True, methods=['GET'], url_path='members', url_name='members')
+    # def project_members(self, request, pk):
+    #     project = self.get_object()
+    #     serializer = UserSerializer(project.members.all(), many=True)
+    #     return Response(serializer.data, status=status.HTTP_200_OK)
 
     @extend_schema(request=ProjectMemberSerializer, responses={201: ProjectMemberSerializer})
-    @project_members.mapping.post
+    # @project_members.mapping.post
+    @action(detail=True, methods=['POST'], url_path='members', url_name='members')
     def add_project_member(self, request, pk):
         project = self.get_object()
         serializer = ProjectMemberSerializer(data=request.data)

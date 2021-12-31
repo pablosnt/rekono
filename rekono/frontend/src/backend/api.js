@@ -78,9 +78,12 @@ class RekonoApi {
   }
 
   paginatedGet (endpoint, page = null, limit = null, filter = null, requiredAuth = true, extraHeaders = null, allowUnauth = false) {
-    let params = {
-      page: page,
-      limit: limit
+    let params = {}
+    if (page && limit) {
+      params = {
+        page: page,
+        limit: limit
+      }
     }
     if (filter) {
       for (let key in filter) {

@@ -93,7 +93,7 @@ class User(AbstractUser):
     email = models.EmailField(max_length=150, unique=True)
 
     otp = models.TextField(max_length=200, unique=True, blank=True, null=True)
-    otp_expiration = models.DateTimeField(default=get_token_expiration)
+    otp_expiration = models.DateTimeField(default=get_token_expiration, blank=True, null=True)
 
     notification_scope = models.TextField(
         max_length=18,
