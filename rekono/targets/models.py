@@ -66,3 +66,9 @@ class TargetEndpoint(models.Model):
                 name='unique target endpoint'
             )
         ]
+    
+    def __str__(self) -> str:
+        return f'{self.target_port.__str__()} - {self.endpoint}'
+
+    def get_project(self) -> Any:
+        return self.target_port.target.project

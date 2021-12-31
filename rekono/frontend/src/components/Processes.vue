@@ -15,10 +15,8 @@
               <b-icon icon="three-dots-vertical"/>
             </template>
             <b-dropdown-item @click="showStepForm(row.item)" v-b-modal.step-modal :disabled="$store.state.role !== 'Admin' && $store.state.user !== row.item.creator.id">
-              <div style="display: inline">
-                <b-icon variant="success" icon="plus-square"/>
-                <label class="ml-1" variant="dark">Add Step</label>
-              </div>
+              <b-icon variant="success" icon="plus-square"/>
+              <label class="ml-1" variant="dark">Add Step</label>
             </b-dropdown-item>
             <b-dropdown-item variant="dark" @click="showProcessForm(row.item)" v-b-modal.process-modal :disabled="$store.state.role !== 'Admin' && $store.state.user !== row.item.creator.id">
               <b-icon icon="pencil-square"/>

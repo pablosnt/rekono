@@ -17,7 +17,6 @@
     <Pagination :page="page" :limit="limit" :limits="limits" :total="total" name="members" @pagination="pagination"/>
     <Deletion id="delete-member-modal"
       title="Delete Member"
-      removeWord="remove"
       @deletion="deleteMember"
       @clean="cleanSelection"
       v-if="selectedUser !== null">
@@ -61,7 +60,6 @@ export default {
         { key: 'actions', sortable: false }
       ],
       selectedUser: null,
-      showNewMemberModal: false,
       filters: []
     }
   },

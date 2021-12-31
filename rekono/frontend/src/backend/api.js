@@ -73,11 +73,7 @@ class RekonoApi {
       })
   }
 
-  get (endpoint, requiredAuth = true, extraHeaders = null, allowUnauth = false) {
-    return this.request(axios.get, endpoint, null, null, requiredAuth, extraHeaders, allowUnauth)
-  }
-
-  paginatedGet (endpoint, page = null, limit = null, filter = null, requiredAuth = true, extraHeaders = null, allowUnauth = false) {
+  get (endpoint, page = null, limit = null, filter = null, requiredAuth = true, extraHeaders = null, allowUnauth = false) {
     let params = {}
     if (page && limit) {
       params = {

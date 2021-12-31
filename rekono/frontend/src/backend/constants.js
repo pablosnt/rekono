@@ -15,11 +15,14 @@ const roles = ['Admin', 'Auditor', 'Reader']
 
 const notificationScopes = ['Disabled', 'Only my executions', 'All executions']
 
+const targetTypes = ['Domain', 'IP range', 'Network', 'Private IP', 'Public IP']
+
 export {
   accessTokenKey,
   refreshTokenKey,
   stages,
   findingTypes,
   roles,
-  notificationScopes
+  notificationScopes,
+  targetTypes
 }
