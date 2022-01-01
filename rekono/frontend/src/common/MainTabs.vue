@@ -42,11 +42,12 @@
 </template>
 
 <script>
+import { auditor } from '@/backend/constants'
 export default {
   name: 'projectDetails',
   data () {
     return {
-      auditor: ['Admin', 'Auditor'],
+      auditor: auditor,
       path: window.location.hash
     }
   },

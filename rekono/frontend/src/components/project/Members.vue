@@ -29,7 +29,7 @@
 <script>
 import UsersApi from '@/backend/users'
 import ProjectsApi from '@/backend/projects'
-import { roles } from '@/backend/constants'
+import { roles, rolesByVariant } from '@/backend/constants'
 import Deletion from '@/common/Deletion.vue'
 import TableHeader from '@/common/TableHeader.vue'
 import Pagination from '@/common/Pagination.vue'
@@ -44,11 +44,7 @@ export default {
   },
   data () {
     return {
-      roles: {
-        admin: 'success',
-        auditor: 'danger',
-        reader: 'primary'
-      },
+      roles: rolesByVariant,
       users: this.fetchData(),
       usersFields: [
         { key: 'first_name', sortable: true },

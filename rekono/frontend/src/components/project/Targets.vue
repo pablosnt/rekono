@@ -82,7 +82,7 @@
 
 <script>
 import Targets from '@/backend/targets'
-import { targetTypes } from '@/backend/constants'
+import { targetTypes, auditor } from '@/backend/constants'
 import Deletion from '@/common/Deletion.vue'
 import TableHeader from '@/common/TableHeader.vue'
 import Pagination from '@/common/Pagination.vue'
@@ -102,7 +102,7 @@ export default {
   },
   data () {
     return {
-      auditor: ['Admin', 'Auditor'],
+      auditor: auditor,
       targets: this.fetchData(),
       targetsFields: [
         { key: 'target', sortable: true },

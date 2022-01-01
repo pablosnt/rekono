@@ -1,8 +1,8 @@
 <template>
   <b-modal id="execute-modal" @hidden="clean" @ok="confirm" :title="title" ok-title="Execute" header-bg-variant="success" header-text-variant="light" ok-variant="success" size="lg">
-    <template #modal-title v-if="tool !== null">
-      <b-link :href="tool.reference" target="_blank">
-        <b-img :src="tool.icon" width="100" height="50"/>
+    <template #modal-title v-if="selectedTool">
+      <b-link :href="selectedTool.reference" target="_blank">
+        <b-img :src="selectedTool.icon" width="100" height="50"/>
       </b-link>
       {{ title }}
     </template>
@@ -12,33 +12,37 @@
           <template #title>
             <b-icon icon="play-fill"/> Basic
           </template>
-          <b-form-group description="Project" invalid-feedback="Project is required">
-            <b-form-select v-model="projectId" :options="projects" @change="selectProject" value-field="id" text-field="name" :state="projectState" required>
+          <b-form-group description="Project" invalid-feedback="Project is required" v-if="!project">
+            <b-form-select v-model="projectId" :options="projects" @change="selectProject" value-field="id" text-field="name" :state="projectState">
               <template #first>
                 <b-form-select-option :value="null" disabled>Select project</b-form-select-option>
               </template>
             </b-form-select>
           </b-form-group>
           <b-form-group description="Target" invalid-feedback="Target is required">
-            <b-form-select v-model="targetId" :options="selectedProject !== null ? selectedProject.targets : []" :disabled="selectedProject === null" value-field="id" text-field="target" :state="targetState" required>
+            <b-form-select v-model="targetId" :options="selectedProject ? selectedProject.targets : []" :disabled="!selectedProject" value-field="id" text-field="target" :state="targetState">
               <template #first>
                 <b-form-select-option :value="null" disabled>Select target</b-form-select-option>
               </template>
             </b-form-select>
           </b-form-group>
-          <div v-if="tool !== null">
-            <b-form-group description="Tool configuration">
-              <b-form-select v-model="configurationId" :options="selectedTool !== null ? selectedTool.configurations : []" :disabled="configurationId == null" @change="selectConfiguration" value-field="id" text-field="name" required/>
-            </b-form-group>
-          </div>
+          <b-form-group description="Process" v-if="!process && !tool">
+            <b-form-select v-model="processId" :options="processes" @change="selectProcess" value-field="id" text-field="name" :state="processState"/>
+          </b-form-group>
+          <b-form-group description="Tool" v-if="!process && !tool">
+            <b-form-select v-model="toolId" :options="tools" @change="selectTool" value-field="id" text-field="name" :state="toolState"/>
+          </b-form-group>
+          <b-form-group description="Tool configuration" v-if="!process">
+            <b-form-select v-model="configurationId" :options="selectedTool ? selectedTool.configurations : []" :disabled="!configurationId" @change="selectConfiguration" value-field="id" text-field="name"/>
+          </b-form-group>
           <b-form-group description="Execution intensity">
             <b-input-group>
               <b-input-group-prepend>
                 <div v-for="i in intensities" :key="i.value">
-                  <b-button v-if="i.value === intensity" v-b-tooltip.hover.top="i.value" :variant="i.variant" no-remove>{{ i.value.charAt(0) }}</b-button>
+                  <b-button v-if="i.intensity_rank === intensity" v-b-tooltip.hover.top="i.intensity_rank" :variant="i.variant" no-remove>{{ intensity ? intensity.charAt(0) : 'H' }}</b-button>
                 </div>
               </b-input-group-prepend>
-              <b-form-select v-model="intensity" :options="intensities" value-field="value" text-field="value" required/>
+              <b-form-select v-model="intensity" :options="intensities" value-field="intensity_rank" text-field="intensity_rank" required/>
             </b-input-group>
           </b-form-group>
         </b-tab>
@@ -97,6 +101,7 @@ import ProjectApi from '@/backend/projects'
 import TaskApi from '@/backend/tasks'
 import ToolApi from '@/backend/tools'
 import WordlistApi from '@/backend/resources'
+import { intensitiesByVariant } from '@/backend/constants'
 import AlertMixin from '@/common/mixin/AlertMixin.vue'
 import { findById } from '@/backend/utils'
 const ProcessApi = Processes.ProcessApi
@@ -114,6 +119,10 @@ export default {
       default: null
     },
     tool: {
+      type: Object,
+      default: null
+    },
+    project: {
       type: Object,
       default: null
     }
@@ -135,7 +144,7 @@ export default {
       processes: [],
       tools: [],
       wordlists: [],
-      intensities: this.defaultIntensities(),
+      intensities: intensitiesByVariant,
       timeUnits: ['Weeks', 'Days', 'Hours', 'Minutes'],
       selectedProject: null,
       selectedProcess: null,
@@ -156,48 +165,45 @@ export default {
       repeatTimeUnit: 'Days',
       projectState: null,
       targetState: null,
+      processState: null,
+      toolState: null,
       scheduledAtState: null,
       minimumDate: new Date()
     }
   },
   watch: {
-    process (process) {
-      if (this.initialized && process !== null) {
-        this.selectProcess(process.id, process)
-      }
-    },
-    tool (tool) {
-      if (this.initialized && tool !== null) {
-        this.selectTool(tool.id, tool)
-      }
-    },
     initialized (initialized) {
       if (initialized) {
-        if (this.tool === null && this.process === null) {
+        if (this.tool) {
+          this.selectTool(this.tool.id, this.tool)
+        }
+        if (this.process) {
+          this.selectProcess(this.process.id, this.process)
+        }
+        if (!this.tool && !this.process) {
           ToolApi.getTools().then(data => { this.tools = data.results })
           ProcessApi.getAllProcesses().then(data => { this.processes = data.results })
         }
-        ProjectApi.getAllProjects().then(data => { this.projects = data.results })
+        if (this.project) {
+          this.selectProject(this.project.id, this.project)
+        } else {
+          ProjectApi.getAllProjects().then(data => { this.projects = data.results })
+        }
       }
     }
   },
   methods: {
-    defaultIntensities () {
-      return [
-        { value: 'Insane', variant: 'danger' },
-        { value: 'Hard', variant: 'warning' },
-        { value: 'Normal', variant: 'secondary' },
-        { value: 'Low', variant: 'success' },
-        { value: 'Sneaky', variant: 'info' }
-      ]
-    },
     check () {
       const valid = this.$refs.execute_form.checkValidity()
-      this.projectState = (this.projectId !== null)
-      this.targetState = (this.targetId !== null)
-      if (this.scheduledAtDate !== null || this.scheduledAtTime !== null) {
+      this.projectState = (this.projectId && this.projectId > 0)
+      this.targetState = (this.targetId && this.targetId > 0)
+      if (!this.processId && !this.toolId) {
+        this.processState = false
+        this.toolState = false
+      }      
+      if (this.scheduledAtDate || this.scheduledAtTime) {
         this.scheduledAtState = false
-        if (this.scheduledAtDate && this.scheduledAtTime !== null) {
+        if (this.scheduledAtDate && this.scheduledAtTime) {
           this.scheduledAtState = (Date.parse(`${this.scheduledAtDate} ${this.scheduledAtTime}`) > new Date())
         }
         return valid && this.scheduledAtState
@@ -229,7 +235,7 @@ export default {
       this.processes = []
       this.tools = []
       this.wordlists = []
-      this.intensities = this.defaultIntensities()
+      this.intensities = intensitiesByVariant
       this.timeUnits = ['Weeks', 'Days', 'Hours', 'Minutes']
       this.selectedProject = null
       this.selectedProcess = null
@@ -251,12 +257,13 @@ export default {
       this.projectState = null
       this.targetState = null
       this.scheduledAtState = null
+      this.$emit('clean')
     },
     checkInputType (inputType) {
       let inputs = []
-      if (this.selectedConfiguration !== null) {
+      if (this.selectedConfiguration) {
         inputs = this.selectedConfiguration.inputs
-      } else if (this.selectedProcess !== null) {
+      } else if (this.selectedProcess) {
         for (let s = 0; s < this.selectedProcess.steps.length; s++) {
           inputs = inputs.concat(this.selectedProcess.steps[s].configuration.inputs)
         }
@@ -272,7 +279,7 @@ export default {
     },
     selectProject (projectId, project = null) {
       this.projectId = projectId
-      if (project !== null) {
+      if (project) {
         this.selectedProject = project
       } else {
         this.selectedProject = findById(this.projects, projectId)
@@ -282,10 +289,12 @@ export default {
       const isWordlist = this.checkInputType('Wordlist')
       this.processId = processId
       this.toolId = null
+      this.selectedTool = null
       this.configurationId = null
-      this.intensities = this.defaultIntensities()
+      this.selectedConfiguration = null
+      this.intensities = intensitiesByVariant
       this.intensity = 'Normal'
-      if (process !== null) {
+      if (process) {
         this.selectedProcess = process
       } else {
         this.selectedProcess = findById(this.processes, processId)
@@ -296,29 +305,35 @@ export default {
     },
     selectTool (toolId, tool = null) {
       this.processId = null
+      this.selectedProcess = null
       this.toolId = toolId
-      if (tool !== null) {
+      if (tool) {
         this.selectedTool = tool
       } else {
         this.selectedTool = findById(this.tools, toolId)
       }
       this.selectConfiguration(this.selectedTool.configurations[0].id, this.selectedTool.configurations[0])
-      this.intensities = this.selectedTool.intensities
       this.intensity = null
-      for (let i = 0; i < this.intensities.length; i++) {
-        if (this.intensities[i].value === 'Normal') {
+      this.intensities = []
+      for (let i = 0; i < this.selectedTool.intensities.length; i++) {
+        for (let j = 0; j < intensitiesByVariant.length; j++) {
+          if (this.selectedTool.intensities[i].intensity_rank === intensitiesByVariant[j].intensity_rank) {
+            this.intensities.push(intensitiesByVariant[j])
+            break
+          }
+        }
+        if (this.selectedTool.intensities[i].intensity_rank === 'Normal') {
           this.intensity = 'Normal'
-          break
         }
       }
-      if (this.intensity === null) {
-        this.intensity = this.intensities[this.intensities.length - 1].value
+      if (!this.intensity) {
+        this.intensity = this.intensities[this.intensities.length - 1].intensity_rank
       }
     },
     selectConfiguration (configurationId, configuration = null) {
       const isWordlist = this.checkInputType('Wordlist')
       this.configurationId = configurationId
-      if (configuration !== null) {
+      if (configuration) {
         this.selectedConfiguration = configuration
       } else {
         this.selectedConfiguration = findById(this.selectedTool.configurations, configurationId)

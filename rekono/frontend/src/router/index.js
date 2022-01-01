@@ -7,6 +7,7 @@ import Project from '@/views/Project'
 import Signup from '@/views/Signup'
 import ResetPassword from '@/views/ResetPassword'
 import Profile from '@/views/Profile'
+import Task from '@/views/Task'
 
 Vue.use(Router)
 
@@ -44,6 +45,12 @@ const routes = [
     path: '/profile',
     name: 'profile',
     component: Profile
+  },
+  {
+    path: '/tasks/:id',
+    name: 'task',
+    component: Task,
+    props: true
   }
 ]
 

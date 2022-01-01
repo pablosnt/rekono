@@ -12,7 +12,7 @@ from rekono.settings import WORDLIST_DIR
 
 class WordlistSerializer(serializers.ModelSerializer):
     file = serializers.FileField(required=True, allow_empty_file=False, write_only=True)
-    creator = SerializerMethodField(method_name='get_creator', read_only=True, required=False)
+    creator = SimplyUserSerializer(many=False, read_only=True, required=False)
 
     class Meta:
         model = Wordlist
@@ -22,9 +22,6 @@ class WordlistSerializer(serializers.ModelSerializer):
             'path': {'write_only': True, 'required': False},
             'checksum': {'write_only': True, 'required': False},
         }
-
-    def get_creator(self, instance: Wordlist) -> SimplyUserSerializer:
-        return SimplyUserSerializer(instance.creator).data
 
     def validate(self, attrs):
         attrs = super().validate(attrs)

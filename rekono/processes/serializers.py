@@ -72,14 +72,11 @@ class ProcessSerializer(serializers.ModelSerializer):
         read_only=True,
         required=False
     )
-    creator = SerializerMethodField(method_name='get_creator', read_only=True, required=False)
+    creator = SimplyUserSerializer(many=False, read_only=True, required=False)
 
     class Meta:
         model = Process
         fields = ('id', 'name', 'description', 'creator', 'steps')
-
-    def get_creator(self, instance: Process) -> SimplyUserSerializer:
-        return SimplyUserSerializer(instance.creator).data
 
     def get_steps(self, instance) -> List[StepSerializer]:
         return StepSerializer(

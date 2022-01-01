@@ -11,15 +11,15 @@
       </b-col>
       <b-col>
         <div class="text-right">
-          <b-button v-if="filters !== null && !showFilters" variant="outline" v-b-tooltip.hover title="Filter" @click="toggleFilters()">
+          <b-button v-if="filters && filters.length > 0 && !showFilters" variant="outline" v-b-tooltip.hover title="Filter" @click="toggleFilters()">
             <p class="h3"><b-icon icon="filter-square-fill"/></p>
           </b-button>
-          <b-button v-if="filters !== null && showFilters" variant="outline" v-b-tooltip.hover title="Clean Filter" @click="clean()">
+          <b-button v-if="filters && filters.length > 0 && showFilters" variant="outline" v-b-tooltip.hover title="Clean Filter" @click="clean()">
             <p class="h3"><b-icon icon="dash-circle-fill"/></p>
           </b-button>
           <span/>
-          <b-button v-if="addAuth === true" variant="outline" v-b-tooltip.hover title="Add" v-b-modal="add">
-            <p class="h3"><b-icon variant="success" icon="plus-square-fill"/></p>
+          <b-button v-if="addAuth === true" variant="outline" v-b-tooltip.hover title="Add" v-b-modal="add" @click="$emit('add-click')">
+            <p class="h3"><b-icon variant="success" :icon="addIcon"/></p>
           </b-button>
         </div>
       </b-col>
@@ -54,6 +54,10 @@ export default {
     addAuth: {
       type: Boolean,
       default: true
+    },
+    addIcon: {
+      type: String,
+      default: 'plus-square-fill'
     }
   },
   computed: {

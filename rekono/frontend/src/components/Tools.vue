@@ -8,7 +8,11 @@
         </b-link>
       </template>
       <template #cell(intensities)="row">
-        <b-form-tag v-for="item in row.item.intensities" v-bind:key="item.value" :variant="item.variant" v-b-tooltip.hover.top="item.value" no-remove>{{ item.summary }}</b-form-tag>
+        <div v-for="base in intensities" v-bind:key="base.intensity_rank" class="d-inline">
+          <div v-for="i in row.item.intensities" v-bind:key="i.intensity_rank" class="d-inline">
+            <b-form-tag v-if="base.intensity_rank === i.intensity_rank" :variant="base.variant" v-b-tooltip.hover.top="i.intensity_rank" no-remove>{{ i.intensity_rank.charAt(0) }}</b-form-tag>
+          </div>
+        </div>
       </template>
       <template #cell(actions)="row">
         <b-button @click="row.toggleDetails" variant="dark" class="mr-2" v-b-tooltip.hover title="Details">
@@ -32,6 +36,12 @@
             <template #cell(default)="config">
               <b-icon v-if="config.item.default" icon="check-circle-fill" variant="success"/>
             </template>
+            <template #cell(inputs)="config">
+              <p>{{ config.item.inputs.map((input) => { return input.type }).join(', ') }}</p>
+            </template>
+            <template #cell(outputs)="config">
+              <p>{{ config.item.outputs.map((output) => { return output.type }).join(', ') }}</p>
+            </template>
           </b-table>
         </b-card>
       </template>
@@ -45,7 +55,7 @@
 
 <script>
 import ToolApi from '@/backend/tools'
-import { stages, findingTypes } from '@/backend/constants'
+import { stages, findingTypes, auditor, intensitiesByVariant } from '@/backend/constants'
 import Pagination from '@/common/Pagination.vue'
 import TableHeader from '@/common/TableHeader.vue'
 import PaginationMixin from '@/common/mixin/PaginationMixin.vue'
@@ -57,7 +67,8 @@ export default {
   mixins: [PaginationMixin],
   data () {
     return {
-      auditor: ['Admin', 'Auditor'],
+      auditor: auditor,
+      intensities: intensitiesByVariant,
       tools: this.fetchData(),
       toolsFields: [
         { key: 'icon', sortable: false },
@@ -70,8 +81,8 @@ export default {
       configFields: [
         { key: 'name', label: 'Configuration', sortable: true },
         { key: 'default', sortable: true },
-        { key: 'inputs_text', label: 'Inputs', sortable: true },
-        { key: 'outputs_text', label: 'Outputs', sortable: true }
+        { key: 'inputs', sortable: true },
+        { key: 'outputs', sortable: true }
       ],
       taskForm: false,
       processForm: false,
@@ -101,42 +112,6 @@ export default {
       ToolApi.getTools(this.getPage(), this.getLimit(), filter)
         .then(data => {
           this.total = data.count
-          for (let t = 0; t < data.results.length; t++) {
-            const intensities = []
-            for (let i = 0; i < data.results[t].intensities.length; i++) {
-              const value = data.results[t].intensities[i].intensity_rank
-              let variant = 'secondary'
-              if (value === 'Sneaky') variant = 'info'
-              else if (value === 'Low') variant = 'success'
-              else if (value === 'Hard') variant = 'warning'
-              else if (value === 'Insane') variant = 'danger'
-              const intensity = {
-                variant: variant,
-                value: value,
-                summary: value.charAt(0).toUpperCase()
-              }
-              intensities.push(intensity)
-            }
-            data.results[t].intensities = intensities
-            for (let c = 0; c < data.results[t].configurations.length; c++) {
-              let inputsText = ''
-              for (let i = 0; i < data.results[t].configurations[c].inputs.length; i++) {
-                inputsText += data.results[t].configurations[c].inputs[i].type
-                if (i + 1 < data.results[t].configurations[c].inputs.length) {
-                  inputsText += ', '
-                }
-              }
-              let outputsText = ''
-              for (let o = 0; o < data.results[t].configurations[c].outputs.length; o++) {
-                outputsText += data.results[t].configurations[c].outputs[o].type
-                if (o + 1 < data.results[t].configurations[c].outputs.length) {
-                  outputsText += ', '
-                }
-              }
-              data.results[t].configurations[c].inputs_text = inputsText
-              data.results[t].configurations[c].outputs_text = outputsText
-            }
-          }
           this.tools = data.results
         })
     },

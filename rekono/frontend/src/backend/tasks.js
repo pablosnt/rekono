@@ -1,6 +1,13 @@
 import RekonoApi from './api'
 
 class Task extends RekonoApi {
+  getAllTasks (page = null, limit = null, filter = null) {
+    return super.get('/api/tasks/', page, limit, filter)
+      .then(response => {
+        return response.data
+      })
+  }
+
   createTask (target, process, tool, configuration, intensity, scheduledAtDate, scheduledAtTime, scheduledIn, scheduledTimeUnit, repeatIn, repeatTimeUnit, wordlists) {
     const data = {
       target: target,
@@ -16,6 +23,13 @@ class Task extends RekonoApi {
       wordlists: wordlists
     }
     return super.post('/api/tasks/', data)
+      .then(response => {
+        return Promise.resolve(response.data)
+      })
+  }
+
+  cancelTask (taskId) {
+    return super.delete(`/api/tasks/${taskId}/`)
       .then(response => {
         return Promise.resolve(response.data)
       })

@@ -110,7 +110,7 @@
 
 <script>
 import ProfileApi from '@/backend/profile'
-import { notificationScopes } from '@/backend/constants'
+import { notificationScopes, rolesByVariant } from '@/backend/constants'
 import AlertMixin from '@/common/mixin/AlertMixin.vue'
 import ChangePasswordForm from '@/modals/ChangePasswordForm.vue'
 export default {
@@ -119,11 +119,7 @@ export default {
   data () {
     this.fetchData()
     return {
-      roles: {
-        admin: 'success',
-        auditor: 'danger',
-        reader: 'primary'
-      },
+      roles: rolesByVariant,
       telegramBot: process.env.VUE_APP_TELEGRAM_BOT,
       showTelegramSteps: false,
       notificationScopes: notificationScopes,
