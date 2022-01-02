@@ -25,3 +25,11 @@ class TargetSerializer(serializers.ModelSerializer):
         model = Target
         fields = ('id', 'project', 'target', 'type', 'target_ports', 'tasks')
         read_only_fields = ('type', 'target_ports', 'tasks')
+
+
+class SimplyTargetSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Target
+        fields = ('id', 'project', 'target', 'type')
+        read_only_fields = ('type',)

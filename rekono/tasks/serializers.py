@@ -1,26 +1,24 @@
 from django.contrib.sites.shortcuts import get_current_site
 from django.utils import timezone
-from executions.serializers import ExecutionSerializer
-from processes.serializers import ProcessSerializer
+from processes.serializers import SimplyProcessSerializer
 from rest_framework import serializers
-from targets.serializers import TargetSerializer
+from targets.serializers import SimplyTargetSerializer
 from tasks.models import Task
 from tasks.queue import producer
 from tools.enums import IntensityRank
 from tools.models import Configuration, Intensity
 from tools.serializers import (ConfigurationSerializer, IntensityField,
-                               ToolSerializer)
+                               SimplyToolSerializer)
 from users.serializers import SimplyUserSerializer
 
 
 class TaskSerializer(serializers.ModelSerializer):
-    target_data = TargetSerializer(source='target', many=False, read_only=True)
-    process_data = ProcessSerializer(source='process', many=False, read_only=True)
-    tool_data = ToolSerializer(source='tool', many=False, read_only=True)
+    target_data = SimplyTargetSerializer(source='target', many=False, read_only=True)
+    process_data = SimplyProcessSerializer(source='process', many=False, read_only=True)
+    tool_data = SimplyToolSerializer(source='tool', many=False, read_only=True)
     configuration_data = ConfigurationSerializer(source='configuration', many=False, read_only=True)
     intensity_rank = IntensityField(source='intensity', required=False)
     executor = SimplyUserSerializer(many=False, read_only=True)
-    executions = ExecutionSerializer(many=True, read_only=True)
 
     class Meta:
         model = Task

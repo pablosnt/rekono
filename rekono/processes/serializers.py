@@ -83,3 +83,10 @@ class ProcessSerializer(serializers.ModelSerializer):
             instance.steps.all().order_by('tool__stage', '-priority'),
             many=True
         ).data
+
+
+class SimplyProcessSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Process
+        fields = ('id', 'name', 'description')
