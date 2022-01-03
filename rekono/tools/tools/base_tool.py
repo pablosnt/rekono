@@ -2,19 +2,22 @@ import os
 import shutil
 import subprocess
 import uuid
+from typing import Any
 
 from arguments import checker, formatter
+from django.core.exceptions import ValidationError
 from django.utils import timezone
 from executions.models import Execution
 from findings.models import Vulnerability
 from findings.queue import producer
+from findings.utils import get_unique_filter
 from tasks.enums import Status
 from tools import utils
 from tools.enums import InputSelection
 from tools.exceptions import (InstallationNotFoundException,
                               InvalidToolParametersException,
                               UnexpectedToolExitCodeException)
-from tools.models import Configuration, Input, Intensity, Tool
+from tools.models import Configuration, Intensity, Tool
 
 from rekono.settings import EXECUTION_OUTPUTS
 
@@ -109,8 +112,25 @@ class BaseTool():
             raise UnexpectedToolExitCodeException(exec.stderr)
         return exec.stdout
 
-    def parse_output(self, output: str) -> list:
-        return []
+    def create_finding(self, finding_type: Any, **fields) -> Any:
+        finding = None
+        fields['execution'] = self.execution
+        try:
+            finding = finding_type.objects.create(**fields)
+            finding.save()
+        except ValidationError as e:
+            if 'Unique constraint violation' in e.message:
+                unique_filter = get_unique_filter(finding_type.key_fields, fields)
+                finding = finding_type.objects.filter(**unique_filter).first()
+                for field, value in fields.items():
+                    if value and value != getattr(finding, field):
+                        setattr(finding, field, value)
+                finding.save()
+        self.findings.append(finding)
+        return finding
+
+    def parse_output(self, output: str) -> None:
+        pass    # This method should be implemented by specific tools to parse the output
 
     def process_findings(self) -> None:
         for finding in self.findings:
@@ -194,6 +214,6 @@ class BaseTool():
         self.clean_environment()
         self.on_completed(output)
         if self.file_output_enabled and os.path.isfile(self.path_output):
-            self.findings = self.parse_output(output)
+            self.parse_output(output)
             self.process_findings()
             self.send_findings(rekono_address)

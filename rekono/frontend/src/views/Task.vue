@@ -233,8 +233,8 @@ export default {
       TasksApi.repeatTask(this.currentTask.id)
         .then((data) => {
           this.$bvModal.hide('repeat-task-modal')
-          this.warning(notification, 'Task executed again successfully')
-          this.$router.push(`/tasks/${data.id}`)
+          this.success(notification, 'Task executed again successfully')
+          this.$router.push({ name: 'task', params: { id: data.id, task: data } })
         })
         .catch(() => {
           this.danger(notification, 'Unexpected error in task execution')
@@ -247,6 +247,11 @@ export default {
         this.selectedExecution = this.executions.length === 1 ? this.executions[0] : null
       }
     }
+  },
+  beforeRouteUpdate(to, from, next) {
+    this.currentTask = to.params.task ? to.params.task : this.fetchTask()
+    this.fetchExecutions()
+    next()
   },
   beforeDestroy () {
     this.stopAutoRefresh()

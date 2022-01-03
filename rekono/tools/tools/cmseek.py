@@ -46,39 +46,35 @@ class CmseekTool(BaseTool):
             shutil.move(report, self.path_output)
             shutil.rmtree(results)
 
-    def analyze_endpoints(self, url: str, technology: Technology, key: str, value: Any) -> list:
+    def analyze_endpoints(self, url: str, technology: Technology, key: str, value: Any) -> None:
         paths = []
-        findings = []
         if isinstance(value, str) and ',' in value:
             paths = value.split(',')
         elif isinstance(value, list):
             paths = value
         paths = [p.replace(url, '/') for p in paths]
         for path in paths:
-            endpoint = Endpoint.objects.create(endpoint=path)
-            findings.append(endpoint)
+            self.create(Endpoint, endpoint=path)
         if 'backup_file' in key:
-            vulnerability = Vulnerability.objects.create(
+            self.create_finding(
+                Vulnerability,
                 technology=technology,
                 name=f'{technology.name} backup files found',
                 description=', '.join(paths),
                 severity=Severity.HIGH,
                 cwe='CWE-530'
             )
-            findings.append(vulnerability)
         elif 'config_file' in key:
-            vulnerability = Vulnerability.objects.create(
+            self.create_finding(
+                Vulnerability,
                 technology=technology,
                 name=f'{technology.name} configuration files found',
                 description=', '.join(paths),
                 severity=Severity.MEDIUM,
                 cwe='CWE-497'
             )
-            findings.append(vulnerability)
-        return findings
 
-    def parse_output(self, output: str) -> list:
-        findings = []
+    def parse_output(self, output: str) -> None:
         with open(self.path_output, 'r') as output_file:
             report = json.load(output_file)
         if report.get('cms_name'):
@@ -90,38 +86,37 @@ class CmseekTool(BaseTool):
             elif f'{cms_name}_version' in report:
                 cms_version = report.get(f'{cms_name}_version')
             url = report.get('url')
-            cms = Technology.objects.create(
+            cms = self.create_finding(
+                Technology,
                 name=cms_name,
                 version=cms_version,
                 reference=report.get('cms_url')
             )
-            findings.append(cms)
             for key, value in [(k, v) for k, v in report.items() if k not in [
                 'cms_id', 'cms_name', 'cms_url', f'{cms_id}_version', f'{cms_name}_version'
             ]]:
                 if 'file' in key or 'directory' in key:
-                    findings.extend(self.analyze_endpoints(url, cms, key, value))
+                    self.analyze_endpoints(url, cms, key, value)
                 elif '_users' in key and ',' in value:
                     for user in value.split(','):
-                        credential = Credential.objects.create(username=user)
-                        findings.append(credential)
+                        self.create_finding(Credential, username=user)
                 elif '_debug_mode' in key and value != 'disabled':
-                    vulnerability = Vulnerability.objects.create(
+                    self.create(
+                        Vulnerability,
                         technology=cms,
                         name=f'{cms_name} debug mode enabled',
                         description=f'{cms_name} debug mode enabled',
                         severity=Severity.LOW,
                         cwe='CWE-489'
                     )
-                    findings.append(vulnerability)
                 elif '_vulns' in key and 'vulnerabilities' in value:
                     for vuln in value['vulnerabilities']:
-                        vulnerability = Vulnerability.objects.create(
+                        self.create(
+                            Vulnerability,
                             technology=cms,
                             name=vuln.get('name'),
                             cve=vuln.get('cve')
                         )
-                        findings.append(vulnerability)
                 elif 'Version' in value and ',' in value:
                     for item in value.split(','):
                         aux = item.split('Version', 1)
@@ -133,11 +128,10 @@ class CmseekTool(BaseTool):
                         tech = aux[0].strip() if len(aux) > 0 else None
                         vers = aux[1].strip() if len(aux) > 1 else None
                         if tech:
-                            technology = Technology.objects.create(
+                            self.create_finding(
+                                Technology,
                                 name=tech,
                                 version=vers,
                                 related_to=cms,
                                 description=f'{cms_name} {name}'
                             )
-                            findings.append(technology)
-        return findings

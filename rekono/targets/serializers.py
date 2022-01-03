@@ -33,6 +33,7 @@ class TargetSerializer(serializers.ModelSerializer):
         attrs = super().validate(attrs)
         try:
             attrs['type'] = get_target_type(attrs.get('target'))
+            return attrs
         except InvalidTargetException:
             raise ValidationError(
                 {'target': f'Invalid target {attrs.get("target")} '}

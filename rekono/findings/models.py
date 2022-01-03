@@ -1,11 +1,11 @@
-from typing import Any, Collection, Optional
+from typing import Any, Collection, Iterable, Optional
 
 from defectdojo.api.constants import DD_FINDING_DATE_FORMAT
 from django.core.exceptions import ValidationError
-from django.db import models
+from django.db import DEFAULT_DB_ALIAS, models
 from executions.models import Execution
 from findings.enums import DataType, OSType, PortStatus, Protocol, Severity
-from tasks.models import Task
+from findings.utils import get_unique_filter
 
 # Create your models here.
 
@@ -22,47 +22,37 @@ class Finding(models.Model):
     is_active = models.BooleanField(default=True)
     reported_to_defectdojo = models.BooleanField(default=False)
 
-    key_fields = ['execution__task']
+    key_fields = []
 
     class Meta:
         abstract = True
         ordering = ['-id']
 
-    def validate_unique(self, exclude: Optional[Collection[str]] = ...) -> None:
-        if not self.execution:
-            return
-        findings_filter = {}
-        for field in self.key_fields:
-            findings_filter[field] = self.get_field(field)
-        if self._meta.model.objects.filter(**findings_filter).exists():
+    def validate_unique(self, exclude: Optional[Collection[str]] = None) -> None:
+        unique_filter = get_unique_filter(self.key_fields, vars(self))
+        if self._meta.model.objects.filter(**unique_filter).exists():
             raise ValidationError('Unique constraint violation')
-
-    def set_execution(self, execution: Any) -> None:
-        self.execution = execution
-        self.validate_unique()
+ 
+    def save(self, force_insert: bool = False, force_update: bool = False, using: Optional[str] = DEFAULT_DB_ALIAS, update_fields: Optional[Iterable[str]] = None) -> None:
+        if not self.id:
+            self.validate_unique()
+        return super().save(force_insert=force_insert, force_update=force_update, using=using, update_fields=update_fields)
 
     def __hash__(self) -> int:
         hash_fields = []
-        for field in self.key_fields:
-            hash_fields.append(self.get_field(field))
+        unique_filter = get_unique_filter(self.key_fields, vars(self))
+        for value in unique_filter.values():
+            hash_fields.append(value)
         return hash(tuple(hash_fields))
 
     def __eq__(self, o: object) -> bool:
         if isinstance(o, self.__class__):
             equals = True
-            for field in self.key_fields:
-                equals = equals and (self.get_field(field) == o.get_field(field))
+            unique_filter = get_unique_filter(o.key_fields, vars(o))
+            for key, value in get_unique_filter(self.key_fields, vars(self)).items():
+                equals = equals and (unique_filter[key] == value)
             return equals
         return False
-
-    def get_field(self, field: str) -> str:
-        relations = field.split('__') if '__' in field else [field]
-        value = self
-        for relation in relations:
-            value = getattr(value, relation)
-            if not value:
-                break
-        return value
 
     def get_project(self) -> Any:
         return self.execution.task.target.project
@@ -74,7 +64,16 @@ class OSINT(Finding):
     source = models.TextField(max_length=50, blank=True, null=True)
     reference = models.TextField(max_length=250, blank=True, null=True)
 
-    key_fields = ['execution__task', 'data', 'data_type']
+    key_fields = [
+        {
+            'name': 'data',
+            'is_base': False,
+        },
+        {
+            'name': 'data_type',
+            'is_base': False,
+        }
+    ]
 
     def defect_dojo(self):
         return {
@@ -90,7 +89,12 @@ class Host(Finding):
     os = models.TextField(max_length=250, blank=True, null=True)
     os_type = models.TextField(max_length=10, choices=OSType.choices, default=OSType.OTHER)
 
-    key_fields = ['execution__task', 'address']
+    key_fields = [
+        {
+            'name': 'address',
+            'is_base': False,
+        }
+    ]
 
     def defect_dojo(self):
         description = self.address
@@ -121,7 +125,16 @@ class Enumeration(Finding):
     protocol = models.TextField(max_length=5, choices=Protocol.choices, blank=True, null=True)
     service = models.TextField(max_length=50, blank=True, null=True)
 
-    key_fields = ['execution__task', 'host', 'port']
+    key_fields = [
+        {
+            'name': 'host',
+            'is_base': True,
+        },
+        {
+            'name': 'port',
+            'is_base': False
+        }
+    ]
 
     def defect_dojo(self):
         description = f'{self.port} - {self.port_status} - {self.protocol} - {self.service}'
@@ -144,7 +157,16 @@ class Endpoint(Finding):
     endpoint = models.TextField(max_length=500)
     status = models.IntegerField(blank=True, null=True)
 
-    key_fields = ['execution__task', 'enumeration', 'endpoint']
+    key_fields = [
+        {
+            'name': 'enumeration',
+            'is_base': True,
+        },
+        {
+            'name': 'endpoint',
+            'is_base': False
+        }
+    ]
 
     def defect_dojo(self):
         return {
@@ -175,7 +197,16 @@ class Technology(Finding):
     )
     reference = models.TextField(max_length=250, blank=True, null=True)
 
-    key_fields = ['execution__task', 'enumeration', 'name', 'version']
+    key_fields = [
+        {
+            'name': 'enumeration',
+            'is_base': True,
+        },
+        {
+            'name': 'name',
+            'is_base': False
+        }
+    ]
 
     def defect_dojo(self):
         return {
@@ -211,7 +242,24 @@ class Vulnerability(Finding):
     osvdb = models.TextField(max_length=20, blank=True, null=True)
     reference = models.TextField(max_length=250, blank=True, null=True)
 
-    key_fields = ['execution__task', 'technology', 'name', 'description', 'cve']
+    key_fields = [
+        {
+            'name': 'technology',
+            'is_base': True,
+        },
+        {
+            'name': 'enumeration',
+            'is_base': True,
+        },
+        {
+            'name': 'cve',
+            'is_base': False
+        },
+        {
+            'name': 'name',
+            'is_base': False
+        }
+    ]
 
     def defect_dojo(self):
         return {
@@ -230,7 +278,20 @@ class Credential(Finding):
     username = models.TextField(max_length=100, blank=True, null=True)
     secret = models.TextField(max_length=300, blank=True, null=True)
 
-    key_fields = ['execution__task', 'email', 'username', 'secret']
+    key_fields = [
+        {
+            'name': 'email',
+            'is_base': False,
+        },
+        {
+            'name': 'username',
+            'is_base': False
+        },
+        {
+            'name': 'secret',
+            'is_base': False
+        }
+    ]
 
     def defect_dojo(self):
         description = ''
@@ -268,7 +329,24 @@ class Exploit(Finding):
     reference = models.TextField(max_length=250, blank=True, null=True)
     checked = models.BooleanField(default=False)
 
-    key_fields = ['execution__task', 'technology', 'vulnerability', 'name', 'reference']
+    key_fields = [
+        {
+            'name': 'vulnerability',
+            'is_base': True,
+        },
+        {
+            'name': 'technology',
+            'is_base': True,
+        },
+        {
+            'name': 'name',
+            'is_base': False
+        },
+        {
+            'name': 'reference',
+            'is_base': False
+        }
+    ]
 
     def defect_dojo(self):
         return {

@@ -48,7 +48,6 @@ class RekonoApi {
   request (method, endpoint, queryData = null, bodydata = null, requiredAuth = true, extraHeaders = null, allowUnauth = false, retry = false) {
     let req = null
     if (bodydata) {
-      console.log('HELLO')
       req = method(endpoint, bodydata, { headers: this.headers(requiredAuth, extraHeaders) })
     } else if (queryData) {
       req = method(endpoint, { params: queryData, headers: this.headers(requiredAuth, extraHeaders) })
