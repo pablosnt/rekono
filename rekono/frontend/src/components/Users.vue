@@ -11,7 +11,7 @@
       </template>
       <template #cell(actions)="row">
         <b-button v-if="row.item.is_active" variant="outline" @click="selectUser(row.item)" v-b-modal.disable-user-modal v-b-tooltip.hover title="Disable User" :disabled="row.item.id === $store.state.user">
-          <b-icon variant="danger" icon="trash-fill"/>
+          <b-icon variant="danger" icon="dash-circle-fill"/>
         </b-button>
         <b-button v-if="!row.item.is_active" variant="outline" @click="selectAndEnableUser(row.item)" v-b-tooltip.hover title="Enable User">
           <b-icon variant="success" icon="check-circle-fill"/>

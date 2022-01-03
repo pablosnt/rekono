@@ -1,41 +1,61 @@
 from django.contrib.sites.shortcuts import get_current_site
 from django.utils import timezone
+from processes.models import Process
 from processes.serializers import SimplyProcessSerializer
 from rest_framework import serializers
+from targets.models import Target
 from targets.serializers import SimplyTargetSerializer
 from tasks.models import Task
 from tasks.queue import producer
 from tools.enums import IntensityRank
-from tools.models import Configuration, Intensity
+from tools.models import Configuration, Intensity, Tool
 from tools.serializers import (ConfigurationSerializer, IntensityField,
                                SimplyToolSerializer)
 from users.serializers import SimplyUserSerializer
 
 
 class TaskSerializer(serializers.ModelSerializer):
-    target_data = SimplyTargetSerializer(source='target', many=False, read_only=True)
-    process_data = SimplyProcessSerializer(source='process', many=False, read_only=True)
-    tool_data = SimplyToolSerializer(source='tool', many=False, read_only=True)
-    configuration_data = ConfigurationSerializer(source='configuration', many=False, read_only=True)
+    target = SimplyTargetSerializer(many=False, read_only=True)
+    target_id = serializers.PrimaryKeyRelatedField(
+        write_only=True,
+        required=True,
+        source='target',
+        queryset=Target.objects.all()
+    )
+    process = SimplyProcessSerializer(many=False, read_only=True)
+    process_id = serializers.PrimaryKeyRelatedField(
+        write_only=True,
+        required=False,
+        source='process',
+        queryset=Process.objects.all()
+    )
+    tool = SimplyToolSerializer(many=False, read_only=True)
+    tool_id = serializers.PrimaryKeyRelatedField(
+        write_only=True,
+        required=False,
+        source='tool',
+        queryset=Tool.objects.all()
+    )
+    configuration = ConfigurationSerializer(many=False, read_only=True)
+    configuration_id = serializers.PrimaryKeyRelatedField(
+        write_only=True,
+        required=False,
+        source='configuration',
+        queryset=Configuration.objects.all()
+    )
     intensity_rank = IntensityField(source='intensity', required=False)
     executor = SimplyUserSerializer(many=False, read_only=True)
 
     class Meta:
         model = Task
         fields = (
-            'id', 'target', 'target_data', 'process', 'process_data', 'tool',
-            'tool_data', 'configuration', 'configuration_data',
+            'id', 'target', 'target_id', 'process', 'process_id', 'tool',
+            'tool_id', 'configuration', 'configuration_id',
             'intensity_rank', 'executor', 'status', 'scheduled_at',
             'scheduled_in', 'scheduled_time_unit', 'repeat_in',
             'repeat_time_unit', 'start', 'end', 'wordlists', 'executions'
         )
         read_only_fields = ('executor', 'status', 'start', 'end', 'executions')
-        extra_kwargs = {
-            'target': {'write_only': True},
-            'process': {'write_only': True},
-            'tool': {'write_only': True},
-            'configuration': {'write_only': True},
-        }
 
     def validate(self, attrs):
         if not attrs.get('process') and not attrs.get('tool'):

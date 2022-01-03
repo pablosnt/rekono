@@ -11,6 +11,7 @@ from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
 from rest_framework.response import Response
 from targets.models import Target
 from tasks import services
+from tasks.enums import Status
 from tasks.exceptions import InvalidTaskException
 from tasks.filters import TaskFilter
 from tasks.models import Task
@@ -70,9 +71,22 @@ class TaskViewSet(
         except InvalidTaskException:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
-    @extend_schema(request=None, responses={200: None})
+    @extend_schema(request=None, responses={200: TaskSerializer})
     @action(detail=True, methods=['POST'], url_path='repeat', url_name='repeat')
-    def execute_again(self, request, pk):
+    def repeat_task(self, request, pk):
         task = self.get_object()
-        producer(task, task.parameters.all(), get_current_site(request).domain)
-        return Response(status=status.HTTP_200_OK)
+        if task.status in [Status.REQUESTED, Status.RUNNING]:
+            return Response('Execution is still running', status=status.HTTP_400_BAD_REQUEST)
+        new_task = Task.objects.create(
+            target=task.target,
+            process=task.process,
+            tool=task.tool,
+            configuration=task.configuration,
+            intensity=task.intensity,
+            executor=request.user
+        )
+        new_task.wordlists.set(task.wordlists.all())
+        new_task.save()
+        producer(new_task, get_current_site(request).domain)
+        serializer = TaskSerializer(instance=new_task)
+        return Response(serializer.data, status=status.HTTP_200_OK)

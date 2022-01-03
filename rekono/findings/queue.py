@@ -2,6 +2,7 @@ from typing import Optional
 
 import django_rq
 from django.core.exceptions import ValidationError
+from django.db.models import Q
 from django_rq import job
 from executions.models import Execution
 from findings.enums import Severity
@@ -38,10 +39,10 @@ def consumer(
         users_to_notify = []
         if execution.task.executor.notification_scope == Notification.OWN_EXECUTIONS:
             users_to_notify.append(execution.task.executor)
-        users_to_notify.extend(list(execution.task.project.members.filter(
-            notification_scope=Notification.ALL_EXECUTIONS,
-            id__ne=execution.task.executor.id
-        ).all()))
+        search_members = execution.task.target.project.members.filter(
+            ~Q(id=execution.task.executor.id) and Q(notification_scope=Notification.ALL_EXECUTIONS)
+        ).all()
+        users_to_notify.extend(list(search_members))
         for user in users_to_notify:
             if user.email_notification:
                 send_email(user, execution, findings, rekono_address)

@@ -150,19 +150,19 @@ class BaseTool():
         self.execution.status = Status.RUNNING
         self.execution.save()
 
-    def on_error(self, stderror: str = None) -> None:
+    def on_error(self, stderror: bytes = None) -> None:
         if stderror:
-            self.execution.output_error = stderror
+            self.execution.output_error = stderror.decode('utf-8')
         self.execution.status = Status.ERROR
         self.execution.end = timezone.now()
         self.execution.save()
 
-    def on_completed(self, output: str) -> None:
+    def on_completed(self, output: bytes) -> None:
         self.execution.status = Status.COMPLETED
         self.execution.end = timezone.now()
         if self.file_output_enabled and os.path.isfile(self.path_output):
             self.execution.output_file = self.path_output
-        self.execution.output_plain = output
+        self.execution.output_plain = output.decode('utf-8')
         self.execution.save()
 
     def run(self, targets: list = [], previous_findings: list = [], rekono_address: str = None) -> None:

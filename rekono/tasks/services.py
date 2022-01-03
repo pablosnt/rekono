@@ -2,17 +2,20 @@ import os
 import signal
 
 from django.utils import timezone
-from tasks.enums import Status
-from tasks.exceptions import InvalidTaskException
 from executions.models import Execution
 from executions.queue.utils import cancel_execution
+from tasks.enums import Status
+from tasks.exceptions import InvalidTaskException
 from tasks.queue import cancel_and_delete_task
 
 
 def cancel_task(task):
     if (
-        task.status in [Status.REQUESTED, Status.RUNNING] or
-        (task.repeat_in and task.repeat_time_unit)
+        task.status != Status.CANCELLED and
+        (
+            task.status in [Status.REQUESTED, Status.RUNNING] or
+            (task.repeat_in and task.repeat_time_unit)
+        )
     ):
         if task.rq_job_id:
             cancel_and_delete_task(task.rq_job_id)

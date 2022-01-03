@@ -110,10 +110,6 @@ export default {
   mixins: [AlertMixin],
   props: {
     id: String,
-    initialized: {
-      type: Boolean,
-      default: false
-    },
     process: {
       type: Object,
       default: null
@@ -125,6 +121,14 @@ export default {
     project: {
       type: Object,
       default: null
+    },
+    reload: {
+      type: Boolean,
+      default: false
+    },
+    initialized: {
+      type: Boolean,
+      default: false
     }
   },
   computed: {
@@ -213,7 +217,7 @@ export default {
     confirm (event) {
       event.preventDefault()
       if (this.check()) {
-        this.create().then((success) => this.$emit('confirm', { id: this.id, success: success, reload: false }))
+        this.create().then((success) => this.$emit('confirm', { id: this.id, success: success, reload: this.reload }))
       }
     },
     create () {

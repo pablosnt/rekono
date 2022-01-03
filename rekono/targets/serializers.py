@@ -1,5 +1,8 @@
+from django.core.exceptions import ValidationError
 from rest_framework import serializers
+from targets.exceptions import InvalidTargetException
 from targets.models import Target, TargetEndpoint, TargetPort
+from targets.utils import get_target_type
 
 
 class TargetEndpointSerializer(serializers.ModelSerializer):
@@ -25,6 +28,15 @@ class TargetSerializer(serializers.ModelSerializer):
         model = Target
         fields = ('id', 'project', 'target', 'type', 'target_ports', 'tasks')
         read_only_fields = ('type', 'target_ports', 'tasks')
+    
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        try:
+            attrs['type'] = get_target_type(attrs.get('target'))
+        except InvalidTargetException:
+            raise ValidationError(
+                {'target': f'Invalid target {attrs.get("target")} '}
+            )
 
 
 class SimplyTargetSerializer(serializers.ModelSerializer):

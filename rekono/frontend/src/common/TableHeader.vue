@@ -18,7 +18,7 @@
             <p class="h3"><b-icon icon="dash-circle-fill"/></p>
           </b-button>
           <span/>
-          <b-button v-if="addAuth === true" variant="outline" v-b-tooltip.hover title="Add" v-b-modal="add" @click="$emit('add-click')">
+          <b-button v-if="addAuth === true" variant="outline" @click="$emit('add-click')" v-b-tooltip.hover title="Add" v-b-modal="add">
             <p class="h3"><b-icon variant="success" :icon="addIcon"/></p>
           </b-button>
         </div>

@@ -1,31 +1,31 @@
 <template>
   <div>
-    <TableHeader :filters="filters" add="execute-modal" :addAuth="auditor.includes($store.state.role)" addIcon="play-btn-fill" @add-click="showTaskForm = true" @filter="fetchData"/>
+    <TableHeader :filters="filters" add="execute-modal" :addAuth="auditor.includes($store.state.role)" addIcon="play-circle-fill" @add-click="showTaskForm = true" @filter="fetchData"/>
     <b-table hover striped borderless head-variant="dark" :fields="tasksFields" :items="tasks" @row-clicked="navigateToTaskDetails">
-      <template #cell(tool_data)="row">
-        <div v-if="row.item.tool_data">
-          <b-link :href="row.item.tool_data.reference" target="_blank">
-            <b-img :src="row.item.tool_data.icon" width="30" height="30"/>
+      <template #cell(tool)="row">
+        <div v-if="row.item.tool">
+          <b-link :href="row.item.tool.reference" target="_blank">
+            <b-img :src="row.item.tool.icon" width="30" height="30"/>
           </b-link>
-          {{ row.item.tool_data.name }}
+          {{ row.item.tool.name }}
         </div>
       </template>
       <template #cell(intensity_rank)="row">
         <div v-for="i in intensities" :key="i.value">
-          <b-badge v-if="i.intensity_rank === row.item.intensity_rank" :variant="i.variant" no-remove>{{ row.item.intensity_rank }}</b-badge>
+          <b-badge v-if="i.intensity_rank === row.item.intensity_rank" :variant="i.variant">{{ row.item.intensity_rank }}</b-badge>
         </div>
       </template>
       <template #cell(status)="row">
         <div v-for="i in statuses" :key="i.value">
-          <b-badge v-if="i.value === row.item.status" :variant="i.variant" no-remove>{{ i.value }}</b-badge>
+          <b-badge v-if="i.value === row.item.status" :variant="i.variant">{{ row.item.status }}</b-badge>
         </div>
       </template>
-      <template #cell(start)="row">
+      <template #cell(date)="row">
         {{ row.item.start !== null ? row.item.start.replace('T', ' ').substring(0, 19) : '' }}
       </template>
       <template #cell(actions)="row">
-        <b-button variant="outline" @click="selectTask(row.item)" v-b-modal.cancel-task-modal v-b-tooltip.hover title="Cancel Task" v-if="auditor.includes($store.state.role) && (cancellable.includes(row.item.status) || (row.item.repeat_in && row.item.repeat_time_unit))">
-          <b-icon variant="danger" icon="trash-fill"/>
+        <b-button variant="outline" @click="selectTask(row.item)" v-b-modal.cancel-task-modal v-b-tooltip.hover title="Cancel Task" v-if="auditor.includes($store.state.role) && row.item.status !== 'Cancelled' && (cancellable.includes(row.item.status) || (row.item.repeat_in && row.item.repeat_time_unit))">
+          <b-icon variant="danger" icon="dash-circle-fill"/>
         </b-button>
       </template>
     </b-table>
@@ -38,7 +38,7 @@
       v-if="selectedTask !== null">
       <span>selected task</span>
     </Deletion>
-    <TaskForm id="execute-modal" :project="currentProject" :initialized="showTaskForm" @confirm="confirm" @clean="cleanSelection"/>
+    <TaskForm id="execute-modal" :project="currentProject" :reload="true" :initialized="showTaskForm" @confirm="confirm" @clean="cleanSelection"/>
   </div>
 </template>
 
@@ -66,17 +66,17 @@ export default {
       cancellable: cancellableStatuses,
       tasks: this.fetchData(),
       tasksFields: [
-        { key: 'target_data.target', label: 'Target', sortable: true },
-        { key: 'process_data.name', label: 'Process', sortable: true },
-        { key: 'tool_data', sortable: true },
-        { key: 'configuration_data.name', label: 'Configuration', sortable: true },
+        { key: 'target.target', label: 'Target', sortable: true },
+        { key: 'process.name', label: 'Process', sortable: true },
+        { key: 'tool', sortable: true },
+        { key: 'configuration.name', label: 'Configuration', sortable: true },
         { key: 'intensity_rank', label: 'Intensity', sortable: true },
         { key: 'status', sortable: true },
         { key: 'executor.username', label: 'Executor', sortable: true },
-        { key: 'start', label: 'Date', sortable: true },
+        { key: 'date', sortable: true },
         { key: 'actions', sortable: false }
       ],
-      currentProject: this.getProject(),
+      currentProject: this.project ? this.project : this.fetchProject(),
       selectedTask: null,
       filters: [],
       showTaskForm: false
@@ -109,8 +109,14 @@ export default {
           this.tasks = data.results
         })
     },
+    fetchProject () {
+      ProjectsApi.getProject(this.$route.params.id)
+        .then(data => {
+          this.currentProject = data
+        })
+    },
     cancelTask () {
-      const notification = this.selectedTask.process_data ? this.selectedTask.process_data.name : this.selectedTask.tool_data.name
+      const notification = this.selectedTask.process ? this.selectedTask.process.name : this.selectedTask.tool.name
       TasksApi.cancelTask(this.selectedTask.id)
         .then(() => {
           this.$bvModal.hide('cancel-task-modal')
@@ -127,16 +133,6 @@ export default {
     cleanSelection () {
       this.selectedTask = null
       this.showTaskForm = false
-    },
-    getProject () {
-      if (this.project) {
-        this.currentProject = this.project
-      } else {
-        ProjectsApi.getProject(this.$route.params.id)
-          .then(data => {
-            this.currentProject = data
-          })
-      }
     },
     navigateToTaskDetails (record) {
       this.$router.push({ name: 'task', params: { id: record.id, task: record }})

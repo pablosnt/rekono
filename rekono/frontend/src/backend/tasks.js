@@ -8,12 +8,23 @@ class Task extends RekonoApi {
       })
   }
 
+  getTask (taskId) {
+    return super.get(`/api/tasks/${taskId}/`)
+      .then(response => {
+        return response.data
+      })
+  }
+
+  repeatTask (taskId) {
+    return super.post(`/api/tasks/${taskId}/repeat/`, { })
+      .then(response => {
+        return response.data
+      })
+  }
+
   createTask (target, process, tool, configuration, intensity, scheduledAtDate, scheduledAtTime, scheduledIn, scheduledTimeUnit, repeatIn, repeatTimeUnit, wordlists) {
     const data = {
-      target: target,
-      process: process,
-      tool: tool,
-      configuration: configuration,
+      target_id: target,
       intensity_rank: intensity,
       scheduled_at: scheduledAtDate !== null && scheduledAtTime !== null ? `${scheduledAtDate}T${scheduledAtTime}Z` : null,
       scheduled_in: scheduledIn,
@@ -21,6 +32,15 @@ class Task extends RekonoApi {
       repeat_in: repeatIn,
       repeat_time_unit: repeatTimeUnit,
       wordlists: wordlists
+    }
+    if (process) {
+      data.process_id = process
+    }
+    if (tool) {
+      data.tool_id = tool
+    }
+    if (configuration) {
+      data.configuration_id = configuration
     }
     return super.post('/api/tasks/', data)
       .then(response => {

@@ -48,6 +48,7 @@ class RekonoApi {
   request (method, endpoint, queryData = null, bodydata = null, requiredAuth = true, extraHeaders = null, allowUnauth = false, retry = false) {
     let req = null
     if (bodydata) {
+      console.log('HELLO')
       req = method(endpoint, bodydata, { headers: this.headers(requiredAuth, extraHeaders) })
     } else if (queryData) {
       req = method(endpoint, { params: queryData, headers: this.headers(requiredAuth, extraHeaders) })
@@ -75,11 +76,11 @@ class RekonoApi {
 
   get (endpoint, page = null, limit = null, filter = null, requiredAuth = true, extraHeaders = null, allowUnauth = false) {
     let params = {}
-    if (page && limit) {
-      params = {
-        page: page,
-        limit: limit
-      }
+    if (page) {
+      params.page = page
+    }
+    if (limit) {
+      params.limit = limit
     }
     if (filter) {
       for (let key in filter) {
