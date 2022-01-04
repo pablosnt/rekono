@@ -12,15 +12,15 @@
           <template #title>
             <b-icon icon="play-fill"/> Basic
           </template>
-          <b-form-group description="Project" invalid-feedback="Project is required" v-if="!project">
+          <b-form-group description="Project" invalid-feedback="Project is required" v-if="!project && !target">
             <b-form-select v-model="projectId" :options="projects" @change="selectProject" value-field="id" text-field="name" :state="projectState">
               <template #first>
                 <b-form-select-option :value="null" disabled>Select project</b-form-select-option>
               </template>
             </b-form-select>
           </b-form-group>
-          <b-form-group description="Target" invalid-feedback="Target is required">
-            <b-form-select v-model="targetId" :options="selectedProject ? selectedProject.targets : []" :disabled="!selectedProject" value-field="id" text-field="target" :state="targetState">
+          <b-form-group description="Target" invalid-feedback="Target is required" v-if="!target">
+            <b-form-select v-model="targetId" :options="targets" :disabled="!selectedProject" value-field="id" text-field="target" :state="targetState">
               <template #first>
                 <b-form-select-option :value="null" disabled>Select target</b-form-select-option>
               </template>
@@ -122,6 +122,10 @@ export default {
       type: Object,
       default: null
     },
+    target: {
+      type: Object,
+      default: null
+    },
     reload: {
       type: Boolean,
       default: false
@@ -145,6 +149,7 @@ export default {
   data () {
     return {
       projects: [],
+      targets: [],
       processes: [],
       tools: [],
       wordlists: [],
@@ -188,7 +193,10 @@ export default {
           ToolApi.getTools().then(data => { this.tools = data.results })
           ProcessApi.getAllProcesses().then(data => { this.processes = data.results })
         }
-        if (this.project) {
+        if (this.target) {
+          this.targetId = this.target.id
+          this.targets = [this.target]
+        } else if (this.project) {
           ProjectApi.getProject(this.project.id).then(data => { this.selectProject(this.project.id, data) })
         } else {
           ProjectApi.getAllProjects().then(data => { this.projects = data.results })
@@ -288,6 +296,7 @@ export default {
       } else {
         this.selectedProject = findById(this.projects, projectId)
       }
+      this.targets = this.selectedProject.targets
     },
     selectProcess (processId, process = null) {
       const isWordlist = this.checkInputType('Wordlist')

@@ -7,6 +7,9 @@
           <b-icon v-if="!row.detailsShowing" variant="dark" icon="eye-fill"/>
           <b-icon v-if="row.detailsShowing" variant="secondary" icon="eye-slash-fill"/>
         </b-button>
+        <b-button variant="outline" class="mr-2" v-b-tooltip.hover title="Execute" @click="selectTarget(row.item)" v-b-modal.execute-modal>
+          <b-icon variant="success" icon="play-circle-fill"/>
+        </b-button>
         <b-dropdown variant="outline" right v-if="auditor.includes($store.state.role)">
           <template #button-content>
             <b-icon variant="dark" icon="three-dots-vertical"/>
@@ -77,6 +80,7 @@
     <TargetForm id="add-target-modal" :projectId="$route.params.id" @confirm="confirm"/>
     <TargetPortForm v-if="selectedTarget !== null" id="add-target-port-modal" :targetId="selectedTarget.id" @confirm="confirm"/>
     <TargetEndpointForm v-if="selectedTargetPort !== null" id="add-target-endpoint-modal" :targetPortId="selectedTargetPort.id" @confirm="confirm"/>
+    <TaskForm id="execute-modal" :target="selectedTarget" :initialized="selectedTarget !== null" @confirm="confirm" @clean="cleanSelection"/>
   </div>
 </template>
 
@@ -91,6 +95,7 @@ import PaginationMixin from '@/common/mixin/PaginationMixin.vue'
 import TargetForm from '@/modals/TargetForm.vue'
 import TargetPortForm from '@/modals/TargetPortForm.vue'
 import TargetEndpointForm from '@/modals/TargetEndpointForm.vue'
+import TaskForm from '@/modals/TaskForm.vue'
 const TargetsApi = Targets.TargetsApi
 const TargetPortsApi = Targets.TargetPortsApi
 const TargetEndpointsApi = Targets.TargetEndpointsApi
@@ -132,7 +137,8 @@ export default {
     Pagination,
     TargetForm,
     TargetPortForm,
-    TargetEndpointForm
+    TargetEndpointForm,
+    TaskForm
   },
   watch: {
     targets () {
