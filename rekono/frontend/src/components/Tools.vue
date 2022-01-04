@@ -15,16 +15,16 @@
         </div>
       </template>
       <template #cell(actions)="row">
-        <b-button @click="row.toggleDetails" variant="dark" class="mr-2" v-b-tooltip.hover title="Details">
-          <b-icon v-if="!row.detailsShowing" icon="eye-fill"/>
-          <b-icon v-if="row.detailsShowing" icon="eye-slash-fill"/>
+        <b-button @click="row.toggleDetails" variant="outline" class="mr-2" v-b-tooltip.hover title="Details">
+          <b-icon v-if="!row.detailsShowing" variant="dark" icon="eye-fill"/>
+          <b-icon v-if="row.detailsShowing" variant="secondary" icon="eye-slash-fill"/>
         </b-button>
-        <b-button variant="success" class="mr-2" v-b-tooltip.hover title="Execute" @click="showExecuteForm(row.item)" v-b-modal.execute-modal>
-          <b-icon icon="play-fill"/>
+        <b-button variant="outline" class="mr-2" v-b-tooltip.hover title="Execute" @click="showExecuteForm(row.item)" v-b-modal.execute-modal>
+          <b-icon variant="success" icon="play-circle-fill"/>
         </b-button>
-        <b-dropdown variant="outline-primary" right v-b-tooltip.hover title="Add to Process">
+        <b-dropdown variant="outline" right v-b-tooltip.hover title="Add to Process">
           <template #button-content>
-            <b-icon icon="plus-square"/>
+            <b-icon variant="dark" icon="plus-square"/>
           </template>
           <b-dropdown-item @click="showProcessForm(row.item)" v-b-modal.new-process-modal >New Process</b-dropdown-item>
           <b-dropdown-item @click="showStepForm(row.item)" v-b-modal.new-step-modal>New Step</b-dropdown-item>

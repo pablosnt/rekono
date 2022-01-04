@@ -3,16 +3,16 @@
     <TableHeader :filters="filters" add="process-modal" @filter="fetchData"/>
     <b-table striped borderless head-variant="dark" :fields="processesFields" :items="processes">
       <template #cell(actions)="row">
-        <b-button @click="row.toggleDetails" variant="dark" class="mr-2" v-b-tooltip.hover title="Details">
-          <b-icon v-if="!row.detailsShowing" icon="eye-fill"/>
-          <b-icon v-if="row.detailsShowing" icon="eye-slash-fill"/>
+        <b-button @click="row.toggleDetails" variant="outline" class="mr-2" v-b-tooltip.hover title="Details">
+          <b-icon v-if="!row.detailsShowing" variant="dark" icon="eye-fill"/>
+          <b-icon v-if="row.detailsShowing" variant="secondary" icon="eye-slash-fill"/>
         </b-button>
-        <b-button variant="success" class="mr-2" v-b-tooltip.hover title="Execute" @click="showExecuteForm(row.item)" v-b-modal.execute-modal>
-          <b-icon icon="play-fill"/>
+        <b-button variant="outline" class="mr-2" :disabled="row.item.steps.length === 0" v-b-tooltip.hover title="Execute" @click="showExecuteForm(row.item)" v-b-modal.execute-modal>
+          <b-icon variant="success" icon="play-circle-fill"/>
         </b-button>
-        <b-dropdown variant="outline-primary" right>
+        <b-dropdown variant="outline" right>
           <template #button-content>
-            <b-icon icon="three-dots-vertical"/>
+            <b-icon variant="dark" icon="three-dots-vertical"/>
           </template>
           <b-dropdown-item @click="showStepForm(row.item)" v-b-modal.step-modal :disabled="$store.state.role !== 'Admin' && $store.state.user !== row.item.creator.id">
             <b-icon variant="success" icon="plus-square"/>
@@ -38,9 +38,9 @@
               </b-link>
             </template>
             <template #cell(actions)="step">
-              <b-dropdown variant="outline-secondary" right>
+              <b-dropdown variant="outline" right>
                 <template #button-content>
-                  <b-icon icon="three-dots-vertical"/>
+                  <b-icon variant="secondary" icon="three-dots-vertical"/>
                 </template>
                 <b-dropdown-item variant="dark" @click="showStepForm(row.item, step.item)" v-b-modal.step-modal :disabled="$store.state.role !== 'Admin' && $store.state.user !== row.item.creator.id">
                   <b-icon icon="pencil-square"/>

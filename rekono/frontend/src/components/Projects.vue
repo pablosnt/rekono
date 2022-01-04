@@ -8,9 +8,9 @@
         </b-link>
       </template>
       <template #cell(actions)="row" v-if="$store.state.role === 'Admin'">
-        <b-dropdown variant="outline-primary" right>
+        <b-dropdown variant="outline" right>
           <template #button-content>
-            <b-icon icon="three-dots-vertical"/>
+            <b-icon variant="dark" icon="three-dots-vertical"/>
           </template>
           <b-dropdown-item variant="dark" @click="selectProject(row.item)" v-b-modal.project-modal>
             <b-icon icon="pencil-square"/>

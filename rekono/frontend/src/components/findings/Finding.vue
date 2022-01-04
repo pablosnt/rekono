@@ -68,9 +68,9 @@
             </div>
           </b-col>
           <b-col cols="2">
-            <b-dropdown variant="outline-primary" right>
+            <b-dropdown variant="outline" right>
               <template #button-content>
-                <b-icon icon="three-dots-vertical"/>
+                <b-icon variant="dark" icon="three-dots-vertical"/>
               </template>
               <b-dropdown-item :disabled="row.item.is_active" @click="enableFinding(row.item)">
                 <b-icon variant="success" icon="check-circle-fill"/> Enable

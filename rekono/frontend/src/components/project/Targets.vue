@@ -3,13 +3,13 @@
     <TableHeader :filters="filters" add="add-target-modal" :addAuth="auditor.includes($store.state.role)" @filter="fetchData"/>
     <b-table striped borderless head-variant="dark" :fields="targetsFields" :items="targets">
       <template #cell(actions)="row">
-        <b-button :disabled="row.item.target_ports.length === 0" @click="row.toggleDetails" variant="dark" class="mr-2" v-b-tooltip.hover title="Details">
-          <b-icon v-if="!row.detailsShowing" icon="eye-fill"/>
-          <b-icon v-if="row.detailsShowing" icon="eye-slash-fill"/>
+        <b-button :disabled="row.item.target_ports.length === 0" @click="row.toggleDetails" variant="outline" class="mr-2" v-b-tooltip.hover title="Details">
+          <b-icon v-if="!row.detailsShowing" variant="dark" icon="eye-fill"/>
+          <b-icon v-if="row.detailsShowing" variant="secondary" icon="eye-slash-fill"/>
         </b-button>
-        <b-dropdown variant="outline-primary" right v-if="auditor.includes($store.state.role)">
+        <b-dropdown variant="outline" right v-if="auditor.includes($store.state.role)">
           <template #button-content>
-            <b-icon icon="three-dots-vertical"/>
+            <b-icon variant="dark" icon="three-dots-vertical"/>
           </template>
           <b-dropdown-item @click="selectTarget(row.item)" v-b-modal.add-target-port-modal>
             <b-icon variant="success" icon="plus-square"/>
@@ -34,9 +34,9 @@
               </b-table>
             </template>
             <template #cell(actions)="port" v-if="auditor.includes($store.state.role)">
-              <b-dropdown variant="outline-primary" right v-if="auditor.includes($store.state.role)">
+              <b-dropdown variant="outline" right v-if="auditor.includes($store.state.role)">
                 <template #button-content>
-                  <b-icon icon="three-dots-vertical"/>
+                  <b-icon variant="dark" icon="three-dots-vertical"/>
                 </template>
                 <b-dropdown-item @click="selectTargetPort(row.item, port.item)" v-b-modal.add-target-endpoint-modal>
                   <b-icon variant="success" icon="plus-square"/>

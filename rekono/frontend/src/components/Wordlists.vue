@@ -3,9 +3,9 @@
     <TableHeader :filters="filters" add="wordlist-modal" @filter="fetchData"/>
     <b-table striped borderless head-variant="dark" :fields="wordlistsFields" :items="wordlists">
       <template #cell(actions)="row">
-        <b-dropdown variant="outline-primary" right>
+        <b-dropdown variant="outline" right>
           <template #button-content>
-            <b-icon icon="three-dots-vertical"/>
+            <b-icon variant="dark" icon="three-dots-vertical"/>
           </template>
           <b-dropdown-item variant="dark" @click="selectWordlist(row.item)" v-b-modal.wordlist-modal :disabled="$store.state.role !== 'Admin' && $store.state.user !== row.item.creator.id">
             <b-icon icon="pencil-square"/>
