@@ -11,7 +11,7 @@
         <b-input-group>
           <b-input-group-prepend>
             <b-button variant="outline" size="sm" v-b-tooltip.hover title="The Defect-Dojo product Id will be used to import the Rekono findings in Defect-Dojo">
-              <b-img src="/static/defect-dojo-favicon.ico" width="30" height="30"/>
+              <b-img src="/static/brands/defect-dojo-favicon.ico" width="30" height="30"/>
             </b-button>
           </b-input-group-prepend>
           <b-form-input v-model="defectDojoId" type="number"/>

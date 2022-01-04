@@ -120,12 +120,8 @@ class BaseTool():
             finding.save()
         except ValidationError as e:
             if 'Unique constraint violation' in e.message:
-                unique_filter = get_unique_filter(finding_type.key_fields, fields)
+                unique_filter = get_unique_filter(finding_type.key_fields, fields, self.execution)
                 finding = finding_type.objects.filter(**unique_filter).first()
-                if not finding:
-                    print(finding_type)
-                    print(fields)
-                    print(unique_filter)
                 for field, value in fields.items():
                     if value and value != getattr(finding, field):
                         setattr(finding, field, value)

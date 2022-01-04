@@ -3,58 +3,58 @@
     <TableHeader :filters="filters" add="process-modal" @filter="fetchData"/>
     <b-table striped borderless head-variant="dark" :fields="processesFields" :items="processes">
       <template #cell(actions)="row">
-          <b-button @click="row.toggleDetails" variant="dark" class="mr-2" v-b-tooltip.hover title="Details">
-            <b-icon v-if="!row.detailsShowing" icon="eye-fill"/>
-            <b-icon v-if="row.detailsShowing" icon="eye-slash-fill"/>
-          </b-button>
-          <b-button variant="success" class="mr-2" v-b-tooltip.hover title="Execute" @click="showExecuteForm(row.item)" v-b-modal.execute-modal>
-            <b-icon icon="play-fill"/>
-          </b-button>
-          <b-dropdown variant="outline-primary" right>
-            <template #button-content>
-              <b-icon icon="three-dots-vertical"/>
+        <b-button @click="row.toggleDetails" variant="dark" class="mr-2" v-b-tooltip.hover title="Details">
+          <b-icon v-if="!row.detailsShowing" icon="eye-fill"/>
+          <b-icon v-if="row.detailsShowing" icon="eye-slash-fill"/>
+        </b-button>
+        <b-button variant="success" class="mr-2" v-b-tooltip.hover title="Execute" @click="showExecuteForm(row.item)" v-b-modal.execute-modal>
+          <b-icon icon="play-fill"/>
+        </b-button>
+        <b-dropdown variant="outline-primary" right>
+          <template #button-content>
+            <b-icon icon="three-dots-vertical"/>
+          </template>
+          <b-dropdown-item @click="showStepForm(row.item)" v-b-modal.step-modal :disabled="$store.state.role !== 'Admin' && $store.state.user !== row.item.creator.id">
+            <b-icon variant="success" icon="plus-square"/>
+            <label class="ml-1" variant="dark">Add Step</label>
+          </b-dropdown-item>
+          <b-dropdown-item variant="dark" @click="showProcessForm(row.item)" v-b-modal.process-modal :disabled="$store.state.role !== 'Admin' && $store.state.user !== row.item.creator.id">
+            <b-icon icon="pencil-square"/>
+            <label class="ml-1">Edit</label>
+          </b-dropdown-item>
+          <b-dropdown-item variant="danger" @click="selectProcess(row.item)" v-b-modal.delete-process-modal :disabled="$store.state.role !== 'Admin' && $store.state.user !== row.item.creator.id">
+            <b-icon icon="trash-fill"/>
+            <label class="ml-1">Delete</label>
+          </b-dropdown-item>
+        </b-dropdown>
+      </template>
+      <template #row-details="row">
+        <b-card>
+          <p>{{ row.item.description }}</p>
+          <b-table striped borderless small head-variant="light" :fields="stepsFields" :items="row.item.steps">
+            <template #cell(icon)="step">
+              <b-link :href="step.item.tool.reference" target="_blank">
+                <b-img :src="step.item.tool.icon" width="100" height="50"/>
+              </b-link>
             </template>
-            <b-dropdown-item @click="showStepForm(row.item)" v-b-modal.step-modal :disabled="$store.state.role !== 'Admin' && $store.state.user !== row.item.creator.id">
-              <b-icon variant="success" icon="plus-square"/>
-              <label class="ml-1" variant="dark">Add Step</label>
-            </b-dropdown-item>
-            <b-dropdown-item variant="dark" @click="showProcessForm(row.item)" v-b-modal.process-modal :disabled="$store.state.role !== 'Admin' && $store.state.user !== row.item.creator.id">
-              <b-icon icon="pencil-square"/>
-              <label class="ml-1">Edit</label>
-            </b-dropdown-item>
-            <b-dropdown-item variant="danger" @click="selectProcess(row.item)" v-b-modal.delete-process-modal :disabled="$store.state.role !== 'Admin' && $store.state.user !== row.item.creator.id">
-              <b-icon icon="trash-fill"/>
-              <label class="ml-1">Delete</label>
-            </b-dropdown-item>
-          </b-dropdown>
-        </template>
-        <template #row-details="row">
-          <b-card>
-            <p>{{ row.item.description }}</p>
-            <b-table striped borderless small head-variant="light" :fields="stepsFields" :items="row.item.steps">
-              <template #cell(icon)="step">
-                <b-link :href="step.item.tool.reference" target="_blank">
-                  <b-img :src="step.item.tool.icon" width="100" height="50"/>
-                </b-link>
-              </template>
-              <template #cell(actions)="step">
-                <b-dropdown variant="outline-secondary" right>
-                  <template #button-content>
-                    <b-icon icon="three-dots-vertical"/>
-                  </template>
-                  <b-dropdown-item variant="dark" @click="showStepForm(row.item, step.item)" v-b-modal.step-modal :disabled="$store.state.role !== 'Admin' && $store.state.user !== row.item.creator.id">
-                    <b-icon icon="pencil-square"/>
-                    <label class="ml-1">Edit</label>
-                  </b-dropdown-item>
-                  <b-dropdown-item variant="danger" @click="selectStep(row.item, step.item)" v-b-modal.delete-step-modal :disabled="$store.state.role !== 'Admin' && $store.state.user !== row.item.creator.id">
-                    <b-icon icon="trash-fill"/>
-                    <label class="ml-1">Delete</label>
-                  </b-dropdown-item>
-                </b-dropdown>
-              </template>
-            </b-table>
-          </b-card>
-        </template>
+            <template #cell(actions)="step">
+              <b-dropdown variant="outline-secondary" right>
+                <template #button-content>
+                  <b-icon icon="three-dots-vertical"/>
+                </template>
+                <b-dropdown-item variant="dark" @click="showStepForm(row.item, step.item)" v-b-modal.step-modal :disabled="$store.state.role !== 'Admin' && $store.state.user !== row.item.creator.id">
+                  <b-icon icon="pencil-square"/>
+                  <label class="ml-1">Edit</label>
+                </b-dropdown-item>
+                <b-dropdown-item variant="danger" @click="selectStep(row.item, step.item)" v-b-modal.delete-step-modal :disabled="$store.state.role !== 'Admin' && $store.state.user !== row.item.creator.id">
+                  <b-icon icon="trash-fill"/>
+                  <label class="ml-1">Delete</label>
+                </b-dropdown-item>
+              </b-dropdown>
+            </template>
+          </b-table>
+        </b-card>
+      </template>
     </b-table>
     <Pagination :page="page" :limit="limit" :limits="limits" :total="total" name="processes" @pagination="pagination"/>
     <Deletion id="delete-process-modal"

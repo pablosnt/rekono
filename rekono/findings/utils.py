@@ -1,6 +1,9 @@
 
 
-def get_unique_filter(key_fields: list, fields: dict) -> dict:
+from executions.models import Execution
+
+
+def get_unique_filter(key_fields: list, fields: dict, execution: Execution) -> dict:
     base_field_found = False
     unique_filter = {}
     for field in key_fields:
@@ -9,6 +12,6 @@ def get_unique_filter(key_fields: list, fields: dict) -> dict:
             unique_filter[field.get('name')] = value
             if field.get('is_base'):
                 base_field_found = True
-    if not base_field_found and fields.get('execution'):
-        unique_filter['execution__task__target'] = fields.get('execution').task.target
+    if not base_field_found and execution:
+        unique_filter['execution__task__target'] = execution.task.target
     return unique_filter

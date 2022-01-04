@@ -4,44 +4,30 @@
       <b-col>
         <TableHeader :addAuth="false" @filter="setSearchFilter"/>
       </b-col>
-      <b-col v-if="!task" cols="3">
+      <b-col v-if="!task" cols="2">
         <b-form-select v-model="selectedTarget" :options="targets" value-field="id" text-field="target"/>
       </b-col>
-      <b-col cols="3">
+      <b-col cols="2">
         <b-form-select v-model="selectedFindings" :options="findings" multiple :select-size="2" value-field="value" text-field="value"/>
       </b-col>
-      <b-col cols="2" class="d-inline">
+      <b-col cols="1">
+        <b-form-select v-model="activeFilter" :options="activeOptions"/>
+      </b-col>
+      <b-col cols="1">
         <b-button variant="outline" v-b-tooltip.hover title="You can select one finding and the related findings will be showed. You can also select the finding types that you want to be displayed">
-          <b-icon icon="info-circle-fill" variant="info"/>
+          <b-icon icon="question-circle-fill" variant="info"/>
         </b-button>
-        <b-dropdown variant="outline-primary" right disabled>
-          <template #button-content>
-            <b-icon icon="three-dots-vertical"/>
-          </template>
-          <b-dropdown-item>
-            <!-- Enable finding (if selected finding is disabled) -->
-          </b-dropdown-item>
-          <b-dropdown-item>
-            <!-- Disable finding (if selected finding is enabled) -->
-          </b-dropdown-item>
-          <b-dropdown-item>
-            <!-- Send finding to Defect-Dojo (if selected finding is enabled) -->
-          </b-dropdown-item>
-          <b-dropdown-item>
-            <!-- Create target from finding (if selected finding type is OSINT and there are no targets with this data) -->
-          </b-dropdown-item>
-        </b-dropdown>
       </b-col>
     </b-row>
     <b-row cols="2" class="mt-3">
-      <Finding name="hosts" :fields="hosts" :details="hostDetails" @finding-selected="selectFinding" :findingTypes="selectedFindings" :target="selectedTarget" :task="task ? task.id : null" :search="search"/>
-      <Finding name="enumerations" :fields="enumerations" :details="enumerationDetails" @finding-selected="selectFinding" :selection="hostFilter" :findingTypes="selectedFindings" :target="selectedTarget" :task="task ? task.id : null" :search="search"/>
-      <Finding name="endpoints" :fields="endpoints" :details="endpointDetails" :selection="enumerationFilter" :findingTypes="selectedFindings" :target="selectedTarget" :task="task ? task.id : null" :search="search"/>
-      <Finding name="technologies" :fields="technologies" @finding-selected="selectFinding" :selection="enumerationFilter" :findingTypes="selectedFindings" :target="selectedTarget" :task="task ? task.id : null" :search="search"/>
-      <Finding name="vulnerabilities" :fields="vulnerabilities" :details="vulnerabilityDetails" @finding-selected="selectFinding" :selection="technologyAndEnumerationFilter" :findingTypes="selectedFindings" :target="selectedTarget" :task="task ? task.id : null" :search="search"/>
-      <Finding name="exploits" :fields="exploits" :details="exploitDetails" :selection="vulnerabilityAndTechnologyFilter" :findingTypes="selectedFindings" :target="selectedTarget" :task="task ? task.id : null" :search="search"/>
-      <Finding name="osint" :fields="osint" :details="osintDetails" :findingTypes="selectedFindings" :target="selectedTarget" :task="task ? task.id : null" :search="search"/>
-      <Finding name="credentials" :fields="credentials" :findingTypes="selectedFindings" :target="selectedTarget" :task="task ? task.id : null" :search="search"/>
+      <Finding name="hosts" :fields="hosts" :details="hostDetails" @finding-selected="selectFinding" :findingTypes="selectedFindings" :target="selectedTarget" :task="task ? task.id : null" :search="search" :active="activeFilter"/>
+      <Finding name="enumerations" :fields="enumerations" :details="enumerationDetails" @finding-selected="selectFinding" :selection="hostFilter" :findingTypes="selectedFindings" :target="selectedTarget" :task="task ? task.id : null" :search="search" :active="activeFilter"/>
+      <Finding name="endpoints" :fields="endpoints" :details="endpointDetails" :selection="enumerationFilter" :findingTypes="selectedFindings" :target="selectedTarget" :task="task ? task.id : null" :search="search" :active="activeFilter"/>
+      <Finding name="technologies" :fields="technologies" @finding-selected="selectFinding" :selection="enumerationFilter" :findingTypes="selectedFindings" :target="selectedTarget" :task="task ? task.id : null" :search="search" :active="activeFilter"/>
+      <Finding name="vulnerabilities" :fields="vulnerabilities" :details="vulnerabilityDetails" @finding-selected="selectFinding" :selection="technologyAndEnumerationFilter" :findingTypes="selectedFindings" :target="selectedTarget" :task="task ? task.id : null" :search="search" :active="activeFilter"/>
+      <Finding name="exploits" :fields="exploits" :details="exploitDetails" :selection="vulnerabilityAndTechnologyFilter" :findingTypes="selectedFindings" :target="selectedTarget" :task="task ? task.id : null" :search="search" :active="activeFilter"/>
+      <Finding name="osint" :fields="osint" :details="osintDetails" :findingTypes="selectedFindings" :target="selectedTarget" :task="task ? task.id : null" :search="search" :active="activeFilter"/>
+      <Finding name="credentials" :fields="credentials" :findingTypes="selectedFindings" :target="selectedTarget" :task="task ? task.id : null" :search="search" :active="activeFilter"/>
     </b-row>
   </div>
 </template>
@@ -49,7 +35,6 @@
 <script>
 import Targets from '@/backend/targets'
 import { portStatusByVariant } from '@/backend/constants'
-// import Deletion from '@/common/Deletion.vue'
 import TableHeader from '@/common/TableHeader.vue'
 import Finding from '@/components/findings/Finding.vue'
 const TargetsApi = Targets.TargetsApi
@@ -96,17 +81,19 @@ export default {
   data () {
     return {
       findings: ['OSINT', 'Credentials', 'Hosts', 'Enumerations', 'Endpoints', 'Technologies', 'Vulnerabilities', 'Exploits'],
+      activeOptions: [{ value: null, text: 'All' }, { value: 'true', text: 'Active' }, { value: 'false', text: 'Disabled' }],
       targets: this.fetchTargets(),
       selectedFindings: [],
       selectedTarget: null,
       search: null,
+      activeFilter: null,
       selectedHost: null,
       selectedEnumeration: null,
       selectedTechnology: null,
       selectedVulnerability: null,
       osint: [
         { key: 'data', sortable: true },
-        { key: 'data_type', sortable: true }
+        { key: 'data_type', label: 'Type', sortable: true }
       ],
       osintDetails: [
         { field: 'source', title: 'Source', type: 'text' },
@@ -114,7 +101,7 @@ export default {
       ],
       hosts: [
         { key: 'address', sortable: true },
-        { key: 'os_type', sortable: true }
+        { key: 'os_type', label: 'OS', sortable: true }
       ],
       hostDetails: [
         { field: 'os', title: 'OS', type: 'text' }
@@ -167,7 +154,6 @@ export default {
     }
   },
   components: {
-    // Deletion,
     TableHeader,
     Finding
   },

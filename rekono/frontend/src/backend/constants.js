@@ -18,6 +18,13 @@ const portStatusByVariant = [
   { value: 'Filtered', variant: 'warning' },
   { value: 'Closed', variant: 'danger' }
 ]
+const severityByVariant = [
+  { value: 'Critical', variant: 'danger' },
+  { value: 'High', variant: 'warning' },
+  { value: 'Medium', variant: 'primary' },
+  { value: 'Low', variant: 'success' },
+  { value: 'Info', variant: 'info' }
+]
 
 // Users
 const roles = ['Admin', 'Auditor', 'Reader']
@@ -63,6 +70,7 @@ export {
   stages,
   findingTypes,
   portStatusByVariant,
+  severityByVariant,
   roles,
   rolesByVariant,
   auditor,

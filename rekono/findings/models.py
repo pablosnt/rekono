@@ -33,8 +33,9 @@ class Finding(models.Model):
         ordering = ['-id']
 
     def validate_unique(self, exclude: Optional[Collection[str]] = None) -> None:
-        unique_filter = get_unique_filter(self.key_fields, vars(self))
-        if self._meta.model.objects.filter(**unique_filter).exists():
+        unique_filter = get_unique_filter(self.key_fields, vars(self), self.execution)
+        search = self._meta.model.objects.filter(**unique_filter)
+        if search.exists():
             raise ValidationError('Unique constraint violation')
  
     def save(
@@ -55,7 +56,7 @@ class Finding(models.Model):
 
     def __hash__(self) -> int:
         hash_fields = []
-        unique_filter = get_unique_filter(self.key_fields, vars(self))
+        unique_filter = get_unique_filter(self.key_fields, vars(self), self.execution)
         for value in unique_filter.values():
             hash_fields.append(value)
         return hash(tuple(hash_fields))
@@ -63,8 +64,8 @@ class Finding(models.Model):
     def __eq__(self, o: object) -> bool:
         if isinstance(o, self.__class__):
             equals = True
-            unique_filter = get_unique_filter(o.key_fields, vars(o))
-            for key, value in get_unique_filter(self.key_fields, vars(self)).items():
+            unique_filter = get_unique_filter(o.key_fields, vars(o), o.execution)
+            for key, value in get_unique_filter(self.key_fields, vars(self), self.execution).items():
                 equals = equals and (unique_filter[key] == value)
             return equals
         return False
@@ -126,7 +127,7 @@ class Enumeration(Finding):
     service = models.TextField(max_length=50, blank=True, null=True)
 
     key_fields = [
-        {'name': 'host', 'is_base': True},
+        {'name': 'host_id', 'is_base': True},
         {'name': 'port', 'is_base': False}
     ]
 
@@ -146,7 +147,7 @@ class Endpoint(Finding):
     status = models.IntegerField(blank=True, null=True)
 
     key_fields = [
-        {'name': 'enumeration', 'is_base': True},
+        {'name': 'enumeration_id', 'is_base': True},
         {'name': 'endpoint', 'is_base': False}
     ]
 
@@ -168,7 +169,7 @@ class Technology(Finding):
     reference = models.TextField(max_length=250, blank=True, null=True)
 
     key_fields = [
-        {'name': 'enumeration', 'is_base': True},
+        {'name': 'enumeration_id', 'is_base': True},
         {'name': 'name', 'is_base': False}
     ]
 
@@ -195,8 +196,8 @@ class Vulnerability(Finding):
     reference = models.TextField(max_length=250, blank=True, null=True)
 
     key_fields = [
-        {'name': 'technology', 'is_base': True},
-        {'name': 'enumeration', 'is_base': True},
+        {'name': 'technology_id', 'is_base': True},
+        {'name': 'enumeration_id', 'is_base': True},
         {'name': 'cve', 'is_base': False},
         {'name': 'name', 'is_base': False}
     ]
@@ -249,8 +250,8 @@ class Exploit(Finding):
     checked = models.BooleanField(default=False)
 
     key_fields = [
-        {'name': 'vulnerability', 'is_base': True},
-        {'name': 'technology', 'is_base': True},
+        {'name': 'vulnerability_id', 'is_base': True},
+        {'name': 'technology_id', 'is_base': True},
         {'name': 'name', 'is_base': False},
         {'name': 'reference', 'is_base': False}
     ]
