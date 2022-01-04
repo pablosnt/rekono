@@ -82,28 +82,63 @@ class HostViewSet(FindingBaseView):
     queryset = Host.objects.all()
     serializer_class = HostSerializer
     filterset_class = HostFilter
-    search_fields = ['address', 'enumeration__service', 'enumeration__technology__name']
+    search_fields = [
+        'address',
+        'enumeration__port', 'enumeration__service',
+        'enumeration__endpoint__endpoint',
+        'enumeration__technology__name', 'enumeration__technology__version',
+        'enumeration__vulnerability__name', 'enumeration__vulnerability__cve',
+        'enumeration__vulnerability__cwe', 'enumeration__vulnerability__severity',
+        'enumeration__technology__vulnerability__name',
+        'enumeration__technology__vulnerability__cve',
+        'enumeration__technology__vulnerability__cwe',
+        'enumeration__technology__vulnerability__severity',
+        'enumeration__vulnerability__exploit__name',
+        'enumeration__technology__vulnerability__exploit__name'
+    ]
 
 
 class EnumerationViewSet(FindingBaseView):
     queryset = Enumeration.objects.all()
     serializer_class = EnumerationSerializer
     filterset_class = EnumerationFilter
-    search_fields = ['host__address', 'port', 'service']
+    search_fields = [
+        'host__address',
+        'port', 'service',
+        'endpoint__endpoint',
+        'technology__name', 'technology__version',
+        'vulnerability__name', 'vulnerability__cve',
+        'vulnerability__cwe', 'vulnerability__severity',
+        'technology__vulnerability__name', 'technology__vulnerability__cve',
+        'technology__vulnerability__cwe', 'technology__vulnerability__severity',
+        'vulnerability__exploit__name', 'technology__vulnerability__exploit__name'
+    ]
 
 
 class EndpointViewSet(FindingBaseView):
     queryset = Endpoint.objects.all()
     serializer_class = EndpointSerializer
     filterset_class = EndpointFilter
-    search_fields = ['enumeration__host__address', 'endpoint']
+    search_fields = [
+        'enumeration__host__address',
+        'enumeration__port', 'enumeration__service',
+        'endpoint'
+    ]
 
 
 class TechnologyViewSet(FindingBaseView):
     queryset = Technology.objects.all()
     serializer_class = TechnologySerializer
     filterset_class = TechnologyFilter
-    search_fields = ['enumeration__host__address', 'name', 'version', 'description']
+    search_fields = [
+        'enumeration__host__address',
+        'enumeration__port', 'enumeration__service',
+        'enumeration__endpoint__endpoint',
+        'name', 'version',
+        'vulnerability__name', 'vulnerability__cve',
+        'vulnerability__cwe', 'vulnerability__severity',
+        'vulnerability__exploit__name', 'exploit__name'
+    ]
 
 
 class VulnerabilityViewSet(FindingBaseView, UpdateModelMixin):
@@ -112,9 +147,14 @@ class VulnerabilityViewSet(FindingBaseView, UpdateModelMixin):
     filterset_class = VulnerabilityFilter
     http_method_names = ['get', 'put', 'post', 'delete']
     search_fields = [
-        'technology__name', 'enumeration__technology__name',
-        'technology__enumeration__service', 'enumeration__service',
-        'name', 'description', 'cve', 'cwe'
+        'enumeration__host__address', 'technology__enumeration__host__address',
+        'enumeration__port', 'enumeration__service',
+        'technology__enumeration__port', 'technology__enumeration__service',
+        'enumeration__endpoint__endpoint', 'technology__enumeration__endpoint__endpoint',
+        'enumeration__technology__name', 'enumeration__technology__version',
+        'technology__name', 'technology__version',
+        'name', 'cve', 'cwe', 'severity',
+        'exploit__name'
     ]
 
 
@@ -134,4 +174,18 @@ class ExploitViewSet(FindingBaseView):
         'vulnerability__enumeration__service', 'technology__vulnerability__name',
         'technology__vulnerability__cve', 'technology__vulnerability__cwe',
         'technology__enumeration__service', 'name', 'description', 'reference'
+    ]
+    search_fields = [
+        'vulnerability__enumeration__host__address', 'technology__enumeration__host__address',
+        'vulnerability__enumeration__port', 'vulnerability__enumeration__service',
+        'technology__enumeration__port', 'technology__enumeration__service',
+        'vulnerability__enumeration__endpoint__endpoint',
+        'technology__enumeration__endpoint__endpoint',
+        'enumeration__technology__name', 'enumeration__technology__version',
+        'technology__name', 'technology__version',
+        'vulnerability__name', 'vulnerability__cve',
+        'vulnerability__cwe', 'vulnerability__severity',
+        'technology__vulnerability__name', 'technology__vulnerability__cve',
+        'technology__vulnerability__cwe', 'technology__vulnerability__severity',
+        'name'
     ]

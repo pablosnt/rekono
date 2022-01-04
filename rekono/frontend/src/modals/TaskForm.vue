@@ -189,7 +189,7 @@ export default {
           ProcessApi.getAllProcesses().then(data => { this.processes = data.results })
         }
         if (this.project) {
-          this.selectProject(this.project.id, this.project)
+          ProjectApi.getProject(this.project.id).then(data => { this.selectProject(this.project.id, data) })
         } else {
           ProjectApi.getAllProjects().then(data => { this.projects = data.results })
         }

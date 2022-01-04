@@ -91,6 +91,18 @@ class RekonoApi {
     return this.request(axios.get, endpoint, params, null, requiredAuth, extraHeaders, allowUnauth)
   }
 
+  getAllPages (endpoint, filter = null, page = 1, limit = 1000, requiredAuth = true, extraHeaders = null, allowUnauth = false, accumulated = []) {
+    return this.get(endpoint, page, limit, filter, requiredAuth, extraHeaders, allowUnauth)
+      .then(response => {
+        accumulated = accumulated.concat(response.data.results)
+        if ((page * limit) < response.data.count) {
+          return this.getAllPages(endpoint, filter, page + 1, limit, requiredAuth, extraHeaders, allowUnauth, accumulated)
+        } else {
+          return Promise.resolve(accumulated)
+        }
+      })
+  }
+
   post (endpoint, data, requiredAuth = true, extraHeaders = null, allowUnauth = false) {
     return this.request(axios.post, endpoint, null, data, requiredAuth, extraHeaders, allowUnauth)
   }

@@ -12,6 +12,12 @@ const stages = [
 
 // Findings
 const findingTypes = ['OSINT', 'Host', 'Enumeration', 'Endpoint', 'Technology', 'Vulnerability', 'Exploit', 'Credential', 'Wordlist']
+const portStatusByVariant = [
+  { value: 'Open', variant: 'success' },
+  { value: 'Open -Filtered', variant: 'primary' },
+  { value: 'Filtered', variant: 'warning' },
+  { value: 'Closed', variant: 'danger' }
+]
 
 // Users
 const roles = ['Admin', 'Auditor', 'Reader']
@@ -56,6 +62,7 @@ export {
   refreshTokenKey,
   stages,
   findingTypes,
+  portStatusByVariant,
   roles,
   rolesByVariant,
   auditor,

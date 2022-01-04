@@ -1,4 +1,4 @@
-from typing import Any, Collection, Iterable, Optional
+from typing import Any, Collection, Dict, Iterable, Optional, Tuple
 
 from defectdojo.api.constants import DD_FINDING_DATE_FORMAT
 from django.core.exceptions import ValidationError
@@ -10,14 +10,18 @@ from findings.utils import get_unique_filter
 # Create your models here.
 
 
-class Finding(models.Model):
-    execution = models.ForeignKey(
-        Execution,
-        related_name='%(class)s',
-        on_delete=models.CASCADE,
+def create_finding_foreign_key(model, name):
+    return models.ForeignKey(
+        model,
+        related_name=name,
+        on_delete=models.DO_NOTHING,
         blank=True,
         null=True
     )
+
+
+class Finding(models.Model):
+    execution = models.ForeignKey(Execution, related_name='%(class)s', on_delete=models.CASCADE)
     creation = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=True)
     reported_to_defectdojo = models.BooleanField(default=False)
@@ -33,10 +37,21 @@ class Finding(models.Model):
         if self._meta.model.objects.filter(**unique_filter).exists():
             raise ValidationError('Unique constraint violation')
  
-    def save(self, force_insert: bool = False, force_update: bool = False, using: Optional[str] = DEFAULT_DB_ALIAS, update_fields: Optional[Iterable[str]] = None) -> None:
+    def save(
+        self,
+        force_insert: bool = False,
+        force_update: bool = False,
+        using: Optional[str] = DEFAULT_DB_ALIAS,
+        update_fields: Optional[Iterable[str]] = None
+    ) -> None:
         if not self.id:
             self.validate_unique()
-        return super().save(force_insert=force_insert, force_update=force_update, using=using, update_fields=update_fields)
+        return super().save(
+            force_insert=force_insert,
+            force_update=force_update,
+            using=using,
+            update_fields=update_fields
+        )
 
     def __hash__(self) -> int:
         hash_fields = []
@@ -65,14 +80,8 @@ class OSINT(Finding):
     reference = models.TextField(max_length=250, blank=True, null=True)
 
     key_fields = [
-        {
-            'name': 'data',
-            'is_base': False,
-        },
-        {
-            'name': 'data_type',
-            'is_base': False,
-        }
+        {'name': 'data', 'is_base': False},
+        {'name': 'data_type', 'is_base': False}
     ]
 
     def defect_dojo(self):
@@ -90,10 +99,7 @@ class Host(Finding):
     os_type = models.TextField(max_length=10, choices=OSType.choices, default=OSType.OTHER)
 
     key_fields = [
-        {
-            'name': 'address',
-            'is_base': False,
-        }
+        {'name': 'address', 'is_base': False}
     ]
 
     def defect_dojo(self):
@@ -109,13 +115,7 @@ class Host(Finding):
 
 
 class Enumeration(Finding):
-    host = models.ForeignKey(
-        Host,
-        related_name='enumeration',
-        on_delete=models.CASCADE,
-        blank=True,
-        null=True
-    )
+    host = create_finding_foreign_key(Host, 'enumeration')
     port = models.IntegerField()
     port_status = models.TextField(
         max_length=15,
@@ -126,14 +126,8 @@ class Enumeration(Finding):
     service = models.TextField(max_length=50, blank=True, null=True)
 
     key_fields = [
-        {
-            'name': 'host',
-            'is_base': True,
-        },
-        {
-            'name': 'port',
-            'is_base': False
-        }
+        {'name': 'host', 'is_base': True},
+        {'name': 'port', 'is_base': False}
     ]
 
     def defect_dojo(self):
@@ -147,25 +141,13 @@ class Enumeration(Finding):
 
 
 class Endpoint(Finding):
-    enumeration = models.ForeignKey(
-        Enumeration,
-        related_name='endpoint',
-        on_delete=models.CASCADE,
-        blank=True,
-        null=True
-    )
+    enumeration = create_finding_foreign_key(Enumeration, 'endpoint')
     endpoint = models.TextField(max_length=500)
     status = models.IntegerField(blank=True, null=True)
 
     key_fields = [
-        {
-            'name': 'enumeration',
-            'is_base': True,
-        },
-        {
-            'name': 'endpoint',
-            'is_base': False
-        }
+        {'name': 'enumeration', 'is_base': True},
+        {'name': 'endpoint', 'is_base': False}
     ]
 
     def defect_dojo(self):
@@ -178,34 +160,16 @@ class Endpoint(Finding):
 
 
 class Technology(Finding):
-    enumeration = models.ForeignKey(
-        Enumeration,
-        related_name='technology',
-        on_delete=models.CASCADE,
-        blank=True,
-        null=True
-    )
+    enumeration = create_finding_foreign_key(Enumeration, 'technology')
     name = models.TextField(max_length=100)
     version = models.TextField(max_length=100, blank=True, null=True)
     description = models.TextField(max_length=200, blank=True, null=True)
-    related_to = models.ForeignKey(
-        'Technology',
-        related_name='related_technologies',
-        on_delete=models.SET_NULL,
-        blank=True,
-        null=True
-    )
+    related_to = create_finding_foreign_key('Technology', 'related_technologies')
     reference = models.TextField(max_length=250, blank=True, null=True)
 
     key_fields = [
-        {
-            'name': 'enumeration',
-            'is_base': True,
-        },
-        {
-            'name': 'name',
-            'is_base': False
-        }
+        {'name': 'enumeration', 'is_base': True},
+        {'name': 'name', 'is_base': False}
     ]
 
     def defect_dojo(self):
@@ -220,20 +184,8 @@ class Technology(Finding):
 
 
 class Vulnerability(Finding):
-    technology = models.ForeignKey(
-        Technology,
-        related_name='vulnerability',
-        on_delete=models.CASCADE,
-        blank=True,
-        null=True
-    )
-    enumeration = models.ForeignKey(
-        Enumeration,
-        related_name='vulnerability',
-        on_delete=models.CASCADE,
-        blank=True,
-        null=True
-    )
+    technology = create_finding_foreign_key(Technology, 'vulnerability')
+    enumeration = create_finding_foreign_key(Enumeration, 'vulnerability')
     name = models.TextField(max_length=50)
     description = models.TextField(blank=True, null=True)
     severity = models.TextField(choices=Severity.choices, default=Severity.MEDIUM)
@@ -243,22 +195,10 @@ class Vulnerability(Finding):
     reference = models.TextField(max_length=250, blank=True, null=True)
 
     key_fields = [
-        {
-            'name': 'technology',
-            'is_base': True,
-        },
-        {
-            'name': 'enumeration',
-            'is_base': True,
-        },
-        {
-            'name': 'cve',
-            'is_base': False
-        },
-        {
-            'name': 'name',
-            'is_base': False
-        }
+        {'name': 'technology', 'is_base': True},
+        {'name': 'enumeration', 'is_base': True},
+        {'name': 'cve', 'is_base': False},
+        {'name': 'name', 'is_base': False}
     ]
 
     def defect_dojo(self):
@@ -279,18 +219,9 @@ class Credential(Finding):
     secret = models.TextField(max_length=300, blank=True, null=True)
 
     key_fields = [
-        {
-            'name': 'email',
-            'is_base': False,
-        },
-        {
-            'name': 'username',
-            'is_base': False
-        },
-        {
-            'name': 'secret',
-            'is_base': False
-        }
+        {'name': 'email', 'is_base': False},
+        {'name': 'username', 'is_base': False},
+        {'name': 'secret', 'is_base': False}
     ]
 
     def defect_dojo(self):
@@ -310,42 +241,18 @@ class Credential(Finding):
 
 
 class Exploit(Finding):
-    vulnerability = models.ForeignKey(
-        Vulnerability,
-        related_name='exploit',
-        on_delete=models.CASCADE,
-        blank=True,
-        null=True
-    )
-    technology = models.ForeignKey(
-        Technology,
-        related_name='exploit',
-        on_delete=models.CASCADE,
-        blank=True,
-        null=True
-    )
+    vulnerability = create_finding_foreign_key(Vulnerability, 'exploit')
+    technology = create_finding_foreign_key(Technology, 'exploit')
     name = models.TextField(max_length=100)
     description = models.TextField(blank=True, null=True)
     reference = models.TextField(max_length=250, blank=True, null=True)
     checked = models.BooleanField(default=False)
 
     key_fields = [
-        {
-            'name': 'vulnerability',
-            'is_base': True,
-        },
-        {
-            'name': 'technology',
-            'is_base': True,
-        },
-        {
-            'name': 'name',
-            'is_base': False
-        },
-        {
-            'name': 'reference',
-            'is_base': False
-        }
+        {'name': 'vulnerability', 'is_base': True},
+        {'name': 'technology', 'is_base': True},
+        {'name': 'name', 'is_base': False},
+        {'name': 'reference', 'is_base': False}
     ]
 
     def defect_dojo(self):

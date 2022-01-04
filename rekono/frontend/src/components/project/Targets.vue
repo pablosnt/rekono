@@ -3,7 +3,7 @@
     <TableHeader :filters="filters" add="add-target-modal" :addAuth="auditor.includes($store.state.role)" @filter="fetchData"/>
     <b-table striped borderless head-variant="dark" :fields="targetsFields" :items="targets">
       <template #cell(actions)="row">
-        <b-button @click="row.toggleDetails" variant="dark" class="mr-2" v-b-tooltip.hover title="Details">
+        <b-button :disabled="row.item.target_ports.length === 0" @click="row.toggleDetails" variant="dark" class="mr-2" v-b-tooltip.hover title="Details">
           <b-icon v-if="!row.detailsShowing" icon="eye-fill"/>
           <b-icon v-if="row.detailsShowing" icon="eye-slash-fill"/>
         </b-button>

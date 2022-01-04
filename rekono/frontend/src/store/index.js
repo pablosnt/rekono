@@ -9,7 +9,8 @@ Vue.use(Vuex)
 export default new Vuex.Store({
   state: {
     user: null,
-    role: null
+    role: null,
+    mainTabs: true
   },
   mutations: {
     login (state, userData) {
@@ -19,6 +20,12 @@ export default new Vuex.Store({
     logout (state) {
       state.user = null
       state.role = null
+    },
+    showMainTabs (state) {
+      state.mainTabs = true
+    },
+    hideMainTabs (state) {
+      state.mainTabs = false
     }
   },
   actions: {
@@ -48,6 +55,13 @@ export default new Vuex.Store({
     redirectToLogin ({ dispatch }) {
       dispatch('checkState')
       router.push({ name: 'login' })
+    },
+    changeMainTabs ({ state, commit }) {
+      if (state.mainTabs) {
+        commit('hideMainTabs')
+      } else {
+        commit('showMainTabs')
+      }
     }
   }
 })

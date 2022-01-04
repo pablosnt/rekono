@@ -150,14 +150,6 @@ export default {
       statuses: statusesByVariant,
       currentTask: this.task ? this.task : this.fetchTask(),
       executions: this.fetchExecutions(),
-      // osint: this.fetchOSINT(),
-      // hosts: this.fetchHosts(),
-      // enumerations: this.fetchEnumerations(),
-      // endpoints: this.fetchEndpoints(),
-      // technologies: this.fetchTechnologies(),
-      // vulnerabilities: this.fetchVulnerabilities(),
-      // credentials: this.fetchCredentials(),
-      // exploits: this.fetchExploits(),
       executionsFields: [
         { key: 'tool', sortable: true },
         { key: 'configuration', sortable: true},
@@ -202,18 +194,10 @@ export default {
         })
     },
     fetchExecutions () {
-      const limit = 1000
-      ExecutionsApi.getAllExecutionsByTask(this.$route.params.id, 1, limit)
-        .then(data => {
-          this.executions = data.results
+      ExecutionsApi.getAllExecutionsByTask(this.$route.params.id)
+        .then(results => {
+          this.executions = results
           this.selectExecution(null)
-          const total = data.count
-          for (let p = 2; (p - 1) * limit < total; p++) {
-            ExecutionsApi.getAllExecutionsByTask(this.$route.params.id, p, limit)
-              .then(nextData => {
-                this.executions = this.executions.concat(nextData.results)
-              })
-          }
         })
     },
     cancelTask () {

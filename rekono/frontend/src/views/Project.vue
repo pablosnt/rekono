@@ -42,7 +42,7 @@ import MainTabs from '@/common/MainTabs.vue'
 import Summary from '@/components/project/Summary.vue'
 import Targets from '@/components/project/Targets.vue'
 import Tasks from '@/components/project/Tasks.vue'
-import Findings from '@/components/project/Findings.vue'
+import Findings from '@/components/findings/Findings.vue'
 import Members from '@/components/project/Members.vue'
 export default {
   name: 'projectDetails',
