@@ -4,7 +4,7 @@
       <b-col>
         <TableHeader :addAuth="false" @filter="setSearchFilter"/>
       </b-col>
-      <b-col v-if="!task" cols="2">
+      <b-col v-if="!task && !execution" cols="2">
         <b-form-select v-model="selectedTarget" :options="targets" value-field="id" text-field="target"/>
       </b-col>
       <b-col cols="2">
@@ -19,8 +19,8 @@
         </b-button>
       </b-col>
     </b-row>
-    <b-row cols="2" class="mt-3">
-      <Finding name="hosts" :fields="hosts" :details="hostDetails" @finding-selected="selectFinding" :findingTypes="selectedFindings" :target="selectedTarget" :task="task ? task.id : null" :search="search" :active="activeFilter"/>
+    <b-row :cols="cols" class="mt-3">
+      <Finding name="hosts" :fields="hosts" :details="hostDetails" @finding-selected="selectFinding" :findingTypes="selectedFindings" :target="selectedTarget" :task="task ? task.id : null" :execution="execution ? execution.id : null" :search="search" :active="activeFilter"/>
       <Finding name="enumerations" :fields="enumerations" :details="enumerationDetails" @finding-selected="selectFinding" :selection="hostFilter" :findingTypes="selectedFindings" :target="selectedTarget" :task="task ? task.id : null" :search="search" :active="activeFilter"/>
       <Finding name="endpoints" :fields="endpoints" :details="endpointDetails" :selection="enumerationFilter" :findingTypes="selectedFindings" :target="selectedTarget" :task="task ? task.id : null" :search="search" :active="activeFilter"/>
       <Finding name="technologies" :fields="technologies" @finding-selected="selectFinding" :selection="enumerationFilter" :findingTypes="selectedFindings" :target="selectedTarget" :task="task ? task.id : null" :search="search" :active="activeFilter"/>
@@ -41,7 +41,12 @@ const TargetsApi = Targets.TargetsApi
 export default {
   name: 'findingsPage',
   props: {
-    task: Object
+    task: Object,
+    execution: Object,
+    cols: {
+      type: Number,
+      default: 2
+    }
   },
   computed: {
     hostFilter () {

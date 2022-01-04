@@ -56,7 +56,7 @@
         </b-button>
       </b-col>
     </b-row>
-    <b-row class="ml-2">
+    <b-row class="ml-2 mr-2">
       <b-col>
         <b-table select-mode="single" selectable hover striped borderless head-variant="dark" :fields="executionsFields" :items="executions" @row-selected="selectExecution">
           <template #cell(tool)="row">
@@ -109,6 +109,7 @@
             <template #title>
               <b-icon icon="flag-fill"/> Findings
             </template>
+            <Findings class="mt-3" :task="currentTask" :execution="selectedExecution" :cols="1"/>
           </b-tab>
         </b-tabs>
       </b-col>
@@ -132,6 +133,7 @@ import ExecutionsApi from '@/backend/executions'
 import { auditor, intensitiesByVariant, statusesByVariant, cancellableStatuses } from '@/backend/constants'
 import Deletion from '@/common/Deletion.vue'
 import AlertMixin from '@/common/mixin/AlertMixin.vue'
+import Findings from '@/components/findings/Findings.vue'
 export default {
   name: 'taskDetails',
   mixins: [AlertMixin],
@@ -163,6 +165,7 @@ export default {
     }
   },
   components: {
+    Findings,
     Deletion
   },
   methods: {

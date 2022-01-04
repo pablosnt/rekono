@@ -111,10 +111,10 @@ import Deletion from '@/common/Deletion.vue'
 export default {
   name: 'findingBase',
   mixins: [AlertMixin],
-  props: ['name', 'fields', 'findingTypes', 'target', 'task', 'search', 'active', 'selection', 'details'],
+  props: ['name', 'fields', 'findingTypes', 'target', 'task', 'execution', 'search', 'active', 'selection', 'details'],
   computed: {
     filterChange () {
-      return this.findingTypes.toString() + this.target + this.task + this.search + this.active + JSON.stringify(this.selection)
+      return this.findingTypes.toString() + this.target + this.task + this.execution + this.search + this.active + JSON.stringify(this.selection)
     },
     selectedFindingTypes () {
       let selection = []
@@ -145,15 +145,16 @@ export default {
   methods: {
     getFilter () {
       let filter = {}
-      if (this.target) {
-        filter.execution__task__target = this.target
+      if (this.execution) {
+        filter.execution = this.execution
       } else if (this.task) {
         filter.execution__task = this.task
-      }
+      } else if (this.target) {
+        filter.execution__task__target = this.target
+      } 
       if (this.search) {
         filter.search = this.search
-      }
-      if (!this.selectedFindingTypes.includes(this.name.toLowerCase()) && this.selection) {
+      } else if (!this.selectedFindingTypes.includes(this.name.toLowerCase()) && this.selection) {
         filter = Object.assign({}, filter, this.selection)
       }
       if (this.active !== null) {
