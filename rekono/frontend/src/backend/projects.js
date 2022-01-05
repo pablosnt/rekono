@@ -66,6 +66,13 @@ class Project extends RekonoApi {
         return Promise.resolve(response.data)
       })
   }
+
+  countProjects (filter = null) {
+    return super.get('/api/projects/', 1, 1, filter)
+      .then(response => {
+        return response.data.count
+      })
+  }
 }
 
 export default new Project()

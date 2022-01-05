@@ -18,6 +18,7 @@ const portStatusByVariant = [
   { value: 'Filtered', variant: 'warning' },
   { value: 'Closed', variant: 'danger' }
 ]
+const severities = ['Critical', 'High', 'Medium', 'Low', 'Info']
 const severityByVariant = [
   { value: 'Critical', variant: 'danger' },
   { value: 'High', variant: 'warning' },
@@ -54,6 +55,7 @@ const intensitiesByValue = [
   { value: 4, text: 'Hard' },
   { value: 5, text: 'Insane' }
 ]
+const statuses = ['Requested', 'Skipped', 'Running', 'Cancelled', 'Error', 'Completed']
 const statusesByVariant = [
   { value: 'Requested', variant: 'primary' },
   { value: 'Skipped', variant: 'secondary' },
@@ -70,6 +72,7 @@ export {
   stages,
   findingTypes,
   portStatusByVariant,
+  severities,
   severityByVariant,
   roles,
   rolesByVariant,
@@ -78,6 +81,7 @@ export {
   targetTypes,
   intensitiesByVariant,
   intensitiesByValue,
+  statuses,
   statusesByVariant,
   cancellableStatuses
 }

@@ -6,5 +6,11 @@ module.exports = {
         changeOrigin: true
       },
     }
+  },
+  pages: {
+    index: {
+      entry: 'src/main.js',
+      title: 'Rekono'
+    }
   }
 }

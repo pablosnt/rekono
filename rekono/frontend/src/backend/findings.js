@@ -25,6 +25,13 @@ class Finding extends RekonoApi {
         response.data
       })
   }
+
+  countFindings (path, filter = null) {
+    return super.get(`/api/${path}/`, 1, 1, filter)
+      .then(response => {
+        return response.data.count
+      })
+  }
 }
 
 export default new Finding()

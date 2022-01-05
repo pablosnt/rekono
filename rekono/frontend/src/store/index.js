@@ -6,11 +6,14 @@ import { accessTokenKey } from '@/backend/constants'
 
 Vue.use(Vuex)
 
+const showMainTabs = 'show-main-tabs'
+
 export default new Vuex.Store({
   state: {
     user: null,
     role: null,
-    mainTabs: true
+    mainTabs: true,
+    refreshing: false,
   },
   mutations: {
     login (state, userData) {
@@ -26,15 +29,28 @@ export default new Vuex.Store({
     },
     hideMainTabs (state) {
       state.mainTabs = false
+    },
+    startRefreshingToken (state) {
+      state.refreshing = true
+    },
+    finishRefreshingToken (state) {
+      state.refreshing = false
     }
   },
   actions: {
     checkState ({ commit }) {
+      // commit('finishRefreshingToken')
       const accessToken = localStorage.getItem(accessTokenKey)
       if (accessToken) {
         commit('login', AuthenticationApi.decodeToken(accessToken))
       } else {
         commit('login', { user: null, role: null })
+      }
+      const mainTabs = localStorage.getItem(showMainTabs)
+      if (mainTabs === 'true') {
+        commit('showMainTabs')
+      } else {
+        commit('hideMainTabs')
       }
     },
     loginAction ({ commit }, { username, password }) {
@@ -59,9 +75,17 @@ export default new Vuex.Store({
     changeMainTabs ({ state, commit }) {
       if (state.mainTabs) {
         commit('hideMainTabs')
+        localStorage.setItem(showMainTabs, false)
       } else {
         commit('showMainTabs')
+        localStorage.setItem(showMainTabs, true)
       }
+    },
+    startRefreshingToken ({ commit }) {
+      commit('startRefreshingToken')
+    },
+    finishRefreshingToken ({ commit }) {
+      commit('finishRefreshingToken')
     }
   }
 })

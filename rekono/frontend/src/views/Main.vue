@@ -23,7 +23,7 @@
 
 <script>
 import MainTabs from '@/common/MainTabs.vue'
-import Dashboard from '@/components/Dashboard.vue'
+import Dashboard from '@/components/dashboard/Dashboard.vue'
 import Projects from '@/components/Projects.vue'
 import Tools from '@/components/Tools.vue'
 import Processes from '@/components/Processes.vue'

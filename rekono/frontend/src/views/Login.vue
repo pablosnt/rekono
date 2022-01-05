@@ -58,6 +58,9 @@ export default {
           })
           .catch(() => {
             this.loginError = true
+            this.password = null
+            this.usernameState = false
+            this.passwordState = false
           })
       }
     },

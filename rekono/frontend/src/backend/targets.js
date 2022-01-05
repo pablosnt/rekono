@@ -21,6 +21,13 @@ class TargetsApi extends RekonoApi {
         return response.data
       })
   }
+
+  countTargets (filter = null) {
+    return super.get('/api/targets/', 1, 1, filter)
+      .then(response => {
+        return response.data.count
+      })
+  }
 }
 
 class TargetPortsApi extends RekonoApi {

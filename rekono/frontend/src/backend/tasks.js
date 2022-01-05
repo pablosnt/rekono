@@ -54,6 +54,13 @@ class Task extends RekonoApi {
         return Promise.resolve(response.data)
       })
   }
+
+  countTasks (filter = null) {
+    return super.get('/api/tasks/', 1, 1, filter)
+      .then(response => {
+        return response.data.count
+      })
+  }
 }
 
 export default new Task()

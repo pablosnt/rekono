@@ -173,6 +173,7 @@ class VulnerabilityFilter(BaseVulnerabilityFilter):
             'description': ['exact', 'icontains'],
             'severity': ['exact'],
             'cve': ['exact', 'contains'],
+            'exploit': ['isnull']
         })
 
 

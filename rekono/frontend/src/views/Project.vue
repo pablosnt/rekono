@@ -4,9 +4,9 @@
       <b-tabs fill active-nav-item-class="font-weight-bold text-danger">
         <b-tab lazy active @click="changeSubTab('details')" title-link-class="text-secondary">
           <template #title>
-            <b-icon icon="bar-chart-line-fill"/> Details
+            <b-icon icon="bar-chart-line-fill"/> Dashboard
           </template>
-          <projectSummary class="mt-3" :project="project"/>
+          <dashboard class="mt-3" :project="project"/>
         </b-tab>
         <b-tab lazy :active="path.includes('targets')" @click="changeSubTab('targets')" title-link-class="text-secondary">
           <template #title>
@@ -39,7 +39,7 @@
 
 <script>
 import MainTabs from '@/common/MainTabs.vue'
-import Summary from '@/components/project/Summary.vue'
+import Dashboard from '@/components/dashboard/Dashboard.vue'
 import Targets from '@/components/project/Targets.vue'
 import Tasks from '@/components/project/Tasks.vue'
 import Findings from '@/components/findings/Findings.vue'
@@ -59,7 +59,7 @@ export default {
   },
   components: {
     mainTabs: MainTabs,
-    projectSummary: Summary,
+    dashboard: Dashboard,
     targets: Targets,
     tasks: Tasks,
     findings: Findings,

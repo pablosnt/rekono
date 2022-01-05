@@ -38,11 +38,23 @@ class RekonoApi {
   }
 
   refresh () {
-    return axios.post('/api/token/refresh/', { refresh: localStorage[refreshTokenKey] }, this.headers())
-      .then(response => {
-        this.removeTokens()
-        return Promise.resolve(this.processTokens(response.data))
-      })
+    if (!store.state.refreshing) {
+      store.dispatch('startRefreshingToken')
+      return axios.post('/api/token/refresh/', { refresh: localStorage[refreshTokenKey] }, this.headers())
+        .then(response => {
+          this.removeTokens()
+          const decodedTokens = this.processTokens(response.data)
+          store.dispatch('finishRefreshingToken')
+          return Promise.resolve(decodedTokens)
+        })
+        .catch(() => {
+          this.removeTokens()
+          store.dispatch('finishRefreshingToken')
+          store.dispatch('redirectToLogin')
+          return Promise.reject()
+        })
+    }
+    return Promise.reject()
   }
 
   request (method, endpoint, queryData = null, bodydata = null, requiredAuth = true, extraHeaders = null, allowUnauth = false, retry = false) {
@@ -57,15 +69,12 @@ class RekonoApi {
     return req
       .then(response => { return Promise.resolve(response) })
       .catch(error => {
-        if (requiredAuth && error.response && error.response.status === 401 && !retry) {
+        if (error.response && error.response.status === 401 && !retry) {
           return this.refresh()
             .then(() => { return this.request(method, endpoint, queryData, bodydata, requiredAuth, extraHeaders, allowUnauth, true) })
-            .catch(error => {
-              if (requiredAuth && !allowUnauth) {
-                this.removeTokens()
-                store.dispatch('redirectToLogin')
-              } else {
-                return Promise.reject(error)
+            .catch(() => {
+              if (store.state.refreshing) {
+                return this.request(method, endpoint, queryData, bodydata, requiredAuth, extraHeaders, allowUnauth, false)
               }
             })
         }
