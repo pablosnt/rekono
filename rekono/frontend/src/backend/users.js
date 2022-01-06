@@ -48,21 +48,21 @@ class Users extends RekonoApi {
       password: password,
       otp: otp
     }
-    return super.post('/api/users/create/', data)
+    return super.post('/api/users/create/', data, true)
       .then(response => {
         return response.data
       })
   }
 
   requestResetPassword (email) {
-    return super.post('/api/reset-password/', { email: email })
+    return super.post('/api/reset-password/', { email: email }, true)
       .then(response => {
         return response.data
       })
   }
 
   resetPassword (password, otp) {
-    return super.put('/api/reset-password/', { password: password, otp: otp })
+    return super.put('/api/reset-password/', { password: password, otp: otp }, true)
       .then(response => {
         return response.data
       })

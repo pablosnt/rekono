@@ -4,6 +4,12 @@ from rest_framework.permissions import BasePermission
 from security.authorization.roles import Role
 
 
+class IsNotAuthenticated(BasePermission):
+
+    def has_permission(self, request, view):
+        return not request.user.is_authenticated
+
+
 class IsAdmin(BasePermission):
 
     def has_permission(self, request, view):

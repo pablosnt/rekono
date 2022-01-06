@@ -16,10 +16,12 @@
       </b-form-group>
       <b-form-group description="Tool" v-if="tool === null">
         <b-input-group>
-          <b-input-group-prepend is-text v-if="selectedTool !== null">
-            <b-link :href="selectedTool.reference" target="_blank">
-              <b-img :src="selectedTool.icon" width="40" height="20"/>
-            </b-link>
+          <b-input-group-prepend v-if="selectedTool !== null">
+            <b-button variant="outline">
+              <b-link :href="selectedTool.reference" target="_blank">
+                <b-img :src="selectedTool.icon" width="50" height="30"/>
+              </b-link>
+            </b-button>
           </b-input-group-prepend>
           <b-form-select v-model="toolId" :options="tools" :disabled="edit && tool === null" @change="selectTool" value-field="id" text-field="name" :state="toolState" required>
             <template #first>
@@ -32,10 +34,12 @@
         <b-form-select v-model="configurationId" :options="selectedTool !== null ? selectedTool.configurations : []" :disabled="configurationId == null || edit" value-field="id" text-field="name" :state="configState" required/>
       </b-form-group>
       <b-form-group>
-        <b-input-group :prepend="priority.toString()">
+        <b-input-group :prepend="priority">
           <b-form-input v-model="priority" type="range" min="1" max="50" required/>
-          <b-input-group-append is-text v-b-tooltip.hover title="The priority allows to run steps with greater value before other tools of the same stage. By default the priority is 1, so all the steps will be treated in the same way">
-            <b-icon icon="info-circle-fill" variant="info"/>
+          <b-input-group-append v-b-tooltip.hover title="The priority allows to run steps with greater value before other tools of the same stage. By default the priority is 1, so all the steps will be treated in the same way">
+            <b-button variant="outline">
+              <b-icon icon="info-circle-fill" variant="info"/>
+            </b-button>
           </b-input-group-append>
         </b-input-group>
         <small class="text-muted">Step priority</small>

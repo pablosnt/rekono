@@ -9,7 +9,7 @@ from rest_framework.permissions import (BasePermission, DjangoModelPermissions,
                                         IsAuthenticated)
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
-from security.authorization.permissions import IsAdmin
+from security.authorization.permissions import IsAdmin, IsNotAuthenticated
 from users.filters import UserFilter
 from users.models import User
 from users.serializers import (ChangeUserPasswordSerializer,
@@ -114,7 +114,7 @@ class UserProfileViewSet(GenericViewSet):
 class UserInitViewSet(GenericViewSet):
     serializer_class = CreateUserSerializer
     queryset = User.objects.all()
-    permission_classes: List[BasePermission] = []
+    permission_classes: List[BasePermission] = [IsNotAuthenticated]
     http_method_names = ['post']
 
     @action(detail=False, methods=['POST'])

@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from django.contrib.auth.password_validation import validate_password
 from django.contrib.sites.shortcuts import get_current_site
 from django.db import transaction
 from rest_framework import serializers, status
@@ -8,6 +9,14 @@ from rest_framework.fields import SerializerMethodField
 from security.authorization.roles import Role
 from telegram_bot.models import TelegramChat
 from users.models import User
+
+
+class UserPasswordSerializer(serializers.Serializer):
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        validate_password(attrs.get('password'))
+        return attrs
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
@@ -71,12 +80,12 @@ class InviteUserSerializer(serializers.Serializer):
         return user
 
 
-class CreateUserSerializer(serializers.Serializer):
+class CreateUserSerializer(UserPasswordSerializer):
     username = serializers.CharField(max_length=150, required=True)
     first_name = serializers.CharField(max_length=150, required=True)
     last_name = serializers.CharField(max_length=150, required=True)
     password = serializers.CharField(max_length=150, required=True)
-    otp = serializers.CharField(max_length=200, required=True)
+    otp = serializers.CharField(max_length=200, required=True)    
 
     @transaction.atomic()
     def create(self, validated_data):
@@ -124,7 +133,7 @@ class ChangeUserPasswordSerializer(serializers.ModelSerializer):
         model = User
         fields = ('password', 'old_password')
         extra_kwargs = {
-            'password': {'write_only': True},
+            'password': {'write_only': True, 'required': True},
             'old_password': {'write_only': True},
         }
 
@@ -133,6 +142,7 @@ class ChangeUserPasswordSerializer(serializers.ModelSerializer):
         user = self.instance
         if not user.check_password(attrs.get('old_password')):
             raise AuthenticationFailed('Invalid password', code=status.HTTP_401_UNAUTHORIZED)
+        validate_password(attrs.get('password'), user)
         return attrs
 
     @transaction.atomic()
@@ -152,7 +162,7 @@ class RequestPasswordResetSerializer(serializers.Serializer):
         return user
 
 
-class ResetPasswordSerializer(serializers.Serializer):
+class ResetPasswordSerializer(UserPasswordSerializer):
     password = serializers.CharField(required=True)
     otp = serializers.CharField(max_length=200, required=True)
 

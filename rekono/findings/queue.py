@@ -31,13 +31,6 @@ def consumer(
                 finding.severity = cve_info.get('severity', Severity.MEDIUM)
                 finding.reference = cve_info.get('reference', '')
                 finding.save()
-        #     try:
-        #         finding.set_execution(execution)
-        #         finding.save()
-        #     except ValidationError as e:
-        #         print(e)
-        #         finding.delete()
-        # findings = [f for f in findings if f.id]
         users_to_notify = []
         if execution.task.executor.notification_scope == Notification.OWN_EXECUTIONS:
             users_to_notify.append(execution.task.executor)
