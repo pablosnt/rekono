@@ -53,7 +53,7 @@
                 <b-form-group id="telegram-notification" v-b-tooltip.hover title="Configure your Telegram bot before enable notifications">
                   <b-form-checkbox v-model="telegramNotification" :disabled="!telegramConfigured">
                     Telegram Bot
-                    <img src="/static/brands/telegram.svg"/>
+                    <v-icon fill="dodgerblue" name="brands/telegram"/>
                   </b-form-checkbox>
                 </b-form-group>
               </b-col>
@@ -73,12 +73,12 @@
             </h4>
             <b-card align="center" v-if="!telegramConfigured">
               <template #header>
-                <img src="/static/brands/telegram.svg"/> <strong>Telegram Bot</strong>
+                <v-icon fill="dodgerblue" name="brands/telegram"/> <strong>Telegram Bot</strong>
               </template>
               <div class="text-right">
-                <b-button v-b-toggle.telegram-steps @click="showTelegramSteps = !showTelegramSteps" variant="secondary">
-                  <b-icon v-if="!showTelegramSteps" icon="eye-fill"/>
-                  <b-icon v-if="showTelegramSteps" icon="eye-slash-fill"/>
+                <b-button v-b-toggle.telegram-steps @click="showTelegramSteps = !showTelegramSteps" variant="outline">
+                  <b-icon v-if="!showTelegramSteps" variant="dark" icon="eye-fill"/>
+                  <b-icon v-if="showTelegramSteps" variant="secondary" icon="eye-slash-fill"/>
                   Steps
                 </b-button>
               </div>

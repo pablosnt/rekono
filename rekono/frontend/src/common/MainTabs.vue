@@ -26,13 +26,13 @@
     </b-tab>
     <b-tab lazy :active="path.includes('wordlists')" @click="click('wordlists')" v-if="auditor.includes($store.state.role)" title-link-class="text-left text-secondary">
       <template #title>
-        <b-icon icon="chat-left-dots-fill"/><span v-if="$store.state.mainTabs"> Wordlists</span>
+        <b-icon icon="file-earmark-word-fill"/><span v-if="$store.state.mainTabs"> Wordlists</span>
       </template>
       <slot name="wordlists"/>
     </b-tab>
     <b-tab lazy :active="path.includes('users')" @click="click('users')" v-if="$store.state.role === 'Admin'" title-link-class="text-left text-secondary">
       <template #title>
-        <b-icon icon="person-fill"/><span v-if="$store.state.mainTabs"> Users</span>
+        <b-icon icon="people-fill"/><span v-if="$store.state.mainTabs"> Users</span>
       </template>
       <slot name="users"/>
     </b-tab>

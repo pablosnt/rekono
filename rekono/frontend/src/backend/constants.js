@@ -12,6 +12,16 @@ const stages = [
 
 // Findings
 const findingTypes = ['OSINT', 'Host', 'Enumeration', 'Endpoint', 'Technology', 'Vulnerability', 'Exploit', 'Credential', 'Wordlist']
+const osTypesWithIcons = [
+  { value: 'Linux', icon: 'brands/linux', color: 'black', variant: 'warning' },
+  { value: 'Windows', icon: 'brands/windows', color: 'darkblue', variant: 'primary' },
+  { value: 'MacOS', icon: 'brands/apple', color: 'gray', variant: 'secondary' },
+  { value: 'iOS', icon: 'brands/apple', color: 'gray', variant: 'secondary' },
+  { value: 'Android', icon: 'brands/android', color: 'forestgreen', variant: 'success' },
+  { value: 'Solaris', icon: 'sun', color: 'orange', variant: 'warning' },
+  { value: 'FreeBSD', icon: 'brands/freebsd', color: 'red', variant: 'danger' },
+  { value: 'Other', icon: 'desktop', color: 'black', variant: 'dark' },
+]
 const portStatusByVariant = [
   { value: 'Open', variant: 'success' },
   { value: 'Open -Filtered', variant: 'primary' },
@@ -71,6 +81,7 @@ export {
   refreshTokenKey,
   stages,
   findingTypes,
+  osTypesWithIcons,
   portStatusByVariant,
   severities,
   severityByVariant,

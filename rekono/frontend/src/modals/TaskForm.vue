@@ -48,7 +48,7 @@
         </b-tab>
         <b-tab title-link-class="text-secondary" v-if="checkInputType('Wordlist')">
           <template #title>
-            <b-icon icon="chat-left-dots-fill"/> Wordlists
+            <b-icon icon="file-earmark-word-fill"/> Wordlists
           </template>
           <b-form-group description="Select wordlists to use">
             <b-form-select v-model="wordlistsItems" :options="wordlists" multiple value-field="id" text-field="name"/>

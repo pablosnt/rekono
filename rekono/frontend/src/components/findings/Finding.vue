@@ -5,16 +5,10 @@
         <b-badge variant="primary">{{ row.item.data_type }}</b-badge>
       </template>
       <template #cell(os_type)="row">
-        <div class="d-inline">
-          <b-icon variant="warning" icon="terminal-fill" v-if="row.item.os_type === 'Linux'"/>
-          <b-img src="/static/brands/windows.svg"  v-if="row.item.os_type === 'Windows'"/>
-          <b-img src="/static/brands/apple.svg"  v-if="row.item.os_type === 'MacOS'"/>
-          <b-img src="/static/brands/apple.svg"  v-if="row.item.os_type === 'iOS'"/>
-          <b-icon variant="success" icon="phone-fill" v-if="row.item.os_type === 'Android'"/>
-          <b-icon variant="warning" icon="sun" v-if="row.item.os_type === 'Solaris'"/>
-          <b-icon variant="danger" icon="terminal-fill" v-if="row.item.os_type === 'FreeBSD'"/>
-          <b-icon variant="dark" icon="terminal-fill" v-if="row.item.os_type === 'Other'"/>
-          <span class="ml-1">{{ row.item.os_type }}</span>
+        <div v-for="type in ostypes" :key="type.value">
+          <div v-if="row.item.os_type === type.value">
+            <v-icon :fill="type.color" :name="type.icon" /><b-badge :variant="type.variant" class="ml-1">{{ row.item.os_type }}</b-badge>          
+          </div>
         </div>
       </template>
       <template #cell(severity)="row">
@@ -80,7 +74,7 @@
               </b-dropdown-item>
               <!-- TODO -->
               <!-- <b-dropdown-item v-if="defectDojo" :disabled="row.item.active && row.item.reported_to_defectdojo" @click="selectFinding(row.item)" v-b-modal.confirm-dojo-import>
-                <b-img src="/static/brands/defect-dojo-favicon.ico" width="30" height="30"/> Import in Defect-Dojo
+                <b-img src="/static/defect-dojo-favicon.ico" width="30" height="30"/> Import in Defect-Dojo
               </b-dropdown-item> -->
               <b-dropdown-item v-if="name === 'osint' && (row.item.data_type === 'IP' || row.item.data_type === 'Domain')" :disabled="row.item.active"  @click="selectFinding(row.item)" v-b-modal.confirm-target>
                 <b-icon variant="danger" icon="geo-fill"/> Create target
@@ -105,7 +99,7 @@
 
 <script>
 import FindingsApi from '@/backend/findings'
-import { severityByVariant } from '@/backend/constants'
+import { osTypesWithIcons, severityByVariant } from '@/backend/constants'
 import AlertMixin from '@/common/mixin/AlertMixin.vue'
 import Deletion from '@/common/Deletion.vue'
 export default {
@@ -130,6 +124,7 @@ export default {
     return {
       findings: [],
       selectedFinding: null,
+      ostypes: osTypesWithIcons,
       severities: severityByVariant,
       defectDojo: process.env.VUE_APP_DEFECTDOJO_HOST
     }

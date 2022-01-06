@@ -16,6 +16,7 @@
     "jwt-decode": "^3.1.2",
     "sass": "^1.45.0",
     "vue": "^2.6.12",
+    "vue-awesome": "^4.5.0",
     "vue-chartjs": "^3.5.1",
     "vue-router": "^3.5.3",
     "vuex": "^3.6.2"
