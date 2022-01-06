@@ -26,6 +26,12 @@ export default {
             data: [this.requested, this.skipped, this.running, this.cancelled, this.error, this.completed]
           }
         ]
+      },
+      {
+        title: {
+          display: true,
+          text: 'Tasks by status'
+        }
       })
     }
   }

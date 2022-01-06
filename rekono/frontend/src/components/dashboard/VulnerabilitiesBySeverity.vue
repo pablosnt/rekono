@@ -18,7 +18,6 @@ export default {
   watch: {
     total () {
       this.renderChart({
-        labels: [this.label],
         datasets: [
           {
             label: 'Critical',
@@ -55,6 +54,10 @@ export default {
               stepSize: 1
             }
           }]
+        },
+        title: {
+          display: true,
+          text: this.label
         }
       })
     }

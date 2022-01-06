@@ -27,6 +27,12 @@ export default {
             data: [this.osint, this.credentials, this.hosts, this.enumerations, this.endpoints, this.technologies, this.vulnerabilities, this.exploits]
           }
         ]
+      },
+      {
+        title: {
+          display: true,
+          text: 'Findings by type'
+        }
       })
     }
   }
