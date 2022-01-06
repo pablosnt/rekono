@@ -72,10 +72,9 @@
               <b-dropdown-item :disabled="!row.item.is_active" @click="selectFinding(row.item)" v-b-modal.disable-finding-modal>
                 <b-icon variant="danger" icon="dash-circle-fill"/> Disable
               </b-dropdown-item>
-              <!-- TODO -->
-              <!-- <b-dropdown-item v-if="defectDojo" :disabled="row.item.active && row.item.reported_to_defectdojo" @click="selectFinding(row.item)" v-b-modal.confirm-dojo-import>
-                <b-img src="/static/defect-dojo-favicon.ico" width="30" height="30"/> Import in Defect-Dojo
-              </b-dropdown-item> -->
+              <b-dropdown-item :disabled="!row.item.is_active" @click="selectFinding(row.item)" v-b-modal.defect-dojo-modal>
+                <b-img src="/static/defect-dojo-favicon.ico" width="20" height="20"/> Import in Defect-Dojo
+              </b-dropdown-item>
               <b-dropdown-item v-if="name === 'osint' && (row.item.data_type === 'IP' || row.item.data_type === 'Domain')" :disabled="row.item.active"  @click="selectFinding(row.item)" v-b-modal.confirm-target>
                 <b-icon variant="danger" icon="geo-fill"/> Create target
               </b-dropdown-item>
@@ -94,6 +93,7 @@
       v-if="selectedFinding !== null">
       <span>selected finding</span>
     </Deletion>
+    <DefectDojoForm id="defect-dojo-modal" :path="name" :itemId="selectedFinding.id" :alreadyReported="selectedFinding.reported_to_defectdojo" @clean="cleanDDSelection" @confirm="cleanDDSelection" v-if="selectedFinding"/>
   </b-col>
 </template>
 
@@ -102,6 +102,7 @@ import FindingsApi from '@/backend/findings'
 import { osTypesWithIcons, severityByVariant } from '@/backend/constants'
 import AlertMixin from '@/common/mixin/AlertMixin.vue'
 import Deletion from '@/common/Deletion.vue'
+import DefectDojoForm from '@/modals/DefectDojoForm.vue'
 export default {
   name: 'findingBase',
   mixins: [AlertMixin],
@@ -130,7 +131,8 @@ export default {
     }
   },
   components: {
-    Deletion
+    Deletion,
+    DefectDojoForm
   },
   watch: {
     filterChange () {
@@ -199,6 +201,10 @@ export default {
     },
     selectRow (items) {
       this.$emit('finding-selected', { type: this.name, finding: (items && items.length > 0) ? items[0] : null })
+    },
+    cleanDDSelection () {
+      this.$bvModal.hide('defect-dojo-modal')
+      this.cleanSelection()
     },
     cleanSelection () {
       this.selectedFinding = null

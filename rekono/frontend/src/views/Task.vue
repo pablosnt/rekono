@@ -4,7 +4,7 @@
       <b-col>
         <label class="text-muted">Target</label>
         <hr/>
-        <b-collapse id="task-details">
+        <b-collapse id="task-details" v-if="currentTask">
           <p>{{ currentTask.target.target }}</p>
           <b-badge variant="secondary">{{ currentTask.target.type }}</b-badge>
         </b-collapse>
@@ -12,7 +12,7 @@
       <b-col>
         <label class="text-muted">Execution</label>
         <hr/>
-        <b-collapse id="task-details">
+        <b-collapse id="task-details" v-if="currentTask">
           <p v-if="currentTask.process">{{ currentTask.process.name }}</p>
           <p v-if="currentTask.tool">{{ currentTask.tool.name }}</p>
           <p v-if="currentTask.configuration">{{ currentTask.configuration.name }}</p>
@@ -24,7 +24,7 @@
       <b-col>
         <label class="text-muted">Status</label>
         <hr/>
-        <b-collapse id="task-details">
+        <b-collapse id="task-details" v-if="currentTask">
           <p v-for="i in statuses" :key="i.value">
             <b-badge v-if="i.value === currentTask.status" :variant="i.variant">{{ currentTask.status }}</b-badge>
           </p>
@@ -35,7 +35,7 @@
       <b-col v-if="currentTask && currentTask.status !== 'Cancelled' && (currentTask.scheduled_at || currentTask.scheduled_in || currentTask.repeat_in)">
         <label class="text-muted">Configuration</label>
         <hr/>
-        <b-collapse id="task-details">
+        <b-collapse id="task-details" v-if="currentTask">
           <p v-if="currentTask.status !== 'Requested' && (currentTask.scheduled_at || currentTask.scheduled_in)"><b-badge variant="success">Scheduled</b-badge></p>
           <p v-if="currentTask.status === 'Requested' && currentTask.scheduled_at">Scheduled at {{ currentTask.scheduled_at.replace('T', ' ').substring(0, 19) }}</p>
           <p v-if="currentTask.status === 'Requested' && currentTask.scheduled_in">Scheduled in {{ currentTask.scheduled_in }} {{ currentTask.scheduled_time_unit }}</p>
@@ -54,6 +54,13 @@
         <b-button variant="outline" v-b-modal.repeat-task-modal v-b-tooltip.hover title="Execute Again" v-if="currentTask && auditor.includes($store.state.role) && currentTask.status !== 'Requested' && currentTask.status !== 'Running'">
           <p class="h5"><b-icon variant="success" icon="play-circle-fill"/></p>
         </b-button>
+        <b-dropdown variant="outline" right>
+          <template #button-content>
+            <b-img src="/static/defect-dojo-favicon.ico" width="30" height="30"/>
+          </template>
+          <b-dropdown-item :disabled="!selectedExecution" v-b-modal.defect-dojo-modal @click="ddPath = 'executions'; ddItemId = selectedExecution.id; ddAlreadyReported = selectedExecution.reported_to_defectdojo">Import selected execution</b-dropdown-item>
+          <b-dropdown-item :disabled="!currentTask" v-b-modal.defect-dojo-modal @click="ddPath = 'tasks'; ddItemId = currentTask.id; ddAlreadyReported = false">Import task</b-dropdown-item>
+        </b-dropdown>
       </b-col>
     </b-row>
     <b-row class="ml-2 mr-2">
@@ -109,7 +116,7 @@
             <template #title>
               <b-icon icon="flag-fill"/> Findings
             </template>
-            <Findings class="mt-3" :task="currentTask" :execution="selectedExecution" :cols="1"/>
+            <Findings v-if="currentTask" class="mt-3" :task="currentTask" :execution="selectedExecution" :cols="1"/>
           </b-tab>
         </b-tabs>
       </b-col>
@@ -124,6 +131,7 @@
       v-if="currentTask !== null">
       <span>selected task</span>
     </Deletion>
+    <DefectDojoForm id="defect-dojo-modal" :path="ddPath" :itemId="ddItemId" :alreadyReported="ddAlreadyReported" @clean="cleanDDSelection" @confirm="cleanDDSelection"/>
   </div>
 </template>
 
@@ -134,6 +142,7 @@ import { auditor, intensitiesByVariant, statusesByVariant, cancellableStatuses }
 import Deletion from '@/common/Deletion.vue'
 import AlertMixin from '@/common/mixin/AlertMixin.vue'
 import Findings from '@/components/findings/Findings.vue'
+import DefectDojoForm from '@/modals/DefectDojoForm.vue'
 export default {
   name: 'taskDetails',
   mixins: [AlertMixin],
@@ -161,12 +170,16 @@ export default {
       ],
       selectedExecution: null,
       showTaskDetails: false,
-      autoRefresh: null
+      autoRefresh: null,
+      ddPath: null,
+      ddItemId: null,
+      ddAlreadyReported: null
     }
   },
   components: {
     Findings,
-    Deletion
+    Deletion,
+    DefectDojoForm
   },
   methods: {
     startAutoRefresh () {
@@ -233,6 +246,12 @@ export default {
       } else {
         this.selectedExecution = this.executions.length === 1 ? this.executions[0] : null
       }
+    },
+    cleanDDSelection () {
+      this.$bvModal.hide('defect-dojo-modal')
+      this.ddPath = null
+      this.ddItemId = null
+      this.ddAlreadyReported = null
     }
   },
   beforeRouteUpdate(to, from, next) {
