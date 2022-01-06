@@ -1,6 +1,6 @@
 <template>
   <b-tabs fill card vertical active-nav-item-class="font-weight-bold text-danger">
-    <b-tab lazy active @click="click('dashboard')" title-link-class="text-left text-secondary">
+    <b-tab lazy :active="path.includes('dashboard')" @click="click('dashboard')" title-link-class="text-left text-secondary">
       <template #title>
         <b-icon icon="bar-chart-line-fill"/><span v-if="$store.state.mainTabs"> Dashboard</span>
       </template>

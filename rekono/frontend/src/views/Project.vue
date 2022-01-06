@@ -2,7 +2,7 @@
   <main-tabs @click="changeMainTab">
     <template v-slot:projects>
       <b-tabs fill active-nav-item-class="font-weight-bold text-danger">
-        <b-tab lazy active @click="changeSubTab('details')" title-link-class="text-secondary">
+        <b-tab lazy :active="path.includes('details')" @click="changeSubTab('details')" title-link-class="text-secondary">
           <template #title>
             <b-icon icon="bar-chart-line-fill"/> Dashboard
           </template>
