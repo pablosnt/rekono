@@ -11,12 +11,14 @@
       </b-col>
       <b-col v-if="(add && addIcon && addAuth === true) || (filters && filters.length > 0)">
         <div class="text-right">
-          <b-button v-if="filters && filters.length > 0 && !showFilters" variant="outline" v-b-tooltip.hover title="Filter" @click="toggleFilters()">
-            <p class="h3"><b-icon icon="filter-square-fill"/></p>
+          <b-button id="filter-button" v-if="filters && filters.length > 0" variant="outline" v-b-toggle.filters @click="toggleFilters()">
+            <p class="h3">
+              <b-icon v-if="!showFilters" icon="filter-square-fill"/>
+              <b-icon v-if="showFilters" icon="dash-circle-fill"/>
+            </p>
           </b-button>
-          <b-button v-if="filters && filters.length > 0 && showFilters" variant="outline" v-b-tooltip.hover title="Clean Filter" @click="clean()">
-            <p class="h3"><b-icon icon="dash-circle-fill"/></p>
-          </b-button>
+          <b-tooltip target="filter-button" triggers="hover" title="Filter" v-if="showFilters"/>
+          <b-tooltip target="filter-button" triggers="hover" title="Clean Filter" v-if="!showFilters"/>
           <span/>
           <b-button v-if="add && addIcon && addAuth === true" variant="outline" @click="$emit('add-click')" v-b-tooltip.hover title="Add" v-b-modal="add">
             <p class="h3"><b-icon variant="success" :icon="addIcon"/></p>
@@ -24,18 +26,20 @@
         </div>
       </b-col>
     </b-row>
-    <b-row v-if="showFilters" class="mb-2">
-      <b-col v-for="ft in filters" :key="ft.name">
-        <b-form-group :description="ft.name">
-          <b-form-input :id="ft.filterField" v-if="!ft.values" :type="ft.type" @change="filter"/>
-          <b-form-select :id="ft.filterField" v-if="ft.values" :value="ft.default" :options="ft.values" :value-field="ft.valueField" :text-field="ft.textField" @change="filter">
-            <template #first>
-              <b-form-select-option :value="null">Select {{ ft.name.toLowerCase() }}</b-form-select-option>
-            </template>
-          </b-form-select>
-        </b-form-group>
-      </b-col>
-    </b-row>
+    <b-collapse id="filters">
+      <b-row class="mb-2">
+        <b-col v-for="ft in filters" :key="ft.name">
+          <b-form-group :description="ft.name">
+            <b-form-input :id="ft.filterField" v-if="!ft.values" :type="ft.type" @change="filter"/>
+            <b-form-select :id="ft.filterField" v-if="ft.values" :value="ft.default" :options="ft.values" :value-field="ft.valueField" :text-field="ft.textField" @change="filter">
+              <template #first>
+                <b-form-select-option :value="null">Select {{ ft.name.toLowerCase() }}</b-form-select-option>
+              </template>
+            </b-form-select>
+          </b-form-group>
+        </b-col>
+      </b-row>
+    </b-collapse>
   </div>
 </template>
 
@@ -87,9 +91,11 @@ export default {
   methods: {
     toggleFilters () {
       this.showFilters = !this.showFilters
+      if (!this.showFilters) {
+        this.clean()
+      }
     },
     clean () {
-      this.toggleFilters()
       for (let i=0; i < this.filters.length; i++) {
         const input = document.getElementById(this.filters[i].filterField)
         if (input) {
