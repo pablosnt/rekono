@@ -3,9 +3,6 @@ import RekonoApi from './api'
 class TargetsApi extends RekonoApi {
   getAllTargets (filter = null) {
     return super.getAllPages('/api/targets/?o=target', filter)
-      .then(response => {
-        return response.data
-      })
   }
 
   getPaginatedTargets (page = null, limit = null, filter = null) {

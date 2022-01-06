@@ -3,9 +3,6 @@ import RekonoApi from './api'
 class Process extends RekonoApi {
   getAllProcesses (filter = null) {
     return super.getAllPages('/api/processes/?o=name', filter)
-      .then(response => {
-        return response.data
-      })
   }
 
   getPaginatedProcesses (page = null, limit = null, filter = null) {

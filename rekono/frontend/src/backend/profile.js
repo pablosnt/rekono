@@ -35,6 +35,13 @@ class Profile extends RekonoApi {
         return response.data
       })
   }
+
+  getApiKey (username, password) {
+    return super.post('/api/api-token/', { username: username, password: password })
+      .then(response => {
+        return response.data
+      })
+  }
 }
 
 export default new Profile()

@@ -10,6 +10,7 @@
             <b-icon style="width: 20px; height: 20px;" icon="person-fill" variant="light"/>
           </template>
           <b-dropdown-item @click="$router.push('/profile')">Profile</b-dropdown-item>
+          <b-dropdown-item href="/api/schema/swagger-ui.html?docExpansion=none" target="_blank">Rekono API Rest</b-dropdown-item>
           <b-dropdown-item @click="handleLogout">Logout</b-dropdown-item>
         </b-nav-item-dropdown>
       </b-navbar-nav>

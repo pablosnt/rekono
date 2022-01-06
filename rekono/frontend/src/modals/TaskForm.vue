@@ -190,8 +190,8 @@ export default {
           this.selectProcess(this.process.id, this.process)
         }
         if (!this.tool && !this.process) {
-          ToolApi.getAllTools().then(data => { this.tools = data.results })
-          ProcessApi.getAllProcesses().then(data => { this.processes = data.results })
+          ToolApi.getAllTools().then(results => { this.tools = results })
+          ProcessApi.getAllProcesses().then(results => { this.processes = results })
         }
         if (this.target) {
           this.targetId = this.target.id
@@ -199,7 +199,7 @@ export default {
         } else if (this.project) {
           ProjectApi.getProject(this.project.id).then(data => { this.selectProject(this.project.id, data) })
         } else {
-          ProjectApi.getAllProjects().then(data => { this.projects = data.results })
+          ProjectApi.getAllProjects().then(results => { this.projects = results })
         }
       }
     }
@@ -356,7 +356,7 @@ export default {
       }
     },
     updateWordlists () {
-      WordlistApi.getAllWordlists().then(data => { this.wordlists = data.results })
+      WordlistApi.getAllWordlists().then(results => { this.wordlists = results })
     },
     cleanScheduledIn () {
       this.scheduledIn = null

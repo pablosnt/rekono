@@ -4,6 +4,7 @@ import router from './router'
 import store from './store'
 import { BootstrapVue, BootstrapVueIcons } from 'bootstrap-vue'
 import Icon from 'vue-awesome/components/Icon'
+import Clipboard from "v-clipboard";
 
 import 'vue-awesome/icons/brands/telegram'
 import 'vue-awesome/icons/brands/linux'
@@ -22,6 +23,7 @@ Vue.config.productionTip = false
 
 Vue.use(BootstrapVue)
 Vue.use(BootstrapVueIcons)
+Vue.use(Clipboard)
 Vue.component('v-icon', Icon)
 
 new Vue({

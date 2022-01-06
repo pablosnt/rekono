@@ -36,10 +36,7 @@ export default {
   },
   methods: {
     fetchData () {
-      UsersApi.getAllUsers({ project__ne: this.projectId })
-        .then(data => {
-          this.users = data.results
-        })
+      UsersApi.getAllUsers({ project__ne: this.projectId }).then(results => { this.users = results })
     },
     check () {
       this.memberState = (this.member !== null)

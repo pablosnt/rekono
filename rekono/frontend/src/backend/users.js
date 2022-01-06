@@ -3,9 +3,6 @@ import RekonoApi from './api'
 class Users extends RekonoApi {
   getAllUsers (filter = null) {
     return super.getAllPages('/api/users/?o=username', filter)
-      .then(response => {
-        return response.data
-      })
   }
 
   getPaginatedUsers (page = null, limit = null, filter = null) {

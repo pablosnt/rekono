@@ -125,7 +125,7 @@ export default {
     initialized (initialized) {
       if (initialized) {
         if (this.step === null && this.tool === null) {
-          ToolApi.getAllTools().then(tools => { this.tools = tools.results })
+          ToolApi.getAllTools().then(results => { this.tools = results })
         } else if (this.step !== null && this.tool == null) {
           this.tools = [this.selectedTool]
         }
@@ -136,7 +136,7 @@ export default {
               creator: this.$store.state.user
             }
           }
-          ProcessApi.getAllProcesses(filter).then(data => { this.processes = data.results })
+          ProcessApi.getAllProcesses(filter).then(results => { this.processes = results })
         }
       }
     }

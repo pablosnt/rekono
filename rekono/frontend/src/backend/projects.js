@@ -10,9 +10,6 @@ class Project extends RekonoApi {
 
   getAllProjects (filter = null) {
     return super.getAllPages('/api/projects/?o=name', filter)
-      .then(response => {
-        return response.data
-      })
   }
 
   getPaginatedProjects (page = null, limit = null, filter = null) {

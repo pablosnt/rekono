@@ -166,10 +166,10 @@ export default {
     fetchTargets () {
       if (!this.task) {
         TargetsApi.getAllTargets({ project: this.$route.params.id })
-          .then(data => {
-            this.targets = data.results
-            if (data.results.length > 0) {
-              this.selectedTarget = data.results[0].id
+          .then(results => {
+            this.targets = results
+            if (results.length > 0) {
+              this.selectedTarget = results[0].id
             }
           })
       }

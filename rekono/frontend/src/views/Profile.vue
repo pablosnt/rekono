@@ -25,8 +25,97 @@
       </b-col>
     </b-row>
     <b-form ref="profile_form" @submit="handleUpdateProfile">
-      <b-row class="mb-3 ml-5 mr-5" align-h="end">
-        <b-col cols="6">
+      <b-row align-h="center">
+        <b-col cols="4">
+          <div class="mb-3">
+            <h4 v-if="telegramConfigured">
+              <b-badge variant="outline">
+                <b-icon variant="success" icon="patch-check-fill"/>
+                {{ telegramBot }} Bot is linked!
+              </b-badge>
+            </h4>
+            <b-card align="center" v-if="!telegramConfigured">
+              <template #header>
+                <b-button v-b-toggle.telegram-bot variant="outline" @click="showTelegramBot = !showTelegramBot">
+                  <v-icon fill="dodgerblue" name="brands/telegram"/>
+                  <strong class="ml-2 mr-2">Telegram Bot</strong>
+                  <b-icon v-if="!showTelegramBot" variant="secondary" icon="caret-down-fill"/>
+                  <b-icon v-if="showTelegramBot" variant="secondary" icon="caret-up-fill"/>
+                </b-button>
+              </template>
+              <b-collapse id="telegram-bot">
+                <div class="text-right">
+                  <b-button v-b-toggle.telegram-steps @click="showTelegramSteps = !showTelegramSteps" variant="outline">
+                    <b-icon v-if="!showTelegramSteps" variant="dark" icon="eye-fill"/>
+                    <b-icon v-if="showTelegramSteps" variant="secondary" icon="eye-slash-fill"/>
+                    Steps
+                  </b-button>
+                </div>
+                <b-collapse id="telegram-steps" class="text-left">
+                  <h4>Steps</h4>
+                  <p>1. Search the <strong>{{ telegramBot }}</strong> bot in Telegram</p>
+                  <p>2. Send the <strong>/start</strong> message to the bot</p>
+                  <p>3. <strong>{{ telegramBot }}</strong> will send you a temporal token</p>
+                  <p>4. Copy the token in this form</p>
+                  <p>5. Now you can use the bot and receive notifications. Send the <strong>/help</strong> message to see the usage</p>
+                </b-collapse>
+                <b-form-group class="mt-4" invalid-description="Token is required">
+                  <b-form-input type="password" v-model="telegramToken" placeholder="Telegram token" :state="telegramTokenState"/>
+                </b-form-group>
+              </b-collapse>
+              <template #footer v-if="showTelegramBot">
+                <b-button squared variant="primary" @click="handleTelegramToken">Link Telegram Bot</b-button>
+              </template>
+            </b-card>
+          </div>
+          <b-card class="mt-3 mb-3">
+            <template #header>
+              <b-button v-b-toggle.rekono-api variant="outline" @click="showRekonoApi = !showRekonoApi">
+                <b-icon variant="danger" icon="code-slash"/>
+                <strong class="ml-2 mr-2">Rekono API Rest</strong>
+                <b-icon v-if="!showRekonoApi" variant="secondary" icon="caret-down-fill"/>
+                <b-icon v-if="showRekonoApi" variant="secondary" icon="caret-up-fill"/>
+              </b-button>
+            </template>
+            <b-collapse id="rekono-api">
+              <b-card-text>
+                <b-alert v-model="passwordError" variant="danger">
+                  <b-icon icon="exclamation-circle-fill" variant="danger"></b-icon>
+                  Invalid credentials
+                </b-alert>
+                <b-form @submit="handleGetApiKey">
+                  <b-row align="start">
+                    <b-col lg="9">
+                      <b-form-input class="mr-2" type="password" v-model="password" :state="passwordState" placeholder="Password"/>
+                    </b-col>
+                    <b-col lg="3">
+                      <b-button type="submit" variant="danger">API key</b-button>
+                    </b-col>
+                  </b-row>
+                </b-form>
+                <b-input-group class="mt-2">
+                  <b-form-input type="password" v-model="apiKey" placeholder="API key" disabled/>
+                  <template #append>
+                    <b-button id="copy-api-key" :disabled="!apiKey" variant="outline-dark" v-b-hover="copyHover" v-clipboard="() => apiKey">
+                      <b-icon v-if="!isCopyHover" variant="dark" icon="files"/>
+                      <b-icon v-if="isCopyHover" variant="light" icon="files"/>
+                    </b-button>
+                    <b-tooltip target="copy-api-key" triggers="hover" title="Copy"/>
+                    <b-tooltip v-if="isCopyHover" target="copy-api-key" triggers="click" title="Copied!"/>
+                  </template>
+                </b-input-group>
+              </b-card-text>
+            </b-collapse>
+            <template #footer v-if="showRekonoApi">
+                <b-link class="text-danger" href="/api/schema/swagger-ui.html?docExpansion=none" target="_blank">API documentation</b-link>
+              </template>
+          </b-card>
+          <b-row class="mt-3" align-h="center">
+            <b-button squared v-b-modal.change-password-modal>Change Password</b-button>
+            <ChangePasswordForm id="change-password-modal" :username="username"/>
+          </b-row>
+        </b-col>
+        <b-col cols="7">
           <b-form-group>
             <b-form-input v-model="firstName" :state="firstNameState" type="text" placeholder="First name"/>
           </b-form-group>
@@ -63,46 +152,6 @@
             <b-button type="submit" variant="dark" size="lg">Save</b-button>
           </b-row>
         </b-col>
-        <b-col cols="4">
-          <b-row class="mt-3" align-h="center">
-            <h4 v-if="telegramConfigured">
-              <b-badge variant="outline">
-                <b-icon variant="success" icon="patch-check-fill"/>
-                {{ telegramBot }} Bot is linked!
-              </b-badge>
-            </h4>
-            <b-card align="center" v-if="!telegramConfigured">
-              <template #header>
-                <v-icon fill="dodgerblue" name="brands/telegram"/> <strong>Telegram Bot</strong>
-              </template>
-              <div class="text-right">
-                <b-button v-b-toggle.telegram-steps @click="showTelegramSteps = !showTelegramSteps" variant="outline">
-                  <b-icon v-if="!showTelegramSteps" variant="dark" icon="eye-fill"/>
-                  <b-icon v-if="showTelegramSteps" variant="secondary" icon="eye-slash-fill"/>
-                  Steps
-                </b-button>
-              </div>
-              <b-collapse id="telegram-steps" class="text-left">
-                <h4>Steps</h4>
-                <p>1. Search the <strong>{{ telegramBot }}</strong> bot in Telegram</p>
-                <p>2. Send the <strong>/start</strong> message to the bot</p>
-                <p>3. <strong>{{ telegramBot }}</strong> will send you a temporal token</p>
-                <p>4. Copy the token in this form</p>
-                <p>5. Now you can use the bot and receive notifications. Send the <strong>/help</strong> message to see the usage</p>
-              </b-collapse>
-              <b-form-group class="mt-4" invalid-description="Token is required">
-                <b-form-input type="password" v-model="telegramToken" placeholder="Telegram token" :state="telegramTokenState"/>
-              </b-form-group>
-              <template #footer>
-                <b-button squared variant="primary" @click="handleTelegramToken">Link Telegram Bot</b-button>
-              </template>
-            </b-card>
-          </b-row>
-          <b-row class="mt-5" align-h="center">
-            <b-button squared v-b-modal.change-password-modal>Change Password</b-button>
-            <ChangePasswordForm id="change-password-modal" :username="username"/>
-          </b-row>
-        </b-col>
       </b-row>
     </b-form>
   </div>
@@ -125,6 +174,7 @@ export default {
       notificationScopes: notificationScopes,
       id: null,
       username: null,
+      password: null,
       firstName: null,
       lastName: null,
       email: null,
@@ -136,9 +186,15 @@ export default {
       emailNotification: null,
       telegramNotification: null,
       telegramToken: null,
+      apiKey: null,
       firstNameState: null,
       lastNameState: null,
-      telegramTokenState: null
+      telegramTokenState: null,
+      passwordState: null,
+      passwordError: false,
+      showTelegramBot: false,
+      showRekonoApi: false,
+      isCopyHover: false,
     }
   },
   components: {
@@ -208,6 +264,29 @@ export default {
         .catch(() => {
           this.danger(this.username, 'Unexpected error in telegram configuration')
         })
+    },
+    handleGetApiKey (event) {
+      event.preventDefault()
+      if (this.checkAPIKey() === null) {
+        this.getApiKey()
+      }
+    },
+    checkAPIKey () {
+      this.passwordState = (this.password === null || this.password.length === 0) ? false : null
+      return this.passwordState
+    },
+    getApiKey () {
+      ProfileApi.getApiKey(this.username, this.password)
+        .then(data => {
+          this.apiKey = data.token
+          this.passwordError = false
+        })
+        .catch(() => {
+          this.passwordError = true
+        })
+    },
+    copyHover (hovered) {
+      this.isCopyHover = hovered
     }
   }
 }
