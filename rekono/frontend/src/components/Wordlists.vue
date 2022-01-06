@@ -72,7 +72,7 @@ export default {
   },
   methods: {
     fetchData (filter = null) {
-      WordlistApi.getAllWordlists(this.getPage(), this.getLimit(), filter).then(data => {
+      WordlistApi.getPaginatedWordlists(this.getPage(), this.getLimit(), filter).then(data => {
         this.total = data.count
         this.wordlists = data.results
       })

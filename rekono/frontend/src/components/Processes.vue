@@ -136,7 +136,7 @@ export default {
   },
   methods: {
     fetchData (filter = null) {
-      ProcessApi.getAllProcesses(this.getPage(), this.getLimit(), filter).then(data => {
+      ProcessApi.getPaginatedProcesses(this.getPage(), this.getLimit(), filter).then(data => {
         this.total = data.count
         this.processes = data.results
       })

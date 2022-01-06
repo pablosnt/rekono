@@ -1,7 +1,14 @@
 import RekonoApi from './api'
 
 class Users extends RekonoApi {
-  getAllUsers (page = null, limit = null, filter = null) {
+  getAllUsers (filter = null) {
+    return super.getAllPages('/api/users/?o=username', filter)
+      .then(response => {
+        return response.data
+      })
+  }
+
+  getPaginatedUsers (page = null, limit = null, filter = null) {
     return super.get('/api/users/?o=username', page, limit, filter)
       .then(response => {
         return response.data

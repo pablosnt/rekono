@@ -1,7 +1,14 @@
 import RekonoApi from './api'
 
 class TargetsApi extends RekonoApi {
-  getAllTargets (page = null, limit = null, filter = null) {
+  getAllTargets (filter = null) {
+    return super.getAllPages('/api/targets/?o=target', filter)
+      .then(response => {
+        return response.data
+      })
+  }
+
+  getPaginatedTargets (page = null, limit = null, filter = null) {
     return super.get('/api/targets/?o=target', page, limit, filter)
       .then(response => {
         return response.data

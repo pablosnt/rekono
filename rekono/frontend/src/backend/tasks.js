@@ -1,7 +1,7 @@
 import RekonoApi from './api'
 
 class Task extends RekonoApi {
-  getAllTasks (page = null, limit = null, filter = null) {
+  getPaginatedTasks (page = null, limit = null, filter = null) {
     return super.get('/api/tasks/', page, limit, filter)
       .then(response => {
         return response.data

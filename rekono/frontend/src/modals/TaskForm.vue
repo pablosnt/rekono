@@ -190,7 +190,7 @@ export default {
           this.selectProcess(this.process.id, this.process)
         }
         if (!this.tool && !this.process) {
-          ToolApi.getTools().then(data => { this.tools = data.results })
+          ToolApi.getAllTools().then(data => { this.tools = data.results })
           ProcessApi.getAllProcesses().then(data => { this.processes = data.results })
         }
         if (this.target) {

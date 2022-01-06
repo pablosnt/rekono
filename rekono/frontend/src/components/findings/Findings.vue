@@ -165,7 +165,7 @@ export default {
   methods: {
     fetchTargets () {
       if (!this.task) {
-        TargetsApi.getAllTargets(null, null, { project: this.$route.params.id })
+        TargetsApi.getAllTargets({ project: this.$route.params.id })
           .then(data => {
             this.targets = data.results
             if (data.results.length > 0) {

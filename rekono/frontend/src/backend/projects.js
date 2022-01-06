@@ -8,8 +8,8 @@ class Project extends RekonoApi {
       })
   }
 
-  getAllProjects () {
-    return super.get('/api/projects/?o=name')
+  getAllProjects (filter = null) {
+    return super.getAllPages('/api/projects/?o=name', filter)
       .then(response => {
         return response.data
       })

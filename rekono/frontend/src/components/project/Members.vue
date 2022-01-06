@@ -78,7 +78,7 @@ export default {
         filters = {}
       }
       filters.project = this.$route.params.id
-      UsersApi.getAllUsers(this.getPage(), this.getLimit(), filters)
+      UsersApi.getPaginatedUsers(this.getPage(), this.getLimit(), filters)
         .then(data => {
           this.total = data.count
           this.users = data.results

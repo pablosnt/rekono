@@ -125,18 +125,18 @@ export default {
     initialized (initialized) {
       if (initialized) {
         if (this.step === null && this.tool === null) {
-          ToolApi.getTools().then(tools => { this.tools = tools.results })
+          ToolApi.getAllTools().then(tools => { this.tools = tools.results })
         } else if (this.step !== null && this.tool == null) {
           this.tools = [this.selectedTool]
         }
         if (this.process === null) {
-          let req = null
-          if (this.$store.state.role === 'Admin') {
-            req = ProcessApi.getAllProcesses()
-          } else {
-            req = ProcessApi.getProcessesByUser(this.$store.state.user)
+          let filter = null
+          if (this.$store.state.role !== 'Admin') {
+            filter = {
+              creator: this.$store.state.user
+            }
           }
-          req.then(data => { this.processes = data.results })
+          ProcessApi.getAllProcesses(filter).then(data => { this.processes = data.results })
         }
       }
     }

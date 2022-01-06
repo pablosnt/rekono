@@ -109,7 +109,7 @@ export default {
   },
   methods: {
     fetchData (filter = null) {
-      ToolApi.getTools(this.getPage(), this.getLimit(), filter)
+      ToolApi.getPaginatedTools(this.getPage(), this.getLimit(), filter)
         .then(data => {
           this.total = data.count
           this.tools = data.results

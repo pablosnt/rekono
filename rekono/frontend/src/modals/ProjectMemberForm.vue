@@ -36,7 +36,7 @@ export default {
   },
   methods: {
     fetchData () {
-      UsersApi.getAllUsers(null, null, { project__ne: this.projectId })
+      UsersApi.getAllUsers({ project__ne: this.projectId })
         .then(data => {
           this.users = data.results
         })

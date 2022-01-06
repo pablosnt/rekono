@@ -76,7 +76,7 @@ export default {
   },
   methods: {
     fetchData (filters = null) {
-      UsersApi.getAllUsers(this.getPage(), this.getLimit(), filters)
+      UsersApi.getPaginatedUsers(this.getPage(), this.getLimit(), filters)
         .then(data => {
           this.total = data.count
           this.users = data.results

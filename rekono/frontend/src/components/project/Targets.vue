@@ -153,7 +153,7 @@ export default {
         filters = {}
       }
       filters.project = this.$route.params.id
-      TargetsApi.getAllTargets(this.getPage(), this.getLimit(), filters)
+      TargetsApi.getPaginatedTargets(this.getPage(), this.getLimit(), filters)
         .then(data => {
           this.total = data.count
           this.targets = data.results
