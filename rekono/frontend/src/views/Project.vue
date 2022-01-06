@@ -6,7 +6,8 @@
           <template #title>
             <b-icon icon="bar-chart-line-fill"/> Dashboard
           </template>
-          <dashboard class="mt-3" :project="project"/>
+          <projectDetails class="mt-3" :project="project"/>
+          <!-- <dashboard class="mt-3" :project="project"/> -->
         </b-tab>
         <b-tab lazy :active="path.includes('targets')" @click="changeSubTab('targets')" title-link-class="text-secondary">
           <template #title>
@@ -39,13 +40,14 @@
 
 <script>
 import MainTabs from '@/common/MainTabs.vue'
-import Dashboard from '@/components/dashboard/Dashboard.vue'
+import Details from '@/components/project/Details.vue'
+// import Dashboard from '@/components/dashboard/Dashboard.vue'
 import Targets from '@/components/project/Targets.vue'
 import Tasks from '@/components/project/Tasks.vue'
 import Findings from '@/components/findings/Findings.vue'
 import Members from '@/components/project/Members.vue'
 export default {
-  name: 'projectDetails',
+  name: 'project',
   props: {
     project: {
       type: Object,
@@ -59,7 +61,8 @@ export default {
   },
   components: {
     mainTabs: MainTabs,
-    dashboard: Dashboard,
+    // dashboard: Dashboard,
+    projectDetails: Details,
     targets: Targets,
     tasks: Tasks,
     findings: Findings,

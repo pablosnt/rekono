@@ -1,5 +1,5 @@
 <template>
-  <b-modal :id="id" @hidden="clean" @ok="confirm" :title="title" :ok-title="button" header-bg-variant="dark" header-text-variant="light" ok-variant="dark">
+  <b-modal :id="id" @close="clean" @hidden="clean" @ok="confirm" :title="title" :ok-title="button" header-bg-variant="dark" header-text-variant="light" ok-variant="dark">
     <b-form ref="project_form">
       <b-form-group description="Project name" invalid-feedback="Project name is required">
         <b-form-input v-model="name" type="text" plaholder="Name" :state="nameState" maxlength="50" required/>
@@ -29,13 +29,13 @@ export default {
   mixins: [AlertMixin],
   props: {
     id: String,
-    initialized: {
-      type: Boolean,
-      default: false
-    },
     project: {
       type: Object,
       default: null
+    },
+    initialized: {
+      type: Boolean,
+      default: false
     }
   },
   computed: {
@@ -59,11 +59,11 @@ export default {
     }
   },
   watch: {
-    project (project) {
-      if (this.initialized && project !== null) {
-        this.name = project.name
-        this.description = project.description
-        this.defectDojoId = project.defectdojo_product_id
+    initialized (initialized) {
+      if (initialized && this.project) {
+        this.name = this.project.name
+        this.description = this.project.description
+        this.defectDojoId = this.project.defectdojo_product_id
       }
     }
   },

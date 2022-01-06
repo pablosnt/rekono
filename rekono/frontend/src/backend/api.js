@@ -37,6 +37,17 @@ class RekonoApi {
     return requestHeaders
   }
 
+  cleanBody (body = null) {
+    if (body) {
+      for (var i in body) {
+        if (!body[i] || body[i].length === 0) {
+          body[i] = null
+        }
+      }
+    }
+    return body
+  }
+
   refresh () {
     if (!store.state.refreshing) {
       store.dispatch('startRefreshingToken')
@@ -113,10 +124,12 @@ class RekonoApi {
   }
 
   post (endpoint, data, requiredAuth = true, extraHeaders = null, allowUnauth = false) {
+    data = this.cleanBody(data)
     return this.request(axios.post, endpoint, null, data, requiredAuth, extraHeaders, allowUnauth)
   }
 
   put (endpoint, data, requiredAuth = true, extraHeaders = null, allowUnauth = false) {
+    data = this.cleanBody(data)
     return this.request(axios.put, endpoint, null, data, requiredAuth, extraHeaders, allowUnauth)
   }
 

@@ -144,7 +144,7 @@ import AlertMixin from '@/common/mixin/AlertMixin.vue'
 import Findings from '@/components/findings/Findings.vue'
 import DefectDojoForm from '@/modals/DefectDojoForm.vue'
 export default {
-  name: 'taskDetails',
+  name: 'task',
   mixins: [AlertMixin],
   props: {
     task: {

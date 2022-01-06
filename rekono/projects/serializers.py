@@ -18,6 +18,9 @@ class ProjectSerializer(serializers.ModelSerializer):
             'id', 'name', 'description', 'defectdojo_product_id', 'owner', 'targets', 'members'
         )
         read_only_fields = ('owner', 'members')
+        extra_kwargs = {
+            'defectdojo_product_id': {'required': False}
+        }
 
     def get_owner(self, instance: Project) -> SimplyUserSerializer:
         return SimplyUserSerializer(instance.owner).data
