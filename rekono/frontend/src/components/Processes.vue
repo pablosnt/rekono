@@ -3,7 +3,7 @@
     <TableHeader :filters="filters" add="process-modal" @filter="fetchData"/>
     <b-table striped borderless head-variant="dark" :fields="processesFields" :items="processes">
       <template #cell(tags)="row">
-        <b-form-tags :value="row.item.tags" placeholder="" remove-on-delete size="md" tag-variant="dark"/>
+        <b-form-tags :value="row.item.tags" placeholder="" remove-on-delete size="md" tag-variant="dark" @input="updateProcess(row.item, $event)"/>
       </template>
       <template #cell(likes)="row">
         {{ row.item.likes }}
@@ -154,6 +154,9 @@ export default {
         this.total = data.count
         this.processes = data.results
       })
+    },
+    updateProcess (process, tags) {
+      ProcessApi.updateProcess(process.id, process.name, process.description, tags)
     },
     deleteProcess () {
       ProcessApi.deleteProcess(this.selectedProcess.id)

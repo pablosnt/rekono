@@ -3,7 +3,7 @@
     <TableHeader :filters="filters" add="project-modal" :addAuth="$store.state.role === 'Admin'" @filter="fetchData"/>
     <b-table hover striped borderless head-variant="dark" :fields="projectsFields" :items="projects" @row-clicked="navigateToProjectDetails">
       <template #cell(tags)="row">
-        <b-form-tags :value="row.item.tags" placeholder="" remove-on-delete size="md" tag-variant="dark"/>
+        <b-form-tags :value="row.item.tags" placeholder="" remove-on-delete size="md" tag-variant="dark" @input="updateProject(row.item, $event)"/>
       </template>
       <template #cell(defectdojo_product_id)="row">
         <b-link v-if="row.item.defectdojo_product_id !== null" :href="defectDojoUrl(row.item.defectdojo_product_id)" target="_blank">
@@ -84,6 +84,9 @@ export default {
         this.total = data.count
         this.projects = data.results
       })
+    },
+    updateProject (project, tags) {
+      ProjectApi.updateProject(project.id, project.name, project.description, project.defectdojo_product_id, tags)
     },
     deleteProject () {
       ProjectApi.deleteProject(this.selectedProject.id)

@@ -1,6 +1,6 @@
 Django==3.2.11
 django-filter==21.1
-django-taggit=2.0.0
+django-taggit==2.0.0
 djangorestframework==3.12.4
 djangorestframework-simplejwt==5.0.0
 django-rq==2.4.1
