@@ -17,6 +17,9 @@
           <b-form-input v-model="defectDojoId" type="number"/>
         </b-input-group>
       </b-form-group>
+      <b-form-group description="Tags">
+        <b-form-tags v-model="tags" placeholder="" remove-on-delete size="md" tag-variant="dark"/>
+      </b-form-group>
     </b-form>
   </b-modal>
 </template>
@@ -54,6 +57,7 @@ export default {
       name: null,
       description: null,
       defectDojoId: null,
+      tags: [],
       nameState: null,
       descriptionState: null
     }
@@ -64,6 +68,7 @@ export default {
         this.name = this.project.name
         this.description = this.project.description
         this.defectDojoId = this.project.defectdojo_product_id
+        this.tags = this.project.tags
       }
     }
   },
@@ -82,7 +87,7 @@ export default {
       }
     },
     create () {
-      return ProjectApi.createProject(this.name, this.description, this.defectDojoId)
+      return ProjectApi.createProject(this.name, this.description, this.defectDojoId, this.tags)
         .then(() => {
           this.success(this.name , 'New project created successfully')
           return Promise.resolve(true)
@@ -93,7 +98,7 @@ export default {
         })
     },
     update () {
-      return ProjectApi.updateProject(this.project.id, this.name, this.description, this.defectDojoId)
+      return ProjectApi.updateProject(this.project.id, this.name, this.description, this.defectDojoId, this.tags)
         .then(() => {
           this.success(this.name , 'Project updated successfully')
           return Promise.resolve(true)
@@ -107,6 +112,7 @@ export default {
       this.name = null
       this.description = null
       this.defectDojoId = null
+      this.tags = []
       this.nameState = null
       this.descriptionState = null
       this.$emit('clean')

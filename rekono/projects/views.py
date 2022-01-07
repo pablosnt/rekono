@@ -13,7 +13,6 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from tasks.enums import Status
 from users.models import User
-from users.serializers import UserSerializer
 
 # Create your views here.
 

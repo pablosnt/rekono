@@ -1,21 +1,27 @@
+from typing import List
+
+from api.serializers import RekonoTagSerializerField
 from defectdojo.api import products
 from django.db import transaction
 from projects.models import Project
 from rest_framework import serializers
 from rest_framework.fields import SerializerMethodField
+from taggit.serializers import TaggitSerializer
 from targets.serializers import TargetSerializer
 from users.models import User
 from users.serializers import SimplyUserSerializer
 
 
-class ProjectSerializer(serializers.ModelSerializer):
+class ProjectSerializer(TaggitSerializer, serializers.ModelSerializer):
     targets = TargetSerializer(read_only=True, many=True)
     owner = SerializerMethodField(method_name='get_owner', read_only=True, required=False)
+    tags = RekonoTagSerializerField()
 
     class Meta:
         model = Project
         fields = (
-            'id', 'name', 'description', 'defectdojo_product_id', 'owner', 'targets', 'members'
+            'id', 'name', 'description', 'defectdojo_product_id', 'owner',
+            'targets', 'members', 'tags'
         )
         read_only_fields = ('owner', 'members')
         extra_kwargs = {

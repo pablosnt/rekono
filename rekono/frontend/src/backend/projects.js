@@ -19,11 +19,12 @@ class Project extends RekonoApi {
       })
   }
 
-  createProject (name, description, defectDojoId = null) {
+  createProject (name, description, defectDojoId = null, tags = []) {
     const data = {
       name: name,
       description: description,
-      defectdojo_product_id: defectDojoId
+      defectdojo_product_id: defectDojoId,
+      tags: tags
     }
     return super.post('/api/projects/', data)
       .then(response => {
@@ -31,11 +32,12 @@ class Project extends RekonoApi {
       })
   }
 
-  updateProject (projectId, name, description, defectDojoId = null) {
+  updateProject (projectId, name, description, defectDojoId = null, tags = []) {
     const data = {
       name: name,
       description: description,
-      defectdojo_product_id: defectDojoId
+      defectdojo_product_id: defectDojoId,
+      tags: tags
     }
     return super.put(`/api/projects/${projectId}/`, data)
       .then(response => {

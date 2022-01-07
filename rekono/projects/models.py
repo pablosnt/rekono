@@ -2,6 +2,7 @@ from typing import Any
 
 from django.conf import settings
 from django.db import models
+from taggit.managers import TaggableManager
 
 # Create your models here.
 
@@ -21,6 +22,7 @@ class Project(models.Model):
         related_name='members',
         blank=True
     )
+    tags = TaggableManager()
 
     class Meta:
         ordering = ['-id']

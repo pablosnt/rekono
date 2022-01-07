@@ -2,6 +2,9 @@
   <div>
     <TableHeader :filters="filters" add="project-modal" :addAuth="$store.state.role === 'Admin'" @filter="fetchData"/>
     <b-table hover striped borderless head-variant="dark" :fields="projectsFields" :items="projects" @row-clicked="navigateToProjectDetails">
+      <template #cell(tags)="row">
+        <b-form-tags :value="row.item.tags" placeholder="" remove-on-delete size="md" tag-variant="dark"/>
+      </template>
       <template #cell(defectdojo_product_id)="row">
         <b-link v-if="row.item.defectdojo_product_id !== null" :href="defectDojoUrl(row.item.defectdojo_product_id)" target="_blank">
           <b-img src="/static/defect-dojo-favicon.ico" width="30" height="30"/>
@@ -52,6 +55,7 @@ export default {
       projectsFields: [
         { key: 'name', label: 'Project', sortable: true },
         { key: 'defectdojo_product_id', label: 'Defect-Dojo', sortable: false },
+        { key: 'tags', sortable: true },
         { key: 'targets.length', label: 'Targets', sortable: true },
         { key: 'owner.username', label: 'Owner', sortable: true },
         { key: 'members.length', label: 'Members', sortable: true },
