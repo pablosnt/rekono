@@ -1,18 +1,14 @@
 from typing import Any
 
+from security.csp_header import get_headers_with_csp
+
 headers = {
     'Server': None,
-    # 'Content-Security-Policy': (
-    #     "default-src 'self'; script-src 'self' http://cdn.jsdelivr.net; "
-    #     "style-src 'self' https://fonts.googleapis.com unsafe-inline; "
-    #     "base-uri 'self'; object-src 'none'; frame-ancestors 'none'"
-    # ),
+    'Cache-Control': 'no-store',
+    'X-Content-Type-Options': 'nosniff',
     'X-Frame-Options': 'DENY',
     'X-XSS-Protection': '1; mode=block',
-    'Feature-Policy': (
-        "microphone 'none'; geolocation 'none'; "
-        "gyroscope 'none'; camera 'none'; accelerometer 'none'"
-    )
+    'Referrer-Policy': 'no-referrer'
 }
 
 
@@ -23,6 +19,6 @@ class RekonoMiddleware:
 
     def __call__(self, request) -> Any:
         response = self.get_response(request)
-        for header, value in headers.items():
+        for header, value in get_headers_with_csp(headers, request.path).items():
             response[header] = value
         return response
