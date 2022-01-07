@@ -1,5 +1,6 @@
 from typing import List
 
+from drf_spectacular.utils import extend_schema_field
 from likes.serializers import LikeBaseSerializer
 from processes.models import Process, Step
 from rest_framework import serializers
@@ -68,17 +69,14 @@ class StepSerializer(serializers.ModelSerializer):
 
 
 class ProcessSerializer(serializers.ModelSerializer, LikeBaseSerializer):
-    steps = SerializerMethodField(
-        method_name='get_steps',
-        read_only=True,
-        required=False
-    )
+    steps = SerializerMethodField(method_name='get_steps', read_only=True, required=False)
     creator = SimplyUserSerializer(many=False, read_only=True, required=False)
 
     class Meta:
         model = Process
         fields = ('id', 'name', 'description', 'creator', 'liked', 'likes', 'steps')
 
+    @extend_schema_field(StepSerializer(many=True, read_only=True))
     def get_steps(self, instance) -> List[StepSerializer]:
         return StepSerializer(
             instance.steps.all().order_by('tool__stage', '-priority'),

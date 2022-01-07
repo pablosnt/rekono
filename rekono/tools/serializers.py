@@ -1,6 +1,7 @@
 from typing import List
 
 from api.serializers import IntegerChoicesField
+from drf_spectacular.utils import extend_schema_field
 from likes.serializers import LikeBaseSerializer
 from rest_framework import serializers
 from rest_framework.fields import SerializerMethodField
@@ -11,7 +12,7 @@ from tools.models import Configuration, Input, Intensity, Output, Tool
 class StageField(IntegerChoicesField):
     model = Stage
 
-    def to_representation(self, value):
+    def to_representation(self, value) -> str:
         if value == 1:
             return super().to_representation(value).upper()
         return super().to_representation(value)
@@ -72,16 +73,8 @@ class IntensitySerializer(serializers.ModelSerializer):
 
 class ToolSerializer(serializers.ModelSerializer, LikeBaseSerializer):
     stage_name = StageField(source='stage')
-    intensities = SerializerMethodField(
-        method_name='get_intensities',
-        read_only=True,
-        required=False
-    )
-    configurations = SerializerMethodField(
-        method_name='get_configurations',
-        read_only=True,
-        required=False
-    )
+    intensities = SerializerMethodField(method_name='get_intensities', read_only=True)
+    configurations = SerializerMethodField(method_name='get_configurations', read_only=True)
 
     class Meta:
         model = Tool
@@ -90,9 +83,11 @@ class ToolSerializer(serializers.ModelSerializer, LikeBaseSerializer):
             'liked', 'likes', 'intensities', 'configurations'
         )
 
+    @extend_schema_field(IntensitySerializer(many=True, read_only=True))
     def get_intensities(self, instance) -> List[IntensitySerializer]:
         return IntensitySerializer(instance.intensities.all().order_by('-value'), many=True).data
 
+    @extend_schema_field(ConfigurationSerializer(many=True, read_only=True))
     def get_configurations(self, instance) -> List[ConfigurationSerializer]:
         return ConfigurationSerializer(
             instance.configurations.all().order_by('-default', 'name'),
