@@ -1,10 +1,12 @@
 from typing import List
 
+from api.serializers import RekonoTagSerializerField
 from drf_spectacular.utils import extend_schema_field
 from likes.serializers import LikeBaseSerializer
 from processes.models import Process, Step
 from rest_framework import serializers
 from rest_framework.fields import SerializerMethodField
+from taggit.serializers import TaggitSerializer
 from tools.models import Configuration, Tool
 from tools.serializers import ConfigurationSerializer, SimplyToolSerializer
 from users.serializers import SimplyUserSerializer
@@ -68,13 +70,16 @@ class StepSerializer(serializers.ModelSerializer):
         return attrs
 
 
-class ProcessSerializer(serializers.ModelSerializer, LikeBaseSerializer):
+class ProcessSerializer(TaggitSerializer, serializers.ModelSerializer, LikeBaseSerializer):
     steps = SerializerMethodField(method_name='get_steps', read_only=True, required=False)
     creator = SimplyUserSerializer(many=False, read_only=True, required=False)
+    tags = RekonoTagSerializerField()
 
     class Meta:
         model = Process
-        fields = ('id', 'name', 'description', 'creator', 'liked', 'likes', 'steps')
+        fields = (
+            'id', 'name', 'description', 'creator', 'liked', 'likes', 'steps', 'tags'
+        )
 
     @extend_schema_field(StepSerializer(many=True, read_only=True))
     def get_steps(self, instance) -> List[StepSerializer]:
@@ -88,4 +93,4 @@ class SimplyProcessSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Process
-        fields = ('id', 'name', 'description')
+        fields = ('id', 'name')

@@ -17,11 +17,7 @@ class Project(models.Model):
         blank=True,
         null=True
     )
-    members = models.ManyToManyField(
-        settings.AUTH_USER_MODEL,
-        related_name='members',
-        blank=True
-    )
+    members = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='members', blank=True)
     tags = TaggableManager()
 
     class Meta:

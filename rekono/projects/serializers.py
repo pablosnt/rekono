@@ -1,5 +1,3 @@
-from typing import List
-
 from api.serializers import RekonoTagSerializerField
 from defectdojo.api import products
 from django.db import transaction
@@ -24,9 +22,6 @@ class ProjectSerializer(TaggitSerializer, serializers.ModelSerializer):
             'targets', 'members', 'tags'
         )
         read_only_fields = ('owner', 'members')
-        extra_kwargs = {
-            'defectdojo_product_id': {'required': False}
-        }
 
     def get_owner(self, instance: Project) -> SimplyUserSerializer:
         return SimplyUserSerializer(instance.owner).data

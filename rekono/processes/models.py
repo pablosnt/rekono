@@ -3,6 +3,7 @@ from typing import Any
 from django.conf import settings
 from django.db import models
 from likes.models import LikeBase
+from taggit.managers import TaggableManager
 from tools.models import Configuration, Tool
 
 # Create your models here.
@@ -18,6 +19,7 @@ class Process(LikeBase):
         blank=True,
         null=True
     )
+    tags = TaggableManager()
 
     class Meta:
         ordering = ['-id']

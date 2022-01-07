@@ -2,6 +2,9 @@
   <div>
     <TableHeader :filters="filters" add="process-modal" @filter="fetchData"/>
     <b-table striped borderless head-variant="dark" :fields="processesFields" :items="processes">
+      <template #cell(tags)="row">
+        <b-form-tags :value="row.item.tags" placeholder="" remove-on-delete size="md" tag-variant="dark"/>
+      </template>
       <template #cell(likes)="row">
         {{ row.item.likes }}
         <b-button variant="outline">
@@ -106,6 +109,7 @@ export default {
       processes: this.fetchData(),
       processesFields: [
         { key: 'name', label: 'Process', sortable: true },
+        { key: 'tags', sortable: true },
         { key: 'steps.length', label: 'Steps', sortable: true },
         { key: 'creator.username', label: 'Creator', sortable: true },
         { key: 'likes', sortable: true },

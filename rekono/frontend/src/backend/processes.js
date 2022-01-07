@@ -12,10 +12,11 @@ class Process extends RekonoApi {
       })
   }
 
-  createProcess (name, description) {
+  createProcess (name, description, tags = []) {
     const data = {
       name: name,
-      description: description
+      description: description,
+      tags: tags
     }
     return super.post('/api/processes/', data)
       .then(response => {
@@ -23,10 +24,11 @@ class Process extends RekonoApi {
       })
   }
 
-  updateProcess (processId, name, description) {
+  updateProcess (processId, name, description, tags = []) {
     const data = {
       name: name,
-      description: description
+      description: description,
+      tags: tags
     }
     return super.put(`/api/processes/${processId}/`, data)
       .then(response => {

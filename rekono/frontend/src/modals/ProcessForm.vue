@@ -30,6 +30,9 @@
         <small class="text-muted">Step priority</small>
       </b-form-group>
     </b-form>
+    <b-form-group description="Tags">
+        <b-form-tags v-model="tags" placeholder="" remove-on-delete size="md" tag-variant="dark"/>
+      </b-form-group>
   </b-modal>
 </template>
 
@@ -43,10 +46,6 @@ export default {
   mixins: [AlertMixin],
   props: {
     id: String,
-    initialized: {
-      type: Boolean,
-      default: false
-    },
     process: {
       type: Object,
       default: null
@@ -54,6 +53,10 @@ export default {
     tool: {
       type: Object,
       default: null
+    },
+    initialized: {
+      type: Boolean,
+      default: false
     }
   },
   computed: {
@@ -77,20 +80,21 @@ export default {
       description: null,
       configuration: null,
       priority: 1,
+      tags: [],
       nameState: null,
       descriptionState: null
     }
   },
   watch: {
-    process (process) {
-      if (this.initialized && process !== null) {
-        this.name = process.name
-        this.description = process.description
-      }
-    },
-    tool (tool) {
-      if (this.initialized && tool !== null) {
-        this.configuration = tool.configurations[0].id
+    initialized (initialized) {
+      if (initialized) {
+        if (this.process) {
+          this.name = this.process.name
+          this.description = this.process.description
+          this.tags = this.process.tags
+        } else if (this.tool) {
+          this.configuration = this.tool.configurations[0].id
+        }
       }
     }
   },
@@ -109,7 +113,7 @@ export default {
       }
     },
     create () {
-      return ProcessApi.createProcess(this.name, this.description)
+      return ProcessApi.createProcess(this.name, this.description, this.tags)
         .then((data) => {
           if (this.tool === null) {
             this.success(this.name, 'New process created successfully')
@@ -131,7 +135,7 @@ export default {
         })
     },
     update () {
-      return ProcessApi.updateProcess(this.process.id, this.name, this.description)
+      return ProcessApi.updateProcess(this.process.id, this.name, this.description, this.tags)
         .then(() => {
           this.success(this.name, 'Process updated successfully')
           return Promise.resolve(true)
@@ -146,6 +150,7 @@ export default {
       this.description = null
       this.configuration = null
       this.priority = 1
+      this.tags = []
       this.nameState = null
       this.descriptionState = null
       this.$emit('clean')
