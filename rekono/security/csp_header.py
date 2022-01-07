@@ -25,7 +25,7 @@ admin = (
 
 
 def get_headers_with_csp(headers: dict, path: str) -> dict:
-    headers['Content-Security-Policy'] = api,
+    headers['Content-Security-Policy'] = api
     if path.startswith('/admin'):
         headers['Content-Security-Policy'] = admin
     elif path.startswith('/api/schema/swagger-ui'):

@@ -40,7 +40,7 @@ class RekonoApi {
   cleanBody (body = null) {
     if (body) {
       for (var i in body) {
-        if (!body[i] || body[i].length === 0) {
+        if (!body[i] || body[i] === '') {
           body[i] = null
         }
       }
