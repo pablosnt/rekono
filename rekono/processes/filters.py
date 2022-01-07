@@ -17,7 +17,8 @@ class ProcessFilter(LikeFilter):
             'steps__tool__name': ['exact', 'icontains'],
             'steps__tool__stage': ['exact'],
             'steps__configuration': ['exact'],
-            'steps__configuration__name': ['exact', 'icontains']
+            'steps__configuration__name': ['exact', 'icontains'],
+            'tags__name': ['in'],
         }
 
 

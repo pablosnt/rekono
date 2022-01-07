@@ -6,7 +6,7 @@
           <b-input-group-prepend>
             <b-button variant="danger" @click="filter"><b-icon icon="search"/></b-button>
           </b-input-group-prepend>
-          <b-form-input v-model="searchInput" placeholder="Search" type="search" @change="filter"/>
+          <b-form-input v-model="searchInput" placeholder="Search" type="search" @input="filter"/>
         </b-input-group>
       </b-col>
       <b-col v-if="(add && addIcon && addAuth === true) || (filters && filters.length > 0)">
@@ -30,8 +30,9 @@
       <b-row class="mb-2">
         <b-col v-for="ft in filters" :key="ft.name">
           <b-form-group :description="ft.name">
-            <b-form-input :id="ft.filterField" v-if="!ft.values" :type="ft.type" @change="filter"/>
-            <b-form-select :id="ft.filterField" v-if="ft.values" :value="ft.default" :options="ft.values" :value-field="ft.valueField" :text-field="ft.textField" @change="filter">
+            <b-form-tags no-outer-focus v-if="!ft.values && ft.type === 'tags'" placeholder="" remove-on-delete size="md" tag-variant="dark" @input="filter(ft.filterField, $event)"/>
+            <b-form-input v-if="!ft.values && ft.type !== 'tags'" :type="ft.type" @input="filter(ft.filterField, $event)"/>
+            <b-form-select v-if="ft.values" :value="ft.default" :options="ft.values" :value-field="ft.valueField" :text-field="ft.textField" @change="filter(ft.filterField, $event)">
               <template #first>
                 <b-form-select-option :value="null">Select {{ ft.name.toLowerCase() }}</b-form-select-option>
               </template>
@@ -68,24 +69,12 @@ export default {
     filterCols () {
       return (this.addAuth === true || (this.filters && this.filters.length > 0)) ? 8 : 12
     },
-    selectedFilters () {
-      let data = {}
-      data.search = this.searchInput
-      if (this.filters) {
-        for (let i=0; i < this.filters.length; i++) {
-          const input = document.getElementById(this.filters[i].filterField)
-          if (input && input.value && input.value.length > 0) {
-            data[this.filters[i].filterField] = input.value
-          }
-        }
-      }
-      return data
-    }
   },
   data () {
     return {
       showFilters: false,
-      searchInput: null
+      searchInput: null,
+      selectedFilters: {}
     }
   },
   methods: {
@@ -96,9 +85,19 @@ export default {
       }
     },
     clean () {
-      this.$emit('filter', { search: this.searchInput })
+      this.selectedFilters = {}
+      this.filter()
     },
-    filter () {
+    filter (field = null, value = null) {
+      if (field) {
+        if (Array.isArray(value)) {
+          value = value.join(',')
+        }
+        this.selectedFilters[field] = value
+      }
+      let filter = this.selectedFilters
+      filter.search = this.searchInput
+      console.log(filter)
       this.$emit('filter', this.selectedFilters)
     }
   }

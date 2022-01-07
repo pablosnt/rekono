@@ -31,7 +31,7 @@
       </b-form-group>
     </b-form>
     <b-form-group description="Tags">
-        <b-form-tags v-model="tags" placeholder="" remove-on-delete size="md" tag-variant="dark"/>
+        <b-form-tags no-outer-focus v-model="tags" placeholder="" remove-on-delete size="md" tag-variant="dark"/>
       </b-form-group>
   </b-modal>
 </template>

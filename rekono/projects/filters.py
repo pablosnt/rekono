@@ -14,4 +14,5 @@ class ProjectFilter(rest_framework.FilterSet):
             'owner': ['exact'],
             'owner__username': ['exact', 'icontains'],
             'members': ['exact'],
+            'tags__name': ['in'],
         }

@@ -3,7 +3,7 @@
     <TableHeader :filters="filters" add="process-modal" @filter="fetchData"/>
     <b-table striped borderless head-variant="dark" :fields="processesFields" :items="processes">
       <template #cell(tags)="row">
-        <b-form-tags :value="row.item.tags" placeholder="" remove-on-delete size="md" tag-variant="dark" @input="updateProcess(row.item, $event)"/>
+        <b-form-tags no-outer-focus :value="row.item.tags" placeholder="" remove-on-delete size="md" tag-variant="dark" @input="updateProcess(row.item, $event)"/>
       </template>
       <template #cell(likes)="row">
         {{ row.item.likes }}
@@ -142,6 +142,7 @@ export default {
   watch: {
     processes () {
       this.filters = [
+        { name: 'Tags', filterField: 'tags__name__in', type: 'tags' },
         { name: 'Stage', values: stages, valueField: 'id', textField: 'value', filterField: 'steps__tool__stage' },
         { name: 'Creator', filterField: 'creator__username__icontains', type: 'text' },
         { name: 'Favourities', values: [{ value: true, text: 'True' }, { value: false, text: 'False' }], valueField: 'value', textField: 'text', filterField: 'liked' }

@@ -3,7 +3,7 @@
     <TableHeader :filters="filters" add="project-modal" :addAuth="$store.state.role === 'Admin'" @filter="fetchData"/>
     <b-table hover striped borderless head-variant="dark" :fields="projectsFields" :items="projects" @row-clicked="navigateToProjectDetails">
       <template #cell(tags)="row">
-        <b-form-tags :value="row.item.tags" placeholder="" remove-on-delete size="md" tag-variant="dark" @input="updateProject(row.item, $event)"/>
+        <b-form-tags no-outer-focus :value="row.item.tags" placeholder="" remove-on-delete size="md" tag-variant="dark" @input="updateProject(row.item, $event)"/>
       </template>
       <template #cell(defectdojo_product_id)="row">
         <b-link v-if="row.item.defectdojo_product_id !== null" :href="defectDojoUrl(row.item.defectdojo_product_id)" target="_blank">
@@ -74,7 +74,8 @@ export default {
   watch: {
     projects () {
       this.filters = [
-        { name: 'Owner', filterField: 'owner__username__icontains', type: 'text' }
+        { name: 'Tags', filterField: 'tags__name__in', type: 'tags' },
+        { name: 'Owner', filterField: 'owner__username__icontains', type: 'text' },
       ]
     }
   },
