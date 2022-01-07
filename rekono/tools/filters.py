@@ -1,12 +1,10 @@
-from django_filters import rest_framework
-from django_filters.rest_framework import filters
-from django_filters.rest_framework.filters import OrderingFilter
-from tools.enums import FindingType
+from django_filters.rest_framework import FilterSet, filters
+from likes.filters import LikeFilter
 from tools.models import Configuration, Tool
 
 
-class ToolFilter(rest_framework.FilterSet):
-    o = OrderingFilter(fields=('name', 'stage'))
+class ToolFilter(LikeFilter):
+    o = filters.OrderingFilter(fields=('name', 'stage', 'likes_count'))
 
     class Meta:
         model = Tool
@@ -21,8 +19,8 @@ class ToolFilter(rest_framework.FilterSet):
         }
 
 
-class ConfigurationFilter(rest_framework.FilterSet):
-    o = OrderingFilter(fields=('tool', 'name'))
+class ConfigurationFilter(FilterSet):
+    o = filters.OrderingFilter(fields=('tool', 'name'))
 
     class Meta:
         model = Configuration

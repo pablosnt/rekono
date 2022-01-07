@@ -2,12 +2,13 @@ from typing import Any
 
 from django.conf import settings
 from django.db import models
+from likes.models import LikeBase
 from resources.enums import WordlistType
 
 # Create your models here.
 
 
-class Wordlist(models.Model):
+class Wordlist(LikeBase):
     name = models.TextField(max_length=50, unique=True)
     type = models.TextField(max_length=10, choices=WordlistType.choices)
     path = models.TextField(max_length=200, unique=True)

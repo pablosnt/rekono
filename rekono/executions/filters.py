@@ -1,7 +1,6 @@
+from api.filters import ToolFilter
 from django_filters.rest_framework.filters import OrderingFilter
 from executions.models import Execution
-
-from rekono.api.filters import ToolFilter
 
 
 class ExecutionFilter(ToolFilter):

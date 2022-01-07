@@ -36,6 +36,12 @@ class BaseCreatorPermission(BasePermission):
         instance = self.get_instance(obj)
         if (
             instance
+            and request.user.is_authenticated
+            and view.action in ['like', 'dislike']
+        ):
+            return True
+        if (
+            instance
             and not IsAdmin().has_permission(request, view)
             and request.method in ['POST', 'PUT', 'DELETE']
             and instance.creator != request.user

@@ -19,7 +19,7 @@
         <b-form-select v-model="configuration" :options="tool.configurations" value-field="id" text-field="name" required/>
       </b-form-group>
       <b-form-group>
-        <b-input-group :prepend="priority">
+        <b-input-group :prepend="priority.toString()">
           <b-form-input v-model="priority" type="range" min="1" max="50" required variant="dark"/>
           <b-input-group-append v-b-tooltip.hover title="The priority allows to run steps with greater value before other tools of the same stage. By default the priority is 1, so all the steps will be treated in the same way">
             <b-button variant="outline">

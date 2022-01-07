@@ -1,5 +1,6 @@
 from typing import List
 
+from likes.serializers import LikeBaseSerializer
 from processes.models import Process, Step
 from rest_framework import serializers
 from rest_framework.fields import SerializerMethodField
@@ -66,7 +67,7 @@ class StepSerializer(serializers.ModelSerializer):
         return attrs
 
 
-class ProcessSerializer(serializers.ModelSerializer):
+class ProcessSerializer(serializers.ModelSerializer, LikeBaseSerializer):
     steps = SerializerMethodField(
         method_name='get_steps',
         read_only=True,
@@ -76,7 +77,7 @@ class ProcessSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Process
-        fields = ('id', 'name', 'description', 'creator', 'steps')
+        fields = ('id', 'name', 'description', 'creator', 'liked', 'likes', 'steps')
 
     def get_steps(self, instance) -> List[StepSerializer]:
         return StepSerializer(

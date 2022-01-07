@@ -96,13 +96,7 @@ export default {
       }
     },
     clean () {
-      for (let i=0; i < this.filters.length; i++) {
-        const input = document.getElementById(this.filters[i].filterField)
-        if (input) {
-          input.value = null
-        }
-      }
-      this.filter()
+      this.$emit('filter', { search: this.searchInput })
     },
     filter () {
       this.$emit('filter', this.selectedFilters)

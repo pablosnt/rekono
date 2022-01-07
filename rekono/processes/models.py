@@ -2,16 +2,18 @@ from typing import Any
 
 from django.conf import settings
 from django.db import models
+from likes.models import LikeBase
 from tools.models import Configuration, Tool
 
 # Create your models here.
 
 
-class Process(models.Model):
+class Process(LikeBase):
     name = models.TextField(max_length=30, unique=True)
     description = models.TextField(max_length=250)
     creator = models.ForeignKey(
         settings.AUTH_USER_MODEL,
+        related_name='created_processes',
         on_delete=models.SET_NULL,
         blank=True,
         null=True

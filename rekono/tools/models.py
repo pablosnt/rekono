@@ -1,12 +1,13 @@
 from typing import Any
 
 from django.db import models
+from likes.models import LikeBase
 from tools.enums import FindingType, InputSelection, IntensityRank, Stage
 
 # Create your models here.
 
 
-class Tool(models.Model):
+class Tool(LikeBase):
     name = models.TextField(max_length=30, unique=True)
     command = models.TextField(max_length=30, blank=True, null=True)
     output_format = models.TextField(max_length=5, blank=True, null=True)

@@ -103,7 +103,7 @@ class RekonoApi {
     }
     if (filter) {
       for (let key in filter) {
-        if (filter[key]) {
+        if (filter[key] !== null && filter[key] !== undefined) {
           params[key] = filter[key]
         }
       }

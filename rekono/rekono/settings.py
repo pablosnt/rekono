@@ -122,7 +122,7 @@ REST_FRAMEWORK = {
         'rest_framework.filters.SearchFilter',
         'rest_framework.filters.OrderingFilter',
     ],
-    'DEFAULT_PAGINATION_CLASS': 'rekono.api.pagination.Pagination',
+    'DEFAULT_PAGINATION_CLASS': 'api.pagination.Pagination',
     'ORDERING_PARAM': 'order',
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',

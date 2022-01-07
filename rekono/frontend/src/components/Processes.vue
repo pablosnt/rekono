@@ -2,6 +2,13 @@
   <div>
     <TableHeader :filters="filters" add="process-modal" @filter="fetchData"/>
     <b-table striped borderless head-variant="dark" :fields="processesFields" :items="processes">
+      <template #cell(likes)="row">
+        {{ row.item.likes }}
+        <b-button variant="outline">
+          <b-icon variant="danger" v-if="row.item.liked" icon="heart-fill" @click="dislike('processes', row.item.id); fetchData()"/>
+          <b-icon variant="danger" v-if="!row.item.liked" icon="heart" @click="like('processes', row.item.id); fetchData()"/>
+        </b-button>
+      </template>
       <template #cell(actions)="row">
         <b-button @click="row.toggleDetails" variant="outline" class="mr-2" v-b-tooltip.hover title="Details">
           <b-icon v-if="!row.detailsShowing" variant="dark" icon="eye-fill"/>
@@ -85,6 +92,7 @@ import TableHeader from '@/common/TableHeader.vue'
 import Pagination from '@/common/Pagination.vue'
 import AlertMixin from '@/common/mixin/AlertMixin.vue'
 import PaginationMixin from '@/common/mixin/PaginationMixin.vue'
+import LikeMixin from '@/common/mixin/LikeMixin.vue'
 import ProcessForm from '@/modals/ProcessForm.vue'
 import StepForm from '@/modals/StepForm.vue'
 import TaskForm from '@/modals/TaskForm.vue'
@@ -92,7 +100,7 @@ const ProcessApi = Processes.ProcessApi
 const StepApi = Processes.StepApi
 export default {
   name: 'processesPage',
-  mixins: [AlertMixin, PaginationMixin],
+  mixins: [AlertMixin, PaginationMixin, LikeMixin],
   data () {
     return {
       processes: this.fetchData(),
@@ -100,6 +108,7 @@ export default {
         { key: 'name', label: 'Process', sortable: true },
         { key: 'steps.length', label: 'Steps', sortable: true },
         { key: 'creator.username', label: 'Creator', sortable: true },
+        { key: 'likes', sortable: true },
         { key: 'actions', sortable: false }
       ],
       stepsFields: [
@@ -130,7 +139,8 @@ export default {
     processes () {
       this.filters = [
         { name: 'Stage', values: stages, valueField: 'id', textField: 'value', filterField: 'steps__tool__stage' },
-        { name: 'Creator', filterField: 'creator__username__icontains', type: 'text' }
+        { name: 'Creator', filterField: 'creator__username__icontains', type: 'text' },
+        { name: 'Favourities', values: [{ value: true, text: 'True' }, { value: false, text: 'False' }], valueField: 'value', textField: 'text', filterField: 'liked' }
       ]
     }
   },

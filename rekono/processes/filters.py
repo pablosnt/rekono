@@ -1,11 +1,10 @@
-from django_filters import rest_framework
-from django_filters.rest_framework import filters
-from django_filters.rest_framework.filters import OrderingFilter
+from django_filters.rest_framework import FilterSet, filters
+from likes.filters import LikeFilter
 from processes.models import Process, Step
 
 
-class ProcessFilter(rest_framework.FilterSet):
-    o = OrderingFilter(fields=('name', 'creator'))
+class ProcessFilter(LikeFilter):
+    o = filters.OrderingFilter(fields=('name', 'creator', 'likes_count'))
 
     class Meta:
         model = Process
@@ -22,8 +21,8 @@ class ProcessFilter(rest_framework.FilterSet):
         }
 
 
-class StepFilter(rest_framework.FilterSet):
-    o = OrderingFilter(fields=('process', 'tool', 'configuration', 'priority'))
+class StepFilter(FilterSet):
+    o = filters.OrderingFilter(fields=('process', 'tool', 'configuration', 'priority'))
 
     class Meta:
         model = Step

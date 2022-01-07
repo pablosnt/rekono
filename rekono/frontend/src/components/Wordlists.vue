@@ -2,16 +2,23 @@
   <div>
     <TableHeader :filters="filters" add="wordlist-modal" @filter="fetchData"/>
     <b-table striped borderless head-variant="dark" :fields="wordlistsFields" :items="wordlists">
+      <template #cell(likes)="row">
+        {{ row.item.likes }}
+        <b-button variant="outline">
+          <b-icon variant="danger" v-if="row.item.liked" icon="heart-fill" @click="dislike('resources/wordlists', row.item.id); fetchData()"/>
+          <b-icon variant="danger" v-if="!row.item.liked" icon="heart" @click="like('resources/wordlists', row.item.id); fetchData()"/>
+        </b-button>
+      </template>
       <template #cell(actions)="row">
         <b-dropdown variant="outline" right>
           <template #button-content>
             <b-icon variant="dark" icon="three-dots-vertical"/>
           </template>
-          <b-dropdown-item variant="dark" @click="selectWordlist(row.item)" v-b-modal.wordlist-modal :disabled="$store.state.role !== 'Admin' && $store.state.user !== row.item.creator.id">
+          <b-dropdown-item variant="dark" @click="selectWordlist(row.item)" v-b-modal.wordlist-modal :disabled="$store.state.role !== 'Admin' && (!row.item.creator || $store.state.user !== row.item.creator.id)">
             <b-icon icon="pencil-square"/>
             <label class="ml-1">Edit</label>
           </b-dropdown-item>
-          <b-dropdown-item variant="danger" @click="selectWordlist(row.item)" v-b-modal.delete-wordlist-modal :disabled="$store.state.role !== 'Admin' && $store.state.user !== row.item.creator.id">
+          <b-dropdown-item variant="danger" @click="selectWordlist(row.item)" v-b-modal.delete-wordlist-modal :disabled="$store.state.role !== 'Admin' && (!row.item.creator || $store.state.user !== row.item.creator.id)">
             <b-icon icon="trash-fill"/>
             <label class="ml-1">Delete</label>
           </b-dropdown-item>
@@ -37,10 +44,11 @@ import TableHeader from '@/common/TableHeader.vue'
 import Pagination from '@/common/Pagination.vue'
 import AlertMixin from '@/common/mixin/AlertMixin.vue'
 import PaginationMixin from '@/common/mixin/PaginationMixin.vue'
+import LikeMixin from '@/common/mixin/LikeMixin.vue'
 import WordlistForm from '@/modals/WordlistForm.vue'
 export default {
   name: 'wordlistsPage',
-  mixins: [AlertMixin, PaginationMixin],
+  mixins: [AlertMixin, PaginationMixin, LikeMixin],
   data () {
     return {
       wordlists: this.fetchData(),
@@ -49,6 +57,7 @@ export default {
         { key: 'type', sortable: true },
         { key: 'size', sortable: true },
         { key: 'creator.username', label: 'Creator', sortable: true },
+        { key: 'likes', sortable: true },
         { key: 'actions', sortable: false }
       ],
       selectedWordlist: null,
@@ -66,7 +75,8 @@ export default {
       this.filters = [
         { name: 'Type', values: ['Endpoint', 'Password'], valueField: 'value', textField: 'value', filterField: 'type' },
         { name: 'Max. Size', filterField: 'size__lte', type: 'number' },
-        { name: 'Creator', filterField: 'creator__username__icontains', type: 'text' }
+        { name: 'Creator', filterField: 'creator__username__icontains', type: 'text' },
+        { name: 'Favourities', values: [{ value: true, text: 'True' }, { value: false, text: 'False' }], valueField: 'value', textField: 'text', filterField: 'liked' }
       ] 
     }
   },

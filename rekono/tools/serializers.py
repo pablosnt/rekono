@@ -1,11 +1,11 @@
 from typing import List
 
+from api.serializers import IntegerChoicesField
+from likes.serializers import LikeBaseSerializer
 from rest_framework import serializers
 from rest_framework.fields import SerializerMethodField
 from tools.enums import IntensityRank, Stage
 from tools.models import Configuration, Input, Intensity, Output, Tool
-
-from rekono.api.serializers import IntegerChoicesField
 
 
 class StageField(IntegerChoicesField):
@@ -70,7 +70,7 @@ class IntensitySerializer(serializers.ModelSerializer):
         ordering = ['-id']
 
 
-class ToolSerializer(serializers.ModelSerializer):
+class ToolSerializer(serializers.ModelSerializer, LikeBaseSerializer):
     stage_name = StageField(source='stage')
     intensities = SerializerMethodField(
         method_name='get_intensities',
@@ -87,7 +87,7 @@ class ToolSerializer(serializers.ModelSerializer):
         model = Tool
         fields = (
             'id', 'name', 'command', 'stage_name', 'reference', 'icon',
-            'intensities', 'configurations'
+            'liked', 'likes', 'intensities', 'configurations'
         )
 
     def get_intensities(self, instance) -> List[IntensitySerializer]:

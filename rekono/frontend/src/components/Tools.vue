@@ -14,6 +14,13 @@
           </div>
         </div>
       </template>
+      <template #cell(likes)="row">
+        {{ row.item.likes }}
+        <b-button variant="outline">
+          <b-icon variant="danger" v-if="row.item.liked" icon="heart-fill" @click="dislike('tools', row.item.id); fetchData()"/>
+          <b-icon variant="danger" v-if="!row.item.liked" icon="heart" @click="like('tools', row.item.id); fetchData()"/>
+        </b-button>
+      </template>
       <template #cell(actions)="row">
         <b-button @click="row.toggleDetails" variant="outline" class="mr-2" v-b-tooltip.hover title="Details">
           <b-icon v-if="!row.detailsShowing" variant="dark" icon="eye-fill"/>
@@ -59,12 +66,13 @@ import { stages, findingTypes, auditor, intensitiesByVariant } from '@/backend/c
 import Pagination from '@/common/Pagination.vue'
 import TableHeader from '@/common/TableHeader.vue'
 import PaginationMixin from '@/common/mixin/PaginationMixin.vue'
+import LikeMixin from '@/common/mixin/LikeMixin.vue'
 import ProcessForm from '@/modals/ProcessForm.vue'
 import StepForm from '@/modals/StepForm.vue'
 import TaskForm from '@/modals/TaskForm.vue'
 export default {
   name: 'toolsPage',
-  mixins: [PaginationMixin],
+  mixins: [PaginationMixin, LikeMixin],
   data () {
     return {
       auditor: auditor,
@@ -76,6 +84,7 @@ export default {
         { key: 'command', sortable: true },
         { key: 'stage_name', label: 'Stage', sortable: true },
         { key: 'intensities', sortable: true },
+        { key: 'likes', sortable: true },
         { key: 'actions', sortable: false }
       ],
       configFields: [
@@ -103,7 +112,8 @@ export default {
       this.filters = [
         { name: 'Stage', values: stages, valueField: 'id', textField: 'value', filterField: 'stage' },
         { name: 'Input', values: findingTypes, valueField: 'value', textField: 'value', filterField: 'configurations__inputs__type' },
-        { name: 'Output', values: findingTypes, valueField: 'value', textField: 'value', filterField: 'configurations__outputs__type' }
+        { name: 'Output', values: findingTypes, valueField: 'value', textField: 'value', filterField: 'configurations__outputs__type' },
+        { name: 'Favourities', values: [{ value: true, text: 'True' }, { value: false, text: 'False' }], valueField: 'value', textField: 'text', filterField: 'liked' }
       ] 
     }
   },

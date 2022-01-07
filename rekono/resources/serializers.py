@@ -1,6 +1,7 @@
 import os
 import uuid
 
+from likes.serializers import LikeBaseSerializer
 from resources.models import Wordlist
 from rest_framework import serializers
 from rest_framework.fields import SerializerMethodField
@@ -10,13 +11,15 @@ from users.serializers import SimplyUserSerializer
 from rekono.settings import WORDLIST_DIR
 
 
-class WordlistSerializer(serializers.ModelSerializer):
+class WordlistSerializer(serializers.ModelSerializer, LikeBaseSerializer):
     file = serializers.FileField(required=True, allow_empty_file=False, write_only=True)
     creator = SimplyUserSerializer(many=False, read_only=True, required=False)
 
     class Meta:
         model = Wordlist
-        fields = ('id', 'name', 'type', 'path', 'file', 'checksum', 'size', 'creator')
+        fields = (
+            'id', 'name', 'type', 'path', 'file', 'checksum', 'size', 'creator', 'liked', 'likes'
+        )
         read_only_fields = ('creator',)
         extra_kwargs = {
             'path': {'write_only': True, 'required': False},

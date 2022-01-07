@@ -2,11 +2,11 @@ import RekonoApi from './api'
 
 class Process extends RekonoApi {
   getAllProcesses (filter = null) {
-    return super.getAllPages('/api/processes/?o=name', filter)
+    return super.getAllPages('/api/processes/?o=-likes_count,name', filter)
   }
 
   getPaginatedProcesses (page = null, limit = null, filter = null) {
-    return super.get('/api/processes/?o=name', page, limit, filter)
+    return super.get('/api/processes/?o=-likes_count,name', page, limit, filter)
       .then(response => {
         return response.data
       })

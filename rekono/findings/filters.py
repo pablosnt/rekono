@@ -6,7 +6,7 @@ from findings.enums import OSType
 from findings.models import (OSINT, Credential, Endpoint, Enumeration, Exploit,
                              Host, Technology, Vulnerability)
 
-from rekono.api.filters import ToolFilter
+from api.filters import ToolFilter
 
 FINDING_ORDERING = (
     ('execution__task', 'task'),

@@ -1,3 +1,4 @@
+from likes.views import LikeManagementView
 from processes.filters import ProcessFilter, StepFilter
 from processes.models import Process, Step
 from processes.serializers import (ProcessSerializer, StepPrioritySerializer,
@@ -10,7 +11,7 @@ from security.authorization.permissions import (ProcessCreatorPermission,
 # Create your views here.
 
 
-class ProcessViewSet(ModelViewSet):
+class ProcessViewSet(ModelViewSet, LikeManagementView):
     queryset = Process.objects.all()
     serializer_class = ProcessSerializer
     filterset_class = ProcessFilter

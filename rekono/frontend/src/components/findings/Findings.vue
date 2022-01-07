@@ -7,10 +7,10 @@
       <b-col v-if="!task && !execution" cols="2">
         <b-form-select v-model="selectedTarget" :options="targets" value-field="id" text-field="target"/>
       </b-col>
-      <b-col cols="2">
+      <b-col :cols="!task && !execution ? 2 : 3">
         <b-form-select v-model="selectedFindings" :options="findings" multiple :select-size="2" value-field="value" text-field="value"/>
       </b-col>
-      <b-col cols="1">
+      <b-col :cols="!task && !execution ? 1 : 2">
         <b-form-select v-model="activeFilter" :options="activeOptions"/>
       </b-col>
       <b-col cols="1">
