@@ -5,7 +5,7 @@
         "fields": {
             "tool_id": 1,
             "name": "TCP ports",
-            "arguments": "{target} {intensity} {ports} -sS -oX {output}",
+            "arguments": "{host} {intensity} {ports} -sS -oX {output}",
             "default": false
         }
     },
@@ -15,7 +15,7 @@
         "fields": {
             "tool_id": 1,
             "name": "UDP ports",
-            "arguments": "{target} {intensity} {ports} -sU -oX {output}",
+            "arguments": "{host} {intensity} {ports} -sU -oX {output}",
             "default": false
         }
     },
@@ -25,7 +25,7 @@
         "fields": {
             "tool_id": 1,
             "name": "TCP ports & service versions",
-            "arguments": "{target} {intensity} {ports} -sS -sV -A -oX {output}",
+            "arguments": "{host} {intensity} {ports} -sS -sV -A -oX {output}",
             "default": true
         }
     },
@@ -35,7 +35,7 @@
         "fields": {
             "tool_id": 1,
             "name": "UDP ports & service versions",
-            "arguments": "{target} {intensity} {ports} -sU -sV -A -oX {output}",
+            "arguments": "{host} {intensity} {ports} -sU -sV -A -oX {output}",
             "default": false
         }
     },
@@ -45,7 +45,7 @@
         "fields": {
             "tool_id": 1,
             "name": "TCP & UDP ports",
-            "arguments": "{target} {intensity} {ports} -sS -sU -oX {output}",
+            "arguments": "{host} {intensity} {ports} -sS -sU -oX {output}",
             "default": false
         }
     },
@@ -55,7 +55,7 @@
         "fields": {
             "tool_id": 1,
             "name": "TCP & UDP ports & service versions",
-            "arguments": "{target} {intensity} {ports} -sS -sU -sV -A -oX {output}",
+            "arguments": "{host} {intensity} {ports} -sS -sU -sV -A -oX {output}",
             "default": false
         }
     },
@@ -65,7 +65,7 @@
         "fields": {
             "tool_id": 1,
             "name": "Fast TCP ports",
-            "arguments": "{target} {intensity} {ports} -F -sS -oX {output}",
+            "arguments": "{host} {intensity} {ports} -F -sS -oX {output}",
             "default": false
         }
     },
@@ -75,7 +75,7 @@
         "fields": {
             "tool_id": 1,
             "name": "Fast UDP ports",
-            "arguments": "{target} {intensity} {ports} -F -sU -oX {output}",
+            "arguments": "{host} {intensity} {ports} -F -sU -oX {output}",
             "default": false
         }
     },
@@ -85,7 +85,7 @@
         "fields": {
             "tool_id": 1,
             "name": "Fast TCP ports & service versions",
-            "arguments": "{target} {intensity} {ports} -F -sS -sV -A -oX {output}",
+            "arguments": "{host} {intensity} {ports} -F -sS -sV -A -oX {output}",
             "default": false
         }
     },
@@ -95,7 +95,7 @@
         "fields": {
             "tool_id": 1,
             "name": "Fast UDP ports & service versions",
-            "arguments": "{target} {intensity} {ports} -F -sU -sV -A -oX {output}",
+            "arguments": "{host} {intensity} {ports} -F -sU -sV -A -oX {output}",
             "default": false
         }
     },
@@ -105,7 +105,7 @@
         "fields": {
             "tool_id": 1,
             "name": "Fast TCP & UDP ports",
-            "arguments": "{target} {intensity} {ports} -F -sS -sU -oX {output}",
+            "arguments": "{host} {intensity} {ports} -F -sS -sU -oX {output}",
             "default": false
         }
     },
@@ -115,7 +115,7 @@
         "fields": {
             "tool_id": 1,
             "name": "Fast TCP & UDP ports & service versions",
-            "arguments": "{target} {intensity} {ports} -F -sS -sU -sV -A -oX {output}",
+            "arguments": "{host} {intensity} {ports} -F -sS -sU -sV -A -oX {output}",
             "default": false
         }
     },
@@ -125,7 +125,7 @@
         "fields": {
             "tool_id": 1,
             "name": "Vulners",
-            "arguments": "{target} {intensity} {ports} -sS -sV -A --script vulners -oX {output}",
+            "arguments": "{host} {intensity} {ports} -sS -sV -A --script vulners -oX {output}",
             "default": false
         }
     },
@@ -135,7 +135,7 @@
         "fields": {
             "tool_id": 1,
             "name": "FTP NSE scripts",
-            "arguments": "{target} {intensity} {ports} -sS -sV -A --script ftp-anon,ftp-proftpd-backdoor,ftp-vsftpd-backdoor,ftp-libopie,ftp-vuln-cve2010-4221 -oX {output}",
+            "arguments": "{host} {intensity} {ports} -sS -sV -A --script ftp-anon,ftp-proftpd-backdoor,ftp-vsftpd-backdoor,ftp-libopie,ftp-vuln-cve2010-4221 -oX {output}",
             "default": false
         }
     },

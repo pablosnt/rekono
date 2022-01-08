@@ -18,10 +18,9 @@ def consumer(
     tool: Tool,
     configuration: Configuration,
     intensity: Intensity,
-    inputs: list,
+    arguments: list,
     targets: list,
-    previous_findings: list,
-    rekono_address: str,
+    previous_findings: list
 ) -> BaseTool:
     current_job = rq.get_current_job()
     tool_class = tool_utils.get_tool_class_by_name(tool.name)
@@ -29,29 +28,27 @@ def consumer(
         execution=execution,
         tool=tool,
         configuration=configuration,
-        inputs=inputs,
+        arguments=arguments,
         intensity=intensity
     )
     if not previous_findings and current_job._dependency_ids:
         previous_findings = process_dependencies(
             execution,
             intensity,
-            inputs,
+            arguments,
             targets,
-            rekono_address,
             current_job,
             tool
         )
-    tool.run(targets=targets, previous_findings=previous_findings, rekono_address=rekono_address)
+    tool.run(targets=targets, previous_findings=previous_findings)
     return tool
 
 
 def process_dependencies(
     execution: Execution,
     intensity: Intensity,
-    inputs: list,
+    arguments: list,
     targets: list,
-    rekono_address: str,
     current_job: Job,
     tool: BaseTool
 ) -> list:
@@ -59,7 +56,7 @@ def process_dependencies(
     if not findings:
         return []
     new_jobs_ids = []
-    all_params = utils.get_executions_from_findings(findings, inputs)
+    all_params = utils.get_executions_from_findings(findings, arguments)
     all_params = [
         param_set for param_set in all_params if check_params_for_tool(tool, targets, param_set)
     ]
@@ -69,10 +66,9 @@ def process_dependencies(
         job = producer.producer(
             new_execution,
             intensity,
-            inputs,
+            arguments,
             targets=targets,
             previous_findings=param_set,
-            rekono_address=rekono_address,
             callback=success_callback,
             at_front=True
         )

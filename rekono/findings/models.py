@@ -6,6 +6,12 @@ from django.db import DEFAULT_DB_ALIAS, models
 from executions.models import Execution
 from findings.enums import DataType, OSType, PortStatus, Protocol, Severity
 from findings.utils import get_unique_filter
+from inputs.base import BaseInput
+from inputs.enums import InputKeyword
+from inputs.utils import get_url
+from targets.enums import TargetType
+from targets.utils import get_target_type
+from tools.models import Input
 
 # Create your models here.
 
@@ -20,7 +26,7 @@ def create_finding_foreign_key(model, name):
     )
 
 
-class Finding(models.Model):
+class Finding(models.Model, BaseInput):
     execution = models.ForeignKey(Execution, related_name='%(class)s', on_delete=models.CASCADE)
     creation = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=True)
@@ -85,6 +91,15 @@ class OSINT(Finding):
         {'name': 'data_type', 'is_base': False}
     ]
 
+    def parse(self, accumulated: dict = {}) -> dict:
+        if self.data_type in [DataType.IP, DataType.DOMAIN]:
+            return {
+                InputKeyword.TARGET.name.lower(): self.data,
+                InputKeyword.HOST.name.lower(): self.data,
+                InputKeyword.URL.name.lower(): get_url(self.data)
+            }
+        return {}
+
     def defect_dojo(self):
         return {
             'title': f'{self.data_type} found using OSINT techniques',
@@ -102,6 +117,19 @@ class Host(Finding):
     key_fields = [
         {'name': 'address', 'is_base': False}
     ]
+
+    def filter(self, input: Input) -> bool:
+        try:
+            return TargetType[input.filter] == get_target_type(self.address)
+        except KeyError:
+            return True
+
+    def parse(self, accumulated: dict = {}) -> dict:
+        return {
+            InputKeyword.TARGET.name.lower(): self.address,
+            InputKeyword.HOST.name.lower(): self.address,
+            InputKeyword.URL.name.lower(): get_url(self.address),
+        }
 
     def defect_dojo(self):
         description = self.address
@@ -131,6 +159,27 @@ class Enumeration(Finding):
         {'name': 'port', 'is_base': False}
     ]
 
+    def filter(self, input: Input) -> bool:
+        try:
+            to_check = int(input.filter)
+            return to_check == self.port
+        except ValueError:
+            return input.filter in self.service
+
+    def parse(self, accumulated: dict = {}) -> dict:
+        output = {
+            InputKeyword.TARGET.name.lower(): f'{self.host.address}:{self.port}',
+            InputKeyword.HOST.name.lower(): self.host.address,
+            InputKeyword.PORT.name.lower(): self.port,
+            InputKeyword.PORTS.name.lower(): [self.port],
+            InputKeyword.URL.name.lower(): get_url(self.host.address, self.port),
+        }
+        if accumulated and InputKeyword.PORTS.name.lower() in accumulated:
+            output[InputKeyword.PORTS.name.lower()] = accumulated[InputKeyword.PORTS.name.lower()]
+            output[InputKeyword.PORTS.name.lower()].append(self.port)
+        output[InputKeyword.PORTS_COMMAS.name.lower()] = ','.join([str(port) for port in output[InputKeyword.PORTS.name.lower()]])    # noqa: E501
+        return output
+
     def defect_dojo(self):
         description = f'{self.port} - {self.port_status} - {self.protocol} - {self.service}'
         return {
@@ -150,6 +199,23 @@ class Endpoint(Finding):
         {'name': 'enumeration_id', 'is_base': True},
         {'name': 'endpoint', 'is_base': False}
     ]
+
+    def filter(self, input: Input) -> bool:
+        try:
+            status_code = int(input.filter)
+            return status_code == self.status
+        except ValueError:
+            return self.endpoint.startswith(input.filter)
+
+    def parse(self, accumulated: dict = {}) -> dict:
+        output = self.enumeration.parse()
+        output[InputKeyword.URL.name.lower()] = get_url(
+            self.enumeration.host.address,
+            self.enumeration.port,
+            self.endpoint
+        )
+        output[InputKeyword.ENDPOINT.name.lower()] = self.endpoint
+        return output
 
     def defect_dojo(self):
         return {
@@ -172,6 +238,16 @@ class Technology(Finding):
         {'name': 'enumeration_id', 'is_base': True},
         {'name': 'name', 'is_base': False}
     ]
+
+    def filter(self, input: Input) -> bool:
+        return input.filter.lower() in self.name.lower()
+
+    def parse(self, accumulated: dict = {}) -> dict:
+        output = self.enumeration.parse()
+        output[InputKeyword.TECHNOLOGY.name.lower()] = self.name
+        if self.version:
+            output[InputKeyword.VERSION.name.lower()] = self.version
+        return output
 
     def defect_dojo(self):
         return {
@@ -202,6 +278,27 @@ class Vulnerability(Finding):
         {'name': 'name', 'is_base': False}
     ]
 
+    def filter(self, input: Input) -> bool:
+        try:
+            return Severity[input.filter] == self.severity
+        except ValueError:
+            f = input.filter.lower()
+            return (
+                f == 'cve' and self.cve
+                or (f.startswith('cve-') and f == self.cve.lower())
+                or (f.startswith('cwe-') and f == self.cwe.lower())
+            )
+    
+    def parse(self, accumulated: dict = {}) -> dict:
+        output = {}
+        if self.enumeration:
+            output = self.enumeration.parse()
+        elif self.technology:
+            output = self.technology.parse()
+        if self.cve:
+            output[InputKeyword.CVE.name.lower()] = self.cve
+        return output
+
     def defect_dojo(self):
         return {
             'title': self.name,
@@ -225,13 +322,15 @@ class Credential(Finding):
         {'name': 'secret', 'is_base': False}
     ]
 
+    def parse(self, accumulated: dict = ...) -> dict:
+        return {
+            InputKeyword.EMAIL.name.lower(): self.email,
+            InputKeyword.USERNAME.name.lower(): self.username,
+            InputKeyword.SECRET.name.lower(): self.secret,
+        }
+
     def defect_dojo(self):
-        description = ''
-        for field in ['email', 'username', 'secret']:
-            if getattr(self, field):
-                if description:
-                    description += ' - '
-                description += getattr(self, field)
+        description = ' - '.join([getattr(self, f) for f in ['email', 'username', 'secret']])
         return {
             'title': 'Credentials exposure',
             'description': description,
@@ -255,6 +354,11 @@ class Exploit(Finding):
         {'name': 'name', 'is_base': False},
         {'name': 'reference', 'is_base': False}
     ]
+
+    def parse(self, accumulated: dict = {}) -> dict:
+        output = self.vulnerability.parse()
+        output[InputKeyword.EXPLOIT.name.lower()] = self.name
+        return output
 
     def defect_dojo(self):
         return {

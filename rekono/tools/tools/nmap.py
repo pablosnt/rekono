@@ -1,11 +1,12 @@
 import re
 from typing import Any
 
-from arguments.constants import CVE_REGEX
 from findings.enums import OSType, PortStatus, Protocol, Severity
 from findings.models import Enumeration, Host, Technology, Vulnerability
 from libnmap.parser import NmapParser
 from tools.tools.base_tool import BaseTool
+
+CVE_REGEX = 'CVE-[0-9]{4}-[0-9]{1,7}'
 
 
 class NmapTool(BaseTool):

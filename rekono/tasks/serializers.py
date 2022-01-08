@@ -96,8 +96,5 @@ class TaskSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         task = super().create(validated_data)
-        rekono_address = None
-        if self.context.get('request'):
-            rekono_address = get_current_site(self.context.get('request')).domain
-        producer(task, rekono_address)
+        producer(task)
         return task

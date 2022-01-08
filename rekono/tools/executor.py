@@ -2,33 +2,32 @@ from django.utils import timezone
 from executions import utils
 from executions.models import Execution
 from executions.queue import producer
+from inputs.enums import InputTypeNames
 from targets.models import TargetEndpoint
 from tasks.models import Task
-from tools.enums import FindingType
-from tools.models import Input, Intensity
+from tools.models import Argument, Intensity
 
 
-def execute(task: Task, rekono_address: str) -> None:
+def execute(task: Task) -> None:
     intensity = Intensity.objects.filter(tool=task.tool, value=task.intensity).first()
-    inputs = Input.objects.filter(configuration=task.configuration).all()
+    arguments = Argument.objects.filter(tool=task.tool).all()
     targets = {
-        FindingType.HOST: [task.target],
-        FindingType.ENUMERATION: list(task.target.target_ports.all()),
-        FindingType.ENDPOINT: list(TargetEndpoint.objects.filter(
+        InputTypeNames.HOST: [task.target],
+        InputTypeNames.ENUMERATION: list(task.target.target_ports.all()),
+        InputTypeNames.ENDPOINT: list(TargetEndpoint.objects.filter(
             target_port__target=task.target
         ).all()),
-        FindingType.WORDLIST: list(task.wordlists.all())
+        InputTypeNames.WORDLIST: list(task.wordlists.all())
     }
-    executions = utils.get_executions_from_findings(targets, inputs)
+    executions = utils.get_executions_from_findings(targets, arguments)
     for execution_targets in executions:
         execution = Execution.objects.create(task=task)
         execution.save()
         producer.producer(
             execution=execution,
             intensity=intensity,
-            inputs=inputs,
+            arguments=arguments,
             targets=execution_targets,
-            rekono_address=rekono_address,
             callback=success_callback
         )
 

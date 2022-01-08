@@ -14,7 +14,7 @@ from users.utils import get_token_expiration
 
 class RekonoUserManager(UserManager):
 
-    def create_user(self, email: str, role: Role, rekono_address: str) -> Any:
+    def create_user(self, email: str, role: Role) -> Any:
         user = User.objects.create(email=email, otp=generate_otp(), is_active=False)
         group = Group.objects.get(name=role.value)
         if not group:
@@ -24,7 +24,7 @@ class RekonoUserManager(UserManager):
         user.save()
         api_token = Token.objects.create(user=user)
         api_token.save()
-        send_invitation_to_new_user(user, rekono_address)
+        send_invitation_to_new_user(user)
         return user
 
     def create_superuser(
@@ -50,7 +50,7 @@ class RekonoUserManager(UserManager):
             user.save()
         return user
 
-    def enable_user(self, user: Any, role: Role, rekono_address: str) -> Any:
+    def enable_user(self, user: Any, role: Role) -> Any:
         user.is_active = True
         user.otp = generate_otp()
         user.otp_expiration = get_token_expiration()
@@ -62,7 +62,7 @@ class RekonoUserManager(UserManager):
         user.save()
         api_token = Token.objects.create(user=user)
         api_token.save()
-        send_password_reset(user, rekono_address)
+        send_password_reset(user)
         return user
 
     def disable_user(self, user: Any) -> Any:
@@ -78,11 +78,11 @@ class RekonoUserManager(UserManager):
             pass
         return user
 
-    def request_password_reset(self, user: Any, rekono_address: str) -> Any:
+    def request_password_reset(self, user: Any) -> Any:
         user.otp = generate_otp()
         user.otp_expiration = get_token_expiration()
         user.save()
-        send_password_reset(user, rekono_address)
+        send_password_reset(user)
         return user
 
 

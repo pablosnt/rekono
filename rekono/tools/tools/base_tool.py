@@ -2,22 +2,23 @@ import os
 import shutil
 import subprocess
 import uuid
-from typing import Any
+from typing import Any, List, Union
 
-from arguments import checker, formatter
+from django.apps import apps
 from django.core.exceptions import ValidationError
+from django.db.models import Model
 from django.utils import timezone
 from executions.models import Execution
 from findings.models import Vulnerability
 from findings.queue import producer
 from findings.utils import get_unique_filter
+from inputs.base import BaseInput
 from tasks.enums import Status
 from tools import utils
-from tools.enums import InputSelection
 from tools.exceptions import (InstallationNotFoundException,
                               InvalidToolParametersException,
                               UnexpectedToolExitCodeException)
-from tools.models import Configuration, Intensity, Tool
+from tools.models import Argument, Configuration, Input, Intensity, Tool
 
 from rekono.settings import EXECUTION_OUTPUTS
 
@@ -33,7 +34,7 @@ class BaseTool():
         execution: Execution,
         tool: Tool,
         configuration: Configuration,
-        inputs: list,
+        arguments: list,
         intensity: Intensity
     ) -> None:
         execution.rq_job_pid = os.getpid()
@@ -41,7 +42,7 @@ class BaseTool():
         self.execution = execution
         self.tool = tool
         self.configuration = configuration
-        self.inputs = inputs
+        self.arguments = arguments
         self.intensity = intensity
         self.file_output_enabled = self.tool.output_format is not None
         self.file_output_extension = self.tool.output_format or 'txt'
@@ -59,47 +60,60 @@ class BaseTool():
 
     def clean_environment(self) -> None:
         pass    # This method can be implemented by specific tools to run code after execution
+    
+    def format(self, argument: Argument, findings: Union[List[BaseInput], BaseInput]) -> str:
+        data = {}
+        if (argument.multiple and isinstance(findings, List)):
+            for finding in findings:
+                data = finding.parse(data)
+        else:
+            data = findings.parse()
+        data = {k: v for k, v in data.items() if v}
+        try:
+            return argument.argument.format(**data)
+        except KeyError:
+            return None
 
-    def evaluate_arguments_error(self, name: str, required: bool, arguments: dict):
-        if required and name not in arguments:
-            raise InvalidToolParametersException(f'Tool configuration requires {name} argument')
-        return arguments[name] if name in arguments else ''
+    def process_source(self, argument: Argument, input: Input, model: Model, source: list, command: dict) -> dict:
+        selection = []
+        for item in source:
+            if isinstance(item, model) and item.check(input):
+                if argument.multiple:
+                    selection.append(item)
+                else:
+                    command[argument.name] = self.format(argument, item)
+                    self.findings_relations[model.__name__.lower()] = item
+                    return command
+        if selection:
+            command[argument.name] = self.format(argument, selection)
+        return command
+                
 
     def get_arguments(self, targets: list, previous_findings: list) -> list:
-        command_arguments = {
+        command = {
             'intensity': self.intensity.argument,
             'output': self.path_output if self.file_output_enabled else ''
         }
-        for i in self.inputs:
-            try:
-                input_classes = utils.get_finding_class_by_input_type(i.type)
-                findings = []
-                for source in [previous_findings, targets]:
-                    for r in source:
-                        for input_class in input_classes:
-                            if isinstance(r, input_class) and checker.check_finding(i, r):
-                                if i.selection == InputSelection.FOR_EACH:
-                                    command_arguments[i.name] = formatter.argument_with_one(i.argument, r)      # noqa: E501
-                                    self.findings_relations[input_class.__name__.lower()] = r
-                                    break
-                                else:
-                                    findings.append(r)
-                    if findings:
-                        command_arguments[i.name] = formatter.argument_with_multiple(i.argument, findings)  # noqa: E501
-                    if i.name in command_arguments:
+        for argument in self.arguments:
+            for input in argument.inputs.order_by('order'):
+                model = input.type.get_related_model_class()
+                command = self.process_source(argument, input, model, previous_findings, command)
+                if argument.name in command and command[argument.name]:
+                    break
+            if argument.name not in command or not command[argument.name]:
+                for input in argument.inputs.order_by('order'):
+                    model = input.type.get_callback_target_class()
+                    command = self.process_source(argument, input, model, targets, command)
+                    if argument.name in command and command[argument.name]:
                         break
-            except KeyError:
-                command_arguments[i.name] = self.evaluate_arguments_error(
-                    i.name,
-                    i.required,
-                    command_arguments
-                )
-            command_arguments[i.name] = self.evaluate_arguments_error(
-                i.name,
-                i.required,
-                command_arguments
-            )
-        args = self.configuration.arguments.format(**command_arguments)
+            if argument.name not in command or not command[argument.name]:
+                if argument.required:
+                    raise InvalidToolParametersException(
+                        f'Tool configuration requires {argument.name} argument'
+                    )
+                else:
+                    command[argument.name] = ''
+        args = self.configuration.arguments.format(**command)
         return [arg for arg in args.split(' ') if arg] if ' ' in args else [args]
 
     def tool_execution(self, args: list, targets: list, previous_findings: list) -> str:
@@ -134,6 +148,12 @@ class BaseTool():
 
     def process_findings(self) -> None:
         for finding in self.findings:
+            if (
+                isinstance(finding, Vulnerability)
+                and getattr(finding, 'enumeration')
+                and 'technology' in self.findings_relations
+            ):
+                setattr(finding, 'enumeration', None)
             for key, value in self.findings_relations.items():
                 if (
                     isinstance(finding, Vulnerability)
@@ -141,17 +161,11 @@ class BaseTool():
                     and key == 'enumeration'
                 ):
                     continue
-                elif (
-                    isinstance(finding, Vulnerability)
-                    and getattr(finding, 'enumeration')
-                    and key == 'technology'
-                ):
-                    setattr(finding, 'enumeration', None)
                 if hasattr(finding, key):
                     setattr(finding, key, value)
 
-    def send_findings(self, rekono_address: str) -> None:
-        producer(self.execution, self.findings, rekono_address)
+    def send_findings(self) -> None:
+        producer(self.execution, self.findings)
 
     def on_start(self) -> None:
         self.execution.start = timezone.now()
@@ -185,7 +199,7 @@ class BaseTool():
         self.execution.output_plain = output.decode('utf-8')
         self.execution.save()
 
-    def run(self, targets: list = [], previous_findings: list = [], rekono_address: str = None) -> None:
+    def run(self, targets: list = [], previous_findings: list = []) -> None:
         self.on_start()
         try:
             self.check_installation()
@@ -216,4 +230,4 @@ class BaseTool():
         if self.file_output_enabled and os.path.isfile(self.path_output):
             self.parse_output(output)
             self.process_findings()
-            self.send_findings(rekono_address)
+            self.send_findings()

@@ -1,0 +1,83 @@
+[
+    {
+        "model": "inputs.inputtype",
+        "pk": 1,
+        "fields": {
+            "name": "OSINT",
+            "related_model": "findings.osint",
+            "callback_target": null
+        }
+    },
+    {
+        "model": "inputs.inputtype",
+        "pk": 2,
+        "fields": {
+            "name": "Host",
+            "related_model": "findings.host",
+            "callback_target": "Target"
+        }
+    },
+    {
+        "model": "inputs.inputtype",
+        "pk": 3,
+        "fields": {
+            "name": "Enumeration",
+            "related_model": "findings.enumeration",
+            "callback_target": "TargetPort"
+        }
+    },
+    {
+        "model": "inputs.inputtype",
+        "pk": 4,
+        "fields": {
+            "name": "Endpoint",
+            "related_model": "findings.endpoint",
+            "callback_target": "TargetEndpoint"
+        }
+    },
+    {
+        "model": "inputs.inputtype",
+        "pk": 5,
+        "fields": {
+            "name": "Technology",
+            "related_model": "findings.technology",
+            "callback_target": null
+        }
+    },
+    {
+        "model": "inputs.inputtype",
+        "pk": 6,
+        "fields": {
+            "name": "Vulnerability",
+            "related_model": "findings.vulnerability",
+            "callback_target": null
+        }
+    },
+    {
+        "model": "inputs.inputtype",
+        "pk": 7,
+        "fields": {
+            "name": "Credential",
+            "related_model": "findings.credential",
+            "callback_target": null
+        }
+    },
+    {
+        "model": "inputs.inputtype",
+        "pk": 8,
+        "fields": {
+            "name": "Exploit",
+            "related_model": "findings.exploit",
+            "callback_target": null
+        }
+    },
+    {
+        "model": "inputs.inputtype",
+        "pk": 9,
+        "fields": {
+            "name": "Wordlist",
+            "related_model": "resources.wordlist",
+            "callback_target": null
+        }
+    }
+]

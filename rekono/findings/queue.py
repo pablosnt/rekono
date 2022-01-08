@@ -1,7 +1,4 @@
-from typing import Optional
-
 import django_rq
-from django.core.exceptions import ValidationError
 from django.db.models import Q
 from django_rq import job
 from executions.models import Execution
@@ -12,17 +9,13 @@ from findings.notification import send_email, send_telegram_message
 from users.enums import Notification
 
 
-def producer(execution: Execution, findings: list, rekono_address: str) -> None:
+def producer(execution: Execution, findings: list) -> None:
     findings_queue = django_rq.get_queue('findings-queue')
-    findings_queue.enqueue(consumer, execution=execution, findings=findings, rekono_address=rekono_address)
+    findings_queue.enqueue(consumer, execution=execution, findings=findings)
 
 
 @job('findings-queue')
-def consumer(
-    execution: Execution = None,
-    findings: list = [],
-    rekono_address: Optional[str] = None
-) -> None:
+def consumer(execution: Execution = None, findings: list = [],) -> None:
     if execution:
         for finding in findings:
             if isinstance(finding, Vulnerability) and finding.cve:
@@ -40,6 +33,6 @@ def consumer(
         users_to_notify.extend(list(search_members))
         for user in users_to_notify:
             if user.email_notification:
-                send_email(user, execution, findings, rekono_address)
+                send_email(user, execution, findings)
             elif user.telegram_notification:
-                send_telegram_message(user, execution, findings, rekono_address)
+                send_telegram_message(user, execution, findings)

@@ -1,8 +1,9 @@
 import django_rq
+from django.apps import apps
 from executions.queue import producer
+from inputs import utils
 from rq.job import Job
 from rq.registry import DeferredJobRegistry
-from tools import utils
 
 
 def cancel_execution(job_id: str) -> Job:
@@ -28,13 +29,13 @@ def get_findings_from_dependencies(dependencies: list) -> dict:
         if not dependency or not dependency.result:
             continue
         for input_type in utils.get_relations_between_input_types().keys():
-            input_class = utils.get_finding_class_by_input_type(input_type)
-            input_findings = [f for f in dependency.result.findings if isinstance(f, input_class)]
+            model = input_type.get_related_model_class()
+            input_findings = [f for f in dependency.result.findings if isinstance(f, model)]
             for finding in input_findings:
-                if input_type in findings:
-                    findings[input_type].append(finding)
+                if input_type.name in findings:
+                    findings[input_type.name].append(finding)
                 else:
-                    findings[input_type] = [finding]
+                    findings[input_type.name] = [finding]
     return findings
 
 
@@ -51,9 +52,8 @@ def update_new_dependencies(parent_job: str, new_jobs: list, targets: list) -> N
             producer.producer(
                 meta['execution'],
                 meta['intensity'],
-                meta['inputs'],
+                meta['arguments'],
                 targets=meta['targets'],
-                request=meta['rekono_address'],
                 callback=meta['callback'],
                 dependencies=dependencies
             )

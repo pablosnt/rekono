@@ -16,10 +16,15 @@ from pathlib import Path
 from typing import List
 
 from findings.enums import Severity
+from inputs.enums import InputTypeNames
 from security.crypto import generate_random_value
 from targets.enums import TargetType
 from tasks.enums import Status, TimeUnit
-from tools.enums import FindingType, IntensityRank
+from tools.enums import IntensityRank
+
+# Rekono frontend address. It's used to include links in notifications
+REKONO_ADDRESS = os.getenv('REKONO_ADDRESS', '127.0.0.1:8080')
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -68,6 +73,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
     'executions',
     'findings',
+    'inputs',
     'processes',
     'projects',
     'resources',
@@ -160,7 +166,7 @@ SPECTACULAR_SETTINGS = {
         'SeverityEnum': Severity.choices,
         'TimeUnitEnum': TimeUnit.choices,
         'IntensityEnum': IntensityRank.choices,
-        'FindingTypeEnum': FindingType.choices,
+        'InputTypeNamesEnum': InputTypeNames.choices,
         'TargetTypeEnum': TargetType.choices,
     }
 }

@@ -13,8 +13,8 @@ class ToolFilter(LikeFilter):
             'command': ['exact', 'icontains'],
             'configurations': ['exact'],
             'configurations__name': ['exact', 'icontains'],
-            'configurations__inputs__type': ['exact'],
-            'configurations__outputs__type': ['exact'],
+            'arguments__inputs__type__name': ['exact'],
+            'configurations__outputs__type__name': ['exact'],
             'stage': ['exact']
         }
 
@@ -31,6 +31,6 @@ class ConfigurationFilter(FilterSet):
             'tool__stage': ['exact'],
             'name': ['exact', 'icontains'],
             'default': ['exact'],
-            'inputs__type': ['exact'],
-            'outputs__type': ['exact'],
+            'tool__arguments__inputs__type__name': ['exact'],
+            'outputs__type__name': ['exact'],
         }

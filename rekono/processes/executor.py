@@ -2,12 +2,13 @@ from django.utils import timezone
 from executions import utils
 from executions.models import Execution
 from executions.queue import producer
+from inputs.enums import InputTypeNames
+from inputs.models import InputType
 from processes.models import Step
 from targets.models import TargetEndpoint
 from tasks.enums import Status
 from tasks.models import Task
-from tools.enums import FindingType
-from tools.models import Input, Intensity, Output
+from tools.models import Argument, Intensity
 
 
 class ExecutionJob():
@@ -15,10 +16,11 @@ class ExecutionJob():
     def __init__(self, step, intensity) -> None:
         self.step = step
         self.intensity = intensity
-        self.inputs = Input.objects.filter(configuration=step.configuration).all()
-        self.input_types = [o.type for o in self.inputs]
-        self.outputs = Output.objects.filter(configuration=step.configuration).all()
-        self.output_types = [o.type for o in self.outputs]
+        self.arguments = Argument.objects.filter(tool=step.tool).all()
+        self.inputs = InputType.objects.filter(inputs__argument__tool=step.tool).distinct()
+        self.outputs = InputType.objects.filter(
+            outputs__configuration=step.configuration
+        ).distinct()
         self.jobs = []
         self.dependencies = set()
         self.dependencies_coverage = []
@@ -35,25 +37,25 @@ def create_plan(task: Task) -> list:
         if intensity:
             j = ExecutionJob(step, intensity)
             for job in execution_plan:
-                for output in job.output_types:
-                    if output in j.input_types:
+                for output in job.outputs:
+                    if output in j.inputs:
                         j.dependencies.add(job)
                         j.dependencies_coverage.append(output)
             execution_plan.append(j)
     return execution_plan
 
 
-def execute(task: Task, rekono_address: str) -> None:
+def execute(task: Task) -> None:
     execution_plan = create_plan(task)
     for job in execution_plan:
-        inputs = [i for i in job.inputs if i.type not in job.dependencies_coverage]
+        inputs = [i for i in job.inputs if i not in job.dependencies_coverage]
         targets = {
-            FindingType.HOST: [task.target],
-            FindingType.ENUMERATION: list(task.target.target_ports.all()),
-            FindingType.ENDPOINT: list(TargetEndpoint.objects.filter(
+            InputTypeNames.HOST: [task.target],
+            InputTypeNames.ENUMERATION: list(task.target.target_ports.all()),
+            InputTypeNames.ENDPOINT: list(TargetEndpoint.objects.filter(
                 target_port__target=task.target
             ).all()),
-            FindingType.WORDLIST: list(task.wordlists.all())
+            InputTypeNames.WORDLIST: list(task.wordlists.all())
         }
         executions = utils.get_executions_from_findings(targets, inputs)
         for execution_targets in executions:
@@ -63,9 +65,8 @@ def execute(task: Task, rekono_address: str) -> None:
                 producer.producer(
                     execution,
                     job.intensity,
-                    job.inputs,
+                    job.arguments,
                     execution_targets,
-                    rekono_address=rekono_address,
                     callback=success_callback,
                     dependencies=[job_id for j in job.dependencies for job_id in j.jobs]
                 )

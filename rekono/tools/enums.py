@@ -11,26 +11,9 @@ class IntensityRank(models.IntegerChoices):
     INSANE = 5
 
 
-class FindingType(models.TextChoices):
-    OSINT = 'OSINT'
-    HOST = 'Host'
-    ENUMERATION = 'Enumeration'
-    ENDPOINT = 'Endpoint'
-    TECHNOLOGY = 'Technology'
-    VULNERABILITY = 'Vulnerability'
-    EXPLOIT = 'Exploit'
-    CREDENTIAL = 'Credential'
-    WORDLIST = 'Wordlist'
-
-
 class Stage(models.IntegerChoices):
     OSINT = 1
     ENUMERATION = 2
     VULNERABILITIES = 3
     SERVICES = 4
     EXPLOITATION = 5
-
-
-class InputSelection(models.TextChoices):
-    ALL = 'All'
-    FOR_EACH = 'For Each'

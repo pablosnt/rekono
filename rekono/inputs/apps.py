@@ -7,15 +7,15 @@ from django.core.management.commands import loaddata
 from django.db.models.signals import post_migrate
 
 
-class ResourcesConfig(AppConfig):
-    name = 'resources'
+class InputsConfig(AppConfig):
+    name = 'inputs'
 
     def ready(self) -> None:
-        post_migrate.connect(self.load_resources_model, sender=self)
+        post_migrate.connect(self.load_inputs_model, sender=self)
 
-    def load_resources_model(self, **kwargs):
+    def load_inputs_model(self, **kwargs):
         path = os.path.join(Path(__file__).resolve().parent, 'fixtures')
         management.call_command(
             loaddata.Command(),
-            os.path.join(path, '1_wordlists.json')
+            os.path.join(path, '1_input_types.json')
         )
