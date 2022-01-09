@@ -31,11 +31,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       
-      - name: Install Node dependencies
+      - name: Install ESLint
         shell: bash
-        run: |
-          cd rekono/frontend
-          npm install
+        run: npm install -g eslint
       
-      - name: ESLint
-        run: yarn run eslint rekono/frontend --ext .js,.jsx,.ts,.tsx
+      - name: ESLint check
+        run: eslint rekono/frontend/ --ext .js,.jsx,.ts,.tsx
