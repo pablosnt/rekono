@@ -38,4 +38,4 @@ jobs:
           npm install
       
       - name: ESLint
-        run: eslint rekono/frontend --ext .js,.jsx,.ts,.tsx
+        run: yarn run eslint rekono/frontend --ext .js,.jsx,.ts,.tsx
