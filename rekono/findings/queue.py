@@ -1,5 +1,5 @@
 import django_rq
-from django.core.exceptions import ValidationError
+from django.db.models import Q
 from django_rq import job
 from executions.models import Execution
 from findings.enums import Severity
@@ -9,13 +9,13 @@ from findings.notification import send_email, send_telegram_message
 from users.enums import Notification
 
 
-def producer(execution: Execution, findings: list, domain: str) -> None:
+def producer(execution: Execution, findings: list) -> None:
     findings_queue = django_rq.get_queue('findings-queue')
-    findings_queue.enqueue(consumer, execution=execution, findings=findings, domain=domain)
+    findings_queue.enqueue(consumer, execution=execution, findings=findings)
 
 
 @job('findings-queue')
-def consumer(execution: Execution = None, findings: list = [], domain: str = None) -> None:
+def consumer(execution: Execution = None, findings: list = [],) -> None:
     if execution:
         for finding in findings:
             if isinstance(finding, Vulnerability) and finding.cve:
@@ -23,15 +23,16 @@ def consumer(execution: Execution = None, findings: list = [], domain: str = Non
                 finding.description = cve_info.get('description', '')
                 finding.severity = cve_info.get('severity', Severity.MEDIUM)
                 finding.reference = cve_info.get('reference', '')
-            try:
-                finding.set_execution(execution)
                 finding.save()
-            except ValidationError:
-                finding.delete()
-        if execution.task.executor.notification_preference == Notification.EMAIL:
-            send_email(execution, [f for f in findings if f.id], domain)
-        elif (
-            execution.task.executor.notification_preference == Notification.TELEGRAM
-            and execution.task.executor.telegram_id
-        ):
-            send_telegram_message(execution, [f for f in findings if f.id], domain)
+        users_to_notify = []
+        if execution.task.executor.notification_scope == Notification.OWN_EXECUTIONS:
+            users_to_notify.append(execution.task.executor)
+        search_members = execution.task.target.project.members.filter(
+            ~Q(id=execution.task.executor.id) and Q(notification_scope=Notification.ALL_EXECUTIONS)
+        ).all()
+        users_to_notify.extend(list(search_members))
+        for user in users_to_notify:
+            if user.email_notification:
+                send_email(user, execution, findings)
+            elif user.telegram_notification:
+                send_telegram_message(user, execution, findings)

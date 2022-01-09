@@ -11,9 +11,10 @@ def get_last_engagement(product_id: str, name: str) -> int:
         f'{utils.urls.get("engagements")}?name={name}&o=-created&product={product_id}',
         headers=utils.headers
     )
-    result = response.json()
-    if result and len(result.get('results')) > 0:
-        return result.get('results')[0].get('id')
+    if response.status_code == 200:
+        result = response.json()
+        if len(result.get('results')) > 0:
+            return result.get('results')[0].get('id')
 
 
 def create_new_engagement(product_id: int, name: str, description: str) -> int:
@@ -30,9 +31,8 @@ def create_new_engagement(product_id: int, name: str, description: str) -> int:
         'target_end': end.strftime('%Y-%m-%d'),
     }
     response = requests.post(utils.urls.get('engagements'), headers=utils.headers, data=data)
-    result = response.json()
-    if result:
-        return result.get('id')
+    if response.status_code == 201:
+        return response.json().get('id')
 
 
 def check_engagement(engagement_id: int, product_id: int = None) -> tuple:
@@ -41,16 +41,15 @@ def check_engagement(engagement_id: int, product_id: int = None) -> tuple:
             f'{utils.urls.get("engagements")}?id={engagement_id}&product={product_id}',
             headers=utils.headers
         )
-        result = response.json()
-        if result and len(result.get('results')) > 0:
-            return product_id, engagement_id
+        if response.status_code == 200:
+            result = response.json()
+            if len(result.get('results')) > 0:
+                return product_id, engagement_id
     else:
         response = requests.get(
             f'{utils.urls.get("engagements")}{engagement_id}/',
             headers=utils.headers
         )
         if response.status_code == 200:
-            result = response.json()
-            if result:
-                return result.get('product'), engagement_id
+            return response.json().get('product'), engagement_id
     return None, None

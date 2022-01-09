@@ -23,11 +23,7 @@ class Task(models.Model):
         blank=True,
         null=True
     )
-    intensity = models.TextField(
-        max_length=10,
-        choices=IntensityRank.choices,
-        default=IntensityRank.NORMAL
-    )
+    intensity = models.IntegerField(choices=IntensityRank.choices, default=IntensityRank.NORMAL)
     executor = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -50,6 +46,8 @@ class Task(models.Model):
         blank=True,
         null=True
     )
+    creation = models.DateTimeField(auto_now_add=True)
+    enqueued_at = models.DateTimeField(blank=True, null=True)
     start = models.DateTimeField(blank=True, null=True)
     end = models.DateTimeField(blank=True, null=True)
     wordlists = models.ManyToManyField(Wordlist, related_name='wordlists', blank=True)

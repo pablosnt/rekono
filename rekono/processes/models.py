@@ -2,21 +2,24 @@ from typing import Any
 
 from django.conf import settings
 from django.db import models
-from processes.enums import StepPriority
+from likes.models import LikeBase
+from taggit.managers import TaggableManager
 from tools.models import Configuration, Tool
 
 # Create your models here.
 
 
-class Process(models.Model):
+class Process(LikeBase):
     name = models.TextField(max_length=30, unique=True)
     description = models.TextField(max_length=250)
     creator = models.ForeignKey(
         settings.AUTH_USER_MODEL,
+        related_name='created_processes',
         on_delete=models.SET_NULL,
         blank=True,
         null=True
     )
+    tags = TaggableManager()
 
     class Meta:
         ordering = ['-id']
@@ -31,11 +34,7 @@ class Process(models.Model):
 class Step(models.Model):
     process = models.ForeignKey(Process, related_name='steps', on_delete=models.CASCADE)
     tool = models.ForeignKey(Tool, on_delete=models.CASCADE)
-    priority = models.TextField(
-        max_length=10,
-        choices=StepPriority.choices,
-        default=StepPriority.MEDIUM
-    )
+    priority = models.IntegerField(default=1)
     configuration = models.ForeignKey(
         Configuration,
         on_delete=models.CASCADE,
@@ -50,7 +49,7 @@ class Step(models.Model):
         ]
 
     def __str__(self) -> str:
-        return self.process.__str__() + ' - ' + self.configuration.__str__()
+        return f'{self.process.__str__()} - {self.configuration.__str__()}'
 
     def get_project(self) -> Any:
         return None

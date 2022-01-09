@@ -1,5 +1,5 @@
 from django.db import models
-from telegram_bot.utils import get_token_expiration
+from users.utils import get_token_expiration
 
 # Create your models here.
 

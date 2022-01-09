@@ -9,8 +9,7 @@ class NiktoTool(BaseTool):
 
     ignore_exit_code = True
 
-    def parse_output(self, output: str) -> list:
-        findings = []
+    def parse_output(self, output: str) -> None:
         http_endpoints = set()
         root = parser.parse(self.path_output).getroot()
         items = root.findall('niktoscan')[-1].findall('scandetails')[0].findall('item')
@@ -25,15 +24,13 @@ class NiktoTool(BaseTool):
             if '<![DATA[' in endpoint:
                 endpoint = endpoint.split('<![DATA[', 1)[1].rsplit(']]>', 1)[0]
             if description:
-                vulnerability = Vulnerability.objects.create(
+                self.create_finding(
+                    Vulnerability,
                     name=name,
                     description=f'[{method} {endpoint}] {description}',
                     severity=Severity.MEDIUM,
                     osvdb=osvdb
                 )
-                findings.append(vulnerability)
             if endpoint and endpoint not in http_endpoints:
                 http_endpoints.add(endpoint)
-                http_endpoint = Endpoint.objects.create(endpoint=endpoint)
-                findings.append(http_endpoint)
-        return findings
+                self.create_finding(Endpoint, endpoint=endpoint)

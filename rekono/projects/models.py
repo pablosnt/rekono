@@ -2,6 +2,7 @@ from typing import Any
 
 from django.conf import settings
 from django.db import models
+from taggit.managers import TaggableManager
 
 # Create your models here.
 
@@ -16,11 +17,8 @@ class Project(models.Model):
         blank=True,
         null=True
     )
-    members = models.ManyToManyField(
-        settings.AUTH_USER_MODEL,
-        related_name='members',
-        blank=True
-    )
+    members = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='members', blank=True)
+    tags = TaggableManager()
 
     class Meta:
         ordering = ['-id']

@@ -20,16 +20,10 @@ class TheHarvesterTool(BaseTool):
         ('linkedin_people', DataType.USER)
     ]
 
-    def parse_output(self, output: str) -> list:
-        osint_data = []
+    def parse_output(self, output: str) -> None:
         with open(self.path_output) as output_file:
             data = json.load(output_file)
         for key, dt in self.data_types:
             if key in data:
                 for item in data[key]:
-                    osint = OSINT.objects.create(
-                        data=item,
-                        data_type=dt
-                    )
-                    osint_data.append(osint)
-        return osint_data
+                    self.create_finding(OSINT, data=item, data_type=dt)

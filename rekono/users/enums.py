@@ -2,7 +2,6 @@ from django.db import models
 
 
 class Notification(models.TextChoices):
-    EMAIL = 'Email'
-    TELEGRAM = 'Telegram'
-
-    __empty__ = 'Disabled'
+    DISABLED = 'Disabled'
+    OWN_EXECUTIONS = 'Only my executions'
+    ALL_EXECUTIONS = 'All executions'

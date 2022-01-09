@@ -20,6 +20,7 @@ class ToolsConfig(AppConfig):
             os.path.join(path, '1_tools.json'),
             os.path.join(path, '2_intensities.json'),
             os.path.join(path, '3_configurations.json'),
-            os.path.join(path, '4_inputs.json'),
-            os.path.join(path, '5_outputs.json')
+            os.path.join(path, '4_arguments.json'),
+            os.path.join(path, '5_inputs.json'),
+            os.path.join(path, '6_outputs.json')
         )

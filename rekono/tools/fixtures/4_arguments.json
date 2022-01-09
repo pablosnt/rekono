@@ -1,0 +1,112 @@
+[
+    {
+        "model": "tools.argument",
+        "pk": 1,
+        "fields": {
+            "tool": 1,
+            "name": "host",
+            "argument": "{host}",
+            "required": true,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 2,
+        "fields": {
+            "tool": 1,
+            "name": "ports",
+            "argument": "-p {ports_commas}",
+            "required": false,
+            "multiple": true
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 3,
+        "fields": {
+            "tool": 2,
+            "name": "url",
+            "argument": "-u {url}",
+            "required": true,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 4,
+        "fields": {
+            "tool": 2,
+            "name": "wordlist",
+            "argument": "--wordlist={wordlist}",
+            "required": true,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 5,
+        "fields": {
+            "tool": 3,
+            "name": "target",
+            "argument": "-d {target}",
+            "required": true,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 6,
+        "fields": {
+            "tool": 4,
+            "name": "url",
+            "argument": "-host {url}",
+            "required": true,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 7,
+        "fields": {
+            "tool": 5,
+            "name": "target",
+            "argument": "{target}",
+            "required": true,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 8,
+        "fields": {
+            "tool": 6,
+            "name": "target",
+            "argument": "{target}",
+            "required": true,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 9,
+        "fields": {
+            "tool": 7,
+            "name": "url",
+            "argument": "-u {url}",
+            "required": true,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 10,
+        "fields": {
+            "tool": 8,
+            "name": "url",
+            "argument": "-quickurl {url}",
+            "required": true,
+            "multiple": false
+        }
+    }
+]

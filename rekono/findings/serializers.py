@@ -29,7 +29,8 @@ class EnumerationSerializer(serializers.ModelSerializer):
         model = Enumeration
         fields = (
             'id', 'execution', 'host', 'port', 'port_status', 'protocol',
-            'service', 'creation', 'is_active', 'endpoint', 'technology', 'reported_to_defectdojo'
+            'service', 'creation', 'is_active', 'endpoint', 'technology',
+            'vulnerability', 'reported_to_defectdojo'
         )
 
 
@@ -59,7 +60,7 @@ class VulnerabilitySerializer(serializers.ModelSerializer):
     class Meta:
         model = Vulnerability
         fields = (
-            'id', 'execution', 'technology', 'name', 'description', 'severity',
+            'id', 'execution', 'enumeration', 'technology', 'name', 'description', 'severity',
             'cve', 'cwe', 'reference', 'creation', 'is_active', 'exploit', 'reported_to_defectdojo'
         )
         read_only_fields = (

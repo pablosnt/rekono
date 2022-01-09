@@ -4,6 +4,12 @@ from rest_framework.permissions import BasePermission
 from security.authorization.roles import Role
 
 
+class IsNotAuthenticated(BasePermission):
+
+    def has_permission(self, request, view):
+        return not request.user.is_authenticated
+
+
 class IsAdmin(BasePermission):
 
     def has_permission(self, request, view):
@@ -21,7 +27,6 @@ class ProjectMemberPermission(BasePermission):
 
 
 class BaseCreatorPermission(BasePermission):
-    model = None
 
     def get_instance(self, obj):
         if self.model and isinstance(obj, self.model):
@@ -29,6 +34,12 @@ class BaseCreatorPermission(BasePermission):
 
     def has_object_permission(self, request, view, obj):
         instance = self.get_instance(obj)
+        if (
+            instance
+            and request.user.is_authenticated
+            and view.action in ['like', 'dislike']
+        ):
+            return True
         if (
             instance
             and not IsAdmin().has_permission(request, view)

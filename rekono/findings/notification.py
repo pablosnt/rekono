@@ -2,11 +2,11 @@ from typing import Any
 
 from mail import sender
 from telegram_bot import bot
+from users.models import User
 
 
-def get_parameters(execution: Any, findings: list, domain: str) -> dict:
+def get_parameters(execution: Any, findings: list) -> dict:
     parameters = {
-        'domain': domain if domain else '127.0.0.1:8000',
         'execution': execution,
         'tool': execution.step.tool if execution.step else execution.task.tool,
         'osint': [],
@@ -23,7 +23,7 @@ def get_parameters(execution: Any, findings: list, domain: str) -> dict:
     return parameters
 
 
-def send_email(execution: Any, findings: list, domain: str) -> None:
+def send_email(user: User, execution: Any, findings: list) -> None:
     if not findings:
         return
     metadata = {
@@ -31,14 +31,14 @@ def send_email(execution: Any, findings: list, domain: str) -> None:
         'subject': '[Rekono] Execution completed',
     }
     sender.send_html_message(
-        execution.task.executor.email,
+        user.email,
         metadata,
-        get_parameters(execution, findings, domain)
+        get_parameters(execution, findings)
     )
 
 
-def send_telegram_message(execution: Any, findings: list, domain: str) -> None:
+def send_telegram_message(user: User, execution: Any, findings: list) -> None:
     if not findings:
         return
-    parameters = get_parameters(execution, findings, domain)
-    bot.send_html_message(execution.task.executor.telegram_id, parameters)
+    parameters = get_parameters(execution, findings)
+    bot.send_html_message(user.telegram_id, parameters)

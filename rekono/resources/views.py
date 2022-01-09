@@ -1,3 +1,4 @@
+from likes.views import LikeManagementView
 from resources.filters import WordlistFilter
 from resources.models import Wordlist
 from resources.serializers import WordlistSerializer
@@ -9,10 +10,11 @@ from security.authorization.permissions import (ProjectMemberPermission,
 # Create your views here.
 
 
-class WordlistViewSet(ModelViewSet):
+class WordlistViewSet(ModelViewSet, LikeManagementView):
     queryset = Wordlist.objects.all()
     serializer_class = WordlistSerializer
     filterset_class = WordlistFilter
+    search_fields = ['name']
     http_method_names = ['get', 'post', 'put', 'delete']
     permission_classes = [
         IsAuthenticated, DjangoModelPermissions, ProjectMemberPermission, WordlistCreatorPermission

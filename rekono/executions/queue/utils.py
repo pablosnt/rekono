@@ -1,9 +1,8 @@
 import django_rq
+from django.apps import apps
 from executions.queue import producer
-from executions.queue.constants import finding_relations
 from rq.job import Job
 from rq.registry import DeferredJobRegistry
-from tools import utils
 
 
 def cancel_execution(job_id: str) -> Job:
@@ -21,25 +20,18 @@ def cancel_and_delete_execution(job_id: str) -> Job:
     return execution
 
 
-def get_findings_from_dependencies(dependencies: list) -> dict:
+def get_findings_from_dependencies(dependencies: list) -> list:
     executions_queue = django_rq.get_queue('executions-queue')
-    findings = {}
+    findings = []
     for dep_id in dependencies:
         dependency = executions_queue.fetch_job(dep_id)
         if not dependency or not dependency.result:
             continue
-        for input_type in finding_relations.keys():
-            input_class = utils.get_finding_class_by_type(input_type)
-            input_findings = [f for f in dependency.result.findings if isinstance(f, input_class)]
-            for finding in input_findings:
-                if input_type in findings:
-                    findings[input_type].append(finding)
-                else:
-                    findings[input_type] = [finding]
+        findings.extend(dependency.result.findings)
     return findings
 
 
-def update_new_dependencies(parent_job: str, new_jobs: list, manual_findings: list) -> None:
+def update_new_dependencies(parent_job: str, new_jobs: list, targets: list) -> None:
     executions_queue = django_rq.get_queue('executions-queue')
     registry = DeferredJobRegistry(queue=executions_queue)
     for job_id in registry.get_job_ids():
@@ -52,9 +44,8 @@ def update_new_dependencies(parent_job: str, new_jobs: list, manual_findings: li
             producer.producer(
                 meta['execution'],
                 meta['intensity'],
-                meta['inputs'],
-                manual_findings=meta['manual_findings'],
-                request=meta['domain'],
+                meta['arguments'],
+                targets=meta['targets'],
                 callback=meta['callback'],
                 dependencies=dependencies
             )

@@ -1,7 +1,6 @@
+from api.filters import ToolFilter
 from django_filters.rest_framework.filters import OrderingFilter
 from executions.models import Execution
-
-from rekono.api.filters import ToolFilter
 
 
 class ExecutionFilter(ToolFilter):
@@ -26,10 +25,13 @@ class ExecutionFilter(ToolFilter):
         fields = {
             'task': ['exact'],
             'task__target': ['exact'],
+            'task__target__target': ['exact', 'icontains'],
             'task__target__project': ['exact'],
+            'task__target__project__name': ['exact', 'icontains'],
             'task__process': ['exact'],
             'task__intensity': ['exact'],
             'task__executor': ['exact'],
+            'task__executor__username': ['exact', 'icontains'],
             'status': ['exact'],
             'start': ['gte', 'lte', 'exact'],
             'end': ['gte', 'lte', 'exact']

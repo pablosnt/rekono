@@ -1,3 +1,4 @@
+from likes.views import LikeManagementView
 from processes.filters import ProcessFilter, StepFilter
 from processes.models import Process, Step
 from processes.serializers import (ProcessSerializer, StepPrioritySerializer,
@@ -10,10 +11,14 @@ from security.authorization.permissions import (ProcessCreatorPermission,
 # Create your views here.
 
 
-class ProcessViewSet(ModelViewSet):
+class ProcessViewSet(ModelViewSet, LikeManagementView):
     queryset = Process.objects.all()
     serializer_class = ProcessSerializer
     filterset_class = ProcessFilter
+    search_fields = [
+        'name', 'description', 'steps__tool__name', 'steps__tool__command',
+        'steps__configuration__name'
+    ]
     http_method_names = ['get', 'post', 'put', 'delete']
     permission_classes = [
         IsAuthenticated, DjangoModelPermissions, ProjectMemberPermission, ProcessCreatorPermission
@@ -27,6 +32,7 @@ class StepViewSet(ModelViewSet):
     queryset = Step.objects.all()
     serializer_class = StepSerializer
     filterset_class = StepFilter
+    search_fields = ['tool__name', 'tool__command', 'configuration__name']
     http_method_names = ['get', 'post', 'put', 'delete']
     permission_classes = [
         IsAuthenticated, DjangoModelPermissions, ProjectMemberPermission, ProcessCreatorPermission

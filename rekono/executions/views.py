@@ -13,6 +13,11 @@ class ExecutionViewSet(ListModelMixin, RetrieveModelMixin, DDScansViewSet, DDFin
     queryset = Execution.objects.all()
     serializer_class = ExecutionSerializer
     filterset_class = ExecutionFilter
+    search_fields = [
+        'task__target__target', 'task__process__steps__tool__name',
+        'task__process__steps__configuration__name', 'task__tool__name',
+        'task__configuration__name'
+    ]
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -30,7 +35,6 @@ class ExecutionViewSet(ListModelMixin, RetrieveModelMixin, DDScansViewSet, DDFin
         ]:
             findings.extend(find_model.objects.filter(
                 execution=execution,
-                is_active=True,
-                is_manual=False
+                is_active=True
             ).all())
         return findings

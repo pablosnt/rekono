@@ -1,0 +1,41 @@
+name: Code Style
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  flake8:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        if: github.event_name == 'pull_request'
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          ref: refs/pull/${{ github.event.pull_request.number }}/merge
+      
+      - name: Checkout
+        if: github.event_name != 'pull_request'
+        uses: actions/checkout@v2
+      
+      - uses: valentijnscholten/flake8-your-pr@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  eslint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      
+      - name: Install Node dependencies
+        shell: bash
+        run: |
+          cd rekono/frontend
+          npm install
+      
+      - name: ESLint
+        run: eslint rekono/frontend --ext .js,.jsx,.ts,.tsx

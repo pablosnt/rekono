@@ -1,6 +1,15 @@
+from typing import List
+
+from api.serializers import RekonoTagSerializerField
+from drf_spectacular.utils import extend_schema_field
+from likes.serializers import LikeBaseSerializer
 from processes.models import Process, Step
 from rest_framework import serializers
-from tools.models import Configuration
+from rest_framework.fields import SerializerMethodField
+from taggit.serializers import TaggitSerializer
+from tools.models import Configuration, Tool
+from tools.serializers import ConfigurationSerializer, SimplyToolSerializer
+from users.serializers import SimplyUserSerializer
 
 
 class StepPrioritySerializer(serializers.ModelSerializer):
@@ -12,10 +21,26 @@ class StepPrioritySerializer(serializers.ModelSerializer):
 
 
 class StepSerializer(serializers.ModelSerializer):
+    tool = SimplyToolSerializer(read_only=True, many=False)
+    tool_id = serializers.PrimaryKeyRelatedField(
+        write_only=True,
+        required=True,
+        source='tool',
+        queryset=Tool.objects.all()
+    )
+    configuration = ConfigurationSerializer(read_only=True, many=False)
+    configuration_id = serializers.PrimaryKeyRelatedField(
+        write_only=True,
+        required=False,
+        source='configuration',
+        queryset=Configuration.objects.all()
+    )
 
     class Meta:
         model = Step
-        fields = ('id', 'process', 'tool', 'configuration', 'priority')
+        fields = (
+            'id', 'process', 'tool', 'tool_id', 'configuration', 'configuration_id', 'priority'
+        )
 
     def validate(self, attrs):
         attrs = super().validate(attrs)
@@ -28,15 +53,14 @@ class StepSerializer(serializers.ModelSerializer):
             if check_configuration == 0:
                 configuration = None
         if not configuration:
-            configuration = Configuration.objects.filter(
+            attrs['configuration'] = Configuration.objects.filter(
                 tool=attrs.get('tool'),
                 default=True
             ).first()
-        attrs['configuration'] = configuration
         steps = Step.objects.filter(
             process=attrs.get('process'),
             tool=attrs.get('tool'),
-            configuration=configuration
+            configuration=attrs.get('configuration')
         ).count()
         if steps > 0:
             process = attrs.get('process').name
@@ -46,10 +70,27 @@ class StepSerializer(serializers.ModelSerializer):
         return attrs
 
 
-class ProcessSerializer(serializers.ModelSerializer):
-    steps = StepSerializer(read_only=True, many=True, required=False)
+class ProcessSerializer(TaggitSerializer, serializers.ModelSerializer, LikeBaseSerializer):
+    steps = SerializerMethodField(method_name='get_steps', read_only=True, required=False)
+    creator = SimplyUserSerializer(many=False, read_only=True, required=False)
+    tags = RekonoTagSerializerField()
 
     class Meta:
         model = Process
-        fields = ('id', 'name', 'description', 'creator', 'steps')
-        read_only_fields = ('creator', 'steps')
+        fields = (
+            'id', 'name', 'description', 'creator', 'liked', 'likes', 'steps', 'tags'
+        )
+
+    @extend_schema_field(StepSerializer(many=True, read_only=True))
+    def get_steps(self, instance) -> List[StepSerializer]:
+        return StepSerializer(
+            instance.steps.all().order_by('tool__stage', '-priority'),
+            many=True
+        ).data
+
+
+class SimplyProcessSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Process
+        fields = ('id', 'name')

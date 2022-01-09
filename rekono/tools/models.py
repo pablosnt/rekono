@@ -1,20 +1,21 @@
 from typing import Any
 
 from django.db import models
-from tools.enums import FindingType, InputSelection, IntensityRank, Stage
+from input_types.models import InputType
+from likes.models import LikeBase
+from tools.enums import IntensityRank, Stage
 
 # Create your models here.
 
 
-class Tool(models.Model):
+class Tool(LikeBase):
     name = models.TextField(max_length=30, unique=True)
     command = models.TextField(max_length=30, blank=True, null=True)
     output_format = models.TextField(max_length=5, blank=True, null=True)
     defectdojo_scan_type = models.TextField(max_length=50, blank=True, null=True)
-    stage = models.TextField(max_length=25, choices=Stage.choices)
+    stage = models.IntegerField(choices=Stage.choices)
     reference = models.TextField(max_length=250, blank=True, null=True)
     icon = models.TextField(max_length=250, blank=True, null=True)
-    for_each_target_port = models.BooleanField(default=False)
 
     class Meta:
         ordering = ['-id']
@@ -29,11 +30,7 @@ class Tool(models.Model):
 class Intensity(models.Model):
     tool = models.ForeignKey(Tool, related_name='intensities', on_delete=models.CASCADE)
     argument = models.TextField(max_length=50, default='', blank=True)
-    value = models.TextField(
-        max_length=10,
-        choices=IntensityRank.choices,
-        default=IntensityRank.NORMAL
-    )
+    value = models.IntegerField(choices=IntensityRank.choices, default=IntensityRank.NORMAL)
 
     class Meta:
         ordering = ['-id']
@@ -64,32 +61,40 @@ class Configuration(models.Model):
         return None
 
 
-class Input(models.Model):
-    configuration = models.ForeignKey(
-        Configuration,
-        related_name='inputs',
-        on_delete=models.CASCADE
-    )
+class Argument(models.Model):
+    tool = models.ForeignKey(Tool, related_name='arguments', on_delete=models.CASCADE)
     name = models.TextField(max_length=20)
-    type = models.TextField(max_length=15, choices=FindingType.choices)
     argument = models.TextField(max_length=50, default='', blank=True)
-    filter = models.TextField(max_length=250, blank=True, null=True)
-    selection = models.TextField(
-        max_length=10,
-        choices=InputSelection.choices,
-        default=InputSelection.FOR_EACH
-    )
     required = models.BooleanField(default=False)
+    multiple = models.BooleanField(default=False)
 
     class Meta:
         ordering = ['-id']
         constraints = [
-            models.UniqueConstraint(fields=['configuration', 'type'], name='unique input')
+            models.UniqueConstraint(fields=['tool', 'name'], name='unique argument')
         ]
 
     def __str__(self) -> str:
-        fk = self.configuration.__str__()
-        return f'{fk} - {self.name}'
+        return f'{self.tool.__str__()} - {self.name}'
+
+    def get_project(self) -> Any:
+        return None
+
+
+class Input(models.Model):
+    argument = models.ForeignKey(Argument, related_name='inputs', on_delete=models.CASCADE)
+    type = models.ForeignKey(InputType, related_name='inputs', on_delete=models.CASCADE)
+    filter = models.TextField(max_length=250, blank=True, null=True)
+    order = models.IntegerField(default=1)
+
+    class Meta:
+        ordering = ['-id']
+        constraints = [
+            models.UniqueConstraint(fields=['argument', 'order'], name='unique input')
+        ]
+    
+    def __str__(self) -> str:
+        return f'{self.argument.__str__()} - {self.type.__str__()}'
 
     def get_project(self) -> Any:
         return None
@@ -101,7 +106,7 @@ class Output(models.Model):
         related_name='outputs',
         on_delete=models.CASCADE
     )
-    type = models.TextField(max_length=15, choices=FindingType.choices)
+    type = models.ForeignKey(InputType, related_name='outputs', on_delete=models.CASCADE)
 
     class Meta:
         ordering = ['-id']
@@ -110,8 +115,7 @@ class Output(models.Model):
         ]
 
     def __str__(self) -> str:
-        fk = self.configuration.__str__()
-        return f'{fk} - {self.type}'
+        return f'{self.configuration.__str__()} - {self.type.__str__()}'
 
     def get_project(self) -> Any:
         return None

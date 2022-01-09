@@ -1,11 +1,13 @@
 from django.utils import timezone
+from executions import utils
 from executions.models import Execution
 from executions.queue import producer
+from input_types.models import InputType
 from processes.models import Step
+from targets.models import TargetEndpoint
 from tasks.enums import Status
 from tasks.models import Task
-from tools.enums import FindingType
-from tools.models import Input, Intensity, Output
+from tools.models import Argument, Intensity
 
 
 class ExecutionJob():
@@ -13,17 +15,19 @@ class ExecutionJob():
     def __init__(self, step, intensity) -> None:
         self.step = step
         self.intensity = intensity
-        self.inputs = Input.objects.filter(configuration=step.configuration).all()
-        self.input_types = [o.type for o in self.inputs]
-        self.outputs = Output.objects.filter(configuration=step.configuration).all()
-        self.output_types = [o.type for o in self.outputs]
+        self.arguments = Argument.objects.filter(tool=step.tool).all()
+        self.inputs = InputType.objects.filter(inputs__argument__tool=step.tool).distinct()
+        self.outputs = InputType.objects.filter(
+            outputs__configuration=step.configuration
+        ).distinct()
         self.jobs = []
         self.dependencies = set()
+        self.dependencies_coverage = []
 
 
 def create_plan(task: Task) -> list:
     execution_plan = []
-    steps = Step.objects.filter(process=task.process).order_by('tool__stage', 'priority')
+    steps = Step.objects.filter(process=task.process).order_by('tool__stage', '-priority')
     for step in steps:
         intensity = Intensity.objects.filter(
             tool=step.tool,
@@ -32,51 +36,40 @@ def create_plan(task: Task) -> list:
         if intensity:
             j = ExecutionJob(step, intensity)
             for job in execution_plan:
-                for output in job.output_types:
-                    if output in j.input_types:
+                for output in job.outputs:
+                    if output in j.inputs:
                         j.dependencies.add(job)
+                        j.dependencies_coverage.append(output)
             execution_plan.append(j)
     return execution_plan
 
 
-def execute(task: Task, manual_findings: list, domain: str) -> None:
+
+def execute(task: Task) -> None:
     execution_plan = create_plan(task)
-    target_ports = task.target.target_ports.all()
-    enumerations = False
     for job in execution_plan:
-        if not enumerations and target_ports and job.step.tool.for_each_target_port:
-            for tp in target_ports:
-                execution = Execution.objects.create(task=task, step=job.step)
-                execution.save()
-                job.jobs.append(
-                    producer.producer(
-                        execution,
-                        job.intensity,
-                        job.inputs,
-                        manual_findings,
-                        target_ports=[tp],
-                        domain=domain,
-                        callback=success_callback,
-                        dependencies=[job_id for j in job.dependencies for job_id in j.jobs]
-                    )
-                )
-        else:
+        covered_targets = [i.callback_target for i in job.dependencies_coverage if i.callback_target is not None]
+        targets = list(task.wordlists.all())
+        if 'Target' not in covered_targets:
+            targets.append(task.target)
+        if 'TargetPort' not in covered_targets:
+            targets.extend(list(task.target.target_ports.all()))
+        if 'TargetEnumeration' not in covered_targets:
+            targets.extend(list(TargetEndpoint.objects.filter(target_port__target=task.target).all()))
+        executions = utils.get_executions_from_findings(targets, job.step.tool)
+        for execution_targets in executions:
             execution = Execution.objects.create(task=task, step=job.step)
             execution.save()
             job.jobs.append(
                 producer.producer(
                     execution,
                     job.intensity,
-                    job.inputs,
-                    manual_findings,
-                    target_ports=target_ports,
-                    domain=domain,
+                    job.arguments,
+                    execution_targets,
                     callback=success_callback,
                     dependencies=[job_id for j in job.dependencies for job_id in j.jobs]
                 )
             )
-        if FindingType.ENUMERATION in job.output_types:
-            enumerations = True
 
 
 def success_callback(job, connection, result, *args, **kwargs):

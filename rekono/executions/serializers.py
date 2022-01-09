@@ -1,8 +1,10 @@
 from executions.models import Execution
+from processes.serializers import StepSerializer
 from rest_framework import serializers
 
 
 class ExecutionSerializer(serializers.ModelSerializer):
+    step = StepSerializer(many=False, read_only=True)
 
     class Meta:
         model = Execution

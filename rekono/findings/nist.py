@@ -10,7 +10,7 @@ CVSS_RANGES = {
 }
 
 
-def get_description(data: str) -> str:
+def get_description(data: dict) -> str:
     options = data.get('cve').get('description').get('description_data')
     for o in options:
         if o.get('lang') == 'en':
@@ -18,7 +18,7 @@ def get_description(data: str) -> str:
     return ''
 
 
-def get_cwe(data: str) -> str:
+def get_cwe(data: dict) -> str:
     items = data.get('cve').get('problemtype').get('problemtype_data')
     for item in items:
         descriptions = item.get('description')
@@ -29,9 +29,10 @@ def get_cwe(data: str) -> str:
                     continue
                 if cwe.lower().startswith('cwe-'):
                     return cwe
+    return None
 
 
-def get_severity(data: str) -> Severity:
+def get_severity(data: dict) -> str:
     cvss = data.get('impact')
     score = 5
     if 'baseMetricV3' in cvss:
@@ -45,6 +46,7 @@ def get_severity(data: str) -> Severity:
             or (severity == Severity.CRITICAL and score >= down and score <= up)
         ):
             return severity
+    return None
 
 
 def get_cve_information(cve: str) -> dict:

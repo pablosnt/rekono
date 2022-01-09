@@ -4,10 +4,10 @@ on:
   pull_request:
     branches:
       - main
-      - develop
   push:
     paths:
       - 'requirements.txt'
+      - 'rekono/frontend/package.json'
 
 jobs:
   snyk:
@@ -17,15 +17,31 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Test
-        uses: snyk/actions/python@master
-        continue-on-error: true
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      - uses: actions/setup-python@v2
         with:
-          args: --sarif-file-output=snyk.sarif
+          python-version: '3.7'
+
+      - name: Install Python dependencies
+        shell: bash
+        run: python3 -m pip install -r requirements.txt
+
+      - name: Install Node dependencies
+        shell: bash
+        run: |
+          cd rekono/frontend
+          npm install
+
+      - name: Install Snyk CLI
+        shell: bash
+        run: npm install snyk@latest
+
+      - name: Snyk test
+        shell: bash
+        env:
+            SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        run: ./node_modules/.bin/snyk test --all-projects --sarif-file-output=snyk.sarif
       
-      # - name: Upload report to GitHub Code Scanning
+      # - name: Upload Snyk report to GitHub Code Scanning
       #  uses: github/codeql-action/upload-sarif@v1
       #  with:
       #    sarif_file: snyk.sarif

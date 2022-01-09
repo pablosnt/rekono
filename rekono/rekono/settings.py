@@ -11,15 +11,20 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 import os
+from datetime import timedelta
 from pathlib import Path
+from typing import List
 
 from findings.enums import Severity
-from processes.enums import StepPriority
+from input_types.enums import InputTypeNames
 from security.crypto import generate_random_value
 from targets.enums import TargetType
 from tasks.enums import Status, TimeUnit
-from tools.enums import FindingType, IntensityRank
-from users.enums import Notification
+from tools.enums import IntensityRank
+
+# Rekono frontend address. It's used to include links in notifications
+REKONO_ADDRESS = os.getenv('REKONO_ADDRESS', '127.0.0.1:8080')
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -41,12 +46,12 @@ FILE_UPLOAD_MAX_SIZE = 500
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = generate_random_value(3000)
+SECRET_KEY = os.getenv('SECRET_KEY', generate_random_value(3000))
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS: List[str] = []
 
 
 # Application definition
@@ -59,15 +64,20 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_filters',
+    'taggit',
     'django_rq',
     'drf_spectacular',
     'rest_framework',
     'rest_framework.authtoken',
+    'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
     'executions',
     'findings',
+    'input_types',
     'processes',
     'projects',
     'resources',
+    'security',
     'targets',
     'tasks',
     'telegram_bot',
@@ -116,19 +126,30 @@ REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_FILTER_BACKENDS': [
         'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.SearchFilter',
         'rest_framework.filters.OrderingFilter',
     ],
-    'DEFAULT_PAGINATION_CLASS': 'rekono.api.pagination.Pagination',
+    'DEFAULT_PAGINATION_CLASS': 'api.pagination.Pagination',
     'ORDERING_PARAM': 'order',
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
         'rest_framework.permissions.DjangoModelPermissions',
         'security.authorization.permissions.ProjectMemberPermission',
     ]
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'UPDATE_LAST_LOGIN': True,
+    'ALGORITHM': 'HS512',
+    'SIGNING_KEY': os.getenv('SIGNING_KEY', generate_random_value(3000)),
 }
 
 # Documentation
@@ -141,13 +162,11 @@ SPECTACULAR_SETTINGS = {
         'drf_spectacular.hooks.preprocess_exclude_path_format'
     ],
     'ENUM_NAME_OVERRIDES': {
-        'PriorityEnum': StepPriority.choices,
         'StatusEnum': Status.choices,
-        'NotificationPreferenceEnum': Notification.choices,
         'SeverityEnum': Severity.choices,
         'TimeUnitEnum': TimeUnit.choices,
         'IntensityEnum': IntensityRank.choices,
-        'FindingTypeEnum': FindingType.choices,
+        'InputTypeNamesEnum': InputTypeNames.choices,
         'TargetTypeEnum': TargetType.choices,
     }
 }
@@ -228,6 +247,7 @@ TOOLS = {
 # Authentication
 
 AUTH_USER_MODEL = 'users.User'
+OTP_TOKEN_EXPIRATION_HOUR = 24
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators

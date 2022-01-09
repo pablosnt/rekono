@@ -11,9 +11,9 @@ class ResourcesConfig(AppConfig):
     name = 'resources'
 
     def ready(self) -> None:
-        post_migrate.connect(self.load_tools_model, sender=self)
+        post_migrate.connect(self.load_resources_model, sender=self)
 
-    def load_tools_model(self, **kwargs):
+    def load_resources_model(self, **kwargs):
         path = os.path.join(Path(__file__).resolve().parent, 'fixtures')
         management.call_command(
             loaddata.Command(),

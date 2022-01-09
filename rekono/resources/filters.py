@@ -1,15 +1,17 @@
-from django_filters import rest_framework
-from django_filters.rest_framework.filters import OrderingFilter
+from django_filters.rest_framework import filters
+from likes.filters import LikeFilter
 from resources.models import Wordlist
 
 
-class WordlistFilter(rest_framework.FilterSet):
-    o = OrderingFilter(fields=('name', 'type', 'creator'))
+class WordlistFilter(LikeFilter):
+    o = filters.OrderingFilter(fields=('name', 'type', 'creator', 'likes_count'))
 
     class Meta:
         model = Wordlist
         fields = {
-            'name': ['exact', 'contains'],
+            'name': ['exact', 'icontains'],
             'type': ['exact'],
             'creator': ['exact'],
+            'creator__username': ['exact', 'icontains'],
+            'size': ['gte', 'lte', 'exact'],
         }

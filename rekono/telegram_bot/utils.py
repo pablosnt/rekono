@@ -1,13 +1,6 @@
-from datetime import timedelta
-
-from django.utils import timezone
+from executions.models import Execution
 from telegram_bot import messages
-
-from rekono.settings import TELEGRAM_TOKEN_EXPIRATION_HOURS
-
-
-def get_token_expiration():
-    return timezone.now() + timedelta(hours=TELEGRAM_TOKEN_EXPIRATION_HOURS)
+from tools.models import Tool
 
 
 def build_execution_notification_message(parameters: dict) -> str:
@@ -26,15 +19,17 @@ def build_execution_notification_message(parameters: dict) -> str:
             template = getattr(messages, f'{finding.upper()}_ITEM')
             findings = findings + template.format(**i.__dict__)
         findings += '\n'
+    execution: Execution = parameters.get('execution')
+    tool: Tool = parameters.get('tool')
     message = messages.EXECUTION_NOTIFICATION.format(
-        project=parameters.get('execution').task.target.project.name,
-        target=parameters.get('execution').task.target.target,
-        task=parameters.get('execution').task.id,
-        execution=parameters.get('execution').id,
-        tool=parameters.get('tool').name,
-        status=parameters.get('execution').status,
-        start=parameters.get('execution').start,
-        end=parameters.get('execution').end,
+        project=execution.task.target.project.name,
+        target=execution.task.target.target,
+        task=execution.task.id,
+        execution=execution.id,
+        tool=tool.name,
+        status=execution.status,
+        start=execution.start,
+        end=execution.end,
         findings=findings
     )
     return message

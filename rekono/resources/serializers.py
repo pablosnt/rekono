@@ -1,19 +1,25 @@
 import os
 import uuid
 
+from likes.serializers import LikeBaseSerializer
 from resources.models import Wordlist
 from rest_framework import serializers
+from rest_framework.fields import SerializerMethodField
 from security import file_upload
+from users.serializers import SimplyUserSerializer
 
 from rekono.settings import WORDLIST_DIR
 
 
-class WordlistSerializer(serializers.ModelSerializer):
+class WordlistSerializer(serializers.ModelSerializer, LikeBaseSerializer):
     file = serializers.FileField(required=True, allow_empty_file=False, write_only=True)
+    creator = SimplyUserSerializer(many=False, read_only=True, required=False)
 
     class Meta:
         model = Wordlist
-        fields = ('id', 'name', 'type', 'path', 'file', 'checksum', 'size', 'creator')
+        fields = (
+            'id', 'name', 'type', 'path', 'file', 'checksum', 'size', 'creator', 'liked', 'likes'
+        )
         read_only_fields = ('creator',)
         extra_kwargs = {
             'path': {'write_only': True, 'required': False},
@@ -23,10 +29,10 @@ class WordlistSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         attrs = super().validate(attrs)
         file_upload.validate(attrs['file'], ['txt', 'text', ''], ['text/plain'])
-        attrs['path'] = os.path.join(WORDLIST_DIR, f'{str(uuid.uuid4())}.txt')
         return attrs
 
     def save(self, **kwargs):
+        self.validated_data['path'] = os.path.join(WORDLIST_DIR, f'{str(uuid.uuid4())}.txt')
         self.validated_data['checksum'] = file_upload.store_file(
             self.validated_data.pop('file'),
             self.validated_data['path']
