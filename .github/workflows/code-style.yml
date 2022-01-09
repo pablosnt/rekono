@@ -33,7 +33,9 @@ jobs:
       
       - name: Install ESLint
         shell: bash
-        run: npm install -g eslint
+        run: |
+          npm install .
+          npm install -g eslint
       
       - name: ESLint check
         run: eslint rekono/frontend/ --ext .js,.jsx,.ts,.tsx
