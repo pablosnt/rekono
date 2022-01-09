@@ -2,8 +2,9 @@ from typing import Optional
 
 import requests
 from django.apps import apps
-from inputs.base import BaseInput
-from inputs.models import InputType
+from django.db import models
+from input_types.base import BaseInput
+from input_types.models import InputType
 
 
 def get_url(host: str, port: int = 0, endpoint: str = '', https: bool = None) -> Optional[str]:
@@ -19,9 +20,9 @@ def get_url(host: str, port: int = 0, endpoint: str = '', https: bool = None) ->
 
 def check_connection(url: str) -> bool:
     try:
-        requests.get(url)
+        requests.get(url, timeout=5)
         return True
-    except Exception:
+    except Exception as ex:
         return False
 
 
@@ -31,9 +32,9 @@ def get_relations_between_input_types() -> dict:
     for it in input_types:
         app_label, model_name = it.related_model.split('.', 1)
         model = apps.get_model(app_label=app_label, model_name=model_name)
-        relations[it.name] = []
+        relations[it] = []
         for field in model._meta.get_fields():
-            if issubclass(field.related_model, BaseInput):
+            if isinstance(field, models.ForeignKey) and issubclass(field.related_model, BaseInput):
                 related_model = f'{field.related_model._meta.app_label}.{field.related_model._meta.model_name}'
                 related_type = InputType.objects.get(related_model=related_model)
                 relations[it].append(related_type)

@@ -87,6 +87,6 @@ class TaskViewSet(
         )
         new_task.wordlists.set(task.wordlists.all())
         new_task.save()
-        producer(new_task, get_current_site(request).domain)
+        producer(new_task)
         serializer = TaskSerializer(instance=new_task)
         return Response(serializer.data, status=status.HTTP_200_OK)

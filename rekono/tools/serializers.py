@@ -2,11 +2,13 @@ from typing import List
 
 from api.serializers import IntegerChoicesField
 from drf_spectacular.utils import extend_schema_field
+from input_types.serializers import InputTypeSerializer
 from likes.serializers import LikeBaseSerializer
 from rest_framework import serializers
 from rest_framework.fields import SerializerMethodField
 from tools.enums import IntensityRank, Stage
-from tools.models import Configuration, Input, Intensity, Output, Tool
+from tools.models import (Argument, Configuration, Input, Intensity, Output,
+                          Tool)
 
 
 class StageField(IntegerChoicesField):
@@ -23,14 +25,15 @@ class IntensityField(IntegerChoicesField):
 
 
 class InputSerializer(serializers.ModelSerializer):
+    type = InputTypeSerializer(many=False, read_only=True)
 
     class Meta:
         model = Input
-        fields = ('name', 'type', 'argument', 'filter', 'selection', 'required')
-        ordering = ['-id']
+        fields = ('type', 'filter', 'order')
 
 
 class OutputSerializer(serializers.ModelSerializer):
+    type = InputTypeSerializer(many=False, read_only=True)
 
     class Meta:
         model = Output
@@ -39,26 +42,14 @@ class OutputSerializer(serializers.ModelSerializer):
 
 
 class ConfigurationSerializer(serializers.ModelSerializer):
-    inputs = SerializerMethodField(
-        method_name='get_inputs',
-        read_only=True,
-        required=False
-    )
-    outputs = SerializerMethodField(
-        method_name='get_outputs',
-        read_only=True,
-        required=False
-    )
+    outputs = SerializerMethodField(method_name='get_outputs', read_only=True)
 
     class Meta:
         model = Configuration
-        fields = ('id', 'name', 'tool', 'arguments', 'default', 'inputs', 'outputs')
+        fields = ('id', 'name', 'tool', 'arguments', 'default', 'outputs')
         ordering = ['-id']
 
-    def get_inputs(self, instance) -> str:
-        return InputSerializer(instance.inputs.all().order_by('id'), many=True).data
-
-    def get_outputs(self, instance) -> str:
+    def get_outputs(self, instance) -> OutputSerializer:
         return OutputSerializer(instance.outputs.all().order_by('id'), many=True).data
 
 
@@ -71,16 +62,29 @@ class IntensitySerializer(serializers.ModelSerializer):
         ordering = ['-id']
 
 
+class ArgumentSerializer(serializers.ModelSerializer):
+    inputs = SerializerMethodField(method_name='get_inputs', read_only=True)
+
+    class Meta:
+        model = Argument
+        fields = ('name', 'argument', 'required', 'multiple', 'inputs')
+        ordering = ['-id']
+    
+    def get_inputs(self, instance) -> InputSerializer:
+        return InputSerializer(instance.inputs.all().order_by('order'), many=True).data
+
+
 class ToolSerializer(serializers.ModelSerializer, LikeBaseSerializer):
     stage_name = StageField(source='stage')
     intensities = SerializerMethodField(method_name='get_intensities', read_only=True)
     configurations = SerializerMethodField(method_name='get_configurations', read_only=True)
+    arguments = ArgumentSerializer(many=True, read_only=True)
 
     class Meta:
         model = Tool
         fields = (
             'id', 'name', 'command', 'stage_name', 'reference', 'icon',
-            'liked', 'likes', 'intensities', 'configurations'
+            'liked', 'likes', 'intensities', 'configurations', 'arguments'
         )
 
     @extend_schema_field(IntensitySerializer(many=True, read_only=True))
@@ -97,7 +101,8 @@ class ToolSerializer(serializers.ModelSerializer, LikeBaseSerializer):
 
 class SimplyToolSerializer(serializers.ModelSerializer):
     stage_name = StageField(source='stage')
+    arguments = ArgumentSerializer(many=True, read_only=True)
 
     class Meta:
         model = Tool
-        fields = ('id', 'name', 'command', 'stage_name', 'reference', 'icon')
+        fields = ('id', 'name', 'command', 'stage_name', 'reference', 'icon', 'arguments')

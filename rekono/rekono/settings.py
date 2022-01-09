@@ -16,7 +16,7 @@ from pathlib import Path
 from typing import List
 
 from findings.enums import Severity
-from inputs.enums import InputTypeNames
+from input_types.enums import InputTypeNames
 from security.crypto import generate_random_value
 from targets.enums import TargetType
 from tasks.enums import Status, TimeUnit
@@ -73,7 +73,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
     'executions',
     'findings',
-    'inputs',
+    'input_types',
     'processes',
     'projects',
     'resources',

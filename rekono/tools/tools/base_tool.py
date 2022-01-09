@@ -12,7 +12,7 @@ from executions.models import Execution
 from findings.models import Vulnerability
 from findings.queue import producer
 from findings.utils import get_unique_filter
-from inputs.base import BaseInput
+from input_types.base import BaseInput
 from tasks.enums import Status
 from tools import utils
 from tools.exceptions import (InstallationNotFoundException,
@@ -26,8 +26,8 @@ from rekono.settings import EXECUTION_OUTPUTS
 class BaseTool():
 
     ignore_exit_code = False
-    findings = []
-    findings_relations = {}
+    # findings = []
+    # findings_relations = {}
 
     def __init__(
         self,
@@ -48,6 +48,8 @@ class BaseTool():
         self.file_output_extension = self.tool.output_format or 'txt'
         self.filename_output = f'{str(uuid.uuid4())}.{self.file_output_extension}'
         self.path_output = os.path.join(EXECUTION_OUTPUTS, self.filename_output)
+        self.findings = []
+        self.findings_relations = {}
 
     def check_installation(self) -> None:
         if self.tool.command and shutil.which(self.tool.command) is None:
@@ -63,7 +65,7 @@ class BaseTool():
     
     def format(self, argument: Argument, findings: Union[List[BaseInput], BaseInput]) -> str:
         data = {}
-        if (argument.multiple and isinstance(findings, List)):
+        if argument.multiple and isinstance(findings, List):
             for finding in findings:
                 data = finding.parse(data)
         else:
@@ -77,7 +79,7 @@ class BaseTool():
     def process_source(self, argument: Argument, input: Input, model: Model, source: list, command: dict) -> dict:
         selection = []
         for item in source:
-            if isinstance(item, model) and item.check(input):
+            if isinstance(item, model) and item.filter(input):
                 if argument.multiple:
                     selection.append(item)
                 else:
@@ -85,7 +87,9 @@ class BaseTool():
                     self.findings_relations[model.__name__.lower()] = item
                     return command
         if selection:
-            command[argument.name] = self.format(argument, selection)
+            formatted_argument = self.format(argument, selection)
+            if formatted_argument:
+                command[argument.name] = formatted_argument
         return command
                 
 
@@ -136,6 +140,7 @@ class BaseTool():
             if 'Unique constraint violation' in e.message:
                 unique_filter = get_unique_filter(finding_type.key_fields, fields, self.execution)
                 finding = finding_type.objects.filter(**unique_filter).first()
+                fields.pop('execution')
                 for field, value in fields.items():
                     if value and value != getattr(finding, field):
                         setattr(finding, field, value)

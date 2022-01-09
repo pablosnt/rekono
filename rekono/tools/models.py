@@ -1,7 +1,7 @@
 from typing import Any
 
 from django.db import models
-from inputs.models import InputType
+from input_types.models import InputType
 from likes.models import LikeBase
 from tools.enums import IntensityRank, Stage
 

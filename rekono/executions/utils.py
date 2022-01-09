@@ -1,154 +1,76 @@
 from django.apps import apps
-from inputs import utils
+from input_types import utils
+from input_types.base import BaseInput
+from input_types.models import InputType
 from tools.models import Argument, Tool
 
 
-# TODO
-def get_executions_from_findings(findings: dict, tool: Tool) -> set:
-    executions = []
+def select_argument(tool: Tool, input_type: InputType) -> Argument:
+    argument = Argument.objects.filter(
+        tool=tool,
+        inputs__type=input_type,
+        inputs__order=1
+    ).first()
+    if not argument:
+        argument = Argument.objects.filter(
+            tool=tool,
+            inputs__type=input_type,
+            inputs__order__gt=1
+        ).first()
+    return argument
+
+
+def add_finding(argument: Argument, finding: BaseInput, executions: list, indexes: list) -> list:
+    for index in indexes:
+        if argument.multiple:
+            executions[index].append(finding)
+        else:
+            execution_copy = [f for f in executions[index] if type(f) != type(finding)]
+            if len(execution_copy) == len(executions[index]):
+                executions[index].append(finding)
+                break
+            else:
+                execution_copy.append(finding)
+                executions.append(execution_copy)
+                break
+    return executions
+
+
+def get_executions_from_findings(findings: list, tool: Tool) -> list:
+    executions = [[]]
     finding_relations = utils.get_relations_between_input_types()
-    for input_type, related_input_types in [(k, v) for k, v in finding_relations.items() if k.name in findings]:
-        for related in related_input_types:
-            for execution in executions:
-                for finding in execution:
-                    if 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-def get_executions_from_findings(findings: dict, arguments: list) -> set:
-    job_counter = 0
-    jobs = {
-        job_counter: []
-    }
-    finding_relations = utils.get_relations_between_input_types()
-    for input_type in finding_relations.keys():
-        if input_type.name not in findings:
+    for input_type, related_input_types in list(reversed(finding_relations.items())):
+        argument = select_argument(tool, input_type)
+        if not argument:
             continue
-        app_label, model_name = input_type.related_model.split('.', 1)
-        model = apps.get_model(app_label=app_label, model_name=model_name)
-        arguments = Argument.objects.filter(inputs__type=input_type, order=1).all()
-        if len(arguments) == 0:
-            arguments = Argument.objects.filter(inputs__type=input_type, order__gt=1).all()
-        for argument in arguments:
-            if finding_relations[input_type.name]:
-                relation_found = False
-                for finding in findings[input_type.name]:
-                    for relation in finding_relations[input_type.name]:
-                        attribute = getattr(finding, relation.name.lower(), None)
-                        if attribute:
-                            for jc in jobs.copy():
-                                if attribute in jobs[jc]:
-                                    relation_found = True
-                                    if argument.multiple:
-                                        jobs[jc].append(finding)
-                                    else:
-                                        pass
-                    if not relation_found:
-                        for jc in jobs.copy():
-                            jobs[jc].append(finding)
-            else:
-                if argument.multiple:
-                    for jc in jobs.copy():
-                        jobs[jc].extend(findings[input_type.name])
-                else:
-                    aux = jobs[job_counter].copy()
-                    for finding in findings[input_type.name]:
-                        jobs[job_counter] = aux.copy()
-                        jobs[job_counter].append(finding)
-                        job_counter += 1
-
-
-                for input_class in input_classes:
-                                            related_items = [
-                                                f for f in jobs[jc] if not isinstance(
-                                                    f,
-                                                    input_class
-                                                )
-                                            ]
-                                            if related_items:
-                                                break
-                                        if len(related_items) < len(jobs[jc]):
-                                            jobs[job_counter] = related_items.copy()
-                                            jobs[job_counter].append(finding)
-                                            job_counter += 1
-                                        else:
-                                            jobs[jc].append(finding)
-                            break
-
-
-        for i in [i for i in inputs if i.type == input_type]:
-            if finding_relations[input_type.name]:
-                relations_found = False
-                for finding in findings[input_type]:
-                    for relation in finding_relations[input_type]:
-                        attribute = getattr(finding, relation.name.lower(), None)
-                        if attribute:
-                            for jc in jobs.copy():
-                                if attribute in jobs[jc]:
-                                    relations_found = True
-                                    if i.selection == InputSelection.ALL:
-                                        jobs[jc].append(finding)
-                                    else:
-                                        for input_class in input_classes:
-                                            related_items = [
-                                                f for f in jobs[jc] if not isinstance(
-                                                    f,
-                                                    input_class
-                                                )
-                                            ]
-                                            if related_items:
-                                                break
-                                        if len(related_items) < len(jobs[jc]):
-                                            jobs[job_counter] = related_items.copy()
-                                            jobs[job_counter].append(finding)
-                                            job_counter += 1
-                                        else:
-                                            jobs[jc].append(finding)
-                            break
-                    if not relations_found:
-                        for jc in jobs.copy():
-                            jobs[jc].append(finding)
-            else:
-                if i.selection == InputSelection.ALL:
-                    for jc in jobs.copy():
-                        jobs[jc].extend(findings[input_type])
-                else:
-                    aux = jobs[job_counter].copy()
-                    for finding in findings[input_type]:
-                        jobs[job_counter] = aux.copy()
-                        jobs[job_counter].append(finding)
-                        job_counter += 1
-    executions = set(tuple(params) for params in jobs.values())
-    return [list(param_set) for param_set in list(executions)]
+        filtered = [f for f in findings if (
+            isinstance(f, input_type.get_related_model_class()) or
+            isinstance(f, input_type.get_callback_target_class())
+        )]
+        if not filtered:
+            continue
+        relations = {}
+        for relation in related_input_types:
+            for index, exec_findings in enumerate(executions):
+                for f in exec_findings:
+                    if (
+                        isinstance(f, relation.get_related_model_class()) or
+                        isinstance(f, relation.get_callback_target_class())
+                    ):
+                        if index in relations:
+                            relations[index]['findings'].append(f)
+                        else:
+                            relations[index] = {
+                                'field': relation.name.lower(),
+                                'findings': [f]
+                            }
+            if relations:
+                break
+        for finding in filtered:
+            indexes = range(len(executions))
+            if relations:
+                related = [index for index, value in relations.items() if getattr(finding, value['field']) in value['findings']]
+                if len(related) > 0:
+                    indexes = related
+            executions = add_finding(argument, finding, executions, indexes)
+    return executions

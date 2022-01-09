@@ -20,7 +20,7 @@ export default {
     pagination (pagination) {
       this.page = pagination.page
       this.limit = pagination.limit
-      this.fetchData(pagination.page, pagination.limit)
+      this.fetchData()
     },
     confirm (operation) {
       if (operation.success) {

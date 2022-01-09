@@ -7,8 +7,8 @@ from django.core.management.commands import loaddata
 from django.db.models.signals import post_migrate
 
 
-class InputsConfig(AppConfig):
-    name = 'inputs'
+class InputTypesConfig(AppConfig):
+    name = 'input_types'
 
     def ready(self) -> None:
         post_migrate.connect(self.load_inputs_model, sender=self)

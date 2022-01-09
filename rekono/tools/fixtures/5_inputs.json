@@ -44,8 +44,8 @@
         "pk": 5,
         "fields": {
             "argument": 3,
-            "type": 2,
-            "filter": null,
+            "type": 3,
+            "filter": "http",
             "order": 1
         }
     },
@@ -54,8 +54,8 @@
         "pk": 6,
         "fields": {
             "argument": 3,
-            "type": 3,
-            "filter": "http",
+            "type": 2,
+            "filter": null,
             "order": 2
         }
     },

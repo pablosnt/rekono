@@ -14,6 +14,9 @@
           </div>
         </div>
       </template>
+      <template #cell(inputs)="row">
+        <p>{{ row.item.arguments.map(argument => { return argument.inputs.find(input => input.order === 1).type.name }).join(', ') }}</p>
+      </template>
       <template #cell(likes)="row">
         {{ row.item.likes }}
         <b-button variant="outline">
@@ -43,11 +46,8 @@
             <template #cell(default)="config">
               <b-icon v-if="config.item.default" icon="check-circle-fill" variant="success"/>
             </template>
-            <template #cell(inputs)="config">
-              <p>{{ config.item.inputs.map((input) => { return input.type }).join(', ') }}</p>
-            </template>
             <template #cell(outputs)="config">
-              <p>{{ config.item.outputs.map((output) => { return output.type }).join(', ') }}</p>
+              <p>{{ config.item.outputs.map((output) => { return output.type.name }).join(', ') }}</p>
             </template>
           </b-table>
         </b-card>
@@ -84,13 +84,13 @@ export default {
         { key: 'command', sortable: true },
         { key: 'stage_name', label: 'Stage', sortable: true },
         { key: 'intensities', sortable: true },
+        { key: 'inputs', sortable: true },
         { key: 'likes', sortable: true },
         { key: 'actions', sortable: false }
       ],
       configFields: [
         { key: 'name', label: 'Configuration', sortable: true },
         { key: 'default', sortable: true },
-        { key: 'inputs', sortable: true },
         { key: 'outputs', sortable: true }
       ],
       taskForm: false,
@@ -111,8 +111,8 @@ export default {
     tools () {
       this.filters = [
         { name: 'Stage', values: stages, valueField: 'id', textField: 'value', filterField: 'stage' },
-        { name: 'Input', values: findingTypes, valueField: 'value', textField: 'value', filterField: 'configurations__inputs__type' },
-        { name: 'Output', values: findingTypes, valueField: 'value', textField: 'value', filterField: 'configurations__outputs__type' },
+        { name: 'Input', values: findingTypes, valueField: 'value', textField: 'value', filterField: 'arguments__inputs__type__name' },
+        { name: 'Output', values: findingTypes, valueField: 'value', textField: 'value', filterField: 'configurations__outputs__type__name' },
         { name: 'Favourities', values: [{ value: true, text: 'True' }, { value: false, text: 'False' }], valueField: 'value', textField: 'text', filterField: 'liked' }
       ] 
     }

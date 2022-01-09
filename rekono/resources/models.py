@@ -3,8 +3,8 @@ from typing import Any
 
 from django.conf import settings
 from django.db import models
-from inputs.base import BaseInput
-from inputs.enums import InputKeyword
+from input_types.base import BaseInput
+from input_types.enums import InputKeyword
 from likes.models import LikeBase
 from resources.enums import WordlistType
 from security.file_upload import check_checksum

@@ -24,7 +24,7 @@ def consumer(
 ) -> BaseTool:
     current_job = rq.get_current_job()
     tool_class = tool_utils.get_tool_class_by_name(tool.name)
-    tool = tool_class(
+    tool_runner = tool_class(
         execution=execution,
         tool=tool,
         configuration=configuration,
@@ -34,31 +34,35 @@ def consumer(
     if not previous_findings and current_job._dependency_ids:
         previous_findings = process_dependencies(
             execution,
+            tool,
             intensity,
             arguments,
             targets,
             current_job,
-            tool
+            tool_runner
         )
-    tool.run(targets=targets, previous_findings=previous_findings)
-    return tool
+    tool_runner.run(targets=targets, previous_findings=previous_findings)
+    return tool_runner
 
 
 def process_dependencies(
     execution: Execution,
+    tool: Tool,
     intensity: Intensity,
     arguments: list,
     targets: list,
     current_job: Job,
-    tool: BaseTool
+    tool_runner: BaseTool
 ) -> list:
     findings = queue_utils.get_findings_from_dependencies(current_job._dependency_ids)
     if not findings:
         return []
     new_jobs_ids = []
-    all_params = utils.get_executions_from_findings(findings, arguments)
+    all_params = utils.get_executions_from_findings(findings, tool)
     all_params = [
-        param_set for param_set in all_params if check_params_for_tool(tool, targets, param_set)
+        param_set for param_set in all_params if check_params_for_tool(
+            tool_runner, targets, param_set
+        )
     ]
     for param_set in all_params[1:]:
         new_execution = Execution.objects.create(task=execution.task, step=execution.step)
@@ -73,8 +77,9 @@ def process_dependencies(
             at_front=True
         )
         new_jobs_ids.append(job.id)
-    queue_utils.update_new_dependencies(current_job.id, new_jobs_ids, targets)
-    return next(iter(all_params), [])
+    if new_jobs_ids:
+        queue_utils.update_new_dependencies(current_job.id, new_jobs_ids, targets)
+    return all_params[0] if all_params else []
 
 
 def check_params_for_tool(tool: BaseTool, targets: list, findings: list) -> bool:

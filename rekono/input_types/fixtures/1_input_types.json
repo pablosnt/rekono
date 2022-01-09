@@ -1,6 +1,6 @@
 [
     {
-        "model": "inputs.inputtype",
+        "model": "input_types.inputtype",
         "pk": 1,
         "fields": {
             "name": "OSINT",
@@ -9,7 +9,7 @@
         }
     },
     {
-        "model": "inputs.inputtype",
+        "model": "input_types.inputtype",
         "pk": 2,
         "fields": {
             "name": "Host",
@@ -18,7 +18,7 @@
         }
     },
     {
-        "model": "inputs.inputtype",
+        "model": "input_types.inputtype",
         "pk": 3,
         "fields": {
             "name": "Enumeration",
@@ -27,7 +27,7 @@
         }
     },
     {
-        "model": "inputs.inputtype",
+        "model": "input_types.inputtype",
         "pk": 4,
         "fields": {
             "name": "Endpoint",
@@ -36,7 +36,7 @@
         }
     },
     {
-        "model": "inputs.inputtype",
+        "model": "input_types.inputtype",
         "pk": 5,
         "fields": {
             "name": "Technology",
@@ -45,7 +45,7 @@
         }
     },
     {
-        "model": "inputs.inputtype",
+        "model": "input_types.inputtype",
         "pk": 6,
         "fields": {
             "name": "Vulnerability",
@@ -54,7 +54,7 @@
         }
     },
     {
-        "model": "inputs.inputtype",
+        "model": "input_types.inputtype",
         "pk": 7,
         "fields": {
             "name": "Credential",
@@ -63,7 +63,7 @@
         }
     },
     {
-        "model": "inputs.inputtype",
+        "model": "input_types.inputtype",
         "pk": 8,
         "fields": {
             "name": "Exploit",
@@ -72,7 +72,7 @@
         }
     },
     {
-        "model": "inputs.inputtype",
+        "model": "input_types.inputtype",
         "pk": 9,
         "fields": {
             "name": "Wordlist",

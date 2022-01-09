@@ -1,7 +1,6 @@
 import django_rq
 from django.apps import apps
 from executions.queue import producer
-from inputs import utils
 from rq.job import Job
 from rq.registry import DeferredJobRegistry
 
@@ -21,21 +20,14 @@ def cancel_and_delete_execution(job_id: str) -> Job:
     return execution
 
 
-def get_findings_from_dependencies(dependencies: list) -> dict:
+def get_findings_from_dependencies(dependencies: list) -> list:
     executions_queue = django_rq.get_queue('executions-queue')
-    findings = {}
+    findings = []
     for dep_id in dependencies:
         dependency = executions_queue.fetch_job(dep_id)
         if not dependency or not dependency.result:
             continue
-        for input_type in utils.get_relations_between_input_types().keys():
-            model = input_type.get_related_model_class()
-            input_findings = [f for f in dependency.result.findings if isinstance(f, model)]
-            for finding in input_findings:
-                if input_type.name in findings:
-                    findings[input_type.name].append(finding)
-                else:
-                    findings[input_type.name] = [finding]
+        findings.extend(dependency.result.findings)
     return findings
 
 

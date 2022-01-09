@@ -1,5 +1,5 @@
 from django.contrib import admin
-from inputs.models import InputType
+from input_types.models import InputType
 
 # Register your models here.
 

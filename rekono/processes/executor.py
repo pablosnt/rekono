@@ -2,8 +2,7 @@ from django.utils import timezone
 from executions import utils
 from executions.models import Execution
 from executions.queue import producer
-from inputs.enums import InputTypeNames
-from inputs.models import InputType
+from input_types.models import InputType
 from processes.models import Step
 from targets.models import TargetEndpoint
 from tasks.enums import Status
@@ -45,19 +44,19 @@ def create_plan(task: Task) -> list:
     return execution_plan
 
 
+
 def execute(task: Task) -> None:
     execution_plan = create_plan(task)
     for job in execution_plan:
-        inputs = [i for i in job.inputs if i not in job.dependencies_coverage]
-        targets = {
-            InputTypeNames.HOST: [task.target],
-            InputTypeNames.ENUMERATION: list(task.target.target_ports.all()),
-            InputTypeNames.ENDPOINT: list(TargetEndpoint.objects.filter(
-                target_port__target=task.target
-            ).all()),
-            InputTypeNames.WORDLIST: list(task.wordlists.all())
-        }
-        executions = utils.get_executions_from_findings(targets, inputs)
+        covered_targets = [i.callback_target for i in job.dependencies_coverage if i.callback_target is not None]
+        targets = list(task.wordlists.all())
+        if 'Target' not in covered_targets:
+            targets.append(task.target)
+        if 'TargetPort' not in covered_targets:
+            targets.extend(list(task.target.target_ports.all()))
+        if 'TargetEnumeration' not in covered_targets:
+            targets.extend(list(TargetEndpoint.objects.filter(target_port__target=task.target).all()))
+        executions = utils.get_executions_from_findings(targets, job.step.tool)
         for execution_targets in executions:
             execution = Execution.objects.create(task=task, step=job.step)
             execution.save()

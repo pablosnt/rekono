@@ -148,6 +148,7 @@ export default {
   },
   data () {
     return {
+      isWordlist: false,
       projects: [],
       targets: [],
       processes: [],
@@ -273,21 +274,12 @@ export default {
     },
     checkInputType (inputType) {
       let inputs = []
-      if (this.selectedConfiguration) {
-        inputs = this.selectedConfiguration.inputs
+      if (this.selectedTool) {
+        this.selectedTool.arguments.map(argument => argument.inputs.map(input => inputs.push(input.type.name)))
       } else if (this.selectedProcess) {
-        for (let s = 0; s < this.selectedProcess.steps.length; s++) {
-          inputs = inputs.concat(this.selectedProcess.steps[s].configuration.inputs)
-        }
+        this.selectedProcess.steps.map(step => step.tool.arguments.map(argument => argument.inputs.map(input => inputs.push(input.type.name))))
       }
-      let check = false
-      for (let i = 0; i < inputs.length; i++) {
-        if (inputs[i].type === inputType) {
-          check = true
-          break
-        }
-      }
-      return check
+      return inputs.includes(inputType)
     },
     selectProject (projectId, project = null) {
       this.projectId = projectId
@@ -299,7 +291,6 @@ export default {
       this.targets = this.selectedProject.targets
     },
     selectProcess (processId, process = null) {
-      const isWordlist = this.checkInputType('Wordlist')
       this.processId = processId
       this.toolId = null
       this.selectedTool = null
@@ -312,7 +303,9 @@ export default {
       } else {
         this.selectedProcess = findById(this.processes, processId)
       }
-      if (!isWordlist && this.checkInputType('Wordlist')) {
+      const isWordlist = this.checkInputType('Wordlist')
+      if (!this.isWordlist && isWordlist) {
+        this.isWordlist = isWordlist
         this.updateWordlists()
       }
     },
@@ -342,17 +335,18 @@ export default {
       if (!this.intensity) {
         this.intensity = this.intensities[this.intensities.length - 1].intensity_rank
       }
+      const isWordlist = this.checkInputType('Wordlist')
+      if (!this.isWordlist && isWordlist) {
+        this.isWordlist = isWordlist
+        this.updateWordlists()
+      }
     },
     selectConfiguration (configurationId, configuration = null) {
-      const isWordlist = this.checkInputType('Wordlist')
       this.configurationId = configurationId
       if (configuration) {
         this.selectedConfiguration = configuration
       } else {
         this.selectedConfiguration = findById(this.selectedTool.configurations, configurationId)
-      }
-      if (!isWordlist && this.checkInputType('Wordlist')) {
-        this.updateWordlists()
       }
     },
     updateWordlists () {

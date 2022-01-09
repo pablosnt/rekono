@@ -6,9 +6,9 @@ from django.db import DEFAULT_DB_ALIAS, models
 from executions.models import Execution
 from findings.enums import DataType, OSType, PortStatus, Protocol, Severity
 from findings.utils import get_unique_filter
-from inputs.base import BaseInput
-from inputs.enums import InputKeyword
-from inputs.utils import get_url
+from input_types.base import BaseInput
+from input_types.enums import InputKeyword
+from input_types.utils import get_url
 from targets.enums import TargetType
 from targets.utils import get_target_type
 from tools.models import Input
@@ -119,6 +119,8 @@ class Host(Finding):
     ]
 
     def filter(self, input: Input) -> bool:
+        if not input.filter:
+            return True
         try:
             return TargetType[input.filter] == get_target_type(self.address)
         except KeyError:
@@ -160,6 +162,8 @@ class Enumeration(Finding):
     ]
 
     def filter(self, input: Input) -> bool:
+        if not input.filter:
+            return True
         try:
             to_check = int(input.filter)
             return to_check == self.port
@@ -201,6 +205,8 @@ class Endpoint(Finding):
     ]
 
     def filter(self, input: Input) -> bool:
+        if not input.filter:
+            return True
         try:
             status_code = int(input.filter)
             return status_code == self.status
@@ -240,7 +246,7 @@ class Technology(Finding):
     ]
 
     def filter(self, input: Input) -> bool:
-        return input.filter.lower() in self.name.lower()
+        return not input.filter or input.filter.lower() in self.name.lower()
 
     def parse(self, accumulated: dict = {}) -> dict:
         output = self.enumeration.parse()
@@ -279,6 +285,8 @@ class Vulnerability(Finding):
     ]
 
     def filter(self, input: Input) -> bool:
+        if not input.filter:
+            return True
         try:
             return Severity[input.filter] == self.severity
         except ValueError:

@@ -112,7 +112,7 @@
             </template>
             <b-form-textarea class="mt-3 text-light" style="background-color: #212529;" plaintext :value="selectedExecution.output_error" size="md" rows="5" max-rows="30"></b-form-textarea>
           </b-tab>
-          <b-tab title-link-class="text-secondary">
+          <b-tab title-link-class="text-secondary" :disabled="(!selectedExecution || !selectedExecution.output_plain) && (currentTask.status === 'Running' || currentTask.status === 'Requested')">
             <template #title>
               <b-icon icon="flag-fill"/> Findings
             </template>
@@ -244,7 +244,7 @@ export default {
       if (items && items.length > 0) {
         this.selectedExecution = items[0]
       } else {
-        this.selectedExecution = this.executions.length === 1 ? this.executions[0] : null
+        this.selectedExecution = this.executions.length > 0 ? this.executions.find(execution => execution.status !== 'Requested' && execution.status !== 'Running' && execution.status !== 'Skipped') : null
       }
     },
     cleanDDSelection () {

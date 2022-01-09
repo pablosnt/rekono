@@ -2,9 +2,9 @@ from typing import Any
 
 from django.apps import apps
 from django.db import models
-from inputs.enums import InputTypeNames
+from input_types.enums import InputTypeNames
 
-from rekono.inputs.base import BaseInput
+from input_types.base import BaseInput
 
 # Create your models here.
 

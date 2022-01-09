@@ -1,9 +1,9 @@
 from typing import Any
 
 from django.db import models
-from inputs.base import BaseInput
-from inputs.enums import InputKeyword
-from inputs.utils import get_url
+from input_types.base import BaseInput
+from input_types.enums import InputKeyword
+from input_types.utils import get_url
 from projects.models import Project
 from targets.enums import TargetType
 from tools.models import Input
@@ -27,6 +27,8 @@ class Target(models.Model, BaseInput):
         ]
 
     def filter(self, input: Input) -> bool:
+        if not input.filter:
+            return True
         try:
             return TargetType[input.filter] == self.type
         except KeyError:
