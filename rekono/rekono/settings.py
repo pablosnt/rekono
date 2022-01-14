@@ -229,8 +229,8 @@ DEFECT_DOJO = {
     'HOST': os.getenv('DEFECTDOJO_HOST', ''),
     'API_KEY': os.getenv('DEFECTDOJO_KEY', ''),
     'TAGS': ['rekono'],
-    'PROD_AUTO_CREATION': True,
-    'PROD_TYPE': 'Rekono Project',
+    'PRODUCT_AUTO_CREATION': True,
+    'PRODUCT_TYPE': 'Rekono Project',
     'TEST_TYPE': 'Rekono Findings Import',
     'TEST': 'Rekono Test'
 }

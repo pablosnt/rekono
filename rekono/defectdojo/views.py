@@ -1,7 +1,5 @@
 from defectdojo import uploader
-from defectdojo.exceptions import (EngagementIdNotFoundException,
-                                   InvalidEngagementIdException,
-                                   ProductIdNotFoundException)
+from defectdojo.exceptions import DefectDojoException
 from defectdojo.serializers import EngagementSerializer
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
@@ -11,7 +9,7 @@ from rest_framework.viewsets import GenericViewSet
 from tasks.enums import Status
 
 
-class DDScansViewSet(GenericViewSet):
+class DefectDojoScans(GenericViewSet):
 
     def get_executions(self):
         return []
@@ -27,29 +25,26 @@ class DDScansViewSet(GenericViewSet):
         executions = [e for e in self.get_executions() if e.status == Status.COMPLETED]
         if not executions:
             return Response(
-                {'executions': 'Imcompleted executions cannot be reported to Defect-Dojo'},
+                {'executions': 'Incompleted executions cannot be reported to Defect-Dojo'},
                 status=status.HTTP_400_BAD_REQUEST
             )
         serializer = EngagementSerializer(data=request.data)
         if serializer.is_valid() and executions:
             try:
-                uploader.upload_executions(
+                uploader.scans(
+                    self.get_object().get_project(),
                     executions,
                     serializer.validated_data.get('engagement_id'),
                     serializer.validated_data.get('engagement_name'),
                     serializer.validated_data.get('engagement_description')
                 )
                 return Response(status=status.HTTP_200_OK)
-            except (
-                ProductIdNotFoundException,
-                EngagementIdNotFoundException,
-                InvalidEngagementIdException
-            ) as ex:
+            except DefectDojoException as ex:
                 return Response(str(ex), status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class DDFindingsViewSet(GenericViewSet):
+class DefectDojoFindings(GenericViewSet):
 
     def get_findings(self):
         return []
@@ -71,17 +66,14 @@ class DDFindingsViewSet(GenericViewSet):
         serializer = EngagementSerializer(data=request.data)
         if serializer.is_valid():
             try:
-                uploader.upload_findings(
+                uploader.findings(
+                    self.get_object().get_project(),
                     findings,
                     serializer.validated_data.get('engagement_id'),
                     serializer.validated_data.get('engagement_name'),
                     serializer.validated_data.get('engagement_description')
                 )
                 return Response(status=status.HTTP_200_OK)
-            except (
-                ProductIdNotFoundException,
-                EngagementIdNotFoundException,
-                InvalidEngagementIdException
-            ) as ex:
+            except DefectDojoException as ex:
                 return Response(str(ex), status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

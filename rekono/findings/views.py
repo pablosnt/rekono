@@ -1,7 +1,7 @@
 from re import search
 
 from defectdojo.serializers import EngagementSerializer
-from defectdojo.views import DDFindingsViewSet
+from defectdojo.views import DefectDojoFindings
 from drf_spectacular.utils import extend_schema
 from findings.enums import DataType
 from findings.filters import (CredentialFilter, EndpointFilter,
@@ -25,7 +25,7 @@ from targets.serializers import TargetSerializer
 # Create your views here.
 
 
-class FindingBaseView(DDFindingsViewSet, ListModelMixin, RetrieveModelMixin, DestroyModelMixin):
+class FindingBaseView(ListModelMixin, RetrieveModelMixin, DestroyModelMixin, DefectDojoFindings):
 
     def get_queryset(self):
         queryset = super().get_queryset()

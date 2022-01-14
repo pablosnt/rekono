@@ -1,4 +1,4 @@
-from defectdojo.views import DDFindingsViewSet, DDScansViewSet
+from defectdojo.views import DefectDojoFindings, DefectDojoScans
 from drf_spectacular.utils import extend_schema
 from executions.models import Execution
 from findings.models import (OSINT, Credential, Endpoint, Enumeration, Exploit,
@@ -17,7 +17,7 @@ from users.models import User
 # Create your views here.
 
 
-class ProjectViewSet(ModelViewSet, DDScansViewSet, DDFindingsViewSet):
+class ProjectViewSet(ModelViewSet, DefectDojoScans, DefectDojoFindings):
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
     filterset_class = ProjectFilter

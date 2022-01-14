@@ -1,4 +1,4 @@
-from defectdojo.api import engagements
+from defectdojo.api import DefectDojo
 from django.core.exceptions import ValidationError
 from rest_framework import serializers
 
@@ -11,8 +11,8 @@ class EngagementSerializer(serializers.Serializer):
     def validate(self, attrs):
         attrs = super().validate(attrs)
         if 'engagement_id' in attrs:
-            _, eng_id = engagements.check_engagement(attrs.get('engagement_id'))
-            if not eng_id:
+            success, _ = DefectDojo().get_engagement(attrs.get('engagement_id'))
+            if not success:
                 raise ValidationError(
                     {'engagement_id': f'Engagement {attrs.get("engagement_id")} not found'}
                 )

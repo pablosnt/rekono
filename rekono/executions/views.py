@@ -1,4 +1,4 @@
-from defectdojo.views import DDFindingsViewSet, DDScansViewSet
+from defectdojo.views import DefectDojoFindings, DefectDojoScans
 from executions.filters import ExecutionFilter
 from executions.models import Execution
 from executions.serializers import ExecutionSerializer
@@ -9,7 +9,7 @@ from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
 # Create your views here.
 
 
-class ExecutionViewSet(ListModelMixin, RetrieveModelMixin, DDScansViewSet, DDFindingsViewSet):
+class ExecutionViewSet(ListModelMixin, RetrieveModelMixin, DefectDojoScans, DefectDojoFindings):
     queryset = Execution.objects.all()
     serializer_class = ExecutionSerializer
     filterset_class = ExecutionFilter

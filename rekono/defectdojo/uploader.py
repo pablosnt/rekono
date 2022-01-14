@@ -1,95 +1,100 @@
-from typing import Any
-
-from defectdojo.api import engagements, findings, products, scans, tests
-from defectdojo.exceptions import (EngagementIdNotFoundException,
-                                   InvalidEngagementIdException,
-                                   ProductIdNotFoundException)
+from defectdojo.api import DefectDojo
+from defectdojo.exceptions import DefectDojoException
 from findings.models import Endpoint
+from projects.models import Project
 
-from rekono.settings import DEFECT_DOJO as config
+from rekono.settings import DEFECT_DOJO
+
+dd_client = DefectDojo()
 
 
-def get_product_id(project: Any) -> int:
-    if not project.defectdojo_product_id and config.get('PROD_AUTO_CREATION'):
-        product_id = products.create_new_product(project)
-        if product_id:
-            project.defectdojo_product_id = product_id
-            project.save()
-            return product_id
-    elif project.defectdojo_product_id:
+def get_product(project: Project) -> int:
+    if project.defectdojo_product_id:
         return project.defectdojo_product_id
-    raise ProductIdNotFoundException(
-        f'Product ID associated to project {project.id} not found and can not be created'
-    )
-
-
-def get_engagement_id(
-    project: Any,
-    engagement_id: int = None,
-    engagement_name: str = None,
-    engagement_description: str = None
-):
-    if engagement_id:
-        prod_id, eng_id = engagements.check_engagement(engagement_id, project.defectdojo_product_id)
-        if eng_id:
-            project.defectdojo_product_id = prod_id
-            project.save()
-            return prod_id, eng_id
-        if project.defectdojo_product_id and not eng_id:
-            raise InvalidEngagementIdException(
-                f'Engagement {engagement_id} not found for product {project.defectdojo_product_id}'
-            )
+    elif DEFECT_DOJO.get('PRODUCT_AUTO_CREATION'):
+        product_type = None
+        success, body = dd_client.get_rekono_product_type()
+        if success and body and len(body.get('results')) > 0:
+            product_type = body.get('results')[0].get('id')
         else:
-            raise EngagementIdNotFoundException(f'Engagement {engagement_id} not found')
-    elif engagement_name and engagement_description:
-        prod_id = get_product_id(project)
-        eng_id = engagements.get_last_engagement(prod_id, engagement_name)
-        if not eng_id:
-            eng_id = engagements.create_new_engagement(
-                prod_id,
-                engagement_name,
-                engagement_description
-            )
-        return prod_id, eng_id
+            success, body = dd_client.create_rekono_product_type()
+            if success:
+                product_type = body.get('id')
+        if product_type:
+            success, body = dd_client.create_product(product_type, project)
+            if success:
+                project.defectdojo_product_id = body.get('id')
+                project.save(update_fields=['defectdojo_product_id'])
+                return body.get('id')
+    raise DefectDojoException(f'Product associated to project {project.id} not found')
 
 
-def upload_executions(
-    rekono_executions: list,
-    engagement_id: int = None,
-    engagement_name: str = None,
-    engagement_description: str = None
+def get_engagement(project: Project, id: int, name: str, description: str) -> int:
+    if id:
+        success, body = dd_client.get_engagement(id)
+        if success and body:
+            if project.defectdojo_product_id and project.defectdojo_product_id != body.get('id'):
+                raise DefectDojoException(f'Invalid engagement Id {id} for project {project.id}')
+            else:
+                return project.defectdojo_product_id, body.get('id')
+        raise DefectDojoException(f'Engagement Id {id} not found')
+    elif name and description:
+        product_id = get_product(project)
+        success, body = dd_client.create_engagement(product_id, name, description)
+        if success and body:
+            return product_id, body.get('id')
+        raise DefectDojoException('Invalid engagement')
+
+
+def scans(
+    project: Project,
+    executions: list,
+    engagement_id: int,
+    name: str,
+    description: str
 ) -> None:
-    _, engagement = get_engagement_id(
-        rekono_executions[0].task.target.project,
-        engagement_id,
-        engagement_name,
-        engagement_description
-    )
-    for execution in rekono_executions:
+    _, engagement_id = get_engagement(project, engagement_id, name, description)
+    for execution in executions:
         tool = execution.step.tool if execution.step else execution.task.tool
         if tool.defectdojo_scan_type:
-            scans.import_scan(engagement, execution, tool)
-            execution.reported_to_defectdojo = True
-            execution.save()
+            success, _ = dd_client.import_scan(engagement_id, execution, tool)
+            if success:
+                execution.reported_to_defectdojo = True
+                execution.save(update_fields=['reported_to_defectdojo'])
 
 
-def upload_findings(
-    rekono_findings: list,
-    engagement_id: int = None,
-    engagement_name: str = None,
-    engagement_description: str = None
+def findings(
+    project: Project,
+    findings: list,
+    engagement_id: int,
+    name: str,
+    description: str
 ) -> None:
-    product, engagement = get_engagement_id(
-        rekono_findings[0].execution.task.target.project,
-        engagement_id,
-        engagement_name,
-        engagement_description
-    )
-    test = tests.create_rekono_test(engagement)
-    for finding in rekono_findings:
+    product_id, engagement_id = get_engagement(project, engagement_id, name, description)
+    test_id = None
+    for finding in findings:
+        success = False
         if isinstance(finding, Endpoint):
-            findings.create_endpoint(product, finding)
+            if not product_id:
+                product_id = get_product(project)
+            success, _ = dd_client.create_endpoint(product_id, finding)
         else:
-            findings.create_finding(test, finding)
-        finding.reported_to_defectdojo = True
-        finding.save()
+            if not test_id:
+                test_type = None
+                result, body = dd_client.get_rekono_product_type()
+                if result and body and len(body.get('results')) > 0:
+                    test_type = body.get('results')[0].get('id')
+                else:
+                    result, body = dd_client.create_rekono_product_type()
+                    if result:
+                        test_type = body.get('id')
+                if test_type:
+                    result, body = dd_client.create_rekono_test(test_type, engagement_id)
+                    if result:
+                        test_id = body.get('id')
+                if not test_id:
+                    raise DefectDojoException('Unexpected error in Rekono test creation')
+            success, _ = dd_client.create_finding(test_id, finding)
+        if success:
+            finding.reported_to_defectdojo = True
+            finding.save(update_fields=['reported_to_defectdojo'])

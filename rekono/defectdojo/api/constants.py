@@ -1,1 +1,0 @@
-DD_FINDING_DATE_FORMAT = '%Y-%m-%d'

@@ -1,4 +1,4 @@
-from defectdojo.views import DDFindingsViewSet, DDScansViewSet
+from defectdojo.views import DefectDojoFindings, DefectDojoScans
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.exceptions import PermissionDenied
 from drf_spectacular.utils import extend_schema
@@ -22,12 +22,12 @@ from tasks.serializers import TaskSerializer
 
 
 class TaskViewSet(
-    DDScansViewSet,
-    DDFindingsViewSet,
     CreateModelMixin,
     ListModelMixin,
     RetrieveModelMixin,
-    DestroyModelMixin
+    DestroyModelMixin,
+    DefectDojoScans,
+    DefectDojoFindings
 ):
     queryset = Task.objects.all()
     serializer_class = TaskSerializer

@@ -1,5 +1,5 @@
 from api.serializers import RekonoTagSerializerField
-from defectdojo.api import products
+from defectdojo.api import DefectDojo
 from django.db import transaction
 from projects.models import Project
 from rest_framework import serializers
@@ -28,9 +28,10 @@ class ProjectSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     def validate(self, attrs):
         attrs = super().validate(attrs)
+        success, _ = DefectDojo().get_product(attrs.get('defectdojo_product_id'))
         if (
             attrs.get('defectdojo_product_id')
-            and not products.check_product_id(attrs.get('defectdojo_product_id'))
+            and not success
         ):
             raise serializers.ValidationError(
                 {

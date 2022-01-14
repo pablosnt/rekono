@@ -1,6 +1,6 @@
-from typing import Any, Collection, Dict, Iterable, Optional, Tuple
+from typing import Any, Collection, Iterable, Optional
 
-from defectdojo.api.constants import DD_FINDING_DATE_FORMAT
+from defectdojo.constants import DD_DATE_FORMAT
 from django.core.exceptions import ValidationError
 from django.db import DEFAULT_DB_ALIAS, models
 from executions.models import Execution
@@ -105,7 +105,7 @@ class OSINT(Finding):
             'title': f'{self.data_type} found using OSINT techniques',
             'description': self.data,
             'severity': Severity.MEDIUM.value,
-            'date': self.creation.strftime(DD_FINDING_DATE_FORMAT)
+            'date': self.creation.strftime(DD_DATE_FORMAT)
         }
 
 
@@ -141,7 +141,7 @@ class Host(Finding):
             'title': 'Host discovered',
             'description': description,
             'severity': Severity.INFO.value,
-            'date': self.creation.strftime(DD_FINDING_DATE_FORMAT)
+            'date': self.creation.strftime(DD_DATE_FORMAT)
         }
 
 
@@ -190,7 +190,7 @@ class Enumeration(Finding):
             'title': 'Port discovered',
             'description': description,
             'severity': Severity.INFO.value,
-            'date': self.creation.strftime(DD_FINDING_DATE_FORMAT)
+            'date': self.creation.strftime(DD_DATE_FORMAT)
         }
 
 
@@ -262,7 +262,7 @@ class Technology(Finding):
             'severity': Severity.LOW.value,
             'cwe': 200,     # CWE-200: Exposure of Sensitive Information to Unauthorized Actor
             'references': self.reference,
-            'date': self.creation.strftime(DD_FINDING_DATE_FORMAT)
+            'date': self.creation.strftime(DD_DATE_FORMAT)
         }
 
 
@@ -315,7 +315,7 @@ class Vulnerability(Finding):
             'cve': self.cve,
             'cwe': int(self.cwe.split('-', 1)[1]) if self.cwe else None,
             'references': self.reference,
-            'date': self.creation.strftime(DD_FINDING_DATE_FORMAT)
+            'date': self.creation.strftime(DD_DATE_FORMAT)
         }
 
 
@@ -330,7 +330,7 @@ class Credential(Finding):
         {'name': 'secret', 'is_base': False}
     ]
 
-    def parse(self, accumulated: dict = ...) -> dict:
+    def parse(self, accumulated: dict = {}) -> dict:
         return {
             InputKeyword.EMAIL.name.lower(): self.email,
             InputKeyword.USERNAME.name.lower(): self.username,
@@ -344,7 +344,7 @@ class Credential(Finding):
             'description': description,
             'cwe': 200,     # CWE-200: Exposure of Sensitive Information to Unauthorized Actor
             'severity': Severity.HIGH.value,
-            'date': self.creation.strftime(DD_FINDING_DATE_FORMAT)
+            'date': self.creation.strftime(DD_DATE_FORMAT)
         }
 
 
@@ -374,5 +374,5 @@ class Exploit(Finding):
             'description': self.description,
             'severity': Severity(self.vulnerability.severity).value if self.vulnerability else Severity.MEDIUM.value,   # noqa: E501
             'reference': self.reference,
-            'date': self.creation.strftime(DD_FINDING_DATE_FORMAT)
+            'date': self.creation.strftime(DD_DATE_FORMAT)
         }

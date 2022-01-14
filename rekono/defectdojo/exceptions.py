@@ -1,10 +1,2 @@
-class ProductIdNotFoundException(Exception):
-    pass
-
-
-class EngagementIdNotFoundException(Exception):
-    pass
-
-
-class InvalidEngagementIdException(Exception):
+class DefectDojoException(Exception):
     pass
