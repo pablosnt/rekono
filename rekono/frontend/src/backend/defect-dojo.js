@@ -4,12 +4,12 @@ class DefectDojo extends RekonoApi {
   getData (engagementId, engagementName, engagementDescription) {
     if (engagementId !== null) {
       return {
-        engagement_id: engagementId
+        id: engagementId
       }
     } else if (engagementName !== null && engagementDescription !== null) {
       return {
-        engagement_name: engagementName,
-        engagement_description: engagementDescription
+        name: engagementName,
+        description: engagementDescription
       }
     }
   }
