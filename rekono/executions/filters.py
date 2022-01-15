@@ -4,7 +4,7 @@ from executions.models import Execution
 
 
 class ExecutionFilter(ToolFilter):
-    '''FilterSet to filter and sort executions data.'''
+    '''FilterSet to filter and sort executions entities.'''
 
     tool_fields = ('task__tool', 'step__tool')                                  # Filter by two Tool fields
     o = OrderingFilter(                                                         # Ordering fields

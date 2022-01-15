@@ -29,7 +29,7 @@ class ToolFilter(BaseFilter):
     '''Filter that allows querysets filtering by Tool using two model fields.'''
 
     tool = filters.NumberFilter(field_name='tool', method='filter_tool')        # Tool Id given by the user
-    tool_fields: tuple = ()                                                     # Field names to filter the queryset
+    tool_fields: tuple = ()                                                     # Tool field names to use in the filter
 
     def filter_tool(self, queryset: QuerySet, name: str, value: Tool) -> QuerySet:
         '''Filter queryset by Tool using two model fields simultaneously.

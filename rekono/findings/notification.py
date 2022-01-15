@@ -4,6 +4,8 @@ from mail import sender
 from telegram_bot import bot
 from users.models import User
 
+# TODO: Notifications refactoring
+
 
 def get_parameters(execution: Any, findings: list) -> dict:
     parameters = {

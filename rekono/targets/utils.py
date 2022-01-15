@@ -29,6 +29,4 @@ def get_target_type(target: str) -> str:
         return TargetType.DOMAIN
     except socket.gaierror:
         pass
-    raise InvalidTargetException(
-        f'Invalid target {target}. IP address, IP range or domain is required'
-    )
+    raise InvalidTargetException(f'Invalid target {target}. IP address, IP range or domain is required')

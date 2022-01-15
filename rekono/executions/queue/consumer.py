@@ -25,7 +25,7 @@ def consumer(
     targets: List[BaseInput],
     previous_findings: List[BaseInput]
 ) -> BaseTool:
-    '''Consumes jobs from executions queue and executes them.
+    '''Consume jobs from executions queue and executes them.
 
     Args:
         execution (Execution): Execution associated to the job

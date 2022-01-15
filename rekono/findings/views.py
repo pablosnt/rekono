@@ -1,7 +1,9 @@
-from re import search
+from typing import Any, List
+from urllib.request import Request
 
 from defectdojo.serializers import EngagementSerializer
 from defectdojo.views import DefectDojoFindings
+from django.db.models import QuerySet
 from drf_spectacular.utils import extend_schema
 from findings.enums import DataType
 from findings.filters import (CredentialFilter, EndpointFilter,
@@ -9,7 +11,7 @@ from findings.filters import (CredentialFilter, EndpointFilter,
                               OSINTFilter, TechnologyFilter,
                               VulnerabilityFilter)
 from findings.models import (OSINT, Credential, Endpoint, Enumeration, Exploit,
-                             Host, Technology, Vulnerability)
+                             Finding, Host, Technology, Vulnerability)
 from findings.serializers import (CredentialSerializer, EndpointSerializer,
                                   EnumerationSerializer, ExploitSerializer,
                                   HostSerializer, OSINTSerializer,
@@ -18,7 +20,7 @@ from findings.serializers import (CredentialSerializer, EndpointSerializer,
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.mixins import (DestroyModelMixin, ListModelMixin,
-                                   RetrieveModelMixin, UpdateModelMixin)
+                                   RetrieveModelMixin)
 from rest_framework.response import Response
 from targets.serializers import TargetSerializer
 
@@ -26,63 +28,107 @@ from targets.serializers import TargetSerializer
 
 
 class FindingBaseView(ListModelMixin, RetrieveModelMixin, DestroyModelMixin, DefectDojoFindings):
+    '''Common finding ViewSet that includes: get, retrieve, enable, disable and import in Defect-Dojo features.'''
 
-    def get_queryset(self):
+    def get_queryset(self) -> QuerySet:
+        '''Get the Finding queryset that the user is allowed to get, based on project members.
+
+        Returns:
+            QuerySet: Execution queryset
+        '''
         queryset = super().get_queryset()
         return queryset.filter(execution__task__target__project__members=self.request.user)
 
-    def get_findings(self):
+    def get_findings(self) -> List[Finding]:
+        '''Get findings list associated to the current instance. Needed for Defect-Dojo integration.
+
+        Returns:
+            List[Finding]: Findings list associated to the current instance
+        '''
         return [self.get_object()]
 
-    def destroy(self, request, *args, **kwargs):
-        finding = self.get_object()
+    def destroy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        '''Disable finding.
+
+        Args:
+            request (Request): Received HTTP request
+
+        Returns:
+            Response: HTTP
+        '''
+        finding: Finding = self.get_object()
         finding.is_active = False
-        finding.save()
+        finding.save(update_fields=['is_active'])
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @extend_schema(request=None, responses={201: None})
     @action(detail=True, methods=['POST'], url_path='enable', url_name='enable')
-    def enable(self, request, pk):
-        finding = self.get_object()
+    def enable(self, request: Request, pk: int) -> Response:
+        '''Enable finding.
+
+        Args:
+            request (Request): Received HTTP request
+            pk (int): Instance Id
+
+        Returns:
+            Response: HTTP response
+        '''
+        finding: Finding = self.get_object()
         finding.is_active = True
-        finding.save()
+        finding.save(update_fields=['is_active'])
         return Response(status=status.HTTP_201_CREATED)
 
     @extend_schema(request=EngagementSerializer, responses={200: None})
     @action(detail=True, methods=['POST'], url_path='defect-dojo', url_name='defect-dojo')
     def defect_dojo_findings(self, request, pk):
+        '''Import finding in Defect-Dojo.
+
+        Args:
+            request (Request): Received HTTP request
+            pk (int): Instance Id
+
+        Returns:
+            Response: HTTP response
+        '''
         return super().defect_dojo_findings(request, pk)
 
 
 class OSINTViewSet(FindingBaseView):
+    '''OSINT ViewSet that includes: get, retrieve, enable, disable, import in Defect-Dojo and target creation features.'''  # noqa: E501
+
     queryset = OSINT.objects.all()
     serializer_class = OSINTSerializer
     filterset_class = OSINTFilter
-    search_fields = ['data', 'source']
+    search_fields = ['data', 'source']                                          # Fields used to search OSINTs
 
     @extend_schema(request=None, responses={201: TargetSerializer})
     @action(detail=True, methods=['POST'], url_path='target', url_name='target')
-    def target(self, request, pk):
+    def target(self, request: Request, pk: int) -> Response:
+        '''Target creation from OSINT data.
+
+        Args:
+            request (Request): Received HTTP request
+            pk (int): Instance Id
+
+        Returns:
+            Response: HTTP response
+        '''
         osint = self.get_object()
-        if osint.data_type in [DataType.IP, DataType.DOMAIN]:
-            serializer = TargetSerializer(data={
-                'project': osint.execution.task.target.project.id,
-                'target': osint.data
-            })
+        if osint.data_type in [DataType.IP, DataType.DOMAIN]:                   # Only supported for IPs and Domains
+            serializer = TargetSerializer(data={'project': osint.execution.task.target.project.id, 'target': osint.data})   # noqa: E501
             if serializer.is_valid():
-                target = serializer.create(serializer.validated_data)
+                target = serializer.create(serializer.validated_data)           # Target creation
                 return Response(TargetSerializer(target).data, status=status.HTTP_201_CREATED)
-        return Response(
-            {'data_type': 'Unsupported option for this OSINT data type'},
-            status=status.HTTP_400_BAD_REQUEST
-        )
+        return Response({'data_type': 'Unsupported option for this OSINT data type'}, status=status.HTTP_400_BAD_REQUEST)   # noqa: E501
 
 
 class HostViewSet(FindingBaseView):
+    '''Host ViewSet that includes: get, retrieve, enable, disable and import Defect-Dojo features.'''
+
     queryset = Host.objects.all()
     serializer_class = HostSerializer
     filterset_class = HostFilter
-    search_fields = [
+    search_fields = [                                                           # Fields used to search Hosts
         'address',
         'enumeration__port', 'enumeration__service',
         'enumeration__endpoint__endpoint',
@@ -99,10 +145,12 @@ class HostViewSet(FindingBaseView):
 
 
 class EnumerationViewSet(FindingBaseView):
+    '''Enumeration ViewSet that includes: get, retrieve, enable, disable and import Defect-Dojo features.'''
+
     queryset = Enumeration.objects.all()
     serializer_class = EnumerationSerializer
     filterset_class = EnumerationFilter
-    search_fields = [
+    search_fields = [                                                           # Fields used to search Enumerations
         'host__address',
         'port', 'service',
         'endpoint__endpoint',
@@ -116,10 +164,12 @@ class EnumerationViewSet(FindingBaseView):
 
 
 class EndpointViewSet(FindingBaseView):
+    '''Endpoint ViewSet that includes: get, retrieve, enable, disable and import Defect-Dojo features.'''
+
     queryset = Endpoint.objects.all()
     serializer_class = EndpointSerializer
     filterset_class = EndpointFilter
-    search_fields = [
+    search_fields = [                                                           # Fields used to search Endpoints
         'enumeration__host__address',
         'enumeration__port', 'enumeration__service',
         'endpoint'
@@ -127,10 +177,12 @@ class EndpointViewSet(FindingBaseView):
 
 
 class TechnologyViewSet(FindingBaseView):
+    '''Technology ViewSet that includes: get, retrieve, enable, disable and import Defect-Dojo features.'''
+
     queryset = Technology.objects.all()
     serializer_class = TechnologySerializer
     filterset_class = TechnologyFilter
-    search_fields = [
+    search_fields = [                                                           # Fields used to search Technologies
         'enumeration__host__address',
         'enumeration__port', 'enumeration__service',
         'enumeration__endpoint__endpoint',
@@ -141,12 +193,13 @@ class TechnologyViewSet(FindingBaseView):
     ]
 
 
-class VulnerabilityViewSet(FindingBaseView, UpdateModelMixin):
+class VulnerabilityViewSet(FindingBaseView):
+    '''Vulnerability ViewSet that includes: get, retrieve, enable, disable and import Defect-Dojo features.'''
+
     queryset = Vulnerability.objects.all()
     serializer_class = VulnerabilitySerializer
     filterset_class = VulnerabilityFilter
-    http_method_names = ['get', 'put', 'post', 'delete']
-    search_fields = [
+    search_fields = [                                                           # Fields used to search Vulnerabilities
         'enumeration__host__address', 'technology__enumeration__host__address',
         'enumeration__port', 'enumeration__service',
         'technology__enumeration__port', 'technology__enumeration__service',
@@ -159,17 +212,21 @@ class VulnerabilityViewSet(FindingBaseView, UpdateModelMixin):
 
 
 class CredentialViewSet(FindingBaseView):
+    '''Credential ViewSet that includes: get, retrieve, enable, disable and import Defect-Dojo features.'''
+
     queryset = Credential.objects.all()
     serializer_class = CredentialSerializer
     filterset_class = CredentialFilter
-    search_fields = ['email', 'username']
+    search_fields = ['email', 'username']                                       # Fields used to search Credentials
 
 
 class ExploitViewSet(FindingBaseView):
+    '''Exploit ViewSet that includes: get, retrieve, enable, disable and import Defect-Dojo features.'''
+
     queryset = Exploit.objects.all()
     serializer_class = ExploitSerializer
     filterset_class = ExploitFilter
-    search_fields = [
+    search_fields = [                                                           # Fields used to search Exploits
         'vulnerability__name', 'vulnerability__cve', 'vulnerability__cwe',
         'vulnerability__enumeration__service', 'technology__vulnerability__name',
         'technology__vulnerability__cve', 'technology__vulnerability__cwe',

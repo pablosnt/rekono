@@ -19,8 +19,8 @@ class Execution(models.Model):
     output_plain = models.TextField(blank=True, null=True)                      # Tool output in plain text
     output_error = models.TextField(blank=True, null=True)                      # Tool errors
     status = models.TextField(max_length=10, choices=Status.choices, default=Status.REQUESTED)      # Execution status
-    start = models.DateTimeField(blank=True, null=True)
-    end = models.DateTimeField(blank=True, null=True)
+    start = models.DateTimeField(blank=True, null=True)                         # Start date
+    end = models.DateTimeField(blank=True, null=True)                           # End date
     reported_to_defectdojo = models.BooleanField(default=False)                 # Indicate if it has been imported yet
 
     class Meta:

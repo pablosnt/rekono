@@ -1,4 +1,4 @@
-from typing import Any, Collection, Iterable, Optional
+from typing import Any, Collection, Dict, Iterable, List, Optional, Union, cast
 
 from defectdojo.constants import DD_DATE_FORMAT
 from django.core.exceptions import ValidationError
@@ -9,6 +9,7 @@ from findings.utils import get_unique_filter
 from input_types.base import BaseInput
 from input_types.enums import InputKeyword
 from input_types.utils import get_url
+from projects.models import Project
 from targets.enums import TargetType
 from targets.utils import get_target_type
 from tools.models import Input
@@ -16,34 +17,52 @@ from tools.models import Input
 # Create your models here.
 
 
-def create_finding_foreign_key(model, name):
-    return models.ForeignKey(
-        model,
-        related_name=name,
-        on_delete=models.DO_NOTHING,
-        blank=True,
-        null=True
-    )
+def create_finding_foreign_key(model: Union[models.Model, str], name: str) -> models.ForeignKey:
+    '''Create a foreign key field to create a relationship between two Finding models.
+
+    Args:
+        model (Union[models.Model, str]): Finding model of the foreign key
+        name (str): Related name of the foreign key
+
+    Returns:
+        models.ForeignKey: Foreign key field
+    '''
+    return models.ForeignKey(model, related_name=name, on_delete=models.DO_NOTHING, blank=True, null=True)
 
 
 class Finding(models.Model, BaseInput):
+    '''Common and abstract Finding model, to define the common fields for all Finding models.'''
+
+    # Execution where the finding is found
     execution = models.ForeignKey(Execution, related_name='%(class)s', on_delete=models.CASCADE)
-    creation = models.DateTimeField(auto_now_add=True)
-    is_active = models.BooleanField(default=True)
+    creation = models.DateTimeField(auto_now_add=True)                          # Creation date of the finding
+    is_active = models.BooleanField(default=True)                               # Indicate if the finding is active
+    # Indicate if the finding has been imported in Defect-Dojo
     reported_to_defectdojo = models.BooleanField(default=False)
 
-    key_fields = []
+    key_fields: List[Dict[str, Any]] = []                                       # Unique field list
 
     class Meta:
-        abstract = True
-        ordering = ['-id']
+        '''Model metadata.'''
+
+        abstract = True                                                         # To be extended by Finding models
+        ordering = ['-id']                                                      # Default ordering for pagination
 
     def validate_unique(self, exclude: Optional[Collection[str]] = None) -> None:
+        '''Validate all uniqueness constraints on the model.
+
+        Args:
+            exclude (Optional[Collection[str]], optional): Field names to be exclude from validation. Defaults to None
+
+        Raises:
+            ValidationError: Raised if one unique constraint is violated
+        '''
+        # Get unique filter from key fields
         unique_filter = get_unique_filter(self.key_fields, vars(self), self.execution)
-        search = self._meta.model.objects.filter(**unique_filter)
-        if search.exists():
-            raise ValidationError('Unique constraint violation')
- 
+        search = self._meta.model.objects.filter(**unique_filter)               # Filter findings with the unique filter
+        if search.exists():                                                     # If findings found
+            raise ValidationError('Unique constraint violation')                # Unique constraint violation
+
     def save(
         self,
         force_insert: bool = False,
@@ -51,9 +70,18 @@ class Finding(models.Model, BaseInput):
         using: Optional[str] = DEFAULT_DB_ALIAS,
         update_fields: Optional[Iterable[str]] = None
     ) -> None:
+        '''Save object in database.
+
+        Args:
+            force_insert (bool, optional): Force an INSERT query. Defaults to False
+            force_update (bool, optional): Force an UPDATE query. Defaults to False
+            using (Optional[str], optional): Database alias. Defaults to DEFAULT_DB_ALIAS
+            update_fields (Optional[Iterable[str]], optional): Fields to be saved. Defaults to None
+        '''
+        # If Id is not setted, it's an insertion. If Id is setted, it's an update
         if not self.id:
-            self.validate_unique()
-        return super().save(
+            self.validate_unique()                                              # Check constraint only in insertions
+        super().save(                                                           # Call parent save method
             force_insert=force_insert,
             force_update=force_update,
             using=using,
@@ -61,37 +89,68 @@ class Finding(models.Model, BaseInput):
         )
 
     def __hash__(self) -> int:
+        '''Get an unique value based on the object unique fields.
+
+        Returns:
+            int: Calculated unique value
+        '''
         hash_fields = []
+        # Get unique filter from key fields
         unique_filter = get_unique_filter(self.key_fields, vars(self), self.execution)
         for value in unique_filter.values():
-            hash_fields.append(value)
-        return hash(tuple(hash_fields))
+            hash_fields.append(value)                                           # Add values to the calculation
+        return hash(tuple(hash_fields))                                         # Hash calculation
 
     def __eq__(self, o: object) -> bool:
-        if isinstance(o, self.__class__):
+        '''Check if other object is equals to this object.
+
+        Args:
+            o (object): Other object to compare
+
+        Returns:
+            bool: Indicate if both objects are equal or not
+        '''
+        if isinstance(o, self.__class__):                                       # Check object class
             equals = True
+            # Get object unique filter from object key fields
             unique_filter = get_unique_filter(o.key_fields, vars(o), o.execution)
+            # Get unique filter from key fields
             for key, value in get_unique_filter(self.key_fields, vars(self), self.execution).items():
-                equals = equals and (unique_filter[key] == value)
+                equals = equals and (unique_filter[key] == value)               # Compare all key fields
             return equals
         return False
 
-    def get_project(self) -> Any:
+    def get_project(self) -> Project:
+        '''Get the related project for the instance. This will be used for authorization purposes.
+
+        Returns:
+            Project: Related project entity
+        '''
         return self.execution.task.target.project
 
 
 class OSINT(Finding):
-    data = models.TextField(max_length=250)
-    data_type = models.TextField(max_length=10, choices=DataType.choices)
-    source = models.TextField(max_length=50, blank=True, null=True)
-    reference = models.TextField(max_length=250, blank=True, null=True)
+    '''OSINT model.'''
 
-    key_fields = [
+    data = models.TextField(max_length=250)                                     # OSINT data found
+    data_type = models.TextField(max_length=10, choices=DataType.choices)       # OSINT data type
+    source = models.TextField(max_length=50, blank=True, null=True)             # Source where data has been found
+    reference = models.TextField(max_length=250, blank=True, null=True)         # Reference associated to the data
+
+    key_fields: List[Dict[str, Any]] = [                                        # Unique field list
         {'name': 'data', 'is_base': False},
         {'name': 'data_type', 'is_base': False}
     ]
 
-    def parse(self, accumulated: dict = {}) -> dict:
+    def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
+        '''Get useful information from this instance to be used in tool execution as argument.
+
+        Args:
+            accumulated (Dict[str, Any], optional): Information from other instances of the same type. Defaults to {}.
+
+        Returns:
+            Dict[str, Any]: Useful information for tool executions, including accumulated if setted
+        '''
         if self.data_type in [DataType.IP, DataType.DOMAIN]:
             return {
                 InputKeyword.TARGET.name.lower(): self.data,
@@ -100,77 +159,122 @@ class OSINT(Finding):
             }
         return {}
 
-    def defect_dojo(self):
+    def defect_dojo(self) -> Dict[str, Any]:
+        '''Get useful information to import this finding in Defect-Dojo.
+
+        Returns:
+            Dict[str, Any]: Useful information for Defect-Dojo imports
+        '''
         return {
             'title': f'{self.data_type} found using OSINT techniques',
             'description': self.data,
-            'severity': Severity.MEDIUM.value,
+            'severity': str(Severity.MEDIUM),
             'date': self.creation.strftime(DD_DATE_FORMAT)
         }
 
 
 class Host(Finding):
-    address = models.TextField(max_length=30)
-    os = models.TextField(max_length=250, blank=True, null=True)
-    os_type = models.TextField(max_length=10, choices=OSType.choices, default=OSType.OTHER)
+    '''Host model.'''
 
-    key_fields = [
+    address = models.TextField(max_length=30)                                   # Host address
+    os = models.TextField(max_length=250, blank=True, null=True)                # OS full specification
+    os_type = models.TextField(max_length=10, choices=OSType.choices, default=OSType.OTHER)         # OS categorization
+
+    key_fields: List[Dict[str, Any]] = [                                        # Unique field list
         {'name': 'address', 'is_base': False}
     ]
 
     def filter(self, input: Input) -> bool:
+        '''Check if this instance is valid based on input filter.
+
+        Args:
+            input (Input): Tool input whose filter will be applied
+
+        Returns:
+            bool: Indicate if this instance match the input filter or not
+        '''
         if not input.filter:
             return True
         try:
-            return TargetType[input.filter] == get_target_type(self.address)
+            # Filter by address type
+            return cast(models.TextChoices, TargetType)[input.filter] == get_target_type(self.address)
         except KeyError:
             return True
 
-    def parse(self, accumulated: dict = {}) -> dict:
+    def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
+        '''Get useful information from this instance to be used in tool execution as argument.
+
+        Args:
+            accumulated (Dict[str, Any], optional): Information from other instances of the same type. Defaults to {}.
+
+        Returns:
+            Dict[str, Any]: Useful information for tool executions, including accumulated if setted
+        '''
         return {
             InputKeyword.TARGET.name.lower(): self.address,
             InputKeyword.HOST.name.lower(): self.address,
             InputKeyword.URL.name.lower(): get_url(self.address),
         }
 
-    def defect_dojo(self):
+    def defect_dojo(self) -> Dict[str, Any]:
+        '''Get useful information to import this finding in Defect-Dojo.
+
+        Returns:
+            Dict[str, Any]: Useful information for Defect-Dojo imports
+        '''
         description = self.address
         if self.os:
             description += '- {self.os} ({self.os_type})'
         return {
             'title': 'Host discovered',
             'description': description,
-            'severity': Severity.INFO.value,
+            'severity': str(Severity.INFO),
             'date': self.creation.strftime(DD_DATE_FORMAT)
         }
 
 
 class Enumeration(Finding):
-    host = create_finding_foreign_key(Host, 'enumeration')
-    port = models.IntegerField()
-    port_status = models.TextField(
-        max_length=15,
-        choices=PortStatus.choices,
-        default=PortStatus.OPEN
-    )
-    protocol = models.TextField(max_length=5, choices=Protocol.choices, blank=True, null=True)
-    service = models.TextField(max_length=50, blank=True, null=True)
+    '''Enumeration model.'''
 
-    key_fields = [
+    host = create_finding_foreign_key(Host, 'enumeration')                      # Host where the port is discovered
+    port = models.IntegerField()                                                # Port number
+    port_status = models.TextField(max_length=15, choices=PortStatus.choices, default=PortStatus.OPEN)  # Port status
+    protocol = models.TextField(max_length=5, choices=Protocol.choices, blank=True, null=True)      # Transport protocol
+    service = models.TextField(max_length=50, blank=True, null=True)            # Service protocol if found
+
+    key_fields: List[Dict[str, Any]] = [                                        # Unique field list
         {'name': 'host_id', 'is_base': True},
         {'name': 'port', 'is_base': False}
     ]
 
     def filter(self, input: Input) -> bool:
+        '''Check if this instance is valid based on input filter.
+
+        Args:
+            input (Input): Tool input whose filter will be applied
+
+        Returns:
+            bool: Indicate if this instance match the input filter or not
+        '''
         if not input.filter:
             return True
         try:
             to_check = int(input.filter)
+            # If the filter is a number, enumeration will be filtered by port
             return to_check == self.port
         except ValueError:
+            # If the filter is a string, enumeration will be filtered by service
             return input.filter in self.service
 
-    def parse(self, accumulated: dict = {}) -> dict:
+    def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
+        '''Get useful information from this instance to be used in tool execution as argument.
+
+        Args:
+            accumulated (Dict[str, Any], optional): Information from other instances of the same type. Defaults to {}.
+
+        Returns:
+            Dict[str, Any]: Useful information for tool executions, including accumulated if setted
+        '''
         output = {
             InputKeyword.TARGET.name.lower(): f'{self.host.address}:{self.port}',
             InputKeyword.HOST.name.lower(): self.host.address,
@@ -181,40 +285,68 @@ class Enumeration(Finding):
         if accumulated and InputKeyword.PORTS.name.lower() in accumulated:
             output[InputKeyword.PORTS.name.lower()] = accumulated[InputKeyword.PORTS.name.lower()]
             output[InputKeyword.PORTS.name.lower()].append(self.port)
-        output[InputKeyword.PORTS_COMMAS.name.lower()] = ','.join([str(port) for port in output[InputKeyword.PORTS.name.lower()]])    # noqa: E501
+        output[InputKeyword.PORTS_COMMAS.name.lower()] = ','.join([str(p) for p in output[InputKeyword.PORTS.name.lower()]])    # noqa: E501
         return output
 
-    def defect_dojo(self):
+    def defect_dojo(self) -> Dict[str, Any]:
+        '''Get useful information to import this finding in Defect-Dojo.
+
+        Returns:
+            Dict[str, Any]: Useful information for Defect-Dojo imports
+        '''
         description = f'{self.port} - {self.port_status} - {self.protocol} - {self.service}'
+        if self.host:
+            description = f'{self.host.address} - {description}'
         return {
             'title': 'Port discovered',
             'description': description,
-            'severity': Severity.INFO.value,
+            'severity': str(Severity.INFO),
             'date': self.creation.strftime(DD_DATE_FORMAT)
         }
 
 
 class Endpoint(Finding):
-    enumeration = create_finding_foreign_key(Enumeration, 'endpoint')
-    endpoint = models.TextField(max_length=500)
+    '''Endpoint model.'''
+
+    enumeration = create_finding_foreign_key(Enumeration, 'endpoint')           # Port where endpoint is discovered
+    endpoint = models.TextField(max_length=500)                                 # Endpoint value
+    # Status receive for that endpoint. Probably HTTP status
     status = models.IntegerField(blank=True, null=True)
 
-    key_fields = [
+    key_fields: List[Dict[str, Any]] = [                                        # Unique field list
         {'name': 'enumeration_id', 'is_base': True},
         {'name': 'endpoint', 'is_base': False}
     ]
 
     def filter(self, input: Input) -> bool:
+        '''Check if this instance is valid based on input filter.
+
+        Args:
+            input (Input): Tool input whose filter will be applied
+
+        Returns:
+            bool: Indicate if this instance match the input filter or not
+        '''
         if not input.filter:
             return True
         try:
             status_code = int(input.filter)
+            # If the filter is a number, endpoint will be filtered by status
             return status_code == self.status
         except ValueError:
+            # If the filter is a string, endpoint will be filtered by endpoint
             return self.endpoint.startswith(input.filter)
 
-    def parse(self, accumulated: dict = {}) -> dict:
-        output = self.enumeration.parse()
+    def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
+        '''Get useful information from this instance to be used in tool execution as argument.
+
+        Args:
+            accumulated (Dict[str, Any], optional): Information from other instances of the same type. Defaults to {}.
+
+        Returns:
+            Dict[str, Any]: Useful information for tool executions, including accumulated if setted
+        '''
+        output = self.enumeration.parse() if self.enumeration else {}
         output[InputKeyword.URL.name.lower()] = get_url(
             self.enumeration.host.address,
             self.enumeration.port,
@@ -223,7 +355,12 @@ class Endpoint(Finding):
         output[InputKeyword.ENDPOINT.name.lower()] = self.endpoint
         return output
 
-    def defect_dojo(self):
+    def defect_dojo(self) -> Dict[str, Any]:
+        '''Get useful information to import this finding in Defect-Dojo.
+
+        Returns:
+            Dict[str, Any]: Useful information for Defect-Dojo imports
+        '''
         return {
             'protocol': self.enumeration.service,
             'host': self.enumeration.host.address,
@@ -233,33 +370,56 @@ class Endpoint(Finding):
 
 
 class Technology(Finding):
-    enumeration = create_finding_foreign_key(Enumeration, 'technology')
-    name = models.TextField(max_length=100)
-    version = models.TextField(max_length=100, blank=True, null=True)
-    description = models.TextField(max_length=200, blank=True, null=True)
-    related_to = create_finding_foreign_key('Technology', 'related_technologies')
-    reference = models.TextField(max_length=250, blank=True, null=True)
+    '''Technology model.'''
 
-    key_fields = [
+    enumeration = create_finding_foreign_key(Enumeration, 'technology')         # Port where technology is discovered
+    name = models.TextField(max_length=100)                                     # Technology name
+    version = models.TextField(max_length=100, blank=True, null=True)           # Technology version
+    description = models.TextField(max_length=200, blank=True, null=True)       # Technology description
+    related_to = create_finding_foreign_key('Technology', 'related_technologies')   # Related technology if exists
+    reference = models.TextField(max_length=250, blank=True, null=True)         # Technology reference
+
+    key_fields: List[Dict[str, Any]] = [                                        # Unique field list
         {'name': 'enumeration_id', 'is_base': True},
         {'name': 'name', 'is_base': False}
     ]
 
     def filter(self, input: Input) -> bool:
-        return not input.filter or input.filter.lower() in self.name.lower()
+        '''Check if this instance is valid based on input filter.
 
-    def parse(self, accumulated: dict = {}) -> dict:
-        output = self.enumeration.parse()
+        Args:
+            input (Input): Tool input whose filter will be applied
+
+        Returns:
+            bool: Indicate if this instance match the input filter or not
+        '''
+        return not input.filter or input.filter.lower() in self.name.lower()    # Filter by technology name
+
+    def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
+        '''Get useful information from this instance to be used in tool execution as argument.
+
+        Args:
+            accumulated (Dict[str, Any], optional): Information from other instances of the same type. Defaults to {}.
+
+        Returns:
+            Dict[str, Any]: Useful information for tool executions, including accumulated if setted
+        '''
+        output = self.enumeration.parse() if self.enumeration else {}
         output[InputKeyword.TECHNOLOGY.name.lower()] = self.name
         if self.version:
             output[InputKeyword.VERSION.name.lower()] = self.version
         return output
 
-    def defect_dojo(self):
+    def defect_dojo(self) -> Dict[str, Any]:
+        '''Get useful information to import this finding in Defect-Dojo.
+
+        Returns:
+            Dict[str, Any]: Useful information for Defect-Dojo imports
+        '''
         return {
             'title': f'Technology {self.name} detected',
             'description': self.description if self.description else f'{self.name} {self.version}',
-            'severity': Severity.LOW.value,
+            'severity': str(Severity.LOW),
             'cwe': 200,     # CWE-200: Exposure of Sensitive Information to Unauthorized Actor
             'references': self.reference,
             'date': self.creation.strftime(DD_DATE_FORMAT)
@@ -267,17 +427,21 @@ class Technology(Finding):
 
 
 class Vulnerability(Finding):
-    technology = create_finding_foreign_key(Technology, 'vulnerability')
-    enumeration = create_finding_foreign_key(Enumeration, 'vulnerability')
-    name = models.TextField(max_length=50)
-    description = models.TextField(blank=True, null=True)
-    severity = models.TextField(choices=Severity.choices, default=Severity.MEDIUM)
-    cve = models.TextField(max_length=20, blank=True, null=True)
-    cwe = models.TextField(max_length=20, blank=True, null=True)
-    osvdb = models.TextField(max_length=20, blank=True, null=True)
-    reference = models.TextField(max_length=250, blank=True, null=True)
+    '''Vulnerability model.'''
 
-    key_fields = [
+    # Technology where vulnerability is found
+    technology = create_finding_foreign_key(Technology, 'vulnerability')
+    # Port where vulnerability is found. Only if technology is null
+    enumeration = create_finding_foreign_key(Enumeration, 'vulnerability')
+    name = models.TextField(max_length=50)                                      # Vulnerability name
+    description = models.TextField(blank=True, null=True)                       # Vulnerability description
+    severity = models.TextField(choices=Severity.choices, default=Severity.MEDIUM)  # Vulnerability severity
+    cve = models.TextField(max_length=20, blank=True, null=True)                # CVE
+    cwe = models.TextField(max_length=20, blank=True, null=True)                # CWE
+    osvdb = models.TextField(max_length=20, blank=True, null=True)              # OSVDB
+    reference = models.TextField(max_length=250, blank=True, null=True)         # Vulnerability reference
+
+    key_fields: List[Dict[str, Any]] = [                                        # Unique field list
         {'name': 'technology_id', 'is_base': True},
         {'name': 'enumeration_id', 'is_base': True},
         {'name': 'cve', 'is_base': False},
@@ -285,29 +449,48 @@ class Vulnerability(Finding):
     ]
 
     def filter(self, input: Input) -> bool:
+        '''Check if this instance is valid based on input filter.
+
+        Args:
+            input (Input): Tool input whose filter will be applied
+
+        Returns:
+            bool: Indicate if this instance match the input filter or not
+        '''
         if not input.filter:
             return True
         try:
-            return Severity[input.filter] == self.severity
+            # If filter is a valid severity, vulnerability will be filtered by severity
+            return cast(models.TextChoices, Severity)[input.filter] == self.severity
         except ValueError:
             f = input.filter.lower()
+            # If filter is a string, vulnerability will be filtered by:
             return (
-                f == 'cve' and self.cve
-                or (f.startswith('cve-') and f == self.cve.lower())
-                or (f.startswith('cwe-') and f == self.cwe.lower())
+                f == 'cve' and self.cve or                                      # CVE found or not
+                (f.startswith('cve-') and f == self.cve.lower()) or             # Specific CVE
+                (f.startswith('cwe-') and f == self.cwe.lower())                # Specific CWE
             )
-    
-    def parse(self, accumulated: dict = {}) -> dict:
-        output = {}
-        if self.enumeration:
-            output = self.enumeration.parse()
-        elif self.technology:
-            output = self.technology.parse()
+
+    def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
+        '''Get useful information from this instance to be used in tool execution as argument.
+
+        Args:
+            accumulated (Dict[str, Any], optional): Information from other instances of the same type. Defaults to {}.
+
+        Returns:
+            Dict[str, Any]: Useful information for tool executions, including accumulated if setted
+        '''
+        output = self.technology.parse() if self.technology else self.enumeration.parse() if self.enumeration else {}
         if self.cve:
             output[InputKeyword.CVE.name.lower()] = self.cve
         return output
 
-    def defect_dojo(self):
+    def defect_dojo(self) -> Dict[str, Any]:
+        '''Get useful information to import this finding in Defect-Dojo.
+
+        Returns:
+            Dict[str, Any]: Useful information for Defect-Dojo imports
+        '''
         return {
             'title': self.name,
             'description': self.description,
@@ -320,59 +503,90 @@ class Vulnerability(Finding):
 
 
 class Credential(Finding):
-    email = models.TextField(max_length=100, blank=True, null=True)
-    username = models.TextField(max_length=100, blank=True, null=True)
-    secret = models.TextField(max_length=300, blank=True, null=True)
+    '''Credential model.'''
 
-    key_fields = [
+    email = models.TextField(max_length=100, blank=True, null=True)             # Email if found
+    username = models.TextField(max_length=100, blank=True, null=True)          # Username if found
+    secret = models.TextField(max_length=300, blank=True, null=True)            # Secret (password, key, etc.) if found
+
+    key_fields: List[Dict[str, Any]] = [                                        # Unique field list
         {'name': 'email', 'is_base': False},
         {'name': 'username', 'is_base': False},
         {'name': 'secret', 'is_base': False}
     ]
 
-    def parse(self, accumulated: dict = {}) -> dict:
+    def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
+        '''Get useful information from this instance to be used in tool execution as argument.
+
+        Args:
+            accumulated (Dict[str, Any], optional): Information from other instances of the same type. Defaults to {}.
+
+        Returns:
+            Dict[str, Any]: Useful information for tool executions, including accumulated if setted
+        '''
         return {
             InputKeyword.EMAIL.name.lower(): self.email,
             InputKeyword.USERNAME.name.lower(): self.username,
             InputKeyword.SECRET.name.lower(): self.secret,
         }
 
-    def defect_dojo(self):
+    def defect_dojo(self) -> Dict[str, Any]:
+        '''Get useful information to import this finding in Defect-Dojo.
+
+        Returns:
+            Dict[str, Any]: Useful information for Defect-Dojo imports
+        '''
         description = ' - '.join([getattr(self, f) for f in ['email', 'username', 'secret']])
         return {
             'title': 'Credentials exposure',
             'description': description,
             'cwe': 200,     # CWE-200: Exposure of Sensitive Information to Unauthorized Actor
-            'severity': Severity.HIGH.value,
+            'severity': str(Severity.HIGH),
             'date': self.creation.strftime(DD_DATE_FORMAT)
         }
 
 
 class Exploit(Finding):
-    vulnerability = create_finding_foreign_key(Vulnerability, 'exploit')
-    technology = create_finding_foreign_key(Technology, 'exploit')
-    name = models.TextField(max_length=100)
-    description = models.TextField(blank=True, null=True)
-    reference = models.TextField(max_length=250, blank=True, null=True)
-    checked = models.BooleanField(default=False)
+    '''Exploit model.'''
 
-    key_fields = [
+    vulnerability = create_finding_foreign_key(Vulnerability, 'exploit')        # Vulnerability that the exploit abuses
+    # Technology that the exploit abuses.  Only if vulnerability is null
+    technology = create_finding_foreign_key(Technology, 'exploit')
+    name = models.TextField(max_length=100)                                     # Exploit name
+    description = models.TextField(blank=True, null=True)                       # Exploit description
+    reference = models.TextField(max_length=250, blank=True, null=True)         # Exploit reference
+    checked = models.BooleanField(default=False)                                # Indicate if the exploit is confirmed
+
+    key_fields: List[Dict[str, Any]] = [                                        # Unique field list
         {'name': 'vulnerability_id', 'is_base': True},
         {'name': 'technology_id', 'is_base': True},
         {'name': 'name', 'is_base': False},
         {'name': 'reference', 'is_base': False}
     ]
 
-    def parse(self, accumulated: dict = {}) -> dict:
-        output = self.vulnerability.parse()
+    def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
+        '''Get useful information from this instance to be used in tool execution as argument.
+
+        Args:
+            accumulated (Dict[str, Any], optional): Information from other instances of the same type. Defaults to {}.
+
+        Returns:
+            Dict[str, Any]: Useful information for tool executions, including accumulated if setted
+        '''
+        output = self.vulnerability.parse() if self.vulnerability else self.technology.parse() if self.technology else {}   # noqa: E501
         output[InputKeyword.EXPLOIT.name.lower()] = self.name
         return output
 
-    def defect_dojo(self):
+    def defect_dojo(self) -> Dict[str, Any]:
+        '''Get useful information to import this finding in Defect-Dojo.
+
+        Returns:
+            Dict[str, Any]: Useful information for Defect-Dojo imports
+        '''
         return {
             'title': f'Exploit {self.name} found',
             'description': self.description,
-            'severity': Severity(self.vulnerability.severity).value if self.vulnerability else Severity.MEDIUM.value,   # noqa: E501
+            'severity': Severity(self.vulnerability.severity).value if self.vulnerability else str(Severity.MEDIUM),
             'reference': self.reference,
             'date': self.creation.strftime(DD_DATE_FORMAT)
         }

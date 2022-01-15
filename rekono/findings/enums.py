@@ -2,6 +2,8 @@ from django.db import models
 
 
 class Severity(models.TextChoices):
+    '''Severity values to categorize findings, specially Vulnerability findings.'''
+
     INFO = 'Info'
     LOW = 'Low'
     MEDIUM = 'Medium'
@@ -10,6 +12,8 @@ class Severity(models.TextChoices):
 
 
 class DataType(models.TextChoices):
+    '''Data types to categorize OSINT findings.'''
+
     IP = 'IP'
     DOMAIN = 'Domain'
     URL = 'Url'
@@ -21,6 +25,8 @@ class DataType(models.TextChoices):
 
 
 class OSType(models.TextChoices):
+    '''OS types to categorize Host findings.'''
+
     LINUX = 'Linux'
     WINDOWS = 'Windows'
     MACOS = 'MacOS'
@@ -32,6 +38,8 @@ class OSType(models.TextChoices):
 
 
 class PortStatus(models.TextChoices):
+    '''Port statuses to categorize Enumeration ports.'''
+
     OPEN = 'Open'
     OPEN_FILTERED = 'Open - Filtered'
     FILTERED = 'Filtered'
@@ -39,5 +47,7 @@ class PortStatus(models.TextChoices):
 
 
 class Protocol(models.TextChoices):
+    '''Protocols to categorize Enumeration services.'''
+
     UDP = 'UDP'
     TCP = 'TCP'

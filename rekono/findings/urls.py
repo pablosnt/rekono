@@ -4,6 +4,8 @@ from findings.views import (CredentialViewSet, EndpointViewSet,
                             VulnerabilityViewSet)
 from rest_framework.routers import SimpleRouter
 
+# Register your views here.
+
 router = SimpleRouter()
 router.register('osint', OSINTViewSet)
 router.register('hosts', HostViewSet)

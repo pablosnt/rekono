@@ -91,7 +91,7 @@ class DefectDojoFindings(GenericViewSet):
             pk (int): Instance Id
 
         Returns:
-            Response: HTTP Response
+            Response: HTTP response
         '''
         # Get only the active findings
         findings = [f for f in self.get_findings() if f.is_active]

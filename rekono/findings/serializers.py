@@ -4,30 +4,39 @@ from rest_framework import serializers
 
 
 class OSINTSerializer(serializers.ModelSerializer):
+    '''Serializer to get the OSINT data via API.'''
 
     class Meta:
+        '''Serializer metadata.'''
+
         model = OSINT
-        fields = (
+        fields = (                                                              # OSINT fields exposed via API
             'id', 'execution', 'data', 'data_type', 'source', 'reference',
             'creation', 'is_active', 'reported_to_defectdojo'
         )
 
 
 class HostSerializer(serializers.ModelSerializer):
+    '''Serializer to get the Host data via API.'''
 
     class Meta:
+        '''Serializer metadata.'''
+
         model = Host
-        fields = (
+        fields = (                                                              # Host fields exposed via API
             'id', 'execution', 'address', 'os', 'os_type', 'creation',
             'is_active', 'enumeration', 'reported_to_defectdojo'
         )
 
 
 class EnumerationSerializer(serializers.ModelSerializer):
+    '''Serializer to get the Enumeration data via API.'''
 
     class Meta:
+        '''Serializer metadata.'''
+
         model = Enumeration
-        fields = (
+        fields = (                                                              # Enumeration fields exposed via API
             'id', 'execution', 'host', 'port', 'port_status', 'protocol',
             'service', 'creation', 'is_active', 'endpoint', 'technology',
             'vulnerability', 'reported_to_defectdojo'
@@ -35,20 +44,26 @@ class EnumerationSerializer(serializers.ModelSerializer):
 
 
 class EndpointSerializer(serializers.ModelSerializer):
+    '''Serializer to get the Endpoint data via API.'''
 
     class Meta:
+        '''Serializer metadata.'''
+
         model = Endpoint
-        fields = (
+        fields = (                                                              # Endpoint fields exposed via API
             'id', 'execution', 'enumeration', 'endpoint', 'status',
             'creation', 'is_active', 'reported_to_defectdojo'
         )
 
 
 class TechnologySerializer(serializers.ModelSerializer):
+    '''Serializer to get the Technology data via API.'''
 
     class Meta:
+        '''Serializer metadata.'''
+
         model = Technology
-        fields = (
+        fields = (                                                              # Technology fields exposed via API
             'id', 'execution', 'enumeration', 'name', 'version', 'description',
             'reference', 'related_to', 'related_technologies', 'creation',
             'is_active', 'vulnerability', 'exploit', 'reported_to_defectdojo'
@@ -56,32 +71,36 @@ class TechnologySerializer(serializers.ModelSerializer):
 
 
 class VulnerabilitySerializer(serializers.ModelSerializer):
+    '''Serializer to get the Vulnerability data via API.'''
 
     class Meta:
+        '''Serializer metadata.'''
+
         model = Vulnerability
-        fields = (
+        fields = (                                                              # Vulnerability fields exposed via API
             'id', 'execution', 'enumeration', 'technology', 'name', 'description', 'severity',
             'cve', 'cwe', 'reference', 'creation', 'is_active', 'exploit', 'reported_to_defectdojo'
-        )
-        read_only_fields = (
-            'id', 'execution', 'technology', 'cve', 'creation', 'is_active',
-            'exploits', 'reported_to_defectdojo'
         )
 
 
 class CredentialSerializer(serializers.ModelSerializer):
+    '''Serializer to get the Credential data via API.'''
 
     class Meta:
+        '''Serializer metadata.'''
+
         model = Credential
-        fields = ('id', 'email', 'username', 'secret', 'reported_to_defectdojo')
+        fields = ('id', 'email', 'username', 'secret', 'reported_to_defectdojo')    # Credential fields exposed via API
 
 
 class ExploitSerializer(serializers.ModelSerializer):
-    technology = TechnologySerializer(read_only=True, many=False, required=False)
+    '''Serializer to get the Exploit data via API.'''
 
     class Meta:
+        '''Serializer metadata.'''
+
         model = Exploit
-        fields = (
+        fields = (                                                              # Exploit fields exposed via API
             'id', 'execution', 'vulnerability', 'technology', 'name',
             'description', 'reference', 'checked', 'creation', 'is_active', 'reported_to_defectdojo'
         )

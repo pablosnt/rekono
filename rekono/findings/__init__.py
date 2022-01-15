@@ -1,0 +1,1 @@
+'''Findings model and queue.'''

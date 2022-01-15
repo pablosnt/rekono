@@ -18,7 +18,7 @@ def producer(
     dependencies: List[Job] = [],
     at_front: bool = False
 ) -> Job:
-    '''Enqueues a new execution in the executions queue.
+    '''Enqueue a new execution in the executions queue.
 
     Args:
         execution (Execution): Execution to enqueue
