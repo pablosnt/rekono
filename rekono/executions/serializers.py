@@ -4,11 +4,15 @@ from rest_framework import serializers
 
 
 class ExecutionSerializer(serializers.ModelSerializer):
-    step = StepSerializer(many=False, read_only=True)
+    '''Serializer to get the executions data via API.'''
+
+    step = StepSerializer(many=False, read_only=True)                           # Step details
 
     class Meta:
+        '''Serializer metadata.'''
+
         model = Execution
-        fields = (
+        fields = (                                                              # Execution fields exposed via API
             'id', 'task', 'step', 'output_plain', 'output_error', 'status', 'start', 'end',
             'reported_to_defectdojo', 'osint', 'host', 'enumeration', 'endpoint', 'technology',
             'vulnerability', 'credential', 'exploit'

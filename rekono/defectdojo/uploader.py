@@ -1,8 +1,9 @@
-from typing import Tuple
+from typing import List, Tuple
 
 from defectdojo.api import DefectDojo
 from defectdojo.exceptions import DefectDojoException
-from findings.models import Endpoint
+from executions.models import Execution
+from findings.models import Endpoint, Finding
 from projects.models import Project
 
 from rekono.settings import DEFECT_DOJO
@@ -106,7 +107,7 @@ def create_rekono_test(engagement_id: int) -> int:
 
 def scans(
     project: Project,
-    executions: list,
+    executions: List[Execution],
     engagement_id: int,
     name: str,
     description: str
@@ -115,7 +116,7 @@ def scans(
 
     Args:
         project (Project): Rekono project associated to the executions
-        executions (list): Execution list whose output will be imported in Defect-Dojo
+        executions (List[Execution]): Execution list whose output will be imported in Defect-Dojo
         engagement_id (int): Engagement Id where the scans will be imported
         name (str): Name to create a new engagement where the scans will be imported
         description (str): Description to create a new engagement where the scans will be imported
@@ -135,7 +136,7 @@ def scans(
 
 def findings(
     project: Project,
-    findings: list,
+    findings: List[Finding],
     engagement_id: int,
     name: str,
     description: str
@@ -144,7 +145,7 @@ def findings(
 
     Args:
         project (Project): Rekono project associated to the findings
-        findings (list): Finding list whose output will be imported in Defect-Dojo
+        findings (List[Finding]): Finding list whose output will be imported in Defect-Dojo
         engagement_id (int): Engagement Id where the findings will be imported
         name (str): Name to create a new engagement where the findings will be imported
         description (str): Description to create a new engagement where the findings will be imported

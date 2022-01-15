@@ -3,7 +3,7 @@ import signal
 
 from django.utils import timezone
 from executions.models import Execution
-from executions.queue.utils import cancel_execution
+from executions.queue.utils import cancel_job
 from tasks.enums import Status
 from tasks.exceptions import InvalidTaskException
 from tasks.queue import cancel_and_delete_task
@@ -25,7 +25,7 @@ def cancel_task(task):
         ).all()
         for execution in executions:
             if execution.rq_job_id:
-                cancel_execution(execution.rq_job_id)
+                cancel_job(execution.rq_job_id)
             if execution.rq_job_pid:
                 os.kill(execution.rq_job_pid, signal.SIGKILL)
             execution.status = Status.CANCELLED

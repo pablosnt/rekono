@@ -4,8 +4,10 @@ from executions.models import Execution
 
 
 class ExecutionFilter(ToolFilter):
-    tool_fields = ('task__tool', 'step__tool')
-    o = OrderingFilter(
+    '''FilterSet to filter and sort executions data.'''
+
+    tool_fields = ('task__tool', 'step__tool')                                  # Filter by two Tool fields
+    o = OrderingFilter(                                                         # Ordering fields
         fields=(
             ('task__target', 'target'),
             ('task__target__project', 'project'),
@@ -21,8 +23,10 @@ class ExecutionFilter(ToolFilter):
     )
 
     class Meta:
+        '''FilterSet metadata.'''
+
         model = Execution
-        fields = {
+        fields = {                                                              # Filter fields
             'task': ['exact'],
             'task__target': ['exact'],
             'task__target__target': ['exact', 'icontains'],
