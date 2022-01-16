@@ -23,11 +23,9 @@ from tools.models import Argument, Configuration, Input, Intensity, Tool
 from rekono.settings import EXECUTION_OUTPUTS
 
 
-class BaseTool():
+class BaseTool:
 
     ignore_exit_code = False
-    # findings = []
-    # findings_relations = {}
 
     def __init__(
         self,

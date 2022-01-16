@@ -10,7 +10,7 @@ from tasks.models import Task
 from tools.models import Argument, Intensity
 
 
-class ExecutionJob():
+class ExecutionJob:
 
     def __init__(self, step, intensity) -> None:
         self.step = step

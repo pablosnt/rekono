@@ -17,6 +17,13 @@ class IsAdmin(BasePermission):
         return bool(admin_group)
 
 
+class IsAuditor(BasePermission):
+
+    def has_permission(self, request, view):
+        auditor_group = request.user.groups.filter(name=Role.AUDITOR.name.capitalize()).exists()
+        return bool(auditor_group) or IsAdmin().has_permission(request, view)
+
+
 class ProjectMemberPermission(BasePermission):
 
     def has_object_permission(self, request, view, obj):
