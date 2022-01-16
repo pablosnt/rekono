@@ -172,6 +172,14 @@ class OSINT(Finding):
             'date': self.creation.strftime(DD_DATE_FORMAT)
         }
 
+    def __str__(self) -> str:
+        '''Instance representation in text format.
+
+        Returns:
+            str: String value that identifies this instance
+        '''
+        return self.data
+
 
 class Host(Finding):
     '''Host model.'''
@@ -231,6 +239,14 @@ class Host(Finding):
             'severity': str(Severity.INFO),
             'date': self.creation.strftime(DD_DATE_FORMAT)
         }
+
+    def __str__(self) -> str:
+        '''Instance representation in text format.
+
+        Returns:
+            str: String value that identifies this instance
+        '''
+        return self.address
 
 
 class Enumeration(Finding):
@@ -304,6 +320,14 @@ class Enumeration(Finding):
             'date': self.creation.strftime(DD_DATE_FORMAT)
         }
 
+    def __str__(self) -> str:
+        '''Instance representation in text format.
+
+        Returns:
+            str: String value that identifies this instance
+        '''
+        return f'{self.host.__str__()} - {self.port}' if self.host else str(self.port)
+
 
 class Endpoint(Finding):
     '''Endpoint model.'''
@@ -368,6 +392,14 @@ class Endpoint(Finding):
             'path': self.endpoint
         }
 
+    def __str__(self) -> str:
+        '''Instance representation in text format.
+
+        Returns:
+            str: String value that identifies this instance
+        '''
+        return f'{self.enumeration.__str__()} - {self.endpoint}' if self.enumeration else self.endpoint
+
 
 class Technology(Finding):
     '''Technology model.'''
@@ -424,6 +456,14 @@ class Technology(Finding):
             'references': self.reference,
             'date': self.creation.strftime(DD_DATE_FORMAT)
         }
+
+    def __str__(self) -> str:
+        '''Instance representation in text format.
+
+        Returns:
+            str: String value that identifies this instance
+        '''
+        return f'{self.enumeration.__str__()} - {self.name}' if self.enumeration else self.name
 
 
 class Vulnerability(Finding):
@@ -501,6 +541,21 @@ class Vulnerability(Finding):
             'date': self.creation.strftime(DD_DATE_FORMAT)
         }
 
+    def __str__(self) -> str:
+        '''Instance representation in text format.
+
+        Returns:
+            str: String value that identifies this instance
+        '''
+        text = self.name
+        if self.technology:
+            text = f'{self.technology.__str__()} - {self.name}'
+        elif self.enumeration:
+            text = f'{self.enumeration.__str__()} - {self.name}'
+        if self.cve:
+            text = f'{text} - {self.cve}'
+        return text
+
 
 class Credential(Finding):
     '''Credential model.'''
@@ -544,6 +599,14 @@ class Credential(Finding):
             'severity': str(Severity.HIGH),
             'date': self.creation.strftime(DD_DATE_FORMAT)
         }
+
+    def __str__(self) -> str:
+        '''Instance representation in text format.
+
+        Returns:
+            str: String value that identifies this instance
+        '''
+        return f'{self.email} - {self.username} - {self.secret}'
 
 
 class Exploit(Finding):
@@ -590,3 +653,16 @@ class Exploit(Finding):
             'reference': self.reference,
             'date': self.creation.strftime(DD_DATE_FORMAT)
         }
+
+    def __str__(self) -> str:
+        '''Instance representation in text format.
+
+        Returns:
+            str: String value that identifies this instance
+        '''
+        text = self.name
+        if self.vulnerability:
+            text = f'{self.vulnerability.__str__()} - {self.name}'
+        elif self.technology:
+            text = f'{self.technology.__str__()} - {self.name}'
+        return text

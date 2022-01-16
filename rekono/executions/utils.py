@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, List, cast
 
 from input_types import utils
 from input_types.base import BaseInput
@@ -24,6 +24,43 @@ def select_argument(tool: Tool, input_type: InputType) -> Argument:
             tool=tool, inputs__type=input_type, inputs__order__gt=1
         ).order_by('inputs__order').first()
     return argument
+
+
+def get_related_executions(
+    related_input_types: List[InputType],
+    executions: List[List[BaseInput]]
+) -> Dict[int, Dict[str, Any]]:
+    '''Get executions with related input types.
+
+    Args:
+        related_input_types (List[InputType]): Related input types to search in the execution list
+        executions (List[List[BaseInput]]):  List with the inputs already associated to each execution
+
+    Returns:
+        Dict[int, Dict[str, Any]]: Related executions data, including index, related field name and related inputs
+    '''
+    # Will save the executions (indexes) where the inputs can be assigned based on the related input types
+    relations: Dict[int, Dict[str, Any]] = {}
+    for relation in related_input_types:                                        # For each related input type
+        for index, exec_inputs in enumerate(executions):                        # For each execution
+            for i in exec_inputs:                                               # For each input assigned to execution
+                if (
+                    # Input related to the input type model
+                    isinstance(i, cast(Any, relation.get_related_model_class())) or
+                    # Input related to the input type target
+                    isinstance(i, cast(Any, relation.get_callback_target_class()))
+                ):
+                    if index in relations:
+                        relations[index]['findings'].append(i)                  # Add input to the relations
+                    else:
+                        relations[index] = {                                    # Create a new relation based on index
+                            # Input field to access the related input
+                            'field': relation.name.lower(),
+                            'inputs': [i]                                       # Related input list
+                        }
+        if relations:
+            break                                                               # Relations found
+    return relations
 
 
 def add_input(
@@ -82,29 +119,12 @@ def get_executions_from_findings(base_inputs: List[BaseInput], tool: Tool) -> Li
             continue                                                            # No argument found
         # Filter base inputs based on the input type model or target
         filtered = [f for f in base_inputs if (
-            isinstance(f, input_type.get_related_model_class()) or isinstance(f, input_type.get_callback_target_class())
+            isinstance(f, cast(Any, input_type.get_related_model_class())) or
+            isinstance(f, cast(Any, input_type.get_callback_target_class()))
         )]
         if not filtered:
             continue                                                            # No base inputs found
-        # Will save the executions (indexes) where the inputs can be assigned based on the related input types
-        relations: Dict[int, Dict[str, Any]] = {}
-        for relation in related_input_types:                                    # For each related input type
-            for index, exec_inputs in enumerate(executions):                    # For each execution
-                for i in exec_inputs:                                           # For each input assigned to execution
-                    if (
-                        isinstance(i, relation.get_related_model_class()) or    # Input related to the input type model
-                        isinstance(i, relation.get_callback_target_class())     # Input related to the input type target
-                    ):
-                        if index in relations:
-                            relations[index]['findings'].append(i)              # Add input to the relations
-                        else:
-                            relations[index] = {                                # Create a new relation based on index
-                                # Input field to access the related input
-                                'field': relation.name.lower(),
-                                'inputs': [i]                                   # Related input list
-                            }
-            if relations:
-                break                                                           # Relations found
+        relations = get_related_executions(related_input_types, executions)     # Get executions with related inputs
         for base_input in filtered:                                             # For each base input
             # By default, can be assigned to all executions
             indexes = list(range(len(executions)))
