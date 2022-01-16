@@ -15,7 +15,7 @@ class LikeManagementView(GenericViewSet):
     '''Base ViewSet that includes the like and dislike features.'''
 
     def get_queryset(self) -> QuerySet:
-        '''Get the model queryset, including likes count.
+        '''Get the model queryset. It's required for allow the access to the likes count by the child ViewSets.
 
         Returns:
             QuerySet: Model queryset

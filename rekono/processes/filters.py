@@ -4,11 +4,15 @@ from processes.models import Process, Step
 
 
 class ProcessFilter(LikeFilter):
-    o = filters.OrderingFilter(fields=('name', 'creator', 'likes_count'))
+    '''FilterSet to filter and sort Process entities.'''
+
+    o = filters.OrderingFilter(fields=('name', 'creator', 'likes_count'))       # Ordering fields
 
     class Meta:
+        '''FilterSet metadata.'''
+
         model = Process
-        fields = {
+        fields = {                                                              # Filter fields
             'name': ['exact', 'icontains'],
             'description': ['exact', 'icontains'],
             'creator': ['exact'],
@@ -23,11 +27,15 @@ class ProcessFilter(LikeFilter):
 
 
 class StepFilter(FilterSet):
-    o = filters.OrderingFilter(fields=('process', 'tool', 'configuration', 'priority'))
+    '''FilterSet to filter and sort Step entities.'''
+
+    o = filters.OrderingFilter(fields=('process', 'tool', 'configuration', 'priority'))             # Ordering fields
 
     class Meta:
+        '''FilterSet metadata.'''
+
         model = Step
-        fields = {
+        fields = {                                                              # Filter fields
             'process__name': ['exact', 'icontains'],
             'process__description': ['exact', 'icontains'],
             'process__creator': ['exact'],

@@ -1,1 +1,1 @@
-'''Findings model and queue.'''
+'''Findings.'''
