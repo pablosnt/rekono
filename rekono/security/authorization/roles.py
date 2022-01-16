@@ -2,165 +2,78 @@ from django.db import models
 
 
 class Role(models.TextChoices):
+    '''User role names.'''
+
     ADMIN = 'Admin'
     AUDITOR = 'Auditor'
     READER = 'Reader'
 
 
-DEFAULT_GROUPS = {
+# Permission association for each user role
+ROLES = {
     Role.ADMIN: [
-        # Users
-        'add_user',
-        'change_user',
-        'delete_user',
-        'view_user',
-        # Projects
-        'add_project',
-        'change_project',
-        'delete_project',
-        'view_project',
-        'add_target',
-        'delete_target',
-        'view_target',
-        'add_targetport',
-        'delete_targetport',
-        'view_targetport',
-        'add_targetendpoint',
-        'delete_targetendpoint',
-        'view_targetendpoint',
-        # Executions
-        'add_task',
-        'delete_task',
-        'view_task',
-        'view_execution',
-        # Findings
-        'add_osint',
-        'delete_osint',
-        'view_osint',
-        'add_host',
-        'delete_host',
-        'view_host',
-        'add_enumeration',
-        'delete_enumeration',
-        'view_enumeration',
-        'add_endpoint',
-        'delete_endpoint',
-        'view_endpoint',
-        'add_technology',
-        'delete_technology',
-        'view_technology',
-        'add_vulnerability',
-        'change_vulnerability',
-        'delete_vulnerability',
-        'view_vulnerability',
-        'add_credential',
-        'delete_credential',
-        'view_credential',
-        'add_exploit',
-        'delete_exploit',
-        'view_exploit',
-        # Processes
-        'add_process',
-        'change_process',
-        'delete_process',
-        'view_process',
-        'add_step',
-        'change_step',
-        'delete_step',
-        'view_step',
-        # Tools
-        'view_tool',
-        'view_intensity',
-        'view_configuration',
-        'view_input',
-        'view_output',
-        # Wordlist
-        'add_wordlist',
-        'change_wordlist',
-        'delete_wordlist',
-        'view_wordlist',
+        'add_user', 'change_user', 'delete_user', 'view_user',                  # Users
+        'add_project', 'change_project', 'delete_project', 'view_project',      # Projects
+        'add_target', 'delete_target', 'view_target',                           # Targets
+        'add_targetport', 'delete_targetport', 'view_targetport',               # Target ports
+        'add_targetendpoint', 'delete_targetendpoint', 'view_targetendpoint',   # Target endpoints
+        'add_task', 'delete_task', 'view_task',                                 # Tasks
+        'view_execution',                                                       # Executions
+        'add_osint', 'delete_osint', 'view_osint',                              # OSINT
+        'add_host', 'delete_host', 'view_host',                                 # Hosts
+        'add_enumeration', 'delete_enumeration', 'view_enumeration',            # Enumerations
+        'add_endpoint', 'delete_endpoint', 'view_endpoint',                     # Endpoints
+        'add_technology', 'delete_technology', 'view_technology',               # Technologies
+        'add_vulnerability', 'change_vulnerability', 'delete_vulnerability', 'view_vulnerability',  # Vulnerabilities
+        'add_credential', 'delete_credential', 'view_credential',               # Credentials
+        'add_exploit', 'delete_exploit', 'view_exploit',                        # Exploits
+        'add_process', 'change_process', 'delete_process', 'view_process',      # Processes
+        'add_step', 'change_step', 'delete_step', 'view_step',                  # Steps
+        'view_tool',                                                            # Tools
+        'view_intensity',                                                       # Intensities
+        'view_configuration',                                                   # Configurations
+        'view_input',                                                           # Inputs
+        'view_output',                                                          # Outputs
+        'add_wordlist', 'change_wordlist', 'delete_wordlist', 'view_wordlist'   # Wordlists
     ],
     Role.AUDITOR: [
-        # Projects
-        'view_project',
-        'add_target',
-        'delete_target',
-        'view_target',
-        'add_targetport',
-        'delete_targetport',
-        'view_targetport',
-        'add_targetendpoint',
-        'delete_targetendpoint',
-        'view_targetendpoint',
-        # Executions
-        'add_task',
-        'delete_task',
-        'view_task',
-        'view_execution',
-        # Findings
-        'add_osint',
-        'delete_osint',
-        'view_osint',
-        'add_host',
-        'delete_host',
-        'view_host',
-        'add_enumeration',
-        'delete_enumeration',
-        'view_enumeration',
-        'add_endpoint',
-        'delete_endpoint',
-        'view_endpoint',
-        'add_technology',
-        'delete_technology',
-        'view_technology',
-        'add_vulnerability',
-        'change_vulnerability',
-        'delete_vulnerability',
-        'view_vulnerability',
-        'add_credential',
-        'delete_credential',
-        'view_credential',
-        'add_exploit',
-        'delete_exploit',
-        'view_exploit',
-        # Processes
-        'add_process',
-        'change_process',
-        'delete_process',
-        'view_process',
-        'add_step',
-        'change_step',
-        'delete_step',
-        'view_step',
-        # Tools
-        'view_tool',
-        'view_intensity',
-        'view_configuration',
-        'view_input',
-        'view_output',
-        # Wordlist
-        'add_wordlist',
-        'change_wordlist',
-        'delete_wordlist',
-        'view_wordlist',
+        'view_project',                                                         # Projects
+        'add_target', 'delete_target', 'view_target',                           # Targets
+        'add_targetport', 'delete_targetport', 'view_targetport',               # Target ports
+        'add_targetendpoint', 'delete_targetendpoint', 'view_targetendpoint',   # Target endpoints
+        'add_task', 'delete_task', 'view_task',                                 # Tasks
+        'view_execution',                                                       # Executions
+        'add_osint', 'delete_osint', 'view_osint',                              # OSINT
+        'add_host', 'delete_host', 'view_host',                                 # Hosts
+        'add_enumeration', 'delete_enumeration', 'view_enumeration',            # Enumerations
+        'add_endpoint', 'delete_endpoint', 'view_endpoint',                     # Endpoints
+        'add_technology', 'delete_technology', 'view_technology',               # Technologies
+        'add_vulnerability', 'change_vulnerability', 'delete_vulnerability', 'view_vulnerability',  # Vulnerabilities
+        'add_credential', 'delete_credential', 'view_credential',               # Credentials
+        'add_exploit', 'delete_exploit', 'view_exploit',                        # Exploits
+        'add_process', 'change_process', 'delete_process', 'view_process',      # Processes
+        'add_step', 'change_step', 'delete_step', 'view_step',                  # Steps
+        'view_tool',                                                            # Tools
+        'view_intensity',                                                       # Intensities
+        'view_configuration',                                                   # Configurations
+        'view_input',                                                           # Inputs
+        'view_output',                                                          # Outputs
+        'add_wordlist', 'change_wordlist', 'delete_wordlist', 'view_wordlist',  # Wordlists
     ],
     Role.READER: [
-        # Projects
-        'view_project',
-        'view_target',
-        'view_targetport',
-        'view_targetendpoint',
-        # Executions
-        'view_task',
-        'view_execution',
-        # Findings
-        'view_osint',
-        'view_host',
-        'view_enumeration',
-        'view_endpoint',
-        'view_technology',
-        'view_vulnerability',
-        'view_credential',
-        'view_exploit',
+        'view_project',                                                         # Projects
+        'view_target',                                                          # Targets
+        'view_targetport',                                                      # Target ports
+        'view_targetendpoint',                                                  # Target endpoints
+        'view_task',                                                            # Tasks
+        'view_execution',                                                       # Executions
+        'view_osint',                                                           # OSINT
+        'view_host',                                                            # Hosts
+        'view_enumeration',                                                     # Enumerations
+        'view_endpoint',                                                        # Endpoints
+        'view_technology',                                                      # Technologies
+        'view_vulnerability',                                                   # Vulnerabilities
+        'view_credential',                                                      # Credentials
+        'view_exploit',                                                         # Exploits
     ]
 }

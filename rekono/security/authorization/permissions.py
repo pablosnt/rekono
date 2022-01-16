@@ -1,72 +1,149 @@
+from typing import Any
+
 from processes.models import Process, Step
 from resources.models import Wordlist
 from rest_framework.permissions import BasePermission
+from rest_framework.request import Request
+from rest_framework.views import View
 from security.authorization.roles import Role
 
 
 class IsNotAuthenticated(BasePermission):
+    '''Check if current user is not authenticated.'''
 
-    def has_permission(self, request, view):
+    def has_permission(self, request: Request, view: View) -> bool:
+        '''Check if current user is not authenticated.
+
+        Args:
+            request (Request): HTTP request
+            view (View): View that user is accessing
+
+        Returns:
+            bool: Indicate if user is authorized to make this request or not
+        '''
         return not request.user.is_authenticated
 
 
 class IsAdmin(BasePermission):
+    '''Check if current user is an administrator.'''
 
-    def has_permission(self, request, view):
-        admin_group = request.user.groups.filter(name=Role.ADMIN.name.capitalize()).exists()
-        return bool(admin_group)
+    def has_permission(self, request: Request, view: View) -> bool:
+        '''Check if current user is an administrator.
+
+        Args:
+            request (Request): HTTP request
+            view (View): View that user is accessing
+
+        Returns:
+            bool: Indicate if user is authorized to make this request or not
+        '''
+        return bool(request.user.groups.filter(name=str(Role.ADMIN)).exists())
 
 
 class IsAuditor(BasePermission):
+    '''Check if current user is an auditor (Admin or Auditor roles).'''
 
-    def has_permission(self, request, view):
-        auditor_group = request.user.groups.filter(name=Role.AUDITOR.name.capitalize()).exists()
-        return bool(auditor_group) or IsAdmin().has_permission(request, view)
+    def has_permission(self, request: Request, view: View) -> bool:
+        '''Check if current user is an auditor (Admin or Auditor roles).
+
+        Args:
+            request (Request): HTTP request
+            view (View): View that user is accessing
+
+        Returns:
+            bool: Indicate if user is authorized to make this request or not
+        '''
+        return (
+            bool(request.user.groups.filter(name=str(Role.AUDITOR)).exists()) or
+            IsAdmin().has_permission(request, view)
+        )
 
 
 class ProjectMemberPermission(BasePermission):
+    '''Check if current user can access an object based on project membership.'''
 
-    def has_object_permission(self, request, view, obj):
-        project = obj.get_project()
-        if project:
+    def has_object_permission(self, request: Request, view: View, obj: Any) -> bool:
+        '''Check if current user can access some entities based on project membership.
+
+        Args:
+            request (Request): HTTP request
+            view (View): View that user is accessing
+            obj (Any): Object that user is accesing
+
+        Returns:
+            bool: Indicate if user is authorized to make this request or not
+        '''
+        project = obj.get_project()                                             # Get project associated to the project
+        if project:                                                             # If project exists
+            # Check if current user is a project member
             return request.user in project.members.all()
         return True
 
 
 class BaseCreatorPermission(BasePermission):
+    '''Check if current user can access an object based on HTTP method and creator user.'''
 
-    def get_instance(self, obj):
-        if self.model and isinstance(obj, self.model):
-            return obj
+    def get_instance(self, obj: Any) -> Any:
+        '''Get object with creator user from object accessed by the current user.
 
-    def has_object_permission(self, request, view, obj):
-        instance = self.get_instance(obj)
-        if (
-            instance
-            and request.user.is_authenticated
-            and view.action in ['like', 'dislike']
-        ):
-            return True
-        if (
-            instance
-            and not IsAdmin().has_permission(request, view)
-            and request.method in ['POST', 'PUT', 'DELETE']
-            and instance.creator != request.user
-        ):
-            return False
+        Args:
+            obj (Any): Object that user is accessing
+
+        Returns:
+            Any: Object with creator user
+        '''
+        return obj
+
+    def has_object_permission(self, request: Request, view: View, obj: Any) -> bool:
+        '''Check if current user can access an object based on HTTP method and creator user.
+
+        Args:
+            request (Request): HTTP request
+            view (View): View that user is accessing
+            obj (Any): Object that user is accesing
+
+        Returns:
+            bool: Indicate if user is authorized to make this request or not
+        '''
+        instance = self.get_instance(obj)                                       # Get object with creator user
+        if instance:
+            if view.action in ['like', 'dislike']:
+                # Like and dislike operations are allowed
+                return True
+            if (
+                not IsAdmin().has_permission(request, view) and                 # Non admin users
+                request.method in ['POST', 'PUT', 'DELETE'] and                 # Write operations
+                instance.creator != request.user                                # Non creator user
+            ):
+                return False                                                    # Access denied
         return True
 
 
 class ProcessCreatorPermission(BaseCreatorPermission):
+    '''Check if current user can access a Process or Step based on HTTP method and creator user.'''
 
-    def get_instance(self, obj):
-        process = None
-        if isinstance(obj, Process):
-            process = obj
-        elif isinstance(obj, Step):
-            process = obj.process
-        return process
+    def get_instance(self, obj: Any) -> Any:
+        '''Get object with creator user from object accessed by the current user.
+
+        Args:
+            obj (Any): Object that user is accessing
+
+        Returns:
+            Any: Object with creator user
+        '''
+        return obj if isinstance(obj, Process) else obj.process if isinstance(obj, Step) else None
 
 
 class WordlistCreatorPermission(BaseCreatorPermission):
-    model = Wordlist
+    '''Check if current user can access a Wordlist based on HTTP method and creator user.'''
+
+    def get_instance(self, obj: Any) -> Any:
+        '''Get object with creator user from object accessed by the current user.
+
+        Args:
+            obj (Any): Object that user is accessing
+
+        Returns:
+            Any: Object with creator user
+        '''
+        return obj if isinstance(obj, Wordlist) else None

@@ -10,8 +10,8 @@ def build_execution_notification_message(parameters: dict) -> str:
         'Endpoint', 'Vulnerability', 'Credential', 'Exploit'
     ]:
         if (
-            finding.lower() not in parameters
-            or (finding.lower() in parameters and not parameters[finding.lower()])
+            finding.lower() not in parameters or
+            (finding.lower() in parameters and not parameters[finding.lower()])
         ):
             continue
         findings = findings + messages.FINDING_TITLE.format(finding=finding.upper())
@@ -19,8 +19,8 @@ def build_execution_notification_message(parameters: dict) -> str:
             template = getattr(messages, f'{finding.upper()}_ITEM')
             findings = findings + template.format(**i.__dict__)
         findings += '\n'
-    execution: Execution = parameters.get('execution')
-    tool: Tool = parameters.get('tool')
+    execution: Execution = parameters['execution']
+    tool: Tool = parameters['tool']
     message = messages.EXECUTION_NOTIFICATION.format(
         project=execution.task.target.project.name,
         target=execution.task.target.target,

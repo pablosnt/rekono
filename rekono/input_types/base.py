@@ -1,16 +1,14 @@
 from typing import Any, Dict
 
-from tools.models import Input
-
 
 class BaseInput:
     '''Class to be extended by all the objects that can be used in tool executions as argument.'''
 
-    def filter(self, input: Input) -> bool:
+    def filter(self, input: Any) -> bool:
         '''Check if this instance is valid based on input filter.
 
         Args:
-            input (Input): Tool input whose filter will be applied
+            input (Any): Tool input whose filter will be applied
 
         Returns:
             bool: Indicate if this instance match the input filter or not

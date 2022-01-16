@@ -128,7 +128,7 @@ def success_callback(job: Any, connection: Any, result: BaseTool, *args, **kwarg
     if bool(pending_executions):                                                # No pending executions found
         # Check if there are error executions associated to this task
         error_executions = Execution.objects.filter(task=task, status=Status.ERROR).exists()
-        # Set task status to error if error executions found, otherwise to completed
+        # Set task status to error if error executions found, completed otherwise
         task.status = Status.COMPLETED if not bool(error_executions) else Status.ERROR
         task.end = timezone.now()                                               # Update the task end date
         task.save(update_fields=['status', 'end'])
