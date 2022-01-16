@@ -1,4 +1,4 @@
-from typing import List
+from typing import Any, Dict, List
 
 from api.serializers import RekonoTagSerializerField
 from drf_spectacular.utils import extend_schema_field
@@ -25,7 +25,7 @@ class StepPrioritySerializer(serializers.ModelSerializer):
 
 
 class StepSerializer(serializers.ModelSerializer):
-    '''Serializer to manage Steps via API.'''
+    '''Serializer to manage steps via API.'''
 
     tool = SimplyToolSerializer(read_only=True, many=False)                     # Tool details for read operations
     tool_id = serializers.PrimaryKeyRelatedField(                               # Tool Id for Step creation
@@ -50,17 +50,17 @@ class StepSerializer(serializers.ModelSerializer):
         # Step fields exposed via API
         fields = ('id', 'process', 'tool', 'tool_id', 'configuration', 'configuration_id', 'priority')
 
-    def validate(self, attrs):
+    def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
         '''Validate the provided data before use it.
 
         Args:
-            attrs (Any): Provided data
+            attrs (Dict[str, Any]): Provided data
 
         Raises:
             ValidationError: Raised if provided data is invalid
 
         Returns:
-            Any: Data after validation process
+            Dict[str, Any]: Data after validation process
         '''
         attrs = super().validate(attrs)                                         # Super data validation
         configuration = attrs.get('configuration')
@@ -79,17 +79,16 @@ class StepSerializer(serializers.ModelSerializer):
         ).exists()
         if bool(steps):                                                         # Step already exists
             raise serializers.ValidationError(
-                {'process': f'Invalid request. Process {attrs.get("process").names} still has this step'}
+                {'process': f'Invalid request. Process {attrs["process"].name} still has this step'}
             )
         return attrs
 
 
 class ProcessSerializer(TaggitSerializer, serializers.ModelSerializer, LikeBaseSerializer):
-    '''Serializer to manage Steps via API.'''
+    '''Serializer to manage processes via API.'''
 
-    # Step details for read operations
-    steps = SerializerMethodField(method_name='get_steps', read_only=True, required=False)
-    creator = SimplyUserSerializer(many=False, read_only=True, required=False)  # Creator details for read operations
+    steps = SerializerMethodField(method_name='get_steps', read_only=True)      # Step details for read operations
+    creator = SimplyUserSerializer(many=False, read_only=True)                  # Creator details for read operations
     tags = RekonoTagSerializerField()                                           # Tags
 
     class Meta:
@@ -113,7 +112,7 @@ class ProcessSerializer(TaggitSerializer, serializers.ModelSerializer, LikeBaseS
 
 
 class SimplyProcessSerializer(serializers.ModelSerializer):
-    '''Simply serializer to include Process main data in other serializers.'''
+    '''Simply serializer to include process main data in other serializers.'''
 
     class Meta:
         '''Serializer metadata.'''

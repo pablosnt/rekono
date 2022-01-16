@@ -26,12 +26,7 @@ class DefectDojoScans(GenericViewSet):
         return []
 
     @extend_schema(request=EngagementSerializer, responses={200: None})
-    @action(
-        detail=True,
-        methods=['POST'],
-        url_path='defect-dojo-scans',
-        url_name='defect-dojo-scans'
-    )
+    @action(detail=True, methods=['POST'], url_path='defect-dojo-scans', url_name='defect-dojo-scans')
     def defect_dojo_scans(self, request: Request, pk: int) -> Response:
         '''Import executions output in Defect-Dojo.
 
@@ -77,12 +72,7 @@ class DefectDojoFindings(GenericViewSet):
         return []
 
     @extend_schema(request=EngagementSerializer, responses={200: None})
-    @action(
-        detail=True,
-        methods=['POST'],
-        url_path='defect-dojo-findings',
-        url_name='defect-dojo-findings'
-    )
+    @action(detail=True, methods=['POST'], url_path='defect-dojo-findings', url_name='defect-dojo-findings')
     def defect_dojo_findings(self, request: Request, pk: int) -> Response:
         '''Import findings in Defect-Dojo.
 

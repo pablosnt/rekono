@@ -4,11 +4,15 @@ from projects.models import Project
 
 
 class ProjectFilter(rest_framework.FilterSet):
-    o = OrderingFilter(fields=('name', 'owner'))
+    '''FilterSet to filter and sort Project entities.'''
+
+    o = OrderingFilter(fields=('name', 'owner'))                                # Ordering fields
 
     class Meta:
+        '''FilterSet metadata.'''
+
         model = Project
-        fields = {
+        fields = {                                                              # Filter fields
             'name': ['exact', 'icontains'],
             'description': ['exact', 'icontains'],
             'owner': ['exact'],

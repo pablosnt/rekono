@@ -13,7 +13,7 @@ from rekono.settings import WORDLIST_DIR
 
 class WordlistSerializer(serializers.ModelSerializer, LikeBaseSerializer):
     file = serializers.FileField(required=True, allow_empty_file=False, write_only=True)
-    creator = SimplyUserSerializer(many=False, read_only=True, required=False)
+    creator = SimplyUserSerializer(many=False, read_only=True)
 
     class Meta:
         model = Wordlist

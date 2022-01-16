@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Dict
 
 from defectdojo.api import DefectDojo
 from django.core.exceptions import ValidationError
@@ -12,21 +12,21 @@ class EngagementSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=100, required=False)                # Name of the new engagement
     description = serializers.CharField(max_length=300, required=False)         # Description of the new engagement
 
-    def validate(self, attrs: Any) -> Any:
+    def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
         '''Validate the provided data before use it.
 
         Args:
-            attrs (Any): Provided data
+            attrs (Dict[str, Any]): Provided data
 
         Raises:
             ValidationError: Raised if provided data is invalid
 
         Returns:
-            Any: Data after validation process
+            Dict[str, Any]: Data after validation process
         '''
         attrs = super().validate(attrs)
         if 'id' in attrs:                                                       # Import using an existing engagement
-            success, _ = DefectDojo().get_engagement(attrs.get('id'))           # Check if the engagement Id exists
+            success, _ = DefectDojo().get_engagement(attrs['id'])               # Check if the engagement Id exists
             if not success:
                 raise ValidationError({'id': f'Engagement {attrs.get("id")} not found'})
         elif not (                                                              # Id or (name and description) required

@@ -13,7 +13,7 @@ class TargetEndpointSerializer(serializers.ModelSerializer):
 
 
 class TargetPortSerializer(serializers.ModelSerializer):
-    target_endpoints = TargetEndpointSerializer(many=True, read_only=True, required=False)
+    target_endpoints = TargetEndpointSerializer(many=True, read_only=True)
 
     class Meta:
         model = TargetPort
@@ -22,7 +22,7 @@ class TargetPortSerializer(serializers.ModelSerializer):
 
 
 class TargetSerializer(serializers.ModelSerializer):
-    target_ports = TargetPortSerializer(many=True, read_only=True, required=False)
+    target_ports = TargetPortSerializer(many=True, read_only=True)
 
     class Meta:
         model = Target

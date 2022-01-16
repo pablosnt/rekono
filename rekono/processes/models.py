@@ -40,7 +40,7 @@ class Process(LikeBase):
         '''Get the related project for the instance. This will be used for authorization purposes.
 
         Returns:
-            Project: Related project entity
+            Any: Related project entity
         '''
         return None
 
