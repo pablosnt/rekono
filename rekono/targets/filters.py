@@ -4,11 +4,15 @@ from targets.models import Target, TargetEndpoint, TargetPort
 
 
 class TargetFilter(rest_framework.FilterSet):
-    o = OrderingFilter(fields=('project', 'target', 'type'))
+    '''FilterSet to filter and sort Target entities.'''
+
+    o = OrderingFilter(fields=('project', 'target', 'type'))                    # Ordering fields
 
     class Meta:
+        '''FilterSet metadata.'''
+
         model = Target
-        fields = {
+        fields = {                                                              # Filter fields
             'project': ['exact'],
             'project__name': ['exact', 'icontains'],
             'project__owner': ['exact'],
@@ -21,11 +25,15 @@ class TargetFilter(rest_framework.FilterSet):
 
 
 class TargetPortFilter(rest_framework.FilterSet):
-    o = OrderingFilter(fields=('target', 'port'))
+    '''FilterSet to filter and sort Target Port entities.'''
+
+    o = OrderingFilter(fields=('target', 'port'))                               # Ordering fields
 
     class Meta:
+        '''FilterSet metadata.'''
+
         model = TargetPort
-        fields = {
+        fields = {                                                              # Filter fields
             'target': ['exact'],
             'target__project': ['exact'],
             'target__project__name': ['exact', 'icontains'],
@@ -39,11 +47,15 @@ class TargetPortFilter(rest_framework.FilterSet):
 
 
 class TargetEndpointFilter(rest_framework.FilterSet):
-    o = OrderingFilter(fields=('target_port', 'endpoint'))
+    '''FilterSet to filter and sort Target Endpoint entities.'''
+
+    o = OrderingFilter(fields=('target_port', 'endpoint'))                      # Ordering fields
 
     class Meta:
+        '''FilterSet metadata.'''
+
         model = TargetEndpoint
-        fields = {
+        fields = {                                                              # Filter fields
             'target_port': ['exact'],
             'target_port__port': ['exact'],
             'target_port__target': ['exact'],
