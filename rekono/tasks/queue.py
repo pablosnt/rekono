@@ -2,11 +2,11 @@ from datetime import timedelta
 from typing import Optional
 
 import django_rq
+from django.core.exceptions import ValidationError
 from django.utils import timezone
 from django_rq import job
 from processes import executor as processes
 from rq.job import Job
-from tasks.exceptions import InvalidTaskException
 from tasks.models import Task
 from tools import executor as tools
 
@@ -67,7 +67,7 @@ def consumer(task: Task = None) -> tuple:
         elif task.process:
             processes.execute(task)
         else:
-            raise InvalidTaskException('Invalid task. Process or tool is required')
+            raise ValidationError({'task': 'Process or tool is required'})
         return task
 
 

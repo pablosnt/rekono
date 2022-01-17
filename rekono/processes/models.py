@@ -14,13 +14,8 @@ class Process(LikeBase):
 
     name = models.TextField(max_length=30, unique=True)                         # Process name
     description = models.TextField(max_length=250)                              # Process description
-    creator = models.ForeignKey(                                                # User that created the process
-        settings.AUTH_USER_MODEL,
-        related_name='created_processes',
-        on_delete=models.SET_NULL,
-        blank=True,
-        null=True
-    )
+    # User that created the process
+    creator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True)
     tags = TaggableManager()                                                    # Process tags
 
     class Meta:

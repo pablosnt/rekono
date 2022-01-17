@@ -1,11 +1,11 @@
 import os
 import signal
 
+from django.core.exceptions import ValidationError
 from django.utils import timezone
 from executions.models import Execution
 from executions.queue.utils import cancel_job
 from tasks.enums import Status
-from tasks.exceptions import InvalidTaskException
 from tasks.queue import cancel_and_delete_task
 
 
@@ -35,4 +35,4 @@ def cancel_task(task):
         task.end = timezone.now()
         task.save()
     else:
-        raise InvalidTaskException(f'Task {task.id} can not be cancelled')
+        raise ValidationError({'id': f'Task {task.id} can not be cancelled'})

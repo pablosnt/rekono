@@ -13,12 +13,8 @@ class Project(models.Model):
     name = models.TextField(max_length=50, unique=True)                         # Project name
     description = models.TextField(max_length=250)                              # Project description
     defectdojo_product_id = models.IntegerField(blank=True, null=True)          # Related product Id in Defect-Dojo
-    owner = models.ForeignKey(                                                  # User that created the project
-        settings.AUTH_USER_MODEL,
-        on_delete=models.SET_NULL,
-        blank=True,
-        null=True
-    )
+    # User that created the project
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True)
     # Relation with all users that belong to the project
     members = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='members', blank=True)
     tags = TaggableManager()                                                    # Project tags

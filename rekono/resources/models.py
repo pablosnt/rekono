@@ -21,12 +21,8 @@ class Wordlist(LikeBase, BaseInput):
     path = models.TextField(max_length=200, unique=True)                        # Wordlist file path
     checksum = models.TextField(max_length=128, blank=True, null=True)          # Wordlist file hash
     size = models.IntegerField(blank=True, null=True)                           # Number of entries in the wordlist file
-    creator = models.ForeignKey(                                                # User that created the wordlist
-        settings.AUTH_USER_MODEL,
-        on_delete=models.SET_NULL,
-        blank=True,
-        null=True
-    )
+    # User that created the wordlist
+    creator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True)
 
     class Meta:
         '''Model metadata.'''

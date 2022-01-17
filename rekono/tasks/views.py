@@ -1,6 +1,6 @@
 from defectdojo.views import DefectDojoFindings, DefectDojoScans
 from django.contrib.sites.shortcuts import get_current_site
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, ValidationError
 from drf_spectacular.utils import extend_schema
 from findings.models import (OSINT, Credential, Endpoint, Enumeration, Exploit,
                              Host, Technology, Vulnerability)
@@ -12,7 +12,6 @@ from rest_framework.response import Response
 from targets.models import Target
 from tasks import services
 from tasks.enums import Status
-from tasks.exceptions import InvalidTaskException
 from tasks.filters import TaskFilter
 from tasks.models import Task
 from tasks.queue import producer
@@ -68,7 +67,7 @@ class TaskViewSet(
         try:
             services.cancel_task(instance)
             return Response(status=status.HTTP_204_NO_CONTENT)
-        except InvalidTaskException:
+        except ValidationError:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
     @extend_schema(request=None, responses={200: TaskSerializer})

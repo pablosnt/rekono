@@ -4,16 +4,18 @@ from tasks.models import Task
 
 
 class TaskFilter(rest_framework.FilterSet):
-    o = OrderingFilter(
-        fields=(
-            ('target__project', 'project'),
-            'target', 'process', 'tool', 'intensity', 'executor', 'status', 'start', 'end'
-        ),
-    )
+    '''FilterSet to filter and sort Task entities.'''
+
+    o = OrderingFilter(fields=(                                                 # Ordering fields
+        ('target__project', 'project'),
+        'target', 'process', 'tool', 'intensity', 'executor', 'status', 'start', 'end'
+    ))
 
     class Meta:
+        '''FilterSet metadata.'''
+
         model = Task
-        fields = {
+        fields = {                                                              # Filter fields
             'target': ['exact'],
             'target__target': ['exact', 'icontains'],
             'target__project': ['exact'],
