@@ -4,7 +4,6 @@ from django.core.exceptions import PermissionDenied
 from django.db.models import QuerySet
 from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
                                    ListModelMixin, RetrieveModelMixin)
-from rest_framework.serializers import Serializer
 from rest_framework.viewsets import GenericViewSet
 from targets.filters import (TargetEndpointFilter, TargetFilter,
                              TargetPortFilter)
@@ -46,13 +45,14 @@ class TargetViewSet(GenericViewSet, CreateModelMixin, ListModelMixin, RetrieveMo
         project_filter = {self.project_members_field: self.request.user}
         return super().get_queryset().filter(**project_filter)
 
-    def perform_create(self, serializer: Serializer) -> None:
+    def perform_create(self, serializer: TargetSerializer) -> None:
         '''Create a new instance using a serializer.
 
         Args:
-            serializer (Serializer): Serializer to use in the instance creation
+            serializer (TargetSerializer): Serializer to use in the instance creation
         '''
         if self.request.user not in self.get_project_members(serializer.validated_data):
+            # Current user can't create a new target in this project
             raise PermissionDenied()
         super().perform_create(serializer)
 

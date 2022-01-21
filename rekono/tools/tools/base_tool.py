@@ -89,8 +89,7 @@ class BaseTool:
             if formatted_argument:
                 command[argument.name] = formatted_argument
         return command
-                
-
+        
     def get_arguments(self, targets: list, previous_findings: list) -> list:
         command = {
             'intensity': self.intensity.argument,
@@ -117,6 +116,23 @@ class BaseTool:
                     command[argument.name] = ''
         args = self.configuration.arguments.format(**command)
         return [arg for arg in args.split(' ') if arg] if ' ' in args else [args]
+
+    def check_arguments(self, targets: List[BaseInput], findings: List[BaseInput]) -> bool:
+        '''Check if given resources (targets, resources and findings) lists are enough to execute the tool.
+
+        Args:
+            tool (BaseTool): Tool instance to be executed
+            targets (List[BaseInput]): Target list (targets and resources) to include in the tool arguments
+            findings (List[BaseInput]): Finding list to include in the tool arguments
+
+        Returns:
+            bool: Indicate if the tool can be executed with the given targets and findings
+        '''
+        try:
+            self.get_arguments(targets, findings)                                   # Try to configure the tool arguments
+            return True
+        except InvalidToolParametersException:
+            return False
 
     def tool_execution(self, args: list, targets: list, previous_findings: list) -> str:
         args.insert(0, self.tool.command)

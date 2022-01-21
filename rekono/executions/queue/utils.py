@@ -1,41 +1,16 @@
 from typing import List
 
 import django_rq
+from executions import utils
+from executions.models import Execution
 from executions.queue import producer
 from input_types.models import BaseInput
+from processes.executor.callback import process_callback
+from queues.utils import cancel_and_delete_job
 from rq.job import Job
 from rq.registry import DeferredJobRegistry
-
-
-def cancel_job(job_id: str) -> Job:
-    '''Cancel a job based on his Id.
-
-    Args:
-        job_id (str): Job Id to be cancelled
-
-    Returns:
-        Job: Cancelled job
-    '''
-    executions_queue = django_rq.get_queue('executions-queue')                  # Get executions queue
-    job = executions_queue.fetch_job(job_id)                                    # Get job to be cancelled by Id
-    if job:
-        job.cancel()                                                            # Cancel job
-    return job
-
-
-def cancel_and_delete_job(job_id: str) -> Job:
-    '''Cancel and delete a job based on hist Id.
-
-    Args:
-        job_id (str): Job Id to be cancelled and deleted
-
-    Returns:
-        Job: Cancelled and deleted job
-    '''
-    execution = cancel_job(job_id)                                              # Cancel job
-    if execution:
-        execution.delete()                                                      # Delete job
-    return execution
+from tools.models import Argument, Intensity, Tool
+from tools.tools.base_tool import BaseTool
 
 
 def get_findings_from_dependencies(dependencies: list) -> List[BaseInput]:
@@ -75,7 +50,7 @@ def update_new_dependencies(parent_job: str, new_jobs: list, targets: List[BaseI
             # Include new jobs as on hold job dependency
             dependencies.extend(new_jobs)
             meta = job_on_hold.get_meta()                                       # Get on hold job metadata
-            cancel_and_delete_job(job_id)                                       # Cancel and delete on hold job
+            cancel_and_delete_job('executions-queue', job_id)                   # Cancel and delete on hold job
             # Enqueue an on hold job copy with new dependencies
             producer.producer(
                 meta['execution'],
@@ -85,3 +60,58 @@ def update_new_dependencies(parent_job: str, new_jobs: list, targets: List[BaseI
                 callback=meta['callback'],
                 dependencies=dependencies
             )
+
+
+def process_dependencies(
+    execution: Execution,
+    tool: Tool,
+    intensity: Intensity,
+    arguments: List[Argument],
+    targets: List[BaseInput],
+    current_job: Job,
+    tool_runner: BaseTool
+) -> List[BaseInput]:
+    '''Get findings from job dependencies and enqueue new executions if required.
+
+    Args:
+        execution (Execution): Execution associated to the current job
+        tool (Tool): Tool to execute
+        intensity (Intensity): Intensity to apply in the execution
+        arguments (List[Argument]): Arguments implied in the execution
+        targets (List[BaseInput]): Targets and resources to include in the execution
+        current_job (Job): Current job
+        tool_runner (BaseTool): Tool instance associated to the tool
+
+    Returns:
+        List[Finding]: Finding list to include in the current job execution
+    '''
+    # Get findings from dependent jobs
+    findings = get_findings_from_dependencies(current_job._dependency_ids)
+    if not findings:
+        return []                                                               # No findings found
+    new_jobs_ids = []
+    # Get required executions to include all previous findings
+    executions: List[List[BaseInput]] = utils.get_executions_from_findings(findings, tool)
+    # Filter executions based on tool arguments
+    executions = [param_set for param_set in executions if tool_runner.check_arguments(targets, param_set)]
+    # For each executions, except first whose findings will be included in the current jobs
+    for findings in executions[1:]:
+        # Create a new execution entity from the current execution data
+        new_execution = Execution.objects.create(task=execution.task, step=execution.step)
+        new_execution.save()
+        job = producer.producer(                                                # Enqueue the new execution
+            new_execution,
+            intensity,
+            arguments,
+            targets=targets,
+            previous_findings=findings,                                         # Include the previous findings
+            callback=process_callback,
+            # At queue start, because it could be a dependency of next jobs
+            at_front=True
+        )
+        new_jobs_ids.append(job.id)                                             # Save new Job Id
+    if new_jobs_ids:                                                            # New Jobs has been created
+        # Update next jobs dependencies based on current job dependents
+        update_new_dependencies(current_job.id, new_jobs_ids, targets)
+    # Return first findings list to be used in the current job
+    return executions[0] if executions else []

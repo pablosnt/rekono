@@ -54,7 +54,7 @@ class FindingBaseView(ListModelMixin, RetrieveModelMixin, DestroyModelMixin, Def
             request (Request): Received HTTP request
 
         Returns:
-            Response: HTTP
+            Response: HTTP response
         '''
         finding: Finding = self.get_object()
         finding.is_active = False

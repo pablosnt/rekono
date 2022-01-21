@@ -1,10 +1,9 @@
-from django.utils import timezone
 from executions import utils
 from executions.models import Execution
 from executions.queue import producer
-from input_types.enums import InputTypeNames
 from targets.models import TargetEndpoint
 from tasks.models import Task
+from tools.executor.callback import tool_callback
 from tools.models import Argument, Intensity
 
 
@@ -24,12 +23,5 @@ def execute(task: Task) -> None:
             intensity=intensity,
             arguments=arguments,
             targets=execution_targets,
-            callback=success_callback
+            callback=tool_callback
         )
-
-
-def success_callback(job, connection, result, *args, **kwargs):
-    task = result.execution.task
-    task.status = result.execution.status
-    task.end = timezone.now()
-    task.save()

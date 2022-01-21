@@ -1,13 +1,17 @@
+from typing import Any, List, Type
+
 from defectdojo.views import DefectDojoFindings, DefectDojoScans
-from django.contrib.sites.shortcuts import get_current_site
 from django.core.exceptions import PermissionDenied, ValidationError
+from django.db.models import QuerySet
 from drf_spectacular.utils import extend_schema
+from executions.models import Execution
 from findings.models import (OSINT, Credential, Endpoint, Enumeration, Exploit,
-                             Host, Technology, Vulnerability)
+                             Finding, Host, Technology, Vulnerability)
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
                                    ListModelMixin, RetrieveModelMixin)
+from rest_framework.request import Request
 from rest_framework.response import Response
 from targets.models import Target
 from tasks import services
@@ -31,38 +35,66 @@ class TaskViewSet(
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
     filterset_class = TaskFilter
+    # Fields used to search tasks
     search_fields = ['target__target', 'process__name', 'process__steps__tool__name', 'tool__name']
 
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        return queryset.filter(target__project__members=self.request.user)
+    def get_queryset(self) -> QuerySet:
+        '''Get the queryset that the user is allowed to get, based on project members.
 
-    def perform_create(self, serializer):
+        Returns:
+            QuerySet: Queryset
+        '''
+        return super().get_queryset().filter(target__project__members=self.request.user)
+
+    def perform_create(self, serializer: TaskSerializer) -> None:
+        '''Create a new instance using a serializer.
+
+        Args:
+            serializer (TaskSerializer): Serializer to use in the instance creation
+        '''
+        # Check if current user can execute tasks against this target based on project membership
         project_check = Target.objects.filter(
             id=serializer.validated_data.get('target').id,
             project__members=self.request.user
         ).exists()
         if not project_check:
+            # Current user can't execute tasks against this target
             raise PermissionDenied()
-        serializer.save(executor=self.request.user)
+        serializer.save(executor=self.request.user)                             # Include current user as executor
 
-    def get_executions(self):
+    def get_executions(self) -> List[Execution]:
+        '''Get executions list associated to the current instance. Needed for Defect-Dojo integration.
+
+        Returns:
+            List[Execution]: Executions list associated to the current instance
+        '''
         return list(self.get_object().executions.all())
 
-    def get_findings(self):
+    def get_findings(self) -> List[Finding]:
+        '''Get findings list associated to the current instance. Needed for Defect-Dojo integration.
+
+        Returns:
+            List[Finding]: Findings list associated to the current instance
+        '''
         task = self.get_object()
-        findings = []
-        for find_model in [
-            OSINT, Host, Enumeration, Technology,
-            Endpoint, Vulnerability, Credential, Exploit
-        ]:
-            findings.extend(find_model.objects.filter(
-                execution__task=task,
-                is_active=True
-            ).all())
+        findings: List[Finding] = []
+        finding_models: List[Type[Finding]] = [
+            OSINT, Host, Enumeration, Technology, Endpoint, Vulnerability, Credential, Exploit
+        ]
+        for finding_model in finding_models:
+            # Search active findings related to this task
+            findings.extend(list(finding_model.objects.filter(execution__task=task, is_active=True).all()))
         return findings
 
-    def destroy(self, request, *args, **kwargs):
+    def destroy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        '''Cancel task.
+
+        Args:
+            request (Request): Received HTTP request
+
+        Returns:
+            Response: HTTP response
+        '''
         instance = self.get_object()
         try:
             services.cancel_task(instance)
@@ -72,10 +104,21 @@ class TaskViewSet(
 
     @extend_schema(request=None, responses={200: TaskSerializer})
     @action(detail=True, methods=['POST'], url_path='repeat', url_name='repeat')
-    def repeat_task(self, request, pk):
+    def repeat_task(self, request: Request, pk: int) -> Response:
+        '''Repeat task execution.
+
+        Args:
+            request (Request): Received HTTP request
+            pk (int): Id of the task to repeat
+
+        Returns:
+            Response: HTTP response
+        '''
         task = self.get_object()
         if task.status in [Status.REQUESTED, Status.RUNNING]:
+            # If task status is requested or running, it can't be repeated
             return Response('Execution is still running', status=status.HTTP_400_BAD_REQUEST)
+        # Create a new task from the original one
         new_task = Task.objects.create(
             target=task.target,
             process=task.process,
@@ -84,8 +127,8 @@ class TaskViewSet(
             intensity=task.intensity,
             executor=request.user
         )
-        new_task.wordlists.set(task.wordlists.all())
+        new_task.wordlists.set(task.wordlists.all())                            # Add wordlists from original task
         new_task.save()
-        producer(new_task)
-        serializer = TaskSerializer(instance=new_task)
+        producer(new_task)                                                      # Enqueue new task
+        serializer = TaskSerializer(instance=new_task)                          # Return new task data
         return Response(serializer.data, status=status.HTTP_200_OK)
