@@ -6,7 +6,9 @@ from tools.tools.base_tool import BaseTool
 
 
 class TheHarvesterTool(BaseTool):
+    '''theHarvester tool class.'''
 
+    # Mapping between theHarvester types and OSINT data types
     data_types = [
         ('ips', DataType.IP),
         ('hosts', DataType.DOMAIN),
@@ -20,10 +22,11 @@ class TheHarvesterTool(BaseTool):
         ('linkedin_people', DataType.USER)
     ]
 
-    def parse_output(self, output: str) -> None:
+    def parse_output_file(self) -> None:
+        '''Parse tool output file to create finding entities.'''
         with open(self.path_output) as output_file:
-            data = json.load(output_file)
-        for key, dt in self.data_types:
-            if key in data:
-                for item in data[key]:
-                    self.create_finding(OSINT, data=item, data_type=dt)
+            data = json.load(output_file)                                       # Read output file
+        for the_harvester_type, rekono_type in self.data_types:                 # For each data type
+            if the_harvester_type in data:                                      # If theHarvester type in report data
+                for item in data[the_harvester_type]:                           # For item associated to this type
+                    self.create_finding(OSINT, data=item, data_type=rekono_type)    # Create OSINT finding

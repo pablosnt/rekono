@@ -3,7 +3,6 @@ import os
 import shutil
 from typing import Any
 
-from arguments import formatter
 from findings.enums import Severity
 from findings.models import Credential, Endpoint, Technology, Vulnerability
 from tools.tools.base_tool import BaseTool
@@ -12,126 +11,165 @@ from rekono.settings import TOOLS
 
 
 class CmseekTool(BaseTool):
+    '''CMSeeK tool class.'''
 
+    # CMSeeK directory where output files can be stored
     home_directory = TOOLS['cmseek']['directory']
 
-    def clean_url(self, url) -> str:
-        if '://' in url:
-            url = url.split('://', 1)[1]
-        if url[-1] == '/':
-            url = url[:-1]
-        url = url.replace('/', '_').replace(':', '_')
-        return url
-
     def get_url_path(self) -> str:
-        for key, value in self.findings_relations:
-            try:
-                url = formatter.argument_with_one('{url}', value)
-                if url:
-                    return self.clean_url(url)
-            except KeyError:
-                pass
+        '''Get path from URL used for tool execution.
+
+        Returns:
+            Union[str, None]: URL path
+        '''
+        path = ''
+        for argument in self.command_arguments:                                 # For each argument used in execution
+            if '-u' in argument:                                                # URL parameter found
+                url = argument.split('-u ', 1)[1].split(' ', 1)[0]              # Get URL value
+                if '://' in url:                                                # URL with protocol data
+                    url = url.split('://', 1)[1]                                # Remove protocol data from URL
+                if url[-1] == '/':                                              # URL ends in slash
+                    url = url[:-1]                                              # Remove last slash form URL
+                path = url.replace('/', '_').replace(':', '_')                  # URL conversion to path
+                break
+        return path
 
     def clean_environment(self) -> None:
-        url_path = self.get_url_path()
-        report_file = 'cms.json'
-        results = os.path.join('Result', url_path)
+        '''Move original file output to Rekono outputs directory.'''
+        url_path = self.get_url_path()                                          # Get URL path from URL used in command
+        report_file = 'cms.json'                                                # Original output file name
+        results = os.path.join('Result', url_path)                              # Result path in current directory
+        # Original output file in current directory
         report = os.path.join(results, report_file)
-        home_results = os.path.join(self.home_directory, results)
+        home_results = os.path.join(self.home_directory, results)               # Result path in CMSeeK directory
+        # Original output file in CMSeeK directory
         home_report = os.path.join(home_results, report_file)
-        if not os.path.isfile(report) and os.path.isfile(home_report):
-            results = home_results
-            report = home_report
-        if os.path.isfile(report):
+        if not os.path.isfile(report) and os.path.isfile(home_report):          # If output file in CMSeeK directory
+            results = home_results                                              # Update results path variable
+            report = home_report                                                # Update report path variable
+        if os.path.isfile(report):                                              # If report file found
+            # Move original report file to Rekono outputs directory
             shutil.move(report, self.path_output)
-            shutil.rmtree(results)
+            shutil.rmtree(results)                                              # Remove results directory
 
     def analyze_endpoints(self, url: str, technology: Technology, key: str, value: Any) -> None:
-        paths = []
+        '''Analyze endpoints from report item.
+
+        Args:
+            url (str): Target URL
+            technology (Technology): Technology created from basic CMS data
+            key (str): Item key
+            value (Any): Item value
+        '''
+        paths = value
         if isinstance(value, str) and ',' in value:
-            paths = value.split(',')
-        elif isinstance(value, list):
-            paths = value
-        paths = [p.replace(url, '/') for p in paths]
-        for path in paths:
-            self.create(Endpoint, endpoint=path)
-        if 'backup_file' in key:
-            self.create_finding(
+            paths = value.split(',')                                            # Paths from string value
+        paths = [p.replace(url, '/') for p in paths]                            # Remove target URL from paths
+        for path in paths:                                                      # For each path
+            self.create_finding(Endpoint, endpoint=path)                        # Create Endpoint
+        if 'backup_file' in key:                                                # Backup file found
+            self.create_finding(                                                # Create Vulnerability
                 Vulnerability,
                 technology=technology,
                 name=f'{technology.name} backup files found',
                 description=', '.join(paths),
                 severity=Severity.HIGH,
+                # CWE-530: Exposure of Backup File to an Unauthorized Control Sphere
                 cwe='CWE-530'
             )
-        elif 'config_file' in key:
+        elif 'config_file' in key:                                              # Configuration file found
             self.create_finding(
                 Vulnerability,
                 technology=technology,
                 name=f'{technology.name} configuration files found',
                 description=', '.join(paths),
                 severity=Severity.MEDIUM,
+                # CWE-497: Exposure of Sensitive System Information to an Unauthorized Control Sphere
                 cwe='CWE-497'
             )
 
-    def parse_output(self, output: str) -> None:
+    def parse_cms_components(self, key: str, value: str, cms_name: str, cms_id: str, cms: Technology) -> None:
+        '''Parse CMS components data to create Technologies.
+
+        Args:
+            key (str): Component key
+            value (str): Component value
+            cms_name (str): CMS name
+            cms_id (str): CMS Id
+            cms (Technology): CMS Technology
+        '''
+        for item in value.split(','):                                           # For each CMS component
+            aux = item.split('Version', 1)                                      # Parse component data
+            name = None
+            if cms_name in key:
+                name = key.replace(f'{cms_name}_', '')                          # Get CMS component type name
+            elif cms_id in key:
+                name = key.replace(f'{cms_id}_', '')                            # Get CMS component type name
+            tech = aux[0].strip() if len(aux) > 0 else None                     # Get CMS component name
+            vers = aux[1].strip() if len(aux) > 1 else None                     # Get CMS component version
+            if tech:                                                            # If CMS component name found
+                # Create Technology with CMS component data
+                self.create_finding(
+                    Technology,
+                    name=tech,
+                    version=vers,
+                    related_to=cms,                                 # Related to CMS technology
+                    description=f'{cms_name} {name}'
+                )
+
+    def parse_cms_vulnerabilities(self, value: dict, cms: Technology) -> None:
+        '''Parse CMS vulnerabilities to create Vulnerabilities.
+
+        Args:
+            value (dict): Vulnerability values
+            cms (Technology): CMS Technology
+        '''
+        for vuln in value['vulnerabilities']:                                   # For each CVE
+            # Create Vulnerability with CVE and related to CMS Technology
+            self.create_finding(Vulnerability, technology=cms, name=vuln.get('name'), cve=vuln.get('cve'))
+
+    def parse_cms_usernames(self, value: str) -> None:
+        '''Parse CMS usernames to create Credentials.
+
+        Args:
+            value (str): Username values
+        '''
+        for user in value.split(','):                                           # For each username
+            self.create_finding(Credential, username=user)                      # Create Credential with username
+
+    def parse_output_file(self) -> None:
+        '''Parse tool output file to create finding entities.'''
         with open(self.path_output, 'r') as output_file:
-            report = json.load(output_file)
-        if report.get('cms_name'):
-            cms_id = report.get('cms_id')
-            cms_name = report.get('cms_name')
+            report = json.load(output_file)                                     # Read output file
+        cms_name = report.get('cms_name')                                       # Get CMS name
+        cms_id = report.get('cms_id')                                           # Get CMS Id
+        if cms_name and cms_id:                                                 # CMS found
             cms_version = None
-            if f'{cms_id}_version' in report:
-                cms_version = report.get(f'{cms_id}_version')
-            elif f'{cms_name}_version' in report:
-                cms_version = report.get(f'{cms_name}_version')
-            url = report.get('url')
-            cms = self.create_finding(
-                Technology,
-                name=cms_name,
-                version=cms_version,
-                reference=report.get('cms_url')
-            )
-            for key, value in [(k, v) for k, v in report.items() if k not in [
-                'cms_id', 'cms_name', 'cms_url', f'{cms_id}_version', f'{cms_name}_version'
+            if f'{cms_id}_version' in report:                                   # Search CMS version by Id
+                cms_version = report.get(f'{cms_id}_version')                   # Get CMS version by Id
+            elif f'{cms_name}_version' in report:                               # Search CMS version by name
+                cms_version = report.get(f'{cms_name}_version')                 # Get CMS version by name
+            url = report.get('url')                                             # Get target URL
+            # Create Technology with the CMS data
+            cms = self.create_finding(Technology, name=cms_name, version=cms_version, reference=report.get('cms_url'))
+            for key, value in [(k, v) for k, v in report.items() if k not in [  # For each data in report
+                'cms_id', 'cms_name', 'cms_url', f'{cms_id}_version', f'{cms_name}_version'     # Exclude basic CMS data
             ]]:
-                if 'file' in key or 'directory' in key:
-                    self.analyze_endpoints(url, cms, key, value)
-                elif '_users' in key and ',' in value:
-                    for user in value.split(','):
-                        self.create_finding(Credential, username=user)
-                elif '_debug_mode' in key and value != 'disabled':
-                    self.create(
+                if 'file' in key or 'directory' in key:                         # Endpoint found
+                    self.analyze_endpoints(url, cms, key, value)                # Analyze endpoint
+                elif '_users' in key and ',' in value:                          # Users found
+                    self.parse_cms_usernames(value)
+                elif '_debug_mode' in key and value != 'disabled':              # Vulnerability found: debug enabled
+                    self.create_finding(                                        # Create Vulnerability
                         Vulnerability,
-                        technology=cms,
+                        technology=cms,                                         # Related to CMS technology
                         name=f'{cms_name} debug mode enabled',
                         description=f'{cms_name} debug mode enabled',
                         severity=Severity.LOW,
-                        cwe='CWE-489'
+                        cwe='CWE-489'                                           # CWE-489: Active Debug Code
                     )
-                elif '_vulns' in key and 'vulnerabilities' in value:
-                    for vuln in value['vulnerabilities']:
-                        self.create(
-                            Vulnerability,
-                            technology=cms,
-                            name=vuln.get('name'),
-                            cve=vuln.get('cve')
-                        )
+                elif '_vulns' in key and 'vulnerabilities' in value:            # CVEs found
+                    self.parse_cms_vulnerabilities(value, cms)                  # Parse CMS vulnerabilities
                 elif 'Version' in value and ',' in value:
-                    for item in value.split(','):
-                        aux = item.split('Version', 1)
-                        name = None
-                        if cms_name in key:
-                            name = key.replace(f'{cms_name}_', '')
-                        elif cms_id in key:
-                            name = key.replace(f'{cms_id}_', '')
-                        tech = aux[0].strip() if len(aux) > 0 else None
-                        vers = aux[1].strip() if len(aux) > 1 else None
-                        if tech:
-                            self.create_finding(
-                                Technology,
-                                name=tech,
-                                version=vers,
-                                related_to=cms,
-                                description=f'{cms_name} {name}'
-                            )
+                    # CMS component found (plugin, theme, ...)
+                    self.parse_cms_components(key, value, cms_name, cms_id, cms)    # Parse CMS components

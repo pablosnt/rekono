@@ -7,7 +7,9 @@ from tools.tools.base_tool import BaseTool
 
 
 class ZapTool(BaseTool):
+    '''OWASP ZAP tool class.'''
 
+    # Mapping between OWASP ZAP severity values and Rekono severity values
     severity_mapping = {
         0: Severity.INFO,
         1: Severity.LOW,
@@ -15,29 +17,47 @@ class ZapTool(BaseTool):
         3: Severity.HIGH
     }
 
-    def clean_value(self, value) -> str:
+    def clean_value(self, value: str) -> str:
+        '''Clean report values before use it.
+
+        Args:
+            value (str): Original value
+
+        Returns:
+            str: Clean value
+        '''
         value = unescape(value)
         return value.replace('<p>', '').replace('</p>', '')
 
-    def parse_output(self, output: str) -> None:
-        endpoints = set()
-        root = parser.parse(self.path_output).getroot()
-        for site in root:
-            url_base = site.attrib['name']
-            for alert in site.findall('alerts/alertitem'):
-                self.create_finding(
-                    Vulnerability,
-                    name=self.clean_value(alert.findtext('alert')),
-                    description=self.clean_value(alert.findtext('desc')),
-                    severity=self.severity_mapping[int(alert.findtext('riskcode'))],
-                    cwe=f'CWE-{alert.findtext("cweid")}',
-                    reference=self.clean_value(alert.findtext('reference'))
-                )
-                for instance in alert.findall('instances/instance'):
-                    http_endpoint = instance.findtext('uri').replace(url_base, '')
-                    if http_endpoint and http_endpoint != '/':
-                        if http_endpoint[-1] != '/':
-                            http_endpoint += '/'
-                        if http_endpoint not in endpoints:
-                            self.create_finding(Endpoint, endpoint=http_endpoint)
-                            endpoints.add(http_endpoint)
+    def parse_output_file(self) -> None:
+        '''Parse tool output file to create finding entities.'''
+        http_endpoints = set()                                                  # HTTP endpoints set
+        root = parser.parse(self.path_output).getroot()                         # Report root
+        for site in root:                                                       # For each site
+            url_base = site.attrib['name']                                      # Get target URL
+            for alert in site.findall('alerts/alertitem'):                      # For each alert
+                name = alert.findtext('alert')                                  # Get alert data
+                description = alert.findtext('desc')
+                severity = alert.findtext('riskcode')
+                cwe = alert.findtext("cweid")
+                reference = alert.findtext('reference')
+                if name:                                                        # If alert name exists
+                    self.create_finding(                                        # Create Vulnerability
+                        Vulnerability,
+                        name=self.clean_value(name),
+                        description=self.clean_value(description) if description else self.clean_value(name),
+                        severity=self.severity_mapping[int(severity)] if severity else Severity.MEDIUM,
+                        cwe=f'CWE-{cwe}' if cwe else None,
+                        reference=self.clean_value(reference) if reference else None
+                    )
+                instances = alert.findall('instances/instance')                 # Get instances
+                for instance in instances or []:                                # For each instance
+                    url = instance.findtext('uri')                              # Get URL
+                    if url:
+                        http_endpoint = url.replace(url_base, '')               # Get HTTP endpoint
+                        if http_endpoint and http_endpoint != '/':              # If valid endpoint
+                            if http_endpoint[-1] != '/':                        # If last endpoint char is not slash
+                                http_endpoint += '/'                            # Add last slash to the endpoint
+                            if http_endpoint not in http_endpoints:             # If it's a new endpoint
+                                http_endpoints.add(http_endpoint)               # Add endpoint to HTTP endpoints set
+                                self.create_finding(Endpoint, endpoint=http_endpoint)   # Create Endpoint

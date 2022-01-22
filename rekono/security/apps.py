@@ -16,7 +16,7 @@ class SecurityConfig(AppConfig):
         post_migrate.connect(self.initialize_user_groups, sender=self)
 
     def initialize_user_groups(self, **kwargs: Any) -> None:
-        '''Initialize user groups in in database.'''
+        '''Initialize user groups in database.'''
         group_model = kwargs['apps'].get_model(app_label='auth', model_name='group')                # Get Group model
         permission_model = kwargs['apps'].get_model(app_label='auth', model_name='permission')  # Get permission model
         for name, permissions in ROLES.items():                                 # For each role

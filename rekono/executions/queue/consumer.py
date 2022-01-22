@@ -1,10 +1,12 @@
 from typing import List
 
 import rq
+from django.utils import timezone
 from django_rq import job
 from executions.models import Execution
 from executions.queue import utils as queue_utils
 from input_types.base import BaseInput
+from tasks.enums import Status
 from tools import utils as tool_utils
 from tools.models import Argument, Configuration, Intensity, Tool
 from tools.tools.base_tool import BaseTool
@@ -35,13 +37,7 @@ def consumer(
         BaseTool: Tool instance that executed the tool and saved the results
     '''
     tool_class = tool_utils.get_tool_class_by_name(tool.name)                   # Get Tool class from Tool name
-    tool_runner = tool_class(                                                   # Create Tool instance
-        execution=execution,
-        tool=tool,
-        configuration=configuration,
-        arguments=arguments,
-        intensity=intensity
-    )
+    tool_runner = tool_class(execution, tool, configuration, intensity, arguments)      # Create Tool instance
     current_job = rq.get_current_job()                                          # Get current Job
     if not previous_findings and current_job._dependency_ids:                   # No previous findings and dependencies
         previous_findings = queue_utils.process_dependencies(                   # Get findings from dependencies
@@ -53,5 +49,11 @@ def consumer(
             current_job,
             tool_runner
         )
+    # If related task start date is null
+    # It could be established before, if this execution belongs to a process execution
+    if not execution.task.start:
+        execution.task.status = Status.RUNNING                                  # Set task status to Running
+        execution.task.start = timezone.now()                                   # Set task start date
+        execution.task.save(update_fields=['status', 'start'])
     tool_runner.run(targets=targets, previous_findings=previous_findings)       # Tool execution
     return tool_runner

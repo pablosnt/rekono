@@ -4,11 +4,15 @@ from tools.models import Configuration, Tool
 
 
 class ToolFilter(LikeFilter):
-    o = filters.OrderingFilter(fields=('name', 'stage', 'likes_count'))
+    '''FilterSet to filter and sort Tool entities.'''
+
+    o = filters.OrderingFilter(fields=('name', 'stage', 'likes_count'))         # Ordering fields
 
     class Meta:
+        '''FilterSet metadata.'''
+
         model = Tool
-        fields = {
+        fields = {                                                              # Filter fields
             'name': ['exact', 'icontains'],
             'command': ['exact', 'icontains'],
             'configurations': ['exact'],
@@ -20,11 +24,15 @@ class ToolFilter(LikeFilter):
 
 
 class ConfigurationFilter(FilterSet):
-    o = filters.OrderingFilter(fields=('tool', 'name'))
+    '''FilterSet to filter and sort Configuration entities.'''
+
+    o = filters.OrderingFilter(fields=('tool', 'name'))                         # Ordering fields
 
     class Meta:
+        '''FilterSet metadata.'''
+
         model = Configuration
-        fields = {
+        fields = {                                                              # Filter fields
             'tool': ['exact'],
             'tool__name': ['exact', 'icontains'],
             'tool__command': ['exact', 'icontains'],

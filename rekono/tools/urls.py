@@ -1,6 +1,7 @@
-from tools.views import ToolViewSet
-from tools.views import ConfigurationViewSet
 from rest_framework.routers import SimpleRouter
+from tools.views import ConfigurationViewSet, ToolViewSet
+
+# Register your views here.
 
 router = SimpleRouter()
 router.register('tools', ToolViewSet)

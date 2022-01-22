@@ -1,14 +1,4 @@
-class InstallationNotFoundException(Exception):
-    pass
+class ToolExecutionException(Exception):
+    '''Tool execution generic exception.'''
 
-
-class InvalidParameterException(Exception):
-    pass
-
-
-class InvalidToolParametersException(Exception):
-    pass
-
-
-class UnexpectedToolExitCodeException(Exception):
     pass

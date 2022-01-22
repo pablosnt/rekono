@@ -23,5 +23,5 @@ class ResourcesConfig(AppConfig):
         path = os.path.join(Path(__file__).resolve().parent, 'fixtures')        # Path to fixtures directory
         management.call_command(
             loaddata.Command(),
-            os.path.join(path, '1_wordlists.json')                              # Input types entities
+            os.path.join(path, '1_wordlists.json')                              # Input type entities
         )

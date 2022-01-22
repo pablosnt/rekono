@@ -1,9 +1,10 @@
-from typing import List
+from typing import List, cast
 
 import django_rq
 from executions import utils
 from executions.models import Execution
 from executions.queue import producer
+from findings.models import Finding
 from input_types.models import BaseInput
 from processes.executor.callback import process_callback
 from queues.utils import cancel_and_delete_job
@@ -93,7 +94,7 @@ def process_dependencies(
     # Get required executions to include all previous findings
     executions: List[List[BaseInput]] = utils.get_executions_from_findings(findings, tool)
     # Filter executions based on tool arguments
-    executions = [param_set for param_set in executions if tool_runner.check_arguments(targets, param_set)]
+    executions = [param_set for param_set in executions if tool_runner.check_arguments(targets, cast(List[Finding], param_set))]    # noqa: E501
     # For each executions, except first whose findings will be included in the current jobs
     for findings in executions[1:]:
         # Create a new execution entity from the current execution data

@@ -6,7 +6,7 @@ from tasks.enums import Status
 from tools.tools.base_tool import BaseTool
 
 
-def process_callback(job: Any, connection: Any, result: BaseTool, *args, **kwargs) -> None:
+def process_callback(job: Any, connection: Any, result: BaseTool, *args: Any, **kwargs: Any) -> None:
     '''Run code after execution job success. In this case, check if all executions of the same task has been finished.
 
     Args:

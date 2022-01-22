@@ -106,7 +106,7 @@ class ProcessSerializer(TaggitSerializer, serializers.ModelSerializer, LikeBaseS
             instance (Process): Process instance
 
         Returns:
-            List[StepSerializer]: Step list sorted by tool stage and priority (descendent).
+            List[StepSerializer]: Step list sorted by tool stage and priority (descendent)
         '''
         return StepSerializer(instance.steps.all().order_by('tool__stage', '-priority'), many=True).data
 

@@ -6,7 +6,7 @@ from taggit.serializers import TagListSerializerField
 
 @extend_schema_field(OpenApiTypes.STR)
 class IntegerChoicesField(serializers.Field):
-    '''Serializer field to manage IntegerChoices fields.'''
+    '''Serializer field to manage IntegerChoices values.'''
 
     def to_representation(self, value: int) -> str:
         '''Return text value to send to the client.
