@@ -1,4 +1,4 @@
-name: Snyk test
+name: SCA
 on:
   workflow_dispatch:
   pull_request:
