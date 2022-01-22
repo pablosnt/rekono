@@ -31,6 +31,8 @@ jobs:
       
       - name: MyPy check
         uses: python/mypy@v0.931
+        with:
+          install_project_dependencies: no
 
   eslint:
     runs-on: ubuntu-latest
