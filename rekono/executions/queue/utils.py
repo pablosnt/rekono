@@ -98,6 +98,7 @@ def process_dependencies(
     for findings in executions[1:]:
         # Create a new execution entity from the current execution data
         new_execution = Execution.objects.create(task=execution.task, step=execution.step)
+        # 'update_fields' not specified because this function is called after Execution creation
         new_execution.save()
         job = producer.producer(                                                # Enqueue the new execution
             new_execution,

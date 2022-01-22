@@ -22,7 +22,7 @@ from users.models import User
 
 
 class ProjectViewSet(ModelViewSet, DefectDojoScans, DefectDojoFindings):
-    '''Execution ViewSet that includes: get, retrieve, create, update, delete and import Defect-Dojo features.'''
+    '''Project ViewSet that includes: get, retrieve, create, update, delete and import Defect-Dojo features.'''
 
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer

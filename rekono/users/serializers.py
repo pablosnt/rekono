@@ -1,7 +1,7 @@
 from datetime import datetime
+from typing import Any, Dict
 
 from django.contrib.auth.password_validation import validate_password
-from django.contrib.sites.shortcuts import get_current_site
 from django.db import transaction
 from rest_framework import serializers, status
 from rest_framework.exceptions import AuthenticationFailed
@@ -11,187 +11,299 @@ from telegram_bot.models import TelegramChat
 from users.models import User
 
 
-class UserPasswordSerializer(serializers.Serializer):
-
-    def validate(self, attrs):
-        attrs = super().validate(attrs)
-        validate_password(attrs.get('password'))
-        return attrs
-
-
-class UserProfileSerializer(serializers.ModelSerializer):
-    role = SerializerMethodField(method_name='get_role')
-    telegram_configured = SerializerMethodField(method_name='get_telegram_configured')
-
-    class Meta:
-        model = User
-        fields = (
-            'id', 'username', 'first_name', 'last_name', 'email',
-            'date_joined', 'last_login', 'role', 'telegram_configured',
-            'notification_scope', 'email_notification', 'telegram_notification'
-        )
-        read_only_fields = (
-            'username', 'email', 'date_joined', 'last_login', 'role', 'telegram_configured'
-        )
-
-    def get_role(self, instance: User) -> str:
-        role = instance.groups.first()
-        return role.name if role else None
-
-    def get_telegram_configured(self, instance: User) -> bool:
-        return instance.telegram_id is not None
- 
-
 class UserSerializer(serializers.ModelSerializer):
+    '''Serializer to get the users data via API.'''
+
+    # Field that indicates the user role name
     role = SerializerMethodField(method_name='get_role')
 
     class Meta:
+        '''Serializer metadata.'''
+
         model = User
-        fields = (
-            'id', 'username', 'first_name', 'last_name', 'email', 'is_active',
-            'date_joined', 'last_login', 'role'
+        fields = (                                                              # Target port fields exposed via API
+            'id', 'username', 'first_name', 'last_name', 'email', 'is_active', 'date_joined', 'last_login', 'role'
         )
-        read_only_fields = ('username', 'email', 'is_active', 'date_joined', 'last_login', 'role')
 
     def get_role(self, instance: User) -> str:
-        role = instance.groups.first()
-        return role.name if role else None
+        '''Get user role name from the user groups.
+
+        Args:
+            instance (User): User to get role name
+
+        Returns:
+            str: Role name assigned to the user
+        '''
+        role = instance.groups.first()                                          # Get user group
+        return role.name if role else None                                      # Return group name
+
 
 class SimplyUserSerializer(serializers.ModelSerializer):
+    '''Simply serializer to include user main data in other serializers.'''
 
     class Meta:
+        '''Serializer metadata.'''
+
         model = User
-        fields = ('id', 'username')
-        read_only_fields = ('id', 'username')
+        fields = ('id', 'username')                                             # User fields exposed via API
 
 
 class InviteUserSerializer(serializers.Serializer):
-    email = serializers.EmailField(required=True)
-    role = serializers.ChoiceField(choices=Role.choices, required=True)
+    '''Serializer to invite a new user via API.'''
 
-    @transaction.atomic()
-    def create(self, validated_data):
-        request = self.context.get('request', None)
-        user = User.objects.create_user(
-            validated_data.get('email'),
-            Role(validated_data.get('role')),
-            get_current_site(request).domain
-        )
-        return user
+    email = serializers.EmailField(required=True)                               # New user email
+    role = serializers.ChoiceField(choices=Role.choices, required=True)         # New user role
 
+    def create(self, validated_data: Dict[str, Any]) -> User:
+        '''Create instance from validated data.
 
-class CreateUserSerializer(UserPasswordSerializer):
-    username = serializers.CharField(max_length=150, required=True)
-    first_name = serializers.CharField(max_length=150, required=True)
-    last_name = serializers.CharField(max_length=150, required=True)
-    password = serializers.CharField(max_length=150, required=True)
-    otp = serializers.CharField(max_length=200, required=True)    
+        Args:
+            validated_data (Dict[str, Any]): Validated data
 
-    @transaction.atomic()
-    def create(self, validated_data):
-        user = User.objects.get(
-            is_active=False,
-            otp=validated_data.get('otp'),
-            otp_expiration__gt=datetime.now()
-        )
-        user.username = validated_data.get('username')
-        user.first_name = validated_data.get('first_name')
-        user.last_name = validated_data.get('last_name')
-        user.set_password(validated_data.get('password'))
-        user.is_active = True
-        user.otp = None
-        user.otp_expiration = None
-        user.save()
-        return user
+        Returns:
+            User: Created instance
+        '''
+        return User.objects.create_user(validated_data['email'], Role(validated_data['role']))
 
 
 class EnableUserSerializer(serializers.Serializer):
-    role = serializers.ChoiceField(choices=Role.choices, required=True)
+    '''Serializer to enable an user via API.'''
 
-    @transaction.atomic()
-    def update(self, instance, validated_data):
-        role = Role(validated_data.get('role'))
-        request = self.context.get('request', None)
-        user = User.objects.enable_user(instance, role, get_current_site(request).domain)
-        return user
+    role = serializers.ChoiceField(choices=Role.choices, required=True)         # Role to assign to the user
+
+    def update(self, instance: User, validated_data: Dict[str, Any]) -> User:
+        '''Update instance from validated data.
+
+        Args:
+            instance (User): Instance to update
+            validated_data (Dict[str, Any]): Validated data
+
+        Returns:
+            User: Updated instance
+        '''
+        return User.objects.enable_user(instance, Role(validated_data['role']))
 
 
 class ChangeUserRoleSerializer(serializers.Serializer):
-    role = serializers.ChoiceField(choices=Role.choices, required=True)
+    '''Serializer to change user role via API.'''
 
-    @transaction.atomic()
-    def update(self, instance, validated_data):
-        role = Role(validated_data.get('role'))
-        instance = User.objects.change_user_role(instance, role)
-        return instance
+    role = serializers.ChoiceField(choices=Role.choices, required=True)         # New role for the user
+
+    def update(self, instance: User, validated_data: Dict[str, Any]) -> User:
+        '''Update instance from validated data.
+
+        Args:
+            instance (User): Instance to update
+            validated_data (Dict[str, Any]): Validated data
+
+        Returns:
+            User: Updated instance
+        '''
+        return User.objects.change_user_role(instance, Role(validated_data['role']))
 
 
-class ChangeUserPasswordSerializer(serializers.ModelSerializer):
-    old_password = serializers.CharField(max_length=150, required=True)
+class UserProfileSerializer(serializers.ModelSerializer):
+    '''Serializer to manage user profile via API.'''
+
+    # Field that indicates the user role name
+    role = SerializerMethodField(method_name='get_role')
+    # Field that indicates if the user has configured Telegram bot yet or not
+    telegram_configured = SerializerMethodField(method_name='get_telegram_configured')
 
     class Meta:
-        model = User
-        fields = ('password', 'old_password')
-        extra_kwargs = {
-            'password': {'write_only': True, 'required': True},
-            'old_password': {'write_only': True},
-        }
+        '''Serializer metadata.'''
 
-    def validate(self, attrs):
-        attrs = super().validate(attrs)
-        user = self.instance
-        if not user.check_password(attrs.get('old_password')):
-            raise AuthenticationFailed('Invalid password', code=status.HTTP_401_UNAUTHORIZED)
-        validate_password(attrs.get('password'), user)
-        return attrs
+        model = User
+        fields = (                                                              # User fields exposed via API
+            'id', 'username', 'first_name', 'last_name', 'email', 'date_joined', 'last_login',
+            'role', 'telegram_configured', 'notification_scope', 'email_notification', 'telegram_notification'
+        )
+        # Read only fields
+        read_only_fields = ('username', 'email', 'date_joined', 'last_login', 'role', 'telegram_configured')
+
+    def get_role(self, instance: User) -> str:
+        '''Get user role name from the user groups.
+
+        Args:
+            instance (User): User to get role name
+
+        Returns:
+            str: Role name assigned to the user
+        '''
+        role = instance.groups.first()                                          # Get user group
+        return role.name if role else None                                      # Return group name
+
+    def get_telegram_configured(self, instance: User) -> bool:
+        '''Check if user has configured Telegam bot yet or not.
+
+        Args:
+            instance (User): User to check Telegram bot configuration
+
+        Returns:
+            bool: Indicate if Telegram bot has been configured
+        '''
+        return instance.telegram_id is not None
+
+
+class TelegramBotSerializer(serializers.Serializer):
+    '''Serializer to configure Telegram Bot via API.'''
+
+    # Temporal token used to link account to the Telegram Bot
+    token = serializers.CharField(max_length=200, required=True)
 
     @transaction.atomic()
-    def update(self, instance, validated_data):
-        instance.set_password(validated_data.get('password'))
-        instance.save()
+    def update(self, instance: User, validated_data: Dict[str, Any]) -> User:
+        '''Update instance from validated data.
+
+        Args:
+            instance (User): Instance to update
+            validated_data (Dict[str, Any]): Validated data
+
+        Returns:
+            User: Updated instance
+        '''
+        try:
+            telegram_chat = TelegramChat.objects.get(                           # Search Telegram chat by token
+                start_token=self.validated_data.get('token'),
+                expiration__gt=datetime.now()                                   # Check token expiration
+            )
+        except TelegramChat.DoesNotExist:                                       # Invalid token
+            raise AuthenticationFailed('Invalid Telegram token', code=status.HTTP_401_UNAUTHORIZED)
+        if User.objects.filter(telegram_id=telegram_chat.chat_id).exists():     # Chat already assigned to an user
+            raise AuthenticationFailed('Invalid Telegram token', code=status.HTTP_401_UNAUTHORIZED)
+        instance.telegram_id = telegram_chat.chat_id                            # Link Telegram chat Id to the user
+        instance.save(update_fields=['telegram_id'])
         return instance
 
 
-class RequestPasswordResetSerializer(serializers.Serializer):
-    email = serializers.EmailField(max_length=150, required=True)
+class UserPasswordSerializer(serializers.Serializer):
+    '''Common serializer for all user password operations.'''
 
-    def save(self, **kwargs):
-        user = User.objects.get(email=self.validated_data.get('email'), is_active=True)
-        request = self.context.get('request', None)
-        user = User.objects.request_password_reset(user, get_current_site(request))
-        return user
+    password = serializers.CharField(max_length=150, required=True)             # User password
+
+    def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
+        '''Validate the provided data before use it.
+
+        Args:
+            attrs (Dict[str, Any]): Provided data
+
+        Raises:
+            ValidationError: Raised if provided data is invalid
+
+        Returns:
+            Dict[str, Any]: Data after validation process
+        '''
+        attrs = super().validate(attrs)
+        validate_password(attrs.get('password'))                                # Check password policy
+        return attrs
 
 
-class ResetPasswordSerializer(UserPasswordSerializer):
-    password = serializers.CharField(required=True)
-    otp = serializers.CharField(max_length=200, required=True)
+class CreateUserSerializer(UserPasswordSerializer):
+    '''Serializer to create an user via API after email invitation.'''
 
-    def save(self, **kwargs):
-        user = User.objects.get(
-            is_active=True,
-            otp=self.validated_data.get('otp'),
-            otp_expiration__gt=datetime.now()
-        )
-        user.set_password(self.validated_data.get('password'))
-        user.otp = None
+    username = serializers.CharField(max_length=150, required=True)             # New user username
+    first_name = serializers.CharField(max_length=150, required=True)           # New user first name
+    last_name = serializers.CharField(max_length=150, required=True)            # New user last name
+    otp = serializers.CharField(max_length=200, required=True)                  # OTP included in the email invitation
+
+    @transaction.atomic()
+    def create(self, validated_data: Dict[str, Any]) -> User:
+        '''Create instance from validated data.
+
+        Args:
+            validated_data (Dict[str, Any]): Validated data
+
+        Returns:
+            User: Created instance
+        '''
+        # Get invited user
+        user = User.objects.get(is_active=False, otp=validated_data.get('otp'), otp_expiration__gt=datetime.now())
+        user.username = validated_data.get('username')                          # Set username
+        user.first_name = validated_data.get('first_name')                      # Set first name
+        user.last_name = validated_data.get('last_name')                        # Set last name
+        user.set_password(validated_data.get('password'))                       # Set password
+        user.is_active = True                                                   # Enable user
+        user.otp = None                                                         # Clear OTP
+        user.otp_expiration = None                                              # Clear OTP expiration
+        # 'update_fields' not specified because can be unknown changes within 'set_password' method
         user.save()
         return user
 
 
-class TelegramTokenSerializer(serializers.Serializer):
-    token = serializers.CharField(max_length=200, required=True)
+class ChangeUserPasswordSerializer(UserPasswordSerializer):
+    '''Serializer to change user password via API.'''
 
-    @transaction.atomic()
-    def update(self, instance, validated_data):
-        try:
-            telegram_chat = TelegramChat.objects.get(
-                start_token=self.validated_data.get('token'),
-                expiration__gt=datetime.now()
-            )
-        except TelegramChat.DoesNotExist:
-            raise AuthenticationFailed('Invalid Telegram token', code=status.HTTP_401_UNAUTHORIZED)
-        if User.objects.filter(telegram_id=telegram_chat.chat_id).exists():
-            raise AuthenticationFailed('Invalid Telegram token', code=status.HTTP_401_UNAUTHORIZED)
-        instance.telegram_id = telegram_chat.chat_id
+    # Original user password to validate his identity
+    old_password = serializers.CharField(max_length=150, required=True)
+
+    def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
+        '''Validate the provided data before use it.
+
+        Args:
+            attrs (Dict[str, Any]): Provided data
+
+        Raises:
+            ValidationError: Raised if provided data is invalid
+
+        Returns:
+            Dict[str, Any]: Data after validation process
+        '''
+        user = self.instance
+        if not user.check_password(attrs.get('old_password')):
+            raise AuthenticationFailed('Invalid password', code=status.HTTP_401_UNAUTHORIZED)
+        return super().validate(attrs)
+
+    def update(self, instance: User, validated_data: Dict[str, Any]) -> User:
+        '''Update instance from validated data.
+
+        Args:
+            instance (User): Instance to update
+            validated_data (Dict[str, Any]): Validated data
+
+        Returns:
+            User: Updated instance
+        '''
+        instance.set_password(validated_data.get('password'))                   # Update password
+        # 'update_fields' not specified because can be unknown changes within 'set_password' method
         instance.save()
         return instance
+
+
+class ResetPasswordSerializer(UserPasswordSerializer):
+    '''Serializer to reset user password via API.'''
+
+    otp = serializers.CharField(max_length=200, required=True)                  # OTP included in the email message
+
+    @transaction.atomic()
+    def save(self, **kwargs: Any) -> User:
+        '''Save changes in instance.
+
+        Returns:
+            User: Instance after apply changes
+        '''
+        # Get user that requested the password reset
+        user = User.objects.get(is_active=True, otp=self.validated_data.get('otp'), otp_expiration__gt=datetime.now())
+        user.set_password(self.validated_data.get('password'))                  # Set password
+        user.otp = None                                                         # Clear OTP
+        # 'update_fields' not specified because can be unknown changes within 'set_password' method
+        user.save()
+        return user
+
+
+class RequestPasswordResetSerializer(serializers.Serializer):
+    '''Serializer to request the user password reset via API.'''
+
+    # User email of the user that requests the password reset
+    email = serializers.EmailField(max_length=150, required=True)
+
+    @transaction.atomic()
+    def save(self, **kwargs: Any) -> User:
+        '''Save changes in instance.
+
+        Returns:
+            User: Instance after apply changes
+        '''
+        # Get user that requests the password reset
+        user = User.objects.get(email=self.validated_data.get('email'), is_active=True)
+        user = User.objects.request_password_reset(user)                        # Request password reset
+        return user

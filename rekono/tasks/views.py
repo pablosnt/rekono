@@ -32,6 +32,8 @@ class TaskViewSet(
     DefectDojoScans,
     DefectDojoFindings
 ):
+    '''Task ViewSet that includes: get, retrieve, create, cancel and import Defect-Dojo features.'''
+
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
     filterset_class = TaskFilter
@@ -128,6 +130,7 @@ class TaskViewSet(
             executor=request.user
         )
         new_task.wordlists.set(task.wordlists.all())                            # Add wordlists from original task
+        # 'update_fields' not specified because this function is called after Task creation
         new_task.save()
         producer(new_task)                                                      # Enqueue new task
         serializer = TaskSerializer(instance=new_task)                          # Return new task data

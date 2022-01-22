@@ -67,4 +67,3 @@ class SimplyTargetSerializer(serializers.ModelSerializer):
 
         model = Target
         fields = ('id', 'project', 'target', 'type')                            # Target fields exposed via API
-        read_only_fields = ('type',)                                            # Read only fields

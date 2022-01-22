@@ -2,6 +2,8 @@ from typing import Any
 
 from mail.sender import send_html_message
 
+# TODO: Notifications refactoring
+
 
 def send_invitation_to_new_user(user: Any) -> None:
     metadata = {

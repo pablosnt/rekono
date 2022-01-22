@@ -1,8 +1,10 @@
 from django.urls import include, path
 from rest_framework.authtoken import views
 from rest_framework.routers import SimpleRouter
-from users.views import (ResetPasswordViewSet, UserAdminViewSet,
-                         UserInitViewSet, UserProfileViewSet)
+from users.views import (CreateUserViewSet, ResetPasswordViewSet,
+                         UserAdminViewSet, UserProfileViewSet)
+
+# Register your views here.
 
 router = SimpleRouter()
 router.register('users', UserAdminViewSet)
@@ -14,7 +16,7 @@ reset_password = ResetPasswordViewSet.as_view({'post': 'create', 'put': 'reset_p
 
 urlpatterns = [
     path('api-token/', views.obtain_auth_token),
-    path('users/create/', UserInitViewSet.as_view({'post': 'create'})),
+    path('users/create/', CreateUserViewSet.as_view({'post': 'create'})),
     path('reset-password/', reset_password),
     path('profile/', profile),
     path('profile/change-password/', change_password),

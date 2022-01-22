@@ -34,7 +34,7 @@ class ProcessViewSet(ModelViewSet, LikeManagementView):
 
 
 class StepViewSet(ModelViewSet):
-    '''Process ViewSet that includes: get, retrieve, create, update and delete features.'''
+    '''Step ViewSet that includes: get, retrieve, create, update and delete features.'''
 
     queryset = Step.objects.all()
     serializer_class = StepSerializer
