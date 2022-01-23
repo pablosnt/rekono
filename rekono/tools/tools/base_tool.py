@@ -252,8 +252,6 @@ class BaseTool:
         fields['execution'] = self.execution                                    # Assign current execution to finding
         try:
             finding = finding_type.objects.create(**fields)                     # Try finding creation
-            # 'update_fields' not specified because this function is called after Finding creation
-            finding.save()
         except ValidationError as e:
             if 'Unique constraint violation' in e.message:                      # This finding already exists
                 # Get unique filter for this finding model and from this fields
@@ -267,7 +265,7 @@ class BaseTool:
                     if value and value != getattr(finding, field):              # Distinct value than the existing one
                         setattr(finding, field, value)                          # Update existing field
                         updated_fields.append(field)
-                finding.save(updated_fields=updated_fields)
+                finding.save(update_fields=updated_fields)
         if finding:
             self.findings.append(finding)                                       # Save finding in finding list
         return finding

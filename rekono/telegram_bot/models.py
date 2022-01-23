@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 from users.utils import get_token_expiration
 
@@ -5,7 +6,16 @@ from users.utils import get_token_expiration
 
 
 class TelegramChat(models.Model):
-    chat_id = models.IntegerField(unique=True)
-    start_token = models.TextField(max_length=200, unique=True)
-    creation = models.DateTimeField(auto_now_add=True)
-    expiration = models.DateTimeField(default=get_token_expiration)
+    '''Telegram Chat model.'''
+
+    user = models.OneToOneField(                                                # Linked user account
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='telegram_chat',
+        blank=True,
+        null=True
+    )
+    chat_id = models.IntegerField(unique=True)                                  # Telegram chat Id
+    creation = models.DateTimeField(auto_now_add=True)                          # Telegram chat creation date
+    otp = models.TextField(max_length=200, unique=True, blank=True, null=True)  # One Time Password to link user account
+    otp_expiration = models.DateTimeField(default=get_token_expiration, blank=True, null=True)  # OTP expiration date

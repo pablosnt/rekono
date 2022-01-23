@@ -25,11 +25,7 @@ class RekonoUserManager(UserManager):
         group = Group.objects.get(name=role.value)                              # Get user group related to the role
         user.groups.clear()                                                     # Clean user groups
         user.groups.set([group])                                                # Set user group
-        # 'update_fields' not specified because this function is probably called after User creation
-        user.save()
-        api_token = Token.objects.create(user=user)                             # Create a new API token for the user
-        # 'update_fields' not specified because this function is called after Token creation
-        api_token.save()
+        Token.objects.create(user=user)                                         # Create a new API token for the user
 
     def create_user(self, email: str, role: Role) -> Any:
         '''Create a new user.
@@ -156,8 +152,6 @@ class User(AbstractUser):
     email_notification = models.BooleanField(default=True)
     # Indicate if Telegram notifications are enabled
     telegram_notification = models.BooleanField(default=False)
-    # Telegram chat Id between the Rekono bot and the user. It will be used to send Telegram notifications
-    telegram_id = models.IntegerField(blank=True, null=True)
 
     USERNAME_FIELD = 'username'                                                 # Generic user configuration
     EMAIL_FIELD = 'email'

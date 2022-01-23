@@ -96,8 +96,6 @@ def execute(task: Task) -> None:
         executions = utils.get_executions_from_findings(targets, job.step.tool)
         for execution_targets in executions:                                    # For each job execution
             execution = Execution.objects.create(task=task, step=job.step)      # Create the Execution entity
-            # 'update_fields' not specified because this function is called after Execution creation
-            execution.save()
             # Enqueue the execution in the executions queue, and save the generated job in the planned job
             # It's important to get dependency jobs in the next planned jobs
             job.jobs.append(

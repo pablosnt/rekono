@@ -1,34 +1,53 @@
 from security.crypto import generate_otp
-from telegram_bot.messages import HELP, HELP_START, LOGOUT, WELCOME
+from telegram import ParseMode
+from telegram.ext import CallbackContext
+from telegram.update import Update
+from telegram_bot.messages.basic import LOGOUT, WELCOME
+from telegram_bot.messages.help import AUTH_HELP, UNAUTH_HELP
 from telegram_bot.models import TelegramChat
-from users.models import User
+from users.utils import get_token_expiration
 
 
-def start(update, context):
-    users = User.objects.filter(telegram_id=update.effective_chat.id).all()
-    for user in users:
-        user.telegram_id = None
-        user.save()
-    previous_chat = TelegramChat.objects.filter(chat_id=update.effective_chat.id).first()
-    if previous_chat:
-        previous_chat.delete()
-    chat = TelegramChat.objects.create(chat_id=update.effective_chat.id, start_token=generate_otp())
-    context.bot.send_message(
-        update.effective_chat.id,
-        text=WELCOME.format(start_token=chat.start_token)
-    )
+def start(update: Update, context: CallbackContext) -> None:
+    '''Initialize Telegram Bot chat.
+
+    Args:
+        update (Update): Telegram Bot update
+        context (CallbackContext): Telegram Bot context
+    '''
+    if update.effective_chat:
+        chat, _ = TelegramChat.objects.update_or_create(                        # Create or update the Telegram chat
+            defaults={'user': None, 'otp': generate_otp(), 'otp_expiration': get_token_expiration()},
+            chat_id=update.effective_chat.id
+        )
+        # Send welcome message including OTP to link Telegram Chat with an user account
+        context.bot.send_message(chat.chat_id, text=WELCOME.format(otp=chat.otp), parse_mode=ParseMode.MARKDOWN_V2)
 
 
-def logout(update, context):
-    user = User.objects.filter(telegram_id=update.effective_chat.id).first()
-    if user:
-        user.telegram_id = None
-        user.save()
-    context.bot.send_message(update.effective_chat.id, text=LOGOUT)
+def logout(update: Update, context: CallbackContext) -> None:
+    '''Unlink Telegram Bot chat for an user account.
+
+    Args:
+        update (Update): Telegram Bot update
+        context (CallbackContext): Telegram Bot context
+    '''
+    if update.effective_chat:
+        chat = TelegramChat.objects.filter(chat_id=update.effective_chat.id).first()    # Get Telegram chat by Id
+        if chat:
+            chat.delete()
+        # Send goodbye message
+        context.bot.send_message(update.effective_chat.id, text=LOGOUT, parse_mode=ParseMode.MARKDOWN_V2)
 
 
-def help(update, context):
-    if User.objects.filter(telegram_id=update.effective_chat.id).exists():
-        context.bot.send_message(update.effective_chat.id, text=HELP)
-    else:
-        context.bot.send_message(update.effective_chat.id, text=HELP_START)
+def help(update: Update, context: CallbackContext) -> None:
+    '''Get Telegram Bot help message.
+
+    Args:
+        update (Update): Telegram Bot update
+        context (CallbackContext): Telegram Bot context
+    '''
+    if update.effective_chat:
+        if TelegramChat.objects.filter(chat_id=update.effective_chat.id).exists():  # Linked Telegram chat
+            context.bot.send_message(update.effective_chat.id, text=AUTH_HELP, parse_mode=ParseMode.MARKDOWN_V2)
+        else:                                                                   # Unlinked Telegram chat
+            context.bot.send_message(update.effective_chat.id, text=UNAUTH_HELP, parse_mode=ParseMode.MARKDOWN_V2)

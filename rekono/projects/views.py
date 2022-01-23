@@ -112,6 +112,5 @@ class ProjectViewSet(ModelViewSet, DefectDojoScans, DefectDojoFindings):
         if member and member_id != project.owner.id:
             # Member found and it isn't the project owner
             project.members.remove(member)                                      # Remove project member
-            project.save(update_fields=['members'])
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(status=status.HTTP_400_BAD_REQUEST)

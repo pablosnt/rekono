@@ -61,7 +61,6 @@ class ProjectSerializer(TaggitSerializer, serializers.ModelSerializer):
         '''
         project = super().create(validated_data)                                # Create project
         project.members.add(validated_data.get('owner'))                        # Add project owner also in member list
-        project.save(update_fields=['members'])
         return project
 
 
@@ -83,5 +82,4 @@ class ProjectMemberSerializer(serializers.Serializer):
         '''
         user = User.objects.get(pk=validated_data.get('user'), is_active=True)  # Get active user from user Id
         instance.members.add(user)                                              # Add user as project member
-        instance.save(update_fields=['members'])
         return instance

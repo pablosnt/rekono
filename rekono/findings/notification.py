@@ -1,7 +1,6 @@
 from typing import Any
 
 from mail import sender
-from telegram_bot import bot
 from users.models import User
 
 # TODO: Notifications refactoring
@@ -37,10 +36,3 @@ def send_email(user: User, execution: Any, findings: list) -> None:
         metadata,
         get_parameters(execution, findings)
     )
-
-
-def send_telegram_message(user: User, execution: Any, findings: list) -> None:
-    if not findings:
-        return
-    parameters = get_parameters(execution, findings)
-    bot.send_html_message(user.telegram_id, parameters)

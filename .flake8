@@ -1,9 +1,7 @@
 [flake8]
-; ignore = 
-;     # Complex methods
-;     C901,
-;     # Line break before binary operator
-;     W503
 exclude = .git,__pycache__,*/migrations/*,venv/*,rekono/frontend/*
+ignore=W504,W605
+; W504: Disallow line break after binary operator (and, or, etc.). Inconsistency with W503
+; W605: Invalid escape characters (needed to send Telegram messages with Markdown style)
 max-line-length = 120
 max-complexity = 10

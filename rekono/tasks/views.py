@@ -130,8 +130,6 @@ class TaskViewSet(
             executor=request.user
         )
         new_task.wordlists.set(task.wordlists.all())                            # Add wordlists from original task
-        # 'update_fields' not specified because this function is called after Task creation
-        new_task.save()
         producer(new_task)                                                      # Enqueue new task
         serializer = TaskSerializer(instance=new_task)                          # Return new task data
         return Response(serializer.data, status=status.HTTP_200_OK)

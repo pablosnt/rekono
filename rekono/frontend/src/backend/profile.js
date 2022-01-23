@@ -30,7 +30,7 @@ class Profile extends RekonoApi {
   }
 
   configureTelegram (telegramToken) {
-    return super.post('/api/profile/telegram-token/', { token: telegramToken })
+    return super.post('/api/profile/telegram-token/', { otp: telegramToken })
       .then(response => {
         return response.data
       })

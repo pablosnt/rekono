@@ -4,8 +4,10 @@ import django_rq
 from django_rq import job
 from executions.models import Execution
 from findings.models import Finding, Vulnerability
-from findings.notification import send_email, send_telegram_message
+from findings.notification import send_email
 from findings.nvd_nist import NvdNist
+from telegram_bot import bot
+from telegram_bot.messages.execution import create_telegram_message
 from users.enums import Notification
 
 
@@ -45,8 +47,9 @@ def consumer(execution: Execution = None, findings: List[Finding] = []) -> None:
         # Search project members with enabled all executions notification
         search_members = execution.task.target.project.members.filter(notification_scope=Notification.ALL_EXECUTIONS).all()     # noqa: E501
         users_to_notify.extend(list(search_members))                            # Save members in the notify list
+        telegram_message = create_telegram_message(execution, findings)         # Create Telegram message
         for user in users_to_notify:                                            # For each user to be notified
             if user.email_notification:
                 send_email(user, execution, findings)                           # Email notification
-            elif user.telegram_notification:
-                send_telegram_message(user, execution, findings)                # Telegram notification
+            if user.telegram_notification:
+                bot.send_message(user.telegram_chat.chat_id, telegram_message)  # Telegram notification

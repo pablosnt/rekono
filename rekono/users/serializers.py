@@ -142,14 +142,14 @@ class UserProfileSerializer(serializers.ModelSerializer):
         Returns:
             bool: Indicate if Telegram bot has been configured
         '''
-        return instance.telegram_id is not None
+        return instance.telegram_chat is not None
 
 
 class TelegramBotSerializer(serializers.Serializer):
     '''Serializer to configure Telegram Bot via API.'''
 
-    # Temporal token used to link account to the Telegram Bot
-    token = serializers.CharField(max_length=200, required=True)
+    # One Time Password used to link account to the Telegram Bot
+    otp = serializers.CharField(max_length=200, required=True)
 
     @transaction.atomic()
     def update(self, instance: User, validated_data: Dict[str, Any]) -> User:
@@ -163,16 +163,16 @@ class TelegramBotSerializer(serializers.Serializer):
             User: Updated instance
         '''
         try:
-            telegram_chat = TelegramChat.objects.get(                           # Search Telegram chat by token
-                start_token=self.validated_data.get('token'),
-                expiration__gt=datetime.now()                                   # Check token expiration
+            telegram_chat = TelegramChat.objects.get(                           # Search Telegram chat by otp
+                otp=validated_data.get('otp'),
+                otp_expiration__gt=datetime.now()                               # Check OTP expiration
             )
-        except TelegramChat.DoesNotExist:                                       # Invalid token
-            raise AuthenticationFailed('Invalid Telegram token', code=status.HTTP_401_UNAUTHORIZED)
-        if User.objects.filter(telegram_id=telegram_chat.chat_id).exists():     # Chat already assigned to an user
-            raise AuthenticationFailed('Invalid Telegram token', code=status.HTTP_401_UNAUTHORIZED)
-        instance.telegram_id = telegram_chat.chat_id                            # Link Telegram chat Id to the user
-        instance.save(update_fields=['telegram_id'])
+        except TelegramChat.DoesNotExist:                                       # Invalid otp
+            raise AuthenticationFailed('Invalid Telegram OTP', code=status.HTTP_401_UNAUTHORIZED)
+        telegram_chat.otp = None                                                # Set otp to null
+        telegram_chat.otp_expiration = None                                     # Set otp expiration to null
+        telegram_chat.user = instance                                           # Link Telegram chat Id to the user
+        telegram_chat.save(update_fields=['otp', 'otp_expiration', 'user'])
         return instance
 
 
