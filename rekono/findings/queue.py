@@ -2,9 +2,9 @@ from typing import List
 
 import django_rq
 from django_rq import job
+from email_notifications import sender as email_sender
 from executions.models import Execution
 from findings.models import Finding, Vulnerability
-from findings.notification import send_email
 from findings.nvd_nist import NvdNist
 from telegram_bot import bot
 from telegram_bot.messages.execution import create_telegram_message
@@ -30,7 +30,7 @@ def consumer(execution: Execution = None, findings: List[Finding] = []) -> None:
         execution (Execution, optional): Execution where the findings are discovered. Defaults to None.
         findings (List[Finding], optional): Findings list to process. Defaults to [].
     '''
-    if execution:
+    if execution and findings:
         for finding in findings:                                                # For each finding
             if isinstance(finding, Vulnerability) and finding.cve:              # If it's a vulnerability with CVE
                 nn_client = NvdNist(finding.cve)                                # NVD NIST request to get information
@@ -45,11 +45,17 @@ def consumer(execution: Execution = None, findings: List[Finding] = []) -> None:
         if execution.task.executor.notification_scope == Notification.OWN_EXECUTIONS:
             users_to_notify.append(execution.task.executor)                     # Save executor user in the notify list
         # Search project members with enabled all executions notification
-        search_members = execution.task.target.project.members.filter(notification_scope=Notification.ALL_EXECUTIONS).all()     # noqa: E501
+        search_members = execution.task.target.project.members.filter(
+            notification_scope=Notification.ALL_EXECUTIONS
+        ).all()
         users_to_notify.extend(list(search_members))                            # Save members in the notify list
         telegram_message = create_telegram_message(execution, findings)         # Create Telegram message
-        for user in users_to_notify:                                            # For each user to be notified
-            if user.email_notification:
-                send_email(user, execution, findings)                           # Email notification
-            if user.telegram_notification:
-                bot.send_message(user.telegram_chat.chat_id, telegram_message)  # Telegram notification
+        for user in [u for u in users_to_notify if u.telegram_notification]:
+            # For each user with enabled Telegram notifications
+            bot.send_message(user.telegram_chat.chat_id, telegram_message)      # Telegram notification
+        # Email notifications
+        email_sender.execution_notifications(
+            [u.email for u in users_to_notify if u.email_notification],
+            execution,
+            findings
+        )

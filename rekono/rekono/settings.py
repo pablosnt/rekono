@@ -102,7 +102,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            os.path.join(BASE_DIR, 'mail', 'templates')
+            os.path.join(BASE_DIR, 'email_notifications', 'templates')
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -207,6 +207,12 @@ RQ_QUEUES = {
         'PORT': os.getenv('RQ_PORT', 6379),
         'DB': 0,
         'DEFAULT_TIMEOUT': 300      # 5 minutes
+    },
+    'emails-queue': {
+        'HOST': os.getenv('RQ_HOST', '127.0.0.1'),
+        'PORT': os.getenv('RQ_PORT', 6379),
+        'DB': 0,
+        'DEFAULT_TIMEOUT': 300       # 5 minutes
     }
 }
 

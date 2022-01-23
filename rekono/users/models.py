@@ -2,11 +2,12 @@ from typing import Any, cast
 
 from django.contrib.auth.models import AbstractUser, Group, UserManager
 from django.db import models
+from email_notifications.sender import (user_enable_account, user_invitation,
+                                        user_password_reset)
 from rest_framework.authtoken.models import Token
 from security.authorization.roles import Role
 from security.crypto import generate_otp
 from users.enums import Notification
-from users.mail import send_invitation_to_new_user, send_password_reset
 from users.utils import get_token_expiration
 
 # Create your models here.
@@ -40,7 +41,7 @@ class RekonoUserManager(UserManager):
         # Create new user including an OTP. The user will be inactive while invitation is not accepted
         user = User.objects.create(email=email, otp=generate_otp(), is_active=False)
         self.initialize(user, role)                                             # Initialize user
-        send_invitation_to_new_user(user)                                       # Send email invitation to the user
+        user_invitation(user)                                                   # Send email invitation to the user
         return user
 
     def create_superuser(self, username: str, email: str, password: str, **extra_fields: Any) -> Any:
@@ -88,7 +89,7 @@ class RekonoUserManager(UserManager):
         user.otp = generate_otp()                                               # Generate its OTP
         user.otp_expiration = get_token_expiration()                            # Set OTP expiration
         self.initialize(user, role)                                             # Initialize user
-        send_password_reset(user)                                               # Send email to establish its password
+        user_enable_account(user)                                               # Send email to establish its password
         return user
 
     def disable_user(self, user: Any) -> Any:
@@ -125,7 +126,7 @@ class RekonoUserManager(UserManager):
         user.otp = generate_otp()                                               # Generate its OTP
         user.otp_expiration = get_token_expiration()                            # Set OTP expiration
         user.save(update_fields=['otp', 'otp_expiration'])
-        send_password_reset(user)                                               # Send password reset email
+        user_password_reset(user)                                               # Send password reset email
         return user
 
 
