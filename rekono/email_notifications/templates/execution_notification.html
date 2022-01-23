@@ -1,216 +1,298 @@
+<!doctype html>
 <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        <title>Rekono</title>
+      </head>
     <body>
-        <h1>{{ execution.task.target.project.name }}</h1>
-
-        <table>
-            <tr>
-                <th>Target</th>
-                <th>Task</th>
-                <th>Execution</th>
-                <th>Tool</th>
-                <th>Status</th>
-                <th>Start</th>
-                <th>End</th>
-            </tr>
-            <tr>
-                <th><a href="http://{{ rekono_address }}/api/targets/{{ execution.task.target.id }}/">{{ execution.task.target.target }}</a></th>
-                <th><a href="http://{{ rekono_address }}/api/tasks/{{ execution.task.id }}/">{{ execution.task.id }}</a></th>
-                <th><a href="http://{{ rekono_address }}/api/executions/{{ execution.id }}/">{{ execution.id }}</a></th>
-                <th><a href="http://{{ rekono_address }}/api/tools/{{ tool.id }}/">{{ tool.name }}</a></th>
-                <th>{{ execution.status }}</th>
-                <th>{{ execution.start }}</th>
-                <th>{{ execution.end }}</th>
-            </tr>
-        </table>
-
+        <div class="card text-center">
+            <div class="text-center">
+                <img src="{{ rekono_address }}/static/logo-black.png" class="card-img-top" alt="Rekono" style="max-width: 30rem;"/>
+            </div>
+            <div class="card-body">
+                <h3 class="card-title">{{ execution.task.target.project.name }}</h3>
+                <div class="card-text">
+                    <div class="container">
+                        <div class="row justify-content-around">
+                            <div class="col-3">
+                                <div class="row">
+                                    <p class="text-muted mr-2">Target</p>
+                                    <p><strong>{{ execution.task.target.target }}</strong></p>
+                                </div>
+                                <div class="row">
+                                    <p class="text-muted mr-2">Tool</p>
+                                    <div>
+                                        <img src="{{ tool.icon }}" width="20" height="20"/>
+                                        <strong>{{ tool.name }}</strong>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <p class="text-muted mr-2">Configuration</p>
+                                    <p>{{ configuration.name }}</p>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div class="row">
+                                    <p class="text-muted mr-2">Status</p>
+                                    <p>{{ execution.status }}</p>
+                                </div>
+                                <div class="row">
+                                    <p class="text-muted mr-2">Start</p>
+                                    <p>{{ execution.start }}</p>
+                                </div>
+                                <div class="row">
+                                    <p class="text-muted mr-2">End</p>
+                                    <p>{{ execution.end }}</p>
+                                </div>
+                                <div class="row">
+                                    <p class="text-muted mr-2">Executor</p>
+                                    <p>{{ execution.task.executor.username }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <a href="{{ rekono_address }}/#/tasks/{{ execution.task.id }}" class="btn btn-danger">Review all details</a>
+            </div>
+        </div>
         <br>
-
-        {% if osint %}
-            <h3>OSINT:</h3>
-            <table>
-                <tr>
-                    <th>Data</th>
-                    <th>Data Type</th>
-                    <th>Source</th>
-                </tr>
-                {% for o in osint %}
-                    <tr>
-                        <th><a href="http://{{ rekono_address }}/api/osint/{{ h.id }}/">{{ o.data }}</a></th>
-                        <th>{{ o.data_type }}</th>
-                        <th>{{ o.source }}</th>
-                    </tr>
-                {% endfor %}
-            </table>
-        {% endif %}
-
         <br>
-
-        {% if host %}
-            <h3>Hosts:</h3>
-            <table>
-                <tr>
-                    <th>Address</th>
-                    <th>OS</th>
-                    <th>OS Type</th>
-                </tr>
-                {% for h in host %}
-                    <tr>
-                        <th><a href="http://{{ rekono_address }}/api/hosts/{{ h.id }}/">{{ h.address }}</a></th>
-                        <th>{{ h.os }}</th>
-                        <th>{{ h.os_type }}</th>
-                    </tr>
-                {% endfor %}
-            </table>
-        {% endif %}
-
-        <br>
-
-        {% if enumeration %}
-            <h3>Ports:</h3>
-            <table>
-                <tr>
-                    <th>Host</th>
-                    <th>Port</th>
-                    <th>Port Status</th>
-                    <th>Protocol</th>
-                    <th>Service</th>
-                </tr>
-                {% for e in enumeration %}
-                    <tr>
-                        <th><a href="http://{{ rekono_address }}/api/hosts/{{ e.host.id }}/">{{ e.host.address }}</a></th>
-                        <th><a href="http://{{ rekono_address }}/api/enumerations/{{ e.id }}/">{{ e.port }}</a></th>
-                        <th>{{ e.port_status }}</th>
-                        <th>{{ e.protocol }}</th>
-                        <th>{{ e.service }}</th>
-                    </tr>
-                {% endfor %}
-            </table>
-        {% endif %}
-
-        <br>
-
-        {% if technology %}
-            <h3>Technologies:</h3>
-            <table>
-                <tr>
-                    <th>Host</th>
-                    <th>Port</th>
-                    <th>Technology</th>
-                    <th>Version</th>
-                </tr>
-                {% for t in technology %}
-                    <tr>
-                        <th><a href="http://{{ rekono_address }}/api/hosts/{{ t.enumeration.host.id }}/">{{ t.enumeration.host.address }}</a></th>
-                        <th><a href="http://{{ rekono_address }}/api/enumerations/{{ t.enumeration.id }}/">{{ t.enumeration.port }}</a></th>
-                        <th><a href="http://{{ rekono_address }}/api/technologies/{{ t.id }}/">{{ t.name }}</a></th>
-                        <th>{{ t.version }}</th>
-                    </tr>
-                {% endfor %}
-            </table>
-        {% endif %}
-
-        <br>
-
-        {% if endpoint %}
-            <h3>Endpoints:</h3>
-            <table>
-                <tr>
-                    <th>Host</th>
-                    <th>Port</th>
-                    <th>Service</th>
-                    <th>Endpoint</th>
-                    <th>Status</th>
-                </tr>
-                {% for e in endpoint %}
-                    <tr>
-                        <th><a href="http://{{ rekono_address }}/api/hosts/{{ e.enumeration.host.id }}/">{{ e.enumeration.host.address }}</a></th>
-                        <th><a href="http://{{ rekono_address }}/api/enumerations/{{ e.enumeration.id }}/">{{ e.enumeration.port }}</a></th>
-                        <th>{{ e.enumeration.service }}</th>
-                        <th><a href="http://{{ rekono_address }}/api/endpoints/{{ e.id }}/">{{ e.endpoint }}</a></th>
-                        <th>{{ e.status }}</th>
-                    </tr>
-                {% endfor %}
-            </table>
-        {% endif %}
-
-        <br>
-
-        {% if vulnerability %}
-            <h3>Vulnerabilities:</h3>
-            <table>
-                <tr>
-                    <th>Host</th>
-                    <th>Port</th>
-                    <th>Technology</th>
-                    <th>Vulnerability</th>
-                    <th>CVE</th>
-                    <th>Severity</th>
-                </tr>
-                {% for v in vulnerability %}
-                    <tr>
-                        {% if v.enumeration %}
-                            <th><a href="http://{{ rekono_address }}/api/hosts/{{ v.enumeration.host.id }}/">{{ v.technology.enumeration.host.address }}</a></th>
-                            <th><a href="http://{{ rekono_address }}/api/enumerations/{{ v.enumeration.id }}/">{{ v.technology.enumeration.port }}</a></th>
-                            <th></th>
-                        {% endif %}
-                        {% if v.technology %}
-                            <th><a href="http://{{ rekono_address }}/api/hosts/{{ v.technology.enumeration.host.id }}/">{{ v.technology.enumeration.host.address }}</a></th>
-                            <th><a href="http://{{ rekono_address }}/api/enumerations/{{ v.technology.enumeration.id }}/">{{ v.technology.enumeration.port }}</a></th>
-                            <th><a href="http://{{ rekono_address }}/api/technologies/{{ v.technology.id }}/">{{ v.technology.name }}</a></th>
-                        {% endif %}
-                        <th><a href="http://{{ rekono_address }}/api/vulnerabilities/{{ v.id }}/">{{ v.name }}</a></th>
-                        <th>{{ v.cve }}</th>
-                        <th>{{ v.severity }}</th>
-                    </tr>
-                {% endfor %}
-            </table>
-        {% endif %}
-
-        <br>
-
-        {% if credential %}
-            <h3>Credentials:</h3>
-            <table>
-                <tr>
-                    <th>Email</th>
-                    <th>Username</th>
-                    <th>Secret</th>
-                </tr>
-                {% for c in credential %}
-                    <tr>
-                        <th>{{ c.email }}</th>
-                        <th>{{ c.username }}</th>
-                        <th>{{ c.secret }}</th>
-                    </tr>
-                {% endfor %}
-            </table>
-        {% endif %}
-
-        <br>
-
-        {% if exploit %}
-            <h3>Exploits:</h3>
-            <table>
-                <tr>
-                    <th>Vulnerability</th>
-                    <th>Technology</th>
-                    <th>Name</th>
-                </tr>
-                {% for e in exploit %}
-                    <tr>
-                        {% if e.vulnability %}
-                            <th><a href="http://{{ rekono_address }}/api/vulnerabilities/{{ v.vulnerability.id }}/">{{ e.vulnerability.name }}</a></th>
-                            <th>None</th>
-                        {% else %}
-                            <th>None</th>
-                            <th><a href="http://{{ rekono_address }}/api/technologies/{{ e.technology.id }}/">{{ e.technology.name }}</a></th>
-                            {% endif %}
-                        <th><a href="http://{{ rekono_address }}/api/exploits/{{ e.id }}/">{{ e.name }}</a></th>
-                    </tr>
-                {% endfor %}
-            </table>
-        {% endif %}
-
-
+        <div class="container">
+            {% if osint %}
+                <table class="table">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th scope="col">OSINT</th>
+                            <th scope="col">Data</th>
+                            <th scope="col">Data type</th>
+                            <th scope="col">Source</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for o in osint %}
+                            <tr>
+                                <td scope="row"></td>
+                                <td scope="row"><strong>{{ o.data }}</strong></td>
+                                <td scope="row">{{ o.data_type }}</td>
+                                <td scope="row">{{ o.source }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% endif %}
+            <br>
+            {% if host %}
+                <table class="table">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th scope="col">Hosts</th>
+                            <th scope="col">Address</th>
+                            <th scope="col">OS</th>
+                            <th scope="col">OS type</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for h in host %}
+                            <tr>
+                                <td scope="row"></td>
+                                <td scope="row"><strong>{{ h.address }}</strong></td>
+                                <td scope="row">{{ h.os }}</td>
+                                <td scope="row">{{ h.os_type }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% endif %}
+            <br>
+            {% if enumeration %}
+                <table class="table">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th scope="col">Enumerations</th>
+                            <th scope="col">Host</th>
+                            <th scope="col">Port</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Protocol</th>
+                            <th scope="col">Service</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for e in enumeration %}
+                            <tr>
+                                <td scope="row"></td>
+                                {% if e.host %}
+                                    <td scope="row"><strong>{{ e.host.address }}</strong></td>
+                                {% else %}
+                                    <td scope="row"></td>
+                                {% endif %}
+                                <td scope="row"><strong>{{ e.port }}</strong></td>
+                                <td scope="row">{{ e.port_status }}</td>
+                                <td scope="row">{{ e.protocol }}</td>
+                                <td scope="row">{{ e.service }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% endif %}
+            <br>
+            {% if endpoint %}
+                <table class="table">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th scope="col">Endpoints</th>
+                            <th scope="col">Enumeration</th>
+                            <th scope="col">Endpoint</th>
+                            <th scope="col">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for e in endpoint %}
+                            <tr>
+                                <td scope="row"></td>
+                                {% if e.enumeration and e.enumeration.host %}
+                                    <td scope="row"><strong>{{ e.enumeration.host.address }} - {{ e.enumeration.port }}</strong></td>
+                                {% elif e.enumeration %}
+                                    <td scope="row"><strong>{{ e.enumeration.port }}</strong></td>
+                                {% else %}
+                                    <td scope="row"></td>
+                                {% endif %}
+                                <td scope="row"><strong>{{ e.endpoint }}</strong></td>
+                                <td scope="row">{{ e.status }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% endif %}
+            <br>
+            {% if technology %}
+                <table class="table">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th scope="col">Technologies</th>
+                            <th scope="col">Enumeration</th>
+                            <th scope="col">Name</th>
+                            <th scope="col">Version</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for t in technology %}
+                            <tr>
+                                <td scope="row"></td>
+                                {% if t.enumeration and t.enumeration.host %}
+                                    <td scope="row"><strong>{{ t.enumeration.host.address }} - {{ t.enumeration.port }}</strong></td>
+                                {% elif t.enumeration %}
+                                    <td scope="row"><strong>{{ t.enumeration.port }}</strong></td>
+                                {% else %}
+                                    <td scope="row"></td>
+                                {% endif %}
+                                <td scope="row"><strong>{{ t.name }}</strong></td>
+                                <td scope="row">{{ t.version }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% endif %}
+            <br>
+            {% if credential %}
+                <table class="table">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th scope="col">Credentials</th>
+                            <th scope="col">Email</th>
+                            <th scope="col">Username</th>
+                            <th scope="col">Secret</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for c in credential %}
+                            <tr>
+                                <td scope="row"></td>
+                                <td scope="row"><strong>{{ c.email }}</strong></td>
+                                <td scope="row"><strong>{{ c.username }}</strong></td>
+                                <td scope="row"><strong>{{ c.secret }}</strong></td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% endif %}
+            <br>
+            {% if vulnerability %}
+                <table class="table">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th scope="col">Vulnerabilities</th>
+                            <th scope="col">Tecnhology</th>
+                            <th scope="col">Enumeration</th>
+                            <th scope="col">Name</th>
+                            <th scope="col">Severity</th>
+                            <th scope="col">CVE</th>
+                            <th scope="col">Reference</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for v in vulnerability %}
+                            <tr>
+                                <td scope="row"></td>
+                                {% if v.technology %}
+                                    <td scope="row"><strong>{{ v.technology.name }}</strong></td>
+                                {% else %}
+                                    <td scope="row"></td>
+                                {% endif %}
+                                {% if v.enumeration and v.enumeration.host %}
+                                    <td scope="row"><strong>{{ v.enumeration.host.address }} - {{ v.enumeration.port }}</strong></td>
+                                {% elif v.enumeration %}
+                                    <td scope="row"><strong>{{ v.enumeration.port }}</strong></td>
+                                {% else %}
+                                    <td scope="row"></td>
+                                {% endif %}
+                                <td scope="row"><strong>{{ v.name }}</strong></td>
+                                <td scope="row">{{ v.severity }}</td>
+                                <td scope="row"><strong>{{ v.cve }}</strong></td>
+                                {% if v.reference %}
+                                    <td scope="row"><a href="{{ v.reference }}">Link</a></td>
+                                {% else %}
+                                    <td scope="row"></td>
+                                {% endif %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% endif %}
+            <br>
+            {% if exploit %}
+                <table class="table">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th scope="col">Exploits</th>
+                            <th scope="col">Vulnerability</th>
+                            <th scope="col">Technology</th>
+                            <th scope="col">Name</th>
+                            <th scope="col">Reference</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for e in exploit %}
+                            <tr>
+                                <td scope="row"></td>
+                                {% if e.vulnerability %}
+                                    <td scope="row"><strong>{{ e.vulnerability.name }}</strong></td>
+                                {% else %}
+                                    <td scope="row"></td>
+                                {% endif %}
+                                {% if e.technology %}
+                                    <td scope="row"><strong>{{ e.technology.name }}</strong></td>
+                                {% else %}
+                                    <td scope="row"></td>
+                                {% endif %}
+                                <td scope="row"><strong>{{ e.name }}</strong></td>
+                                <td scope="row">{{ e.reference }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% endif %}
+        </div>
     </body>
 </html>

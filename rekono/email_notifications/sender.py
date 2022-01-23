@@ -39,7 +39,7 @@ def user_invitation(user: Any) -> None:
         addresses=[user.email],
         subject='Welcome to Rekono',
         template_name='user_invitation.html',
-        data={'otp': user.otp}
+        data={'user': user}
     )
 
 
@@ -53,9 +53,9 @@ def user_password_reset(user: Any) -> None:
     emails_queue.enqueue(                                                       # Enqueue email notification
         consumer,
         addresses=[user.email],
-        subject='Reset your Rekono password',
+        subject='Reset Rekono password',
         template_name='user_password_reset.html',
-        data={'otp': user.otp}
+        data={'user': user}
     )
 
 
@@ -71,7 +71,7 @@ def user_enable_account(user: Any) -> None:
         addresses=[user.email],
         subject='Rekono user enabled',
         template_name='user_enable_account.html',
-        data={'otp': user.otp}
+        data={'user': user}
     )
 
 
@@ -97,7 +97,7 @@ def execution_notifications(emails: List[str], execution: Any, findings: List[Fi
     emails_queue.enqueue(                                                       # Enqueue email notifications
         consumer,
         addresses=emails,
-        subject=f'[Rekono]{data["tool"].name} execution completed',
+        subject=f'[Rekono] {data["tool"].name} execution completed',
         template_name='execution_notification.html',
         data=data
     )

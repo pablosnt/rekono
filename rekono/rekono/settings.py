@@ -23,7 +23,7 @@ from tasks.enums import Status, TimeUnit
 from tools.enums import IntensityRank
 
 # Rekono frontend address. It's used to include links in notifications
-REKONO_ADDRESS = os.getenv('REKONO_ADDRESS', '127.0.0.1:8080')
+REKONO_ADDRESS = os.getenv('REKONO_ADDRESS', 'http://127.0.0.1:8080')
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
