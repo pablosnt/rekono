@@ -24,6 +24,9 @@ export default new Vuex.Store({
     },
     changeRefreshStatus (state) {
       state.refreshing = !state.refreshing
+    },
+    setRefreshStatus (state, status) {
+      state.refreshing = status
     }
   },
   actions: {
@@ -36,14 +39,17 @@ export default new Vuex.Store({
       }
       const mainTabs = localStorage.getItem(showMainTabs)
       if (mainTabs && mainTabs !== state.mainTabs) {
-        commit('changeRefreshStatus')
+        commit('changeMainTabs')
       }
+      commit('setRefreshStatus', false)
     },
     login ({ commit }, { tokens }) {
       commit('authenticateUser', processTokens(tokens))
+      commit('setRefreshStatus', false)
     },
     logout ({ commit, dispatch }) {
       removeTokens()
+      commit('setRefreshStatus', false)
       commit('authenticateUser', { user: null, role: null })
       dispatch('redirectToLogin')
     },

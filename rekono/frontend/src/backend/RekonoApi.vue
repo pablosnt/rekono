@@ -138,11 +138,9 @@ export default {
       return httpRequest
         .then(response => { return Promise.resolve(response) })
         .catch(error => {
-          if (error.response && error.response.status === 401 && !retry && requiredAuth) {
+          if (error.response && error.response.status === 401 && !retry) {
             return this.refresh()
-              .then(() => {
-                return this.request(method, endpoint, queryData, bodyData, requiredAuth, extraHeaders, true)
-              })
+              .then(() => { return this.request(method, endpoint, queryData, bodyData, requiredAuth, extraHeaders, true) })
               .catch(() => {
                 if (this.$store.state.refreshing) {
                   return this.request(method, endpoint, queryData, bodyData, requiredAuth, extraHeaders, false)

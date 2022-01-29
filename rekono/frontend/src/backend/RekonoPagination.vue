@@ -23,7 +23,6 @@ export default {
       this.fetchData()
     },
     confirm (operation) {
-      console.log(operation)
       if (operation.success) {
         this.$bvModal.hide(operation.id)
         if (operation.reload) {
