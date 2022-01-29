@@ -144,9 +144,11 @@ export default {
   },
   data () {
     this.startAutoRefresh()
+    this.fetchTask()
+    this.fetchExecutions()
     return {
-      currentTask: this.task ? this.task : this.fetchTask(),
-      executions: this.fetchExecutions(),
+      currentTask: this.task ? this.task : [],
+      executions: [],
       executionsFields: [
         { key: 'tool', sortable: true },
         { key: 'configuration', sortable: true},
@@ -190,7 +192,9 @@ export default {
       }
     },
     fetchTask () {
-      this.get(`/api/tasks/${this.$route.params.id}/`).then(response => { this.currentTask = response.data })
+      if (!this.task) {
+        this.get(`/api/tasks/${this.$route.params.id}/`).then(response => { this.currentTask = response.data })
+      }
     },
     fetchExecutions () {
       this.getAllPages('/api/executions/', { task: this.$route.params.id }).then(response => { this.executions = response.data.results; this.selectExecution(null) })

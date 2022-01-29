@@ -38,11 +38,11 @@
           <b-form-group description="Execution intensity">
             <b-input-group>
               <b-input-group-prepend>
-                <div v-for="i in intensities" :key="i.value">
+                <div v-for="i in intensitySelection" :key="i.value">
                   <b-button v-if="i.intensity_rank === intensity" v-b-tooltip.hover.top="i.intensity_rank" :variant="i.variant" no-remove>{{ intensity ? intensity.charAt(0) : 'H' }}</b-button>
                 </div>
               </b-input-group-prepend>
-              <b-form-select v-model="intensity" :options="intensities" value-field="intensity_rank" text-field="intensity_rank" required/>
+              <b-form-select v-model="intensity" :options="intensitySelection" value-field="intensity_rank" text-field="intensity_rank" required/>
             </b-input-group>
           </b-form-group>
         </b-tab>
@@ -117,9 +117,9 @@ export default {
   },
   computed: {
     title () {
-      return this.process !== null ? `Execute ${this.process.name}` : this.tool !== null ? `Execute ${this.tool.name}` : 'New Task'
+      return this.process ? `Execute ${this.process.name}` : this.tool ? `Execute ${this.tool.name}` : 'New Task'
     },
-    intensities () {
+    intensitySelection () {
       if (this.selectedTool) {
         return this.intensitiesByVariant.filter(intensity => this.selectedTool.intensities.find(i => i.intensity_rank === intensity.intensity_rank))
       }

@@ -155,7 +155,6 @@ export default {
     refresh () {
       if (!this.$store.state.refreshing) {
         this.$store.dispatch('changeRefreshStatus')
-        console.log(localStorage[refreshTokenKey])
         return axios.post('/api/token/refresh/', { refresh: localStorage[refreshTokenKey] }, this.headers())
           .then(response => {
             removeTokens()
@@ -187,7 +186,8 @@ export default {
     },
     handleError (error, title) {
       if (error.response.status === 400) {
-        this.danger(title, Object.values(error.response.data)[0])
+        const message = Object.values(error.response.data)[0][0]
+        this.danger(title, message.charAt(0).toUpperCase() + message.slice(1))
       }
       else if (error.response.status === 401) {
         this.danger(title, 'You are not authenticated. Please, try again after login in')

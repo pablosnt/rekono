@@ -83,6 +83,12 @@ export default {
     project: Object
   },
   data () {
+    this.countProjects()
+    this.countTargets()
+    this.countTasks()
+    this.countExecutions()
+    this.countVulnerabilities()
+    this.countFindings()
     return {
       height: 250,
       timeOptions: [
@@ -91,16 +97,16 @@ export default {
         { value: 30, text: 'Last 30 days'}
       ], 
       timeFilter: null,
-      projects: this.countProjects(),
-      targets: this.countTargets(),
+      projects: 0,
+      targets: 0,
       requested: 0,
       skipped: 0,
       running: 0,
       cancelled: 0,
       error: 0,
       completed: 0,
-      tasks: this.countTasks(),
-      executions: this.countExecutions(),
+      tasks: 0,
+      executions: 0,
       osint: 0,
       credentials: 0,
       hosts: 0,
@@ -116,10 +122,10 @@ export default {
       low: 0,
       lowExploit: 0,
       info: 0,
-      infoExploit: this.countVulnerabilities(),
+      infoExploit: 0,
       vulnerabilities: 0,
       exploits: 0,
-      findings: this.countFindings()
+      findings: 0
     }
   },
   components: {

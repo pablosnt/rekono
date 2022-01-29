@@ -91,8 +91,9 @@ export default {
   name: 'processesPage',
   mixins: [RekonoApi],
   data () {
+    this.fetchData()
     return {
-      data: this.fetchData(),
+      data: [],
       processesFields: [
         { key: 'name', label: 'Process', sortable: true },
         { key: 'tags', sortable: true },
@@ -156,7 +157,7 @@ export default {
       this.delete(`/api/processes/${this.selectedProcess.id}/`, this.selectedProcess.name, 'Process deleted successfully').then(() => this.fetchData())
     },
     deleteStep () {
-      this.delete(`/api/steps/${this.selectedStep.id}/`, `${this.processName} - ${this.selectedStep.name}`, 'Step deleted successfully').then(() => this.fetchData())
+      this.delete(`/api/steps/${this.selectedStep.id}/`, `${this.processName} - ${this.selectedStep.tool.name}`, 'Step deleted successfully').then(() => this.fetchData())
     },
     taskModal (process) {
       this.cleanSelection()
@@ -166,7 +167,7 @@ export default {
     processModal (process) {
       this.cleanSelection()
       this.processForm = true
-      tthis.selectProcess(process)
+      this.selectProcess(process)
     },
     stepModal (process, step = null) {
       this.cleanSelection()

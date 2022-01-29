@@ -88,8 +88,9 @@ export default {
     project: Object
   },
   data () {
+    this.fetchData()
     return {
-      data: this.fetchData(),
+      data: [],
       targetsFields: [
         { key: 'target', sortable: true },
         { key: 'type', sortable: true },
@@ -130,7 +131,7 @@ export default {
   },
   methods: {
     fetchData (params = { }) {
-      filters.project = this.$route.params.id
+      params.project = this.$route.params.id
       return this.getOnePage('/api/targets/?o=target', params)
         .then(response => {
           this.data = response.data.results

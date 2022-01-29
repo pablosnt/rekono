@@ -50,8 +50,10 @@ export default {
     project: Object
   },
   data () {
+    this.fetchData()
+    this.fetchProject()
     return {
-      data: this.fetchData(),
+      data: [],
       tasksFields: [
         { key: 'target.target', label: 'Target', sortable: true },
         { key: 'process.name', label: 'Process', sortable: true },
@@ -63,7 +65,7 @@ export default {
         { key: 'date', sortable: true },
         { key: 'actions', sortable: false }
       ],
-      currentProject: this.project ? this.project : this.fetchProject(),
+      currentProject: this.project ? this.project : [],
       selectedTask: null,
       filters: [],
       showTaskForm: false
@@ -94,7 +96,9 @@ export default {
         })
     },
     fetchProject () {
-      this.get(`/api/projects/${this.$route.params.id}/`).then(response => this.currentProject = response.data)
+      if (!this.project) {
+        this.get(`/api/projects/${this.$route.params.id}/`).then(response => this.currentProject = response.data)
+      }
     },
     cancelTask () {
       this.delete(`/api/tasks/${this.selectedTask.id}/`, this.selectedTask.process ? this.selectedTask.process.name : this.selectedTask.tool.name, 'Task cancelled successfully').then(this.fetchData())

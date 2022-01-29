@@ -62,9 +62,10 @@ export default {
     }
   },
   data () {
+    this.fetchTargets()
     return {
       activeOptions: [{ value: null, text: 'All' }, { value: 'true', text: 'Active' }, { value: 'false', text: 'Disabled' }],
-      targets: this.fetchTargets(),
+      targets: [],
       selectedFindings: [],
       selectedTarget: null,
       search: null,

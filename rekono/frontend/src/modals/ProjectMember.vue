@@ -1,5 +1,5 @@
 <template>
-  <b-modal :id="id" @show="fetchData" @hidden="clean" @ok="confirm" title="Add Member" ok-title="Add Member" header-bg-variant="dark" header-text-variant="light" ok-variant="dark">
+  <b-modal :id="id" @show="fetchUsers" @hidden="clean" @ok="confirm" title="Add Member" ok-title="Add Member" header-bg-variant="dark" header-text-variant="light" ok-variant="dark">
     <b-form ref="add_member_form">
       <b-form-group invalid-feedback="User is required">
         <b-form-select v-model="member" :options="users" value-field="id" text-field="username" :state="memberState">
@@ -22,8 +22,9 @@ export default {
     projectId: Number
   },
   data () {
+    this.fetchUsers()
     return {
-      users: this.fetchUsers(),
+      users: [],
       member: null,
       memberState: null
     }
@@ -31,7 +32,7 @@ export default {
   watch: {
     initialized (initialized) {
       if (initialized) {
-        this.fetchData()
+        this.fetchUsers()
       }
     }
   },

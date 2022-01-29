@@ -40,7 +40,6 @@ class LikeManagementView(GenericViewSet):
         '''
         instance = self.get_object()
         instance.liked_by.add(request.user)                                     # Add user like
-        instance.save(update_fields=['liked_by'])
         return Response(status=status.HTTP_201_CREATED)
 
     @extend_schema(request=None, responses={204: None})
@@ -62,8 +61,6 @@ class LikeManagementView(GenericViewSet):
         instance = self.get_object()
         user: User = request.user
         instance.liked_by.remove(user)                                          # Remove user like
-        instance.save(update_fields=['liked_by'])
         # Remove instance from liked instances by user
         getattr(user, f'liked_{instance.__class__.__name__.lower()}').remove(instance)
-        user.save(update_fields=[f'liked_{instance.__class__.__name__.lower()}'])
         return Response(status=status.HTTP_204_NO_CONTENT)

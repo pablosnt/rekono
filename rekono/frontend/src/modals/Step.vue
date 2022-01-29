@@ -68,10 +68,10 @@ export default {
       return (this.step !== null)
     },
     title () {
-      return this.process !== null ? this.edit ? `Edit step for ${this.process.name}` : `New step for ${this.process.name}` : this.tool !== null ? `New step ${this.tool.name}` : 'New step'
+      return this.process ? this.edit ? `Edit step for ${this.process.name}` : `New step for ${this.process.name}` : this.tool ? `New step ${this.tool.name}` : 'New step'
     },
     button () {
-      return this.step !== null ? 'Update Step' : 'Create Step'
+      return this.step ? 'Update Step' : 'Create Step'
     }
   },
   data () {

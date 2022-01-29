@@ -35,8 +35,9 @@ export default {
     project: Object
   },
   data () {
+    this.fetchData()
     return {
-      data: this.fetchData(),
+      data: [],
       usersFields: [
         { key: 'first_name', sortable: true },
         { key: 'last_name', sortable: true },
@@ -65,7 +66,7 @@ export default {
   },
   methods: {
     fetchData (params = { }) {
-      filters.project = this.$route.params.id
+      params.project = this.$route.params.id
       return this.getOnePage('/api/users/?o=username', params)
         .then(response => {
           this.data = response.data.results

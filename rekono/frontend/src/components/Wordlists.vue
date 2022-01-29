@@ -43,8 +43,9 @@ export default {
   name: 'wordlistsPage',
   mixins: [RekonoApi],
   data () {
+    this.fetchData()
     return {
-      data: this.fetchData(),
+      data: [],
       wordlistsFields: [
         { key: 'name', label: 'Wordlist', sortable: true },
         { key: 'type', sortable: true },

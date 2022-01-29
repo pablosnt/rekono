@@ -53,9 +53,10 @@ export default {
     project: Object
   },
   data () {
+    this.fetchProject()
     return {
       defectDojoUrl: this.project && this.project.defectdojo_product_id ? `${process.env.VUE_APP_DEFECTDOJO_HOST}/product/${this.project.defectdojo_product_id}` : null,
-      currentProject: this.project ? this.project : this.fetchProject(),
+      currentProject: this.project ? this.project : [],
       showEditForm: false
     }
   },
@@ -67,11 +68,13 @@ export default {
   },
   methods: {
     fetchProject () {
-      this.get(`/api/projects/${this.$route.params.id}/`)
-        .then(response => {
-          this.currentProject = response.data
-          this.defectDojoUrl = response.data.defectdojo_product_id ? `${process.env.VUE_APP_DEFECTDOJO_HOST}/product/${response.data.defectdojo_product_id}` : null
-        })
+      if (!this.project) {
+        this.get(`/api/projects/${this.$route.params.id}/`)
+          .then(response => {
+            this.currentProject = response.data
+            this.defectDojoUrl = response.data.defectdojo_product_id ? `${process.env.VUE_APP_DEFECTDOJO_HOST}/product/${response.data.defectdojo_product_id}` : null
+          })
+      }
     },
     deleteProject () {
       this.delete(`/api/projects/${this.currentProject.id}/`, this.currentProject.name, 'Project deleted successfully').then(() => this.$router.push({ path: '/projects' }))

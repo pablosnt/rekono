@@ -71,8 +71,9 @@ export default {
   name: 'toolsPage',
   mixins: [RekonoApi],
   data () {
+    this.fetchData()
     return {
-      data: this.fetchData(),
+      data: [],
       toolsFields: [
         { key: 'icon', sortable: false },
         { key: 'name', label: 'Tool', sortable: true },

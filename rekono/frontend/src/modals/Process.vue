@@ -1,6 +1,6 @@
 <template>
   <b-modal :id="id" @hidden="clean" @ok="confirm" :title="title" :ok-title="button" header-bg-variant="dark" header-text-variant="light" ok-variant="dark">
-    <template #modal-title v-if="tool !== null">
+    <template #modal-title v-if="tool">
       <b-link :href="tool.reference" target="_blank">
         <b-img :src="tool.icon" width="100" height="50"/>
       </b-link>
@@ -14,7 +14,7 @@
         <b-form-textarea v-model="description" placeholder="Process description" :state="descriptionState" maxlength="350" required/>
       </b-form-group>
     </b-form>
-    <b-form ref="step_form" v-if="tool !== null">
+    <b-form ref="step_form" v-if="tool">
       <b-form-group description="Tool configuration">
         <b-form-select v-model="configuration" :options="tool.configurations" value-field="id" text-field="name"/>
       </b-form-group>
@@ -55,14 +55,14 @@ export default {
       return (this.process !== null)
     },
     title () {
-      let title = this.process !== null ? 'Edit Process' : 'New Process'
-      if (this.tool !== null) {
+      let title = this.process ? 'Edit Process' : 'New Process'
+      if (this.tool) {
         title = `${title} with ${this.tool.name}`
       }
       return title
     },
     button () {
-      return this.process !== null ? 'Update Process' : 'Create Process'
+      return this.process ? 'Update Process' : 'Create Process'
     }
   },
   data () {
@@ -117,7 +117,7 @@ export default {
               'New process created successfully'
             )
               .then(() => { return Promise.resolve(true) })
-              .catch(() => { return Promise.resolve(false) })
+              .catch((error) => { console.log(error); return Promise.resolve(false) })
           }
         })
         .catch(() => { return Promise.resolve(false) })
