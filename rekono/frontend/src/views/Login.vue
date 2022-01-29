@@ -1,11 +1,11 @@
 <template>
-  <PublicForm>
+  <public-form>
     <template>
       <b-alert v-model="loginError" variant="danger">
         <b-icon icon="exclamation-circle-fill" variant="danger"></b-icon>
         Invalid credentials
       </b-alert>
-      <b-form @submit="handleLogin">
+      <b-form @submit="login">
         <b-input-group size="lg" class="mb-3">
           <b-input-group-prepend is-text>
             <b-icon icon="person-fill"/>
@@ -28,13 +28,15 @@
         </b-row>
       </b-form>
     </template>
-  </PublicForm>
+  </public-form>
 </template>
 
 <script>
-import PublicForm from '@/common/PublicForm.vue'
+import RekonoApi from '@/backend/RekonoApi'
+import PublicForm from '@/common/PublicForm'
 export default {
-  name: 'loginForm',
+  name: 'loginPage',
+  mixins: [RekonoApi],
   data () {
     return {
       username: null,
@@ -48,11 +50,12 @@ export default {
     PublicForm
   },
   methods: {
-    handleLogin (event) {
+    login (event) {
       event.preventDefault()
       if (this.check()) {
-        this.$store.dispatch('loginAction', { username: this.username, password: this.password })
-          .then(() => {
+        this.post('/api/token/', { username: this.username, password: this.password }, false)
+          .then(data => {
+            this.$store.dispatch('login', { tokens: data })
             this.loginError = false
             this.$router.push('/')
           })

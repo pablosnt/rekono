@@ -6,12 +6,6 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'publicForm'
-}
-</script>
-
 <style>
 #public-page {
   height: 100%;

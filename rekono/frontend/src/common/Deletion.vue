@@ -6,7 +6,7 @@
 
 <script>
 export default {
-  name: 'deletionConfirm',
+  name: 'deletion',
   props: {
     id: String,
     title: String,

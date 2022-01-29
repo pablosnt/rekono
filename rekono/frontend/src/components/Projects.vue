@@ -1,7 +1,7 @@
 <template>
   <div>
-    <TableHeader :filters="filters" add="project-modal" :addAuth="$store.state.role === 'Admin'" @filter="fetchData"/>
-    <b-table hover striped borderless head-variant="dark" :fields="projectsFields" :items="projects" @row-clicked="navigateToProjectDetails">
+    <table-header :filters="filters" add="project-modal" :addAuth="$store.state.role === 'Admin'" @filter="fetchData"/>
+    <b-table hover striped borderless head-variant="dark" :fields="projectsFields" :items="data" @row-clicked="navigateToProjectDetails">
       <template #cell(tags)="row">
         <b-form-tags no-outer-focus :value="row.item.tags" placeholder="" remove-on-delete size="md" tag-variant="dark" @input="updateProject(row.item, $event)"/>
       </template>
@@ -26,32 +26,26 @@
         </b-dropdown>
       </template>
     </b-table>
-    <Pagination :page="page" :limit="limit" :limits="limits" :total="total" name="projects" @pagination="pagination"/>
-    <Deletion id="delete-project-modal"
-      title="Delete Project"
-      @deletion="deleteProject"
-      @clean="cleanSelection"
-      v-if="selectedProject !== null">
+    <pagination :page="page" :limit="limit" :limits="limits" :total="total" name="projects" @pagination="pagination"/>
+    <deletion id="delete-project-modal" title="Delete Project" @deletion="deleteProject" @clean="cleanSelection" v-if="selectedProject !== null">
       <span><strong>{{ selectedProject.name }}</strong> project</span>
-    </Deletion>
-    <ProjectForm id="project-modal" :project="selectedProject" :initialized="selectedProject !== null" @confirm="confirm" @clean="cleanSelection"/>
+    </deletion>
+    <project id="project-modal" :project="selectedProject" :initialized="selectedProject !== null" @confirm="confirm" @clean="cleanSelection"/>
   </div>
 </template>
 
 <script>
-import ProjectApi from '@/backend/projects'
-import Deletion from '@/common/Deletion.vue'
-import TableHeader from '@/common/TableHeader.vue'
-import Pagination from '@/common/Pagination.vue'
-import AlertMixin from '@/common/mixin/AlertMixin.vue'
-import PaginationMixin from '@/common/mixin/PaginationMixin.vue'
-import ProjectForm from '@/modals/ProjectForm.vue'
+import RekonoApi from '@/backend/RekonoApi'
+import Deletion from '@/common/Deletion'
+import TableHeader from '@/common/TableHeader'
+import Pagination from '@/common/Pagination'
+import Project from '@/modals/Project'
 export default {
   name: 'projectsPage',
-  mixins: [AlertMixin, PaginationMixin],
+  mixins: [RekonoApi],
   data () {
     return {
-      projects: this.fetchData(),
+      data: this.fetchData(),
       projectsFields: [
         { key: 'name', label: 'Project', sortable: true },
         { key: 'defectdojo_product_id', label: 'Defect-Dojo', sortable: false },
@@ -69,7 +63,7 @@ export default {
     Deletion,
     TableHeader,
     Pagination,
-    ProjectForm
+    Project
   },
   watch: {
     projects () {
@@ -80,25 +74,18 @@ export default {
     }
   },
   methods: {
-    fetchData (filter = null) {
-      ProjectApi.getPaginatedProjects(this.getPage(), this.getLimit(), filter).then(data => {
-        this.total = data.count
-        this.projects = data.results
-      })
+    fetchData (params = null) {
+      return this.getOnePage('/api/projects/?o=name', params)
+        .then(response => {
+          this.data = response.data.results
+          this.total = response.data.count
+        })
     },
     updateProject (project, tags) {
-      ProjectApi.updateProject(project.id, project.name, project.description, project.defectdojo_product_id, tags)
+      this.put(`/api/projects/${project.id}/`, { name: project.name, description: project.description, defectdojo_product_id: defectdojo_product_id, tags: tags })
     },
     deleteProject () {
-      ProjectApi.deleteProject(this.selectedProject.id)
-        .then(() => {
-          this.$bvModal.hide('delete-project-modal')
-          this.warning(this.selectedProject.name, 'Project deleted successfully')
-          this.fetchData()
-        })
-        .catch(() => {
-          this.danger(this.selectedProject.name, 'Unexpected error in project deletion')
-        })
+      this.delete(`/api/projects/${this.selectedProject.id}/`, this.selectedProject.name, 'Project deleted successfully').then(() => this.fetchData())
     },
     selectProject (project) {
       this.selectedProject = project

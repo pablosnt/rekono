@@ -1,5 +1,5 @@
 <template>
-  <PublicForm>
+  <public-form>
     <template>
       <b-form @submit="handleSignup">
         <b-form-group invalid-feedback="Username is required">
@@ -27,16 +27,15 @@
         </b-row>
       </b-form>
     </template>
-  </PublicForm>
+  </public-form>
 </template>
 
 <script>
-import UsersApi from '@/backend/users'
-import PublicForm from '@/common/PublicForm.vue'
-import AlertMixin from '@/common/mixin/AlertMixin.vue'
+import RekonoApi from '@/backend/RekonoApi'
+import PublicForm from '@/common/PublicForm'
 export default {
-  name: 'signupForm',
-  mixins: [AlertMixin],
+  name: 'signupPage',
+  mixins: [RekonoApi],
   props: ['otp'],
   data () {
     return {
@@ -63,7 +62,11 @@ export default {
     handleSignup (event) {
       event.preventDefault()
       if (this.check()) {
-        this.signup()
+        this.post(
+          '/api/users/create/',
+          { username: this.username, first_name: this.firstName, last_name: this.lastName, password: this.password, otp: this.otp },
+          this.username, 'User created successfully', true
+        ).then(() => this.$store.dispatch('redirectToLogin'))
       }
     },
     checkOtp (otp) {
@@ -78,16 +81,6 @@ export default {
       this.lastNameState = (this.lastName !== null && this.lastName.length > 0)
       this.passwordState = (this.password && this.password.length > 0 && this.password === this.passwordConfirm)
       return this.usernameState && this.firstNameState && this.lastNameState && this.passwordState
-    },
-    signup () {
-      UsersApi.createUser(this.username, this.firstName, this.lastName, this.password, this.otp)
-        .then(() => {
-          this.success(this.username, 'User created successfully')
-          this.$store.dispatch('redirectToLogin')
-        })
-        .catch(() => {
-          this.danger(this.username, 'Unexpected error in user creation')
-        })
     }
   }
 }

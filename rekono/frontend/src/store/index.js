@@ -1,8 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import router from '@/router'
-import AuthenticationApi from '@/backend/authentication'
-import { accessTokenKey } from '@/backend/constants'
+import { accessTokenKey, removeTokens, decodeToken, processTokens } from '@/backend/tokens'
 
 Vue.use(Vuex)
 
@@ -16,76 +15,48 @@ export default new Vuex.Store({
     refreshing: false,
   },
   mutations: {
-    login (state, userData) {
+    authenticateUser (state, userData) {
       state.user = userData.user
       state.role = userData.role
     },
-    logout (state) {
-      state.user = null
-      state.role = null
+    changeMainTabs (state) {
+      state.mainTabs = !state.mainTabs
     },
-    showMainTabs (state) {
-      state.mainTabs = true
-    },
-    hideMainTabs (state) {
-      state.mainTabs = false
-    },
-    startRefreshingToken (state) {
-      state.refreshing = true
-    },
-    finishRefreshingToken (state) {
-      state.refreshing = false
+    changeRefreshStatus (state) {
+      state.refreshing = !state.refreshing
     }
   },
   actions: {
-    checkState ({ commit }) {
-      // commit('finishRefreshingToken')
+    checkState ({ state, commit }) {
       const accessToken = localStorage.getItem(accessTokenKey)
       if (accessToken) {
-        commit('login', AuthenticationApi.decodeToken(accessToken))
+        commit('authenticateUser', decodeToken(accessToken))
       } else {
-        commit('login', { user: null, role: null })
+        commit('authenticateUser', { user: null, role: null })
       }
       const mainTabs = localStorage.getItem(showMainTabs)
-      if (mainTabs === 'true') {
-        commit('showMainTabs')
-      } else {
-        commit('hideMainTabs')
+      if (mainTabs && mainTabs !== state.mainTabs) {
+        commit('changeRefreshStatus')
       }
     },
-    loginAction ({ commit }, { username, password }) {
-      return AuthenticationApi.login(username, password)
-        .then(data => {
-          commit('login', data)
-          return Promise.resolve()
-        })
+    login ({ commit }, { tokens }) {
+      commit('authenticateUser', processTokens(tokens))
     },
-    logoutAction ({ commit, dispatch }) {
-      return AuthenticationApi.logout()
-        .then(() => {
-          commit('logout')
-          dispatch('redirectToLogin')
-          return Promise.resolve()
-        })
+    logout ({ commit, dispatch }) {
+      removeTokens()
+      commit('authenticateUser', { user: null, role: null })
+      dispatch('redirectToLogin')
     },
     redirectToLogin ({ dispatch }) {
       dispatch('checkState')
       router.push({ name: 'login' })
     },
     changeMainTabs ({ state, commit }) {
-      if (state.mainTabs) {
-        commit('hideMainTabs')
-        localStorage.setItem(showMainTabs, false)
-      } else {
-        commit('showMainTabs')
-        localStorage.setItem(showMainTabs, true)
-      }
+      localStorage.setItem(showMainTabs, !state.mainTabs)
+      commit('changeMainTabs')
     },
-    startRefreshingToken ({ commit }) {
-      commit('startRefreshingToken')
-    },
-    finishRefreshingToken ({ commit }) {
-      commit('finishRefreshingToken')
+    changeRefreshStatus ({ commit }) {
+      commit('changeRefreshStatus')
     }
   }
 })

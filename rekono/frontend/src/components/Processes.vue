@@ -1,7 +1,7 @@
 <template>
   <div>
-    <TableHeader :filters="filters" add="process-modal" @filter="fetchData"/>
-    <b-table striped borderless head-variant="dark" :fields="processesFields" :items="processes">
+    <table-header :filters="filters" add="process-modal" @filter="fetchData"/>
+    <b-table striped borderless head-variant="dark" :fields="processesFields" :items="data">
       <template #cell(tags)="row">
         <b-form-tags no-outer-focus :value="row.item.tags" placeholder="" remove-on-delete size="md" tag-variant="dark" @input="updateProcess(row.item, $event)"/>
       </template>
@@ -17,18 +17,18 @@
           <b-icon v-if="!row.detailsShowing" variant="dark" icon="eye-fill"/>
           <b-icon v-if="row.detailsShowing" variant="secondary" icon="eye-slash-fill"/>
         </b-button>
-        <b-button variant="outline" class="mr-2" :disabled="row.item.steps.length === 0" v-b-tooltip.hover title="Execute" @click="showExecuteForm(row.item)" v-b-modal.execute-modal>
+        <b-button variant="outline" class="mr-2" :disabled="row.item.steps.length === 0" v-b-tooltip.hover title="Execute" @click="taskModal(row.item)" v-b-modal.task-modal>
           <b-icon variant="success" icon="play-circle-fill"/>
         </b-button>
         <b-dropdown variant="outline" right>
           <template #button-content>
             <b-icon variant="dark" icon="three-dots-vertical"/>
           </template>
-          <b-dropdown-item @click="showStepForm(row.item)" v-b-modal.step-modal :disabled="$store.state.role !== 'Admin' && $store.state.user !== row.item.creator.id">
+          <b-dropdown-item @click="stepModal(row.item)" v-b-modal.step-modal :disabled="$store.state.role !== 'Admin' && $store.state.user !== row.item.creator.id">
             <b-icon variant="success" icon="plus-square"/>
             <label class="ml-1" variant="dark">Add Step</label>
           </b-dropdown-item>
-          <b-dropdown-item variant="dark" @click="showProcessForm(row.item)" v-b-modal.process-modal :disabled="$store.state.role !== 'Admin' && $store.state.user !== row.item.creator.id">
+          <b-dropdown-item variant="dark" @click="processModal(row.item)" v-b-modal.process-modal :disabled="$store.state.role !== 'Admin' && $store.state.user !== row.item.creator.id">
             <b-icon icon="pencil-square"/>
             <label class="ml-1">Edit</label>
           </b-dropdown-item>
@@ -52,7 +52,7 @@
                 <template #button-content>
                   <b-icon variant="secondary" icon="three-dots-vertical"/>
                 </template>
-                <b-dropdown-item variant="dark" @click="showStepForm(row.item, step.item)" v-b-modal.step-modal :disabled="$store.state.role !== 'Admin' && $store.state.user !== row.item.creator.id">
+                <b-dropdown-item variant="dark" @click="stepModal(row.item, step.item)" v-b-modal.step-modal :disabled="$store.state.role !== 'Admin' && $store.state.user !== row.item.creator.id">
                   <b-icon icon="pencil-square"/>
                   <label class="ml-1">Edit</label>
                 </b-dropdown-item>
@@ -66,47 +66,33 @@
         </b-card>
       </template>
     </b-table>
-    <Pagination :page="page" :limit="limit" :limits="limits" :total="total" name="processes" @pagination="pagination"/>
-    <Deletion id="delete-process-modal"
-      title="Delete Process"
-      @deletion="deleteProcess"
-      @clean="cleanSelection"
-      v-if="selectedProcess !== null">
+    <pagination :page="page" :limit="limit" :limits="limits" :total="total" name="processes" @pagination="pagination"/>
+    <deletion id="delete-process-modal" title="Delete Process" @deletion="deleteProcess" @clean="cleanSelection" v-if="selectedProcess !== null">
       <span><strong>{{ selectedProcess.name }}</strong> process</span>
-    </Deletion>
-    <Deletion id="delete-step-modal"
-      title="Delete Step"
-      @deletion="deleteStep"
-      @clean="cleanSelection"
-      v-if="selectedProcess !== null && selectedStep !== null">
+    </deletion>
+    <deletion id="delete-step-modal" title="Delete Step" @deletion="deleteStep" @clean="cleanSelection" v-if="selectedProcess !== null && selectedStep !== null">
       <span><strong>{{ this.selectedStep.tool.name }}</strong> step from <strong>{{ selectedProcess.name }}</strong> process</span>
-    </Deletion>
-    <ProcessForm id="process-modal" :process="selectedProcess" :initialized="processForm" @confirm="confirm" @clean="cleanSelection"/>
-    <StepForm id="step-modal" :process="selectedProcess" :step="selectedStep" :initialized="stepForm" @confirm="confirm" @clean="cleanSelection"/>
-    <TaskForm id="execute-modal" :process="selectedProcess" :initialized="taskForm" @confirm="confirm" @clean="cleanSelection"/>
+    </deletion>
+    <process id="process-modal" :process="selectedProcess" :initialized="showProcessModal" @confirm="confirm" @clean="cleanSelection"/>
+    <step id="step-modal" :process="selectedProcess" :step="selectedStep" :initialized="showStepModal" @confirm="confirm" @clean="cleanSelection"/>
+    <task id="task-modal" :process="selectedProcess" :initialized="showTaskModal" @confirm="confirm" @clean="cleanSelection"/>
   </div>
 </template>
 
 <script>
-import Processes from '@/backend/processes'
-import { stages } from '@/backend/constants'
-import Deletion from '@/common/Deletion.vue'
-import TableHeader from '@/common/TableHeader.vue'
-import Pagination from '@/common/Pagination.vue'
-import AlertMixin from '@/common/mixin/AlertMixin.vue'
-import PaginationMixin from '@/common/mixin/PaginationMixin.vue'
-import LikeMixin from '@/common/mixin/LikeMixin.vue'
-import ProcessForm from '@/modals/ProcessForm.vue'
-import StepForm from '@/modals/StepForm.vue'
-import TaskForm from '@/modals/TaskForm.vue'
-const ProcessApi = Processes.ProcessApi
-const StepApi = Processes.StepApi
+import RekonoApi from '@/backend/RekonoApi'
+import Deletion from '@/common/Deletion'
+import TableHeader from '@/common/TableHeader'
+import Pagination from '@/common/Pagination'
+import Process from '@/modals/Process'
+import Step from '@/modals/Step'
+import Task from '@/modals/Task'
 export default {
   name: 'processesPage',
-  mixins: [AlertMixin, PaginationMixin, LikeMixin],
+  mixins: [RekonoApi],
   data () {
     return {
-      processes: this.fetchData(),
+      data: this.fetchData(),
       processesFields: [
         { key: 'name', label: 'Process', sortable: true },
         { key: 'tags', sortable: true },
@@ -123,9 +109,9 @@ export default {
         { key: 'priority', sortable: true },
         { key: 'actions', sortable: false }
       ],
-      taskForm: false,
-      processForm: false,
-      stepForm: false,
+      showTaskModal: false,
+      showProcessModal: false,
+      showStepModal: false,
       selectedProcess: null,
       selectedStep: null,
       filters: []
@@ -135,69 +121,55 @@ export default {
     Deletion,
     TableHeader,
     Pagination,
-    ProcessForm,
-    StepForm,
-    TaskForm
+    Process,
+    Step,
+    Task
   },
   watch: {
     processes () {
       this.filters = [
         { name: 'Tags', filterField: 'tags__name__in', type: 'tags' },
-        { name: 'Stage', values: stages, valueField: 'id', textField: 'value', filterField: 'steps__tool__stage' },
+        { name: 'Stage', values: this.stages, valueField: 'id', textField: 'value', filterField: 'steps__tool__stage' },
         { name: 'Creator', filterField: 'creator__username__icontains', type: 'text' },
         { name: 'Favourities', values: [{ value: true, text: 'True' }, { value: false, text: 'False' }], valueField: 'value', textField: 'text', filterField: 'liked' }
       ]
     }
   },
   methods: {
-    fetchData (filter = null) {
-      ProcessApi.getPaginatedProcesses(this.getPage(), this.getLimit(), filter).then(data => {
-        this.total = data.count
-        this.processes = data.results
-      })
+    fetchData (params = null) {
+      return this.getOnePage('/api/processes/?o=-likes_count,name', params)
+        .then(response => {
+          this.data = response.data.results
+          this.total = response.data.count
+        })
+    },
+    likeProcess (processId) {
+      this.post(`/api/processes/${processId}/like/`, { }).then(() => this.fetchData())
+    },
+    dislikeProcess (processId) {
+      this.post(`/api/processes/${processId}/dislike/`, { }).then(() => this.fetchData())
     },
     updateProcess (process, tags) {
-      ProcessApi.updateProcess(process.id, process.name, process.description, tags)
+      this.put(`/api/processes/${process.id}/`, { name: process.name, description: process.description, tags: tags })
     },
     deleteProcess () {
-      ProcessApi.deleteProcess(this.selectedProcess.id)
-        .then(() => {
-          this.$bvModal.hide('delete-process-modal')
-          this.warning(this.selectedProcess.name, 'Process deleted successfully')
-          this.fetchData()
-        })
-        .catch(() => {
-          this.danger(this.selectedProcess.name, 'Unexpected error in process deletion')
-        })
+      this.delete(`/api/processes/${this.selectedProcess.id}/`, this.selectedProcess.name, 'Process deleted successfully').then(() => this.fetchData())
     },
     deleteStep () {
-      StepApi.deleteStep(this.selectedStep.id)
-        .then(() => {
-          this.$bvModal.hide('delete-step-modal')
-          this.warning(`${this.processName} - ${this.selectedStep.name}`, 'Step deleted successfully')
-          this.fetchData()
-        })
-        .catch(() => {
-          this.danger(this.processName, 'Unexpected error in step deletion')
-        })
+      this.delete(`/api/steps/${this.selectedStep.id}/`, `${this.processName} - ${this.selectedStep.name}`, 'Step deleted successfully').then(() => this.fetchData())
     },
-    showExecuteForm (process, step = null) {
+    taskModal (process) {
+      this.cleanSelection()
       this.taskForm = true
-      if (step !== null) {
-        this.selectStep(process, step)
-      } else {
-        this.selectProcess(process)
-      }
+      this.selectProcess(process)
     },
-    showProcessForm (process, step = null) {
+    processModal (process) {
+      this.cleanSelection()
       this.processForm = true
-      if (step !== null) {
-        this.selectStep(process, step)
-      } else {
-        this.selectProcess(process)
-      }
+      tthis.selectProcess(process)
     },
-    showStepForm (process, step = null) {
+    stepModal (process, step = null) {
+      this.cleanSelection()
       this.stepForm = true
       if (step !== null) {
         this.selectStep(process, step)

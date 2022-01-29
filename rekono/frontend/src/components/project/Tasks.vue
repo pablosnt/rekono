@@ -1,7 +1,7 @@
 <template>
   <div>
-    <TableHeader :filters="filters" add="execute-modal" :addAuth="auditor.includes($store.state.role)" addIcon="play-circle-fill" @add-click="showTaskForm = true" @filter="fetchData"/>
-    <b-table hover striped borderless head-variant="dark" :fields="tasksFields" :items="tasks" @row-clicked="navigateToTaskDetails">
+    <table-header :filters="filters" add="task-modal" :addAuth="auditor.includes($store.state.role)" addIcon="play-circle-fill" @add-click="showTaskForm = true" @filter="fetchData"/>
+    <b-table hover striped borderless head-variant="dark" :fields="tasksFields" :items="data" @row-clicked="navigateToTaskDetails">
       <template #cell(tool)="row">
         <div v-if="row.item.tool">
           <b-link :href="row.item.tool.reference" target="_blank">
@@ -11,12 +11,12 @@
         </div>
       </template>
       <template #cell(intensity_rank)="row">
-        <div v-for="i in intensities" :key="i.value">
+        <div v-for="i in intensityByVariant" :key="i.value">
           <b-badge v-if="i.intensity_rank === row.item.intensity_rank" :variant="i.variant">{{ row.item.intensity_rank }}</b-badge>
         </div>
       </template>
       <template #cell(status)="row">
-        <div v-for="i in statuses" :key="i.value">
+        <div v-for="i in statusByVariant" :key="i.value">
           <b-badge v-if="i.value === row.item.status" :variant="i.variant">{{ row.item.status }}</b-badge>
         </div>
       </template>
@@ -24,47 +24,34 @@
         {{ row.item.start !== null ? row.item.start.replace('T', ' ').substring(0, 19) : '' }}
       </template>
       <template #cell(actions)="row">
-        <b-button variant="outline" @click="selectTask(row.item)" v-b-modal.cancel-task-modal v-b-tooltip.hover title="Cancel Task" v-if="auditor.includes($store.state.role) && row.item.status !== 'Cancelled' && (cancellable.includes(row.item.status) || (row.item.repeat_in && row.item.repeat_time_unit))">
+        <b-button variant="outline" @click="selectTask(row.item)" v-b-modal.cancel-task-modal v-b-tooltip.hover title="Cancel Task" v-if="auditor.includes($store.state.role) && row.item.status !== 'Cancelled' && (cancellableStatuses.includes(row.item.status) || (row.item.repeat_in && row.item.repeat_time_unit))">
           <b-icon variant="danger" icon="dash-circle-fill"/>
         </b-button>
       </template>
     </b-table>
-    <Pagination :page="page" :limit="limit" :limits="limits" :total="total" name="tasks" @pagination="pagination"/>
-    <Deletion id="cancel-task-modal"
-      title="Cancel Task"
-      removeWord="cancel"
-      @deletion="cancelTask"
-      @clean="cleanSelection"
-      v-if="selectedTask !== null">
+    <pagination :page="page" :limit="limit" :limits="limits" :total="total" name="tasks" @pagination="pagination"/>
+    <deletion id="cancel-task-modal" title="Cancel Task" removeWord="cancel" @deletion="cancelTask" @clean="cleanSelection" v-if="selectedTask !== null">
       <span>selected task</span>
-    </Deletion>
-    <TaskForm id="execute-modal" :project="currentProject" :reload="true" :initialized="showTaskForm" @confirm="confirm" @clean="cleanSelection"/>
+    </deletion>
+    <task id="task-modal" :project="currentProject" :reload="true" :initialized="showTaskForm" @confirm="confirm" @clean="cleanSelection"/>
   </div>
 </template>
 
 <script>
-import TasksApi from '@/backend/tasks'
-import ProjectsApi from '@/backend/projects'
-import { auditor, intensitiesByVariant, intensitiesByValue, statusesByVariant, cancellableStatuses } from '@/backend/constants'
-import Deletion from '@/common/Deletion.vue'
-import TableHeader from '@/common/TableHeader.vue'
-import Pagination from '@/common/Pagination.vue'
-import AlertMixin from '@/common/mixin/AlertMixin.vue'
-import PaginationMixin from '@/common/mixin/PaginationMixin.vue'
-import TaskForm from '@/modals/TaskForm.vue'
+import RekonoApi from '@/backend/RekonoApi'
+import Deletion from '@/common/Deletion'
+import TableHeader from '@/common/TableHeader'
+import Pagination from '@/common/Pagination'
+import Task from '@/modals/Task'
 export default {
   name: 'projectTaskPage',
-  mixins: [AlertMixin, PaginationMixin],
+  mixins: [RekonoApi],
   props: {
     project: Object
   },
   data () {
     return {
-      auditor: auditor,
-      intensities: intensitiesByVariant,
-      statuses: statusesByVariant,
-      cancellable: cancellableStatuses,
-      tasks: this.fetchData(),
+      data: this.fetchData(),
       tasksFields: [
         { key: 'target.target', label: 'Target', sortable: true },
         { key: 'process.name', label: 'Process', sortable: true },
@@ -86,46 +73,31 @@ export default {
     Deletion,
     TableHeader,
     Pagination,
-    TaskForm
+    Task
   },
   watch: {
     tasks () {
       this.filters = [
-         { name: 'Intensity', values: intensitiesByValue, valueField: 'value', textField: 'text', filterField: 'intensity' },
-         { name: 'Status', values: statusesByVariant, valueField: 'value', textField: 'value', filterField: 'status' },
+         { name: 'Intensity', values: this.intensities, valueField: 'value', textField: 'text', filterField: 'intensity' },
+         { name: 'Status', values: this.statusesByVariant, valueField: 'value', textField: 'value', filterField: 'status' },
          { name: 'Executor', filterField: 'executor__username__icontains', type: 'text' }
       ]
     }
   },
   methods: {
-    fetchData (filters = null) {
-      if (!filters) {
-        filters = {}
-      }
-      filters.project = this.$route.params.id
-      TasksApi.getPaginatedTasks(this.getPage(), this.getLimit(), filters)
-        .then(data => {
-          this.total = data.count
-          this.tasks = data.results
+    fetchData (params = { }) {
+      params.project = this.$route.params.id
+      return this.getOnePage('/api/tasks/', params)
+        .then(response => {
+          this.data = response.data.results
+          this.total = response.data.count
         })
     },
     fetchProject () {
-      ProjectsApi.getProject(this.$route.params.id)
-        .then(data => {
-          this.currentProject = data
-        })
+      this.get(`/api/projects/${this.$route.params.id}/`).then(response => this.currentProject = response.data)
     },
     cancelTask () {
-      const notification = this.selectedTask.process ? this.selectedTask.process.name : this.selectedTask.tool.name
-      TasksApi.cancelTask(this.selectedTask.id)
-        .then(() => {
-          this.$bvModal.hide('cancel-task-modal')
-          this.warning(notification, 'Task cancelled successfully')
-          this.fetchData()
-        })
-        .catch(() => {
-          this.danger(notification, 'Unexpected error in task cancellation')
-        })
+      this.delete(`/api/tasks/${this.selectedTask.id}/`, this.selectedTask.process ? this.selectedTask.process.name : this.selectedTask.tool.name, 'Task cancelled successfully').then(this.fetchData())
     },
     selectTask (task) {
       this.selectedTask = task

@@ -1,7 +1,7 @@
 
 <script>
 export default {
-  name: 'paginationMixin',
+  name: 'rekonoPagination',
   data () {
     return {
       page: 1,

@@ -1,8 +1,9 @@
 <script>
 import { Doughnut } from 'vue-chartjs'
-import { statuses } from '@/backend/constants'
+import RekonoApi from '@/backend/RekonoApi'
 export default {
   extends: Doughnut,
+  mixins: [RekonoApi],
   props: {
     requested: Number,
     skipped: Number,
@@ -19,7 +20,7 @@ export default {
   watch: {
     total () {
       this.renderChart({
-        labels: statuses,
+        labels: this.statuses,
         datasets: [
           {
             backgroundColor: ['blue', 'gray', 'gold', 'black', 'red', 'green'],

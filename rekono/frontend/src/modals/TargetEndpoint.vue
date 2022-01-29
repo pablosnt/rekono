@@ -9,13 +9,14 @@
 </template>
 
 <script>
-import Targets from '@/backend/targets'
-import AlertMixin from '@/common/mixin/AlertMixin.vue'
-const TargetEndpointsApi = Targets.TargetEndpointsApi
+import RekonoApi from '@/backend/RekonoApi'
 export default {
-  name: 'targetEndpointForm',
-  mixins: [AlertMixin],
-  props: ['id', 'targetPortId'],
+  name: 'targetEndpointModal',
+  mixins: [RekonoApi],
+  props: {
+    id: String,
+    targetPortId: Number
+  },
   data () {
     return {
       targetEndpoint: null,
@@ -30,22 +31,11 @@ export default {
     confirm (event) {
       event.preventDefault()
       if (this.check()) {
-        this.createTargetEndpoint()
-          .then(success => {
-            this.$emit('confirm', { id: this.id, success: success, reload: true })
-          })
+        this.post('/api/target-endpoints/', { target_port: this.targetPortId, endpoint: this.targetEndpoint }, this.targetEndpoint, 'New target endpoint created successfully')
+          .then(() => { return Promise.resolve(true) })
+          .catch(() => { return Promise.resolve(false) })
+          .then(success => this.$emit('confirm', { id: this.id, success: success, reload: true }))
       }
-    },
-    createTargetEndpoint () {
-      return TargetEndpointsApi.createTargetEndpoint(this.targetPortId, this.targetEndpoint)
-        .then(() => {
-          this.success(this.targetEndpoint, 'New target endpoint created successfully')
-          return Promise.resolve(true)
-        })
-        .catch(() => {
-          this.danger(this.targetEndpoint, 'Unexpected error in target endpoint creation')
-          return Promise.resolve(false)
-        })
     },
     clean () {
       this.targetEndpoint = null

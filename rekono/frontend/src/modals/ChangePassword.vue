@@ -1,5 +1,9 @@
 <template>
   <b-modal :id="id" @hidden="clean" @ok="confirm" title="Change Password" ok-title="Change Password" header-bg-variant="dark" header-text-variant="light" ok-variant="dark">
+    <b-alert v-model="passwordError" variant="danger">
+      <b-icon icon="exclamation-circle-fill" variant="danger"></b-icon>
+      Invalid credentials
+    </b-alert>
     <b-form ref="change_password_form">
       <b-form-group invalid-feedback="Old password is required">
         <b-form-input type="password" v-model="oldPassword" :state="oldPasswordState" placeholder="Old password"/>
@@ -15,11 +19,10 @@
 </template>
 
 <script>
-import ProfileApi from '@/backend/profile'
-import AlertMixin from '@/common/mixin/AlertMixin.vue'
+import RekonoApi from '@/backend/RekonoApi'
 export default {
-  name: 'changePasswordForm',
-  mixins: [AlertMixin],
+  name: 'changePasswordModal',
+  mixins: [RekonoApi],
   props: {
     id: String,
     username: String
@@ -30,14 +33,25 @@ export default {
       newPassword: null,
       passwordConfirm: null,
       oldPasswordState: null,
-      newPasswordState: null
+      newPasswordState: null,
+      passwordError: false
     }
   },
   methods: {
+    handleError (error, title) {
+      if (error.response.status !== 401) {
+        this.$parent.$options.methods.handleError(error, title)
+      }
+    },
     confirm (event) {
       event.preventDefault()
       if (this.check()) {
-        this.changePassword()
+        this.put('/api/profile/change-password/', { password: this.newPassword, old_password: this.oldPassword }, this.username, 'Password changed successfully')
+          .catch(error => {
+            if (error.response.status !== 401) {
+              this.passwordError = true
+            }
+          })
       }
     },
     check () {
@@ -45,20 +59,6 @@ export default {
       this.oldPasswordState = (this.oldPassword && this.oldPassword.length > 0)
       this.newPasswordState = (this.newPassword && this.newPassword.length > 0 && this.newPassword === this.passwordConfirm)
       return valid && this.oldPasswordState && this.newPasswordState
-    },
-    changePassword () {
-      ProfileApi.changePassword(this.newPassword, this.oldPassword)
-        .then(() => {
-          this.success(this.username, 'Password changed successfully')
-          this.$bvModal.hide(this.id)
-        })
-        .catch(error => {
-          if (error.response.status === 401) {
-            this.danger(this.username, 'Invalid password')
-          } else {
-            this.danger(this.username, 'Unexpected error in password change')
-          }
-        })
     },
     clean () {
       this.oldPassword = null

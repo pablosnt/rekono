@@ -13,16 +13,17 @@
 </template>
 
 <script>
-import UsersApi from '@/backend/users'
-import ProjectsApi from '@/backend/projects'
-import AlertMixin from '@/common/mixin/AlertMixin.vue'
+import RekonoApi from '@/backend/RekonoApi'
 export default {
-  name: 'addProjectMemberForm',
-  mixins: [AlertMixin],
-  props: ['id', 'projectId'],
+  name: 'addProjectMemberModal',
+  mixins: [RekonoApi],
+  props: {
+    id: String,
+    projectId: Number
+  },
   data () {
     return {
-      users: this.fetchData(),
+      users: this.fetchUsers(),
       member: null,
       memberState: null
     }
@@ -35,8 +36,8 @@ export default {
     }
   },
   methods: {
-    fetchData () {
-      UsersApi.getAllUsers({ project__ne: this.projectId }).then(results => { this.users = results })
+    fetchUsers () {
+      this.getAllPages('/api/users/?o=username', { project__ne: this.projectId }).then(response => this.users = response.data.results)
     },
     check () {
       this.memberState = (this.member !== null)
@@ -45,21 +46,11 @@ export default {
     confirm (event) {
       event.preventDefault()
       if (this.check()) {
-        this.addMember().then(success => {
-          this.$emit('confirm', { id: this.id, success: success, reload: true })
-        })
+        super.post(`/api/projects/${this.projectId}/members/`, { user: this.member }, 'New member', 'New member added successfully')
+          .then(() => { return Promise.resolve(true) })
+          .catch(() => { return Promise.resolve(false) })
+          .then(success => { this.$emit('confirm', { id: this.id, success: success, reload: true }) })
       }
-    },
-    addMember () {
-      return ProjectsApi.addMember(this.projectId, this.member)
-        .then(() => {
-          this.success('New member', 'New member added successfully')
-          return Promise.resolve(true)
-        })
-        .catch(() => {
-          this.danger('New member', 'Unexpected error in member addition')
-          return Promise.resolve(false)
-        })
     },
     clean () {
       this.member = null

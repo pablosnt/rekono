@@ -72,19 +72,16 @@
 </template>
 
 <script>
-import ProjectsApi from '@/backend/projects'
-import Targets from '@/backend/targets'
-import TasksApi from '@/backend/tasks'
-import ExecutionsApi from '@/backend/executions'
-import FindingsApi from '@/backend/findings'
-import { severities, statuses } from '@/backend/constants'
-import FindingsByType from './FindingsByType.vue'
-import TasksByStatus from './TasksByStatus.vue'
-import VulnerabilitiesBySeverity from './VulnerabilitiesBySeverity.vue'
-const TargetsApi = Targets.TargetsApi
+import RekonoApi from '@/backend/RekonoApi'
+import FindingsByType from './FindingsByType'
+import TasksByStatus from './TasksByStatus'
+import VulnerabilitiesBySeverity from './VulnerabilitiesBySeverity'
 export default {
   name: 'dashboard',
-  props: ['project'],
+  mixins: [RekonoApi],
+  props: {
+    project: Object
+  },
   data () {
     return {
       height: 250,
@@ -131,8 +128,7 @@ export default {
     VulnerabilitiesBySeverity
   },
   methods: {
-    getFilter (field) {
-      let filter = null
+    getFilter (field, filter = null) {
       if (this.project) {
         filter = { [field]: this.project.id }
       }
@@ -140,58 +136,48 @@ export default {
     },
     countProjects () {
       if (!this.project) {
-        ProjectsApi.countProjects().then(count => { this.projects = count })
+        this.get('/api/projects/', 1, 1).then(response => { this.projects = response.data.count })
       } else {
         this.projects = 1
       }
     },
     countTargets () {
-      TargetsApi.countTargets(this.getFilter('project')).then(count => { this.targets = count })
+      this.get('/api/targets/', 1, 1, this.getFilter('project')).then(response => { this.targets = response.data.count })
     },
     countTasks () {
-      let filter = this.getFilter('project')
-      if (filter === null) {
-        filter = {}
-      }
-      for (let i in statuses) {
-        filter.status = statuses[i]
-        TasksApi.countTasks(filter).then(count => { this[statuses[i].toLowerCase()] = count; this.tasks = (this.tasks ? this.tasks : 0) + count })
-      }
+      let filter = this.getFilter('project', { })
+      this.statuses.forEach(status => {
+        filter.status = status
+        this.get('/api/tasks/', 1, 1, filter).then(response => { this[status.toLowerCase()] = response.data.count; this.tasks = (this.tasks ? this.tasks : 0) + response.data.count })
+      })
     },
     countExecutions () {
-      ExecutionsApi.countExecutions(this.getFilter('task__project')).then(count => { this.executions = count })
+      this.get('/api/executions/', 1, 1, this.getFilter('task__project')).then(response => { this.executions = response.data.count })
     },
     countFindings () {
-      let filter = this.getFilter('execution__task__target__project')
-      if (filter === null) {
-        filter = {}
-      }
+      let filter = this.getFilter('execution__task__target__project', { })
       filter.is_active = 'true'
-      const types = ['osint', 'credentials', 'hosts', 'enumerations', 'endpoints', 'technologies', 'vulnerabilities', 'exploits']
-      for (let i in types) {
-        FindingsApi.countFindings(types[i], filter).then(count => { this[types[i]] = count; this.findings = (this.findings ? this.findings : 0) + count })
-      }
+      this.findingTypes.forEach(type => {
+        this.get(`/api/${type.toLowerCase()}/`, 1, 1, filter).then(response => { this[type.toLowerCase()] = response.data.count; this.findings = (this.findings ? this.findings : 0) + response.data.count })
+      })
     },
     countVulnerabilities () {
-      let filter = this.getFilter('execution__task__target__project')
-      if (filter === null) {
-        filter = {}
-      }
+      let filter = this.getFilter('execution__task__target__project', { })
       filter.is_active = 'true'
       if (this.timeFilter) {
         let date = new Date()
         date.setDate(date.getDate() - this.timeFilter)
         filter.creation__gte = date.toISOString().replace('T', ' ').split('.', 1)[0]
       }
-      for (let i in severities) {
-        filter.severity = severities[i]
-        FindingsApi.countFindings('vulnerabilities', filter).then(count => { this[severities[i].toLowerCase()] = count })
-      }
+      this.severities.forEach(severity => {
+        filter.severity = severity
+        this.get('/api/vulnerabilities/', filter).then(response => this[severity.toLowerCase()] = response.data.count)
+      })
       filter.exploit__isnull = 'false'
-      for (let i in severities) {
-        filter.severity = severities[i]
-        FindingsApi.countFindings('vulnerabilities', filter).then(count => { this[`${severities[i].toLowerCase()}Exploit`] = count })
-      }
+      this.severities.forEach(severity => {
+        filter.severity = severity
+        this.get('/api/vulnerabilities/', filter).then(response => this[`${severity.toLowerCase()}Exploit`] = response.data.count)
+      })
     }
   }
 }

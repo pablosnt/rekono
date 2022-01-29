@@ -16,7 +16,7 @@
     </b-form>
     <b-form ref="step_form" v-if="tool !== null">
       <b-form-group description="Tool configuration">
-        <b-form-select v-model="configuration" :options="tool.configurations" value-field="id" text-field="name" required/>
+        <b-form-select v-model="configuration" :options="tool.configurations" value-field="id" text-field="name"/>
       </b-form-group>
       <b-form-group>
         <b-input-group :prepend="priority.toString()">
@@ -37,23 +37,14 @@
 </template>
 
 <script>
-import Processes from '@/backend/processes'
-import AlertMixin from '@/common/mixin/AlertMixin.vue'
-const ProcessApi = Processes.ProcessApi
-const StepApi = Processes.StepApi
+import RekonoApi from '@/backend/RekonoApi'
 export default {
-  name: 'processForm',
-  mixins: [AlertMixin],
+  name: 'processModal',
+  mixins: [RekonoApi],
   props: {
     id: String,
-    process: {
-      type: Object,
-      default: null
-    },
-    tool: {
-      type: Object,
-      default: null
-    },
+    process: Object,
+    tool: Object,
     initialized: {
       type: Boolean,
       default: false
@@ -109,41 +100,36 @@ export default {
       event.preventDefault()
       if (this.check()) {
         const operation = this.edit ? this.update() : this.create()
-        operation.then((success) => this.$emit('confirm', { id: this.id, success: success, reload: true }))
+        operation.then(success => this.$emit('confirm', { id: this.id, success: success, reload: true }))
       }
     },
     create () {
-      return ProcessApi.createProcess(this.name, this.description, this.tags)
-        .then((data) => {
+      return  this.post('/api/processes/', { name: this.name, description: this.description, tags: this.tags }, this.name)
+        .then(response => {
           if (this.tool === null) {
             this.success(this.name, 'New process created successfully')
             return Promise.resolve(true)
           } else {
-            return StepApi.createStep(data.id, this.tool.id, this.configuration, this.priority)
-              .then(() => {
-                this.success(`${this.name} - ${this.tool.name}`, 'New process created successfully')
-                return Promise.resolve(true)
-              })
-              .catch(() => {
-                this.danger(this.tool.name, 'Unexpected error in step creation')
-              })
+            return this.post(
+              '/api/steps/',
+              { process: response.data.id, tool_id: this.tool.id, configuration_id: this.configuration, priority: this.priority },
+              `${this.name} - ${this.tool.name}`,
+              'New process created successfully'
+            )
+              .then(() => { return Promise.resolve(true) })
+              .catch(() => { return Promise.resolve(false) })
           }
         })
-        .catch(() => {
-          this.danger(this.name, 'Unexpected error in process creation')
-          return Promise.resolve(false)
-        })
+        .catch(() => { return Promise.resolve(false) })
     },
     update () {
-      return ProcessApi.updateProcess(this.process.id, this.name, this.description, this.tags)
-        .then(() => {
-          this.success(this.name, 'Process updated successfully')
-          return Promise.resolve(true)
-        })
-        .catch(() => {
-          this.danger(this.name, 'Unexpected error in process update')
-          return Promise.resolve(false)
-        })
+      return this.put(
+        `/api/processes/${this.process.id}/`,
+        { name: this.name, description: this.description, tags: this.tags },
+        this.name, 'Process updated successfully'
+      )
+        .then(() => { return Promise.resolve(true) })
+        .catch(() => { return Promise.resolve(false) })
     },
     clean () {
       this.name = null

@@ -16,7 +16,7 @@
           <p v-if="currentTask.process">{{ currentTask.process.name }}</p>
           <p v-if="currentTask.tool">{{ currentTask.tool.name }}</p>
           <p v-if="currentTask.configuration">{{ currentTask.configuration.name }}</p>
-          <p v-for="i in intensities" :key="i.value">
+          <p v-for="i in intensitiesByVariant" :key="i.value">
             <b-badge v-if="i.intensity_rank === currentTask.intensity_rank" :variant="i.variant">{{ currentTask.intensity_rank }}</b-badge>
           </p>
         </b-collapse>
@@ -25,7 +25,7 @@
         <label class="text-muted">Status</label>
         <hr/>
         <b-collapse id="task-details" v-if="currentTask">
-          <p v-for="i in statuses" :key="i.value">
+          <p v-for="i in statusesByVariant" :key="i.value">
             <b-badge v-if="i.value === currentTask.status" :variant="i.variant">{{ currentTask.status }}</b-badge>
           </p>
           <p v-if="currentTask.start">Started at {{ currentTask.start.replace('T', ' ').substring(0, 19) }}</p>
@@ -48,7 +48,7 @@
           <p class="h5"><b-icon v-if="!showTaskDetails" variant="dark" icon="caret-down-fill"/></p>
           <p class="h5"><b-icon v-if="showTaskDetails" variant="dark" icon="caret-up-fill"/></p>
         </b-button>
-        <b-button variant="outline" v-b-modal.cancel-task-modal v-b-tooltip.hover title="Cancel Task" v-if="currentTask && auditor.includes($store.state.role) && currentTask.status !== 'Cancelled' && (cancellable.includes(currentTask.status) || (currentTask.repeat_in && currentTask.repeat_time_unit))">
+        <b-button variant="outline" v-b-modal.cancel-task-modal v-b-tooltip.hover title="Cancel Task" v-if="currentTask && auditor.includes($store.state.role) && currentTask.status !== 'Cancelled' && (cancellableStatuses.includes(currentTask.status) || (currentTask.repeat_in && currentTask.repeat_time_unit))">
           <p class="h5"><b-icon variant="danger" icon="dash-circle-fill"/></p>
         </b-button>
         <b-button variant="outline" v-b-modal.repeat-task-modal v-b-tooltip.hover title="Execute Again" v-if="currentTask && auditor.includes($store.state.role) && currentTask.status !== 'Requested' && currentTask.status !== 'Running'">
@@ -89,7 +89,7 @@
             <p v-if="!row.item.step">{{ currentTask.tool.stage_name }}</p>
           </template>
           <template #cell(status)="row">
-            <div v-for="i in statuses" :key="i.value">
+            <div v-for="i in statusesByVariant" :key="i.value">
               <b-badge v-if="i.value === row.item.status" :variant="i.variant">{{ row.item.status }}</b-badge>
             </div>
           </template>
@@ -116,7 +116,7 @@
             <template #title>
               <b-icon icon="flag-fill"/> Findings
             </template>
-            <Findings v-if="currentTask" class="mt-3" :task="currentTask" :execution="selectedExecution" :cols="1"/>
+            <findings v-if="currentTask" class="mt-3" :task="currentTask" :execution="selectedExecution" :cols="1"/>
           </b-tab>
         </b-tabs>
       </b-col>
@@ -124,41 +124,27 @@
     <b-modal id="repeat-task-modal" @ok="repeatTask" title="Repeat Task" ok-title="Execute Now" header-bg-variant="success" header-text-variant="light" ok-variant="success">
       <p>This task will be executed right now. Are you sure?</p>
     </b-modal>
-    <Deletion id="cancel-task-modal"
-      title="Cancel Task"
-      removeWord="cancel"
-      @deletion="cancelTask"
-      v-if="currentTask !== null">
+    <deletion id="cancel-task-modal" title="Cancel Task" removeWord="cancel" @deletion="cancelTask" v-if="currentTask !== null">
       <span>selected task</span>
-    </Deletion>
-    <DefectDojoForm id="defect-dojo-modal" :path="ddPath" :itemId="ddItemId" :alreadyReported="ddAlreadyReported" @clean="cleanDDSelection" @confirm="cleanDDSelection"/>
+    </deletion>
+    <defect-dojo id="defect-dojo-modal" :path="ddPath" :itemId="ddItemId" :alreadyReported="ddAlreadyReported" @clean="cleanDDSelection" @confirm="cleanDDSelection"/>
   </div>
 </template>
 
 <script>
-import TasksApi from '@/backend/tasks'
-import ExecutionsApi from '@/backend/executions'
-import { auditor, intensitiesByVariant, statusesByVariant, cancellableStatuses } from '@/backend/constants'
-import Deletion from '@/common/Deletion.vue'
-import AlertMixin from '@/common/mixin/AlertMixin.vue'
-import Findings from '@/components/findings/Findings.vue'
-import DefectDojoForm from '@/modals/DefectDojoForm.vue'
+import RekonoApi from '@/backend/RekonoApi'
+import Deletion from '@/common/Deletion'
+import Findings from '@/components/findings/Findings'
+import DefectDojo from '@/modals/DefectDojo'
 export default {
-  name: 'task',
-  mixins: [AlertMixin],
+  name: 'taskPage',
+  mixins: [RekonoApi],
   props: {
-    task: {
-      type: Object,
-      default: null
-    }
+    task: Object
   },
   data () {
     this.startAutoRefresh()
     return {
-      auditor: auditor,
-      cancellable: cancellableStatuses,
-      intensities: intensitiesByVariant,
-      statuses: statusesByVariant,
       currentTask: this.task ? this.task : this.fetchTask(),
       executions: this.fetchExecutions(),
       executionsFields: [
@@ -179,12 +165,12 @@ export default {
   components: {
     Findings,
     Deletion,
-    DefectDojoForm
+    DefectDojo
   },
   methods: {
     startAutoRefresh () {
       if (!this.autoRefresh) {
-        this.autoRefresh = setInterval(this.fetchData, 5000)
+        this.autoRefresh = setInterval(this.handleRefresh, 5000)
       }
     },
     stopAutoRefresh () {
@@ -193,7 +179,7 @@ export default {
         this.autoRefresh = null
       }
     },
-    fetchData () {
+    handleRefresh () {
       if (this.currentTask) {
         if (this.currentTask.status === 'Running' || this.currentTask.status === 'Requested') {
           this.fetchTask()
@@ -204,47 +190,28 @@ export default {
       }
     },
     fetchTask () {
-      TasksApi.getTask(this.$route.params.id)
-        .then((data) => {
-          this.currentTask = data
-        })
+      this.get(`/api/tasks/${this.$route.params.id}/`).then(response => { this.currentTask = response.data })
     },
     fetchExecutions () {
-      ExecutionsApi.getAllExecutionsByTask(this.$route.params.id)
-        .then(results => {
-          this.executions = results
-          this.selectExecution(null)
-        })
+      this.getAllPages('/api/executions/', { task: this.$route.params.id }).then(response => { this.executions = response.data.results; this.selectExecution(null) })
     },
     cancelTask () {
-      const notification = this.currentTask.process ? this.currentTask.process.name : this.currentTask.tool.name
-      TasksApi.cancelTask(this.currentTask.id)
-        .then(() => {
-          this.$bvModal.hide('cancel-task-modal')
-          this.warning(notification, 'Task cancelled successfully')
-          this.fetchTask()
-        })
-        .catch(() => {
-          this.danger(notification, 'Unexpected error in task cancellation')
-        })
+      super.delete(
+        `/api/tasks/${this.currentTask.id}/`,
+        this.currentTask.process ? this.currentTask.process.name : this.currentTask.tool.name, 'Task cancelled successfully'
+      ).then(() => { this.fetchTask() })
     },
     repeatTask () {
-      const notification = this.currentTask.process ? this.currentTask.process.name : this.currentTask.tool.name
-      TasksApi.repeatTask(this.currentTask.id)
-        .then((data) => {
-          this.$bvModal.hide('repeat-task-modal')
-          this.success(notification, 'Task executed again successfully')
-          this.$router.push({ name: 'task', params: { id: data.id, task: data } })
-        })
-        .catch(() => {
-          this.danger(notification, 'Unexpected error in task execution')
-        })
+      super.post(
+        `/api/tasks/${this.currentTask.id}/repeat/`, { },
+        this.currentTask.process ? this.currentTask.process.name : this.currentTask.tool.name, 'Task executed again successfully'
+      ).then(response => { this.$router.push({ name: 'task', params: { id: response.data.id, task: response.data } }) })
     },
     selectExecution (items) {
       if (items && items.length > 0) {
         this.selectedExecution = items[0]
       } else {
-        this.selectedExecution = this.executions.length > 0 ? this.executions.find(execution => execution.status !== 'Requested' && execution.status !== 'Running' && execution.status !== 'Skipped') : null
+        this.selectedExecution = this.executions.length > 0 ? this.executions.find(execution => execution.status === 'Completed') : null
       }
     },
     cleanDDSelection () {

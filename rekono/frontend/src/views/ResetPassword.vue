@@ -1,5 +1,5 @@
 <template>
-  <PublicForm>
+  <public-form>
     <template>
       <b-form @submit="handleResetPassword">
         <b-alert v-if="!otp" v-model="emailSent" variant="success">
@@ -40,16 +40,15 @@
         </b-row>
       </b-form>
     </template>
-  </PublicForm>
+  </public-form>
 </template>
 
 <script>
-import UsersApi from '@/backend/users'
-import PublicForm from '@/common/PublicForm.vue'
-import AlertMixin from '@/common/mixin/AlertMixin.vue'
+import RekonoApi from '@/backend/RekonoApi'
+import PublicForm from '@/common/PublicForm'
 export default {
-  name: 'resetPasswordForm',
-  mixins: [AlertMixin],
+  name: 'resetPasswordPage',
+  mixins: [RekonoApi],
   props: ['otp'],
   data () {
     return {
@@ -69,9 +68,10 @@ export default {
       event.preventDefault()
       if (this.check()) {
         if (this.otp && this.otp.length > 0) {
-          this.resetPassword()
+          this.put('/api/reset-password/', { password: this.password, otp: this.otp }, 'Reset Password', 'Password changed successfully', true).then(() => this.$store.dispatch('redirectToLogin'))
         } else {
-          this.requestResetPassword()
+          this.post('/api/reset-password/', { email: this.email }, null, null, true)
+          this.emailSent = true
         }
       }
     },
@@ -83,20 +83,6 @@ export default {
         this.emailState = (this.email !== null && this.email.length > 0)
         return this.emailState
       }
-    },
-    requestResetPassword () {
-      UsersApi.requestResetPassword(this.email)
-      this.emailSent = true
-    },
-    resetPassword () {
-      UsersApi.resetPassword(this.password, this.otp)
-        .then(() => {
-          this.success('Reset Password', 'Password changed successfully')
-          this.$store.dispatch('redirectToLogin')
-        })
-        .catch(() => {
-          this.danger('Reset Password', 'Unexpected error in password change')
-        })
     }
   }
 }

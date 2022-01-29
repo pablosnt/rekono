@@ -25,11 +25,9 @@ export default {
   computed: {
     limitItems () {
       if (this.total > 0) {
-        const items = [this.limits[0]]
-        for (let s = 1; s < this.limits.length; s++) {
-          if (this.limits[s] < this.total) {
-            items.push(this.limits[s])
-          }
+        let items = this.limits.filter(limit => limit < this.total)
+        if (items.length === 0) {
+          items = [this.limits[0]]
         }
         return items
       } else {

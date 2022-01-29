@@ -13,30 +13,21 @@
         <b-form-select v-model="role" :options="roles" value-field="value" text-field="value" :state="roleState" required/>
       </b-form-group>
     </b-form>
-    <template v-if="loading" #modal-ok>
-      <b-button variant="dark" disabled>
-        <b-spinner small></b-spinner>
-      </b-button>
-    </template>
    </b-modal>
 </template>
 
 <script>
-import UsersApi from '@/backend/users'
-import { roles } from '@/backend/constants'
-import AlertMixin from '@/common/mixin/AlertMixin.vue'
+import RekonoApi from '@/backend/RekonoApi'
 export default {
-  name: 'inviteUserForm',
-  mixins: [AlertMixin],
+  name: 'inviteUserModal',
+  mixins: [RekonoApi],
   props: ['id'],
   data () {
     return {
-      roles: roles,
       email: null,
       role: null,
       emailState: null,
-      roleState: null,
-      loading: false
+      roleState: null
     }
   },
   methods: {
@@ -49,23 +40,11 @@ export default {
     confirm (event) {
       event.preventDefault()
       if (this.check()) {
-        this.loading = true
-        this.invite().then(success => {
-          this.$emit('confirm', { id: this.id, success: success, reload: true })
-          this.loading = false
-        })
+        this.post('/api/users/invite/', { email: this.email, role: this.role }, this.email, 'New user invited successfully')
+          .then(() => {
+            this.$emit('confirm', { id: this.id, success: true, reload: true })
+          })
       }
-    },
-    invite () {
-      return UsersApi.inviteUser(this.email, this.role)
-        .then(() => {
-          this.success(this.email, 'New user invited successfully')
-          return Promise.resolve(true)
-        })
-        .catch(() => {
-          this.danger(this.email, 'Unexpected error in user invitation')
-          return Promise.resolve(false)
-        })
     },
     clean () {
       this.email = null

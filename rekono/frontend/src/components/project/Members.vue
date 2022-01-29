@@ -1,9 +1,9 @@
 <template>
   <div>
-    <TableHeader :filters="filters" add="add-member-modal" @filter="fetchData"/>
-    <b-table striped borderless head-variant="dark" :fields="usersFields" :items="users">
+    <table-header :filters="filters" add="add-member-modal" @filter="fetchData"/>
+    <b-table striped borderless head-variant="dark" :fields="usersFields" :items="data">
       <template #cell(role)="row">
-        <b-badge :variant="roles[row.item.role.toLowerCase()]"><strong>{{ row.item.role.toUpperCase() }}</strong></b-badge>
+        <b-badge :variant="roleByVariant[row.item.role.toLowerCase()]"><strong>{{ row.item.role.toUpperCase() }}</strong></b-badge>
       </template>
       <template #cell(last_login)="row">
         {{ row.item.last_login !== null ? row.item.last_login.split('.', 1)[0].replace('T', ' ') : '' }}
@@ -14,38 +14,29 @@
         </b-button>
       </template>
     </b-table>
-    <Pagination :page="page" :limit="limit" :limits="limits" :total="total" name="members" @pagination="pagination"/>
-    <Deletion id="delete-member-modal"
-      title="Delete Member"
-      @deletion="deleteMember"
-      @clean="cleanSelection"
-      v-if="selectedUser !== null">
+    <pagination :page="page" :limit="limit" :limits="limits" :total="total" name="members" @pagination="pagination"/>
+    <deletion id="delete-member-modal" title="Delete Member" @deletion="deleteMember" @clean="cleanSelection" v-if="selectedUser !== null">
       <span><strong>{{ selectedUser.username }}</strong> member</span>
-    </Deletion>
-    <ProjectMemberForm id="add-member-modal" :projectId="$route.params.id" @confirm="confirm"/>
+    </deletion>
+    <project-member id="add-member-modal" :projectId="$route.params.id" @confirm="confirm"/>
   </div>
 </template>
 
 <script>
-import UsersApi from '@/backend/users'
-import ProjectsApi from '@/backend/projects'
-import { roles, rolesByVariant } from '@/backend/constants'
-import Deletion from '@/common/Deletion.vue'
-import TableHeader from '@/common/TableHeader.vue'
-import Pagination from '@/common/Pagination.vue'
-import AlertMixin from '@/common/mixin/AlertMixin.vue'
-import PaginationMixin from '@/common/mixin/PaginationMixin.vue'
-import ProjectMemberForm from '@/modals/ProjectMemberForm.vue'
+import RekonoApi from '@/backend/RekonoApi'
+import Deletion from '@/common/Deletion'
+import TableHeader from '@/common/TableHeader'
+import Pagination from '@/common/Pagination'
+import ProjectMember from '@/modals/ProjectMember'
 export default {
   name: 'projectMembersPage',
-  mixins: [AlertMixin, PaginationMixin],
+  mixins: [RekonoApi],
   props: {
     project: Object
   },
   data () {
     return {
-      roles: rolesByVariant,
-      users: this.fetchData(),
+      data: this.fetchData(),
       usersFields: [
         { key: 'first_name', sortable: true },
         { key: 'last_name', sortable: true },
@@ -63,37 +54,26 @@ export default {
     Deletion,
     TableHeader,
     Pagination,
-    ProjectMemberForm
+    ProjectMember
   },
   watch: {
     users () {
       this.filters = [
-        { name: 'Role', values: roles, valueField: 'value', textField: 'value', filterField: 'role' }
+        { name: 'Role', values: this.roles, valueField: 'value', textField: 'value', filterField: 'role' }
       ]
     }
   },
   methods: {
-    fetchData (filters = null) {
-      if (!filters) {
-        filters = {}
-      }
+    fetchData (params = { }) {
       filters.project = this.$route.params.id
-      UsersApi.getPaginatedUsers(this.getPage(), this.getLimit(), filters)
-        .then(data => {
-          this.total = data.count
-          this.users = data.results
+      return this.getOnePage('/api/users/?o=username', params)
+        .then(response => {
+          this.data = response.data.results
+          this.total = response.data.count
         })
     },
     deleteMember () {
-      ProjectsApi.deleteMember(this.$route.params.id, this.selectedUser.id)
-        .then(() => {
-          this.$bvModal.hide('delete-member-modal')
-          this.warning(`${this.selectedUser.username}`, 'Member deleted successfully')
-          this.fetchData()
-        })
-        .catch(() => {
-          this.danger(`${this.selectedUser.username}`, 'Unexpected error in member deletion')
-        })
+      this.delete(`/api/projects/${this.$route.params.id}/members/${this.selectedUser.id}`, this.selectedUser.username, 'Member deleted successfully').then(() => this.fetchData())
     },
     selectUser (user) {
       this.selectedUser = user

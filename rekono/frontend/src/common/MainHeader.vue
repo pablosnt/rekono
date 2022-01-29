@@ -17,7 +17,7 @@
             <b-icon variant="danger" icon="code-slash"/>
             <label class="ml-2">Rekono API Rest</label>
           </b-dropdown-item>
-          <b-dropdown-item @click="handleLogout">
+          <b-dropdown-item @click.native.prevent="logout">
             <b-icon variant="secondary" icon="box-arrow-right"/>
             <label class="ml-2">Logout</label>
           </b-dropdown-item>
@@ -28,12 +28,16 @@
 </template>
 
 <script>
+import RekonoApi from '@/backend/RekonoApi'
+import { refreshTokenKey } from '@/backend/tokens'
+
 export default {
-  name: 'commonHeader',
+  name: 'mainHeader',
+  mixins: [RekonoApi],
   methods: {
-    handleLogout (event) {
-      event.preventDefault()
-      this.$store.dispatch('logoutAction')
+    logout () {
+      this.post('/api/logout/', { refresh_token: localStorage[refreshTokenKey] })
+      this.$store.dispatch('logout')
     }
   }
 }

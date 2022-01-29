@@ -9,13 +9,14 @@
 </template>
 
 <script>
-import Targets from '@/backend/targets'
-import AlertMixin from '@/common/mixin/AlertMixin.vue'
-const TargetPortsApi = Targets.TargetPortsApi
+import RekonoApi from '@/backend/RekonoApi'
 export default {
-  name: 'targetPortForm',
-  mixins: [AlertMixin],
-  props: ['id', 'targetId'],
+  name: 'targetPortModal',
+  mixins: [RekonoApi],
+  props: {
+    id: String,
+    targetId: Number
+  },
   data () {
     return {
       targetPort: null,
@@ -30,22 +31,11 @@ export default {
     confirm (event) {
       event.preventDefault()
       if (this.check()) {
-        this.createTargetPort()
-          .then(success => {
-            this.$emit('confirm', { id: this.id, success: success, reload: true })
-          })
+        super.post('/api/target-ports/', { target: this.targetId, port: this.targetPort }, this.targetPort, 'New target port created successfully')
+          .then(() => { return Promise.resolve(true) })
+          .catch(() => { return Promise.resolve(false) })
+          .then(success => this.$emit('confirm', { id: this.id, success: success, reload: true }))
       }
-    },
-    createTargetPort () {
-      return TargetPortsApi.createTargetPort(this.targetId, this.targetPort)
-        .then(() => {
-          this.success(this.targetPort, 'New target port created successfully')
-          return Promise.resolve(true)
-        })
-        .catch(() => {
-          this.danger(this.targetPort, 'Unexpected error in target port creation')
-          return Promise.resolve(false)
-        })
     },
     clean () {
       this.targetPort = null

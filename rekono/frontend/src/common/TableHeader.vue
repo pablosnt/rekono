@@ -9,7 +9,7 @@
           <b-form-input v-model="searchInput" placeholder="Search" type="search" @input="filter"/>
         </b-input-group>
       </b-col>
-      <b-col v-if="(add && addIcon && addAuth === true) || (filters && filters.length > 0)">
+      <b-col v-if="(add && addIcon && showAdd === true) || (filters && filters.length > 0)">
         <div class="text-right">
           <b-button id="filter-button" v-if="filters && filters.length > 0" variant="outline" v-b-toggle.filters @click="toggleFilters()">
             <p class="h3">
@@ -20,7 +20,7 @@
           <b-tooltip target="filter-button" triggers="hover" title="Filter" v-if="showFilters"/>
           <b-tooltip target="filter-button" triggers="hover" title="Clean Filter" v-if="!showFilters"/>
           <span/>
-          <b-button v-if="add && addIcon && addAuth === true" variant="outline" @click="$emit('add-click')" v-b-tooltip.hover title="Add" v-b-modal="add">
+          <b-button v-if="add && addIcon && showAdd === true" variant="outline" @click="$emit('add-click')" v-b-tooltip.hover title="Add" v-b-modal="add">
             <p class="h3"><b-icon variant="success" :icon="addIcon"/></p>
           </b-button>
         </div>
@@ -45,18 +45,14 @@
 </template>
 
 <script>
+import RekonoApi from '@/backend/RekonoApi'
 export default {
   name: 'tableHeader',
+  mixins: [RekonoApi],
   props: {
-    filters: {
-      type: Array,
-      default: null
-    },
-    add: {
-      type: String,
-      default: null
-    },
-    addAuth: {
+    filters: Array,
+    add: String,
+    showAdd: {
       type: Boolean,
       default: true
     },
@@ -67,7 +63,7 @@ export default {
   },
   computed: {
     filterCols () {
-      return (this.addAuth === true || (this.filters && this.filters.length > 0)) ? 8 : 12
+      return (this.showAdd === true || (this.filters && this.filters.length > 0)) ? 8 : 12
     },
   },
   data () {
@@ -95,10 +91,7 @@ export default {
         }
         this.selectedFilters[field] = value
       }
-      let filter = this.selectedFilters
-      filter.search = this.searchInput
-      console.log(filter)
-      this.$emit('filter', this.selectedFilters)
+      this.$emit('filter', Object.assign({}, this.selectedFilters, { search: this.searchInput }))
     }
   }
 }

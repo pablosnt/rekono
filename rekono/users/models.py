@@ -26,7 +26,8 @@ class RekonoUserManager(UserManager):
         group = Group.objects.get(name=role.value)                              # Get user group related to the role
         user.groups.clear()                                                     # Clean user groups
         user.groups.set([group])                                                # Set user group
-        Token.objects.create(user=user)                                         # Create a new API token for the user
+        if not Token.objects.filter(user=user).exists():
+            Token.objects.create(user=user)                                     # Create a new API token for the user
 
     def create_user(self, email: str, role: Role) -> Any:
         '''Create a new user.

@@ -1,10 +1,10 @@
 <template>
   <div>
-    <TableHeader :filters="filters" add="invite-modal" @filter="fetchData"/>
-    <b-table striped borderless head-variant="dark" :fields="usersFields" :items="users">
+    <table-header :filters="filters" add="invite-modal" @filter="fetchData"/>
+    <b-table striped borderless head-variant="dark" :fields="usersFields" :items="data">
       <template #cell(role)="row">
         <b-form-select v-if="row.item.is_active" v-model="row.item.role" :options="roles" value-field="value" text-field="value" :disabled="row.item.id === $store.state.user" @input="selectUser(row.item)" @change="updateRole"/>
-        <b-form-select v-if="!row.item.is_active" v-model="row.item.role" :options="roles" value-field="value" text-field="value" @change="selectRoleBeforeEnableUser"/>
+        <b-form-select v-if="!row.item.is_active" v-model="row.item.role" :options="roles" value-field="value" text-field="value" @change="selectRole"/>
       </template>
       <template #cell(last_login)="row">
         {{ row.item.last_login !== null ? row.item.last_login.split('.', 1)[0].replace('T', ' ') : '' }}
@@ -18,35 +18,27 @@
         </b-button>
       </template>
     </b-table>
-    <Pagination :page="page" :limit="limit" :limits="limits" :total="total" name="users" @pagination="pagination"/>
-    <Deletion id="disable-user-modal"
-      title="Disable User"
-      removeWord="disable"
-      @deletion="disableUser"
-      @clean="cleanSelection"
-      v-if="selectedUser !== null">
+    <pagination :page="page" :limit="limit" :limits="limits" :total="total" name="users" @pagination="pagination"/>
+    <deletion id="disable-user-modal" title="Disable User" removeWord="disable" @deletion="disableUser" @clean="cleanSelection" v-if="selectedUser !== null">
       <span><strong>{{ selectedUser.username }}</strong> user</span>
-    </Deletion>
-    <UserInviteForm id="invite-modal" @confirm="confirm"/>
+    </deletion>
+    <invite-user id="invite-modal" @confirm="confirm"/>
   </div>
 </template>
 
 <script>
-import UsersApi from '@/backend/users'
-import { roles } from '@/backend/constants'
-import Deletion from '@/common/Deletion.vue'
-import TableHeader from '@/common/TableHeader.vue'
-import Pagination from '@/common/Pagination.vue'
-import AlertMixin from '@/common/mixin/AlertMixin.vue'
-import PaginationMixin from '@/common/mixin/PaginationMixin.vue'
-import UserInviteForm from '@/modals/UserInviteForm.vue'
+import RekonoApi from '@/backend/RekonoApi'
+import Deletion from '@/common/Deletion'
+import TableHeader from '@/common/TableHeader'
+import Pagination from '@/common/Pagination'
+import InviteUser from '@/modals/InviteUser'
 export default {
   name: 'usersPage',
-  mixins: [AlertMixin, PaginationMixin],
+  mixins: [RekonoApi],
   data () {
+    this.fetchData()
     return {
-      roles: roles,
-      users: this.fetchData(),
+      data: [],
       usersFields: [
         { key: 'first_name', sortable: true },
         { key: 'last_name', sortable: true },
@@ -65,52 +57,31 @@ export default {
     Deletion,
     TableHeader,
     Pagination,
-    UserInviteForm
+    InviteUser
   },
   watch: {
-    users () {
+    data () {
       this.filters = [
-        { name: 'Role', values: roles, valueField: 'value', textField: 'value', filterField: 'role' }
+        { name: 'Role', values: this.roles, valueField: 'value', textField: 'value', filterField: 'role' }
       ]
     }
   },
   methods: {
-    fetchData (filters = null) {
-      UsersApi.getPaginatedUsers(this.getPage(), this.getLimit(), filters)
-        .then(data => {
-          this.total = data.count
-          this.users = data.results
+    fetchData (params = null) {
+      return this.getOnePage('/api/users/?o=username', params)
+        .then(response => {
+          this.data = response.data.results
+          this.total = response.data.count
         })
     },
     updateRole (role) {
-      UsersApi.updateRole(this.selectedUser.id, role)
-        .then(() => {
-          this.success(this.selectedUser.username, 'User role updated successfully')
-          this.fetchData()
-        })
-        .catch(() => {
-          this.danger(this.selectedUser.username, 'Unexpected error in user role update')
-        })
+      this.put(`/api/users/${this.selectedUser.id}/role/`, { role: role }, this.selectedUser.username, 'User role updated successfully')
     },
     disableUser () {
-      UsersApi.disableUser(this.selectedUser.id)
-        .then(() => {
-          this.warning(this.selectedUser.username, 'User disabled successfully')
-          this.fetchData()
-        })
-        .catch(() => {
-          this.danger(this.selectedUser.username, 'Unexpected error in user disabling')
-        })
+      this.delete(`/api/users/${this.selectedUser.id}/`, this.selectedUser.username, 'User disabled successfully').then(() => this.fetchData())
     },
     enableUser () {
-      UsersApi.enableUser(this.selectedUser.id, this.selectedRole)
-        .then(() => {
-          this.success(this.selectedUser.username, 'User enabled successfully')
-          this.fetchData()
-        })
-        .catch(() => {
-          this.danger(this.selectedUser.username, 'Unexpected error in user enabling')
-        })
+      this.post(`/api/users/${this.selectedUser.id}/enable/`, { role: this.selectedRole }, this.selectedUser.username, 'User enabled successfully').then(() => this.fetchData())
     },
     selectAndEnableUser (user) {
       if (this.selectedRole) {
@@ -120,7 +91,7 @@ export default {
         this.warning(user.username, 'Before enable this user, you need to select one role')
       }
     },
-    selectRoleBeforeEnableUser (role) {
+    selectRole (role) {
       this.selectedRole = role
     },
     selectUser (user) {
@@ -133,4 +104,3 @@ export default {
   }
 }
 </script>
-

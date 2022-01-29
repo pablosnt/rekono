@@ -25,17 +25,13 @@
 </template>
 
 <script>
-import ProjectApi from '@/backend/projects'
-import AlertMixin from '@/common/mixin/AlertMixin.vue'
+import RekonoApi from '@/backend/RekonoApi'
 export default {
-  name: 'projectForm',
-  mixins: [AlertMixin],
+  name: 'projectModal',
+  mixins: [RekonoApi],
   props: {
     id: String,
-    project: {
-      type: Object,
-      default: null
-    },
+    project: Object,
     initialized: {
       type: Boolean,
       default: false
@@ -87,26 +83,22 @@ export default {
       }
     },
     create () {
-      return ProjectApi.createProject(this.name, this.description, this.defectDojoId, this.tags)
-        .then(() => {
-          this.success(this.name , 'New project created successfully')
-          return Promise.resolve(true)
-        })
-        .catch(() => {
-          this.danger(this.name, 'Unexpected error in project creation')
-          return Promise.resolve(false)
-        })
+      return this.post(
+        '/api/projects/',
+        { name: this.name, description: this.description, defectdojo_product_id: this.defectDojoId, tags: this.tags },
+        this.name , 'New project created successfully'
+      )
+        .then(() => { return Promise.resolve(true) })
+        .catch(() => { return Promise.resolve(false) })
     },
     update () {
-      return ProjectApi.updateProject(this.project.id, this.name, this.description, this.defectDojoId, this.tags)
-        .then(() => {
-          this.success(this.name , 'Project updated successfully')
-          return Promise.resolve(true)
-        })
-        .catch(() => {
-          this.danger(this.name, 'Unexpected error in project update')
-          return Promise.resolve(false)
-        })
+      return this.put(
+        `/api/projects/${this.project.id}/`,
+        { name: this.name, description: this.description, defectdojo_product_id: this.defectDojoId, tags: this.tags },
+        this.name , 'Project updated successfully'
+      )
+        .then(() => { return Promise.resolve(true) })
+        .catch(() => { return Promise.resolve(false) })
     },
     clean () {
       this.name = null

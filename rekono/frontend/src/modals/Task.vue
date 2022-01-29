@@ -96,36 +96,16 @@
 </template>
 
 <script>
-import Processes from '@/backend/processes'
-import ProjectApi from '@/backend/projects'
-import TaskApi from '@/backend/tasks'
-import ToolApi from '@/backend/tools'
-import WordlistApi from '@/backend/resources'
-import { intensitiesByVariant } from '@/backend/constants'
-import AlertMixin from '@/common/mixin/AlertMixin.vue'
-import { findById } from '@/backend/utils'
-const ProcessApi = Processes.ProcessApi
+import RekonoApi from '@/backend/RekonoApi'
 export default {
-  name: 'taskForm',
-  mixins: [AlertMixin],
+  name: 'taskModal',
+  mixins: [RekonoApi],
   props: {
     id: String,
-    process: {
-      type: Object,
-      default: null
-    },
-    tool: {
-      type: Object,
-      default: null
-    },
-    project: {
-      type: Object,
-      default: null
-    },
-    target: {
-      type: Object,
-      default: null
-    },
+    process: Object,
+    tool: Object,
+    project: Object,
+    target: Object,
     reload: {
       type: Boolean,
       default: false
@@ -137,13 +117,13 @@ export default {
   },
   computed: {
     title () {
-      let title = 'New Task'
-      if (this.process !== null) {
-        title = `Execute ${this.process.name}`
-      } else if (this.tool !== null) {
-        title = `Execute ${this.tool.name}`
+      return this.process !== null ? `Execute ${this.process.name}` : this.tool !== null ? `Execute ${this.tool.name}` : 'New Task'
+    },
+    intensities () {
+      if (this.selectedTool) {
+        return this.intensitiesByVariant.filter(intensity => this.selectedTool.intensities.find(i => i.intensity_rank === intensity.intensity_rank))
       }
-      return title
+      return this.intensityByVariant
     }
   },
   data () {
@@ -154,8 +134,6 @@ export default {
       processes: [],
       tools: [],
       wordlists: [],
-      intensities: intensitiesByVariant,
-      timeUnits: ['Weeks', 'Days', 'Hours', 'Minutes'],
       selectedProject: null,
       selectedProcess: null,
       selectedTool: null,
@@ -186,21 +164,18 @@ export default {
       if (initialized) {
         if (this.tool) {
           this.selectTool(this.tool.id, this.tool)
-        }
-        if (this.process) {
+        } else if (this.process) {
           this.selectProcess(this.process.id, this.process)
-        }
-        if (!this.tool && !this.process) {
-          ToolApi.getAllTools().then(results => { this.tools = results })
-          ProcessApi.getAllProcesses().then(results => { this.processes = results })
+        } else if (!this.tool && !this.process) {
+          this.getAllPages('/api/tools/?o=stage,-likes_count,name').then(response => { this.tools = response.data.results })
+          this.getAllPages('/api/processes/?o=-likes_count,name').then(response => { this.processes = response.data.results })
         }
         if (this.target) {
           this.targetId = this.target.id
-          this.targets = [this.target]
         } else if (this.project) {
-          ProjectApi.getProject(this.project.id).then(data => { this.selectProject(this.project.id, data) })
+          this.get(`/api/projects/${this.project.id}/`).then(response => { this.selectProject(this.project.id, response.data) })
         } else {
-          ProjectApi.getAllProjects().then(results => { this.projects = results })
+          this.getAllPages('/api/projects/?o=name').then(response => { this.projects = response.data.results })
         }
       }
     }
@@ -226,30 +201,37 @@ export default {
     confirm (event) {
       event.preventDefault()
       if (this.check()) {
-        this.create().then((success) => this.$emit('confirm', { id: this.id, success: success, reload: this.reload }))
+        this.create().then(success => this.$emit('confirm', { id: this.id, success: success, reload: this.reload }))
       }
     },
     create () {
-      let notification = null
-      if (this.selectedTool !== null) notification = this.selectedTool.name
-      else if (this.selectedProcess !== null) notification = this.selectedProcess.name
-      return TaskApi.createTask(this.targetId, this.processId, this.toolId, this.configurationId, this.intensity, this.scheduledAtDate, this.scheduledAtTime, this.scheduledIn, this.scheduledTimeUnit, this.repeatIn, this.repeatTimeUnit, this.wordlistsItems)
-        .then(() => {
-          this.$bvModal.hide('execute-modal')
-          this.success(notification, 'Execution requested successfully')
-          return Promise.resolve(true)
-        })
-        .catch(() => {
-          this.danger(notification, 'Unexpected error in execution request')
-          return Promise.resolve(false)
-        })
+      const data = {
+        target_id: this.targetId,
+        intensity_rank: this.intensity,
+        scheduled_at: this.scheduledAtDate && this.scheduledAtTime ? `${this.scheduledAtDate}T${this.scheduledAtTime}Z` : null,
+        scheduled_in: this.scheduledIn,
+        schduled_time_unit: this.scheduledTimeUnit,
+        repeat_in: this.repeatIn,
+        repeat_time_unit: this.repeatTimeUnit,
+        wordlists: this.wordlistsItems
+      }
+      if (this.processId) {
+        data.process_id = this.processId
+      }
+      if (this.toolId) {
+        data.tool_id = this.toolId
+      }
+      if (this.configurationId) {
+        data.configuration_id = this.configurationId
+      }
+      return this.post('/api/tasks/', data, this.selectedTool ? this.selectedTool.name : this.selectedProcess.name, 'Execution requested successfully')
+        .then(() => { return Promise.resolve(true) })
+        .catch(() => { return Promise.resolve(false) })
     },
     clean () {
       this.processes = []
       this.tools = []
       this.wordlists = []
-      this.intensities = intensitiesByVariant
-      this.timeUnits = ['Weeks', 'Days', 'Hours', 'Minutes']
       this.selectedProject = null
       this.selectedProcess = null
       this.selectedTool = null
@@ -286,7 +268,7 @@ export default {
       if (project) {
         this.selectedProject = project
       } else {
-        this.selectedProject = findById(this.projects, projectId)
+        this.selectedProject = this.projects.find(project => project.id === projectId)
       }
       this.targets = this.selectedProject.targets
     },
@@ -296,12 +278,11 @@ export default {
       this.selectedTool = null
       this.configurationId = null
       this.selectedConfiguration = null
-      this.intensities = intensitiesByVariant
       this.intensity = 'Normal'
       if (process) {
         this.selectedProcess = process
       } else {
-        this.selectedProcess = findById(this.processes, processId)
+        this.selectedProcess = this.processes.find(process => process.id === processId)
       }
       const isWordlist = this.checkInputType('Wordlist')
       if (!this.isWordlist && isWordlist) {
@@ -316,24 +297,14 @@ export default {
       if (tool) {
         this.selectedTool = tool
       } else {
-        this.selectedTool = findById(this.tools, toolId)
+        this.selectedTool = this.tools.find(tool => tool.id === toolId)
       }
       this.selectConfiguration(this.selectedTool.configurations[0].id, this.selectedTool.configurations[0])
-      this.intensity = null
-      this.intensities = []
-      for (let i = 0; i < this.selectedTool.intensities.length; i++) {
-        for (let j = 0; j < intensitiesByVariant.length; j++) {
-          if (this.selectedTool.intensities[i].intensity_rank === intensitiesByVariant[j].intensity_rank) {
-            this.intensities.push(intensitiesByVariant[j])
-            break
-          }
-        }
-        if (this.selectedTool.intensities[i].intensity_rank === 'Normal') {
-          this.intensity = 'Normal'
-        }
-      }
-      if (!this.intensity) {
-        this.intensity = this.intensities[this.intensities.length - 1].intensity_rank
+      const normalIntensity = this.selectedTool.intensities.find(i => i.intensity_rank === 'Normal')
+      if (normalIntensity) {
+        this.intensity = 'Normal'
+      } else {
+        this.intensity = this.selectedTool.intensities[this.selectedTool.intensities.length - 1].intensity_rank
       }
       const isWordlist = this.checkInputType('Wordlist')
       if (!this.isWordlist && isWordlist) {
@@ -346,11 +317,11 @@ export default {
       if (configuration) {
         this.selectedConfiguration = configuration
       } else {
-        this.selectedConfiguration = findById(this.selectedTool.configurations, configurationId)
+        this.selectedConfiguration = this.selectedTool.configurations.find(configuration => configuration.id === configurationId)
       }
     },
     updateWordlists () {
-      WordlistApi.getAllWordlists().then(results => { this.wordlists = results })
+      this.getAllPages('/api/resources/wordlists/?o=type,-likes_count,name').then(response => { this.wordlists = response.data.results })
     },
     cleanScheduledIn () {
       this.scheduledIn = null

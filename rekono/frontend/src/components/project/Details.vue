@@ -31,28 +31,24 @@
         </b-dropdown>
       </b-col>
     </b-row>
-    <Dashboard class="mt-3" :project="currentProject"/>
-    <Deletion id="delete-project-modal"
-      title="Delete Project"
-      @deletion="deleteProject"
-      v-if="currentProject">
+    <dashboard class="mt-3" :project="currentProject"/>
+    <deletion id="delete-project-modal" title="Delete Project" @deletion="deleteProject" v-if="currentProject">
       <span><strong>{{ currentProject.name }}</strong> project</span>
-    </Deletion>
-    <ProjectForm id="project-modal" :project="currentProject" :initialized="showEditForm" @confirm="confirm" @clean="showEditForm = false"/>
-    <DefectDojoForm id="defect-dojo-modal" path="projects" :itemId="currentProject.id" :alreadyReported="false" @clean="$bvModal.hide('defect-dojo-modal')" @confirm="$bvModal.hide('defect-dojo-modal')"/>
+    </deletion>
+    <project id="project-modal" :project="currentProject" :initialized="showEditForm" @confirm="confirm" @clean="showEditForm = false"/>
+    <defect-dojo id="defect-dojo-modal" path="projects" :itemId="currentProject.id" :alreadyReported="false" @clean="$bvModal.hide('defect-dojo-modal')" @confirm="$bvModal.hide('defect-dojo-modal')"/>
   </div>
 </template>
 
 <script>
-import ProjectsApi from '@/backend/projects'
-import Dashboard from '@/components/dashboard/Dashboard.vue'
-import AlertMixin from '@/common/mixin/AlertMixin.vue'
-import Deletion from '@/common/Deletion.vue'
-import ProjectForm from '@/modals/ProjectForm.vue'
-import DefectDojoForm from '@/modals/DefectDojoForm.vue'
+import RekonoApi from '@/backend/RekonoApi'
+import Dashboard from '@/components/dashboard/Dashboard'
+import Deletion from '@/common/Deletion'
+import Project from '@/modals/Project'
+import DefectDojo from '@/modals/DefectDojo'
 export default {
-  name: 'projectDetails',
-  mixins: [AlertMixin],
+  name: 'projectDetailsPage',
+  mixins: [RekonoApi],
   props: {
     project: Object
   },
@@ -66,31 +62,19 @@ export default {
   components: {
     Dashboard,
     Deletion,
-    ProjectForm,
-    DefectDojoForm
+    Project,
+    DefectDojo
   },
   methods: {
     fetchProject () {
-      ProjectsApi.getProject(this.$route.params.id)
-        .then(data => {
-          this.currentProject = data
-          if (data.defectdojo_product_id) {
-            this.defectDojoUrl = `${process.env.VUE_APP_DEFECTDOJO_HOST}/product/${data.defectdojo_product_id}`
-          } else {
-            this.defectDojoUrl = null
-          }
+      this.get(`/api/projects/${this.$route.params.id}/`)
+        .then(response => {
+          this.currentProject = response.data
+          this.defectDojoUrl = response.data.defectdojo_product_id ? `${process.env.VUE_APP_DEFECTDOJO_HOST}/product/${response.data.defectdojo_product_id}` : null
         })
     },
     deleteProject () {
-      ProjectsApi.deleteProject(this.currentProject.id)
-        .then(() => {
-          this.$bvModal.hide('delete-project-modal')
-          this.warning(this.currentProject.name, 'Project deleted successfully')
-          this.$router.push({ path: '/projects' })
-        })
-        .catch(() => {
-          this.danger(this.currentProject.name, 'Unexpected error in project deletion')
-        })
+      this.delete(`/api/projects/${this.currentProject.id}/`, this.currentProject.name, 'Project deleted successfully').then(() => this.$router.push({ path: '/projects' }))
     },
     confirm (operation) {
       if (operation.success) {

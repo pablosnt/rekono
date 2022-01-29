@@ -46,12 +46,12 @@
 </template>
 
 <script>
-import { auditor } from '@/backend/constants'
+import RekonoApi from '@/backend/RekonoApi'
 export default {
-  name: 'projectDetails',
+  name: 'mainTabs',
+  mixins: [RekonoApi],
   data () {
     return {
-      auditor: auditor,
       path: window.location.hash
     }
   },

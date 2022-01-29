@@ -7,23 +7,23 @@
      {{ title }}
     </template>
     <b-form ref="step_form">
-      <b-form-group description="Process" invalid-feedback="Process is required" v-if="process === null">
+      <b-form-group description="Process" invalid-feedback="Process is required" v-if="!process">
         <b-form-select v-model="processId" :options="processes" value-field="id" text-field="name" :state="processState" :disabled="processes.length == 0" @change="selectProcess" required>
           <template #first>
             <b-form-select-option :value="null" disabled>Select your process</b-form-select-option>
           </template>
         </b-form-select>
       </b-form-group>
-      <b-form-group description="Tool" v-if="tool === null">
+      <b-form-group description="Tool" v-if="!tool">
         <b-input-group>
-          <b-input-group-prepend v-if="selectedTool !== null">
+          <b-input-group-prepend v-if="selectedTool">
             <b-button variant="outline">
               <b-link :href="selectedTool.reference" target="_blank">
                 <b-img :src="selectedTool.icon" width="50" height="30"/>
               </b-link>
             </b-button>
           </b-input-group-prepend>
-          <b-form-select v-model="toolId" :options="tools" :disabled="edit && tool === null" @change="selectTool" value-field="id" text-field="name" :state="toolState" required>
+          <b-form-select v-model="toolId" :options="tools" :disabled="edit && !tool" @change="selectTool" value-field="id" text-field="name" :state="toolState" required>
             <template #first>
               <b-form-select-option :value="null" disabled>Select tool</b-form-select-option>
             </template>
@@ -31,7 +31,7 @@
         </b-input-group>
       </b-form-group>
       <b-form-group description="Tool configuration" invalid-feedback="This step already exists in the process">
-        <b-form-select v-model="configurationId" :options="selectedTool !== null ? selectedTool.configurations : []" :disabled="configurationId == null || edit" value-field="id" text-field="name" :state="configState" required/>
+        <b-form-select v-model="configurationId" :options="selectedTool ? selectedTool.configurations : []" :disabled="!configurationId || edit" value-field="id" text-field="name" :state="configState" required/>
       </b-form-group>
       <b-form-group>
         <b-input-group :prepend="priority.toString()">
@@ -49,32 +49,18 @@
 </template>
 
 <script>
-import Processes from '@/backend/processes'
-import ToolApi from '@/backend/tools'
-import { findById } from '@/backend/utils'
-import AlertMixin from '@/common/mixin/AlertMixin.vue'
-const ProcessApi = Processes.ProcessApi
-const StepApi = Processes.StepApi
+import RekonoApi from '@/backend/RekonoApi'
 export default {
-  name: 'stepForm',
-  mixins: [AlertMixin],
+  name: 'stepModal',
+  mixins: [RekonoApi],
   props: {
     id: String,
+    process: Object,
+    step: Object,
+    tool: Object,
     initialized: {
       type: Boolean,
       default: false
-    },
-    process: {
-      type: Object,
-      default: null
-    },
-    step: {
-      type: Object,
-      default: null
-    },
-    tool: {
-      type: Object,
-      default: null
     }
   },
   computed: {
@@ -82,13 +68,7 @@ export default {
       return (this.step !== null)
     },
     title () {
-      const start = this.edit ? 'Edit step from ' : 'New step for '
-      if (this.process !== null) {
-        return start + this.process.name
-      } else if (this.tool !== null) {
-        return `New step ${this.tool.name}`
-      }
-      return start
+      return this.process !== null ? this.edit ? `Edit step for ${this.process.name}` : `New step for ${this.process.name}` : this.tool !== null ? `New step ${this.tool.name}` : 'New step'
     },
     button () {
       return this.step !== null ? 'Update Step' : 'Create Step'
@@ -109,38 +89,25 @@ export default {
     }
   },
   watch: {
-    process (process) {
-      if (this.initialized && process !== null) {
-        this.selectProcess(process.id, process)
-      }
-    },
-    step (step) {
-      if (this.initialized && step !== null) {
-        step.tool.configurations = [step.configuration]
-        this.selectTool(step.tool.id, step.tool)
-        this.priority = step.priority
-      }
-    },
-    tool (tool) {
-      if (this.initialized && tool !== null) {
-        this.selectTool(tool.id, tool)
-      }
-    },
     initialized (initialized) {
       if (initialized) {
-        if (this.step === null && this.tool === null) {
-          ToolApi.getAllTools().then(results => { this.tools = results })
-        } else if (this.step !== null && this.tool == null) {
-          this.tools = [this.selectedTool]
+        if (!this.step && !this.tool) {
+          this.getAllPages('/api/tools/?o=stage,-likes_count,name').then(response => { this.tools = response.data.results })
+        } else if (this.step && !this.tool) {
+          this.priority = this.step.priority
+          this.step.tool.configurations = [this.step.configuration]
+          this.selectedTool(this.step.tool.id, this.step.tool)
+        } else if (this.tool) {
+          this.selectTool(this.tool.id, this.tool)
         }
-        if (this.process === null) {
+        if (!this.process) {
           let filter = null
           if (this.$store.state.role !== 'Admin') {
-            filter = {
-              creator: this.$store.state.user
-            }
+            filter = { creator: this.$store.state.user }
           }
-          ProcessApi.getAllProcesses(filter).then(results => { this.processes = results })
+          this.getAllPages('/api/processes/?o=-likes_count,name', filter).then(response => { this.processes = response.data.results })
+        } else {
+          this.selectProcess(this.process.id, this.process)
         }
       }
     }
@@ -151,11 +118,11 @@ export default {
       this.processState = (this.processId !== null)
       this.toolState = (this.toolId !== null)
       if (!this.edit && this.selectedProcess !== null) {
-        for (let s = 0; s < this.selectedProcess.steps.length; s++) {
-          if (this.selectedProcess.steps[s].tool.id === this.toolId && this.selectedProcess.steps[s].configuration.id === this.configurationId) {
-            this.configState = false
-            return false
-          }
+        const existing_step = this.selectedProcess.steps.find(step => step.tool.id === this.toolId && step.configuration.id === this.configurationId)
+        if (existing_step) {
+          this.toolState = false
+          this.configState = false
+          return false
         }
       }
       return valid
@@ -164,30 +131,22 @@ export default {
       event.preventDefault()
       if (this.check()) {
         const operation = this.edit ? this.update() : this.create()
-        operation.then((success) => this.$emit('confirm', { id: this.id, success: success, reload: true }))
+        operation.then(success => this.$emit('confirm', { id: this.id, success: success, reload: true }))
       }
     },
     create () {
-      return StepApi.createStep(this.processId, this.toolId, this.configurationId, this.priority)
-        .then(() => {
-          this.success(this.selectedTool.name, 'New step created successfully')
-          return Promise.resolve(true)
-        })
-        .catch(() => {
-          this.danger(this.selectedTool.name, 'Unexpected error in step creation')
-          return Promise.resolve(false)
-        })
+      return this.post(
+        '/api/steps/',
+        { process: this.processId, tool_id: this.toolId, configuration_id: this.configurationId, priority: this.priority },
+        this.selectedTool.name, 'New step created successfully'
+      )
+        .then(() => { return Promise.resolve(true) })
+        .catch(() => { return Promise.resolve(false) })
     },
     update () {
-      return StepApi.updateStep(this.step.id, this.priority)
-        .then(() => {
-          this.success(this.selectedTool.name, 'Step updated successfully')
-          return Promise.resolve(true)
-        })
-        .catch(() => {
-          this.danger(this.selectedTool.name, 'Unexpected error in step update')
-          return Promise.resolve(false)
-        })
+      return this.put(`/api/steps/${this.step.id}/`, { priority: this.priority }, this.selectedTool.name, 'Step updated successfully')
+        .then(() => { return Promise.resolve(true) })
+        .catch(() => { return Promise.resolve(false) })
     },
     clean () {
       this.tools = []
@@ -204,9 +163,9 @@ export default {
     selectProcess (processId, process = null) {
       this.processId = processId
       if (process !== null) {
-        this.selectedProcess = null
+        this.selectedProcess = process
       } else {
-        this.selectedProcess = findById(this.processes, processId)
+        this.selectedProcess = this.processes.find(process => process.id === processId)
       }
     },
     selectTool (toolId, tool = null) {
@@ -214,7 +173,7 @@ export default {
       if (tool !== null) {
         this.selectedTool = tool
       } else {
-        this.selectedTool = findById(this.tools, toolId)
+        this.selectedTool = this.tools.find(tool => tool.id === toolId)
       }
       this.configurationId = this.selectedTool.configurations[0].id
     }

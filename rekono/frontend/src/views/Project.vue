@@ -6,8 +6,7 @@
           <template #title>
             <b-icon icon="bar-chart-line-fill"/> Dashboard
           </template>
-          <projectDetails class="mt-3" :project="project"/>
-          <!-- <dashboard class="mt-3" :project="project"/> -->
+          <details class="mt-3" :project="project"/>
         </b-tab>
         <b-tab lazy :active="path.includes('targets')" @click="changeSubTab('targets')" title-link-class="text-secondary">
           <template #title>
@@ -39,20 +38,16 @@
 </template>
 
 <script>
-import MainTabs from '@/common/MainTabs.vue'
-import Details from '@/components/project/Details.vue'
-// import Dashboard from '@/components/dashboard/Dashboard.vue'
-import Targets from '@/components/project/Targets.vue'
-import Tasks from '@/components/project/Tasks.vue'
-import Findings from '@/components/findings/Findings.vue'
-import Members from '@/components/project/Members.vue'
+import MainTabs from '@/common/MainTabs'
+import Details from '@/components/project/Details'
+import Targets from '@/components/project/Targets'
+import Tasks from '@/components/project/Tasks'
+import Findings from '@/components/findings/Findings'
+import Members from '@/components/project/Members'
 export default {
-  name: 'project',
+  name: 'projectPage',
   props: {
-    project: {
-      type: Object,
-      default: null
-    }
+    project: Object
   },
   data () {
     return {
@@ -60,13 +55,12 @@ export default {
     }
   },
   components: {
-    mainTabs: MainTabs,
-    // dashboard: Dashboard,
-    projectDetails: Details,
-    targets: Targets,
-    tasks: Tasks,
-    findings: Findings,
-    members: Members
+    MainTabs,
+    Details,
+    Targets,
+    Tasks,
+    Findings,
+    Members
   },
   methods: {
     changeMainTab (tab) {

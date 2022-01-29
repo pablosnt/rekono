@@ -5,14 +5,14 @@
         <b-badge variant="primary">{{ row.item.data_type }}</b-badge>
       </template>
       <template #cell(os_type)="row">
-        <div v-for="type in ostypes" :key="type.value">
+        <div v-for="type in osTypeByIcon" :key="type.value">
           <div v-if="row.item.os_type === type.value">
             <v-icon :fill="type.color" :name="type.icon" /><b-badge :variant="type.variant" class="ml-1">{{ row.item.os_type }}</b-badge>          
           </div>
         </div>
       </template>
       <template #cell(severity)="row">
-        <div v-for="s in severities" :key="s.value">
+        <div v-for="s in severityByVariant" :key="s.value">
           <b-badge v-if="s.value == row.item.severity" :variant="s.variant">{{ row.item.severity.toUpperCase() }}</b-badge>
         </div>
       </template>
@@ -86,26 +86,20 @@
     <b-modal id="confirm-target" @ok="createTargetFromOSINT" title="New Target" ok-title="Create Target" header-bg-variant="dark" header-text-variant="light" ok-variant="dark" v-if="name === 'osint' && selectedFinding">
       <p>You will create the target <strong>{{ selectedFinding.target }}</strong>. Are you sure?</p>
     </b-modal>
-    <Deletion id="disable-finding-modal"
-      title="Disable Finding"
-      @deletion="disableFinding"
-      @clean="cleanSelection"
-      v-if="selectedFinding !== null">
+    <deletion id="disable-finding-modal" title="Disable Finding" @deletion="disableFinding" @clean="cleanSelection" v-if="selectedFinding !== null">
       <span>selected finding</span>
-    </Deletion>
-    <DefectDojoForm id="defect-dojo-modal" :path="name" :itemId="selectedFinding.id" :alreadyReported="selectedFinding.reported_to_defectdojo" @clean="cleanDDSelection" @confirm="cleanDDSelection" v-if="selectedFinding"/>
+    </deletion>
+    <defect-dojo id="defect-dojo-modal" :path="name" :itemId="selectedFinding.id" :alreadyReported="selectedFinding.reported_to_defectdojo" @clean="cleanDDSelection" @confirm="cleanDDSelection" v-if="selectedFinding"/>
   </b-col>
 </template>
 
 <script>
-import FindingsApi from '@/backend/findings'
-import { osTypesWithIcons, severityByVariant } from '@/backend/constants'
-import AlertMixin from '@/common/mixin/AlertMixin.vue'
-import Deletion from '@/common/Deletion.vue'
-import DefectDojoForm from '@/modals/DefectDojoForm.vue'
+import RekonoApi from '@/backend/RekonoApi'
+import Deletion from '@/common/Deletion'
+import DefectDojo from '@/modals/DefectDojo'
 export default {
   name: 'findingBase',
-  mixins: [AlertMixin],
+  mixins: [RekonoApi],
   props: ['name', 'fields', 'findingTypes', 'target', 'task', 'execution', 'search', 'active', 'selection', 'details'],
   computed: {
     filterChange () {
@@ -113,11 +107,7 @@ export default {
     },
     selectedFindingTypes () {
       let selection = []
-      for (let f in this.findingTypes) {
-        if (this.findingTypes[f]) {
-          selection.push(this.findingTypes[f].toLowerCase())
-        }
-      }
+      this.findingTypes.forEach(item => selection.push(item.toLowerCase()))
       return selection
     }
   },
@@ -125,14 +115,12 @@ export default {
     return {
       findings: [],
       selectedFinding: null,
-      ostypes: osTypesWithIcons,
-      severities: severityByVariant,
       defectDojo: process.env.VUE_APP_DEFECTDOJO_HOST
     }
   },
   components: {
     Deletion,
-    DefectDojoForm
+    DefectDojo
   },
   watch: {
     filterChange () {
@@ -161,40 +149,17 @@ export default {
     },
     fetchData () {
       if ((this.task || this.target) && (this.selectedFindingTypes.length === 0 || this.selectedFindingTypes.includes(this.name.toLowerCase()))) {
-        FindingsApi.getAllFindings(this.name.toLowerCase(), this.getFilter())
-          .then(results => {
-            this.findings = results
-          })
+        this.getAllPages(`/api/${this.name.toLowerCase()}/?o=-creation`, this.getFilter()).then(response => this.findings = response.data.results)
       }
     },
     enableFinding (finding) {
-      FindingsApi.enableFinding(this.name, finding.id)
-        .then(() => {
-          this.success('Enable finding', 'Finding enabled successfully')
-          this.fetchData()
-        })
-        .catch(() => {
-          this.danger('Enable finding', 'Unexpected error in finding enabling')
-        })
+      this.post(`/api/${this.name}/${finding.id}/enable/`, { }, 'Enable finding', 'Finding enabled successfully').then(() => this.fetchData())
     },
     disableFinding () {
-      FindingsApi.disableFinding(this.name, this.selectedFinding.id)
-        .then(() => {
-          this.warning('Disable finding', 'Finding disabled successfully')
-          this.fetchData()
-        })
-        .catch(() => {
-          this.danger('Disable finding', 'Unexpected error in finding disabling')
-        })
+      this.delete(`/api/${this.name}/${this.selectedFinding.id}/`, 'Disable finding', 'Finding disabled successfully').then(() => this.fetchData())
     },
     createTargetFromOSINT () {
-      FindingsApi.createTargetFromOSINT(this.selectedFinding.id)
-        .then(() => {
-          this.success(this.selectedFinding.data, 'Target created successfully')
-        })
-        .catch(() => {
-          this.danger(this.selectedFinding.data, 'Unexpected error in target creation')
-        })
+      this.post(`/api/osint/${this.selectedFinding.id}/target/`, { }, this.selectedFinding.data, 'Target created successfully')
     },
     selectFinding (finding) {
       this.selectedFinding = finding

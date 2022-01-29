@@ -51,24 +51,22 @@
 </template>
 
 <script>
-import DefectDojoApi from '@/backend/defect-dojo.js'
-import AlertMixin from '@/common/mixin/AlertMixin.vue'
+import RekonoApi from '@/backend/RekonoApi'
 export default {
-  name: 'defectDojoForm',
-  mixins: [AlertMixin],
-  props: ['id', 'path', 'itemId', 'alreadyReported'],
+  name: 'defectDojoModal',
+  mixins: [RekonoApi],
+  props: {
+    id: String,
+    path: String,
+    itemId: Number,
+    alreadyReported: Boolean
+  },
   computed: {
     isFinding () {
       return (this.path !== 'tasks' && this.path !== 'executions' && this.path !== 'projects')
     },
     okTitle () {
-      if (!this.isFinding && !this.importFindings) {
-        return 'Import scans'
-      } else if (!this.isFinding) {
-        return 'Import findings'
-      } else {
-        return 'Import finding'
-      }
+      return !this.isFinding && !this.importFindings ? 'Import scans' : !this.isFinding ? 'Import findings' : 'Import finding'
     }
   },
   data () {
@@ -92,17 +90,12 @@ export default {
       event.preventDefault()
       if (this.check()) {
         const element = (!this.isFinding && !this.importFindings) ? 'Scans' : 'Findings'
-        this.defectDojoImport()
-          .then(() => {
-            this.success('Defect-Dojo', `${element} imported successfully in Defect-Dojo`)
-            this.clean()
-          })
-          .catch(() => {
-            this.danger('Defect-Dojo', `Unexpected error in ${element.toLowerCase()} import`)
-            this.idState = null
-            this.nameState = null
-            this.descriptionState = null
-          })
+        const path = this.isFinding ? 'defect-dojo' : this.importFindings ? 'defect-dojo-findings' : 'defect-dojo-scans'
+        this.post(
+          `/api/${this.path}/${this.itemId}/${path}/`,
+          this.engagementId ? { id: this.engagementId } : { name: this.engagementName, description: this.engagementDescription },
+          'Defect-Dojo', `${element} imported successfully in Defect-Dojo`
+        )
       }
     },
     check () {
@@ -116,15 +109,6 @@ export default {
         this.engagementDescription = null
         this.idState = (this.engagementId && this.engagementId > 0)
         return this.idState
-      }
-    },
-    defectDojoImport () {
-      if (this.isFinding) {
-        return DefectDojoApi.importFinding(this.path, this.itemId, this.engagementId, this.engagementName, this.engagementDescription)
-      } else if (this.importFindings) {
-        return DefectDojoApi.importFindings(this.path, this.itemId, this.engagementId, this.engagementName, this.engagementDescription)
-      } else {
-        return DefectDojoApi.importScans(this.path, this.itemId, this.engagementId, this.engagementName, this.engagementDescription)
       }
     },
     clean () {

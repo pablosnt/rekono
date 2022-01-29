@@ -1,6 +1,6 @@
 <template>
   <div>
-    <commonHeader v-if="$store.state.user != null"/>
+    <main-header v-if="$store.state.user != null"/>
     <div id="app">
       <router-view/>
     </div>
@@ -8,11 +8,11 @@
 </template>
 
 <script>
-import Header from '@/common/Header.vue'
+import MainHeader from './common/MainHeader'
 export default {
   name: 'App',
   components: {
-    commonHeader: Header
+    MainHeader
   }
 }
 </script>

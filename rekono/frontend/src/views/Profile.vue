@@ -7,7 +7,7 @@
             <h2><strong>{{ username }}</strong></h2>
           </b-col>
           <b-col align-self="center">
-            <b-badge :variant="roles[role.toLowerCase()]"><strong>{{ role.toUpperCase() }}</strong></b-badge>
+            <b-badge :variant="roleByVariant[role.toLowerCase()]"><strong>{{ role.toUpperCase() }}</strong></b-badge>
           </b-col>
         </b-row>
       </b-col>
@@ -112,7 +112,7 @@
           </b-card>
           <b-row class="mt-3" align-h="center">
             <b-button squared v-b-modal.change-password-modal>Change Password</b-button>
-            <ChangePasswordForm id="change-password-modal" :username="username"/>
+            <change-password id="change-password-modal" :username="username"/>
           </b-row>
         </b-col>
         <b-col cols="7">
@@ -158,20 +158,16 @@
 </template>
 
 <script>
-import ProfileApi from '@/backend/profile'
-import { notificationScopes, rolesByVariant } from '@/backend/constants'
-import AlertMixin from '@/common/mixin/AlertMixin.vue'
-import ChangePasswordForm from '@/modals/ChangePasswordForm.vue'
+import RekonoApi from '@/backend/RekonoApi'
+import ChangePassword from '@/modals/ChangePassword'
 export default {
   name: 'profilePage',
-  mixins: [AlertMixin],
+  mixins: [RekonoApi],
   data () {
-    this.fetchData()
+    this.getProfile()
     return {
-      roles: rolesByVariant,
       telegramBot: process.env.VUE_APP_TELEGRAM_BOT,
       showTelegramSteps: false,
-      notificationScopes: notificationScopes,
       id: null,
       username: null,
       password: null,
@@ -198,7 +194,7 @@ export default {
     }
   },
   components: {
-    ChangePasswordForm
+    ChangePassword
   },
   methods: {
     processData (data) {
@@ -218,15 +214,17 @@ export default {
         this.$root.$emit('bv::disable::tooltip', 'telegram-notification')
       }
     },
-    fetchData () {
-      ProfileApi.getProfile().then(data => {
-        this.processData(data)
-      }) 
+    getProfile () {
+      this.get('/api/profile/').then(response => { this.processData(response.data) }) 
     },
     handleUpdateProfile(event) {
       event.preventDefault()
       if (this.checkProfile) {
-        this.updateProfile()
+        this.put(
+          '/api/profile/',
+          { first_name: this.firstName, last_name: this.lastName, notification_scope: this.notificationScope, email_notification: this.emailNotification, telegram_notification: this.telegramNotification },
+          this.username, 'Profile updated successfully'
+        ).then(response => this.processData(response.data))
       }
     },
     checkProfile () {
@@ -235,55 +233,27 @@ export default {
       this.lastNameState = (this.lastName && this.lastName.length > 0)
       return valid
     },
-    updateProfile () {
-      ProfileApi.updateProfile(this.firstName, this.lastName, this.notificationScope, this.emailNotification, this.telegramNotification)
-        .then(data => {
-          this.processData(data)
-          this.success(this.username, 'Profile updated successfully')
-        })
-        .catch(() => {
-          this.danger(this.username, 'Unexpected error in profile update')
-        })
-    },
     handleTelegramToken (event) {
       event.preventDefault()
       if (this.checkTelegramToken()) {
-        this.configureTelegram()
+        this.post('/api/profile/telegram-token/', { otp: this.telegramToken }, this.username, 'Telegram configured successfully')
       }
     },
     checkTelegramToken () {
       this.telegramTokenState = (this.telegramToken && this.telegramToken.length > 0)
       return this.telegramTokenState
     },
-    configureTelegram () {
-      ProfileApi.configureTelegram(this.telegramToken)
-        .then(() => {
-          this.success(this.username, 'Telegram configured successfully')
-          this.fetchData()
-        })
-        .catch(() => {
-          this.danger(this.username, 'Unexpected error in telegram configuration')
-        })
-    },
     handleGetApiKey (event) {
       event.preventDefault()
       if (this.checkAPIKey() === null) {
-        this.getApiKey()
+        super.post('/api/api-token/', { username: this.username, password: this.password })
+          .then(response => { this.apiKey = response.data.token; this.passwordError = false })
+          .catch(() => { this.passwordError = true })
       }
     },
     checkAPIKey () {
       this.passwordState = (this.password === null || this.password.length === 0) ? false : null
       return this.passwordState
-    },
-    getApiKey () {
-      ProfileApi.getApiKey(this.username, this.password)
-        .then(data => {
-          this.apiKey = data.token
-          this.passwordError = false
-        })
-        .catch(() => {
-          this.passwordError = true
-        })
     },
     copyHover (hovered) {
       this.isCopyHover = hovered

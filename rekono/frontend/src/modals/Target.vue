@@ -9,13 +9,14 @@
 </template>
 
 <script>
-import Targets from '@/backend/targets'
-import AlertMixin from '@/common/mixin/AlertMixin.vue'
-const TargetsApi = Targets.TargetsApi
+import RekonoApi from '@/backend/RekonoApi'
 export default {
-  name: 'targetForm',
-  mixins: [AlertMixin],
-  props: ['id', 'projectId'],
+  name: 'targetModal',
+  mixins: [RekonoApi],
+  props: {
+    id: String,
+    projectId: Number
+  },
   data () {
     return {
       target: null,
@@ -30,22 +31,11 @@ export default {
     confirm (event) {
       event.preventDefault()
       if (this.check()) {
-        this.createTarget()
-          .then(success => {
-            this.$emit('confirm', { id: this.id, success: success, reload: true })
-          })
+        this.post('/api/targets/', { project: this.projectId, target: this.target }, this.target, 'New target created successfully')
+          .then(() => { return Promise.resolve(true) })
+          .catch(() => { return Promise.resolve(false) })
+          .then(success => this.$emit('confirm', { id: this.id, success: success, reload: true }))
       }
-    },
-    createTarget () {
-      return TargetsApi.createTarget(this.projectId, this.target)
-        .then(() => {
-          this.success(this.target, 'New target created successfully')
-          return Promise.resolve(true)
-        })
-        .catch(() => {
-          this.danger(this.target, 'Unexpected error in target creation')
-          return Promise.resolve(false)
-        })
     },
     clean () {
       this.target = null

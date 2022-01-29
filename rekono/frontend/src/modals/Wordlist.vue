@@ -15,20 +15,16 @@
 </template>
 
 <script>
-import WordlistApi from '@/backend/resources'
-import AlertMixin from '@/common/mixin/AlertMixin.vue'
+import RekonoApi from '@/backend/RekonoApi'
 export default {
-  name: 'wordlistForm',
-  mixins: [AlertMixin],
-  initialized: {
-    type: Boolean,
-    default: false
-  },
+  name: 'wordlistModal',
+  mixins: [RekonoApi],
   props: {
     id: String,
-    wordlist: {
-      type: Object,
-      default: null
+    wordlist: Object,
+    initialized: {
+      type: Boolean,
+      default: false
     }
   },
   computed: {
@@ -36,18 +32,10 @@ export default {
       return (this.wordlist !== null)
     },
     title () {
-      if (this.wordlist !== null) {
-        return 'Edit Wordlist'
-      } else {
-        return 'New Wordlist'
-      }
+      return this.wordlist !== null ? 'Edit Wordlist' : 'New Wordlist'
     },
     button () {
-      if (this.wordlist !== null) {
-        return 'Update Wordlist'
-      } else {
-        return 'Create Wordlist'
-      }
+      return this.wordlist !== null ? 'Update Wordlist' : 'Create Wordlist'
     }
   },
   data () {
@@ -86,30 +74,34 @@ export default {
       event.preventDefault()
       if (this.check()) {
         const operation = this.edit ? this.update() : this.create()
-        operation.then((success) => this.$emit('confirm', { id: this.id, success: success, reload: true }))
+        operation.then(success => this.$emit('confirm', { id: this.id, success: success, reload: true }))
       }
     },
     create () {
-      return WordlistApi.createWordlist(this.name, this.type, this.file)
-        .then(() => {
-          this.success(this.name, 'New wordlist created successfully')
-          return Promise.resolve(true)
-        })
-        .catch(() => {
-          this.danger(this.name, 'Unexpected error in wordlist creation')
-          return Promise.resolve(false)
-        })
+      return this.post(
+        '/api/resources/wordlists/',
+        this.getFormData(),
+        this.name, 'New wordlist created successfully',
+        false, { 'Content-Type': 'multipart/form-data' }
+      )
+        .then(() => { return Promise.resolve(true) })
+        .catch(() => { return Promise.resolve(false) })
     },
     update () {
-      return WordlistApi.updateWordlist(this.wordlist.id, this.name, this.type, this.file)
-        .then(() => {
-          this.success(this.name, 'New wordlist updated successfully')
-          return Promise.resolve(true)
-        })
-        .catch(() => {
-          this.danger(this.name, 'Unexpected error in wordlist update')
-          return Promise.resolve(false)
-        })
+      return this.put(
+        `/api/resources/wordlists/${this.wordlist.id}/`,
+        this.getFormData(),
+        this.name, 'New wordlist created successfully',
+        false, { 'Content-Type': 'multipart/form-data' }
+      )
+        .then(() => { return Promise.resolve(true) })
+        .catch(() => { return Promise.resolve(false) })
+    },
+    getFormData () {
+      const data = new FormData()
+      data.append('name', this.name)
+      data.append('type', this.type)
+      data.append('file', this.file)
     },
     clean () {
       this.name = null
