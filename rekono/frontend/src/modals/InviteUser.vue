@@ -41,9 +41,7 @@ export default {
       event.preventDefault()
       if (this.check()) {
         this.post('/api/users/invite/', { email: this.email, role: this.role }, this.email, 'New user invited successfully')
-          .then(() => {
-            this.$emit('confirm', { id: this.id, success: true, reload: true })
-          })
+          .then(() => this.$emit('confirm', { id: this.id, success: true, reload: true }))
       }
     },
     clean () {

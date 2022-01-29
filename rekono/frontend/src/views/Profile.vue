@@ -224,7 +224,7 @@ export default {
           '/api/profile/',
           { first_name: this.firstName, last_name: this.lastName, notification_scope: this.notificationScope, email_notification: this.emailNotification, telegram_notification: this.telegramNotification },
           this.username, 'Profile updated successfully'
-        ).then(response => this.processData(response.data))
+        ).then(data => this.processData(data))
       }
     },
     checkProfile () {

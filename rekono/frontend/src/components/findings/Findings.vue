@@ -20,14 +20,14 @@
       </b-col>
     </b-row>
     <b-row :cols="cols" class="mt-3">
-      <finding name="hosts" :fields="hosts" :details="hostDetails" @finding-selected="selectFinding" :findingTypes="selectedFindings" :target="selectedTarget" :task="task ? task.id : null" :execution="execution ? execution.id : null" :search="search" :active="activeFilter"/>
-      <finding name="enumerations" :fields="enumerations" :details="enumerationDetails" @finding-selected="selectFinding" :selection="hostFilter" :findingTypes="selectedFindings" :target="selectedTarget" :task="task ? task.id : null" :search="search" :active="activeFilter"/>
-      <finding name="endpoints" :fields="endpoints" :details="endpointDetails" :selection="enumerationFilter" :findingTypes="selectedFindings" :target="selectedTarget" :task="task ? task.id : null" :search="search" :active="activeFilter"/>
-      <finding name="technologies" :fields="technologies" @finding-selected="selectFinding" :selection="enumerationFilter" :findingTypes="selectedFindings" :target="selectedTarget" :task="task ? task.id : null" :search="search" :active="activeFilter"/>
-      <finding name="vulnerabilities" :fields="vulnerabilities" :details="vulnerabilityDetails" @finding-selected="selectFinding" :selection="technologyAndEnumerationFilter" :findingTypes="selectedFindings" :target="selectedTarget" :task="task ? task.id : null" :search="search" :active="activeFilter"/>
-      <finding name="exploits" :fields="exploits" :details="exploitDetails" :selection="vulnerabilityAndTechnologyFilter" :findingTypes="selectedFindings" :target="selectedTarget" :task="task ? task.id : null" :search="search" :active="activeFilter"/>
-      <finding name="osint" :fields="osint" :details="osintDetails" :findingTypes="selectedFindings" :target="selectedTarget" :task="task ? task.id : null" :search="search" :active="activeFilter"/>
-      <finding name="credentials" :fields="credentials" :findingTypes="selectedFindings" :target="selectedTarget" :task="task ? task.id : null" :search="search" :active="activeFilter"/>
+      <finding name="hosts" :fields="hosts" :details="hostDetails" @finding-selected="selectFinding" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="task ? task.id : null" :execution="execution ? execution.id : null" :search="search" :active="activeFilter"/>
+      <finding name="enumerations" :fields="enumerations" :details="enumerationDetails" @finding-selected="selectFinding" :selection="hostFilter" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="task ? task.id : null" :search="search" :active="activeFilter"/>
+      <finding name="endpoints" :fields="endpoints" :details="endpointDetails" :selection="enumerationFilter" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="task ? task.id : null" :search="search" :active="activeFilter"/>
+      <finding name="technologies" :fields="technologies" @finding-selected="selectFinding" :selection="enumerationFilter" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="task ? task.id : null" :search="search" :active="activeFilter"/>
+      <finding name="vulnerabilities" :fields="vulnerabilities" :details="vulnerabilityDetails" @finding-selected="selectFinding" :selection="technologyAndEnumerationFilter" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="task ? task.id : null" :search="search" :active="activeFilter"/>
+      <finding name="exploits" :fields="exploits" :details="exploitDetails" :selection="vulnerabilityAndTechnologyFilter" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="task ? task.id : null" :search="search" :active="activeFilter"/>
+      <finding name="osint" :fields="osint" :details="osintDetails" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="task ? task.id : null" :search="search" :active="activeFilter"/>
+      <finding name="credentials" :fields="credentials" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="task ? task.id : null" :search="search" :active="activeFilter"/>
     </b-row>
   </div>
 </template>
@@ -144,10 +144,10 @@ export default {
     fetchTargets () {
       if (!this.task) {
         this.getAllPages('/api/targets/?o=target', { project: this.$route.params.id })
-          .then(response => {
-            this.targets = response.data.results
-            if (response.data.results.length > 0) {
-              this.selectedTarget = response.data.results[0].id
+          .then(results => {
+            this.targets = results
+            if (results.length > 0) {
+              this.selectedTarget = results[0].id
             }
           })
       }

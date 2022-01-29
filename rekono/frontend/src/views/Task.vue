@@ -197,7 +197,7 @@ export default {
       }
     },
     fetchExecutions () {
-      this.getAllPages('/api/executions/', { task: this.$route.params.id }).then(response => { this.executions = response.data.results; this.selectExecution(null) })
+      this.getAllPages('/api/executions/', { task: this.$route.params.id }).then(results => { this.executions = results; this.selectExecution(null) })
     },
     cancelTask () {
       super.delete(

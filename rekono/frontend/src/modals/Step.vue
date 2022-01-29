@@ -92,7 +92,7 @@ export default {
     initialized (initialized) {
       if (initialized) {
         if (!this.step && !this.tool) {
-          this.getAllPages('/api/tools/?o=stage,-likes_count,name').then(response => { this.tools = response.data.results })
+          this.getAllPages('/api/tools/?o=stage,-likes_count,name').then(results => this.tools = results)
         } else if (this.step && !this.tool) {
           this.priority = this.step.priority
           this.step.tool.configurations = [this.step.configuration]
@@ -105,7 +105,7 @@ export default {
           if (this.$store.state.role !== 'Admin') {
             filter = { creator: this.$store.state.user }
           }
-          this.getAllPages('/api/processes/?o=-likes_count,name', filter).then(response => { this.processes = response.data.results })
+          this.getAllPages('/api/processes/?o=-likes_count,name', filter).then(results => this.processes = results)
         } else {
           this.selectProcess(this.process.id, this.process)
         }

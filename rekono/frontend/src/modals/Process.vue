@@ -52,7 +52,7 @@ export default {
   },
   computed: {
     edit () {
-      return (this.process !== null)
+      return (this.process !== null && this.process !== undefined)
     },
     title () {
       let title = this.process ? 'Edit Process' : 'New Process'
@@ -104,20 +104,20 @@ export default {
       }
     },
     create () {
-      return  this.post('/api/processes/', { name: this.name, description: this.description, tags: this.tags }, this.name)
-        .then(response => {
-          if (this.tool === null) {
+      return this.post('/api/processes/', { name: this.name, description: this.description, tags: this.tags }, this.name)
+        .then(data => {
+          if (!this.tool) {
             this.success(this.name, 'New process created successfully')
             return Promise.resolve(true)
           } else {
             return this.post(
               '/api/steps/',
-              { process: response.data.id, tool_id: this.tool.id, configuration_id: this.configuration, priority: this.priority },
+              { process: data.id, tool_id: this.tool.id, configuration_id: this.configuration, priority: this.priority },
               `${this.name} - ${this.tool.name}`,
               'New process created successfully'
             )
               .then(() => { return Promise.resolve(true) })
-              .catch((error) => { console.log(error); return Promise.resolve(false) })
+              .catch(() => { return Promise.resolve(false) })
           }
         })
         .catch(() => { return Promise.resolve(false) })

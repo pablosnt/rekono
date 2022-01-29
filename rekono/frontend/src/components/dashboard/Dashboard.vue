@@ -85,10 +85,7 @@ export default {
   data () {
     this.countProjects()
     this.countTargets()
-    this.countTasks()
     this.countExecutions()
-    this.countVulnerabilities()
-    this.countFindings()
     return {
       height: 250,
       timeOptions: [
@@ -132,6 +129,13 @@ export default {
     FindingsByType,
     TasksByStatus,
     VulnerabilitiesBySeverity
+  },
+  watch: {
+    executions () {
+      this.countTasks()
+      this.countVulnerabilities()
+      this.countFindings()
+    }
   },
   methods: {
     getFilter (field, filter = null) {
@@ -177,12 +181,12 @@ export default {
       }
       this.severities.forEach(severity => {
         filter.severity = severity
-        this.get('/api/vulnerabilities/', filter).then(response => this[severity.toLowerCase()] = response.data.count)
+        this.get('/api/vulnerabilities/', 1, 1, filter).then(response => this[severity.toLowerCase()] = response.data.count)
       })
       filter.exploit__isnull = 'false'
       this.severities.forEach(severity => {
         filter.severity = severity
-        this.get('/api/vulnerabilities/', filter).then(response => this[`${severity.toLowerCase()}Exploit`] = response.data.count)
+        this.get('/api/vulnerabilities/', 1, 1, filter).then(response => this[`${severity.toLowerCase()}Exploit`] = response.data.count)
       })
     }
   }

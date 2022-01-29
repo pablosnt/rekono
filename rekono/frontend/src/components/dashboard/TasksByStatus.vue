@@ -13,12 +13,12 @@ export default {
     completed: Number
   },
   computed: {
-    total () {
+    totalTasks () {
       return this.requested + this.skipped + this.running + this.cancelled + this.error + this.completed
     }
   },
   watch: {
-    total () {
+    totalTasks () {
       this.renderChart({
         labels: this.statuses,
         datasets: [

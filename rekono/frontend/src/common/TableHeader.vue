@@ -17,8 +17,8 @@
               <b-icon v-if="showFilters" icon="dash-circle-fill"/>
             </p>
           </b-button>
-          <b-tooltip target="filter-button" triggers="hover" title="Filter" v-if="showFilters"/>
-          <b-tooltip target="filter-button" triggers="hover" title="Clean Filter" v-if="!showFilters"/>
+          <b-tooltip target="filter-button" triggers="hover" title="Filter" v-if="showFilters && filters && filters.length > 0"/>
+          <b-tooltip target="filter-button" triggers="hover" title="Clean Filter" v-if="!showFilters && filters && filters.length > 0"/>
           <span/>
           <b-button v-if="add && addIcon && showAdd === true" variant="outline" @click="$emit('add-click')" v-b-tooltip.hover title="Add" v-b-modal="add">
             <p class="h3"><b-icon variant="success" :icon="addIcon"/></p>

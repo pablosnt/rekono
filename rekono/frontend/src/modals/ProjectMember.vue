@@ -19,7 +19,7 @@ export default {
   mixins: [RekonoApi],
   props: {
     id: String,
-    projectId: Number
+    projectId: [Number, String]
   },
   data () {
     this.fetchUsers()
@@ -38,7 +38,7 @@ export default {
   },
   methods: {
     fetchUsers () {
-      this.getAllPages('/api/users/?o=username', { project__ne: this.projectId }).then(response => this.users = response.data.results)
+      this.getAllPages('/api/users/?o=username', { project__ne: this.projectId }).then(results => this.users = results)
     },
     check () {
       this.memberState = (this.member !== null)

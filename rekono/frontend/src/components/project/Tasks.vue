@@ -65,7 +65,7 @@ export default {
         { key: 'date', sortable: true },
         { key: 'actions', sortable: false }
       ],
-      currentProject: this.project ? this.project : [],
+      currentProject: this.project ? this.project : null,
       selectedTask: null,
       filters: [],
       showTaskForm: false

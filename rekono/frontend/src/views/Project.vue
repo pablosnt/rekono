@@ -6,7 +6,7 @@
           <template #title>
             <b-icon icon="bar-chart-line-fill"/> Dashboard
           </template>
-          <details class="mt-3" :project="project"/>
+          <dashboard class="mt-3" :project="project"/>
         </b-tab>
         <b-tab lazy :active="path.includes('targets')" @click="changeSubTab('targets')" title-link-class="text-secondary">
           <template #title>
@@ -39,7 +39,7 @@
 
 <script>
 import MainTabs from '@/common/MainTabs'
-import Details from '@/components/project/Details'
+import Dashboard from '@/components/project/Dashboard'
 import Targets from '@/components/project/Targets'
 import Tasks from '@/components/project/Tasks'
 import Findings from '@/components/findings/Findings'
@@ -56,7 +56,7 @@ export default {
   },
   components: {
     MainTabs,
-    Details,
+    Dashboard,
     Targets,
     Tasks,
     Findings,

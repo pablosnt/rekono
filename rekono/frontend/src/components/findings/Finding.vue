@@ -1,5 +1,5 @@
 <template>
-  <b-col v-if="findings && findings.length > 0 && (selectedFindingTypes.length === 0 || selectedFindingTypes.includes(name.toLowerCase()))">
+  <b-col v-if="findings && findings.length > 0 && (types.length === 0 || types.includes(name.toLowerCase()))">
     <b-table select-mode="single" :selectable="details !== null" hover striped borderless head-variant="dark" :fields="fields" :items="findings" @row-clicked="displayRowDetails" @row-selected="selectRow">
       <template #cell(data_type)="row">
         <b-badge variant="primary">{{ row.item.data_type }}</b-badge>
@@ -100,14 +100,25 @@ import DefectDojo from '@/modals/DefectDojo'
 export default {
   name: 'findingBase',
   mixins: [RekonoApi],
-  props: ['name', 'fields', 'findingTypes', 'target', 'task', 'execution', 'search', 'active', 'selection', 'details'],
+  props: {
+    name: String,
+    fields: Array,
+    selectedFindingTypes: Array,
+    target: Number,
+    task: Number,
+    execution: Number,
+    search: String,
+    active: String,
+    selection: Object,
+    details: Array
+  },
   computed: {
     filterChange () {
-      return this.findingTypes.toString() + this.target + this.task + this.execution + this.search + this.active + JSON.stringify(this.selection)
+      return this.selectedFindingTypes.toString() + this.target + this.task + this.execution + this.search + this.active + JSON.stringify(this.selection)
     },
-    selectedFindingTypes () {
+    types () {
       let selection = []
-      this.findingTypes.forEach(item => selection.push(item.toLowerCase()))
+      this.selectedFindingTypes.forEach(item => selection.push(item.toLowerCase()))
       return selection
     }
   },
@@ -139,7 +150,7 @@ export default {
       } 
       if (this.search) {
         filter.search = this.search
-      } else if (!this.selectedFindingTypes.includes(this.name.toLowerCase()) && this.selection) {
+      } else if (!this.types.includes(this.name.toLowerCase()) && this.selection) {
         filter = Object.assign({}, filter, this.selection)
       }
       if (this.active !== null) {
@@ -148,8 +159,8 @@ export default {
       return filter
     },
     fetchData () {
-      if ((this.task || this.target) && (this.selectedFindingTypes.length === 0 || this.selectedFindingTypes.includes(this.name.toLowerCase()))) {
-        this.getAllPages(`/api/${this.name.toLowerCase()}/?o=-creation`, this.getFilter()).then(response => this.findings = response.data.results)
+      if ((this.task || this.target) && (this.types.length === 0 || this.types.includes(this.name.toLowerCase()))) {
+        this.getAllPages(`/api/${this.name.toLowerCase()}/?o=-creation`, this.getFilter()).then(results => this.findings = results)
       }
     },
     enableFinding (finding) {

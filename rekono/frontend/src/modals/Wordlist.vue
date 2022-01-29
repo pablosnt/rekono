@@ -74,7 +74,10 @@ export default {
       event.preventDefault()
       if (this.check()) {
         const operation = this.edit ? this.update() : this.create()
-        operation.then(success => this.$emit('confirm', { id: this.id, success: success, reload: true }))
+        operation
+          .then(() => { return Promise.resolve(true) })
+          .catch(() => { return Promise.resolve(false) })
+          .then(success => this.$emit('confirm', { id: this.id, success: success, reload: true }))
       }
     },
     create () {
@@ -84,8 +87,6 @@ export default {
         this.name, 'New wordlist created successfully',
         false, { 'Content-Type': 'multipart/form-data' }
       )
-        .then(() => { return Promise.resolve(true) })
-        .catch(() => { return Promise.resolve(false) })
     },
     update () {
       return this.put(
@@ -94,8 +95,6 @@ export default {
         this.name, 'New wordlist created successfully',
         false, { 'Content-Type': 'multipart/form-data' }
       )
-        .then(() => { return Promise.resolve(true) })
-        .catch(() => { return Promise.resolve(false) })
     },
     getFormData () {
       const data = new FormData()

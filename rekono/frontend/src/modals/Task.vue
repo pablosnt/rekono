@@ -167,15 +167,15 @@ export default {
         } else if (this.process) {
           this.selectProcess(this.process.id, this.process)
         } else if (!this.tool && !this.process) {
-          this.getAllPages('/api/tools/?o=stage,-likes_count,name').then(response => { this.tools = response.data.results })
-          this.getAllPages('/api/processes/?o=-likes_count,name').then(response => { this.processes = response.data.results })
+          this.getAllPages('/api/tools/?o=stage,-likes_count,name').then(results => this.tools = results)
+          this.getAllPages('/api/processes/?o=-likes_count,name').then(results => this.processes = results)
         }
         if (this.target) {
           this.targetId = this.target.id
         } else if (this.project) {
           this.get(`/api/projects/${this.project.id}/`).then(response => { this.selectProject(this.project.id, response.data) })
         } else {
-          this.getAllPages('/api/projects/?o=name').then(response => { this.projects = response.data.results })
+          this.getAllPages('/api/projects/?o=name').then(results => this.projects = results)
         }
       }
     }
@@ -321,7 +321,7 @@ export default {
       }
     },
     updateWordlists () {
-      this.getAllPages('/api/resources/wordlists/?o=type,-likes_count,name').then(response => { this.wordlists = response.data.results })
+      this.getAllPages('/api/resources/wordlists/?o=type,-likes_count,name').then(results => this.wordlists = results)
     },
     cleanScheduledIn () {
       this.scheduledIn = null

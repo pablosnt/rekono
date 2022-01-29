@@ -15,7 +15,7 @@ export default {
   mixins: [RekonoApi],
   props: {
     id: String,
-    projectId: Number
+    projectId: [Number, String]
   },
   data () {
     return {

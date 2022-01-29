@@ -58,7 +58,7 @@ export default {
   props: {
     id: String,
     path: String,
-    itemId: Number,
+    itemId: [Number, String],
     alreadyReported: Boolean
   },
   computed: {

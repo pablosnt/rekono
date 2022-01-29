@@ -36,7 +36,7 @@
       <span><strong>{{ currentProject.name }}</strong> project</span>
     </deletion>
     <project id="project-modal" :project="currentProject" :initialized="showEditForm" @confirm="confirm" @clean="showEditForm = false"/>
-    <defect-dojo id="defect-dojo-modal" path="projects" :itemId="currentProject.id" :alreadyReported="false" @clean="$bvModal.hide('defect-dojo-modal')" @confirm="$bvModal.hide('defect-dojo-modal')"/>
+    <defect-dojo id="defect-dojo-modal" path="projects" :itemId="$route.params.id" :alreadyReported="false" @clean="$bvModal.hide('defect-dojo-modal')" @confirm="$bvModal.hide('defect-dojo-modal')"/>
   </div>
 </template>
 
@@ -47,7 +47,7 @@ import Deletion from '@/common/Deletion'
 import Project from '@/modals/Project'
 import DefectDojo from '@/modals/DefectDojo'
 export default {
-  name: 'projectDetailsPage',
+  name: 'projectDashboardPage',
   mixins: [RekonoApi],
   props: {
     project: Object
@@ -56,7 +56,7 @@ export default {
     this.fetchProject()
     return {
       defectDojoUrl: this.project && this.project.defectdojo_product_id ? `${process.env.VUE_APP_DEFECTDOJO_HOST}/product/${this.project.defectdojo_product_id}` : null,
-      currentProject: this.project ? this.project : [],
+      currentProject: this.project ? this.project : null,
       showEditForm: false
     }
   },
@@ -77,7 +77,7 @@ export default {
       }
     },
     deleteProject () {
-      this.delete(`/api/projects/${this.currentProject.id}/`, this.currentProject.name, 'Project deleted successfully').then(() => this.$router.push({ path: '/projects' }))
+      this.delete(`/api/projects/${this.$route.params.id}/`, this.currentProject.name, 'Project deleted successfully').then(() => this.$router.push({ path: '/projects' }))
     },
     confirm (operation) {
       if (operation.success) {
