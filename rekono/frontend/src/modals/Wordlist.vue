@@ -85,7 +85,7 @@ export default {
         '/api/resources/wordlists/',
         this.getFormData(),
         this.name, 'New wordlist created successfully',
-        false, { 'Content-Type': 'multipart/form-data' }
+        true, { 'Content-Type': 'multipart/form-data' }
       )
     },
     update () {
@@ -93,7 +93,7 @@ export default {
         `/api/resources/wordlists/${this.wordlist.id}/`,
         this.getFormData(),
         this.name, 'New wordlist created successfully',
-        false, { 'Content-Type': 'multipart/form-data' }
+        true, { 'Content-Type': 'multipart/form-data' }
       )
     },
     getFormData () {
@@ -101,6 +101,7 @@ export default {
       data.append('name', this.name)
       data.append('type', this.type)
       data.append('file', this.file)
+      return data
     },
     clean () {
       this.name = null

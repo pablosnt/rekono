@@ -246,8 +246,8 @@ export default {
     handleGetApiKey (event) {
       event.preventDefault()
       if (this.checkAPIKey() === null) {
-        super.post('/api/api-token/', { username: this.username, password: this.password })
-          .then(response => { this.apiKey = response.data.token; this.passwordError = false })
+        this.post('/api/api-token/', { username: this.username, password: this.password })
+          .then(data => { this.apiKey = data.token; this.passwordError = false })
           .catch(() => { this.passwordError = true })
       }
     },

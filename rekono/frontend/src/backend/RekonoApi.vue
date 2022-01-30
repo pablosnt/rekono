@@ -169,35 +169,37 @@ export default {
       }
       return Promise.reject()
     },
-    headers (requiredAuth = true, extraHeaders = null) {
+    headers (requiredAuth, extraHeaders) {
       let requestHeaders = {
         'Content-Type': 'application/json',
         Accept: 'application/json'
       }
       if (this.$store.state.user !== null && requiredAuth) {
         requestHeaders.Authorization = `Bearer ${localStorage[accessTokenKey]}`
+        console.log(requestHeaders.Authorization)
       }
-      if (extraHeaders !== null) {
+      if (extraHeaders) {
         requestHeaders = Object.assign({}, requestHeaders, extraHeaders)
+        console.log(requestHeaders)
       }
       return requestHeaders
     },
     handleError (error, title) {
+      let message = 'Unexpected error'
       if (error.response.status === 400) {
-        const message = Object.values(error.response.data)[0][0]
-        this.danger(title, message.charAt(0).toUpperCase() + message.slice(1))
+        const aux = Object.values(error.response.data)[0][0]
+        message = aux.charAt(0).toUpperCase() + aux.slice(1)
       }
       else if (error.response.status === 401) {
-        this.danger(title, 'You are not authenticated. Please, try again after login in')
+        message = 'You are not authenticated. Please, try again after login in'
       }
       else if (error.response.status === 403) {
-        this.danger(title, 'You are not authorized to perform this operation')
+        message = 'You are not authorized to perform this operation'
       }
       else if (error.response.status === 404) {
-        this.danger(title, 'Resource not found')
-      } else {
-        this.danger(title, 'Unexpected error')
+        message = 'Resource not found'
       }
+      this.danger(title, message)
     },
     cleanParams (params) {
       if (params) {

@@ -47,7 +47,7 @@ export default {
     confirm (event) {
       event.preventDefault()
       if (this.check()) {
-        super.post(`/api/projects/${this.projectId}/members/`, { user: this.member }, 'New member', 'New member added successfully')
+        this.post(`/api/projects/${this.projectId}/members/`, { user: this.member }, 'New member', 'New member added successfully')
           .then(() => { return Promise.resolve(true) })
           .catch(() => { return Promise.resolve(false) })
           .then(success => { this.$emit('confirm', { id: this.id, success: success, reload: true }) })

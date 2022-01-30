@@ -200,13 +200,13 @@ export default {
       this.getAllPages('/api/executions/', { task: this.$route.params.id }).then(results => { this.executions = results; this.selectExecution(null) })
     },
     cancelTask () {
-      super.delete(
+      this.delete(
         `/api/tasks/${this.currentTask.id}/`,
         this.currentTask.process ? this.currentTask.process.name : this.currentTask.tool.name, 'Task cancelled successfully'
       ).then(() => { this.fetchTask() })
     },
     repeatTask () {
-      super.post(
+      this.post(
         `/api/tasks/${this.currentTask.id}/repeat/`, { },
         this.currentTask.process ? this.currentTask.process.name : this.currentTask.tool.name, 'Task executed again successfully'
       ).then(response => { this.$router.push({ name: 'task', params: { id: response.data.id, task: response.data } }) })

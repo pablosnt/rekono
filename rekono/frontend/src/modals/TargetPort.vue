@@ -31,7 +31,7 @@ export default {
     confirm (event) {
       event.preventDefault()
       if (this.check()) {
-        super.post('/api/target-ports/', { target: this.targetId, port: this.targetPort }, this.targetPort, 'New target port created successfully')
+        this.post('/api/target-ports/', { target: this.targetId, port: this.targetPort }, this.targetPort, 'New target port created successfully')
           .then(() => { return Promise.resolve(true) })
           .catch(() => { return Promise.resolve(false) })
           .then(success => this.$emit('confirm', { id: this.id, success: success, reload: true }))
