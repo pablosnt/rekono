@@ -128,14 +128,15 @@ class CmseekTool(BaseTool):
             # Create Vulnerability with CVE and related to CMS Technology
             self.create_finding(Vulnerability, technology=cms, name=vuln.get('name'), cve=vuln.get('cve'))
 
-    def parse_cms_usernames(self, value: str) -> None:
+    def parse_cms_usernames(self, value: str, cms: Technology) -> None:
         '''Parse CMS usernames to create Credentials.
 
         Args:
             value (str): Username values
+            cms (Technology): CMS Technology
         '''
         for user in value.split(','):                                           # For each username
-            self.create_finding(Credential, username=user)                      # Create Credential with username
+            self.create_finding(Credential, technology=cms, username=user)      # Create Credential with username
 
     def parse_output_file(self) -> None:
         '''Parse tool output file to create finding entities.'''
@@ -158,7 +159,7 @@ class CmseekTool(BaseTool):
                 if 'file' in key or 'directory' in key:                         # Endpoint found
                     self.analyze_endpoints(url, cms, key, value)                # Analyze endpoint
                 elif '_users' in key and ',' in value:                          # Users found
-                    self.parse_cms_usernames(value)
+                    self.parse_cms_usernames(value, cms)
                 elif '_debug_mode' in key and value != 'disabled':              # Vulnerability found: debug enabled
                     self.create_finding(                                        # Create Vulnerability
                         Vulnerability,

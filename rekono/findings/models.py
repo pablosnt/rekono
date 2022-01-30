@@ -466,6 +466,63 @@ class Technology(Finding):
         return f'{self.enumeration.__str__()} - {self.name}' if self.enumeration else self.name
 
 
+class Credential(Finding):
+    '''Credential model.'''
+
+    # Technology where credentials are discovered
+    technology = create_finding_foreign_key(Technology, 'technology')
+    email = models.TextField(max_length=100, blank=True, null=True)             # Email if found
+    username = models.TextField(max_length=100, blank=True, null=True)          # Username if found
+    secret = models.TextField(max_length=300, blank=True, null=True)            # Secret (password, key, etc.) if found
+
+    key_fields: List[Dict[str, Any]] = [                                        # Unique field list
+        {'name': 'email', 'is_base': False},
+        {'name': 'username', 'is_base': False},
+        {'name': 'secret', 'is_base': False}
+    ]
+
+    def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
+        '''Get useful information from this instance to be used in tool execution as argument.
+
+        Args:
+            accumulated (Dict[str, Any], optional): Information from other instances of the same type. Defaults to {}.
+
+        Returns:
+            Dict[str, Any]: Useful information for tool executions, including accumulated if setted
+        '''
+        return {
+            InputKeyword.EMAIL.name.lower(): self.email,
+            InputKeyword.USERNAME.name.lower(): self.username,
+            InputKeyword.SECRET.name.lower(): self.secret,
+        }
+
+    def defect_dojo(self) -> Dict[str, Any]:
+        '''Get useful information to import this finding in Defect-Dojo.
+
+        Returns:
+            Dict[str, Any]: Useful information for Defect-Dojo imports
+        '''
+        description = ' - '.join([getattr(self, f) for f in ['email', 'username', 'secret']])
+        return {
+            'title': 'Credentials exposure',
+            'description': description,
+            'cwe': 200,     # CWE-200: Exposure of Sensitive Information to Unauthorized Actor
+            'severity': str(Severity.HIGH),
+            'date': self.creation.strftime(DD_DATE_FORMAT)
+        }
+
+    def __str__(self) -> str:
+        '''Instance representation in text format.
+
+        Returns:
+            str: String value that identifies this instance
+        '''
+        text = f'{self.email} - {self.username} - {self.secret}'
+        if self.technology:
+            text = f'{self.technology.__str__()} - {text}'
+        return text
+
+
 class Vulnerability(Finding):
     '''Vulnerability model.'''
 
@@ -555,58 +612,6 @@ class Vulnerability(Finding):
         if self.cve:
             text = f'{text} - {self.cve}'
         return text
-
-
-class Credential(Finding):
-    '''Credential model.'''
-
-    email = models.TextField(max_length=100, blank=True, null=True)             # Email if found
-    username = models.TextField(max_length=100, blank=True, null=True)          # Username if found
-    secret = models.TextField(max_length=300, blank=True, null=True)            # Secret (password, key, etc.) if found
-
-    key_fields: List[Dict[str, Any]] = [                                        # Unique field list
-        {'name': 'email', 'is_base': False},
-        {'name': 'username', 'is_base': False},
-        {'name': 'secret', 'is_base': False}
-    ]
-
-    def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
-        '''Get useful information from this instance to be used in tool execution as argument.
-
-        Args:
-            accumulated (Dict[str, Any], optional): Information from other instances of the same type. Defaults to {}.
-
-        Returns:
-            Dict[str, Any]: Useful information for tool executions, including accumulated if setted
-        '''
-        return {
-            InputKeyword.EMAIL.name.lower(): self.email,
-            InputKeyword.USERNAME.name.lower(): self.username,
-            InputKeyword.SECRET.name.lower(): self.secret,
-        }
-
-    def defect_dojo(self) -> Dict[str, Any]:
-        '''Get useful information to import this finding in Defect-Dojo.
-
-        Returns:
-            Dict[str, Any]: Useful information for Defect-Dojo imports
-        '''
-        description = ' - '.join([getattr(self, f) for f in ['email', 'username', 'secret']])
-        return {
-            'title': 'Credentials exposure',
-            'description': description,
-            'cwe': 200,     # CWE-200: Exposure of Sensitive Information to Unauthorized Actor
-            'severity': str(Severity.HIGH),
-            'date': self.creation.strftime(DD_DATE_FORMAT)
-        }
-
-    def __str__(self) -> str:
-        '''Instance representation in text format.
-
-        Returns:
-            str: String value that identifies this instance
-        '''
-        return f'{self.email} - {self.username} - {self.secret}'
 
 
 class Exploit(Finding):

@@ -24,10 +24,10 @@
       <finding name="enumerations" :fields="enumerations" :details="enumerationDetails" @finding-selected="selectFinding" :id="selectedEnumeration" :filter="hostFilter" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="selectedTask" :execution="selectedExecution" :search="search" :active="activeFilter"/>
       <finding name="endpoints" :fields="endpoints" :details="endpointDetails" :filter="enumerationFilter" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="selectedTask" :execution="selectedExecution" :search="search" :active="activeFilter"/>
       <finding name="technologies" :fields="technologies" @finding-selected="selectFinding" :id="selectedTechnology" :filter="enumerationFilter" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="selectedTask" :execution="selectedExecution" :search="search" :active="activeFilter"/>
+      <finding name="credentials" :fields="credentials" :filter="technologyFilter" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="selectedTask" :execution="selectedExecution" :search="search" :active="activeFilter"/>
       <finding name="vulnerabilities" :fields="vulnerabilities" :details="vulnerabilityDetails" @finding-selected="selectFinding" :id="selectedVulnerability" :filter="technologyAndEnumerationFilter" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="selectedTask" :execution="selectedExecution" :search="search" :active="activeFilter"/>
       <finding name="exploits" :fields="exploits" :details="exploitDetails" :filter="vulnerabilityAndTechnologyFilter" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="selectedTask" :execution="selectedExecution" :search="search" :active="activeFilter"/>
       <finding name="osint" :fields="osint" :details="osintDetails" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="selectedTask" :execution="selectedExecution" :search="search" :active="activeFilter"/>
-      <finding name="credentials" :fields="credentials" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="selectedTask" :execution="selectedExecution" :search="search" :active="activeFilter"/>
     </b-row>
   </div>
 </template>
@@ -69,6 +69,11 @@ export default {
         return this.selectedEnumeration ? { enumeration: this.selectedEnumeration } : { enumeration__isnull: true}
       }
       return null
+    },
+    technologyFilter () {
+      if (this.selection) {
+        return this.selectedTechnology ? { technology: this.selectedTechnology } : { technology__isnull: true }
+      }
     },
     technologyAndEnumerationFilter () {
       if (this.selection) {
@@ -132,6 +137,11 @@ export default {
         { field: 'description', type: 'text' },
         { field: 'reference', title: 'Reference', type: 'link' }
       ],
+      credentials: [
+        { key: 'email', sortable: true },
+        { key: 'username', sortable: true },
+        { key: 'secret', sortable: true }
+      ],
       vulnerabilities: [
         { key: 'name', label: 'Vulnerability', sortable: true },
         { key: 'severity', sortable: true },
@@ -142,11 +152,6 @@ export default {
         { field: 'cwe', type: 'badge', variant: 'primary' },
         { field: 'osvdb', type: 'badge', variant: 'sedondary' },
         { field: 'reference', title: 'Reference', type: 'link' }
-      ],
-      credentials: [
-        { key: 'email', sortable: true },
-        { key: 'username', sortable: true },
-        { key: 'secret', sortable: true }
       ],
       exploits: [
         { key: 'name', label: 'Exploit', sortable: true },

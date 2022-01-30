@@ -193,6 +193,21 @@ class TechnologyViewSet(FindingBaseView):
     ]
 
 
+class CredentialViewSet(FindingBaseView):
+    '''Credential ViewSet that includes: get, retrieve, enable, disable and import Defect-Dojo features.'''
+
+    queryset = Credential.objects.all()
+    serializer_class = CredentialSerializer
+    filterset_class = CredentialFilter
+    # Fields used to search Credentials
+    search_fields = [
+        'technology__enumeration__host__address',
+        'technology__enumeration__port', 'technology__enumeration__service',
+        'technology__name', 'technology__version',
+        'email', 'username'
+    ]
+
+
 class VulnerabilityViewSet(FindingBaseView):
     '''Vulnerability ViewSet that includes: get, retrieve, enable, disable and import Defect-Dojo features.'''
 
@@ -209,15 +224,6 @@ class VulnerabilityViewSet(FindingBaseView):
         'name', 'cve', 'cwe', 'severity',
         'exploit__name'
     ]
-
-
-class CredentialViewSet(FindingBaseView):
-    '''Credential ViewSet that includes: get, retrieve, enable, disable and import Defect-Dojo features.'''
-
-    queryset = Credential.objects.all()
-    serializer_class = CredentialSerializer
-    filterset_class = CredentialFilter
-    search_fields = ['email', 'username']                                       # Fields used to search Credentials
 
 
 class ExploitViewSet(FindingBaseView):

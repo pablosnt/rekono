@@ -70,6 +70,17 @@ class TechnologySerializer(serializers.ModelSerializer):
         )
 
 
+class CredentialSerializer(serializers.ModelSerializer):
+    '''Serializer to get the Credential data via API.'''
+
+    class Meta:
+        '''Serializer metadata.'''
+
+        model = Credential
+        # Credential fields exposed via API
+        fields = ('id', 'technology', 'email', 'username', 'secret', 'reported_to_defectdojo')
+
+
 class VulnerabilitySerializer(serializers.ModelSerializer):
     '''Serializer to get the Vulnerability data via API.'''
 
@@ -81,16 +92,6 @@ class VulnerabilitySerializer(serializers.ModelSerializer):
             'id', 'execution', 'enumeration', 'technology', 'name', 'description', 'severity',
             'cve', 'cwe', 'reference', 'creation', 'is_active', 'exploit', 'reported_to_defectdojo'
         )
-
-
-class CredentialSerializer(serializers.ModelSerializer):
-    '''Serializer to get the Credential data via API.'''
-
-    class Meta:
-        '''Serializer metadata.'''
-
-        model = Credential
-        fields = ('id', 'email', 'username', 'secret', 'reported_to_defectdojo')    # Credential fields exposed via API
 
 
 class ExploitSerializer(serializers.ModelSerializer):

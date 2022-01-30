@@ -228,6 +228,30 @@ class TechnologyFilter(FindingFilter):
         })
 
 
+class CredentialFilter(FindingFilter):
+    '''FilterSet to filter and sort Credential entities.'''
+
+    o = OrderingFilter(fields=FINDING_ORDERING + ('email', 'username'))         # Ordering fields including common ones
+
+    class Meta:
+        '''FilterSet metadata.'''
+
+        model = Credential
+        fields = FINDING_FILTERING.copy()                                       # Common filtering fields
+        fields.update({                                                         # Include specific filtering fields
+            'technology': ['exact', 'isnull'],
+            'technology__enumeration': ['exact', 'isnull'],
+            'technology__enumeration__host': ['exact'],
+            'technology__enumeration__host__address': ['exact', 'icontains'],
+            'technology__enumeration__host__os_type': ['exact'],
+            'technology__enumeration__port': ['exact'],
+            'technology__name': ['exact', 'icontains'],
+            'technology__version': ['exact', 'icontains'],
+            'email': ['exact', 'icontains'],
+            'username': ['exact', 'icontains'],
+        })
+
+
 class VulnerabilityFilter(BaseVulnerabilityFilter):
     '''FilterSet to filter and sort Vulnerability entities.'''
 
@@ -254,22 +278,6 @@ class VulnerabilityFilter(BaseVulnerabilityFilter):
             'severity': ['exact'],
             'cve': ['exact', 'contains'],
             'exploit': ['isnull']
-        })
-
-
-class CredentialFilter(FindingFilter):
-    '''FilterSet to filter and sort Credential entities.'''
-
-    o = OrderingFilter(fields=FINDING_ORDERING + ('email', 'username'))         # Ordering fields including common ones
-
-    class Meta:
-        '''FilterSet metadata.'''
-
-        model = Credential
-        fields = FINDING_FILTERING.copy()                                       # Common filtering fields
-        fields.update({                                                         # Include specific filtering fields
-            'email': ['exact', 'icontains'],
-            'username': ['exact', 'icontains'],
         })
 
 
