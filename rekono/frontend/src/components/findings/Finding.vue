@@ -1,6 +1,6 @@
 <template>
   <b-col v-if="findings && findings.length > 0 && (types.length === 0 || types.includes(name.toLowerCase()))">
-    <b-table select-mode="single" :selectable="details !== null" hover striped borderless head-variant="dark" :fields="fields" :items="findings" @row-clicked="displayRowDetails" @row-selected="selectRow">
+    <b-table ref="findingTable" select-mode="single" :selectable="details !== null" hover striped borderless head-variant="dark" :fields="fields" :items="findings" :filter="findingId ? findingId.toString() : null" :filter-function="selectedFilter" @filtered="preventSelection = true" @row-selected="selectRow">
       <template #cell(data_type)="row">
         <b-badge variant="primary">{{ row.item.data_type }}</b-badge>
       </template>
@@ -23,7 +23,7 @@
         <b-row>
           <b-col>
             <div v-for="detail in details" :key="detail.field">
-              <div v-if="row.item[detail.field] !== null">
+              <div v-if="row.item[detail.field]">
                 <div v-if="detail.type === 'text' && row.item[detail.field].length > 0" class="text-left">
                   <div v-if="detail.title">
                     <label class="text-muted">{{ detail.title }}</label><span class="ml-2">{{ row.item[detail.field] }}</span>
@@ -104,6 +104,7 @@ export default {
     name: String,
     fields: Array,
     selectedFindingTypes: Array,
+    findingId: Number,
     target: Number,
     task: Number,
     execution: Number,
@@ -126,6 +127,7 @@ export default {
     return {
       findings: [],
       selectedFinding: null,
+      preventSelection: false,
       defectDojo: process.env.VUE_APP_DEFECTDOJO_HOST
     }
   },
@@ -139,6 +141,9 @@ export default {
     }
   },
   methods: {
+    selectedFilter (record) {
+      return (!this.findingId || record.id === this.findingId)
+    },
     getFilter () {
       let filter = {}
       if (this.execution) {
@@ -176,7 +181,18 @@ export default {
       this.selectedFinding = finding
     },
     selectRow (items) {
-      this.$emit('finding-selected', { type: this.name, finding: (items && items.length > 0) ? items[0] : null })
+      let row = (items && items.length > 0) ? items[0] : null
+      if (row && this.findingId && !this.preventSelection) {
+        this.$refs.findingTable.clearSelected()
+      } else if (!this.findingId || !this.preventSelection) {
+        if (row) {
+          row._showDetails = true;
+        } else {
+          this.$refs.findingTable.items.forEach(r => r._showDetails = false)
+        }
+        this.$emit('finding-selected', { type: this.name, finding: row })
+      }
+      this.preventSelection = false
     },
     cleanDDSelection () {
       this.$bvModal.hide('defect-dojo-modal')
@@ -184,9 +200,6 @@ export default {
     },
     cleanSelection () {
       this.selectedFinding = null
-    },
-    displayRowDetails (row) {
-      row._showDetails = !row._showDetails;
     }
   }
 }
