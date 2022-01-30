@@ -58,7 +58,7 @@ export default {
     ProjectMember
   },
   watch: {
-    users () {
+    data () {
       this.filters = [
         { name: 'Role', values: this.roles, valueField: 'value', textField: 'value', filterField: 'role' }
       ]

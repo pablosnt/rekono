@@ -127,7 +127,7 @@ export default {
     Task
   },
   watch: {
-    processes () {
+    data () {
       this.filters = [
         { name: 'Tags', filterField: 'tags__name__in', type: 'tags' },
         { name: 'Stage', values: this.stages, valueField: 'id', textField: 'value', filterField: 'steps__tool__stage' },
@@ -138,7 +138,7 @@ export default {
   },
   methods: {
     fetchData (params = null) {
-      return this.getOnePage('/api/processes/?o=-likes_count,name', params)
+      return this.getOnePage('/api/processes/?o=name', params)
         .then(response => {
           this.data = response.data.results
           this.total = response.data.count

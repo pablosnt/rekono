@@ -123,7 +123,7 @@ export default {
     Task
   },
   watch: {
-    targets () {
+    data () {
       this.filters = [
         { name: 'Type', values: this.targetTypes, valueField: 'value', textField: 'value', filterField: 'type' }
       ]

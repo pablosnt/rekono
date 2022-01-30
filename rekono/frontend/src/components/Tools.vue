@@ -104,7 +104,7 @@ export default {
     Task
   },
   watch: {
-    tools () {
+    data () {
       this.filters = [
         { name: 'Stage', values: this.stages, valueField: 'id', textField: 'value', filterField: 'stage' },
         { name: 'Input', values: this.inputTypes, valueField: 'value', textField: 'value', filterField: 'arguments__inputs__type__name' },
@@ -115,7 +115,7 @@ export default {
   },
   methods: {
     fetchData (params = null) {
-      return this.getOnePage('/api/tools/?o=stage,-likes_count,name', params)
+      return this.getOnePage('/api/tools/?o=stage,name', params)
         .then(response => {
           this.data = response.data.results
           this.total = response.data.count

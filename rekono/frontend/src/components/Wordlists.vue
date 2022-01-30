@@ -65,10 +65,10 @@ export default {
     Wordlist
   },
   watch: {
-    wordlists () {
+    data () {
       this.filters = [
         { name: 'Type', values: ['Endpoint', 'Password'], valueField: 'value', textField: 'value', filterField: 'type' },
-        { name: 'Max. Size', filterField: 'size__lte', type: 'number' },
+        { name: 'Max Size', filterField: 'size__lte', type: 'number' },
         { name: 'Creator', filterField: 'creator__username__icontains', type: 'text' },
         { name: 'Favourities', values: [{ value: true, text: 'True' }, { value: false, text: 'False' }], valueField: 'value', textField: 'text', filterField: 'liked' }
       ] 
@@ -76,7 +76,7 @@ export default {
   },
   methods: {
     fetchData (params = null) {
-      return this.getOnePage('/api/resources/wordlists/?o=type,-likes_count,name', params)
+      return this.getOnePage('/api/resources/wordlists/?o=type,name', params)
         .then(response => {
           this.data = response.data.results
           this.total = response.data.count

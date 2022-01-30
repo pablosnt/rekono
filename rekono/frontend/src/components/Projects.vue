@@ -67,7 +67,7 @@ export default {
     Project
   },
   watch: {
-    projects () {
+    data () {
       this.filters = [
         { name: 'Tags', filterField: 'tags__name__in', type: 'tags' },
         { name: 'Owner', filterField: 'owner__username__icontains', type: 'text' },

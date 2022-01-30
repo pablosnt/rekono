@@ -167,8 +167,8 @@ export default {
         } else if (this.process) {
           this.selectProcess(this.process.id, this.process)
         } else if (!this.tool && !this.process) {
-          this.getAllPages('/api/tools/?o=stage,-likes_count,name').then(results => this.tools = results)
-          this.getAllPages('/api/processes/?o=-likes_count,name').then(results => this.processes = results)
+          this.getAllPages('/api/tools/?o=stage,name').then(results => this.tools = results)
+          this.getAllPages('/api/processes/?o=name').then(results => this.processes = results)
         }
         if (this.target) {
           this.targetId = this.target.id
@@ -321,7 +321,7 @@ export default {
       }
     },
     updateWordlists () {
-      this.getAllPages('/api/resources/wordlists/?o=type,-likes_count,name').then(results => this.wordlists = results)
+      this.getAllPages('/api/resources/wordlists/?o=type,name').then(results => this.wordlists = results)
     },
     cleanScheduledIn () {
       this.scheduledIn = null

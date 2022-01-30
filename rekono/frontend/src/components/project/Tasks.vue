@@ -78,7 +78,7 @@ export default {
     Task
   },
   watch: {
-    tasks () {
+    data () {
       this.filters = [
          { name: 'Intensity', values: this.intensities, valueField: 'value', textField: 'text', filterField: 'intensity' },
          { name: 'Status', values: this.statusesByVariant, valueField: 'value', textField: 'value', filterField: 'status' },

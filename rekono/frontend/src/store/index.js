@@ -37,8 +37,7 @@ export default new Vuex.Store({
       } else {
         commit('authenticateUser', { user: null, role: null })
       }
-      const mainTabs = localStorage.getItem(showMainTabs)
-      if (mainTabs && mainTabs !== state.mainTabs) {
+      if ((localStorage.getItem(showMainTabs) === 'true') !== state.mainTabs) {
         commit('changeMainTabs')
       }
       commit('setRefreshStatus', false)
