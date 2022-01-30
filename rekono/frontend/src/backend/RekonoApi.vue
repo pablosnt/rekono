@@ -220,6 +220,20 @@ export default {
         }
       }
       return body
+    },
+    changeHashParam (name, value) {
+      const url = new URL(window.location.href.replace('#/', ''))
+      name = name.toLowerCase().replace(' ', '_')
+      if (value) {
+        url.searchParams.set(name, value);
+      } else {
+        url.searchParams.delete(name);
+      }
+      let from = window.location.hash
+      if (from.includes('?')) {
+        from = from.split('?', 2)[0]
+      }
+      window.location.hash = from + url.search
     }
   }
 }

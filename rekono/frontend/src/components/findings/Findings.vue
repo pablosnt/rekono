@@ -74,6 +74,7 @@ export default {
       if (this.selection) {
         return this.selectedTechnology ? { technology: this.selectedTechnology } : { technology__isnull: true }
       }
+      return null
     },
     technologyAndEnumerationFilter () {
       if (this.selection) {
@@ -93,10 +94,10 @@ export default {
     return {
       activeOptions: [{ value: null, text: 'All' }, { value: 'true', text: 'Active' }, { value: 'false', text: 'Disabled' }],
       targets: [],
-      selectedFindings: [],
-      selectedTarget: null,
+      selectedFindings: this.$route.query.types ? this.$route.query.types.split(',') : [],
+      selectedTarget: this.$route.query.target ? parseInt(this.$route.query.target) : null,
+      activeFilter: this.$route.query.active ? this.$route.query.active : null,
       search: null,
-      activeFilter: null,
       selectedHost: null,
       selectedEnumeration: null,
       selectedTechnology: null,
@@ -166,6 +167,17 @@ export default {
   components: {
     TableHeader,
     Finding
+  },
+  watch: {
+    selectedFindings () {
+      this.changeHashParam('types', this.selectedFindings.join(','))
+    },
+    selectedTarget () {
+      this.changeHashParam('target', this.selectedTarget)
+    },
+    activeFilter () {
+      this.changeHashParam('active', this.activeFilter)
+    }
   },
   methods: {
     fetchTargets () {

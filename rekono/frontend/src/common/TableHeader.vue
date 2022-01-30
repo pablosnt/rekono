@@ -81,7 +81,6 @@ export default {
       }
     },
     clean () {
-      console.log('CLEAN')
       this.selectedFilters = {}
       if (window.location.hash.includes('?')) {
         window.location.hash = window.location.hash.split('?', 2)[0]
@@ -89,30 +88,16 @@ export default {
       this.filter()
     },
     addFilter (name = null, field = null, value = null) {
-      console.log('ADD')
       if (name && field) {
         if (Array.isArray(value)) {
           value = value.join(',')
         }
         this.selectedFilters[field] = value
-        const url = new URL(window.location.href.replace('#/', ''))
-        name = name.toLowerCase().replace(' ', '_')
-        if (value) {
-          url.searchParams.set(name, value);
-        } else {
-          url.searchParams.delete(name);
-        }
-        let from = window.location.hash
-        if (from.includes('?')) {
-          from = from.split('?', 2)[0]
-        }
-        window.location.hash = from + url.search
-
+        this.changeHashParam(name, value)
       }
       this.filter()
     },
     filter () {
-      console.log('FILTER')
       this.$emit('filter', Object.assign({}, this.selectedFilters, { search: this.searchInput }))
     }
   },
