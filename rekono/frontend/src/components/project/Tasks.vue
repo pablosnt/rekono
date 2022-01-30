@@ -1,6 +1,6 @@
 <template>
   <div>
-    <table-header :filters="filters" add="task-modal" :addAuth="auditor.includes($store.state.role)" addIcon="play-circle-fill" @add-click="showTaskForm = true" @filter="fetchData"/>
+    <table-header :filters="filters" add="task-modal" :showAdd="auditor.includes($store.state.role)" addIcon="play-circle-fill" @add-click="showTaskForm = true" @filter="fetchData"/>
     <b-table hover striped borderless head-variant="dark" :fields="tasksFields" :items="data" @row-clicked="navigateToTaskDetails">
       <template #cell(tool)="row">
         <div v-if="row.item.tool">

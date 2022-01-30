@@ -116,7 +116,7 @@
             <template #title>
               <b-icon icon="flag-fill"/> Findings
             </template>
-            <findings v-if="currentTask" class="mt-3" :task="currentTask" :execution="selectedExecution" :cols="1"/>
+            <findings v-if="currentTask" class="mt-3" :task="currentTask" :execution="selectedExecution" :selection="false" :cols="1"/>
           </b-tab>
         </b-tabs>
       </b-col>

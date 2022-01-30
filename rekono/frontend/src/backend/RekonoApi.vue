@@ -176,11 +176,9 @@ export default {
       }
       if (this.$store.state.user !== null && requiredAuth) {
         requestHeaders.Authorization = `Bearer ${localStorage[accessTokenKey]}`
-        console.log(requestHeaders.Authorization)
       }
       if (extraHeaders) {
         requestHeaders = Object.assign({}, requestHeaders, extraHeaders)
-        console.log(requestHeaders)
       }
       return requestHeaders
     },

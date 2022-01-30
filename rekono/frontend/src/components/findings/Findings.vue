@@ -2,7 +2,7 @@
   <div>
     <b-row>
       <b-col>
-        <table-header :addAuth="false" @filter="setSearchFilter"/>
+        <table-header :showAdd="false" @filter="setSearchFilter"/>
       </b-col>
       <b-col v-if="!task && !execution" cols="2">
         <b-form-select v-model="selectedTarget" :options="targets" value-field="id" text-field="target"/>
@@ -13,21 +13,21 @@
       <b-col :cols="!task && !execution ? 1 : 2">
         <b-form-select v-model="activeFilter" :options="activeOptions"/>
       </b-col>
-      <b-col cols="1">
+      <b-col cols="1" v-if="selection">
         <b-button variant="outline" v-b-tooltip.hover title="You can select one finding and the related findings will be showed. You can also select the finding types that you want to be displayed">
           <b-icon icon="question-circle-fill" variant="info"/>
         </b-button>
       </b-col>
     </b-row>
     <b-row :cols="cols" class="mt-3">
-      <finding name="hosts" :fields="hosts" :details="hostDetails" @finding-selected="selectFinding" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="task ? task.id : null" :execution="execution ? execution.id : null" :search="search" :active="activeFilter"/>
-      <finding name="enumerations" :fields="enumerations" :details="enumerationDetails" @finding-selected="selectFinding" :selection="hostFilter" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="task ? task.id : null" :search="search" :active="activeFilter"/>
-      <finding name="endpoints" :fields="endpoints" :details="endpointDetails" :selection="enumerationFilter" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="task ? task.id : null" :search="search" :active="activeFilter"/>
-      <finding name="technologies" :fields="technologies" @finding-selected="selectFinding" :selection="enumerationFilter" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="task ? task.id : null" :search="search" :active="activeFilter"/>
-      <finding name="vulnerabilities" :fields="vulnerabilities" :details="vulnerabilityDetails" @finding-selected="selectFinding" :selection="technologyAndEnumerationFilter" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="task ? task.id : null" :search="search" :active="activeFilter"/>
-      <finding name="exploits" :fields="exploits" :details="exploitDetails" :selection="vulnerabilityAndTechnologyFilter" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="task ? task.id : null" :search="search" :active="activeFilter"/>
-      <finding name="osint" :fields="osint" :details="osintDetails" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="task ? task.id : null" :search="search" :active="activeFilter"/>
-      <finding name="credentials" :fields="credentials" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="task ? task.id : null" :search="search" :active="activeFilter"/>
+      <finding name="hosts" :fields="hosts" :details="hostDetails" @finding-selected="selectFinding" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="selectedTask" :execution="selectedExecution" :search="search" :active="activeFilter"/>
+      <finding name="enumerations" :fields="enumerations" :details="enumerationDetails" @finding-selected="selectFinding" :filter="hostFilter" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="selectedTask" :execution="selectedExecution" :search="search" :active="activeFilter"/>
+      <finding name="endpoints" :fields="endpoints" :details="endpointDetails" :filter="enumerationFilter" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="selectedTask" :execution="selectedExecution" :search="search" :active="activeFilter"/>
+      <finding name="technologies" :fields="technologies" @finding-selected="selectFinding" :filter="enumerationFilter" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="selectedTask" :execution="selectedExecution" :search="search" :active="activeFilter"/>
+      <finding name="vulnerabilities" :fields="vulnerabilities" :details="vulnerabilityDetails" @finding-selected="selectFinding" :filter="technologyAndEnumerationFilter" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="selectedTask" :execution="selectedExecution" :search="search" :active="activeFilter"/>
+      <finding name="exploits" :fields="exploits" :details="exploitDetails" :filter="vulnerabilityAndTechnologyFilter" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="selectedTask" :execution="selectedExecution" :search="search" :active="activeFilter"/>
+      <finding name="osint" :fields="osint" :details="osintDetails" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="selectedTask" :execution="selectedExecution" :search="search" :active="activeFilter"/>
+      <finding name="credentials" :fields="credentials" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="selectedTask" :execution="selectedExecution" :search="search" :active="activeFilter"/>
     </b-row>
   </div>
 </template>
@@ -42,23 +42,45 @@ export default {
   props: {
     task: Object,
     execution: Object,
+    selection: {
+      type: Boolean,
+      default: true
+    },
     cols: {
       type: Number,
       default: 2
     }
   },
   computed: {
+    selectedTask () {
+      return this.task ? this.task.id : null
+    },
+    selectedExecution () {
+      return this.execution ? this.execution.id : null
+    },
     hostFilter () {
-      return this.selectedHost ? { host: this.selectedHost } : { host__isnull: true }
+      if (this.selection) {
+        return this.selectedHost ? { host: this.selectedHost } : { host__isnull: true }
+      }
+      return null
     },
     enumerationFilter () {
-      return this.selectedEnumeration ? { enumeration: this.selectedEnumeration } : { enumeration__isnull: true}
+      if (this.selection) {
+        return this.selectedEnumeration ? { enumeration: this.selectedEnumeration } : { enumeration__isnull: true}
+      }
+      return null
     },
     technologyAndEnumerationFilter () {
-      return this.selectedTechnology ? { technology: this.selectedTechnology } : this.selectedEnumeration ? { enumeration: this.selectedEnumeration } : { technology__isnull: true, enumeration__isnull: true }
+      if (this.selection) {
+        return this.selectedTechnology ? { technology: this.selectedTechnology } : this.selectedEnumeration ? { enumeration: this.selectedEnumeration } : { technology__isnull: true, enumeration__isnull: true }
+      }
+      return null
     },
     vulnerabilityAndTechnologyFilter () {
-      return this.selectedVulnerability ? { vulnerability: this.selectedVulnerability } : this.selectedTechnology ? { technology: this.selectedTechnology } : { vulnerability__isnull: true, technology__isnull: true }
+      if (this.selection) {
+        return this.selectedVulnerability ? { vulnerability: this.selectedVulnerability } : this.selectedTechnology ? { technology: this.selectedTechnology } : { vulnerability__isnull: true, technology__isnull: true }
+      }
+      return null
     }
   },
   data () {

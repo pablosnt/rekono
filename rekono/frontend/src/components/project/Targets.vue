@@ -1,6 +1,6 @@
 <template>
   <div>
-    <table-header :filters="filters" add="add-target-modal" :addAuth="auditor.includes($store.state.role)" @filter="fetchData"/>
+    <table-header :filters="filters" add="add-target-modal" :showAdd="auditor.includes($store.state.role)" @filter="fetchData"/>
     <b-table striped borderless head-variant="dark" :fields="targetsFields" :items="data">
       <template #cell(actions)="row">
         <b-button :disabled="row.item.target_ports.length === 0" @click="row.toggleDetails" variant="outline" class="mr-2" v-b-tooltip.hover title="Details">

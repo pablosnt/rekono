@@ -109,17 +109,17 @@ export default {
     execution: Number,
     search: String,
     active: String,
-    selection: Object,
+    filter: Object,
     details: Array
   },
   computed: {
     filterChange () {
-      return this.selectedFindingTypes.toString() + this.target + this.task + this.execution + this.search + this.active + JSON.stringify(this.selection)
+      return this.selectedFindingTypes.toString() + this.target + this.task + this.execution + this.search + this.active + JSON.stringify(this.filter)
     },
     types () {
-      let selection = []
-      this.selectedFindingTypes.forEach(item => selection.push(item.toLowerCase()))
-      return selection
+      let types = []
+      this.selectedFindingTypes.forEach(item => types.push(item.toLowerCase()))
+      return types
     }
   },
   data () {
@@ -150,8 +150,8 @@ export default {
       } 
       if (this.search) {
         filter.search = this.search
-      } else if (!this.types.includes(this.name.toLowerCase()) && this.selection) {
-        filter = Object.assign({}, filter, this.selection)
+      } else if (!this.types.includes(this.name.toLowerCase()) && this.filter) {
+        filter = Object.assign({}, filter, this.filter)
       }
       if (this.active !== null) {
         filter.is_active = this.active.toString()
@@ -159,7 +159,7 @@ export default {
       return filter
     },
     fetchData () {
-      if ((this.task || this.target) && (this.types.length === 0 || this.types.includes(this.name.toLowerCase()))) {
+      if ((this.target || this.task || this.execution) && (this.types.length === 0 || this.types.includes(this.name.toLowerCase()))) {
         this.getAllPages(`/api/${this.name.toLowerCase()}/?o=-creation`, this.getFilter()).then(results => this.findings = results)
       }
     },
