@@ -7,7 +7,7 @@
           <b-icon v-if="!row.detailsShowing" variant="dark" icon="eye-fill"/>
           <b-icon v-if="row.detailsShowing" variant="secondary" icon="eye-slash-fill"/>
         </b-button>
-        <b-button variant="outline" class="mr-2" v-b-tooltip.hover title="Execute" @click="selectTarget(row.item)" v-b-modal.task-modal>
+        <b-button variant="outline" class="mr-2" v-b-tooltip.hover title="Execute" @click="selectTarget(row.item)" v-b-modal.task-modal v-if="auditor.includes($store.state.role)">
           <b-icon variant="success" icon="play-circle-fill"/>
         </b-button>
         <b-dropdown variant="outline" right v-if="auditor.includes($store.state.role)">

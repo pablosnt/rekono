@@ -11,12 +11,12 @@
           <b-img src="/static/defect-dojo-favicon.ico" width="30" height="30"/>
         </b-link>
       </b-col>
-      <b-col cols="1">
+      <b-col cols="1" v-if="auditor.includes($store.state.role)">
         <b-dropdown variant="outline" right>
           <template #button-content>
             <b-icon variant="dark" icon="three-dots-vertical"/>
           </template>
-          <b-dropdown-item variant="dark" v-b-modal.project-modal @click="showEditForm = true">
+          <b-dropdown-item variant="dark" v-b-modal.project-modal @click="showEditForm = true" v-if="$store.state.role === 'Admin'">
             <b-icon icon="pencil-square"/>
             <label class="ml-1">Edit</label>
           </b-dropdown-item>
@@ -24,7 +24,7 @@
             <b-img src="/static/defect-dojo-favicon.ico" width="20" height="20"/>
             <label class="ml-1">Import in Defect-Dojo</label>
           </b-dropdown-item>
-          <b-dropdown-item variant="danger" v-b-modal.delete-project-modal>
+          <b-dropdown-item variant="danger" v-b-modal.delete-project-modal v-if="$store.state.role === 'Admin'">
             <b-icon icon="trash-fill"/>
             <label class="ml-1">Delete</label>
           </b-dropdown-item>

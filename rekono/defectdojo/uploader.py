@@ -42,7 +42,7 @@ def get_product(project: Project) -> int:
                 project.defectdojo_product_id = body['id']                      # Save the Id in the Rekono project
                 project.save(update_fields=['defectdojo_product_id'])
                 return body['id']
-    raise DefectDojoException(f'Product associated to project {project.id} not found')
+    raise DefectDojoException({'product': [f'Product associated to project {project.id} not found']})
 
 
 def get_engagement(project: Project, id: int, name: str, description: str) -> Tuple[int, int]:
@@ -65,17 +65,18 @@ def get_engagement(project: Project, id: int, name: str, description: str) -> Tu
         if success and body:
             # Engagement product doesn't match the product associated to the Rekono project
             if project.defectdojo_product_id and project.defectdojo_product_id != body.get('id'):
-                raise DefectDojoException(f'Invalid engagement Id {id} for project {project.id}')
+                raise DefectDojoException({'engagement': [f'Invalid engagement Id {id} for project {project.id}']})
             else:
                 return project.defectdojo_product_id, body['id']
-        raise DefectDojoException(f'Engagement Id {id} not found')              # Engagement not found in Defect-Dojo
+        # Engagement not found in Defect-Dojo
+        raise DefectDojoException({'engagement': [f'Engagement Id {id} not found']})
     elif name and description:                                                  # Name and description provided
         product_id = get_product(project)                                       # Get Defect-Dojo product
         # Create a new engagement in Defect-Dojo
         success, body = dd_client.create_engagement(product_id, name, description)
         if success and body:
             return product_id, body['id']
-    raise DefectDojoException('Invalid engagement')
+    raise DefectDojoException({'engagement': ['Invalid engagement']})
 
 
 def create_rekono_test(engagement_id: int) -> int:
@@ -102,7 +103,7 @@ def create_rekono_test(engagement_id: int) -> int:
         result, body = dd_client.create_rekono_test(test_type, engagement_id)   # Create Rekono test
         if result:
             return body['id']
-    raise DefectDojoException('Unexpected error in Rekono test creation')       # Rekono test can't be created
+    raise DefectDojoException({'test': ['Unexpected error in Rekono test creation']})   # Rekono test can't be created
 
 
 def scans(

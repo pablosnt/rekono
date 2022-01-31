@@ -119,7 +119,7 @@ class OSINTViewSet(FindingBaseView):
             if serializer.is_valid():
                 target = serializer.create(serializer.validated_data)           # Target creation
                 return Response(TargetSerializer(target).data, status=status.HTTP_201_CREATED)
-        return Response({'data_type': 'Unsupported option for this OSINT data type'}, status=status.HTTP_400_BAD_REQUEST)   # noqa: E501
+        return Response({'data_type': ['Unsupported option for this OSINT data type']}, status=status.HTTP_400_BAD_REQUEST)     # noqa: E501
 
 
 class HostViewSet(FindingBaseView):

@@ -1,7 +1,7 @@
 <template>
   <div>
     <b-row class="mr-4 ml-4 mb-5 mt-4" align-h="between">
-      <b-col cols="2">
+      <b-col cols="3">
         <b-row>
           <b-col align-self="center">
             <h2><strong>{{ username }}</strong></h2>

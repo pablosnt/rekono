@@ -8,9 +8,12 @@ from executions.models import Execution
 from findings.models import Finding
 from rest_framework import status
 from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
+from security.authorization.permissions import (IsAuditor,
+                                                ProjectMemberPermission)
 from tasks.enums import Status
 
 
@@ -26,7 +29,15 @@ class DefectDojoScans(GenericViewSet):
         return []
 
     @extend_schema(request=EngagementSerializer, responses={200: None})
-    @action(detail=True, methods=['POST'], url_path='defect-dojo-scans', url_name='defect-dojo-scans')
+    # Permission classes are overrided to IsAuthenticated, IsAuditor and ProjectMemberPermission to allow all project
+    # Auditors and Admins to make Defect-Dojo imports.
+    @action(
+        detail=True,
+        methods=['POST'],
+        url_path='defect-dojo-scans',
+        url_name='defect-dojo-scans',
+        permission_classes=[IsAuthenticated, IsAuditor, ProjectMemberPermission]
+    )
     def defect_dojo_scans(self, request: Request, pk: int) -> Response:
         '''Import executions output in Defect-Dojo.
 
@@ -72,7 +83,15 @@ class DefectDojoFindings(GenericViewSet):
         return []
 
     @extend_schema(request=EngagementSerializer, responses={200: None})
-    @action(detail=True, methods=['POST'], url_path='defect-dojo-findings', url_name='defect-dojo-findings')
+    # Permission classes are overrided to IsAuthenticated, IsAuditor and ProjectMemberPermission to allow all project
+    # Auditors and Admins to make Defect-Dojo imports.
+    @action(
+        detail=True,
+        methods=['POST'],
+        url_path='defect-dojo-findings',
+        url_name='defect-dojo-findings',
+        permission_classes=[IsAuthenticated, IsAuditor, ProjectMemberPermission]
+    )
     def defect_dojo_findings(self, request: Request, pk: int) -> Response:
         '''Import findings in Defect-Dojo.
 

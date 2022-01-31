@@ -54,7 +54,7 @@
         <b-button variant="outline" v-b-modal.repeat-task-modal v-b-tooltip.hover title="Execute Again" v-if="currentTask && auditor.includes($store.state.role) && currentTask.status !== 'Requested' && currentTask.status !== 'Running'">
           <p class="h5"><b-icon variant="success" icon="play-circle-fill"/></p>
         </b-button>
-        <b-dropdown variant="outline" right>
+        <b-dropdown variant="outline" right v-if="auditor.includes($store.state.role)">
           <template #button-content>
             <b-img src="/static/defect-dojo-favicon.ico" width="30" height="30"/>
           </template>

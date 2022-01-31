@@ -52,7 +52,7 @@ export default {
   },
   computed: {
     edit () {
-      return (this.process !== null && this.process !== undefined)
+      return ![null, undefined].includes(this.process)
     },
     title () {
       let title = this.process ? 'Edit Process' : 'New Process'

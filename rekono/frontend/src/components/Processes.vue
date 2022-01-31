@@ -3,13 +3,13 @@
     <table-header :filters="filters" add="process-modal" @filter="fetchData"/>
     <b-table striped borderless head-variant="dark" :fields="processesFields" :items="data">
       <template #cell(tags)="row">
-        <b-form-tags no-outer-focus :value="row.item.tags" placeholder="" remove-on-delete size="md" tag-variant="dark" @input="updateProcess(row.item, $event)"/>
+        <b-form-tags no-outer-focus :disabled="$store.state.role !== 'Admin' && $store.state.user !== row.item.creator.id" :value="row.item.tags" placeholder="" remove-on-delete size="md" tag-variant="dark" @input="updateProcess(row.item, $event)"/>
       </template>
       <template #cell(likes)="row">
         {{ row.item.likes }}
         <b-button variant="outline">
-          <b-icon variant="danger" v-if="row.item.liked" icon="heart-fill" @click="dislike('processes', row.item.id); fetchData()"/>
-          <b-icon variant="danger" v-if="!row.item.liked" icon="heart" @click="like('processes', row.item.id); fetchData()"/>
+          <b-icon variant="danger" v-if="row.item.liked" icon="heart-fill" @click="dislikeProcess(row.item.id)"/>
+          <b-icon variant="danger" v-if="!row.item.liked" icon="heart" @click="likeProcess(row.item.id)"/>
         </b-button>
       </template>
       <template #cell(actions)="row">
@@ -161,17 +161,17 @@ export default {
     },
     taskModal (process) {
       this.cleanSelection()
-      this.taskForm = true
+      this.showTaskModal = true
       this.selectProcess(process)
     },
     processModal (process) {
       this.cleanSelection()
-      this.processForm = true
+      this.showProcessModal = true
       this.selectProcess(process)
     },
     stepModal (process, step = null) {
       this.cleanSelection()
-      this.stepForm = true
+      this.showStepModal = true
       if (step !== null) {
         this.selectStep(process, step)
       } else {

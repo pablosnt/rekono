@@ -2,6 +2,7 @@ from django.db.models import Count, QuerySet
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
@@ -23,11 +24,11 @@ class LikeManagementView(GenericViewSet):
         return super().get_queryset().annotate(likes_count=Count('liked_by'))
 
     @extend_schema(request=None, responses={201: None})
-    # Permission classes is overrided to IsAuditor, because currently only Tools, Processes and Resources (Wordlists)
-    # can be liked, and auditors and admins are the only ones that can see this resources. Permission classes should
-    # be overrided here, because if not, the standard permissions would be applied, and not all auditors can make
-    # POST requests to resources like these.
-    @action(detail=True, methods=['POST'], url_path='like', url_name='like', permission_classes=[IsAuditor])
+    # Permission classes are overrided to IsAuthenticated and IsAuditor, because currently only Tools, Processes and
+    # Resources (Wordlists) can be liked, and auditors and admins are the only ones that can see this resources.
+    # Permission classes should be overrided here, because if not, the standard permissions would be applied, and not
+    # all auditors can make POST requests to resources like these.
+    @action(detail=True, methods=['POST'], url_path='like', url_name='like', permission_classes=[IsAuthenticated, IsAuditor])   # noqa: E501
     def like(self, request: Request, pk: int) -> Response:
         '''Mark an instance as liked by the current user.
 
@@ -43,11 +44,11 @@ class LikeManagementView(GenericViewSet):
         return Response(status=status.HTTP_201_CREATED)
 
     @extend_schema(request=None, responses={204: None})
-    # Permission classes is overrided to IsAuditor, because currently only Tools, Processes and Resources (Wordlists)
-    # can be liked, and auditors and admins are the only ones that can see this resources. Permission classes should
-    # be overrided here, because if not, the standard permissions would be applied, and not all auditors can make
-    # POST requests to resources like these.
-    @action(detail=True, methods=['POST'], url_path='dislike', url_name='dislike', permission_classes=[IsAuditor])
+    # Permission classes is overrided to IsAuthenticated and IsAuditor, because currently only Tools, Processes and
+    # Resources (Wordlists) can be liked, and auditors and admins are the only ones that can see this resources.
+    # Permission classes should be overrided here, because if not, the standard permissions would be applied, and not
+    # all auditors can make POST requests to resources like these.
+    @action(detail=True, methods=['POST'], url_path='dislike', url_name='dislike', permission_classes=[IsAuthenticated, IsAuditor])     # noqa: E501
     def dislike(self, request: Request, pk: int) -> Response:
         '''Unmark an instance as liked by the current user.
 

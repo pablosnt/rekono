@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import Any, Dict
 
+from attr import has
 from django.contrib.auth.password_validation import validate_password
 from django.db import transaction
 from rest_framework import serializers, status
@@ -142,7 +143,8 @@ class UserProfileSerializer(serializers.ModelSerializer):
         Returns:
             bool: Indicate if Telegram bot has been configured
         '''
-        return instance.telegram_chat is not None
+        # return TelegramChat.objects.filter(user=instance).exists()
+        return hasattr(instance, 'telegram_chat') and instance.telegram_chat is not None
 
 
 class TelegramBotSerializer(serializers.Serializer):

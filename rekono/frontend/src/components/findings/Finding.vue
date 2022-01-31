@@ -61,7 +61,7 @@
               </div>
             </div>
           </b-col>
-          <b-col cols="2">
+          <b-col cols="2" v-if="auditor.includes($store.state.role)">
             <b-dropdown variant="outline" right>
               <template #button-content>
                 <b-icon variant="dark" icon="three-dots-vertical"/>

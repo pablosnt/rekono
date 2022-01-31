@@ -1,6 +1,6 @@
 <template>
   <b-modal :id="id" @hidden="clean" @ok="confirm" :title="title" :ok-title="button" header-bg-variant="dark" header-text-variant="light" ok-variant="dark">
-    <template #modal-title v-if="tool !== null">
+    <template #modal-title v-if="tool">
       <b-link :href="tool.reference" target="_blank">
         <b-img :src="tool.icon" width="100" height="50"/>
       </b-link>
@@ -65,7 +65,7 @@ export default {
   },
   computed: {
     edit () {
-      return (this.step !== null)
+      return ![null, undefined].includes(this.step)
     },
     title () {
       return this.process ? this.edit ? `Edit step for ${this.process.name}` : `New step for ${this.process.name}` : this.tool ? `New step ${this.tool.name}` : 'New step'
@@ -90,7 +90,10 @@ export default {
   },
   watch: {
     initialized (initialized) {
+      console.log(initialized)
       if (initialized) {
+        console.log(this.step)
+        console.log(this.tool)
         if (!this.step && !this.tool) {
           this.getAllPages('/api/tools/?o=stage,name').then(results => this.tools = results)
         } else if (this.step && !this.tool) {

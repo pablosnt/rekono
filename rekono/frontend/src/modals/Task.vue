@@ -1,5 +1,5 @@
 <template>
-  <b-modal id="execute-modal" @hidden="clean" @ok="confirm" :title="title" ok-title="Execute" header-bg-variant="success" header-text-variant="light" ok-variant="success" size="lg">
+  <b-modal :id="id" @hidden="clean" @ok="confirm" :title="title" ok-title="Execute" header-bg-variant="success" header-text-variant="light" ok-variant="success" size="lg">
     <template #modal-title v-if="selectedTool">
       <b-link :href="selectedTool.reference" target="_blank">
         <b-img :src="selectedTool.icon" width="100" height="50"/>
@@ -121,7 +121,7 @@ export default {
     },
     intensitySelection () {
       if (this.selectedTool) {
-        return this.intensitiesByVariant.filter(intensity => this.selectedTool.intensities.find(i => i.intensity_rank === intensity.intensity_rank))
+        return this.intensityByVariant.filter(intensity => this.selectedTool.intensities.find(i => i.intensity_rank === intensity.intensity_rank))
       }
       return this.intensityByVariant
     }
