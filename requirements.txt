@@ -1,4 +1,4 @@
-Django==3.2.11
+Django==3.2.12
 django-filter==21.1
 django-taggit==2.0.0
 djangorestframework==3.12.4
