@@ -8,6 +8,7 @@ import Signup from '@/views/Signup'
 import ResetPassword from '@/views/ResetPassword'
 import Profile from '@/views/Profile'
 import Task from '@/views/Task'
+import NotFound from '@/errors/NotFound'
 
 Vue.use(Router)
 
@@ -51,6 +52,11 @@ const routes = [
     name: 'task',
     component: Task,
     props: true
+  },
+  {
+    path: '*',
+    name: 'notFound',
+    component: NotFound
   }
 ]
 

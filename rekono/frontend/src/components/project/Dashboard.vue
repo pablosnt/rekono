@@ -3,7 +3,7 @@
     <b-row align-v="center">
       <b-col>
         <b-card>
-          <b-card-text v-if="currentProject" class="text-left">{{ currentProject.description }}</b-card-text>
+          <b-card-text class="text-left">{{ project.description }}</b-card-text>
         </b-card>
       </b-col>
       <b-col cols="1" v-if="defectDojoUrl">
@@ -31,11 +31,11 @@
         </b-dropdown>
       </b-col>
     </b-row>
-    <dashboard class="mt-3" :project="currentProject"/>
-    <deletion id="delete-project-modal" title="Delete Project" @deletion="deleteProject" v-if="currentProject">
-      <span><strong>{{ currentProject.name }}</strong> project</span>
+    <dashboard class="mt-3" :project="project"/>
+    <deletion id="delete-project-modal" title="Delete Project" @deletion="deleteProject">
+      <span><strong>{{ project.name }}</strong> project</span>
     </deletion>
-    <project id="project-modal" :project="currentProject" :initialized="showEditForm" @confirm="confirm" @clean="showEditForm = false"/>
+    <project id="project-modal" :project="project" :initialized="showEditForm" @confirm="confirm" @clean="showEditForm = false"/>
     <defect-dojo id="defect-dojo-modal" path="projects" :itemId="$route.params.id" :alreadyReported="false" @clean="$bvModal.hide('defect-dojo-modal')" @confirm="$bvModal.hide('defect-dojo-modal')"/>
   </div>
 </template>
@@ -53,10 +53,8 @@ export default {
     project: Object
   },
   data () {
-    this.fetchProject()
     return {
       defectDojoUrl: this.project && this.project.defectdojo_product_id ? `${process.env.VUE_APP_DEFECTDOJO_HOST}/product/${this.project.defectdojo_product_id}` : null,
-      currentProject: this.project ? this.project : null,
       showEditForm: false
     }
   },
@@ -67,17 +65,8 @@ export default {
     DefectDojo
   },
   methods: {
-    fetchProject () {
-      if (!this.project) {
-        this.get(`/api/projects/${this.$route.params.id}/`)
-          .then(response => {
-            this.currentProject = response.data
-            this.defectDojoUrl = response.data.defectdojo_product_id ? `${process.env.VUE_APP_DEFECTDOJO_HOST}/product/${response.data.defectdojo_product_id}` : null
-          })
-      }
-    },
     deleteProject () {
-      this.delete(`/api/projects/${this.$route.params.id}/`, this.currentProject.name, 'Project deleted successfully').then(() => this.$router.push({ path: '/projects' }))
+      this.delete(`/api/projects/${this.$route.params.id}/`, this.project.name, 'Project deleted successfully').then(() => this.$router.push({ path: '/projects' }))
     },
     confirm (operation) {
       if (operation.success) {

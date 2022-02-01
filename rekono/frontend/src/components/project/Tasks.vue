@@ -33,7 +33,7 @@
     <deletion id="cancel-task-modal" title="Cancel Task" removeWord="cancel" @deletion="cancelTask" @clean="cleanSelection" v-if="selectedTask !== null">
       <span>selected task</span>
     </deletion>
-    <task id="task-modal" :project="currentProject" :reload="true" :initialized="showTaskForm" @confirm="confirm" @clean="cleanSelection"/>
+    <task id="task-modal" :project="project" :reload="true" :initialized="showTaskForm" @confirm="confirm" @clean="cleanSelection"/>
   </div>
 </template>
 
@@ -51,7 +51,6 @@ export default {
   },
   data () {
     this.fetchData()
-    this.fetchProject()
     return {
       data: [],
       tasksFields: [
@@ -65,7 +64,6 @@ export default {
         { key: 'date', sortable: true },
         { key: 'actions', sortable: false }
       ],
-      currentProject: this.project ? this.project : null,
       selectedTask: null,
       filters: [],
       showTaskForm: false
@@ -94,11 +92,6 @@ export default {
           this.data = response.data.results
           this.total = response.data.count
         })
-    },
-    fetchProject () {
-      if (!this.project) {
-        this.get(`/api/projects/${this.$route.params.id}/`).then(response => this.currentProject = response.data)
-      }
     },
     cancelTask () {
       this.delete(`/api/tasks/${this.selectedTask.id}/`, this.selectedTask.process ? this.selectedTask.process.name : this.selectedTask.tool.name, 'Task cancelled successfully').then(this.fetchData())
