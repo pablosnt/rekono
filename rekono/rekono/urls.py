@@ -20,6 +20,8 @@ from drf_spectacular.views import (SpectacularAPIView, SpectacularRedocView,
                                    SpectacularSwaggerView)
 from rest_framework.urlpatterns import format_suffix_patterns
 
+# Register your views here.
+
 urlpatterns = [
     path('admin/', admin.site.urls),                                            # Admin site
     path('api/', include('executions.urls')),                                   # Rekono API Rest

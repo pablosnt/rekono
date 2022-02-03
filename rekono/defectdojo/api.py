@@ -25,7 +25,7 @@ class DefectDojo:
 
     def __init__(self):
         '''Defect-Dojo API constructor.'''
-        self.url = f'{config.get("HOST")}/api/v2'                               # Defect-Dojo base URL
+        self.url = f'{config.get("URL")}/api/v2'                                # Defect-Dojo base URL
         self.api_key = config.get('API_KEY')                                    # Defect-Dojo API key
         self.tags = config.get('TAGS')                                          # Tags to use in Rekono items
         self.product_auto_creation = config.get('PRODUCT_AUTO_CREATION')        # Product creation from Rekono project

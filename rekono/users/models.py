@@ -8,7 +8,7 @@ from rest_framework.authtoken.models import Token
 from security.authorization.roles import Role
 from security.crypto import generate_otp
 from users.enums import Notification
-from users.utils import get_token_expiration
+from security.otp import get_expiration
 
 # Create your models here.
 
@@ -88,7 +88,7 @@ class RekonoUserManager(UserManager):
         '''
         user.is_active = True                                                   # Enable user
         user.otp = generate_otp()                                               # Generate its OTP
-        user.otp_expiration = get_token_expiration()                            # Set OTP expiration
+        user.otp_expiration = get_expiration()                            # Set OTP expiration
         self.initialize(user, role)                                             # Initialize user
         user_enable_account(user)                                               # Send email to establish its password
         return user
@@ -125,7 +125,7 @@ class RekonoUserManager(UserManager):
             Any: User after request password reset
         '''
         user.otp = generate_otp()                                               # Generate its OTP
-        user.otp_expiration = get_token_expiration()                            # Set OTP expiration
+        user.otp_expiration = get_expiration()                            # Set OTP expiration
         user.save(update_fields=['otp', 'otp_expiration'])
         user_password_reset(user)                                               # Send password reset email
         return user
@@ -143,7 +143,7 @@ class User(AbstractUser):
     # One Time Password used for invite and enable users, or reset passwords
     otp = models.TextField(max_length=200, unique=True, blank=True, null=True)
     # Expiration date for the OTP
-    otp_expiration = models.DateTimeField(default=get_token_expiration, blank=True, null=True)
+    otp_expiration = models.DateTimeField(default=get_expiration, blank=True, null=True)
 
     notification_scope = models.TextField(                                      # User notification preferences
         max_length=18,

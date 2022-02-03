@@ -9,7 +9,7 @@
     <body>
         <div class="card border-light text-center">
             <div class="text-center">
-                <img src="{{ rekono_address }}/static/logo-black.png" class="card-img-top" alt="Rekono" style="max-width: 30rem;"/>
+                <img src="{{ rekono_url }}/static/logo-black.png" class="card-img-top" alt="Rekono" style="max-width: 30rem;"/>
             </div>
             <div class="card-body">
                 {% if user.first_name %}
@@ -18,7 +18,7 @@
                     <h3 class="card-title">Welcome {{ user.username }}!</h3>
                 {% endif %}
                 <p class="card-text">Your Rekono user has been enabled. Please, follow this link to establish your password.</p>
-                <a href="{{ rekono_address }}/#/reset-password?token={{ user.otp }}" class="btn btn-danger"><strong>Set password</strong></a>
+                <a href="{{ rekono_url }}/#/reset-password?token={{ user.otp }}" class="btn btn-danger"><strong>Set password</strong></a>
             </div>
         </div>
     </body>

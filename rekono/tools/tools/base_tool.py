@@ -16,7 +16,7 @@ from tasks.enums import Status
 from tools.exceptions import ToolExecutionException
 from tools.models import Argument, Configuration, Input, Intensity, Tool
 
-from rekono.settings import EXECUTION_OUTPUTS
+from rekono.settings import OUTPUTS_DIR
 
 
 class BaseTool:
@@ -53,7 +53,7 @@ class BaseTool:
         self.file_output_enabled = self.tool.output_format is not None          # Tool output to file enabled
         self.file_output_extension = self.tool.output_format or 'txt'           # Tool output file extension
         self.filename_output = f'{str(uuid.uuid4())}.{self.file_output_extension}'  # Tool output file name
-        self.path_output = os.path.join(EXECUTION_OUTPUTS, self.filename_output)    # Tool output file path
+        self.path_output = os.path.join(OUTPUTS_DIR, self.filename_output)      # Tool output file path
         self.findings: List[Finding] = []                                       # Findings obtained from tool execution
         # Inputs used during tool execution
         # This data will be used to maintain relations between findings and previous findings always as possible

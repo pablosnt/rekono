@@ -5,7 +5,7 @@ from telegram.update import Update
 from telegram_bot.messages.basic import LOGOUT, WELCOME
 from telegram_bot.messages.help import AUTH_HELP, UNAUTH_HELP
 from telegram_bot.models import TelegramChat
-from users.utils import get_token_expiration
+from security.otp import get_expiration
 
 
 def start(update: Update, context: CallbackContext) -> None:
@@ -17,7 +17,7 @@ def start(update: Update, context: CallbackContext) -> None:
     '''
     if update.effective_chat:
         chat, _ = TelegramChat.objects.update_or_create(                        # Create or update the Telegram chat
-            defaults={'user': None, 'otp': generate_otp(), 'otp_expiration': get_token_expiration()},
+            defaults={'user': None, 'otp': generate_otp(), 'otp_expiration': get_expiration()},
             chat_id=update.effective_chat.id
         )
         # Send welcome message including OTP to link Telegram Chat with an user account

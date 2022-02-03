@@ -1,0 +1,37 @@
+frontend:
+  url: http://127.0.0.1:8080
+security:
+  # secret-key: 
+  # jwt-key: 
+  otp-expiration-hours: 24
+  upload-files-max-mb: 500
+database:
+  name: rekono
+  # user:
+  # password:
+  host: 127.0.0.1
+  port: 5432
+rq:
+  host: 127.0.0.1
+  port: 6379
+email:
+  # host:
+  port: 587
+  # user:
+  # password:
+  tls: true
+telegram:
+  # token:
+defect-dojo:
+  url: http://127.0.0.1:8080
+  # api-key:
+  tags:
+    - rekono
+  product:
+    auto-creation: true
+  product-type: Rekono Project
+  test-type: Rekono Findings Import
+  test: Rekono Test
+tools:
+  cmseek:
+    directory: /usr/share/cmseek
