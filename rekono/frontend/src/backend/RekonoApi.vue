@@ -76,9 +76,9 @@ export default {
       ],
       cancellableStatuses: ['Requested', 'Running'],
       timeUnits: ['Weeks', 'Days', 'Hours', 'Minutes'],
-      nameRegex: /^[\w\s\.\-]*$/,
-      textRegex: /^[\w\s\.:,+\-\'"?¿¡!#%$€]*$/,
-      endpointRegex: /^[\w\./#?&%]*$/
+      nameRegex: /^[\w\s.-]*$/,
+      textRegex: /^[\w\s.:,+\-'"?¿¡!#%$€]*$/,
+      endpointRegex: /^[\w./#?&%]*$/
     }
   },
   methods: {
