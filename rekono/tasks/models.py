@@ -5,6 +5,7 @@ from django.db import models
 from processes.models import Process
 from projects.models import Project
 from resources.models import Wordlist
+from security.input_validation import validate_time_amount
 from targets.models import Target
 from tasks.enums import Status, TimeUnit
 from tools.enums import IntensityRank
@@ -28,11 +29,12 @@ class Task(models.Model):
     executor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True)
     status = models.TextField(max_length=10, choices=Status.choices, default=Status.REQUESTED)  # Task status
     scheduled_at = models.DateTimeField(blank=True, null=True)                  # Date when the task will be executed
-    scheduled_in = models.IntegerField(blank=True, null=True)                   # Amount of time before task execution
+    # Amount of time before task execution
+    scheduled_in = models.IntegerField(blank=True, null=True, validators=[validate_time_amount])
     # Time unit to apply to the 'sheduled in' value
     scheduled_time_unit = models.TextField(max_length=10, choices=TimeUnit.choices, blank=True, null=True)
     # Amount of time before repeat task execution
-    repeat_in = models.IntegerField(blank=True, null=True)
+    repeat_in = models.IntegerField(blank=True, null=True, validators=[validate_time_amount])
     # Time unit to apply to the 'repeat in' value
     repeat_time_unit = models.TextField(max_length=10, choices=TimeUnit.choices, blank=True, null=True)
     creation = models.DateTimeField(auto_now_add=True)                          # Creation date

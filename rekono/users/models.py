@@ -7,8 +7,9 @@ from email_notifications.sender import (user_enable_account, user_invitation,
 from rest_framework.authtoken.models import Token
 from security.authorization.roles import Role
 from security.crypto import generate_otp
-from users.enums import Notification
+from security.input_validation import validate_name
 from security.otp import get_expiration
+from users.enums import Notification
 
 # Create your models here.
 
@@ -135,9 +136,9 @@ class User(AbstractUser):
     '''User model.'''
 
     # Main user data
-    username = models.TextField(max_length=150, unique=True, blank=True, null=True)
-    first_name = models.TextField(max_length=150, blank=True, null=True)
-    last_name = models.TextField(max_length=150, blank=True, null=True)
+    username = models.TextField(max_length=100, unique=True, blank=True, null=True, validators=[validate_name])
+    first_name = models.TextField(max_length=100, blank=True, null=True, validators=[validate_name])
+    last_name = models.TextField(max_length=100, blank=True, null=True, validators=[validate_name])
     email = models.EmailField(max_length=150, unique=True)
 
     # One Time Password used for invite and enable users, or reset passwords

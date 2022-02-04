@@ -3,6 +3,7 @@ from typing import Any
 from django.conf import settings
 from django.db import models
 from likes.models import LikeBase
+from security.input_validation import validate_name, validate_text
 from taggit.managers import TaggableManager
 from tools.models import Configuration, Tool
 
@@ -12,8 +13,8 @@ from tools.models import Configuration, Tool
 class Process(LikeBase):
     '''Process model.'''
 
-    name = models.TextField(max_length=30, unique=True)                         # Process name
-    description = models.TextField(max_length=250)                              # Process description
+    name = models.TextField(max_length=100, unique=True, validators=[validate_name])                # Process name
+    description = models.TextField(max_length=300, validators=[validate_text])  # Process description
     # User that created the process
     creator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True)
     tags = TaggableManager()                                                    # Process tags

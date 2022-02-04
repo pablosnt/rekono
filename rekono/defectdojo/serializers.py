@@ -3,6 +3,7 @@ from typing import Any, Dict
 from defectdojo.api import DefectDojo
 from django.core.exceptions import ValidationError
 from rest_framework import serializers
+from security.input_validation import validate_name, validate_text
 
 
 class EngagementSerializer(serializers.Serializer):
@@ -38,4 +39,13 @@ class EngagementSerializer(serializers.Serializer):
                 'name': 'This field is required if "id" is not specified',
                 'description': 'This field is required if "id" is not specified'
             })
+        else:
+            try:
+                validate_name(attrs['name'])                                    # Check name value
+            except ValidationError as ex:
+                raise ValidationError({'name': str(ex)})
+            try:
+                validate_text(attrs['description'])                             # Check description value
+            except ValidationError as ex:
+                raise ValidationError({'description': str(ex)})
         return attrs

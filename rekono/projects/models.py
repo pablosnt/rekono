@@ -2,6 +2,7 @@ from typing import Any
 
 from django.conf import settings
 from django.db import models
+from security.input_validation import validate_name, validate_text
 from taggit.managers import TaggableManager
 
 # Create your models here.
@@ -10,8 +11,8 @@ from taggit.managers import TaggableManager
 class Project(models.Model):
     '''Project model.'''
 
-    name = models.TextField(max_length=50, unique=True)                         # Project name
-    description = models.TextField(max_length=250)                              # Project description
+    name = models.TextField(max_length=100, unique=True, validators=[validate_name])                # Project name
+    description = models.TextField(max_length=300, validators=[validate_text])  # Project description
     defectdojo_product_id = models.IntegerField(blank=True, null=True)          # Related product Id in Defect-Dojo
     # User that created the project
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True)
