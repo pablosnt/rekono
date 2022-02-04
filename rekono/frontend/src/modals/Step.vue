@@ -120,7 +120,7 @@ export default {
       const valid = this.$refs.step_form.checkValidity()
       this.processState = (this.processId !== null)
       this.toolState = (this.toolId !== null)
-      if (!this.edit && this.selectedProcess !== null) {
+      if (this.toolState && !this.edit && this.selectedProcess !== null) {
         const existing_step = this.selectedProcess.steps.find(step => step.tool.id === this.toolId && step.configuration.id === this.configurationId)
         if (existing_step) {
           this.toolState = false

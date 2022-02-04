@@ -1,11 +1,11 @@
 <template>
   <b-modal :id="id" @close="clean" @hidden="clean" @ok="confirm" :title="title" :ok-title="button" header-bg-variant="dark" header-text-variant="light" ok-variant="dark">
     <b-form ref="project_form">
-      <b-form-group description="Project name" invalid-feedback="Project name is required">
-        <b-form-input v-model="name" type="text" plaholder="Name" :state="nameState" maxlength="50" required/>
+      <b-form-group description="Project name" :invalid-feedback="invalidName">
+        <b-form-input v-model="name" type="text" plaholder="Name" :state="nameState" maxlength="100" required/>
       </b-form-group>
-      <b-form-group description="Project description" invalid-feedback="Project description is required">
-        <b-form-textarea v-model="description" placeholder="Description" :state="descriptionState" maxlength="250" required/>
+      <b-form-group description="Project description" :invalid-feedback="invalidDescription">
+        <b-form-textarea v-model="description" placeholder="Description" :state="descriptionState" maxlength="300" required/>
       </b-form-group>
       <b-form-group description="Defect-Dojo product Id">
         <b-input-group>
@@ -55,7 +55,9 @@ export default {
       defectDojoId: null,
       tags: [],
       nameState: null,
-      descriptionState: null
+      descriptionState: null,
+      invalidName: 'Project name is required',
+      invalidDescription: 'Project description is required'
     }
   },
   watch: {
@@ -71,9 +73,15 @@ export default {
   methods: {
     check () {
       const valid = this.$refs.project_form.checkValidity()
-      this.nameState = (this.name !== null && this.name.length > 0)
-      this.descriptionState = (this.description !== null && this.description.length > 0)
-      return valid
+      if (!this.name || this.name.length === 0 || !this.validateName(this.name)) {
+        this.nameState = false
+        this.invalidName = this.name && this.name.length > 0 ? 'Invalid project name' : 'Project name is required'
+      }
+      if (!this.description || this.description.length === 0 || !this.validateText(this.description)) {
+        this.descriptionState = false
+        this.invalidDescription = this.description && this.description.length > 0 ? 'Invalid project description' : 'Project description is required'
+      }
+      return valid && this.nameState && this.descriptionState
     },
     confirm (event) {
       event.preventDefault()

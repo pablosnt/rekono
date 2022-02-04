@@ -14,7 +14,7 @@
             <b-form-input type="email" v-model="email" placeholder="Email" :state="emailState" max-length="150" autofocus/>
           </b-input-group>
         </b-form-group>
-        <b-form-group v-if="otp" invalid-feedback="Password is required">
+        <b-form-group v-if="otp" :invalid-feedback="invalidPassword">
           <b-input-group size="lg" class="mb-3">
             <b-input-group-prepend is-text>
               <b-icon icon="key-fill"/>
@@ -22,7 +22,7 @@
             <b-form-input type="password" v-model="password" placeholder="Password" :state="passwordState"/>
           </b-input-group>
         </b-form-group>
-        <b-form-group v-if="otp" invalid-feedback="Password is required">
+        <b-form-group v-if="otp" :invalid-feedback="invalidPasswordConfirm">
           <b-input-group size="lg" class="mb-3">
             <b-input-group-prepend is-text>
               <b-icon icon="key-fill"/>
@@ -57,7 +57,9 @@ export default {
       emailSent: false,
       password: null,
       passwordConfirm: null,
-      passwordState: null
+      passwordState: null,
+      invalidPassword: 'Password is required',
+      invalidPasswordConfirm: 'Password confirmation is required'
     }
   },
   components: {
@@ -77,8 +79,12 @@ export default {
     },
     check () {
       if (this.otp && this.otp.length > 0) {
-        this.passwordState = (this.password !== null && this.password.length > 0 && this.password === this.passwordConfirm)
-        return this.passwordConfirm
+        if (!this.password || this.password.length === 0 || this.password !== this.passwordConfirm) {
+          this.passwordState = false
+          this.invalidPassword = this.password && this.password.length > 0 ? "Password doesn't match confirmation" : 'Password is required'
+          this.invalidPasswordConfirm = this.passwordConfirm && this.passwordConfirm.length > 0 ? "Password doesn't match confirmation" : 'Password confirmation is required'
+        }
+        return this.passwordState !== false
       } else {
         this.emailState = (this.email !== null && this.email.length > 0)
         return this.emailState

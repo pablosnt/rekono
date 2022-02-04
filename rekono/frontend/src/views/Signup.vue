@@ -2,19 +2,19 @@
   <public-form>
     <template>
       <b-form @submit="handleSignup">
-        <b-form-group invalid-feedback="Username is required">
+        <b-form-group :invalid-feedback="invalidUsername">
           <b-form-input type="text" v-model="username" :state="usernameState" placeholder="Username"/>
         </b-form-group>
-        <b-form-group invalid-feedback="First name is required">
+        <b-form-group :invalid-feedback="invalidFirstName">
           <b-form-input type="text" v-model="firstName" :state="firstNameState" placeholder="First name"/>
         </b-form-group>
-        <b-form-group invalid-feedback="Last name is required">
+        <b-form-group :invalid-feedback="invalidLastName">
           <b-form-input type="text" v-model="lastName" :state="lastNameState" placeholder="Last name"/>
         </b-form-group>
-        <b-form-group invalid-feedback="Password is required">
+        <b-form-group :invalid-feedback="invalidPassword">
           <b-form-input type="password" v-model="password" :state="passwordState" placeholder="Password"/>
         </b-form-group>
-        <b-form-group invalid-feedback="Password is required">
+        <b-form-group :invalid-feedback="invalidPasswordConfirm">
           <b-form-input type="password" v-model="passwordConfirm" :state="passwordState" placeholder="Confirm password"/>
         </b-form-group>
         <b-row>
@@ -47,7 +47,12 @@ export default {
       usernameState: null,
       firstNameState: null,
       lastNameState: null,
-      passwordState: null
+      passwordState: null,
+      invalidUsername: 'Username is required',
+      invalidFirstName: 'First name is required',
+      invalidLastName: 'Last name is required',
+      invalidPassword: 'Password is required',
+      invalidPasswordConfirm: 'Password confirmation is required'
     }
   },
   components: {
@@ -76,10 +81,23 @@ export default {
     },
     check () {
       this.checkOtp(this.otp)
-      this.usernameState = (this.username !== null && this.username.length > 0)
-      this.firstNameState = (this.firstName !== null && this.firstName.length > 0)
-      this.lastNameState = (this.lastName !== null && this.lastName.length > 0)
-      this.passwordState = (this.password && this.password.length > 0 && this.password === this.passwordConfirm)
+      if (!this.username || this.username.length === 0 || !this.validateName(this.username)) {
+        this.usernameState = false
+        this.invalidUsername = this.username && this.username.length > 0 ? 'Invalid username' : 'Username is required'
+      }
+      if (!this.firstName || this.firstName.length === 0 || !this.validateName(this.firstName)) {
+        this.firstNameState = false
+        this.invalidFirstName = this.firstName && this.firstName.length > 0 ? 'Invalid first name' : 'First name is required'
+      }
+      if (!this.lastName || this.lastName.length === 0 || !this.validateName(this.lastName)) {
+        this.lastNameState = false
+        this.invalidLastName = this.lastName && this.lastName.length > 0 ? 'Invalid last name' : 'Last name is required'
+      }
+      if (!this.password || this.password.length === 0 || this.password !== this.passwordConfirm) {
+        this.passwordState = false
+        this.invalidPassword = this.password && this.password.length > 0 ? "Password doesn't match confirmation" : 'Password is required'
+        this.invalidPasswordConfirm = this.passwordConfirm && this.passwordConfirm.length > 0 ? "Password doesn't match confirmation" : 'Password confirmation is required'
+      }
       return this.usernameState && this.firstNameState && this.lastNameState && this.passwordState
     }
   }

@@ -7,11 +7,11 @@
       {{ title }}
     </template>
     <b-form ref="process_form">
-      <b-form-group description="Process name" invalid-feedback="Process name is required">
-        <b-form-input v-model="name" type="text" :state="nameState" maxlength="30" required/>
+      <b-form-group description="Process name" :invalid-feedback="invalidName">
+        <b-form-input v-model="name" type="text" :state="nameState" maxlength="100" required/>
       </b-form-group>
-      <b-form-group invalid-feedback="Process description is required">
-        <b-form-textarea v-model="description" placeholder="Process description" :state="descriptionState" maxlength="350" required/>
+      <b-form-group :invalid-feedback="invalidDescription">
+        <b-form-textarea v-model="description" placeholder="Process description" :state="descriptionState" maxlength="300" required/>
       </b-form-group>
     </b-form>
     <b-form ref="step_form" v-if="tool">
@@ -73,7 +73,9 @@ export default {
       priority: 1,
       tags: [],
       nameState: null,
-      descriptionState: null
+      descriptionState: null,
+      invalidName: 'Process name is required',
+      invalidDescription: 'Process description is required'
     }
   },
   watch: {
@@ -92,9 +94,15 @@ export default {
   methods: {
     check () {
       const valid = this.$refs.process_form.checkValidity()
-      this.nameState = (this.name !== null && this.name.length > 0)
-      this.descriptionState = (this.description !== null && this.description.length > 0)
-      return valid
+      if (!this.name || this.name.length === 0 || !this.validateName(this.name)) {
+        this.nameState = false
+        this.invalidName = this.name && this.name.length > 0 ? 'Invalid process name' : 'Process name is required'
+      }
+      if (!this.description || this.description.length === 0 || !this.validateText(this.description)) {
+        this.descriptionState = false
+        this.invalidDescription = this.description && this.description.length > 0 ? 'Invalid process description' : 'Process description is required'
+      }
+      return valid && this.nameState && this.descriptionState
     },
     confirm (event) {
       event.preventDefault()

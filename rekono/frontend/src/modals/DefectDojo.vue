@@ -15,11 +15,11 @@
     <b-form class="mt-2">
       <b-tabs active-nav-item-class="text-info" align="center" @input="changeTab">
         <b-tab title="Create Engagement" title-link-class="text-secondary">
-          <b-form-group class="mt-3" description="Engagement name" invalid-feedback="Engagement name is required">
-            <b-form-input type="text" v-model="engagementName" :state="nameState"/>
+          <b-form-group class="mt-3" description="Engagement name" :invalid-feedback="invalidName">
+            <b-form-input type="text" v-model="engagementName" :state="nameState" maxlength="100"/>
           </b-form-group>
-          <b-form-group description="Engagement description" invalid-feedback="Engagement description is required">
-            <b-form-textarea v-model="engagementDescription" :state="descriptionState" rows="4"/>
+          <b-form-group description="Engagement description" :invalid-feedback="invalidDescription">
+            <b-form-textarea v-model="engagementDescription" :state="descriptionState" rows="4" maxlength="300"/>
           </b-form-group>
         </b-tab>
         <b-tab title="Select Engagement" title-link-class="text-secondary">
@@ -78,6 +78,8 @@ export default {
       idState: null,
       nameState: null,
       descriptionState: null,
+      invalidName: 'Engagement name is required',
+      invalidDescription: 'Engagement description is required',
       importFindings: false,
       currentTab: null
     }
@@ -101,8 +103,14 @@ export default {
     check () {
       if (this.currentTab === 0) {
         this.engagementId = null
-        this.nameState = (this.engagementName && this.engagementName.length > 0)
-        this.descriptionState = (this.engagementDescription && this.engagementDescription.length > 0)
+        if (!this.engagementName || this.engagementName.length === 0 || !this.validateName(this.engagementName)) {
+          this.nameState = false
+          this.invalidName = this.engagementName && this.engagementName.length > 0 ? 'Invalid engagement name' : 'Engagement name is required'
+        }
+        if (!this.engagementDescription || this.engagementDescription.length === 0 || !this.validateText(this.engagementDescription)) {
+          this.descriptionState = false
+          this.invalidDescription = this.engagementDescription && this.engagementDescription.length > 0 ? 'Invalid engagement description' : 'Engagement description is required'
+        }
         return this.nameState && this.descriptionState
       } else if (this.currentTab === 1) {
         this.engagementName = null

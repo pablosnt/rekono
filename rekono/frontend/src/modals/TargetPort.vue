@@ -1,8 +1,8 @@
 <template>
   <b-modal :id="id" @hidden="clean" @ok="confirm" title="New Target Port" ok-title="Create Target Port" header-bg-variant="dark" header-text-variant="light" ok-variant="dark">
     <b-form ref="target_form">
-      <b-form-group invalid-feedback="Target is required">
-        <b-form-input type="number" v-model="targetPort" placeholder="Target Port" :state="targetPortState" max-length="100" autofocus/>
+      <b-form-group :invalid-feedback="invalidTargetPort">
+        <b-form-input type="number" v-model="targetPort" placeholder="Target Port" :state="targetPortState" autofocus/>
       </b-form-group>
     </b-form>
   </b-modal>
@@ -20,13 +20,16 @@ export default {
   data () {
     return {
       targetPort: null,
-      targetPortState: null
+      targetPortState: null,
+      invalidTargetPort: 'Target port is required'
     }
   },
   methods: {
     check () {
-      this.targetPortState = (this.targetPort && this.targetPort > 0)
-      return this.targetPortState
+      const valid = this.$refs.target_form.checkValidity()
+      this.targetPortState = (this.targetPort && this.targetPort > 0 && this.targetPort < 999999)
+      this.invalidTargetPort = this.targetPort ? 'Invalid port value' : 'Target port is required'
+      return valid && this.targetPortState
     },
     confirm (event) {
       event.preventDefault()

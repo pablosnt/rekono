@@ -188,6 +188,7 @@ export default {
       if (!this.processId && !this.toolId) {
         this.processState = false
         this.toolState = false
+        return false
       }      
       if (this.scheduledAtDate || this.scheduledAtTime) {
         this.scheduledAtState = false

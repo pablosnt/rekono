@@ -8,10 +8,10 @@
       <b-form-group invalid-feedback="Old password is required">
         <b-form-input type="password" v-model="oldPassword" :state="oldPasswordState" placeholder="Old password"/>
       </b-form-group>
-      <b-form-group invalid-feedback="New password is required">
+      <b-form-group :invalid-feedback="invalidNewPassword">
         <b-form-input type="password" v-model="newPassword" :state="newPasswordState" placeholder="New password"/>
       </b-form-group>
-      <b-form-group invalid-feedback="New password is required">
+      <b-form-group :invalid-feedback="invalidPasswordConfirm">
         <b-form-input type="password" v-model="passwordConfirm" :state="newPasswordState" placeholder="Confirm password"/>
       </b-form-group>
     </b-form>
@@ -34,7 +34,9 @@ export default {
       passwordConfirm: null,
       oldPasswordState: null,
       newPasswordState: null,
-      passwordError: false
+      passwordError: false,
+      invalidNewPassword: 'New password is required',
+      invalidPasswordConfirm: 'Password confirmation is required'
     }
   },
   methods: {
@@ -55,10 +57,13 @@ export default {
       }
     },
     check () {
-      const valid = this.$refs.change_password_form.checkValidity()
       this.oldPasswordState = (this.oldPassword && this.oldPassword.length > 0)
-      this.newPasswordState = (this.newPassword && this.newPassword.length > 0 && this.newPassword === this.passwordConfirm)
-      return valid && this.oldPasswordState && this.newPasswordState
+      if (!this.newPassword || this.newPassword.length === 0 || this.newPassword !== this.passwordConfirm) {
+        this.newPasswordState = false
+        this.invalidNewPassword = this.password && this.password.length > 0 ? "Password doesn't match confirmation" : 'New password is required'
+        this.invalidPasswordConfirm = this.passwordConfirm && this.passwordConfirm.length > 0 ? "Password doesn't match confirmation" : 'Password confirmation is required'
+      }
+      return this.newPasswordState !== false && this.oldPasswordState
     },
     clean () {
       this.oldPassword = null

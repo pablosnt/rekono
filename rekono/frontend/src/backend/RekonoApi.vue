@@ -75,7 +75,10 @@ export default {
         { value: 'Completed', variant: 'success' }
       ],
       cancellableStatuses: ['Requested', 'Running'],
-      timeUnits: ['Weeks', 'Days', 'Hours', 'Minutes']
+      timeUnits: ['Weeks', 'Days', 'Hours', 'Minutes'],
+      nameRegex: /^[\w\s\.\-]*$/,
+      textRegex: /^[\w\s\.:,+\-\'"?¿¡!#%$€]*$/,
+      endpointRegex: /^[\w\./#?&%]*$/
     }
   },
   methods: {
@@ -234,6 +237,15 @@ export default {
         from = from.split('?', 2)[0]
       }
       window.location.hash = from + url.search
+    },
+    validateName (value) {
+      return this.nameRegex.test(value)
+    },
+    validateText (value) {
+      return this.textRegex.test(value)
+    },
+    validateEndpoint (value) {
+      return this.endpointRegex.test(value)
     }
   }
 }

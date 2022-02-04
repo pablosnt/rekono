@@ -10,7 +10,7 @@
           <b-input-group-prepend is-text>
             <b-icon icon="person-fill"/>
           </b-input-group-prepend>
-          <b-form-input type="text" v-model="username" placeholder="Username" :state="usernameState" autofocus/>
+          <b-form-input type="text" v-model="username" placeholder="Username" :state="usernameState" max-length="100" autofocus/>
         </b-input-group>
         <b-input-group size="lg" class="mb-3">
           <b-input-group-prepend is-text>
@@ -68,7 +68,7 @@ export default {
       }
     },
     check () {
-      this.usernameState = (this.username !== null)
+      this.usernameState = (this.username && this.validateName(this.username))
       this.passwordState = (this.password !== null)
       return this.usernameState && this.passwordState
     }

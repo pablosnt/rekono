@@ -25,8 +25,9 @@ export default {
   },
   methods: {
     check () {
+      const valid = this.$refs.target_form.checkValidity()
       this.targetState = (this.target && this.target.length > 0)
-      return this.targetState
+      return valid && this.targetState
     },
     confirm (event) {
       event.preventDefault()
