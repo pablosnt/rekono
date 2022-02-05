@@ -9,6 +9,12 @@ from telegram_bot.conversations.cancel import cancel
 from telegram_bot.conversations.new_target import (
     NT_CREATE_TARGET, NT_SELECT_PROJECT, create_target, new_target,
     select_project_for_new_target)
+from telegram_bot.conversations.new_target_endpoint import (
+    NTE_CREATE_TARGET_ENDPOINT, NTE_SELECT_PROJECT, NTE_SELECT_TARGET,
+    NTE_SELECT_TARGET_PORT, create_target_endpoint, new_target_endpoint,
+    select_project_for_new_target_endpoint,
+    select_target_for_new_target_endpoint,
+    select_target_port_for_new_target_endpoint)
 from telegram_bot.conversations.new_target_port import (
     NTP_CREATE_TARGET_PORT, NTP_SELECT_PROJECT, NTP_SELECT_TARGET,
     create_target_port, new_target_port, select_project_for_new_target_port,
@@ -58,11 +64,22 @@ def deploy() -> None:
         per_chat=True
     ))
     updater.dispatcher.add_handler(ConversationHandler(
-        entry_points=[CommandHandler('newtargetport', new_target_port)],
+        entry_points=[CommandHandler('newport', new_target_port)],
         states={
             NTP_SELECT_PROJECT: [CallbackQueryHandler(select_project_for_new_target_port)],
             NTP_SELECT_TARGET: [CallbackQueryHandler(select_target_for_new_target_port)],
             NTP_CREATE_TARGET_PORT: [MessageHandler(Filters.text, create_target_port)]
+        },
+        fallbacks=[CommandHandler('cancel', cancel)],
+        per_chat=True
+    ))
+    updater.dispatcher.add_handler(ConversationHandler(
+        entry_points=[CommandHandler('newendpoint', new_target_endpoint)],
+        states={
+            NTE_SELECT_PROJECT: [CallbackQueryHandler(select_project_for_new_target_endpoint)],
+            NTE_SELECT_TARGET: [CallbackQueryHandler(select_target_for_new_target_endpoint)],
+            NTE_SELECT_TARGET_PORT: [CallbackQueryHandler(select_target_port_for_new_target_endpoint)],
+            NTE_CREATE_TARGET_ENDPOINT: [MessageHandler(Filters.text, create_target_endpoint)]
         },
         fallbacks=[CommandHandler('cancel', cancel)],
         per_chat=True

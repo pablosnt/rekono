@@ -69,8 +69,8 @@ def create_target_port(update: Update, context: CallbackContext) -> int:
             target_port = serializer.save()
             update.message.reply_text(
                 NEW_TARGET_PORT.format(
-                    target=escape_markdown(target_port.target.target, version=2),
-                    port=escape_markdown(str(target_port.port), version=2)
+                    port=escape_markdown(str(target_port.port), version=2),
+                    target=escape_markdown(target_port.target.target, version=2)
                 ), parse_mode=ParseMode.MARKDOWN_V2
             )
         else:

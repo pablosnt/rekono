@@ -1,13 +1,13 @@
-from email import message
 from typing import List
 
 from projects.models import Project
-from targets.models import Target
+from targets.models import Target, TargetPort
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ConversationHandler
 from telegram.update import Update
-from telegram_bot.messages.selection import (ASK_FOR_PROJECT, ASK_FOR_TARGET,
-                                             NO_PROJECTS, NO_TARGETS)
+from telegram_bot.messages.ask import (ASK_FOR_PROJECT, ASK_FOR_TARGET,
+                                       ASK_FOR_TARGET_PORT, NO_PROJECTS,
+                                       NO_TARGET_PORTS, NO_TARGETS)
 from telegram_bot.models import TelegramChat
 
 
@@ -44,4 +44,15 @@ def ask_for_target(update: Update, chat: TelegramChat, next_stage: int) -> int:
     else:
         keyboard = [[InlineKeyboardButton(t.target, callback_data=t.id) for t in targets]]
         send_options(update, chat, ASK_FOR_TARGET, keyboard)
+        return next_stage
+
+
+def ask_for_target_port(update: Update, chat: TelegramChat, next_stage: int) -> int:
+    target_ports = TargetPort.objects.filter(target=chat.target).order_by('port').all()
+    if not target_ports:
+        send_message(update, chat, NO_TARGET_PORTS)
+        return ConversationHandler.END
+    else:
+        keyboard = [[InlineKeyboardButton(tp.port, callback_data=tp.id) for tp in target_ports]]
+        send_options(update, chat, ASK_FOR_TARGET_PORT, keyboard)
         return next_stage
