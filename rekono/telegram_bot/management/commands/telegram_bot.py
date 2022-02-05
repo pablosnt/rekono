@@ -11,4 +11,5 @@ class Command(BaseCommand):
 
     def handle(self, *args: Any, **options: Any) -> None:
         '''Deploy Telegram Bot.'''
+        bot.initialize()
         bot.deploy()

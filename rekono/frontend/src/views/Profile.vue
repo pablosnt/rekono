@@ -237,6 +237,9 @@ export default {
       event.preventDefault()
       if (this.checkTelegramToken()) {
         this.post('/api/profile/telegram-token/', { otp: this.telegramToken }, this.username, 'Telegram configured successfully')
+          .then(() => {
+            this.getProfile()
+          })
       }
     },
     checkTelegramToken () {

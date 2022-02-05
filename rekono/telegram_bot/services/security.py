@@ -1,19 +1,12 @@
 from django.db.models import Q
 from security.authorization.roles import Role
-from telegram import Chat
 from telegram.update import Update
 from telegram_bot.messages.security import AUTHN_ERROR, AUTHZ_ERROR
 from telegram_bot.models import TelegramChat
 
 
-def check_authentication(chat: Chat) -> bool:
-    if chat:
-        return TelegramChat.objects.filter(chat_id=chat.id).exists()
-    return False
-
-
-def check_auditor(chat: Chat) -> bool:
-    if chat:
+def check_auditor(chat: TelegramChat) -> bool:
+    if chat and chat.user:
         return chat.user.groups.filter(Q(name=str(Role.AUDITOR)) | Q(name=str(Role.ADMIN))).exists()
     return False
 
