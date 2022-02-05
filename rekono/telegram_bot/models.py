@@ -4,7 +4,8 @@ from processes.models import Process
 from projects.models import Project
 from security.otp import get_expiration
 from targets.models import Target, TargetPort
-from tools.models import Tool
+from tools.enums import IntensityRank
+from tools.models import Configuration, Tool
 
 # Create your models here.
 
@@ -24,7 +25,10 @@ class TelegramChat(models.Model):
     # Selected target port
     target_port = models.ForeignKey(TargetPort, on_delete=models.SET_NULL, blank=True, null=True)
     tool = models.ForeignKey(Tool, on_delete=models.SET_NULL, blank=True, null=True)                # Selected tool
+    # Selected configuration
+    configuration = models.ForeignKey(Configuration, on_delete=models.SET_NULL, blank=True, null=True)
     process = models.ForeignKey(Process, on_delete=models.SET_NULL, blank=True, null=True)          # Selected process
+    intensity = models.IntegerField(choices=IntensityRank.choices, default=IntensityRank.NORMAL)    # Selected intensity
     chat_id = models.IntegerField(unique=True)                                  # Telegram chat Id
     creation = models.DateTimeField(auto_now_add=True)                          # Telegram chat creation date
     otp = models.TextField(max_length=200, unique=True, blank=True, null=True)  # One Time Password to link user account
