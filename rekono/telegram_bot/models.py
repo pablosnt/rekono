@@ -1,6 +1,8 @@
 from django.conf import settings
 from django.db import models
+from projects.models import Project
 from security.otp import get_expiration
+from targets.models import Target
 
 # Create your models here.
 
@@ -15,6 +17,8 @@ class TelegramChat(models.Model):
         blank=True,
         null=True
     )
+    project = models.ForeignKey(Project, on_delete=models.SET_NULL, blank=True, null=True)
+    target = models.ForeignKey(Target, on_delete=models.SET_NULL, blank=True, null=True)
     chat_id = models.IntegerField(unique=True)                                  # Telegram chat Id
     creation = models.DateTimeField(auto_now_add=True)                          # Telegram chat creation date
     otp = models.TextField(max_length=200, unique=True, blank=True, null=True)  # One Time Password to link user account

@@ -81,7 +81,7 @@ export default {
         this.descriptionState = false
         this.invalidDescription = this.description && this.description.length > 0 ? 'Invalid project description' : 'Project description is required'
       }
-      return valid && this.nameState && this.descriptionState
+      return valid && this.nameState !== false && this.descriptionState !== false
     },
     confirm (event) {
       event.preventDefault()
