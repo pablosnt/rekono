@@ -21,6 +21,9 @@ from telegram_bot.conversations.new_target_port import (
     select_target_for_new_target_port)
 from telegram_bot.conversations.select_project import (SP_SELECT_PROJECT,
                                                        project, select_project)
+from telegram_bot.conversations.select_target import (
+    ST_SELECT_PROJECT, ST_SELECT_TARGET, select_project_before_target,
+    select_target, target)
 
 from rekono.settings import TELEGRAM_TOKEN
 
@@ -50,6 +53,15 @@ def deploy() -> None:
         entry_points=[CommandHandler('selectproject', project)],
         states={
             SP_SELECT_PROJECT: [CallbackQueryHandler(select_project)]
+        },
+        fallbacks=[CommandHandler('cancel', cancel)],
+        per_chat=True
+    ))
+    updater.dispatcher.add_handler(ConversationHandler(
+        entry_points=[CommandHandler('selecttarget', target)],
+        states={
+            ST_SELECT_PROJECT: [CallbackQueryHandler(select_project_before_target)],
+            ST_SELECT_TARGET: [CallbackQueryHandler(select_target)]
         },
         fallbacks=[CommandHandler('cancel', cancel)],
         per_chat=True
