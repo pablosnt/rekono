@@ -1,14 +1,17 @@
 from typing import List
 
+from processes.models import Process
 from projects.models import Project
 from targets.models import Target, TargetPort
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ConversationHandler
 from telegram.update import Update
-from telegram_bot.messages.ask import (ASK_FOR_PROJECT, ASK_FOR_TARGET,
-                                       ASK_FOR_TARGET_PORT, NO_PROJECTS,
-                                       NO_TARGET_PORTS, NO_TARGETS)
+from telegram_bot.messages.ask import (ASK_FOR_PROCESS, ASK_FOR_PROJECT,
+                                       ASK_FOR_TARGET, ASK_FOR_TARGET_PORT,
+                                       ASK_FOR_TOOL, NO_PROCESSES, NO_PROJECTS,
+                                       NO_TARGET_PORTS, NO_TARGETS, NO_TOOLS)
 from telegram_bot.models import TelegramChat
+from tools.models import Tool
 
 
 def send_message(update: Update, chat: TelegramChat, text: str) -> None:
@@ -103,4 +106,48 @@ def ask_for_target_port(update: Update, chat: TelegramChat, next_state: int) -> 
         # Build keyboard with the target ports data
         keyboard = [[InlineKeyboardButton(tp.port, callback_data=tp.id) for tp in target_ports]]
         send_options(update, chat, ASK_FOR_TARGET_PORT, keyboard)
+        return next_state                                                       # Go to next conversation state
+
+
+def ask_for_process(update: Update, chat: TelegramChat, next_state: int) -> int:
+    '''Ask the user for choose one process.
+
+    Args:
+        update (Update): Telegram Bot update
+        chat (TelegramChat): Telegram chat entity
+        next_state (int): Next conversation state to call
+
+    Returns:
+        int: Next conversation state or end conversation
+    '''
+    processes = Process.objects.order_by('name').all()
+    if not processes:
+        send_message(update, chat, NO_PROCESSES)
+        return ConversationHandler.END                                          # End conversation
+    else:
+        # Build keyboard with the processes data
+        keyboard = [[InlineKeyboardButton(p.name, callback_data=p.id) for p in processes]]
+        send_options(update, chat, ASK_FOR_PROCESS, keyboard)
+        return next_state                                                       # Go to next conversation state
+
+
+def ask_for_tool(update: Update, chat: TelegramChat, next_state: int) -> int:
+    '''Ask the user for choose one tool.
+
+    Args:
+        update (Update): Telegram Bot update
+        chat (TelegramChat): Telegram chat entity
+        next_state (int): Next conversation state to call
+
+    Returns:
+        int: Next conversation state or end conversation
+    '''
+    tools = Tool.objects.order_by('name').all()
+    if not tools:
+        send_message(update, chat, NO_TOOLS)
+        return ConversationHandler.END                                          # End conversation
+    else:
+        # Build keyboard with the tools data
+        keyboard = [[InlineKeyboardButton(t.name, callback_data=t.id) for t in tools]]
+        send_options(update, chat, ASK_FOR_TOOL, keyboard)
         return next_state                                                       # Go to next conversation state

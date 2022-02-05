@@ -9,14 +9,14 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('processes', '0001_initial'),
-        ('executions', '0001_initial'),
+        ('telegram_bot', '0001_initial'),
+        ('tools', '0001_initial'),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='execution',
-            name='step',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='processes.step'),
+            model_name='telegramchat',
+            name='tool',
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='tools.tool'),
         ),
     ]

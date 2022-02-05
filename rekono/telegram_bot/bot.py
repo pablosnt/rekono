@@ -19,11 +19,15 @@ from telegram_bot.conversations.new_target_port import (
     NTP_CREATE_TARGET_PORT, NTP_SELECT_PROJECT, NTP_SELECT_TARGET,
     create_target_port, new_target_port, select_project_for_new_target_port,
     select_target_for_new_target_port)
+from telegram_bot.conversations.select_process import (SP_SELECT_PROCESS,
+                                                       process, select_process)
 from telegram_bot.conversations.select_project import (SP_SELECT_PROJECT,
                                                        project, select_project)
 from telegram_bot.conversations.select_target import (
     ST_SELECT_PROJECT, ST_SELECT_TARGET, select_project_before_target,
     select_target, target)
+from telegram_bot.conversations.select_tool import (ST_SELECT_TOOL,
+                                                    select_tool, tool)
 from telegram_bot.messages.help import get_my_commands
 
 from rekono.settings import TELEGRAM_TOKEN
@@ -71,6 +75,22 @@ def deploy() -> None:
         states={
             ST_SELECT_PROJECT: [CallbackQueryHandler(select_project_before_target)],
             ST_SELECT_TARGET: [CallbackQueryHandler(select_target)]
+        },
+        fallbacks=[CommandHandler('cancel', cancel)],
+        per_chat=True
+    ))
+    updater.dispatcher.add_handler(ConversationHandler(                         # Select process
+        entry_points=[CommandHandler('selectprocess', process)],
+        states={
+            SP_SELECT_PROCESS: [CallbackQueryHandler(select_process)]
+        },
+        fallbacks=[CommandHandler('cancel', cancel)],
+        per_chat=True
+    ))
+    updater.dispatcher.add_handler(ConversationHandler(                         # Select tool
+        entry_points=[CommandHandler('selecttool', tool)],
+        states={
+            ST_SELECT_TOOL: [CallbackQueryHandler(select_tool)]
         },
         fallbacks=[CommandHandler('cancel', cancel)],
         per_chat=True

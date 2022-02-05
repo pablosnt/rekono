@@ -8,3 +8,9 @@ NO_TARGETS = 'There are no targets in this project. Use the command /newtarget'
 
 ASK_FOR_TARGET_PORT = 'Choose one target port'
 NO_TARGET_PORTS = 'There are no target ports in this target. Use the command /newtargetport'
+
+ASK_FOR_PROCESS = 'Choose one process'
+NO_PROCESSES = 'There are no processes. Go to Rekono to create one'
+
+ASK_FOR_TOOL = 'Choose one tool'
+NO_TOOLS = 'There are no tool. Contact with your administrator'
