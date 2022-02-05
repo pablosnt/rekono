@@ -1,7 +1,7 @@
 from telegram import ParseMode
 from telegram.ext import CallbackContext, ConversationHandler
 from telegram.update import Update
-from telegram_bot.conversations.selection import ask_for_project
+from telegram_bot.conversations.ask import ask_for_project
 from telegram_bot.messages.selection import create_selection_message
 from telegram_bot.services.projects import save_project_by_id
 from telegram_bot.services.security import get_chat

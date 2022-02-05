@@ -3,13 +3,14 @@ from telegram import ParseMode
 from telegram.ext import CallbackContext, ConversationHandler
 from telegram.update import Update
 from telegram.utils.helpers import escape_markdown
+from telegram_bot.conversations.ask import ask_for_project
 from telegram_bot.conversations.cancel import cancel
-from telegram_bot.conversations.selection import ask_for_project
 from telegram_bot.messages.errors import create_error_message
 from telegram_bot.messages.selection import SELECTED_PROJECT
 from telegram_bot.messages.targets import ASK_FOR_NEW_TARGET, NEW_TARGET
 from telegram_bot.services.projects import save_project_by_id
 from telegram_bot.services.security import get_chat
+from telegram_bot.services.targets import save_target
 
 NT_SELECT_PROJECT = 0
 NT_CREATE_TARGET = 1
@@ -51,11 +52,10 @@ def create_target(update: Update, context: CallbackContext) -> int:
     if chat:
         if update.message.text == '/cancel':
             return cancel(update, context)
-        chat.target = None
-        chat.save(update_fields=['target'])
         serializer = TargetSerializer(data={'project': chat.project.id, 'target': update.message.text})
         if serializer.is_valid():
             target = serializer.save()
+            save_target(chat, target)
             update.message.reply_text(
                 NEW_TARGET.format(
                     target=escape_markdown(target.target, version=2),

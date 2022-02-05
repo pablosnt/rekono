@@ -9,6 +9,10 @@ from telegram_bot.conversations.cancel import cancel
 from telegram_bot.conversations.new_target import (
     NT_CREATE_TARGET, NT_SELECT_PROJECT, create_target, new_target,
     select_project_for_new_target)
+from telegram_bot.conversations.new_target_port import (
+    NTP_CREATE_TARGET_PORT, NTP_SELECT_PROJECT, NTP_SELECT_TARGET,
+    create_target_port, new_target_port, select_project_for_new_target_port,
+    select_target_for_new_target_port)
 from telegram_bot.conversations.select_project import (SP_SELECT_PROJECT,
                                                        project, select_project)
 
@@ -49,6 +53,16 @@ def deploy() -> None:
         states={
             NT_SELECT_PROJECT: [CallbackQueryHandler(select_project_for_new_target)],
             NT_CREATE_TARGET: [MessageHandler(Filters.text, create_target)]
+        },
+        fallbacks=[CommandHandler('cancel', cancel)],
+        per_chat=True
+    ))
+    updater.dispatcher.add_handler(ConversationHandler(
+        entry_points=[CommandHandler('newtargetport', new_target_port)],
+        states={
+            NTP_SELECT_PROJECT: [CallbackQueryHandler(select_project_for_new_target_port)],
+            NTP_SELECT_TARGET: [CallbackQueryHandler(select_target_for_new_target_port)],
+            NTP_CREATE_TARGET_PORT: [MessageHandler(Filters.text, create_target_port)]
         },
         fallbacks=[CommandHandler('cancel', cancel)],
         per_chat=True
