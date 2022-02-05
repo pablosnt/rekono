@@ -25,7 +25,7 @@ _Executor_          {executor}
 
 
 def create_telegram_message(execution: Execution, findings: List[Finding]) -> str:
-    '''Create Telegram text message including execution and findings details.
+    '''Create text message including execution and findings details.
 
     Args:
         execution (Execution): Execution to include in the message

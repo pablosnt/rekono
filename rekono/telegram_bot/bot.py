@@ -30,8 +30,9 @@ from rekono.settings import TELEGRAM_TOKEN
 
 
 def initialize() -> None:
+    '''Initialize Telegram Bot.'''
     updater = Updater(token=TELEGRAM_TOKEN)                                     # Telegram client
-    updater.bot.set_my_commands(get_my_commands())
+    updater.bot.set_my_commands(get_my_commands())                              # Configure bot commands
 
 
 def send_message(chat_id: int, text: str) -> None:
@@ -51,13 +52,13 @@ def deploy() -> None:
     updater.dispatcher.add_handler(CommandHandler('start', start))              # Start command
     updater.dispatcher.add_handler(CommandHandler('logout', logout))            # Logout command
     updater.dispatcher.add_handler(CommandHandler('help', help))                # Help command
-    updater.dispatcher.add_handler(CommandHandler('show', show))
-    updater.dispatcher.add_handler(CommandHandler('showselection', show))
-    updater.dispatcher.add_handler(CommandHandler('clear', clear))
-    updater.dispatcher.add_handler(CommandHandler('clearselection', clear))
-    updater.dispatcher.add_handler(CommandHandler('clearproject', clear))
-    updater.dispatcher.add_handler(CommandHandler('cleartarget', clear_target))
-    updater.dispatcher.add_handler(ConversationHandler(
+    updater.dispatcher.add_handler(CommandHandler('showselection', show))       # Show selected items
+    updater.dispatcher.add_handler(CommandHandler('show', show))                # Alternative command
+    updater.dispatcher.add_handler(CommandHandler('clearselection', clear))     # Clear all selected items
+    updater.dispatcher.add_handler(CommandHandler('clear', clear))              # Alternative command
+    updater.dispatcher.add_handler(CommandHandler('clearproject', clear))       # Alternative command
+    updater.dispatcher.add_handler(CommandHandler('cleartarget', clear_target))     # Clear selected target
+    updater.dispatcher.add_handler(ConversationHandler(                         # Select project
         entry_points=[CommandHandler('selectproject', project)],
         states={
             SP_SELECT_PROJECT: [CallbackQueryHandler(select_project)]
@@ -65,7 +66,7 @@ def deploy() -> None:
         fallbacks=[CommandHandler('cancel', cancel)],
         per_chat=True
     ))
-    updater.dispatcher.add_handler(ConversationHandler(
+    updater.dispatcher.add_handler(ConversationHandler(                         # Select target
         entry_points=[CommandHandler('selecttarget', target)],
         states={
             ST_SELECT_PROJECT: [CallbackQueryHandler(select_project_before_target)],
@@ -74,7 +75,7 @@ def deploy() -> None:
         fallbacks=[CommandHandler('cancel', cancel)],
         per_chat=True
     ))
-    updater.dispatcher.add_handler(ConversationHandler(
+    updater.dispatcher.add_handler(ConversationHandler(                         # Create new target
         entry_points=[CommandHandler('newtarget', new_target)],
         states={
             NT_SELECT_PROJECT: [CallbackQueryHandler(select_project_for_new_target)],
@@ -83,10 +84,10 @@ def deploy() -> None:
         fallbacks=[CommandHandler('cancel', cancel)],
         per_chat=True
     ))
-    updater.dispatcher.add_handler(ConversationHandler(
+    updater.dispatcher.add_handler(ConversationHandler(                         # Create new target port
         entry_points=[
-            CommandHandler('newport', new_target_port),
-            CommandHandler('newtargetport', new_target_port)
+            CommandHandler('newtargetport', new_target_port),
+            CommandHandler('newport', new_target_port)                          # Alternative command
         ],
         states={
             NTP_SELECT_PROJECT: [CallbackQueryHandler(select_project_for_new_target_port)],
@@ -96,10 +97,10 @@ def deploy() -> None:
         fallbacks=[CommandHandler('cancel', cancel)],
         per_chat=True
     ))
-    updater.dispatcher.add_handler(ConversationHandler(
+    updater.dispatcher.add_handler(ConversationHandler(                         # Create new target endpoint
         entry_points=[
-            CommandHandler('newendpoint', new_target_endpoint),
-            CommandHandler('newtargetendpoint', new_target_endpoint)
+            CommandHandler('newtargetendpoint', new_target_endpoint),
+            CommandHandler('newendpoint', new_target_endpoint)                  # Alternative command
         ],
         states={
             NTE_SELECT_PROJECT: [CallbackQueryHandler(select_project_for_new_target_endpoint)],

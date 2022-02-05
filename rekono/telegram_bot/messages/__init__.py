@@ -1,1 +1,1 @@
-'''Messages to send by the Telegram Bot.'''
+'''Rekono Bot messages.'''

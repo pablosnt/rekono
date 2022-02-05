@@ -1,10 +1,11 @@
-'''Help messages.'''
-
 from typing import List, Tuple
 
 from telegram.utils.helpers import escape_markdown
 
 from rekono.settings import DESCRIPTION
+
+'''Help messages.'''
+
 
 UNAUTH_HELP = 'To initialize Rekono Bot use the command /start'
 
@@ -24,22 +25,37 @@ HELP = [
 
 
 def get_my_commands() -> List[Tuple[str, str]]:
-    my_commands = []
-    for commands, _, description in HELP:
-        my_commands.append((commands[0], description))
-    return my_commands
+    '''Get Telegram commands from commands definition.
+
+    Returns:
+        List[Tuple[str, str]]: Telegram command list
+    '''
+    return [(c, d) for c, _, d, in HELP]
 
 
 def get_help_message(commands: List[Tuple[str, str, str]] = HELP) -> str:
-    message = f'{escape_markdown(DESCRIPTION, version=2)}\n\n'
+    '''Get help message from commands definition.
+
+    Args:
+        commands (List[Tuple[str, str, str]], optional): Command definition. If not set, default will be used
+
+    Returns:
+        str: Help message
+    '''
+    message = f'{escape_markdown(DESCRIPTION, version=2)}\n\n'                  # Add Rekono description
     current_section = ''
-    for command, section, description in commands:
-        if section != current_section:
-            message += f'\n*{section}*\n'
+    for command, section, description in commands:                              # For each command
+        if section != current_section:                                          # New section
+            message += f'\n*{section}*\n'                                       # Add section title
             current_section = section
-        message += f'/{command} \- {escape_markdown(description, version=2)}\n'
+        message += f'/{command} \- {escape_markdown(description, version=2)}\n'     # Add command details
     return message
 
 
 def get_reader_help_message() -> str:
-    return get_help_message([(c, d) for c, d, s in HELP if not s])
+    '''Get help message for reader user. Only basic commands will be included.
+
+    Returns:
+        str: Help message for reader user
+    '''
+    return get_help_message([(c, s, d) for c, s, d in HELP if not s])           # Get help message for basic commands

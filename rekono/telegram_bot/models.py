@@ -17,8 +17,11 @@ class TelegramChat(models.Model):
         blank=True,
         null=True
     )
+    # Selected project
     project = models.ForeignKey(Project, on_delete=models.SET_NULL, blank=True, null=True)
+    # Selected target
     target = models.ForeignKey(Target, on_delete=models.SET_NULL, blank=True, null=True)
+    # Selected target port
     target_port = models.ForeignKey(TargetPort, on_delete=models.SET_NULL, blank=True, null=True)
     chat_id = models.IntegerField(unique=True)                                  # Telegram chat Id
     creation = models.DateTimeField(auto_now_add=True)                          # Telegram chat creation date
