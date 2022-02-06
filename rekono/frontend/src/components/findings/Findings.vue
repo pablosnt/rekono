@@ -78,13 +78,25 @@ export default {
     },
     technologyAndEnumerationFilter () {
       if (this.selection) {
-        return this.selectedTechnology ? { technology: this.selectedTechnology } : this.selectedEnumeration ? { enumeration: this.selectedEnumeration } : { technology__isnull: true, enumeration__isnull: true }
+        if (this.selectedTechnology) {
+          return { technology: this.selectedTechnology }
+        } else if (this.selectedEnumeration) {
+          return { enumeration: this.selectedEnumeration }
+        } else {
+          return { technology__isnull: true, enumeration__isnull: true }
+        }
       }
       return null
     },
     vulnerabilityAndTechnologyFilter () {
       if (this.selection) {
-        return this.selectedVulnerability ? { vulnerability: this.selectedVulnerability } : this.selectedTechnology ? { technology: this.selectedTechnology } : { vulnerability__isnull: true, technology__isnull: true }
+        if (this.selectedVulnerability) {
+          return { vulnerability: this.selectedVulnerability }
+        } else if (this.selectedTechnology) {
+          return { technology: this.selectedTechnology }
+        } else {
+          return { vulnerability__isnull: true, technology__isnull: true }
+        }
       }
       return null
     }

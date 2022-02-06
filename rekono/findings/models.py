@@ -577,7 +577,11 @@ class Vulnerability(Finding):
         Returns:
             Dict[str, Any]: Useful information for tool executions, including accumulated if setted
         '''
-        output = self.technology.parse() if self.technology else self.enumeration.parse() if self.enumeration else {}
+        output = {}
+        if self.technology:
+            output = self.technology.parse()
+        elif self.enumeration:
+            output = self.enumeration.parse()
         if self.cve:
             output[InputKeyword.CVE.name.lower()] = self.cve
         return output
@@ -641,7 +645,11 @@ class Exploit(Finding):
         Returns:
             Dict[str, Any]: Useful information for tool executions, including accumulated if setted
         '''
-        output = self.vulnerability.parse() if self.vulnerability else self.technology.parse() if self.technology else {}   # noqa: E501
+        output = {}
+        if self.vulnerability:
+            output = self.vulnerability.parse()
+        elif self.technology:
+            output = self.technology.parse()
         output[InputKeyword.EXPLOIT.name.lower()] = self.name
         return output
 

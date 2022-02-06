@@ -68,7 +68,12 @@ export default {
       return ![null, undefined].includes(this.step)
     },
     title () {
-      return this.process ? this.edit ? `Edit step for ${this.process.name}` : `New step for ${this.process.name}` : this.tool ? `New step ${this.tool.name}` : 'New step'
+      if (this.process) {
+        return this.edit ? `Edit step for ${this.process.name}` : `New step for ${this.process.name}`
+      } else if (this.tool) {
+        return `New step ${this.tool.name}`
+      }
+      return 'New step'
     },
     button () {
       return this.step ? 'Update Step' : 'Create Step'
@@ -168,7 +173,7 @@ export default {
       if (process !== null) {
         this.selectedProcess = process
       } else {
-        this.selectedProcess = this.processes.find(process => process.id === processId)
+        this.selectedProcess = this.processes.find(p => p.id === processId)
       }
     },
     selectTool (toolId, tool = null) {
@@ -176,7 +181,7 @@ export default {
       if (tool !== null) {
         this.selectedTool = tool
       } else {
-        this.selectedTool = this.tools.find(tool => tool.id === toolId)
+        this.selectedTool = this.tools.find(t => t.id === toolId)
       }
       this.configurationId = this.selectedTool.configurations[0].id
     }

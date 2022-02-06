@@ -131,7 +131,9 @@ class ProcessCreatorPermission(BaseCreatorPermission):
         Returns:
             Any: Object with creator user
         '''
-        return obj if isinstance(obj, Process) else obj.process if isinstance(obj, Step) else None
+        if isinstance(obj, Process):
+            return obj
+        return obj.process if isinstance(obj, Step) else None
 
 
 class WordlistCreatorPermission(BaseCreatorPermission):

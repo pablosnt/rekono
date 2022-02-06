@@ -117,7 +117,12 @@ export default {
   },
   computed: {
     title () {
-      return this.process ? `Execute ${this.process.name}` : this.tool ? `Execute ${this.tool.name}` : 'New Task'
+      if (this.process) {
+        return `Execute ${this.process.name}`
+      } else if (this.tool) {
+        return `Execute ${this.tool.name}`
+      }
+      return 'New Task'
     },
     intensitySelection () {
       if (this.selectedTool) {
@@ -269,7 +274,7 @@ export default {
       if (project) {
         this.selectedProject = project
       } else {
-        this.selectedProject = this.projects.find(project => project.id === projectId)
+        this.selectedProject = this.projects.find(p => p.id === projectId)
       }
       this.targets = this.selectedProject.targets
     },
@@ -283,7 +288,7 @@ export default {
       if (process) {
         this.selectedProcess = process
       } else {
-        this.selectedProcess = this.processes.find(process => process.id === processId)
+        this.selectedProcess = this.processes.find(p => p.id === processId)
       }
       const isWordlist = this.checkInputType('Wordlist')
       if (!this.isWordlist && isWordlist) {
@@ -298,7 +303,7 @@ export default {
       if (tool) {
         this.selectedTool = tool
       } else {
-        this.selectedTool = this.tools.find(tool => tool.id === toolId)
+        this.selectedTool = this.tools.find(t => t.id === toolId)
       }
       this.selectConfiguration(this.selectedTool.configurations[0].id, this.selectedTool.configurations[0])
       const normalIntensity = this.selectedTool.intensities.find(i => i.intensity_rank === 'Normal')
@@ -318,7 +323,7 @@ export default {
       if (configuration) {
         this.selectedConfiguration = configuration
       } else {
-        this.selectedConfiguration = this.selectedTool.configurations.find(configuration => configuration.id === configurationId)
+        this.selectedConfiguration = this.selectedTool.configurations.find(c => c.id === configurationId)
       }
     },
     updateWordlists () {

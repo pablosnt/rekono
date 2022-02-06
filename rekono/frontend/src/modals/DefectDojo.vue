@@ -66,7 +66,11 @@ export default {
       return (this.path !== 'tasks' && this.path !== 'executions' && this.path !== 'projects')
     },
     okTitle () {
-      return !this.isFinding && !this.importFindings ? 'Import scans' : !this.isFinding ? 'Import findings' : 'Import finding'
+      if (!this.isFinding && !this.importFindings) {
+        return !this.importFindings ? 'Import scans' : 'Import findings'
+      } else {
+        return 'Import finding'
+      }
     }
   },
   data () {
@@ -92,7 +96,10 @@ export default {
       event.preventDefault()
       if (this.check()) {
         const element = (!this.isFinding && !this.importFindings) ? 'Scans' : 'Findings'
-        const path = this.isFinding ? 'defect-dojo' : this.importFindings ? 'defect-dojo-findings' : 'defect-dojo-scans'
+        let path = 'defect-dojo'
+        if (!this.isFinding) {
+          path = this.importFindings ? 'defect-dojo-findings' : 'defect-dojo-scans'
+        }
         this.post(
           `/api/${this.path}/${this.itemId}/${path}/`,
           this.engagementId ? { id: this.engagementId } : { name: this.engagementName, description: this.engagementDescription },

@@ -58,14 +58,14 @@ def select_project(update: Update, context: CallbackContext) -> int:
         project = Project.objects.get(pk=int(update.callback_query.data))       # Get project by Id
         context.chat_data[PROJECT] = project                                    # Save selected project
         update.callback_query.answer(SELECTED_PROJECT.format(project=project.name))     # Confirm selection
-        next = next_state(update, context, chat)                                # Get next conversation state
-        if next == ConversationHandler.END:                                     # This is the last state
+        state = next_state(update, context, chat)                               # Get next conversation state
+        if state == ConversationHandler.END:                                    # This is the last state
             update.callback_query.bot.send_message(                             # Send confirmation message
                 chat.chat_id,
                 text=SELECTION.format(project=escape_markdown(context.chat_data[PROJECT].name, version=2)),
                 parse_mode=ParseMode.MARKDOWN_V2
             )
-        return next                                                             # Go to next state
+        return state                                                            # Go to next state
     update.callback_query.answer()                                              # Empty answer
     return ConversationHandler.END                                              # End conversation
 
