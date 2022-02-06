@@ -38,7 +38,7 @@ def get_help_message(commands: List[Tuple[str, str, str]] = HELP) -> str:
     '''Get help message from commands definition.
 
     Args:
-        commands (List[Tuple[str, str, str]], optional): Command definition. If not set, default will be used
+        commands (List[Tuple[str, str, str]], optional): Command definition. If not set, default commands will be used
 
     Returns:
         str: Help message

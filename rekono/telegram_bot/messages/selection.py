@@ -1,4 +1,4 @@
-'''Messages with selected items.'''
+'''Messages for selection management.'''
 
 SELECTED_PROJECT = 'Project {project} has been selected'
 SELECTED_TARGET = 'Target {target} has been selected'

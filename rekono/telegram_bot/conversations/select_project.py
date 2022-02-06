@@ -5,7 +5,7 @@ from telegram_bot.security import get_chat
 
 
 def project(update: Update, context: CallbackContext) -> int:
-    '''Select project to be used via Telegram Bot.
+    '''Select project to be used in next operations via Telegram Bot.
 
     Args:
         update (Update): Telegram Bot update

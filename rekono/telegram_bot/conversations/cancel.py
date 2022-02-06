@@ -16,6 +16,6 @@ def cancel(update: Update, context: CallbackContext) -> int:
     Returns:
         int: End conversation
     '''
-    clear(context, [STATES, TARGET, TARGET_PORT, PROCESS, TOOL, CONFIGURATION, INTENSITY])
-    update.message.reply_text(CANCEL)
+    clear(context, [STATES, TARGET, TARGET_PORT, PROCESS, TOOL, CONFIGURATION, INTENSITY])      # Clear Telegram context
+    update.message.reply_text(CANCEL)                                           # Confirm cancellation
     return ConversationHandler.END

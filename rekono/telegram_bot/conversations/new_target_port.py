@@ -16,7 +16,7 @@ from telegram_bot.security import get_chat
 
 
 def new_target_port(update: Update, context: CallbackContext) -> int:
-    '''Create new target port via Telegram Bot.
+    '''Request new target port creation via Telegram Bot.
 
     Args:
         update (Update): Telegram Bot update
@@ -27,17 +27,18 @@ def new_target_port(update: Update, context: CallbackContext) -> int:
     '''
     chat = get_chat(update)                                                     # Get Telegram chat
     if chat:
-        if PROJECT in context.chat_data:
-            context.chat_data[STATES] = [(CREATE, ASK_FOR_NEW_TARGET_PORT)]
+        if PROJECT in context.chat_data:                                        # Project already selected
+            context.chat_data[STATES] = [(CREATE, ASK_FOR_NEW_TARGET_PORT)]     # Configure next steps
             return ask_for_target(update, context, chat)                        # Ask for target selection
-        else:
+        else:                                                                   # No selected project
+            # Configure next steps
             context.chat_data[STATES] = [(None, ask_for_target), (CREATE, ASK_FOR_NEW_TARGET_PORT)]
-            return ask_for_project(update, context, chat)
+            return ask_for_project(update, context, chat)                       # Ask for project selection
     return ConversationHandler.END                                              # Unauthorized: end conversation
 
 
 def create_target_port(update: Update, context: CallbackContext) -> int:
-    '''Create new target port.
+    '''Create new target port via Telegram Bot.
 
     Args:
         update (Update): Telegram Bot update
@@ -46,7 +47,7 @@ def create_target_port(update: Update, context: CallbackContext) -> int:
     Returns:
         int: Conversation state
     '''
-    clear(context, [STATES])
+    clear(context, [STATES])                                                    # Clear Telegram context
     chat = get_chat(update)                                                     # Get Telegram chat
     if chat:
         if update.message.text == '/cancel':                                    # Check if cancellation is requested
@@ -72,5 +73,5 @@ def create_target_port(update: Update, context: CallbackContext) -> int:
             update.message.reply_text(create_error_message(serializer.errors), parse_mode=ParseMode.MARKDOWN_V2)
             update.message.reply_text(ASK_FOR_NEW_TARGET_PORT)                  # Re-ask for the new target port
             return CREATE                                                       # Repeat the current state
-    clear(context, [TARGET])
+    clear(context, [TARGET])                                                    # Clear Telegram context
     return ConversationHandler.END                                              # End conversation

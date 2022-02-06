@@ -25,12 +25,3 @@ def hash(value: str) -> str:
         str: Hash value
     '''
     return hashlib.sha512(value.encode()).hexdigest()
-
-
-def generate_otp() -> str:
-    '''Generate a secure OTP (One Time Password).
-
-    Returns:
-        str: OTP value
-    '''
-    return hash(generate_random_value(3000))

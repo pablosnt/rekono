@@ -1,3 +1,5 @@
+'''List of available conversation states.'''
+
 SELECT_PROJECT = 0
 SELECT_TARGET = 1
 SELECT_TARGET_PORT = 2

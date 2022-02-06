@@ -16,7 +16,7 @@ from telegram_bot.security import get_chat
 
 
 def new_target_endpoint(update: Update, context: CallbackContext) -> int:
-    '''Create new target endpoint via Telegram Bot.
+    '''Request new target endpoint creation via Telegram Bot.
 
     Args:
         update (Update): Telegram Bot update
@@ -27,17 +27,22 @@ def new_target_endpoint(update: Update, context: CallbackContext) -> int:
     '''
     chat = get_chat(update)                                                     # Get Telegram chat
     if chat:
-        if PROJECT in context.chat_data:
+        if PROJECT in context.chat_data:                                        # Project already selected
+            # Configure next steps
             context.chat_data[STATES] = [(None, ask_for_target_port), (CREATE, ASK_FOR_NEW_TARGET_ENDPOINT)]
             return ask_for_target(update, context, chat)                        # Ask for target selection
-        else:
-            context.chat_data[STATES] = [(None, ask_for_target), (None, ask_for_target_port), (CREATE, ASK_FOR_NEW_TARGET_ENDPOINT)]
-            return ask_for_project(update, context, chat)
+        else:                                                                   # No selected project
+            context.chat_data[STATES] = [                                       # Configure next steps
+                (None, ask_for_target),
+                (None, ask_for_target_port),
+                (CREATE, ASK_FOR_NEW_TARGET_ENDPOINT)
+            ]
+            return ask_for_project(update, context, chat)                       # Ask for project creation
     return ConversationHandler.END                                              # Unauthorized: end conversation
 
 
 def create_target_endpoint(update: Update, context: CallbackContext) -> int:
-    '''Create new target endpoint.
+    '''Create new target endpoint via Telegram Bot.
 
     Args:
         update (Update): Telegram Bot update
@@ -46,7 +51,7 @@ def create_target_endpoint(update: Update, context: CallbackContext) -> int:
     Returns:
         int: Conversation state
     '''
-    clear(context, [STATES, TARGET])
+    clear(context, [STATES, TARGET])                                            # Clear Telegram context
     chat = get_chat(update)                                                     # Get Telegram chat
     if chat:
         if update.message.text == '/cancel':                                    # Check if cancellation is requested
@@ -67,5 +72,5 @@ def create_target_endpoint(update: Update, context: CallbackContext) -> int:
             update.message.reply_text(create_error_message(serializer.errors), parse_mode=ParseMode.MARKDOWN_V2)
             update.message.reply_text(ASK_FOR_NEW_TARGET_ENDPOINT)              # Re-ask for the new target endpoint
             return CREATE                                                       # Repeat the current state
-    clear(context, [TARGET_PORT])
+    clear(context, [TARGET_PORT])                                               # Clear Telegram context
     return ConversationHandler.END                                              # End conversation

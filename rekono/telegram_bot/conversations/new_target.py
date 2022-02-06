@@ -14,7 +14,7 @@ from telegram_bot.security import get_chat
 
 
 def new_target(update: Update, context: CallbackContext) -> int:
-    '''Create new target via Telegram Bot.
+    '''Request new target creation via Telegram Bot.
 
     Args:
         update (Update): Telegram Bot update
@@ -29,13 +29,13 @@ def new_target(update: Update, context: CallbackContext) -> int:
             update.message.reply_text(ASK_FOR_NEW_TARGET)                       # Ask for the new target
             return CREATE                                                       # Go to target creation
         else:                                                                   # No selected project
-            context.chat_data[STATES] = [(CREATE, ASK_FOR_NEW_TARGET)]
+            context.chat_data[STATES] = [(CREATE, ASK_FOR_NEW_TARGET)]          # Configure next steps
             return ask_for_project(update, context, chat)                       # Ask for project selection
     return ConversationHandler.END                                              # Unauthorized: end conversation
 
 
 def create_target(update: Update, context: CallbackContext) -> int:
-    '''Create new target.
+    '''Create new target via Telegram Bot.
 
     Args:
         update (Update): Telegram Bot update
@@ -44,7 +44,7 @@ def create_target(update: Update, context: CallbackContext) -> int:
     Returns:
         int: Conversation state
     '''
-    clear(context, [STATES])
+    clear(context, [STATES])                                                    # Clear Telegram context
     chat = get_chat(update)                                                     # Get Telegram chat
     if chat:
         if update.message.text == '/cancel':                                    # Check if cancellation is requested

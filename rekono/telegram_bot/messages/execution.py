@@ -50,7 +50,7 @@ TOOL_CONFIRMATION = '''
 EXECUTION_LAUNCHED = '✅ Task {id} created successfully!'
 
 
-def create_telegram_message(execution: Execution, findings: List[Finding]) -> str:
+def notification_message(execution: Execution, findings: List[Finding]) -> str:
     '''Create text message including execution and findings details.
 
     Args:
@@ -107,16 +107,24 @@ def create_telegram_message(execution: Execution, findings: List[Finding]) -> st
 
 
 def confirmation_message(context: CallbackContext) -> str:
+    '''Create text message to ask user for confirmation before start execution.
+
+    Args:
+        context (CallbackContext): Telegram Bot context
+
+    Returns:
+        str: Text message for execution confirmation
+    '''
     tool = ''
     process = ''
-    if TOOL in context.chat_data:
+    if TOOL in context.chat_data:                                               # Tool execution
         tool = TOOL_CONFIRMATION.format(
             tool=escape_markdown(context.chat_data[TOOL].name, version=2),
             configuration=escape_markdown(context.chat_data[CONFIGURATION].name, version=2)
         )
-    elif PROCESS in context.chat_data:
+    elif PROCESS in context.chat_data:                                          # Process execution
         process = PROCESS_CONFIRMATION.format(process=escape_markdown(context.chat_data[PROCESS].name, version=2))
-    return EXECUTION_CONFIRMATION.format(
+    return EXECUTION_CONFIRMATION.format(                                       # Create confirmation message
         project=escape_markdown(context.chat_data[PROJECT].name, version=2),
         target=escape_markdown(context.chat_data[TARGET].target, version=2),
         tool=tool,

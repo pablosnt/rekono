@@ -6,9 +6,8 @@ from email_notifications.sender import (user_enable_account, user_invitation,
                                         user_password_reset)
 from rest_framework.authtoken.models import Token
 from security.authorization.roles import Role
-from security.crypto import generate_otp
 from security.input_validation import validate_name
-from security.otp import get_expiration
+from security.otp import generate, get_expiration
 from users.enums import Notification
 
 # Create your models here.
@@ -41,7 +40,7 @@ class RekonoUserManager(UserManager):
             Any: Created user
         '''
         # Create new user including an OTP. The user will be inactive while invitation is not accepted
-        user = User.objects.create(email=email, otp=generate_otp(), is_active=False)
+        user = User.objects.create(email=email, otp=generate(), is_active=False)
         self.initialize(user, role)                                             # Initialize user
         user_invitation(user)                                                   # Send email invitation to the user
         return user
@@ -88,8 +87,8 @@ class RekonoUserManager(UserManager):
             Any: Enabled user
         '''
         user.is_active = True                                                   # Enable user
-        user.otp = generate_otp()                                               # Generate its OTP
-        user.otp_expiration = get_expiration()                            # Set OTP expiration
+        user.otp = generate()                                                   # Generate its OTP
+        user.otp_expiration = get_expiration()                                  # Set OTP expiration
         self.initialize(user, role)                                             # Initialize user
         user_enable_account(user)                                               # Send email to establish its password
         return user
@@ -125,8 +124,8 @@ class RekonoUserManager(UserManager):
         Returns:
             Any: User after request password reset
         '''
-        user.otp = generate_otp()                                               # Generate its OTP
-        user.otp_expiration = get_expiration()                            # Set OTP expiration
+        user.otp = generate()                                                   # Generate its OTP
+        user.otp_expiration = get_expiration()                                  # Set OTP expiration
         user.save(update_fields=['otp', 'otp_expiration'])
         user_password_reset(user)                                               # Send password reset email
         return user

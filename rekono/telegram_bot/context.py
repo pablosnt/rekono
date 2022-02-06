@@ -1,3 +1,5 @@
+'''Keywords used to save data in Telegram chat context.'''
+
 STATES = 'states'
 PROJECT = 'project'
 TARGET = 'target'

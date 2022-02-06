@@ -7,7 +7,7 @@ from executions.models import Execution
 from findings.models import Finding, Vulnerability
 from findings.nvd_nist import NvdNist
 from telegram_bot import sender as telegram_sender
-from telegram_bot.messages.execution import create_telegram_message
+from telegram_bot.messages.execution import notification_message
 from users.enums import Notification
 
 
@@ -49,7 +49,7 @@ def consumer(execution: Execution = None, findings: List[Finding] = []) -> None:
             notification_scope=Notification.ALL_EXECUTIONS
         ).all()
         users_to_notify.extend(list(search_members))                            # Save members in the notify list
-        telegram_message = create_telegram_message(execution, findings)         # Create Telegram message
+        telegram_message = notification_message(execution, findings)            # Create Telegram message
         for user in [u for u in users_to_notify if u.telegram_notification]:
             # For each user with enabled Telegram notifications
             telegram_sender.send_message(user.telegram_chat.chat_id, telegram_message)      # Telegram notification

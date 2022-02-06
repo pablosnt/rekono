@@ -1,5 +1,4 @@
-from security.crypto import generate_otp
-from security.otp import get_expiration
+from security.otp import generate, get_expiration
 from telegram import ParseMode
 from telegram.ext import CallbackContext
 from telegram.update import Update
@@ -16,7 +15,14 @@ def start(update: Update, context: CallbackContext) -> None:
     '''
     if update.effective_chat:
         chat, _ = TelegramChat.objects.update_or_create(                        # Create or update the Telegram chat
-            defaults={'user': None, 'otp': generate_otp(), 'otp_expiration': get_expiration(), 'project': None, 'target': None, 'target_port': None},
+            defaults={
+                'user': None,
+                'otp': generate(),
+                'otp_expiration': get_expiration(),
+                'project': None,
+                'target': None,
+                'target_port': None
+            },
             chat_id=update.effective_chat.id
         )
         # Send welcome message including OTP to link Telegram Chat with an user account
@@ -33,5 +39,5 @@ def logout(update: Update, context: CallbackContext) -> None:
     if update.effective_chat:
         chat = TelegramChat.objects.filter(chat_id=update.effective_chat.id).first()    # Get Telegram chat by Id
         if chat:
-            chat.delete()
+            chat.delete()                                                       # Remove Telegram chat update
         update.message.reply_text(LOGOUT, parse_mode=ParseMode.MARKDOWN_V2)     # Send goodbye message

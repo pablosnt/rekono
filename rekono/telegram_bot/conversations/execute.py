@@ -17,7 +17,7 @@ from telegram_bot.security import get_chat
 
 
 def execute_tool(update: Update, context: CallbackContext) -> int:
-    '''Execute tool via Telegram Bot.
+    '''Request tool execution via Telegram Bot.
 
     Args:
         update (Update): Telegram Bot update
@@ -28,28 +28,28 @@ def execute_tool(update: Update, context: CallbackContext) -> int:
     '''
     chat = get_chat(update)                                                     # Get Telegram chat
     if chat:
-        if PROJECT in context.chat_data:
-            context.chat_data[STATES] = [
+        if PROJECT in context.chat_data:                                        # Project already selected
+            context.chat_data[STATES] = [                                       # Prepare next steps
                 (None, ask_for_tool),
                 (None, ask_for_configuration),
                 (None, ask_for_intensity),
                 (None, ask_for_execution_confirmation)
             ]
-            return ask_for_target(update, context, chat)
-        else:
-            context.chat_data[STATES] = [
+            return ask_for_target(update, context, chat)                        # Ask for target selection
+        else:                                                                   # No selected project
+            context.chat_data[STATES] = [                                       # Prepare next steps
                 (None, ask_for_target),
                 (None, ask_for_tool),
                 (None, ask_for_configuration),
                 (None, ask_for_intensity),
                 (None, ask_for_execution_confirmation)
             ]
-            return ask_for_project(update, context, chat)
+            return ask_for_project(update, context, chat)                       # Ask for project selection
     return ConversationHandler.END                                              # Unauthorized: end conversation
 
 
 def execute_process(update: Update, context: CallbackContext) -> int:
-    '''Execute process via Telegram Bot.
+    '''Request process execution via Telegram Bot.
 
     Args:
         update (Update): Telegram Bot update
@@ -60,26 +60,26 @@ def execute_process(update: Update, context: CallbackContext) -> int:
     '''
     chat = get_chat(update)                                                     # Get Telegram chat
     if chat:
-        if PROJECT in context.chat_data:
-            context.chat_data[STATES] = [
+        if PROJECT in context.chat_data:                                        # Project already selected
+            context.chat_data[STATES] = [                                       # Prepare next steps
                 (None, ask_for_process),
                 (None, ask_for_intensity),
                 (None, ask_for_execution_confirmation)
             ]
-            return ask_for_target(update, context, chat)
-        else:
-            context.chat_data[STATES] = [
+            return ask_for_target(update, context, chat)                        # Ask for target selection
+        else:                                                                   # No selected project
+            context.chat_data[STATES] = [                                       # Prepare next steps
                 (None, ask_for_target),
                 (None, ask_for_process),
                 (None, ask_for_intensity),
                 (None, ask_for_execution_confirmation)
             ]
-            return ask_for_project(update, context, chat)
+            return ask_for_project(update, context, chat)                       # Ask for project selection
     return ConversationHandler.END                                              # Unauthorized: end conversation
 
 
 def execute(update: Update, context: CallbackContext) -> int:
-    '''Execute tool.
+    '''Launch execution.
 
     Args:
         update (Update): Telegram Bot update
@@ -88,34 +88,35 @@ def execute(update: Update, context: CallbackContext) -> int:
     Returns:
         int: Conversation state
     '''
-    clear(context, [STATES])
+    clear(context, [STATES])                                                    # Clear Telegram context
     chat = get_chat(update)                                                     # Get Telegram chat
     update.callback_query.answer()                                              # Empty answer
     if chat:
-        if update.callback_query.data.lower() == 'yes':
-            task_data = {
+        if update.callback_query.data.lower() == 'yes':                         # Check execution confirmation
+            task_data = {                                                       # Prepare common execution data
                 'target_id': context.chat_data[TARGET].id,
                 'intensity_rank': context.chat_data[INTENSITY],
                 'executor': chat.user
             }
-            if TOOL in context.chat_data:
-                task_data.update({
+            if TOOL in context.chat_data:                                       # Tool execution
+                task_data.update({                                              # Add tool data
                     'tool_id': context.chat_data[TOOL].id,
                     'configuration_id': context.chat_data[CONFIGURATION].id
                 })
-            elif PROCESS in context.chat_data:
-                task_data['process_id'] = context.chat_data[PROCESS].id
-            serializer = TaskSerializer(data=task_data)
-            if serializer.is_valid():
-                task = serializer.create(serializer.validated_data)
+            elif PROCESS in context.chat_data:                                  # Process execution
+                task_data['process_id'] = context.chat_data[PROCESS].id         # Add process data
+            serializer = TaskSerializer(data=task_data)                         # Create Task serializer
+            if serializer.is_valid():                                           # Task is valid
+                task = serializer.create(serializer.validated_data)             # Create task
+                # Confirm task creation
                 update.callback_query.bot.send_message(chat.chat_id, text=EXECUTION_LAUNCHED.format(id=task.id))
-            else:
-                update.callback_query.bot.send_message(
+            else:                                                               # Invalid task data
+                update.callback_query.bot.send_message(                         # Send error details
                     chat.chat_id,
                     text=create_error_message(serializer.errors),
                     parse_mode=ParseMode.MARKDOWN_V2
                 )
         else:
-            update.callback_query.bot.send_message(chat.chat_id, text=CANCEL)
-    clear(context, [TARGET, INTENSITY, TOOL, CONFIGURATION, PROCESS])
+            update.callback_query.bot.send_message(chat.chat_id, text=CANCEL)   # User didn't confirm the execution
+    clear(context, [TARGET, INTENSITY, TOOL, CONFIGURATION, PROCESS])           # Clear Telegram context
     return ConversationHandler.END                                              # End conversation

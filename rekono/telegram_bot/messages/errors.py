@@ -4,7 +4,7 @@ from telegram.utils.helpers import escape_markdown
 
 '''Error messages.'''
 
-AUTHN_ERROR = 'You have to link your Rekono account before use the Telegram Bot. Use the command /start'
+AUTHN_ERROR = 'You have to link your Rekono account before using the Telegram Bot. Use the command /start'
 AUTHZ_ERROR = 'You are not authorized to perform this operation'
 
 
