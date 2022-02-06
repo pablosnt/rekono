@@ -24,7 +24,7 @@
                                 <div class="row">
                                     <p class="text-muted mr-2">Tool</p>
                                     <div>
-                                        <img src="{{ tool.icon }}" width="20" height="20"/>
+                                        <img src="{{ tool.icon }}" width="20" height="20" alt="{{ tool.name }}"/>
                                         <strong>{{ tool.name }}</strong>
                                     </div>
                                 </div>
@@ -62,9 +62,9 @@
         <div class="container">
             {% if osint %}
                 <table class="table">
+                    <caption>OSINT</caption>
                     <thead class="thead-dark">
                         <tr>
-                            <th scope="col">OSINT</th>
                             <th scope="col">Data</th>
                             <th scope="col">Data type</th>
                             <th scope="col">Source</th>
@@ -73,7 +73,6 @@
                     <tbody>
                         {% for o in osint %}
                             <tr>
-                                <td scope="row"></td>
                                 <td scope="row"><strong>{{ o.data }}</strong></td>
                                 <td scope="row">{{ o.data_type }}</td>
                                 <td scope="row">{{ o.source }}</td>
@@ -85,9 +84,9 @@
             <br>
             {% if host %}
                 <table class="table">
+                    <caption>Hosts</caption>
                     <thead class="thead-dark">
                         <tr>
-                            <th scope="col">Hosts</th>
                             <th scope="col">Address</th>
                             <th scope="col">OS</th>
                             <th scope="col">OS type</th>
@@ -96,7 +95,6 @@
                     <tbody>
                         {% for h in host %}
                             <tr>
-                                <td scope="row"></td>
                                 <td scope="row"><strong>{{ h.address }}</strong></td>
                                 <td scope="row">{{ h.os }}</td>
                                 <td scope="row">{{ h.os_type }}</td>
@@ -108,6 +106,7 @@
             <br>
             {% if enumeration %}
                 <table class="table">
+                    <caption>Enumeration findings</caption>
                     <thead class="thead-dark">
                         <tr>
                             <th scope="col">Enumerations</th>
@@ -139,9 +138,9 @@
             <br>
             {% if endpoint %}
                 <table class="table">
+                    <caption>Endpoints</caption>
                     <thead class="thead-dark">
                         <tr>
-                            <th scope="col">Endpoints</th>
                             <th scope="col">Enumeration</th>
                             <th scope="col">Endpoint</th>
                             <th scope="col">Status</th>
@@ -150,7 +149,6 @@
                     <tbody>
                         {% for e in endpoint %}
                             <tr>
-                                <td scope="row"></td>
                                 {% if e.enumeration and e.enumeration.host %}
                                     <td scope="row"><strong>{{ e.enumeration.host.address }} - {{ e.enumeration.port }}</strong></td>
                                 {% elif e.enumeration %}
@@ -168,9 +166,9 @@
             <br>
             {% if technology %}
                 <table class="table">
+                    <caption>Technologies</caption>
                     <thead class="thead-dark">
                         <tr>
-                            <th scope="col">Technologies</th>
                             <th scope="col">Enumeration</th>
                             <th scope="col">Name</th>
                             <th scope="col">Version</th>
@@ -179,7 +177,6 @@
                     <tbody>
                         {% for t in technology %}
                             <tr>
-                                <td scope="row"></td>
                                 {% if t.enumeration and t.enumeration.host %}
                                     <td scope="row"><strong>{{ t.enumeration.host.address }} - {{ t.enumeration.port }}</strong></td>
                                 {% elif t.enumeration %}
@@ -197,9 +194,9 @@
             <br>
             {% if credential %}
                 <table class="table">
+                    <caption>Credentials</caption>
                     <thead class="thead-dark">
                         <tr>
-                            <th scope="col">Credentials</th>
                             <th scope="col">Email</th>
                             <th scope="col">Username</th>
                             <th scope="col">Secret</th>
@@ -208,7 +205,6 @@
                     <tbody>
                         {% for c in credential %}
                             <tr>
-                                <td scope="row"></td>
                                 <td scope="row"><strong>{{ c.email }}</strong></td>
                                 <td scope="row"><strong>{{ c.username }}</strong></td>
                                 <td scope="row"><strong>{{ c.secret }}</strong></td>
@@ -220,9 +216,9 @@
             <br>
             {% if vulnerability %}
                 <table class="table">
+                    <caption>Vulnerabilities</caption>
                     <thead class="thead-dark">
                         <tr>
-                            <th scope="col">Vulnerabilities</th>
                             <th scope="col">Tecnhology</th>
                             <th scope="col">Enumeration</th>
                             <th scope="col">Name</th>
@@ -234,7 +230,6 @@
                     <tbody>
                         {% for v in vulnerability %}
                             <tr>
-                                <td scope="row"></td>
                                 {% if v.technology %}
                                     <td scope="row"><strong>{{ v.technology.name }}</strong></td>
                                 {% else %}
@@ -263,9 +258,9 @@
             <br>
             {% if exploit %}
                 <table class="table">
+                    <caption>Exploits</caption>
                     <thead class="thead-dark">
                         <tr>
-                            <th scope="col">Exploits</th>
                             <th scope="col">Vulnerability</th>
                             <th scope="col">Technology</th>
                             <th scope="col">Name</th>
@@ -275,7 +270,6 @@
                     <tbody>
                         {% for e in exploit %}
                             <tr>
-                                <td scope="row"></td>
                                 {% if e.vulnerability %}
                                     <td scope="row"><strong>{{ e.vulnerability.name }}</strong></td>
                                 {% else %}

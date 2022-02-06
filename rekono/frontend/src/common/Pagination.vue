@@ -3,8 +3,8 @@
     <b-col cols="6">
       <b-pagination v-model="selectedPage" :total-rows="total" :per-page="limit" align="right" first-class="text-black" ellipsis-class="text-black" last-class="text-black" next-class="text-black" prev-class="text-black">
         <template #page="{ page, active }">
-          <b v-if="active" class="text-light">{{ page }}</b>
-          <i v-else class="text-dark">{{ page }}</i>
+          <strong v-if="active" class="text-light">{{ page }}</strong>
+          <em v-else class="text-dark">{{ page }}</em>
         </template>
       </b-pagination>
     </b-col>
