@@ -1,0 +1,8 @@
+STATES = 'states'
+PROJECT = 'project'
+TARGET = 'target'
+TARGET_PORT = 'target_port'
+PROCESS = 'process'
+TOOL = 'tool'
+CONFIGURATION = 'configuration'
+INTENSITY = 'intensity'

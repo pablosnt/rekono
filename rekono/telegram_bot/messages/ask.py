@@ -13,4 +13,6 @@ ASK_FOR_PROCESS = 'Choose one process'
 NO_PROCESSES = 'There are no processes. Go to Rekono to create one'
 
 ASK_FOR_TOOL = 'Choose one tool'
-NO_TOOLS = 'There are no tool. Contact with your administrator'
+ASK_FOR_CONFIGURATION = 'Choose one configuration'
+
+ASK_FOR_INTENSITY = 'Choose one intensity'

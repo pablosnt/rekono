@@ -4,7 +4,7 @@ from telegram.update import Update
 from telegram_bot.messages.help import (UNAUTH_HELP, get_help_message,
                                         get_reader_help_message)
 from telegram_bot.models import TelegramChat
-from telegram_bot.services.security import check_auditor
+from telegram_bot.security import check_auditor
 
 
 def help(update: Update, context: CallbackContext) -> None:

@@ -31,7 +31,7 @@ export default {
         this.targetEndpointState = false
         this.invalidTargetEndpoint = this.targetEndpoint && this.targetEndpoint.length > 0 ? 'Invalid target endpoint' : 'Target endpoint is required'
       }
-      return valid && this.targetEndpointState
+      return valid && this.targetEndpointState !== false
     },
     confirm (event) {
       event.preventDefault()

@@ -195,7 +195,7 @@ export default {
         if (this.scheduledAtDate && this.scheduledAtTime) {
           this.scheduledAtState = (Date.parse(`${this.scheduledAtDate} ${this.scheduledAtTime}`) > new Date())
         }
-        return valid && this.scheduledAtState
+        return valid && this.scheduledAtState !== false
       }
       return valid
     },

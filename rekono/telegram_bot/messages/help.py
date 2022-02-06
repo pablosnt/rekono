@@ -14,15 +14,14 @@ HELP = [
     ('logout', '', 'Unlink bot from your account'),
     ('help', '', 'Show this message'),
     ('selectproject', 'Selection', 'Select one project to be used in next operations'),
-    ('selecttarget', 'Selection', 'Select one target to be used in next operations'),
-    ('selectprocess', 'Selection', 'Select one process to be used in next operations'),
-    ('selecttool', 'Selection', 'Select one tool to be used in next operations'),
-    ('showselection', 'Selection', 'Show selected items'),
-    ('clearselection', 'Selection', 'Unselect all selected items'),
-    ('cleartarget', 'Selection', 'Unselect the selected target'),
+    ('showproject', 'Selection', 'Show selected project'),
+    ('clearproject', 'Selection', 'Unselect the selected project'),
     ('newtarget', 'Targets', 'Create new target'),
-    ('newtargetport', 'Targets', 'Create new target port'),
-    ('newtargetendpoint', 'Targets', 'Create new target endpoint')
+    ('newport', 'Targets', 'Create new target port'),
+    ('newendpoint', 'Targets', 'Create new target endpoint'),
+    ('tool', 'Execution', 'Execute tool'),
+    ('process', 'Execution', 'Execute process'),
+    ('cancel', 'Common', 'Cancel current operation')
 ]
 
 

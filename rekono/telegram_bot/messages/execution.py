@@ -3,11 +3,14 @@ from typing import List
 from executions.models import Execution
 from findings.models import (OSINT, Credential, Endpoint, Enumeration, Exploit,
                              Finding, Host, Technology, Vulnerability)
+from telegram.ext import CallbackContext
 from telegram.utils.helpers import escape_markdown
+from telegram_bot.context import (CONFIGURATION, INTENSITY, PROCESS, PROJECT,
+                                  TARGET, TOOL)
 from telegram_bot.messages import findings as messages
 from telegram_bot.messages.constants import DATE_FORMAT
 
-'''Messages for execution notification.'''
+'''Messages related to executions.'''
 
 EXECUTION_NOTIFICATION = '''
 *{project}*
@@ -22,6 +25,29 @@ _Executor_          {executor}
 
 {findings}
 '''
+
+EXECUTION_CONFIRMATION = '''
+The following execution will be launched:
+
+💼 _Project_   *{project}*
+🎯 _Target_    *{target}*
+{process}
+{tool}
+🔊 _Intensity_ *{intensity}*
+
+Are you sure?
+'''
+
+PROCESS_CONFIRMATION = '''
+⛓ _Process_   *{process}*
+'''
+
+TOOL_CONFIRMATION = '''
+🛠 _Tool_      *{tool}*
+📄 _Configuration_  *{configuration}*
+'''
+
+EXECUTION_LAUNCHED = '✅ Task {id} created successfully!'
 
 
 def create_telegram_message(execution: Execution, findings: List[Finding]) -> str:
@@ -77,4 +103,23 @@ def create_telegram_message(execution: Execution, findings: List[Finding]) -> st
         end=escape_markdown(execution.end.strftime(DATE_FORMAT), version=2),
         executor=escape_markdown(execution.task.executor.username, version=2),
         findings=text_message
+    )
+
+
+def confirmation_message(context: CallbackContext) -> str:
+    tool = ''
+    process = ''
+    if TOOL in context.chat_data:
+        tool = TOOL_CONFIRMATION.format(
+            tool=escape_markdown(context.chat_data[TOOL].name, version=2),
+            configuration=escape_markdown(context.chat_data[CONFIGURATION].name, version=2)
+        )
+    elif PROCESS in context.chat_data:
+        process = PROCESS_CONFIRMATION.format(process=escape_markdown(context.chat_data[PROCESS].name, version=2))
+    return EXECUTION_CONFIRMATION.format(
+        project=escape_markdown(context.chat_data[PROJECT].name, version=2),
+        target=escape_markdown(context.chat_data[TARGET].target, version=2),
+        tool=tool,
+        process=process,
+        intensity=context.chat_data[INTENSITY].capitalize()
     )
