@@ -39,6 +39,7 @@
 </template>
 
 <script>
+import RekonoApi from '@/backend/RekonoApi'
 import MainTabs from '@/common/MainTabs'
 import Dashboard from '@/components/project/Dashboard'
 import Targets from '@/components/project/Targets'
@@ -48,6 +49,7 @@ import Members from '@/components/project/Members'
 import NotFound from '@/errors/NotFound.vue'
 export default {
   name: 'projectPage',
+  mixins: [RekonoApi],
   props: {
     project: Object
   },

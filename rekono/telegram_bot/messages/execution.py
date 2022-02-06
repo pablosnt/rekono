@@ -31,21 +31,16 @@ The following execution will be launched:
 
 💼 _Project_   *{project}*
 🎯 _Target_    *{target}*
-{process}
-{tool}
+{execution_item}
 🔊 _Intensity_ *{intensity}*
 
 Are you sure?
 '''
 
-PROCESS_CONFIRMATION = '''
-⛓ _Process_   *{process}*
-'''
+PROCESS_CONFIRMATION = '⛓ _Process_   *{process}*'
 
-TOOL_CONFIRMATION = '''
-🛠 _Tool_      *{tool}*
-📄 _Configuration_  *{configuration}*
-'''
+TOOL_CONFIRMATION = '''🛠 _Tool_      *{tool}*
+📄 _Configuration_  *{configuration}*'''
 
 EXECUTION_LAUNCHED = '✅ Task {id} created successfully!'
 
@@ -115,19 +110,17 @@ def confirmation_message(context: CallbackContext) -> str:
     Returns:
         str: Text message for execution confirmation
     '''
-    tool = ''
-    process = ''
+    execution_item = ''
     if TOOL in context.chat_data:                                               # Tool execution
-        tool = TOOL_CONFIRMATION.format(
+        execution_item = TOOL_CONFIRMATION.format(
             tool=escape_markdown(context.chat_data[TOOL].name, version=2),
             configuration=escape_markdown(context.chat_data[CONFIGURATION].name, version=2)
         )
     elif PROCESS in context.chat_data:                                          # Process execution
-        process = PROCESS_CONFIRMATION.format(process=escape_markdown(context.chat_data[PROCESS].name, version=2))
+        execution_item = PROCESS_CONFIRMATION.format(process=escape_markdown(context.chat_data[PROCESS].name, version=2))
     return EXECUTION_CONFIRMATION.format(                                       # Create confirmation message
         project=escape_markdown(context.chat_data[PROJECT].name, version=2),
         target=escape_markdown(context.chat_data[TARGET].target, version=2),
-        tool=tool,
-        process=process,
+        execution_item=execution_item,
         intensity=context.chat_data[INTENSITY].capitalize()
     )

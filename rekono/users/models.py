@@ -2,6 +2,7 @@ from typing import Any, cast
 
 from django.contrib.auth.models import AbstractUser, Group, UserManager
 from django.db import models
+from django.forms import ValidationError
 from email_notifications.sender import (user_enable_account, user_invitation,
                                         user_password_reset)
 from rest_framework.authtoken.models import Token

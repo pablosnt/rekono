@@ -107,7 +107,7 @@ def execute(update: Update, context: CallbackContext) -> int:
                 task_data['process_id'] = context.chat_data[PROCESS].id         # Add process data
             serializer = TaskSerializer(data=task_data)                         # Create Task serializer
             if serializer.is_valid():                                           # Task is valid
-                task = serializer.create(serializer.validated_data)             # Create task
+                task = serializer.save(executor=chat.user)                      # Create task
                 # Confirm task creation
                 update.callback_query.bot.send_message(chat.chat_id, text=EXECUTION_LAUNCHED.format(id=task.id))
             else:                                                               # Invalid task data

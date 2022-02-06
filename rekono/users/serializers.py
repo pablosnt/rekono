@@ -4,6 +4,7 @@ from typing import Any, Dict
 from attr import has
 from django.contrib.auth.password_validation import validate_password
 from django.db import transaction
+from django.forms import ValidationError
 from rest_framework import serializers, status
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.fields import SerializerMethodField
@@ -54,6 +55,23 @@ class InviteUserSerializer(serializers.Serializer):
 
     email = serializers.EmailField(required=True)                               # New user email
     role = serializers.ChoiceField(choices=Role.choices, required=True)         # New user role
+
+    def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
+        '''Validate the provided data before use it.
+
+        Args:
+            attrs (Dict[str, Any]): Provided data
+
+        Raises:
+            ValidationError: Raised if provided data is invalid
+
+        Returns:
+            Dict[str, Any]: Data after validation process
+        '''
+        attrs = super().validate(attrs)
+        if User.objects.filter(email=attrs['email']):
+            raise ValidationError({'email': 'This email already exists'})
+        return attrs
 
     def create(self, validated_data: Dict[str, Any]) -> User:
         '''Create instance from validated data.
@@ -207,6 +225,23 @@ class CreateUserSerializer(UserPasswordSerializer):
     last_name = serializers.CharField(max_length=150, required=True)            # New user last name
     otp = serializers.CharField(max_length=200, required=True)                  # OTP included in the email invitation
 
+    def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
+        '''Validate the provided data before use it.
+
+        Args:
+            attrs (Dict[str, Any]): Provided data
+
+        Raises:
+            ValidationError: Raised if provided data is invalid
+
+        Returns:
+            Dict[str, Any]: Data after validation process
+        '''
+        attrs = super().validate(attrs)
+        if User.objects.filter(email=attrs['email']):
+            raise ValidationError({'username': 'This username already exists'})
+        return attrs
+
     @transaction.atomic()
     def create(self, validated_data: Dict[str, Any]) -> User:
         '''Create instance from validated data.
@@ -245,6 +280,7 @@ class ChangeUserPasswordSerializer(UserPasswordSerializer):
 
         Raises:
             ValidationError: Raised if provided data is invalid
+            AuthenticationFailed: Raised if old password is invalid
 
         Returns:
             Dict[str, Any]: Data after validation process
