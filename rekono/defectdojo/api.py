@@ -27,6 +27,7 @@ class DefectDojo:
         '''Defect-Dojo API constructor.'''
         self.url = f'{config.get("URL")}/api/v2'                                # Defect-Dojo base URL
         self.api_key = config.get('API_KEY')                                    # Defect-Dojo API key
+        self.verify_tls = config.get('VERIFY_TLS')                              # TLS certificate verification
         self.tags = config.get('TAGS')                                          # Tags to use in Rekono items
         self.product_auto_creation = config.get('PRODUCT_AUTO_CREATION')        # Product creation from Rekono project
         self.product_type = config.get('PRODUCT_TYPE')                          # Product type name for Rekono
@@ -66,7 +67,7 @@ class DefectDojo:
             params=params,
             data=data,
             files=files,
-            verify=False
+            verify=self.verify_tls
         )
         if response.status_code == expected_status:
             return True, response.json()                                        # Successful request

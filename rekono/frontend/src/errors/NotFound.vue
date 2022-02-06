@@ -1,11 +1,11 @@
 <template>
-  <center class="mt-5">
+  <div class="text-center mt-5">
     <h1><strong>NOT FOUND</strong></h1>
     <br>
     <p>The page that you are looking for is not here.</p>
     <br>
     <b-button variant="danger" @click="comeBack">Go back!</b-button>
-  </center>
+  </div>
 </template>
 
 <script>

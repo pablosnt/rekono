@@ -301,6 +301,7 @@ TELEGRAM_TOKEN = os.getenv('RKN_TELEGRAM_TOKEN', CONFIG.TELEGRAM_TOKEN)         
 DEFECT_DOJO = {
     'URL': os.getenv('RKN_DD_URL', CONFIG.DD_URL),
     'API_KEY': os.getenv('RKN_DD_API_KEY', CONFIG.DD_API_KEY),                  # Defect-Dojo API key
+    'VERIFY_TLS': CONFIG.DD_VERIFY_TLS,                                         # Defect-Dojo TLS verification
     'TAGS': CONFIG.DD_TAGS,                                                     # Tags to be included in DD entities
     # Indicate if Defect-Dojo products can be created from Rekono projects
     'PRODUCT_AUTO_CREATION': CONFIG.DD_PRODUCT_AUTO_CREATION,
