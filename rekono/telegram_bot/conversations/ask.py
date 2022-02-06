@@ -7,8 +7,7 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
 from telegram.ext import CallbackContext, ConversationHandler
 from telegram.update import Update
 from telegram_bot.context import PROJECT, TARGET, TOOL
-from telegram_bot.conversations.states import (CREATE, EXECUTE,
-                                               SELECT_CONFIGURATION,
+from telegram_bot.conversations.states import (EXECUTE, SELECT_CONFIGURATION,
                                                SELECT_INTENSITY,
                                                SELECT_PROCESS, SELECT_PROJECT,
                                                SELECT_TARGET,
@@ -39,7 +38,7 @@ def send_message(update: Update, chat: TelegramChat, text: str) -> None:
         update.callback_query.bot.send_message(chat.chat_id, text=text, parse_mode=ParseMode.MARKDOWN_V2)
 
 
-def send_options(update: Update, chat: TelegramChat, text: str, keyboard: List[List[InlineKeyboardButton]]) -> None:
+def send_options(update: Update, chat: TelegramChat, text: str, keyboard: List[InlineKeyboardButton], per_row: int) -> None:
     '''Send Telegram options message.
 
     Args:
@@ -48,10 +47,13 @@ def send_options(update: Update, chat: TelegramChat, text: str, keyboard: List[L
         text (str): Text message to send
         keyboard (List[List[InlineKeyboardButton]]): Keyboard with the available options
     '''
+    keyboard_by_row = []
+    for i in range(0, len(keyboard), per_row):
+        keyboard_by_row.append(keyboard[i:i+per_row])
     if hasattr(update, 'message') and getattr(update, 'message'):               # Standard update
-        update.message.reply_text(text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode=ParseMode.MARKDOWN_V2)
+        update.message.reply_text(text, reply_markup=InlineKeyboardMarkup(keyboard_by_row), parse_mode=ParseMode.MARKDOWN_V2)
     else:                                                                       # Update from keyboard selection
-        update.callback_query.bot.send_message(chat.chat_id, text=text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode=ParseMode.MARKDOWN_V2)
+        update.callback_query.bot.send_message(chat.chat_id, text=text, reply_markup=InlineKeyboardMarkup(keyboard_by_row), parse_mode=ParseMode.MARKDOWN_V2)
 
 
 def ask_for_project(update: Update, context: CallbackContext, chat: TelegramChat) -> int:
@@ -70,8 +72,8 @@ def ask_for_project(update: Update, context: CallbackContext, chat: TelegramChat
         return ConversationHandler.END                                          # End conversation
     else:
         # Build keyboard with the projects data
-        keyboard = [[InlineKeyboardButton(p.name, callback_data=p.id) for p in projects]]
-        send_options(update, chat, ASK_FOR_PROJECT, keyboard)
+        keyboard = [InlineKeyboardButton(p.name, callback_data=p.id) for p in projects]
+        send_options(update, chat, ASK_FOR_PROJECT, keyboard, 3)
         return SELECT_PROJECT                                                   # Go to next conversation state
 
 
@@ -91,8 +93,8 @@ def ask_for_target(update: Update, context: CallbackContext, chat: TelegramChat)
         return ConversationHandler.END                                          # End conversation
     else:
         # Build keyboard with the targets data
-        keyboard = [[InlineKeyboardButton(t.target, callback_data=t.id) for t in targets]]
-        send_options(update, chat, ASK_FOR_TARGET, keyboard)
+        keyboard = [InlineKeyboardButton(t.target, callback_data=t.id) for t in targets]
+        send_options(update, chat, ASK_FOR_TARGET, keyboard, 3)
         return SELECT_TARGET                                                    # Go to next conversation state
 
 
@@ -112,8 +114,8 @@ def ask_for_target_port(update: Update, context: CallbackContext, chat: Telegram
         return ConversationHandler.END                                          # End conversation
     else:
         # Build keyboard with the target ports data
-        keyboard = [[InlineKeyboardButton(tp.port, callback_data=tp.id) for tp in target_ports]]
-        send_options(update, chat, ASK_FOR_TARGET_PORT, keyboard)
+        keyboard = [InlineKeyboardButton(tp.port, callback_data=tp.id) for tp in target_ports]
+        send_options(update, chat, ASK_FOR_TARGET_PORT, keyboard, 5)
         return SELECT_TARGET_PORT                                                       # Go to next conversation state
 
 
@@ -133,8 +135,8 @@ def ask_for_process(update: Update, context: CallbackContext, chat: TelegramChat
         return ConversationHandler.END                                          # End conversation
     else:
         # Build keyboard with the processes data
-        keyboard = [[InlineKeyboardButton(p.name, callback_data=p.id) for p in processes]]
-        send_options(update, chat, ASK_FOR_PROCESS, keyboard)
+        keyboard = [InlineKeyboardButton(p.name, callback_data=p.id) for p in processes]
+        send_options(update, chat, ASK_FOR_PROCESS, keyboard, 3)
         return SELECT_PROCESS                                                    # Go to next conversation state
 
 
@@ -150,8 +152,8 @@ def ask_for_tool(update: Update, context: CallbackContext, chat: TelegramChat) -
     '''
     tools = Tool.objects.order_by('name').all()
     # Build keyboard with the tools data
-    keyboard = [[InlineKeyboardButton(t.name, callback_data=t.id) for t in tools]]
-    send_options(update, chat, ASK_FOR_TOOL, keyboard)
+    keyboard = [InlineKeyboardButton(t.name, callback_data=t.id) for t in tools]
+    send_options(update, chat, ASK_FOR_TOOL, keyboard, 3)
     return SELECT_TOOL                                                          # Go to next conversation state
 
 
@@ -167,8 +169,8 @@ def ask_for_configuration(update: Update, context: CallbackContext, chat: Telegr
     '''
     configurations = Configuration.objects.filter(tool=context.chat_data[TOOL]).order_by('name').all()
     # Build keyboard with the configurations data
-    keyboard = [[InlineKeyboardButton(c.name, callback_data=c.id) for c in configurations]]
-    send_options(update, chat, ASK_FOR_CONFIGURATION, keyboard)
+    keyboard = [InlineKeyboardButton(c.name, callback_data=c.id) for c in configurations]
+    send_options(update, chat, ASK_FOR_CONFIGURATION, keyboard, 2)
     return SELECT_CONFIGURATION                                                 # Go to next conversation state
 
 
@@ -186,8 +188,8 @@ def ask_for_intensity(update: Update, context: CallbackContext, chat: TelegramCh
     if TOOL in context.chat_data:
         intensities = [IntensityRank(i.value).name for i in context.chat_data[TOOL].intensities.order_by('value').all()]
     intensities.reverse()
-    keyboard = [[InlineKeyboardButton(i.capitalize(), callback_data=i) for i in intensities]]
-    send_options(update, chat, ASK_FOR_INTENSITY, keyboard)
+    keyboard = [InlineKeyboardButton(i.capitalize(), callback_data=i) for i in intensities]
+    send_options(update, chat, ASK_FOR_INTENSITY, keyboard, len(intensities))
     return SELECT_INTENSITY                                                     # Go to next conversation state
 
 
@@ -201,9 +203,9 @@ def ask_for_execution_confirmation(update: Update, context: CallbackContext, cha
     Returns:
         int: Next conversation state or end conversation
     '''
-    keyboard = [[
+    keyboard = [
         InlineKeyboardButton('Yes', callback_data='yes'),
         InlineKeyboardButton('No', callback_data='no')
-    ]]
-    send_options(update, chat, confirmation_message(context), keyboard)
+    ]
+    send_options(update, chat, confirmation_message(context), keyboard, 2)
     return EXECUTE                                                           # Go to next conversation state
