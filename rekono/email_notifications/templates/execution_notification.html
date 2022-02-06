@@ -73,9 +73,9 @@
                     <tbody>
                         {% for o in osint %}
                             <tr>
-                                <td scope="row"><strong>{{ o.data }}</strong></td>
-                                <td scope="row">{{ o.data_type }}</td>
-                                <td scope="row">{{ o.source }}</td>
+                                <td><strong>{{ o.data }}</strong></td>
+                                <td>{{ o.data_type }}</td>
+                                <td>{{ o.source }}</td>
                             </tr>
                         {% endfor %}
                     </tbody>
@@ -95,9 +95,9 @@
                     <tbody>
                         {% for h in host %}
                             <tr>
-                                <td scope="row"><strong>{{ h.address }}</strong></td>
-                                <td scope="row">{{ h.os }}</td>
-                                <td scope="row">{{ h.os_type }}</td>
+                                <td><strong>{{ h.address }}</strong></td>
+                                <td>{{ h.os }}</td>
+                                <td>{{ h.os_type }}</td>
                             </tr>
                         {% endfor %}
                     </tbody>
@@ -120,16 +120,16 @@
                     <tbody>
                         {% for e in enumeration %}
                             <tr>
-                                <td scope="row"></td>
+                                <td></td>
                                 {% if e.host %}
-                                    <td scope="row"><strong>{{ e.host.address }}</strong></td>
+                                    <td><strong>{{ e.host.address }}</strong></td>
                                 {% else %}
-                                    <td scope="row"></td>
+                                    <td></td>
                                 {% endif %}
-                                <td scope="row"><strong>{{ e.port }}</strong></td>
-                                <td scope="row">{{ e.port_status }}</td>
-                                <td scope="row">{{ e.protocol }}</td>
-                                <td scope="row">{{ e.service }}</td>
+                                <td><strong>{{ e.port }}</strong></td>
+                                <td>{{ e.port_status }}</td>
+                                <td>{{ e.protocol }}</td>
+                                <td>{{ e.service }}</td>
                             </tr>
                         {% endfor %}
                     </tbody>
@@ -150,14 +150,14 @@
                         {% for e in endpoint %}
                             <tr>
                                 {% if e.enumeration and e.enumeration.host %}
-                                    <td scope="row"><strong>{{ e.enumeration.host.address }} - {{ e.enumeration.port }}</strong></td>
+                                    <td><strong>{{ e.enumeration.host.address }} - {{ e.enumeration.port }}</strong></td>
                                 {% elif e.enumeration %}
-                                    <td scope="row"><strong>{{ e.enumeration.port }}</strong></td>
+                                    <td><strong>{{ e.enumeration.port }}</strong></td>
                                 {% else %}
-                                    <td scope="row"></td>
+                                    <td></td>
                                 {% endif %}
-                                <td scope="row"><strong>{{ e.endpoint }}</strong></td>
-                                <td scope="row">{{ e.status }}</td>
+                                <td><strong>{{ e.endpoint }}</strong></td>
+                                <td>{{ e.status }}</td>
                             </tr>
                         {% endfor %}
                     </tbody>
@@ -178,14 +178,14 @@
                         {% for t in technology %}
                             <tr>
                                 {% if t.enumeration and t.enumeration.host %}
-                                    <td scope="row"><strong>{{ t.enumeration.host.address }} - {{ t.enumeration.port }}</strong></td>
+                                    <td><strong>{{ t.enumeration.host.address }} - {{ t.enumeration.port }}</strong></td>
                                 {% elif t.enumeration %}
-                                    <td scope="row"><strong>{{ t.enumeration.port }}</strong></td>
+                                    <td><strong>{{ t.enumeration.port }}</strong></td>
                                 {% else %}
-                                    <td scope="row"></td>
+                                    <td></td>
                                 {% endif %}
-                                <td scope="row"><strong>{{ t.name }}</strong></td>
-                                <td scope="row">{{ t.version }}</td>
+                                <td><strong>{{ t.name }}</strong></td>
+                                <td>{{ t.version }}</td>
                             </tr>
                         {% endfor %}
                     </tbody>
@@ -205,9 +205,9 @@
                     <tbody>
                         {% for c in credential %}
                             <tr>
-                                <td scope="row"><strong>{{ c.email }}</strong></td>
-                                <td scope="row"><strong>{{ c.username }}</strong></td>
-                                <td scope="row"><strong>{{ c.secret }}</strong></td>
+                                <td><strong>{{ c.email }}</strong></td>
+                                <td><strong>{{ c.username }}</strong></td>
+                                <td><strong>{{ c.secret }}</strong></td>
                             </tr>
                         {% endfor %}
                     </tbody>
@@ -231,24 +231,24 @@
                         {% for v in vulnerability %}
                             <tr>
                                 {% if v.technology %}
-                                    <td scope="row"><strong>{{ v.technology.name }}</strong></td>
+                                    <td><strong>{{ v.technology.name }}</strong></td>
                                 {% else %}
-                                    <td scope="row"></td>
+                                    <td></td>
                                 {% endif %}
                                 {% if v.enumeration and v.enumeration.host %}
-                                    <td scope="row"><strong>{{ v.enumeration.host.address }} - {{ v.enumeration.port }}</strong></td>
+                                    <td><strong>{{ v.enumeration.host.address }} - {{ v.enumeration.port }}</strong></td>
                                 {% elif v.enumeration %}
-                                    <td scope="row"><strong>{{ v.enumeration.port }}</strong></td>
+                                    <td><strong>{{ v.enumeration.port }}</strong></td>
                                 {% else %}
-                                    <td scope="row"></td>
+                                    <td></td>
                                 {% endif %}
-                                <td scope="row"><strong>{{ v.name }}</strong></td>
-                                <td scope="row">{{ v.severity }}</td>
-                                <td scope="row"><strong>{{ v.cve }}</strong></td>
+                                <td><strong>{{ v.name }}</strong></td>
+                                <td>{{ v.severity }}</td>
+                                <td><strong>{{ v.cve }}</strong></td>
                                 {% if v.reference %}
-                                    <td scope="row"><a href="{{ v.reference }}">Link</a></td>
+                                    <td><a href="{{ v.reference }}">Link</a></td>
                                 {% else %}
-                                    <td scope="row"></td>
+                                    <td></td>
                                 {% endif %}
                             </tr>
                         {% endfor %}
@@ -271,17 +271,17 @@
                         {% for e in exploit %}
                             <tr>
                                 {% if e.vulnerability %}
-                                    <td scope="row"><strong>{{ e.vulnerability.name }}</strong></td>
+                                    <td><strong>{{ e.vulnerability.name }}</strong></td>
                                 {% else %}
-                                    <td scope="row"></td>
+                                    <td></td>
                                 {% endif %}
                                 {% if e.technology %}
-                                    <td scope="row"><strong>{{ e.technology.name }}</strong></td>
+                                    <td><strong>{{ e.technology.name }}</strong></td>
                                 {% else %}
-                                    <td scope="row"></td>
+                                    <td></td>
                                 {% endif %}
-                                <td scope="row"><strong>{{ e.name }}</strong></td>
-                                <td scope="row">{{ e.reference }}</td>
+                                <td><strong>{{ e.name }}</strong></td>
+                                <td>{{ e.reference }}</td>
                             </tr>
                         {% endfor %}
                     </tbody>
