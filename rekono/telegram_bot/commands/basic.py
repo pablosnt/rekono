@@ -15,14 +15,7 @@ def start(update: Update, context: CallbackContext) -> None:
     '''
     if update.effective_chat:
         chat, _ = TelegramChat.objects.update_or_create(                        # Create or update the Telegram chat
-            defaults={
-                'user': None,
-                'otp': generate(),
-                'otp_expiration': get_expiration(),
-                'project': None,
-                'target': None,
-                'target_port': None
-            },
+            defaults={'user': None, 'otp': generate(), 'otp_expiration': get_expiration()},
             chat_id=update.effective_chat.id
         )
         # Send welcome message including OTP to link Telegram Chat with an user account

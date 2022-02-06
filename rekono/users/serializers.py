@@ -143,7 +143,6 @@ class UserProfileSerializer(serializers.ModelSerializer):
         Returns:
             bool: Indicate if Telegram bot has been configured
         '''
-        # return TelegramChat.objects.filter(user=instance).exists()
         return hasattr(instance, 'telegram_chat') and instance.telegram_chat is not None
 
 

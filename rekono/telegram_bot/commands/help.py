@@ -15,7 +15,7 @@ def help(update: Update, context: CallbackContext) -> None:
         context (CallbackContext): Telegram Bot context
     '''
     if update.effective_chat:
-        chat = TelegramChat.objects.filter(chat_id=update.effective_chat.id).first()
+        chat = TelegramChat.objects.filter(chat_id=update.effective_chat.id, user__is_active=True).first()
         if not chat or not chat.user:                                           # Unlinked Telegram chat
             update.message.reply_text(UNAUTH_HELP, parse_mode=ParseMode.MARKDOWN_V2)
         elif check_auditor(chat):                                               # Chat linked to auditor account
