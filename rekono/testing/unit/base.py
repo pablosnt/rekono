@@ -12,6 +12,7 @@ class RekonoTestCase(TestCase):
 
     def setUp(self) -> None:
         '''Create initial data before run tests.'''
+        super().setUp()
         self.username = 'rekono'                                                # Username for test authentication
         self.email = 'rekono@rekono.rekono'                                     # Email for test authentication
         self.password = 'rekono'                                                # Password for test authentication
@@ -20,7 +21,6 @@ class RekonoTestCase(TestCase):
         data = {'username': self.username, 'password': self.password}           # Login data
         content = self.api_test(APIClient().post, '/api/token/', 200, data, {})     # Login request
         self.rekono = APIClient(HTTP_AUTHORIZATION=f'Bearer {content.get("access")}')   # Configure Rekono API client
-        super().setUp()
 
     def get_content(self, response: HttpResponse) -> Dict[Any, Any]:
         '''Get content from HTTP response.

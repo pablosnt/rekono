@@ -106,12 +106,12 @@ class TaskViewSet(
 
     @extend_schema(request=None, responses={200: TaskSerializer})
     @action(detail=True, methods=['POST'], url_path='repeat', url_name='repeat')
-    def repeat_task(self, request: Request, pk: int) -> Response:
+    def repeat_task(self, request: Request, pk: str) -> Response:
         '''Repeat task execution.
 
         Args:
             request (Request): Received HTTP request
-            pk (int): Id of the task to repeat
+            pk (str): Id of the task to repeat
 
         Returns:
             Response: HTTP response

@@ -38,12 +38,12 @@ class DefectDojoScans(GenericViewSet):
         url_name='defect-dojo-scans',
         permission_classes=[IsAuthenticated, IsAuditor, ProjectMemberPermission]
     )
-    def defect_dojo_scans(self, request: Request, pk: int) -> Response:
+    def defect_dojo_scans(self, request: Request, pk: str) -> Response:
         '''Import executions output in Defect-Dojo.
 
         Args:
             request (Request): Received HTTP request
-            pk (int): Instance Id
+            pk (str): Instance Id
 
         Returns:
             Response: HTTP Response
@@ -92,12 +92,12 @@ class DefectDojoFindings(GenericViewSet):
         url_name='defect-dojo-findings',
         permission_classes=[IsAuthenticated, IsAuditor, ProjectMemberPermission]
     )
-    def defect_dojo_findings(self, request: Request, pk: int) -> Response:
+    def defect_dojo_findings(self, request: Request, pk: str) -> Response:
         '''Import findings in Defect-Dojo.
 
         Args:
             request (Request): Received HTTP request
-            pk (int): Instance Id
+            pk (str): Instance Id
 
         Returns:
             Response: HTTP response

@@ -29,12 +29,12 @@ class LikeManagementView(GenericViewSet):
     # Permission classes should be overrided here, because if not, the standard permissions would be applied, and not
     # all auditors can make POST requests to resources like these.
     @action(detail=True, methods=['POST'], url_path='like', url_name='like', permission_classes=[IsAuthenticated, IsAuditor])   # noqa: E501
-    def like(self, request: Request, pk: int) -> Response:
+    def like(self, request: Request, pk: str) -> Response:
         '''Mark an instance as liked by the current user.
 
         Args:
             request (Request): Received HTTP request
-            pk (int): Instance Id
+            pk (str): Instance Id
 
         Returns:
             Response: HTTP Response
@@ -49,12 +49,12 @@ class LikeManagementView(GenericViewSet):
     # Permission classes should be overrided here, because if not, the standard permissions would be applied, and not
     # all auditors can make POST requests to resources like these.
     @action(detail=True, methods=['POST'], url_path='dislike', url_name='dislike', permission_classes=[IsAuthenticated, IsAuditor])     # noqa: E501
-    def dislike(self, request: Request, pk: int) -> Response:
+    def dislike(self, request: Request, pk: str) -> Response:
         '''Unmark an instance as liked by the current user.
 
         Args:
             request (Request): Received HTTP request
-            pk (int): Instance Id
+            pk (str): Instance Id
 
         Returns:
             Response: HTTP Response

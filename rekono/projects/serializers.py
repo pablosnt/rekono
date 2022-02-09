@@ -42,11 +42,10 @@ class ProjectSerializer(TaggitSerializer, serializers.ModelSerializer):
         if attrs.get('defectdojo_product_id'):
             # Check if product Id exists in Defect-Dojo
             success, _ = DefectDojo().get_product(attrs['defectdojo_product_id'])
-        if attrs.get('defectdojo_product_id') and not success:
-            # Product Id not found in Defect-Dojo
-            raise serializers.ValidationError(
-                {'defectdojo_product_id': f'Product ID {attrs.get("defectdojo_product_id")} not found in Defect-Dojo'}
-            )
+            if not success:                                                     # Product Id not found in Defect-Dojo
+                raise serializers.ValidationError({
+                    'defectdojo_product_id': f'Product ID {attrs.get("defectdojo_product_id")} not found in Defect-Dojo'
+                })
         return attrs
 
     @transaction.atomic()

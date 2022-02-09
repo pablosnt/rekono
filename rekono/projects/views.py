@@ -75,12 +75,12 @@ class ProjectViewSet(ModelViewSet, DefectDojoScans, DefectDojoFindings):
 
     @extend_schema(request=ProjectMemberSerializer, responses={201: ProjectMemberSerializer})
     @action(detail=True, methods=['POST'], url_path='members', url_name='members')
-    def add_project_member(self, request: Request, pk: int) -> Response:
+    def add_project_member(self, request: Request, pk: str) -> Response:
         '''Add user to the project members.
 
         Args:
             request (Request): Received HTTP request
-            pk (int): Instance Id
+            pk (str): Instance Id
 
         Returns:
             Response: HTTP Response
@@ -90,26 +90,26 @@ class ProjectViewSet(ModelViewSet, DefectDojoScans, DefectDojoFindings):
         if serializer.is_valid():
             try:
                 serializer.update(project, serializer.validated_data)           # Add project member
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
+                return Response(status=status.HTTP_201_CREATED)
             except User.DoesNotExist:
                 return Response(status=status.HTTP_404_NOT_FOUND)               # User not found
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, methods=['DELETE'], url_path='members/(?P<member_id>[0-9])', url_name='delete_member')
-    def delete_project_member(self, request: Request, member_id: int, pk: int) -> Response:
+    def delete_project_member(self, request: Request, member_id: str, pk: str) -> Response:
         '''Remove user from the project members.
 
         Args:
             request (Request): Received HTTP request
-            member_id (int): User Id to be removed
-            pk (int): Instance Id
+            member_id (str): User Id to be removed
+            pk (str): Instance Id
 
         Returns:
             Response: HTTP Response
         '''
         project = self.get_object()
         member = get_object_or_404(project.members, pk=member_id)               # Get member from project members
-        if member and member_id != project.owner.id:
+        if int(member_id) != project.owner.id:
             # Member found and it isn't the project owner
             project.members.remove(member)                                      # Remove project member
             return Response(status=status.HTTP_204_NO_CONTENT)

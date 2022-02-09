@@ -63,12 +63,12 @@ class FindingBaseView(ListModelMixin, RetrieveModelMixin, DestroyModelMixin, Def
 
     @extend_schema(request=None, responses={201: None})
     @action(detail=True, methods=['POST'], url_path='enable', url_name='enable')
-    def enable(self, request: Request, pk: int) -> Response:
+    def enable(self, request: Request, pk: str) -> Response:
         '''Enable finding.
 
         Args:
             request (Request): Received HTTP request
-            pk (int): Instance Id
+            pk (str): Instance Id
 
         Returns:
             Response: HTTP response
@@ -85,7 +85,7 @@ class FindingBaseView(ListModelMixin, RetrieveModelMixin, DestroyModelMixin, Def
 
         Args:
             request (Request): Received HTTP request
-            pk (int): Instance Id
+            pk (str): Instance Id
 
         Returns:
             Response: HTTP response
@@ -103,12 +103,12 @@ class OSINTViewSet(FindingBaseView):
 
     @extend_schema(request=None, responses={201: TargetSerializer})
     @action(detail=True, methods=['POST'], url_path='target', url_name='target')
-    def target(self, request: Request, pk: int) -> Response:
+    def target(self, request: Request, pk: str) -> Response:
         '''Target creation from OSINT data.
 
         Args:
             request (Request): Received HTTP request
-            pk (int): Instance Id
+            pk (str): Instance Id
 
         Returns:
             Response: HTTP response

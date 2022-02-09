@@ -66,12 +66,12 @@ class UserAdminViewSet(GenericViewSet, ListModelMixin, RetrieveModelMixin, Destr
 
     @extend_schema(request=ChangeUserRoleSerializer, responses={200: UserSerializer})
     @action(detail=True, methods=['PUT'], url_path='role', url_name='role')
-    def change_user_role(self, request: Request, pk: int) -> Response:
+    def change_user_role(self, request: Request, pk: str) -> Response:
         '''Change user role.
 
         Args:
             request (Request): Received HTTP request
-            pk (int): Instance Id
+            pk (str): Instance Id
 
         Returns:
             Response: HTTP response
@@ -85,12 +85,12 @@ class UserAdminViewSet(GenericViewSet, ListModelMixin, RetrieveModelMixin, Destr
 
     @extend_schema(request=EnableUserSerializer, responses={200: UserSerializer})
     @action(detail=True, methods=['POST'], url_path='enable', url_name='enable')
-    def enable_user(self, request: Request, pk: int) -> Response:
+    def enable_user(self, request: Request, pk: str) -> Response:
         '''Enable disabled user.
 
         Args:
             request (Request): Received HTTP request
-            pk (int): Instance Id
+            pk (str): Instance Id
 
         Returns:
             Response: HTTP response
