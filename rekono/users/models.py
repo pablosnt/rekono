@@ -2,7 +2,6 @@ from typing import Any, cast
 
 from django.contrib.auth.models import AbstractUser, Group, UserManager
 from django.db import models
-from django.forms import ValidationError
 from email_notifications.sender import (user_enable_account, user_invitation,
                                         user_password_reset)
 from rest_framework.authtoken.models import Token
@@ -74,7 +73,6 @@ class RekonoUserManager(UserManager):
         group = Group.objects.get(name=role.value)                              # Get user group related to the role
         user.groups.clear()                                                     # Clean user groups
         user.groups.set([group])                                                # Set user group
-        user.save(update_fields=['groups'])
         return user
 
     def enable_user(self, user: Any, role: Role) -> Any:
@@ -107,8 +105,7 @@ class RekonoUserManager(UserManager):
         user.set_unusable_password()                                            # Make its password unusable
         user.otp = None                                                         # Remove its OTP
         user.groups.clear()                                                     # Clear its groups
-        # 'update_fields' not specified because can be unknown changes within 'set_unusable_password' method
-        user.save()
+        user.save(update_fields=['otp', 'is_active'])
         try:
             token = Token.objects.get(user=user)                                # Get user API token
             token.delete()                                                      # Delete user API token

@@ -1,10 +1,9 @@
-from datetime import datetime
 from typing import Any, Dict
 
-from attr import has
 from django.contrib.auth.password_validation import validate_password
 from django.db import transaction
 from django.forms import ValidationError
+from django.utils import timezone
 from rest_framework import serializers, status
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.fields import SerializerMethodField
@@ -170,6 +169,27 @@ class TelegramBotSerializer(serializers.Serializer):
     # One Time Password used to link account to the Telegram Bot
     otp = serializers.CharField(max_length=200, required=True)
 
+    def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
+        '''Validate the provided data before use it.
+
+        Args:
+            attrs (Dict[str, Any]): Provided data
+
+        Raises:
+            ValidationError: Raised if provided data is invalid
+            AuthenticationFailed: Raised if Telegram OTP is invalid
+
+        Returns:
+            Dict[str, Any]: Data after validation process
+        '''
+        attrs = super().validate(attrs)
+        try:
+            # Search Telegram chat by otp
+            attrs['telegram_chat'] = TelegramChat.objects.get(otp=attrs.get('otp'), otp_expiration__gt=timezone.now())
+        except TelegramChat.DoesNotExist:                                       # Invalid otp
+            raise AuthenticationFailed('Invalid Telegram OTP', code=status.HTTP_401_UNAUTHORIZED)
+        return attrs
+
     @transaction.atomic()
     def update(self, instance: User, validated_data: Dict[str, Any]) -> User:
         '''Update instance from validated data.
@@ -181,17 +201,10 @@ class TelegramBotSerializer(serializers.Serializer):
         Returns:
             User: Updated instance
         '''
-        try:
-            telegram_chat = TelegramChat.objects.get(                           # Search Telegram chat by otp
-                otp=validated_data.get('otp'),
-                otp_expiration__gt=datetime.now()                               # Check OTP expiration
-            )
-        except TelegramChat.DoesNotExist:                                       # Invalid otp
-            raise AuthenticationFailed('Invalid Telegram OTP', code=status.HTTP_401_UNAUTHORIZED)
-        telegram_chat.otp = None                                                # Set otp to null
-        telegram_chat.otp_expiration = None                                     # Set otp expiration to null
-        telegram_chat.user = instance                                           # Link Telegram chat Id to the user
-        telegram_chat.save(update_fields=['otp', 'otp_expiration', 'user'])
+        validated_data['telegram_chat'].otp = None                              # Set otp to null
+        validated_data['telegram_chat'].otp_expiration = None                   # Set otp expiration to null
+        validated_data['telegram_chat'].user = instance                         # Link Telegram chat Id to the user
+        validated_data['telegram_chat'].save(update_fields=['otp', 'otp_expiration', 'user'])
         return instance
 
 
@@ -233,13 +246,20 @@ class CreateUserSerializer(UserPasswordSerializer):
 
         Raises:
             ValidationError: Raised if provided data is invalid
+             AuthenticationFailed: Raised if OTP is invalid
 
         Returns:
             Dict[str, Any]: Data after validation process
         '''
+        try:
+            # Search inactive user by otp and check expiration datetime
+            user = User.objects.get(is_active=False, otp=attrs.get('otp'), otp_expiration__gt=timezone.now())
+        except User.DoesNotExist:                                               # Invalid otp
+            raise AuthenticationFailed('Invalid OTP value', code=status.HTTP_401_UNAUTHORIZED)
         attrs = super().validate(attrs)
-        if User.objects.filter(email=attrs['email']):
+        if User.objects.filter(username=attrs['username']):
             raise ValidationError({'username': 'This username already exists'})
+        attrs['user'] = user
         return attrs
 
     @transaction.atomic()
@@ -253,17 +273,17 @@ class CreateUserSerializer(UserPasswordSerializer):
             User: Created instance
         '''
         # Get invited user
-        user = User.objects.get(is_active=False, otp=validated_data.get('otp'), otp_expiration__gt=datetime.now())
-        user.username = validated_data.get('username')                          # Set username
-        user.first_name = validated_data.get('first_name')                      # Set first name
-        user.last_name = validated_data.get('last_name')                        # Set last name
-        user.set_password(validated_data.get('password'))                       # Set password
-        user.is_active = True                                                   # Enable user
-        user.otp = None                                                         # Clear OTP
-        user.otp_expiration = None                                              # Clear OTP expiration
-        # 'update_fields' not specified because can be unknown changes within 'set_password' method
-        user.save()
-        return user
+        validated_data['user'].username = validated_data.get('username')        # Set username
+        validated_data['user'].first_name = validated_data.get('first_name')    # Set first name
+        validated_data['user'].last_name = validated_data.get('last_name')      # Set last name
+        validated_data['user'].set_password(validated_data.get('password'))     # Set password
+        validated_data['user'].is_active = True                                 # Enable user
+        validated_data['user'].otp = None                                       # Clear OTP
+        validated_data['user'].otp_expiration = None                            # Clear OTP expiration
+        validated_data['user'].save(update_fields=[
+            'username', 'first_name', 'last_name', 'password', 'is_active', 'otp', 'otp_expiration'
+        ])
+        return validated_data['user']
 
 
 class ChangeUserPasswordSerializer(UserPasswordSerializer):
@@ -301,8 +321,7 @@ class ChangeUserPasswordSerializer(UserPasswordSerializer):
             User: Updated instance
         '''
         instance.set_password(validated_data.get('password'))                   # Update password
-        # 'update_fields' not specified because can be unknown changes within 'set_password' method
-        instance.save()
+        instance.save(update_fields=['password'])
         return instance
 
 
@@ -310,6 +329,28 @@ class ResetPasswordSerializer(UserPasswordSerializer):
     '''Serializer to reset user password via API.'''
 
     otp = serializers.CharField(max_length=200, required=True)                  # OTP included in the email message
+
+    def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
+        '''Validate the provided data before use it.
+
+        Args:
+            attrs (Dict[str, Any]): Provided data
+
+        Raises:
+            ValidationError: Raised if provided data is invalid
+            AuthenticationFailed: Raised if OTP is invalid
+
+        Returns:
+            Dict[str, Any]: Data after validation process
+        '''
+        try:
+            # Search active user by otp and check expiration datetime
+            user = User.objects.get(is_active=True, otp=attrs['otp'], otp_expiration__gt=timezone.now())
+        except User.DoesNotExist:                                               # Invalid otp
+            raise AuthenticationFailed('Invalid OTP value', code=status.HTTP_401_UNAUTHORIZED)
+        attrs = super().validate(attrs)
+        attrs['user'] = user
+        return attrs
 
     @transaction.atomic()
     def save(self, **kwargs: Any) -> User:
@@ -319,12 +360,10 @@ class ResetPasswordSerializer(UserPasswordSerializer):
             User: Instance after apply changes
         '''
         # Get user that requested the password reset
-        user = User.objects.get(is_active=True, otp=self.validated_data.get('otp'), otp_expiration__gt=datetime.now())
-        user.set_password(self.validated_data.get('password'))                  # Set password
-        user.otp = None                                                         # Clear OTP
-        # 'update_fields' not specified because can be unknown changes within 'set_password' method
-        user.save()
-        return user
+        self.validated_data['user'].set_password(self.validated_data.get('password'))   # Set password
+        self.validated_data['user'].otp = None                                  # Clear OTP
+        self.validated_data['user'].save(update_fields=['password', 'otp'])
+        return self.validated_data['user']
 
 
 class RequestPasswordResetSerializer(serializers.Serializer):

@@ -10,6 +10,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 '''
 
 import os
+import sys
 from datetime import timedelta
 from pathlib import Path
 from typing import List
@@ -232,17 +233,24 @@ SPECTACULAR_SETTINGS = {
 
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('RKN_DB_NAME', CONFIG.DB_NAME),
-        'USER': os.getenv('RKN_DB_USER', CONFIG.DB_USER),
-        'PASSWORD': os.getenv('RKN_DB_PASSWORD', CONFIG.DB_PASSWORD),
-        'HOST': os.getenv('RKN_DB_HOST', CONFIG.DB_HOST),
-        'PORT': os.getenv('RKN_DB_PORT', CONFIG.DB_PORT),
+if 'test' in sys.argv:
+    DATABASES = {                                                               # In memory database for testing
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': ':memory:'
+        }
     }
-}
-
+else:
+    DATABASES = {                                                               # Production database
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.getenv('RKN_DB_NAME', CONFIG.DB_NAME),
+            'USER': os.getenv('RKN_DB_USER', CONFIG.DB_USER),
+            'PASSWORD': os.getenv('RKN_DB_PASSWORD', CONFIG.DB_PASSWORD),
+            'HOST': os.getenv('RKN_DB_HOST', CONFIG.DB_HOST),
+            'PORT': os.getenv('RKN_DB_PORT', CONFIG.DB_PORT),
+        }
+    }
 
 ################################################################################
 # Redis Queues                                                                 #

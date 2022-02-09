@@ -20,9 +20,7 @@ class UsersConfig(AppConfig):
         group_model = kwargs['apps'].get_model(app_label='auth', model_name='group')                # Get Group model
         permission_model = kwargs['apps'].get_model(app_label='auth', model_name='permission')  # Get permission model
         for name, permissions in ROLES.items():                                 # For each role
-            group, created = group_model.objects.get_or_create(name=str(name))  # Create group
-            if not created:
-                continue                                                        # If group already exists, continue
+            group, _ = group_model.objects.get_or_create(name=str(name))  # Create group
             permission_set = []
             for permission_name in permissions:                                 # For each permission name
                 permission = permission_model.objects.get(codename=permission_name)     # Get permission model

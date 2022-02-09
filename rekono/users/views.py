@@ -194,11 +194,8 @@ class CreateUserViewSet(GenericViewSet):
         '''
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():                                               # Check input data
-            try:
-                serializer.save()                                               # Initialize user data
-                return Response(status=status.HTTP_201_CREATED)
-            except User.DoesNotExist:                                           # User invitation not found
-                return Response(status=status.HTTP_404_NOT_FOUND)
+            serializer.save()                                                   # Initialize user data
+            return Response(status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)  # Invalid input data
 
 
@@ -243,10 +240,6 @@ class ResetPasswordViewSet(GenericViewSet):
         '''
         serializer = ResetPasswordSerializer(data=request.data)
         if serializer.is_valid():                                               # Check input data
-            try:
-                serializer.save()                                               # Reset password
-            except User.DoesNotExist:
-                # Unauthorized error when user not found based on OTP
-                return Response(status=status.HTTP_401_UNAUTHORIZED)
+            serializer.save()                                                   # Reset password
             return Response(status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)  # Invalid input data
