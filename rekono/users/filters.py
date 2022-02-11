@@ -58,7 +58,7 @@ class UserFilter(rest_framework.FilterSet):
         '''
         try:
             project = Project.objects.get(pk=value, members=self.request.user)
-            return project.members.all()
+            return project.members.all().order_by('-id')
         except Project.DoesNotExist:
             return queryset.none()
 

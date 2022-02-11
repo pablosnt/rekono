@@ -17,7 +17,7 @@ from targets.serializers import (TargetEndpointSerializer,
 class TargetViewSet(GenericViewSet, CreateModelMixin, ListModelMixin, RetrieveModelMixin, DestroyModelMixin):
     '''Target ViewSet that includes: get, retrieve, create, and delete features.'''
 
-    queryset = Target.objects.all()
+    queryset = Target.objects.all().order_by('-id')
     serializer_class = TargetSerializer
     filterset_class = TargetFilter
     # Fields used to search targets
@@ -60,7 +60,7 @@ class TargetViewSet(GenericViewSet, CreateModelMixin, ListModelMixin, RetrieveMo
 class TargetPortViewSet(TargetViewSet):
     '''TargetPort ViewSet that includes: get, retrieve, create, and delete features.'''
 
-    queryset = TargetPort.objects.all()
+    queryset = TargetPort.objects.all().order_by('-id')
     serializer_class = TargetPortSerializer
     filterset_class = TargetPortFilter
     # Fields used to search target ports
@@ -83,7 +83,7 @@ class TargetPortViewSet(TargetViewSet):
 class TargetEndpointViewSet(TargetViewSet):
     '''TargetEndpoint ViewSet that includes: get, retrieve, create, and delete features.'''
 
-    queryset = TargetEndpoint.objects.all()
+    queryset = TargetEndpoint.objects.all().order_by('-id')
     serializer_class = TargetEndpointSerializer
     filterset_class = TargetEndpointFilter
     # Fields used to search target endpoints

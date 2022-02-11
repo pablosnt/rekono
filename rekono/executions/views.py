@@ -15,7 +15,7 @@ from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
 class ExecutionViewSet(ListModelMixin, RetrieveModelMixin, DefectDojoScans, DefectDojoFindings):
     '''Execution ViewSet that includes: get, retrieve and import Defect-Dojo features.'''
 
-    queryset = Execution.objects.all()
+    queryset = Execution.objects.all().order_by('-id')
     serializer_class = ExecutionSerializer
     filterset_class = ExecutionFilter
     search_fields = [                                                           # Fields used to search executions

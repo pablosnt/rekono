@@ -34,7 +34,7 @@ class TaskViewSet(
 ):
     '''Task ViewSet that includes: get, retrieve, create, cancel and import Defect-Dojo features.'''
 
-    queryset = Task.objects.all()
+    queryset = Task.objects.all().order_by('-id')
     serializer_class = TaskSerializer
     filterset_class = TaskFilter
     # Fields used to search tasks

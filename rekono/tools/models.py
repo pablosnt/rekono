@@ -19,11 +19,6 @@ class Tool(LikeBase):
     reference = models.TextField(max_length=250, blank=True, null=True)         # Tool reference link
     icon = models.TextField(max_length=250, blank=True, null=True)              # Tool icon link
 
-    class Meta:
-        '''Model metadata.'''
-
-        ordering = ['-id']                                                      # Default ordering for pagination
-
     def __str__(self) -> str:
         '''Instance representation in text format.
 
@@ -47,11 +42,6 @@ class Intensity(models.Model):
     tool = models.ForeignKey(Tool, related_name='intensities', on_delete=models.CASCADE)            # Related tool
     argument = models.TextField(max_length=50, default='', blank=True)          # Argument needed to apply the intensity
     value = models.IntegerField(choices=IntensityRank.choices, default=IntensityRank.NORMAL)        # Intensity value
-
-    class Meta:
-        '''Model metadata.'''
-
-        ordering = ['-id']                                                      # Default ordering for pagination
 
     def __str__(self) -> str:
         '''Instance representation in text format.
@@ -81,7 +71,6 @@ class Configuration(models.Model):
     class Meta:
         '''Model metadata.'''
 
-        ordering = ['-id']                                                      # Default ordering for pagination
         constraints = [
             # Unique constraint by: Tool and Name
             models.UniqueConstraint(fields=['tool', 'name'], name='unique configuration')
@@ -116,7 +105,6 @@ class Argument(models.Model):
     class Meta:
         '''Model metadata.'''
 
-        ordering = ['-id']                                                      # Default ordering for pagination
         constraints = [
             # Unique constraint by: Tool and Name
             models.UniqueConstraint(fields=['tool', 'name'], name='unique argument')
@@ -150,7 +138,6 @@ class Input(models.Model):
     class Meta:
         '''Model metadata.'''
 
-        ordering = ['-id']                                                      # Default ordering for pagination
         constraints = [
             # Unique constraint by: Argument and Order
             models.UniqueConstraint(fields=['argument', 'order'], name='unique input')
@@ -183,7 +170,6 @@ class Output(models.Model):
     class Meta:
         '''Model metadata.'''
 
-        ordering = ['-id']                                                      # Default ordering for pagination
         constraints = [
             # Unique constraint by: Configuration and Input Type
             models.UniqueConstraint(fields=['configuration', 'type'], name='unique output')

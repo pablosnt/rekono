@@ -22,7 +22,6 @@ class Target(models.Model, BaseInput):
     class Meta:
         '''Model metadata.'''
 
-        ordering = ['-id']                                                      # Default ordering for pagination
         constraints = [
             # Unique constraint by: Project and Target
             models.UniqueConstraint(fields=['project', 'target'], name='unique target')
@@ -85,7 +84,6 @@ class TargetPort(models.Model, BaseInput):
     class Meta:
         '''Model metadata.'''
 
-        ordering = ['-id']                                                      # Default ordering for pagination
         constraints = [
             # Unique constraint by: Target and Port
             models.UniqueConstraint(fields=['target', 'port'], name='unique target port')
@@ -140,7 +138,6 @@ class TargetEndpoint(models.Model, BaseInput):
     class Meta:
         '''Model metadata.'''
 
-        ordering = ['-id']                                                      # Default ordering for pagination
         constraints = [
             # Unique constraint by: TargetPort and Endpoint
             models.UniqueConstraint(fields=['target_port', 'endpoint'], name='unique target endpoint')

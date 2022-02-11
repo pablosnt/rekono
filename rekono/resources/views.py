@@ -13,7 +13,7 @@ from security.authorization.permissions import (ProjectMemberPermission,
 class WordlistViewSet(ModelViewSet, LikeManagementView):
     '''Wordlist ViewSet that includes: get, retrieve, create, update, delete, like and dislike features.'''
 
-    queryset = Wordlist.objects.all()
+    queryset = Wordlist.objects.all().order_by('-id')
     serializer_class = WordlistSerializer
     filterset_class = WordlistFilter
     search_fields = ['name']                                                    # Fields used to search projects

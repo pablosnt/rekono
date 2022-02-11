@@ -158,11 +158,6 @@ class User(AbstractUser):
     REQUIRED_FIELDS = ['email']
     objects = RekonoUserManager()                                               # Model manager
 
-    class Meta:
-        '''Model metadata.'''
-
-        ordering = ['-id']                                                      # Default ordering for pagination
-
     def __str__(self) -> str:
         '''Instance representation in text format.
 

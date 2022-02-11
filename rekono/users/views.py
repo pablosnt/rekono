@@ -27,7 +27,7 @@ class UserAdminViewSet(GenericViewSet, ListModelMixin, RetrieveModelMixin, Destr
     '''User administration ViewSet that includes: get, retrieve, invite, role change, enable and disable features.'''
 
     serializer_class = UserSerializer
-    queryset = User.objects.all()
+    queryset = User.objects.all().order_by('-id')
     filterset_class = UserFilter
     # Fields used to search tasks
     search_fields = ['username', 'first_name', 'last_name', 'username', 'email']
@@ -107,7 +107,7 @@ class UserProfileViewSet(GenericViewSet):
     '''User profile ViewSet that includes: get, update, password change and Telegram bot configuration features.'''
 
     serializer_class = UserProfileSerializer
-    queryset = User.objects.all()
+    queryset = User.objects.all().order_by('-id')
     # Only IsAuthenticated class is required because all users can manage its profile
     permission_classes = [IsAuthenticated]
 
@@ -178,7 +178,7 @@ class CreateUserViewSet(GenericViewSet):
     '''User ViewSet that includes user initialization from invitation feature.'''
 
     serializer_class = CreateUserSerializer
-    queryset = User.objects.all()
+    queryset = User.objects.all().order_by('-id')
     # Only IsNotAuthenticated class is required because, users can be initialized from another user session
     permission_classes = [IsNotAuthenticated]
 
@@ -202,7 +202,7 @@ class CreateUserViewSet(GenericViewSet):
 class ResetPasswordViewSet(GenericViewSet):
     '''User ViewSet that includes reset password feature.'''
 
-    queryset = User.objects.all()
+    queryset = User.objects.all().order_by('-id')
     # No class required because all users can reset his password
     # This operation can be performed from an user session or not
     permission_classes: List[BasePermission] = []

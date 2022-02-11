@@ -10,4 +10,3 @@ class InputTypeSerializer(serializers.ModelSerializer):
 
         model = InputType
         fields = ('name', 'callback_target')                                    # Input type fields exposed via API
-        ordering = ['-id']

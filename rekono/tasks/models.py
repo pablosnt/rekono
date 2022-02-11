@@ -1,5 +1,3 @@
-from typing import Any
-
 from django.conf import settings
 from django.db import models
 from processes.models import Process
@@ -42,11 +40,6 @@ class Task(models.Model):
     start = models.DateTimeField(blank=True, null=True)                         # Task execution start date
     end = models.DateTimeField(blank=True, null=True)                           # Task execution end date
     wordlists = models.ManyToManyField(Wordlist, related_name='wordlists', blank=True)  # Wordlists applied
-
-    class Meta:
-        '''Model metadata.'''
-
-        ordering = ['-id']                                                      # Default ordering for pagination
 
     def __str__(self) -> str:
         '''Instance representation in text format.

@@ -46,7 +46,6 @@ class Finding(models.Model, BaseInput):
         '''Model metadata.'''
 
         abstract = True                                                         # To be extended by Finding models
-        ordering = ['-id']                                                      # Default ordering for pagination
 
     def validate_unique(self, exclude: Optional[Collection[str]] = None) -> None:
         '''Validate all uniqueness constraints on the model.

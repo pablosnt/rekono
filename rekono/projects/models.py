@@ -20,11 +20,6 @@ class Project(models.Model):
     members = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='members', blank=True)
     tags = TaggableManager()                                                    # Project tags
 
-    class Meta:
-        '''Model metadata.'''
-
-        ordering = ['-id']                                                      # Default ordering for pagination
-
     def __str__(self) -> str:
         '''Instance representation in text format.
 

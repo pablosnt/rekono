@@ -23,11 +23,6 @@ class Execution(models.Model):
     end = models.DateTimeField(blank=True, null=True)                           # End date
     reported_to_defectdojo = models.BooleanField(default=False)                 # Indicate if it has been imported yet
 
-    class Meta:
-        '''Model metadata.'''
-
-        ordering = ['-id']                                                      # Default ordering for pagination
-
     def __str__(self) -> str:
         '''Instance representation in text format.
 

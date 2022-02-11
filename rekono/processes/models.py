@@ -19,11 +19,6 @@ class Process(LikeBase):
     creator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True)
     tags = TaggableManager()                                                    # Process tags
 
-    class Meta:
-        '''Model metadata.'''
-
-        ordering = ['-id']                                                      # Default ordering for pagination
-
     def __str__(self) -> str:
         '''Instance representation in text format.
 
@@ -53,7 +48,6 @@ class Step(models.Model):
     class Meta:
         '''Model metadata.'''
 
-        ordering = ['-id']                                                      # Default ordering for pagination
         constraints = [
             # Unique constraint by: Process, Tool and Configuration
             models.UniqueConstraint(fields=['process', 'tool', 'configuration'], name='unique step')

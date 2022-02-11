@@ -96,7 +96,7 @@ class FindingBaseView(ListModelMixin, RetrieveModelMixin, DestroyModelMixin, Def
 class OSINTViewSet(FindingBaseView):
     '''OSINT ViewSet that includes: get, retrieve, enable, disable, import in Defect-Dojo and target creation features.'''  # noqa: E501
 
-    queryset = OSINT.objects.all()
+    queryset = OSINT.objects.all().order_by('-id')
     serializer_class = OSINTSerializer
     filterset_class = OSINTFilter
     search_fields = ['data', 'source']                                          # Fields used to search OSINTs
@@ -125,7 +125,7 @@ class OSINTViewSet(FindingBaseView):
 class HostViewSet(FindingBaseView):
     '''Host ViewSet that includes: get, retrieve, enable, disable and import Defect-Dojo features.'''
 
-    queryset = Host.objects.all()
+    queryset = Host.objects.all().order_by('-id')
     serializer_class = HostSerializer
     filterset_class = HostFilter
     search_fields = [                                                           # Fields used to search Hosts
@@ -147,7 +147,7 @@ class HostViewSet(FindingBaseView):
 class EnumerationViewSet(FindingBaseView):
     '''Enumeration ViewSet that includes: get, retrieve, enable, disable and import Defect-Dojo features.'''
 
-    queryset = Enumeration.objects.all()
+    queryset = Enumeration.objects.all().order_by('-id')
     serializer_class = EnumerationSerializer
     filterset_class = EnumerationFilter
     search_fields = [                                                           # Fields used to search Enumerations
@@ -166,7 +166,7 @@ class EnumerationViewSet(FindingBaseView):
 class EndpointViewSet(FindingBaseView):
     '''Endpoint ViewSet that includes: get, retrieve, enable, disable and import Defect-Dojo features.'''
 
-    queryset = Endpoint.objects.all()
+    queryset = Endpoint.objects.all().order_by('-id')
     serializer_class = EndpointSerializer
     filterset_class = EndpointFilter
     search_fields = [                                                           # Fields used to search Endpoints
@@ -179,7 +179,7 @@ class EndpointViewSet(FindingBaseView):
 class TechnologyViewSet(FindingBaseView):
     '''Technology ViewSet that includes: get, retrieve, enable, disable and import Defect-Dojo features.'''
 
-    queryset = Technology.objects.all()
+    queryset = Technology.objects.all().order_by('-id')
     serializer_class = TechnologySerializer
     filterset_class = TechnologyFilter
     search_fields = [                                                           # Fields used to search Technologies
@@ -196,7 +196,7 @@ class TechnologyViewSet(FindingBaseView):
 class CredentialViewSet(FindingBaseView):
     '''Credential ViewSet that includes: get, retrieve, enable, disable and import Defect-Dojo features.'''
 
-    queryset = Credential.objects.all()
+    queryset = Credential.objects.all().order_by('-id')
     serializer_class = CredentialSerializer
     filterset_class = CredentialFilter
     # Fields used to search Credentials
@@ -211,7 +211,7 @@ class CredentialViewSet(FindingBaseView):
 class VulnerabilityViewSet(FindingBaseView):
     '''Vulnerability ViewSet that includes: get, retrieve, enable, disable and import Defect-Dojo features.'''
 
-    queryset = Vulnerability.objects.all()
+    queryset = Vulnerability.objects.all().order_by('-id')
     serializer_class = VulnerabilitySerializer
     filterset_class = VulnerabilityFilter
     search_fields = [                                                           # Fields used to search Vulnerabilities
@@ -229,7 +229,7 @@ class VulnerabilityViewSet(FindingBaseView):
 class ExploitViewSet(FindingBaseView):
     '''Exploit ViewSet that includes: get, retrieve, enable, disable and import Defect-Dojo features.'''
 
-    queryset = Exploit.objects.all()
+    queryset = Exploit.objects.all().order_by('-id')
     serializer_class = ExploitSerializer
     filterset_class = ExploitFilter
     search_fields = [                                                           # Fields used to search Exploits

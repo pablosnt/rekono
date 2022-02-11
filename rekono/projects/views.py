@@ -24,7 +24,7 @@ from users.models import User
 class ProjectViewSet(ModelViewSet, DefectDojoScans, DefectDojoFindings):
     '''Project ViewSet that includes: get, retrieve, create, update, delete and import Defect-Dojo features.'''
 
-    queryset = Project.objects.all()
+    queryset = Project.objects.all().order_by('-id')
     serializer_class = ProjectSerializer
     filterset_class = ProjectFilter
     search_fields = ['name', 'description']                                     # Fields used to search projects

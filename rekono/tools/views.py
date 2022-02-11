@@ -11,7 +11,7 @@ from tools.serializers import ConfigurationSerializer, ToolSerializer
 class ToolViewSet(LikeManagementView, ListModelMixin, RetrieveModelMixin):
     '''Tool ViewSet that includes: get, retrieve, like and dislike features.'''
 
-    queryset = Tool.objects.all()
+    queryset = Tool.objects.all().order_by('-id')
     serializer_class = ToolSerializer
     filterset_class = ToolFilter
     # Fields used to search tools
@@ -21,7 +21,7 @@ class ToolViewSet(LikeManagementView, ListModelMixin, RetrieveModelMixin):
 class ConfigurationViewSet(GenericViewSet, ListModelMixin, RetrieveModelMixin):
     '''Configuration ViewSet that includes: get and retrieve features.'''
 
-    queryset = Configuration.objects.all()
+    queryset = Configuration.objects.all().order_by('-id')
     serializer_class = ConfigurationSerializer
     filterset_class = ConfigurationFilter
     # Fields used to search configurations

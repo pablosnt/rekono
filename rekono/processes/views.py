@@ -15,7 +15,7 @@ from security.authorization.permissions import (ProcessCreatorPermission,
 class ProcessViewSet(ModelViewSet, LikeManagementView):
     '''Process ViewSet that includes: get, retrieve, create, update, delete, like and dislike features.'''
 
-    queryset = Process.objects.all()
+    queryset = Process.objects.all().order_by('-id')
     serializer_class = ProcessSerializer
     filterset_class = ProcessFilter
     # Fields used to search processes
@@ -36,7 +36,7 @@ class ProcessViewSet(ModelViewSet, LikeManagementView):
 class StepViewSet(ModelViewSet):
     '''Step ViewSet that includes: get, retrieve, create, update and delete features.'''
 
-    queryset = Step.objects.all()
+    queryset = Step.objects.all().order_by('-id')
     serializer_class = StepSerializer
     filterset_class = StepFilter
     search_fields = ['tool__name', 'tool__command', 'configuration__name']      # Fields used to search steps
