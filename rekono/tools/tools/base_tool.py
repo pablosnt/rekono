@@ -16,7 +16,7 @@ from tasks.enums import Status
 from tools.exceptions import ToolExecutionException
 from tools.models import Argument, Configuration, Input, Intensity, Tool
 
-from rekono.settings import OUTPUTS_DIR
+from rekono.settings import OUTPUTS_DIR, TESTING
 
 
 class BaseTool:
@@ -369,7 +369,9 @@ class BaseTool:
         self.prepare_environment()                                              # Prepare environment
         self.on_running()                                                       # Run execution
         try:
-            output = self.tool_execution(self.command_arguments, targets, previous_findings)        # Run tool
+            output = ''
+            if not TESTING:
+                output = self.tool_execution(self.command_arguments, targets, previous_findings)    # Run tool
         except ToolExecutionException as ex:                                    # Error during tool execution
             self.on_error(stderr=str(ex))                                       # Execution error
             self.clean_environment()                                            # Clean environment

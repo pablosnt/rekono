@@ -181,6 +181,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'rekono.wsgi.application'
 
+TESTING = 'test' in sys.argv                                                    # Tests execution
+
 
 ################################################################################
 # API Rest                                                                     #
@@ -233,7 +235,7 @@ SPECTACULAR_SETTINGS = {
 
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
-if 'test' in sys.argv:
+if TESTING:
     DATABASES = {                                                               # In memory database for testing
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
