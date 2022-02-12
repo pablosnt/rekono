@@ -15,13 +15,14 @@ class RekonoTestCase(TestCase):
         '''Create initial data before run tests.'''
         super().setUp()
         self.current_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..')         # Testing path
+        self.login = '/api/token/'                                              # Login endpoint
         self.username = 'rekono'                                                # Username for test authentication
         self.email = 'rekono@rekono.rekono'                                     # Email for test authentication
         self.password = 'rekono'                                                # Password for test authentication
         # Create user for test authentication
         self.admin = User.objects.create_superuser(self.username, self.email, self.password)
         data = {'username': self.username, 'password': self.password}           # Login data
-        content = self.api_test(APIClient().post, '/api/token/', 200, data, {})     # Login request
+        content = self.api_test(APIClient().post, self.login, 200, data, {})    # Login request
         self.rekono = APIClient(HTTP_AUTHORIZATION=f'Bearer {content.get("access")}')   # Configure Rekono API client
 
     def get_content(self, response: HttpResponse) -> Dict[Any, Any]:
@@ -34,6 +35,17 @@ class RekonoTestCase(TestCase):
             Dict[Any, Any]: Response content
         '''
         return json.loads(response.content.decode('utf-8')) if response.content else {}
+
+    def check_fields(self, fields: List[str], content: Dict[str, Any], expected: Dict[str, Any]) -> None:
+        '''Check expected values for some response fields.
+
+        Args:
+            fields (List[str]): List of field names
+            content (Dict[str, Any]): Response content
+            expected (Dict[str, Any]): Expected data
+        '''
+        for field in fields:
+            self.assertEqual(content[field], expected[field])
 
     def api_test(
         self,
@@ -64,17 +76,5 @@ class RekonoTestCase(TestCase):
         self.assertEqual(response.status_code, expected_status)                 # Check HTTP status code
         content = self.get_content(response)                                    # Get content from HTTP response
         if expected:                                                            # Expected response content
-            for field, value in expected.items():                               # For each expected data
-                self.assertEqual(content[field], value)                         # Check expected value for field
+            self.check_fields(list(expected.keys()), content, expected)         # Check expected data
         return content
-
-    def check_fields(self, fields: List[str], response: Dict[str, Any], expected: Dict[str, Any]) -> None:
-        '''Check expected values for some response fields.
-
-        Args:
-            fields (List[str]): List of field names
-            response (Dict[str, Any]): Response data
-            expected (Dict[str, Any]): Expected data
-        '''
-        for field in fields:
-            self.assertEqual(response[field], expected[field])

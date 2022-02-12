@@ -1,1 +1,1 @@
-'''Unit tests for Rekono.'''
+'''Testing for Rekono API.'''
