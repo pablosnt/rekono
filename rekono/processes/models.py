@@ -1,9 +1,8 @@
-from typing import Any
-
 from django.conf import settings
 from django.db import models
 from likes.models import LikeBase
-from security.input_validation import validate_name, validate_text
+from security.input_validation import (validate_name, validate_number,
+                                       validate_text)
 from taggit.managers import TaggableManager
 from tools.models import Configuration, Tool
 
@@ -27,14 +26,6 @@ class Process(LikeBase):
         '''
         return self.name
 
-    def get_project(self) -> Any:
-        '''Get the related project for the instance. This will be used for authorization purposes.
-
-        Returns:
-            Any: Related project entity
-        '''
-        return None
-
 
 class Step(models.Model):
     '''Process model.'''
@@ -43,7 +34,7 @@ class Step(models.Model):
     tool = models.ForeignKey(Tool, on_delete=models.CASCADE)                    # Tool
     configuration = models.ForeignKey(Configuration, on_delete=models.CASCADE, blank=True, null=True)   # Configuration
     # Priority value. Steps with greater priority will be executed before other of same process and with same tool stage
-    priority = models.IntegerField(default=1)
+    priority = models.IntegerField(default=1, validators=[validate_number])
 
     class Meta:
         '''Model metadata.'''
@@ -60,11 +51,3 @@ class Step(models.Model):
             str: String value that identifies this instance
         '''
         return f'{self.process.__str__()} - {self.configuration.__str__()}'
-
-    def get_project(self) -> Any:
-        '''Get the related project for the instance. This will be used for authorization purposes.
-
-        Returns:
-            Project: Related project entity
-        '''
-        return None

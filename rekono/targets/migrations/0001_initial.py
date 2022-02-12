@@ -32,7 +32,7 @@ class Migration(migrations.Migration):
             name='TargetPort',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('port', models.IntegerField(validators=[security.input_validation.validate_port])),
+                ('port', models.IntegerField(validators=[security.input_validation.validate_number])),
                 ('target', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='target_ports', to='targets.target')),
             ],
             options={

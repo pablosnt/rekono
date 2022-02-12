@@ -1,6 +1,6 @@
 import os
 
-from testing.unit.base import RekonoTestCase
+from testing.api.base import RekonoTestCase
 
 
 class ResourcesTest(RekonoTestCase):

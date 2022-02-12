@@ -31,7 +31,7 @@ class UserAdminViewSet(GenericViewSet, ListModelMixin, RetrieveModelMixin, Destr
     filterset_class = UserFilter
     # Fields used to search tasks
     search_fields = ['username', 'first_name', 'last_name', 'username', 'email']
-    # Required to include the IsAdmin to the base authorization classes and remove unneeded classes
+    # Required to include the IsAdmin to the base authorization classes and remove unneeded ProjectMemberPermission
     permission_classes = [IsAuthenticated, DjangoModelPermissions, IsAdmin]
 
     def destroy(self, request: Request, *args: Any, **kwargs: Any) -> Response:

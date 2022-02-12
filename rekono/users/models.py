@@ -165,11 +165,3 @@ class User(AbstractUser):
             str: String value that identifies this instance
         '''
         return self.email
-
-    def get_project(self) -> Any:
-        '''Get the related project for the instance. This will be used for authorization purposes.
-
-        Returns:
-            Any: Related project entity
-        '''
-        return None

@@ -33,11 +33,11 @@ def validate_text(value: str) -> None:
         raise ValidationError('Value contains unallowed characters')
 
 
-def validate_port(value: int) -> None:
-    '''Validate if port number is valid based on min and max values.
+def validate_number(value: int) -> None:
+    '''Validate if number is valid based on min and max values.
 
     Args:
-        value (int): Port number
+        value (int): Number value
 
     Raises:
         ValidationError: Raised if value is lower or greater than the expected range

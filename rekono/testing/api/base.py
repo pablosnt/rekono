@@ -52,7 +52,7 @@ class RekonoTestCase(TestCase):
             expected_status (int): Expected HTTP status code
             data (Dict[str, Any], optional): Request body. Defaults to {}.
             expected (Dict[str, Any], optional): Expected response content. Defaults to {}.
-            format (str, optional): Request body format. Defaults to 'json'.
+            format (str, optional): Request body format. Defaults to json.
 
         Returns:
             Dict[Any, Any]: Response content

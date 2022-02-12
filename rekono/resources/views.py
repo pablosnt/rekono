@@ -4,8 +4,7 @@ from resources.models import Wordlist
 from resources.serializers import WordlistSerializer
 from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
-from security.authorization.permissions import (ProjectMemberPermission,
-                                                WordlistCreatorPermission)
+from security.authorization.permissions import WordlistCreatorPermission
 
 # Create your views here.
 
@@ -18,8 +17,8 @@ class WordlistViewSet(ModelViewSet, LikeManagementView):
     filterset_class = WordlistFilter
     search_fields = ['name']                                                    # Fields used to search projects
     http_method_names = ['get', 'post', 'put', 'delete']                        # Required to remove PATCH method
-    # Required to include the WordlistCreatorPermission to the base authorization classes
-    permission_classes = [IsAuthenticated, DjangoModelPermissions, ProjectMemberPermission, WordlistCreatorPermission]
+    # Required to include the WordlistCreatorPermission and remove unneeded ProjectMemberPermission
+    permission_classes = [IsAuthenticated, DjangoModelPermissions, WordlistCreatorPermission]
 
     def perform_create(self, serializer: WordlistSerializer) -> None:
         '''Create a new instance using a serializer.

@@ -33,14 +33,6 @@ class Wordlist(LikeBase, BaseInput):
         '''
         return self.name
 
-    def get_project(self) -> Any:
-        '''Get the related project for the instance. This will be used for authorization purposes.
-
-        Returns:
-            Any: Related project entity
-        '''
-        return None
-
     def filter(self, input: Input) -> bool:
         '''Check if this instance is valid based on input filter.
 

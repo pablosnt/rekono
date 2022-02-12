@@ -5,7 +5,7 @@ from input_types.base import BaseInput
 from input_types.enums import InputKeyword
 from input_types.utils import get_url
 from projects.models import Project
-from security.input_validation import validate_endpoint, validate_port
+from security.input_validation import validate_endpoint, validate_number
 from targets.enums import TargetType
 from tools.models import Input
 
@@ -79,7 +79,7 @@ class TargetPort(models.Model, BaseInput):
     '''Target port model.'''
 
     target = models.ForeignKey(Target, related_name='target_ports', on_delete=models.CASCADE)       # Related target
-    port = models.IntegerField(validators=[validate_port])                      # Port number
+    port = models.IntegerField(validators=[validate_number])                    # Port number
 
     class Meta:
         '''Model metadata.'''

@@ -6,8 +6,7 @@ from processes.serializers import (ProcessSerializer, StepPrioritySerializer,
 from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated
 from rest_framework.serializers import Serializer
 from rest_framework.viewsets import ModelViewSet
-from security.authorization.permissions import (ProcessCreatorPermission,
-                                                ProjectMemberPermission)
+from security.authorization.permissions import ProcessCreatorPermission
 
 # Create your views here.
 
@@ -21,8 +20,8 @@ class ProcessViewSet(ModelViewSet, LikeManagementView):
     # Fields used to search processes
     search_fields = ['name', 'description', 'steps__tool__name', 'steps__tool__command', 'steps__configuration__name']
     http_method_names = ['get', 'post', 'put', 'delete']                        # Required to remove PATCH method
-    # Required to include the ProcessCreatorPermission to the base authorization classes
-    permission_classes = [IsAuthenticated, DjangoModelPermissions, ProjectMemberPermission, ProcessCreatorPermission]
+    # Required to include the ProcessCreatorPermission and remove unneeded ProjectMemberPermission
+    permission_classes = [IsAuthenticated, DjangoModelPermissions, ProcessCreatorPermission]
 
     def perform_create(self, serializer: ProcessSerializer) -> None:
         '''Create a new instance using a serializer.
@@ -41,8 +40,8 @@ class StepViewSet(ModelViewSet):
     filterset_class = StepFilter
     search_fields = ['tool__name', 'tool__command', 'configuration__name']      # Fields used to search steps
     http_method_names = ['get', 'post', 'put', 'delete']                        # Required to remove PATCH method
-    # Required to include the ProcessCreatorPermission to the base authorization classes
-    permission_classes = [IsAuthenticated, DjangoModelPermissions, ProjectMemberPermission, ProcessCreatorPermission]
+    # Required to include the ProcessCreatorPermission and remove unneeded ProjectMemberPermission
+    permission_classes = [IsAuthenticated, DjangoModelPermissions, ProcessCreatorPermission]
 
     def get_serializer_class(self) -> Serializer:
         '''Get serializer class to use in each request.

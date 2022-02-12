@@ -1,5 +1,3 @@
-from typing import Any
-
 from django.db import models
 from input_types.models import InputType
 from likes.models import LikeBase
@@ -27,14 +25,6 @@ class Tool(LikeBase):
         '''
         return self.name
 
-    def get_project(self) -> Any:
-        '''Get the related project for the instance. This will be used for authorization purposes.
-
-        Returns:
-            Any: Related project entity
-        '''
-        return None
-
 
 class Intensity(models.Model):
     '''Intensity model.'''
@@ -50,14 +40,6 @@ class Intensity(models.Model):
             str: String value that identifies this instance
         '''
         return f'{self.tool.name} - {IntensityRank(self.value).name}'
-
-    def get_project(self) -> Any:
-        '''Get the related project for the instance. This will be used for authorization purposes.
-
-        Returns:
-            Any: Related project entity
-        '''
-        return None
 
 
 class Configuration(models.Model):
@@ -83,14 +65,6 @@ class Configuration(models.Model):
             str: String value that identifies this instance
         '''
         return f'{self.tool.name} - {self.name}'
-
-    def get_project(self) -> Any:
-        '''Get the related project for the instance. This will be used for authorization purposes.
-
-        Returns:
-            Any: Related project entity
-        '''
-        return None
 
 
 class Argument(models.Model):
@@ -118,14 +92,6 @@ class Argument(models.Model):
         '''
         return f'{self.tool.__str__()} - {self.name}'
 
-    def get_project(self) -> Any:
-        '''Get the related project for the instance. This will be used for authorization purposes.
-
-        Returns:
-            Any: Related project entity
-        '''
-        return None
-
 
 class Input(models.Model):
     '''Input model.'''
@@ -151,14 +117,6 @@ class Input(models.Model):
         '''
         return f'{self.argument.__str__()} - {self.type.__str__()}'
 
-    def get_project(self) -> Any:
-        '''Get the related project for the instance. This will be used for authorization purposes.
-
-        Returns:
-            Any: Related project entity
-        '''
-        return None
-
 
 class Output(models.Model):
     '''Output model.'''
@@ -182,11 +140,3 @@ class Output(models.Model):
             str: String value that identifies this instance
         '''
         return f'{self.configuration.__str__()} - {self.type.__str__()}'
-
-    def get_project(self) -> Any:
-        '''Get the related project for the instance. This will be used for authorization purposes.
-
-        Returns:
-            Any: Related project entity
-        '''
-        return None
