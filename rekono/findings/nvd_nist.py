@@ -38,9 +38,7 @@ class NvdNist:
             dict: Raw NVD NIST CVE information
         '''
         res = requests.get(self.api_url_pattern.format(cve=self.cve))
-        if res.status_code == 200:
-            return res.json()['result']['CVE_Items'][0]
-        return {}
+        return res.json()['result']['CVE_Items'][0] if res.status_code == 200 else {}
 
     def parse_description(self) -> str:
         '''Get description from raw CVE information.

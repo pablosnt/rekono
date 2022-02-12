@@ -78,7 +78,7 @@ class CredentialSerializer(serializers.ModelSerializer):
 
         model = Credential
         # Credential fields exposed via API
-        fields = ('id', 'technology', 'email', 'username', 'secret', 'reported_to_defectdojo')
+        fields = ('id', 'technology', 'email', 'username', 'secret', 'is_active', 'reported_to_defectdojo')
 
 
 class VulnerabilitySerializer(serializers.ModelSerializer):

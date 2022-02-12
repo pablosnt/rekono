@@ -80,7 +80,6 @@ class TargetPortsTest(TargetsTestCase):
 
     def test_invalid_create(self) -> None:
         '''Test target port creation feature with invalid data.'''
-        print('HELLo')
         self.api_test(self.rekono.post, self.target_ports, 400, self.tp_data)   # Target port already exists
         self.tp_data['port'] = -1
         self.api_test(self.rekono.post, self.target_ports, 400, self.tp_data)   # Invalid port number
