@@ -8,7 +8,7 @@ from projects.models import Project
 from targets.models import Target
 from tasks.enums import Status
 from tasks.models import Task
-from testing.api.base import RekonoTestCase
+from testing.base import RekonoTestCase
 from tools.enums import IntensityRank
 from tools.models import Configuration, Tool
 

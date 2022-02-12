@@ -1,5 +1,5 @@
 from rest_framework.test import APIClient
-from testing.api.base import RekonoTestCase
+from testing.base import RekonoTestCase
 from users.models import User
 
 

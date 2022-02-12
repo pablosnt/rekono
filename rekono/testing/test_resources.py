@@ -1,7 +1,7 @@
 import os
 from typing import Any, Dict
 
-from testing.api.base import RekonoTestCase
+from testing.base import RekonoTestCase
 
 
 class WordlistsTest(RekonoTestCase):

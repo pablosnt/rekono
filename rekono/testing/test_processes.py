@@ -1,6 +1,6 @@
 from typing import Any, Dict
 
-from testing.api.base import RekonoTestCase
+from testing.base import RekonoTestCase
 from tools.models import Configuration, Tool
 
 

@@ -14,7 +14,7 @@ class RekonoTestCase(TestCase):
     def setUp(self) -> None:
         '''Create initial data before run tests.'''
         super().setUp()
-        self.current_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..')         # Testing path
+        self.current_path = os.path.dirname(os.path.realpath(__file__))         # Testing path
         self.login = '/api/token/'                                              # Login endpoint
         self.username = 'rekono'                                                # Username for test authentication
         self.email = 'rekono@rekono.rekono'                                     # Email for test authentication

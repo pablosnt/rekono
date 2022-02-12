@@ -1,4 +1,4 @@
-from testing.api.base import RekonoTestCase
+from testing.base import RekonoTestCase
 
 
 class ToolsTest(RekonoTestCase):
