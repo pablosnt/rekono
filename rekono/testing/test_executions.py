@@ -5,7 +5,7 @@ from rest_framework.test import APIClient
 from targets.models import Target
 from tasks.enums import Status
 from tasks.models import Task
-from testing.base import RekonoTestCase
+from testing.test_base import RekonoTestCase
 from tools.enums import IntensityRank
 from tools.models import Configuration, Tool
 from users.models import User

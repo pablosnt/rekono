@@ -73,18 +73,15 @@ class ProjectMemberPermission(BasePermission):
         Returns:
             bool: Indicate if user is authorized to make this request or not
         '''
-        project = obj.get_project()                                             # Get project associated to the project
-        if project:                                                             # If project exists
-            # Check if current user is a project member
-            return request.user in project.members.all()
-        return True
+        # Check if current user is a project member
+        return request.user in obj.get_project().members.all()
 
 
 class BaseCreatorPermission(BasePermission):
     '''Check if current user can access an object based on HTTP method and creator user.'''
 
     def get_instance(self, obj: Any) -> Any:
-        '''Get object with creator user from object accessed by the current user.
+        '''Get object with creator user from object accessed by the current user. To be implemented by subclasses.
 
         Args:
             obj (Any): Object that user is accessing
@@ -92,7 +89,7 @@ class BaseCreatorPermission(BasePermission):
         Returns:
             Any: Object with creator user
         '''
-        return obj
+        pass
 
     def has_object_permission(self, request: Request, view: View, obj: Any) -> bool:
         '''Check if current user can access an object based on HTTP method and creator user.
@@ -106,16 +103,13 @@ class BaseCreatorPermission(BasePermission):
             bool: Indicate if user is authorized to make this request or not
         '''
         instance = self.get_instance(obj)                                       # Get object with creator user
-        if instance:
-            if view.action in ['like', 'dislike']:
-                # Like and dislike operations are allowed
-                return True
-            if (
-                not IsAdmin().has_permission(request, view) and                 # Non admin users
-                request.method in ['POST', 'PUT', 'DELETE'] and                 # Write operations
-                instance.creator != request.user                                # Non creator user
-            ):
-                return False                                                    # Access denied
+        if (
+            instance and                                                        # Instance exists
+            not IsAdmin().has_permission(request, view) and                     # Non admin users
+            request.method in ['POST', 'PUT', 'DELETE'] and                     # Write operations
+            instance.creator != request.user                                    # Non creator user
+        ):
+            return False                                                        # Access denied
         return True
 
 

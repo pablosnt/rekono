@@ -1,7 +1,11 @@
 import os
 from typing import Any, Dict
 
-from testing.base import RekonoTestCase
+from resources.models import Wordlist
+from rest_framework.test import APIClient
+from security.file_upload import check_checksum
+from testing.test_base import RekonoTestCase
+from users.models import User
 
 
 class WordlistsTest(RekonoTestCase):
@@ -12,8 +16,12 @@ class WordlistsTest(RekonoTestCase):
         super().setUp()
         self.endpoint = '/api/resources/wordlists/'                             # Wordlists API endpoint
         # Wordlists paths
-        self.passwords = os.path.join(self.current_path, 'data', 'resources', 'passwords.txt')
-        self.endpoints = os.path.join(self.current_path, 'data', 'resources', 'endpoints.txt')
+        self.resources = os.path.join(self.data_path, 'resources')
+        self.passwords = os.path.join(self.resources, 'passwords_wordlist.txt')
+        self.endpoints = os.path.join(self.resources, 'endpoints_wordlist.txt')
+        self.invalid_size = os.path.join(self.resources, 'invalid_size.txt')
+        self.invalid_extension = os.path.join(self.resources, 'invalid_extension.pdf')
+        self.invalid_mime_type = os.path.join(self.resources, 'invalid_mime_type.txt')
         # Data for testing
         self.name = 'ZZZ'
         self.fields = ['name', 'type', 'size', 'size', 'creator']               # Fields to check
@@ -31,10 +39,10 @@ class WordlistsTest(RekonoTestCase):
         Returns:
             Dict[str, Any]: Created wordlist data
         '''
-        with open(path, 'r') as file:
+        with open(path, 'rb') as file:
             data = {'name': name, 'type': type, 'file': file}
-            expected = {'name': name, 'type': type, 'size': 3}
             if status_code == 201:
+                expected = {'name': name, 'type': type, 'size': 3}
                 # Create wordlist and check response. Expected successfull request
                 return self.api_test(self.rekono.post, self.endpoint, status_code, data, expected, 'multipart')
             else:
@@ -68,13 +76,27 @@ class WordlistsTest(RekonoTestCase):
     def test_create(self) -> None:
         '''Test wordlist creation feature.'''
         new_wordlist = self.create_endpoints_wordlist(self.name + self.name)    # Create new wordlist
-        content = self.api_test(self.rekono.get, '/api/resources/wordlists/?o=-name', 200)          # Get all wordlists
+        content = self.api_test(self.rekono.get, f'{self.endpoint}?o=-name', 200)   # Get all wordlists
         # Check that the first one is the new wordlist
         self.check_fields(self.fields, content['results'][0], new_wordlist)
+        db_wordlist = Wordlist.objects.get(pk=new_wordlist['id'])
+        self.assertTrue(check_checksum(self.endpoints, db_wordlist.checksum))   # Check Wordlist checksum
 
     def test_invalid_create(self) -> None:
         '''Test wordlist creation feature with invalid data.'''
         self.create_endpoints_wordlist(self.name, 400)                          # Wordlist already exists
+
+    def test_create_with_too_big_file(self) -> None:
+        '''Test wordlist creation feature using file with invalid size.'''
+        self.create_wordlist('Invalid size', self.invalid_size, 'Password', 400)
+
+    def test_create_with_invalid_extension(self) -> None:
+        '''Test wordlist creation feature using file with invalid extension.'''
+        self.create_wordlist('Invalid extension', self.invalid_extension, 'Password', 400)
+
+    def test_create_with_invalid_mime_type(self) -> None:
+        '''Test wordlist creation feature using file with invalid MIME type.'''
+        self.create_wordlist('Invalid MIME type', self.invalid_mime_type, 'Password', 400)
 
     def test_update(self) -> None:
         '''Test wordlist update feature.'''
@@ -86,7 +108,7 @@ class WordlistsTest(RekonoTestCase):
                 data, expected, 'multipart'
             )
         # Check the updated wordlist data
-        self.api_test(self.rekono.get, f'/api/resources/wordlists/{self.wordlist["id"]}/', 200, {}, updated)
+        self.api_test(self.rekono.get, f'{self.endpoint}{self.wordlist["id"]}/', 200, {}, updated)
 
     def test_invalid_update(self) -> None:
         '''Test wordlist update feature with invalid data.'''
@@ -102,6 +124,18 @@ class WordlistsTest(RekonoTestCase):
         # Delete testing wordlist
         self.api_test(self.rekono.delete, f'{self.endpoint}{self.wordlist["id"]}/', 204, {})
         self.api_test(self.rekono.get, f'{self.endpoint}?o=-name', 200, {}, {'count': before['count'] - 1})
+
+    def test_unauthorized_delete(self) -> None:
+        '''Test wordlist deletion feature without Admin or process creator.'''
+        credential = 'other'
+        user = User.objects.create_superuser(credential, 'other@other.other', credential)           # Create other user
+        data = {'username': credential, 'password': credential}                 # Login data
+        content = self.api_test(APIClient().post, self.login, 200, data, {})    # Login request
+        unauth = APIClient(HTTP_AUTHORIZATION=f'Bearer {content.get("access")}')            # Configure API client
+        data = {'role': 'Auditor'}
+        # Change user role to Auditor, because Admins can delete all wordlists
+        self.api_test(self.rekono.put, f'/api/users/{user.id}/role/', 200, data, data)
+        self.api_test(unauth.delete, f'{self.endpoint}{self.wordlist["id"]}/', 403)         # User is not authorized
 
     def test_like_dislike(self) -> None:
         '''Test like and dislike features for wordlists.'''

@@ -58,62 +58,6 @@ CONFIG = RekonoConfig(CONFIG_FILE)                                              
 
 
 ################################################################################
-# Security                                                                     #
-################################################################################
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('RKN_SECRET_KEY', CONFIG.SECRET_KEY)                     # Django secret key
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS: List[str] = []
-
-AUTH_USER_MODEL = 'users.User'                                                  # User model
-
-# OTP expiration time in hours
-OTP_EXPIRATION_HOURS = CONFIG.OTP_EXPIRATION_HOURS
-
-# Password validation
-# https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
-
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-        'OPTIONS': {
-            'min_length': 8,
-        }
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
-    {
-        'NAME': 'security.passwords.PasswordComplexityValidator',               # Custom password policy
-    }
-]
-
-# JWT configuration
-SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),                              # Access token expiration after 5 min
-    'REFRESH_TOKEN_LIFETIME': timedelta(hours=1),                               # Refresh token expiration after 1 hour
-    'ROTATE_REFRESH_TOKENS': True,
-    'BLACKLIST_AFTER_ROTATION': True,
-    'UPDATE_LAST_LOGIN': True,
-    'ALGORITHM': 'HS512',
-    'SIGNING_KEY': os.getenv('RKN_JWT_KEY', CONFIG.JWT_SIGNING_KEY),            # Key used for JWT signatures
-}
-
-# Max allowed size in MB for upload files
-UPLOAD_FILES_MAX_MB = os.getenv('RKN_UPLOAD_FILES_MAX_MB', CONFIG.UPLOAD_FILES_MAX_MB)
-
-
-################################################################################
 # Django                                                                       #
 ################################################################################
 
@@ -182,6 +126,62 @@ TEMPLATES = [
 WSGI_APPLICATION = 'rekono.wsgi.application'
 
 TESTING = 'test' in sys.argv                                                    # Tests execution
+
+
+################################################################################
+# Security                                                                     #
+################################################################################
+
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = os.getenv('RKN_SECRET_KEY', CONFIG.SECRET_KEY)                     # Django secret key
+
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = True
+
+ALLOWED_HOSTS: List[str] = []
+
+AUTH_USER_MODEL = 'users.User'                                                  # User model
+
+# OTP expiration time in hours
+OTP_EXPIRATION_HOURS = CONFIG.OTP_EXPIRATION_HOURS
+
+# Password validation
+# https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
+
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {
+            'min_length': 8,
+        }
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    },
+    {
+        'NAME': 'security.passwords.PasswordComplexityValidator',               # Custom password policy
+    }
+]
+
+# JWT configuration
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),                              # Access token expiration after 5 min
+    'REFRESH_TOKEN_LIFETIME': timedelta(hours=1),                               # Refresh token expiration after 1 hour
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'UPDATE_LAST_LOGIN': True,
+    'ALGORITHM': 'HS512',
+    'SIGNING_KEY': os.getenv('RKN_JWT_KEY', CONFIG.JWT_SIGNING_KEY),            # Key used for JWT signatures
+}
+
+# Max allowed size in MB for upload files
+UPLOAD_FILES_MAX_MB = 1 if TESTING else os.getenv('RKN_UPLOAD_FILES_MAX_MB', CONFIG.UPLOAD_FILES_MAX_MB)
 
 
 ################################################################################

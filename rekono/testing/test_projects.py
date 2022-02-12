@@ -1,4 +1,4 @@
-from testing.base import RekonoTestCase
+from testing.test_base import RekonoTestCase
 from users.models import User
 
 

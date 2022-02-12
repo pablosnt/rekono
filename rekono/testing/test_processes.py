@@ -1,7 +1,9 @@
 from typing import Any, Dict
 
-from testing.base import RekonoTestCase
+from rest_framework.test import APIClient
+from testing.test_base import RekonoTestCase
 from tools.models import Configuration, Tool
+from users.models import User
 
 
 class ProcessesTestCase(RekonoTestCase):
@@ -43,7 +45,7 @@ class ProcessesTestCase(RekonoTestCase):
 
 
 class ProcessesTest(ProcessesTestCase):
-    '''Test cases for Process entity from Processes module.'''        
+    '''Test cases for Process entity from Processes module.'''
 
     def test_create(self) -> None:
         '''Test process creation feature.'''
@@ -72,6 +74,18 @@ class ProcessesTest(ProcessesTestCase):
         '''Test process deletion feature.'''
         self.api_test(self.rekono.delete, f'{self.processes}{self.process["id"]}/', 204)    # Delete process
         self.api_test(self.rekono.get, f'{self.processes}{self.process["id"]}/', 404)       # Check process not found
+
+    def test_unauthorized_delete(self) -> None:
+        '''Test process deletion feature without Admin or process creator.'''
+        credential = 'other'
+        user = User.objects.create_superuser(credential, 'other@other.other', credential)           # Create other user
+        data = {'username': credential, 'password': credential}                 # Login data
+        content = self.api_test(APIClient().post, self.login, 200, data, {})    # Login request
+        unauth = APIClient(HTTP_AUTHORIZATION=f'Bearer {content.get("access")}')            # Configure API client
+        data = {'role': 'Auditor'}
+        # Change user role to Auditor, because Admins can delete all processes
+        self.api_test(self.rekono.put, f'/api/users/{user.id}/role/', 200, data, data)
+        self.api_test(unauth.delete, f'{self.processes}{self.process["id"]}/', 403)     # User is not authorized
 
     def test_like_dislike(self) -> None:
         '''Test like and dislike features for processes.'''

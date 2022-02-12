@@ -42,8 +42,8 @@ def validate_number(value: int) -> None:
     Raises:
         ValidationError: Raised if value is lower or greater than the expected range
     '''
-    if value < 0 or value > 999999:
-        raise ValidationError('Invalid port number')
+    if value < 1 or value > 999999:
+        raise ValidationError('Invalid number')
 
 
 def validate_endpoint(value: str) -> None:
@@ -68,5 +68,5 @@ def validate_time_amount(value: int) -> None:
     Raises:
         ValidationError: Raised if value is lower or greater than the expected range
     '''
-    if value < 0 or value > 1000:
+    if value < 1 or value > 1000:
         raise ValidationError('Invalid time value')
