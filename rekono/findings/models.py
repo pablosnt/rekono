@@ -115,7 +115,7 @@ class Finding(models.Model, BaseInput):
             unique_filter = get_unique_filter(o.key_fields, vars(o), o.execution)
             # Get unique filter from key fields
             for key, value in get_unique_filter(self.key_fields, vars(self), self.execution).items():
-                equals = equals and (unique_filter[key] == value)               # Compare all key fields
+                equals = equals and (unique_filter.get(key) == value)           # Compare all key fields
             return equals
         return False
 

@@ -1,6 +1,6 @@
-from typing import Tuple
+from typing import List
 
-from api.filters import ToolFilter
+from api.filters import BaseToolFilter
 from django.db.models import QuerySet
 from django_filters.rest_framework import filters
 from django_filters.rest_framework.filters import OrderingFilter
@@ -36,10 +36,10 @@ FINDING_FILTERING = {
 }
 
 
-class FindingFilter(ToolFilter):
+class FindingFilter(BaseToolFilter):
     '''Common FilterSet to filter and sort findings entities.'''
 
-    tool_fields: Tuple[str, str] = ('execution__task__tool', 'execution__step__tool')   # Filter by two Tool fields
+    tool_fields: List[str] = ['execution__task__tool', 'execution__step__tool']   # Filter by two Tool fields
 
 
 class BaseVulnerabilityFilter(FindingFilter):
@@ -51,8 +51,8 @@ class BaseVulnerabilityFilter(FindingFilter):
     host_address = filters.CharFilter(method='filter_host_address')             # Filter by host address
     host_os_type = filters.ChoiceFilter(method='filter_host_os_type', choices=OSType.choices)       # Filter by host OS
     # Enumeration field names to use in the filters
-    enumeration_fields: tuple = ()
-    host_fields: tuple = ()                                                     # Host field names to use in the filters
+    enumeration_fields: List[str] = []
+    host_fields: List[str] = []                                                 # Host field names to use in the filters
 
     def filter_enumeration(self, queryset: QuerySet, name: str, value: int) -> QuerySet:
         '''Filter queryset by enumeration Id.
@@ -78,8 +78,7 @@ class BaseVulnerabilityFilter(FindingFilter):
         Returns:
             QuerySet: Filtered queryset by enumeration port
         '''
-        field1, field2 = self.enumeration_fields
-        return self.multiple_field_filter(queryset, value, (f'{field1}__port', f'{field2}__port'))
+        return self.multiple_field_filter(queryset, value, [f'{f}__port' for f in self.enumeration_fields])
 
     def filter_host(self, queryset: QuerySet, name: str, value: int) -> QuerySet:
         '''Filter queryset by host Id.
@@ -105,10 +104,7 @@ class BaseVulnerabilityFilter(FindingFilter):
         Returns:
             QuerySet: Filtered queryset by host address
         '''
-        field1, field2 = self.host_fields
-        return self.multiple_field_filter(
-            queryset, value, (f'{field1}__address', f'{field2}__address')
-        )
+        return self.multiple_field_filter(queryset, value, [f'{f}__address' for f in self.host_fields])
 
     def filter_host_os_type(self, queryset: QuerySet, name: str, value: OSType) -> QuerySet:
         '''Filter queryset by host OS type.
@@ -121,10 +117,7 @@ class BaseVulnerabilityFilter(FindingFilter):
         Returns:
             QuerySet: Filtered queryset by host OS type
         '''
-        field1, field2 = self.host_fields
-        return self.multiple_field_filter(
-            queryset, value, (f'{field1}__os_type', f'{field2}__os_type')
-        )
+        return self.multiple_field_filter(queryset, value, [f'{f}__os_type' for f in self.host_fields])
 
 
 class OSINTFilter(FindingFilter):
@@ -256,9 +249,9 @@ class VulnerabilityFilter(BaseVulnerabilityFilter):
     '''FilterSet to filter and sort Vulnerability entities.'''
 
     # Enumeration field names to use in the filters
-    enumeration_fields: Tuple[str, str] = ('technology__enumeration', 'enumeration')
+    enumeration_fields: List[str] = ['technology__enumeration', 'enumeration']
     # Host field names to use in the filters
-    host_fields: Tuple[str, str] = ('technology__enumeration__host', 'enumeration__host')
+    host_fields: List[str] = ['technology__enumeration__host', 'enumeration__host']
     o = OrderingFilter(fields=FINDING_ORDERING + (                              # Ordering fields including common ones
         ('enumeration__host', 'host'), 'enumeration', 'technology', 'name', 'severity', 'cve'
     ))
@@ -285,9 +278,15 @@ class ExploitFilter(BaseVulnerabilityFilter):
     '''FilterSet to filter and sort Exploit entities.'''
 
     # Enumeration field names to use in the filters
-    enumeration_fields: Tuple[str, str] = ('vulnerability__technology__enumeration', 'vulnerability__enumeration')
+    enumeration_fields: List[str] = [
+        'technology__enumeration', 'vulnerability__enumeration',
+        'vulnerability__technology__enumeration'
+    ]
     # Host field names to use in the filters
-    host_fields: Tuple[str, str] = ('vulnerability__technology__enumeration__host', 'vulnerability__enumeration__host')
+    host_fields: List[str] = [
+        'technology__enumeration__host', 'vulnerability__enumeration__host',
+        'vulnerability__technology__enumeration__host'
+    ]
     # Ordering fields including common ones
     o = OrderingFilter(fields=FINDING_ORDERING + (('enumeration__host', 'host'), 'enumeration', 'technology', 'name'))
 

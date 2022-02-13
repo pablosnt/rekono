@@ -1,18 +1,19 @@
 from typing import Callable, cast
 
 from django.forms import ValidationError
-from rest_framework.test import APIClient
 from security.csp_header import admin, redoc, swagger
 from security.input_validation import (validate_endpoint, validate_name,
                                        validate_number, validate_text,
                                        validate_time_amount)
 from security.passwords import PasswordComplexityValidator
-from testing.test_base import RekonoTestCase
+from testing.api.test_base import RekonoTestCase
 
 
 class SecurityTest(RekonoTestCase):
+    '''Test cases for Security module.'''
 
     def setUp(self) -> None:
+        '''Create initial data before run tests.'''
         super().setUp()
         # Mapping between endpoints and CSP headersa
         self.csp_mapping = [('/admin/', admin), ('/api/schema/swagger-ui.html', swagger), ('/api/schema/redoc/', redoc)]
@@ -42,19 +43,18 @@ class SecurityTest(RekonoTestCase):
 
     def test_logout(self) -> None:
         '''Test logout feature.'''
-        self.api_test(self.rekono.post, '/api/logout/', 200, {'refresh_token': self.refresh_token})     # Logout
+        self.api_test(self.client.post, '/api/logout/', data={'refresh_token': self.refresh})       # Logout
         # Try to refresh access token
-        self.api_test(self.rekono.post, '/api/token/refresh/', 401, {'refresh': self.refresh_token})
+        self.api_test(self.client.post, '/api/token/refresh/', 401, data={'refresh': self.refresh})
 
     def test_invalid_logout(self) -> None:
         '''Test logout feature with invalid data.'''
-        self.api_test(self.rekono.post, '/api/logout/', 400)                    # Refresh token is required
+        self.api_test(self.client.post, '/api/logout/', 400)                    # Refresh token is required
 
     def test_csp_header_selection(self) -> None:
         '''Test CSP header value by endpoint.'''
-        client = APIClient()
         for endpoint, csp in self.csp_mapping:
-            response = client.get(endpoint)                                     # Request to endpoint
+            response = self.unauthn_client.get(endpoint)                        # Request to endpoint
             self.assertEqual(csp, response.headers['Content-Security-Policy'])  # Check CSP in the response headers
 
     def test_invalid_password_policy(self) -> None:

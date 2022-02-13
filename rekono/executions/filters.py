@@ -1,12 +1,12 @@
-from api.filters import ToolFilter
+from api.filters import BaseToolFilter
 from django_filters.rest_framework.filters import OrderingFilter
 from executions.models import Execution
 
 
-class ExecutionFilter(ToolFilter):
+class ExecutionFilter(BaseToolFilter):
     '''FilterSet to filter and sort executions entities.'''
 
-    tool_fields = ('task__tool', 'step__tool')                                  # Filter by two Tool fields
+    tool_fields = ['task__tool', 'step__tool']                                  # Filter by two Tool fields
     o = OrderingFilter(                                                         # Ordering fields
         fields=(
             ('task__target', 'target'),
