@@ -156,7 +156,7 @@ class BaseTool:
                         return command
         if selection:                                                           # If base input selection is not empty
             # Format argument using selected base inputs
-            formatted_argument = self.format_multiple(argument.multiple, selection)
+            formatted_argument = self.format_multiple(argument.argument, selection)
             if formatted_argument:                                              # If formatted argument is valid
                 command[argument.name] = formatted_argument                     # Add formatted argument to the command
         return command

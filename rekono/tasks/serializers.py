@@ -76,7 +76,7 @@ class TaskSerializer(serializers.ModelSerializer):
             Dict[str, Any]: Data after validation process
         '''
         if not attrs.get('intensity'):                                          # Intensity doesn't exist
-            attrs['intensity'] = str(IntensityRank.NORMAL)                      # Normal intensity by default
+            attrs['intensity'] = IntensityRank.NORMAL                           # Normal intensity by default
         if attrs.get('tool'):                                                   # Tool task
             attrs['process'] = None
             if not attrs.get('configuration'):                                  # Configuration doesn't exist

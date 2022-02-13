@@ -13,3 +13,4 @@ python-libnmap==0.7.2
 python-telegram-bot==13.7
 pyyaml==6.0.0
 requests==2.26.0
+stringcase==1.2.0

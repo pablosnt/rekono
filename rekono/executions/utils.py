@@ -3,6 +3,7 @@ from typing import Any, Dict, List, cast
 from input_types import utils
 from input_types.base import BaseInput
 from input_types.models import InputType
+from stringcase import snakecase
 from tools.models import Argument, Tool
 
 
@@ -44,18 +45,17 @@ def get_related_executions(
     for relation in related_input_types:                                        # For each related input type
         for index, exec_inputs in enumerate(executions):                        # For each execution
             for i in exec_inputs:                                               # For each input assigned to execution
-                if (
-                    # Input related to the input type model
-                    isinstance(i, cast(Any, relation.get_related_model_class())) or
-                    # Input related to the input type target
-                    isinstance(i, cast(Any, relation.get_callback_target_class()))
-                ):
+                # Input related to the input type model
+                is_model = isinstance(i, cast(Any, relation.get_related_model_class()))
+                # Input related to the input type target
+                is_target = isinstance(i, cast(Any, relation.get_callback_target_class()))
+                if is_model or is_target:
                     if index in relations:
                         relations[index]['findings'].append(i)                  # Add input to the relations
                     else:
                         relations[index] = {                                    # Create a new relation based on index
                             # Input field to access the related input
-                            'field': relation.name.lower(),
+                            'field': relation.name.lower() if is_model else snakecase(relation.callback_target),
                             'inputs': [i]                                       # Related input list
                         }
         if relations:

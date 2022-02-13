@@ -132,4 +132,4 @@ class TaskViewSet(
         new_task.wordlists.set(task.wordlists.all())                            # Add wordlists from original task
         producer(new_task)                                                      # Enqueue new task
         serializer = TaskSerializer(instance=new_task)                          # Return new task data
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
