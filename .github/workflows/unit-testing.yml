@@ -16,9 +16,9 @@ jobs:
       
       - name: Install and start Redis server
         run: |
-          apt update -y
-          apt install redis-server -y
-          systemctl start redis-server
+          sudo apt update -y
+          sudo apt install redis-server -y
+          sudo systemctl start redis-server
 
       - uses: actions/setup-python@v2
         with:

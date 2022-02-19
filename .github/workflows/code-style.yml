@@ -1,4 +1,4 @@
-name: Code Style
+name: Code style
 on:
   workflow_dispatch:
   pull_request:
