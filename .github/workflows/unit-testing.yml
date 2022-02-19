@@ -4,7 +4,7 @@ on:
   pull_request:
 
 env:
-  REQUIRED_COVERAGE: 80
+  REQUIRED_COVERAGE: 90
 
 jobs:
   unit-testing:
@@ -37,7 +37,8 @@ jobs:
         run: |
           cd rekono
           coverage report -m --skip-covered
-          percent=$(coverage json -o /dev/stdout | jq .totals.percent_covered)
+          coverage json -o coverage-report.json
+          percent=$(cat coverage-report.json | jq .totals.percent_covered)
           echo ::set-output name=percent:: $percent
 
       - name: Fail if covered percent is not enough
