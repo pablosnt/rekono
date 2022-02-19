@@ -1,0 +1,339 @@
+<?xml version="1.0"?>
+<OWASPZAPReport version="2.11.1" generated="Fri, 18 Feb 2022 18:08:17">
+	
+		<site name="http://10.10.10.10" host="10.10.10.10" port="80" ssl="false">
+			<alerts>
+				
+					<alertitem>
+						<pluginid>0</pluginid>
+						<alertRef>0</alertRef>
+						<alert>Directory Browsing</alert>
+						<name>Directory Browsing</name>
+						<riskcode>2</riskcode>
+						<confidence>2</confidence>
+						<riskdesc>Medium (Medium)</riskdesc>
+						<confidencedesc>Medium</confidencedesc>
+						<desc>&lt;p&gt;It is possible to view the directory listing.  Directory listing may reveal hidden scripts, include files, backup source files, etc. which can be accessed to read sensitive information.&lt;/p&gt;</desc>
+						<instances>
+							
+								<instance>
+									<uri>http://10.10.10.10/images/</uri>
+									<method>GET</method>
+									<param></param>
+									<attack>http://10.10.10.10/images/</attack>
+									<evidence>Parent Directory</evidence>
+								</instance>
+							
+							
+								<instance>
+									<uri>http://10.10.10.10/shared/</uri>
+									<method>GET</method>
+									<param></param>
+									<attack>http://10.10.10.10/shared/</attack>
+									<evidence>Parent Directory</evidence>
+								</instance>
+							
+							
+								<instance>
+									<uri>http://10.10.10.10/shared/css/</uri>
+									<method>GET</method>
+									<param></param>
+									<attack>http://10.10.10.10/shared/css/</attack>
+									<evidence>Parent Directory</evidence>
+								</instance>
+							
+							
+								<instance>
+									<uri>http://10.10.10.10/shared/images/Acunetix/</uri>
+									<method>GET</method>
+									<param></param>
+									<attack>http://10.10.10.10/shared/images/Acunetix/</attack>
+									<evidence>Parent Directory</evidence>
+								</instance>
+							
+						</instances>
+						<count>4</count>
+						<solution>&lt;p&gt;Disable directory browsing.  If this is required, make sure the listed files does not induce risks.&lt;/p&gt;</solution>
+						<otherinfo></otherinfo>
+						<reference>&lt;p&gt;http://httpd.apache.org/docs/mod/core.html#options&lt;/p&gt;&lt;p&gt;http://alamo.satlug.org/pipermail/satlug/2002-February/000053.html&lt;/p&gt;</reference>
+						<cweid>548</cweid>
+						<wascid>48</wascid>
+						<sourceid>118</sourceid>
+					</alertitem>
+				
+				
+					<alertitem>
+						<pluginid>10020</pluginid>
+						<alertRef>10020</alertRef>
+						<alert>X-Frame-Options Header Not Set</alert>
+						<name>X-Frame-Options Header Not Set</name>
+						<riskcode>2</riskcode>
+						<confidence>2</confidence>
+						<riskdesc>Medium (Medium)</riskdesc>
+						<confidencedesc>Medium</confidencedesc>
+						<desc>&lt;p&gt;X-Frame-Options header is not included in the HTTP response to protect against &apos;ClickJacking&apos; attacks.&lt;/p&gt;</desc>
+						<instances>
+							
+								<instance>
+									<uri>http://10.10.10.10</uri>
+									<method>GET</method>
+									<param>X-Frame-Options</param>
+									<attack></attack>
+									<evidence></evidence>
+								</instance>
+							
+							
+								<instance>
+									<uri>http://10.10.10.10/</uri>
+									<method>GET</method>
+									<param>X-Frame-Options</param>
+									<attack></attack>
+									<evidence></evidence>
+								</instance>
+							
+						</instances>
+						<count>2</count>
+						<solution>&lt;p&gt;Most modern Web browsers support the X-Frame-Options HTTP header. Ensure it&apos;s set on all web pages returned by your site (if you expect the page to be framed only by pages on your server (e.g. it&apos;s part of a FRAMESET) then you&apos;ll want to use SAMEORIGIN, otherwise if you never expect the page to be framed, you should use DENY. Alternatively consider implementing Content Security Policy&apos;s &quot;frame-ancestors&quot; directive. &lt;/p&gt;</solution>
+						<otherinfo></otherinfo>
+						<reference>&lt;p&gt;https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options&lt;/p&gt;</reference>
+						<cweid>1021</cweid>
+						<wascid>15</wascid>
+						<sourceid>1</sourceid>
+					</alertitem>
+				
+				
+					<alertitem>
+						<pluginid>10202</pluginid>
+						<alertRef>10202</alertRef>
+						<alert>Absence of Anti-CSRF Tokens</alert>
+						<name>Absence of Anti-CSRF Tokens</name>
+						<riskcode>1</riskcode>
+						<confidence>2</confidence>
+						<riskdesc>Low (Medium)</riskdesc>
+						<confidencedesc>Medium</confidencedesc>
+						<desc>&lt;p&gt;No Anti-CSRF tokens were found in a HTML submission form.&lt;/p&gt;&lt;p&gt;A cross-site request forgery is an attack that involves forcing a victim to send an HTTP request to a target destination without their knowledge or intent in order to perform an action as the victim. The underlying cause is application functionality using predictable URL/form actions in a repeatable way. The nature of the attack is that CSRF exploits the trust that a web site has for a user. By contrast, cross-site scripting (XSS) exploits the trust that a user has for a web site. Like XSS, CSRF attacks are not necessarily cross-site, but they can be. Cross-site request forgery is also known as CSRF, XSRF, one-click attack, session riding, confused deputy, and sea surf.&lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;CSRF attacks are effective in a number of situations, including:&lt;/p&gt;&lt;p&gt;    * The victim has an active session on the target site.&lt;/p&gt;&lt;p&gt;    * The victim is authenticated via HTTP auth on the target site.&lt;/p&gt;&lt;p&gt;    * The victim is on the same local network as the target site.&lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;CSRF has primarily been used to perform an action against a target site using the victim&apos;s privileges, but recent techniques have been discovered to disclose information by gaining access to the response. The risk of information disclosure is dramatically increased when the target site is vulnerable to XSS, because XSS can be used as a platform for CSRF, allowing the attack to operate within the bounds of the same-origin policy.&lt;/p&gt;</desc>
+						<instances>
+							
+								<instance>
+									<uri>http://10.10.10.10</uri>
+									<method>GET</method>
+									<param></param>
+									<attack></attack>
+									<evidence>&lt;form action=&quot;https://nmap.org/search.html&quot; id=&quot;cse-search-box-sidebar&quot;&gt;</evidence>
+								</instance>
+							
+							
+								<instance>
+									<uri>http://10.10.10.10/</uri>
+									<method>GET</method>
+									<param></param>
+									<attack></attack>
+									<evidence>&lt;form action=&quot;https://nmap.org/search.html&quot; id=&quot;cse-search-box-sidebar&quot;&gt;</evidence>
+								</instance>
+							
+						</instances>
+						<count>2</count>
+						<solution>&lt;p&gt;Phase: Architecture and Design&lt;/p&gt;&lt;p&gt;Use a vetted library or framework that does not allow this weakness to occur or provides constructs that make this weakness easier to avoid.&lt;/p&gt;&lt;p&gt;For example, use anti-CSRF packages such as the OWASP CSRFGuard.&lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;Phase: Implementation&lt;/p&gt;&lt;p&gt;Ensure that your application is free of cross-site scripting issues, because most CSRF defenses can be bypassed using attacker-controlled script.&lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;Phase: Architecture and Design&lt;/p&gt;&lt;p&gt;Generate a unique nonce for each form, place the nonce into the form, and verify the nonce upon receipt of the form. Be sure that the nonce is not predictable (CWE-330).&lt;/p&gt;&lt;p&gt;Note that this can be bypassed using XSS.&lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;Identify especially dangerous operations. When the user performs a dangerous operation, send a separate confirmation request to ensure that the user intended to perform that operation.&lt;/p&gt;&lt;p&gt;Note that this can be bypassed using XSS.&lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;Use the ESAPI Session Management control.&lt;/p&gt;&lt;p&gt;This control includes a component for CSRF.&lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;Do not use the GET method for any request that triggers a state change.&lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;Phase: Implementation&lt;/p&gt;&lt;p&gt;Check the HTTP Referer header to see if the request originated from an expected page. This could break legitimate functionality, because users or proxies may have disabled sending the Referer for privacy reasons.&lt;/p&gt;</solution>
+						<otherinfo>&lt;p&gt;No known Anti-CSRF token [anticsrf, CSRFToken, __RequestVerificationToken, csrfmiddlewaretoken, authenticity_token, OWASP_CSRFTOKEN, anoncsrf, csrf_token, _csrf, _csrfSecret, __csrf_magic, CSRF, _token, _csrf_token] was found in the following HTML form: [Form 1: &quot;cof&quot; &quot;cx&quot; &quot;ie&quot; &quot;q&quot; &quot;sa&quot; ].&lt;/p&gt;</otherinfo>
+						<reference>&lt;p&gt;http://projects.webappsec.org/Cross-Site-Request-Forgery&lt;/p&gt;&lt;p&gt;http://cwe.mitre.org/data/definitions/352.html&lt;/p&gt;</reference>
+						<cweid>352</cweid>
+						<wascid>9</wascid>
+						<sourceid>1</sourceid>
+					</alertitem>
+				
+				
+					<alertitem>
+						<pluginid>10017</pluginid>
+						<alertRef>10017</alertRef>
+						<alert>Cross-Domain JavaScript Source File Inclusion</alert>
+						<name>Cross-Domain JavaScript Source File Inclusion</name>
+						<riskcode>1</riskcode>
+						<confidence>2</confidence>
+						<riskdesc>Low (Medium)</riskdesc>
+						<confidencedesc>Medium</confidencedesc>
+						<desc>&lt;p&gt;The page includes one or more script files from a third-party domain.&lt;/p&gt;</desc>
+						<instances>
+							
+								<instance>
+									<uri>http://10.10.10.10</uri>
+									<method>GET</method>
+									<param>//g.adspeed.net/ad.php?do=js&amp;zid=14678&amp;wd=-1&amp;ht=-1&amp;target=_blank</param>
+									<attack></attack>
+									<evidence>&lt;script type=&quot;text/javascript&quot; src=&quot;//g.adspeed.net/ad.php?do=js&amp;amp;zid=14678&amp;amp;wd=-1&amp;amp;ht=-1&amp;amp;target=_blank&quot;&gt;&lt;/script&gt;</evidence>
+								</instance>
+							
+							
+								<instance>
+									<uri>http://10.10.10.10</uri>
+									<method>GET</method>
+									<param>//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js</param>
+									<attack></attack>
+									<evidence>&lt;script async src=&quot;//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js&quot;&gt;&lt;/script&gt;</evidence>
+								</instance>
+							
+							
+								<instance>
+									<uri>http://10.10.10.10/</uri>
+									<method>GET</method>
+									<param>//g.adspeed.net/ad.php?do=js&amp;zid=14678&amp;wd=-1&amp;ht=-1&amp;target=_blank</param>
+									<attack></attack>
+									<evidence>&lt;script type=&quot;text/javascript&quot; src=&quot;//g.adspeed.net/ad.php?do=js&amp;amp;zid=14678&amp;amp;wd=-1&amp;amp;ht=-1&amp;amp;target=_blank&quot;&gt;&lt;/script&gt;</evidence>
+								</instance>
+							
+							
+								<instance>
+									<uri>http://10.10.10.10/</uri>
+									<method>GET</method>
+									<param>//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js</param>
+									<attack></attack>
+									<evidence>&lt;script async src=&quot;//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js&quot;&gt;&lt;/script&gt;</evidence>
+								</instance>
+							
+						</instances>
+						<count>4</count>
+						<solution>&lt;p&gt;Ensure JavaScript source files are loaded from only trusted sources, and the sources can&apos;t be controlled by end users of the application.&lt;/p&gt;</solution>
+						<otherinfo></otherinfo>
+						<reference></reference>
+						<cweid>829</cweid>
+						<wascid>15</wascid>
+						<sourceid>1</sourceid>
+					</alertitem>
+				
+				
+					<alertitem>
+						<pluginid>10096</pluginid>
+						<alertRef>10096</alertRef>
+						<alert>Timestamp Disclosure - Unix</alert>
+						<name>Timestamp Disclosure - Unix</name>
+						<riskcode>1</riskcode>
+						<confidence>1</confidence>
+						<riskdesc>Low (Low)</riskdesc>
+						<confidencedesc>Low</confidencedesc>
+						<desc>&lt;p&gt;A timestamp was disclosed by the application/web server - Unix&lt;/p&gt;</desc>
+						<instances>
+							
+								<instance>
+									<uri>http://10.10.10.10</uri>
+									<method>GET</method>
+									<param></param>
+									<attack></attack>
+									<evidence>11009417</evidence>
+								</instance>
+							
+							
+								<instance>
+									<uri>http://10.10.10.10/</uri>
+									<method>GET</method>
+									<param></param>
+									<attack></attack>
+									<evidence>11009417</evidence>
+								</instance>
+							
+							
+								<instance>
+									<uri>http://10.10.10.10/shared/images/Acunetix/acx_Chess-WB.gif</uri>
+									<method>GET</method>
+									<param></param>
+									<attack></attack>
+									<evidence>51125622</evidence>
+								</instance>
+							
+						</instances>
+						<count>3</count>
+						<solution>&lt;p&gt;Manually confirm that the timestamp data is not sensitive, and that the data cannot be aggregated to disclose exploitable patterns.&lt;/p&gt;</solution>
+						<otherinfo>&lt;p&gt;11009417, which evaluates to: 1970-05-08 11:10:17&lt;/p&gt;</otherinfo>
+						<reference>&lt;p&gt;http://projects.webappsec.org/w/page/13246936/Information%20Leakage&lt;/p&gt;</reference>
+						<cweid>200</cweid>
+						<wascid>13</wascid>
+						<sourceid>1</sourceid>
+					</alertitem>
+				
+				
+					<alertitem>
+						<pluginid>10021</pluginid>
+						<alertRef>10021</alertRef>
+						<alert>X-Content-Type-Options Header Missing</alert>
+						<name>X-Content-Type-Options Header Missing</name>
+						<riskcode>1</riskcode>
+						<confidence>2</confidence>
+						<riskdesc>Low (Medium)</riskdesc>
+						<confidencedesc>Medium</confidencedesc>
+						<desc>&lt;p&gt;The Anti-MIME-Sniffing header X-Content-Type-Options was not set to &apos;nosniff&apos;. This allows older versions of Internet Explorer and Chrome to perform MIME-sniffing on the response body, potentially causing the response body to be interpreted and displayed as a content type other than the declared content type. Current (early 2014) and legacy versions of Firefox will use the declared content type (if one is set), rather than performing MIME-sniffing.&lt;/p&gt;</desc>
+						<instances>
+							
+								<instance>
+									<uri>http://10.10.10.10</uri>
+									<method>GET</method>
+									<param>X-Content-Type-Options</param>
+									<attack></attack>
+									<evidence></evidence>
+								</instance>
+							
+							
+								<instance>
+									<uri>http://10.10.10.10/</uri>
+									<method>GET</method>
+									<param>X-Content-Type-Options</param>
+									<attack></attack>
+									<evidence></evidence>
+								</instance>
+							
+							
+								<instance>
+									<uri>http://10.10.10.10/images/sitelogo.png</uri>
+									<method>GET</method>
+									<param>X-Content-Type-Options</param>
+									<attack></attack>
+									<evidence></evidence>
+								</instance>
+							
+							
+								<instance>
+									<uri>http://10.10.10.10/shared/css/insecdb.css</uri>
+									<method>GET</method>
+									<param>X-Content-Type-Options</param>
+									<attack></attack>
+									<evidence></evidence>
+								</instance>
+							
+							
+								<instance>
+									<uri>http://10.10.10.10/shared/images/Acunetix/acx_Chess-WB.gif</uri>
+									<method>GET</method>
+									<param>X-Content-Type-Options</param>
+									<attack></attack>
+									<evidence></evidence>
+								</instance>
+							
+							
+								<instance>
+									<uri>http://10.10.10.10/shared/images/tiny-eyeicon.png</uri>
+									<method>GET</method>
+									<param>X-Content-Type-Options</param>
+									<attack></attack>
+									<evidence></evidence>
+								</instance>
+							
+							
+								<instance>
+									<uri>http://10.10.10.10/shared/images/topleftcurve.gif</uri>
+									<method>GET</method>
+									<param>X-Content-Type-Options</param>
+									<attack></attack>
+									<evidence></evidence>
+								</instance>
+							
+						</instances>
+						<count>7</count>
+						<solution>&lt;p&gt;Ensure that the application/web server sets the Content-Type header appropriately, and that it sets the X-Content-Type-Options header to &apos;nosniff&apos; for all web pages.&lt;/p&gt;&lt;p&gt;If possible, ensure that the end user uses a standards-compliant and modern web browser that does not perform MIME-sniffing at all, or that can be directed by the web application/web server to not perform MIME-sniffing.&lt;/p&gt;</solution>
+						<otherinfo>&lt;p&gt;This issue still applies to error type pages (401, 403, 500, etc.) as those pages are often still affected by injection issues, in which case there is still concern for browsers sniffing pages away from their actual content type.&lt;/p&gt;&lt;p&gt;At &quot;High&quot; threshold this scan rule will not alert on client or server error responses.&lt;/p&gt;</otherinfo>
+						<reference>&lt;p&gt;http://msdn.microsoft.com/en-us/library/ie/gg622941%28v=vs.85%29.aspx&lt;/p&gt;&lt;p&gt;https://owasp.org/www-community/Security_Headers&lt;/p&gt;</reference>
+						<cweid>693</cweid>
+						<wascid>15</wascid>
+						<sourceid>1</sourceid>
+					</alertitem>
+				
+			</alerts>
+		</site>
+	
+</OWASPZAPReport>
