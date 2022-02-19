@@ -29,9 +29,22 @@ class ZapTool(BaseTool):
         value = unescape(value)
         return value.replace('<p>', '').replace('</p>', '')
 
+    def clean_reference(self, value: str) -> str:
+        '''Clean reference values because it can contains multiples links.
+
+        Args:
+            value (str): Original value
+
+        Returns:
+            str: Clean reference value
+        '''
+        if '</p><p>' in value:
+            value = value.split('</p><p>', 1)[0]                                # If multiples links, get the first one
+        return self.clean_value(value)
+
     def parse_output_file(self) -> None:
         '''Parse tool output file to create finding entities.'''
-        http_endpoints = set()                                                  # HTTP endpoints set
+        http_endpoints = set(['/'])                                             # HTTP endpoints set
         root = parser.parse(self.path_output).getroot()                         # Report root
         for site in root:                                                       # For each site
             url_base = site.attrib['name']                                      # Get target URL
@@ -48,7 +61,7 @@ class ZapTool(BaseTool):
                         description=self.clean_value(description) if description else self.clean_value(name),
                         severity=self.severity_mapping[int(severity)] if severity else Severity.MEDIUM,
                         cwe=f'CWE-{cwe}' if cwe else None,
-                        reference=self.clean_value(reference) if reference else None
+                        reference=self.clean_reference(reference) if reference else None
                     )
                 instances = alert.findall('instances/instance')                 # Get instances
                 for instance in instances or []:                                # For each instance
@@ -56,8 +69,8 @@ class ZapTool(BaseTool):
                     if url:
                         http_endpoint = url.replace(url_base, '')               # Get HTTP endpoint
                         if http_endpoint and http_endpoint != '/':              # If valid endpoint
-                            if http_endpoint[-1] != '/':                        # If last endpoint char is not slash
-                                http_endpoint += '/'                            # Add last slash to the endpoint
+                            # if http_endpoint[-1] != '/':                        # If last endpoint char is not slash
+                            #     http_endpoint += '/'                            # Add last slash to the endpoint
                             if http_endpoint not in http_endpoints:             # If it's a new endpoint
                                 http_endpoints.add(http_endpoint)               # Add endpoint to HTTP endpoints set
                                 self.create_finding(Endpoint, endpoint=http_endpoint)   # Create Endpoint
