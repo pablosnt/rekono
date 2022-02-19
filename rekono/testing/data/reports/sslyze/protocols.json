@@ -16,7 +16,7 @@
                 "network_timeout": 5,
                 "tls_client_auth_credentials": null,
                 "tls_opportunistic_encryption": null,
-                "tls_server_name_indication": "10.10.11.145",
+                "tls_server_name_indication": "10.10.10.10",
                 "xmpp_to_hostname": null
             },
             "scan_result": {
@@ -353,7 +353,7 @@
                                 "verified_chain_has_sha1_signature": null
                             }
                         ],
-                        "hostname_used_for_server_name_indication": "10.10.11.145"
+                        "hostname_used_for_server_name_indication": "10.10.10.10"
                     },
                     "status": "COMPLETED"
                 },
@@ -4401,9 +4401,9 @@
             "scan_status": "COMPLETED",
             "server_location": {
                 "connection_type": "DIRECT",
-                "hostname": "10.10.11.145",
+                "hostname": "10.10.10.10",
                 "http_proxy_settings": null,
-                "ip_address": "10.10.11.145",
+                "ip_address": "10.10.10.10",
                 "port": 443
             },
             "uuid": "cd735bc5-1f63-46d6-94b8-01b17098d616"

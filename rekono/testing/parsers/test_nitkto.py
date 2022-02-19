@@ -34,16 +34,16 @@ class NiktoParserTest(ToolParserTest):
             },
             {
                 'model': Vulnerability,
-                'name': 'Uncommon header \'tcn\' found, with contents: list',
-                'description': '[GET /index] Uncommon header \'tcn\' found, with contents: list',
+                'name': "Uncommon header 'tcn' found, with contents: list",
+                'description': "[GET /index] Uncommon header 'tcn' found, with contents: list",
                 'severity': Severity.MEDIUM,
                 'osvdb': 0
             },
             {'model': Endpoint, 'endpoint': '/index'},
             {
                 'model': Vulnerability,
-                'name': 'Apache mod_negotiation is enabled with MultiViews, which allows attackers to easily brute force file names. See http://www.wisec.it/sectou.php?id=4698ebdc59d15. The following alternatives for \'index\' were found: index.html',     # noqa: E501
-                'description': '[GET /index] Apache mod_negotiation is enabled with MultiViews, which allows attackers to easily brute force file names. See http://www.wisec.it/sectou.php?id=4698ebdc59d15. The following alternatives for \'index\' were found: index.html',     # noqa: E501
+                'name': "Apache mod_negotiation is enabled with MultiViews, which allows attackers to easily brute force file names. See http://www.wisec.it/sectou.php?id=4698ebdc59d15. The following alternatives for 'index' were found: index.html",     # noqa: E501
+                'description': "[GET /index] Apache mod_negotiation is enabled with MultiViews, which allows attackers to easily brute force file names. See http://www.wisec.it/sectou.php?id=4698ebdc59d15. The following alternatives for 'index' were found: index.html",     # noqa: E501
                 'severity': Severity.MEDIUM,
                 'osvdb': 0
             },

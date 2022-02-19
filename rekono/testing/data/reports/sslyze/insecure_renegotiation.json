@@ -16,7 +16,7 @@
                 "network_timeout": 5,
                 "tls_client_auth_credentials": null,
                 "tls_opportunistic_encryption": null,
-                "tls_server_name_indication": "file2fly.atns.co.za",
+                "tls_server_name_indication": "10.10.10.10",
                 "xmpp_to_hostname": null
             },
             "scan_result": {
@@ -364,15 +364,15 @@
                                                         "dotted_string": "2.5.4.3",
                                                         "name": "commonName"
                                                     },
-                                                    "rfc4514_string": "CN=file2fly.atns.co.za",
-                                                    "value": "file2fly.atns.co.za"
+                                                    "rfc4514_string": "CN=10.10.10.10",
+                                                    "value": "10.10.10.10"
                                                 }
                                             ],
-                                            "rfc4514_string": "CN=file2fly.atns.co.za,O=Air Traffic and Navigation Services,L=Johannesburg,ST=Gauteng,C=ZA"
+                                            "rfc4514_string": "CN=10.10.10.10,O=Air Traffic and Navigation Services,L=Johannesburg,ST=Gauteng,C=ZA"
                                         },
                                         "subject_alternative_name": {
                                             "dns": [
-                                                "file2fly.atns.co.za"
+                                                "10.10.10.10"
                                             ]
                                         }
                                     }
@@ -384,7 +384,7 @@
                                 "verified_chain_has_sha1_signature": null
                             }
                         ],
-                        "hostname_used_for_server_name_indication": "file2fly.atns.co.za"
+                        "hostname_used_for_server_name_indication": "10.10.10.10"
                     },
                     "status": "COMPLETED"
                 },
@@ -4303,7 +4303,7 @@
             "scan_status": "COMPLETED",
             "server_location": {
                 "connection_type": "DIRECT",
-                "hostname": "file2fly.atns.co.za",
+                "hostname": "10.10.10.10",
                 "http_proxy_settings": null,
                 "ip_address": "196.31.129.43",
                 "port": 443
