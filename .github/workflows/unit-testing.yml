@@ -45,7 +45,7 @@ jobs:
         env:
           COVERAGE: ${{ steps.coverage.outputs.percent }}
         run: |
-          if [ $(echo "$REQUIRED_COVERAGE > $percent" | bc) -ne 0 ]
+          if [ $(echo "$REQUIRED_COVERAGE > $COVERAGE" | bc) -ne 0 ]
           then
             exit 10
           fi
