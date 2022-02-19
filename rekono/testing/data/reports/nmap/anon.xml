@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE nmaprun>
+<?xml-stylesheet href="file:///usr/bin/../share/nmap/nmap.xsl" type="text/xsl"?>
+<!-- Nmap 7.92 scan initiated Fri Feb 18 18:08:02 2022 as: nmap -p 21 -sS -sV -A -&#45;script ftp-anon,ftp-proftpd-backdoor,ftp-vsftpd-backdoor,ftp-libopie,ftp-vuln-cve2010-4221 -oX nmap/anon.xml 192.168.1.36 -->
+<nmaprun scanner="nmap" args="nmap -p 21 -sS -sV -A -&#45;script ftp-anon,ftp-proftpd-backdoor,ftp-vsftpd-backdoor,ftp-libopie,ftp-vuln-cve2010-4221 -oX nmap/anon.xml 192.168.1.36" start="1645204082" startstr="Fri Feb 18 18:08:02 2022" version="7.92" xmloutputversion="1.05">
+<scaninfo type="syn" protocol="tcp" numservices="1" services="21"/>
+<verbose level="0"/>
+<debugging level="0"/>
+<hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.1.36" addrtype="ipv4"/>
+<address addr="8C:85:90:45:C5:4E" addrtype="mac" vendor="Apple"/>
+<hostnames>
+</hostnames>
+</hosthint>
+<host starttime="1645204083" endtime="1645204099"><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.1.36" addrtype="ipv4"/>
+<address addr="8C:85:90:45:C5:4E" addrtype="mac" vendor="Apple"/>
+<hostnames>
+</hostnames>
+<ports><port protocol="tcp" portid="21"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="ftp" product="vsftpd" version="2.0.8 or later" hostname="Welcome" method="probed" conf="10"><cpe>cpe:/a:vsftpd:vsftpd</cpe></service><script id="ftp-anon" output="Anonymous FTP login allowed (FTP code 230)&#xa;Can&apos;t get directory listing: PASV IP 172.17.0.2 is not the same as 192.168.1.36"/></port>
+</ports>
+<os><portused state="open" proto="tcp" portid="21"/>
+<portused state="closed" proto="udp" portid="42910"/>
+<osmatch name="Apple macOS 10.13 (High Sierra) - 10.15 (Catalina) or iOS 11.0 - 13.4 (Darwin 17.0.0 - 19.2.0)" accuracy="97" line="3614">
+<osclass type="phone" vendor="Apple" osfamily="iOS" osgen="11.X" accuracy="97"><cpe>cpe:/o:apple:iphone_os:11</cpe></osclass>
+<osclass type="phone" vendor="Apple" osfamily="iOS" osgen="12.X" accuracy="97"><cpe>cpe:/o:apple:iphone_os:12</cpe></osclass>
+<osclass type="phone" vendor="Apple" osfamily="iOS" osgen="13.X" accuracy="97"><cpe>cpe:/o:apple:iphone_os:13</cpe></osclass>
+<osclass type="general purpose" vendor="Apple" osfamily="macOS" osgen="10.13.X" accuracy="97"><cpe>cpe:/o:apple:mac_os_x:10.13</cpe></osclass>
+<osclass type="general purpose" vendor="Apple" osfamily="macOS" osgen="10.14.X" accuracy="97"><cpe>cpe:/o:apple:mac_os_x:10.14</cpe></osclass>
+<osclass type="general purpose" vendor="Apple" osfamily="macOS" osgen="10.15.X" accuracy="97"><cpe>cpe:/o:apple:mac_os_x:10.15</cpe></osclass>
+</osmatch>
+<osmatch name="Apple Mac OS X 10.11 (El Capitan) or iOS 12.4 - 13.0 (Darwin 15.6.0 - 19.0.0)" accuracy="97" line="7506">
+<osclass type="general purpose" vendor="Apple" osfamily="OS X" osgen="10.11.X" accuracy="97"><cpe>cpe:/o:apple:mac_os_x:10.11</cpe></osclass>
+<osclass type="media device" vendor="Apple" osfamily="iOS" osgen="12.X" accuracy="97"><cpe>cpe:/o:apple:iphone_os:12</cpe></osclass>
+</osmatch>
+<osmatch name="Apple TV 5" accuracy="93" line="3341">
+<osclass type="media device" vendor="Apple" osfamily="Apple TV" osgen="5.X" accuracy="93"><cpe>cpe:/o:apple:apple_tv:5</cpe></osclass>
+</osmatch>
+<osmatch name="Apple Mac OS X 10.4.8 - 10.4.11 (Tiger) (Darwin 8.8.0 - 8.11.0)" accuracy="90" line="5488">
+<osclass type="general purpose" vendor="Apple" osfamily="Mac OS X" osgen="10.4.X" accuracy="90"><cpe>cpe:/o:apple:mac_os_x:10.4</cpe></osclass>
+</osmatch>
+<osmatch name="Apple iPad tablet computer (iOS 4.3.2)" accuracy="90" line="3680">
+<osclass type="media device" vendor="Apple" osfamily="iOS" osgen="4.X" accuracy="90"><cpe>cpe:/o:apple:iphone_os:4.3.2</cpe></osclass>
+</osmatch>
+<osmatch name="Apple iPad tablet computer or iPhone mobile phone (iOS 4.0 - 4.1)" accuracy="90" line="3817">
+<osclass type="phone" vendor="Apple" osfamily="iOS" osgen="4.X" accuracy="90"><cpe>cpe:/o:apple:iphone_os:4</cpe></osclass>
+</osmatch>
+<osmatch name="Apple iPhone mobile phone (iOS 4.3.2)" accuracy="90" line="3853">
+<osclass type="phone" vendor="Apple" osfamily="iOS" osgen="4.X" accuracy="90"><cpe>cpe:/o:apple:iphone_os:4.3.2</cpe></osclass>
+</osmatch>
+<osmatch name="Apple Mac OS X 10.5 (Leopard) - 10.6.8 (Snow Leopard) or iOS 4.0 - 4.2.1 (Darwin 9.0.0b5 - 10.8.0)" accuracy="90" line="3912">
+<osclass type="phone" vendor="Apple" osfamily="iOS" osgen="4.X" accuracy="90"><cpe>cpe:/o:apple:iphone_os:4</cpe></osclass>
+<osclass type="media device" vendor="Apple" osfamily="iOS" osgen="4.X" accuracy="90"><cpe>cpe:/o:apple:iphone_os:4</cpe></osclass>
+<osclass type="general purpose" vendor="Apple" osfamily="Mac OS X" osgen="10.6.X" accuracy="90"><cpe>cpe:/o:apple:mac_os_x:10.6</cpe></osclass>
+</osmatch>
+<osmatch name="Apple iOS 5.0.1" accuracy="90" line="3954">
+<osclass type="media device" vendor="Apple" osfamily="iOS" osgen="5.X" accuracy="90"><cpe>cpe:/o:apple:iphone_os:5.0.1</cpe></osclass>
+<osclass type="phone" vendor="Apple" osfamily="iOS" osgen="5.X" accuracy="90"><cpe>cpe:/o:apple:iphone_os:5.0.1</cpe></osclass>
+</osmatch>
+<osmatch name="Apple iPad tablet computer (iPhone OS 3.2)" accuracy="90" line="4805">
+<osclass type="general purpose" vendor="Apple" osfamily="iPhone OS" osgen="3.X" accuracy="90"><cpe>cpe:/o:apple:iphone_os:3.2</cpe></osclass>
+</osmatch>
+</os>
+<uptime seconds="2" lastboot="Fri Feb 18 18:08:17 2022"/>
+<distance value="1"/>
+<tcpsequence index="263" difficulty="Good luck!" values="2C919F4E,933554AD,176CA04,81D25E3,E9ED912D,97F7DA6D"/>
+<ipidsequence class="All zeros" values="0,0,0,0,0,0"/>
+<tcptssequence class="other" values="50130395,ECB4B764,2A68ED1E,2835232A,BC78F012,E9A477C3"/>
+<trace>
+<hop ttl="1" ipaddr="192.168.1.36" rtt="27.61"/>
+</trace>
+<times srtt="27611" rttvar="32691" to="158375"/>
+</host>
+<runstats><finished time="1645204099" timestr="Fri Feb 18 18:08:19 2022" summary="Nmap done at Fri Feb 18 18:08:19 2022; 1 IP address (1 host up) scanned in 16.73 seconds" elapsed="16.73" exit="success"/><hosts up="1" down="0" total="1"/>
+</runstats>
+</nmaprun>

@@ -2,7 +2,7 @@ from executions.models import Execution
 from processes.models import Step
 from tasks.enums import Status
 from tasks.models import Task
-from testing.api.test_base import RekonoTestCase
+from testing.api.base import RekonoTestCase
 from tools.models import Configuration, Tool
 
 

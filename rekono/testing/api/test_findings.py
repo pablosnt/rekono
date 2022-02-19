@@ -1,7 +1,7 @@
 from findings.enums import DataType, OSType, PortStatus, Protocol, Severity
 from findings.models import (OSINT, Credential, Endpoint, Enumeration, Exploit,
                              Host, Technology, Vulnerability)
-from testing.api.test_base import RekonoTestCase
+from testing.api.base import RekonoTestCase
 
 
 class FindingsTest(RekonoTestCase):

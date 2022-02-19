@@ -3,7 +3,7 @@ from typing import Any, Dict
 
 from resources.models import Wordlist
 from security.file_upload import check_checksum
-from testing.api.test_base import RekonoTestCase
+from testing.api.base import RekonoTestCase
 
 
 class WordlistsTest(RekonoTestCase):

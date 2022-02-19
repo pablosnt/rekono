@@ -1,4 +1,4 @@
-from testing.api.test_base import RekonoTestCase
+from testing.api.base import RekonoTestCase
 from tools.models import Configuration, Tool
 
 

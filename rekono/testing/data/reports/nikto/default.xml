@@ -1,0 +1,36 @@
+<?xml version="1.0" ?>
+<!DOCTYPE niktoscan SYSTEM "/var/lib/nikto/docs/nikto.dtd">
+<niktoscan>
+<niktoscan hoststest="0" options="-h http://10.10.11.112 -Format xml -output /home/kali/Desktop/new_testing/nikto/default.xml" version="2.1.6" scanstart="Fri Feb 18 17:30:14 2022" scanend="Thu Jan  1 01:00:00 1970" scanelapsed=" seconds" nxmlversion="1.2">
+
+<scandetails targetip="10.10.11.112" targethostname="10.10.11.112" targetport="80" targetbanner="Apache/2.4.41 (Ubuntu)" starttime="2022-02-18 17:30:15" sitename="http://10.10.11.112:80/" siteip="http://10.10.11.112:80/" hostheader="10.10.11.112" errors="0" checks="6897">
+
+
+<item id="999957" osvdbid="0" osvdblink="http://osvdb.org/0" method="GET">
+<description><![CDATA[The anti-clickjacking X-Frame-Options header is not present.]]></description>
+<uri><![CDATA[/]]></uri>
+<namelink><![CDATA[http://10.10.11.112:80/]]></namelink>
+<iplink><![CDATA[http://10.10.11.112:80/]]></iplink>
+</item>
+
+<item id="999102" osvdbid="0" osvdblink="http://osvdb.org/0" method="GET">
+<description><![CDATA[The X-XSS-Protection header is not defined. This header can hint to the user agent to protect against some forms of XSS]]></description>
+<uri><![CDATA[/]]></uri>
+<namelink><![CDATA[http://10.10.11.112:80/]]></namelink>
+<iplink><![CDATA[http://10.10.11.112:80/]]></iplink>
+</item>
+
+<item id="999103" osvdbid="0" osvdblink="http://osvdb.org/0" method="GET">
+<description><![CDATA[The X-Content-Type-Options header is not set. This could allow the user agent to render the content of the site in a different fashion to the MIME type]]></description>
+<uri><![CDATA[/]]></uri>
+<namelink><![CDATA[http://10.10.11.112:80/]]></namelink>
+<iplink><![CDATA[http://10.10.11.112:80/]]></iplink>
+</item>
+
+<statistics elapsed="441" itemsfound="3" itemstested="6897" endtime="2022-02-18 17:37:36" />
+</scandetails>
+
+</niktoscan>
+
+
+</niktoscan>

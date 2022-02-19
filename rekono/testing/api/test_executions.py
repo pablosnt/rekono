@@ -1,7 +1,7 @@
 from django.utils import timezone
 from executions.models import Execution
 from tasks.enums import Status
-from testing.api.test_base import RekonoTestCase
+from testing.api.base import RekonoTestCase
 
 
 class ExecutionsTest(RekonoTestCase):

@@ -2,6 +2,7 @@ import json
 import os
 import shutil
 from typing import Any
+from urllib.parse import urlparse
 
 from findings.enums import Severity
 from findings.models import Credential, Endpoint, Technology, Vulnerability
@@ -62,11 +63,12 @@ class CmseekTool(BaseTool):
             value (Any): Item value
         '''
         paths = value
-        if isinstance(value, str) and ',' in value:
-            paths = value.split(',')                                            # Paths from string value
-        paths = [p.replace(url, '/') for p in paths]                            # Remove target URL from paths
+        if isinstance(value, str):
+            paths = value.split(',') if ',' in value else [value]               # Paths from string value
+        # Remove target URL from paths
+        paths = [p.replace(url, '/') for p in paths if p and p.replace(url, '/') != '/']
         for path in paths:                                                      # For each path
-            self.create_finding(Endpoint, endpoint=path)                        # Create Endpoint
+            self.create_finding(Endpoint, endpoint=path.replace('//', '/'))     # Create Endpoint
         if 'backup_file' in key:                                                # Backup file found
             self.create_finding(                                                # Create Vulnerability
                 Vulnerability,
@@ -136,7 +138,8 @@ class CmseekTool(BaseTool):
             cms (Technology): CMS Technology
         '''
         for user in value.split(','):                                           # For each username
-            self.create_finding(Credential, technology=cms, username=user)      # Create Credential with username
+            if user:
+                self.create_finding(Credential, technology=cms, username=user)  # Create Credential with username
 
     def parse_output_file(self) -> None:
         '''Parse tool output file to create finding entities.'''
@@ -151,12 +154,26 @@ class CmseekTool(BaseTool):
             elif f'{cms_name}_version' in report:                               # Search CMS version by name
                 cms_version = report.get(f'{cms_name}_version')                 # Get CMS version by name
             url = report.get('url')                                             # Get target URL
-            # Create Technology with the CMS data
-            cms = self.create_finding(Technology, name=cms_name, version=cms_version, reference=report.get('cms_url'))
+            if url:
+                url_parsed = urlparse(report.get('url'))                        # Parse target URL
+                if url_parsed.path:                                             # Endpoint in the target URL
+                    url = url.replace(url_parsed.path, '/')                     # Remove endpoint from the base URL
+            cms = self.create_finding(                                          # Create Technology with the CMS data
+                Technology,
+                name=cms_name,
+                version=cms_version,
+                description='CMS',
+                reference=report.get('cms_url')
+            )
             for key, value in [(k, v) for k, v in report.items() if k not in [  # For each data in report
-                'cms_id', 'cms_name', 'cms_url', f'{cms_id}_version', f'{cms_name}_version'     # Exclude basic CMS data
+                'cms_id', 'cms_name', 'cms_url',                                # Exclude basic CMS data
+                f'{cms_id}_version', f'{cms_name}_version', 'url'
             ]]:
-                if 'file' in key or 'directory' in key:                         # Endpoint found
+                if (
+                    (isinstance(value, str) and url in value) or
+                    (isinstance(value, list) and len([i for i in value if url in i]) > 0)
+                ):
+                    # Endpoint found
                     self.analyze_endpoints(url, cms, key, value)                # Analyze endpoint
                 elif '_users' in key and ',' in value:                          # Users found
                     self.parse_cms_usernames(value, cms)

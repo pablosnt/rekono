@@ -2,7 +2,7 @@ from typing import Dict
 
 from security.otp import generate
 from telegram_bot.models import TelegramChat
-from testing.api.test_base import RekonoTestCase
+from testing.api.base import RekonoTestCase
 from users.models import User
 
 

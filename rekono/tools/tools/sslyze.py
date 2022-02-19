@@ -112,7 +112,7 @@ class SslyzeTool(BaseTool):
         # Create generic TLS Technology if scan results found
         generic_tech = self.create_finding(Technology, name='Generic TLS') if report else None
         for item in report or []:                                               # For item in report
-            r = item['scan_commands_results']
+            r = item['scan_commands_results'] if 'scan_commands_results' in item else item['scan_result']
             if self.check_true(r, 'heartbleed', 'is_vulnerable_to_heartbleed'):
                 # If it is vulnerable to Heartbleed
                 # Create Vulnerability with CVE-2014-0160

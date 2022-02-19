@@ -1,4 +1,4 @@
-from testing.api.test_base import RekonoTestCase
+from testing.api.base import RekonoTestCase
 from tools.enums import IntensityRank
 from tools.models import Argument, Input, Intensity, Output
 

@@ -20,6 +20,7 @@ class NiktoTool(BaseTool):
             osvdb = int(item.attrib['osvdbid'])                                 # Get OSVDB Id
             method = item.attrib['method']                                      # Get HTTP method
             name = None
+            description = None
             description_tag = item.find('description')                          # Get description tag
             if description_tag:
                 description = description_tag.text                              # Get description value

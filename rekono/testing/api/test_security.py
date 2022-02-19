@@ -6,7 +6,7 @@ from security.input_validation import (validate_endpoint, validate_name,
                                        validate_number, validate_text,
                                        validate_time_amount)
 from security.passwords import PasswordComplexityValidator
-from testing.api.test_base import RekonoTestCase
+from testing.api.base import RekonoTestCase
 
 
 class SecurityTest(RekonoTestCase):
