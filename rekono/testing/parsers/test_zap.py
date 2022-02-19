@@ -68,4 +68,4 @@ class ZapParserTest(ToolParserTest):
             {'model': Endpoint, 'endpoint': '/shared/images/tiny-eyeicon.png'},
             {'model': Endpoint, 'endpoint': '/shared/images/topleftcurve.gif'}
         ]
-        super().check_tool_parser('active_scan.xml', expected)
+        super().check_tool_parser('active-scan.xml', expected)

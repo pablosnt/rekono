@@ -22,9 +22,13 @@ class NmapTool(BaseTool):
             output (str, optional): NSE script vulners output
         '''
         if output:
+            created = set()
             cves: List[str] = re.findall(CVE_REGEX, output)                     # Search CVE patterns in vulners output
             for cve in cves:                                                    # For each CVE
-                self.create_finding(Vulnerability, technology=technology, name=cve, cve=cve)    # Create Vulnerability
+                if cve not in created:                                       # Check if CVE has been used before
+                    created.add(cve)
+                    # Create Vulnerability
+                    self.create_finding(Vulnerability, technology=technology, name=cve, cve=cve)
 
     def create_ftp_anonymous(self, technology: Technology, output: str = None) -> None:
         '''Create FTP anonymous Vulnerability reported by NSE script ftp-anon.
@@ -36,8 +40,8 @@ class NmapTool(BaseTool):
         self.create_finding(
             Vulnerability,
             technology=technology,
-            name='FTP anonymous',
-            description='FTP anonymous login is allowed',
+            name='Anonymous FTP',
+            description='Anonymous login is allowed in FTP',
             severity=Severity.CRITICAL,
             cwe='CWE-287',                                                      # CWE-287: Improper Authentication
             reference='https://book.hacktricks.xyz/pentesting/pentesting-ftp#anonymous-login'

@@ -182,4 +182,4 @@ class SslscanParserTest(ToolParserTest):
                 'cwe': 'CWE-326'
             }
         ]
-        super().check_tool_parser('insecure_renegotiation.xml', expected)
+        super().check_tool_parser('insecure-renegotiation.xml', expected)

@@ -130,4 +130,4 @@ class SSLyzeParserTest(ToolParserTest):
                 'cwe': 'CWE-326'
             }
         ]
-        super().check_tool_parser('insecure_renegotiation.json', expected)
+        super().check_tool_parser('insecure-renegotiation.json', expected)
