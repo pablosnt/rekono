@@ -5,7 +5,7 @@ from findings.models import OSINT
 from tools.tools.base_tool import BaseTool
 
 
-class TheHarvesterTool(BaseTool):
+class TheharvesterTool(BaseTool):
     '''theHarvester tool class.'''
 
     # Mapping between theHarvester types and OSINT data types
@@ -15,6 +15,7 @@ class TheHarvesterTool(BaseTool):
         ('vhosts', DataType.DOMAIN),
         ('urls', DataType.URL),
         ('trello_urls', DataType.URL),
+        ('interesting_urls', DataType.URL),
         ('emails', DataType.EMAIL),
         ('linkedin_links', DataType.LINK),
         ('asns', DataType.ASN),
