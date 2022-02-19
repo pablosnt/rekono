@@ -14,7 +14,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       
-      - name: Install and start Redis server
+      - name: Install and start Redis server to prevent errors when tests queue jobs
         run: |
           sudo apt update -y
           sudo apt install redis-server -y
@@ -45,7 +45,7 @@ jobs:
         env:
           COVERAGE: ${{ steps.coverage.outputs.percent }}
         run: |
-          if (( $REQUIRED_COVERAGE > $COVERAGE ))
+          if [ $(echo "$REQUIRED_COVERAGE > $percent" | bc) -ne 0 ]
           then
             exit 10
           fi
