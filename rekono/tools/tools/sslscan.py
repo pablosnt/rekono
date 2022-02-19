@@ -29,7 +29,7 @@ class SslscanTool(BaseTool):
         tests = root.findall('ssltest')                                         # Get test
         for test in tests:                                                      # For each test
             for item in test:                                                   # For each item
-                if item.tag == 'protocol':                                      # If item is a protocol
+                if item.tag == 'protocol' and item.attrib['enabled'] == '1':    # If item is an enabled protocol
                     technology = self.create_finding(                           # Create Technology
                         Technology,
                         name=item.attrib['type'].upper(),
@@ -37,12 +37,9 @@ class SslscanTool(BaseTool):
                     )
                     technologies.append(technology)                             # Save Technology in list
                     if (
-                        item.attrib['enabled'] == '1' and                       # Enabled
-                        (
-                            # Insecure TLS version
-                            (item.attrib['type'] == 'tls' and item.attrib['version'] not in ['1.2', '1.3']) or
-                            item.attrib['type'] == 'ssl'                        # Insecure SSL protocol
-                        )
+                        # Insecure TLS version
+                        (item.attrib['type'] == 'tls' and item.attrib['version'] not in ['1.2', '1.3']) or
+                        item.attrib['type'] == 'ssl'                        # Insecure SSL protocol
                     ):
                         desc = '{protocol} {version} is supported'.format(      # Vulnerability description
                             protocol=item.attrib["type"].upper(),
@@ -53,7 +50,7 @@ class SslscanTool(BaseTool):
                             technology=technology,                              # Related to current protocol Technology
                             name=f'Insecure {item.attrib["type"].upper()} version supported',
                             description=desc,
-                            severity=Severity.MEDIUM,
+                            severity=Severity.MEDIUM if item.attrib['type'] == 'tls' else Severity.HIGH,
                             # CWE-326: Inadequate Encryption Strength
                             cwe='CWE-326'
                         )
@@ -61,8 +58,6 @@ class SslscanTool(BaseTool):
                     # If it is vulnerable to Insecure Renegotiation
                     self.create_finding(
                         Vulnerability,
-                        # Get technology based on protocol and version (sslversion field)
-                        technology=self.get_technology(technologies, item.attrib['sslversion']),
                         name='Insecure TLS renegotiation supported',
                         description='Insecure TLS renegotiation supported',
                         severity=Severity.MEDIUM,

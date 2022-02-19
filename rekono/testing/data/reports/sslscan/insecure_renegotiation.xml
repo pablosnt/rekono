@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document title="SSLScan Results" version="2.0.11-static" web="http://github.com/rbsec/sslscan">
+ <ssltest host="10.10.10.10" sniname="10.10.10.10" port="443">
+  <protocol type="ssl" version="2" enabled="1" />
+  <protocol type="ssl" version="3" enabled="1" />
+  <protocol type="tls" version="1.0" enabled="1" />
+  <protocol type="tls" version="1.1" enabled="0" />
+  <protocol type="tls" version="1.2" enabled="0" />
+  <protocol type="tls" version="1.3" enabled="0" />
+  <fallback supported="0" />
+  <renegotiation supported="1" secure="0" />
+  <compression supported="0" />
+  <heartbleed sslversion="TLSv1.0" vulnerable="0" />
+  <cipher status="preferred" sslversion="TLSv1.0" bits="256" cipher="DHE-RSA-AES256-SHA" id="0x0039" strength="acceptable" dhebits="1024" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="128" cipher="DHE-RSA-AES128-SHA" id="0x0033" strength="acceptable" dhebits="1024" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="112" cipher="DHE-RSA-DES-CBC3-SHA" id="0x0016" strength="medium" dhebits="1024" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="256" cipher="AES256-SHA" id="0x0035" strength="acceptable" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="128" cipher="AES128-SHA" id="0x002F" strength="acceptable" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="128" cipher="RC4-SHA" id="0x0005" strength="medium" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="128" cipher="RC4-MD5" id="0x0004" strength="medium" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="112" cipher="DES-CBC3-SHA" id="0x000A" strength="medium" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="40" cipher="TLS_RSA_EXPORT_WITH_RC4_40_MD5" id="0x0003" strength="weak" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="40" cipher="TLS_RSA_EXPORT_WITH_RC2_CBC_40_MD5" id="0x0006" strength="weak" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="40" cipher="TLS_RSA_EXPORT_WITH_DES40_CBC_SHA" id="0x0008" strength="weak" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="56" cipher="TLS_RSA_WITH_DES_CBC_SHA" id="0x0009" strength="medium" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="40" cipher="TLS_DHE_RSA_EXPORT_WITH_DES40_CBC_SHA" id="0x0014" strength="weak" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="56" cipher="TLS_DHE_RSA_WITH_DES_CBC_SHA" id="0x0015" strength="medium" />
+ <certificates>
+  <certificate type="short">
+   <signature-algorithm>sha256WithRSAEncryption</signature-algorithm>
+   <pk error="false" type="RSA" bits="2048" />
+   <subject><![CDATA[10.10.10.10]]></subject>
+   <altnames><![CDATA[DNS:10.10.10.10]]></altnames>
+   <issuer><![CDATA[DigiCert TLS RSA SHA256 2020 CA1]]></issuer>
+   <self-signed>false</self-signed>
+   <not-valid-before>Sep  9 00:00:00 2021 GMT</not-valid-before>
+   <not-valid-after>Sep 16 23:59:59 2022 GMT</not-valid-after>
+   <expired>false</expired>
+  </certificate>
+ </certificates>
+ </ssltest>
+</document>

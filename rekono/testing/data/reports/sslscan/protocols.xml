@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document title="SSLScan Results" version="2.0.11-static" web="http://github.com/rbsec/sslscan">
- <ssltest host="10.10.11.145" sniname="10.10.11.145" port="443">
+ <ssltest host="10.10.10.10" sniname="10.10.10.10" port="443">
   <protocol type="ssl" version="2" enabled="0" />
   <protocol type="ssl" version="3" enabled="0" />
   <protocol type="tls" version="1.0" enabled="1" />

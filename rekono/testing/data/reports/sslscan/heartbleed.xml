@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document title="SSLScan Results" version="2.0.11-static" web="http://github.com/rbsec/sslscan">
- <ssltest host="allabs.com" sniname="allabs.com" port="443">
+ <ssltest host="10.10.10.10" sniname="10.10.10.10" port="443">
   <protocol type="ssl" version="2" enabled="0" />
   <protocol type="ssl" version="3" enabled="0" />
   <protocol type="tls" version="1.0" enabled="1" />
@@ -35,8 +35,8 @@
   <certificate type="short">
    <signature-algorithm>sha256WithRSAEncryption</signature-algorithm>
    <pk error="false" type="RSA" bits="2048" />
-   <subject><![CDATA[*.worldspice.net]]></subject>
-   <altnames><![CDATA[DNS:*.worldspice.net, DNS:mail.worldspice.net, DNS:nagios.worldspice.net, DNS:oss.worldspice.net, DNS:imap.worldspice.net, DNS:smtp.worldspice.net, DNS:controlpanel.worldspice.net, DNS:staff.worldspice.net, DNS:secure-commerce.worldspice.net, DNS:worldspice.net]]></altnames>
+   <subject><![CDATA[10.10.10.10]]></subject>
+   <altnames><![CDATA[DNS:10.10.10.10]]></altnames>
    <issuer><![CDATA[DigiCert SHA2 Secure Server CA]]></issuer>
    <self-signed>false</self-signed>
    <not-valid-before>Jul 21 00:00:00 2020 GMT</not-valid-before>
