@@ -23,21 +23,17 @@ jobs:
           python-version: '3.7'
 
       - name: Install Python dependencies
-        shell: bash
         run: python3 -m pip install -r requirements.txt
 
       - name: Install Node dependencies
-        shell: bash
         run: |
           cd rekono/frontend
           npm install
 
       - name: Install Snyk CLI
-        shell: bash
         run: npm install -g snyk@latest
 
       - name: Snyk test
-        shell: bash
         env:
             SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         run: snyk test --all-projects --sarif-file-output=snyk.sarif

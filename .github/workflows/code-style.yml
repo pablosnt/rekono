@@ -41,7 +41,6 @@ jobs:
         uses: actions/checkout@v2
       
       - name: Install ESLint
-        shell: bash
         run: |
           cd rekono/frontend/
           npm install .

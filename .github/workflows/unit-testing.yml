@@ -1,0 +1,44 @@
+name: Unit testing
+on:
+  workflow_dispatch:
+  pull_request:
+
+env:
+  REQUIRED_COVERAGE: 80
+
+jobs:
+  unit-testing:
+    name: Unit testing
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.7'
+
+      - name: Install Python dependencies
+        run: python3 -m pip install -r requirements.txt
+
+      - name: Run unit tests
+        run: |
+          cd rekono
+          coverage run --source='.' manage.py test
+      
+      - name: Check coverage
+        id: coverage
+        run: |
+          cd rekono
+          coverage report -m --skip-covered
+          percent=$(coverage json -o /dev/stdout | jq .totals.percent_covered)
+          echo ::set-output name=percent:: $percent
+
+      - name: Fail if covered percent is not enough
+        env:
+          COVERAGE: steps.coverage.outputs.percent
+        run: |
+          if (( $REQUIRED_COVERAGE > $COVERAGE ))
+          then
+            exit 10
+          fi
