@@ -13,6 +13,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      
+      - name: Install and start Redis server
+        run: |
+          apt update -y
+          apt install redis-server -y
+          systemctl start redis-server
 
       - uses: actions/setup-python@v2
         with:
@@ -36,7 +42,7 @@ jobs:
 
       - name: Fail if covered percent is not enough
         env:
-          COVERAGE: steps.coverage.outputs.percent
+          COVERAGE: ${{ steps.coverage.outputs.percent }}
         run: |
           if (( $REQUIRED_COVERAGE > $COVERAGE ))
           then
