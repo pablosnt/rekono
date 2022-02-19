@@ -1,11 +1,11 @@
 {
     "info": {
-        "args": "dirsearch.py -u http://10.10.11.136 -o /home/kali/Desktop/testing/dirsearch/default.json --format=json",
+        "args": "dirsearch.py -u http://10.10.10.10 -o /home/kali/Desktop/testing/dirsearch/default.json --format=json",
         "time": "Fri Feb 18 16:49:03 2022"
     },
     "results": [
         {
-            "http://10.10.11.136:80/": [
+            "http://10.10.10.10:80/": [
                 {
                     "content-length": 277,
                     "path": "/.ht_wsr.txt",
@@ -117,7 +117,7 @@
                 {
                     "content-length": 313,
                     "path": "/assets",
-                    "redirect": "http://10.10.11.136/assets/",
+                    "redirect": "http://10.10.10.10/assets/",
                     "status": 301
                 },
                 {
