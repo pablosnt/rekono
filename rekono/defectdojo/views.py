@@ -30,7 +30,7 @@ class DefectDojoScans(GenericViewSet):
 
     @extend_schema(request=EngagementSerializer, responses={200: None})
     # Permission classes are overrided to IsAuthenticated, IsAuditor and ProjectMemberPermission to allow all project
-    # Auditors and Admins to make Defect-Dojo imports.
+    # Auditors and Admins to make Defect-Dojo imports from their projects.
     @action(
         detail=True,
         methods=['POST'],
@@ -84,7 +84,7 @@ class DefectDojoFindings(GenericViewSet):
 
     @extend_schema(request=EngagementSerializer, responses={200: None})
     # Permission classes are overrided to IsAuthenticated, IsAuditor and ProjectMemberPermission to allow all project
-    # Auditors and Admins to make Defect-Dojo imports.
+    # Auditors and Admins to make Defect-Dojo imports from their projects.
     @action(
         detail=True,
         methods=['POST'],

@@ -6,6 +6,8 @@ from django.http import HttpResponse
 from django.test import TestCase
 from django.utils import timezone
 from executions.models import Execution
+from findings.enums import OSType
+from findings.models import Host
 from processes.models import Process, Step
 from projects.models import Project
 from rest_framework.test import APIClient
@@ -62,8 +64,15 @@ class RekonoTestCase(TestCase):
         self.execution = Execution.objects.create(
             task=self.task,
             status=Status.COMPLETED,
+            output_file=os.path.join(self.data_path, 'reports', 'nmap', 'ftp-vulnerabilities.xml'),
             start=timezone.now(),
             end=timezone.now()
+        )
+        self.finding = Host.objects.create(
+            execution=self.execution,
+            address='100.100.100.100',
+            os='Apple macOS 10.13 (High Sierra) - 10.15 (Catalina) or iOS 11.0 - 13.4 (Darwin 17.0.0 - 19.2.0)',
+            os_type=OSType.MACOS
         )
 
     def get_content(self, response: HttpResponse) -> Dict[Any, Any]:

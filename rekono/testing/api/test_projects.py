@@ -1,4 +1,8 @@
+from typing import Any, Dict
+from unittest import mock
+
 from testing.api.base import RekonoTestCase
+from testing.mocks.defectdojo import get_product, get_product_not_found
 
 
 class ProjectsTest(RekonoTestCase):
@@ -10,7 +14,7 @@ class ProjectsTest(RekonoTestCase):
         super().setUp()
         # Data for testing
         self.used_data = {'name': self.project.name, 'description': self.project.description, 'tags': self.project.tags}
-        self.new_data = {'name': 'New Test', 'description': 'New Test', 'tags': ['new']}
+        self.new_data: Dict[str, Any] = {'name': 'New Test', 'description': 'New Test', 'tags': ['new']}
         self.models = {self.project: self.project.name}                         # Models to test __str__ method
 
     def test_create(self) -> None:
@@ -18,9 +22,23 @@ class ProjectsTest(RekonoTestCase):
         # Create new project
         self.api_test(self.client.post, self.endpoint, 201, data=self.new_data, expected=self.new_data)
 
+    @mock.patch('defectdojo.api.DefectDojo.get_product', get_product)           # Mocks Defect-Dojo response
+    def test_create_with_defect_dojo_product(self) -> None:
+        '''Test project creation feature with valid Defect-Dojo product Id.'''
+        self.new_data['defectdojo_product_id'] = 1
+        # Create new project
+        self.api_test(self.client.post, self.endpoint, 201, data=self.new_data, expected=self.new_data)
+
     def test_invalid_create(self) -> None:
         '''Test project creation feature with invalid data.'''
         self.api_test(self.client.post, self.endpoint, 400, data=self.used_data)    # Project already exists
+
+    @mock.patch('defectdojo.api.DefectDojo.get_product', get_product_not_found)     # Mocks Defect-Dojo response
+    def test_invalid_create_with_defect_dojo_product_not_found(self) -> None:
+        '''Test project creation feature with not found Defect-Dojo product Id.'''
+        self.new_data['defectdojo_product_id'] = 1
+        # Defect-Dojo product Id doesn't exist
+        self.api_test(self.client.post, self.endpoint, 400, data=self.new_data)
 
     def test_update(self) -> None:
         '''Test project update feature.'''
