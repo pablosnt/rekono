@@ -26,7 +26,7 @@ def new_target_port(update: Update, context: CallbackContext) -> int:
         int: Conversation state
     '''
     chat = get_chat(update)                                                     # Get Telegram chat
-    if chat:
+    if chat and context.chat_data:
         if PROJECT in context.chat_data:                                        # Project already selected
             context.chat_data[STATES] = [(CREATE, ASK_FOR_NEW_TARGET_PORT)]     # Configure next steps
             return ask_for_target(update, context, chat)                        # Ask for target selection
@@ -49,7 +49,7 @@ def create_target_port(update: Update, context: CallbackContext) -> int:
     '''
     clear(context, [STATES])                                                    # Clear Telegram context
     chat = get_chat(update)                                                     # Get Telegram chat
-    if chat:
+    if chat and context.chat_data and update.message and update.message.text:
         if update.message.text == '/cancel':                                    # Check if cancellation is requested
             return cancel(update, context)                                      # Cancel operation
         try:

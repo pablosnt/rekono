@@ -27,7 +27,7 @@ def execute_tool(update: Update, context: CallbackContext) -> int:
         int: Conversation state
     '''
     chat = get_chat(update)                                                     # Get Telegram chat
-    if chat:
+    if chat and context.chat_data:
         if PROJECT in context.chat_data:                                        # Project already selected
             context.chat_data[STATES] = [                                       # Prepare next steps
                 (None, ask_for_tool),
@@ -59,7 +59,7 @@ def execute_process(update: Update, context: CallbackContext) -> int:
         int: Conversation state
     '''
     chat = get_chat(update)                                                     # Get Telegram chat
-    if chat:
+    if chat and context.chat_data:
         if PROJECT in context.chat_data:                                        # Project already selected
             context.chat_data[STATES] = [                                       # Prepare next steps
                 (None, ask_for_process),
@@ -89,9 +89,15 @@ def execute(update: Update, context: CallbackContext) -> int:
         int: Conversation state
     '''
     clear(context, [STATES])                                                    # Clear Telegram context
-    chat = get_chat(update)                                                     # Get Telegram chat
-    update.callback_query.answer()                                              # Empty answer
-    if chat:
+    chat = get_chat(update)                                                  # Get Telegram chat
+    if (
+        chat and
+        context.chat_data and
+        update.callback_query and
+        update.callback_query.bot and
+        update.callback_query.data
+    ):
+        update.callback_query.answer()                                          # Empty answer
         if update.callback_query.data.lower() == 'yes':                         # Check execution confirmation
             task_data = {                                                       # Prepare common execution data
                 'target_id': context.chat_data[TARGET].id,

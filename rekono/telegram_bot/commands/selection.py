@@ -16,7 +16,7 @@ def show(update: Update, context: CallbackContext) -> None:
         context (CallbackContext): Telegram Bot context
     '''
     chat = get_chat(update)                                                     # Get Telegram chat
-    if chat:
+    if chat and context.chat_data and update.message:
         if PROJECT in context.chat_data:                                        # Selected project
             update.message.reply_text(
                 SELECTION.format(project=escape_markdown(context.chat_data[PROJECT].name, version=2)),
@@ -34,7 +34,7 @@ def clear(update: Update, context: CallbackContext) -> None:
         context (CallbackContext): Telegram Bot context
     '''
     chat = get_chat(update)                                                     # Get Telegram chat
-    if chat:
+    if chat and context.chat_data and update.message:
         if PROJECT in context.chat_data:                                        # Selected project
             context.chat_data.pop(PROJECT)                                      # Unselect project
         update.message.reply_text(CLEAR_SELECTION)

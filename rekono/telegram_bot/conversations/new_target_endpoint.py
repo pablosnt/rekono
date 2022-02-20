@@ -26,7 +26,7 @@ def new_target_endpoint(update: Update, context: CallbackContext) -> int:
         int: Conversation state
     '''
     chat = get_chat(update)                                                     # Get Telegram chat
-    if chat:
+    if chat and context.chat_data:
         if PROJECT in context.chat_data:                                        # Project already selected
             # Configure next steps
             context.chat_data[STATES] = [(None, ask_for_target_port), (CREATE, ASK_FOR_NEW_TARGET_ENDPOINT)]
@@ -53,7 +53,7 @@ def create_target_endpoint(update: Update, context: CallbackContext) -> int:
     '''
     clear(context, [STATES, TARGET])                                            # Clear Telegram context
     chat = get_chat(update)                                                     # Get Telegram chat
-    if chat:
+    if chat and context.chat_data and update.message:
         if update.message.text == '/cancel':                                    # Check if cancellation is requested
             return cancel(update, context)                                      # Cancel operation
         serializer = TargetEndpointSerializer(                                  # Prepare target endpoint data

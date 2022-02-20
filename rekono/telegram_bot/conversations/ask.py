@@ -32,13 +32,20 @@ def send_message(update: Update, chat: TelegramChat, text: str) -> None:
         chat (TelegramChat): Telegram chat entity
         text (str): Text message to send
     '''
-    if hasattr(update, 'message') and getattr(update, 'message'):               # Standard update
+    if hasattr(update, 'message') and update.message:                           # Standard update
         update.message.reply_text(text, parse_mode=ParseMode.MARKDOWN_V2)
-    else:                                                                       # Update from keyboard selection
+    elif hasattr(update, 'callback_query') and update.callback_query and update.callback_query.bot:
+        # Update from keyboard selection
         update.callback_query.bot.send_message(chat.chat_id, text=text, parse_mode=ParseMode.MARKDOWN_V2)
 
 
-def send_options(update: Update, chat: TelegramChat, text: str, keyboard: List[InlineKeyboardButton], per_row: int) -> None:
+def send_options(
+    update: Update,
+    chat: TelegramChat,
+    text: str,
+    keyboard: List[InlineKeyboardButton],
+    per_row: int
+) -> None:
     '''Send Telegram options message.
 
     Args:
@@ -51,13 +58,14 @@ def send_options(update: Update, chat: TelegramChat, text: str, keyboard: List[I
     keyboard_by_row = []
     for i in range(0, len(keyboard), per_row):                                  # For each row
         keyboard_by_row.append(keyboard[i:i + per_row])                         # Get keyboard buttons for this row
-    if hasattr(update, 'message') and getattr(update, 'message'):               # Standard update
+    if hasattr(update, 'message') and update.message:                           # Standard update
         update.message.reply_text(
             text,
             reply_markup=InlineKeyboardMarkup(keyboard_by_row),
             parse_mode=ParseMode.MARKDOWN_V2
         )
-    else:                                                                       # Update from keyboard selection
+    elif hasattr(update, 'callback_query') and update.callback_query and update.callback_query.bot:
+        # Update from keyboard selection
         update.callback_query.bot.send_message(
             chat.chat_id,
             text=text,
@@ -99,7 +107,10 @@ def ask_for_target(update: Update, context: CallbackContext, chat: TelegramChat)
     Returns:
         int: Next conversation state or end conversation
     '''
-    targets = Target.objects.filter(project=context.chat_data[PROJECT]).order_by('target').all()  # Get all user targets
+    targets = []
+    if context.chat_data:
+        # Get all user targets
+        targets = Target.objects.filter(project=context.chat_data[PROJECT]).order_by('target').all()
     if not targets:                                                             # No targets found
         send_message(update, chat, NO_TARGETS)
         return ConversationHandler.END                                          # End conversation
@@ -121,8 +132,10 @@ def ask_for_target_port(update: Update, context: CallbackContext, chat: Telegram
     Returns:
         int: Next conversation state or end conversation
     '''
-    # Get target ports by selected target
-    target_ports = TargetPort.objects.filter(target=context.chat_data[TARGET]).order_by('port').all()
+    target_ports = []
+    if context.chat_data:
+        # Get target ports by selected target
+        target_ports = TargetPort.objects.filter(target=context.chat_data[TARGET]).order_by('port').all()
     if not target_ports:                                                        # No target ports found
         send_message(update, chat, NO_TARGET_PORTS)
         return ConversationHandler.END                                          # End conversation
@@ -184,8 +197,10 @@ def ask_for_configuration(update: Update, context: CallbackContext, chat: Telegr
     Returns:
         int: Next conversation state or end conversation
     '''
-    # Get configurations by selected tool
-    configurations = Configuration.objects.filter(tool=context.chat_data[TOOL]).order_by('name').all()
+    configurations = []
+    if context.chat_data:
+        # Get configurations by selected tool
+        configurations = Configuration.objects.filter(tool=context.chat_data[TOOL]).order_by('name').all()
     # Create keyboard buttons with the configurations data
     keyboard = [InlineKeyboardButton(c.name, callback_data=c.id) for c in configurations]
     send_options(update, chat, ASK_FOR_CONFIGURATION, keyboard, 2)
@@ -204,7 +219,7 @@ def ask_for_intensity(update: Update, context: CallbackContext, chat: TelegramCh
         int: Next conversation state or end conversation
     '''
     intensities = IntensityRank.names                                           # Get all intensities
-    if TOOL in context.chat_data:                                               # Tool is selected
+    if context.chat_data and TOOL in context.chat_data:                         # Tool is selected
         # Get available intensities for selected tool
         intensities = [IntensityRank(i.value).name for i in context.chat_data[TOOL].intensities.order_by('value').all()]
     intensities.reverse()                                                       # Show harder intensities first

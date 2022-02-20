@@ -24,7 +24,7 @@ def new_target(update: Update, context: CallbackContext) -> int:
         int: Conversation state
     '''
     chat = get_chat(update)                                                     # Get Telegram chat
-    if chat:
+    if chat and context.chat_data and update.message:
         if PROJECT in context.chat_data:                                        # Project already selected
             update.message.reply_text(ASK_FOR_NEW_TARGET)                       # Ask for the new target
             return CREATE                                                       # Go to target creation
@@ -46,7 +46,7 @@ def create_target(update: Update, context: CallbackContext) -> int:
     '''
     clear(context, [STATES])                                                    # Clear Telegram context
     chat = get_chat(update)                                                     # Get Telegram chat
-    if chat:
+    if chat and context.chat_data and update.message:
         if update.message.text == '/cancel':                                    # Check if cancellation is requested
             return cancel(update, context)                                      # Cancel operation
         # Prepare target data
