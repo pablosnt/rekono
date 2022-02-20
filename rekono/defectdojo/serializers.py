@@ -1,6 +1,5 @@
 from typing import Any, Dict
 
-from defectdojo.api import DefectDojo
 from django.core.exceptions import ValidationError
 from rest_framework import serializers
 from security.input_validation import validate_name, validate_text
@@ -26,20 +25,7 @@ class EngagementSerializer(serializers.Serializer):
             Dict[str, Any]: Data after validation process
         '''
         attrs = super().validate(attrs)
-        if 'id' in attrs:                                                       # Import using an existing engagement
-            success, _ = DefectDojo().get_engagement(attrs['id'])               # Check if the engagement Id exists
-            if not success:
-                raise ValidationError({'id': f'Engagement {attrs.get("id")} not found'})
-        elif not (                                                              # Id or (name and description) required
-            'name' in attrs and attrs.get('name') and
-            'description' in attrs and attrs.get('description')
-        ):
-            raise ValidationError({
-                'id': 'This field is required if "name" and "description" are not provided',
-                'name': 'This field is required if "id" is not specified',
-                'description': 'This field is required if "id" is not specified'
-            })
-        else:
+        if attrs.get('name') and attrs.get('description'):
             try:
                 validate_name(attrs['name'])                                    # Check name value
             except ValidationError as ex:
@@ -48,4 +34,10 @@ class EngagementSerializer(serializers.Serializer):
                 validate_text(attrs['description'])                             # Check description value
             except ValidationError as ex:
                 raise ValidationError({'description': str(ex)})
+        elif not attrs.get('id'):                                               # Id or (name and description) required
+            raise ValidationError({
+                'id': 'This field is required if "name" and "description" are not provided',
+                'name': 'This field is required if "id" is not specified',
+                'description': 'This field is required if "id" is not specified'
+            })
         return attrs

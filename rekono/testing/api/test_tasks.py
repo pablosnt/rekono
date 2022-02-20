@@ -1,12 +1,15 @@
+from unittest import mock
+
 from executions.models import Execution
 from processes.models import Step
 from tasks.enums import Status
 from tasks.models import Task
-from testing.api.base import RekonoTestCase
+from testing.api.defect_dojo_base import RekonoTestCaseWithDDImports
+from testing.mocks.defectdojo import defect_dojo_success
 from tools.models import Configuration, Tool
 
 
-class TasksTest(RekonoTestCase):
+class TasksTest(RekonoTestCaseWithDDImports):
     '''Test cases for Tasks module.'''
 
     def setUp(self) -> None:
@@ -30,6 +33,7 @@ class TasksTest(RekonoTestCase):
             self.task: f'{self.project.name} - {self.target.target} - {self.tool.name} - {self.configuration.name}',
             self.running_task: f'{self.project.name} - {self.target.target} - {self.process.name}',
         }
+        self.dd_model = self.task                                               # Model to test Defect-Dojo integration
 
     def test_create_with_tool(self) -> None:
         '''Test creation feature with tool task.'''
@@ -98,3 +102,19 @@ class TasksTest(RekonoTestCase):
         '''Test repeat task feature with running task.'''
         # It's not possible to repeat a running task
         self.api_test(self.client.post, f'{self.endpoint}{self.running_task.id}/repeat/', 400)
+
+    @mock.patch('defectdojo.api.DefectDojo.request', defect_dojo_success)       # Mocks Defect-Dojo response
+    def test_import_in_defect_dojo_without_executions_and_findings(self) -> None:
+        '''Test Defect-Dojo import feature with no data to import.'''
+        # Try to import executions from running task
+        self.api_test(
+            self.client.post,
+            f'{self.endpoint}{self.running_task.id}/defect-dojo-scans/',
+            400, data={'id': 1}
+        )
+        # Try to import findings from running task
+        self.api_test(
+            self.client.post,
+            f'{self.endpoint}{self.running_task.id}/defect-dojo-findings/',
+            400, data={'id': 1}
+        )

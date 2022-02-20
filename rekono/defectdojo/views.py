@@ -20,13 +20,13 @@ from tasks.enums import Status
 class DefectDojoScans(GenericViewSet):
     '''Base ViewSet that includes the Defect-Dojo scans import feature.'''
 
-    def get_executions(self) -> List[Execution]:
-        '''Get executions list associated to the current instance.
+    def get_executions(self) -> List[Execution]:                                # pragma: no cover
+        '''Get executions list associated to the current instance. To be implemented by subclasses.
 
         Returns:
             List[Execution]: Executions list associated to the current instance
         '''
-        return []
+        pass
 
     @extend_schema(request=EngagementSerializer, responses={200: None})
     # Permission classes are overrided to IsAuthenticated, IsAuditor and ProjectMemberPermission to allow all project
@@ -56,7 +56,7 @@ class DefectDojoScans(GenericViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
         serializer = EngagementSerializer(data=request.data)
-        if serializer.is_valid() and executions:
+        if serializer.is_valid():
             try:
                 uploader.scans(                                                 # Import executions in Defect-Dojo
                     self.get_object().get_project(),
@@ -74,13 +74,13 @@ class DefectDojoScans(GenericViewSet):
 class DefectDojoFindings(GenericViewSet):
     '''Base ViewSet that includes the Defect-Dojo findings import feature.'''
 
-    def get_findings(self) -> List[Finding]:
-        '''Get findings list associated to the current instance.
+    def get_findings(self) -> List[Finding]:                                    # pragma: no cover
+        '''Get findings list associated to the current instance. To be implemented by subclasses.
 
         Returns:
             List[Finding]: Findings list associated to the current instance
         '''
-        return []
+        pass
 
     @extend_schema(request=EngagementSerializer, responses={200: None})
     # Permission classes are overrided to IsAuthenticated, IsAuditor and ProjectMemberPermission to allow all project

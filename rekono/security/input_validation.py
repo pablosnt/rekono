@@ -7,6 +7,35 @@ TEXT_REGEX = r'[\w\s\.:,+\-\'"?¿¡!#%$€]*'                                   
 ENDPOINT_REGEX = r'[\w\./#?&%]*'                                                # Regex for endpoint validation
 
 
+def validate_text_value(value: str, regex: str) -> None:
+    '''Validate if text value match the allowed regex.
+
+    Args:
+        value (str): Text value to be validated
+        regex (str): Regex that the value should match
+
+    Raises:
+        ValidationError: Raised if value doesn't match the allowed regex
+    '''
+    if not bool(re.fullmatch(regex, value)):
+        raise ValidationError('Value contains unallowed characters')
+
+
+def validate_number_value(value: int, min: int, max: int) -> None:
+    '''Validate if number is in the allowed range.
+
+    Args:
+        value (int): Number value to be validated
+        min (int): Min allowed value
+        max (int): Max allowed value
+
+    Raises:
+        ValidationError: Raised if value is not in the allowed range
+    '''
+    if value < min or value > max:
+        raise ValidationError('Number value is not in the allowed range')
+
+
 def validate_name(value: str) -> None:
     '''Validate if name is valid based on regex.
 
@@ -16,8 +45,7 @@ def validate_name(value: str) -> None:
     Raises:
         ValidationError: Raised if value doesn't match the expected regex
     '''
-    if not bool(re.fullmatch(NAME_REGEX, value)):
-        raise ValidationError('Value contains unallowed characters')
+    validate_text_value(value, NAME_REGEX)
 
 
 def validate_text(value: str) -> None:
@@ -29,21 +57,7 @@ def validate_text(value: str) -> None:
     Raises:
         ValidationError: Raised if value doesn't match the expected regex
     '''
-    if not bool(re.fullmatch(TEXT_REGEX, value)):
-        raise ValidationError('Value contains unallowed characters')
-
-
-def validate_number(value: int) -> None:
-    '''Validate if number is valid based on min and max values.
-
-    Args:
-        value (int): Number value
-
-    Raises:
-        ValidationError: Raised if value is lower or greater than the expected range
-    '''
-    if value < 1 or value > 999999:
-        raise ValidationError('Invalid number')
+    validate_text_value(value, TEXT_REGEX)
 
 
 def validate_endpoint(value: str) -> None:
@@ -55,8 +69,19 @@ def validate_endpoint(value: str) -> None:
     Raises:
         ValidationError: Raised if value doesn't match the expected regex
     '''
-    if not bool(re.fullmatch(ENDPOINT_REGEX, value)):
-        raise ValidationError('Invalid endpoint value')
+    validate_text_value(value, ENDPOINT_REGEX)
+
+
+def validate_number(value: int) -> None:
+    '''Validate if number is valid based on min and max values.
+
+    Args:
+        value (int): Number value
+
+    Raises:
+        ValidationError: Raised if value is lower or greater than the expected range
+    '''
+    validate_number_value(value, 1, 999999)
 
 
 def validate_time_amount(value: int) -> None:
@@ -68,5 +93,4 @@ def validate_time_amount(value: int) -> None:
     Raises:
         ValidationError: Raised if value is lower or greater than the expected range
     '''
-    if value < 1 or value > 1000:
-        raise ValidationError('Invalid time value')
+    validate_number_value(value, 1, 1000)

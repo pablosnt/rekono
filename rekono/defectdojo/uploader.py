@@ -29,7 +29,7 @@ def get_product(project: Project) -> int:
     elif DEFECT_DOJO.get('PRODUCT_AUTO_CREATION'):                              # Defect-Dojo creation enabled
         product_type = None
         success, body = dd_client.get_rekono_product_type()                     # Get product type associated to Rekono
-        if success and body and 'results' in body and len(body['results']) > 0:
+        if success and body and len(body.get('results', [])) > 0:
             product_type = body['results'][0].get('id')
         else:                                                                   # Error obtaining product type
             # Create product type associated to Rekono
@@ -64,10 +64,13 @@ def get_engagement(project: Project, id: int, name: str, description: str) -> Tu
         success, body = dd_client.get_engagement(id)                            # Get engagement from Defect-Dojo
         if success and body:
             # Engagement product doesn't match the product associated to the Rekono project
-            if project.defectdojo_product_id and project.defectdojo_product_id != body.get('id'):
+            if project.defectdojo_product_id and project.defectdojo_product_id != body.get('product'):
                 raise DefectDojoException({'engagement': [f'Invalid engagement Id {id} for project {project.id}']})
-            else:
-                return project.defectdojo_product_id, body['id']
+            elif not project.defectdojo_product_id:                             # No related product Id yet
+                # Save engagement product in Rekono project
+                project.defectdojo_product_id = body.get('product')
+                project.save(update_fields=['defectdojo_product_id'])
+            return project.defectdojo_product_id, id
         # Engagement not found in Defect-Dojo
         raise DefectDojoException({'engagement': [f'Engagement Id {id} not found']})
     elif name and description:                                                  # Name and description provided
@@ -93,7 +96,7 @@ def create_rekono_test(engagement_id: int) -> int:
     '''
     test_type = None
     result, body = dd_client.get_rekono_test_type()                             # Get Rekono test type
-    if result and body and 'results' in body and len(body['results']) > 0:
+    if result and body and len(body.get('results', [])) > 0:
         test_type = body['results'][0].get('id')
     else:                                                                       # Rekono test type not found
         result, body = dd_client.create_rekono_test_type()                      # Create Rekono test type
@@ -160,8 +163,6 @@ def findings(
     for finding in findings:                                                    # For each finding
         success = False
         if isinstance(finding, Endpoint):                                       # Endpoint finding
-            if not product_id:
-                product_id = get_product(project)                               # Get the product if not found before
             success, _ = dd_client.create_endpoint(product_id, finding)         # Import finding as Defect-Dojo endpoint
         else:
             if not test_id:

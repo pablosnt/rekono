@@ -1,7 +1,10 @@
-from findings.enums import DataType, OSType, PortStatus, Protocol, Severity
-from findings.models import (OSINT, Credential, Endpoint, Enumeration, Exploit,
-                             Host, Technology, Vulnerability)
+from unittest import mock
+
+from findings.enums import DataType, Severity
+from findings.models import (OSINT, Credential, Exploit, Technology,
+                             Vulnerability)
 from testing.api.base import RekonoTestCase
+from testing.mocks.defectdojo import defect_dojo_success
 
 
 class FindingsTest(RekonoTestCase):
@@ -18,19 +21,9 @@ class FindingsTest(RekonoTestCase):
         self.user_osint = OSINT.objects.create(
             execution=self.execution, data='Test', data_type=DataType.USER, source='DuckDuckGo'
         )
-        self.host = Host.objects.create(
-            execution=self.execution, address='10.10.10.10', os='Ubuntu', os_type=OSType.LINUX
-        )
-        self.enumeration = Enumeration.objects.create(
-            execution=self.execution, host=self.host, port=80,
-            port_status=PortStatus.OPEN, protocol=Protocol.TCP, service='http'
-        )
         self.technology = Technology.objects.create(
             execution=self.execution, enumeration=self.enumeration,
             name='Wordpress', version='1.0.0', description='Test'
-        )
-        self.endpoint = Endpoint.objects.create(
-            execution=self.execution, enumeration=self.enumeration, endpoint='/robots.txt', status=200
         )
         self.credential_finding = Credential.objects.create(
             execution=self.execution, technology=self.technology,
@@ -61,7 +54,7 @@ class FindingsTest(RekonoTestCase):
             (self.host, 'hosts'),
             (self.enumeration, 'enumerations'),
             (self.technology, 'technologies'),
-            (self.endpoint, 'endpoints'),
+            (self.http_endpoint, 'endpoints'),
             (self.credential_finding, 'credentials'),
             (self.vulnerability, 'vulnerabilities'),
             (self.enum_vulnerability, 'vulnerabilities'),
@@ -75,7 +68,7 @@ class FindingsTest(RekonoTestCase):
             self.host: self.host.address,
             self.enumeration: f'{self.host.__str__()} - {self.enumeration.port}',
             self.technology: f'{self.enumeration.__str__()} - {self.technology.name}',
-            self.endpoint: f'{self.enumeration.__str__()} - {self.endpoint.endpoint}',
+            self.http_endpoint: f'{self.enumeration.__str__()} - {self.http_endpoint.endpoint}',
             self.credential_finding: f'{self.technology.__str__()} - {self.credential_finding.email} - {self.credential_finding.username} - {self.credential_finding.secret}',      # noqa: E501
             self.vulnerability: f'{self.technology.__str__()} - {self.vulnerability.name} - {self.vulnerability.cve}',
             self.enum_vulnerability: f'{self.enumeration.__str__()} - {self.enum_vulnerability.name} - {self.enum_vulnerability.cve}',      # noqa: E501
@@ -127,3 +120,14 @@ class FindingsTest(RekonoTestCase):
                     findings.reverse()                                          # Order findings by creation (so by Id)
                     for index, finding in enumerate(findings):
                         self.assertEqual(finding.id, content['results'][index]['id'])
+
+    @mock.patch('defectdojo.api.DefectDojo.request', defect_dojo_success)       # Mocks Defect-Dojo response
+    def test_import_defect_dojo(self) -> None:
+        '''Test Defect-Dojo import feature.'''
+        engagement_id = {'id': 1}
+        new_engagement = {'name': 'Engagement', 'description': 'Engagement'}
+        for finding, endpoint in self.data:
+            # Import in existing engagement
+            self.api_test(self.client.post, f'/api/{endpoint}/{finding.id}/defect-dojo/', 200, data=engagement_id)
+            # Import in new engagement
+            self.api_test(self.client.post, f'/api/{endpoint}/{finding.id}/defect-dojo/', 200, data=new_engagement)

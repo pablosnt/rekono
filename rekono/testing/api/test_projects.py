@@ -1,11 +1,11 @@
 from typing import Any, Dict
 from unittest import mock
 
-from testing.api.base import RekonoTestCase
-from testing.mocks.defectdojo import get_product, get_product_not_found
+from testing.api.defect_dojo_base import RekonoTestCaseWithDDImports
+from testing.mocks.defectdojo import defect_dojo_error, defect_dojo_success
 
 
-class ProjectsTest(RekonoTestCase):
+class ProjectsTest(RekonoTestCaseWithDDImports):
     '''Test cases for Projects module.'''
 
     def setUp(self) -> None:
@@ -16,13 +16,14 @@ class ProjectsTest(RekonoTestCase):
         self.used_data = {'name': self.project.name, 'description': self.project.description, 'tags': self.project.tags}
         self.new_data: Dict[str, Any] = {'name': 'New Test', 'description': 'New Test', 'tags': ['new']}
         self.models = {self.project: self.project.name}                         # Models to test __str__ method
+        self.dd_model = self.project                                            # Model to test Defect-Dojo integration
 
     def test_create(self) -> None:
         '''Test project creation feature.'''
         # Create new project
         self.api_test(self.client.post, self.endpoint, 201, data=self.new_data, expected=self.new_data)
 
-    @mock.patch('defectdojo.api.DefectDojo.get_product', get_product)           # Mocks Defect-Dojo response
+    @mock.patch('defectdojo.api.DefectDojo.request', defect_dojo_success)       # Mocks Defect-Dojo response
     def test_create_with_defect_dojo_product(self) -> None:
         '''Test project creation feature with valid Defect-Dojo product Id.'''
         self.new_data['defectdojo_product_id'] = 1
@@ -33,7 +34,7 @@ class ProjectsTest(RekonoTestCase):
         '''Test project creation feature with invalid data.'''
         self.api_test(self.client.post, self.endpoint, 400, data=self.used_data)    # Project already exists
 
-    @mock.patch('defectdojo.api.DefectDojo.get_product', get_product_not_found)     # Mocks Defect-Dojo response
+    @mock.patch('defectdojo.api.DefectDojo.request', defect_dojo_error)         # Mocks Defect-Dojo response
     def test_invalid_create_with_defect_dojo_product_not_found(self) -> None:
         '''Test project creation feature with not found Defect-Dojo product Id.'''
         self.new_data['defectdojo_product_id'] = 1
@@ -87,3 +88,12 @@ class ProjectsTest(RekonoTestCase):
         '''Test remove project member feature with invalid data.'''
         # Project owner can't be removed
         self.api_test(self.client.delete, f'{self.endpoint}{self.project.id}/members/{self.admin.id}/', 400)
+
+    @mock.patch('defectdojo.api.DefectDojo.request', defect_dojo_success)       # Mocks Defect-Dojo response
+    def test_import_in_defect_dojo_without_executions_and_findings(self) -> None:
+        '''Test Defect-Dojo import feature with no data to import.'''
+        # Uninitailized environment (no executions and no findings)
+        # Try to import project executions
+        self.api_test(self.client.post, f'{self.endpoint}{self.project.id}/defect-dojo-scans/', 400, data={'id': 1})
+        # Try to import project findings
+        self.api_test(self.client.post, f'{self.endpoint}{self.project.id}/defect-dojo-findings/', 400, data={'id': 1})

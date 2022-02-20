@@ -6,8 +6,8 @@ from django.http import HttpResponse
 from django.test import TestCase
 from django.utils import timezone
 from executions.models import Execution
-from findings.enums import OSType
-from findings.models import Host
+from findings.enums import OSType, PortStatus, Protocol
+from findings.models import Endpoint, Enumeration, Host
 from processes.models import Process, Step
 from projects.models import Project
 from rest_framework.test import APIClient
@@ -42,9 +42,12 @@ class RekonoTestCase(TestCase):
         self.project = Project.objects.create(name='Test', description='Test', tags=['test'], owner=self.admin)
         self.project.members.add(self.admin)
         self.models: Dict[Any, str] = {}                                        # Models to test __str__ method
+        # Indicate if environment has been initialized
+        self.initialized = False
 
     def initialize_environment(self) -> None:
         '''Initialize environment for testing.'''
+        self.initialized = True
         self.target = Target.objects.create(project=self.project, target='10.10.10.10')
         self.target_port = TargetPort.objects.create(target=self.target, port=80)
         self.target_endpoint = TargetEndpoint.objects.create(target_port=self.target_port, endpoint='/robots.txt')
@@ -68,11 +71,15 @@ class RekonoTestCase(TestCase):
             start=timezone.now(),
             end=timezone.now()
         )
-        self.finding = Host.objects.create(
-            execution=self.execution,
-            address='100.100.100.100',
-            os='Apple macOS 10.13 (High Sierra) - 10.15 (Catalina) or iOS 11.0 - 13.4 (Darwin 17.0.0 - 19.2.0)',
-            os_type=OSType.MACOS
+        self.host = Host.objects.create(
+            execution=self.execution, address='10.10.10.10', os='Ubuntu', os_type=OSType.LINUX
+        )
+        self.enumeration = Enumeration.objects.create(
+            execution=self.execution, host=self.host, port=80,
+            port_status=PortStatus.OPEN, protocol=Protocol.TCP, service='http'
+        )
+        self.http_endpoint = Endpoint.objects.create(
+            execution=self.execution, enumeration=self.enumeration, endpoint='/robots.txt', status=200
         )
 
     def get_content(self, response: HttpResponse) -> Dict[Any, Any]:
@@ -116,7 +123,7 @@ class RekonoTestCase(TestCase):
             response = request(endpoint, data=kwargs['data'], format=kwargs.get('format', 'json'))
         else:                                                                   # No HTTP body
             response = request(endpoint)                                        # Make Rekono API request
-        self.assertEqual(response.status_code, status_code)                     # Check HTTP status code
+        self.assertEqual(status_code, response.status_code)                     # Check HTTP status code
         content = self.get_content(response)                                    # Get content from HTTP response
         if kwargs.get('expected'):                                              # Expected response content
             self.check_fields(list(kwargs['expected'].keys()), content, kwargs['expected'])     # Check expected data

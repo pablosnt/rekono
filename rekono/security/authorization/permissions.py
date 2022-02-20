@@ -80,7 +80,7 @@ class ProjectMemberPermission(BasePermission):
 class BaseCreatorPermission(BasePermission):
     '''Check if current user can access an object based on HTTP method and creator user.'''
 
-    def get_instance(self, obj: Any) -> Any:
+    def get_instance(self, obj: Any) -> Any:                                    # pragma: no cover
         '''Get object with creator user from object accessed by the current user. To be implemented by subclasses.
 
         Args:
