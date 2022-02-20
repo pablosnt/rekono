@@ -40,7 +40,7 @@ jobs:
         run: python3 -m pip install mypy
       
       - name: MyPy check
-        run: mypy -p rekono --ignore-missing-imports
+        run: mypy --namespace-packages -p rekono --ignore-missing-imports
 
   eslint:
     runs-on: ubuntu-latest
