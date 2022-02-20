@@ -6,7 +6,7 @@ from django.template.loader import get_template
 from django_rq import job
 from findings.models import Finding
 
-from rekono.settings import EMAIL_HOST_USER, FRONTEND_URL
+from rekono.settings import FRONTEND_URL
 
 
 @job('emails-queue')
@@ -22,7 +22,7 @@ def consumer(addresses: List[str], subject: str, template_name: str, data: Dict[
     template = get_template(template_name)                                      # Get HTML template
     data['rekono_url'] = FRONTEND_URL                                           # Include frontend address for links
     content = template.render(data)                                             # Render HTML template using data
-    message = EmailMultiAlternatives(subject, '', EMAIL_HOST_USER, addresses)   # Create email message
+    message = EmailMultiAlternatives(subject, '', None, addresses)        # Create email message
     message.attach_alternative(content, 'text/html')                            # Add HTML content to email message
     message.send()                                                              # Send email message
 

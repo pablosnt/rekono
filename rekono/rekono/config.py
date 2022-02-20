@@ -34,10 +34,10 @@ class RekonoConfig:
         self.RQ_HOST = self.get_config_key(config, ['rq', 'host'], '127.0.0.1')
         self.RQ_PORT = self.get_config_key(config, ['rq', 'port'], 6379)
         # Email: SMTP configuration
-        self.EMAIL_HOST = self.get_config_key(config, ['email', 'host'], '')
-        self.EMAIL_PORT = self.get_config_key(config, ['email', 'port'], 0)
-        self.EMAIL_USER = self.get_config_key(config, ['email', 'user'], '')
-        self.EMAIL_PASSWORD = self.get_config_key(config, ['email', 'password'], '')
+        self.EMAIL_HOST = self.get_config_key(config, ['email', 'host'], '127.0.0.1')
+        self.EMAIL_PORT = self.get_config_key(config, ['email', 'port'], 587)
+        self.EMAIL_USER = self.get_config_key(config, ['email', 'user'], None)
+        self.EMAIL_PASSWORD = self.get_config_key(config, ['email', 'password'], None)
         self.EMAIL_TLS = self.get_config_key(config, ['email', 'tls'], True)
         # Telegram Bot token
         self.TELEGRAM_TOKEN = self.get_config_key(config, ['telegram', 'token'], '')
@@ -66,7 +66,7 @@ class RekonoConfig:
         '''
         value = config
         for key in path:
-            value = value.get(key, {})
-            if not value:                                                       # Value not found
+            if key not in value or value.get(key) is None:                      # Value not found
                 return default                                                  # Return default value
+            value = value.get(key, {})
         return value

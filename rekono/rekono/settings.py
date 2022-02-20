@@ -290,6 +290,7 @@ RQ_QUEUES = {
 # Email                                                                        #
 ################################################################################
 
+DEFAULT_FROM_EMAIL = 'Rekono <noreply@rekono.com>'                              # Email from address
 EMAIL_HOST = os.getenv('RKN_EMAIL_HOST', CONFIG.EMAIL_HOST)                     # SMTP host
 EMAIL_PORT = os.getenv('RKN_EMAIL_PORT', CONFIG.EMAIL_PORT)                     # SMTP port
 EMAIL_HOST_USER = os.getenv('RKN_EMAIL_USER', CONFIG.EMAIL_USER)                # User for auth in SMTP server
