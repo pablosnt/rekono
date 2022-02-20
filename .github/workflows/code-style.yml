@@ -35,15 +35,19 @@ jobs:
       
       - name: Install Python dependencies
         run: |
+          pip install --upgrade pip
           python3 -m pip install -r requirements-dev.txt
           python3 -m venv venv
           source venv/bin/activate
           python3 -m pip install -r requirements.txt
+          echo "VIRTUAL ENV:" $VIRTUAL_ENV
       
       - name: MyPy check
         run: |
+          ls -la
           source venv/bin/activate
-          mypy --namespace-packages --package rekono
+          echo "VIRTUAL ENV:" $VIRTUAL_ENV
+          mypy -v --namespace-packages --package rekono
 
   eslint:
     runs-on: ubuntu-latest
