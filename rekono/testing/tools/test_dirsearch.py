@@ -1,5 +1,5 @@
 from findings.models import Endpoint
-from testing.parsers.base import ToolParserTest
+from testing.tools.base import ToolParserTest
 
 
 class DirsearchParserTest(ToolParserTest):

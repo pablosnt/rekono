@@ -13,7 +13,7 @@ def start(update: Update, context: CallbackContext) -> None:
         update (Update): Telegram Bot update
         context (CallbackContext): Telegram Bot context
     '''
-    if update.effective_chat:
+    if update.effective_chat and update.message:
         chat, _ = TelegramChat.objects.update_or_create(                        # Create or update the Telegram chat
             defaults={'user': None, 'otp': generate(), 'otp_expiration': get_expiration()},
             chat_id=update.effective_chat.id
@@ -29,7 +29,7 @@ def logout(update: Update, context: CallbackContext) -> None:
         update (Update): Telegram Bot update
         context (CallbackContext): Telegram Bot context
     '''
-    if update.effective_chat:
+    if update.effective_chat and update.message:
         chat = TelegramChat.objects.filter(chat_id=update.effective_chat.id).first()    # Get Telegram chat by Id
         if chat:
             chat.delete()                                                       # Remove Telegram chat update

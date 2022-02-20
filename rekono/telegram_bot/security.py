@@ -32,7 +32,7 @@ def get_chat(update: Update, auditor: bool = True) -> Union[TelegramChat, None]:
     Returns:
         TelegramChat: Telegram chat entity if the user is authorized
     '''
-    if update.effective_chat:                                                   # Chat Id from the update
+    if update.effective_chat and update.message:                                # Chat Id from the update
         # Get chat entity
         chat = TelegramChat.objects.filter(chat_id=update.effective_chat.id, user__is_active=True).first()
         if not chat:                                                            # No chat found

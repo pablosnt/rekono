@@ -1,6 +1,6 @@
 from findings.enums import DataType
 from findings.models import OSINT
-from testing.parsers.base import ToolParserTest
+from testing.tools.base import ToolParserTest
 
 
 class TheHarvesterParserTest(ToolParserTest):

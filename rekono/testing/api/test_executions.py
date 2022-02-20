@@ -34,6 +34,13 @@ class ExecutionsTest(RekonoTestCaseWithDDImports):
         self.check_fields(['id'], content['results'][0], self.step_execution)
         self.check_fields(['id'], content['results'][1], self.execution)
 
+    def test_tool_filter(self) -> None:
+        '''Test filter by tool feature.'''
+        # Get executions related to testing tool
+        content = self.api_test(self.client.get, f'{self.endpoint}?tool={self.tool.id}', 200, expected={'count': 2})
+        self.check_fields(['id'], content['results'][0], self.step_execution)
+        self.check_fields(['id'], content['results'][1], self.execution)
+
     def test_unauthorized_get_all(self) -> None:
         '''Test get all feature with an unauthorized user.'''
         self.api_test(self.other_client.get, self.endpoint, expected={'count': 0})      # Get all executions

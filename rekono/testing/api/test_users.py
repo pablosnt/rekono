@@ -141,6 +141,12 @@ class UsersTest(RekonoTestCase):
         expected = {'role': 'Admin', 'is_active': False}
         self.api_test(self.client.get, f'{self.endpoint}{self.other.id}/', expected=expected)
 
+    def test_disable_without_api_token(self) -> None:
+        '''Test disable feature with user without API token.'''
+        user = User.objects.create(email='test@test.test', username='test', is_active=True)
+        self.api_test(self.client.delete, f'{self.endpoint}{user.id}/', 204)    # Disable testing user
+        self.api_test(self.client.get, f'{self.endpoint}{user.id}/', expected={'is_active': False})
+
     def test_invalid_enable(self) -> None:
         '''Test enable feature with invalid data.'''
         # Enable testing user with invalid role

@@ -14,7 +14,7 @@ def help(update: Update, context: CallbackContext) -> None:
         update (Update): Telegram Bot update
         context (CallbackContext): Telegram Bot context
     '''
-    if update.effective_chat:
+    if update.effective_chat and update.message:
         chat = TelegramChat.objects.filter(chat_id=update.effective_chat.id, user__is_active=True).first()
         if not chat or not chat.user:                                           # Unlinked Telegram chat
             update.message.reply_text(UNAUTH_HELP, parse_mode=ParseMode.MARKDOWN_V2)

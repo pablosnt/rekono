@@ -1,6 +1,6 @@
 from findings.enums import OSType, PortStatus, Protocol, Severity
 from findings.models import Enumeration, Host, Technology, Vulnerability
-from testing.parsers.base import ToolParserTest
+from testing.tools.base import ToolParserTest
 
 
 class NmapParserTest(ToolParserTest):

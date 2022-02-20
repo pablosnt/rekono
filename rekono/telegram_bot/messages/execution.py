@@ -111,13 +111,16 @@ def confirmation_message(context: CallbackContext) -> str:
         str: Text message for execution confirmation
     '''
     execution_item = ''
-    if TOOL in context.chat_data:                                               # Tool execution
-        execution_item = TOOL_CONFIRMATION.format(
-            tool=escape_markdown(context.chat_data[TOOL].name, version=2),
-            configuration=escape_markdown(context.chat_data[CONFIGURATION].name, version=2)
-        )
-    elif PROCESS in context.chat_data:                                          # Process execution
-        execution_item = PROCESS_CONFIRMATION.format(process=escape_markdown(context.chat_data[PROCESS].name, version=2))
+    if context.chat_data:
+        if TOOL in context.chat_data:                                           # Tool execution
+            execution_item = TOOL_CONFIRMATION.format(
+                tool=escape_markdown(context.chat_data[TOOL].name, version=2),
+                configuration=escape_markdown(context.chat_data[CONFIGURATION].name, version=2)
+            )
+        elif PROCESS in context.chat_data:                                      # Process execution
+            execution_item = PROCESS_CONFIRMATION.format(
+                process=escape_markdown(context.chat_data[PROCESS].name, version=2)
+            )
     return EXECUTION_CONFIRMATION.format(                                       # Create confirmation message
         project=escape_markdown(context.chat_data[PROJECT].name, version=2),
         target=escape_markdown(context.chat_data[TARGET].target, version=2),

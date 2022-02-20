@@ -107,9 +107,14 @@ class WordlistsTest(RekonoTestCase):
 
     def test_like_dislike(self) -> None:
         '''Test like and dislike features for wordlists.'''
+        count = self.api_test(self.client.get, f'{self.endpoint}?o=-name')['count']     # Get total count of wordlists
         # Like testing wordlist
         self.api_test(self.client.post, f'{self.endpoint}{self.wordlist.id}/like/', 201)
         self.api_test(self.client.get, f'{self.endpoint}{self.wordlist.id}/', expected={'liked': True, 'likes': 1})
+        self.api_test(self.client.get, f'{self.endpoint}?liked=true', expected={'count': 1})
+        self.api_test(self.client.get, f'{self.endpoint}?liked=false', expected={'count': count - 1})
         # Dislike testing wordlist
         self.api_test(self.client.post, f'{self.endpoint}{self.wordlist.id}/dislike/', 204)
         self.api_test(self.client.get, f'{self.endpoint}{self.wordlist.id}/', expected={'liked': False, 'likes': 0})
+        self.api_test(self.client.get, f'{self.endpoint}?liked=true', expected={'count': 0})
+        self.api_test(self.client.get, f'{self.endpoint}?liked=false', expected={'count': count})

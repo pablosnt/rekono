@@ -47,5 +47,9 @@ class ToolsTest(RekonoTestCase):
             self.check_fields(['liked', 'likes'], tool, no_likes)
             self.api_test(self.client.post, f'{self.tools}{tool["id"]}/like/', 201)      # Like tool
             self.api_test(self.client.get, f'{self.tools}{tool["id"]}/', expected={'liked': True, 'likes': 1})
+            self.api_test(self.client.get, f'{self.tools}?liked=true', expected={'count': 1})
+            self.api_test(self.client.get, f'{self.tools}?liked=false', expected={'count': tools['count'] - 1})
             self.api_test(self.client.post, f'{self.tools}{tool["id"]}/dislike/', 204)   # Dislike tool
             self.api_test(self.client.get, f'{self.tools}{tool["id"]}/', expected=no_likes)
+            self.api_test(self.client.get, f'{self.tools}?liked=true', expected={'count': 0})
+            self.api_test(self.client.get, f'{self.tools}?liked=false', expected={'count': tools['count']})

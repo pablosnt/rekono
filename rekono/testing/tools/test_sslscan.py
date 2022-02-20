@@ -1,6 +1,6 @@
 from findings.enums import Severity
 from findings.models import Technology, Vulnerability
-from testing.parsers.base import ToolParserTest
+from testing.tools.base import ToolParserTest
 
 
 class SslscanParserTest(ToolParserTest):
