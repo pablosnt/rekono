@@ -6,12 +6,12 @@ repos:
             entry: mypy
             language: python
             types: [python]
-    # - repo: https://github.com/Yelp/detect-secrets
-    #   rev: v1.2.0
-    #   hooks:
-    #       - id: detect-secrets
-    #         args: ["--baseline", ".secrets.baseline"]
-    # - repo: https://github.com/PyCQA/flake8
-    #   rev: 4.0.1
-    #   hooks:
-    #       - id: flake8
+    - repo: https://github.com/Yelp/detect-secrets
+      rev: v1.2.0
+      hooks:
+          - id: detect-secrets
+            args: ["--baseline", ".secrets.baseline"]
+    - repo: https://github.com/PyCQA/flake8
+      rev: 4.0.1
+      hooks:
+          - id: flake8

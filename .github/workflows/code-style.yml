@@ -29,10 +29,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       
-      - name: MyPy check
-        uses: python/mypy@v0.931
+      - uses: actions/setup-python@v2
         with:
-          install_project_dependencies: no
+          python-version: '3.7'
+
+      - name: Install Python dependencies
+        run: python3 -m pip install -r requirements.txt
+      
+      - name: Install MyPy
+        run: python3 -m pip install mypy
+      
+      - name: MyPy check
+        run: mypy --namespace-packages -p rekono
 
   eslint:
     runs-on: ubuntu-latest
