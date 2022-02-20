@@ -38,12 +38,9 @@ jobs:
       
       - name: Install MyPy
         run: python3 -m pip install mypy
-
-      - name: test
-        run: ls -la
       
       - name: MyPy check
-        run: mypy --namespace-packages -p rekono --config-file mypy.ini
+        run: mypy -p rekono --ignore-missing-imports
 
   eslint:
     runs-on: ubuntu-latest
