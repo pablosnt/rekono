@@ -3,7 +3,9 @@ from typing import Any, Dict, List
 import django_rq
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
+from django.utils import timezone
 from django_rq import job
+from email_notifications.constants import DATETIME_FORMAT
 from findings.models import Finding
 
 from rekono.settings import FRONTEND_URL
@@ -72,6 +74,38 @@ def user_enable_account(user: Any) -> None:
         subject='Rekono user enabled',
         template_name='user_enable_account.html',
         data={'user': user}
+    )
+
+
+def user_login_notification(user: Any) -> None:
+    '''Send email notification after user login.
+
+    Args:
+        user (Any): Recently enabled user
+    '''
+    emails_queue = django_rq.get_queue('emails-queue')                          # Get emails queue
+    emails_queue.enqueue(                                                       # Enqueue email notification
+        consumer,
+        addresses=[user.email],
+        subject='New login on your Rekono account',
+        template_name='user_login_notification.html',
+        data={'time': timezone.now().strftime(DATETIME_FORMAT)}
+    )
+
+
+def user_telegram_linked_notification(user: Any) -> None:
+    '''Send email notification after link user account to Telegram bot.
+
+    Args:
+        user (Any): Recently enabled user
+    '''
+    emails_queue = django_rq.get_queue('emails-queue')                          # Get emails queue
+    emails_queue.enqueue(                                                       # Enqueue email notification
+        consumer,
+        addresses=[user.email],
+        subject='Welcome to Rekono Bot',
+        template_name='user_telegram_linked_notification.html',
+        data={'time': timezone.now().strftime(DATETIME_FORMAT)}
     )
 
 

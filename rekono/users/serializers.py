@@ -4,6 +4,7 @@ from django.contrib.auth.password_validation import validate_password
 from django.db import transaction
 from django.forms import ValidationError
 from django.utils import timezone
+from email_notifications.sender import user_telegram_linked_notification
 from rest_framework import serializers, status
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.fields import SerializerMethodField
@@ -201,6 +202,7 @@ class TelegramBotSerializer(serializers.Serializer):
         Returns:
             User: Updated instance
         '''
+        user_telegram_linked_notification(instance)                             # Send email notification to the user
         validated_data['telegram_chat'].otp = None                              # Set otp to null
         validated_data['telegram_chat'].otp_expiration = None                   # Set otp expiration to null
         validated_data['telegram_chat'].user = instance                         # Link Telegram chat Id to the user

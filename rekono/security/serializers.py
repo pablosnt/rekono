@@ -1,5 +1,6 @@
 from typing import Any, Dict
 
+from email_notifications.sender import user_login_notification
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -8,6 +9,22 @@ from users.models import User
 
 class RekonoTokenObtainPairSerializer(TokenObtainPairSerializer):
     '''Serializer to user authentication and access token refresh via API.'''
+
+    def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
+        '''Validate the provided data before use it.
+
+        Args:
+            attrs (Dict[str, Any]): Provided data
+
+        Raises:
+            ValidationError: Raised if provided data is invalid
+
+        Returns:
+            Dict[str, Any]: Data after validation process
+        '''
+        attrs = super().validate(attrs)                                         # User login
+        user_login_notification(self.user)                                      # Send email notification to the user
+        return attrs
 
     @classmethod
     def get_token(cls, user: User) -> Dict[str, Any]:
