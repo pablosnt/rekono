@@ -33,8 +33,6 @@ jobs:
           coverage run manage.py test
       
       - name: Check coverage
-        env:
-          COVERAGE: ${{ steps.coverage.outputs.percent }}
         run: |
           cd rekono
-          coverage report -m --skip-covered --fail-under=$COVERAGE
+          coverage report -m --skip-covered --fail-under=$REQUIRED_COVERAGE
