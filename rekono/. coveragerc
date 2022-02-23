@@ -1,0 +1,6 @@
+[coverage:run]
+source = .
+omit =
+    # Telegram Bot for Python doesn't offer unit testing, only integration testing
+    # Moreover, the unique alternative is currently unmaintained: https://github.com/python-telegram-bot/ptbtest
+    telegram_bot/*
