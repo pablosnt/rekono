@@ -221,10 +221,10 @@ if not TESTING:                                                                 
             # 2 requests by second by IP
             # To allow requests from different users with same public IP address
             # Note that most API requests requires authentication
-            'anon': '120/min',
+            'anon': '100/min',
             # 4 request by second by user
             # It is enough for legitimate usage, but attacks will be blocked
-            'user': '240/min',
+            'user': '300/min',
             # Prevent brute force attacks in login and refresh token features
             # Login is not authenticated, we can receive many requests from different users with same public IP address
             'login': '30/min',
