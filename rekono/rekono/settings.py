@@ -38,6 +38,8 @@ VERSION = '1.0.0'                                                               
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+FRONTEND_DIR = os.path.join(BASE_DIR, 'frontend')                               # Frontend directory
+
 # Rekono home directory. By default /opt/rekono
 REKONO_HOME = os.getenv('REKONO_HOME', os.path.join('opt', 'rekono'))
 if not os.path.isdir(REKONO_HOME):                                              # Rekono home doesn't exist
@@ -320,6 +322,7 @@ EMAIL_USE_TLS = CONFIG.EMAIL_TLS
 # Telegram                                                                     #
 ################################################################################
 
+TELEGRAM_BOT = CONFIG.TELEGRAM_BOT                                              # Telegram bot name
 TELEGRAM_TOKEN = os.getenv('RKN_TELEGRAM_TOKEN', CONFIG.TELEGRAM_TOKEN)         # Telegram token provided by BotFather
 
 
@@ -352,11 +355,24 @@ TOOLS = {
 
 
 ################################################################################
-# Miscellaneous                                                                #
+# Frontend                                                                     #
 ################################################################################
 
 # Rekono frontend address. It's used to include links in notifications
 FRONTEND_URL = os.getenv('RKN_FRONTEND_URL', CONFIG.FRONTEND_URL)
+
+CONFIG.load_config_in_frontend(                                                 # Load configuration in frontend .env
+    FRONTEND_DIR,
+    {
+        'VUE_APP_DEFECTDOJO_HOST': DEFECT_DOJO['URL'],                          # Defect-Dojo URL to create links
+        'VUE_APP_TELEGRAM_BOT': TELEGRAM_BOT,                                   # Telegram bot name to show in the UI
+    }
+)
+
+
+################################################################################
+# Miscellaneous                                                                #
+################################################################################
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/

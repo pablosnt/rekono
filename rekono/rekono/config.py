@@ -1,3 +1,4 @@
+import os
 from typing import Any, Dict, List
 
 import yaml
@@ -6,6 +7,8 @@ from security.crypto import generate_random_value
 
 class RekonoConfig:
     '''Rekono config loader from configuration file.'''
+
+    frontend_env_filename = '.env'                                              # Frontend environment file
 
     def __init__(self, filepath: str) -> None:
         '''Rekono config constructor.
@@ -40,6 +43,7 @@ class RekonoConfig:
         self.EMAIL_PASSWORD = self.get_config_key(config, ['email', 'password'], None)
         self.EMAIL_TLS = self.get_config_key(config, ['email', 'tls'], True)
         # Telegram Bot token
+        self.TELEGRAM_BOT = self.get_config_key(config, ['telegram', 'bot'], 'Rekono')
         self.TELEGRAM_TOKEN = self.get_config_key(config, ['telegram', 'token'], '')
         # Defect-Dojo
         self.DD_URL = self.get_config_key(config, ['defect-dojo', 'url'], 'http://127.0.0.1:8080')
@@ -70,3 +74,17 @@ class RekonoConfig:
                 return default                                                  # Return default value
             value = value.get(key, {})
         return value
+
+    def load_config_in_frontend(self, frontend: str, config: Dict[str, Any]) -> None:
+        '''Load configuration values in frontend .env file.
+
+        Args:
+            frontend (str): Frontend directory
+            config (Dict[str, Any]): Configuration keys and values
+        '''
+        if os.path.isdir(frontend):                                             # If frontend directory is found
+            frontend_env_filepath = os.path.join(frontend, self.frontend_env_filename)      # Path to .env file
+            with open(frontend_env_filepath, 'a') as frontend_env:              # Open .env file
+                frontend_env.truncate(0)                                        # Clear .env content
+                # Save frontend configuration
+                frontend_env.write('\n'.join([f'{key}={value}' for key, value in config.items()]))
