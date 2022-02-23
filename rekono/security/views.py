@@ -7,15 +7,23 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
-from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.views import (TokenObtainPairView,
+                                            TokenRefreshView)
 from security.serializers import (LogoutSerializer,
                                   RekonoTokenObtainPairSerializer)
 
 
 class RekonoTokenObtainPairView(TokenObtainPairView):
-    '''Token ViewSet that includes: user login (get access and refresh token) and refresh access token features.'''
+    '''Token ViewSet that includes the user login (get access and refresh token).'''
 
     serializer_class = RekonoTokenObtainPairSerializer
+    throttle_scope = 'login'
+
+
+class RekonoTokenRefreshView(TokenRefreshView):
+    '''Token ViewSet that includes the refresh access token feature.'''
+
+    throttle_scope = 'refresh'
 
 
 class LogoutView(GenericViewSet, CreateModelMixin):

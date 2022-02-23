@@ -206,7 +206,25 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',                           # Authentication required by default
         'rest_framework.permissions.DjangoModelPermissions',                    # Authorization based on permissions
         'security.authorization.permissions.ProjectMemberPermission',           # and in project membership
-    ]
+    ],
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',                           # Rate limit for anonymous users
+        'rest_framework.throttling.UserRateThrottle',                           # Rate limit for authenticated users
+        'rest_framework.throttling.ScopedRateThrottle',                         # Rate limit for specific cases
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        # 2 requests by second by IP
+        # To allow requests from different users with same public IP address
+        # Note that most API requests requires authentication
+        'anon': '120/min',
+        # 4 request by second by user
+        # It is enough for legitimate usage, but attacks will be blocked
+        'user': '240/min',
+        # Prevent brute force attacks in login and refresh token features
+        'login': '10/min',
+        # Requires more requests than login because the frontend can generate many refresh requests at the same time
+        'refresh': '20/min',
+    }
 }
 
 # Documentation
