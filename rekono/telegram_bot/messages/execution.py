@@ -80,7 +80,8 @@ def notification_message(execution: Execution, findings: List[Finding]) -> str:
                         for field in fields:                                    # For each relation field
                             if hasattr(entity, field) and getattr(entity, field):   # Check if field exists
                                 # Add field data to the text message
-                                getattr(messages, f'{field.upper()}_PARAM').format(getattr(entity, field).__str__())
+                                relation_text = {field: getattr(entity, field).__str__()}
+                                data[field] = getattr(messages, f'{field.upper()}_PARAM').format(**relation_text)
                                 break                                           # Only get the most relevant relation
                         break
                 # Escape finding data values

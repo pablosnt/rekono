@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Union
 
 from django.apps import apps
 from django.db import models
@@ -12,9 +12,10 @@ class InputType(models.Model):
     '''Input type model, related to each object type that can be included in a tool argument.'''
 
     name = models.TextField(max_length=15, choices=InputTypeNames.choices)      # Input type name
-    # Related model name in 'app.Model' format. It can be a reference to a Finding or a Resource
-    related_model = models.TextField(max_length=30)
-    # Related target model name in 'Model' format. It will be used when 'related_model' is not available.
+    # Related model name in 'app.Model' format. It can be a reference to a Finding
+    related_model = models.TextField(max_length=30, null=True, blank=True)
+    # Related target model name in 'app.Model' format. It will be used when 'related_model' is not available.
+    # It can be also a reference to a Resource, since resources are used as Targets in tool executions
     callback_target = models.TextField(max_length=15, null=True, blank=True)
 
     def __str__(self) -> str:
@@ -25,27 +26,30 @@ class InputType(models.Model):
         '''
         return self.name
 
-    def get_project(self) -> Any:
-        '''Get the related project for the instance. This will be used for authorization purposes.
+    def get_model_class(self, reference: str) -> BaseInput:
+        '''Get model from string reference.
+
+        Args:
+            reference (str): Reference to model
 
         Returns:
-            Project: Related project entity
+            Union[BaseInput, None]: Model class related to reference
         '''
-        return None
+        app_label, model_name = reference.split('.', 1)                         # Get model attributes from reference
+        return apps.get_model(app_label=app_label, model_name=model_name)
 
-    def get_related_model_class(self) -> BaseInput:
+    def get_related_model_class(self) -> Union[BaseInput, None]:
         '''Get related model from 'related_model' reference.
 
         Returns:
             BaseInput: Related model of the input type
         '''
-        app_label, model_name = self.related_model.split('.', 1)                # Parse 'related_model' field
-        return apps.get_model(app_label=app_label, model_name=model_name)
+        return self.get_model_class(self.related_model) if self.related_model else None
 
-    def get_callback_target_class(self) -> BaseInput:
+    def get_callback_target_class(self) -> Union[BaseInput, None]:
         '''Get callback target model from 'callback_target' reference.
 
         Returns:
             BaseInput: Target model of the input type
         '''
-        return apps.get_model(app_label='targets', model_name=self.callback_target)
+        return self.get_model_class(self.callback_target) if self.callback_target else None

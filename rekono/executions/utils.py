@@ -45,17 +45,20 @@ def get_related_executions(
     for relation in related_input_types:                                        # For each related input type
         for index, exec_inputs in enumerate(executions):                        # For each execution
             for i in exec_inputs:                                               # For each input assigned to execution
+                related_model = relation.get_related_model_class()
+                callback_target = relation.get_callback_target_class()
+                target_field_name = snakecase(cast(Any, callback_target).__name__) if callback_target else None
                 # Input related to the input type model
-                is_model = isinstance(i, cast(Any, relation.get_related_model_class()))
+                is_model = isinstance(i, cast(Any, related_model)) if related_model else False
                 # Input related to the input type target
-                is_target = isinstance(i, cast(Any, relation.get_callback_target_class()))
+                is_target = isinstance(i, cast(Any, callback_target)) if callback_target else False
                 if is_model or is_target:
                     if index in relations:
                         relations[index]['findings'].append(i)                  # Add input to the relations
                     else:
                         relations[index] = {                                    # Create a new relation based on index
                             # Input field to access the related input
-                            'field': relation.name.lower() if is_model else snakecase(relation.callback_target),
+                            'field': relation.name.lower() if is_model else target_field_name,
                             'inputs': [i]                                       # Related input list
                         }
         if relations:
@@ -117,10 +120,12 @@ def get_executions_from_findings(base_inputs: List[BaseInput], tool: Tool) -> Li
         argument = select_argument(tool, input_type)                            # Get properly argument for input type
         if not argument:
             continue                                                            # No argument found
+        related_model = input_type.get_related_model_class()
+        callback_target = input_type.get_callback_target_class()
         # Filter base inputs based on the input type model or target
         filtered = [f for f in base_inputs if (
-            isinstance(f, cast(Any, input_type.get_related_model_class())) or
-            isinstance(f, cast(Any, input_type.get_callback_target_class()))
+            (related_model and isinstance(f, cast(Any, related_model))) or
+            (callback_target and isinstance(f, cast(Any, callback_target)))
         )]
         if not filtered:
             continue                                                            # No base inputs found

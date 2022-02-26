@@ -83,7 +83,7 @@ class StepsTest(RekonoTestCase):
             'process': self.process.id
         }
         self.models = {                                                         # Models to test __str__ method
-            self.step: f'{self.process.__str__()} - {self.configuration.__str__()}'
+            self.step: f'{self.process.__str__()} - {self.nmap_configuration.__str__()}'
         }
 
     def test_create(self) -> None:
@@ -111,8 +111,8 @@ class StepsTest(RekonoTestCase):
 
     def test_invalid_create(self) -> None:
         '''Test step creation feature with invalid data.'''
-        self.new_data['tool_id'] = self.tool.id
-        self.new_data['configuration_id'] = self.configuration.id
+        self.new_data['tool_id'] = self.nmap.id
+        self.new_data['configuration_id'] = self.nmap_configuration.id
         # Step with this tool and configuration already exists
         self.api_test(self.client.post, self.endpoint, 400, data=self.new_data)
 

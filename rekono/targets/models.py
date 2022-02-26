@@ -89,6 +89,24 @@ class TargetPort(models.Model, BaseInput):
             models.UniqueConstraint(fields=['target', 'port'], name='unique target port')
         ]
 
+    def filter(self, input: Input) -> bool:
+        '''Check if this instance is valid based on input filter.
+
+        Args:
+            input (Input): Tool input whose filter will be applied
+
+        Returns:
+            bool: Indicate if this instance match the input filter or not
+        '''
+        if not input.filter:
+            return True
+        try:
+            to_check = int(input.filter)
+            # If the filter is a number, target ports will be filtered by port
+            return to_check == self.port
+        except ValueError:
+            return True
+
     def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
         '''Get useful information from this instance to be used in tool execution as argument.
 
@@ -142,6 +160,25 @@ class TargetEndpoint(models.Model, BaseInput):
             # Unique constraint by: TargetPort and Endpoint
             models.UniqueConstraint(fields=['target_port', 'endpoint'], name='unique target endpoint')
         ]
+
+    def filter(self, input: Input) -> bool:
+        '''Check if this instance is valid based on input filter.
+
+        Args:
+            input (Input): Tool input whose filter will be applied
+
+        Returns:
+            bool: Indicate if this instance match the input filter or not
+        '''
+        if not input.filter:
+            return True
+        try:
+            int(input.filter)
+            # If the filter is a number, endpoint won't be filtered
+            return True
+        except ValueError:
+            # If the filter is a string, endpoint will be filtered by endpoint
+            return self.endpoint.startswith(input.filter)
 
     def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
         '''Get useful information from this instance to be used in tool execution as argument.

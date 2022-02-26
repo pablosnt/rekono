@@ -10,7 +10,6 @@ from tasks.enums import Status
 from tasks.models import Task
 from tools.enums import IntensityRank
 from tools.models import Configuration, Intensity, Tool
-from tools.tools.base_tool import BaseTool
 from tools.utils import get_tool_class_by_name
 
 
@@ -48,10 +47,6 @@ class ToolParserTest(TestCase):
             )
             tool_class = get_tool_class_by_name(self.tool_name)                 # Get tool class from name
             self.tool = tool_class(execution, tool, configuration, intensity, [])   # Create tool instance
-
-    def test_default_tool_class(self) -> None:
-        '''Test get tool class from invalid name.'''
-        self.assertEqual(BaseTool, get_tool_class_by_name('NotFound'))
 
     def check_tool_parser(self, filename: str, expected: List[Dict[str, Any]]) -> None:
         '''Check expected findings for results obtained after parse tool report.

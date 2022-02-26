@@ -14,11 +14,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       
-      - name: Install and start Redis server to prevent errors when tests queue jobs
+      - name: Install and start Redis server
         run: |
           sudo apt update -y
           sudo apt install redis-server -y
           sudo systemctl start redis-server
+
+      - name: Install Nmap and Dirsearch to check its installation
+        run: sudo apt install nmap dirsearch -y
 
       - uses: actions/setup-python@v2
         with:

@@ -6,6 +6,8 @@ from typing import Any, Dict, List, Union, cast
 
 from django.core.exceptions import ValidationError
 from django.db.models import Model
+from django.db.models.fields.related_descriptors import \
+    ReverseManyToOneDescriptor
 from django.utils import timezone
 from executions.models import Execution
 from findings.models import Finding, Vulnerability
@@ -92,7 +94,7 @@ class BaseTool:
         except KeyError:
             return None                                                         # Inputs data isn't enough
 
-    def format_multiple(self, argument: str, base_inputs: List[BaseInput]) -> Union[str, None]:
+    def format_argument(self, argument: str, base_inputs: List[BaseInput]) -> Union[str, None]:
         '''Format tool argument using multiple input objects.
 
         Args:
@@ -106,18 +108,6 @@ class BaseTool:
         for base_input in base_inputs:                                          # For each input
             data = base_input.parse(data)                                       # Get input data
         return self.format(argument, data)
-
-    def format_unique(self, argument: str, base_input: BaseInput) -> Union[str, None]:
-        '''Format tool argument using one input object.
-
-        Args:
-            argument (str): Tool argument to be formatted
-            base_input (BaseInput): Input to use in the tool argument
-
-        Returns:
-            Union[str, None]: Formatted argument
-        '''
-        return self.format(argument, base_input.parse())
 
     def process_source(
         self,
@@ -148,7 +138,7 @@ class BaseTool:
                     selection.append(base_input)                                # Add base input to the selection
                 else:                                                           # Unique argument
                     # Format argument using current base input
-                    formatted_argument = self.format_unique(argument.argument, base_input)
+                    formatted_argument = self.format_argument(argument.argument, [base_input])
                     if formatted_argument:                                      # If formatted argument is valid
                         command[argument.name] = formatted_argument             # Add formatted argument to the command
                         # Save base input in the findings_relations to link findings later
@@ -156,9 +146,36 @@ class BaseTool:
                         return command
         if selection:                                                           # If base input selection is not empty
             # Format argument using selected base inputs
-            formatted_argument = self.format_multiple(argument.argument, selection)
+            formatted_argument = self.format_argument(argument.argument, selection)
             if formatted_argument:                                              # If formatted argument is valid
                 command[argument.name] = formatted_argument                     # Add formatted argument to the command
+        return command
+
+    def process_argument(
+        self,
+        argument: Argument,
+        model_method: str,
+        source: List[BaseInput],
+        command: Dict[str, str]
+    ) -> Dict[str, str]:
+        '''Process argument entity to include required base inputs in the tool command.
+
+        Args:
+            argument (Argument): Tool argument
+            model_method (str): Method to get model from argument inputs
+            source (List[BaseInput]): List of base inputs to use in the tool argument
+            command (Dict[str, str]): Tool command created with previous arguments
+
+        Returns:
+            Dict[str, str]: Tool command including the new argument
+        '''
+        if argument.name not in command or not command[argument.name]:          # Argument can't be added yet
+            for input in argument.inputs.order_by('order'):                     # For each argument input (ordered)
+                model = getattr(input.type, model_method)()                     # Get model from input
+                if model:                                                       # Model found
+                    command = self.process_source(argument, input, model, source, command)      # Process base inputs
+                    if argument.name in command:                                # Arguments added successfully
+                        break
         return command
 
     def get_arguments(self, targets: List[BaseInput], previous_findings: List[Finding]) -> List[str]:
@@ -179,19 +196,13 @@ class BaseTool:
             'output': self.path_output if self.file_output_enabled else ''      # Add output config to the arguments
         }
         for argument in self.arguments:                                         # For each tool argument
-            for input in argument.inputs.order_by('order'):                     # For each argument input (ordered)
-                model = input.type.get_related_model_class()                    # Get related input model
-                # Add arguments for this input using previous findings
-                command = self.process_source(argument, input, model, cast(List[BaseInput], previous_findings), command)
-                if argument.name in command and command[argument.name]:         # Argument added successfully
-                    break
-            if argument.name not in command or not command[argument.name]:      # Argument can't be added
-                for input in argument.inputs.order_by('order'):                 # For each argument input (ordered)
-                    model = input.type.get_callback_target_class()              # Get callback target model
-                    # Add arguments for this input using targets
-                    command = self.process_source(argument, input, model, targets, command)
-                    if argument.name in command and command[argument.name]:     # Arguments added successfully
-                        break
+            command = self.process_argument(
+                argument,
+                'get_related_model_class',
+                cast(List[BaseInput], previous_findings),
+                command
+            )
+            command = self.process_argument(argument, 'get_callback_target_class', targets, command)
             if argument.name not in command or not command[argument.name]:      # Argument can't be added
                 if argument.required:                                           # Argument is required for the tool
                     raise ToolExecutionException(f'Tool configuration requires {argument.name} argument')
@@ -272,7 +283,7 @@ class BaseTool:
 
     def parse_output_file(self) -> None:
         '''Parse tool output file to create finding entities. This should be implemented by child tool classes.'''
-        pass
+        pass                                                                    # pragma: no cover
 
     def parse_plain_output(self, output: str) -> None:
         '''Parse tool plain output to create finding entities. This should be implemented by child tool classes.
@@ -280,7 +291,7 @@ class BaseTool:
         Args:
             output (str): Plain tool output
         '''
-        pass
+        pass                                                                    # pragma: no cover
 
     def process_findings(self) -> None:
         '''Set relations between parsed findings and previous findings, and send new findings to the findings queue.'''
@@ -299,7 +310,10 @@ class BaseTool:
                 if isinstance(finding, Vulnerability) and getattr(finding, 'technology') and key == 'enumeration':
                     # Ignore this relation because technology relation is more relevant
                     continue
-                if hasattr(finding, key):
+                if (
+                    hasattr(finding, key) and
+                    not isinstance(getattr(finding.__class__, key), ReverseManyToOneDescriptor)
+                ):
                     # Finding has a field that matches the current relation
                     setattr(finding, key, value)                                # Set relation between findings
                     finding.save(update_fields=[key])
@@ -371,12 +385,15 @@ class BaseTool:
         try:
             output = ''
             if not TESTING:
-                output = self.tool_execution(self.command_arguments, targets, previous_findings)    # Run tool
-        except ToolExecutionException as ex:                                    # Error during tool execution
+                # Run tool
+                output = self.tool_execution(self.command_arguments, targets, previous_findings)    # pragma: no cover
+        except ToolExecutionException as ex:                                    # pragma: no cover
+            # Error during tool execution
             self.on_error(stderr=str(ex))                                       # Execution error
             self.clean_environment()                                            # Clean environment
             return
-        except Exception:                                                       # Unexpected error during tool execution
+        except Exception:                                                       # pragma: no cover
+            # Unexpected error during tool execution
             self.on_error()                                                     # Execution error
             self.clean_environment()                                            # Clean environment
             return

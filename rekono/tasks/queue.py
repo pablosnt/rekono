@@ -5,6 +5,7 @@ import django_rq
 from django.utils import timezone
 from django_rq import job
 from processes.executor import executor as processes
+from tasks.enums import Status
 from tasks.models import Task
 from tools.executor import executor as tools
 
@@ -23,7 +24,7 @@ def producer(task: Task) -> None:
         task_job = task_queue.enqueue_at(task.scheduled_at, consumer, task=task, on_success=scheduled_callback)
     elif task.scheduled_in and task.scheduled_time_unit:
         # Task scheduled after specific amount of time
-        delay = {task.scheduled_time_unit.name.lower(): task.scheduled_in}
+        delay = {task.scheduled_time_unit.lower(): task.scheduled_in}
         task.enqueued_at = timezone.now() + timedelta(**delay)                  # Update enqueued date
         # Enqueue task after specific amount of time
         task_job = task_queue.enqueue_in(timedelta(**delay), consumer, task=task, on_success=scheduled_callback)
@@ -60,15 +61,11 @@ def scheduled_callback(job: Any, connection: Any, result: Task, *args: Any, **kw
         result (Task): Previous task execution
     '''
     if result and result.repeat_in and result.repeat_time_unit:                 # Periodic task
-        frequency = {result.repeat_time_unit.name.lower(): result.repeat_in}
+        frequency = {result.repeat_time_unit.lower(): result.repeat_in}
         result.enqueued_at = result.enqueued_at + timedelta(**frequency)        # Update enqueued date
         task_queue = django_rq.get_queue('tasks-queue')                         # Get tasks queue
         # Enqueue the task again after the configured time
-        task_job = task_queue.enqueue_at(
-            result.enqueued_at,
-            consumer.process_task,
-            task=result,
-            on_success=scheduled_callback
-        )
+        task_job = task_queue.enqueue_at(result.enqueued_at, consumer, task=result, on_success=scheduled_callback)
         result.rq_job_id = task_job.id                                          # Update Job Id in task model
-        result.save(update_fields=['enqueued_at', 'rq_job_id'])
+        result.status = Status.REQUESTED                                        # Update task status
+        result.save(update_fields=['enqueued_at', 'rq_job_id', 'status'])

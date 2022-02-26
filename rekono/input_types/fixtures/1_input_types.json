@@ -14,7 +14,7 @@
         "fields": {
             "name": "Host",
             "related_model": "findings.host",
-            "callback_target": "Target"
+            "callback_target": "targets.target"
         }
     },
     {
@@ -23,7 +23,7 @@
         "fields": {
             "name": "Enumeration",
             "related_model": "findings.enumeration",
-            "callback_target": "TargetPort"
+            "callback_target": "targets.targetport"
         }
     },
     {
@@ -32,7 +32,7 @@
         "fields": {
             "name": "Endpoint",
             "related_model": "findings.endpoint",
-            "callback_target": "TargetEndpoint"
+            "callback_target": "targets.targetendpoint"
         }
     },
     {
@@ -76,8 +76,8 @@
         "pk": 9,
         "fields": {
             "name": "Wordlist",
-            "related_model": "resources.wordlist",
-            "callback_target": null
+            "related_model": null,
+            "callback_target": "resources.wordlist"
         }
     }
 ]

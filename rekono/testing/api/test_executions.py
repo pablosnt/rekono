@@ -37,7 +37,7 @@ class ExecutionsTest(RekonoTestCaseWithDDImports):
     def test_tool_filter(self) -> None:
         '''Test filter by tool feature.'''
         # Get executions related to testing tool
-        content = self.api_test(self.client.get, f'{self.endpoint}?tool={self.tool.id}', 200, expected={'count': 2})
+        content = self.api_test(self.client.get, f'{self.endpoint}?tool={self.nmap.id}', 200, expected={'count': 2})
         self.check_fields(['id'], content['results'][0], self.step_execution)
         self.check_fields(['id'], content['results'][1], self.execution)
 

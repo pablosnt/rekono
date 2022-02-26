@@ -17,7 +17,7 @@ def process_callback(job: Any, connection: Any, result: BaseTool, *args: Any, **
     task = result.execution.task                                                # Get the associated task
     # Check if there are pending executions (requested or running) associated to this task
     pending_executions = Execution.objects.filter(task=task, status__in=[Status.REQUESTED, Status.RUNNING]).exists()
-    if bool(pending_executions):                                                # No pending executions found
+    if not bool(pending_executions):                                            # No pending executions found
         # Check if there are error executions associated to this task
         error_executions = Execution.objects.filter(task=task, status=Status.ERROR).exists()
         # Set task status to error if error executions found, completed otherwise

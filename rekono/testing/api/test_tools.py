@@ -14,17 +14,17 @@ class ToolsTest(RekonoTestCase):
         super().initialize_environment()                                        # Initialize testing environment
         # Data for testing
         self.stages = [(1, 'OSINT'), (2, 'Enumeration'), (3, 'Vulnerabilities'), (4, 'Services'), (5, 'Exploitation')]
-        self.intensity = Intensity.objects.filter(tool=self.tool).first()
-        self.argument = Argument.objects.filter(tool=self.tool).first()
+        self.intensity = Intensity.objects.filter(tool=self.nmap).first()
+        self.argument = Argument.objects.filter(tool=self.nmap).first()
         self.input = Input.objects.filter(argument=self.argument).first()
-        self.output = Output.objects.filter(configuration=self.configuration).first()
+        self.output = Output.objects.filter(configuration=self.nmap_configuration).first()
         self.models = {                                                         # Models to test __str__ method
-            self.tool: self.tool.name,
-            self.configuration: f'{self.tool.name} - {self.configuration.name}',
-            self.intensity: f'{self.tool.name} - {IntensityRank(self.intensity.value).name}',
-            self.argument: f'{self.tool.__str__()} - {self.argument.name}',
+            self.nmap: self.nmap.name,
+            self.nmap_configuration: f'{self.nmap.name} - {self.nmap_configuration.name}',
+            self.intensity: f'{self.nmap.name} - {IntensityRank(self.intensity.value).name}',
+            self.argument: f'{self.nmap.__str__()} - {self.argument.name}',
             self.input: f'{self.argument.__str__()} - {self.input.type.__str__()}',
-            self.output: f'{self.configuration.__str__()} - {self.output.type.__str__()}',
+            self.output: f'{self.nmap_configuration.__str__()} - {self.output.type.__str__()}',
         }
 
     def test_get_tools_and_configurations(self) -> None:

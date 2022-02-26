@@ -2,6 +2,7 @@ import json
 import os
 from typing import Any, Callable, Dict, List, Tuple
 
+import django_rq
 from django.http import HttpResponse
 from django.test import TestCase
 from django.utils import timezone
@@ -11,12 +12,15 @@ from findings.models import Endpoint, Enumeration, Host
 from processes.models import Process, Step
 from projects.models import Project
 from rest_framework.test import APIClient
+from rq import SimpleWorker
 from targets.models import Target, TargetEndpoint, TargetPort
 from tasks.enums import Status
 from tasks.models import Task
 from tools.enums import IntensityRank
 from tools.models import Configuration, Tool
 from users.models import User
+
+from rekono.settings import RQ_QUEUES
 
 
 class RekonoTestCase(TestCase):
@@ -51,14 +55,22 @@ class RekonoTestCase(TestCase):
         self.target = Target.objects.create(project=self.project, target='10.10.10.10')
         self.target_port = TargetPort.objects.create(target=self.target, port=80)
         self.target_endpoint = TargetEndpoint.objects.create(target_port=self.target_port, endpoint='/robots.txt')
-        self.tool = Tool.objects.get(name='Nmap')
-        self.configuration = Configuration.objects.get(tool=self.tool, default=True)
+        # TODO: Change variable names to nmap
+        self.nmap = Tool.objects.get(name='Nmap')
+        self.nmap_configuration = Configuration.objects.get(tool=self.nmap, default=True)
+        self.dirsearch = Tool.objects.get(name='Dirsearch')
+        self.dirsearch_configuration = Configuration.objects.get(tool=self.dirsearch, default=True)
         self.process = Process.objects.create(name='Test', description='Test', tags=['test'], creator=self.admin)
-        self.step = Step.objects.create(process=self.process, tool=self.tool, configuration=self.configuration)
+        self.step = Step.objects.create(process=self.process, tool=self.nmap, configuration=self.nmap_configuration)
+        self.step_1 = Step.objects.create(
+            process=self.process,
+            tool=self.dirsearch,
+            configuration=self.dirsearch_configuration
+        )
         self.task = Task.objects.create(
             target=self.target,
-            tool=self.tool,
-            configuration=self.configuration,
+            tool=self.nmap,
+            configuration=self.nmap_configuration,
             intensity=IntensityRank.NORMAL,
             status=Status.COMPLETED,
             start=timezone.now(),
@@ -81,6 +93,32 @@ class RekonoTestCase(TestCase):
         self.http_endpoint = Endpoint.objects.create(
             execution=self.execution, enumeration=self.enumeration, endpoint='/robots.txt', status=200
         )
+
+    def tearDown(self) -> None:
+        '''Run code after run tests.'''
+        super().tearDown()
+        self.clear_rq_queues()                                                  # Clear enqueued jobs
+
+    def get_rq_queues(self) -> List[Any]:
+        '''Get Redis Queues for testing.'''
+        queues = []
+        for queue_name in RQ_QUEUES.keys():
+            queue = django_rq.get_queue(queue_name)
+            if queue_name != 'emails-queue':                                    # Exclude email notifications from tests
+                queues.append(queue)
+        return queues
+
+    def launch_rq_worker(self) -> None:
+        '''Launch Redis Queue worker for testing under demand.'''
+        queues = self.get_rq_queues()
+        worker = SimpleWorker(queues, connection=queues[0].connection)          # Create worker with all needed queues
+        worker.work(burst=True)                                                 # Run RQ woker
+
+    def clear_rq_queues(self) -> None:
+        '''Clear enqueued jobs in Redis Queues during tests execution.'''
+        queues = self.get_rq_queues()
+        for queue in queues:
+            queue.empty()                                                       # Clear queue
 
     def get_content(self, response: HttpResponse) -> Dict[Any, Any]:
         '''Get content from HTTP response.

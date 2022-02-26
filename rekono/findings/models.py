@@ -279,7 +279,7 @@ class Enumeration(Finding):
             return to_check == self.port
         except ValueError:
             # If the filter is a string, enumeration will be filtered by service
-            return input.filter in self.service
+            return input.filter.lower() in self.service.lower()
 
     def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
         '''Get useful information from this instance to be used in tool execution as argument.
@@ -558,13 +558,12 @@ class Vulnerability(Finding):
         try:
             # If filter is a valid severity, vulnerability will be filtered by severity
             return cast(models.TextChoices, Severity)[input.filter] == self.severity
-        except ValueError:
+        except KeyError:
             f = input.filter.lower()
             # If filter is a string, vulnerability will be filtered by:
             return (
-                f == 'cve' and self.cve or                                      # CVE found or not
-                (f.startswith('cve-') and f == self.cve.lower()) or             # Specific CVE
-                (f.startswith('cwe-') and f == self.cwe.lower())                # Specific CWE
+                (self.cve and (f == 'cve' or (f.startswith('cve-') and f == self.cve.lower()))) or  # CVE
+                (self.cwe and (f.startswith('cwe-') and f == self.cwe.lower()))                     # CWE
             )
 
     def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:

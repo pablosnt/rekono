@@ -18,10 +18,12 @@ class BaseInput:
     def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
         '''Get useful information from this instance to be used in tool execution as argument.
 
+        To be implemented by subclasses.
+
         Args:
             accumulated (Dict[str, Any], optional): Information from other instances of the same type. Defaults to {}.
 
         Returns:
             Dict[str, Any]: Useful information for tool executions, including accumulated if setted
         '''
-        return {}
+        return {}                                                               # pragma: no cover

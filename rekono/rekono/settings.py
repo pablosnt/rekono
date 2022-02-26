@@ -211,7 +211,7 @@ REST_FRAMEWORK: Dict[str, Any] = {
     ]
 }
 if not TESTING:                                                                 # Rate limit only for real environments
-    REST_FRAMEWORK.update({
+    REST_FRAMEWORK.update({                                                     # pragma: no cover
         'DEFAULT_THROTTLE_CLASSES': [
             'rest_framework.throttling.AnonRateThrottle',                       # Rate limit for anonymous users
             'rest_framework.throttling.UserRateThrottle',                       # Rate limit for authenticated users
@@ -267,7 +267,8 @@ if TESTING:
         }
     }
 else:
-    DATABASES = {                                                               # Production database
+    # Production database
+    DATABASES = {                                                               # pragma: no cover
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
             'NAME': os.getenv('RKN_DB_NAME', CONFIG.DB_NAME),
