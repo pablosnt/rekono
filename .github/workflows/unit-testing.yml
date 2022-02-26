@@ -20,8 +20,13 @@ jobs:
           sudo apt install redis-server -y
           sudo systemctl start redis-server
 
-      - name: Install Nmap and Dirsearch to check its installation
-        run: sudo apt install nmap dirsearch -y
+      - name: Install Nmap to check its installation
+        run: sudo apt install nmap -y
+
+      - name: Install Dirsearch to check its installation
+        run: |
+          git clone https://github.com/maurosoria/dirsearch.git
+          ln -s dirsearch/dirsearch.py /bin/dirsearch
 
       - uses: actions/setup-python@v2
         with:
