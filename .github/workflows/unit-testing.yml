@@ -26,7 +26,7 @@ jobs:
       - name: Install Dirsearch to check its installation
         run: |
           git clone https://github.com/maurosoria/dirsearch.git
-          ln -s dirsearch/dirsearch.py /bin/dirsearch
+          ln -s dirsearch/dirsearch.py /usr/local/bin/dirsearch
 
       - uses: actions/setup-python@v2
         with:
