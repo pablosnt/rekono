@@ -190,6 +190,7 @@ export default {
       if (error.response.status === 400) {
         const aux = Object.values(error.response.data)[0][0]
         message = aux.charAt(0).toUpperCase() + aux.slice(1)
+        title = Object.keys(error.response.data)[0]
       }
       else if (error.response.status === 401) {
         message = 'You are not authenticated. Please, try again after login in'

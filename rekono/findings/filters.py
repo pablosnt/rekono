@@ -252,9 +252,8 @@ class VulnerabilityFilter(BaseVulnerabilityFilter):
     enumeration_fields: List[str] = ['technology__enumeration', 'enumeration']
     # Host field names to use in the filters
     host_fields: List[str] = ['technology__enumeration__host', 'enumeration__host']
-    o = OrderingFilter(fields=FINDING_ORDERING + (                              # Ordering fields including common ones
-        ('enumeration__host', 'host'), 'enumeration', 'technology', 'name', 'severity', 'cve'
-    ))
+    # Ordering fields including common ones
+    o = OrderingFilter(fields=FINDING_ORDERING + ('enumeration', 'technology', 'name', 'severity', 'cve'))
 
     class Meta:
         '''FilterSet metadata.'''
@@ -288,7 +287,7 @@ class ExploitFilter(BaseVulnerabilityFilter):
         'vulnerability__technology__enumeration__host'
     ]
     # Ordering fields including common ones
-    o = OrderingFilter(fields=FINDING_ORDERING + (('enumeration__host', 'host'), 'enumeration', 'technology', 'name'))
+    o = OrderingFilter(fields=FINDING_ORDERING + ('vulnerability', 'technology', 'name'))
 
     class Meta:
         '''FilterSet metadata.'''

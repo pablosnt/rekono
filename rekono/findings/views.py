@@ -235,18 +235,12 @@ class ExploitViewSet(FindingBaseView):
     serializer_class = ExploitSerializer
     filterset_class = ExploitFilter
     search_fields = [                                                           # Fields used to search Exploits
-        'vulnerability__name', 'vulnerability__cve', 'vulnerability__cwe',
-        'vulnerability__enumeration__service', 'technology__vulnerability__name',
-        'technology__vulnerability__cve', 'technology__vulnerability__cwe',
-        'technology__enumeration__service', 'name', 'description', 'reference'
-    ]
-    search_fields = [
         'vulnerability__enumeration__host__address', 'technology__enumeration__host__address',
         'vulnerability__enumeration__port', 'vulnerability__enumeration__service',
         'technology__enumeration__port', 'technology__enumeration__service',
         'vulnerability__enumeration__endpoint__endpoint',
         'technology__enumeration__endpoint__endpoint',
-        'enumeration__technology__name', 'enumeration__technology__version',
+        'vulnerability__enumeration__technology__name', 'vulnerability__enumeration__technology__version',
         'technology__name', 'technology__version',
         'vulnerability__name', 'vulnerability__cve',
         'vulnerability__cwe', 'vulnerability__severity',

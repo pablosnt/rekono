@@ -5,7 +5,7 @@
         <b-col>
           <label class="text-muted">Target</label>
           <hr/>
-          <b-collapse id="task-details" v-if="currentTask">
+          <b-collapse id="task-details" v-if="currentTask.target">
             <p>{{ currentTask.target.target }}</p>
             <b-badge variant="secondary">{{ currentTask.target.type }}</b-badge>
           </b-collapse>
@@ -17,7 +17,7 @@
             <p v-if="currentTask.process">{{ currentTask.process.name }}</p>
             <p v-if="currentTask.tool">{{ currentTask.tool.name }}</p>
             <p v-if="currentTask.configuration">{{ currentTask.configuration.name }}</p>
-            <p v-for="i in intensitiesByVariant" :key="i.value">
+            <p v-for="i in intensityByVariant" :key="i.value">
               <b-badge v-if="i.intensity_rank === currentTask.intensity_rank" :variant="i.variant">{{ currentTask.intensity_rank }}</b-badge>
             </p>
           </b-collapse>
@@ -151,7 +151,7 @@ export default {
     this.fetchTask()
     this.fetchExecutions()
     return {
-      currentTask: this.task ? this.task : [],
+      currentTask: this.task ? this.task : {},
       isFound: true,
       executions: [],
       executionsFields: [
@@ -217,7 +217,7 @@ export default {
       this.post(
         `/api/tasks/${this.currentTask.id}/repeat/`, { },
         this.currentTask.process ? this.currentTask.process.name : this.currentTask.tool.name, 'Task executed again successfully'
-      ).then(response => { this.$router.push({ name: 'task', params: { id: response.data.id, task: response.data } }) })
+      ).then(data => { this.$router.push({ name: 'task', params: { id: data.id, task: data } }) })
     },
     selectExecution (items) {
       if (items && items.length > 0) {
