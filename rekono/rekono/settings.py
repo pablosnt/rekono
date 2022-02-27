@@ -179,7 +179,7 @@ SIMPLE_JWT = {
     'BLACKLIST_AFTER_ROTATION': True,
     'UPDATE_LAST_LOGIN': True,
     'ALGORITHM': 'HS512',
-    'SIGNING_KEY': os.getenv('RKN_JWT_KEY', CONFIG.JWT_SIGNING_KEY),            # Key used for JWT signatures
+    'SIGNING_KEY': SECRET_KEY
 }
 
 # Max allowed size in MB for upload files
@@ -228,7 +228,7 @@ if not TESTING:                                                                 
             # Prevent brute force attacks in login and refresh token features
             # Login is not authenticated, we can receive many requests from different users with same public IP address
             'login': '30/min',
-            # The frontend can generate many refresh requests at the same time
+            # The frontend can generate many refresh requests for the same user
             'refresh': '30/min',
         }
     })

@@ -2,7 +2,6 @@ frontend:
   url: http://127.0.0.1:8080
 security:
   # secret-key: 
-  # jwt-key: 
   otp-expiration-hours: 24
   upload-files-max-mb: 500
 database:
