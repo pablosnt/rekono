@@ -85,7 +85,7 @@ class TaskViewSet(
         ]
         for finding_model in finding_models:
             # Search active findings related to this task
-            findings.extend(list(finding_model.objects.filter(execution__task=task, is_active=True).all()))
+            findings.extend(list(finding_model.objects.filter(executions__task=task, is_active=True).distinct().all()))
         return findings
 
     def destroy(self, request: Request, *args: Any, **kwargs: Any) -> Response:

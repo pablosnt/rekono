@@ -54,5 +54,5 @@ class ExecutionViewSet(ListModelMixin, RetrieveModelMixin, DefectDojoScans, Defe
         ]
         for finding_model in finding_models:
             # Search active findings related to this execution
-            findings.extend(list(finding_model.objects.filter(execution=execution, is_active=True).all()))
+            findings.extend(list(finding_model.objects.filter(executions=execution, is_active=True).distinct().all()))
         return findings

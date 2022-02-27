@@ -68,9 +68,9 @@ class ProjectViewSet(ModelViewSet, DefectDojoScans, DefectDojoFindings):
         for find_model in finding_models:
             # Search active findings related to this project
             findings.extend(list(find_model.objects.filter(
-                execution__task__target__project=project,
+                executions__task__target__project=project,
                 is_active=True
-            ).all()))
+            ).distinct().all()))
         return findings
 
     @extend_schema(request=ProjectMemberSerializer, responses={201: ProjectMemberSerializer})

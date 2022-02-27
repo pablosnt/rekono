@@ -15,38 +15,51 @@ class FindingsTest(RekonoTestCase):
         super().setUp()
         super().initialize_environment()
         # Create findings entities
-        self.domain_osint = OSINT.objects.create(
-            execution=self.execution, data='scanme.nmap.org', data_type=DataType.DOMAIN, source='Google'
-        )
-        self.user_osint = OSINT.objects.create(
-            execution=self.execution, data='Test', data_type=DataType.USER, source='DuckDuckGo'
-        )
+        self.domain_osint = OSINT.objects.create(data='scanme.nmap.org', data_type=DataType.DOMAIN, source='Google')
+        self.domain_osint.executions.add(self.execution)
+        self.user_osint = OSINT.objects.create(data='Test', data_type=DataType.USER, source='DuckDuckGo')
+        self.user_osint.executions.add(self.execution)
         self.technology = Technology.objects.create(
-            execution=self.execution, enumeration=self.enumeration,
-            name='Wordpress', version='1.0.0', description='Test'
+            enumeration=self.enumeration,
+            name='Wordpress', version='1.0.0',
+            description='Test'
         )
+        self.technology.executions.add(self.execution)
         self.credential_finding = Credential.objects.create(
-            execution=self.execution, technology=self.technology,
-            username='test', email='test@test.test', secret='test'
+            technology=self.technology,
+            username='test',
+            email='test@test.test',
+            secret='test'
         )
+        self.credential_finding.executions.add(self.execution)
         self.vulnerability = Vulnerability.objects.create(
-            execution=self.execution, technology=self.technology,
-            name='Log4Shell', description='Log4Shell', severity=Severity.CRITICAL,
+            technology=self.technology,
+            name='Log4Shell', description='Log4Shell',
+            severity=Severity.CRITICAL,
             cve='CVE-2021-44228', cwe='CWE-20'
         )
+        self.vulnerability.executions.add(self.execution)
         self.enum_vulnerability = Vulnerability.objects.create(
-            execution=self.execution, enumeration=self.enumeration,
-            name='Log4Shell', description='Log4Shell', severity=Severity.CRITICAL,
+            enumeration=self.enumeration,
+            name='Log4Shell', description='Log4Shell',
+            severity=Severity.CRITICAL,
             cve='CVE-2021-44228', cwe='CWE-20'
         )
+        self.enum_vulnerability.executions.add(self.execution)
         self.exploit = Exploit.objects.create(
-            execution=self.execution, vulnerability=self.vulnerability,
-            name='Easy Exploit', description='RCE for script kiddies', checked=True
+            vulnerability=self.vulnerability,
+            name='Easy Exploit',
+            description='RCE for script kiddies',
+            checked=True
         )
+        self.exploit.executions.add(self.execution)
         self.tech_exploit = Exploit.objects.create(
-            execution=self.execution, technology=self.technology,
-            name='Easy Exploit', description='RCE for script kiddies', checked=True
+            technology=self.technology,
+            name='Easy Exploit',
+            description='RCE for script kiddies',
+            checked=True
         )
+        self.tech_exploit.executions.add(self.execution)
         # Mapping between findings and endpoints
         self.data = [
             (self.domain_osint, 'osint'),

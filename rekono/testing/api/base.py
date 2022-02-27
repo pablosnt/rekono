@@ -83,16 +83,15 @@ class RekonoTestCase(TestCase):
             start=timezone.now(),
             end=timezone.now()
         )
-        self.host = Host.objects.create(
-            execution=self.execution, address='10.10.10.10', os='Ubuntu', os_type=OSType.LINUX
-        )
+        self.host = Host.objects.create(address='10.10.10.10', os='Ubuntu', os_type=OSType.LINUX)
+        self.host.executions.add(self.execution)
         self.enumeration = Enumeration.objects.create(
-            execution=self.execution, host=self.host, port=80,
-            port_status=PortStatus.OPEN, protocol=Protocol.TCP, service='http'
+            host=self.host, port=80, port_status=PortStatus.OPEN,
+            protocol=Protocol.TCP, service='http'
         )
-        self.http_endpoint = Endpoint.objects.create(
-            execution=self.execution, enumeration=self.enumeration, endpoint='/robots.txt', status=200
-        )
+        self.enumeration.executions.add(self.execution)
+        self.http_endpoint = Endpoint.objects.create(enumeration=self.enumeration, endpoint='/robots.txt', status=200)
+        self.http_endpoint.executions.add(self.execution)
 
     def tearDown(self) -> None:
         '''Run code after run tests.'''

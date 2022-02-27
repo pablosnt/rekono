@@ -135,18 +135,10 @@ class BaseToolTest(TestCase):
     def create_osint(self) -> None:
         '''Create OSINT data for testing.'''
         # OSINT entity that can be used as argument. Only DOMAIN and IP are valid
-        osint_user = OSINT.objects.create(
-            execution=self.first_execution,
-            data='test',
-            data_type=DataType.USER,
-            source='Google'
-        )
-        osint_domain = OSINT.objects.create(
-            execution=self.first_execution,
-            data='scanme.nmap.org',
-            data_type=DataType.DOMAIN,
-            source='Google'
-        )
+        osint_user = OSINT.objects.create(data='test', data_type=DataType.USER, source='Google')
+        osint_user.executions.add(self.first_execution)
+        osint_domain = OSINT.objects.create(data='scanme.nmap.org', data_type=DataType.DOMAIN, source='Google')
+        osint_domain.executions.add(self.first_execution)
         argument = Argument.objects.create(tool=self.nmap, name='test_osint', argument='--osint {url}', required=True)
         Input.objects.create(argument=argument, type=InputType.objects.get(name='OSINT'))
         self.arguments.append(argument)
@@ -161,8 +153,10 @@ class BaseToolTest(TestCase):
             Host: Valid host instance
         '''
         # Host filtered due to address type. Private IP required
-        filtered = Host.objects.create(execution=self.first_execution, address='scanme.nmap.org')
-        host = Host.objects.create(execution=self.first_execution, address='10.10.10.10')
+        filtered = Host.objects.create(address='scanme.nmap.org')
+        filtered.executions.add(self.first_execution)
+        host = Host.objects.create(address='10.10.10.10')
+        host.executions.add(self.first_execution)
         # Argument with only one input
         argument_only_host = Argument.objects.create(
             tool=self.nmap,
@@ -192,27 +186,12 @@ class BaseToolTest(TestCase):
             Enumeration: Valid enumeration instance
         '''
         # Enumeration filtered due to service type. HTTP service required
-        filtered = Enumeration.objects.create(
-            execution=self.first_execution,
-            host=host,
-            port=22,
-            protocol=Protocol.TCP,
-            service='ssh'
-        )
-        http = Enumeration.objects.create(
-            execution=self.first_execution,
-            host=host,
-            port=80,
-            protocol=Protocol.TCP,
-            service='http'
-        )
-        https = Enumeration.objects.create(
-            execution=self.first_execution,
-            host=host,
-            port=443,
-            protocol=Protocol.TCP,
-            service='https'
-        )
+        filtered = Enumeration.objects.create(host=host, port=22, protocol=Protocol.TCP, service='ssh')
+        filtered.executions.add(self.first_execution)
+        http = Enumeration.objects.create(host=host, port=80, protocol=Protocol.TCP, service='http')
+        http.executions.add(self.first_execution)
+        https = Enumeration.objects.create(host=host, port=443, protocol=Protocol.TCP, service='https')
+        https.executions.add(self.first_execution)
         argument = Argument.objects.create(
             tool=self.nmap,
             name='test_enumeration',
@@ -234,18 +213,10 @@ class BaseToolTest(TestCase):
             enumeration (Enumeration): Related enumeration
         '''
         # Endpoint filtered due to HTTP status code. 200 Ok required
-        filtered = Endpoint.objects.create(
-            execution=self.first_execution,
-            enumeration=enumeration,
-            endpoint='/admin',
-            status=403
-        )
-        endpoint = Endpoint.objects.create(
-            execution=self.first_execution,
-            enumeration=enumeration,
-            endpoint='/robots.txt',
-            status=200
-        )
+        filtered = Endpoint.objects.create(enumeration=enumeration, endpoint='/admin', status=403)
+        filtered.executions.add(self.first_execution)
+        endpoint = Endpoint.objects.create(enumeration=enumeration, endpoint='/robots.txt', status=200)
+        endpoint.executions.add(self.first_execution)
         argument = Argument.objects.create(
             tool=self.nmap,
             name='test_endpoint',
@@ -268,18 +239,10 @@ class BaseToolTest(TestCase):
             Technology: Valid technology instance
         '''
         # Technology filtered by name: Wordpress required
-        filtered = Technology.objects.create(
-            execution=self.first_execution,
-            enumeration=enumeration,
-            name='Joomla',
-            version='1.0.0'
-        )
-        technology = Technology.objects.create(
-            execution=self.first_execution,
-            enumeration=enumeration,
-            name='Wordpress',
-            version='1.0.0'
-        )
+        filtered = Technology.objects.create(enumeration=enumeration, name='Joomla', version='1.0.0')
+        filtered.executions.add(self.first_execution)
+        technology = Technology.objects.create(enumeration=enumeration, name='Wordpress', version='1.0.0')
+        technology.executions.add(self.first_execution)
         argument = Argument.objects.create(
             tool=self.nmap,
             name='test_technology',
@@ -301,12 +264,12 @@ class BaseToolTest(TestCase):
             technology (Technology): Related technology
         '''
         credential = Credential.objects.create(
-            execution=self.first_execution,
             technology=technology,
             email='test@test.test',
             username='test',
             secret='test'
         )
+        credential.executions.add(self.first_execution)
         argument = Argument.objects.create(
             tool=self.nmap,
             name='test_credential',
@@ -329,26 +292,24 @@ class BaseToolTest(TestCase):
         '''
         # Vulnerability filtered due to CVE is required
         filtered_1 = Vulnerability.objects.create(
-            execution=self.first_execution,
             technology=technology,
             name='Predefined vulnerability',
             description='Predefined vulnerability',
             severity=Severity.HIGH,
             cwe='CWE-20'
         )
+        filtered_1.executions.add(self.first_execution)
         # Vulnerability filtered due to CVE doesn't match the required one
         filtered_2 = Vulnerability.objects.create(
-            execution=self.first_execution,
             technology=technology,
             name='CVE found',
             description='CVE found',
             severity=Severity.HIGH,
             cve='CVE-1111-1111',
             cwe='CWE-20'
-
         )
+        filtered_2.executions.add(self.first_execution)
         vulnerability = Vulnerability.objects.create(
-            execution=self.first_execution,
             technology=technology,
             name='Log4Shell',
             description='Log4Shell',
@@ -356,6 +317,7 @@ class BaseToolTest(TestCase):
             cve='CVE-2021-44228',
             cwe='CWE-20'
         )
+        vulnerability.executions.add(self.first_execution)
         argument = Argument.objects.create(
             tool=self.nmap,
             name='test_vulnerability',
@@ -383,12 +345,8 @@ class BaseToolTest(TestCase):
         Returns:
             Vulnerability: Valid vulnerability instance
         '''
-        exploit = Exploit.objects.create(
-            execution=self.first_execution,
-            vulnerability=vulnerability,
-            name='Test',
-            description='Test'
-        )
+        exploit = Exploit.objects.create(vulnerability=vulnerability, name='Test', description='Test')
+        exploit.executions.add(self.first_execution)
         argument = Argument.objects.create(
             tool=self.nmap,
             name='test_exploit',
