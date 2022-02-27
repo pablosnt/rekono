@@ -165,14 +165,14 @@ export default {
       this.get('/api/executions/', 1, 1, this.getFilter('task__project')).then(response => { this.executions = response.data.count })
     },
     countFindings () {
-      let filter = this.getFilter('execution__task__target__project', { })
+      let filter = this.getFilter('executions__task__target__project', { })
       filter.is_active = 'true'
       this.findingTypes.forEach(type => {
         this.get(`/api/${type.toLowerCase()}/`, 1, 1, filter).then(response => { this[type.toLowerCase()] = response.data.count; this.findings = (this.findings ? this.findings : 0) + response.data.count })
       })
     },
     countVulnerabilities () {
-      let filter = this.getFilter('execution__task__target__project', { })
+      let filter = this.getFilter('executions__task__target__project', { })
       filter.is_active = 'true'
       if (this.timeFilter) {
         let date = new Date()

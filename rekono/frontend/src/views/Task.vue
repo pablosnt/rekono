@@ -26,7 +26,7 @@
           <label class="text-muted">Status</label>
           <hr/>
           <b-collapse id="task-details" v-if="currentTask">
-            <p v-for="i in statusesByVariant" :key="i.value">
+            <p v-for="i in statusByVariant" :key="i.value">
               <b-badge v-if="i.value === currentTask.status" :variant="i.variant">{{ currentTask.status }}</b-badge>
             </p>
             <p v-if="currentTask.start">Started at {{ currentTask.start.replace('T', ' ').substring(0, 19) }}</p>
@@ -90,7 +90,7 @@
               <p v-if="!row.item.step">{{ currentTask.tool.stage_name }}</p>
             </template>
             <template #cell(status)="row">
-              <div v-for="i in statusesByVariant" :key="i.value">
+              <div v-for="i in statusByVariant" :key="i.value">
                 <b-badge v-if="i.value === row.item.status" :variant="i.variant">{{ row.item.status }}</b-badge>
               </div>
             </template>

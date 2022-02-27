@@ -10,27 +10,27 @@ from findings.models import (OSINT, Credential, Endpoint, Enumeration, Exploit,
 
 # Common ordering anf filtering fields for all Finding models
 FINDING_ORDERING = (
-    ('execution__task', 'task'),
-    ('execution__task__target', 'target'),
-    ('execution__task__target__project', 'project'),
-    ('execution__task__tool', 'task__tool'),
-    ('execution__step__tool', 'step__tool'),
-    ('execution__task__executor', 'executor'),
-    'execution',
+    ('executions__task', 'task'),
+    ('executions__task__target', 'target'),
+    ('executions__task__target__project', 'project'),
+    ('executions__task__tool', 'task__tool'),
+    ('executions__step__tool', 'step__tool'),
+    ('executions__task__executor', 'executor'),
+    'executions',
     'creation',
     'is_active'
 )
 FINDING_FILTERING = {
-    'execution': ['exact'],
-    'execution__task': ['exact'],
-    'execution__task__target': ['exact'],
-    'execution__task__target__target': ['exact', 'icontains'],
-    'execution__task__target__project': ['exact'],
-    'execution__task__target__project__name': ['exact', 'icontains'],
-    'execution__task__executor': ['exact'],
-    'execution__task__executor__username': ['exact', 'icontains'],
-    'execution__start': ['gte', 'lte', 'exact'],
-    'execution__end': ['gte', 'lte', 'exact'],
+    'executions': ['exact'],
+    'executions__task': ['exact'],
+    'executions__task__target': ['exact'],
+    'executions__task__target__target': ['exact', 'icontains'],
+    'executions__task__target__project': ['exact'],
+    'executions__task__target__project__name': ['exact', 'icontains'],
+    'executions__task__executor': ['exact'],
+    'executions__task__executor__username': ['exact', 'icontains'],
+    'executions__start': ['gte', 'lte', 'exact'],
+    'executions__end': ['gte', 'lte', 'exact'],
     'creation': ['gte', 'lte', 'exact'],
     'is_active': ['exact'],
 }
@@ -39,7 +39,7 @@ FINDING_FILTERING = {
 class FindingFilter(BaseToolFilter):
     '''Common FilterSet to filter and sort findings entities.'''
 
-    tool_fields: List[str] = ['execution__task__tool', 'execution__step__tool']   # Filter by two Tool fields
+    tool_fields: List[str] = ['executions__task__tool', 'executions__step__tool']   # Filter by two Tool fields
 
 
 class BaseVulnerabilityFilter(FindingFilter):

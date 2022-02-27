@@ -106,10 +106,9 @@
             <br>
             {% if enumeration %}
                 <table class="table">
-                    <caption>Enumeration findings</caption>
+                    <caption>Enumerations</caption>
                     <thead class="thead-dark">
                         <tr>
-                            <th scope="col">Enumerations</th>
                             <th scope="col">Host</th>
                             <th scope="col">Port</th>
                             <th scope="col">Status</th>
@@ -120,7 +119,6 @@
                     <tbody>
                         {% for e in enumeration %}
                             <tr>
-                                <td></td>
                                 {% if e.host %}
                                     <td><strong>{{ e.host.address }}</strong></td>
                                 {% else %}

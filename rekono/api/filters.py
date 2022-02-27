@@ -1,11 +1,66 @@
 from typing import Any, List
 
 from django.db.models import Q, QuerySet
-from django_filters.rest_framework import FilterSet, filters
+from django.views import View
+from django_filters.rest_framework import (DjangoFilterBackend, FilterSet,
+                                           filters)
+from rest_framework.filters import OrderingFilter, SearchFilter
+from rest_framework.request import Request
 from tools.models import Tool
 
 
-class BaseFilter(FilterSet):
+class RekonoFilterBackend(DjangoFilterBackend):
+    '''Rekono filter backend from DjangoFilterBackend.'''
+
+    def filter_queryset(self, request: Request, queryset: QuerySet, view: View) -> QuerySet:
+        '''Filter queryset.
+
+        Args:
+            request (Request): HTTP request
+            queryset (QuerySet): Queryset to filter
+            view (View): Django view affected
+
+        Returns:
+            QuerySet: Filtered queryset
+        '''
+        return super().filter_queryset(request, queryset, view).distinct()      # Ignore duplicates if exist
+
+
+class RekonoSearchFilter(SearchFilter):
+    '''Rekono search filter from SearchFilter.'''
+
+    def filter_queryset(self, request: Request, queryset: QuerySet, view: View) -> QuerySet:
+        '''Filter queryset.
+
+        Args:
+            request (Request): HTTP request
+            queryset (QuerySet): Queryset to filter
+            view (View): Django view affected
+
+        Returns:
+            QuerySet: Filtered queryset
+        '''
+        return super().filter_queryset(request, queryset, view).distinct()      # Ignore duplicates if exist
+
+
+class RekonoOrderingFilter(OrderingFilter):
+    '''Rekono ordering filter from OrderingFilter.'''
+
+    def filter_queryset(self, request: Request, queryset: QuerySet, view: View) -> QuerySet:
+        '''Filter queryset.
+
+        Args:
+            request (Request): HTTP request
+            queryset (QuerySet): Queryset to filter
+            view (View): Django view affected
+
+        Returns:
+            QuerySet: Filtered queryset
+        '''
+        return super().filter_queryset(request, queryset, view).distinct()      # Ignore duplicates if exist
+
+
+class RekonoMultipleFieldFilter(FilterSet):
     '''Filter that allows querysets filtering using two model fields.'''
 
     def multiple_field_filter(self, queryset: QuerySet, value: Any, fields: List[str]) -> QuerySet:
@@ -25,7 +80,7 @@ class BaseFilter(FilterSet):
         return queryset.filter(filter_query)
 
 
-class BaseToolFilter(BaseFilter):
+class BaseToolFilter(RekonoMultipleFieldFilter):
     '''Filter that allows querysets filtering by Tool using two model fields.'''
 
     tool = filters.NumberFilter(field_name='tool', method='filter_tool')        # Tool Id given by the user

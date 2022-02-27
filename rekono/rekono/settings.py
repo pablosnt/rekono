@@ -194,9 +194,9 @@ REST_FRAMEWORK: Dict[str, Any] = {
     'DEFAULT_METADATA_CLASS': None,
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_FILTER_BACKENDS': [
-        'django_filters.rest_framework.DjangoFilterBackend',
-        'rest_framework.filters.SearchFilter',
-        'rest_framework.filters.OrderingFilter',
+        'api.filters.RekonoFilterBackend',
+        'api.filters.RekonoSearchFilter',
+        'api.filters.RekonoOrderingFilter',
     ],
     'DEFAULT_PAGINATION_CLASS': 'api.pagination.Pagination',                    # Pagination configuration
     'ORDERING_PARAM': 'order',

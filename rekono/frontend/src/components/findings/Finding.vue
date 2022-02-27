@@ -147,11 +147,11 @@ export default {
     getFilter () {
       let filter = {}
       if (this.execution) {
-        filter.execution = this.execution
+        filter.executions = this.execution
       } else if (this.task) {
-        filter.execution__task = this.task
+        filter.executions__task = this.task
       } else if (this.target) {
-        filter.execution__task__target = this.target
+        filter.executions__task__target = this.target
       } 
       if (this.search) {
         filter.search = this.search

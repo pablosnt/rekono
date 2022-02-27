@@ -1,8 +1,7 @@
-from typing import Any, Collection, Dict, Iterable, List, Optional, Union, cast
+from typing import Any, Dict, List, Union, cast
 
 from defectdojo.constants import DD_DATE_FORMAT
-from django.core.exceptions import ValidationError
-from django.db import DEFAULT_DB_ALIAS, models
+from django.db import models
 from executions.models import Execution
 from findings.enums import DataType, OSType, PortStatus, Protocol, Severity
 from findings.utils import get_unique_filter
@@ -34,7 +33,7 @@ class Finding(models.Model, BaseInput):
     '''Common and abstract Finding model, to define the common fields for all Finding models.'''
 
     # Execution where the finding is found
-    execution = models.ForeignKey(Execution, related_name='%(class)s', on_delete=models.CASCADE)
+    executions = models.ManyToManyField(Execution, related_name='%(class)s')
     creation = models.DateTimeField(auto_now_add=True)                          # Creation date of the finding
     is_active = models.BooleanField(default=True)                               # Indicate if the finding is active
     # Indicate if the finding has been imported in Defect-Dojo
@@ -47,46 +46,6 @@ class Finding(models.Model, BaseInput):
 
         abstract = True                                                         # To be extended by Finding models
 
-    def validate_unique(self, exclude: Optional[Collection[str]] = None) -> None:
-        '''Validate all uniqueness constraints on the model.
-
-        Args:
-            exclude (Optional[Collection[str]], optional): Field names to be exclude from validation. Defaults to None
-
-        Raises:
-            ValidationError: Raised if one unique constraint is violated
-        '''
-        # Get unique filter from key fields
-        unique_filter = get_unique_filter(self.key_fields, vars(self), self.execution)
-        search = self._meta.model.objects.filter(**unique_filter)               # Filter findings with the unique filter
-        if search.exists():                                                     # If findings found
-            raise ValidationError('Unique constraint violation')                # Unique constraint violation
-
-    def save(
-        self,
-        force_insert: bool = False,
-        force_update: bool = False,
-        using: Optional[str] = DEFAULT_DB_ALIAS,
-        update_fields: Optional[Iterable[str]] = None
-    ) -> None:
-        '''Save object in database.
-
-        Args:
-            force_insert (bool, optional): Force an INSERT query. Defaults to False
-            force_update (bool, optional): Force an UPDATE query. Defaults to False
-            using (Optional[str], optional): Database alias. Defaults to DEFAULT_DB_ALIAS
-            update_fields (Optional[Iterable[str]], optional): Fields to be saved. Defaults to None
-        '''
-        # If Id is not setted, it's an insertion. If Id is setted, it's an update
-        if not self.id:
-            self.validate_unique()                                              # Check constraint only in insertions
-        super().save(                                                           # Call parent save method
-            force_insert=force_insert,
-            force_update=force_update,
-            using=using,
-            update_fields=update_fields
-        )
-
     def __hash__(self) -> int:
         '''Get an unique value based on the object unique fields.
 
@@ -95,7 +54,7 @@ class Finding(models.Model, BaseInput):
         '''
         hash_fields = []
         # Get unique filter from key fields
-        unique_filter = get_unique_filter(self.key_fields, vars(self), self.execution)
+        unique_filter = get_unique_filter(self.key_fields, vars(self), self.executions.first().task.target)
         for value in unique_filter.values():
             hash_fields.append(value)                                           # Add values to the calculation
         return hash(tuple(hash_fields))                                         # Hash calculation
@@ -112,10 +71,11 @@ class Finding(models.Model, BaseInput):
         if isinstance(o, self.__class__):                                       # Check object class
             equals = True
             # Get object unique filter from object key fields
-            unique_filter = get_unique_filter(o.key_fields, vars(o), o.execution)
+            other_filter = get_unique_filter(o.key_fields, vars(o), o.executions.first().task.target)
+            self_filter = get_unique_filter(self.key_fields, vars(self), self.executions.first().task.target)
             # Get unique filter from key fields
-            for key, value in get_unique_filter(self.key_fields, vars(self), self.execution).items():
-                equals = equals and (unique_filter.get(key) == value)           # Compare all key fields
+            for key, value in self_filter.items():
+                equals = equals and (other_filter.get(key) == value)            # Compare all key fields
             return equals
         return False
 
@@ -125,7 +85,7 @@ class Finding(models.Model, BaseInput):
         Returns:
             Project: Related project entity
         '''
-        return self.execution.task.target.project
+        return self.executions.first().task.target.project
 
 
 class OSINT(Finding):

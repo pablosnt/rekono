@@ -37,7 +37,7 @@ class FindingBaseView(ListModelMixin, RetrieveModelMixin, DestroyModelMixin, Def
             QuerySet: Execution queryset
         '''
         queryset = super().get_queryset()
-        return queryset.filter(execution__task__target__project__members=self.request.user)
+        return queryset.filter(executions__task__target__project__members=self.request.user)
 
     def get_findings(self) -> List[Finding]:
         '''Get findings list associated to the current instance. Needed for Defect-Dojo integration.
@@ -115,11 +115,13 @@ class OSINTViewSet(FindingBaseView):
         '''
         osint = self.get_object()
         if osint.data_type in [DataType.IP, DataType.DOMAIN]:                   # Only supported for IPs and Domains
-            serializer = TargetSerializer(data={'project': osint.execution.task.target.project.id, 'target': osint.data})   # noqa: E501
+            serializer = TargetSerializer(data={'project': osint.get_project().id, 'target': osint.data})
             if serializer.is_valid():
                 target = serializer.create(serializer.validated_data)           # Target creation
                 return Response(TargetSerializer(target).data, status=status.HTTP_201_CREATED)
-        return Response({'data_type': ['Unsupported option for this OSINT data type']}, status=status.HTTP_400_BAD_REQUEST)     # noqa: E501
+        return Response(
+            {'data_type': ['Unsupported option for this OSINT data type']}, status=status.HTTP_400_BAD_REQUEST
+        )
 
 
 class HostViewSet(FindingBaseView):

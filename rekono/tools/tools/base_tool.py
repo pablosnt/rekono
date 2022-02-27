@@ -4,7 +4,6 @@ import subprocess
 import uuid
 from typing import Any, Dict, List, Union, cast
 
-from django.core.exceptions import ValidationError
 from django.db.models import Model
 from django.db.models.fields.related_descriptors import \
     ReverseManyToOneDescriptor
@@ -259,26 +258,21 @@ class BaseTool:
         Returns:
             Finding: Created finding entity
         '''
-        finding = None
-        fields['execution'] = self.execution                                    # Assign current execution to finding
-        try:
-            finding = finding_type.objects.create(**fields)                     # Try finding creation
-        except ValidationError as e:
-            if 'Unique constraint violation' in e.message:                      # This finding already exists
-                # Get unique filter for this finding model and from this fields
-                unique_filter = get_unique_filter(finding_type.key_fields, fields, self.execution)
-                # Get existing finding that causes the unique constraint violation
-                finding = finding_type.objects.filter(**unique_filter).first()
-                # Remove execution from fields, because the existing finding execution won't be updated
-                fields.pop('execution')
-                updated_fields = []
-                for field, value in fields.items():                             # For each finding field
-                    if value and value != getattr(finding, field):              # Distinct value than the existing one
-                        setattr(finding, field, value)                          # Update existing field
-                        updated_fields.append(field)
-                finding.save(update_fields=updated_fields)
+        # Get unique filter for this finding model and from this fields
+        unique_filter = get_unique_filter(finding_type.key_fields, fields, self.execution.task.target)
+        finding = finding_type.objects.filter(**unique_filter).first()          # Check if finding already exists
         if finding:
-            self.findings.append(finding)                                       # Save finding in finding list
+            updated_fields = []
+            for field, value in fields.items():                                 # For each finding field
+                if value and value != getattr(finding, field):                  # Distinct value than the existing one
+                    setattr(finding, field, value)                              # Update existing field
+                    updated_fields.append(field)
+            if updated_fields:
+                finding.save(update_fields=updated_fields)                      # Update existing finding
+        else:                                                                   # Finding not found
+            finding = finding_type.objects.create(**fields)                     # Create new finding
+        finding.executions.add(self.execution)                                  # Link finding to the current execution
+        self.findings.append(finding)
         return finding
 
     def parse_output_file(self) -> None:

@@ -1,15 +1,15 @@
 from typing import Any, Dict, List
 
-from executions.models import Execution
+from targets.models import Target
 
 
-def get_unique_filter(key_fields: List[Dict[str, Any]], fields: Dict[str, Any], execution: Execution) -> Dict[str, Any]:
+def get_unique_filter(key_fields: List[Dict[str, Any]], fields: Dict[str, Any], target: Target) -> Dict[str, Any]:
     '''Get filter from finding data and its key fields.
 
     Args:
         key_fields (List[Dict[str, Any]]): Finding key fields
         fields (Dict[str, Any]): Finding fields and values
-        execution (Execution): Execution where the finding is discovered
+        target (Target): Execution where the finding is discovered
 
     Returns:
         Dict[str, Any]: Filter with the key fields and values
@@ -23,6 +23,6 @@ def get_unique_filter(key_fields: List[Dict[str, Any]], fields: Dict[str, Any], 
             unique_filter[field['name']] = value                                # Add key field and value to the filter
             if field.get('is_base'):
                 base_field_found = True                                         # Update base indicator
-    if not base_field_found and execution:                                      # If no base field found, use target
-        unique_filter['execution__task__target'] = execution.task.target        # Add target value from execution
+    if not base_field_found and target:                                         # If no base field found, use target
+        unique_filter['executions__task__target'] = target                      # Add target value
     return unique_filter
