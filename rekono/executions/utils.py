@@ -7,26 +7,6 @@ from stringcase import snakecase
 from tools.models import Argument, Tool
 
 
-def select_argument(tool: Tool, input_type: InputType) -> Argument:
-    '''Select the properly argument for a tool and an input type.
-
-    Args:
-        tool (Tool): Tool to search the argument
-        input_type (InputType): Input type to search the argument
-
-    Returns:
-        Argument: Selected argument
-    '''
-    # First, search argument with input order equals to 1
-    argument = Argument.objects.filter(tool=tool, inputs__type=input_type, inputs__order=1).first()
-    if not argument:
-        # If not found, search first argument with input orger greater than 1
-        argument = Argument.objects.filter(
-            tool=tool, inputs__type=input_type, inputs__order__gt=1
-        ).order_by('inputs__order').first()
-    return argument
-
-
 def get_related_executions(
     related_input_types: List[InputType],
     executions: List[List[BaseInput]]
@@ -54,7 +34,7 @@ def get_related_executions(
                 is_target = isinstance(i, cast(Any, callback_target)) if callback_target else False
                 if is_model or is_target:
                     if index in relations:
-                        relations[index]['findings'].append(i)                  # Add input to the relations
+                        relations[index]['inputs'].append(i)                    # Add input to the relations
                     else:
                         relations[index] = {                                    # Create a new relation based on index
                             # Input field to access the related input
@@ -64,6 +44,29 @@ def get_related_executions(
         if relations:
             break                                                               # Relations found
     return relations
+
+
+def is_execution_in_list(to_check: List[BaseInput], executions: List[List[BaseInput]]) -> bool:
+    '''Check if execution is already in the execution list.
+
+    Args:
+        to_check (List[BaseInput]): Execution to check
+        executions (List[List[BaseInput]]): Execution list
+
+    Returns:
+        bool: Indicate if execution already exists or not
+    '''
+    existing = False
+    for execution in executions:                                                # For each execution
+        for index, item in enumerate(execution):                                # For each base input in execution
+            if item != to_check[index]:                                         # Execution doesn't match
+                existing = False
+                break
+            else:                                                               # Execution match
+                existing = True
+        if existing:                                                            # Execution found
+            break
+    return existing
 
 
 def add_input(
@@ -96,9 +99,8 @@ def add_input(
             else:                                                               # Inputs with same type in this index
                 # New execution is created from the filtered index and the input
                 execution_copy.append(base_input)
-                executions.append(execution_copy)
-            # As argument multiple is False, base input only is assigned to one execution
-            break
+                if not is_execution_in_list(execution_copy, executions):        # Check if execution exists
+                    executions.append(execution_copy)
     return executions
 
 
@@ -117,7 +119,8 @@ def get_executions_from_findings(base_inputs: List[BaseInput], tool: Tool) -> Li
     input_relations = utils.get_relations_between_input_types()                 # Get relations between input types
     # For each input type, and his related input types
     for input_type, related_input_types in list(reversed(input_relations.items())):
-        argument = select_argument(tool, input_type)                            # Get properly argument for input type
+        # Get properly argument for input type
+        argument = Argument.objects.filter(tool=tool, inputs__type=input_type).order_by('inputs__order').first()
         if not argument:
             continue                                                            # No argument found
         related_model = input_type.get_related_model_class()

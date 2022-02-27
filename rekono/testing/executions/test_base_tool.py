@@ -26,7 +26,7 @@ from tools.utils import get_tool_class_by_name
 from users.models import User
 
 
-class BaseToolTestCase(TestCase):
+class BaseToolTest(TestCase):
     '''Test cases for Base Tool operations.'''
 
     def setUp(self) -> None:
