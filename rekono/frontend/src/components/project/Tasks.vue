@@ -94,7 +94,7 @@ export default {
         })
     },
     cancelTask () {
-      this.delete(`/api/tasks/${this.selectedTask.id}/`, this.selectedTask.process ? this.selectedTask.process.name : this.selectedTask.tool.name, 'Task cancelled successfully').then(this.fetchData())
+      this.delete(`/api/tasks/${this.selectedTask.id}/`, this.selectedTask.process ? this.selectedTask.process.name : this.selectedTask.tool.name, 'Task cancelled successfully').then(() => this.fetchData())
     },
     selectTask (task) {
       this.selectedTask = task

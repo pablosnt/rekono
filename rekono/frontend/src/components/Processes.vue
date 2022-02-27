@@ -191,6 +191,9 @@ export default {
       this.stepForm = false
       this.selectedProcess = null
       this.selectedStep = null
+      this.showTaskModal = false
+      this.showProcessModal = false
+      this.showStepModal = false
     }
   }
 }

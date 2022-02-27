@@ -1,6 +1,6 @@
 <template>
-  <div id="public-page" class="fixed-top d-flex align-items-center justify-content-center" style="bottom: 0">
-    <b-card id="public-form" img-src="/static/logo-black.png" img-top img-height="150" class="mb-3">
+  <div id="public-page" class="fixed-top d-flex align-items-center justify-content-center mb-0">
+    <b-card id="public-form" img-src="/static/logo-black.png" img-top img-height="150">
       <slot/>
     </b-card>
   </div>

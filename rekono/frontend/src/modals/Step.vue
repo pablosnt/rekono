@@ -95,10 +95,7 @@ export default {
   },
   watch: {
     initialized (initialized) {
-      console.log(initialized)
       if (initialized) {
-        console.log(this.step)
-        console.log(this.tool)
         if (!this.step && !this.tool) {
           this.getAllPages('/api/tools/?o=stage,name').then(results => this.tools = results)
         } else if (this.step && !this.tool) {
