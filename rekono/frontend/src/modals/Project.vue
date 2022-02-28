@@ -73,11 +73,11 @@ export default {
   methods: {
     check () {
       const valid = this.$refs.project_form.checkValidity()
-      if (!this.name || this.name.length === 0 || !this.validateName(this.name)) {
+      if (!this.validateName(this.name)) {
         this.nameState = false
         this.invalidName = this.name && this.name.length > 0 ? 'Invalid project name' : 'Project name is required'
       }
-      if (!this.description || this.description.length === 0 || !this.validateText(this.description)) {
+      if (!this.validateText(this.description)) {
         this.descriptionState = false
         this.invalidDescription = this.description && this.description.length > 0 ? 'Invalid project description' : 'Project description is required'
       }

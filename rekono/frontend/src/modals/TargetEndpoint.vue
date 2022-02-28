@@ -27,7 +27,7 @@ export default {
   methods: {
     check () {
       const valid = this.$refs.target_form.checkValidity()
-      if (!this.targetEndpoint || this.targetEndpoint.length === 0 || !this.validateEndpoint(this.targetEndpoint)) {
+      if (!this.validateEndpoint(this.targetEndpoint)) {
         this.targetEndpointState = false
         this.invalidTargetEndpoint = this.targetEndpoint && this.targetEndpoint.length > 0 ? 'Invalid target endpoint' : 'Target endpoint is required'
       }

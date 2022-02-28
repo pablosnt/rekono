@@ -81,15 +81,15 @@ export default {
     },
     check () {
       this.checkOtp(this.otp)
-      if (!this.username || this.username.length === 0 || !this.validateName(this.username)) {
+      if (!this.validateName(this.username)) {
         this.usernameState = false
         this.invalidUsername = this.username && this.username.length > 0 ? 'Invalid username' : 'Username is required'
       }
-      if (!this.firstName || this.firstName.length === 0 || !this.validateName(this.firstName)) {
+      if (!this.validateName(this.firstName)) {
         this.firstNameState = false
         this.invalidFirstName = this.firstName && this.firstName.length > 0 ? 'Invalid first name' : 'First name is required'
       }
-      if (!this.lastName || this.lastName.length === 0 || !this.validateName(this.lastName)) {
+      if (!this.validateName(this.lastName)) {
         this.lastNameState = false
         this.invalidLastName = this.lastName && this.lastName.length > 0 ? 'Invalid last name' : 'Last name is required'
       }

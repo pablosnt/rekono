@@ -68,7 +68,7 @@ export default {
       }
     },
     check () {
-      this.usernameState = (this.username && this.validateName(this.username))
+      this.usernameState = this.validateName(this.username)
       this.passwordState = (this.password !== null)
       return this.usernameState && this.passwordState
     }

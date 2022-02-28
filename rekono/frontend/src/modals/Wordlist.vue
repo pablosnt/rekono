@@ -62,7 +62,7 @@ export default {
   methods: {
     check () {
       const valid = this.$refs.wordlist_form.checkValidity()
-      if (!this.name || this.name.length === 0 || !this.validateName(this.name)) {
+      if (!this.validateName(this.name)) {
         this.nameState = false
         this.invalidName = this.name && this.name.length > 0 ? 'Invalid wordlist name' : 'Wordlist name is required'
       }

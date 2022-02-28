@@ -68,9 +68,6 @@ class ZapTool(BaseTool):
                     url = instance.findtext('uri')                              # Get URL
                     if url:
                         http_endpoint = url.replace(url_base, '')               # Get HTTP endpoint
-                        if http_endpoint and http_endpoint != '/':              # If valid endpoint
-                            # if http_endpoint[-1] != '/':                        # If last endpoint char is not slash
-                            #     http_endpoint += '/'                            # Add last slash to the endpoint
-                            if http_endpoint not in http_endpoints:             # If it's a new endpoint
-                                http_endpoints.add(http_endpoint)               # Add endpoint to HTTP endpoints set
-                                self.create_finding(Endpoint, endpoint=http_endpoint)   # Create Endpoint
+                        if http_endpoint and http_endpoint not in http_endpoints:   # If it's a new endpoint
+                            http_endpoints.add(http_endpoint)                   # Add endpoint to HTTP endpoints set
+                            self.create_finding(Endpoint, endpoint=http_endpoint)   # Create Endpoint

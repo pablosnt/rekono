@@ -240,13 +240,13 @@ export default {
       window.location.hash = from + url.search
     },
     validateName (value) {
-      return this.nameRegex.test(value)
+      return value && value.length > 0 && this.nameRegex.test(value)
     },
     validateText (value) {
-      return this.textRegex.test(value)
+      return value && value.length > 0 && this.textRegex.test(value)
     },
     validateEndpoint (value) {
-      return this.endpointRegex.test(value)
+      return value && value.length > 0 && this.endpointRegex.test(value)
     }
   }
 }

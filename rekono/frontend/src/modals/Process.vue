@@ -94,11 +94,11 @@ export default {
   methods: {
     check () {
       const valid = this.$refs.process_form.checkValidity()
-      if (!this.name || this.name.length === 0 || !this.validateName(this.name)) {
+      if (!this.validateName(this.name)) {
         this.nameState = false
         this.invalidName = this.name && this.name.length > 0 ? 'Invalid process name' : 'Process name is required'
       }
-      if (!this.description || this.description.length === 0 || !this.validateText(this.description)) {
+      if (!this.validateText(this.description)) {
         this.descriptionState = false
         this.invalidDescription = this.description && this.description.length > 0 ? 'Invalid process description' : 'Process description is required'
       }

@@ -110,11 +110,11 @@ export default {
     check () {
       if (this.currentTab === 0) {
         this.engagementId = null
-        if (!this.engagementName || this.engagementName.length === 0 || !this.validateName(this.engagementName)) {
+        if (!this.validateName(this.engagementName)) {
           this.nameState = false
           this.invalidName = this.engagementName && this.engagementName.length > 0 ? 'Invalid engagement name' : 'Engagement name is required'
         }
-        if (!this.engagementDescription || this.engagementDescription.length === 0 || !this.validateText(this.engagementDescription)) {
+        if (!this.validateText(this.engagementDescription)) {
           this.descriptionState = false
           this.invalidDescription = this.engagementDescription && this.engagementDescription.length > 0 ? 'Invalid engagement description' : 'Engagement description is required'
         }
