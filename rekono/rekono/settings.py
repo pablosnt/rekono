@@ -45,10 +45,11 @@ REKONO_HOME = os.getenv('REKONO_HOME', os.path.join('opt', 'rekono'))
 if not os.path.isdir(REKONO_HOME):                                              # Rekono home doesn't exist
     REKONO_HOME = str(BASE_DIR.parent)                                          # Use current directory as home
 
-OUTPUTS_DIR = os.path.join(REKONO_HOME, 'outputs')                              # Directory to save execution outputs
+REPORTS_DIR = os.path.join(REKONO_HOME, 'reports')                              # Directory to save tool reports
 WORDLIST_DIR = os.path.join(REKONO_HOME, 'wordlists')                           # Directory to save wordlist files
+LOGGING_DIR = os.path.join(REKONO_HOME, 'logs')                                 # Directory to save log files
 
-for dir in [OUTPUTS_DIR, WORDLIST_DIR]:                                         # Initialize directories if needed
+for dir in [REPORTS_DIR, WORDLIST_DIR, LOGGING_DIR]:                            # Initialize directories if needed
     if not os.path.isdir(dir):
         os.mkdir(dir)
 
@@ -102,7 +103,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'security.middleware.RekonoMiddleware',                                     # Includes HTTP response headers
+    'security.middleware.RekonoSecurityMiddleware',                             # Includes security response headers
 ]
 
 ROOT_URLCONF = 'rekono.urls'
@@ -185,6 +186,42 @@ SIMPLE_JWT = {
 # Max allowed size in MB for upload files
 UPLOAD_FILES_MAX_MB = 1 if TESTING else os.getenv('RKN_UPLOAD_FILES_MAX_MB', CONFIG.UPLOAD_FILES_MAX_MB)
 
+LOGGING = {                                                                     # Logging configuration
+    'version': 1,
+    'disable_existing_loggers': True,                                           # Disable default Django logging system
+    'formatters': {
+        'rekono': {
+            'format': '%(asctime)s [%(levelname)s] %(module)s - %(source_ip)s - %(user)s - %(message)s'
+        }
+    },
+    'filters': {
+        'rekono': {
+            '()': 'api.log.RekonoLoggingFilter',                                # Custom logging filter
+        }
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'rekono',
+            'filters': ['rekono'],
+        },
+        'file': {
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(LOGGING_DIR, 'rekono.log'),
+            'maxBytes': 50 * 1024 * 1024,                                       # Max. 50 MB per file
+            'backupCount': 10,
+            'formatter': 'rekono',
+            'filters': ['rekono'],
+        }
+    },
+    'loggers': {
+        'rekono': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG' if DEBUG else 'INFO',
+            'propagate': False,
+        }
+    }
+}
 
 ################################################################################
 # API Rest                                                                     #

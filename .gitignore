@@ -132,8 +132,9 @@ dmypy.json
 .DS_Store
 .vscode/
 .scannerwork/
-outputs/
+reports/
 wordlists/
+logs/
 
 # Vue.JS
 node_modules/
