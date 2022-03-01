@@ -1,7 +1,10 @@
+import logging
 from typing import Any
 
 from django.utils import timezone
 from tools.tools.base_tool import BaseTool
+
+logger = logging.getLogger()                                                    # Rekono logger
 
 
 def tool_callback(job: Any, connection: Any, result: BaseTool, *args: Any, **kwargs: Any) -> None:
@@ -16,3 +19,4 @@ def tool_callback(job: Any, connection: Any, result: BaseTool, *args: Any, **kwa
     task.status = result.execution.status                                       # Update task status
     task.end = timezone.now()                                                   # Update the task end date
     task.save(update_fields=['status', 'end'])
+    logger.info(f'[Task] Task {task.id} has been completed with {task.status} status')

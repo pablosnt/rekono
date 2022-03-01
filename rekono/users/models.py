@@ -1,3 +1,4 @@
+import logging
 from typing import Any, cast
 
 from django.contrib.auth.models import AbstractUser, Group, UserManager
@@ -11,6 +12,8 @@ from security.otp import generate, get_expiration
 from users.enums import Notification
 
 # Create your models here.
+
+logger = logging.getLogger()                                                    # Rekono logger
 
 
 class RekonoUserManager(UserManager):
@@ -43,6 +46,7 @@ class RekonoUserManager(UserManager):
         user = User.objects.create(email=email, otp=generate(), is_active=False)
         self.initialize(user, role)                                             # Initialize user
         user_invitation(user)                                                   # Send email invitation to the user
+        logger.info(f'[User] User {user.id} has been invited with role {role}')
         return user
 
     def create_superuser(self, username: str, email: str, password: str, **extra_fields: Any) -> Any:
@@ -58,6 +62,7 @@ class RekonoUserManager(UserManager):
         '''
         user = super().create_superuser(username, email, password, **extra_fields)      # Create new superuser
         self.initialize(user, cast(Role, Role.ADMIN))                           # Initialize user
+        logger.info(f'[User] Superuser {user.id} has been created')
         return user
 
     def change_user_role(self, user: Any, role: Role) -> Any:
@@ -73,6 +78,7 @@ class RekonoUserManager(UserManager):
         group = Group.objects.get(name=role.value)                              # Get user group related to the role
         user.groups.clear()                                                     # Clean user groups
         user.groups.set([group])                                                # Set user group
+        logger.info(f'[User] Role for user {user.id} has been changed to {role}')
         return user
 
     def enable_user(self, user: Any, role: Role) -> Any:
@@ -90,6 +96,7 @@ class RekonoUserManager(UserManager):
         user.otp_expiration = get_expiration()                                  # Set OTP expiration
         self.initialize(user, role)                                             # Initialize user
         user_enable_account(user)                                               # Send email to establish its password
+        logger.info(f'[User] User {user.id} has been enabled')
         return user
 
     def disable_user(self, user: Any) -> Any:
@@ -111,6 +118,7 @@ class RekonoUserManager(UserManager):
             token.delete()                                                      # Delete user API token
         except Token.DoesNotExist:
             pass
+        logger.info(f'[User] User {user.id} has been disabled')
         return user
 
     def request_password_reset(self, user: Any) -> Any:
@@ -126,6 +134,7 @@ class RekonoUserManager(UserManager):
         user.otp_expiration = get_expiration()                                  # Set OTP expiration
         user.save(update_fields=['otp', 'otp_expiration'])
         user_password_reset(user)                                               # Send password reset email
+        logger.info(f'[User] User {user.id} requested a password reset', extra={'user': user.id})
         return user
 
 

@@ -1,3 +1,5 @@
+import logging
+
 from telegram.ext import (CallbackQueryHandler, CommandHandler,
                           ConversationHandler, Filters, MessageHandler,
                           Updater)
@@ -30,82 +32,90 @@ from telegram_bot.messages.help import get_my_commands
 
 from rekono.settings import TELEGRAM_TOKEN
 
+logger = logging.getLogger()                                                    # Rekono logger
+
 
 def initialize() -> None:
     '''Initialize Telegram Bot.'''
-    updater = Updater(token=TELEGRAM_TOKEN)                                     # Telegram client
-    updater.bot.set_my_commands(get_my_commands())                              # Configure bot commands
+    try:
+        updater = Updater(token=TELEGRAM_TOKEN)                                 # Telegram client
+        updater.bot.set_my_commands(get_my_commands())                          # Configure bot commands
+    except Exception:
+        logger.error('[Telegram Bot] Error during Telegram bot initialization')
 
 
 def deploy() -> None:
     '''Start listenning for commands.'''
-    updater = Updater(token=TELEGRAM_TOKEN)                                     # Telegram client
-    updater.dispatcher.add_handler(CommandHandler('start', start))              # Start command
-    updater.dispatcher.add_handler(CommandHandler('logout', logout))            # Logout command
-    updater.dispatcher.add_handler(CommandHandler('help', help))                # Help command
-    updater.dispatcher.add_handler(CommandHandler('showproject', show))         # Show selected project
-    updater.dispatcher.add_handler(CommandHandler('clearproject', clear))       # Clear selected project
-    updater.dispatcher.add_handler(ConversationHandler(                         # Select project
-        entry_points=[CommandHandler('selectproject', project)],
-        states={
-            SELECT_PROJECT: [CallbackQueryHandler(select_project)]
-        },
-        fallbacks=[CommandHandler('cancel', cancel)],
-        per_chat=True
-    ))
-    updater.dispatcher.add_handler(ConversationHandler(                         # Create new target
-        entry_points=[CommandHandler('newtarget', new_target)],
-        states={
-            SELECT_PROJECT: [CallbackQueryHandler(select_project)],
-            CREATE: [MessageHandler(Filters.text, create_target)]
-        },
-        fallbacks=[CommandHandler('cancel', cancel)],
-        per_chat=True
-    ))
-    updater.dispatcher.add_handler(ConversationHandler(                         # Create new target port
-        entry_points=[CommandHandler('newport', new_target_port)],
-        states={
-            SELECT_PROJECT: [CallbackQueryHandler(select_project)],
-            SELECT_TARGET: [CallbackQueryHandler(select_target)],
-            CREATE: [MessageHandler(Filters.text, create_target_port)]
-        },
-        fallbacks=[CommandHandler('cancel', cancel)],
-        per_chat=True
-    ))
-    updater.dispatcher.add_handler(ConversationHandler(                         # Create new target endpoint
-        entry_points=[CommandHandler('newendpoint', new_target_endpoint)],
-        states={
-            SELECT_PROJECT: [CallbackQueryHandler(select_project)],
-            SELECT_TARGET: [CallbackQueryHandler(select_target)],
-            SELECT_TARGET_PORT: [CallbackQueryHandler(select_target_port)],
-            CREATE: [MessageHandler(Filters.text, create_target_endpoint)]
-        },
-        fallbacks=[CommandHandler('cancel', cancel)],
-        per_chat=True
-    ))
-    updater.dispatcher.add_handler(ConversationHandler(                         # Execute tool
-        entry_points=[CommandHandler('tool', execute_tool)],
-        states={
-            SELECT_PROJECT: [CallbackQueryHandler(select_project)],
-            SELECT_TARGET: [CallbackQueryHandler(select_target)],
-            SELECT_TOOL: [CallbackQueryHandler(select_tool)],
-            SELECT_CONFIGURATION: [CallbackQueryHandler(select_configuration)],
-            SELECT_INTENSITY: [CallbackQueryHandler(select_intensity)],
-            EXECUTE: [CallbackQueryHandler(execute)]
-        },
-        fallbacks=[CommandHandler('cancel', cancel)],
-        per_chat=True
-    ))
-    updater.dispatcher.add_handler(ConversationHandler(                         # Execute process
-        entry_points=[CommandHandler('process', execute_process)],
-        states={
-            SELECT_PROJECT: [CallbackQueryHandler(select_project)],
-            SELECT_TARGET: [CallbackQueryHandler(select_target)],
-            SELECT_PROCESS: [CallbackQueryHandler(select_process)],
-            SELECT_INTENSITY: [CallbackQueryHandler(select_intensity)],
-            EXECUTE: [CallbackQueryHandler(execute)]
-        },
-        fallbacks=[CommandHandler('cancel', cancel)],
-        per_chat=True
-    ))
-    updater.start_polling()                                                     # Start Telegram Bot
+    try:
+        updater = Updater(token=TELEGRAM_TOKEN)                                     # Telegram client
+        updater.dispatcher.add_handler(CommandHandler('start', start))              # Start command
+        updater.dispatcher.add_handler(CommandHandler('logout', logout))            # Logout command
+        updater.dispatcher.add_handler(CommandHandler('help', help))                # Help command
+        updater.dispatcher.add_handler(CommandHandler('showproject', show))         # Show selected project
+        updater.dispatcher.add_handler(CommandHandler('clearproject', clear))       # Clear selected project
+        updater.dispatcher.add_handler(ConversationHandler(                         # Select project
+            entry_points=[CommandHandler('selectproject', project)],
+            states={
+                SELECT_PROJECT: [CallbackQueryHandler(select_project)]
+            },
+            fallbacks=[CommandHandler('cancel', cancel)],
+            per_chat=True
+        ))
+        updater.dispatcher.add_handler(ConversationHandler(                         # Create new target
+            entry_points=[CommandHandler('newtarget', new_target)],
+            states={
+                SELECT_PROJECT: [CallbackQueryHandler(select_project)],
+                CREATE: [MessageHandler(Filters.text, create_target)]
+            },
+            fallbacks=[CommandHandler('cancel', cancel)],
+            per_chat=True
+        ))
+        updater.dispatcher.add_handler(ConversationHandler(                         # Create new target port
+            entry_points=[CommandHandler('newport', new_target_port)],
+            states={
+                SELECT_PROJECT: [CallbackQueryHandler(select_project)],
+                SELECT_TARGET: [CallbackQueryHandler(select_target)],
+                CREATE: [MessageHandler(Filters.text, create_target_port)]
+            },
+            fallbacks=[CommandHandler('cancel', cancel)],
+            per_chat=True
+        ))
+        updater.dispatcher.add_handler(ConversationHandler(                         # Create new target endpoint
+            entry_points=[CommandHandler('newendpoint', new_target_endpoint)],
+            states={
+                SELECT_PROJECT: [CallbackQueryHandler(select_project)],
+                SELECT_TARGET: [CallbackQueryHandler(select_target)],
+                SELECT_TARGET_PORT: [CallbackQueryHandler(select_target_port)],
+                CREATE: [MessageHandler(Filters.text, create_target_endpoint)]
+            },
+            fallbacks=[CommandHandler('cancel', cancel)],
+            per_chat=True
+        ))
+        updater.dispatcher.add_handler(ConversationHandler(                         # Execute tool
+            entry_points=[CommandHandler('tool', execute_tool)],
+            states={
+                SELECT_PROJECT: [CallbackQueryHandler(select_project)],
+                SELECT_TARGET: [CallbackQueryHandler(select_target)],
+                SELECT_TOOL: [CallbackQueryHandler(select_tool)],
+                SELECT_CONFIGURATION: [CallbackQueryHandler(select_configuration)],
+                SELECT_INTENSITY: [CallbackQueryHandler(select_intensity)],
+                EXECUTE: [CallbackQueryHandler(execute)]
+            },
+            fallbacks=[CommandHandler('cancel', cancel)],
+            per_chat=True
+        ))
+        updater.dispatcher.add_handler(ConversationHandler(                         # Execute process
+            entry_points=[CommandHandler('process', execute_process)],
+            states={
+                SELECT_PROJECT: [CallbackQueryHandler(select_project)],
+                SELECT_TARGET: [CallbackQueryHandler(select_target)],
+                SELECT_PROCESS: [CallbackQueryHandler(select_process)],
+                SELECT_INTENSITY: [CallbackQueryHandler(select_intensity)],
+                EXECUTE: [CallbackQueryHandler(execute)]
+            },
+            fallbacks=[CommandHandler('cancel', cancel)],
+            per_chat=True
+        ))
+        updater.start_polling()                                                     # Start Telegram Bot
+    except Exception:
+        logger.error('[Telegram Bot] Error during Telegram bot deployment')

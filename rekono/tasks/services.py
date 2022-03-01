@@ -1,3 +1,4 @@
+import logging
 import os
 import signal
 
@@ -7,6 +8,8 @@ from executions.models import Execution
 from queues.utils import cancel_and_delete_job, cancel_job
 from tasks.enums import Status
 from tasks.models import Task
+
+logger = logging.getLogger()                                                    # Rekono logger
 
 
 def cancel_task(task: Task) -> None:
@@ -26,14 +29,17 @@ def cancel_task(task: Task) -> None:
         if task.rq_job_id:
             # Job Id exists, so it has been enqueued at least one time
             cancel_and_delete_job('tasks-queue', task.rq_job_id)                # Cancel and delete the task job
+            logger.info(f'[Task] Task {task.id} has been cancelled')
         # Get all pending executions for this task
         executions = Execution.objects.filter(task=task, status__in=[Status.REQUESTED, Status.RUNNING]).all()
         for execution in executions:                                            # For each execution
             if execution.rq_job_id:                                             # Job Id exists, so it has been enqueued
                 cancel_job('executions-queue', execution.rq_job_id)             # Cancel execution job
+                logger.info(f'[Execution] Execution {execution.id} has been cancelled')
             if execution.rq_job_pid:
                 # Process PID exists, so it is running right now
                 os.kill(execution.rq_job_pid, signal.SIGKILL)                   # Kill running process (requires sudo)
+                logger.info(f'[Execution] Process related to execution {execution.id} has been killed')
             execution.status = Status.CANCELLED                                 # Set execution status to Cancelled
             execution.end = timezone.now()                                      # Update execution end date
             execution.save(update_fields=['status', 'end'])
@@ -41,4 +47,5 @@ def cancel_task(task: Task) -> None:
         task.end = timezone.now()                                               # Update task end date
         task.save(update_fields=['status', 'end'])
     else:
+        logger.warning(f'[Task] Task {task.id} can\'t be cancelled')
         raise ValidationError({'id': f'Task {task.id} can not be cancelled'})   # Task is not eligible for cancellation

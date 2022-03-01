@@ -1,3 +1,4 @@
+import logging
 from typing import Any, Dict
 
 from email_notifications.sender import user_login_notification
@@ -5,6 +6,8 @@ from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from users.models import User
+
+logger = logging.getLogger()                                                    # Rekono logger
 
 
 class RekonoTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -24,6 +27,7 @@ class RekonoTokenObtainPairSerializer(TokenObtainPairSerializer):
         '''
         attrs = super().validate(attrs)                                         # User login
         user_login_notification(self.user)                                      # Send email notification to the user
+        logger.info(f'[Security] User {self.user.id} has logged in', extra={'user': self.user.id})
         return attrs
 
     @classmethod

@@ -1,3 +1,4 @@
+import logging
 from typing import Any, List
 
 from drf_spectacular.utils import extend_schema
@@ -21,6 +22,8 @@ from users.serializers import (ChangeUserPasswordSerializer,
                                UserProfileSerializer, UserSerializer)
 
 # Create your views here.
+
+logger = logging.getLogger()                                                    # Rekono logger
 
 
 class UserAdminViewSet(GenericViewSet, ListModelMixin, RetrieveModelMixin, DestroyModelMixin):

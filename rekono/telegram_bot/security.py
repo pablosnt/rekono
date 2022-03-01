@@ -1,3 +1,4 @@
+import logging
 from typing import Union
 
 from django.db.models import Q
@@ -5,6 +6,8 @@ from security.authorization.roles import Role
 from telegram.update import Update
 from telegram_bot.messages.errors import AUTHN_ERROR, AUTHZ_ERROR
 from telegram_bot.models import TelegramChat
+
+logger = logging.getLogger()                                                    # Rekono logger
 
 
 def check_auditor(chat: TelegramChat) -> bool:
@@ -36,8 +39,13 @@ def get_chat(update: Update, auditor: bool = True) -> Union[TelegramChat, None]:
         # Get chat entity
         chat = TelegramChat.objects.filter(chat_id=update.effective_chat.id, user__is_active=True).first()
         if not chat:                                                            # No chat found
+            logger.error('[Telegram Bot] Unauthenticated request')
             update.message.reply_text(AUTHN_ERROR)                              # Authentication error
         elif auditor and not check_auditor(chat):                               # User is not auditor
+            logger.error(
+                f'[Telegram Bot] User {chat.user.id} isn\'t authorized to use Telegram bot',
+                extra={'user': chat.user.id}
+            )
             update.message.reply_text(AUTHZ_ERROR)                              # Authorization error
         else:
             return chat                                                         # Chat is authorized

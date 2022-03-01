@@ -1,4 +1,5 @@
 import hashlib
+import logging
 from pathlib import Path
 from typing import Any, List
 
@@ -6,6 +7,8 @@ import magic
 from django.core.exceptions import ValidationError
 
 from rekono.settings import UPLOAD_FILES_MAX_MB
+
+logger = logging.getLogger()                                                    # Rekono logger
 
 
 def validate(in_memory_file: Any, extensions: List[str], mime_types: List[str]) -> None:
@@ -21,12 +24,15 @@ def validate(in_memory_file: Any, extensions: List[str], mime_types: List[str]) 
     '''
     size = in_memory_file.size / (1024 * 1024)                                  # Get file size in MB
     if size > UPLOAD_FILES_MAX_MB:                                              # File size greater than size limit
+        logger.warning(f'[Security] Attempt of upload too large file with {size} MB')
         raise ValidationError({'file': f'File size is greater than the max size allowed ({UPLOAD_FILES_MAX_MB} MB)'})
     extension = Path(in_memory_file.name).suffix[1:].lower()                    # Get file extension
     if extension not in extensions:                                             # Invalid file extension
+        logger.warning(f'[Security] Attempt of upload file with invalid {extension} extension')
         raise ValidationError({'file': f'Invalid extension {extension}'})
     mime_type = magic.from_buffer(in_memory_file.read(1024), mime=True)         # Get MIME type from file content
     if mime_type not in mime_types:                                             # Invalid file MIME type
+        logger.warning(f'[Security] Attempt of upload file with invalid {mime_type} MIME type')
         raise ValidationError({'file': f'Invalid MIME type {mime_type}'})
 
 
@@ -60,4 +66,5 @@ def store_file(in_memory_file: Any, filepath: str) -> str:
         for chunk in in_memory_file.chunks():
             storage.write(chunk)                                                # Write file content
             checksum.update(chunk)                                              # Calculate hash value
+    logger.warning(f'[Security] New file uploaded to the server in the path {filepath}')
     return checksum.hexdigest()

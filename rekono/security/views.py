@@ -1,3 +1,4 @@
+import logging
 from typing import Any
 
 from drf_spectacular.utils import extend_schema
@@ -11,6 +12,8 @@ from rest_framework_simplejwt.views import (TokenObtainPairView,
                                             TokenRefreshView)
 from security.serializers import (LogoutSerializer,
                                   RekonoTokenObtainPairSerializer)
+
+logger = logging.getLogger()                                                    # Rekono logger
 
 
 class RekonoTokenObtainPairView(TokenObtainPairView):
@@ -46,5 +49,6 @@ class LogoutView(GenericViewSet, CreateModelMixin):
         serializer = LogoutSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()                                                   # Perform logout
+            logger.info(f'[Security] User {request.user.id} has logged out', extra={'user': request.user.id})
             return Response(status=status.HTTP_200_OK)                          # Logged out
         return Response(status=status.HTTP_400_BAD_REQUEST)                     # Valid refresh token is required

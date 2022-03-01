@@ -1,3 +1,4 @@
+import logging
 from typing import List
 
 import django_rq
@@ -10,6 +11,8 @@ from telegram_bot import sender as telegram_sender
 from telegram_bot.messages.execution import notification_message
 from users.enums import Notification
 
+logger = logging.getLogger()                                                    # Rekono logger
+
 
 def producer(execution: Execution, findings: List[Finding]) -> None:
     '''Enqueue a list of findings in the findings queue.
@@ -20,6 +23,7 @@ def producer(execution: Execution, findings: List[Finding]) -> None:
     '''
     findings_queue = django_rq.get_queue('findings-queue')                      # Get findings queue
     findings_queue.enqueue(consumer, execution=execution, findings=findings)    # Enqueue findings list
+    logger.info(f'[Findings] {len(findings)} findings from execution {execution.id} have been enqueued')
 
 
 @job('findings-queue')
@@ -49,6 +53,7 @@ def consumer(execution: Execution = None, findings: List[Finding] = []) -> None:
             notification_scope=Notification.ALL_EXECUTIONS
         ).all()
         users_to_notify.extend(list(search_members))                            # Save members in the notify list
+        logger.info(f'[Findings] {len(users_to_notify)} will receive a notification with the findings from execution {execution.id}')   # noqa: E501
         telegram_message = notification_message(execution, findings)            # Create Telegram message
         for user in [u for u in users_to_notify if u.telegram_notification]:
             # For each user with enabled Telegram notifications

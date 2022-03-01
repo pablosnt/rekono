@@ -1,3 +1,5 @@
+import logging
+
 from tasks.serializers import TaskSerializer
 from telegram import ParseMode
 from telegram.ext import CallbackContext, ConversationHandler
@@ -14,6 +16,8 @@ from telegram_bot.messages.conversations import CANCEL
 from telegram_bot.messages.errors import create_error_message
 from telegram_bot.messages.execution import EXECUTION_LAUNCHED
 from telegram_bot.security import get_chat
+
+logger = logging.getLogger()                                                    # Rekono logger
 
 
 def execute_tool(update: Update, context: CallbackContext) -> int:
@@ -114,9 +118,11 @@ def execute(update: Update, context: CallbackContext) -> int:
             serializer = TaskSerializer(data=task_data)                         # Create Task serializer
             if serializer.is_valid():                                           # Task is valid
                 task = serializer.save(executor=chat.user)                      # Create task
+                logger.info(f'[Telegram Bot] New task {task.id} has been created', extra={'user': chat.user.id})
                 # Confirm task creation
                 update.callback_query.bot.send_message(chat.chat_id, text=EXECUTION_LAUNCHED.format(id=task.id))
             else:                                                               # Invalid task data
+                logger.info('[Telegram Bot] Attempt of task creation with invalid data', extra={'user': chat.user.id})
                 update.callback_query.bot.send_message(                         # Send error details
                     chat.chat_id,
                     text=create_error_message(serializer.errors),

@@ -1,3 +1,4 @@
+import logging
 from typing import Callable, List
 
 import django_rq
@@ -6,6 +7,8 @@ from executions.queue import consumer
 from input_types.base import BaseInput
 from rq.job import Job
 from tools.models import Argument, Intensity
+
+logger = logging.getLogger()                                                    # Rekono logger
 
 
 def producer(
@@ -55,6 +58,7 @@ def producer(
         depends_on=dependencies,
         at_front=at_front
     )
+    logger.info(f'[Execution] Execution {execution.id} ({tool.name} {configuration.name}) has been enqueued')
     # Save important data in job metadata if it is needed later
     execution_job.meta['execution'] = execution
     execution_job.meta['intensity'] = intensity

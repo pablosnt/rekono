@@ -1,3 +1,4 @@
+import logging
 from typing import Any, Dict
 
 from django.contrib.auth.password_validation import validate_password
@@ -11,6 +12,8 @@ from rest_framework.fields import SerializerMethodField
 from security.authorization.roles import Role
 from telegram_bot.models import TelegramChat
 from users.models import User
+
+logger = logging.getLogger()                                                    # Rekono logger
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -202,11 +205,12 @@ class TelegramBotSerializer(serializers.Serializer):
         Returns:
             User: Updated instance
         '''
-        user_telegram_linked_notification(instance)                             # Send email notification to the user
         validated_data['telegram_chat'].otp = None                              # Set otp to null
         validated_data['telegram_chat'].otp_expiration = None                   # Set otp expiration to null
         validated_data['telegram_chat'].user = instance                         # Link Telegram chat Id to the user
         validated_data['telegram_chat'].save(update_fields=['otp', 'otp_expiration', 'user'])
+        user_telegram_linked_notification(instance)                             # Send email notification to the user
+        logger.info(f'[Security] User {instance.id} has logged in the Telegram bot', extra={'user': instance.id})
         return instance
 
 
@@ -285,6 +289,10 @@ class CreateUserSerializer(UserPasswordSerializer):
         validated_data['user'].save(update_fields=[
             'username', 'first_name', 'last_name', 'password', 'is_active', 'otp', 'otp_expiration'
         ])
+        logger.info(
+            f'[User] User {validated_data["user"].id} has been created',
+            extra={'user': validated_data["user"].id}
+        )
         return validated_data['user']
 
 
@@ -307,8 +315,7 @@ class ChangeUserPasswordSerializer(UserPasswordSerializer):
         Returns:
             Dict[str, Any]: Data after validation process
         '''
-        user = self.instance
-        if not user.check_password(attrs.get('old_password')):
+        if not self.instance.check_password(attrs.get('old_password')):
             raise AuthenticationFailed('Invalid password', code=status.HTTP_401_UNAUTHORIZED)
         return super().validate(attrs)
 
@@ -324,6 +331,7 @@ class ChangeUserPasswordSerializer(UserPasswordSerializer):
         '''
         instance.set_password(validated_data.get('password'))                   # Update password
         instance.save(update_fields=['password'])
+        logger.info(f'[Security] User {self.instance.id} changed his password', extra={'user': self.instance.id})
         return instance
 
 
@@ -365,6 +373,10 @@ class ResetPasswordSerializer(UserPasswordSerializer):
         self.validated_data['user'].set_password(self.validated_data.get('password'))   # Set password
         self.validated_data['user'].otp = None                                  # Clear OTP
         self.validated_data['user'].save(update_fields=['password', 'otp'])
+        logger.info(
+            f'[Security] User {self.validated_data["user"].id} changed his password',
+            extra={'user': self.validated_data["user"].id}
+        )
         return self.validated_data['user']
 
 

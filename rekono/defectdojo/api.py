@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime, timedelta
 from typing import Any, Tuple
 
@@ -11,6 +12,7 @@ from tools.models import Tool
 
 from rekono.settings import DEFECT_DOJO as config
 
+# Mapping between Rekono and Defect-Dojo severities
 SEVERITY_MAPPING = {
     str(Severity.INFO): 'S0',
     str(Severity.LOW): 'S1',
@@ -18,6 +20,8 @@ SEVERITY_MAPPING = {
     str(Severity.HIGH): 'S4',
     str(Severity.CRITICAL): 'S5',
 }
+
+logger = logging.getLogger()                                                    # Rekono logger
 
 
 class DefectDojo:
@@ -69,10 +73,22 @@ class DefectDojo:
             files=files,
             verify=self.verify_tls
         )
+        logger.info(f'[Defect-Dojo] {method.upper()} /api/v2{endpoint} > HTTP {response.status_code}')
         if response.status_code == expected_status:
             return True, response.json()                                        # Successful request
         else:
             return False, response                                              # Failed request
+
+    def is_available(self) -> bool:
+        '''Check if Defect-Dojo integration is available.
+
+        Returns:
+            bool: Indicate if Defect-Dojo integration is available or not
+        '''
+        status, _ = self.request('get', '/test_types/', params={'limit': 1})
+        if not status:
+            logger.error('[Defect-Dojo] Integration with Defect-Dojo is not available')
+        return status
 
     def get_rekono_product_type(self) -> Tuple[bool, dict]:
         '''Get product type associated to Rekono, based on configurated name.

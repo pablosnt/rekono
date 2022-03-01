@@ -40,12 +40,16 @@ class ProjectSerializer(TaggitSerializer, serializers.ModelSerializer):
         '''
         attrs = super().validate(attrs)
         if attrs.get('defectdojo_product_id'):
-            # Check if product Id exists in Defect-Dojo
-            success, _ = DefectDojo().get_product(attrs['defectdojo_product_id'])
-            if not success:                                                     # Product Id not found in Defect-Dojo
-                raise serializers.ValidationError({
-                    'defectdojo_product_id': f'Product ID {attrs.get("defectdojo_product_id")} not found in Defect-Dojo'
-                })
+            dd_client = DefectDojo()
+            if dd_client.is_available():                                        # Check Defect-Dojo integration
+                # Check if product Id exists in Defect-Dojo
+                success, _ = dd_client.get_product(attrs['defectdojo_product_id'])
+                if not success:                                                 # Product Id not found in Defect-Dojo
+                    raise serializers.ValidationError({
+                        'defectdojo_product_id': f'Product ID {attrs.get("defectdojo_product_id")} not found in Defect-Dojo'    # noqa: E501
+                    })
+            else:                                                               # Defect-Dojo is not available
+                raise serializers.ValidationError({'defect-dojo': ['Integration with Defect-Dojo is not available']})
         return attrs
 
     @transaction.atomic()

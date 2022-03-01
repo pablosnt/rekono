@@ -1,6 +1,9 @@
+import logging
 import re
 
 from django.forms import ValidationError
+
+logger = logging.getLogger()                                                    # Rekono logger
 
 NAME_REGEX = r'[\w\s\.\-]*'                                                     # Regex for names validation
 TEXT_REGEX = r'[\w\s\.:,+\-\'"?¿¡!#%$€]*'                                       # Regex for text validation
@@ -18,6 +21,7 @@ def validate_text_value(value: str, regex: str) -> None:
         ValidationError: Raised if value doesn't match the allowed regex
     '''
     if not bool(re.fullmatch(regex, value)):
+        logger.warning(f'[Security] Invalid text value that doesn\'t match the regex {regex}')
         raise ValidationError('Value contains unallowed characters')
 
 
@@ -33,6 +37,7 @@ def validate_number_value(value: int, min: int, max: int) -> None:
         ValidationError: Raised if value is not in the allowed range
     '''
     if value < min or value > max:
+        logger.warning(f'[Security] Invalid number value {value} that is not in the range {min} - {max}')
         raise ValidationError('Number value is not in the allowed range')
 
 

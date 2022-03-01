@@ -191,7 +191,7 @@ LOGGING = {                                                                     
     'disable_existing_loggers': True,                                           # Disable default Django logging system
     'formatters': {
         'rekono': {
-            'format': '%(asctime)s [%(levelname)s] %(module)s - %(source_ip)s - %(user)s - %(message)s'
+            'format': '%(asctime)s [%(levelname)s] - %(process)d %(module)s - %(source_ip)s - %(user)s - %(message)s'
         }
     },
     'filters': {
@@ -214,12 +214,10 @@ LOGGING = {                                                                     
             'filters': ['rekono'],
         }
     },
-    'loggers': {
-        'rekono': {
-            'handlers': ['console', 'file'],
-            'level': 'DEBUG' if DEBUG else 'INFO',
-            'propagate': False,
-        }
+    'root': {
+        'handlers': ['console', 'file'],
+        'level': 'DEBUG' if DEBUG else 'INFO',
+        'propagate': False,
     }
 }
 

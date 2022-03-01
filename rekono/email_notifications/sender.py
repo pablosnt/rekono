@@ -1,3 +1,4 @@
+import logging
 from typing import Any, Dict, List
 
 import django_rq
@@ -9,6 +10,8 @@ from email_notifications.constants import DATETIME_FORMAT
 from findings.models import Finding
 
 from rekono.settings import FRONTEND_URL
+
+logger = logging.getLogger()                                                    # Rekono logger
 
 
 @job('emails-queue')
@@ -24,9 +27,12 @@ def consumer(addresses: List[str], subject: str, template_name: str, data: Dict[
     template = get_template(template_name)                                      # Get HTML template
     data['rekono_url'] = FRONTEND_URL                                           # Include frontend address for links
     content = template.render(data)                                             # Render HTML template using data
-    message = EmailMultiAlternatives(subject, '', None, addresses)        # Create email message
-    message.attach_alternative(content, 'text/html')                            # Add HTML content to email message
-    message.send()                                                              # Send email message
+    try:
+        message = EmailMultiAlternatives(subject, '', None, addresses)          # Create email message
+        message.attach_alternative(content, 'text/html')                        # Add HTML content to email message
+        message.send()                                                          # Send email message
+    except Exception:
+        logger.error('[Email] Error during email message sending')
 
 
 def user_invitation(user: Any) -> None:

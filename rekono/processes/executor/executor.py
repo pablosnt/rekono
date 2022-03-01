@@ -1,3 +1,4 @@
+import logging
 from typing import List, Set
 
 from executions import utils
@@ -10,6 +11,8 @@ from rq.job import Job
 from targets.models import TargetEndpoint
 from tasks.models import Task
 from tools.models import Argument, Intensity
+
+logger = logging.getLogger()                                                    # Rekono logger
 
 
 class ExecutionJob:
@@ -74,6 +77,7 @@ def execute(task: Task) -> None:
         task (Task): Task that requests a process execution
     '''
     execution_plan = create_plan(task)                                          # Create the execution plan
+    logger.info(f'[Process] Execution plan has been created for task {task.id} with {len(execution_plan)} jobs')
     for job in execution_plan:                                                  # For each planned jobs
         # Check unneeded target types, due to dependencies with previous jobs
         covered_targets = [i.callback_target for i in job.dependencies_coverage if i.callback_target is not None]

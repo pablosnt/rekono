@@ -1,4 +1,5 @@
 import ipaddress
+import logging
 import re
 import socket
 
@@ -7,6 +8,8 @@ from targets.enums import TargetType
 
 # Regex to match IP ranges like 10.10.10.1-20
 IP_RANGE_REGEX = '[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}-[0-9]{1,3}'
+
+logger = logging.getLogger()                                                    # Rekono logger
 
 
 def get_target_type(target: str) -> str:
@@ -42,5 +45,6 @@ def get_target_type(target: str) -> str:
         return TargetType.DOMAIN
     except socket.gaierror:
         pass
+    logger.warning(f'[Security] Invalid target {target}')
     # Target is invalid or target type is not supported
     raise ValidationError({'target': f'Invalid target {target}. IP address, IP range or domain is required'})

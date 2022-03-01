@@ -14,7 +14,7 @@ headers = {
     'Referrer-Policy': 'no-referrer'
 }
 
-logger = logging.getLogger('rekono')                                            # Rekono logger
+logger = logging.getLogger()                                                    # Rekono logger
 
 
 class RekonoSecurityMiddleware:
@@ -40,10 +40,10 @@ class RekonoSecurityMiddleware:
         response = self.get_response(request)                                   # Process request
         for header, value in add_csp_to_headers(headers, request.path).items():     # Get response headers with CSP
             response[header] = value                                            # Include response headers in response
-        logger_level = logger.info                                              # Info level by default
+        log = logger.info                                                       # Info level by default
         if response.status_code >= 400 and response.status_code < 500:
-            logger_level = logger.warning                                       # Warning level for 4XX error responses
+            log = logger.warning                                                # Warning level for 4XX error responses
         elif response.status_code >= 500:
-            logger_level = logger.error                                         # Error level for 5XX error responses
-        logger_level(f'"{request.method} {request.get_full_path()}" {response.status_code}', extra={'request': request})
+            log = logger.error                                                  # Error level for 5XX error responses
+        log(f'{request.method} {request.get_full_path()} > HTTP {response.status_code}', extra={'request': request})
         return response

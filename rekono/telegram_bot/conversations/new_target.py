@@ -1,3 +1,5 @@
+import logging
+
 from targets.serializers import TargetSerializer
 from telegram import ParseMode
 from telegram.ext import CallbackContext, ConversationHandler
@@ -11,6 +13,8 @@ from telegram_bot.conversations.states import CREATE
 from telegram_bot.messages.errors import create_error_message
 from telegram_bot.messages.targets import ASK_FOR_NEW_TARGET, NEW_TARGET
 from telegram_bot.security import get_chat
+
+logger = logging.getLogger()                                                    # Rekono logger
 
 
 def new_target(update: Update, context: CallbackContext) -> int:
@@ -53,6 +57,7 @@ def create_target(update: Update, context: CallbackContext) -> int:
         serializer = TargetSerializer(data={'project': context.chat_data[PROJECT].id, 'target': update.message.text})
         if serializer.is_valid():                                               # Target is valid
             target = serializer.save()                                          # Create target
+            logger.info(f'[Telegram Bot] New target {target.id} has been created', extra={'user': chat.user.id})
             update.message.reply_text(                                          # Confirm target creation
                 NEW_TARGET.format(
                     target=escape_markdown(target.target, version=2),
@@ -61,6 +66,7 @@ def create_target(update: Update, context: CallbackContext) -> int:
                 ), parse_mode=ParseMode.MARKDOWN_V2
             )
         else:                                                                   # Invalid target data
+            logger.info('[Telegram Bot] Attempt of target creation with invalid data', extra={'user': chat.user.id})
             # Send error details
             update.message.reply_text(create_error_message(serializer.errors), parse_mode=ParseMode.MARKDOWN_V2)
             update.message.reply_text(ASK_FOR_NEW_TARGET)                       # Re-ask for the new target

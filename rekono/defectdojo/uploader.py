@@ -1,3 +1,4 @@
+import logging
 from typing import List, Tuple
 
 from defectdojo.api import DefectDojo
@@ -8,8 +9,9 @@ from projects.models import Project
 
 from rekono.settings import DEFECT_DOJO
 
-# Defect-Dojo client
-dd_client = DefectDojo()
+dd_client = DefectDojo()                                                        # Defect-Dojo client
+
+logger = logging.getLogger()                                                    # Rekono logger
 
 
 def get_product(project: Project) -> int:
@@ -36,12 +38,15 @@ def get_product(project: Project) -> int:
             success, body = dd_client.create_rekono_product_type()
             if success:
                 product_type = body.get('id')
+                logger.info('[Defect-Dojo] Rekono product type has been created')
         if product_type:                                                        # If product type found or created
             success, body = dd_client.create_product(product_type, project)     # Create product associated to project
             if success:
+                logger.info(f'[Defect-Dojo] New product {body["id"]} has been created and linked to project {project.id}')  # noqa: E501
                 project.defectdojo_product_id = body['id']                      # Save the Id in the Rekono project
                 project.save(update_fields=['defectdojo_product_id'])
                 return body['id']
+    logger.warning(f'[Defect-Dojo] Product related to project {project.id} is not found and can\'t be created due to configuration')    # noqa: E501
     raise DefectDojoException({'product': [f'Product associated to project {project.id} not found']})
 
 
@@ -60,11 +65,14 @@ def get_engagement(project: Project, id: int, name: str, description: str) -> Tu
     Returns:
         int: Defect-Dojo engagement Id
     '''
+    if not dd_client.is_available():                                            # Check Defect-Dojo integration
+        raise DefectDojoException({'defect-dojo': ['Integration with Defect-Dojo is not available']})
     if id:                                                                      # Id provided
         success, body = dd_client.get_engagement(id)                            # Get engagement from Defect-Dojo
         if success and body:
             # Engagement product doesn't match the product associated to the Rekono project
             if project.defectdojo_product_id and project.defectdojo_product_id != body.get('product'):
+                logger.warning(f'[Defect-Dojo] Engagement {id} doesn\'t belong to product {project.defectdojo_product_id}')     # noqa: E501
                 raise DefectDojoException({'engagement': [f'Invalid engagement Id {id} for project {project.id}']})
             elif not project.defectdojo_product_id:                             # No related product Id yet
                 # Save engagement product in Rekono project
@@ -78,7 +86,9 @@ def get_engagement(project: Project, id: int, name: str, description: str) -> Tu
         # Create a new engagement in Defect-Dojo
         success, body = dd_client.create_engagement(product_id, name, description)
         if success and body:
+            logger.info(f'[Defect-Dojo] New engagement {body["id"]} has been created')
             return product_id, body['id']
+    logger.warning('[Defect-Dojo] Engagement not found and can\'t be created')
     raise DefectDojoException({'engagement': ['Invalid engagement']})
 
 
@@ -101,11 +111,14 @@ def create_rekono_test(engagement_id: int) -> int:
     else:                                                                       # Rekono test type not found
         result, body = dd_client.create_rekono_test_type()                      # Create Rekono test type
         if result:
+            logger.info(f'[Defect-Dojo] Rekono test type {body["id"]} has been created')
             test_type = body.get('id')
     if test_type:                                                               # If test type found or created
         result, body = dd_client.create_rekono_test(test_type, engagement_id)   # Create Rekono test
         if result:
+            logger.info(f'[Defect-Dojo] Rekono test {body["id"]} has been created')
             return body['id']
+    logger.warning('[Defect-Dojo] Rekono test can\'t be created')
     raise DefectDojoException({'test': ['Unexpected error in Rekono test creation']})   # Rekono test can't be created
 
 
@@ -134,6 +147,7 @@ def scans(
         if tool.defectdojo_scan_type:
             success, _ = dd_client.import_scan(engagement_id, execution, tool)  # Import the execution output
             if success:
+                logger.info(f'[Defect-Dojo] Execution {execution.id} has been imported in engagement {engagement_id}')
                 execution.reported_to_defectdojo = True                         # Update the execution as reported
                 execution.save(update_fields=['reported_to_defectdojo'])
 
@@ -169,5 +183,6 @@ def findings(
                 test_id = create_rekono_test(engagement_id)                     # Create the test if not created before
             success, _ = dd_client.create_finding(test_id, finding)             # Import finding as Defect-Dojo finding
         if success:
+            logger.info(f'[Defect-Dojo] {finding.__class__.__name__} {finding.id} has been imported in product {product_id}')   # noqa: E501
             finding.reported_to_defectdojo = True                               # Update the finding as reported
             finding.save(update_fields=['reported_to_defectdojo'])

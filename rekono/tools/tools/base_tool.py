@@ -1,3 +1,4 @@
+import logging
 import os
 import shutil
 import subprocess
@@ -18,6 +19,8 @@ from tools.exceptions import ToolExecutionException
 from tools.models import Argument, Configuration, Input, Intensity, Tool
 
 from rekono.settings import REPORTS_DIR, TESTING
+
+logger = logging.getLogger()                                                    # Rekono logger
 
 
 class BaseTool:
@@ -243,6 +246,7 @@ class BaseTool:
             str: Plain output of the tool execution
         '''
         arguments.insert(0, self.tool.command)                                  # Combine tool command with arguments
+        logger.info(f'[Tool] Running: {" ".join(arguments)}')
         exec = subprocess.run(arguments, capture_output=True)                   # Execute the tool
         if not self.ignore_exit_code and exec.returncode > 0:
             # Execution error and ignore exit code is False
@@ -365,12 +369,14 @@ class BaseTool:
         try:
             self.check_installation()                                           # Check tool installation
         except ToolExecutionException:                                          # Tool installation not found
+            logger.error(f'[Tool] Tool {self.tool.name} is not installed in the system. This execution will be skipped')
             self.on_skipped()                                                   # Skip execution
             return
         try:
             # Get arguments to include in command
             self.command_arguments = self.get_arguments(targets, previous_findings)
-        except ToolExecutionException:
+        except ToolExecutionException as ex:
+            logger.error(f'[Tool] {str(ex)}')
             # Targets and findings aren't enough to build the command
             self.on_skipped()                                                   # Skip execution
             return
@@ -382,19 +388,23 @@ class BaseTool:
                 # Run tool
                 output = self.tool_execution(self.command_arguments, targets, previous_findings)    # pragma: no cover
         except ToolExecutionException as ex:                                    # pragma: no cover
+            logger.error(f'[Tool] {self.tool.name} execution finish with errors')
             # Error during tool execution
             self.on_error(stderr=str(ex))                                       # Execution error
             self.clean_environment()                                            # Clean environment
             return
         except Exception:                                                       # pragma: no cover
+            logger.error(f'[Tool] Unexpected error during {self.tool.name} execution')
             # Unexpected error during tool execution
             self.on_error()                                                     # Execution error
             self.clean_environment()                                            # Clean environment
             return
         self.clean_environment()                                                # Clean environment
         self.on_completed(output)                                               # Completed execution
+        logger.error(f'[Tool] {self.tool.name} execution has been completed')
         if self.file_output_enabled and os.path.isfile(self.path_output):       # Output file exists
             self.parse_output_file()                                            # Parse output file
         else:                                                                   # Output file not found
             self.parse_plain_output(output)                                     # Parse plain output
+        logger.error(f'[Tool] {len(self.findings)} findings parsed from {self.tool.name} output')
         self.process_findings()                                                 # Process parsed findings

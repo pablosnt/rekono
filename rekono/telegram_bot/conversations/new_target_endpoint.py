@@ -1,3 +1,5 @@
+import logging
+
 from targets.serializers import TargetEndpointSerializer
 from telegram import ParseMode
 from telegram.ext import CallbackContext, ConversationHandler
@@ -13,6 +15,8 @@ from telegram_bot.messages.errors import create_error_message
 from telegram_bot.messages.targets import (ASK_FOR_NEW_TARGET_ENDPOINT,
                                            NEW_TARGET_ENDPOINT)
 from telegram_bot.security import get_chat
+
+logger = logging.getLogger()                                                    # Rekono logger
 
 
 def new_target_endpoint(update: Update, context: CallbackContext) -> int:
@@ -61,6 +65,10 @@ def create_target_endpoint(update: Update, context: CallbackContext) -> int:
         )
         if serializer.is_valid():                                               # Target endpoint is valid
             target_endpoint = serializer.save()                                 # Create target endpoint
+            logger.info(
+                f'[Telegram Bot] New target endpoint {target_endpoint.id} has been created',
+                extra={'user': chat.user.id}
+            )
             update.message.reply_text(                                          # Confirm target endpoint creation
                 NEW_TARGET_ENDPOINT.format(
                     endpoint=escape_markdown(target_endpoint.endpoint, version=2),
@@ -68,6 +76,10 @@ def create_target_endpoint(update: Update, context: CallbackContext) -> int:
                 ), parse_mode=ParseMode.MARKDOWN_V2
             )
         else:                                                                   # Invalid target endpoint data
+            logger.info(
+                '[Telegram Bot] Attempt of target endpoint creation with invalid data',
+                extra={'user': chat.user.id}
+            )
             # Send error details
             update.message.reply_text(create_error_message(serializer.errors), parse_mode=ParseMode.MARKDOWN_V2)
             update.message.reply_text(ASK_FOR_NEW_TARGET_ENDPOINT)              # Re-ask for the new target endpoint

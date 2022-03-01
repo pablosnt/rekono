@@ -1,3 +1,4 @@
+import logging
 from typing import List, cast
 
 import django_rq
@@ -12,6 +13,8 @@ from rq.job import Job
 from rq.registry import DeferredJobRegistry
 from tools.models import Argument, Intensity, Tool
 from tools.tools.base_tool import BaseTool
+
+logger = logging.getLogger()                                                    # Rekono logger
 
 
 def get_findings_from_dependencies(dependencies: list) -> List[BaseInput]:
@@ -89,10 +92,12 @@ def process_dependencies(
     # Get findings from dependent jobs
     findings = get_findings_from_dependencies(current_job._dependency_ids)
     if not findings:
+        logger.info('[Execution] No findings found from dependencies')
         return []                                                               # No findings found
     new_jobs_ids = []
     # Get required executions to include all previous findings
     executions: List[List[BaseInput]] = utils.get_executions_from_findings(findings, tool)
+    logger.info(f'[Execution] {len(executions) - 1} new executions from previous findings')
     # Filter executions based on tool arguments
     executions = [param_set for param_set in executions if tool_runner.check_arguments(targets, cast(List[Finding], param_set))]    # noqa: E501
     # For each executions, except first whose findings will be included in the current jobs

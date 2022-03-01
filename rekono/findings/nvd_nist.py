@@ -1,3 +1,5 @@
+import logging
+
 import requests
 from findings.enums import Severity
 
@@ -9,6 +11,8 @@ CVSS_RANGES = {
     Severity.LOW: (2, 4),
     Severity.INFO: (0, 2)
 }
+
+logger = logging.getLogger()                                                    # Rekono logger
 
 
 class NvdNist:
@@ -38,6 +42,7 @@ class NvdNist:
             dict: Raw NVD NIST CVE information
         '''
         res = requests.get(self.api_url_pattern.format(cve=self.cve))
+        logger.info(f'[NVD NIST] GET {self.cve} > HTTP {res.status_code}')
         return res.json()['result']['CVE_Items'][0] if res.status_code == 200 else {}
 
     def parse_description(self) -> str:
