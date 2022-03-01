@@ -1,6 +1,7 @@
 from typing import Any, List
 from urllib.request import Request
 
+from api.filters import RekonoFilterBackend
 from defectdojo.serializers import EngagementSerializer
 from defectdojo.views import DefectDojoFindings
 from django.db.models import QuerySet
@@ -19,6 +20,7 @@ from findings.serializers import (CredentialSerializer, EndpointSerializer,
                                   VulnerabilitySerializer)
 from rest_framework import status
 from rest_framework.decorators import action
+from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.mixins import (DestroyModelMixin, ListModelMixin,
                                    RetrieveModelMixin)
 from rest_framework.response import Response
@@ -29,6 +31,9 @@ from targets.serializers import TargetSerializer
 
 class FindingBaseView(ListModelMixin, RetrieveModelMixin, DestroyModelMixin, DefectDojoFindings):
     '''Common finding ViewSet that includes: get, retrieve, enable, disable and import in Defect-Dojo features.'''
+
+    # Replace DjangoFilterBackend by RekonoFilterBackend to allow filters by N-M relations like 'executions' field.
+    filter_backends = [RekonoFilterBackend, SearchFilter, OrderingFilter]
 
     def get_queryset(self) -> QuerySet:
         '''Get the Finding queryset that the user is allowed to get, based on project members.

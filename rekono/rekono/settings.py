@@ -235,7 +235,7 @@ REST_FRAMEWORK: Dict[str, Any] = {
     'DEFAULT_METADATA_CLASS': None,
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_FILTER_BACKENDS': [
-        'api.filters.RekonoFilterBackend',
+        'django_filters.rest_framework.DjangoFilterBackend',
         'api.filters.RekonoSearchFilter',
         'api.filters.RekonoOrderingFilter',
     ],

@@ -10,9 +10,13 @@ from tools.models import Tool
 
 
 class RekonoFilterBackend(DjangoFilterBackend):
-    '''Rekono filter backend from DjangoFilterBackend.'''
+    '''Rekono filter backend from DjangoFilterBackend.
 
-    def filter_queryset(self, request: Request, queryset: QuerySet, view: View) -> QuerySet:
+    This can't be added as default backend because cause warnings when access swagger-ui.
+    This is required at least for Finding views to allow filters by N-M relations like 'executions' field.
+    '''
+
+    def filter_queryset(self, request: Request, queryset: QuerySet, view: View) -> Any:
         '''Filter queryset.
 
         Args:
@@ -21,9 +25,9 @@ class RekonoFilterBackend(DjangoFilterBackend):
             view (View): Django view affected
 
         Returns:
-            QuerySet: Filtered queryset
+            Any: Filtered queryset
         '''
-        return super().filter_queryset(request, queryset, view).distinct()      # Ignore duplicates if exist
+        return super().filter_queryset(request, queryset, view).distinct()
 
 
 class RekonoSearchFilter(SearchFilter):
