@@ -13,15 +13,14 @@ import os
 import sys
 from datetime import timedelta
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict
 
 from findings.enums import Severity
 from input_types.enums import InputTypeNames
+from rekono_config.loader import RekonoConfigLoader
 from targets.enums import TargetType
 from tasks.enums import Status, TimeUnit
 from tools.enums import IntensityRank
-
-from rekono.config import RekonoConfig
 
 ################################################################################
 # Rekono basic information                                                     #
@@ -57,7 +56,7 @@ CONFIG_FILE = ''                                                                
 for filename in ['config.yaml', 'config.yml', 'rekono.yaml', 'rekono.yml']:     # For each config filename
     if os.path.isfile(os.path.join(REKONO_HOME, filename)):                     # Check if config file exists
         CONFIG_FILE = os.path.join(REKONO_HOME, filename)
-CONFIG = RekonoConfig(CONFIG_FILE)                                              # Load configuration
+CONFIG = RekonoConfigLoader(CONFIG_FILE)                                        # Load configuration
 
 
 ################################################################################
@@ -86,6 +85,7 @@ INSTALLED_APPS = [
     'input_types',
     'processes',
     'projects',
+    'rekono_config',
     'resources',
     'security',
     'targets',
@@ -139,9 +139,15 @@ TESTING = 'test' in sys.argv                                                    
 SECRET_KEY = os.getenv('RKN_SECRET_KEY', CONFIG.SECRET_KEY)                     # Django secret key
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS: List[str] = []
+allowed_hosts = os.getenv('RKN_ALLOWED_HOSTS')
+if allowed_hosts and ' ' in allowed_hosts:
+    ALLOWED_HOSTS = allowed_hosts.split(' ')                                    # Multiple allowed hosts from env
+elif allowed_hosts:
+    ALLOWED_HOSTS = [allowed_hosts]                                             # One allowed host from env
+else:
+    ALLOWED_HOSTS = CONFIG.ALLOWED_HOSTS                                        # Default allowed hosts
 
 AUTH_USER_MODEL = 'users.User'                                                  # User model
 
@@ -400,14 +406,6 @@ TOOLS = {
 
 # Rekono frontend address. It's used to include links in notifications
 FRONTEND_URL = os.getenv('RKN_FRONTEND_URL', CONFIG.FRONTEND_URL)
-
-CONFIG.load_config_in_frontend(                                                 # Load configuration in frontend .env
-    FRONTEND_DIR,
-    {
-        'VUE_APP_DEFECTDOJO_HOST': DEFECT_DOJO['URL'],                          # Defect-Dojo URL to create links
-        'VUE_APP_TELEGRAM_BOT': TELEGRAM_BOT,                                   # Telegram bot name to show in the UI
-    }
-)
 
 
 ################################################################################

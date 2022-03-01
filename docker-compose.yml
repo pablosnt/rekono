@@ -1,0 +1,173 @@
+version: '1.0'
+
+services:
+  postgres:
+    restart: always
+    image: postgres:latest
+    hostname: postgres
+    ports:
+      - 5432:5432
+    volumes:
+      - postgres:/var/lib/postgresql/data/
+    networks:
+      - internal
+    environment:
+      - POSTGRES_DB=rekono
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+  
+  initialize:
+    restart: 'no'
+    build:
+      dockerfile: Dockerfile
+      target: backend
+    command: sh -c "python manage.py migrate && python manage.py createsuperuser --no-input"
+    networks:
+      - internal
+    depends_on:
+      - postgres
+    environment:
+      - RKN_DB_HOST=postgres
+      - RKN_DB_USER=postgres
+      - RKN_DB_PASSWORD=postgres
+      - DJANGO_SUPERUSER_EMAIL=rekono@rekono.com
+      - DJANGO_SUPERUSER_USERNAME=rekono
+      - DJANGO_SUPERUSER_PASSWORD=rekono
+  
+  # mailhog:
+
+  redis:
+    restart: always
+    image: redis:alpine
+    hostname: redis
+    ports:
+      - 6379:6379
+    networks:
+      - internal
+  
+  tasks-worker:
+    restart: always
+    build:
+      dockerfile: Dockerfile
+      target: backend
+    command: python manage.py rqworker tasks-queue
+    hostname: tasks-worker
+    volumes:
+      - rekono:/rekono
+    networks:
+      - internal
+    depends_on:
+      - postgres
+      - redis
+    environment:
+      - RKN_DB_HOST=postgres
+      - RKN_DB_USER=postgres
+      - RKN_DB_PASSWORD=postgres
+      - RKN_RQ_HOST=redis
+      - OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
+
+  executions-worker:
+    restart: always
+    build:
+      dockerfile: Dockerfile
+      target: backend
+    command: python manage.py rqworker executions-queue
+    hostname: executions-worker
+    volumes:
+      - rekono:/rekono
+    networks:
+      - internal
+    depends_on:
+      - postgres
+      - redis
+    environment:
+      - RKN_DB_HOST=postgres
+      - RKN_DB_USER=postgres
+      - RKN_DB_PASSWORD=postgres
+      - RKN_RQ_HOST=redis
+      - OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
+
+  findings-worker:
+    restart: always
+    build:
+      dockerfile: Dockerfile
+      target: backend
+    command: python manage.py rqworker findings-queue
+    hostname: findings-worker
+    volumes:
+      - rekono:/rekono
+    networks:
+      - internal
+    depends_on:
+      - postgres
+      - redis
+    environment:
+      - RKN_DB_HOST=postgres
+      - RKN_DB_USER=postgres
+      - RKN_DB_PASSWORD=postgres
+      - RKN_RQ_HOST=redis
+      - OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
+    
+  # emails-worker
+  
+  backend:
+    restart: always
+    build:
+      dockerfile: Dockerfile
+      target: backend
+    command: python manage.py runserver 0.0.0.0:8000
+    hostname: backend
+    ports:
+      - 8000:8000
+    volumes:
+      - rekono:/rekono
+    networks:
+      - internal
+    depends_on:
+      - postgres
+      - redis
+    environment:
+      - RKN_DB_HOST=postgres
+      - RKN_DB_USER=postgres
+      - RKN_DB_PASSWORD=postgres
+      - RKN_RQ_HOST=redis
+      - RKN_ALLOWED_HOSTS=backend
+  
+  frontend:
+    restart: always
+    build:
+      dockerfile: Dockerfile
+      target: frontend
+    command: serve -s dist
+    hostname: frontend
+    ports:
+      - 3000:3000
+    networks:
+      - internal
+    environment:
+      - NODE_OPTIONS=--openssl-legacy-provider
+
+  nginx:
+    restart: always
+    build:
+      dockerfile: ./nginx/Dockerfile
+    hostname: nginx
+    ports:
+      - 80:80
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - internal
+      - external
+
+volumes:
+  postgres:
+  rekono:
+
+networks:
+  internal:
+    internal: true
+  external:

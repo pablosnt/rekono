@@ -5,7 +5,7 @@ import yaml
 from security.crypto import generate_random_value
 
 
-class RekonoConfig:
+class RekonoConfigLoader:
     '''Rekono config loader from configuration file.'''
 
     frontend_env_filename = '.env'                                              # Frontend environment file
@@ -24,6 +24,7 @@ class RekonoConfig:
         self.FRONTEND_URL = self.get_config_key(config, ['frontend', 'url'], 'http://127.0.0.1:8080')
         # Security
         self.SECRET_KEY = self.get_config_key(config, ['security', 'secret-key'], generate_random_value(3000))
+        self.ALLOWED_HOSTS = self.get_config_key(config, ['security', 'allowed-hosts'], ['.ocalhost', '127.0.0.1', '::1'])    # noqa: E501
         self.UPLOAD_FILES_MAX_MB = self.get_config_key(config, ['security', 'upload-files-max-mb'], 500)
         self.OTP_EXPIRATION_HOURS = self.get_config_key(config, ['security', 'otp-expiration-hours'], 24)
         # Database

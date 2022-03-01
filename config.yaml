@@ -2,6 +2,10 @@ frontend:
   url: http://127.0.0.1:8080
 security:
   # secret-key: 
+  allowed-hosts:
+    - 127.0.0.1
+    - localhost
+    - ::1
   otp-expiration-hours: 24
   upload-files-max-mb: 500
 database:

@@ -1,0 +1,1 @@
+'''Rekono configuration module.'''
