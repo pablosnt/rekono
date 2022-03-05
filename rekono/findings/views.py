@@ -42,7 +42,11 @@ class FindingBaseView(ListModelMixin, RetrieveModelMixin, DestroyModelMixin, Def
             QuerySet: Execution queryset
         '''
         queryset = super().get_queryset()
-        return queryset.filter(executions__task__target__project__members=self.request.user)
+        # Prevent warnings when access the API schema in SwaggerUI or Redoc
+        # This is caused by the use of RekonoFilterBackend, that is required for Findings entities
+        if self.request.user.id:
+            return queryset.filter(executions__task__target__project__members=self.request.user)
+        return None
 
     def get_findings(self) -> List[Finding]:
         '''Get findings list associated to the current instance. Needed for Defect-Dojo integration.
