@@ -38,8 +38,9 @@ def logout(update: Update, context: CallbackContext) -> None:
         chat = TelegramChat.objects.filter(chat_id=update.effective_chat.id).first()    # Get Telegram chat by Id
         if chat:
             chat.delete()                                                       # Remove Telegram chat update
-        logger.info(
-            f'[Security] User {chat.user.id} has logged out from the Telegram bot',
-            extra={'user': chat.user.id}
-        )
+        if chat.user:
+            logger.info(
+                f'[Security] User {chat.user.id} has logged out from the Telegram bot',
+                extra={'user': chat.user.id}
+            )
         update.message.reply_text(LOGOUT, parse_mode=ParseMode.MARKDOWN_V2)     # Send goodbye message

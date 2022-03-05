@@ -8,10 +8,10 @@ from security.csp_header import add_csp_to_headers
 headers = {
     'Server': None,
     'Cache-Control': 'no-store',
+    'Referrer-Policy': 'no-referrer',
     'X-Content-Type-Options': 'nosniff',
     'X-Frame-Options': 'DENY',
     'X-XSS-Protection': '1; mode=block',
-    'Referrer-Policy': 'no-referrer'
 }
 
 logger = logging.getLogger()                                                    # Rekono logger

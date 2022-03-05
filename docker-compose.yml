@@ -5,6 +5,7 @@ services:
     restart: always
     image: postgres:latest
     hostname: postgres
+    container_name: postgres
     ports:
       - 5432:5432
     volumes:
@@ -17,11 +18,14 @@ services:
       - POSTGRES_PASSWORD=postgres
   
   initialize:
-    restart: 'no'
+    restart: on-failure
     build:
-      dockerfile: Dockerfile
+      dockerfile: docker/rekono/Dockerfile
       target: backend
     command: sh -c "python manage.py migrate && python manage.py createsuperuser --no-input"
+    container_name: initialize
+    volumes:
+      - ./config.yaml:/rekono/config.yaml:ro
     networks:
       - internal
     depends_on:
@@ -30,6 +34,7 @@ services:
       - RKN_DB_HOST=postgres
       - RKN_DB_USER=postgres
       - RKN_DB_PASSWORD=postgres
+      - REKONO_HOME=/rekono
       - DJANGO_SUPERUSER_EMAIL=rekono@rekono.com
       - DJANGO_SUPERUSER_USERNAME=rekono
       - DJANGO_SUPERUSER_PASSWORD=rekono
@@ -40,6 +45,7 @@ services:
     restart: always
     image: redis:alpine
     hostname: redis
+    container_name: redis
     ports:
       - 6379:6379
     networks:
@@ -48,12 +54,13 @@ services:
   tasks-worker:
     restart: always
     build:
-      dockerfile: Dockerfile
+      dockerfile: docker/rekono/Dockerfile
       target: backend
     command: python manage.py rqworker tasks-queue
     hostname: tasks-worker
     volumes:
       - rekono:/rekono
+      - ./config.yaml:/rekono/config.yaml:ro
     networks:
       - internal
     depends_on:
@@ -64,19 +71,21 @@ services:
       - RKN_DB_USER=postgres
       - RKN_DB_PASSWORD=postgres
       - RKN_RQ_HOST=redis
+      - REKONO_HOME=/rekono
       - OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
 
   executions-worker:
     restart: always
     build:
-      dockerfile: Dockerfile
-      target: backend
+      dockerfile: docker/kali/Dockerfile
     command: python manage.py rqworker executions-queue
     hostname: executions-worker
     volumes:
       - rekono:/rekono
+      - ./config.yaml:/rekono/config.yaml:ro
     networks:
       - internal
+      - external
     depends_on:
       - postgres
       - redis
@@ -85,19 +94,22 @@ services:
       - RKN_DB_USER=postgres
       - RKN_DB_PASSWORD=postgres
       - RKN_RQ_HOST=redis
+      - REKONO_HOME=/rekono
       - OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
 
   findings-worker:
     restart: always
     build:
-      dockerfile: Dockerfile
+      dockerfile: docker/rekono/Dockerfile
       target: backend
     command: python manage.py rqworker findings-queue
     hostname: findings-worker
     volumes:
       - rekono:/rekono
+      - ./config.yaml:/rekono/config.yaml:ro
     networks:
       - internal
+      - external
     depends_on:
       - postgres
       - redis
@@ -106,21 +118,50 @@ services:
       - RKN_DB_USER=postgres
       - RKN_DB_PASSWORD=postgres
       - RKN_RQ_HOST=redis
+      - RKN_TELEGRAM_TOKEN
+      - REKONO_HOME=/rekono
       - OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
     
   # emails-worker
+
+  telegram-bot:
+    restart: on-failure
+    build:
+      dockerfile: docker/rekono/Dockerfile
+      target: backend
+    command: python manage.py telegram_bot
+    hostname: telegram_bot
+    container_name: telegram_bot
+    volumes:
+      - rekono:/rekono
+      - ./config.yaml:/rekono/config.yaml:ro
+    networks:
+      - internal
+      - external
+    depends_on:
+      - postgres
+      - redis
+    environment:
+      - RKN_DB_HOST=postgres
+      - RKN_DB_USER=postgres
+      - RKN_DB_PASSWORD=postgres
+      - RKN_RQ_HOST=redis
+      - RKN_TELEGRAM_TOKEN
+      - REKONO_HOME=/rekono
   
   backend:
     restart: always
     build:
-      dockerfile: Dockerfile
+      dockerfile: docker/rekono/Dockerfile
       target: backend
     command: python manage.py runserver 0.0.0.0:8000
     hostname: backend
+    container_name: backend
     ports:
       - 8000:8000
     volumes:
       - rekono:/rekono
+      - ./config.yaml:/rekono/config.yaml:ro
     networks:
       - internal
     depends_on:
@@ -132,14 +173,18 @@ services:
       - RKN_DB_PASSWORD=postgres
       - RKN_RQ_HOST=redis
       - RKN_ALLOWED_HOSTS=backend
+      - RKN_DD_URL
+      - RKN_DD_API_KEY
+      - REKONO_HOME=/rekono
   
   frontend:
     restart: always
     build:
-      dockerfile: Dockerfile
+      dockerfile: docker/rekono/Dockerfile
       target: frontend
     command: serve -s dist
     hostname: frontend
+    container_name: frontend
     ports:
       - 3000:3000
     networks:
@@ -150,12 +195,13 @@ services:
   nginx:
     restart: always
     build:
-      dockerfile: ./nginx/Dockerfile
+      dockerfile: docker//nginx/Dockerfile
     hostname: nginx
+    container_name: nginx
     ports:
       - 80:80
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
       - backend
       - frontend

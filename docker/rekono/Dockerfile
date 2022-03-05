@@ -1,29 +1,33 @@
-FROM python:3.9.6-alpine as backend
+FROM python:3.9.10-alpine as backend
 
-RUN mkdir rekono/
-COPY rekono/ rekono/
+RUN mkdir /rekono
+COPY config.yaml /rekono
+
+RUN mkdir /code
+COPY rekono/ /code
+COPY requirements.txt /code
 
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
 RUN apk update && apk add postgresql-dev gcc python3-dev musl-dev libmagic --repository=http://dl-cdn.alpinelinux.org/alpine/edge/community
 
-RUN pip install --upgrade pip
-COPY requirements.txt .
-RUN pip install -r requirements.txt
 
-WORKDIR /rekono
+RUN pip install --upgrade pip
+RUN pip install -r /code/requirements.txt
+
+WORKDIR /code
 RUN python manage.py frontend
 
 
 FROM node:17.6.0-alpine as frontend
 
 RUN mkdir frontend/
-WORKDIR /frontend
-COPY --from=backend /rekono/frontend .
+COPY --from=backend /code/frontend /frontend
 
 ENV NODE_OPTIONS --openssl-legacy-provider
 
+WORKDIR /frontend
 RUN npm install -g serve
 RUN npm install
 RUN npm run build

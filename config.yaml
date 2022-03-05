@@ -25,7 +25,7 @@ email:
   tls: true
 telegram:
   bot: Rekono
-  # token:
+  # token: 
 defect-dojo:
   url: http://127.0.0.1:8080
   # api-key:
