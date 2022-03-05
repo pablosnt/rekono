@@ -136,7 +136,7 @@ class UsersTest(RekonoTestCase):
         self.api_test(self.client.delete, f'{self.endpoint}{self.other.id}/', 204)   # Disable testing user
         self.api_test(self.client.get, f'{self.endpoint}{self.other.id}/', expected={'is_active': False})
         # Enable testing user as Admin
-        self.api_test(self.client.post, f'{self.endpoint}{self.other.id}/enable/', data={'role': 'Admin'})
+        self.api_test(self.client.post, f'{self.endpoint}{self.other.id}/enable/')
         # Inactive because password should be established
         expected = {'role': 'Admin', 'is_active': False}
         self.api_test(self.client.get, f'{self.endpoint}{self.other.id}/', expected=expected)
@@ -146,11 +146,6 @@ class UsersTest(RekonoTestCase):
         user = User.objects.create(email='test@test.test', username='test', is_active=True)
         self.api_test(self.client.delete, f'{self.endpoint}{user.id}/', 204)    # Disable testing user
         self.api_test(self.client.get, f'{self.endpoint}{user.id}/', expected={'is_active': False})
-
-    def test_invalid_enable(self) -> None:
-        '''Test enable feature with invalid data.'''
-        # Enable testing user with invalid role
-        self.api_test(self.client.post, f'{self.endpoint}{self.other.id}/enable/', 400, data={'role': 'Invalid'})
 
     def test_profile(self) -> None:
         '''Test get profile feature.'''
