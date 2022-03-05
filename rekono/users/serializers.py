@@ -88,24 +88,6 @@ class InviteUserSerializer(serializers.Serializer):
         return User.objects.create_user(validated_data['email'], Role(validated_data['role']))
 
 
-class EnableUserSerializer(serializers.Serializer):
-    '''Serializer to enable an user via API.'''
-
-    role = serializers.ChoiceField(choices=Role.choices, required=True)         # Role to assign to the user
-
-    def update(self, instance: User, validated_data: Dict[str, Any]) -> User:
-        '''Update instance from validated data.
-
-        Args:
-            instance (User): Instance to update
-            validated_data (Dict[str, Any]): Validated data
-
-        Returns:
-            User: Updated instance
-        '''
-        return User.objects.enable_user(instance, Role(validated_data['role']))
-
-
 class ChangeUserRoleSerializer(serializers.Serializer):
     '''Serializer to change user role via API.'''
 

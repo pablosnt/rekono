@@ -3,8 +3,7 @@
     <table-header :filters="filters" add="invite-modal" @filter="fetchData"/>
     <b-table striped borderless head-variant="dark" :fields="usersFields" :items="data">
       <template #cell(role)="row">
-        <b-form-select v-if="row.item.is_active" v-model="row.item.role" :options="roles" value-field="value" text-field="value" :disabled="row.item.id === $store.state.user" @input="selectUser(row.item)" @change="updateRole"/>
-        <b-form-select v-if="!row.item.is_active" v-model="row.item.role" :options="roles" value-field="value" text-field="value" @change="selectRole"/>
+        <b-form-select v-model="row.item.role" :options="roles" value-field="value" text-field="value" :disabled="row.item.id === $store.state.user" @input="selectUser(row.item)" @change="updateRole"/>
       </template>
       <template #cell(last_login)="row">
         {{ row.item.last_login !== null ? row.item.last_login.split('.', 1)[0].replace('T', ' ') : '' }}
@@ -13,7 +12,7 @@
         <b-button v-if="row.item.is_active" variant="outline" @click="selectUser(row.item)" v-b-modal.disable-user-modal v-b-tooltip.hover title="Disable User" :disabled="row.item.id === $store.state.user">
           <b-icon variant="danger" icon="dash-circle-fill"/>
         </b-button>
-        <b-button v-if="!row.item.is_active" variant="outline" @click="selectAndEnableUser(row.item)" v-b-tooltip.hover title="Enable User">
+        <b-button v-if="!row.item.is_active" variant="outline" @click="enableUser(row.item)" v-b-tooltip.hover title="Enable User">
           <b-icon variant="success" icon="check-circle-fill"/>
         </b-button>
       </template>
@@ -49,7 +48,6 @@ export default {
         { key: 'actions', sortable: false }
       ],
       selectedUser: null,
-      selectedRole: null,
       filters: []
     }
   },
@@ -80,26 +78,14 @@ export default {
     disableUser () {
       this.delete(`/api/users/${this.selectedUser.id}/`, this.selectedUser.username, 'User disabled successfully').then(() => this.fetchData())
     },
-    enableUser () {
-      this.post(`/api/users/${this.selectedUser.id}/enable/`, { role: this.selectedRole }, this.selectedUser.username, 'User enabled successfully').then(() => this.fetchData())
-    },
-    selectAndEnableUser (user) {
-      if (this.selectedRole) {
-        this.selectUser(user)
-        this.enableUser()
-      } else {
-        this.warning(user.username, 'Before enable this user, you need to select one role')
-      }
-    },
-    selectRole (role) {
-      this.selectedRole = role
+    enableUser (user) {
+      this.post(`/api/users/${user.id}/enable/`, { }, user.username, 'User enabled successfully').then(() => this.fetchData())
     },
     selectUser (user) {
       this.selectedUser = user
     },
     cleanSelection () {
       this.selectedUser = null
-      this.selectedRole = null
     }
   }
 }

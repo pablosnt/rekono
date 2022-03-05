@@ -81,12 +81,11 @@ class RekonoUserManager(UserManager):
         logger.info(f'[User] Role for user {user.id} has been changed to {role}')
         return user
 
-    def enable_user(self, user: Any, role: Role) -> Any:
+    def enable_user(self, user: Any) -> Any:
         '''Enable disabled user, assigning it a new role.
 
         Args:
             user (Any): User to enable
-            role (Role): Role to assign to the user
 
         Returns:
             Any: Enabled user
@@ -94,7 +93,8 @@ class RekonoUserManager(UserManager):
         user.is_active = True                                                   # Enable user
         user.otp = generate()                                                   # Generate its OTP
         user.otp_expiration = get_expiration()                                  # Set OTP expiration
-        self.initialize(user, role)                                             # Initialize user
+        if not Token.objects.filter(user=user).exists():
+            Token.objects.create(user=user)                                     # Create a new API token for the user
         user_enable_account(user)                                               # Send email to establish its password
         logger.info(f'[User] User {user.id} has been enabled')
         return user

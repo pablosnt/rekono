@@ -16,7 +16,7 @@ from users.filters import UserFilter
 from users.models import User
 from users.serializers import (ChangeUserPasswordSerializer,
                                ChangeUserRoleSerializer, CreateUserSerializer,
-                               EnableUserSerializer, InviteUserSerializer,
+                               InviteUserSerializer,
                                RequestPasswordResetSerializer,
                                ResetPasswordSerializer, TelegramBotSerializer,
                                UserProfileSerializer, UserSerializer)
@@ -86,7 +86,7 @@ class UserAdminViewSet(GenericViewSet, ListModelMixin, RetrieveModelMixin, Destr
             return Response(UserSerializer(user).data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)  # Invalid input data
 
-    @extend_schema(request=EnableUserSerializer, responses={200: UserSerializer})
+    @extend_schema(request=None, responses={200: UserSerializer})
     @action(detail=True, methods=['POST'], url_path='enable', url_name='enable')
     def enable_user(self, request: Request, pk: str) -> Response:
         '''Enable disabled user.
@@ -99,11 +99,8 @@ class UserAdminViewSet(GenericViewSet, ListModelMixin, RetrieveModelMixin, Destr
             Response: HTTP response
         '''
         user = self.get_object()                                                # Get user instance
-        serializer = EnableUserSerializer(data=request.data)
-        if serializer.is_valid():                                               # Check input data
-            serializer.update(user, serializer.validated_data)                  # Enable user
-            return Response(UserSerializer(user).data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)  # Invalid input data
+        User.objects.enable_user(user)
+        return Response(UserSerializer(user).data, status=status.HTTP_200_OK)
 
 
 class UserProfileViewSet(GenericViewSet):
