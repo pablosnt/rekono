@@ -12,7 +12,6 @@ class Execution(models.Model):
 
     task = models.ForeignKey(Task, related_name='executions', on_delete=models.CASCADE)             # Related Task
     rq_job_id = models.TextField(max_length=50, blank=True, null=True)          # Job Id in the executions queue
-    rq_job_pid = models.IntegerField(blank=True, null=True)                     # Execution PID
     # If it's a Process task, will be an execution for each Process step. If it's a Tool task, step is null
     step = models.ForeignKey(Step, on_delete=models.SET_NULL, blank=True, null=True)
     output_file = models.TextField(max_length=50, blank=True, null=True)        # Tool output filepath

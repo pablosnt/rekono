@@ -17,10 +17,11 @@ from typing import Any, Dict
 
 from findings.enums import Severity
 from input_types.enums import InputTypeNames
-from rekono.config import RekonoConfigLoader
 from targets.enums import TargetType
 from tasks.enums import Status, TimeUnit
 from tools.enums import IntensityRank
+
+from rekono.config import RekonoConfigLoader
 
 ################################################################################
 # Rekono basic information                                                     #

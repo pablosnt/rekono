@@ -138,8 +138,7 @@ class UsersTest(RekonoTestCase):
         # Enable testing user as Admin
         self.api_test(self.client.post, f'{self.endpoint}{self.other.id}/enable/')
         # Inactive because password should be established
-        expected = {'role': 'Admin', 'is_active': False}
-        self.api_test(self.client.get, f'{self.endpoint}{self.other.id}/', expected=expected)
+        self.api_test(self.client.get, f'{self.endpoint}{self.other.id}/', expected={'is_active': False})
 
     def test_disable_without_api_token(self) -> None:
         '''Test disable feature with user without API token.'''

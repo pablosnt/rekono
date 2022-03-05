@@ -46,8 +46,6 @@ class BaseTool:
             intensity (Intensity): Intensity to apply
             arguments (List[Argument]): Arguments implicated in the tool execution
         '''
-        execution.rq_job_pid = os.getpid()                                      # Save PID in execution entity
-        execution.save(update_fields=['rq_job_pid'])
         self.execution = execution
         self.tool = tool
         self.configuration = configuration
