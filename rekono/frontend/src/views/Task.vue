@@ -3,52 +3,32 @@
     <div class="mt-3" v-if="isFound">
       <b-row>
         <b-col>
-          <label class="text-muted">Target</label>
-          <hr/>
-          <b-collapse id="task-details" v-if="currentTask.target">
-            <p>{{ currentTask.target.target }}</p>
-            <b-badge variant="secondary">{{ currentTask.target.type }}</b-badge>
-          </b-collapse>
+          <p>{{ currentTask.target.target }}</p>
+          <b-badge variant="secondary">{{ currentTask.target.type }}</b-badge>
+        </b-col>
+        <b-col>  
+          <p v-if="currentTask.process">{{ currentTask.process.name }}</p>
+          <p v-if="currentTask.tool">{{ currentTask.tool.name }}</p>
+          <p v-if="currentTask.configuration">{{ currentTask.configuration.name }}</p>
+          <p v-for="i in intensityByVariant" :key="i.value">
+            <b-badge v-if="i.intensity_rank === currentTask.intensity_rank" :variant="i.variant">{{ currentTask.intensity_rank }}</b-badge>
+          </p>
         </b-col>
         <b-col>
-          <label class="text-muted">Execution</label>
-          <hr/>
-          <b-collapse id="task-details" v-if="currentTask">
-            <p v-if="currentTask.process">{{ currentTask.process.name }}</p>
-            <p v-if="currentTask.tool">{{ currentTask.tool.name }}</p>
-            <p v-if="currentTask.configuration">{{ currentTask.configuration.name }}</p>
-            <p v-for="i in intensityByVariant" :key="i.value">
-              <b-badge v-if="i.intensity_rank === currentTask.intensity_rank" :variant="i.variant">{{ currentTask.intensity_rank }}</b-badge>
-            </p>
-          </b-collapse>
+          <p v-for="i in statusByVariant" :key="i.value">
+            <b-badge v-if="i.value === currentTask.status" :variant="i.variant">{{ currentTask.status }}</b-badge>
+          </p>
+          <p v-if="currentTask.start">Started at {{ currentTask.start.replace('T', ' ').substring(0, 19) }}</p>
+          <p v-if="currentTask.end">Finished at {{ currentTask.end.replace('T', ' ').substring(0, 19) }}</p>
+        </b-col>
+        <b-col v-if="currentTask && currentTask.status !== 'Cancelled' && (currentTask.scheduled_at || currentTask.scheduled_in || currentTask.repeat_in)">      
+          <p v-if="currentTask.status !== 'Requested' && (currentTask.scheduled_at || currentTask.scheduled_in)"><b-badge variant="success">Scheduled</b-badge></p>
+          <p v-if="currentTask.status === 'Requested' && currentTask.scheduled_at">Scheduled at {{ currentTask.scheduled_at.replace('T', ' ').substring(0, 19) }}</p>
+          <p v-if="currentTask.status === 'Requested' && currentTask.scheduled_in">Scheduled in {{ currentTask.scheduled_in }} {{ currentTask.scheduled_time_unit }}</p>
+          <p v-if="currentTask.repeat_in"><b-badge variant="primary">Periodical</b-badge></p>
+          <p v-if="currentTask.repeat_in">Every {{ currentTask.repeat_in }} {{ currentTask.repeat_time_unit }}</p>
         </b-col>
         <b-col>
-          <label class="text-muted">Status</label>
-          <hr/>
-          <b-collapse id="task-details" v-if="currentTask">
-            <p v-for="i in statusByVariant" :key="i.value">
-              <b-badge v-if="i.value === currentTask.status" :variant="i.variant">{{ currentTask.status }}</b-badge>
-            </p>
-            <p v-if="currentTask.start">Started at {{ currentTask.start.replace('T', ' ').substring(0, 19) }}</p>
-            <p v-if="currentTask.end">Finished at {{ currentTask.end.replace('T', ' ').substring(0, 19) }}</p>
-          </b-collapse>
-        </b-col>
-        <b-col v-if="currentTask && currentTask.status !== 'Cancelled' && (currentTask.scheduled_at || currentTask.scheduled_in || currentTask.repeat_in)">
-          <label class="text-muted">Configuration</label>
-          <hr/>
-          <b-collapse id="task-details" v-if="currentTask">
-            <p v-if="currentTask.status !== 'Requested' && (currentTask.scheduled_at || currentTask.scheduled_in)"><b-badge variant="success">Scheduled</b-badge></p>
-            <p v-if="currentTask.status === 'Requested' && currentTask.scheduled_at">Scheduled at {{ currentTask.scheduled_at.replace('T', ' ').substring(0, 19) }}</p>
-            <p v-if="currentTask.status === 'Requested' && currentTask.scheduled_in">Scheduled in {{ currentTask.scheduled_in }} {{ currentTask.scheduled_time_unit }}</p>
-            <p v-if="currentTask.repeat_in"><b-badge variant="primary">Periodical</b-badge></p>
-            <p v-if="currentTask.repeat_in">Every {{ currentTask.repeat_in }} {{ currentTask.repeat_time_unit }}</p>
-          </b-collapse>
-        </b-col>
-        <b-col>
-          <b-button v-b-toggle.task-details @click="showTaskDetails = !showTaskDetails" variant="outline" class="mr-2" v-b-tooltip.hover title="Details">
-            <p class="h5"><b-icon v-if="!showTaskDetails" variant="dark" icon="caret-down-fill"/></p>
-            <p class="h5"><b-icon v-if="showTaskDetails" variant="dark" icon="caret-up-fill"/></p>
-          </b-button>
           <b-button variant="outline" v-b-modal.cancel-task-modal v-b-tooltip.hover title="Cancel Task" v-if="currentTask && auditor.includes($store.state.role) && currentTask.status !== 'Cancelled' && (cancellableStatuses.includes(currentTask.status) || (currentTask.repeat_in && currentTask.repeat_time_unit))">
             <p class="h5"><b-icon variant="danger" icon="dash-circle-fill"/></p>
           </b-button>
