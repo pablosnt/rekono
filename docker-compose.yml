@@ -3,9 +3,10 @@ version: '1.0'
 services:
   postgres:
     restart: always
-    image: postgres:latest
+    image: postgres:14.2-alpine
     hostname: postgres
     container_name: postgres
+    user: postgres
     ports:
       - 5432:5432
     volumes:
@@ -18,7 +19,7 @@ services:
       - POSTGRES_PASSWORD=postgres
   
   initialize:
-    restart: on-failure
+    restart: 'no'
     build:
       dockerfile: docker/rekono/Dockerfile
       target: backend
@@ -38,14 +39,13 @@ services:
       - DJANGO_SUPERUSER_EMAIL=rekono@rekono.com
       - DJANGO_SUPERUSER_USERNAME=rekono
       - DJANGO_SUPERUSER_PASSWORD=rekono
-  
-  # mailhog:
 
   redis:
     restart: always
-    image: redis:alpine
+    image: redis:7.0-rc-alpine
     hostname: redis
     container_name: redis
+    user: redis
     ports:
       - 6379:6379
     networks:
@@ -122,7 +122,32 @@ services:
       - REKONO_HOME=/rekono
       - OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
     
-  # emails-worker
+  emails-worker:
+    restart: always
+    build:
+      dockerfile: docker/rekono/Dockerfile
+      target: backend
+    command: python manage.py rqworker emails-queue
+    hostname: emails-worker
+    volumes:
+      - rekono:/rekono
+      - ./config.yaml:/rekono/config.yaml:ro
+    networks:
+      - internal
+    depends_on:
+      - redis
+      - mailserver
+    environment:
+      - RKN_DB_HOST=postgres
+      - RKN_DB_USER=postgres
+      - RKN_DB_PASSWORD=postgres
+      - RKN_RQ_HOST=redis
+      - RKN_EMAIL_HOST
+      - RKN_EMAIL_PORT
+      - RKN_EMAIL_USER
+      - RKN_EMAIL_PASSWORD
+      - REKONO_HOME=/rekono
+      - OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
 
   telegram-bot:
     restart: on-failure
@@ -131,7 +156,7 @@ services:
       target: backend
     command: python manage.py telegram_bot
     hostname: telegram_bot
-    container_name: telegram_bot
+    container_name: telegram-bot
     volumes:
       - rekono:/rekono
       - ./config.yaml:/rekono/config.yaml:ro
@@ -173,7 +198,6 @@ services:
       - RKN_DB_PASSWORD=postgres
       - RKN_RQ_HOST=redis
       - RKN_ALLOWED_HOSTS=backend
-      - RKN_DD_URL
       - RKN_DD_API_KEY
       - REKONO_HOME=/rekono
   

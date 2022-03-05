@@ -12,17 +12,23 @@ ENV PYTHONUNBUFFERED 1
 
 RUN apk update && apk add postgresql-dev gcc python3-dev musl-dev libmagic --repository=http://dl-cdn.alpinelinux.org/alpine/edge/community
 
-
 RUN pip install --upgrade pip
 RUN pip install -r /code/requirements.txt
 
+RUN adduser --disabled-password rekono
+RUN chown -R rekono:rekono /code
+RUN chown -R rekono:rekono /rekono
+
+USER rekono
 WORKDIR /code
+
+ENV REKONO_HOME /rekono
 RUN python manage.py frontend
 
 
 FROM node:17.6.0-alpine as frontend
 
-RUN mkdir frontend/
+RUN mkdir /frontend
 COPY --from=backend /code/frontend /frontend
 
 ENV NODE_OPTIONS --openssl-legacy-provider
@@ -31,3 +37,7 @@ WORKDIR /frontend
 RUN npm install -g serve
 RUN npm install
 RUN npm run build
+
+RUN adduser --disabled-password rekono
+RUN chown -R rekono /frontend
+USER rekono
