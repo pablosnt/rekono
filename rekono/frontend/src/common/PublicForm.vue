@@ -10,7 +10,8 @@
 #public-page {
   height: 100%;
   background-image: url('/static/background.jpg');
-  background-size: 100%;
+  background-size: cover;
+  background-repeat: no-repeat;
 }
 #public-form {
   background: white;

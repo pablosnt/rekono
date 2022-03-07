@@ -41,7 +41,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 FRONTEND_DIR = os.path.join(BASE_DIR, 'frontend')                               # Frontend directory
 
 # Rekono home directory. By default /opt/rekono
-REKONO_HOME = os.getenv('REKONO_HOME', os.path.join('opt', 'rekono'))
+REKONO_HOME = os.getenv('REKONO_HOME', '/opt/rekono')
 if not os.path.isdir(REKONO_HOME):                                              # Rekono home doesn't exist
     REKONO_HOME = str(BASE_DIR.parent)                                          # Use current directory as home
 

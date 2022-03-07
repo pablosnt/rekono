@@ -10,6 +10,8 @@ from rest_framework import serializers, status
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.fields import SerializerMethodField
 from security.authorization.roles import Role
+from telegram_bot import sender as telegram_sender
+from telegram_bot.messages.basic import LINKED
 from telegram_bot.models import TelegramChat
 from users.models import User
 
@@ -192,6 +194,7 @@ class TelegramBotSerializer(serializers.Serializer):
         validated_data['telegram_chat'].user = instance                         # Link Telegram chat Id to the user
         validated_data['telegram_chat'].save(update_fields=['otp', 'otp_expiration', 'user'])
         user_telegram_linked_notification(instance)                             # Send email notification to the user
+        telegram_sender.send_message(validated_data['telegram_chat'], LINKED)   # Send Telegram notification to the user
         logger.info(f'[Security] User {instance.id} has logged in the Telegram bot', extra={'user': instance.id})
         return instance
 

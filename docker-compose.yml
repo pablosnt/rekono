@@ -7,17 +7,43 @@ services:
     hostname: postgres
     container_name: postgres
     user: postgres
-    ports:
-      - 5432:5432
+    expose:
+      - 5432
     volumes:
       - postgres:/var/lib/postgresql/data/
     networks:
       - internal
+      - external
     environment:
       - POSTGRES_DB=rekono
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
   
+  redis:
+    restart: always
+    image: redis:7.0-rc-alpine
+    hostname: redis
+    container_name: redis
+    user: redis
+    expose:
+      - 6379
+    networks:
+      - internal
+  
+  postfix:
+    restart: always
+    image: catatnight/postfix:latest
+    hostname: postfix
+    container_name: postfix
+    expose:
+      - 25
+    networks:
+      - internal
+      - external
+    environment:
+      - maildomain=rekono.com
+      - smtp_user=postfix:postfix
+
   initialize:
     restart: 'no'
     build:
@@ -39,17 +65,6 @@ services:
       - DJANGO_SUPERUSER_EMAIL=rekono@rekono.com
       - DJANGO_SUPERUSER_USERNAME=rekono
       - DJANGO_SUPERUSER_PASSWORD=rekono
-
-  redis:
-    restart: always
-    image: redis:7.0-rc-alpine
-    hostname: redis
-    container_name: redis
-    user: redis
-    ports:
-      - 6379:6379
-    networks:
-      - internal
   
   tasks-worker:
     restart: always
@@ -134,18 +149,19 @@ services:
       - ./config.yaml:/rekono/config.yaml:ro
     networks:
       - internal
+      - external
     depends_on:
       - redis
-      - mailserver
+      - postfix
     environment:
       - RKN_DB_HOST=postgres
       - RKN_DB_USER=postgres
       - RKN_DB_PASSWORD=postgres
       - RKN_RQ_HOST=redis
-      - RKN_EMAIL_HOST
-      - RKN_EMAIL_PORT
-      - RKN_EMAIL_USER
-      - RKN_EMAIL_PASSWORD
+      - RKN_EMAIL_HOST=${RKN_EMAIL_HOST:-postfix}
+      - RKN_EMAIL_PORT=${RKN_EMAIL_PORT:-25}
+      - RKN_EMAIL_USER=${RKN_EMAIL_USER:-postfix}
+      - RKN_EMAIL_PASSWORD=${RKN_EMAIL_PASSWORD:-postfix}
       - REKONO_HOME=/rekono
       - OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
 
@@ -182,13 +198,14 @@ services:
     command: python manage.py runserver 0.0.0.0:8000
     hostname: backend
     container_name: backend
-    ports:
-      - 8000:8000
+    expose:
+      - 8000
     volumes:
       - rekono:/rekono
       - ./config.yaml:/rekono/config.yaml:ro
     networks:
       - internal
+      - external
     depends_on:
       - postgres
       - redis
@@ -209,8 +226,8 @@ services:
     command: serve -s dist
     hostname: frontend
     container_name: frontend
-    ports:
-      - 3000:3000
+    expose:
+      - 3000
     networks:
       - internal
     environment:
@@ -219,7 +236,7 @@ services:
   nginx:
     restart: always
     build:
-      dockerfile: docker//nginx/Dockerfile
+      dockerfile: docker/nginx/Dockerfile
     hostname: nginx
     container_name: nginx
     ports:

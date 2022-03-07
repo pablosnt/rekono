@@ -4,7 +4,7 @@ from security.otp import generate, get_expiration
 from telegram import ParseMode
 from telegram.ext import CallbackContext
 from telegram.update import Update
-from telegram_bot.messages.basic import LOGOUT, WELCOME
+from telegram_bot.messages.basic import LOGOUT, OTP, WELCOME
 from telegram_bot.models import TelegramChat
 
 logger = logging.getLogger()                                                    # Rekono logger
@@ -24,7 +24,8 @@ def start(update: Update, context: CallbackContext) -> None:
         )
         logger.info(f'[Security] New login request using the Telegram bot from the chat {chat.chat_id}')
         # Send welcome message including OTP to link Telegram Chat with an user account
-        update.message.reply_text(WELCOME.format(otp=chat.otp), parse_mode=ParseMode.MARKDOWN_V2)
+        update.message.reply_text(WELCOME, parse_mode=ParseMode.MARKDOWN_V2)
+        update.message.reply_text(OTP.format(otp=chat.otp), parse_mode=ParseMode.MARKDOWN_V2)
 
 
 def logout(update: Update, context: CallbackContext) -> None:

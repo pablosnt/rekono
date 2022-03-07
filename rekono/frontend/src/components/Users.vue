@@ -73,13 +73,14 @@ export default {
         })
     },
     updateRole (role) {
-      this.put(`/api/users/${this.selectedUser.id}/role/`, { role: role }, this.selectedUser.username, 'User role updated successfully')
+      this.put(`/api/users/${this.selectedUser.id}/role/`, { role: role }, this.selectedUser.email, 'User role updated successfully')
     },
     disableUser () {
-      this.delete(`/api/users/${this.selectedUser.id}/`, this.selectedUser.username, 'User disabled successfully').then(() => this.fetchData())
+      this.delete(`/api/users/${this.selectedUser.id}/`, this.selectedUser.email, 'User disabled successfully').then(() => this.fetchData())
     },
     enableUser (user) {
-      this.post(`/api/users/${user.id}/enable/`, { }, user.username, 'User enabled successfully').then(() => this.fetchData())
+      console.log(user.email)
+      this.post(`/api/users/${user.id}/enable/`, { }, user.email, 'User enabled successfully').then(() => this.fetchData())
     },
     selectUser (user) {
       this.selectedUser = user
