@@ -30,7 +30,7 @@ def new_target_port(update: Update, context: CallbackContext) -> int:
         int: Conversation state
     '''
     chat = get_chat(update)                                                     # Get Telegram chat
-    if chat and context.chat_data:
+    if chat and context.chat_data is not None:
         if PROJECT in context.chat_data:                                        # Project already selected
             context.chat_data[STATES] = [(CREATE, ASK_FOR_NEW_TARGET_PORT)]     # Configure next steps
             return ask_for_target(update, context, chat)                        # Ask for target selection
@@ -53,14 +53,14 @@ def create_target_port(update: Update, context: CallbackContext) -> int:
     '''
     clear(context, [STATES])                                                    # Clear Telegram context
     chat = get_chat(update)                                                     # Get Telegram chat
-    if chat and context.chat_data and update.message and update.message.text:
-        if update.message.text == '/cancel':                                    # Check if cancellation is requested
+    if chat and context.chat_data is not None and update.effective_message and update.effective_message.text:
+        if update.effective_message.text == '/cancel':                          # Check if cancellation is requested
             return cancel(update, context)                                      # Cancel operation
         try:
-            port = int(update.message.text)                                     # Check if port is a valid number
+            port = int(update.effective_message.text)                           # Check if port is a valid number
         except ValueError:
-            update.message.reply_text(INVALID_TARGET_PORT)                      # Invalid target port
-            update.message.reply_text(ASK_FOR_NEW_TARGET_PORT)                  # Re-ask for the new target port
+            update.effective_message.reply_text(INVALID_TARGET_PORT)            # Invalid target port
+            update.effective_message.reply_text(ASK_FOR_NEW_TARGET_PORT)        # Re-ask for the new target port
             return CREATE                                                       # Repeat the current state
         # Prepare target port data
         serializer = TargetPortSerializer(data={'target': context.chat_data[TARGET].id, 'port': port})
@@ -70,7 +70,7 @@ def create_target_port(update: Update, context: CallbackContext) -> int:
                 f'[Telegram Bot] New target port {target_port.id} has been created',
                 extra={'user': chat.user.id}
             )
-            update.message.reply_text(                                          # Confirm target port creation
+            update.effective_message.reply_text(                                # Confirm target port creation
                 NEW_TARGET_PORT.format(
                     port=escape_markdown(str(target_port.port), version=2),
                     target=escape_markdown(target_port.target.target, version=2)
@@ -82,8 +82,11 @@ def create_target_port(update: Update, context: CallbackContext) -> int:
                 extra={'user': chat.user.id}
             )
             # Send error details
-            update.message.reply_text(create_error_message(serializer.errors), parse_mode=ParseMode.MARKDOWN_V2)
-            update.message.reply_text(ASK_FOR_NEW_TARGET_PORT)                  # Re-ask for the new target port
+            update.effective_message.reply_text(
+                create_error_message(serializer.errors),
+                parse_mode=ParseMode.MARKDOWN_V2
+            )
+            update.effective_message.reply_text(ASK_FOR_NEW_TARGET_PORT)        # Re-ask for the new target port
             return CREATE                                                       # Repeat the current state
     clear(context, [TARGET])                                                    # Clear Telegram context
     return ConversationHandler.END                                              # End conversation

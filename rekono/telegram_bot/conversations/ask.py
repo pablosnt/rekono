@@ -32,9 +32,9 @@ def send_message(update: Update, chat: TelegramChat, text: str) -> None:
         chat (TelegramChat): Telegram chat entity
         text (str): Text message to send
     '''
-    if hasattr(update, 'message') and update.message:                           # Standard update
-        update.message.reply_text(text, parse_mode=ParseMode.MARKDOWN_V2)
-    elif hasattr(update, 'callback_query') and update.callback_query and update.callback_query.bot:
+    if update.effective_message:                                                # Standard update
+        update.effective_message.reply_text(text, parse_mode=ParseMode.MARKDOWN_V2)
+    elif update.callback_query and update.callback_query.bot:
         # Update from keyboard selection
         update.callback_query.bot.send_message(chat.chat_id, text=text, parse_mode=ParseMode.MARKDOWN_V2)
 
@@ -58,13 +58,13 @@ def send_options(
     keyboard_by_row = []
     for i in range(0, len(keyboard), per_row):                                  # For each row
         keyboard_by_row.append(keyboard[i:i + per_row])                         # Get keyboard buttons for this row
-    if hasattr(update, 'message') and update.message:                           # Standard update
-        update.message.reply_text(
+    if update.effective_message:                                                # Standard update
+        update.effective_message.reply_text(
             text,
             reply_markup=InlineKeyboardMarkup(keyboard_by_row),
             parse_mode=ParseMode.MARKDOWN_V2
         )
-    elif hasattr(update, 'callback_query') and update.callback_query and update.callback_query.bot:
+    elif update.callback_query and update.callback_query.bot:
         # Update from keyboard selection
         update.callback_query.bot.send_message(
             chat.chat_id,

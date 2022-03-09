@@ -55,7 +55,7 @@ def select_project(update: Update, context: CallbackContext) -> int:
         int: Conversation state
     '''
     chat = get_chat(update)                                                     # Get Telegram chat
-    if chat and context.chat_data and update.callback_query and update.callback_query.data:
+    if chat and context.chat_data is not None and update.callback_query and update.callback_query.data:
         project = Project.objects.get(pk=int(update.callback_query.data))       # Get project by Id
         context.chat_data[PROJECT] = project                                    # Save selected project
         update.callback_query.answer(SELECTED_PROJECT.format(project=project.name))     # Confirm selection
@@ -83,7 +83,7 @@ def select_target(update: Update, context: CallbackContext) -> int:
         int: Conversation state
     '''
     chat = get_chat(update)                                                     # Get Telegram chat
-    if chat and context.chat_data and update.callback_query and update.callback_query.data:
+    if chat and context.chat_data is not None and update.callback_query and update.callback_query.data:
         target = Target.objects.get(pk=int(update.callback_query.data))         # Get target by Id
         context.chat_data[TARGET] = target                                      # Save selected target
         update.callback_query.answer(SELECTED_TARGET.format(target=target.target))     # Confirm selection
@@ -104,7 +104,7 @@ def select_target_port(update: Update, context: CallbackContext) -> int:
         int: Conversation state
     '''
     chat = get_chat(update)                                                     # Get Telegram chat
-    if chat and context.chat_data and update.callback_query and update.callback_query.data:
+    if chat and context.chat_data is not None and update.callback_query and update.callback_query.data:
         target_port = TargetPort.objects.get(pk=int(update.callback_query.data))    # Get target port by Id
         context.chat_data[TARGET_PORT] = target_port                            # Save selected target port
         update.callback_query.answer(SELECTED_TARGET_PORT.format(port=target_port.port))     # Confirm selection
@@ -125,7 +125,7 @@ def select_tool(update: Update, context: CallbackContext) -> int:
         int: Conversation state
     '''
     chat = get_chat(update)                                                     # Get Telegram chat
-    if chat and context.chat_data and update.callback_query and update.callback_query.data:
+    if chat and context.chat_data is not None and update.callback_query and update.callback_query.data:
         tool = Tool.objects.get(pk=int(update.callback_query.data))             # Get tool by Id
         context.chat_data[TOOL] = tool                                          # Save selected tool
         update.callback_query.answer(SELECTED_TOOL.format(tool=tool.name))      # Confirm selection
@@ -146,7 +146,7 @@ def select_process(update: Update, context: CallbackContext) -> int:
         int: Conversation state
     '''
     chat = get_chat(update)                                                     # Get Telegram chat
-    if chat and context.chat_data and update.callback_query and update.callback_query.data:
+    if chat and context.chat_data is not None and update.callback_query and update.callback_query.data:
         process = Process.objects.get(pk=int(update.callback_query.data))       # Get process by Id
         context.chat_data[PROCESS] = process                                    # Save selected process
         update.callback_query.answer(SELECTED_PROCESS.format(process=process.name))     # Confirm selection
@@ -167,7 +167,7 @@ def select_configuration(update: Update, context: CallbackContext) -> int:
         int: Conversation state
     '''
     chat = get_chat(update)                                                     # Get Telegram chat
-    if chat and context.chat_data and update.callback_query and update.callback_query.data:
+    if chat and context.chat_data is not None and update.callback_query and update.callback_query.data:
         configuration = Configuration.objects.get(pk=int(update.callback_query.data))   # Get configuration by Id
         context.chat_data[CONFIGURATION] = configuration                        # Save selected configuration
         # Confirm selection
@@ -189,7 +189,7 @@ def select_intensity(update: Update, context: CallbackContext) -> int:
         int: Conversation state
     '''
     chat = get_chat(update)                                                     # Get Telegram chat
-    if chat and context.chat_data and update.callback_query and update.callback_query.data:
+    if chat and context.chat_data is not None and update.callback_query and update.callback_query.data:
         context.chat_data[INTENSITY] = update.callback_query.data.upper()       # Save selected intensity
         # Confirm selection
         update.callback_query.answer(SELECTED_INTENSITY.format(intensity=update.callback_query.data.capitalize()))

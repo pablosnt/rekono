@@ -35,18 +35,18 @@ def get_chat(update: Update, auditor: bool = True) -> Union[TelegramChat, None]:
     Returns:
         TelegramChat: Telegram chat entity if the user is authorized
     '''
-    if update.effective_chat and update.message:                                # Chat Id from the update
+    if update.effective_chat and update.effective_message:                      # Chat Id from the update
         # Get chat entity
         chat = TelegramChat.objects.filter(chat_id=update.effective_chat.id, user__is_active=True).first()
         if not chat:                                                            # No chat found
             logger.error('[Telegram Bot] Unauthenticated request')
-            update.message.reply_text(AUTHN_ERROR)                              # Authentication error
+            update.effective_message.reply_text(AUTHN_ERROR)                    # Authentication error
         elif auditor and not check_auditor(chat):                               # User is not auditor
             logger.error(
                 f'[Telegram Bot] User {chat.user.id} isn\'t authorized to use Telegram bot',
                 extra={'user': chat.user.id}
             )
-            update.message.reply_text(AUTHZ_ERROR)                              # Authorization error
+            update.effective_message.reply_text(AUTHZ_ERROR)                    # Authorization error
         else:
             return chat                                                         # Chat is authorized
     return None                                                                 # Unauthorized chat

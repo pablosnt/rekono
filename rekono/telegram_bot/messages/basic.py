@@ -10,6 +10,6 @@ Enjoy\!'''
 
 OTP = '*{otp}*'
 
-LINKED = 'Rekono bot has been linked!'
+LINKED = 'Rekono bot has been linked\!'
 
 LOGOUT = 'Bye\!'

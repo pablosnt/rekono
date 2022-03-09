@@ -194,7 +194,8 @@ class TelegramBotSerializer(serializers.Serializer):
         validated_data['telegram_chat'].user = instance                         # Link Telegram chat Id to the user
         validated_data['telegram_chat'].save(update_fields=['otp', 'otp_expiration', 'user'])
         user_telegram_linked_notification(instance)                             # Send email notification to the user
-        telegram_sender.send_message(validated_data['telegram_chat'], LINKED)   # Send Telegram notification to the user
+        # Send Telegram notification to the user
+        telegram_sender.send_message(validated_data['telegram_chat'].chat_id, LINKED)
         logger.info(f'[Security] User {instance.id} has logged in the Telegram bot', extra={'user': instance.id})
         return instance
 

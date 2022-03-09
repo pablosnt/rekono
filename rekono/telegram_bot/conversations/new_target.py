@@ -28,9 +28,9 @@ def new_target(update: Update, context: CallbackContext) -> int:
         int: Conversation state
     '''
     chat = get_chat(update)                                                     # Get Telegram chat
-    if chat and context.chat_data and update.message:
+    if chat and context.chat_data is not None and update.effective_message:
         if PROJECT in context.chat_data:                                        # Project already selected
-            update.message.reply_text(ASK_FOR_NEW_TARGET)                       # Ask for the new target
+            update.effective_message.reply_text(ASK_FOR_NEW_TARGET)             # Ask for the new target
             return CREATE                                                       # Go to target creation
         else:                                                                   # No selected project
             context.chat_data[STATES] = [(CREATE, ASK_FOR_NEW_TARGET)]          # Configure next steps
@@ -50,15 +50,18 @@ def create_target(update: Update, context: CallbackContext) -> int:
     '''
     clear(context, [STATES])                                                    # Clear Telegram context
     chat = get_chat(update)                                                     # Get Telegram chat
-    if chat and context.chat_data and update.message:
-        if update.message.text == '/cancel':                                    # Check if cancellation is requested
+    if chat and context.chat_data is not None and update.effective_message:
+        if update.effective_message.text == '/cancel':                          # Check if cancellation is requested
             return cancel(update, context)                                      # Cancel operation
         # Prepare target data
-        serializer = TargetSerializer(data={'project': context.chat_data[PROJECT].id, 'target': update.message.text})
+        serializer = TargetSerializer(data={
+            'project': context.chat_data[PROJECT].id,
+            'target': update.effective_message.text
+        })
         if serializer.is_valid():                                               # Target is valid
             target = serializer.save()                                          # Create target
             logger.info(f'[Telegram Bot] New target {target.id} has been created', extra={'user': chat.user.id})
-            update.message.reply_text(                                          # Confirm target creation
+            update.effective_message.reply_text(                                # Confirm target creation
                 NEW_TARGET.format(
                     target=escape_markdown(target.target, version=2),
                     target_type=escape_markdown(target.type, version=2),
@@ -68,7 +71,10 @@ def create_target(update: Update, context: CallbackContext) -> int:
         else:                                                                   # Invalid target data
             logger.info('[Telegram Bot] Attempt of target creation with invalid data', extra={'user': chat.user.id})
             # Send error details
-            update.message.reply_text(create_error_message(serializer.errors), parse_mode=ParseMode.MARKDOWN_V2)
-            update.message.reply_text(ASK_FOR_NEW_TARGET)                       # Re-ask for the new target
+            update.effective_message.reply_text(
+                create_error_message(serializer.errors),
+                parse_mode=ParseMode.MARKDOWN_V2
+            )
+            update.effective_message.reply_text(ASK_FOR_NEW_TARGET)                       # Re-ask for the new target
             return CREATE                                                       # Repeat the current state
     return ConversationHandler.END                                              # End conversation

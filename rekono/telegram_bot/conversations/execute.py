@@ -31,7 +31,7 @@ def execute_tool(update: Update, context: CallbackContext) -> int:
         int: Conversation state
     '''
     chat = get_chat(update)                                                     # Get Telegram chat
-    if chat and context.chat_data:
+    if chat and context.chat_data is not None:
         if PROJECT in context.chat_data:                                        # Project already selected
             context.chat_data[STATES] = [                                       # Prepare next steps
                 (None, ask_for_tool),
@@ -63,7 +63,7 @@ def execute_process(update: Update, context: CallbackContext) -> int:
         int: Conversation state
     '''
     chat = get_chat(update)                                                     # Get Telegram chat
-    if chat and context.chat_data:
+    if chat and context.chat_data is not None:
         if PROJECT in context.chat_data:                                        # Project already selected
             context.chat_data[STATES] = [                                       # Prepare next steps
                 (None, ask_for_process),
