@@ -101,6 +101,8 @@ services:
     networks:
       - internal
       - external
+    cap_add:
+      - NET_ADMIN
     depends_on:
       - postgres
       - redis

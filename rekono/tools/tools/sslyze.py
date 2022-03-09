@@ -9,6 +9,8 @@ from tools.tools.base_tool import BaseTool
 class SslyzeTool(BaseTool):
     '''SSLyze tool class.'''
 
+    # Exit code ignored because SSLyze can "fail" when find vulnerabilities
+    ignore_exit_code = True
     tls_versions = [                                                            # SSL and TLS versions
         ('ssl', '2.0'), ('ssl', '3.0'), ('tls', '1.0'), ('tls', '1.1'), ('tls', '1.2'), ('tls', '1.3')
     ]
