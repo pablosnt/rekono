@@ -23,17 +23,13 @@ class CmseekTool(BaseTool):
         Returns:
             Union[str, None]: URL path
         '''
-        path = ''
-        for argument in self.command_arguments:                                 # For each argument used in execution
-            if '-u' in argument:                                                # URL parameter found
-                url = argument.split('-u ', 1)[1].split(' ', 1)[0]              # Get URL value
-                if '://' in url:                                                # URL with protocol data
-                    url = url.split('://', 1)[1]                                # Remove protocol data from URL
-                if url[-1] == '/':                                              # URL ends in slash
-                    url = url[:-1]                                              # Remove last slash form URL
-                path = url.replace('/', '_').replace(':', '_')                  # URL conversion to path
-                break
-        return path
+        index = self.command_arguments.index('-u') + 1
+        url = self.command_arguments[index]
+        if '://' in url:                                                        # URL with protocol data
+            url = url.split('://', 1)[1]                                        # Remove protocol data from URL
+        if url[-1] == '/':                                                      # URL ends in slash
+            url = url[:-1]                                                      # Remove last slash form URL
+        return url.replace('/', '_').replace(':', '_')                          # URL conversion to path
 
     def clean_environment(self) -> None:
         '''Move original file output to Rekono outputs directory.'''
