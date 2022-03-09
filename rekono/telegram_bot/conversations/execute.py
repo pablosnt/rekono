@@ -5,7 +5,7 @@ from telegram import ParseMode
 from telegram.ext import CallbackContext, ConversationHandler
 from telegram.update import Update
 from telegram_bot.context import (CONFIGURATION, INTENSITY, PROCESS, PROJECT,
-                                  STATES, TARGET, TOOL)
+                                  STATES, TARGET, TOOL, WORDLIST)
 from telegram_bot.conversations.ask import (ask_for_configuration,
                                             ask_for_execution_confirmation,
                                             ask_for_intensity, ask_for_process,
@@ -115,6 +115,8 @@ def execute(update: Update, context: CallbackContext) -> int:
                 })
             elif PROCESS in context.chat_data:                                  # Process execution
                 task_data['process_id'] = context.chat_data[PROCESS].id         # Add process data
+            if WORDLIST in context.chat_data:                                   # Wordlist selected
+                task_data['wordlists'] = [context.chat_data[WORDLIST].id]       # Add wordlist data
             serializer = TaskSerializer(data=task_data)                         # Create Task serializer
             if serializer.is_valid():                                           # Task is valid
                 task = serializer.save(executor=chat.user)                      # Create task

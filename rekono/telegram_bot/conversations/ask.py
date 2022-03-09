@@ -2,6 +2,7 @@ from typing import List
 
 from processes.models import Process
 from projects.models import Project
+from resources.models import Wordlist
 from targets.models import Target, TargetPort
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
 from telegram.ext import CallbackContext, ConversationHandler
@@ -11,13 +12,15 @@ from telegram_bot.conversations.states import (EXECUTE, SELECT_CONFIGURATION,
                                                SELECT_INTENSITY,
                                                SELECT_PROCESS, SELECT_PROJECT,
                                                SELECT_TARGET,
-                                               SELECT_TARGET_PORT, SELECT_TOOL)
+                                               SELECT_TARGET_PORT, SELECT_TOOL,
+                                               SELECT_WORDLIST)
 from telegram_bot.messages.ask import (ASK_FOR_CONFIGURATION,
                                        ASK_FOR_INTENSITY, ASK_FOR_PROCESS,
                                        ASK_FOR_PROJECT, ASK_FOR_TARGET,
                                        ASK_FOR_TARGET_PORT, ASK_FOR_TOOL,
-                                       NO_PROCESSES, NO_PROJECTS,
-                                       NO_TARGET_PORTS, NO_TARGETS)
+                                       ASK_FOR_WORDLIST, NO_PROCESSES,
+                                       NO_PROJECTS, NO_TARGET_PORTS,
+                                       NO_TARGETS)
 from telegram_bot.messages.execution import confirmation_message
 from telegram_bot.models import TelegramChat
 from tools.enums import IntensityRank
@@ -205,6 +208,24 @@ def ask_for_configuration(update: Update, context: CallbackContext, chat: Telegr
     keyboard = [InlineKeyboardButton(c.name, callback_data=c.id) for c in configurations]
     send_options(update, chat, ASK_FOR_CONFIGURATION, keyboard, 2)
     return SELECT_CONFIGURATION                                                 # Go to selected config management
+
+
+def ask_for_wordlist(update: Update, context: CallbackContext, chat: TelegramChat) -> int:
+    '''Ask the user for choose one wordlist.
+
+    Args:
+        update (Update): Telegram Bot update
+        context (CallbackContext): Telegram Bot context
+        chat (TelegramChat): Telegram chat entity
+
+    Returns:
+        int: Next conversation state or end conversation
+    '''
+    wordlists = Wordlist.objects.all()                                          # Get all wordlists
+    # Create keyboard buttons with the wordlists data
+    keyboard = [InlineKeyboardButton(w.name, callback_data=w.id) for w in wordlists]
+    send_options(update, chat, ASK_FOR_WORDLIST, keyboard, 2)
+    return SELECT_WORDLIST                                                      # Go to selected wordlist management
 
 
 def ask_for_intensity(update: Update, context: CallbackContext, chat: TelegramChat) -> int:

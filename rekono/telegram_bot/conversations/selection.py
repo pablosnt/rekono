@@ -2,22 +2,25 @@ from typing import List
 
 from processes.models import Process
 from projects.models import Project
+from resources.models import Wordlist
 from targets.models import Target, TargetPort
 from telegram import ParseMode
 from telegram.ext import CallbackContext, ConversationHandler
 from telegram.update import Update
 from telegram.utils.helpers import escape_markdown
 from telegram_bot.context import (CONFIGURATION, INTENSITY, PROCESS, PROJECT,
-                                  STATES, TARGET, TARGET_PORT, TOOL)
+                                  STATES, TARGET, TARGET_PORT, TOOL, WORDLIST)
+from telegram_bot.conversations.ask import ask_for_wordlist
 from telegram_bot.messages.selection import (SELECTED_CONFIGURATION,
                                              SELECTED_INTENSITY,
                                              SELECTED_PROCESS,
                                              SELECTED_PROJECT, SELECTED_TARGET,
                                              SELECTED_TARGET_PORT,
-                                             SELECTED_TOOL, SELECTION)
+                                             SELECTED_TOOL, SELECTED_WORDLIST,
+                                             SELECTION)
 from telegram_bot.models import TelegramChat
 from telegram_bot.security import get_chat
-from tools.models import Configuration, Tool
+from tools.models import Configuration, Input, Tool
 
 
 def next_state(update: Update, context: CallbackContext, chat: TelegramChat) -> int:
@@ -129,6 +132,9 @@ def select_tool(update: Update, context: CallbackContext) -> int:
         tool = Tool.objects.get(pk=int(update.callback_query.data))             # Get tool by Id
         context.chat_data[TOOL] = tool                                          # Save selected tool
         update.callback_query.answer(SELECTED_TOOL.format(tool=tool.name))      # Confirm selection
+        # Tool with Wordlist input
+        if Input.objects.filter(argument__tool=tool, type__name='Wordlist').exists():
+            context.chat_data[STATES].insert(0, (None, ask_for_wordlist))       # Add wordlist question
         return next_state(update, context, chat)                                # Go to next state
     if update.callback_query:
         update.callback_query.answer()                                          # Empty answer
@@ -150,6 +156,9 @@ def select_process(update: Update, context: CallbackContext) -> int:
         process = Process.objects.get(pk=int(update.callback_query.data))       # Get process by Id
         context.chat_data[PROCESS] = process                                    # Save selected process
         update.callback_query.answer(SELECTED_PROCESS.format(process=process.name))     # Confirm selection
+        # Tool with Wordlist input
+        if Input.objects.filter(argument__tool__in=process.steps.all().values('tool'), type__name='Wordlist').exists():
+            context.chat_data[STATES].insert(0, (None, ask_for_wordlist))       # Add wordlist question
         return next_state(update, context, chat)                                # go to next state
     if update.callback_query:
         update.callback_query.answer()                                          # Empty answer
@@ -172,6 +181,27 @@ def select_configuration(update: Update, context: CallbackContext) -> int:
         context.chat_data[CONFIGURATION] = configuration                        # Save selected configuration
         # Confirm selection
         update.callback_query.answer(SELECTED_CONFIGURATION.format(configuration=configuration.name))
+        return next_state(update, context, chat)                                # Go to next state
+    if update.callback_query:
+        update.callback_query.answer()                                          # Empty answer
+    return ConversationHandler.END                                              # End conversation
+
+
+def select_wordlist(update: Update, context: CallbackContext) -> int:
+    '''Manage selected wordlist.
+
+    Args:
+        update (Update): Telegram Bot update
+        context (CallbackContext): Telegram Bot context
+
+    Returns:
+        int: Conversation state
+    '''
+    chat = get_chat(update)                                                     # Get Telegram chat
+    if chat and context.chat_data is not None and update.callback_query and update.callback_query.data:
+        wordlist = Wordlist.objects.get(pk=int(update.callback_query.data))     # Get wordlist by Id
+        context.chat_data[WORDLIST] = wordlist                                  # Save selected intensity
+        update.callback_query.answer(SELECTED_WORDLIST.format(wordlist=wordlist.name))      # Confirm selection
         return next_state(update, context, chat)                                # Go to next state
     if update.callback_query:
         update.callback_query.answer()                                          # Empty answer
