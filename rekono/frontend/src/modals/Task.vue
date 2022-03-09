@@ -207,7 +207,7 @@ export default {
     confirm (event) {
       event.preventDefault()
       if (this.check()) {
-        this.create().then(success => this.$emit('confirm', { id: this.id, success: success, reload: this.reload }))
+        this.create()
       }
     },
     create () {
@@ -231,8 +231,7 @@ export default {
         data.configuration_id = this.configurationId
       }
       return this.post('/api/tasks/', data, this.selectedTool ? this.selectedTool.name : this.selectedProcess.name, 'Execution requested successfully')
-        .then(() => { return Promise.resolve(true) })
-        .catch(() => { return Promise.resolve(false) })
+        .then(task => this.$router.push({ name: 'task', params: { id: task.id, task: task } }))
     },
     clean () {
       this.processes = []

@@ -68,7 +68,7 @@
     <target id="add-target-modal" :projectId="$route.params.id" @confirm="confirm"/>
     <target-port v-if="selectedTarget !== null" id="add-target-port-modal" :targetId="selectedTarget.id" @confirm="confirm"/>
     <target-endpoint v-if="selectedTargetPort !== null" id="add-target-endpoint-modal" :targetPortId="selectedTargetPort.id" @confirm="confirm"/>
-    <task id="task-modal" :target="selectedTarget" :initialized="selectedTarget !== null" @confirm="confirm" @clean="cleanSelection"/>
+    <task id="task-modal" :target="selectedTarget" :initialized="selectedTarget !== null" @clean="cleanSelection"/>
   </div>
 </template>
 

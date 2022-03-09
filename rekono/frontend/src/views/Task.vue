@@ -170,40 +170,37 @@ export default {
     handleRefresh () {
       if (this.currentTask) {
         if (this.currentTask.status === 'Running' || this.currentTask.status === 'Requested') {
-          this.fetchTask()
+          this.fetchTask(true)
           this.fetchExecutions()
         } else {
           this.stopAutoRefresh()
         }
       }
     },
-    fetchTask () {
-      if (!this.task) {
+    fetchTask (reload = false) {
+      if (!this.task || reload) {
         this.get(`/api/tasks/${this.$route.params.id}/`)
           .then(response => this.currentTask = response.data)
           .catch(error => this.isFound = (error.response.status !== 404))
       }
     },
     fetchExecutions () {
-      this.getAllPages('/api/executions/', { task: this.$route.params.id }).then(results => { this.executions = results; this.selectExecution(null) })
+      this.getAllPages('/api/executions/', { task: this.$route.params.id }).then(results => { this.executions = results })
     },
     cancelTask () {
-      this.delete(
-        `/api/tasks/${this.currentTask.id}/`,
-        this.currentTask.process ? this.currentTask.process.name : this.currentTask.tool.name, 'Task cancelled successfully'
-      ).then(() => { this.fetchTask() })
+      this.delete(`/api/tasks/${this.currentTask.id}/`, this.currentTask.process ? this.currentTask.process.name : this.currentTask.tool.name, 'Task cancelled successfully')
+        .then(() => {
+          this.fetchTask(true)
+          this.fetchExecutions()
+        })
     },
     repeatTask () {
-      this.post(
-        `/api/tasks/${this.currentTask.id}/repeat/`, { },
-        this.currentTask.process ? this.currentTask.process.name : this.currentTask.tool.name, 'Task executed again successfully'
-      ).then(data => { this.$router.push({ name: 'task', params: { id: data.id, task: data } }) })
+      this.post(`/api/tasks/${this.currentTask.id}/repeat/`, { }, this.currentTask.process ? this.currentTask.process.name : this.currentTask.tool.name, 'Task executed again successfully')
+        .then(data => { this.$router.push({ name: 'task', params: { id: data.id, task: data } }) })
     },
     selectExecution (items) {
       if (items && items.length > 0) {
         this.selectedExecution = items[0]
-      } else {
-        this.selectedExecution = this.executions.length > 0 ? this.executions.find(execution => execution.status === 'Completed') : null
       }
     },
     cleanDDSelection () {

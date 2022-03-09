@@ -56,7 +56,7 @@
     <pagination :page="page" :limit="limit" :limits="limits" :total="total" name="tools" @pagination="pagination"/>
     <process id="new-process-modal" :tool="selectedTool" :initialized="showProcessModal" @confirm="confirm" @clean="cleanSelection"/>
     <step id="new-step-modal" :tool="selectedTool" :initialized="showStepModal" @confirm="confirm" @clean="cleanSelection"/>
-    <task id="task-modal" :tool="selectedTool" :initialized="showTaskModal" @confirm="confirm" @clean="cleanSelection"/>
+    <task id="task-modal" :tool="selectedTool" :initialized="showTaskModal" @clean="cleanSelection"/>
   </div>
 </template>
 

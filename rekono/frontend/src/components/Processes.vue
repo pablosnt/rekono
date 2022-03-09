@@ -75,7 +75,7 @@
     </deletion>
     <process id="process-modal" :process="selectedProcess" :initialized="showProcessModal" @confirm="confirm" @clean="cleanSelection"/>
     <step id="step-modal" :process="selectedProcess" :step="selectedStep" :initialized="showStepModal" @confirm="confirm" @clean="cleanSelection"/>
-    <task id="task-modal" :process="selectedProcess" :initialized="showTaskModal" @confirm="confirm" @clean="cleanSelection"/>
+    <task id="task-modal" :process="selectedProcess" :initialized="showTaskModal" @clean="cleanSelection"/>
   </div>
 </template>
 

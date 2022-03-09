@@ -124,6 +124,7 @@ export default {
     }
   },
   data () {
+    this.fetchData()
     return {
       findings: [],
       selectedFinding: null,
@@ -155,7 +156,7 @@ export default {
       } 
       if (this.search) {
         filter.search = this.search
-      } else if (!this.types.includes(this.name.toLowerCase()) && this.filter) {
+      } else if (this.types && !this.types.includes(this.name.toLowerCase()) && this.filter) {
         filter = Object.assign({}, filter, this.filter)
       }
       if (this.active !== null) {
@@ -164,7 +165,10 @@ export default {
       return filter
     },
     fetchData () {
-      if ((this.target || this.task || this.execution) && (this.types.length === 0 || this.types.includes(this.name.toLowerCase()))) {
+      if (this.types && this.types.length > 0 && !this.types.includes(this.name.toLowerCase())) {
+        return
+      }
+      if (this.target || this.task || this.execution) {
         this.getAllPages(`/api/${this.name.toLowerCase()}/?o=-creation`, this.getFilter()).then(results => this.findings = results)
       }
     },
