@@ -39,7 +39,7 @@
             "tool": 2,
             "name": "wordlist",
             "argument": "--wordlist={wordlist}",
-            "required": true,
+            "required": false,
             "multiple": false
         }
     },

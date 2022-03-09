@@ -3,7 +3,7 @@ import os
 import shutil
 import subprocess
 import uuid
-from typing import Any, Dict, List, Union, cast
+from typing import Any, Dict, List, Tuple, Union, cast
 
 from django.db.models import Model
 from django.db.models.fields.related_descriptors import \
@@ -116,7 +116,7 @@ class BaseTool:
         model: Model,
         source: List[BaseInput],
         command: Dict[str, str]
-    ) -> Dict[str, str]:
+    ) -> Tuple[bool, Dict[str, str]]:
         '''Process a list of base inputs to include a new argument in the tool command.
 
         Args:
@@ -124,32 +124,38 @@ class BaseTool:
             input (Input): Argument input
             model (Model): Model associated to the tool input (can be the related model or the callback target)
             source (List[BaseInput]): List of base inputs to use in the tool argument
-            command (Dict[str, str]): Tool command created with previous arguments
+            command (Tuple[bool, Dict[str, str]]): Tool command created with previous arguments
 
         Returns:
-            Dict[str, str]: Tool command including the new argument
+            Tuple[bool, Dict[str, str]]: Boolean that indicates if some base input is found and the tool command updated
         '''
+        # Indicate if finding or target is found for this argument input
+        found = False
         # List of base inputs to include a multiple argument
         selection: List[BaseInput] = []
         for base_input in source:                                               # For each base input
-            # Base input is valid based on argument input
-            if isinstance(base_input, model) and base_input.filter(input):
-                if argument.multiple:                                           # Multiple argument
-                    selection.append(base_input)                                # Add base input to the selection
-                else:                                                           # Unique argument
-                    # Format argument using current base input
-                    formatted_argument = self.format_argument(argument.argument, [base_input])
-                    if formatted_argument:                                      # If formatted argument is valid
-                        command[argument.name] = formatted_argument             # Add formatted argument to the command
-                        # Save base input in the findings_relations to link findings later
-                        self.findings_relations[model.__name__.lower()] = base_input
-                        return command
+            # Check base input model
+            if not isinstance(base_input, model):
+                continue
+            found = True
+            if not base_input.filter(input):                                    # Check input filter
+                continue
+            if argument.multiple:                                               # Multiple argument
+                selection.append(base_input)                                    # Add base input to the selection
+            else:                                                               # Unique argument
+                # Format argument using current base input
+                formatted_argument = self.format_argument(argument.argument, [base_input])
+                if formatted_argument:                                          # If formatted argument is valid
+                    command[argument.name] = formatted_argument                 # Add formatted argument to the command
+                    # Save base input in the findings_relations to link findings later
+                    self.findings_relations[model.__name__.lower()] = base_input
+                    return found, command
         if selection:                                                           # If base input selection is not empty
             # Format argument using selected base inputs
             formatted_argument = self.format_argument(argument.argument, selection)
             if formatted_argument:                                              # If formatted argument is valid
                 command[argument.name] = formatted_argument                     # Add formatted argument to the command
-        return command
+        return found, command
 
     def process_argument(
         self,
@@ -157,7 +163,7 @@ class BaseTool:
         model_method: str,
         source: List[BaseInput],
         command: Dict[str, str]
-    ) -> Dict[str, str]:
+    ) -> Tuple[bool, Dict[str, str]]:
         '''Process argument entity to include required base inputs in the tool command.
 
         Args:
@@ -167,16 +173,18 @@ class BaseTool:
             command (Dict[str, str]): Tool command created with previous arguments
 
         Returns:
-            Dict[str, str]: Tool command including the new argument
+            Tuple[bool, Dict[str, str]]: Boolean that indicates if some base input is found and the tool command updated
         '''
+        found = False
         if argument.name not in command or not command[argument.name]:          # Argument can't be added yet
             for input in argument.inputs.order_by('order'):                     # For each argument input (ordered)
                 model = getattr(input.type, model_method)()                     # Get model from input
                 if model:                                                       # Model found
-                    command = self.process_source(argument, input, model, source, command)      # Process base inputs
-                    if argument.name in command:                                # Arguments added successfully
+                    # Process base inputs
+                    found, command = self.process_source(argument, input, model, source, command)
+                    if found:                                                   # Related base input found and processed
                         break
-        return command
+        return found, command
 
     def get_arguments(self, targets: List[BaseInput], previous_findings: List[Finding]) -> List[str]:
         '''Get tool arguments for the tool command.
@@ -196,13 +204,14 @@ class BaseTool:
             'output': self.path_output if self.file_output_enabled else ''      # Add output config to the arguments
         }
         for argument in self.arguments:                                         # For each tool argument
-            command = self.process_argument(
+            found, command = self.process_argument(
                 argument,
                 'get_related_model_class',
                 cast(List[BaseInput], previous_findings),
                 command
             )
-            command = self.process_argument(argument, 'get_callback_target_class', targets, command)
+            if not found:
+                _, command = self.process_argument(argument, 'get_callback_target_class', targets, command)
             if argument.name not in command or not command[argument.name]:      # Argument can't be added
                 if argument.required:                                           # Argument is required for the tool
                     raise ToolExecutionException(f'Tool configuration requires {argument.name} argument')

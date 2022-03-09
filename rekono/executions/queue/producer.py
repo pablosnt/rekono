@@ -58,7 +58,7 @@ def producer(
         depends_on=dependencies,
         at_front=at_front
     )
-    logger.info(f'[Execution] Execution {execution.id} ({tool.name} {configuration.name}) has been enqueued')
+    logger.info(f'[Execution] Execution {execution.id} ({tool.name} - {configuration.name}) has been enqueued')
     # Save important data in job metadata if it is needed later
     execution_job.meta['execution'] = execution
     execution_job.meta['intensity'] = intensity

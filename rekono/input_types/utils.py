@@ -4,6 +4,9 @@ import requests
 from django.db import models
 from input_types.base import BaseInput
 from input_types.models import InputType
+from urllib3.exceptions import InsecureRequestWarning
+
+requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
 
 
 def get_url(host: str, port: int = None, endpoint: str = '', protocols: List[str] = ['http', 'https']) -> Optional[str]:
@@ -18,17 +21,16 @@ def get_url(host: str, port: int = None, endpoint: str = '', protocols: List[str
     Returns:
         Optional[str]: [description]
     '''
-    schemas = ['{protocol}://{host}/{endpoint}']
+    schema = '{protocol}://{host}/{endpoint}'
     if port:
-        schemas.append('{protocol}://{host}:{port}/{endpoint}')                 # Include port schema if port exists
-    for url in schemas:                                                         # For each schema
-        for protocol in protocols:                                              # For each protocol
-            url_to_test = url.format(protocol=protocol, host=host, port=port, endpoint=endpoint)
-            try:
-                requests.get(url_to_test, timeout=2)                            # Test URL connection
-                return url_to_test
-            except Exception:
-                continue
+        schema = '{protocol}://{host}:{port}/{endpoint}'                        # Include port schema if port exists
+    for protocol in protocols:                                                  # For each protocol
+        url_to_test = schema.format(protocol=protocol, host=host, port=port, endpoint=endpoint)
+        try:
+            requests.get(url_to_test, timeout=2, verify=False)                  # Test URL connection
+            return url_to_test
+        except Exception:
+            continue
     return None
 
 
