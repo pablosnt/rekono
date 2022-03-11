@@ -81,8 +81,8 @@ class FindingsTest(RekonoTestCase):
             self.credential_finding: f'{self.technology.__str__()} - {self.credential_finding.email} - {self.credential_finding.username} - {self.credential_finding.secret}',      # noqa: E501
             self.vulnerability: f'{self.technology.__str__()} - {self.vulnerability.name} - {self.vulnerability.cve}',
             self.enum_vulnerability: f'{self.enumeration.__str__()} - {self.enum_vulnerability.name} - {self.enum_vulnerability.cve}',      # noqa: E501
-            self.exploit: f'{self.vulnerability.__str__()} - {self.exploit.name}',
-            self.tech_exploit: f'{self.technology.__str__()} - {self.tech_exploit.name}',
+            self.exploit: f'{self.vulnerability.__str__()} - {self.exploit.title}',
+            self.tech_exploit: f'{self.technology.__str__()} - {self.tech_exploit.title}',
         }
 
     def test_disable_enable(self) -> None:

@@ -171,7 +171,7 @@ export default {
         { key: 'edb_id', label: 'EDB-ID', sortable: true }
       ],
       exploitDetails: [
-        { field: 'reference', title: 'Exploit DB', type: 'link'}
+        { field: 'reference', title: 'Reference', type: 'text'}
       ]
     }
   },

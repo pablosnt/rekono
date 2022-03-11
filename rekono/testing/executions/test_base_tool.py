@@ -487,7 +487,7 @@ class BaseToolTest(TestCase):
             self.tool_instance.on_error(stderr=str(ex))                         # Test on_error feature
             execution = Execution.objects.get(pk=self.new_execution.id)         # Check execution data
             self.assertEqual(Status.ERROR, execution.status)
-            self.assertEqual(str(ex), execution.output_error)
+            self.assertEqual(str(ex).strip(), execution.output_error)
             errors_count += 1
         self.tool_instance.tool_execution(['/'], [], [])                        # Valid ls execution
         self.assertEqual(1, errors_count)
