@@ -48,7 +48,7 @@ class FindingsTest(RekonoTestCase):
         self.enum_vulnerability.executions.add(self.execution)
         self.exploit = Exploit.objects.create(
             vulnerability=self.vulnerability,
-            name='Easy Exploit'
+            title='Easy Exploit'
         )
         self.exploit.executions.add(self.execution)
         self.tech_exploit = Exploit.objects.create(

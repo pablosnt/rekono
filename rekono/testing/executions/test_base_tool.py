@@ -345,7 +345,7 @@ class BaseToolTest(TestCase):
         Returns:
             Vulnerability: Valid vulnerability instance
         '''
-        exploit = Exploit.objects.create(vulnerability=vulnerability, name='Test', description='Test')
+        exploit = Exploit.objects.create(vulnerability=vulnerability, title='Test')
         exploit.executions.add(self.first_execution)
         argument = Argument.objects.create(
             tool=self.nmap,
