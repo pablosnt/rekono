@@ -126,7 +126,7 @@
             "defectdojo_scan_type": null,
             "stage": 5,
             "reference": "https://www.metasploit.com/",
-            "icon": "https://raw.githubusercontent.com/rapid7/metasploit-framework/master/docs/assets/images/favicon.png"
+            "icon": "https://www.kali.org/tools/metasploit-framework/images/metasploit-framework-logo.svg"
         }
     }
 ]
