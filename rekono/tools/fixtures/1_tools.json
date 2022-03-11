@@ -118,7 +118,7 @@
     },
     {
         "model": "tools.tool",
-        "pk": 9,
+        "pk": 10,
         "fields": {
             "name": "Metasploit",
             "command": "msfconsole",
