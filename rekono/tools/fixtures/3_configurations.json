@@ -258,5 +258,15 @@
             "arguments": "{technology} --json > {output}",
             "default": true
         }
+    },
+    {
+        "model": "tools.configuration",
+        "pk": 27,
+        "fields": {
+            "tool_id": 10,
+            "name": "Search by CVE",
+            "arguments": "-q -x 'search {cve};quit' -o {output}",
+            "default": true
+        }
     }
 ]

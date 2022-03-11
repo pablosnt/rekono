@@ -115,5 +115,18 @@
             "reference": "https://www.exploit-db.com/searchsploit",
             "icon": "https://www.kali.org/tools/exploitdb/images/exploitdb-logo.svg"
         }
+    },
+    {
+        "model": "tools.tool",
+        "pk": 9,
+        "fields": {
+            "name": "Metasploit",
+            "command": "msfconsole",
+            "output_format": "txt",
+            "defectdojo_scan_type": null,
+            "stage": 5,
+            "reference": "https://www.metasploit.com/",
+            "icon": "https://raw.githubusercontent.com/rapid7/metasploit-framework/master/docs/assets/images/favicon.png"
+        }
     }
 ]

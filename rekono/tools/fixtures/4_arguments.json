@@ -119,5 +119,16 @@
             "required": true,
             "multiple": false
         }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 12,
+        "fields": {
+            "tool": 10,
+            "name": "cve",
+            "argument": "cve:{cve}",
+            "required": true,
+            "multiple": false
+        }
     }
 ]

@@ -12,7 +12,7 @@ ENV PYTHONUNBUFFERED 1
 
 RUN apt update && apt install python3-pip libpq-dev python3-dev libmagic1 libcap2-bin -y
 RUN ln -s /usr/bin/python3 /usr/bin/python
-RUN apt install nmap dirsearch theharvester nikto sslscan sslyze cmseek zaproxy exploitdb -y
+RUN apt install nmap dirsearch theharvester nikto sslscan sslyze cmseek zaproxy exploitdb metasploit-framework -y
 RUN apt install wordlists seclists dirb -y
 RUN gzip -d /usr/share/wordlists/rockyou.txt.gz
 
