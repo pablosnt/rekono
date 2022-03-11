@@ -255,5 +255,5 @@ class ExploitViewSet(FindingBaseView):
         'vulnerability__cwe', 'vulnerability__severity',
         'technology__vulnerability__name', 'technology__vulnerability__cve',
         'technology__vulnerability__cwe', 'technology__vulnerability__severity',
-        'name'
+        'title', 'edb_id'
     ]

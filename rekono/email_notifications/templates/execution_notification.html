@@ -261,8 +261,8 @@
                         <tr>
                             <th scope="col">Vulnerability</th>
                             <th scope="col">Technology</th>
-                            <th scope="col">Name</th>
-                            <th scope="col">Reference</th>
+                            <th scope="col">Title</th>
+                            <th scope="col">Exploit DB</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -278,8 +278,8 @@
                                 {% else %}
                                     <td></td>
                                 {% endif %}
-                                <td><strong>{{ e.name }}</strong></td>
-                                <td>{{ e.reference }}</td>
+                                <td><strong>{{ e.title }}</strong></td>
+                                <td><a href="{{ e.reference }}">{{ e.edb_id }}</a></td>
                             </tr>
                         {% endfor %}
                     </tbody>

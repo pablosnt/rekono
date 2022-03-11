@@ -208,5 +208,15 @@
             "filter": null,
             "order": 3
         }
+    },
+    {
+        "model": "tools.input",
+        "pk": 22,
+        "fields": {
+            "argument": 11,
+            "type": 5,
+            "filter": null,
+            "order": 1
+        }
     }
 ]

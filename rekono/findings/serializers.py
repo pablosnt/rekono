@@ -102,6 +102,6 @@ class ExploitSerializer(serializers.ModelSerializer):
 
         model = Exploit
         fields = (                                                              # Exploit fields exposed via API
-            'id', 'executions', 'vulnerability', 'technology', 'name',
-            'description', 'reference', 'checked', 'creation', 'is_active', 'reported_to_defectdojo'
+            'id', 'executions', 'vulnerability', 'technology', 'title', 'edb_id',
+            'reference', 'creation', 'is_active', 'reported_to_defectdojo'
         )

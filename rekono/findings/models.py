@@ -582,16 +582,14 @@ class Exploit(Finding):
     vulnerability = create_finding_foreign_key(Vulnerability, 'exploit')        # Vulnerability that the exploit abuses
     # Technology that the exploit abuses.  Only if vulnerability is null
     technology = create_finding_foreign_key(Technology, 'exploit')
-    name = models.TextField(max_length=100)                                     # Exploit name
-    description = models.TextField(blank=True, null=True)                       # Exploit description
+    title = models.TextField(max_length=100)                                    # Exploit title
+    edb_id = models.IntegerField(blank=True, null=True)                         # Id in Exploit-DB
     reference = models.TextField(max_length=250, blank=True, null=True)         # Exploit reference
-    checked = models.BooleanField(default=False)                                # Indicate if the exploit is confirmed
 
     key_fields: List[Dict[str, Any]] = [                                        # Unique field list
         {'name': 'vulnerability_id', 'is_base': True},
         {'name': 'technology_id', 'is_base': True},
-        {'name': 'name', 'is_base': False},
-        {'name': 'reference', 'is_base': False}
+        {'name': 'edb_id', 'is_base': False}
     ]
 
     def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
@@ -608,7 +606,7 @@ class Exploit(Finding):
             output = self.vulnerability.parse()
         elif self.technology:
             output = self.technology.parse()
-        output[InputKeyword.EXPLOIT.name.lower()] = self.name
+        output[InputKeyword.EXPLOIT.name.lower()] = self.title
         return output
 
     def defect_dojo(self) -> Dict[str, Any]:
@@ -618,8 +616,8 @@ class Exploit(Finding):
             Dict[str, Any]: Useful information for Defect-Dojo imports
         '''
         return {
-            'title': f'Exploit {self.name} found',
-            'description': self.description,
+            'title': f'Exploit {self.edb_id} found' if self.edb_id else 'Exploit found',
+            'description': self.title,
             'severity': Severity(self.vulnerability.severity).value if self.vulnerability else str(Severity.MEDIUM),
             'reference': self.reference,
             'date': self.creation.strftime(DD_DATE_FORMAT)
@@ -631,9 +629,9 @@ class Exploit(Finding):
         Returns:
             str: String value that identifies this instance
         '''
-        text = self.name
+        text = self.title
         if self.vulnerability:
-            text = f'{self.vulnerability.__str__()} - {self.name}'
+            text = f'{self.vulnerability.__str__()} - {self.title}'
         elif self.technology:
-            text = f'{self.technology.__str__()} - {self.name}'
+            text = f'{self.technology.__str__()} - {self.title}'
         return text

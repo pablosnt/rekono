@@ -108,5 +108,16 @@
             "required": true,
             "multiple": false
         }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 11,
+        "fields": {
+            "tool": 9,
+            "name": "technology",
+            "argument": "-c {technology} {version}",
+            "required": true,
+            "multiple": false
+        }
     }
 ]

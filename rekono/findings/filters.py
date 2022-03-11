@@ -287,7 +287,7 @@ class ExploitFilter(BaseVulnerabilityFilter):
         'vulnerability__technology__enumeration__host'
     ]
     # Ordering fields including common ones
-    o = OrderingFilter(fields=FINDING_ORDERING + ('vulnerability', 'technology', 'name'))
+    o = OrderingFilter(fields=FINDING_ORDERING + ('vulnerability', 'technology', 'title', 'edb_id'))
 
     class Meta:
         '''FilterSet metadata.'''
@@ -310,8 +310,7 @@ class ExploitFilter(BaseVulnerabilityFilter):
             'technology__enumeration__host__address': ['exact', 'icontains'],
             'technology__enumeration__host__os_type': ['exact'],
             'technology__enumeration__port': ['exact'],
-            'name': ['exact', 'icontains'],
-            'description': ['exact', 'icontains'],
+            'title': ['exact', 'icontains'],
+            'edb_id': ['exact'],
             'reference': ['exact', 'icontains'],
-            'checked': ['exact'],
         })

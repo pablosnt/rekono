@@ -347,7 +347,7 @@ class BaseTool:
             stderr (str, optional): Command execution stderr. Defaults to None.
         '''
         if stderr:
-            self.execution.output_error = stderr                                # Save execution error output
+            self.execution.output_error = stderr.strip()                        # Save execution error output
         self.execution.status = Status.ERROR                                    # Set execution status to Error
         self.execution.end = timezone.now()                                     # Set execution end date
         self.execution.save(update_fields=['output_error', 'status', 'end'])
@@ -361,7 +361,7 @@ class BaseTool:
         self.execution.status = Status.COMPLETED                                # Set execution status to Completed
         self.execution.end = timezone.now()                                     # Set execution end date
         if self.file_output_enabled and os.path.isfile(self.path_output):       # If tool execution has an output file
-            self.execution.output_file = self.path_output                       # Save output file path
+            self.execution.output_file = self.path_output.strip()               # Save output file path
         self.execution.output_plain = stdout                                    # Save plain output
         self.execution.save(update_fields=['status', 'end', 'output_file', 'output_plain'])
 

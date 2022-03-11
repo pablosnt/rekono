@@ -167,12 +167,11 @@ export default {
         { field: 'reference', title: 'Reference', type: 'link' }
       ],
       exploits: [
-        { key: 'name', label: 'Exploit', sortable: true },
-        { key: 'reference', sortable: true }
+        { key: 'title', label: 'Exploit', sortable: true },
+        { key: 'edb_id', label: 'EDB-ID', sortable: true }
       ],
       exploitDetails: [
-        { field: 'description', type: 'text' },
-        { field: 'checked', title: 'Checked', type: 'boolean' }
+        { field: 'reference', title: 'Exploit DB', type: 'link'}
       ]
     }
   },

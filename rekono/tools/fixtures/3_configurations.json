@@ -248,5 +248,15 @@
             "arguments": "-cmd {url} -quickprogress -quickout {output}",
             "default": true
         }
+    },
+    {
+        "model": "tools.configuration",
+        "pk": 26,
+        "fields": {
+            "tool_id": 9,
+            "name": "Search by Technology",
+            "arguments": "{technology} --json > {output}",
+            "default": true
+        }
     }
 ]

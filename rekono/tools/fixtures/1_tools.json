@@ -102,5 +102,18 @@
             "reference": "https://www.zaproxy.org/",
             "icon": "https://www.kali.org/tools/zaproxy/images/zaproxy-logo.svg"
         }
+    },
+    {
+        "model": "tools.tool",
+        "pk": 9,
+        "fields": {
+            "name": "SearchSploit",
+            "command": "searchsploit",
+            "output_format": "json",
+            "defectdojo_scan_type": null,
+            "stage": 5,
+            "reference": "https://www.exploit-db.com/searchsploit",
+            "icon": "https://www.kali.org/tools/exploitdb/images/exploitdb-logo.svg"
+        }
     }
 ]
