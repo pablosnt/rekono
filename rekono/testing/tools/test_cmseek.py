@@ -49,14 +49,14 @@ class CMSeeKParserTest(ToolParserTest):
             {'model': Endpoint, 'endpoint': '/demo/2.txt'},
             {
                 'model': Vulnerability,
-                'name': 'joomla backup files found',
+                'name': 'Backup files found',
                 'description': '/demo/2.back, /demo/2.save, /demo/2.tmp, /demo/2.backup, /demo/2.txt',
                 'severity': Severity.HIGH,
                 'cwe': 'CWE-530'
             },
             {
                 'model': Vulnerability,
-                'name': 'joomla debug mode enabled',
+                'name': 'Debug mode enabled',
                 'description': 'joomla debug mode enabled',
                 'severity': Severity.LOW,
                 'cwe': 'CWE-489'

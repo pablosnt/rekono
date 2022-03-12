@@ -163,5 +163,16 @@
             "required": true,
             "multiple": false
         }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 16,
+        "fields": {
+            "tool": 14,
+            "name": "url",
+            "argument": "-u {url}",
+            "required": true,
+            "multiple": false
+        }
     }
 ]

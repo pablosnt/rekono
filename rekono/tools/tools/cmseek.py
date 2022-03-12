@@ -17,23 +17,10 @@ class CmseekTool(BaseTool):
     # CMSeeK directory where output files can be stored
     home_directory = TOOLS['cmseek']['directory']
 
-    def get_url_path(self) -> str:
-        '''Get path from URL used for tool execution.
-
-        Returns:
-            Union[str, None]: URL path
-        '''
-        index = self.command_arguments.index('-u') + 1
-        url = self.command_arguments[index]
-        if '://' in url:                                                        # URL with protocol data
-            url = url.split('://', 1)[1]                                        # Remove protocol data from URL
-        if url[-1] == '/':                                                      # URL ends in slash
-            url = url[:-1]                                                      # Remove last slash form URL
-        return url.replace('/', '_').replace(':', '_')                          # URL conversion to path
-
     def clean_environment(self) -> None:
         '''Move original file output to Rekono outputs directory.'''
-        url_path = self.get_url_path()                                          # Get URL path from URL used in command
+        # Get path from URL used in command
+        url_path = self.get_host_from_url('-u').replace('/', '_').replace(':', '_')
         report_file = 'cms.json'                                                # Original output file name
         results = os.path.join('Result', url_path)                              # Result path in current directory
         # Original output file in current directory
@@ -69,7 +56,7 @@ class CmseekTool(BaseTool):
             self.create_finding(                                                # Create Vulnerability
                 Vulnerability,
                 technology=technology,
-                name=f'{technology.name} backup files found',
+                name='Backup files found',
                 description=', '.join(paths),
                 severity=Severity.HIGH,
                 # CWE-530: Exposure of Backup File to an Unauthorized Control Sphere
@@ -79,7 +66,7 @@ class CmseekTool(BaseTool):
             self.create_finding(
                 Vulnerability,
                 technology=technology,
-                name=f'{technology.name} configuration files found',
+                name='Configuration files found',
                 description=', '.join(paths),
                 severity=Severity.MEDIUM,
                 # CWE-497: Exposure of Sensitive System Information to an Unauthorized Control Sphere
@@ -111,7 +98,7 @@ class CmseekTool(BaseTool):
                     Technology,
                     name=tech,
                     version=vers,
-                    related_to=cms,                                 # Related to CMS technology
+                    related_to=cms,                                             # Related to CMS technology
                     description=f'{cms_name} {name}'
                 )
 
@@ -177,7 +164,7 @@ class CmseekTool(BaseTool):
                     self.create_finding(                                        # Create Vulnerability
                         Vulnerability,
                         technology=cms,                                         # Related to CMS technology
-                        name=f'{cms_name} debug mode enabled',
+                        name='Debug mode enabled',
                         description=f'{cms_name} debug mode enabled',
                         severity=Severity.LOW,
                         cwe='CWE-489'                                           # CWE-489: Active Debug Code

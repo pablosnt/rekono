@@ -1,0 +1,98 @@
+from findings.enums import Severity
+from findings.models import Endpoint, Exploit, Technology, Vulnerability
+from tools.tools.base_tool import BaseTool
+
+
+class JoomscanTool(BaseTool):
+    '''JoomScan tool class.'''
+
+    def parse_plain_output(self, output: str) -> None:
+        '''Parse tool plain output to create finding entities. This should be implemented by child tool classes.
+
+        Args:
+            output (str): Plain tool output
+        '''
+        technology = None
+        current_vulnerability = None
+        endpoints = set(['/'])
+        backups = []
+        configurations = []
+        path_disclosure = []
+        directory_listing = []
+        host = self.get_host_from_url('-u')                                     # Get host associated to the target URL
+        lines = output.split('\n')
+        for index, line in enumerate(lines):                                    # For each line
+            data = line.strip()
+            if not data:
+                continue
+            if '[++] Joomla' in data and lines[index - 1] == '[+] Detecting Joomla Version':    # Joomla version found
+                version = data.replace('[++] Joomla ', '').strip()
+                technology = self.create_finding(
+                    Technology,
+                    name='Joomla',
+                    version=version,
+                    description=f'Joomla {version}',
+                    reference='https://www.joomla.org/'
+                )
+            elif 'CVE : ' in data:                                              # CVE found
+                current_vulnerability = None                                    # Remove current vulnerability
+                current_vulnerability = self.create_finding(
+                    Vulnerability,
+                    technology=technology,                                      # Related to Joomla technology
+                    name=lines[index - 1].replace('[++] ', '').strip(),         # Get name from previous line
+                    cve=data.replace('CVE : ', '').strip()
+                )
+            elif 'EDB : ' in data:                                              # Exploit found
+                link = data.replace('EDB : ', '').strip()                       # Get Exploit DB link
+                self.create_finding(
+                    Exploit,
+                    vulnerability=current_vulnerability,                        # Related to current vulnerability
+                    title=lines[index - 2].replace('[++] ', '').strip(),        # Get name from 2 lines before
+                    edb_id=int(link.split('https://www.exploit-db.com/exploits/', 1)[1].replace('/', '')),
+                    reference=link
+                )
+            elif host in data:                                                  # Host in line, so there is an endpoint
+                endpoint = data.split(host, 1)[1]                               # Get endpoint from line
+                if ' ' in endpoint:
+                    endpoint.split(' ', 1)[0]                                   # Remove no-endpoint data
+                elif '\n' in endpoint:
+                    endpoint.split('\n', 1)[0]                                  # Remove no-endpoint data
+                if endpoint and endpoint not in endpoints:                      # Check if it's a valid endpoint
+                    endpoints.add(endpoint)
+                    if 'Backup file is found' in data:                          # Endpoint with backup data
+                        backups.append(endpoint)
+                    if 'config file path :' in data:                            # Endpoint with configuration data
+                        configurations.append(endpoint)
+                    if 'Full Path Disclosure (FPD) in' in data:                 # Endpoint with path disclosure
+                        path_disclosure.append(endpoint)
+                    if 'directory has directory listing :' in data:             # Endpoint with directory listing
+                        directory_listing.append(endpoint)
+                    self.create_finding(Endpoint, endpoint=endpoint)
+            elif 'Debug mode Enabled' in data:
+                self.create_finding(                                            # Create Vulnerability
+                    Vulnerability,
+                    technology=technology,                                      # Related to Joomla technology
+                    name='Joomla debug mode enabled',
+                    description='Joomla debug mode enabled',
+                    severity=Severity.LOW,
+                    cwe='CWE-489'                                               # CWE-489: Active Debug Code
+                )
+        for name, paths, severity, cwe in [                                     # For each vulnerability found
+            # CWE-530: Exposure of Backup File to an Unauthorized Control Sphere
+            ('Backup files found', backups, Severity.HIGH, 'CWE-530'),
+            # CWE-497: Exposure of Sensitive System Information to an Unauthorized Control Sphere
+            ('Configuration files found', configurations, Severity.MEDIUM, 'CWE-497'),
+            # CWE-497: Exposure of Sensitive System Information to an Unauthorized Control Sphere
+            ('Full path disclosure', path_disclosure, Severity.LOW, 'CWE-497'),
+            # CWE-548: Exposure of Information Through Directory Listing
+            ('Directory listing', directory_listing, Severity.LOW, 'CWE-548'),
+        ]:
+            if paths:
+                self.create_finding(
+                    Vulnerability,
+                    technology=technology,                                      # Related to Joomla technology
+                    name=name,
+                    description=', '.join(paths),
+                    severity=severity,
+                    cwe=cwe
+                )

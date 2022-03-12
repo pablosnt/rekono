@@ -278,5 +278,35 @@
             "filter": "DOMAIN",
             "order": 1
         }
+    },
+    {
+        "model": "tools.input",
+        "pk": 29,
+        "fields": {
+            "argument": 16,
+            "type": 4,
+            "filter": null,
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 30,
+        "fields": {
+            "argument": 16,
+            "type": 3,
+            "filter": "http",
+            "order": 2
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 31,
+        "fields": {
+            "argument": 16,
+            "type": 2,
+            "filter": null,
+            "order": 3
+        }
     }
 ]

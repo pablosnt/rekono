@@ -308,5 +308,15 @@
             "arguments": "{domain} -s {output}",
             "default": true
         }
+    },
+    {
+        "model": "tools.configuration",
+        "pk": 32,
+        "fields": {
+            "tool_id": 14,
+            "name": "Default",
+            "arguments": "{url}",
+            "default": true
+        }
     }
 ]

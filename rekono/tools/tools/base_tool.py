@@ -238,6 +238,23 @@ class BaseTool:
         except ToolExecutionException:
             return False
 
+    def get_host_from_url(self, argument: str) -> str:
+        '''Get host from URL used for tool execution.
+
+        Args:
+            argument (str): URL argument name
+
+        Returns:
+            str: Host associated to the URL
+        '''
+        index = self.command_arguments.index(argument) + 1
+        host = self.command_arguments[index]
+        if '://' in host:                                                       # URL with protocol data
+            host = host.split('://', 1)[1]                                      # Remove protocol data from URL
+        if host[-1] == '/':                                                     # URL ends in slash
+            host = host[:-1]                                                    # Remove last slash form URL
+        return host
+
     def tool_execution(
         self,
         arguments: List[str],
@@ -357,6 +374,8 @@ class BaseTool:
             stderr (str, optional): Command execution stderr. Defaults to None.
         '''
         if stderr:
+            if self.path_output in stderr:
+                stderr.replace(self.path_output, f'output.{self.tool.output_format}')   # Prevent information exposure
             self.execution.output_error = stderr.strip()                        # Save execution error output
         self.execution.status = Status.ERROR                                    # Set execution status to Error
         self.execution.end = timezone.now()                                     # Set execution end date
@@ -372,6 +391,8 @@ class BaseTool:
         self.execution.end = timezone.now()                                     # Set execution end date
         if self.file_output_enabled and os.path.isfile(self.path_output):       # If tool execution has an output file
             self.execution.output_file = self.path_output.strip()               # Save output file path
+        if self.path_output in stdout:
+            stdout.replace(self.path_output, f'output.{self.tool.output_format}')   # Prevent information exposure
         self.execution.output_plain = stdout                                    # Save plain output
         self.execution.save(update_fields=['status', 'end', 'output_file', 'output_plain'])
 

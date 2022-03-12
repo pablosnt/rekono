@@ -12,6 +12,8 @@ from rekono.settings import TOOLS
 class Log4jscannerTool(BaseTool):
     '''Log4j Scanner tool class.'''
 
+    home_directory = TOOLS['log4j-scanner']['directory']
+
     def check_installation(self) -> None:
         '''Check if tool is installed in the system.
 
@@ -19,10 +21,9 @@ class Log4jscannerTool(BaseTool):
             ToolExecutionException: Raised if tool isn't installed
         '''
         super().check_installation()
-        directory = TOOLS['log4j-scanner']['directory']
         if (
-            not os.path.isdir(directory) or                                     # Check log4j-scanner directory
-            not os.path.isfile(os.path.join(directory, 'log4j-scan.py'))        # Check log4j-scanner script
+            not os.path.isdir(self.home_directory) or                           # Check log4j-scanner directory
+            not os.path.isfile(os.path.join(self.home_directory, 'log4j-scan.py'))  # Check log4j-scanner script
         ):
             raise ToolExecutionException(f'Tool {self.tool.name} is not installed in the system')
 
@@ -47,9 +48,8 @@ class Log4jscannerTool(BaseTool):
         Returns:
             str: Plain output of the tool execution
         '''
-        directory = TOOLS['log4j-scanner']['directory']
-        arguments.insert(0, os.path.join(directory, 'log4j-scan.py'))           # Add log4j-scanner script
-        return super().tool_execution(arguments, targets, previous_findings, directory)     # Execute script
+        arguments.insert(0, os.path.join(self.home_directory, 'log4j-scan.py'))     # Add log4j-scanner script
+        return super().tool_execution(arguments, targets, previous_findings, self.home_directory)   # Execute script
 
     def parse_plain_output(self, output: str) -> None:
         '''Parse tool plain output to create finding entities. This should be implemented by child tool classes.

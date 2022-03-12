@@ -167,5 +167,18 @@
             "reference": "https://github.com/maldevel/EmailHarvester",
             "icon": null
         }
+    },
+    {
+        "model": "tools.tool",
+        "pk": 14,
+        "fields": {
+            "name": "JoomScan",
+            "command": "joomscan",
+            "output_format": null,
+            "defectdojo_scan_type": null,
+            "stage": 4,
+            "reference": "https://github.com/OWASP/joomscan",
+            "icon": "https://raw.githubusercontent.com/rezasp/Trash/master/joomscan.png"
+        }
     }
 ]
