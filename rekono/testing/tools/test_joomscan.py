@@ -91,25 +91,36 @@ class JoomScanParserTest(ToolParserTest):
             {'model': Endpoint, 'endpoint': '/static'},
             {
                 'model': Vulnerability,
+                'name': 'Debug mode enabled',
+                'description': 'Joomla debug mode enabled',
+                'severity': Severity.LOW,
+                'cwe': 'CWE-489'
+            },
+            {
+                'model': Vulnerability,
                 'name': 'Backup files found',
+                'description': '/backup/config.php.bak',
                 'severity': Severity.HIGH,
                 'cwe': 'CWE-530'
             },
             {
                 'model': Vulnerability,
                 'name': 'Configuration files found',
+                'description': '/config.php',
                 'severity': Severity.MEDIUM,
                 'cwe': 'CWE-497'
             },
             {
                 'model': Vulnerability,
                 'name': 'Full path disclosure',
+                'description': '/static',
                 'severity': Severity.LOW,
                 'cwe': 'CWE-497'
             },
             {
                 'model': Vulnerability,
                 'name': 'Directory listing',
+                'description': '/error.php',
                 'severity': Severity.LOW,
                 'cwe': 'CWE-548'
             }

@@ -61,8 +61,6 @@ class JoomscanTool(BaseTool):
                 endpoint = data.split(host, 1)[1]                               # Get endpoint from line
                 if ' ' in endpoint:
                     endpoint = endpoint.split(' ', 1)[0]                        # Remove no-endpoint data
-                elif '\n' in endpoint:
-                    endpoint = endpoint.split('\n', 1)[0]                       # Remove no-endpoint data
                 if endpoint and endpoint not in endpoints:                      # Check if it's a valid endpoint
                     endpoints.append(endpoint)
                     if 'Path :' in data:                                        # Endpoint with backup data
@@ -78,7 +76,7 @@ class JoomscanTool(BaseTool):
                 self.create_finding(                                            # Create Vulnerability
                     Vulnerability,
                     technology=technology,                                      # Related to Joomla technology
-                    name='Joomla debug mode enabled',
+                    name='Debug mode enabled',
                     description='Joomla debug mode enabled',
                     severity=Severity.LOW,
                     cwe='CWE-489'                                               # CWE-489: Active Debug Code
