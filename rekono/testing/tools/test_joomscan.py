@@ -8,6 +8,11 @@ class JoomScanParserTest(ToolParserTest):
 
     tool_name = 'JoomScan'
 
+    def setUp(self) -> None:
+        '''Create initial data before run tests.'''
+        super().setUp()
+        self.tool.command_arguments = ['-u', 'http://10.10.10.10/']
+
     def test_report_with_exploits(self) -> None:
         '''Test to parse report with CVEs and exploits.'''
         expected = [
