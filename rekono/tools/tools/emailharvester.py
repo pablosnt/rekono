@@ -11,4 +11,5 @@ class EmailharvesterTool(BaseTool):
         with open(self.path_output, 'r') as output_file:
             emails = output_file.readlines()                                    # Read emails
         for email in emails:
-            self.create_finding(OSINT, data=email, data_type=DataType.EMAIL)
+            if email.strip():
+                self.create_finding(OSINT, data=email.strip(), data_type=DataType.EMAIL)
