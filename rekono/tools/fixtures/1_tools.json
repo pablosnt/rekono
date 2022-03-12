@@ -122,7 +122,7 @@
         "fields": {
             "name": "Metasploit",
             "command": "msfconsole",
-            "output_format": "txt",
+            "output_format": null,
             "defectdojo_scan_type": null,
             "stage": 5,
             "reference": "https://www.metasploit.com/",

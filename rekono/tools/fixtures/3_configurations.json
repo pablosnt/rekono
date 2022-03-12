@@ -265,7 +265,7 @@
         "fields": {
             "tool_id": 10,
             "name": "Search by CVE",
-            "arguments": "-q -x 'search {cve};quit' -o {output}",
+            "arguments": "-q -x 'search {cve};quit'",
             "default": true
         }
     },
