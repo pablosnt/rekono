@@ -78,4 +78,4 @@ class NiktoParserTest(ToolParserTest):
             },
             {'model': Endpoint, 'endpoint': '/icons/README'}
         ]
-        super().check_tool_parser('default.xml', expected)
+        super().check_tool_file_parser('default.xml', expected)

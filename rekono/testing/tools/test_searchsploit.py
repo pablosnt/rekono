@@ -143,8 +143,8 @@ class SearchSploitParserTest(ToolParserTest):
                 'reference': 'https://www.exploit-db.com/exploits/47800'
             }
         ]
-        super().check_tool_parser('exploits.json', expected)
+        super().check_tool_file_parser('exploits.json', expected)
 
     def test_searchsploit_without_exploits(self) -> None:
         '''Test to parse an empty report.'''
-        super().check_tool_parser('nothing.json', [])
+        super().check_tool_file_parser('nothing.json', [])

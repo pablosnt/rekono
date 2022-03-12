@@ -30,7 +30,7 @@ class CMSeeKParserTest(ToolParserTest):
             {'model': Endpoint, 'endpoint': '/readme.html'},
             {'model': Technology, 'name': 'twentytwenty', 'version': '1.0', 'description': 'WordPress themes'}
         ]
-        super().check_tool_parser('dvwp.json', expected)
+        super().check_tool_file_parser('dvwp.json', expected)
 
     def test_joomla(self) -> None:
         '''Test to parse report with pre-defined vulnerabilities.'''
@@ -62,7 +62,7 @@ class CMSeeKParserTest(ToolParserTest):
                 'cwe': 'CWE-489'
             },
         ]
-        super().check_tool_parser('joomla.json', expected)
+        super().check_tool_file_parser('joomla.json', expected)
 
     def test_vwp(self) -> None:
         '''Test to parse report with known vulnerabilities.'''
@@ -105,7 +105,7 @@ class CMSeeKParserTest(ToolParserTest):
             {'model': Vulnerability, 'cve': 'CVE-2018-12895'},
             {'model': Vulnerability, 'cve': 'CVE-2017-1000600'},
         ]
-        super().check_tool_parser('vwp.json', expected)
+        super().check_tool_file_parser('vwp.json', expected)
 
     def test_wordpress(self) -> None:
         '''Test to parse report with credentials.'''
@@ -143,4 +143,4 @@ class CMSeeKParserTest(ToolParserTest):
             {'model': Credential, 'username': 'superadmin'},
             {'model': Credential, 'username': 'wpdemo'},
         ]
-        super().check_tool_parser('wordpress.json', expected)
+        super().check_tool_file_parser('wordpress.json', expected)

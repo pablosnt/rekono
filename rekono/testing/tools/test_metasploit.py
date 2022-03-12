@@ -31,8 +31,8 @@ class MetasploitParserTest(ToolParserTest):
                 'reference': 'exploit/unix/webapp/xymon_useradm_cmd_exec'
             }
         ]
-        super().check_tool_parser('exploits.txt', expected)
+        super().check_tool_file_parser('exploits.txt', expected)
 
     def test_metasploit_without_exploits(self) -> None:
         '''Test to parse an empty report.'''
-        super().check_tool_parser('nothing.txt', [])
+        super().check_tool_file_parser('nothing.txt', [])

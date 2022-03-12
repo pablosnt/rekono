@@ -48,17 +48,42 @@ class ToolParserTest(TestCase):
             tool_class = get_tool_class_by_name(self.tool_name)                 # Get tool class from name
             self.tool = tool_class(execution, tool, configuration, intensity, [])   # Create tool instance
 
-    def check_tool_parser(self, filename: str, expected: List[Dict[str, Any]]) -> None:
+    def check_expected_findings(self, expected: List[Dict[str, Any]]) -> None:
+        '''Check expected findings for tool results.
+
+        Args:
+            expected (List[Dict[str, Any]]): Expected findings data. Requires the field 'model' to check finding type
+        '''
+        self.assertEqual(len(expected), len(self.tool.findings))                # Check total number of findings
+        for index, finding_data in enumerate(expected):                         # For each expected finding
+            self.assertTrue(isinstance(self.tool.findings[index], finding_data.pop('model')))   # Check finding type
+            for key, value in finding_data.items():                             # For each finding field
+                self.assertEqual(value, getattr(self.tool.findings[index], key))    # Check finding value
+
+    def check_tool_file_parser(self, filename: str, expected: List[Dict[str, Any]]) -> None:
         '''Check expected findings for results obtained after parse tool report.
 
         Args:
             filename (str): Report filename to parse
             expected (List[Dict[str, Any]]): Expected findings data. Requires the field 'model' to check finding type
         '''
-        self.tool.path_output = os.path.join(self.reports_path, self.tool_name.lower().replace(' ', '_'), filename)   # Set report file
+        self.tool.path_output = os.path.join(                                   # Set report file
+            self.reports_path,
+            self.tool_name.lower().replace(' ', '_'),
+            filename
+        )
         self.tool.parse_output_file()                                           # Parse tool report
-        self.assertEqual(len(expected), len(self.tool.findings))                # Check total number of findings
-        for index, finding_data in enumerate(expected):                         # For each expected finding
-            self.assertTrue(isinstance(self.tool.findings[index], finding_data.pop('model')))   # Check finding type
-            for key, value in finding_data.items():                             # For each finding field
-                self.assertEqual(value, getattr(self.tool.findings[index], key))    # Check finding value
+        self.check_expected_findings(expected)
+
+    def check_tool_output_parser(self, filename: str, expected: List[Dict[str, Any]]) -> None:
+        '''Check expected findings for results obtained after parse the plain output of tool.
+
+        Args:
+            filename (str): Filename with the tool plain output
+            expected (List[Dict[str, Any]]): Expected findings data. Requires the field 'model' to check finding type
+        '''
+        filepath = os.path.join(self.reports_path, self.tool_name.lower().replace(' ', '_'), filename)
+        with open(filepath, 'r') as output_file:
+            plain_output = output_file.read()
+        self.tool.parse_plain_output(plain_output)
+        self.check_expected_findings(expected)

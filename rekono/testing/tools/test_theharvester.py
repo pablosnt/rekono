@@ -19,4 +19,4 @@ class TheHarvesterParserTest(ToolParserTest):
             {'model': OSINT, 'data': 'http://scanme.nmap.org//r/n/r/nUser:/r/n-', 'data_type': DataType.URL},
             {'model': OSINT, 'data': 'AS63949', 'data_type': DataType.ASN},
         ]
-        super().check_tool_parser('scanme.json', expected)
+        super().check_tool_file_parser('scanme.json', expected)

@@ -33,4 +33,4 @@ class DirsearchParserTest(ToolParserTest):
             {'model': Endpoint, 'endpoint': '/server-status', 'status': 403},
             {'model': Endpoint, 'endpoint': '/server-status/', 'status': 403},
         ]
-        super().check_tool_parser('default.json', expected)
+        super().check_tool_file_parser('default.json', expected)

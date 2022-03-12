@@ -50,7 +50,7 @@ class SslscanParserTest(ToolParserTest):
                 'cwe': 'CWE-326'
             }
         ]
-        super().check_tool_parser('protocols.xml', expected)
+        super().check_tool_file_parser('protocols.xml', expected)
 
     def test_heartbleed(self) -> None:
         '''Test to parse report with Heartbleed vulnerability.'''
@@ -75,7 +75,7 @@ class SslscanParserTest(ToolParserTest):
             {'model': Vulnerability, 'name': 'Heartbleed in TLSv1.1', 'cve': 'CVE-2014-0160'},
             {'model': Vulnerability, 'name': 'Heartbleed in TLSv1.0', 'cve': 'CVE-2014-0160'}
         ]
-        super().check_tool_parser('heartbleed.xml', expected)
+        super().check_tool_file_parser('heartbleed.xml', expected)
 
     def test_insecure_renegotiation(self) -> None:
         '''Test to parse report with insecure renegotiation vulnerability.'''
@@ -182,4 +182,4 @@ class SslscanParserTest(ToolParserTest):
                 'cwe': 'CWE-326'
             }
         ]
-        super().check_tool_parser('insecure-renegotiation.xml', expected)
+        super().check_tool_file_parser('insecure-renegotiation.xml', expected)

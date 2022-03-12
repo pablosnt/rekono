@@ -105,7 +105,7 @@ class NmapParserTest(ToolParserTest):
             {'model': Vulnerability, 'name': 'CVE-2020-11993', 'cve': 'CVE-2020-11993'},
             {'model': Vulnerability, 'name': 'CVE-2019-10092', 'cve': 'CVE-2019-10092'},
         ]
-        super().check_tool_parser('enumeration-vulners.xml', expected)
+        super().check_tool_file_parser('enumeration-vulners.xml', expected)
 
     def test_ftp_vulnerabilities(self) -> None:
         '''Test to parse report with vulnerabilities in FTP service.'''
@@ -134,4 +134,4 @@ class NmapParserTest(ToolParserTest):
                 'reference': 'https://book.hacktricks.xyz/pentesting/pentesting-ftp#anonymous-login'
             }
         ]
-        super().check_tool_parser('ftp-vulnerabilities.xml', expected)
+        super().check_tool_file_parser('ftp-vulnerabilities.xml', expected)

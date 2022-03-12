@@ -37,7 +37,7 @@ class SSLyzeParserTest(ToolParserTest):
                 'cwe': 'CWE-295'
             }
         ]
-        super().check_tool_parser('protocols.json', expected)
+        super().check_tool_file_parser('protocols.json', expected)
 
     def test_vulnerabilities(self) -> None:
         '''Test to parse report with pre-defined vulnerabilities.'''
@@ -79,7 +79,7 @@ class SSLyzeParserTest(ToolParserTest):
                 'cwe': 'CWE-295'
             }
         ]
-        super().check_tool_parser('vulnerabilities.json', expected)
+        super().check_tool_file_parser('vulnerabilities.json', expected)
 
     def test_insecure_renegotiation(self) -> None:
         '''Test to parse report with insecure renegotiation vulnerability.'''
@@ -130,4 +130,4 @@ class SSLyzeParserTest(ToolParserTest):
                 'cwe': 'CWE-326'
             }
         ]
-        super().check_tool_parser('insecure-renegotiation.json', expected)
+        super().check_tool_file_parser('insecure-renegotiation.json', expected)
