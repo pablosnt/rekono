@@ -228,5 +228,35 @@
             "filter": "cve",
             "order": 1
         }
+    },
+    {
+        "model": "tools.input",
+        "pk": 24,
+        "fields": {
+            "argument": 13,
+            "type": 4,
+            "filter": null,
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 25,
+        "fields": {
+            "argument": 13,
+            "type": 3,
+            "filter": "http",
+            "order": 2
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 26,
+        "fields": {
+            "argument": 13,
+            "type": 2,
+            "filter": null,
+            "order": 3
+        }
     }
 ]

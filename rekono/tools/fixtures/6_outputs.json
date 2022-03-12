@@ -462,5 +462,21 @@
             "configuration_id": 27,
             "type": 9
         }
+    },
+    {
+        "model": "tools.output",
+        "pk": 59,
+        "fields": {
+            "configuration_id": 28,
+            "type": 6
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 60,
+        "fields": {
+            "configuration_id": 29,
+            "type": 6
+        }
     }
 ]

@@ -268,5 +268,25 @@
             "arguments": "-q -x 'search {cve};quit' -o {output}",
             "default": true
         }
+    },
+    {
+        "model": "tools.configuration",
+        "pk": 28,
+        "fields": {
+            "tool_id": 11,
+            "name": "CVE-2021-44228",
+            "arguments": "{url} --run-all-tests --waf-bypass",
+            "default": true
+        }
+    },
+    {
+        "model": "tools.configuration",
+        "pk": 29,
+        "fields": {
+            "tool_id": 11,
+            "name": "CVE-2021-45046",
+            "arguments": "{url} --run-all-tests --waf-bypass --test-CVE-2021-45046",
+            "default": false
+        }
     }
 ]

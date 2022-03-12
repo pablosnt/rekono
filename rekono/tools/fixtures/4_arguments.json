@@ -130,5 +130,16 @@
             "required": true,
             "multiple": false
         }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 13,
+        "fields": {
+            "tool": 11,
+            "name": "url",
+            "argument": "-u {url}",
+            "required": true,
+            "multiple": false
+        }
     }
 ]

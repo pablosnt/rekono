@@ -128,5 +128,18 @@
             "reference": "https://www.metasploit.com/",
             "icon": "https://www.kali.org/tools/metasploit-framework/images/metasploit-framework-logo.svg"
         }
+    },
+    {
+        "model": "tools.tool",
+        "pk": 11,
+        "fields": {
+            "name": "Log4j Scanner",
+            "command": "python3",
+            "output_format": null,
+            "defectdojo_scan_type": null,
+            "stage": 4,
+            "reference": "https://github.com/cisagov/log4j-scanner",
+            "icon": "https://www.lunasec.io/docs/img/log4shell-logo.png"
+        }
     }
 ]

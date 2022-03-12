@@ -55,7 +55,7 @@ class ToolParserTest(TestCase):
             filename (str): Report filename to parse
             expected (List[Dict[str, Any]]): Expected findings data. Requires the field 'model' to check finding type
         '''
-        self.tool.path_output = os.path.join(self.reports_path, self.tool_name.lower(), filename)   # Set report file
+        self.tool.path_output = os.path.join(self.reports_path, self.tool_name.lower().replace(' ', '_'), filename)   # Set report file
         self.tool.parse_output_file()                                           # Parse tool report
         self.assertEqual(len(expected), len(self.tool.findings))                # Check total number of findings
         for index, finding_data in enumerate(expected):                         # For each expected finding

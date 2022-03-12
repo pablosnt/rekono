@@ -398,6 +398,9 @@ DEFECT_DOJO = {
 TOOLS = {
     'cmseek': {
         'directory': os.getenv('RKN_CMSEEK_DIR', CONFIG.TOOLS_CMSEEK_DIR)       # CMSeeK home directory
+    },
+    'log4j-scanner': {
+        'directory': os.getenv('RKN_LOG4J_SCANNER_DIR', CONFIG.TOOLS_LOG4J_SCANNER_DIR)
     }
 }
 

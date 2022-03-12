@@ -24,6 +24,7 @@ RUN pip install -r /code/requirements.txt
 RUN adduser --disabled-password rekono
 RUN chown -R rekono:rekono /code
 RUN chown -R rekono:rekono /rekono
+RUN chown -R rekono:rekono /usr/share/cmseek
 
 USER rekono
 WORKDIR /code

@@ -238,7 +238,7 @@ class BaseTool:
         except ToolExecutionException:
             return False
 
-    def tool_execution(self, arguments: List[str], targets: List[BaseInput], previous_findings: List[Finding]) -> str:
+    def tool_execution(self, arguments: List[str], targets: List[BaseInput], previous_findings: List[Finding], directory: str = None) -> str:
         '''Execute the tool.
 
         Args:
@@ -254,7 +254,10 @@ class BaseTool:
         '''
         arguments.insert(0, self.tool.command)                                  # Combine tool command with arguments
         logger.info(f'[Tool] Running: {" ".join(arguments)}')
-        exec = subprocess.run(arguments, capture_output=True)                   # Execute the tool
+        if directory:
+            exec = subprocess.run(arguments, capture_output=True, cwd=directory)
+        else:
+            exec = subprocess.run(arguments, capture_output=True)               # Execute the tool
         if not self.ignore_exit_code and exec.returncode > 0:
             # Execution error and ignore exit code is False
             raise ToolExecutionException(exec.stderr.decode('utf-8'))
