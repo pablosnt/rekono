@@ -50,13 +50,15 @@
             <template #cell(tool)="row">
               <div v-if="!row.item.step">
                 <b-link :href="currentTask.tool.reference" target="_blank">
-                  <b-img :src="currentTask.tool.icon" width="30" height="30"/>
+                  <b-img v-if="currentTask.tool.icon" :src="currentTask.tool.icon" width="50" height="30"/>
+                  <b-img v-if="!currentTask.tool.icon" src="favicon.ico" width="50" height="30"/>
                 </b-link>
                 {{ currentTask.tool.name }}
               </div>
               <div v-if="row.item.step">
                 <b-link :href="row.item.step.tool.reference" target="_blank">
-                  <b-img :src="row.item.step.tool.icon" width="30" height="30"/>
+                  <b-img v-if="row.item.step.tool.icon" :src="row.item.step.tool.icon" width="50" height="30"/>
+                  <b-img v-if="!row.item.step.tool.icon" src="favicon.ico" width="50" height="30"/>
                 </b-link>
                 {{ row.item.step.tool.name }}
               </div>

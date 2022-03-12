@@ -24,7 +24,9 @@
                                 <div class="row">
                                     <p class="text-muted mr-2">Tool</p>
                                     <div>
-                                        <img src="{{ tool.icon }}" width="20" height="20" alt="{{ tool.name }}"/>
+                                        {% if tool.icon %}
+                                            <img src="{{ tool.icon }}" width="20" height="20" alt="{{ tool.name }}"/>
+                                        {% endif %}
                                         <strong>{{ tool.name }}</strong>
                                     </div>
                                 </div>

@@ -2,7 +2,8 @@
   <b-modal :id="id" @hidden="clean" @ok="confirm" :title="title" :ok-title="button" header-bg-variant="dark" header-text-variant="light" ok-variant="dark">
     <template #modal-title v-if="tool">
       <b-link :href="tool.reference" target="_blank">
-        <b-img :src="tool.icon" width="100" height="50"/>
+        <b-img v-if="tool.icon" :src="tool.icon" width="100" height="50"/>
+        <b-img v-if="!tool.icon" src="favicon.ico" width="100" height="50"/>
       </b-link>
       {{ title }}
     </template>

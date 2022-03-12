@@ -17,4 +17,4 @@ class EmailHarvesterParserTest(ToolParserTest):
             {'model': OSINT, 'data': 'someone@test.com', 'data_type': DataType.EMAIL},
             {'model': OSINT, 'data': 'other@test.com', 'data_type': DataType.EMAIL},
         ]
-        self.check_tool_output_parser('default.txt', expected)
+        self.check_tool_file_parser('default.txt', expected)

@@ -7,7 +7,7 @@
       <template #cell(os_type)="row">
         <div v-for="type in osTypeByIcon" :key="type.value">
           <div v-if="row.item.os_type === type.value">
-            <v-icon :fill="type.color" :name="type.icon" /><b-badge :variant="type.variant" class="ml-1">{{ row.item.os_type }}</b-badge>          
+            <v-icon :fill="type.color" :name="type.icon" /><b-badge :variant="type.variant" class="ml-1">{{ row.item.os_type }}</b-badge>
           </div>
         </div>
       </template>
