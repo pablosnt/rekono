@@ -3,7 +3,7 @@
     <template #modal-title v-if="selectedTool">
       <b-link :href="selectedTool.reference" target="_blank">
         <b-img v-if="selectedTool.icon" :src="selectedTool.icon" width="100" height="50"/>
-        <b-img v-if="!selectedTool.icon" src="favicon.ico" width="100" height="50"/>
+        <b-img v-if="!selectedTool.icon" src="favicon.ico"/>
       </b-link>
       {{ title }}
     </template>

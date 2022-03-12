@@ -3,7 +3,7 @@
     <template #modal-title v-if="tool">
       <b-link :href="tool.reference" target="_blank">
         <b-img v-if="tool.icon" :src="tool.icon" width="100" height="50"/>
-        <b-img v-if="!tool.icon" src="favicon.ico" width="100" height="50"/>
+        <b-img v-if="!tool.icon" src="favicon.ico"/>
       </b-link>
      {{ title }}
     </template>
@@ -21,7 +21,7 @@
             <b-button variant="outline">
               <b-link :href="selectedTool.reference" target="_blank">
                 <b-img v-if="selectedTool.icon" :src="selectedTool.icon" width="50" height="30"/>
-                <b-img v-if="!selectedTool.icon" src="favicon.ico" width="50" height="30"/>
+                <b-img v-if="!selectedTool.icon" src="favicon.ico"/>
               </b-link>
             </b-button>
           </b-input-group-prepend>

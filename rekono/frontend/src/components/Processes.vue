@@ -45,7 +45,7 @@
             <template #cell(icon)="step">
               <b-link :href="step.item.tool.reference" target="_blank">
                 <b-img v-if="step.item.tool.icon" :src="step.item.tool.icon" width="100" height="50"/>
-                <b-img v-if="!step.item.tool.icon" src="favicon.ico" width="100" height="50"/>
+                <b-img v-if="!step.item.tool.icon" src="favicon.ico"/>
               </b-link>
             </template>
             <template #cell(actions)="step">

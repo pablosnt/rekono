@@ -6,7 +6,7 @@
         <div v-if="row.item.tool">
           <b-link :href="row.item.tool.reference" target="_blank">
             <b-img v-if="row.item.tool.icon" :src="row.item.tool.icon" width="30" height="30"/>
-            <b-img v-if="!row.item.tool.icon" src="favicon.ico" width="30" height="30"/>
+            <b-img v-if="!row.item.tool.icon" src="favicon.ico"/>
           </b-link>
           {{ row.item.tool.name }}
         </div>

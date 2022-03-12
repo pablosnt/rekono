@@ -266,7 +266,7 @@
             "argument": 14,
             "type": 2,
             "filter": "DOMAIN",
-            "order": 3
+            "order": 1
         }
     },
     {
@@ -276,7 +276,7 @@
             "argument": 15,
             "type": 2,
             "filter": "DOMAIN",
-            "order": 3
+            "order": 1
         }
     }
 ]
