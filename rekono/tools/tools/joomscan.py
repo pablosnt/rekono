@@ -14,7 +14,7 @@ class JoomscanTool(BaseTool):
         '''
         technology = None
         vulnerability_name = None
-        endpoints = set(['/'])
+        endpoints = ['/']
         backups = []
         configurations = []
         path_disclosure = []
@@ -37,7 +37,7 @@ class JoomscanTool(BaseTool):
             elif 'CVE : ' in data:                                              # CVE found
                 aux = data.replace('CVE : ', '').strip()
                 cves = [aux]
-                if ',' in cves:
+                if ',' in aux:
                     cves = aux.split(',')
                 # Get name from previous line
                 vulnerability_name = lines[index - 1].replace('[++]', '').replace('Joomla!', '').strip()
@@ -60,11 +60,11 @@ class JoomscanTool(BaseTool):
             elif host in data:                                                  # Host in line, so there is an endpoint
                 endpoint = data.split(host, 1)[1]                               # Get endpoint from line
                 if ' ' in endpoint:
-                    endpoint.split(' ', 1)[0]                                   # Remove no-endpoint data
+                    endpoint = endpoint.split(' ', 1)[0]                        # Remove no-endpoint data
                 elif '\n' in endpoint:
-                    endpoint.split('\n', 1)[0]                                  # Remove no-endpoint data
+                    endpoint = endpoint.split('\n', 1)[0]                       # Remove no-endpoint data
                 if endpoint and endpoint not in endpoints:                      # Check if it's a valid endpoint
-                    endpoints.add(endpoint)
+                    endpoints.append(endpoint)
                     if 'Path :' in data:                                        # Endpoint with backup data
                         backups.append(endpoint)
                     if 'config file path :' in data:                            # Endpoint with configuration data

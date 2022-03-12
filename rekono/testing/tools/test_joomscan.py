@@ -13,7 +13,7 @@ class JoomScanParserTest(ToolParserTest):
         super().setUp()
         self.tool.command_arguments = ['-u', 'http://10.10.10.10/']
 
-    def test_report_with_exploits(self) -> None:
+    def test_report_with_cves_and_exploits(self) -> None:
         '''Test to parse report with CVEs and exploits.'''
         expected = [
             {
