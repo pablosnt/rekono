@@ -13,7 +13,7 @@ class JoomscanTool(BaseTool):
             output (str): Plain tool output
         '''
         technology = None
-        current_vulnerability = None
+        vulnerability_name = None
         endpoints = set(['/'])
         backups = []
         configurations = []
@@ -35,19 +35,25 @@ class JoomscanTool(BaseTool):
                     reference='https://www.joomla.org/'
                 )
             elif 'CVE : ' in data:                                              # CVE found
-                current_vulnerability = None                                    # Remove current vulnerability
-                current_vulnerability = self.create_finding(
-                    Vulnerability,
-                    technology=technology,                                      # Related to Joomla technology
-                    name=lines[index - 1].replace('[++] ', '').strip(),         # Get name from previous line
-                    cve=data.replace('CVE : ', '').strip()
-                )
+                aux = data.replace('CVE : ', '').strip()
+                cves = [aux]
+                if ',' in cves:
+                    cves = aux.split(',')
+                # Get name from previous line
+                vulnerability_name = lines[index - 1].replace('[++]', '').replace('Joomla!', '').strip()
+                for cve in cves:
+                    self.create_finding(
+                        Vulnerability,
+                        technology=technology,                                  # Related to Joomla technology
+                        name=vulnerability_name,
+                        cve=cve.strip()
+                    )
             elif 'EDB : ' in data:                                              # Exploit found
                 link = data.replace('EDB : ', '').strip()                       # Get Exploit DB link
                 self.create_finding(
                     Exploit,
-                    vulnerability=current_vulnerability,                        # Related to current vulnerability
-                    title=lines[index - 2].replace('[++] ', '').strip(),        # Get name from 2 lines before
+                    technology=technology,                                      # Related to Joomla technology
+                    title=vulnerability_name,
                     edb_id=int(link.split('https://www.exploit-db.com/exploits/', 1)[1].replace('/', '')),
                     reference=link
                 )
@@ -59,7 +65,7 @@ class JoomscanTool(BaseTool):
                     endpoint.split('\n', 1)[0]                                  # Remove no-endpoint data
                 if endpoint and endpoint not in endpoints:                      # Check if it's a valid endpoint
                     endpoints.add(endpoint)
-                    if 'Backup file is found' in data:                          # Endpoint with backup data
+                    if 'Path :' in data:                                        # Endpoint with backup data
                         backups.append(endpoint)
                     if 'config file path :' in data:                            # Endpoint with configuration data
                         configurations.append(endpoint)
