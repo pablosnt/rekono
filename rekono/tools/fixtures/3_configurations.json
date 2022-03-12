@@ -288,5 +288,25 @@
             "arguments": "{url} --run-all-tests --waf-bypass --test-CVE-2021-45046",
             "default": false
         }
+    },
+    {
+        "model": "tools.configuration",
+        "pk": 30,
+        "fields": {
+            "tool_id": 12,
+            "name": "Default",
+            "arguments": "{domain}",
+            "default": true
+        }
+    },
+    {
+        "model": "tools.configuration",
+        "pk": 31,
+        "fields": {
+            "tool_id": 13,
+            "name": "Default",
+            "arguments": "{domain} -s {output}",
+            "default": true
+        }
     }
 ]

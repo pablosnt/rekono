@@ -196,5 +196,23 @@
             "argument": "",
             "value": 4
         }
+    },
+    {
+        "model": "tools.intensity",
+        "pk": 23,
+        "fields": {
+            "tool_id": 12,
+            "argument": "",
+            "value": 1
+        }
+    },
+    {
+        "model": "tools.intensity",
+        "pk": 24,
+        "fields": {
+            "tool_id": 13,
+            "argument": "",
+            "value": 1
+        }
     }
 ]

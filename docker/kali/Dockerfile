@@ -16,10 +16,11 @@ RUN ln -s /usr/bin/python3 /usr/bin/python
 RUN pip install --upgrade pip
 RUN pip install -r /code/requirements.txt
 
-RUN apt install nmap dirsearch theharvester nikto sslscan sslyze cmseek zaproxy exploitdb metasploit-framework -y
+RUN apt install nmap dirsearch theharvester nikto sslscan sslyze cmseek zaproxy exploitdb metasploit-framework emailharvester -y
 RUN setcap cap_net_raw,cap_net_admin,cap_net_bind_service+eip $(which nmap)
 RUN git clone https://github.com/cisagov/log4j-scanner.git /opt/log4j-scanner
 RUN pip install -r /opt/log4j-scanner/log4-scanner/requirements.txt
+RUN pip install emailfinder
 
 RUN apt install wordlists seclists dirb -y
 RUN gzip -d /usr/share/wordlists/rockyou.txt.gz

@@ -12,7 +12,7 @@ class DirsearchTool(BaseTool):
 
     def parse_output_file(self) -> None:
         '''Parse tool output file to create finding entities.'''
-        with open(self.path_output) as output_file:
+        with open(self.path_output, 'r') as output_file:
             data = json.load(output_file)                                       # Read output file
         for url in data.get('results', []):                                     # For each URL
             for item in url.values():                                           # For each item

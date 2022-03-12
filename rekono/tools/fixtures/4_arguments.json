@@ -141,5 +141,27 @@
             "required": true,
             "multiple": false
         }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 14,
+        "fields": {
+            "tool": 12,
+            "name": "domain",
+            "argument": "-d {domain}",
+            "required": true,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 15,
+        "fields": {
+            "tool": 13,
+            "name": "domain",
+            "argument": "-d {domain}",
+            "required": true,
+            "multiple": false
+        }
     }
 ]

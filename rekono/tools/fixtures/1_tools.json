@@ -141,5 +141,31 @@
             "reference": "https://github.com/cisagov/log4j-scanner",
             "icon": "https://www.lunasec.io/docs/img/log4shell-logo.png"
         }
+    },
+    {
+        "model": "tools.tool",
+        "pk": 12,
+        "fields": {
+            "name": "EmailFinder",
+            "command": "emailfinder",
+            "output_format": null,
+            "defectdojo_scan_type": null,
+            "stage": 1,
+            "reference": "https://github.com/Josue87/EmailFinder",
+            "icon": null
+        }
+    },
+    {
+        "model": "tools.tool",
+        "pk": 13,
+        "fields": {
+            "name": "EmailHarvester",
+            "command": "emailharvester",
+            "output_format": "txt",
+            "defectdojo_scan_type": null,
+            "stage": 1,
+            "reference": "https://github.com/maldevel/EmailHarvester",
+            "icon": null
+        }
     }
 ]

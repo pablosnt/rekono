@@ -258,5 +258,25 @@
             "filter": null,
             "order": 3
         }
+    },
+    {
+        "model": "tools.input",
+        "pk": 27,
+        "fields": {
+            "argument": 14,
+            "type": 2,
+            "filter": "DOMAIN",
+            "order": 3
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 28,
+        "fields": {
+            "argument": 15,
+            "type": 2,
+            "filter": "DOMAIN",
+            "order": 3
+        }
     }
 ]
