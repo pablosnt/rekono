@@ -14,6 +14,7 @@ class Execution(models.Model):
     rq_job_id = models.TextField(max_length=50, blank=True, null=True)          # Job Id in the executions queue
     # If it's a Process task, will be an execution for each Process step. If it's a Tool task, step is null
     step = models.ForeignKey(Step, on_delete=models.SET_NULL, blank=True, null=True)
+    extra_data_path = models.TextField(max_length=50, blank=True, null=True)    # Filepath with extra data
     output_file = models.TextField(max_length=50, blank=True, null=True)        # Tool output filepath
     output_plain = models.TextField(blank=True, null=True)                      # Tool output in plain text
     output_error = models.TextField(blank=True, null=True)                      # Tool errors

@@ -12,7 +12,7 @@ from rekono.settings import TOOLS
 class Log4jscannerTool(BaseTool):
     '''Log4j Scanner tool class.'''
 
-    home_directory = TOOLS['log4j-scanner']['directory']
+    run_directory = os.path.join(TOOLS['log4j-scanner']['directory'], 'log4-scanner')
 
     def check_installation(self) -> None:
         '''Check if tool is installed in the system.
@@ -22,25 +22,18 @@ class Log4jscannerTool(BaseTool):
         '''
         super().check_installation()
         if (
-            not os.path.isdir(self.home_directory) or                           # Check log4j-scanner directory
-            not os.path.isfile(os.path.join(self.home_directory, 'log4j-scan.py'))  # Check log4j-scanner script
+            not os.path.isdir(self.run_directory) or                            # Check log4j-scanner directory
+            not os.path.isfile(os.path.join(self.run_directory, 'log4j-scan.py'))   # Check log4j-scanner script
         ):
             raise ToolExecutionException(f'Tool {self.tool.name} is not installed in the system')
 
-    def tool_execution(
-        self,
-        arguments: List[str],
-        targets: List[BaseInput],
-        previous_findings: List[Finding],
-        directory: str = None
-    ) -> str:
+    def tool_execution(self, arguments: List[str], targets: List[BaseInput], previous_findings: List[Finding]) -> str:
         '''Execute the tool.
 
         Args:
             arguments (List[str]): Arguments to include in the tool command
             targets (List[BaseInput]): List of targets and resources
             previous_findings (List[Finding]): List of previous findings
-            directory (str): Directory where the tool should be executed
 
         Raises:
             ToolExecutionException: Raised if tool execution finishes with an exit code distinct than zero
@@ -48,8 +41,8 @@ class Log4jscannerTool(BaseTool):
         Returns:
             str: Plain output of the tool execution
         '''
-        arguments.insert(0, os.path.join(self.home_directory, 'log4j-scan.py'))     # Add log4j-scanner script
-        return super().tool_execution(arguments, targets, previous_findings, self.home_directory)   # Execute script
+        arguments.insert(0, os.path.join(self.run_directory, 'log4j-scan.py'))  # Add log4j-scanner script
+        return super().tool_execution(arguments, targets, previous_findings)    # Execute script
 
     def parse_plain_output(self, output: str) -> None:
         '''Parse tool plain output to create finding entities. This should be implemented by child tool classes.

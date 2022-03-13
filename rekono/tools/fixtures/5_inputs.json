@@ -308,5 +308,15 @@
             "filter": null,
             "order": 3
         }
+    },
+    {
+        "model": "tools.input",
+        "pk": 32,
+        "fields": {
+            "argument": 17,
+            "type": 4,
+            "filter": ".git",
+            "order": 1
+        }
     }
 ]

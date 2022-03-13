@@ -27,6 +27,9 @@ jobs:
         run: |
           git clone https://github.com/maurosoria/dirsearch.git
           ln -s dirsearch/dirsearch.py /usr/local/bin/dirsearch
+      
+      - name: Install GitLeaks to check its installation
+        run: sudo apt install gitleaks -y
 
       - uses: actions/setup-python@v2
         with:

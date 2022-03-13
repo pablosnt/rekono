@@ -204,7 +204,7 @@
         "pk": 21,
         "fields": {
             "tool_id": 4,
-            "name": "Default Nikto",
+            "name": "Default",
             "arguments": "{url} -Format xml -output {output}",
             "default": true
         }
@@ -214,7 +214,7 @@
         "pk": 22,
         "fields": {
             "tool_id": 5,
-            "name": "Default Sslscan",
+            "name": "Default",
             "arguments": "--xml={output} {intensity} {target}",
             "default": true
         }
@@ -224,7 +224,7 @@
         "pk": 23,
         "fields": {
             "tool_id": 6,
-            "name": "Default SSLyze",
+            "name": "Default",
             "arguments": "--json_out={output} {target}",
             "default": true
         }
@@ -234,7 +234,7 @@
         "pk": 24,
         "fields": {
             "tool_id": 7,
-            "name": "Default CMSeeK",
+            "name": "Default",
             "arguments": "{url} {intensity}",
             "default": true
         }
@@ -316,6 +316,16 @@
             "tool_id": 14,
             "name": "Default",
             "arguments": "{url}",
+            "default": true
+        }
+    },
+    {
+        "model": "tools.configuration",
+        "pk": 33,
+        "fields": {
+            "tool_id": 15,
+            "name": "Default",
+            "arguments": "detect -f json --report-path {output}",
             "default": true
         }
     }

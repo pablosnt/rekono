@@ -178,7 +178,7 @@ class TargetEndpoint(models.Model, BaseInput):
             return True
         except ValueError:
             # If the filter is a string, endpoint will be filtered by endpoint
-            return self.endpoint.startswith(input.filter)
+            return input.filter in self.endpoint
 
     def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
         '''Get useful information from this instance to be used in tool execution as argument.

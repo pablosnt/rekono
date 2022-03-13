@@ -174,5 +174,16 @@
             "required": true,
             "multiple": false
         }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 17,
+        "fields": {
+            "tool": 15,
+            "name": "endpoint",
+            "argument": "{endpoint}",
+            "required": true,
+            "multiple": false
+        }
     }
 ]

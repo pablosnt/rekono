@@ -59,8 +59,9 @@ class RekonoConfigLoader:
         self.TOOLS_LOG4J_SCANNER_DIR = self.get_config_key(
             config,
             ['tools', 'log4j-scanner', 'directory'],
-            '/opt/log4j-scanner/log4-scanner'
+            '/opt/log4j-scanner'
         )
+        self.TOOLS_GITTOOLS_DIR = self.get_config_key(config, ['tools', 'gittools', 'directory'], '/opt/GitTools')
 
     def get_config_key(self, config: Dict[str, Any], path: List[str], default: Any) -> Any:
         '''Get configuration value by dict path. Default value will be returned if value not found or it's null.

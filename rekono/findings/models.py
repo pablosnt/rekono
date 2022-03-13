@@ -318,7 +318,7 @@ class Endpoint(Finding):
             return status_code == self.status
         except ValueError:
             # If the filter is a string, endpoint will be filtered by endpoint
-            return self.endpoint.startswith(input.filter)
+            return input.filter in self.endpoint
 
     def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
         '''Get useful information from this instance to be used in tool execution as argument.
@@ -433,6 +433,7 @@ class Credential(Finding):
     email = models.TextField(max_length=100, blank=True, null=True)             # Email if found
     username = models.TextField(max_length=100, blank=True, null=True)          # Username if found
     secret = models.TextField(max_length=300, blank=True, null=True)            # Secret (password, key, etc.) if found
+    context = models.TextField(max_length=300, blank=True, null=True)           # Context information about credential
 
     key_fields: List[Dict[str, Any]] = [                                        # Unique field list
         {'name': 'email', 'is_base': False},

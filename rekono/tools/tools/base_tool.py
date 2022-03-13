@@ -255,20 +255,13 @@ class BaseTool:
             host = host[:-1]                                                    # Remove last slash form URL
         return host
 
-    def tool_execution(
-        self,
-        arguments: List[str],
-        targets: List[BaseInput],
-        previous_findings: List[Finding],
-        directory: str = None
-    ) -> str:
+    def tool_execution(self, arguments: List[str], targets: List[BaseInput], previous_findings: List[Finding]) -> str:
         '''Execute the tool.
 
         Args:
             arguments (List[str]): Arguments to include in the tool command
             targets (List[BaseInput]): List of targets and resources
             previous_findings (List[Finding]): List of previous findings
-            directory (str): Directory where the tool should be executed
 
         Raises:
             ToolExecutionException: Raised if tool execution finishes with an exit code distinct than zero
@@ -278,8 +271,9 @@ class BaseTool:
         '''
         arguments.insert(0, self.tool.command)                                  # Combine tool command with arguments
         logger.info(f'[Tool] Running: {" ".join(arguments)}')
-        if directory:
-            exec = subprocess.run(arguments, capture_output=True, cwd=directory)    # Execute the tool in directory
+        if hasattr(self, 'run_directory'):
+            # Execute the tool in directory
+            exec = subprocess.run(arguments, capture_output=True, cwd=getattr(self, 'run_directory'))
         else:
             exec = subprocess.run(arguments, capture_output=True)               # Execute the tool
         if not self.ignore_exit_code and exec.returncode > 0:

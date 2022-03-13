@@ -397,10 +397,13 @@ DEFECT_DOJO = {
 
 TOOLS = {
     'cmseek': {
-        'directory': os.getenv('RKN_CMSEEK_DIR', CONFIG.TOOLS_CMSEEK_DIR)       # CMSeeK home directory
+        'directory': os.getenv('RKN_CMSEEK_RESULTS', CONFIG.TOOLS_CMSEEK_DIR)   # CMSeeK directory
     },
     'log4j-scanner': {
         'directory': os.getenv('RKN_LOG4J_SCANNER_DIR', CONFIG.TOOLS_LOG4J_SCANNER_DIR)     # Log4j Scanner directory
+    },
+    'gittools': {
+        'directory': os.getenv('RKN_GITTOOLS_DIR', CONFIG.TOOLS_GITTOOLS_DIR)   # GitTools directory
     }
 }
 

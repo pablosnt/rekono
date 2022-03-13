@@ -15,7 +15,7 @@ class CmseekTool(BaseTool):
     '''CMSeeK tool class.'''
 
     # CMSeeK directory where output files can be stored
-    home_directory = TOOLS['cmseek']['directory']
+    home_directory = TOOLS['cmseek']['results']
 
     def clean_environment(self) -> None:
         '''Move original file output to Rekono outputs directory.'''
@@ -122,7 +122,12 @@ class CmseekTool(BaseTool):
         '''
         for user in value.split(','):                                           # For each username
             if user:
-                self.create_finding(Credential, technology=cms, username=user)  # Create Credential with username
+                self.create_finding(                                            # Create Credential with username
+                    Credential,
+                    technology=cms,
+                    username=user,
+                    context=f'{cms.name} username'
+                )
 
     def parse_output_file(self) -> None:
         '''Parse tool output file to create finding entities.'''
