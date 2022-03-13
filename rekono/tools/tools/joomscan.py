@@ -57,6 +57,15 @@ class JoomscanTool(BaseTool):
                     edb_id=int(link.split('https://www.exploit-db.com/exploits/', 1)[1].replace('/', '')),
                     reference=link
                 )
+            elif 'Debug mode Enabled' in data:
+                self.create_finding(                                            # Create Vulnerability
+                    Vulnerability,
+                    technology=technology,                                      # Related to Joomla technology
+                    name='Debug mode enabled',
+                    description='Joomla debug mode enabled',
+                    severity=Severity.LOW,
+                    cwe='CWE-489'                                               # CWE-489: Active Debug Code
+                )
             elif host in data:                                                  # Host in line, so there is an endpoint
                 endpoint = data.split(host, 1)[1]                               # Get endpoint from line
                 if ' ' in endpoint:
@@ -72,15 +81,6 @@ class JoomscanTool(BaseTool):
                     if 'directory has directory listing :' in data:             # Endpoint with directory listing
                         directory_listing.append(endpoint)
                     self.create_finding(Endpoint, endpoint=endpoint)
-            elif 'Debug mode Enabled' in data:
-                self.create_finding(                                            # Create Vulnerability
-                    Vulnerability,
-                    technology=technology,                                      # Related to Joomla technology
-                    name='Debug mode enabled',
-                    description='Joomla debug mode enabled',
-                    severity=Severity.LOW,
-                    cwe='CWE-489'                                               # CWE-489: Active Debug Code
-                )
         for name, paths, severity, cwe in [                                     # For each vulnerability found
             # CWE-530: Exposure of Backup File to an Unauthorized Control Sphere
             ('Backup files found', backups, Severity.HIGH, 'CWE-530'),
