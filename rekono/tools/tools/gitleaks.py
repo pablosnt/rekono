@@ -5,8 +5,10 @@ import uuid
 from typing import Any, List
 
 from findings.enums import Severity
-from findings.models import Credential, Finding, Vulnerability
+from findings.models import Credential, Endpoint, Finding, Vulnerability
+from input_types.enums import InputKeyword
 from input_types.models import BaseInput
+from targets.models import TargetEndpoint
 from tools.exceptions import ToolExecutionException
 from tools.tools.base_tool import BaseTool
 
@@ -16,6 +18,8 @@ from rekono.settings import REPORTS_DIR, TOOLS
 class GitleaksTool(BaseTool):
     '''GitLeaks tool class.'''
 
+    # Exit code ignored because GitLeaks fails when find secrets
+    ignore_exit_code = True
     gitdumper = 'gitdumper.sh'
     gitdumper_directory = os.path.join(TOOLS['gittools']['directory'], 'Dumper')
 
@@ -32,12 +36,24 @@ class GitleaksTool(BaseTool):
         ):
             raise ToolExecutionException('Tool gitdumper is not installed in the system')
 
+    def get_git_endpoint(self) -> Any:
+        '''Get .git endpoint from arguments.
+
+        Returns:
+            Any: Endpoint or TargetEndpoint
+        '''
+        endpoint: Any = None
+        if Endpoint.__name__.lower() in self.findings_relations:
+            endpoint = self.findings_relations[Endpoint.__name__.lower()]       # Get Endpoint
+        elif TargetEndpoint.__name__.lower() in self.findings_relations:
+            endpoint = self.findings_relations[TargetEndpoint.__name__.lower()]     # Get TargetEndpoint
+        return endpoint
+
     def parse_output_file(self) -> None:
         '''Parse tool output file to create finding entities. This should be implemented by child tool classes.'''
         with open(self.path_output, 'r') as output_file:
             data = json.load(output_file)                                       # Read output file
-        # endpoint could be an Endpoint or TargetEndpoint
-        endpoint: Any = self.findings_relations['endpoint']                     # Get .git endpoint
+        endpoint = self.get_git_endpoint()                                      # Get .git endpoint
         emails = []
         for finding in data:                                                    # For each finding
             self.create_finding(                                                # Save secret match
@@ -68,37 +84,44 @@ class GitleaksTool(BaseTool):
         Returns:
             str: Plain output of the tool execution
         '''
-        # endpoint could be an Endpoint or TargetEndpoint
-        endpoint: Any = self.findings_relations['endpoint']                     # Get .git endpoint
-        data = endpoint.parse()                                                 # Parse endpoint data
-        if data['URL'] and data['URL'][-1] != '/':
-            data['URL'] += '/'                                                  # Add last slash to prevent errors
-        self.run_directory = os.path.join(REPORTS_DIR, str(uuid.uuid4()))       # Path where Git repo will be dumped
-        exec = subprocess.run(                                                  # Dump Git repository
-            [self.gitdumper, data['URL'], self.run_directory],
-            capture_output=True,
-            cwd=self.gitdumper_directory
-        )
-        subprocess.run(['git', 'checkout', '--', '.'], capture_output=True, cwd=self.run_directory)     # Checkout files
-        git_dumped = False
-        for _, dirs, files in os.walk(self.run_directory):
-            # Check if Git repository has been dumped or not
-            git_dumped = len([d for d in dirs if d != '.git']) > 0 or len(files) > 0
-            break
-        if git_dumped:                                                          # Git repository has been dumped
-            self.create_finding(                                                # Create related vulnerability
-                Vulnerability,
-                enumeration=endpoint.enumeration if hasattr(endpoint, 'enumeration') else None,
-                name='Git source code exposure',
-                description=f"Source code is exposed in the endpoint {endpoint.endpoint} and it's possible to dump it as a git repository",     # noqa: E501
-                severity=Severity.HIGH,
-                # CWE-527: Exposure of Version-Control Repository to an Unauthorized Control Sphere
-                cwe='CWE-527',
-                reference='https://iosentrix.com/blog/git-source-code-disclosure-vulnerability/'
+        endpoint = self.get_git_endpoint()                                      # Get .git endpoint
+        if endpoint:
+            data = endpoint.parse()                                             # Parse endpoint data
+            if data[InputKeyword.URL.name.lower()] and data[InputKeyword.URL.name.lower()][-1] != '/':
+                data[InputKeyword.URL.name.lower()] += '/'                      # Add last slash to prevent errors
+            self.run_directory = os.path.join(REPORTS_DIR, str(uuid.uuid4()))   # Path where Git repo will be dumped
+            exec = subprocess.run(                                              # Dump Git repository
+                [
+                    'bash',
+                    os.path.join(self.gitdumper_directory, self.gitdumper),
+                    data[InputKeyword.URL.name.lower()],
+                    self.run_directory
+                ],
+                capture_output=True,
+                cwd=self.gitdumper_directory
             )
-            self.execution.extra_data_path = self.run_directory                 # Save extra data related to GitLeaks
-            self.execution.save(update_fields=['extra_data_path'])
-            return super().tool_execution(arguments, targets, previous_findings)    # Run GitLeaks
-        if exec.returncode > 0:                                                 # Error during gitdumper execution
-            raise ToolExecutionException(exec.stderr.decode('utf-8'))
-        return exec.stdout.decode('utf-8')                                      # Git repository hasn't been dumped
+            # Checkout files
+            subprocess.run(['git', 'checkout', '--', '.'], capture_output=True, cwd=self.run_directory)
+            git_dumped = True
+            for _, dirs, files in os.walk(self.run_directory):
+                # Check if Git repository has been dumped or not
+                git_dumped = len([d for d in dirs if d != '.git']) > 0 or len(files) > 0
+                break
+            if git_dumped:                                                      # Git repository has been dumped
+                self.create_finding(                                            # Create related vulnerability
+                    Vulnerability,
+                    enumeration=endpoint.enumeration if isinstance(endpoint, Endpoint) else None,
+                    name='Git source code exposure',
+                    description=f"Source code is exposed in the endpoint {endpoint.endpoint} and it's possible to dump it as a git repository",     # noqa: E501
+                    severity=Severity.HIGH,
+                    # CWE-527: Exposure of Version-Control Repository to an Unauthorized Control Sphere
+                    cwe='CWE-527',
+                    reference='https://iosentrix.com/blog/git-source-code-disclosure-vulnerability/'
+                )
+                self.execution.extra_data_path = self.run_directory             # Save extra data related to GitLeaks
+                self.execution.save(update_fields=['extra_data_path'])
+                return super().tool_execution(arguments, targets, previous_findings)    # Run GitLeaks
+            if exec.returncode > 0:                                             # Error during gitdumper execution
+                raise ToolExecutionException(exec.stderr.decode('utf-8'))
+            return exec.stdout.decode('utf-8')                                  # Git repository hasn't been dumped
+        raise ToolExecutionException('Endpoint argument is required')

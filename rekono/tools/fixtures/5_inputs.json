@@ -115,7 +115,7 @@
         "fields": {
             "argument": 7,
             "type": 3,
-            "filter": "http",
+            "filter": null,
             "order": 1
         }
     },
@@ -135,7 +135,7 @@
         "fields": {
             "argument": 8,
             "type": 3,
-            "filter": "http",
+            "filter": null,
             "order": 1
         }
     },
