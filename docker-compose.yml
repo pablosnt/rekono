@@ -246,7 +246,7 @@ services:
       - 443:443
     volumes:
       - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./static:/www/rekono:ro
+      - ./static:/www/rekono/static:ro
     depends_on:
       - backend
       - frontend
