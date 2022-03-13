@@ -25,7 +25,7 @@ class GitLeaksParserTest(ToolParserTest):
                 'secret': 'token: "7f9cc25de23d1a255720b0ae4551f4044d600f46"',
                 'context': '/.git/ : hub -> Line 4'
             },
-            {'model': Credential, 'email': 'git@asdf.com', 'context': '/.git/  : Email of the commit author  ASDF'},
+            {'model': Credential, 'email': 'git@asdf.com', 'context': '/.git/ : Email of the commit author ASDF'},
             {'model': Credential, 'secret': 'xoxp-858723095049', 'context': '/.git/ : .bash_profile -> Line 23'},
             {
                 'model': Credential,

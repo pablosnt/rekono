@@ -15,7 +15,7 @@ class CmseekTool(BaseTool):
     '''CMSeeK tool class.'''
 
     # CMSeeK directory where output files can be stored
-    home_directory = TOOLS['cmseek']['results']
+    home_directory = TOOLS['cmseek']['directory']
 
     def clean_environment(self) -> None:
         '''Move original file output to Rekono outputs directory.'''
