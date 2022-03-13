@@ -1,11 +1,21 @@
 from findings.models import Credential, Endpoint
 from testing.tools.base import ToolParserTest
+from tools.exceptions import ToolExecutionException
 
 
 class GitLeaksParserTest(ToolParserTest):
     '''Test cases for GitLeaks parser.'''
 
     tool_name = 'GitLeaks'
+
+    def test_check_installation(self) -> None:
+        '''Test check installation feature for GitLeaks.'''
+        installed = True
+        try:
+            self.tool.check_installation()
+        except ToolExecutionException:
+            installed = False
+        self.assertFalse(installed)
 
     def test_leaky_repo(self) -> None:
         '''Test to parse report with secrets from https://github.com/Plazmaz/leaky-repo.'''

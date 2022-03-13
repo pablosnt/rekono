@@ -16,9 +16,10 @@ RUN ln -s /usr/bin/python3 /usr/bin/python
 RUN pip install --upgrade pip
 RUN pip install -r /code/requirements.txt
 
-RUN apt install nmap dirsearch theharvester nikto sslscan sslyze cmseek zaproxy exploitdb metasploit-framework emailharvester joomscan -y
+RUN apt install nmap dirsearch theharvester nikto sslscan sslyze cmseek zaproxy exploitdb metasploit-framework emailharvester joomscan gitleaks -y
 RUN setcap cap_net_raw,cap_net_admin,cap_net_bind_service+eip $(which nmap)
 RUN git clone https://github.com/cisagov/log4j-scanner.git /opt/log4j-scanner
+RUN git clone https://github.com/internetwache/GitTools.git /opt/GitTools
 RUN pip install -r /opt/log4j-scanner/log4-scanner/requirements.txt
 RUN pip install emailfinder
 
