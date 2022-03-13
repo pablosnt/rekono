@@ -133,8 +133,9 @@ dmypy.json
 .vscode/
 .scannerwork/
 /reports/
-wordlists/
-logs/
+/wordlists/
+/logs/
+/static/
 
 # Vue.JS
 node_modules/
