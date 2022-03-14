@@ -43,11 +43,9 @@ jobs:
         run: python3 -m pip install -r requirements.txt
 
       - name: Run unit tests
-        run: |
-          cd rekono
-          coverage run manage.py test
+        working-directory: rekono
+        run: coverage run manage.py test
       
       - name: Check coverage
-        run: |
-          cd rekono
-          coverage report -m --skip-covered --fail-under=$REQUIRED_COVERAGE
+        working-directory: rekono
+        run: coverage report -m --skip-covered --fail-under=$REQUIRED_COVERAGE
