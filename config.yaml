@@ -41,4 +41,4 @@ tools:
   cmseek:
     directory: /usr/share/cmseek
   log4j-scanner:
-    directory: /opt/log4j-scanner/log4-scanner
+    directory: /opt/log4j-scanner
