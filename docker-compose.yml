@@ -1,4 +1,4 @@
-version: '1.0'
+version: '3.8'
 
 services:
   postgres:
@@ -47,6 +47,7 @@ services:
   initialize:
     restart: 'no'
     build:
+      context: .
       dockerfile: docker/rekono/Dockerfile
       target: backend
     command: sh -c "python manage.py migrate && python manage.py createsuperuser --no-input"
@@ -69,6 +70,7 @@ services:
   tasks-worker:
     restart: always
     build:
+      context: .
       dockerfile: docker/rekono/Dockerfile
       target: backend
     command: python manage.py rqworker tasks-queue
@@ -92,6 +94,7 @@ services:
   executions-worker:
     restart: always
     build:
+      context: .
       dockerfile: docker/kali/Dockerfile
     command: python manage.py rqworker executions-queue
     hostname: executions-worker
@@ -117,6 +120,7 @@ services:
   findings-worker:
     restart: always
     build:
+      context: .
       dockerfile: docker/rekono/Dockerfile
       target: backend
     command: python manage.py rqworker findings-queue
@@ -142,6 +146,7 @@ services:
   emails-worker:
     restart: always
     build:
+      context: .
       dockerfile: docker/rekono/Dockerfile
       target: backend
     command: python manage.py rqworker emails-queue
@@ -170,6 +175,7 @@ services:
   telegram-bot:
     restart: on-failure
     build:
+      context: .
       dockerfile: docker/rekono/Dockerfile
       target: backend
     command: python manage.py telegram_bot
@@ -195,6 +201,7 @@ services:
   backend:
     restart: always
     build:
+      context: .
       dockerfile: docker/rekono/Dockerfile
       target: backend
     command: python manage.py runserver 0.0.0.0:8000
@@ -223,6 +230,7 @@ services:
   frontend:
     restart: always
     build:
+      context: .
       dockerfile: docker/rekono/Dockerfile
       target: frontend
     command: serve -s dist
@@ -238,6 +246,7 @@ services:
   nginx:
     restart: always
     build:
+      context: .
       dockerfile: docker/nginx/Dockerfile
     hostname: nginx
     container_name: nginx
@@ -246,7 +255,6 @@ services:
       - 443:443
     volumes:
       - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./static:/www/rekono/static:ro
     depends_on:
       - backend
       - frontend
