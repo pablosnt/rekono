@@ -23,8 +23,8 @@
       <finding name="hosts" :fields="hosts" :details="hostDetails" @finding-selected="selectFinding" :id="selectedHost" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="selectedTask" :execution="selectedExecution" :search="search" :active="activeFilter"/>
       <finding name="enumerations" :fields="enumerations" :details="enumerationDetails" @finding-selected="selectFinding" :id="selectedEnumeration" :filter="hostFilter" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="selectedTask" :execution="selectedExecution" :search="search" :active="activeFilter"/>
       <finding name="endpoints" :fields="endpoints" :details="endpointDetails" :filter="enumerationFilter" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="selectedTask" :execution="selectedExecution" :search="search" :active="activeFilter"/>
-      <finding name="technologies" :fields="technologies" @finding-selected="selectFinding" :id="selectedTechnology" :filter="enumerationFilter" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="selectedTask" :execution="selectedExecution" :search="search" :active="activeFilter"/>
-      <finding name="credentials" :fields="credentials" :filter="technologyFilter" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="selectedTask" :execution="selectedExecution" :search="search" :active="activeFilter"/>
+      <finding name="technologies" :fields="technologies" :details="technologyDetails" @finding-selected="selectFinding" :id="selectedTechnology" :filter="enumerationFilter" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="selectedTask" :execution="selectedExecution" :search="search" :active="activeFilter"/>
+      <finding name="credentials" :fields="credentials" :details="credentialDetails" :filter="technologyFilter" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="selectedTask" :execution="selectedExecution" :search="search" :active="activeFilter"/>
       <finding name="vulnerabilities" :fields="vulnerabilities" :details="vulnerabilityDetails" @finding-selected="selectFinding" :id="selectedVulnerability" :filter="technologyAndEnumerationFilter" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="selectedTask" :execution="selectedExecution" :search="search" :active="activeFilter"/>
       <finding name="exploits" :fields="exploits" :details="exploitDetails" :filter="vulnerabilityAndTechnologyFilter" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="selectedTask" :execution="selectedExecution" :search="search" :active="activeFilter"/>
       <finding name="osint" :fields="osint" :details="osintDetails" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="selectedTask" :execution="selectedExecution" :search="search" :active="activeFilter"/>
@@ -154,6 +154,9 @@ export default {
         { key: 'email', sortable: true },
         { key: 'username', sortable: true },
         { key: 'secret', sortable: true }
+      ],
+      credentialDetails: [
+        { field: 'context', type: 'text' },
       ],
       vulnerabilities: [
         { key: 'name', label: 'Vulnerability', sortable: true },

@@ -54,6 +54,7 @@ CREDENTIAL = '''
 _Email_     *{email}*
 _Username_  *{username}*
 _Secret_    *{secret}*
+_Context_   *{context}*
 '''
 
 VULNERABILITY_ICON = '🐛'

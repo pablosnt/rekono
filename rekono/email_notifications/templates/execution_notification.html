@@ -200,6 +200,7 @@
                             <th scope="col">Email</th>
                             <th scope="col">Username</th>
                             <th scope="col">Secret</th>
+                            <th scope="col">Context</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -208,6 +209,7 @@
                                 <td><strong>{{ c.email }}</strong></td>
                                 <td><strong>{{ c.username }}</strong></td>
                                 <td><strong>{{ c.secret }}</strong></td>
+                                <td>{{ c.secret }}</td>
                             </tr>
                         {% endfor %}
                     </tbody>
