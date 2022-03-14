@@ -131,7 +131,7 @@ class CmseekTool(BaseTool):
 
     def parse_output_file(self) -> None:
         '''Parse tool output file to create finding entities.'''
-        with open(self.path_output, 'r') as output_file:
+        with open(self.path_output, 'r', encoding='utf-8') as output_file:
             report = json.load(output_file)                                     # Read output file
         cms_name = report.get('cms_name')                                       # Get CMS name
         cms_id = report.get('cms_id')                                           # Get CMS Id

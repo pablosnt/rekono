@@ -66,7 +66,7 @@ class SslyzeTool(BaseTool):
 
     def parse_output_file(self) -> None:
         '''Parse tool output file to create finding entities.'''
-        with open(self.path_output, 'r') as output_file:
+        with open(self.path_output, 'r', encoding='utf-8') as output_file:
             report = json.load(output_file)                                     # Read output file
         report = report.get('server_scan_results', [])                          # Get scan results
         # Create generic TLS Technology if scan results found

@@ -9,7 +9,7 @@ class SearchsploitTool(BaseTool):
 
     def parse_output_file(self) -> None:
         '''Parse tool output file to create finding entities.'''
-        with open(self.path_output, 'r') as output_file:
+        with open(self.path_output, 'r', encoding='utf-8') as output_file:
             data = json.load(output_file)                                       # Read output file
         for exploit in data.get('RESULTS_EXPLOIT'):                             # For each exploit
             edb_id = exploit.get('EDB-ID')                                      # Get Exploit-DB Id

@@ -51,7 +51,7 @@ class GitleaksTool(BaseTool):
 
     def parse_output_file(self) -> None:
         '''Parse tool output file to create finding entities. This should be implemented by child tool classes.'''
-        with open(self.path_output, 'r') as output_file:
+        with open(self.path_output, 'r', encoding='utf-8') as output_file:
             data = json.load(output_file)                                       # Read output file
         endpoint = self.get_git_endpoint()                                      # Get .git endpoint
         emails = []

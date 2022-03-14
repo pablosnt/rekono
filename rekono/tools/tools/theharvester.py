@@ -25,7 +25,7 @@ class TheharvesterTool(BaseTool):
 
     def parse_output_file(self) -> None:
         '''Parse tool output file to create finding entities.'''
-        with open(self.path_output, 'r') as output_file:
+        with open(self.path_output, 'r', encoding='utf-8') as output_file:
             data = json.load(output_file)                                       # Read output file
         for the_harvester_type, rekono_type in self.data_types:                 # For each data type
             if the_harvester_type in data:                                      # If theHarvester type in report data
