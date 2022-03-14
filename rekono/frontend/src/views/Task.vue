@@ -83,19 +83,19 @@
         </b-col>
         <b-col>
           <b-tabs fill active-nav-item-class="font-weight-bold text-danger">
-            <b-tab title-link-class="text-secondary" active :disabled="!selectedExecution || !selectedExecution.output_plain">
+            <b-tab title-link-class="text-secondary" :disabled="!selectedExecution || !selectedExecution.output_plain">
               <template #title>
                 <b-icon icon="gear-fill"/> Output
               </template>
               <b-form-textarea class="mt-3 text-light" style="background-color: #212529;" plaintext v-if="selectedExecution && selectedExecution.output_plain" :value="selectedExecution.output_plain" size="md" rows="5" max-rows="30"></b-form-textarea>
             </b-tab>
-            <b-tab title-link-class="text-secondary" v-if="selectedExecution && selectedExecution.output_error">
+            <b-tab title-link-class="text-secondary" v-if="selectedTask && selectedExecution && selectedExecution.output_error">
               <template #title>
                 <b-icon icon="exclamation-triangle-fill"/> Error
               </template>
               <b-form-textarea class="mt-3 text-light" style="background-color: #212529;" plaintext :value="selectedExecution.output_error" size="md" rows="5" max-rows="30"></b-form-textarea>
             </b-tab>
-            <b-tab title-link-class="text-secondary" :disabled="(!selectedExecution || !selectedExecution.output_plain) && (currentTask.status === 'Running' || currentTask.status === 'Requested')">
+            <b-tab title-link-class="text-secondary" active :disabled="!currentTask || currentTask.status === 'Requested'">
               <template #title>
                 <b-icon icon="flag-fill"/> Findings
               </template>
@@ -144,7 +144,6 @@ export default {
         { key: 'date', sortable: true }
       ],
       selectedExecution: null,
-      showTaskDetails: false,
       autoRefresh: null,
       ddPath: null,
       ddItemId: null,
