@@ -103,16 +103,16 @@ export default {
         }
         params = Object.assign({}, params, {page: page, limit: limit})
       }
-      return this.request(axios.get, endpoint, params, null, requiredAuth, extraHeaders)
+      return this.request(axios.get, endpoint, params, null, requiredAuth, extraHeaders, false)
     },
-    post (endpoint, data, title = null, message = null, requiredAuth = true, extraHeaders = null) {
-      return this.writeOperation(this.request(axios.post, endpoint, null, data, requiredAuth, extraHeaders), title, message)
+    post (endpoint, data, title = null, message = null, requiredAuth = true, extraHeaders = null, allowUnauth = false) {
+      return this.writeOperation(this.request(axios.post, endpoint, null, data, requiredAuth, extraHeaders, allowUnauth), title, message)
     },
-    put (endpoint, data, title = null, message = null, requiredAuth = true, extraHeaders = null) {
-      return this.writeOperation(this.request(axios.put, endpoint, null, data, requiredAuth, extraHeaders), title, message)
+    put (endpoint, data, title = null, message = null, requiredAuth = true, extraHeaders = null, allowUnauth = false) {
+      return this.writeOperation(this.request(axios.put, endpoint, null, data, requiredAuth, extraHeaders, allowUnauth), title, message)
     },
-    delete (endpoint, title = null, message = null, requiredAuth = true, extraHeaders = null) {
-      return this.writeOperation(this.request(axios.delete, endpoint, null, null, requiredAuth, extraHeaders), title, message, this.warning)
+    delete (endpoint, title = null, message = null, requiredAuth = true, extraHeaders = null, allowUnauth = false) {
+      return this.writeOperation(this.request(axios.delete, endpoint, null, null, requiredAuth, extraHeaders, allowUnauth), title, message, this.warning)
     },
     writeOperation (rekonoRequest, title, message, success = this.success) {
       return rekonoRequest
@@ -123,13 +123,13 @@ export default {
           return Promise.resolve(response.data)
         })
         .catch(error => {
-          if (error && title) {
+          if (error && title && error.response.status !== 401) {
             this.handleError(error, title)
           }
           return Promise.reject(error)
         })
     },
-    request (method, endpoint, queryData = null, bodyData = null, requiredAuth = true, extraHeaders = null, retry = false) {
+    request (method, endpoint, queryData = null, bodyData = null, requiredAuth = true, extraHeaders = null, allowUnauth = false, retry = false) {
       let httpRequest = null
       if (bodyData) {
         httpRequest = method(endpoint, this.cleanBody(bodyData), { headers: this.headers(requiredAuth, extraHeaders) })
@@ -141,12 +141,12 @@ export default {
       return httpRequest
         .then(response => { return Promise.resolve(response) })
         .catch(error => {
-          if (error.response && error.response.status === 401 && !retry) {
+          if (error.response && error.response.status === 401 && !retry && !allowUnauth) {
             return this.refresh()
-              .then(() => { return this.request(method, endpoint, queryData, bodyData, requiredAuth, extraHeaders, true) })
+              .then(() => { return this.request(method, endpoint, queryData, bodyData, requiredAuth, extraHeaders, allowUnauth, true) })
               .catch(() => {
                 if (this.$store.state.refreshing) {
-                  return this.request(method, endpoint, queryData, bodyData, requiredAuth, extraHeaders, false)
+                  return this.request(method, endpoint, queryData, bodyData, requiredAuth, extraHeaders, allowUnauth, false)
                 }
               })
           }
@@ -191,9 +191,6 @@ export default {
         const aux = Object.values(error.response.data)[0][0]
         message = aux.charAt(0).toUpperCase() + aux.slice(1)
         title = Object.keys(error.response.data)[0]
-      }
-      else if (error.response.status === 401) {
-        message = 'You are not authenticated. Please, try again after login in'
       }
       else if (error.response.status === 403) {
         message = 'You are not authorized to perform this operation'

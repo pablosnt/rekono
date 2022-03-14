@@ -40,11 +40,6 @@ export default {
     }
   },
   methods: {
-    handleError (error, title) {
-      if (error.response.status !== 401) {
-        this.$parent.$options.methods.handleError(error, title)
-      }
-    },
     confirm (event) {
       event.preventDefault()
       if (this.check()) {

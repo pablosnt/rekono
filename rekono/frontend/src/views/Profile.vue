@@ -236,10 +236,9 @@ export default {
     handleTelegramToken (event) {
       event.preventDefault()
       if (this.checkTelegramToken()) {
-        this.post('/api/profile/telegram-token/', { otp: this.telegramToken }, this.username, 'Telegram configured successfully')
-          .then(() => {
-            this.getProfile()
-          })
+        this.post('/api/profile/telegram-token/', { otp: this.telegramToken }, this.username, 'Telegram configured successfully', true, null, true)
+          .then(() => { this.getProfile() })
+          .catch(() => { this.danger(this.username, 'Invalid Telegram token') })
       }
     },
     checkTelegramToken () {

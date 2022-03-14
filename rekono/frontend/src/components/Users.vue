@@ -79,7 +79,6 @@ export default {
       this.delete(`/api/users/${this.selectedUser.id}/`, this.selectedUser.email, 'User disabled successfully').then(() => this.fetchData())
     },
     enableUser (user) {
-      console.log(user.email)
       this.post(`/api/users/${user.id}/enable/`, { }, user.email, 'User enabled successfully').then(() => this.fetchData())
     },
     selectUser (user) {
