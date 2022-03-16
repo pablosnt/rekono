@@ -328,5 +328,15 @@
             "arguments": "detect -f json --report-path {output}",
             "default": true
         }
+    },
+    {
+        "model": "tools.configuration",
+        "pk": 34,
+        "fields": {
+            "tool_id": 16,
+            "name": "Default",
+            "arguments": "{host} {port} --batch",
+            "default": true
+        }
     }
 ]

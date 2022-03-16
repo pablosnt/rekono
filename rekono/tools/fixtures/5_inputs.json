@@ -318,5 +318,35 @@
             "filter": ".git",
             "order": 1
         }
+    },
+    {
+        "model": "tools.input",
+        "pk": 33,
+        "fields": {
+            "argument": 18,
+            "type": 2,
+            "filter": null,
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 34,
+        "fields": {
+            "argument": 18,
+            "type": 3,
+            "filter": "ssh",
+            "order": 2
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 35,
+        "fields": {
+            "argument": 19,
+            "type": 3,
+            "filter": "ssh",
+            "order": 1
+        }
     }
 ]

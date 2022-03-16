@@ -1,0 +1,73 @@
+Starting audit of 10.10.10.10...
+(gen) banner: SSH-2.0-libssh_0.8.1
+(gen) software: libssh 0.8.1
+(gen) compatibility: OpenSSH 7.4+ (some functionality from 6.6), Dropbear SSH 2018.76+ (some functionality from 0.52)
+(gen) compression: enabled (zlib, zlib@openssh.com)
+(cve) CVE-2018-10933 -- (CVSSv2: 6.4) authentication bypass
+(kex) curve25519-sha256 -- [info] available since OpenSSH 7.4, Dropbear SSH 2018.76
+(kex) curve25519-sha256@libssh.org -- [info] available since OpenSSH 6.5, Dropbear SSH 2013.62
+(kex) ecdh-sha2-nistp256 -- [fail] using weak elliptic curves
+(kex) ecdh-sha2-nistp256 -- [info] available since OpenSSH 5.7, Dropbear SSH 2013.62
+(kex) ecdh-sha2-nistp384 -- [fail] using weak elliptic curves
+(kex) ecdh-sha2-nistp384 -- [info] available since OpenSSH 5.7, Dropbear SSH 2013.62
+(kex) ecdh-sha2-nistp521 -- [fail] using weak elliptic curves
+(kex) ecdh-sha2-nistp521 -- [info] available since OpenSSH 5.7, Dropbear SSH 2013.62
+(kex) diffie-hellman-group14-sha1 -- [warn] using weak hashing algorithm
+(kex) diffie-hellman-group14-sha1 -- [info] available since OpenSSH 3.9, Dropbear SSH 0.53
+(kex) diffie-hellman-group1-sha1 -- [fail] using small 1024-bit modulus
+(kex) diffie-hellman-group1-sha1 -- [fail] removed (in server) since OpenSSH 6.7, unsafe algorithm
+(kex) diffie-hellman-group1-sha1 -- [fail] disabled (in client) since OpenSSH 7.0, logjam attack
+(kex) diffie-hellman-group1-sha1 -- [warn] using weak hashing algorithm
+(kex) diffie-hellman-group1-sha1 -- [info] available since OpenSSH 2.3.0, Dropbear SSH 0.28
+(key) ssh-rsa (2048-bit) -- [fail] using weak hashing algorithm
+(key) ssh-rsa (2048-bit) -- [info] available since OpenSSH 2.5.0, Dropbear SSH 0.28
+(key) ssh-rsa (2048-bit) -- [info] a future deprecation notice has been issued in OpenSSH 8.2: https://www.openssh.com/txt/release-8.2
+(enc) chacha20-poly1305@openssh.com -- [info] available since OpenSSH 6.5
+(enc) chacha20-poly1305@openssh.com -- [info] default cipher since OpenSSH 6.9.
+(enc) aes256-ctr -- [info] available since OpenSSH 3.7, Dropbear SSH 0.52
+(enc) aes192-ctr -- [info] available since OpenSSH 3.7
+(enc) aes128-ctr -- [info] available since OpenSSH 3.7, Dropbear SSH 0.52
+(enc) aes256-cbc -- [fail] removed (in server) since OpenSSH 6.7, unsafe algorithm
+(enc) aes256-cbc -- [warn] using weak cipher mode
+(enc) aes256-cbc -- [info] available since OpenSSH 2.3.0, Dropbear SSH 0.47
+(enc) aes192-cbc -- [fail] removed (in server) since OpenSSH 6.7, unsafe algorithm
+(enc) aes192-cbc -- [warn] using weak cipher mode
+(enc) aes192-cbc -- [info] available since OpenSSH 2.3.0
+(enc) aes128-cbc -- [fail] removed (in server) since OpenSSH 6.7, unsafe algorithm
+(enc) aes128-cbc -- [warn] using weak cipher mode
+(enc) aes128-cbc -- [info] available since OpenSSH 2.3.0, Dropbear SSH 0.28
+(enc) blowfish-cbc -- [fail] removed (in server) since OpenSSH 6.7, unsafe algorithm
+(enc) blowfish-cbc -- [fail] disabled since Dropbear SSH 0.53
+(enc) blowfish-cbc -- [warn] disabled (in client) since OpenSSH 7.2, legacy algorithm
+(enc) blowfish-cbc -- [warn] using weak cipher mode
+(enc) blowfish-cbc -- [warn] using small 64-bit block size
+(enc) blowfish-cbc -- [info] available since OpenSSH 1.2.2, Dropbear SSH 0.28
+(enc) 3des-cbc -- [fail] removed (in server) since OpenSSH 6.7, unsafe algorithm
+(enc) 3des-cbc -- [warn] disabled (in client) since OpenSSH 7.4, unsafe algorithm
+(enc) 3des-cbc -- [warn] using weak cipher
+(enc) 3des-cbc -- [warn] using weak cipher mode
+(enc) 3des-cbc -- [warn] using small 64-bit block size
+(enc) 3des-cbc -- [info] available since OpenSSH 1.2.2, Dropbear SSH 0.28
+(mac) hmac-sha2-256 -- [warn] using encrypt-and-MAC mode
+(mac) hmac-sha2-256 -- [info] available since OpenSSH 5.9, Dropbear SSH 2013.56
+(mac) hmac-sha2-512 -- [warn] using encrypt-and-MAC mode
+(mac) hmac-sha2-512 -- [info] available since OpenSSH 5.9, Dropbear SSH 2013.56
+(mac) hmac-sha1 -- [warn] using encrypt-and-MAC mode
+(mac) hmac-sha1 -- [warn] using weak hashing algorithm
+(mac) hmac-sha1 -- [info] available since OpenSSH 2.1.0, Dropbear SSH 0.28
+(fin) ssh-rsa: SHA256:ytuGwbpvc9QRltCF9oSbSvyhsNOBaTCLlura//V9Gnw
+(fin) ssh-rsa: MD5:34:f3:32:c6:e8:50:23:6a:67:23:bd:58:a3:88:e3:a6 -- [info] do not rely on MD5 fingerprints for server identification; it is insecure for this use case
+(rec) -3des-cbc-- enc algorithm to remove 
+(rec) -aes128-cbc-- enc algorithm to remove 
+(rec) -aes192-cbc-- enc algorithm to remove 
+(rec) -aes256-cbc-- enc algorithm to remove 
+(rec) -blowfish-cbc-- enc algorithm to remove 
+(rec) -diffie-hellman-group1-sha1-- kex algorithm to remove 
+(rec) -ecdh-sha2-nistp256-- kex algorithm to remove 
+(rec) -ssh-rsa-- key algorithm to remove 
+(rec) +ssh-ed25519-- key algorithm to append 
+(rec) -diffie-hellman-group14-sha1-- kex algorithm to remove 
+(rec) -hmac-sha1-- mac algorithm to remove 
+(rec) -hmac-sha2-256-- mac algorithm to remove 
+(rec) -hmac-sha2-512-- mac algorithm to remove 
+(nfo) For hardening guides on common OSes, please see: <https://www.ssh-audit.com/hardening_guides.html>

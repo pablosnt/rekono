@@ -232,5 +232,14 @@
             "argument": "",
             "value": 3
         }
+    },
+    {
+        "model": "tools.intensity",
+        "pk": 27,
+        "fields": {
+            "tool_id": 16,
+            "argument": "",
+            "value": 3
+        }
     }
 ]

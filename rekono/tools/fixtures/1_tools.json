@@ -193,5 +193,18 @@
             "reference": "https://github.com/zricethezav/gitleaks",
             "icon": "https://raw.githubusercontent.com/zricethezav/gifs/master/gitleakslogo.png"
         }
+    },
+    {
+        "model": "tools.tool",
+        "pk": 16,
+        "fields": {
+            "name": "SSH Audit",
+            "command": "ssh-audit",
+            "output_format": null,
+            "defectdojo_scan_type": null,
+            "stage": 4,
+            "reference": "https://github.com/jtesta/ssh-audit",
+            "icon": null
+        }
     }
 ]
