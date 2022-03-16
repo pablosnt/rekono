@@ -8,6 +8,9 @@ from tools.tools.base_tool import BaseTool
 class SshauditTool(BaseTool):
     '''SSH Audit tool class.'''
 
+    # Exit code ignored because SSH Audit fails when find vulnerabilities
+    ignore_exit_code = True
+
     def parse_plain_output(self, output: str) -> None:
         '''Parse tool plain output to create finding entities. This should be implemented by child tool classes.
 
@@ -23,21 +26,22 @@ class SshauditTool(BaseTool):
         technology = None
         for line in output.split('\n'):                                         # Get output by lines
             data = line.strip()
-            if data.startswith('(gen) software: '):                             # SSH version
+            if '(gen) software: ' in data:                                      # SSH version
                 aux = data.split('(gen) software: ', 1)[1].split(' ', 1)
-                technology = self.create_finding(Technology, name=aux[0], version=aux[1])
-            elif data.startswith('(cve) '):                                     # CVE found
+                technology = self.create_finding(Technology, name=aux[0], version=aux[1].split(' [', 1)[0])
+            elif '(cve) ' in data:                                              # CVE found
                 aux = data.split('(cve) ', 1)[1].split(' ', 1)
-                self.create_finding(Vulnerability, name=aux[1].split(') ', 1)[1].capitalize(), cve=aux[0])
+                self.create_finding(
+                    Vulnerability,
+                    name=aux[1].split(') ', 1)[1].split(' [', 1)[0].capitalize(),
+                    cve=aux[0]
+                )
             else:
                 for topic in algorithms_mapping.keys():                         # For each algorithm type
-                    algorithm = data.split(f'({topic}) ', 1)[1].split(' ', 1)[0]
-                    if (                                                        # Insecure algorithm found
-                        data.startswith(f'({topic}) ') and
-                        '[fail]' in data and
-                        algorithm not in algorithms_mapping[topic]['algorithms']
-                    ):
-                        algorithms_mapping[topic]['algorithms'].append(algorithm)
+                    if f'({topic}) ' in data and '[fail]' in data:              # Insecure algorithm found
+                        algorithm = data.split(f'({topic}) ', 1)[1].split(' ', 1)[0]
+                        if algorithm not in algorithms_mapping[topic]['algorithms']:
+                            algorithms_mapping[topic]['algorithms'].append(algorithm)
                         break
         for details in algorithms_mapping.values():                             # For each algorithm type
             if len(details['algorithms']) > 0:                                  # With insecure algorithms
