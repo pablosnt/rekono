@@ -18,6 +18,7 @@ export default {
   watch: {
     total () {
       this.renderChart({
+        labels: ['Vulnerabilities'],
         datasets: [
           {
             label: 'Critical',
