@@ -338,5 +338,25 @@
             "arguments": "{host} {port} --batch",
             "default": true
         }
+    },
+    {
+        "model": "tools.configuration",
+        "pk": 35,
+        "fields": {
+            "tool_id": 17,
+            "name": "List shares",
+            "arguments": "{host} {port}",
+            "default": true
+        }
+    },
+    {
+        "model": "tools.configuration",
+        "pk": 36,
+        "fields": {
+            "tool_id": 17,
+            "name": "List shares and directories recursively",
+            "arguments": "{host} {port} -R",
+            "default": false
+        }
     }
 ]

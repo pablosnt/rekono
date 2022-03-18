@@ -206,5 +206,18 @@
             "reference": "https://github.com/jtesta/ssh-audit",
             "icon": null
         }
+    },
+    {
+        "model": "tools.tool",
+        "pk": 17,
+        "fields": {
+            "name": "smbmap",
+            "command": "smbmap",
+            "output_format": null,
+            "defectdojo_scan_type": null,
+            "stage": 4,
+            "reference": "https://github.com/ShawnDEvans/smbmap",
+            "icon": null
+        }
     }
 ]

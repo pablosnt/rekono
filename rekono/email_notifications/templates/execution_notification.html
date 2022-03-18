@@ -142,8 +142,10 @@
                     <thead class="thead-dark">
                         <tr>
                             <th scope="col">Enumeration</th>
+                            <th scope="col">Protocol</th>
                             <th scope="col">Endpoint</th>
                             <th scope="col">Status</th>
+                            <th scope="col">Extra</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -156,8 +158,10 @@
                                 {% else %}
                                     <td></td>
                                 {% endif %}
+                                <td>{{ e.protocol }}</td>
                                 <td><strong>{{ e.endpoint }}</strong></td>
                                 <td>{{ e.status }}</td>
+                                <td>{{ e.extra }}</td>
                             </tr>
                         {% endfor %}
                     </tbody>

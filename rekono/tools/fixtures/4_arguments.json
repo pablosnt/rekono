@@ -207,5 +207,27 @@
             "required": false,
             "multiple": false
         }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 20,
+        "fields": {
+            "tool": 17,
+            "name": "host",
+            "argument": "-H {host}",
+            "required": true,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 21,
+        "fields": {
+            "tool": 17,
+            "name": "port",
+            "argument": "-P {port}",
+            "required": false,
+            "multiple": false
+        }
     }
 ]

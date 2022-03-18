@@ -140,7 +140,9 @@ export default {
         { key: 'endpoint', sortable: true }
       ],
       endpointDetails: [
-        { field: 'status', title: 'Status', type: 'text'}
+        { field: 'protocol', type: 'badge', variant: 'primary' },
+        { field: 'status', title: 'Status', type: 'text'},
+        { field: 'extra', type: 'text'},
       ],
       technologies: [
         { key: 'name', label: 'Technology', sortable: true },

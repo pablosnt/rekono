@@ -3,7 +3,8 @@ from typing import Any, Dict, List, Union, cast
 from defectdojo.constants import DD_DATE_FORMAT
 from django.db import models
 from executions.models import Execution
-from findings.enums import DataType, OSType, PortStatus, Protocol, Severity
+from findings.enums import (DataType, EndpointProtocol, OSType, PortStatus,
+                            Protocol, Severity)
 from findings.utils import get_unique_filter
 from input_types.base import BaseInput
 from input_types.enums import InputKeyword
@@ -295,6 +296,9 @@ class Endpoint(Finding):
     endpoint = models.TextField(max_length=500)                                 # Endpoint value
     # Status receive for that endpoint. Probably HTTP status
     status = models.IntegerField(blank=True, null=True)
+    extra = models.TextField(max_length=100, blank=True, null=True)             # Extra information related to endpoint
+    # Protocol related to the endpoint
+    protocol = models.TextField(choices=EndpointProtocol.choices, default=EndpointProtocol.HTTP)
 
     key_fields: List[Dict[str, Any]] = [                                        # Unique field list
         {'name': 'enumeration_id', 'is_base': True},

@@ -51,3 +51,10 @@ class Protocol(models.TextChoices):
 
     UDP = 'UDP'
     TCP = 'TCP'
+
+
+class EndpointProtocol(models.TextChoices):
+    '''Protocols to categorize Endpoints.'''
+
+    HTTP = 'HTTP'
+    SMB = 'SMB'

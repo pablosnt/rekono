@@ -51,8 +51,8 @@ class EndpointSerializer(serializers.ModelSerializer):
 
         model = Endpoint
         fields = (                                                              # Endpoint fields exposed via API
-            'id', 'executions', 'enumeration', 'endpoint', 'status',
-            'creation', 'is_active', 'reported_to_defectdojo'
+            'id', 'executions', 'enumeration', 'endpoint', 'status', 'extra',
+            'protocol', 'creation', 'is_active', 'reported_to_defectdojo'
         )
 
 

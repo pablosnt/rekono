@@ -348,5 +348,35 @@
             "filter": "ssh",
             "order": 1
         }
+    },
+    {
+        "model": "tools.input",
+        "pk": 36,
+        "fields": {
+            "argument": 20,
+            "type": 2,
+            "filter": null,
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 37,
+        "fields": {
+            "argument": 20,
+            "type": 3,
+            "filter": "smb",
+            "order": 2
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 38,
+        "fields": {
+            "argument": 21,
+            "type": 3,
+            "filter": "smb",
+            "order": 1
+        }
     }
 ]

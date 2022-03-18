@@ -195,6 +195,7 @@ class EndpointFilter(FindingFilter):
             'enumeration__port': ['exact'],
             'endpoint': ['exact', 'icontains'],
             'status': ['exact'],
+            'protocol': ['exact'],
         })
 
 

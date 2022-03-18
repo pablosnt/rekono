@@ -35,8 +35,10 @@ _Enumeration_   *{enumeration}*
 ENDPOINT_ICON = '🌐'
 ENDPOINT = '''
 _Enumeration_   *{enumeration}*
+_Protocol_      {protocol}
 _Endpoint_      *{endpoint}*
 _Status_        {status}
+_Extra_         {extra}
 '''
 
 TECHNOLOGY_ICON = '🖲'
