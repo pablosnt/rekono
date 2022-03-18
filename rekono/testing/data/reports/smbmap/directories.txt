@@ -1,0 +1,8 @@
+[+] Guest session       IP: 10.10.10.10:445    Name: 10.10.10.10                                      
+        Disk                                                    Permissions     Comment
+        ----                                                    -----------     -------
+        shared                                                  READ, WRITE
+        .\shared\*
+        dr--r--r--                0 Fri Mar 18 18:51:40 2022    .
+        dr--r--r--                0 Fri Mar 18 17:58:29 2022    ..
+        IPC$                                                    NO ACCESS       IPC Service (Samba 4.5.4)
