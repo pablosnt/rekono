@@ -8,15 +8,17 @@ class SmbmapParserTest(ToolParserTest):
 
     tool_name = 'smbmap'
 
-    expected_shares = [
-        {'model': Endpoint, 'endpoint': 'shared', 'extra': 'READ, WRITE', 'protocol': EndpointProtocol.SMB},
-        {
-            'model': Endpoint,
-            'endpoint': 'IPC$',
-            'extra': '[NO ACCESS] IPC Service (Samba 4.5.4)',
-            'protocol': EndpointProtocol.SMB
-        }
-    ]
+    def setUp(self) -> None:
+        '''Create initial data before run tests.'''
+        self.expected_shares = [
+            {'model': Endpoint, 'endpoint': 'shared', 'extra': 'READ, WRITE', 'protocol': EndpointProtocol.SMB},
+            {
+                'model': Endpoint,
+                'endpoint': 'IPC$',
+                'extra': '[NO ACCESS] IPC Service (Samba 4.5.4)',
+                'protocol': EndpointProtocol.SMB
+            }
+        ]
 
     def test_smbmap_only_with_shares(self) -> None:
         '''Test to parse report only with shares.'''
