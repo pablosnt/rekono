@@ -1,4 +1,4 @@
-from findings.enums import Severity
+from findings.enums import EndpointProtocol, Severity
 from findings.models import Endpoint, Vulnerability
 from testing.tools.base import ToolParserTest
 
@@ -39,7 +39,7 @@ class NiktoParserTest(ToolParserTest):
                 'severity': Severity.MEDIUM,
                 'osvdb': 'OSVDB-0'
             },
-            {'model': Endpoint, 'endpoint': '/index'},
+            {'model': Endpoint, 'endpoint': '/index', 'protocol': EndpointProtocol.HTTP},
             {
                 'model': Vulnerability,
                 'name': "Apache mod_negotiation is enabled with MultiViews, which allows attackers to easily brute force file names. See http://www.wisec.it/sectou.php?id=4698ebdc59d15. The following alternatives for 'index' were found: index.html",     # noqa: E501
@@ -68,7 +68,7 @@ class NiktoParserTest(ToolParserTest):
                 'severity': Severity.MEDIUM,
                 'osvdb': 'OSVDB-3268'
             },
-            {'model': Endpoint, 'endpoint': '/images/'},
+            {'model': Endpoint, 'endpoint': '/images/', 'protocol': EndpointProtocol.HTTP},
             {
                 'model': Vulnerability,
                 'name': 'OSVDB-3233',
@@ -76,6 +76,6 @@ class NiktoParserTest(ToolParserTest):
                 'severity': Severity.MEDIUM,
                 'osvdb': 'OSVDB-3233'
             },
-            {'model': Endpoint, 'endpoint': '/icons/README'}
+            {'model': Endpoint, 'endpoint': '/icons/README', 'protocol': EndpointProtocol.HTTP}
         ]
         super().check_tool_file_parser('default.xml', expected)

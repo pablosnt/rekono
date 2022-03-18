@@ -1,6 +1,6 @@
 import xml.etree.ElementTree as parser
 
-from findings.enums import Severity
+from findings.enums import EndpointProtocol, Severity
 from findings.models import Endpoint, Vulnerability
 from tools.tools.base_tool import BaseTool
 
@@ -34,4 +34,4 @@ class NiktoTool(BaseTool):
                 )
             if endpoint and endpoint not in http_endpoints:                     # If it's a new endpoint
                 http_endpoints.add(endpoint)                                    # Add endpoint to HTTP endpoints set
-                self.create_finding(Endpoint, endpoint=endpoint)                # Create Endpoint
+                self.create_finding(Endpoint, endpoint=endpoint, protocol=EndpointProtocol.HTTP)    # Create Endpoint

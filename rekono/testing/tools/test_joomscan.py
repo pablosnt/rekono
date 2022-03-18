@@ -1,4 +1,4 @@
-from findings.enums import Severity
+from findings.enums import EndpointProtocol, Severity
 from findings.models import Endpoint, Exploit, Technology, Vulnerability
 from testing.tools.base import ToolParserTest
 
@@ -70,7 +70,7 @@ class JoomScanParserTest(ToolParserTest):
                 'edb_id': 40969,
                 'reference': 'https://www.exploit-db.com/exploits/40969/'
             },
-            {'model': Endpoint, 'endpoint': '/administrator/'}
+            {'model': Endpoint, 'endpoint': '/administrator/', 'protocol': EndpointProtocol.HTTP}
         ]
         super().check_tool_output_parser('exploitable.txt', expected)
 
@@ -84,11 +84,11 @@ class JoomScanParserTest(ToolParserTest):
                 'description': 'Joomla 3.7.0',
                 'reference': 'https://www.joomla.org/'
             },
-            {'model': Endpoint, 'endpoint': '/administrator/'},
-            {'model': Endpoint, 'endpoint': '/backup/config.php.bak'},
-            {'model': Endpoint, 'endpoint': '/config.php'},
-            {'model': Endpoint, 'endpoint': '/error.php'},
-            {'model': Endpoint, 'endpoint': '/static'},
+            {'model': Endpoint, 'endpoint': '/administrator/', 'protocol': EndpointProtocol.HTTP},
+            {'model': Endpoint, 'endpoint': '/backup/config.php.bak', 'protocol': EndpointProtocol.HTTP},
+            {'model': Endpoint, 'endpoint': '/config.php', 'protocol': EndpointProtocol.HTTP},
+            {'model': Endpoint, 'endpoint': '/error.php', 'protocol': EndpointProtocol.HTTP},
+            {'model': Endpoint, 'endpoint': '/static', 'protocol': EndpointProtocol.HTTP},
             {
                 'model': Vulnerability,
                 'name': 'Debug mode enabled',

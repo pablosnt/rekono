@@ -4,7 +4,7 @@ import shutil
 from typing import Any
 from urllib.parse import urlparse
 
-from findings.enums import Severity
+from findings.enums import EndpointProtocol, Severity
 from findings.models import Credential, Endpoint, Technology, Vulnerability
 from tools.tools.base_tool import BaseTool
 
@@ -51,7 +51,8 @@ class CmseekTool(BaseTool):
         # Remove target URL from paths
         paths = [p.replace(url, '/') for p in paths if p and p.replace(url, '/') != '/']
         for path in paths:                                                      # For each path
-            self.create_finding(Endpoint, endpoint=path.replace('//', '/'))     # Create Endpoint
+            # Create Endpoint
+            self.create_finding(Endpoint, endpoint=path.replace('//', '/'), protocol=EndpointProtocol.HTTP)
         if 'backup_file' in key:                                                # Backup file found
             self.create_finding(                                                # Create Vulnerability
                 Vulnerability,

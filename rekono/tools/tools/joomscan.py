@@ -1,4 +1,4 @@
-from findings.enums import Severity
+from findings.enums import EndpointProtocol, Severity
 from findings.models import Endpoint, Exploit, Technology, Vulnerability
 from tools.tools.base_tool import BaseTool
 
@@ -80,7 +80,7 @@ class JoomscanTool(BaseTool):
                         path_disclosure.append(endpoint)
                     if 'directory has directory listing :' in data:             # Endpoint with directory listing
                         directory_listing.append(endpoint)
-                    self.create_finding(Endpoint, endpoint=endpoint)
+                    self.create_finding(Endpoint, endpoint=endpoint, protocol=EndpointProtocol.HTTP)
         for name, paths, severity, cwe in [                                     # For each vulnerability found
             # CWE-530: Exposure of Backup File to an Unauthorized Control Sphere
             ('Backup files found', backups, Severity.HIGH, 'CWE-530'),

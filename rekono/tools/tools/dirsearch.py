@@ -1,5 +1,6 @@
 import json
 
+from findings.enums import EndpointProtocol
 from findings.models import Endpoint
 from tools.tools.base_tool import BaseTool
 
@@ -17,5 +18,9 @@ class DirsearchTool(BaseTool):
         for url in data.get('results', []):                                     # For each URL
             for item in url.values():                                           # For each item
                 for endpoint in item:                                           # For each endpoint
-                    # Create Endpoint
-                    self.create_finding(Endpoint, endpoint=endpoint.get('path', ''), status=endpoint.get('status', 0))
+                    self.create_finding(                                        # Create Endpoint
+                        Endpoint,
+                        endpoint=endpoint.get('path', ''),
+                        status=endpoint.get('status', 0),
+                        protocol=EndpointProtocol.HTTP
+                    )
