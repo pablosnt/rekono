@@ -365,7 +365,7 @@
         "fields": {
             "argument": 20,
             "type": 3,
-            "filter": "smb",
+            "filter": "microsoft-ds",
             "order": 2
         }
     },
@@ -375,7 +375,7 @@
         "fields": {
             "argument": 21,
             "type": 3,
-            "filter": "smb",
+            "filter": "microsoft-ds",
             "order": 1
         }
     }
