@@ -36,7 +36,9 @@ class SearchSploitParserTest(ToolParserTest):
             },
             {
                 'model': Exploit,
-                'title': "WordPress Core 1.2.1/1.2.2 - 'link-manager.php' Multiple Cross-Site Scripting Vulnerabilities",   # noqa: E501
+                'title': (
+                    "WordPress Core 1.2.1/1.2.2 - 'link-manager.php' Multiple Cross-Site Scripting Vulnerabilities"
+                ),
                 'edb_id': 24992,
                 'reference': 'https://www.exploit-db.com/exploits/24992'
             },

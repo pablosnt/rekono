@@ -220,7 +220,8 @@ class Enumeration(Finding):
 
     key_fields: List[Dict[str, Any]] = [                                        # Unique field list
         {'name': 'host_id', 'is_base': True},
-        {'name': 'port', 'is_base': False}
+        {'name': 'port', 'is_base': False},
+        {'name': 'protocol', 'is_base': False},
     ]
 
     def filter(self, input: Input) -> bool:

@@ -112,7 +112,10 @@ class GitleaksTool(BaseTool):
                     Vulnerability,
                     enumeration=endpoint.enumeration if isinstance(endpoint, Endpoint) else None,
                     name='Git source code exposure',
-                    description=f"Source code is exposed in the endpoint {endpoint.endpoint} and it's possible to dump it as a git repository",     # noqa: E501
+                    description=(
+                        f'Source code is exposed in the endpoint {endpoint.endpoint} and '
+                        "it's possible to dump it as a git repository"
+                    ),
                     severity=Severity.HIGH,
                     # CWE-527: Exposure of Version-Control Repository to an Unauthorized Control Sphere
                     cwe='CWE-527',
