@@ -574,5 +574,45 @@
             "configuration_id": 36,
             "type": 4
         }
+    },
+    {
+        "model": "tools.output",
+        "pk": 73,
+        "fields": {
+            "configuration_id": 37,
+            "type": 2
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 74,
+        "fields": {
+            "configuration_id": 37,
+            "type": 3
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 75,
+        "fields": {
+            "configuration_id": 37,
+            "type": 4
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 76,
+        "fields": {
+            "configuration_id": 37,
+            "type": 5
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 77,
+        "fields": {
+            "configuration_id": 37,
+            "type": 6
+        }
     }
 ]

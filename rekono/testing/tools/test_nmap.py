@@ -124,7 +124,7 @@ class NmapParserTest(ToolParserTest):
                 'service': 'ftp'
             },
             {'model': Technology, 'name': 'vsftpd', 'version': '2.3.4'},
-            {'model': Vulnerability, 'name': 'CVE-2011-2523', 'cve': 'CVE-2011-2523'},
+            {'model': Vulnerability, 'name': 'vsFTPd Backdoor', 'cve': 'CVE-2011-2523'},
             {
                 'model': Vulnerability,
                 'name': 'Anonymous FTP',
