@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE nmaprun>
 <?xml-stylesheet href="file:///usr/bin/../share/nmap/nmap.xsl" type="text/xsl"?>
-<!-- Nmap 7.92 scan initiated Sat Mar 19 18:14:58 2022 as: nmap -sV -A -p 445 -&#45;script smb-enum-users,smb-enum-shares -oX /home/kali/Desktop/smb-users.xml 192.168.1.38 -->
-<nmaprun scanner="nmap" args="nmap -sV -A -p 445 -&#45;script smb-enum-users,smb-enum-shares -oX /home/kali/Desktop/smb-users.xml 192.168.1.38" start="1647710098" startstr="Sat Mar 19 18:14:58 2022" version="7.92" xmloutputversion="1.05">
+<!-- Nmap 7.92 scan initiated Sat Mar 19 18:14:58 2022 as: nmap -sV -A -p 445 -&#45;script smb-enum-users,smb-enum-shares -oX /home/kali/Desktop/smb-users.xml 10.10.10.10 -->
+<nmaprun scanner="nmap" args="nmap -sV -A -p 445 -&#45;script smb-enum-users,smb-enum-shares -oX /home/kali/Desktop/smb-users.xml 10.10.10.10" start="1647710098" startstr="Sat Mar 19 18:14:58 2022" version="7.92" xmloutputversion="1.05">
 <scaninfo type="syn" protocol="tcp" numservices="1" services="445"/>
 <verbose level="0"/>
 <debugging level="0"/>
 <hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
-<address addr="192.168.1.38" addrtype="ipv4"/>
+<address addr="10.10.10.10" addrtype="ipv4"/>
 <address addr="8C:85:90:45:C5:4E" addrtype="mac" vendor="Apple"/>
 <hostnames>
 </hostnames>
 </hosthint>
 <host starttime="1647710098" endtime="1647710115"><status state="up" reason="arp-response" reason_ttl="0"/>
-<address addr="192.168.1.38" addrtype="ipv4"/>
+<address addr="10.10.10.10" addrtype="ipv4"/>
 <address addr="8C:85:90:45:C5:4E" addrtype="mac" vendor="Apple"/>
 <hostnames>
 </hostnames>
@@ -78,8 +78,8 @@
 <tcpsequence index="261" difficulty="Good luck!" values="85FFEB3E,FC002222,1B909B90,74E059F5,60BE3F48,A039C5AF"/>
 <ipidsequence class="All zeros" values="0,0,0,0,0,0"/>
 <tcptssequence class="other" values="DCF61DF9,D06CEAF2,8D627F8E,AC78850,B6DDDC67,FD970FC7"/>
-<hostscript><script id="smb-enum-users" output="&#xa;  629F42ED79BB\test (RID: 1000)&#xa;    Full name:   Linux User&#xa;    Description: &#xa;    Flags:       Password not required, Account disabled, Normal user account&#xa;"/><script id="smb-enum-shares" output="&#xa;  account_used: guest&#xa;  \\192.168.1.38\IPC$: &#xa;    Type: STYPE_IPC_HIDDEN&#xa;    Comment: IPC Service (Samba 4.5.4)&#xa;    Users: 2&#xa;    Max Users: &lt;unlimited&gt;&#xa;    Path: C:\tmp&#xa;    Anonymous access: READ/WRITE&#xa;    Current user access: READ/WRITE&#xa;  \\192.168.1.38\shared: &#xa;    Type: STYPE_DISKTREE&#xa;    Comment: &#xa;    Users: 0&#xa;    Max Users: &lt;unlimited&gt;&#xa;    Path: C:\data\shared&#xa;    Anonymous access: READ/WRITE&#xa;    Current user access: READ/WRITE"><elem key="account_used">guest</elem>
-<table key="\\192.168.1.38\IPC$">
+<hostscript><script id="smb-enum-users" output="&#xa;  629F42ED79BB\test (RID: 1000)&#xa;    Full name:   Linux User&#xa;    Description: &#xa;    Flags:       Password not required, Account disabled, Normal user account&#xa;"/><script id="smb-enum-shares" output="&#xa;  account_used: guest&#xa;  \\10.10.10.10\IPC$: &#xa;    Type: STYPE_IPC_HIDDEN&#xa;    Comment: IPC Service (Samba 4.5.4)&#xa;    Users: 2&#xa;    Max Users: &lt;unlimited&gt;&#xa;    Path: C:\tmp&#xa;    Anonymous access: READ/WRITE&#xa;    Current user access: READ/WRITE&#xa;  \\10.10.10.10\shared: &#xa;    Type: STYPE_DISKTREE&#xa;    Comment: &#xa;    Users: 0&#xa;    Max Users: &lt;unlimited&gt;&#xa;    Path: C:\data\shared&#xa;    Anonymous access: READ/WRITE&#xa;    Current user access: READ/WRITE"><elem key="account_used">guest</elem>
+<table key="\\10.10.10.10\IPC$">
 <elem key="Type">STYPE_IPC_HIDDEN</elem>
 <elem key="Comment">IPC Service (Samba 4.5.4)</elem>
 <elem key="Users">2</elem>
@@ -88,7 +88,7 @@
 <elem key="Anonymous access">READ/WRITE</elem>
 <elem key="Current user access">READ/WRITE</elem>
 </table>
-<table key="\\192.168.1.38\shared">
+<table key="\\10.10.10.10\shared">
 <elem key="Type">STYPE_DISKTREE</elem>
 <elem key="Comment"></elem>
 <elem key="Users">0</elem>
@@ -98,7 +98,7 @@
 <elem key="Current user access">READ/WRITE</elem>
 </table>
 </script></hostscript><trace>
-<hop ttl="1" ipaddr="192.168.1.38" rtt="19.54"/>
+<hop ttl="1" ipaddr="10.10.10.10" rtt="19.54"/>
 </trace>
 <times srtt="19537" rttvar="26444" to="125313"/>
 </host>

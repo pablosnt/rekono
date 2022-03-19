@@ -4,12 +4,10 @@ from typing import Any, Callable, Dict, List, Tuple, Union, cast
 from django.db.models import TextChoices
 from findings.enums import (EndpointProtocol, OSType, PortStatus, Protocol,
                             Severity)
-from findings.models import (Endpoint, Enumeration, Host, Technology,
-                             Vulnerability)
+from findings.models import (Credential, Endpoint, Enumeration, Host,
+                             Technology, Vulnerability)
 from libnmap.parser import NmapParser
 from tools.tools.base_tool import BaseTool
-
-from rekono.findings.models import Credential
 
 # CVE regex
 CVE_REGEX = 'CVE-[0-9]{4}-[0-9]{1,7}'
@@ -177,23 +175,33 @@ class NmapTool(BaseTool):
             script (Any): NSE script output
             technology (Union[Technology, None]): Technology associated to the NSE scripts execution
         '''
-        for share in script.get('elements', {}).keys():
+        for share, fields in script.get('elements', {}).items():
             if 'account_used' not in share:
                 path = share
                 if '\\' in path:
-                    path = path.rsplit('\\')[1]                                 # Remove host information
+                    path = path.rsplit('\\', 1)[1]                              # Remove host information
+                anonymous = fields.get("Anonymous access")
                 self.create_finding(                                            # Create share finding
                     Endpoint,
-                    technology=technology,
+                    enumeration=technology.enumeration if technology else None,
                     endpoint=path,
                     extra=(
-                        f'{share.get("Comment")}. '
-                        f'Type: {share.get("Type")} '
-                        f'Anonymous access: {share.get("Anonymous access")} '
-                        f'Current access: {share.get("Current user access")}'
-                    ),
+                        f'{fields.get("Comment") or ""} '
+                        f'Type: {fields.get("Type")} '
+                        f'Anonymous access: {anonymous} '
+                        f'Current access: {fields.get("Current user access")}'
+                    ).strip(),
                     protocol=EndpointProtocol.SMB
                 )
+                if 'READ' in anonymous or 'WRITE' in anonymous:
+                    self.create_finding(
+                        Vulnerability,
+                        technology=technology,
+                        name='Anonymous SMB',
+                        description=f'Anonymous access is allowed to the SMB share {path}',
+                        severity=Severity.CRITICAL if 'WRITE' in anonymous else Severity.HIGH,
+                        cwe='CWE-287'                                           # CWE-287: Improper Authentication
+                    )
 
     def parse_smb_users(self, script: Any, technology: Union[Technology, None]) -> None:
         '''Parse findings reported by NSE script smb-enum-users.
@@ -222,8 +230,10 @@ class NmapTool(BaseTool):
         if technology:
             protocols = []
             for protocol in script.get('elements', {}).get('dialects', {}).get(None):
-                protocols.append(protocol if '[dangerous' not in protocol else protocol.split('[dangerous', 1)[0])
-            technology.description = ', '.join(protocols)
+                protocols.append(
+                    protocol if '[dangerous' not in protocol else protocol.split('[dangerous', 1)[0].strip()
+                )
+            technology.description = f'Protocols: {", ".join(protocols)}'
             technology.save(update_fields=['description'])
 
     def parse_nse_scripts(
@@ -256,7 +266,7 @@ class NmapTool(BaseTool):
             'smb-vuln-ms07-029': (self.parse_vulners_nse, smb_technology),
             'smb-vuln-ms10-061': (self.parse_vulners_nse, smb_technology),
             'smb-vuln-ms17-010': (self.parse_vulners_nse, smb_technology),
-            'smb-enum-users': (self.parse_vulners_nse, smb_technology),
+            'smb-enum-users': (self.parse_smb_users, smb_technology),
             'smb-enum-shares': (self.parse_smb_shares, smb_technology),
             'smb-protocols': (self.parse_smb_protocols, smb_technology),
         }

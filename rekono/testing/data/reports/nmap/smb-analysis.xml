@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE nmaprun>
 <?xml-stylesheet href="file:///usr/bin/../share/nmap/nmap.xsl" type="text/xsl"?>
-<!-- Nmap 7.92 scan initiated Sat Mar 19 17:03:46 2022 as: nmap -sV -A -p 445 -&#45;script smb-enum-shares,smb-enum-users,smb-enum-groups,smb-enum-sessions,smb-protocols,smb-enum-domains,smb-enum-services,smb-mbenum,smb-ls,smb-security-mode,smb2-security-mode,smb-double-pulsar-backdoor,smb-vuln-webexec,smb2-vuln-uptime,smb-vuln-ms06-025,smb-vuln-ms07-029,smb-vuln-ms10-061,smb-vuln-ms17-010,smb-vuln-cve-2017-7494 -oX /home/kali/Desktop/smb-analysis 192.168.1.38 -->
-<nmaprun scanner="nmap" args="nmap -sV -A -p 445 -&#45;script smb-enum-shares,smb-enum-users,smb-enum-groups,smb-enum-sessions,smb-protocols,smb-enum-domains,smb-enum-services,smb-mbenum,smb-ls,smb-security-mode,smb2-security-mode,smb-double-pulsar-backdoor,smb-vuln-webexec,smb2-vuln-uptime,smb-vuln-ms06-025,smb-vuln-ms07-029,smb-vuln-ms10-061,smb-vuln-ms17-010,smb-vuln-cve-2017-7494 -oX /home/kali/Desktop/smb-analysis 192.168.1.38" start="1647705826" startstr="Sat Mar 19 17:03:46 2022" version="7.92" xmloutputversion="1.05">
+<!-- Nmap 7.92 scan initiated Sat Mar 19 17:03:46 2022 as: nmap -sV -A -p 445 -&#45;script smb-enum-shares,smb-enum-users,smb-enum-groups,smb-enum-sessions,smb-protocols,smb-enum-domains,smb-enum-services,smb-mbenum,smb-ls,smb-security-mode,smb2-security-mode,smb-double-pulsar-backdoor,smb-vuln-webexec,smb2-vuln-uptime,smb-vuln-ms06-025,smb-vuln-ms07-029,smb-vuln-ms10-061,smb-vuln-ms17-010,smb-vuln-cve-2017-7494 -oX /home/kali/Desktop/smb-analysis 10.10.10.10 -->
+<nmaprun scanner="nmap" args="nmap -sV -A -p 445 -&#45;script smb-enum-shares,smb-enum-users,smb-enum-groups,smb-enum-sessions,smb-protocols,smb-enum-domains,smb-enum-services,smb-mbenum,smb-ls,smb-security-mode,smb2-security-mode,smb-double-pulsar-backdoor,smb-vuln-webexec,smb2-vuln-uptime,smb-vuln-ms06-025,smb-vuln-ms07-029,smb-vuln-ms10-061,smb-vuln-ms17-010,smb-vuln-cve-2017-7494 -oX /home/kali/Desktop/smb-analysis 10.10.10.10" start="1647705826" startstr="Sat Mar 19 17:03:46 2022" version="7.92" xmloutputversion="1.05">
 <scaninfo type="syn" protocol="tcp" numservices="1" services="445"/>
 <verbose level="0"/>
 <debugging level="0"/>
 <hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
-<address addr="192.168.1.38" addrtype="ipv4"/>
+<address addr="10.10.10.10" addrtype="ipv4"/>
 <address addr="8C:85:90:45:C5:4E" addrtype="mac" vendor="Apple"/>
 <hostnames>
 </hostnames>
 </hosthint>
 <host starttime="1647705826" endtime="1647706147"><status state="up" reason="arp-response" reason_ttl="0"/>
-<address addr="192.168.1.38" addrtype="ipv4"/>
+<address addr="10.10.10.10" addrtype="ipv4"/>
 <address addr="8C:85:90:45:C5:4E" addrtype="mac" vendor="Apple"/>
 <hostnames>
 </hostnames>
@@ -66,8 +66,8 @@
 <tcpsequence index="260" difficulty="Good luck!" values="84E96936,73CF3F22,14B59DFB,651883EE,2184B7DD,ECB74D1"/>
 <ipidsequence class="All zeros" values="0,0,0,0,0,0"/>
 <tcptssequence class="other" values="14082D8A,2ADC7768,ABEC570C,FE4DDA52,7B48A49,2038C6BE"/>
-<hostscript><script id="smb-enum-domains" output="&#xa;  547CD6A40F36&#xa;    Groups: n/a&#xa;    Users: n/a&#xa;    Creation time: unknown&#xa;    Passwords: min length: 5; min age: n/a days; max age: n/a days; history: n/a passwords&#xa;    Account lockout disabled&#xa;  Builtin&#xa;    Groups: n/a&#xa;    Users: n/a&#xa;    Creation time: unknown&#xa;    Passwords: min length: 5; min age: n/a days; max age: n/a days; history: n/a passwords&#xa;    Account lockout disabled&#xa;"/><script id="smb-enum-shares" output="&#xa;  account_used: guest&#xa;  \\192.168.1.38\IPC$: &#xa;    Type: STYPE_IPC_HIDDEN&#xa;    Comment: IPC Service (Samba Server Version 4.6.3)&#xa;    Users: 4&#xa;    Max Users: &lt;unlimited&gt;&#xa;    Path: C:\tmp&#xa;    Anonymous access: READ/WRITE&#xa;    Current user access: READ/WRITE&#xa;  \\192.168.1.38\myshare: &#xa;    Type: STYPE_DISKTREE&#xa;    Comment: &#xa;    Users: 0&#xa;    Max Users: &lt;unlimited&gt;&#xa;    Path: C:\home\share&#xa;    Anonymous access: READ/WRITE&#xa;    Current user access: READ/WRITE"><elem key="account_used">guest</elem>
-<table key="\\192.168.1.38\IPC$">
+<hostscript><script id="smb-enum-domains" output="&#xa;  547CD6A40F36&#xa;    Groups: n/a&#xa;    Users: n/a&#xa;    Creation time: unknown&#xa;    Passwords: min length: 5; min age: n/a days; max age: n/a days; history: n/a passwords&#xa;    Account lockout disabled&#xa;  Builtin&#xa;    Groups: n/a&#xa;    Users: n/a&#xa;    Creation time: unknown&#xa;    Passwords: min length: 5; min age: n/a days; max age: n/a days; history: n/a passwords&#xa;    Account lockout disabled&#xa;"/><script id="smb-enum-shares" output="&#xa;  account_used: guest&#xa;  \\10.10.10.10\IPC$: &#xa;    Type: STYPE_IPC_HIDDEN&#xa;    Comment: IPC Service (Samba Server Version 4.6.3)&#xa;    Users: 4&#xa;    Max Users: &lt;unlimited&gt;&#xa;    Path: C:\tmp&#xa;    Anonymous access: READ/WRITE&#xa;    Current user access: READ/WRITE&#xa;  \\10.10.10.10\myshare: &#xa;    Type: STYPE_DISKTREE&#xa;    Comment: &#xa;    Users: 0&#xa;    Max Users: &lt;unlimited&gt;&#xa;    Path: C:\home\share&#xa;    Anonymous access: READ/WRITE&#xa;    Current user access: READ/WRITE"><elem key="account_used">guest</elem>
+<table key="\\10.10.10.10\IPC$">
 <elem key="Type">STYPE_IPC_HIDDEN</elem>
 <elem key="Comment">IPC Service (Samba Server Version 4.6.3)</elem>
 <elem key="Users">4</elem>
@@ -76,7 +76,7 @@
 <elem key="Anonymous access">READ/WRITE</elem>
 <elem key="Current user access">READ/WRITE</elem>
 </table>
-<table key="\\192.168.1.38\myshare">
+<table key="\\10.10.10.10\myshare">
 <elem key="Type">STYPE_DISKTREE</elem>
 <elem key="Comment"></elem>
 <elem key="Users">0</elem>
@@ -92,7 +92,7 @@
 <elem key="authentication_level">user</elem>
 <elem key="challenge_response">supported</elem>
 <elem key="message_signing">disabled</elem>
-</script><script id="smb-ls" output="Volume \\192.168.1.38\myshare&#xa;SIZE   TIME                 FILENAME&#xa;&lt;DIR&gt;  2022-03-19T16:09:12  .&#xa;&lt;DIR&gt;  2017-06-12T16:40:35  ..&#xa;&#xa;"><table key="volumes">
+</script><script id="smb-ls" output="Volume \\10.10.10.10\myshare&#xa;SIZE   TIME                 FILENAME&#xa;&lt;DIR&gt;  2022-03-19T16:09:12  .&#xa;&lt;DIR&gt;  2017-06-12T16:40:35  ..&#xa;&#xa;"><table key="volumes">
 <table>
 <table key="files">
 <table>
@@ -106,7 +106,7 @@
 <elem key="time">2017-06-12T16:40:35</elem>
 </table>
 </table>
-<elem key="volume">\\192.168.1.38\myshare</elem>
+<elem key="volume">\\10.10.10.10\myshare</elem>
 </table>
 </table>
 <table key="total">
@@ -122,7 +122,7 @@
 <elem>3.1.1</elem>
 </table>
 </script><script id="smb-enum-sessions" output="&#xa;  &lt;nobody&gt;&#xa;"/></hostscript><trace>
-<hop ttl="1" ipaddr="192.168.1.38" rtt="128.68"/>
+<hop ttl="1" ipaddr="10.10.10.10" rtt="128.68"/>
 </trace>
 <times srtt="128677" rttvar="203840" to="944037"/>
 </host>

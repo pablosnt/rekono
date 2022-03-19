@@ -1,5 +1,7 @@
-from findings.enums import OSType, PortStatus, Protocol, Severity
-from findings.models import Enumeration, Host, Technology, Vulnerability
+from findings.enums import (EndpointProtocol, OSType, PortStatus, Protocol,
+                            Severity)
+from findings.models import (Credential, Endpoint, Enumeration, Host,
+                             Technology, Vulnerability)
 from testing.tools.base import ToolParserTest
 
 
@@ -135,3 +137,107 @@ class NmapParserTest(ToolParserTest):
             }
         ]
         super().check_tool_file_parser('ftp-vulnerabilities.xml', expected)
+
+    def test_smb_analysis(self) -> None:
+        '''Test to parse report with full SMB analysis.'''
+        expected = [
+            {
+                'model': Host,
+                'address': '10.10.10.10',
+                'os': 'Apple macOS 10.13 (High Sierra) - 10.15 (Catalina) or iOS 11.0 - 13.4 (Darwin 17.0.0 - 19.2.0)',
+                'os_type': OSType.MACOS
+            },
+            {
+                'model': Enumeration,
+                'port': 445,
+                'port_status': PortStatus.OPEN,
+                'protocol': Protocol.TCP,
+                'service': 'netbios-ssn'
+            },
+            {
+                'model': Technology,
+                'name': 'Samba smbd',
+                'version': '3.X - 4.X',
+                'description': 'Protocols: NT LM 0.12 (SMBv1), 2.0.2, 2.1, 3.0, 3.0.2, 3.1.1'
+            },
+            {
+                'model': Endpoint,
+                'endpoint': 'IPC$',
+                'extra': (
+                    'IPC Service (Samba Server Version 4.6.3) Type: STYPE_IPC_HIDDEN '
+                    'Anonymous access: READ/WRITE Current access: READ/WRITE'
+                ),
+                'protocol': EndpointProtocol.SMB
+            },
+            {
+                'model': Vulnerability,
+                'name': 'Anonymous SMB',
+                'description': 'Anonymous access is allowed to the SMB share IPC$',
+                'severity': Severity.CRITICAL,
+                'cwe': 'CWE-287'
+            },
+            {
+                'model': Endpoint,
+                'endpoint': 'myshare',
+                'extra': 'Type: STYPE_DISKTREE Anonymous access: READ/WRITE Current access: READ/WRITE',
+                'protocol': EndpointProtocol.SMB
+            },
+            {
+                'model': Vulnerability,
+                'name': 'Anonymous SMB',
+                'description': 'Anonymous access is allowed to the SMB share myshare',
+                'severity': Severity.CRITICAL,
+                'cwe': 'CWE-287'
+            },
+        ]
+        super().check_tool_file_parser('smb-analysis.xml', expected)
+
+    def test_smb_users(self) -> None:
+        '''Test to parse report with SMB users.'''
+        expected = [
+            {
+                'model': Host,
+                'address': '10.10.10.10',
+                'os': 'Apple macOS 10.13 (High Sierra) - 10.15 (Catalina) or iOS 11.0 - 13.4 (Darwin 17.0.0 - 19.2.0)',
+                'os_type': OSType.MACOS
+            },
+            {
+                'model': Enumeration,
+                'port': 445,
+                'port_status': PortStatus.OPEN,
+                'protocol': Protocol.TCP,
+                'service': 'netbios-ssn'
+            },
+            {'model': Technology, 'name': 'Samba smbd', 'version': '3.X - 4.X'},
+            {'model': Credential, 'username': '629F42ED79BB\\test'},
+            {
+                'model': Endpoint,
+                'endpoint': 'IPC$',
+                'extra': (
+                    'IPC Service (Samba 4.5.4) Type: STYPE_IPC_HIDDEN '
+                    'Anonymous access: READ/WRITE Current access: READ/WRITE'
+                ),
+                'protocol': EndpointProtocol.SMB
+            },
+            {
+                'model': Vulnerability,
+                'name': 'Anonymous SMB',
+                'description': 'Anonymous access is allowed to the SMB share IPC$',
+                'severity': Severity.CRITICAL,
+                'cwe': 'CWE-287'
+            },
+            {
+                'model': Endpoint,
+                'endpoint': 'shared',
+                'extra': 'Type: STYPE_DISKTREE Anonymous access: READ/WRITE Current access: READ/WRITE',
+                'protocol': EndpointProtocol.SMB
+            },
+            {
+                'model': Vulnerability,
+                'name': 'Anonymous SMB',
+                'description': 'Anonymous access is allowed to the SMB share shared',
+                'severity': Severity.CRITICAL,
+                'cwe': 'CWE-287'
+            },
+        ]
+        super().check_tool_file_parser('smb-users.xml', expected)
