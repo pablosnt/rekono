@@ -25,9 +25,8 @@ class NmapTool(BaseTool):
         Returns:
             Union[Technology, None]: Technology related to SMB service if found
         '''
-        for service in ['microsoft-ds', 'netbios-ssn', 'smbdirect', 'smb']:
-            if service in technologies:
-                return technologies[service]
+        if 'microsoft-ds' in technologies:
+            return technologies['microsoft-ds']
         return None
 
     def parse_vulners_nse(self, script: Any, technology: Union[Technology, None]) -> None:
