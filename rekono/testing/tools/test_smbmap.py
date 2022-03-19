@@ -10,6 +10,7 @@ class SmbmapParserTest(ToolParserTest):
 
     def setUp(self) -> None:
         '''Create initial data before run tests.'''
+        super().setUp()
         self.expected_shares = [
             {'model': Endpoint, 'endpoint': 'shared', 'extra': 'READ, WRITE', 'protocol': EndpointProtocol.SMB},
             {
