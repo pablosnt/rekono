@@ -28,9 +28,13 @@
         <b-button variant="outline" @click="selectTask(row.item)" v-b-modal.cancel-task-modal v-b-tooltip.hover title="Cancel Task" v-if="auditor.includes($store.state.role) && row.item.status !== 'Cancelled' && (cancellableStatuses.includes(row.item.status) || (row.item.repeat_in && row.item.repeat_time_unit))">
           <b-icon variant="danger" icon="dash-circle-fill"/>
         </b-button>
+        <b-button variant="outline" @click="selectTask(row.item)" v-b-modal.repeat-task-modal v-b-tooltip.hover title="Execute Again" v-if="auditor.includes($store.state.role) && row.item.status !== 'Requested' && row.item.status !== 'Running'">
+          <b-icon variant="success" icon="play-circle-fill"/>
+        </b-button>
       </template>
     </b-table>
     <pagination :page="page" :limit="limit" :limits="limits" :total="total" name="tasks" @pagination="pagination"/>
+    <task-repeat id="repeat-task-modal" :task="selectedTask"/>
     <deletion id="cancel-task-modal" title="Cancel Task" removeWord="cancel" @deletion="cancelTask" @clean="cleanSelection" v-if="selectedTask !== null">
       <span>selected task</span>
     </deletion>
@@ -44,6 +48,7 @@ import Deletion from '@/common/Deletion'
 import TableHeader from '@/common/TableHeader'
 import Pagination from '@/common/Pagination'
 import Task from '@/modals/Task'
+import TaskRepeat from '@/modals/TaskRepeat'
 export default {
   name: 'projectTaskPage',
   mixins: [RekonoApi],
@@ -74,7 +79,8 @@ export default {
     Deletion,
     TableHeader,
     Pagination,
-    Task
+    Task,
+    TaskRepeat
   },
   watch: {
     data () {

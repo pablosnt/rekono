@@ -104,9 +104,7 @@
           </b-tabs>
         </b-col>
       </b-row>
-      <b-modal id="repeat-task-modal" @ok="repeatTask" title="Repeat Task" ok-title="Execute Now" header-bg-variant="success" header-text-variant="light" ok-variant="success">
-        <p>This task will be executed right now. Are you sure?</p>
-      </b-modal>
+      <task-repeat id="repeat-task-modal" :task="currentTask"/>
       <deletion id="cancel-task-modal" title="Cancel Task" removeWord="cancel" @deletion="cancelTask" v-if="currentTask !== null">
         <span>selected task</span>
       </deletion>
@@ -121,6 +119,7 @@ import RekonoApi from '@/backend/RekonoApi'
 import Deletion from '@/common/Deletion'
 import Findings from '@/components/findings/Findings'
 import DefectDojo from '@/modals/DefectDojo'
+import TaskRepeat from '@/modals/TaskRepeat'
 import NotFound from '@/errors/NotFound'
 export default {
   name: 'taskPage',
@@ -155,6 +154,7 @@ export default {
     Findings,
     Deletion,
     DefectDojo,
+    TaskRepeat,
     NotFound
   },
   methods: {
@@ -202,10 +202,6 @@ export default {
           this.fetchTask(true)
           this.fetchExecutions()
         })
-    },
-    repeatTask () {
-      this.post(`/api/tasks/${this.currentTask.id}/repeat/`, { }, this.currentTask.process ? this.currentTask.process.name : this.currentTask.tool.name, 'Task executed again successfully')
-        .then(data => { this.$router.push({ name: 'task', params: { id: data.id, task: data } }) })
     },
     selectExecution (items) {
       if (items && items.length > 0) {
