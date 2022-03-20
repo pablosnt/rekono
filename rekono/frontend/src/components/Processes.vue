@@ -104,7 +104,7 @@ export default {
         { key: 'actions', sortable: false }
       ],
       stepsFields: [
-        { key: 'icon', sortable: false },
+        { key: 'icon', label: '', sortable: false },
         { key: 'tool.name', label: 'Tool', sortable: true },
         { key: 'configuration.name', label: 'Configuration', sortable: true },
         { key: 'tool.stage_name', label: 'Stage', sortable: true },

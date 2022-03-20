@@ -76,7 +76,7 @@ export default {
     return {
       data: [],
       toolsFields: [
-        { key: 'icon', sortable: false },
+        { key: 'icon', label: '', sortable: false },
         { key: 'name', label: 'Tool', sortable: true },
         { key: 'command', sortable: true },
         { key: 'stage_name', label: 'Stage', sortable: true },
