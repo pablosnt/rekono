@@ -37,7 +37,10 @@ class RekonoTestCase(TestCase):
         # Create other user for unauthorized requests
         self.other_credential = 'other'                                         # Credentials for other user
         self.other_email = 'other@other.other'                                  # Email for other user
-        self.other, self.other_access, self.other_refresh = self.create_and_login(self.other_credential, self.other_email)  # noqa: E501
+        self.other, self.other_access, self.other_refresh = self.create_and_login(
+            self.other_credential,
+            self.other_email
+        )
         # Rekono API clients
         self.client = APIClient(HTTP_AUTHORIZATION=f'Bearer {self.access}')     # Authenticated and Authorized
         self.other_client = APIClient(HTTP_AUTHORIZATION=f'Bearer {self.other_access}')     # Unauthorized

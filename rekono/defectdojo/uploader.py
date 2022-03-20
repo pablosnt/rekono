@@ -4,7 +4,7 @@ from typing import List, Tuple
 from defectdojo.api import DefectDojo
 from defectdojo.exceptions import DefectDojoException
 from executions.models import Execution
-from findings.models import Path, Finding
+from findings.models import Finding, Path
 from projects.models import Project
 
 from rekono.settings import DEFECT_DOJO
@@ -42,11 +42,15 @@ def get_product(project: Project) -> int:
         if product_type:                                                        # If product type found or created
             success, body = dd_client.create_product(product_type, project)     # Create product associated to project
             if success:
-                logger.info(f'[Defect-Dojo] New product {body["id"]} has been created and linked to project {project.id}')  # noqa: E501
+                logger.info(
+                    f'[Defect-Dojo] New product {body["id"]} has been created and linked to project {project.id}'
+                )
                 project.defectdojo_product_id = body['id']                      # Save the Id in the Rekono project
                 project.save(update_fields=['defectdojo_product_id'])
                 return body['id']
-    logger.warning(f'[Defect-Dojo] Product related to project {project.id} is not found and can\'t be created due to configuration')    # noqa: E501
+    logger.warning(
+        f'[Defect-Dojo] Product related to project {project.id} is not found and can\'t be created due to configuration'
+    )
     raise DefectDojoException({'product': [f'Product associated to project {project.id} not found']})
 
 
@@ -72,7 +76,9 @@ def get_engagement(project: Project, id: int, name: str, description: str) -> Tu
         if success and body:
             # Engagement product doesn't match the product associated to the Rekono project
             if project.defectdojo_product_id and project.defectdojo_product_id != body.get('product'):
-                logger.warning(f'[Defect-Dojo] Engagement {id} doesn\'t belong to product {project.defectdojo_product_id}')     # noqa: E501
+                logger.warning(
+                    f'[Defect-Dojo] Engagement {id} doesn\'t belong to product {project.defectdojo_product_id}'
+                )
                 raise DefectDojoException({'engagement': [f'Invalid engagement Id {id} for project {project.id}']})
             elif not project.defectdojo_product_id:                             # No related product Id yet
                 # Save engagement product in Rekono project
@@ -183,6 +189,8 @@ def findings(
                 test_id = create_rekono_test(engagement_id)                     # Create the test if not created before
             success, _ = dd_client.create_finding(test_id, finding)             # Import finding as Defect-Dojo finding
         if success:
-            logger.info(f'[Defect-Dojo] {finding.__class__.__name__} {finding.id} has been imported in product {product_id}')   # noqa: E501
+            logger.info(
+                f'[Defect-Dojo] {finding.__class__.__name__} {finding.id} has been imported in product {product_id}'
+            )
             finding.reported_to_defectdojo = True                               # Update the finding as reported
             finding.save(update_fields=['reported_to_defectdojo'])

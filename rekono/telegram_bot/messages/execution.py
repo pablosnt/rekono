@@ -1,8 +1,8 @@
 from typing import List
 
 from executions.models import Execution
-from findings.models import (OSINT, Credential, Path, Port, Exploit,
-                             Finding, Host, Technology, Vulnerability)
+from findings.models import (OSINT, Credential, Exploit, Finding, Host, Path,
+                             Port, Technology, Vulnerability)
 from telegram.ext import CallbackContext
 from telegram.utils.helpers import escape_markdown
 from telegram_bot.context import (CONFIGURATION, INTENSITY, PROCESS, PROJECT,
@@ -93,7 +93,10 @@ def notification_message(execution: Execution, findings: List[Finding]) -> str:
         project=escape_markdown(execution.task.target.project.name, version=2),
         target=escape_markdown(execution.task.target.target, version=2),
         tool=escape_markdown(execution.step.tool.name if execution.step else execution.task.tool.name, version=2),
-        configuration=escape_markdown(execution.step.configuration.name if execution.step else execution.task.configuration.name, version=2),   # noqa: E501
+        configuration=escape_markdown(
+            execution.step.configuration.name if execution.step else execution.task.configuration.name,
+            version=2
+        ),
         status=escape_markdown(execution.status, version=2),
         start=escape_markdown(execution.start.strftime(DATE_FORMAT), version=2),
         end=escape_markdown(execution.end.strftime(DATE_FORMAT), version=2),

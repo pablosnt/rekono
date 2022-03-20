@@ -28,7 +28,13 @@ class LikeManagementView(GenericViewSet):
     # Resources (Wordlists) can be liked, and auditors and admins are the only ones that can see this resources.
     # Permission classes should be overrided here, because if not, the standard permissions would be applied, and not
     # all auditors can make POST requests to resources like these.
-    @action(detail=True, methods=['POST'], url_path='like', url_name='like', permission_classes=[IsAuthenticated, IsAuditor])   # noqa: E501
+    @action(
+        detail=True,
+        methods=['POST'],
+        url_path='like',
+        url_name='like',
+        permission_classes=[IsAuthenticated, IsAuditor]
+    )
     def like(self, request: Request, pk: str) -> Response:
         '''Mark an instance as liked by the current user.
 
@@ -48,7 +54,13 @@ class LikeManagementView(GenericViewSet):
     # Resources (Wordlists) can be liked, and auditors and admins are the only ones that can see this resources.
     # Permission classes should be overrided here, because if not, the standard permissions would be applied, and not
     # all auditors can make POST requests to resources like these.
-    @action(detail=True, methods=['POST'], url_path='dislike', url_name='dislike', permission_classes=[IsAuthenticated, IsAuditor])     # noqa: E501
+    @action(
+        detail=True,
+        methods=['POST'],
+        url_path='dislike',
+        url_name='dislike',
+        permission_classes=[IsAuthenticated, IsAuditor]
+    )
     def dislike(self, request: Request, pk: str) -> Response:
         '''Unmark an instance as liked by the current user.
 

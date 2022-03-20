@@ -7,15 +7,14 @@ from defectdojo.views import DefectDojoFindings
 from django.db.models import QuerySet
 from drf_spectacular.utils import extend_schema
 from findings.enums import DataType
-from findings.filters import (CredentialFilter, PathFilter,
-                              PortFilter, ExploitFilter, HostFilter,
-                              OSINTFilter, TechnologyFilter,
-                              VulnerabilityFilter)
-from findings.models import (OSINT, Credential, Path, Port, Exploit,
-                             Finding, Host, Technology, Vulnerability)
-from findings.serializers import (CredentialSerializer, PathSerializer,
-                                  PortSerializer, ExploitSerializer,
+from findings.filters import (CredentialFilter, ExploitFilter, HostFilter,
+                              OSINTFilter, PathFilter, PortFilter,
+                              TechnologyFilter, VulnerabilityFilter)
+from findings.models import (OSINT, Credential, Exploit, Finding, Host, Path,
+                             Port, Technology, Vulnerability)
+from findings.serializers import (CredentialSerializer, ExploitSerializer,
                                   HostSerializer, OSINTSerializer,
+                                  PathSerializer, PortSerializer,
                                   TechnologySerializer,
                                   VulnerabilitySerializer)
 from rest_framework import status
@@ -103,7 +102,7 @@ class FindingBaseView(ListModelMixin, RetrieveModelMixin, DestroyModelMixin, Def
 
 
 class OSINTViewSet(FindingBaseView):
-    '''OSINT ViewSet that includes: get, retrieve, enable, disable, import in Defect-Dojo and target creation features.'''  # noqa: E501
+    '''OSINT ViewSet that includes: get, retrieve, enable, disable, import in DD and target creation features.'''
 
     queryset = OSINT.objects.all().order_by('-id')
     serializer_class = OSINTSerializer

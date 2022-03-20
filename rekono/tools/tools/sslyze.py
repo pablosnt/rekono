@@ -79,7 +79,12 @@ class SslyzeTool(BaseTool):
             if r['openssl_ccs_injection']['result']['is_vulnerable_to_ccs_injection']:
                 # If it is vulnerable to CCS injection
                 # Create Vulnerability with CVE-2014-0224
-                self.create_finding(Vulnerability, technology=generic_tech, name='OpenSSL CSS Injection', cve='CVE-2014-0224')      # noqa: E501
+                self.create_finding(
+                    Vulnerability,
+                    technology=generic_tech,
+                    name='OpenSSL CSS Injection',
+                    cve='CVE-2014-0224'
+                )
             if r['robot']['result']['robot_result'] in ['VULNERABLE_STRONG_ORACLE', 'VULNERABLE_WEAK_ORACLE']:
                 # If it is vulnerable to ROBOT
                 self.create_finding(                                            # Create Vulnerability

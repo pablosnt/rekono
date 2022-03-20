@@ -78,9 +78,14 @@ class FindingsTest(RekonoTestCase):
             self.port: f'{self.host.__str__()} - {self.port.port}',
             self.technology: f'{self.port.__str__()} - {self.technology.name}',
             self.http_path: f'{self.port.__str__()} - {self.http_path.path}',
-            self.credential_finding: f'{self.technology.__str__()} - {self.credential_finding.email} - {self.credential_finding.username} - {self.credential_finding.secret}',      # noqa: E501
+            self.credential_finding: (
+                f'{self.technology.__str__()} - {self.credential_finding.email} - '
+                f'{self.credential_finding.username} - {self.credential_finding.secret}'
+            ),
             self.vulnerability: f'{self.technology.__str__()} - {self.vulnerability.name} - {self.vulnerability.cve}',
-            self.port_vulnerability: f'{self.port.__str__()} - {self.port_vulnerability.name} - {self.port_vulnerability.cve}',      # noqa: E501
+            self.port_vulnerability: (
+                f'{self.port.__str__()} - {self.port_vulnerability.name} - {self.port_vulnerability.cve}'
+            ),
             self.exploit: f'{self.vulnerability.__str__()} - {self.exploit.title}',
             self.tech_exploit: f'{self.technology.__str__()} - {self.tech_exploit.title}',
         }

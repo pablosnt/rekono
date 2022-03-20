@@ -26,7 +26,12 @@ class RekonoTestCaseWithDDImports(RekonoTestCase):
             # Test import of execution report in Defect-Dojo
             self.api_test(self.client.post, f'{self.endpoint}{self.dd_model.id}/defect-dojo-scans/', status, data=data)
             # Test import of findings in Defect-Dojo
-            self.api_test(self.client.post, f'{self.endpoint}{self.dd_model.id}/defect-dojo-findings/', status, data=data)  # noqa: E501
+            self.api_test(
+                self.client.post,
+                f'{self.endpoint}{self.dd_model.id}/defect-dojo-findings/',
+                status,
+                data=data
+            )
 
     @mock.patch('defectdojo.api.DefectDojo.request', defect_dojo_success)       # Mocks Defect-Dojo response
     def test_import_in_defect_dojo(self) -> None:

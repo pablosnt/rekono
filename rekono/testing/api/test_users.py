@@ -106,10 +106,14 @@ class UsersTest(RekonoTestCase):
     def test_filter_by_project(self) -> None:
         '''Test filter feature by project.'''
         # Get users that belong to created project
-        content = self.api_test(self.client.get, f'{self.endpoint}?project={self.project.id}&o=-username', expected={'count': 1})     # noqa: E501
+        content = self.api_test(
+            self.client.get, f'{self.endpoint}?project={self.project.id}&o=-username', expected={'count': 1}
+        )
         self.check_fields(['id', 'username', 'email'], content['results'][0], self.admin)
         # Get users that don't belong to created project
-        content = self.api_test(self.client.get, f'{self.endpoint}?project__ne={self.project.id}&o=-username', expected={'count': 1})     # noqa: E501
+        content = self.api_test(
+            self.client.get, f'{self.endpoint}?project__ne={self.project.id}&o=-username', expected={'count': 1}
+        )
         self.check_fields(['id', 'username', 'email'], content['results'][0], self.other)
 
     def test_filter_by_project_not_found(self) -> None:

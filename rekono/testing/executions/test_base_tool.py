@@ -40,7 +40,10 @@ class BaseToolTest(TestCase):
         self.configuration = Configuration.objects.create(                      # Configuration with all argument types
             name='Test',
             tool=self.nmap,
-            arguments='{intensity} {test_osint} {test_only_host} {test_host} {test_port} {test_path} {test_technology} {test_credential} {test_vulnerability} {test_exploit} {test_wordlist}'  # noqa: E501
+            arguments=(
+                '{intensity} {test_osint} {test_only_host} {test_host} {test_port} {test_path} '
+                '{test_technology} {test_credential} {test_vulnerability} {test_exploit} {test_wordlist}'
+            )
         )
         # Initialize auxiliary lists to help data usage
         self.arguments: List[Argument] = []

@@ -99,7 +99,9 @@ def process_dependencies(
     executions: List[List[BaseInput]] = utils.get_executions_from_findings(findings, tool)
     logger.info(f'[Execution] {len(executions) - 1} new executions from previous findings')
     # Filter executions based on tool arguments
-    executions = [param_set for param_set in executions if tool_runner.check_arguments(targets, cast(List[Finding], param_set))]    # noqa: E501
+    executions = [
+        param_set for param_set in executions if tool_runner.check_arguments(targets, cast(List[Finding], param_set))
+    ]
     # For each executions, except first whose findings will be included in the current jobs
     for findings in executions[1:]:
         # Create a new execution entity from the current execution data

@@ -31,7 +31,9 @@ class TasksTest(RekonoTestCaseWithDDImports):
         self.process_data = {'target_id': self.target.id, 'process_id': self.process.id}
         self.expected_data = {'intensity_rank': 'Normal', 'status': Status.REQUESTED}
         self.models = {                                                         # Models to test __str__ method
-            self.task: f'{self.project.name} - {self.target.target} - {self.nmap.name} - {self.nmap_configuration.name}',   # noqa: E501
+            self.task: (
+                f'{self.project.name} - {self.target.target} - {self.nmap.name} - {self.nmap_configuration.name}'
+            ),
             self.running_task: f'{self.project.name} - {self.target.target} - {self.process.name}',
         }
         self.dd_model = self.task                                               # Model to test Defect-Dojo integration
@@ -54,7 +56,9 @@ class TasksTest(RekonoTestCaseWithDDImports):
     def test_create_with_process(self) -> None:
         '''Test creation feature with process task.'''
         # Create task
-        content = self.api_test(self.client.post, self.endpoint, 201, data=self.process_data, expected=self.expected_data)      # noqa: E501
+        content = self.api_test(
+            self.client.post, self.endpoint, 201, data=self.process_data, expected=self.expected_data
+        )
         self.check_fields(['id', 'target'], content['target'], self.target)
         self.check_fields(['id', 'name'], content['process'], self.process)
         self.run_task_and_check_status(content['id'])
@@ -126,7 +130,9 @@ class TasksTest(RekonoTestCaseWithDDImports):
     def test_repeat(self) -> None:
         '''Test repeat task feature.'''
         # Repeat completed task
-        content = self.api_test(self.client.post, f'{self.endpoint}{self.task.id}/repeat/', 201, expected=self.expected_data)   # noqa: E501
+        content = self.api_test(
+            self.client.post, f'{self.endpoint}{self.task.id}/repeat/', 201, expected=self.expected_data
+        )
         self.check_fields(['id', 'target'], content['target'], self.target)
         self.check_fields(['id', 'name'], content['tool'], self.nmap)
         self.check_fields(['id', 'name'], content['configuration'], self.nmap_configuration)
