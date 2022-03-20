@@ -11,6 +11,13 @@
           </div>
         </div>
       </template>
+      <template #cell(port_status)="row">
+        <div v-for="variant in portStatusByVariant" :key="variant.value">
+          <div v-if="variant.value === row.item.port_status">
+            <b-badge :variant="variant.variant">{{ row.item.port_status }}</b-badge>
+          </div>
+        </div>
+      </template>
       <template #cell(severity)="row">
         <div v-for="s in severityByVariant" :key="s.value">
           <b-badge v-if="s.value == row.item.severity" :variant="s.variant">{{ row.item.severity.toUpperCase() }}</b-badge>

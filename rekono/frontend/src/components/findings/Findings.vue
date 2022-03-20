@@ -21,7 +21,7 @@
     </b-row>
     <b-row :cols="cols" class="mt-3">
       <finding name="hosts" :fields="hosts" :details="hostDetails" @finding-selected="selectFinding" :id="selectedHost" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="selectedTask" :execution="selectedExecution" :search="search" :active="activeFilter" :reload="reload"/>
-      <finding name="ports" :fields="ports" :details="portDetails" @finding-selected="selectFinding" :id="selectedPort" :filter="hostFilter" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="selectedTask" :execution="selectedExecution" :search="search" :active="activeFilter" :reload="reload"/>
+      <finding name="ports" :fields="ports" @finding-selected="selectFinding" :id="selectedPort" :filter="hostFilter" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="selectedTask" :execution="selectedExecution" :search="search" :active="activeFilter" :reload="reload"/>
       <finding name="paths" :fields="paths" :details="pathDetails" :filter="portFilter" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="selectedTask" :execution="selectedExecution" :search="search" :active="activeFilter" :reload="reload"/>
       <finding name="technologies" :fields="technologies" :details="technologyDetails" @finding-selected="selectFinding" :id="selectedTechnology" :filter="portFilter" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="selectedTask" :execution="selectedExecution" :search="search" :active="activeFilter" :reload="reload"/>
       <finding name="credentials" :fields="credentials" :details="credentialDetails" :filter="technologyFilter" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="selectedTask" :execution="selectedExecution" :search="search" :active="activeFilter" :reload="reload"/>
@@ -135,18 +135,17 @@ export default {
       ],
       ports: [
         { key: 'port', sortable: true },
+        { key: 'protocol', sortable: true },
+        { key: 'port_status', sortable: true },
         { key: 'service', sortable: true}
       ],
-      portDetails: [
-        { field: 'port_status', title: 'Port Status', type: 'badge', variants: this.portStatusByVariant }
-      ],
       paths: [
-        { key: 'path', sortable: true }
+        { key: 'path', sortable: true },
+        { key: 'type', sortable: true },
       ],
       pathDetails: [
-        { field: 'protocol', type: 'badge', variant: 'primary' },
-        { field: 'status', title: 'Status', type: 'text'},
-        { field: 'extra', type: 'text'},
+        { field: 'status', title: 'Status', type: 'text' },
+        { field: 'extra', type: 'text' },
       ],
       technologies: [
         { key: 'name', label: 'Technology', sortable: true },
