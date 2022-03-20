@@ -2,9 +2,8 @@ import re
 from typing import Any, Callable, Dict, List, Tuple, Union, cast
 
 from django.db.models import TextChoices
-from findings.enums import (PathType, OSType, PortStatus, Protocol,
-                            Severity)
-from findings.models import (Credential, Path, Host, Port, Technology,
+from findings.enums import OSType, PathType, PortStatus, Protocol, Severity
+from findings.models import (Credential, Host, Path, Port, Technology,
                              Vulnerability)
 from libnmap.parser import NmapParser
 from tools.tools.base_tool import BaseTool
@@ -340,4 +339,4 @@ class NmapTool(BaseTool):
                         # Parse NSE scripts results
                         self.parse_nse_scripts(s.scripts_results, technology, technologies)
             if h.scripts_results:
-                self.parse_nse_scripts(h.scripts_results, technology if len(h.services) == 0 else None, technologies)
+                self.parse_nse_scripts(h.scripts_results, technology if len(h.services) == 1 else None, technologies)
