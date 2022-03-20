@@ -4,7 +4,7 @@
         "pk": 1,
         "fields": {
             "name": "All tools",
-            "description": "nmap"
+            "description": "Run all tools with the most relevant configurations. This process covers all the pentesting stages from OSINT to find exploits."
         }
     },
     {
@@ -12,7 +12,7 @@
         "pk": 2,
         "fields": {
             "name": "HTTP Analysis",
-            "description": "nmap"
+            "description": "Analysis of HTTP services after port enumeration. Search for endpoints, TLS vulnerabilities, CMS information, Log4Shell, etc."
         }
     },
     {
@@ -20,7 +20,7 @@
         "pk": 3,
         "fields": {
             "name": "FTP Analysis",
-            "description": "nmap"
+            "description": "Analysis of FTP services using nmap with NSE scripts."
         }
     },
     {
@@ -28,7 +28,7 @@
         "pk": 4,
         "fields": {
             "name": "SSH Analysis",
-            "description": "nmap"
+            "description": "Analysis of SSH services after port enumeration, using ssh-audit."
         }
     },
     {
@@ -36,7 +36,7 @@
         "pk": 5,
         "fields": {
             "name": "SMB Analysis",
-            "description": "nmap"
+            "description": "Analysis of SMB services using nmap with NSE scripts and smbmap."
         }
     },
     {
@@ -44,7 +44,7 @@
         "pk": 6,
         "fields": {
             "name": "OSINT",
-            "description": "nmap"
+            "description": "Run OSINT tools to gather publicly available information."
         }
     }
 ]
