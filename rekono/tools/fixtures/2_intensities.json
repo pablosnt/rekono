@@ -3,7 +3,7 @@
         "model": "tools.intensity",
         "pk": 1,
         "fields": {
-            "tool_id": 1,
+            "tool": 1,
             "argument": "-T0",
             "value": 1
         }
@@ -12,7 +12,7 @@
         "model": "tools.intensity",
         "pk": 2,
         "fields": {
-            "tool_id": 1,
+            "tool": 1,
             "argument": "-T2",
             "value": 2
         }
@@ -21,7 +21,7 @@
         "model": "tools.intensity",
         "pk": 3,
         "fields": {
-            "tool_id": 1,
+            "tool": 1,
             "argument": "-T3",
             "value": 3
         }
@@ -30,7 +30,7 @@
         "model": "tools.intensity",
         "pk": 4,
         "fields": {
-            "tool_id": 1,
+            "tool": 1,
             "argument": "-T4",
             "value": 4
         }
@@ -39,7 +39,7 @@
         "model": "tools.intensity",
         "pk": 5,
         "fields": {
-            "tool_id": 1,
+            "tool": 1,
             "argument": "-T5",
             "value": 5
         }
@@ -48,7 +48,7 @@
         "model": "tools.intensity",
         "pk": 6,
         "fields": {
-            "tool_id": 2,
+            "tool": 2,
             "argument": "-t 1 -s 1",
             "value": 1
         }
@@ -57,7 +57,7 @@
         "model": "tools.intensity",
         "pk": 7,
         "fields": {
-            "tool_id": 2,
+            "tool": 2,
             "argument": "-t 10 -s 1",
             "value": 2
         }
@@ -66,7 +66,7 @@
         "model": "tools.intensity",
         "pk": 8,
         "fields": {
-            "tool_id": 2,
+            "tool": 2,
             "argument": "-t 30",
             "value": 3
         }
@@ -75,7 +75,7 @@
         "model": "tools.intensity",
         "pk": 9,
         "fields": {
-            "tool_id": 2,
+            "tool": 2,
             "argument": "-t 60",
             "value": 4
         }
@@ -84,7 +84,7 @@
         "model": "tools.intensity",
         "pk": 10,
         "fields": {
-            "tool_id": 2,
+            "tool": 2,
             "argument": "-t 100",
             "value": 5
         }
@@ -93,7 +93,7 @@
         "model": "tools.intensity",
         "pk": 11,
         "fields": {
-            "tool_id": 3,
+            "tool": 3,
             "argument": "",
             "value": 1
         }
@@ -102,7 +102,7 @@
         "model": "tools.intensity",
         "pk": 12,
         "fields": {
-            "tool_id": 4,
+            "tool": 4,
             "argument": "",
             "value": 4
         }
@@ -111,7 +111,7 @@
         "model": "tools.intensity",
         "pk": 13,
         "fields": {
-            "tool_id": 5,
+            "tool": 5,
             "argument": "--sleep=100",
             "value": 1
         }
@@ -120,7 +120,7 @@
         "model": "tools.intensity",
         "pk": 14,
         "fields": {
-            "tool_id": 5,
+            "tool": 5,
             "argument": "--sleep=50",
             "value": 2
         }
@@ -129,7 +129,7 @@
         "model": "tools.intensity",
         "pk": 15,
         "fields": {
-            "tool_id": 5,
+            "tool": 5,
             "argument": "",
             "value": 3
         }
@@ -138,7 +138,7 @@
         "model": "tools.intensity",
         "pk": 16,
         "fields": {
-            "tool_id": 6,
+            "tool": 6,
             "argument": "",
             "value": 3
         }
@@ -147,7 +147,7 @@
         "model": "tools.intensity",
         "pk": 17,
         "fields": {
-            "tool_id": 7,
+            "tool": 7,
             "argument": "--light-scan",
             "value": 2
         }
@@ -156,7 +156,7 @@
         "model": "tools.intensity",
         "pk": 18,
         "fields": {
-            "tool_id": 7,
+            "tool": 7,
             "argument": "",
             "value": 3
         }
@@ -165,7 +165,7 @@
         "model": "tools.intensity",
         "pk": 19,
         "fields": {
-            "tool_id": 8,
+            "tool": 8,
             "argument": "",
             "value": 4
         }
@@ -174,7 +174,7 @@
         "model": "tools.intensity",
         "pk": 20,
         "fields": {
-            "tool_id": 9,
+            "tool": 9,
             "argument": "",
             "value": 1
         }
@@ -183,7 +183,7 @@
         "model": "tools.intensity",
         "pk": 21,
         "fields": {
-            "tool_id": 10,
+            "tool": 10,
             "argument": "",
             "value": 1
         }
@@ -192,7 +192,7 @@
         "model": "tools.intensity",
         "pk": 22,
         "fields": {
-            "tool_id": 11,
+            "tool": 11,
             "argument": "",
             "value": 4
         }
@@ -201,7 +201,7 @@
         "model": "tools.intensity",
         "pk": 23,
         "fields": {
-            "tool_id": 12,
+            "tool": 12,
             "argument": "",
             "value": 1
         }
@@ -210,7 +210,7 @@
         "model": "tools.intensity",
         "pk": 24,
         "fields": {
-            "tool_id": 13,
+            "tool": 13,
             "argument": "",
             "value": 1
         }
@@ -219,7 +219,7 @@
         "model": "tools.intensity",
         "pk": 25,
         "fields": {
-            "tool_id": 14,
+            "tool": 14,
             "argument": "",
             "value": 3
         }
@@ -228,7 +228,7 @@
         "model": "tools.intensity",
         "pk": 26,
         "fields": {
-            "tool_id": 15,
+            "tool": 15,
             "argument": "",
             "value": 3
         }
@@ -237,7 +237,7 @@
         "model": "tools.intensity",
         "pk": 27,
         "fields": {
-            "tool_id": 16,
+            "tool": 16,
             "argument": "",
             "value": 3
         }
@@ -246,7 +246,7 @@
         "model": "tools.intensity",
         "pk": 28,
         "fields": {
-            "tool_id": 17,
+            "tool": 17,
             "argument": "",
             "value": 3
         }

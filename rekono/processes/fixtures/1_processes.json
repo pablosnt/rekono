@@ -1,0 +1,50 @@
+[
+    {
+        "model": "processes.process",
+        "pk": 1,
+        "fields": {
+            "name": "All tools",
+            "description": "nmap"
+        }
+    },
+    {
+        "model": "processes.process",
+        "pk": 2,
+        "fields": {
+            "name": "HTTP Analysis",
+            "description": "nmap"
+        }
+    },
+    {
+        "model": "processes.process",
+        "pk": 3,
+        "fields": {
+            "name": "FTP Analysis",
+            "description": "nmap"
+        }
+    },
+    {
+        "model": "processes.process",
+        "pk": 4,
+        "fields": {
+            "name": "SSH Analysis",
+            "description": "nmap"
+        }
+    },
+    {
+        "model": "processes.process",
+        "pk": 5,
+        "fields": {
+            "name": "SMB Analysis",
+            "description": "nmap"
+        }
+    },
+    {
+        "model": "processes.process",
+        "pk": 6,
+        "fields": {
+            "name": "OSINT",
+            "description": "nmap"
+        }
+    }
+]
