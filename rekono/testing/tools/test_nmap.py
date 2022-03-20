@@ -22,7 +22,7 @@ class NmapParserTest(ToolParserTest):
                 'model': Port,
                 'port': 22,
                 'port_status': PortStatus.OPEN,
-                'type': Protocol.TCP,
+                'protocol': Protocol.TCP,
                 'service': 'ssh'
             },
             {'model': Technology, 'name': 'OpenSSH', 'version': '8.0'},
@@ -35,7 +35,7 @@ class NmapParserTest(ToolParserTest):
                 'model': Port,
                 'port': 80,
                 'port_status': PortStatus.OPEN,
-                'type': Protocol.TCP,
+                'protocol': Protocol.TCP,
                 'service': 'http'
             },
             {'model': Technology, 'name': 'Apache httpd', 'version': '2.4.37'},
@@ -72,7 +72,7 @@ class NmapParserTest(ToolParserTest):
                 'model': Port,
                 'port': 443,
                 'port_status': PortStatus.OPEN,
-                'type': Protocol.TCP,
+                'protocol': Protocol.TCP,
                 'service': 'http'
             },
             {'model': Technology, 'name': 'Apache httpd', 'version': '2.4.37'},
@@ -121,7 +121,7 @@ class NmapParserTest(ToolParserTest):
                 'model': Port,
                 'port': 21,
                 'port_status': PortStatus.OPEN,
-                'type': Protocol.TCP,
+                'protocol': Protocol.TCP,
                 'service': 'ftp'
             },
             {'model': Technology, 'name': 'vsftpd', 'version': '2.3.4'},
@@ -150,7 +150,7 @@ class NmapParserTest(ToolParserTest):
                 'model': Port,
                 'port': 445,
                 'port_status': PortStatus.OPEN,
-                'type': Protocol.TCP,
+                'protocol': Protocol.TCP,
                 'service': 'netbios-ssn'
             },
             {
@@ -204,7 +204,7 @@ class NmapParserTest(ToolParserTest):
                 'model': Port,
                 'port': 445,
                 'port_status': PortStatus.OPEN,
-                'type': Protocol.TCP,
+                'protocol': Protocol.TCP,
                 'service': 'netbios-ssn'
             },
             {'model': Technology, 'name': 'Samba smbd', 'version': '3.X - 4.X'},

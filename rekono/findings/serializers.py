@@ -1,5 +1,5 @@
-from findings.models import (OSINT, Credential, Path, Port, Exploit,
-                             Host, Technology, Vulnerability)
+from findings.models import (OSINT, Credential, Exploit, Host, Path, Port,
+                             Technology, Vulnerability)
 from rest_framework import serializers
 
 
@@ -52,7 +52,7 @@ class PathSerializer(serializers.ModelSerializer):
         model = Path
         fields = (                                                              # Path fields exposed via API
             'id', 'executions', 'port', 'path', 'status', 'extra',
-            'protocol', 'creation', 'is_active', 'reported_to_defectdojo'
+            'type', 'creation', 'is_active', 'reported_to_defectdojo'
         )
 
 

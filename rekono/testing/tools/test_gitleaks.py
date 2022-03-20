@@ -60,7 +60,7 @@ class GitLeaksParserTest(ToolParserTest):
         super().check_tool_file_parser('leaky-repo.json', expected)
         target_port = TargetPort.objects.create(target=self.target, port=80)
         self.tool.findings_relations = {                                        # Test with TargetEndpoint
-            TargetEndpoint.__name__.lower(): TargetEndpoint.objects.create(target_port=target_port, path='/.git/')
+            TargetEndpoint.__name__.lower(): TargetEndpoint.objects.create(target_port=target_port, endpoint='/.git/')
         }
         self.tool.findings = []                                                 # Reset tool findings
         for item in expected:
