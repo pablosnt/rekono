@@ -17,8 +17,8 @@ export default {
         { id: 5, value: 'Exploitation' }
       ],
       targetTypes: ['Domain', 'IP range', 'Network', 'Private IP', 'Public IP'],
-      inputTypes: ['OSINT', 'Host', 'Port', 'Endpoint', 'Technology', 'Vulnerability', 'Exploit', 'Credential', 'Wordlist'],
-      findingTypes: ['OSINT', 'Credentials', 'Hosts', 'Ports', 'Endpoints', 'Technologies', 'Vulnerabilities', 'Exploits'],
+      inputTypes: ['OSINT', 'Host', 'Port', 'Path', 'Technology', 'Vulnerability', 'Exploit', 'Credential', 'Wordlist'],
+      findingTypes: ['OSINT', 'Credentials', 'Hosts', 'Ports', 'Paths', 'Technologies', 'Vulnerabilities', 'Exploits'],
       osTypeByIcon: [
         { value: 'Linux', icon: 'brands/linux', color: 'black', variant: 'warning' },
         { value: 'Windows', icon: 'brands/windows', color: 'darkblue', variant: 'primary' },
@@ -78,7 +78,7 @@ export default {
       timeUnits: ['Weeks', 'Days', 'Hours', 'Minutes'],
       nameRegex: /^[\w\s.-]*$/,
       textRegex: /^[\w\s.:,+\-'"?¿¡!#%$€]*$/,
-      endpointRegex: /^[\w./#?&%]*$/
+      pathRegex: /^[\w./#?&%]*$/
     }
   },
   methods: {
@@ -242,8 +242,8 @@ export default {
     validateText (value) {
       return value && value.length > 0 && this.textRegex.test(value)
     },
-    validateEndpoint (value) {
-      return value && value.length > 0 && this.endpointRegex.test(value)
+    validatePath (value) {
+      return value && value.length > 0 && this.pathRegex.test(value)
     }
   }
 }

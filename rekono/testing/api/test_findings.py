@@ -63,21 +63,21 @@ class FindingsTest(RekonoTestCase):
             (self.host, 'hosts'),
             (self.port, 'ports'),
             (self.technology, 'technologies'),
-            (self.http_endpoint, 'endpoints'),
+            (self.http_path, 'paths'),
             (self.credential_finding, 'credentials'),
             (self.vulnerability, 'vulnerabilities'),
             (self.port_vulnerability, 'vulnerabilities'),
             (self.exploit, 'exploits'),
             (self.tech_exploit, 'exploits'),
         ]
-        self.filter_endpoints = ['vulnerabilities', 'exploits']                 # Endpoints with filters to test
+        self.filter_paths = ['vulnerabilities', 'exploits']                     # Paths with filters to test
         self.models = {                                                         # Models to test __str__ method
             self.domain_osint: self.domain_osint.data,
             self.user_osint: self.user_osint.data,
             self.host: self.host.address,
             self.port: f'{self.host.__str__()} - {self.port.port}',
             self.technology: f'{self.port.__str__()} - {self.technology.name}',
-            self.http_endpoint: f'{self.port.__str__()} - {self.http_endpoint.endpoint}',
+            self.http_path: f'{self.port.__str__()} - {self.http_path.path}',
             self.credential_finding: f'{self.technology.__str__()} - {self.credential_finding.email} - {self.credential_finding.username} - {self.credential_finding.secret}',      # noqa: E501
             self.vulnerability: f'{self.technology.__str__()} - {self.vulnerability.name} - {self.vulnerability.cve}',
             self.port_vulnerability: f'{self.port.__str__()} - {self.port_vulnerability.name} - {self.port_vulnerability.cve}',      # noqa: E501
@@ -121,7 +121,7 @@ class FindingsTest(RekonoTestCase):
             (f'host_os_type={self.host.os_type}', 2),                           # Filter by host OS type
             ('host_os_type=Windows', 0),
         ]:
-            for endpoint in self.filter_endpoints:                              # For each filterable endpoint
+            for endpoint in self.filter_paths:                                  # For each filterable endpoint
                 # Filter findings
                 content = self.api_test(self.client.get, f'/api/{endpoint}/?{filter}', expected={'count': count})
                 if count > 0:                                                   # Expected results

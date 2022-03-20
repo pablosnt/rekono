@@ -22,7 +22,7 @@ ROLES = {
         'add_osint', 'delete_osint', 'view_osint',                              # OSINT
         'add_host', 'delete_host', 'view_host',                                 # Hosts
         'add_port', 'delete_port', 'view_port',                                 # Ports
-        'add_endpoint', 'delete_endpoint', 'view_endpoint',                     # Endpoints
+        'add_path', 'delete_path', 'view_path',                                 # Paths
         'add_technology', 'delete_technology', 'view_technology',               # Technologies
         'add_vulnerability', 'change_vulnerability', 'delete_vulnerability', 'view_vulnerability',  # Vulnerabilities
         'add_credential', 'delete_credential', 'view_credential',               # Credentials
@@ -46,7 +46,7 @@ ROLES = {
         'add_osint', 'delete_osint', 'view_osint',                              # OSINT
         'add_host', 'delete_host', 'view_host',                                 # Hosts
         'add_port', 'delete_port', 'view_port',                                 # Ports
-        'add_endpoint', 'delete_endpoint', 'view_endpoint',                     # Endpoints
+        'add_path', 'delete_path', 'view_path',                                 # Paths
         'add_technology', 'delete_technology', 'view_technology',               # Technologies
         'add_vulnerability', 'change_vulnerability', 'delete_vulnerability', 'view_vulnerability',  # Vulnerabilities
         'add_credential', 'delete_credential', 'view_credential',               # Credentials
@@ -70,7 +70,7 @@ ROLES = {
         'view_osint',                                                           # OSINT
         'view_host',                                                            # Hosts
         'view_port',                                                            # Ports
-        'view_endpoint',                                                        # Endpoints
+        'view_path',                                                            # Paths
         'view_technology',                                                      # Technologies
         'view_vulnerability',                                                   # Vulnerabilities
         'view_credential',                                                      # Credentials

@@ -1,5 +1,5 @@
-from findings.enums import EndpointProtocol
-from findings.models import Endpoint
+from findings.enums import PathType
+from findings.models import Path
 from tools.tools.base_tool import BaseTool
 
 
@@ -17,8 +17,8 @@ class SmbmapTool(BaseTool):
             if data and ('READ' in data or 'WRITE' in data or 'NO ACCESS' in data):     # Share entry
                 share = [i.strip() for i in data.split('  ') if i.strip()]      # Get fields: disk, permissions, comment
                 self.create_finding(
-                    Endpoint,
-                    endpoint=share[0],                                          # Disk
+                    Path,
+                    path=share[0],                                              # Disk
                     extra=f'[{share[1]}] {share[2]}' if len(share) >= 3 else share[1],  # Details
-                    protocol=EndpointProtocol.SMB
+                    type=PathType.SHARE
                 )

@@ -1,4 +1,4 @@
-from findings.views import (CredentialViewSet, EndpointViewSet,
+from findings.views import (CredentialViewSet, PathViewSet,
                             PortViewSet, ExploitViewSet, HostViewSet,
                             OSINTViewSet, TechnologyViewSet,
                             VulnerabilityViewSet)
@@ -10,7 +10,7 @@ router = SimpleRouter()
 router.register('osint', OSINTViewSet)
 router.register('hosts', HostViewSet)
 router.register('ports', PortViewSet)
-router.register('endpoints', EndpointViewSet)
+router.register('paths', PathViewSet)
 router.register('technologies', TechnologyViewSet)
 router.register('vulnerabilities', VulnerabilityViewSet)
 router.register('credentials', CredentialViewSet)

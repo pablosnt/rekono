@@ -7,24 +7,24 @@ export default {
     credentials: Number,
     hosts: Number,
     ports: Number,
-    endpoints: Number,
+    paths: Number,
     technologies: Number,
     vulnerabilities: Number,
     exploits: Number
   },
   computed: {
     total () {
-      return this.osint + this.credentials + this.hosts + this.ports + this.endpoints + this.technologies + this.vulnerabilities + this.exploits
+      return this.osint + this.credentials + this.hosts + this.ports + this.paths + this.technologies + this.vulnerabilities + this.exploits
     }
   },
   watch: {
     total () {
       this.renderChart({
-        labels: ['OSINT', 'Credentials', 'Hosts', 'Ports', 'Endpoints', 'Technologies', 'Vulnerabilities', 'Exploits'],
+        labels: ['OSINT', 'Credentials', 'Hosts', 'Ports', 'Paths', 'Technologies', 'Vulnerabilities', 'Exploits'],
         datasets: [
           {
             backgroundColor: ['black', 'gray', 'blue', 'green', 'purple', 'gold', 'orange', 'red'],
-            data: [this.osint, this.credentials, this.hosts, this.ports, this.endpoints, this.technologies, this.vulnerabilities, this.exploits]
+            data: [this.osint, this.credentials, this.hosts, this.ports, this.paths, this.technologies, this.vulnerabilities, this.exploits]
           }
         ]
       },

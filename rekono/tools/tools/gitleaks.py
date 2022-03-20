@@ -2,10 +2,10 @@ import json
 import os
 import subprocess
 import uuid
-from typing import Any, List
+from typing import Any, List, Union
 
 from findings.enums import Severity
-from findings.models import Credential, Endpoint, Finding, Vulnerability
+from findings.models import Credential, Finding, Path, Vulnerability
 from input_types.enums import InputKeyword
 from input_types.models import BaseInput
 from targets.models import TargetEndpoint
@@ -36,15 +36,15 @@ class GitleaksTool(BaseTool):
         ):
             raise ToolExecutionException('Tool gitdumper is not installed in the system')
 
-    def get_git_endpoint(self) -> Any:
+    def get_git_endpoint(self) -> Union[Path, TargetEndpoint]:
         '''Get .git endpoint from arguments.
 
         Returns:
-            Any: Endpoint or TargetEndpoint
+            Union[Path, TargetEndpoint]: Path or TargetEndpoint with .git endpoint
         '''
         endpoint: Any = None
-        if Endpoint.__name__.lower() in self.findings_relations:
-            endpoint = self.findings_relations[Endpoint.__name__.lower()]       # Get Endpoint
+        if Path.__name__.lower() in self.findings_relations:
+            endpoint = self.findings_relations[Path.__name__.lower()]       # Get Path
         elif TargetEndpoint.__name__.lower() in self.findings_relations:
             endpoint = self.findings_relations[TargetEndpoint.__name__.lower()]     # Get TargetEndpoint
         return endpoint
@@ -56,10 +56,11 @@ class GitleaksTool(BaseTool):
         endpoint = self.get_git_endpoint()                                      # Get .git endpoint
         emails = []
         for finding in data:                                                    # For each finding
+            path = endpoint.endpoint if isinstance(endpoint, TargetEndpoint) else endpoint.path
             self.create_finding(                                                # Save secret match
                 Credential,
                 secret=finding.get('Match'),
-                context=f'{endpoint.endpoint} : {finding.get("File")} -> Line {finding.get("StartLine")}'
+                context=f'{path} : {finding.get("File")} -> Line {finding.get("StartLine")}'
             )
             email = finding.get('Email')
             if email and email not in emails:                                   # New commit author email
@@ -67,7 +68,7 @@ class GitleaksTool(BaseTool):
                 self.create_finding(                                            # Save commit author email
                     Credential,
                     email=email,
-                    context=f'{endpoint.endpoint} : Email of the commit author {finding.get("Author")}'
+                    context=f'{path} : Email of the commit author {finding.get("Author")}'
                 )
 
     def tool_execution(self, arguments: List[str], targets: List[BaseInput], previous_findings: List[Finding]) -> str:
@@ -108,12 +109,13 @@ class GitleaksTool(BaseTool):
                 git_dumped = len([d for d in dirs if d != '.git']) > 0 or len(files) > 0
                 break
             if git_dumped:                                                      # Git repository has been dumped
+                path = endpoint.endpoint if isinstance(endpoint, TargetEndpoint) else endpoint.path
                 self.create_finding(                                            # Create related vulnerability
                     Vulnerability,
-                    port=endpoint.port if isinstance(endpoint, Endpoint) else None,
+                    port=endpoint.port if isinstance(endpoint, Path) else None,
                     name='Git source code exposure',
                     description=(
-                        f'Source code is exposed in the endpoint {endpoint.endpoint} and '
+                        f'Source code is exposed in the endpoint {path} and '
                         "it's possible to dump it as a git repository"
                     ),
                     severity=Severity.HIGH,
@@ -127,4 +129,4 @@ class GitleaksTool(BaseTool):
             if exec.returncode > 0:                                             # Error during gitdumper execution
                 raise ToolExecutionException(exec.stderr.decode('utf-8'))
             return exec.stdout.decode('utf-8')                                  # Git repository hasn't been dumped
-        raise ToolExecutionException('Endpoint argument is required')
+        raise ToolExecutionException('Path argument is required')

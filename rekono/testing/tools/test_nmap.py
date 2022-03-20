@@ -1,7 +1,6 @@
-from findings.enums import (EndpointProtocol, OSType, PortStatus, Protocol,
-                            Severity)
-from findings.models import (Credential, Endpoint, Port, Host,
-                             Technology, Vulnerability)
+from findings.enums import OSType, PathType, PortStatus, Protocol, Severity
+from findings.models import (Credential, Host, Path, Port, Technology,
+                             Vulnerability)
 from testing.tools.base import ToolParserTest
 
 
@@ -23,7 +22,7 @@ class NmapParserTest(ToolParserTest):
                 'model': Port,
                 'port': 22,
                 'port_status': PortStatus.OPEN,
-                'protocol': Protocol.TCP,
+                'type': Protocol.TCP,
                 'service': 'ssh'
             },
             {'model': Technology, 'name': 'OpenSSH', 'version': '8.0'},
@@ -36,7 +35,7 @@ class NmapParserTest(ToolParserTest):
                 'model': Port,
                 'port': 80,
                 'port_status': PortStatus.OPEN,
-                'protocol': Protocol.TCP,
+                'type': Protocol.TCP,
                 'service': 'http'
             },
             {'model': Technology, 'name': 'Apache httpd', 'version': '2.4.37'},
@@ -73,7 +72,7 @@ class NmapParserTest(ToolParserTest):
                 'model': Port,
                 'port': 443,
                 'port_status': PortStatus.OPEN,
-                'protocol': Protocol.TCP,
+                'type': Protocol.TCP,
                 'service': 'http'
             },
             {'model': Technology, 'name': 'Apache httpd', 'version': '2.4.37'},
@@ -122,7 +121,7 @@ class NmapParserTest(ToolParserTest):
                 'model': Port,
                 'port': 21,
                 'port_status': PortStatus.OPEN,
-                'protocol': Protocol.TCP,
+                'type': Protocol.TCP,
                 'service': 'ftp'
             },
             {'model': Technology, 'name': 'vsftpd', 'version': '2.3.4'},
@@ -151,7 +150,7 @@ class NmapParserTest(ToolParserTest):
                 'model': Port,
                 'port': 445,
                 'port_status': PortStatus.OPEN,
-                'protocol': Protocol.TCP,
+                'type': Protocol.TCP,
                 'service': 'netbios-ssn'
             },
             {
@@ -161,13 +160,13 @@ class NmapParserTest(ToolParserTest):
                 'description': 'Protocols: NT LM 0.12 (SMBv1), 2.0.2, 2.1, 3.0, 3.0.2, 3.1.1'
             },
             {
-                'model': Endpoint,
-                'endpoint': 'IPC$',
+                'model': Path,
+                'path': 'IPC$',
                 'extra': (
                     'IPC Service (Samba Server Version 4.6.3) Type: STYPE_IPC_HIDDEN '
                     'Anonymous access: READ/WRITE Current access: READ/WRITE'
                 ),
-                'protocol': EndpointProtocol.SMB
+                'type': PathType.SHARE
             },
             {
                 'model': Vulnerability,
@@ -177,10 +176,10 @@ class NmapParserTest(ToolParserTest):
                 'cwe': 'CWE-287'
             },
             {
-                'model': Endpoint,
-                'endpoint': 'myshare',
+                'model': Path,
+                'path': 'myshare',
                 'extra': 'Type: STYPE_DISKTREE Anonymous access: READ/WRITE Current access: READ/WRITE',
-                'protocol': EndpointProtocol.SMB
+                'type': PathType.SHARE
             },
             {
                 'model': Vulnerability,
@@ -205,19 +204,19 @@ class NmapParserTest(ToolParserTest):
                 'model': Port,
                 'port': 445,
                 'port_status': PortStatus.OPEN,
-                'protocol': Protocol.TCP,
+                'type': Protocol.TCP,
                 'service': 'netbios-ssn'
             },
             {'model': Technology, 'name': 'Samba smbd', 'version': '3.X - 4.X'},
             {'model': Credential, 'username': '629F42ED79BB\\test'},
             {
-                'model': Endpoint,
-                'endpoint': 'IPC$',
+                'model': Path,
+                'path': 'IPC$',
                 'extra': (
                     'IPC Service (Samba 4.5.4) Type: STYPE_IPC_HIDDEN '
                     'Anonymous access: READ/WRITE Current access: READ/WRITE'
                 ),
-                'protocol': EndpointProtocol.SMB
+                'type': PathType.SHARE
             },
             {
                 'model': Vulnerability,
@@ -227,10 +226,10 @@ class NmapParserTest(ToolParserTest):
                 'cwe': 'CWE-287'
             },
             {
-                'model': Endpoint,
-                'endpoint': 'shared',
+                'model': Path,
+                'path': 'shared',
                 'extra': 'Type: STYPE_DISKTREE Anonymous access: READ/WRITE Current access: READ/WRITE',
-                'protocol': EndpointProtocol.SMB
+                'type': PathType.SHARE
             },
             {
                 'model': Vulnerability,

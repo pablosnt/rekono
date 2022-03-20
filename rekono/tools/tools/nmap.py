@@ -2,9 +2,9 @@ import re
 from typing import Any, Callable, Dict, List, Tuple, Union, cast
 
 from django.db.models import TextChoices
-from findings.enums import (EndpointProtocol, OSType, PortStatus, Protocol,
+from findings.enums import (PathType, OSType, PortStatus, Protocol,
                             Severity)
-from findings.models import (Credential, Endpoint, Host, Port, Technology,
+from findings.models import (Credential, Path, Host, Port, Technology,
                              Vulnerability)
 from libnmap.parser import NmapParser
 from tools.tools.base_tool import BaseTool
@@ -181,16 +181,16 @@ class NmapTool(BaseTool):
                     path = path.rsplit('\\', 1)[1]                              # Remove host information
                 anonymous = fields.get("Anonymous access")
                 self.create_finding(                                            # Create share finding
-                    Endpoint,
+                    Path,
                     port=technology.port if technology else None,
-                    endpoint=path,
+                    path=path,
                     extra=(
                         f'{fields.get("Comment") or ""} '
                         f'Type: {fields.get("Type")} '
                         f'Anonymous access: {anonymous} '
                         f'Current access: {fields.get("Current user access")}'
                     ).strip(),
-                    protocol=EndpointProtocol.SMB
+                    type=PathType.SHARE
                 )
                 if 'READ' in anonymous or 'WRITE' in anonymous:
                     self.create_finding(

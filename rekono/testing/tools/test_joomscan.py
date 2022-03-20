@@ -1,5 +1,5 @@
-from findings.enums import EndpointProtocol, Severity
-from findings.models import Endpoint, Exploit, Technology, Vulnerability
+from findings.enums import PathType, Severity
+from findings.models import Path, Exploit, Technology, Vulnerability
 from testing.tools.base import ToolParserTest
 
 
@@ -70,7 +70,7 @@ class JoomScanParserTest(ToolParserTest):
                 'edb_id': 40969,
                 'reference': 'https://www.exploit-db.com/exploits/40969/'
             },
-            {'model': Endpoint, 'endpoint': '/administrator/', 'protocol': EndpointProtocol.HTTP}
+            {'model': Path, 'path': '/administrator/', 'type': PathType.ENDPOINT}
         ]
         super().check_tool_output_parser('exploitable.txt', expected)
 
@@ -84,11 +84,11 @@ class JoomScanParserTest(ToolParserTest):
                 'description': 'Joomla 3.7.0',
                 'reference': 'https://www.joomla.org/'
             },
-            {'model': Endpoint, 'endpoint': '/administrator/', 'protocol': EndpointProtocol.HTTP},
-            {'model': Endpoint, 'endpoint': '/backup/config.php.bak', 'protocol': EndpointProtocol.HTTP},
-            {'model': Endpoint, 'endpoint': '/config.php', 'protocol': EndpointProtocol.HTTP},
-            {'model': Endpoint, 'endpoint': '/error.php', 'protocol': EndpointProtocol.HTTP},
-            {'model': Endpoint, 'endpoint': '/static', 'protocol': EndpointProtocol.HTTP},
+            {'model': Path, 'path': '/administrator/', 'type': PathType.ENDPOINT},
+            {'model': Path, 'path': '/backup/config.php.bak', 'type': PathType.ENDPOINT},
+            {'model': Path, 'path': '/config.php', 'type': PathType.ENDPOINT},
+            {'model': Path, 'path': '/error.php', 'type': PathType.ENDPOINT},
+            {'model': Path, 'path': '/static', 'type': PathType.ENDPOINT},
             {
                 'model': Vulnerability,
                 'name': 'Debug mode enabled',

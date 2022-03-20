@@ -4,8 +4,8 @@ import shutil
 from typing import Any
 from urllib.parse import urlparse
 
-from findings.enums import EndpointProtocol, Severity
-from findings.models import Credential, Endpoint, Technology, Vulnerability
+from findings.enums import PathType, Severity
+from findings.models import Credential, Path, Technology, Vulnerability
 from tools.tools.base_tool import BaseTool
 
 from rekono.settings import TOOLS
@@ -51,8 +51,8 @@ class CmseekTool(BaseTool):
         # Remove target URL from paths
         paths = [p.replace(url, '/') for p in paths if p and p.replace(url, '/') != '/']
         for path in paths:                                                      # For each path
-            # Create Endpoint
-            self.create_finding(Endpoint, endpoint=path.replace('//', '/'), protocol=EndpointProtocol.HTTP)
+            # Create Path
+            self.create_finding(Path, path=path.replace('//', '/'), type=PathType.ENDPOINT)
         if 'backup_file' in key:                                                # Backup file found
             self.create_finding(                                                # Create Vulnerability
                 Vulnerability,
@@ -145,7 +145,7 @@ class CmseekTool(BaseTool):
             url = report.get('url')                                             # Get target URL
             if url:
                 url_parsed = urlparse(report.get('url'))                        # Parse target URL
-                if url_parsed.path:                                             # Endpoint in the target URL
+                if url_parsed.path:                                             # Path in the target URL
                     url = url.replace(url_parsed.path, '/')                     # Remove endpoint from the base URL
             cms = self.create_finding(                                          # Create Technology with the CMS data
                 Technology,
@@ -162,7 +162,7 @@ class CmseekTool(BaseTool):
                     (isinstance(value, str) and url in value) or
                     (isinstance(value, list) and len([i for i in value if url in i]) > 0)
                 ):
-                    # Endpoint found
+                    # Path found
                     self.analyze_endpoints(url, cms, key, value)                # Analyze endpoint
                 elif '_users' in key and ',' in value:                          # Users found
                     self.parse_cms_usernames(value, cms)

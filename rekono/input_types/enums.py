@@ -9,7 +9,7 @@ class InputTypeNames(models.TextChoices):
     OSINT = 'OSINT'
     HOST = 'Host'
     PORT = 'Port'
-    ENDPOINT = 'Endpoint'
+    PATH = 'Path'
     TECHNOLOGY = 'Technology'
     VULNERABILITY = 'Vulnerability'
     EXPLOIT = 'Exploit'

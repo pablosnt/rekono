@@ -4,7 +4,7 @@ from typing import List, Tuple
 from defectdojo.api import DefectDojo
 from defectdojo.exceptions import DefectDojoException
 from executions.models import Execution
-from findings.models import Endpoint, Finding
+from findings.models import Path, Finding
 from projects.models import Project
 
 from rekono.settings import DEFECT_DOJO
@@ -176,7 +176,7 @@ def findings(
     test_id = None
     for finding in findings:                                                    # For each finding
         success = False
-        if isinstance(finding, Endpoint):                                       # Endpoint finding
+        if isinstance(finding, Path):                                           # Path finding
             success, _ = dd_client.create_endpoint(product_id, finding)         # Import finding as Defect-Dojo endpoint
         else:
             if not test_id:

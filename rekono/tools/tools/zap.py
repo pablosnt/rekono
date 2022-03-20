@@ -1,8 +1,8 @@
 import xml.etree.ElementTree as parser
 from html import unescape
 
-from findings.enums import EndpointProtocol, Severity
-from findings.models import Endpoint, Vulnerability
+from findings.enums import PathType, Severity
+from findings.models import Path, Vulnerability
 from tools.tools.base_tool import BaseTool
 
 
@@ -70,5 +70,5 @@ class ZapTool(BaseTool):
                         http_endpoint = url.replace(url_base, '')               # Get HTTP endpoint
                         if http_endpoint and http_endpoint not in http_endpoints:   # If it's a new endpoint
                             http_endpoints.add(http_endpoint)                   # Add endpoint to HTTP endpoints set
-                            # Create Endpoint
-                            self.create_finding(Endpoint, endpoint=http_endpoint, protocol=EndpointProtocol.HTTP)
+                            # Create Path
+                            self.create_finding(Path, path=http_endpoint, type=PathType.ENDPOINT)

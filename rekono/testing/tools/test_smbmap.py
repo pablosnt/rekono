@@ -1,5 +1,5 @@
-from findings.enums import EndpointProtocol
-from findings.models import Endpoint
+from findings.enums import PathType
+from findings.models import Path
 from testing.tools.base import ToolParserTest
 
 
@@ -12,12 +12,12 @@ class SmbmapParserTest(ToolParserTest):
         '''Create initial data before run tests.'''
         super().setUp()
         self.expected_shares = [
-            {'model': Endpoint, 'endpoint': 'shared', 'extra': 'READ, WRITE', 'protocol': EndpointProtocol.SMB},
+            {'model': Path, 'path': 'shared', 'extra': 'READ, WRITE', 'type': PathType.SHARE},
             {
-                'model': Endpoint,
-                'endpoint': 'IPC$',
+                'model': Path,
+                'path': 'IPC$',
                 'extra': '[NO ACCESS] IPC Service (Samba 4.5.4)',
-                'protocol': EndpointProtocol.SMB
+                'type': PathType.SHARE
             }
         ]
 

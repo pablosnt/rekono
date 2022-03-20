@@ -7,7 +7,7 @@ logger = logging.getLogger()                                                    
 
 NAME_REGEX = r'[\w\s\.\-]*'                                                     # Regex for names validation
 TEXT_REGEX = r'[\w\s\.:,+\-\'"?¿¡!#%$€]*'                                       # Regex for text validation
-ENDPOINT_REGEX = r'[\w\./#?&%]*'                                                # Regex for endpoint validation
+PATH_REGEX = r'[\w\./#?&%$\\]*'                                                 # Regex for path validation
 
 
 def validate_text_value(value: str, regex: str) -> None:
@@ -65,16 +65,16 @@ def validate_text(value: str) -> None:
     validate_text_value(value, TEXT_REGEX)
 
 
-def validate_endpoint(value: str) -> None:
-    '''Validate if endpoint is valid based on regex.
+def validate_path(value: str) -> None:
+    '''Validate if path is valid based on regex.
 
     Args:
-        value (str): Endpoint value
+        value (str): Path value
 
     Raises:
         ValidationError: Raised if value doesn't match the expected regex
     '''
-    validate_text_value(value, ENDPOINT_REGEX)
+    validate_text_value(value, PATH_REGEX)
 
 
 def validate_number(value: int) -> None:

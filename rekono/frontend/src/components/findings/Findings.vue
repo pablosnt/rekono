@@ -22,7 +22,7 @@
     <b-row :cols="cols" class="mt-3">
       <finding name="hosts" :fields="hosts" :details="hostDetails" @finding-selected="selectFinding" :id="selectedHost" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="selectedTask" :execution="selectedExecution" :search="search" :active="activeFilter"/>
       <finding name="ports" :fields="ports" :details="portDetails" @finding-selected="selectFinding" :id="selectedPort" :filter="hostFilter" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="selectedTask" :execution="selectedExecution" :search="search" :active="activeFilter"/>
-      <finding name="endpoints" :fields="endpoints" :details="endpointDetails" :filter="portFilter" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="selectedTask" :execution="selectedExecution" :search="search" :active="activeFilter"/>
+      <finding name="paths" :fields="paths" :details="pathDetails" :filter="portFilter" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="selectedTask" :execution="selectedExecution" :search="search" :active="activeFilter"/>
       <finding name="technologies" :fields="technologies" :details="technologyDetails" @finding-selected="selectFinding" :id="selectedTechnology" :filter="portFilter" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="selectedTask" :execution="selectedExecution" :search="search" :active="activeFilter"/>
       <finding name="credentials" :fields="credentials" :details="credentialDetails" :filter="technologyFilter" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="selectedTask" :execution="selectedExecution" :search="search" :active="activeFilter"/>
       <finding name="vulnerabilities" :fields="vulnerabilities" :details="vulnerabilityDetails" @finding-selected="selectFinding" :id="selectedVulnerability" :filter="technologyAndPortFilter" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="selectedTask" :execution="selectedExecution" :search="search" :active="activeFilter"/>
@@ -136,10 +136,10 @@ export default {
       portDetails: [
         { field: 'port_status', title: 'Port Status', type: 'badge', variants: this.portStatusByVariant }
       ],
-      endpoints: [
-        { key: 'endpoint', sortable: true }
+      paths: [
+        { key: 'path', sortable: true }
       ],
-      endpointDetails: [
+      pathDetails: [
         { field: 'protocol', type: 'badge', variant: 'primary' },
         { field: 'status', title: 'Status', type: 'text'},
         { field: 'extra', type: 'text'},

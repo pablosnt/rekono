@@ -8,7 +8,7 @@ from django.test import TestCase
 from django.utils import timezone
 from executions.models import Execution
 from findings.enums import OSType, PortStatus, Protocol
-from findings.models import Endpoint, Port, Host
+from findings.models import Host, Path, Port
 from processes.models import Process, Step
 from projects.models import Project
 from rest_framework.test import APIClient
@@ -55,7 +55,6 @@ class RekonoTestCase(TestCase):
         self.target = Target.objects.create(project=self.project, target='10.10.10.10')
         self.target_port = TargetPort.objects.create(target=self.target, port=80)
         self.target_endpoint = TargetEndpoint.objects.create(target_port=self.target_port, endpoint='/robots.txt')
-        # TODO: Change variable names to nmap
         self.nmap = Tool.objects.get(name='Nmap')
         self.nmap_configuration = Configuration.objects.get(tool=self.nmap, default=True)
         self.dirsearch = Tool.objects.get(name='Dirsearch')
@@ -90,8 +89,8 @@ class RekonoTestCase(TestCase):
             protocol=Protocol.TCP, service='http'
         )
         self.port.executions.add(self.execution)
-        self.http_endpoint = Endpoint.objects.create(port=self.port, endpoint='/robots.txt', status=200)
-        self.http_endpoint.executions.add(self.execution)
+        self.http_path = Path.objects.create(port=self.port, path='/robots.txt', status=200)
+        self.http_path.executions.add(self.execution)
 
     def tearDown(self) -> None:
         '''Run code after run tests.'''

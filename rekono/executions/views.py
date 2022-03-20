@@ -5,7 +5,7 @@ from django.db.models import QuerySet
 from executions.filters import ExecutionFilter
 from executions.models import Execution
 from executions.serializers import ExecutionSerializer
-from findings.models import (OSINT, Credential, Endpoint, Port, Exploit,
+from findings.models import (OSINT, Credential, Path, Port, Exploit,
                              Finding, Host, Technology, Vulnerability)
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
 
@@ -50,7 +50,7 @@ class ExecutionViewSet(ListModelMixin, RetrieveModelMixin, DefectDojoScans, Defe
         execution = self.get_object()
         findings: List[Finding] = []
         finding_models: List[Type[Finding]] = [
-            OSINT, Host, Port, Technology, Endpoint, Vulnerability, Credential, Exploit
+            OSINT, Host, Port, Technology, Path, Vulnerability, Credential, Exploit
         ]
         for finding_model in finding_models:
             # Search active findings related to this execution

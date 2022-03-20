@@ -46,7 +46,7 @@
         <tasks-by-status :height="height" :requested="requested" :skipped="skipped" :running="running" :cancelled="cancelled" :error="error" :completed="completed"/>
       </b-card>
       <b-card style="min-width: 20rem;">
-        <findings-by-type :height="height" :osint="osint" :credentials="credentials" :hosts="hosts" :ports="ports" :endpoints="endpoints" :technologies="technologies" :vulnerabilities="vulnerabilities" :exploits="exploits"/>
+        <findings-by-type :height="height" :osint="osint" :credentials="credentials" :hosts="hosts" :ports="ports" :paths="paths" :technologies="technologies" :vulnerabilities="vulnerabilities" :exploits="exploits"/>
       </b-card>
     </b-card-group>
     <hr/>
@@ -108,7 +108,7 @@ export default {
       credentials: 0,
       hosts: 0,
       ports: 0,
-      endpoints: 0,
+      paths: 0,
       technologies: 0,
       critical: 0,
       criticalExploit: 0,

@@ -1,4 +1,4 @@
-from findings.models import (OSINT, Credential, Endpoint, Port, Exploit,
+from findings.models import (OSINT, Credential, Path, Port, Exploit,
                              Host, Technology, Vulnerability)
 from rest_framework import serializers
 
@@ -38,20 +38,20 @@ class PortSerializer(serializers.ModelSerializer):
         model = Port
         fields = (                                                              # Port fields exposed via API
             'id', 'executions', 'host', 'port', 'port_status', 'protocol',
-            'service', 'creation', 'is_active', 'endpoint', 'technology',
+            'service', 'creation', 'is_active', 'path', 'technology',
             'vulnerability', 'reported_to_defectdojo'
         )
 
 
-class EndpointSerializer(serializers.ModelSerializer):
-    '''Serializer to get the Endpoint data via API.'''
+class PathSerializer(serializers.ModelSerializer):
+    '''Serializer to get the Path data via API.'''
 
     class Meta:
         '''Serializer metadata.'''
 
-        model = Endpoint
-        fields = (                                                              # Endpoint fields exposed via API
-            'id', 'executions', 'port', 'endpoint', 'status', 'extra',
+        model = Path
+        fields = (                                                              # Path fields exposed via API
+            'id', 'executions', 'port', 'path', 'status', 'extra',
             'protocol', 'creation', 'is_active', 'reported_to_defectdojo'
         )
 

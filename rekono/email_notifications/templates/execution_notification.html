@@ -136,20 +136,20 @@
                 </table>
             {% endif %}
             <br>
-            {% if endpoint %}
+            {% if path %}
                 <table class="table">
-                    <caption>Endpoints</caption>
+                    <caption>Paths</caption>
                     <thead class="thead-dark">
                         <tr>
                             <th scope="col">Port</th>
-                            <th scope="col">Protocol</th>
-                            <th scope="col">Endpoint</th>
+                            <th scope="col">Type</th>
+                            <th scope="col">Path</th>
                             <th scope="col">Status</th>
                             <th scope="col">Extra</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for e in endpoint %}
+                        {% for e in path %}
                             <tr>
                                 {% if e.port and e.port.host %}
                                     <td><strong>{{ e.port.host.address }} - {{ e.port.port }}</strong></td>
@@ -158,8 +158,8 @@
                                 {% else %}
                                     <td></td>
                                 {% endif %}
-                                <td>{{ e.protocol }}</td>
-                                <td><strong>{{ e.endpoint }}</strong></td>
+                                <td>{{ e.type }}</td>
+                                <td><strong>{{ e.path }}</strong></td>
                                 <td>{{ e.status }}</td>
                                 <td>{{ e.extra }}</td>
                             </tr>

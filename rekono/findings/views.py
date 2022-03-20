@@ -7,13 +7,13 @@ from defectdojo.views import DefectDojoFindings
 from django.db.models import QuerySet
 from drf_spectacular.utils import extend_schema
 from findings.enums import DataType
-from findings.filters import (CredentialFilter, EndpointFilter,
+from findings.filters import (CredentialFilter, PathFilter,
                               PortFilter, ExploitFilter, HostFilter,
                               OSINTFilter, TechnologyFilter,
                               VulnerabilityFilter)
-from findings.models import (OSINT, Credential, Endpoint, Port, Exploit,
+from findings.models import (OSINT, Credential, Path, Port, Exploit,
                              Finding, Host, Technology, Vulnerability)
-from findings.serializers import (CredentialSerializer, EndpointSerializer,
+from findings.serializers import (CredentialSerializer, PathSerializer,
                                   PortSerializer, ExploitSerializer,
                                   HostSerializer, OSINTSerializer,
                                   TechnologySerializer,
@@ -142,7 +142,7 @@ class HostViewSet(FindingBaseView):
     search_fields = [                                                           # Fields used to search Hosts
         'address',
         'port__port', 'port__service',
-        'port__endpoint__endpoint',
+        'port__path__path',
         'port__technology__name', 'port__technology__version',
         'port__vulnerability__name', 'port__vulnerability__cve',
         'port__vulnerability__cwe', 'port__vulnerability__severity',
@@ -164,7 +164,7 @@ class PortViewSet(FindingBaseView):
     search_fields = [                                                           # Fields used to search Ports
         'host__address',
         'port', 'service',
-        'endpoint__endpoint',
+        'path__path',
         'technology__name', 'technology__version',
         'vulnerability__name', 'vulnerability__cve',
         'vulnerability__cwe', 'vulnerability__severity',
@@ -174,16 +174,16 @@ class PortViewSet(FindingBaseView):
     ]
 
 
-class EndpointViewSet(FindingBaseView):
-    '''Endpoint ViewSet that includes: get, retrieve, enable, disable and import Defect-Dojo features.'''
+class PathViewSet(FindingBaseView):
+    '''Path ViewSet that includes: get, retrieve, enable, disable and import Defect-Dojo features.'''
 
-    queryset = Endpoint.objects.all().order_by('-id')
-    serializer_class = EndpointSerializer
-    filterset_class = EndpointFilter
-    search_fields = [                                                           # Fields used to search Endpoints
+    queryset = Path.objects.all().order_by('-id')
+    serializer_class = PathSerializer
+    filterset_class = PathFilter
+    search_fields = [                                                           # Fields used to search Paths
         'port__host__address',
         'port__port', 'port__service',
-        'endpoint'
+        'path'
     ]
 
 
@@ -196,7 +196,7 @@ class TechnologyViewSet(FindingBaseView):
     search_fields = [                                                           # Fields used to search Technologies
         'port__host__address',
         'port__port', 'port__service',
-        'port__endpoint__endpoint',
+        'port__path__path',
         'name', 'version',
         'vulnerability__name', 'vulnerability__cve',
         'vulnerability__cwe', 'vulnerability__severity',
@@ -229,7 +229,7 @@ class VulnerabilityViewSet(FindingBaseView):
         'port__host__address', 'technology__port__host__address',
         'port__port', 'port__service',
         'technology__port__port', 'technology__port__service',
-        'port__endpoint__endpoint', 'technology__port__endpoint__endpoint',
+        'port__path__path', 'technology__port__path__path',
         'port__technology__name', 'port__technology__version',
         'technology__name', 'technology__version',
         'name', 'cve', 'cwe', 'severity',
@@ -247,8 +247,8 @@ class ExploitViewSet(FindingBaseView):
         'vulnerability__port__host__address', 'technology__port__host__address',
         'vulnerability__port__port', 'vulnerability__port__service',
         'technology__port__port', 'technology__port__service',
-        'vulnerability__port__endpoint__endpoint',
-        'technology__port__endpoint__endpoint',
+        'vulnerability__port__path__path',
+        'technology__port__path__path',
         'vulnerability__port__technology__name', 'vulnerability__port__technology__version',
         'technology__name', 'technology__version',
         'vulnerability__name', 'vulnerability__cve',

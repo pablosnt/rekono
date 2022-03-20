@@ -3,8 +3,8 @@ from typing import Any, Dict, List, Union, cast
 from defectdojo.constants import DD_DATE_FORMAT
 from django.db import models
 from executions.models import Execution
-from findings.enums import (DataType, EndpointProtocol, OSType, PortStatus,
-                            Protocol, Severity)
+from findings.enums import (DataType, OSType, PathType, PortStatus, Protocol,
+                            Severity)
 from findings.utils import get_unique_filter
 from input_types.base import BaseInput
 from input_types.enums import InputKeyword
@@ -290,20 +290,20 @@ class Port(Finding):
         return f'{self.host.__str__()} - {self.port}' if self.host else str(self.port)
 
 
-class Endpoint(Finding):
-    '''Endpoint model.'''
+class Path(Finding):
+    '''Path model.'''
 
-    port = create_finding_foreign_key(Port, 'endpoint')                         # Port where endpoint is discovered
-    endpoint = models.TextField(max_length=500)                                 # Endpoint value
-    # Status receive for that endpoint. Probably HTTP status
+    port = create_finding_foreign_key(Port, 'path')                             # Port where path is discovered
+    path = models.TextField(max_length=500)                                     # Path value
+    # Status receive for that path. Probably HTTP status
     status = models.IntegerField(blank=True, null=True)
-    extra = models.TextField(max_length=100, blank=True, null=True)             # Extra information related to endpoint
-    # Protocol related to the endpoint
-    protocol = models.TextField(choices=EndpointProtocol.choices, default=EndpointProtocol.HTTP)
+    extra = models.TextField(max_length=100, blank=True, null=True)             # Extra information related to the path
+    # Path type depending on the protocol where it's found
+    type = models.TextField(choices=PathType.choices, default=PathType.ENDPOINT)
 
     key_fields: List[Dict[str, Any]] = [                                        # Unique field list
         {'name': 'port_id', 'is_base': True},
-        {'name': 'endpoint', 'is_base': False}
+        {'name': 'path', 'is_base': False}
     ]
 
     def filter(self, input: Input) -> bool:
@@ -319,11 +319,11 @@ class Endpoint(Finding):
             return True
         try:
             status_code = int(input.filter)
-            # If the filter is a number, endpoint will be filtered by status
+            # If the filter is a number, will be filtered by status
             return status_code == self.status
         except ValueError:
-            # If the filter is a string, endpoint will be filtered by endpoint
-            return input.filter in self.endpoint
+            # If the filter is a string, will be filtered by path
+            return input.filter in self.path
 
     def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
         '''Get useful information from this instance to be used in tool execution as argument.
@@ -338,9 +338,9 @@ class Endpoint(Finding):
         output[InputKeyword.URL.name.lower()] = get_url(
             self.port.host.address,
             self.port.port,
-            self.endpoint
+            self.path
         )
-        output[InputKeyword.ENDPOINT.name.lower()] = self.endpoint
+        output[InputKeyword.ENDPOINT.name.lower()] = self.path
         return output
 
     def defect_dojo(self) -> Dict[str, Any]:
@@ -353,7 +353,7 @@ class Endpoint(Finding):
             'protocol': self.port.service,
             'host': self.port.host.address,
             'port': self.port.port,
-            'path': self.endpoint
+            'path': self.path
         }
 
     def __str__(self) -> str:
@@ -362,7 +362,7 @@ class Endpoint(Finding):
         Returns:
             str: String value that identifies this instance
         '''
-        return f'{self.port.__str__()} - {self.endpoint}' if self.port else self.endpoint
+        return f'{self.port.__str__()} - {self.path}' if self.port else self.path
 
 
 class Technology(Finding):

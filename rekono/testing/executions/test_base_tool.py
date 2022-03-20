@@ -6,8 +6,8 @@ from django.test import TestCase
 from django.utils import timezone
 from executions.models import Execution
 from findings.enums import DataType, Protocol, Severity
-from findings.models import (OSINT, Credential, Endpoint, Exploit, Finding,
-                             Host, Port, Technology, Vulnerability)
+from findings.models import (OSINT, Credential, Exploit, Finding, Host, Path,
+                             Port, Technology, Vulnerability)
 from input_types.base import BaseInput
 from input_types.models import InputType
 from projects.models import Project
@@ -40,7 +40,7 @@ class BaseToolTest(TestCase):
         self.configuration = Configuration.objects.create(                      # Configuration with all argument types
             name='Test',
             tool=self.nmap,
-            arguments='{intensity} {test_osint} {test_only_host} {test_host} {test_port} {test_endpoint} {test_technology} {test_credential} {test_vulnerability} {test_exploit} {test_wordlist}'  # noqa: E501
+            arguments='{intensity} {test_osint} {test_only_host} {test_host} {test_port} {test_path} {test_technology} {test_credential} {test_vulnerability} {test_exploit} {test_wordlist}'  # noqa: E501
         )
         # Initialize auxiliary lists to help data usage
         self.arguments: List[Argument] = []
@@ -54,7 +54,7 @@ class BaseToolTest(TestCase):
         self.create_osint()
         host = self.create_hosts()
         self.port = self.create_ports(host)
-        self.create_endpoints(self.port)
+        self.create_paths(self.port)
         self.technology = self.create_technologies(self.port)
         self.create_credentials(self.technology)
         self.vulnerability = self.create_vulnerabilities(self.technology)
@@ -168,7 +168,7 @@ class BaseToolTest(TestCase):
         Input.objects.create(argument=argument_only_host, type=InputType.objects.get(name='Host'), filter='PRIVATE_IP')
         # Argument with multiple inputs
         argument = Argument.objects.create(tool=self.nmap, name='test_host', argument='--host {host}', required=True)
-        Input.objects.create(argument=argument, type=InputType.objects.get(name='Endpoint'), order=1)
+        Input.objects.create(argument=argument, type=InputType.objects.get(name='Path'), order=1)
         Input.objects.create(argument=argument, type=InputType.objects.get(name='Port'), order=2)
         Input.objects.create(argument=argument, type=InputType.objects.get(name='Host'), order=3)
         self.arguments.extend([argument_only_host, argument])
@@ -206,28 +206,28 @@ class BaseToolTest(TestCase):
         self.required_findings.extend([filtered, http, https])
         return http
 
-    def create_endpoints(self, port: Port) -> None:
-        '''Create endpoint data for testing.
+    def create_paths(self, port: Port) -> None:
+        '''Create path data for testing.
 
         Args:
             port (Port): Related port
         '''
-        # Endpoint filtered due to HTTP status code. 200 Ok required
-        filtered = Endpoint.objects.create(port=port, endpoint='/admin', status=403)
+        # Path filtered due to HTTP status code. 200 Ok required
+        filtered = Path.objects.create(port=port, path='/admin', status=403)
         filtered.executions.add(self.first_execution)
-        endpoint = Endpoint.objects.create(port=port, endpoint='/robots.txt', status=200)
-        endpoint.executions.add(self.first_execution)
+        path = Path.objects.create(port=port, path='/robots.txt', status=200)
+        path.executions.add(self.first_execution)
         argument = Argument.objects.create(
             tool=self.nmap,
-            name='test_endpoint',
+            name='test_path',
             argument='--endpoint {endpoint}',
             required=True
         )
         # Input filtered by HTTP status code: HTTP Ok required
-        Input.objects.create(argument=argument, type=InputType.objects.get(name='Endpoint'), filter='200')
+        Input.objects.create(argument=argument, type=InputType.objects.get(name='Path'), filter='200')
         self.arguments.append(argument)
-        self.all_findings.extend([filtered, endpoint])
-        self.required_findings.extend([filtered, endpoint])
+        self.all_findings.extend([filtered, path])
+        self.required_findings.extend([filtered, path])
 
     def create_technologies(self, port: Port) -> Technology:
         '''Create technology data for testing.
@@ -375,8 +375,8 @@ class BaseToolTest(TestCase):
         i.filter = '80'                                                         # By port number
         i.save(update_fields=['filter'])
         i = Input.objects.get(
-            argument__name='test_endpoint',
-            type=InputType.objects.get(name='Endpoint')
+            argument__name='test_path',
+            type=InputType.objects.get(name='Path')
         )
         i.filter = '/robot'                                                     # By endpoint content
         i.save(update_fields=['filter'])

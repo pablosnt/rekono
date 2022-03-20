@@ -5,7 +5,7 @@ from django.test import TestCase
 from django.utils import timezone
 from executions.models import Execution
 from executions.utils import get_executions_from_findings
-from findings.models import Endpoint, Port, Host
+from findings.models import Host, Path, Port
 from input_types.base import BaseInput
 from input_types.models import InputType
 from projects.models import Project
@@ -36,9 +36,9 @@ class ExecutionsFromFindingsTest(TestCase):
         Input.objects.create(argument=test_enum, type=InputType.objects.get(name='Vulnerability'), order=1)
         Input.objects.create(argument=test_enum, type=InputType.objects.get(name='Technology'), order=2)
         Input.objects.create(argument=test_enum, type=InputType.objects.get(name='Port'), order=3)
-        # Endpoint argument
-        test_endp = Argument.objects.create(tool=self.tool, name='test_endp', required=True)
-        Input.objects.create(argument=test_endp, type=InputType.objects.get(name='Endpoint'))
+        # Path argument
+        test_path = Argument.objects.create(tool=self.tool, name='test_path', required=True)
+        Input.objects.create(argument=test_path, type=InputType.objects.get(name='Path'))
         # Wordlist argument
         test_word = Argument.objects.create(tool=self.tool, name='test_word', required=False)
         Input.objects.create(argument=test_word, type=InputType.objects.get(name='Wordlist'))
@@ -80,38 +80,38 @@ class ExecutionsFromFindingsTest(TestCase):
         host_1 = self.create_finding(Host, address='10.10.10.1')
         port_1_1 = self.create_finding(Port, host=host_1, port=22)
         port_1_2 = self.create_finding(Port, host=host_1, port=80)
-        endp_1_2_1 = self.create_finding(Endpoint, port=port_1_2, endpoint='/endpoint1')
-        endp_1_2_2 = self.create_finding(Endpoint, port=port_1_2, endpoint='/endpoint2')
-        endp_1_2_3 = self.create_finding(Endpoint, port=port_1_2, endpoint='/endpoint3')
+        path_1_2_1 = self.create_finding(Path, port=port_1_2, path='/endpoint1')
+        path_1_2_2 = self.create_finding(Path, port=port_1_2, path='/endpoint2')
+        path_1_2_3 = self.create_finding(Path, port=port_1_2, path='/endpoint3')
         port_1_3 = self.create_finding(Port, host=host_1, port=443)
-        endp_1_3_1 = self.create_finding(Endpoint, port=port_1_3, endpoint='/endpoint')
+        path_1_3_1 = self.create_finding(Path, port=port_1_3, path='/endpoint')
         port_1_4 = self.create_finding(Port, host=host_1, port=8080)
-        endp_1_4_1 = self.create_finding(Endpoint, port=port_1_4, endpoint='/endpoint')
+        path_1_4_1 = self.create_finding(Path, port=port_1_4, path='/endpoint')
         port_1_5 = self.create_finding(Port, host=host_1, port=8000)
-        endp_1_5_1 = self.create_finding(Endpoint, port=port_1_5, endpoint='/endpoint')
+        path_1_5_1 = self.create_finding(Path, port=port_1_5, path='/endpoint')
         # Host 2 with some endpoints in some ports
         host_2 = self.create_finding(Host, address='10.10.10.2')
         port_2_1 = self.create_finding(Port, host=host_2, port=22)
         port_2_2 = self.create_finding(Port, host=host_2, port=80)
-        endp_2_2_1 = self.create_finding(Endpoint, port=port_2_2, endpoint='/endpoint1')
-        endp_2_2_2 = self.create_finding(Endpoint, port=port_2_2, endpoint='/endpoint2')
+        path_2_2_1 = self.create_finding(Path, port=port_2_2, path='/endpoint1')
+        path_2_2_2 = self.create_finding(Path, port=port_2_2, path='/endpoint2')
         port_2_3 = self.create_finding(Port, host=host_2, port=443)
         port_2_4 = self.create_finding(Port, host=host_2, port=8080)
-        endp_2_4_1 = self.create_finding(Endpoint, port=port_2_4, endpoint='/endpoint1')
-        endp_2_4_2 = self.create_finding(Endpoint, port=port_2_4, endpoint='/endpoint2')
+        path_2_4_1 = self.create_finding(Path, port=port_2_4, path='/endpoint1')
+        path_2_4_2 = self.create_finding(Path, port=port_2_4, path='/endpoint2')
         port_2_5 = self.create_finding(Port, host=host_2, port=8000)
         # Host 3 with one endpoint for each port
         host_3 = self.create_finding(Host, address='10.10.10.3')
         port_3_1 = self.create_finding(Port, host=host_3, port=22)
-        endp_3_1_1 = self.create_finding(Endpoint, port=port_3_1, endpoint='/endpoint')
+        path_3_1_1 = self.create_finding(Path, port=port_3_1, path='/endpoint')
         port_3_2 = self.create_finding(Port, host=host_3, port=80)
-        endp_3_2_1 = self.create_finding(Endpoint, port=port_3_2, endpoint='/endpoint')
+        path_3_2_1 = self.create_finding(Path, port=port_3_2, path='/endpoint')
         port_3_3 = self.create_finding(Port, host=host_3, port=443)
-        endp_3_3_1 = self.create_finding(Endpoint, port=port_3_3, endpoint='/endpoint')
+        path_3_3_1 = self.create_finding(Path, port=port_3_3, path='/endpoint')
         port_3_4 = self.create_finding(Port, host=host_3, port=8080)
-        endp_3_4_1 = self.create_finding(Endpoint, port=port_3_4, endpoint='/endpoint')
+        path_3_4_1 = self.create_finding(Path, port=port_3_4, path='/endpoint')
         port_3_5 = self.create_finding(Port, host=host_3, port=8000)
-        endp_3_5_1 = self.create_finding(Endpoint, port=port_3_5, endpoint='/endpoint')
+        path_3_5_1 = self.create_finding(Path, port=port_3_5, path='/endpoint')
         # Host 4 without endpoints
         host_4 = self.create_finding(Host, address='10.10.10.4')
         port_4_1 = self.create_finding(Port, host=host_4, port=22)
@@ -128,29 +128,29 @@ class ExecutionsFromFindingsTest(TestCase):
             port_2_1, port_2_2, port_2_3, port_2_4, port_2_5,
             port_3_1, port_3_2, port_3_3, port_3_4, port_3_5,
             port_4_1, port_4_2, port_4_3, port_4_4, port_4_5,
-            endp_1_2_1, endp_1_2_2, endp_1_2_3, endp_1_3_1, endp_1_4_1, endp_1_5_1,
-            endp_2_2_1, endp_2_2_2, endp_2_4_1, endp_2_4_2,
-            endp_3_1_1, endp_3_2_1, endp_3_3_1, endp_3_4_1, endp_3_5_1
+            path_1_2_1, path_1_2_2, path_1_2_3, path_1_3_1, path_1_4_1, path_1_5_1,
+            path_2_2_1, path_2_2_2, path_2_4_1, path_2_4_2,
+            path_3_1_1, path_3_2_1, path_3_3_1, path_3_4_1, path_3_5_1
         ]
         # Expected executions
         expected = [
-            [host_1, port_1_1, port_1_2, port_1_3, port_1_4, port_1_5, endp_1_2_1],
-            [host_2, port_2_1, port_2_2, port_2_3, port_2_4, port_2_5, endp_2_2_1],
-            [host_3, port_3_1, port_3_2, port_3_3, port_3_4, port_3_5, endp_3_1_1],
+            [host_1, port_1_1, port_1_2, port_1_3, port_1_4, port_1_5, path_1_2_1],
+            [host_2, port_2_1, port_2_2, port_2_3, port_2_4, port_2_5, path_2_2_1],
+            [host_3, port_3_1, port_3_2, port_3_3, port_3_4, port_3_5, path_3_1_1],
             [host_4, port_4_1, port_4_2, port_4_3, port_4_4, port_4_5],
             [host_5],
-            [host_1, port_1_1, port_1_2, port_1_3, port_1_4, port_1_5, endp_1_2_2],
-            [host_1, port_1_1, port_1_2, port_1_3, port_1_4, port_1_5, endp_1_2_3],
-            [host_1, port_1_1, port_1_2, port_1_3, port_1_4, port_1_5, endp_1_3_1],
-            [host_1, port_1_1, port_1_2, port_1_3, port_1_4, port_1_5, endp_1_4_1],
-            [host_1, port_1_1, port_1_2, port_1_3, port_1_4, port_1_5, endp_1_5_1],
-            [host_2, port_2_1, port_2_2, port_2_3, port_2_4, port_2_5, endp_2_2_2],
-            [host_2, port_2_1, port_2_2, port_2_3, port_2_4, port_2_5, endp_2_4_1],
-            [host_2, port_2_1, port_2_2, port_2_3, port_2_4, port_2_5, endp_2_4_2],
-            [host_3, port_3_1, port_3_2, port_3_3, port_3_4, port_3_5, endp_3_2_1],
-            [host_3, port_3_1, port_3_2, port_3_3, port_3_4, port_3_5, endp_3_3_1],
-            [host_3, port_3_1, port_3_2, port_3_3, port_3_4, port_3_5, endp_3_4_1],
-            [host_3, port_3_1, port_3_2, port_3_3, port_3_4, port_3_5, endp_3_5_1],
+            [host_1, port_1_1, port_1_2, port_1_3, port_1_4, port_1_5, path_1_2_2],
+            [host_1, port_1_1, port_1_2, port_1_3, port_1_4, port_1_5, path_1_2_3],
+            [host_1, port_1_1, port_1_2, port_1_3, port_1_4, port_1_5, path_1_3_1],
+            [host_1, port_1_1, port_1_2, port_1_3, port_1_4, port_1_5, path_1_4_1],
+            [host_1, port_1_1, port_1_2, port_1_3, port_1_4, port_1_5, path_1_5_1],
+            [host_2, port_2_1, port_2_2, port_2_3, port_2_4, port_2_5, path_2_2_2],
+            [host_2, port_2_1, port_2_2, port_2_3, port_2_4, port_2_5, path_2_4_1],
+            [host_2, port_2_1, port_2_2, port_2_3, port_2_4, port_2_5, path_2_4_2],
+            [host_3, port_3_1, port_3_2, port_3_3, port_3_4, port_3_5, path_3_2_1],
+            [host_3, port_3_1, port_3_2, port_3_3, port_3_4, port_3_5, path_3_3_1],
+            [host_3, port_3_1, port_3_2, port_3_3, port_3_4, port_3_5, path_3_4_1],
+            [host_3, port_3_1, port_3_2, port_3_3, port_3_4, port_3_5, path_3_5_1],
         ]
         executions = get_executions_from_findings(findings, self.tool)
         self.assertEqual(expected, executions)

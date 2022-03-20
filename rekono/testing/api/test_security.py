@@ -2,7 +2,7 @@ from typing import Callable, cast
 
 from django.forms import ValidationError
 from security.csp_header import admin, redoc, swagger
-from security.input_validation import (validate_endpoint, validate_name,
+from security.input_validation import (validate_path, validate_name,
                                        validate_number, validate_text,
                                        validate_time_amount)
 from security.passwords import PasswordComplexityValidator
@@ -33,8 +33,8 @@ class SecurityTest(RekonoTestCase):
             (1000000, validate_number, False),
             (1, validate_number, True),
             (999999, validate_number, True),
-            ('/invalid;', validate_endpoint, False),
-            ('/valid', validate_endpoint, True),
+            ('/invalid;', validate_path, False),
+            ('/valid', validate_path, True),
             (0, validate_time_amount, False),
             (1001, validate_time_amount, False),
             (1, validate_time_amount, True),

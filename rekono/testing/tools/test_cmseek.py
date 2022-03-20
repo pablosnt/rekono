@@ -1,5 +1,5 @@
-from findings.enums import EndpointProtocol, Severity
-from findings.models import Credential, Endpoint, Technology, Vulnerability
+from findings.enums import PathType, Severity
+from findings.models import Credential, Path, Technology, Vulnerability
 from testing.tools.base import ToolParserTest
 
 
@@ -9,7 +9,7 @@ class CMSeeKParserTest(ToolParserTest):
     tool_name = 'CMSeeK'
 
     def test_dvwp(self) -> None:
-        '''Test to parse simple report with endpoints and technologies.'''
+        '''Test to parse simple report with paths and technologies.'''
         expected = [
             {
                 'model': Technology,
@@ -18,7 +18,7 @@ class CMSeeKParserTest(ToolParserTest):
                 'description': 'CMS',
                 'reference': 'https://wordpress.org'
             },
-            {'model': Endpoint, 'endpoint': '/license.txt', 'protocol': EndpointProtocol.HTTP},
+            {'model': Path, 'path': '/license.txt', 'type': PathType.ENDPOINT},
             {'model': Technology, 'name': 'social-warfare', 'version': '3.5.2', 'description': 'WordPress plugins'},
             {'model': Technology, 'name': 'wp-file-upload', 'version': '5.3', 'description': 'WordPress plugins'},
             {
@@ -27,7 +27,7 @@ class CMSeeKParserTest(ToolParserTest):
                 'version': '1.0',
                 'description': 'WordPress plugins'
             },
-            {'model': Endpoint, 'endpoint': '/readme.html', 'protocol': EndpointProtocol.HTTP},
+            {'model': Path, 'path': '/readme.html', 'type': PathType.ENDPOINT},
             {'model': Technology, 'name': 'twentytwenty', 'version': '1.0', 'description': 'WordPress themes'}
         ]
         super().check_tool_file_parser('dvwp.json', expected)
@@ -42,11 +42,11 @@ class CMSeeKParserTest(ToolParserTest):
                 'description': 'CMS',
                 'reference': 'https://joomla.org'
             },
-            {'model': Endpoint, 'endpoint': '/demo/2.back', 'protocol': EndpointProtocol.HTTP},
-            {'model': Endpoint, 'endpoint': '/demo/2.save', 'protocol': EndpointProtocol.HTTP},
-            {'model': Endpoint, 'endpoint': '/demo/2.tmp', 'protocol': EndpointProtocol.HTTP},
-            {'model': Endpoint, 'endpoint': '/demo/2.backup', 'protocol': EndpointProtocol.HTTP},
-            {'model': Endpoint, 'endpoint': '/demo/2.txt', 'protocol': EndpointProtocol.HTTP},
+            {'model': Path, 'path': '/demo/2.back', 'type': PathType.ENDPOINT},
+            {'model': Path, 'path': '/demo/2.save', 'type': PathType.ENDPOINT},
+            {'model': Path, 'path': '/demo/2.tmp', 'type': PathType.ENDPOINT},
+            {'model': Path, 'path': '/demo/2.backup', 'type': PathType.ENDPOINT},
+            {'model': Path, 'path': '/demo/2.txt', 'type': PathType.ENDPOINT},
             {
                 'model': Vulnerability,
                 'name': 'Backup files found',
@@ -74,7 +74,7 @@ class CMSeeKParserTest(ToolParserTest):
                 'description': 'CMS',
                 'reference': 'https://wordpress.org'
             },
-            {'model': Endpoint, 'endpoint': '/license.txt', 'protocol': EndpointProtocol.HTTP},
+            {'model': Path, 'path': '/license.txt', 'type': PathType.ENDPOINT},
             {
                 'model': Technology,
                 'name': 'wp-advanced-search',
@@ -84,7 +84,7 @@ class CMSeeKParserTest(ToolParserTest):
             {'model': Technology, 'name': 'social-warfare', 'version': '3.5.2', 'description': 'WordPress plugins'},
             {'model': Technology, 'name': 'simple-file-list', 'version': '5', 'description': 'WordPress plugins'},
             {'model': Technology, 'name': 'wp-file-upload', 'version': '4.8.3', 'description': 'WordPress plugins'},
-            {'model': Endpoint, 'endpoint': '/readme.html', 'protocol': EndpointProtocol.HTTP},
+            {'model': Path, 'path': '/readme.html', 'type': PathType.ENDPOINT},
             {'model': Technology, 'name': 'twentyseventeen', 'version': '4.8.3', 'description': 'WordPress themes'},
             {'model': Vulnerability, 'cve': 'CVE-2019-16223'},
             {'model': Vulnerability, 'cve': 'CVE-2019-16222'},
@@ -117,7 +117,7 @@ class CMSeeKParserTest(ToolParserTest):
                 'description': 'CMS',
                 'reference': 'https://wordpress.org'
             },
-            {'model': Endpoint, 'endpoint': '/license.txt', 'protocol': EndpointProtocol.HTTP},
+            {'model': Path, 'path': '/license.txt', 'type': PathType.ENDPOINT},
             {
                 'model': Technology,
                 'name': 'orbisius-simple-notice',
@@ -131,7 +131,7 @@ class CMSeeKParserTest(ToolParserTest):
                 'description': 'WordPress plugins'
             },
             {'model': Technology, 'name': 'monarch', 'version': '1.4.14', 'description': 'WordPress plugins'},
-            {'model': Endpoint, 'endpoint': '/readme.html', 'protocol': EndpointProtocol.HTTP},
+            {'model': Path, 'path': '/readme.html', 'type': PathType.ENDPOINT},
             {'model': Technology, 'name': 'primer', 'version': '1590756562', 'description': 'WordPress themes'},
             {
                 'model': Technology,

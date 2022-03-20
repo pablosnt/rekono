@@ -1,5 +1,5 @@
-from findings.enums import EndpointProtocol, Severity
-from findings.models import Endpoint, Vulnerability
+from findings.enums import PathType, Severity
+from findings.models import Path, Vulnerability
 from testing.tools.base import ToolParserTest
 
 
@@ -22,10 +22,10 @@ class ZapParserTest(ToolParserTest):
                 'cwe': 'CWE-548',
                 'reference': 'http://httpd.apache.org/docs/mod/core.html#options'
             },
-            {'model': Endpoint, 'endpoint': '/images/', 'protocol': EndpointProtocol.HTTP},
-            {'model': Endpoint, 'endpoint': '/shared/', 'protocol': EndpointProtocol.HTTP},
-            {'model': Endpoint, 'endpoint': '/shared/css/', 'protocol': EndpointProtocol.HTTP},
-            {'model': Endpoint, 'endpoint': '/shared/images/Acunetix/', 'protocol': EndpointProtocol.HTTP},
+            {'model': Path, 'path': '/images/', 'type': PathType.ENDPOINT},
+            {'model': Path, 'path': '/shared/', 'type': PathType.ENDPOINT},
+            {'model': Path, 'path': '/shared/css/', 'type': PathType.ENDPOINT},
+            {'model': Path, 'path': '/shared/images/Acunetix/', 'type': PathType.ENDPOINT},
             {
                 'model': Vulnerability,
                 'name': 'X-Frame-Options Header Not Set',
@@ -78,9 +78,9 @@ class ZapParserTest(ToolParserTest):
                 'reference': 'http://projects.webappsec.org/w/page/13246936/Information%20Leakage'
             },
             {
-                'model': Endpoint,
-                'endpoint': '/shared/images/Acunetix/acx_Chess-WB.gif',
-                'protocol': EndpointProtocol.HTTP
+                'model': Path,
+                'path': '/shared/images/Acunetix/acx_Chess-WB.gif',
+                'type': PathType.ENDPOINT
             },
             {
                 'model': Vulnerability,
@@ -97,9 +97,9 @@ class ZapParserTest(ToolParserTest):
                 'cwe': 'CWE-693',
                 'reference': 'http://msdn.microsoft.com/en-us/library/ie/gg622941%28v=vs.85%29.aspx'
             },
-            {'model': Endpoint, 'endpoint': '/images/sitelogo.png', 'protocol': EndpointProtocol.HTTP},
-            {'model': Endpoint, 'endpoint': '/shared/css/insecdb.css', 'protocol': EndpointProtocol.HTTP},
-            {'model': Endpoint, 'endpoint': '/shared/images/tiny-eyeicon.png', 'protocol': EndpointProtocol.HTTP},
-            {'model': Endpoint, 'endpoint': '/shared/images/topleftcurve.gif', 'protocol': EndpointProtocol.HTTP}
+            {'model': Path, 'path': '/images/sitelogo.png', 'type': PathType.ENDPOINT},
+            {'model': Path, 'path': '/shared/css/insecdb.css', 'type': PathType.ENDPOINT},
+            {'model': Path, 'path': '/shared/images/tiny-eyeicon.png', 'type': PathType.ENDPOINT},
+            {'model': Path, 'path': '/shared/images/topleftcurve.gif', 'type': PathType.ENDPOINT}
         ]
         super().check_tool_file_parser('active-scan.xml', expected)

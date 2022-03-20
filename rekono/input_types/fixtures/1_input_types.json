@@ -30,8 +30,8 @@
         "model": "input_types.inputtype",
         "pk": 4,
         "fields": {
-            "name": "Endpoint",
-            "related_model": "findings.endpoint",
+            "name": "Path",
+            "related_model": "findings.path",
             "callback_target": "targets.targetendpoint"
         }
     },

@@ -53,8 +53,8 @@ class Protocol(models.TextChoices):
     TCP = 'TCP'
 
 
-class EndpointProtocol(models.TextChoices):
-    '''Protocols to categorize Endpoints.'''
+class PathType(models.TextChoices):
+    '''Protocols to categorize Paths.'''
 
-    HTTP = 'HTTP'
-    SMB = 'SMB'
+    ENDPOINT = 'ENDPOINT'
+    SHARE = 'SHARE'

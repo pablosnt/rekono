@@ -6,7 +6,7 @@ import requests
 from defectdojo.constants import DD_DATE_FORMAT, DD_DATETIME_FORMAT
 from executions.models import Execution
 from findings.enums import Severity
-from findings.models import Endpoint, Finding
+from findings.models import Path, Finding
 from projects.models import Project
 from tools.models import Tool
 
@@ -215,12 +215,12 @@ class DefectDojo:
         }
         return self.request('POST', '/tests/', data=data, expected_status=201)
 
-    def create_endpoint(self, product: int, endpoint: Endpoint) -> Tuple[bool, dict]:
+    def create_endpoint(self, product: int, endpoint: Path) -> Tuple[bool, dict]:
         '''Create new Defect-Dojo endpoint from Rekono endpoint.
 
         Args:
             product (int): Product Id where the endpoint will be created
-            endpoint (Endpoint): Rekono endpoint to create in Defect-Dojo
+            endpoint (Path): Rekono endpoint to create in Defect-Dojo
 
         Returns:
             Tuple[bool, dict]: Indicates if request was successful or not (bool), and return the response body (dict)

@@ -32,11 +32,11 @@ PORT_PARAM = '''
 _Port_          *{port}*
 '''
 
-ENDPOINT_ICON = '🌐'
-ENDPOINT = '''
+PATH_ICON = '🌐'
+PATH = '''
 _Port_          *{port}*
-_Protocol_      {protocol}
-_Endpoint_      *{endpoint}*
+_Type_          {type}
+_Path_          *{path}*
 _Status_        {status}
 _Extra_         {extra}
 '''

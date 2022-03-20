@@ -5,7 +5,7 @@ from django.db.models import QuerySet
 from django_filters.rest_framework import filters
 from django_filters.rest_framework.filters import OrderingFilter
 from findings.enums import OSType
-from findings.models import (OSINT, Credential, Endpoint, Exploit, Host, Port,
+from findings.models import (OSINT, Credential, Exploit, Host, Path, Port,
                              Technology, Vulnerability)
 
 # Common ordering anf filtering fields for all Finding models
@@ -176,16 +176,16 @@ class PortFilter(FindingFilter):
         })
 
 
-class EndpointFilter(FindingFilter):
-    '''FilterSet to filter and sort Endpoint entities.'''
+class PathFilter(FindingFilter):
+    '''FilterSet to filter and sort Path entities.'''
 
     # Ordering fields including common ones
-    o = OrderingFilter(fields=FINDING_ORDERING + (('port__host', 'host'), 'port', 'endpoint', 'status'))
+    o = OrderingFilter(fields=FINDING_ORDERING + (('port__host', 'host'), 'port', 'path', 'status'))
 
     class Meta:
         '''FilterSet metadata.'''
 
-        model = Endpoint
+        model = Path
         fields = FINDING_FILTERING.copy()                                       # Common filtering fields
         fields.update({                                                         # Include specific filtering fields
             'port': ['exact', 'isnull'],
@@ -193,9 +193,9 @@ class EndpointFilter(FindingFilter):
             'port__host__address': ['exact', 'icontains'],
             'port__host__os_type': ['exact'],
             'port__port': ['exact'],
-            'endpoint': ['exact', 'icontains'],
+            'path': ['exact', 'icontains'],
             'status': ['exact'],
-            'protocol': ['exact'],
+            'type': ['exact'],
         })
 
 
