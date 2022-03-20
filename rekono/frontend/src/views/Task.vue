@@ -99,7 +99,7 @@
               <template #title>
                 <b-icon icon="flag-fill"/> Findings
               </template>
-              <findings v-if="currentTask" class="mt-3" :task="currentTask" :execution="selectedExecution" :selection="false" :cols="1"/>
+              <findings v-if="currentTask" class="mt-3" :task="currentTask" :execution="selectedExecution" :selection="false" :cols="1" :reload="reloadFindings"/>
             </b-tab>
           </b-tabs>
         </b-col>
@@ -147,7 +147,8 @@ export default {
       autoRefresh: null,
       ddPath: null,
       ddItemId: null,
-      ddAlreadyReported: null
+      ddAlreadyReported: null,
+      reloadFindings: false
     }
   },
   components: {
@@ -166,6 +167,7 @@ export default {
       if (this.autoRefresh) {
         clearInterval(this.autoRefresh)
         this.autoRefresh = null
+        this.reloadFindings = !this.reloadFindings
       }
     },
     handleRefresh () {
@@ -186,7 +188,13 @@ export default {
       }
     },
     fetchExecutions () {
-      this.getAllPages('/api/executions/', { task: this.$route.params.id }).then(results => { this.executions = results })
+      this.getAllPages('/api/executions/', { task: this.$route.params.id })
+        .then(results => {
+          this.executions = results
+          if (this.executions.length === 1) {
+            this.selectExecution(this.executions)
+          }
+        })
     },
     cancelTask () {
       this.delete(`/api/tasks/${this.currentTask.id}/`, this.currentTask.process ? this.currentTask.process.name : this.currentTask.tool.name, 'Task cancelled successfully')

@@ -111,11 +111,12 @@ export default {
     search: String,
     active: String,
     filter: Object,
-    details: Array
+    details: Array,
+    reload: Boolean
   },
   computed: {
     filterChange () {
-      return this.selectedFindingTypes.toString() + this.target + this.task + this.execution + this.search + this.active + JSON.stringify(this.filter)
+      return this.selectedFindingTypes.toString() + this.target + this.task + this.execution + this.search + this.active + JSON.stringify(this.filter) + this.reload
     },
     types () {
       let types = []
