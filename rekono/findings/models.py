@@ -318,12 +318,16 @@ class Path(Finding):
         if not input.filter:
             return True
         try:
-            status_code = int(input.filter)
-            # If the filter is a number, will be filtered by status
-            return status_code == self.status
-        except ValueError:
-            # If the filter is a string, will be filtered by path
-            return input.filter in self.path
+            # If filter is a valid severity, vulnerability will be filtered by severity
+            return cast(models.TextChoices, PathType)[input.filter.upper()] == self.type
+        except KeyError:
+            try:
+                status_code = int(input.filter)
+                # If the filter is a number, will be filtered by status
+                return status_code == self.status
+            except ValueError:
+                # If the filter is a string, will be filtered by path
+                return input.filter in self.path
 
     def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
         '''Get useful information from this instance to be used in tool execution as argument.
@@ -335,11 +339,12 @@ class Path(Finding):
             Dict[str, Any]: Useful information for tool executions, including accumulated if setted
         '''
         output = self.port.parse() if self.port else {}
-        output[InputKeyword.URL.name.lower()] = get_url(
-            self.port.host.address,
-            self.port.port,
-            self.path
-        )
+        if self.type == PathType.ENDPOINT:
+            output[InputKeyword.URL.name.lower()] = get_url(
+                self.port.host.address,
+                self.port.port,
+                self.path
+            )
         output[InputKeyword.ENDPOINT.name.lower()] = self.path
         return output
 

@@ -1,6 +1,7 @@
 from typing import Any, Dict, cast
 
 from django.db import models
+from findings.enums import PathType
 from input_types.base import BaseInput
 from input_types.enums import InputKeyword
 from input_types.utils import get_url
@@ -172,6 +173,12 @@ class TargetEndpoint(models.Model, BaseInput):
         '''
         if not input.filter:
             return True
+        try:
+            # If filter is a valid severity, vulnerability will be filtered by severity
+            if cast(models.TextChoices, PathType)[input.filter.upper()] == PathType.ENDPOINT:
+                return True
+        except KeyError:
+            pass
         try:
             int(input.filter)
             # If the filter is a number, endpoint won't be filtered
