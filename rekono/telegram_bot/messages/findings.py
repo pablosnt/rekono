@@ -20,21 +20,21 @@ _OS_        {os}
 _OS type_   {os_type}
 '''
 
-ENUMERATION_ICON = '🚪'
-ENUMERATION = '''
+PORT_ICON = '🚪'
+PORT = '''
 _Host_          *{host}*
 _Port_          *{port}*
 _Status_        {port_status}
 _Protocol_      {protocol}
 _Service_       {service}
 '''
-ENUMERATION_PARAM = '''
-_Enumeration_   *{enumeration}*
+PORT_PARAM = '''
+_Port_          *{port}*
 '''
 
 ENDPOINT_ICON = '🌐'
 ENDPOINT = '''
-_Enumeration_   *{enumeration}*
+_Port_          *{port}*
 _Protocol_      {protocol}
 _Endpoint_      *{endpoint}*
 _Status_        {status}
@@ -43,7 +43,7 @@ _Extra_         {extra}
 
 TECHNOLOGY_ICON = '🖲'
 TECHNOLOGY = '''
-_Enumeration_   *{enumeration}*
+_Port_          *{port}*
 _Name_          *{name}*
 _Version_       {version}
 '''

@@ -4,8 +4,8 @@ from typing import Any, Callable, Dict, List, Tuple, Union, cast
 from django.db.models import TextChoices
 from findings.enums import (EndpointProtocol, OSType, PortStatus, Protocol,
                             Severity)
-from findings.models import (Credential, Endpoint, Enumeration, Host,
-                             Technology, Vulnerability)
+from findings.models import (Credential, Endpoint, Host, Port, Technology,
+                             Vulnerability)
 from libnmap.parser import NmapParser
 from tools.tools.base_tool import BaseTool
 
@@ -182,7 +182,7 @@ class NmapTool(BaseTool):
                 anonymous = fields.get("Anonymous access")
                 self.create_finding(                                            # Create share finding
                     Endpoint,
-                    enumeration=technology.enumeration if technology else None,
+                    port=technology.port if technology else None,
                     endpoint=path,
                     extra=(
                         f'{fields.get("Comment") or ""} '
@@ -320,8 +320,8 @@ class NmapTool(BaseTool):
             technology = None
             technologies = {}
             for s in h.services:                                                # For each service
-                enumeration = self.create_finding(                              # Create Enumeration
-                    Enumeration,
+                port = self.create_finding(                                     # Create Port
+                    Port,
                     host=host,
                     port=s.port,
                     port_status=cast(TextChoices, PortStatus)[s.state.upper()],
@@ -331,7 +331,7 @@ class NmapTool(BaseTool):
                 if 'product' in s.service_dict and 'version' in s.service_dict:     # If service details found
                     technology = self.create_finding(                           # Create technology
                         Technology,
-                        enumeration=enumeration,
+                        port=port,
                         name=s.service_dict['product'],
                         version=s.service_dict['version']
                     )

@@ -110,7 +110,7 @@ class GitleaksTool(BaseTool):
             if git_dumped:                                                      # Git repository has been dumped
                 self.create_finding(                                            # Create related vulnerability
                     Vulnerability,
-                    enumeration=endpoint.enumeration if isinstance(endpoint, Endpoint) else None,
+                    port=endpoint.port if isinstance(endpoint, Endpoint) else None,
                     name='Git source code exposure',
                     description=(
                         f'Source code is exposed in the endpoint {endpoint.endpoint} and '

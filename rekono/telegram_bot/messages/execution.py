@@ -1,7 +1,7 @@
 from typing import List
 
 from executions.models import Execution
-from findings.models import (OSINT, Credential, Endpoint, Enumeration, Exploit,
+from findings.models import (OSINT, Credential, Endpoint, Port, Exploit,
                              Finding, Host, Technology, Vulnerability)
 from telegram.ext import CallbackContext
 from telegram.utils.helpers import escape_markdown
@@ -56,7 +56,7 @@ def notification_message(execution: Execution, findings: List[Finding]) -> str:
         str: Text message with execution and findings details
     '''
     text_message = ''
-    finding_models = [OSINT, Host, Enumeration, Endpoint, Technology, Credential, Vulnerability, Exploit]
+    finding_models = [OSINT, Host, Port, Endpoint, Technology, Credential, Vulnerability, Exploit]
     for model in finding_models:                                                # For each finding model
         entities = [f for f in findings if isinstance(f, model)]                # Get findings related to current model
         if entities:                                                            # Findings found
@@ -72,7 +72,7 @@ def notification_message(execution: Execution, findings: List[Finding]) -> str:
                     # Replace related finding by its string representation
                     data[field] = getattr(entity, field).__str__()
                 for finding_model, fields in [
-                    (Vulnerability, ['technology', 'enumeration']),
+                    (Vulnerability, ['technology', 'port']),
                     (Exploit, ['vulnerability', 'technology'])
                 ]:
                     # For each model with multiple findings relations, select the most relevant one

@@ -6,8 +6,8 @@ from django.test import TestCase
 from django.utils import timezone
 from executions.models import Execution
 from findings.enums import DataType, Protocol, Severity
-from findings.models import (OSINT, Credential, Endpoint, Enumeration, Exploit,
-                             Finding, Host, Technology, Vulnerability)
+from findings.models import (OSINT, Credential, Endpoint, Exploit, Finding,
+                             Host, Port, Technology, Vulnerability)
 from input_types.base import BaseInput
 from input_types.models import InputType
 from projects.models import Project
@@ -40,7 +40,7 @@ class BaseToolTest(TestCase):
         self.configuration = Configuration.objects.create(                      # Configuration with all argument types
             name='Test',
             tool=self.nmap,
-            arguments='{intensity} {test_osint} {test_only_host} {test_host} {test_enumeration} {test_endpoint} {test_technology} {test_credential} {test_vulnerability} {test_exploit} {test_wordlist}'  # noqa: E501
+            arguments='{intensity} {test_osint} {test_only_host} {test_host} {test_port} {test_endpoint} {test_technology} {test_credential} {test_vulnerability} {test_exploit} {test_wordlist}'  # noqa: E501
         )
         # Initialize auxiliary lists to help data usage
         self.arguments: List[Argument] = []
@@ -53,9 +53,9 @@ class BaseToolTest(TestCase):
         self.create_targets()
         self.create_osint()
         host = self.create_hosts()
-        self.enumeration = self.create_enumerations(host)
-        self.create_endpoints(self.enumeration)
-        self.technology = self.create_technologies(self.enumeration)
+        self.port = self.create_ports(host)
+        self.create_endpoints(self.port)
+        self.technology = self.create_technologies(self.port)
         self.create_credentials(self.technology)
         self.vulnerability = self.create_vulnerabilities(self.technology)
         self.exploit = self.create_exploits(self.vulnerability)
@@ -169,53 +169,53 @@ class BaseToolTest(TestCase):
         # Argument with multiple inputs
         argument = Argument.objects.create(tool=self.nmap, name='test_host', argument='--host {host}', required=True)
         Input.objects.create(argument=argument, type=InputType.objects.get(name='Endpoint'), order=1)
-        Input.objects.create(argument=argument, type=InputType.objects.get(name='Enumeration'), order=2)
+        Input.objects.create(argument=argument, type=InputType.objects.get(name='Port'), order=2)
         Input.objects.create(argument=argument, type=InputType.objects.get(name='Host'), order=3)
         self.arguments.extend([argument_only_host, argument])
         self.all_findings.extend([filtered, host])
         self.required_findings.extend([filtered, host])
         return host
 
-    def create_enumerations(self, host: Host) -> Enumeration:
-        '''Create enumeration data for testing.
+    def create_ports(self, host: Host) -> Port:
+        '''Create port data for testing.
 
         Args:
             host (Host): Related host
 
         Returns:
-            Enumeration: Valid enumeration instance
+            Port: Valid port instance
         '''
-        # Enumeration filtered due to service type. HTTP service required
-        filtered = Enumeration.objects.create(host=host, port=22, protocol=Protocol.TCP, service='ssh')
+        # Port filtered due to service type. HTTP service required
+        filtered = Port.objects.create(host=host, port=22, protocol=Protocol.TCP, service='ssh')
         filtered.executions.add(self.first_execution)
-        http = Enumeration.objects.create(host=host, port=80, protocol=Protocol.TCP, service='http')
+        http = Port.objects.create(host=host, port=80, protocol=Protocol.TCP, service='http')
         http.executions.add(self.first_execution)
-        https = Enumeration.objects.create(host=host, port=443, protocol=Protocol.TCP, service='https')
+        https = Port.objects.create(host=host, port=443, protocol=Protocol.TCP, service='https')
         https.executions.add(self.first_execution)
         argument = Argument.objects.create(
             tool=self.nmap,
-            name='test_enumeration',
+            name='test_port',
             argument='--port {port} --port-commas {ports_commas}',
             required=True,
             multiple=True
         )
         # Input filtered by service type: HTTP service required
-        Input.objects.create(argument=argument, type=InputType.objects.get(name='Enumeration'), filter='http')
+        Input.objects.create(argument=argument, type=InputType.objects.get(name='Port'), filter='http')
         self.arguments.append(argument)
         self.all_findings.extend([filtered, http, https])
         self.required_findings.extend([filtered, http, https])
         return http
 
-    def create_endpoints(self, enumeration: Enumeration) -> None:
+    def create_endpoints(self, port: Port) -> None:
         '''Create endpoint data for testing.
 
         Args:
-            enumeration (Enumeration): Related enumeration
+            port (Port): Related port
         '''
         # Endpoint filtered due to HTTP status code. 200 Ok required
-        filtered = Endpoint.objects.create(enumeration=enumeration, endpoint='/admin', status=403)
+        filtered = Endpoint.objects.create(port=port, endpoint='/admin', status=403)
         filtered.executions.add(self.first_execution)
-        endpoint = Endpoint.objects.create(enumeration=enumeration, endpoint='/robots.txt', status=200)
+        endpoint = Endpoint.objects.create(port=port, endpoint='/robots.txt', status=200)
         endpoint.executions.add(self.first_execution)
         argument = Argument.objects.create(
             tool=self.nmap,
@@ -229,19 +229,19 @@ class BaseToolTest(TestCase):
         self.all_findings.extend([filtered, endpoint])
         self.required_findings.extend([filtered, endpoint])
 
-    def create_technologies(self, enumeration: Enumeration) -> Technology:
+    def create_technologies(self, port: Port) -> Technology:
         '''Create technology data for testing.
 
         Args:
-            enumeration (Enumeration): Related enumeration
+            port (Port): Related port
 
         Returns:
             Technology: Valid technology instance
         '''
         # Technology filtered by name: Wordpress required
-        filtered = Technology.objects.create(enumeration=enumeration, name='Joomla', version='1.0.0')
+        filtered = Technology.objects.create(port=port, name='Joomla', version='1.0.0')
         filtered.executions.add(self.first_execution)
-        technology = Technology.objects.create(enumeration=enumeration, name='Wordpress', version='1.0.0')
+        technology = Technology.objects.create(port=port, name='Wordpress', version='1.0.0')
         technology.executions.add(self.first_execution)
         argument = Argument.objects.create(
             tool=self.nmap,
@@ -369,8 +369,8 @@ class BaseToolTest(TestCase):
         i.filter = 'NOTFOUND'                                                   # By unknown address type. All included
         i.save(update_fields=['filter'])
         i = Input.objects.get(
-            argument__name='test_enumeration',
-            type=InputType.objects.get(name='Enumeration')
+            argument__name='test_port',
+            type=InputType.objects.get(name='Port')
         )
         i.filter = '80'                                                         # By port number
         i.save(update_fields=['filter'])
@@ -424,8 +424,8 @@ class BaseToolTest(TestCase):
         '''Test get_arguments feature using only the required findings.'''
         # Change findings relations for more test situations
         self.vulnerability.technology = None
-        self.vulnerability.enumeration = self.enumeration                       # Change vulnerability relations
-        self.vulnerability.save(update_fields=['technology', 'enumeration'])
+        self.vulnerability.port = self.port                                     # Change vulnerability relations
+        self.vulnerability.save(update_fields=['technology', 'port'])
         self.exploit.vulnerability = None
         self.exploit.technology = self.technology                               # Change technology relations
         self.exploit.save(update_fields=['vulnerability', 'technology'])

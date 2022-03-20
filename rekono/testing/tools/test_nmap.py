@@ -1,6 +1,6 @@
 from findings.enums import (EndpointProtocol, OSType, PortStatus, Protocol,
                             Severity)
-from findings.models import (Credential, Endpoint, Enumeration, Host,
+from findings.models import (Credential, Endpoint, Port, Host,
                              Technology, Vulnerability)
 from testing.tools.base import ToolParserTest
 
@@ -20,7 +20,7 @@ class NmapParserTest(ToolParserTest):
                 'os_type': OSType.LINUX
             },
             {
-                'model': Enumeration,
+                'model': Port,
                 'port': 22,
                 'port_status': PortStatus.OPEN,
                 'protocol': Protocol.TCP,
@@ -33,7 +33,7 @@ class NmapParserTest(ToolParserTest):
             {'model': Vulnerability, 'name': 'CVE-2020-14145', 'cve': 'CVE-2020-14145'},
             {'model': Vulnerability, 'name': 'CVE-2016-20012', 'cve': 'CVE-2016-20012'},
             {
-                'model': Enumeration,
+                'model': Port,
                 'port': 80,
                 'port_status': PortStatus.OPEN,
                 'protocol': Protocol.TCP,
@@ -70,7 +70,7 @@ class NmapParserTest(ToolParserTest):
             {'model': Vulnerability, 'name': 'CVE-2020-11993', 'cve': 'CVE-2020-11993'},
             {'model': Vulnerability, 'name': 'CVE-2019-10092', 'cve': 'CVE-2019-10092'},
             {
-                'model': Enumeration,
+                'model': Port,
                 'port': 443,
                 'port_status': PortStatus.OPEN,
                 'protocol': Protocol.TCP,
@@ -119,7 +119,7 @@ class NmapParserTest(ToolParserTest):
                 'os_type': OSType.MACOS
             },
             {
-                'model': Enumeration,
+                'model': Port,
                 'port': 21,
                 'port_status': PortStatus.OPEN,
                 'protocol': Protocol.TCP,
@@ -148,7 +148,7 @@ class NmapParserTest(ToolParserTest):
                 'os_type': OSType.MACOS
             },
             {
-                'model': Enumeration,
+                'model': Port,
                 'port': 445,
                 'port_status': PortStatus.OPEN,
                 'protocol': Protocol.TCP,
@@ -202,7 +202,7 @@ class NmapParserTest(ToolParserTest):
                 'os_type': OSType.MACOS
             },
             {
-                'model': Enumeration,
+                'model': Port,
                 'port': 445,
                 'port_status': PortStatus.OPEN,
                 'protocol': Protocol.TCP,

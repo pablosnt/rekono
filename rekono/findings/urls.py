@@ -1,5 +1,5 @@
 from findings.views import (CredentialViewSet, EndpointViewSet,
-                            EnumerationViewSet, ExploitViewSet, HostViewSet,
+                            PortViewSet, ExploitViewSet, HostViewSet,
                             OSINTViewSet, TechnologyViewSet,
                             VulnerabilityViewSet)
 from rest_framework.routers import SimpleRouter
@@ -9,7 +9,7 @@ from rest_framework.routers import SimpleRouter
 router = SimpleRouter()
 router.register('osint', OSINTViewSet)
 router.register('hosts', HostViewSet)
-router.register('enumerations', EnumerationViewSet)
+router.register('ports', PortViewSet)
 router.register('endpoints', EndpointViewSet)
 router.register('technologies', TechnologyViewSet)
 router.register('vulnerabilities', VulnerabilityViewSet)

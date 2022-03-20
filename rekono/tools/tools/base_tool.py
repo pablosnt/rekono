@@ -323,17 +323,17 @@ class BaseTool:
         '''Set relations between parsed findings and previous findings, and send new findings to the findings queue.'''
         for finding in self.findings:                                           # For each parsed finding
             if (
-                # Vulnerability with enumeration and technology exists in saved relations
+                # Vulnerability with port and technology exists in saved relations
                 isinstance(finding, Vulnerability) and
-                getattr(finding, 'enumeration') and
+                getattr(finding, 'port') and
                 'technology' in self.findings_relations
             ):
-                # Remove enumeration value because technology is more relevant
-                setattr(finding, 'enumeration', None)
-                finding.save(update_fields=['enumeration'])
+                # Remove port value because technology is more relevant
+                setattr(finding, 'port', None)
+                finding.save(update_fields=['port'])
             for key, value in self.findings_relations.items():                  # For each saved relations
-                # Vulnerability with technology value and the current relation is with enumeration
-                if isinstance(finding, Vulnerability) and getattr(finding, 'technology') and key == 'enumeration':
+                # Vulnerability with technology value and the current relation is with port
+                if isinstance(finding, Vulnerability) and getattr(finding, 'technology') and key == 'port':
                     # Ignore this relation because technology relation is more relevant
                     continue
                 if (

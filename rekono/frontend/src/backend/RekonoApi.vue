@@ -17,8 +17,8 @@ export default {
         { id: 5, value: 'Exploitation' }
       ],
       targetTypes: ['Domain', 'IP range', 'Network', 'Private IP', 'Public IP'],
-      inputTypes: ['OSINT', 'Host', 'Enumeration', 'Endpoint', 'Technology', 'Vulnerability', 'Exploit', 'Credential', 'Wordlist'],
-      findingTypes: ['OSINT', 'Credentials', 'Hosts', 'Enumerations', 'Endpoints', 'Technologies', 'Vulnerabilities', 'Exploits'],
+      inputTypes: ['OSINT', 'Host', 'Port', 'Endpoint', 'Technology', 'Vulnerability', 'Exploit', 'Credential', 'Wordlist'],
+      findingTypes: ['OSINT', 'Credentials', 'Hosts', 'Ports', 'Endpoints', 'Technologies', 'Vulnerabilities', 'Exploits'],
       osTypeByIcon: [
         { value: 'Linux', icon: 'brands/linux', color: 'black', variant: 'warning' },
         { value: 'Windows', icon: 'brands/windows', color: 'darkblue', variant: 'primary' },

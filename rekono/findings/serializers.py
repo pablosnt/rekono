@@ -1,4 +1,4 @@
-from findings.models import (OSINT, Credential, Endpoint, Enumeration, Exploit,
+from findings.models import (OSINT, Credential, Endpoint, Port, Exploit,
                              Host, Technology, Vulnerability)
 from rest_framework import serializers
 
@@ -25,18 +25,18 @@ class HostSerializer(serializers.ModelSerializer):
         model = Host
         fields = (                                                              # Host fields exposed via API
             'id', 'executions', 'address', 'os', 'os_type', 'creation',
-            'is_active', 'enumeration', 'reported_to_defectdojo'
+            'is_active', 'port', 'reported_to_defectdojo'
         )
 
 
-class EnumerationSerializer(serializers.ModelSerializer):
-    '''Serializer to get the Enumeration data via API.'''
+class PortSerializer(serializers.ModelSerializer):
+    '''Serializer to get the Port data via API.'''
 
     class Meta:
         '''Serializer metadata.'''
 
-        model = Enumeration
-        fields = (                                                              # Enumeration fields exposed via API
+        model = Port
+        fields = (                                                              # Port fields exposed via API
             'id', 'executions', 'host', 'port', 'port_status', 'protocol',
             'service', 'creation', 'is_active', 'endpoint', 'technology',
             'vulnerability', 'reported_to_defectdojo'
@@ -51,7 +51,7 @@ class EndpointSerializer(serializers.ModelSerializer):
 
         model = Endpoint
         fields = (                                                              # Endpoint fields exposed via API
-            'id', 'executions', 'enumeration', 'endpoint', 'status', 'extra',
+            'id', 'executions', 'port', 'endpoint', 'status', 'extra',
             'protocol', 'creation', 'is_active', 'reported_to_defectdojo'
         )
 
@@ -64,7 +64,7 @@ class TechnologySerializer(serializers.ModelSerializer):
 
         model = Technology
         fields = (                                                              # Technology fields exposed via API
-            'id', 'executions', 'enumeration', 'name', 'version', 'description',
+            'id', 'executions', 'port', 'name', 'version', 'description',
             'reference', 'related_to', 'related_technologies', 'creation',
             'is_active', 'vulnerability', 'exploit', 'reported_to_defectdojo'
         )
@@ -89,7 +89,7 @@ class VulnerabilitySerializer(serializers.ModelSerializer):
 
         model = Vulnerability
         fields = (                                                              # Vulnerability fields exposed via API
-            'id', 'executions', 'enumeration', 'technology', 'name', 'description', 'severity',
+            'id', 'executions', 'port', 'technology', 'name', 'description', 'severity',
             'cve', 'cwe', 'reference', 'creation', 'is_active', 'exploit', 'reported_to_defectdojo'
         )
 

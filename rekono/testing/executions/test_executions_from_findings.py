@@ -5,7 +5,7 @@ from django.test import TestCase
 from django.utils import timezone
 from executions.models import Execution
 from executions.utils import get_executions_from_findings
-from findings.models import Endpoint, Enumeration, Host
+from findings.models import Endpoint, Port, Host
 from input_types.base import BaseInput
 from input_types.models import InputType
 from projects.models import Project
@@ -31,11 +31,11 @@ class ExecutionsFromFindingsTest(TestCase):
         # Host argument
         test_host = Argument.objects.create(tool=self.tool, name='test_host', required=True)
         Input.objects.create(argument=test_host, type=InputType.objects.get(name='Host'))
-        # Enumeration argument
+        # Port argument
         test_enum = Argument.objects.create(tool=self.tool, name='test_enum', required=True, multiple=True)
         Input.objects.create(argument=test_enum, type=InputType.objects.get(name='Vulnerability'), order=1)
         Input.objects.create(argument=test_enum, type=InputType.objects.get(name='Technology'), order=2)
-        Input.objects.create(argument=test_enum, type=InputType.objects.get(name='Enumeration'), order=3)
+        Input.objects.create(argument=test_enum, type=InputType.objects.get(name='Port'), order=3)
         # Endpoint argument
         test_endp = Argument.objects.create(tool=self.tool, name='test_endp', required=True)
         Input.objects.create(argument=test_endp, type=InputType.objects.get(name='Endpoint'))
@@ -76,81 +76,81 @@ class ExecutionsFromFindingsTest(TestCase):
 
     def test_with_findings(self) -> None:
         '''Test get_executions_from_findings feature with findings. Simulates new executions from previous findings.'''
-        # Host 1 with some endpoints in some enumerations
+        # Host 1 with some endpoints in some ports
         host_1 = self.create_finding(Host, address='10.10.10.1')
-        enum_1_1 = self.create_finding(Enumeration, host=host_1, port=22)
-        enum_1_2 = self.create_finding(Enumeration, host=host_1, port=80)
-        endp_1_2_1 = self.create_finding(Endpoint, enumeration=enum_1_2, endpoint='/endpoint1')
-        endp_1_2_2 = self.create_finding(Endpoint, enumeration=enum_1_2, endpoint='/endpoint2')
-        endp_1_2_3 = self.create_finding(Endpoint, enumeration=enum_1_2, endpoint='/endpoint3')
-        enum_1_3 = self.create_finding(Enumeration, host=host_1, port=443)
-        endp_1_3_1 = self.create_finding(Endpoint, enumeration=enum_1_3, endpoint='/endpoint')
-        enum_1_4 = self.create_finding(Enumeration, host=host_1, port=8080)
-        endp_1_4_1 = self.create_finding(Endpoint, enumeration=enum_1_4, endpoint='/endpoint')
-        enum_1_5 = self.create_finding(Enumeration, host=host_1, port=8000)
-        endp_1_5_1 = self.create_finding(Endpoint, enumeration=enum_1_5, endpoint='/endpoint')
-        # Host 2 with some endpoints in some enumerations
+        port_1_1 = self.create_finding(Port, host=host_1, port=22)
+        port_1_2 = self.create_finding(Port, host=host_1, port=80)
+        endp_1_2_1 = self.create_finding(Endpoint, port=port_1_2, endpoint='/endpoint1')
+        endp_1_2_2 = self.create_finding(Endpoint, port=port_1_2, endpoint='/endpoint2')
+        endp_1_2_3 = self.create_finding(Endpoint, port=port_1_2, endpoint='/endpoint3')
+        port_1_3 = self.create_finding(Port, host=host_1, port=443)
+        endp_1_3_1 = self.create_finding(Endpoint, port=port_1_3, endpoint='/endpoint')
+        port_1_4 = self.create_finding(Port, host=host_1, port=8080)
+        endp_1_4_1 = self.create_finding(Endpoint, port=port_1_4, endpoint='/endpoint')
+        port_1_5 = self.create_finding(Port, host=host_1, port=8000)
+        endp_1_5_1 = self.create_finding(Endpoint, port=port_1_5, endpoint='/endpoint')
+        # Host 2 with some endpoints in some ports
         host_2 = self.create_finding(Host, address='10.10.10.2')
-        enum_2_1 = self.create_finding(Enumeration, host=host_2, port=22)
-        enum_2_2 = self.create_finding(Enumeration, host=host_2, port=80)
-        endp_2_2_1 = self.create_finding(Endpoint, enumeration=enum_2_2, endpoint='/endpoint1')
-        endp_2_2_2 = self.create_finding(Endpoint, enumeration=enum_2_2, endpoint='/endpoint2')
-        enum_2_3 = self.create_finding(Enumeration, host=host_2, port=443)
-        enum_2_4 = self.create_finding(Enumeration, host=host_2, port=8080)
-        endp_2_4_1 = self.create_finding(Endpoint, enumeration=enum_2_4, endpoint='/endpoint1')
-        endp_2_4_2 = self.create_finding(Endpoint, enumeration=enum_2_4, endpoint='/endpoint2')
-        enum_2_5 = self.create_finding(Enumeration, host=host_2, port=8000)
-        # Host 3 with one endpoint for each enumeration
+        port_2_1 = self.create_finding(Port, host=host_2, port=22)
+        port_2_2 = self.create_finding(Port, host=host_2, port=80)
+        endp_2_2_1 = self.create_finding(Endpoint, port=port_2_2, endpoint='/endpoint1')
+        endp_2_2_2 = self.create_finding(Endpoint, port=port_2_2, endpoint='/endpoint2')
+        port_2_3 = self.create_finding(Port, host=host_2, port=443)
+        port_2_4 = self.create_finding(Port, host=host_2, port=8080)
+        endp_2_4_1 = self.create_finding(Endpoint, port=port_2_4, endpoint='/endpoint1')
+        endp_2_4_2 = self.create_finding(Endpoint, port=port_2_4, endpoint='/endpoint2')
+        port_2_5 = self.create_finding(Port, host=host_2, port=8000)
+        # Host 3 with one endpoint for each port
         host_3 = self.create_finding(Host, address='10.10.10.3')
-        enum_3_1 = self.create_finding(Enumeration, host=host_3, port=22)
-        endp_3_1_1 = self.create_finding(Endpoint, enumeration=enum_3_1, endpoint='/endpoint')
-        enum_3_2 = self.create_finding(Enumeration, host=host_3, port=80)
-        endp_3_2_1 = self.create_finding(Endpoint, enumeration=enum_3_2, endpoint='/endpoint')
-        enum_3_3 = self.create_finding(Enumeration, host=host_3, port=443)
-        endp_3_3_1 = self.create_finding(Endpoint, enumeration=enum_3_3, endpoint='/endpoint')
-        enum_3_4 = self.create_finding(Enumeration, host=host_3, port=8080)
-        endp_3_4_1 = self.create_finding(Endpoint, enumeration=enum_3_4, endpoint='/endpoint')
-        enum_3_5 = self.create_finding(Enumeration, host=host_3, port=8000)
-        endp_3_5_1 = self.create_finding(Endpoint, enumeration=enum_3_5, endpoint='/endpoint')
+        port_3_1 = self.create_finding(Port, host=host_3, port=22)
+        endp_3_1_1 = self.create_finding(Endpoint, port=port_3_1, endpoint='/endpoint')
+        port_3_2 = self.create_finding(Port, host=host_3, port=80)
+        endp_3_2_1 = self.create_finding(Endpoint, port=port_3_2, endpoint='/endpoint')
+        port_3_3 = self.create_finding(Port, host=host_3, port=443)
+        endp_3_3_1 = self.create_finding(Endpoint, port=port_3_3, endpoint='/endpoint')
+        port_3_4 = self.create_finding(Port, host=host_3, port=8080)
+        endp_3_4_1 = self.create_finding(Endpoint, port=port_3_4, endpoint='/endpoint')
+        port_3_5 = self.create_finding(Port, host=host_3, port=8000)
+        endp_3_5_1 = self.create_finding(Endpoint, port=port_3_5, endpoint='/endpoint')
         # Host 4 without endpoints
         host_4 = self.create_finding(Host, address='10.10.10.4')
-        enum_4_1 = self.create_finding(Enumeration, host=host_4, port=22)
-        enum_4_2 = self.create_finding(Enumeration, host=host_4, port=80)
-        enum_4_3 = self.create_finding(Enumeration, host=host_4, port=443)
-        enum_4_4 = self.create_finding(Enumeration, host=host_4, port=8080)
-        enum_4_5 = self.create_finding(Enumeration, host=host_4, port=8000)
-        # Host 5 without enumerations
+        port_4_1 = self.create_finding(Port, host=host_4, port=22)
+        port_4_2 = self.create_finding(Port, host=host_4, port=80)
+        port_4_3 = self.create_finding(Port, host=host_4, port=443)
+        port_4_4 = self.create_finding(Port, host=host_4, port=8080)
+        port_4_5 = self.create_finding(Port, host=host_4, port=8000)
+        # Host 5 without ports
         host_5 = self.create_finding(Host, address='10.10.10.5')
         # Finding list to pass as argument
         findings = [
             host_1, host_2, host_3, host_4, host_5,
-            enum_1_1, enum_1_2, enum_1_3, enum_1_4, enum_1_5,
-            enum_2_1, enum_2_2, enum_2_3, enum_2_4, enum_2_5,
-            enum_3_1, enum_3_2, enum_3_3, enum_3_4, enum_3_5,
-            enum_4_1, enum_4_2, enum_4_3, enum_4_4, enum_4_5,
+            port_1_1, port_1_2, port_1_3, port_1_4, port_1_5,
+            port_2_1, port_2_2, port_2_3, port_2_4, port_2_5,
+            port_3_1, port_3_2, port_3_3, port_3_4, port_3_5,
+            port_4_1, port_4_2, port_4_3, port_4_4, port_4_5,
             endp_1_2_1, endp_1_2_2, endp_1_2_3, endp_1_3_1, endp_1_4_1, endp_1_5_1,
             endp_2_2_1, endp_2_2_2, endp_2_4_1, endp_2_4_2,
             endp_3_1_1, endp_3_2_1, endp_3_3_1, endp_3_4_1, endp_3_5_1
         ]
         # Expected executions
         expected = [
-            [host_1, enum_1_1, enum_1_2, enum_1_3, enum_1_4, enum_1_5, endp_1_2_1],
-            [host_2, enum_2_1, enum_2_2, enum_2_3, enum_2_4, enum_2_5, endp_2_2_1],
-            [host_3, enum_3_1, enum_3_2, enum_3_3, enum_3_4, enum_3_5, endp_3_1_1],
-            [host_4, enum_4_1, enum_4_2, enum_4_3, enum_4_4, enum_4_5],
+            [host_1, port_1_1, port_1_2, port_1_3, port_1_4, port_1_5, endp_1_2_1],
+            [host_2, port_2_1, port_2_2, port_2_3, port_2_4, port_2_5, endp_2_2_1],
+            [host_3, port_3_1, port_3_2, port_3_3, port_3_4, port_3_5, endp_3_1_1],
+            [host_4, port_4_1, port_4_2, port_4_3, port_4_4, port_4_5],
             [host_5],
-            [host_1, enum_1_1, enum_1_2, enum_1_3, enum_1_4, enum_1_5, endp_1_2_2],
-            [host_1, enum_1_1, enum_1_2, enum_1_3, enum_1_4, enum_1_5, endp_1_2_3],
-            [host_1, enum_1_1, enum_1_2, enum_1_3, enum_1_4, enum_1_5, endp_1_3_1],
-            [host_1, enum_1_1, enum_1_2, enum_1_3, enum_1_4, enum_1_5, endp_1_4_1],
-            [host_1, enum_1_1, enum_1_2, enum_1_3, enum_1_4, enum_1_5, endp_1_5_1],
-            [host_2, enum_2_1, enum_2_2, enum_2_3, enum_2_4, enum_2_5, endp_2_2_2],
-            [host_2, enum_2_1, enum_2_2, enum_2_3, enum_2_4, enum_2_5, endp_2_4_1],
-            [host_2, enum_2_1, enum_2_2, enum_2_3, enum_2_4, enum_2_5, endp_2_4_2],
-            [host_3, enum_3_1, enum_3_2, enum_3_3, enum_3_4, enum_3_5, endp_3_2_1],
-            [host_3, enum_3_1, enum_3_2, enum_3_3, enum_3_4, enum_3_5, endp_3_3_1],
-            [host_3, enum_3_1, enum_3_2, enum_3_3, enum_3_4, enum_3_5, endp_3_4_1],
-            [host_3, enum_3_1, enum_3_2, enum_3_3, enum_3_4, enum_3_5, endp_3_5_1],
+            [host_1, port_1_1, port_1_2, port_1_3, port_1_4, port_1_5, endp_1_2_2],
+            [host_1, port_1_1, port_1_2, port_1_3, port_1_4, port_1_5, endp_1_2_3],
+            [host_1, port_1_1, port_1_2, port_1_3, port_1_4, port_1_5, endp_1_3_1],
+            [host_1, port_1_1, port_1_2, port_1_3, port_1_4, port_1_5, endp_1_4_1],
+            [host_1, port_1_1, port_1_2, port_1_3, port_1_4, port_1_5, endp_1_5_1],
+            [host_2, port_2_1, port_2_2, port_2_3, port_2_4, port_2_5, endp_2_2_2],
+            [host_2, port_2_1, port_2_2, port_2_3, port_2_4, port_2_5, endp_2_4_1],
+            [host_2, port_2_1, port_2_2, port_2_3, port_2_4, port_2_5, endp_2_4_2],
+            [host_3, port_3_1, port_3_2, port_3_3, port_3_4, port_3_5, endp_3_2_1],
+            [host_3, port_3_1, port_3_2, port_3_3, port_3_4, port_3_5, endp_3_3_1],
+            [host_3, port_3_1, port_3_2, port_3_3, port_3_4, port_3_5, endp_3_4_1],
+            [host_3, port_3_1, port_3_2, port_3_3, port_3_4, port_3_5, endp_3_5_1],
         ]
         executions = get_executions_from_findings(findings, self.tool)
         self.assertEqual(expected, executions)

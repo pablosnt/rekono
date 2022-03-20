@@ -8,13 +8,13 @@ from django.db.models import QuerySet
 from drf_spectacular.utils import extend_schema
 from findings.enums import DataType
 from findings.filters import (CredentialFilter, EndpointFilter,
-                              EnumerationFilter, ExploitFilter, HostFilter,
+                              PortFilter, ExploitFilter, HostFilter,
                               OSINTFilter, TechnologyFilter,
                               VulnerabilityFilter)
-from findings.models import (OSINT, Credential, Endpoint, Enumeration, Exploit,
+from findings.models import (OSINT, Credential, Endpoint, Port, Exploit,
                              Finding, Host, Technology, Vulnerability)
 from findings.serializers import (CredentialSerializer, EndpointSerializer,
-                                  EnumerationSerializer, ExploitSerializer,
+                                  PortSerializer, ExploitSerializer,
                                   HostSerializer, OSINTSerializer,
                                   TechnologySerializer,
                                   VulnerabilitySerializer)
@@ -141,27 +141,27 @@ class HostViewSet(FindingBaseView):
     filterset_class = HostFilter
     search_fields = [                                                           # Fields used to search Hosts
         'address',
-        'enumeration__port', 'enumeration__service',
-        'enumeration__endpoint__endpoint',
-        'enumeration__technology__name', 'enumeration__technology__version',
-        'enumeration__vulnerability__name', 'enumeration__vulnerability__cve',
-        'enumeration__vulnerability__cwe', 'enumeration__vulnerability__severity',
-        'enumeration__technology__vulnerability__name',
-        'enumeration__technology__vulnerability__cve',
-        'enumeration__technology__vulnerability__cwe',
-        'enumeration__technology__vulnerability__severity',
-        'enumeration__vulnerability__exploit__name',
-        'enumeration__technology__vulnerability__exploit__name'
+        'port__port', 'port__service',
+        'port__endpoint__endpoint',
+        'port__technology__name', 'port__technology__version',
+        'port__vulnerability__name', 'port__vulnerability__cve',
+        'port__vulnerability__cwe', 'port__vulnerability__severity',
+        'port__technology__vulnerability__name',
+        'port__technology__vulnerability__cve',
+        'port__technology__vulnerability__cwe',
+        'port__technology__vulnerability__severity',
+        'port__vulnerability__exploit__name',
+        'port__technology__vulnerability__exploit__name'
     ]
 
 
-class EnumerationViewSet(FindingBaseView):
-    '''Enumeration ViewSet that includes: get, retrieve, enable, disable and import Defect-Dojo features.'''
+class PortViewSet(FindingBaseView):
+    '''Port ViewSet that includes: get, retrieve, enable, disable and import Defect-Dojo features.'''
 
-    queryset = Enumeration.objects.all().order_by('-id')
-    serializer_class = EnumerationSerializer
-    filterset_class = EnumerationFilter
-    search_fields = [                                                           # Fields used to search Enumerations
+    queryset = Port.objects.all().order_by('-id')
+    serializer_class = PortSerializer
+    filterset_class = PortFilter
+    search_fields = [                                                           # Fields used to search Ports
         'host__address',
         'port', 'service',
         'endpoint__endpoint',
@@ -181,8 +181,8 @@ class EndpointViewSet(FindingBaseView):
     serializer_class = EndpointSerializer
     filterset_class = EndpointFilter
     search_fields = [                                                           # Fields used to search Endpoints
-        'enumeration__host__address',
-        'enumeration__port', 'enumeration__service',
+        'port__host__address',
+        'port__port', 'port__service',
         'endpoint'
     ]
 
@@ -194,9 +194,9 @@ class TechnologyViewSet(FindingBaseView):
     serializer_class = TechnologySerializer
     filterset_class = TechnologyFilter
     search_fields = [                                                           # Fields used to search Technologies
-        'enumeration__host__address',
-        'enumeration__port', 'enumeration__service',
-        'enumeration__endpoint__endpoint',
+        'port__host__address',
+        'port__port', 'port__service',
+        'port__endpoint__endpoint',
         'name', 'version',
         'vulnerability__name', 'vulnerability__cve',
         'vulnerability__cwe', 'vulnerability__severity',
@@ -212,8 +212,8 @@ class CredentialViewSet(FindingBaseView):
     filterset_class = CredentialFilter
     # Fields used to search Credentials
     search_fields = [
-        'technology__enumeration__host__address',
-        'technology__enumeration__port', 'technology__enumeration__service',
+        'technology__port__host__address',
+        'technology__port__port', 'technology__port__service',
         'technology__name', 'technology__version',
         'email', 'username'
     ]
@@ -226,11 +226,11 @@ class VulnerabilityViewSet(FindingBaseView):
     serializer_class = VulnerabilitySerializer
     filterset_class = VulnerabilityFilter
     search_fields = [                                                           # Fields used to search Vulnerabilities
-        'enumeration__host__address', 'technology__enumeration__host__address',
-        'enumeration__port', 'enumeration__service',
-        'technology__enumeration__port', 'technology__enumeration__service',
-        'enumeration__endpoint__endpoint', 'technology__enumeration__endpoint__endpoint',
-        'enumeration__technology__name', 'enumeration__technology__version',
+        'port__host__address', 'technology__port__host__address',
+        'port__port', 'port__service',
+        'technology__port__port', 'technology__port__service',
+        'port__endpoint__endpoint', 'technology__port__endpoint__endpoint',
+        'port__technology__name', 'port__technology__version',
         'technology__name', 'technology__version',
         'name', 'cve', 'cwe', 'severity',
         'exploit__name'
@@ -244,12 +244,12 @@ class ExploitViewSet(FindingBaseView):
     serializer_class = ExploitSerializer
     filterset_class = ExploitFilter
     search_fields = [                                                           # Fields used to search Exploits
-        'vulnerability__enumeration__host__address', 'technology__enumeration__host__address',
-        'vulnerability__enumeration__port', 'vulnerability__enumeration__service',
-        'technology__enumeration__port', 'technology__enumeration__service',
-        'vulnerability__enumeration__endpoint__endpoint',
-        'technology__enumeration__endpoint__endpoint',
-        'vulnerability__enumeration__technology__name', 'vulnerability__enumeration__technology__version',
+        'vulnerability__port__host__address', 'technology__port__host__address',
+        'vulnerability__port__port', 'vulnerability__port__service',
+        'technology__port__port', 'technology__port__service',
+        'vulnerability__port__endpoint__endpoint',
+        'technology__port__endpoint__endpoint',
+        'vulnerability__port__technology__name', 'vulnerability__port__technology__version',
         'technology__name', 'technology__version',
         'vulnerability__name', 'vulnerability__cve',
         'vulnerability__cwe', 'vulnerability__severity',

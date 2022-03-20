@@ -8,7 +8,7 @@ from django.test import TestCase
 from django.utils import timezone
 from executions.models import Execution
 from findings.enums import OSType, PortStatus, Protocol
-from findings.models import Endpoint, Enumeration, Host
+from findings.models import Endpoint, Port, Host
 from processes.models import Process, Step
 from projects.models import Project
 from rest_framework.test import APIClient
@@ -85,12 +85,12 @@ class RekonoTestCase(TestCase):
         )
         self.host = Host.objects.create(address='10.10.10.10', os='Ubuntu', os_type=OSType.LINUX)
         self.host.executions.add(self.execution)
-        self.enumeration = Enumeration.objects.create(
+        self.port = Port.objects.create(
             host=self.host, port=80, port_status=PortStatus.OPEN,
             protocol=Protocol.TCP, service='http'
         )
-        self.enumeration.executions.add(self.execution)
-        self.http_endpoint = Endpoint.objects.create(enumeration=self.enumeration, endpoint='/robots.txt', status=200)
+        self.port.executions.add(self.execution)
+        self.http_endpoint = Endpoint.objects.create(port=self.port, endpoint='/robots.txt', status=200)
         self.http_endpoint.executions.add(self.execution)
 
     def tearDown(self) -> None:

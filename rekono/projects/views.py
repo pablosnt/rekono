@@ -4,7 +4,7 @@ from defectdojo.views import DefectDojoFindings, DefectDojoScans
 from django.db.models import QuerySet
 from drf_spectacular.utils import extend_schema
 from executions.models import Execution
-from findings.models import (OSINT, Credential, Endpoint, Enumeration, Exploit,
+from findings.models import (OSINT, Credential, Endpoint, Port, Exploit,
                              Finding, Host, Technology, Vulnerability)
 from projects.filters import ProjectFilter
 from projects.models import Project
@@ -63,7 +63,7 @@ class ProjectViewSet(ModelViewSet, DefectDojoScans, DefectDojoFindings):
         project = self.get_object()
         findings: List[Finding] = []
         finding_models: List[Type[Finding]] = [
-            OSINT, Host, Enumeration, Technology, Endpoint, Vulnerability, Credential, Exploit
+            OSINT, Host, Port, Technology, Endpoint, Vulnerability, Credential, Exploit
         ]
         for find_model in finding_models:
             # Search active findings related to this project

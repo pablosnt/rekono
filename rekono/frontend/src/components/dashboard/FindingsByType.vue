@@ -6,7 +6,7 @@ export default {
     osint: Number,
     credentials: Number,
     hosts: Number,
-    enumerations: Number,
+    ports: Number,
     endpoints: Number,
     technologies: Number,
     vulnerabilities: Number,
@@ -14,17 +14,17 @@ export default {
   },
   computed: {
     total () {
-      return this.osint + this.credentials + this.hosts + this.enumerations + this.endpoints + this.technologies + this.vulnerabilities + this.exploits
+      return this.osint + this.credentials + this.hosts + this.ports + this.endpoints + this.technologies + this.vulnerabilities + this.exploits
     }
   },
   watch: {
     total () {
       this.renderChart({
-        labels: ['OSINT', 'Credentials', 'Hosts', 'Enumerations', 'Endpoints', 'Technologies', 'Vulnerabilities', 'Exploits'],
+        labels: ['OSINT', 'Credentials', 'Hosts', 'Ports', 'Endpoints', 'Technologies', 'Vulnerabilities', 'Exploits'],
         datasets: [
           {
             backgroundColor: ['black', 'gray', 'blue', 'green', 'purple', 'gold', 'orange', 'red'],
-            data: [this.osint, this.credentials, this.hosts, this.enumerations, this.endpoints, this.technologies, this.vulnerabilities, this.exploits]
+            data: [this.osint, this.credentials, this.hosts, this.ports, this.endpoints, this.technologies, this.vulnerabilities, this.exploits]
           }
         ]
       },

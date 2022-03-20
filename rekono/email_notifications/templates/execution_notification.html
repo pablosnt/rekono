@@ -106,9 +106,9 @@
                 </table>
             {% endif %}
             <br>
-            {% if enumeration %}
+            {% if port %}
                 <table class="table">
-                    <caption>Enumerations</caption>
+                    <caption>Ports</caption>
                     <thead class="thead-dark">
                         <tr>
                             <th scope="col">Host</th>
@@ -119,7 +119,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for e in enumeration %}
+                        {% for e in port %}
                             <tr>
                                 {% if e.host %}
                                     <td><strong>{{ e.host.address }}</strong></td>
@@ -141,7 +141,7 @@
                     <caption>Endpoints</caption>
                     <thead class="thead-dark">
                         <tr>
-                            <th scope="col">Enumeration</th>
+                            <th scope="col">Port</th>
                             <th scope="col">Protocol</th>
                             <th scope="col">Endpoint</th>
                             <th scope="col">Status</th>
@@ -151,10 +151,10 @@
                     <tbody>
                         {% for e in endpoint %}
                             <tr>
-                                {% if e.enumeration and e.enumeration.host %}
-                                    <td><strong>{{ e.enumeration.host.address }} - {{ e.enumeration.port }}</strong></td>
-                                {% elif e.enumeration %}
-                                    <td><strong>{{ e.enumeration.port }}</strong></td>
+                                {% if e.port and e.port.host %}
+                                    <td><strong>{{ e.port.host.address }} - {{ e.port.port }}</strong></td>
+                                {% elif e.port %}
+                                    <td><strong>{{ e.port.port }}</strong></td>
                                 {% else %}
                                     <td></td>
                                 {% endif %}
@@ -173,7 +173,7 @@
                     <caption>Technologies</caption>
                     <thead class="thead-dark">
                         <tr>
-                            <th scope="col">Enumeration</th>
+                            <th scope="col">Port</th>
                             <th scope="col">Name</th>
                             <th scope="col">Version</th>
                         </tr>
@@ -181,10 +181,10 @@
                     <tbody>
                         {% for t in technology %}
                             <tr>
-                                {% if t.enumeration and t.enumeration.host %}
-                                    <td><strong>{{ t.enumeration.host.address }} - {{ t.enumeration.port }}</strong></td>
-                                {% elif t.enumeration %}
-                                    <td><strong>{{ t.enumeration.port }}</strong></td>
+                                {% if t.port and t.port.host %}
+                                    <td><strong>{{ t.port.host.address }} - {{ t.port.port }}</strong></td>
+                                {% elif t.port %}
+                                    <td><strong>{{ t.port.port }}</strong></td>
                                 {% else %}
                                     <td></td>
                                 {% endif %}
@@ -226,7 +226,7 @@
                     <thead class="thead-dark">
                         <tr>
                             <th scope="col">Tecnhology</th>
-                            <th scope="col">Enumeration</th>
+                            <th scope="col">Port</th>
                             <th scope="col">Name</th>
                             <th scope="col">Severity</th>
                             <th scope="col">CVE</th>
@@ -241,10 +241,10 @@
                                 {% else %}
                                     <td></td>
                                 {% endif %}
-                                {% if v.enumeration and v.enumeration.host %}
-                                    <td><strong>{{ v.enumeration.host.address }} - {{ v.enumeration.port }}</strong></td>
-                                {% elif v.enumeration %}
-                                    <td><strong>{{ v.enumeration.port }}</strong></td>
+                                {% if v.port and v.port.host %}
+                                    <td><strong>{{ v.port.host.address }} - {{ v.port.port }}</strong></td>
+                                {% elif v.port %}
+                                    <td><strong>{{ v.port.port }}</strong></td>
                                 {% else %}
                                     <td></td>
                                 {% endif %}

@@ -21,7 +21,7 @@ ROLES = {
         'view_execution',                                                       # Executions
         'add_osint', 'delete_osint', 'view_osint',                              # OSINT
         'add_host', 'delete_host', 'view_host',                                 # Hosts
-        'add_enumeration', 'delete_enumeration', 'view_enumeration',            # Enumerations
+        'add_port', 'delete_port', 'view_port',                                 # Ports
         'add_endpoint', 'delete_endpoint', 'view_endpoint',                     # Endpoints
         'add_technology', 'delete_technology', 'view_technology',               # Technologies
         'add_vulnerability', 'change_vulnerability', 'delete_vulnerability', 'view_vulnerability',  # Vulnerabilities
@@ -45,7 +45,7 @@ ROLES = {
         'view_execution',                                                       # Executions
         'add_osint', 'delete_osint', 'view_osint',                              # OSINT
         'add_host', 'delete_host', 'view_host',                                 # Hosts
-        'add_enumeration', 'delete_enumeration', 'view_enumeration',            # Enumerations
+        'add_port', 'delete_port', 'view_port',                                 # Ports
         'add_endpoint', 'delete_endpoint', 'view_endpoint',                     # Endpoints
         'add_technology', 'delete_technology', 'view_technology',               # Technologies
         'add_vulnerability', 'change_vulnerability', 'delete_vulnerability', 'view_vulnerability',  # Vulnerabilities
@@ -69,7 +69,7 @@ ROLES = {
         'view_execution',                                                       # Executions
         'view_osint',                                                           # OSINT
         'view_host',                                                            # Hosts
-        'view_enumeration',                                                     # Enumerations
+        'view_port',                                                            # Ports
         'view_endpoint',                                                        # Endpoints
         'view_technology',                                                      # Technologies
         'view_vulnerability',                                                   # Vulnerabilities

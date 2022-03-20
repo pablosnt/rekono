@@ -209,10 +209,10 @@ class Host(Finding):
         return self.address
 
 
-class Enumeration(Finding):
-    '''Enumeration model.'''
+class Port(Finding):
+    '''Port model.'''
 
-    host = create_finding_foreign_key(Host, 'enumeration')                      # Host where the port is discovered
+    host = create_finding_foreign_key(Host, 'port')                             # Host where the port is discovered
     port = models.IntegerField()                                                # Port number
     port_status = models.TextField(max_length=15, choices=PortStatus.choices, default=PortStatus.OPEN)  # Port status
     protocol = models.TextField(max_length=5, choices=Protocol.choices, blank=True, null=True)      # Transport protocol
@@ -237,10 +237,10 @@ class Enumeration(Finding):
             return True
         try:
             to_check = int(input.filter)
-            # If the filter is a number, enumeration will be filtered by port
+            # If the filter is a number, will be filtered by port
             return to_check == self.port
         except ValueError:
-            # If the filter is a string, enumeration will be filtered by service
+            # If the filter is a string, will be filtered by service
             return input.filter.lower() in self.service.lower()
 
     def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
@@ -293,7 +293,7 @@ class Enumeration(Finding):
 class Endpoint(Finding):
     '''Endpoint model.'''
 
-    enumeration = create_finding_foreign_key(Enumeration, 'endpoint')           # Port where endpoint is discovered
+    port = create_finding_foreign_key(Port, 'endpoint')                         # Port where endpoint is discovered
     endpoint = models.TextField(max_length=500)                                 # Endpoint value
     # Status receive for that endpoint. Probably HTTP status
     status = models.IntegerField(blank=True, null=True)
@@ -302,7 +302,7 @@ class Endpoint(Finding):
     protocol = models.TextField(choices=EndpointProtocol.choices, default=EndpointProtocol.HTTP)
 
     key_fields: List[Dict[str, Any]] = [                                        # Unique field list
-        {'name': 'enumeration_id', 'is_base': True},
+        {'name': 'port_id', 'is_base': True},
         {'name': 'endpoint', 'is_base': False}
     ]
 
@@ -334,10 +334,10 @@ class Endpoint(Finding):
         Returns:
             Dict[str, Any]: Useful information for tool executions, including accumulated if setted
         '''
-        output = self.enumeration.parse() if self.enumeration else {}
+        output = self.port.parse() if self.port else {}
         output[InputKeyword.URL.name.lower()] = get_url(
-            self.enumeration.host.address,
-            self.enumeration.port,
+            self.port.host.address,
+            self.port.port,
             self.endpoint
         )
         output[InputKeyword.ENDPOINT.name.lower()] = self.endpoint
@@ -350,9 +350,9 @@ class Endpoint(Finding):
             Dict[str, Any]: Useful information for Defect-Dojo imports
         '''
         return {
-            'protocol': self.enumeration.service,
-            'host': self.enumeration.host.address,
-            'port': self.enumeration.port,
+            'protocol': self.port.service,
+            'host': self.port.host.address,
+            'port': self.port.port,
             'path': self.endpoint
         }
 
@@ -362,13 +362,13 @@ class Endpoint(Finding):
         Returns:
             str: String value that identifies this instance
         '''
-        return f'{self.enumeration.__str__()} - {self.endpoint}' if self.enumeration else self.endpoint
+        return f'{self.port.__str__()} - {self.endpoint}' if self.port else self.endpoint
 
 
 class Technology(Finding):
     '''Technology model.'''
 
-    enumeration = create_finding_foreign_key(Enumeration, 'technology')         # Port where technology is discovered
+    port = create_finding_foreign_key(Port, 'technology')                       # Port where technology is discovered
     name = models.TextField(max_length=100)                                     # Technology name
     version = models.TextField(max_length=100, blank=True, null=True)           # Technology version
     description = models.TextField(max_length=200, blank=True, null=True)       # Technology description
@@ -376,7 +376,7 @@ class Technology(Finding):
     reference = models.TextField(max_length=250, blank=True, null=True)         # Technology reference
 
     key_fields: List[Dict[str, Any]] = [                                        # Unique field list
-        {'name': 'enumeration_id', 'is_base': True},
+        {'name': 'port_id', 'is_base': True},
         {'name': 'name', 'is_base': False}
     ]
 
@@ -400,7 +400,7 @@ class Technology(Finding):
         Returns:
             Dict[str, Any]: Useful information for tool executions, including accumulated if setted
         '''
-        output = self.enumeration.parse() if self.enumeration else {}
+        output = self.port.parse() if self.port else {}
         output[InputKeyword.TECHNOLOGY.name.lower()] = self.name
         if self.version:
             output[InputKeyword.VERSION.name.lower()] = self.version
@@ -427,7 +427,7 @@ class Technology(Finding):
         Returns:
             str: String value that identifies this instance
         '''
-        return f'{self.enumeration.__str__()} - {self.name}' if self.enumeration else self.name
+        return f'{self.port.__str__()} - {self.name}' if self.port else self.name
 
 
 class Credential(Finding):
@@ -494,7 +494,7 @@ class Vulnerability(Finding):
     # Technology where vulnerability is found
     technology = create_finding_foreign_key(Technology, 'vulnerability')
     # Port where vulnerability is found. Only if technology is null
-    enumeration = create_finding_foreign_key(Enumeration, 'vulnerability')
+    port = create_finding_foreign_key(Port, 'vulnerability')
     name = models.TextField(max_length=50)                                      # Vulnerability name
     description = models.TextField(blank=True, null=True)                       # Vulnerability description
     severity = models.TextField(choices=Severity.choices, default=Severity.MEDIUM)  # Vulnerability severity
@@ -505,7 +505,7 @@ class Vulnerability(Finding):
 
     key_fields: List[Dict[str, Any]] = [                                        # Unique field list
         {'name': 'technology_id', 'is_base': True},
-        {'name': 'enumeration_id', 'is_base': True},
+        {'name': 'port_id', 'is_base': True},
         {'name': 'cve', 'is_base': False},
         {'name': 'name', 'is_base': False}
     ]
@@ -544,8 +544,8 @@ class Vulnerability(Finding):
         output = {}
         if self.technology:
             output = self.technology.parse()
-        elif self.enumeration:
-            output = self.enumeration.parse()
+        elif self.port:
+            output = self.port.parse()
         if self.cve:
             output[InputKeyword.CVE.name.lower()] = self.cve
         return output
@@ -575,8 +575,8 @@ class Vulnerability(Finding):
         text = self.name
         if self.technology:
             text = f'{self.technology.__str__()} - {self.name}'
-        elif self.enumeration:
-            text = f'{self.enumeration.__str__()} - {self.name}'
+        elif self.port:
+            text = f'{self.port.__str__()} - {self.name}'
         if self.cve:
             text = f'{text} - {self.cve}'
         return text

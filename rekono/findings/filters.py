@@ -5,8 +5,8 @@ from django.db.models import QuerySet
 from django_filters.rest_framework import filters
 from django_filters.rest_framework.filters import OrderingFilter
 from findings.enums import OSType
-from findings.models import (OSINT, Credential, Endpoint, Enumeration, Exploit,
-                             Host, Technology, Vulnerability)
+from findings.models import (OSINT, Credential, Endpoint, Exploit, Host, Port,
+                             Technology, Vulnerability)
 
 # Common ordering anf filtering fields for all Finding models
 FINDING_ORDERING = (
@@ -45,40 +45,40 @@ class FindingFilter(BaseToolFilter):
 class BaseVulnerabilityFilter(FindingFilter):
     '''Common FilterSet to filter findings entities based on vulnerability fields.'''
 
-    enumeration = filters.NumberFilter(method='filter_enumeration')             # Filter by enumeration
-    enumeration_port = filters.NumberFilter(method='filter_enumeration_port')   # Filter by enumeration port
+    port = filters.NumberFilter(method='filter_port')                           # Filter by port
+    port_number = filters.NumberFilter(method='filter_port_number')             # Filter by port number
     host = filters.NumberFilter(method='filter_host')                           # Filter by host
     host_address = filters.CharFilter(method='filter_host_address')             # Filter by host address
     host_os_type = filters.ChoiceFilter(method='filter_host_os_type', choices=OSType.choices)       # Filter by host OS
-    # Enumeration field names to use in the filters
-    enumeration_fields: List[str] = []
+    # Port field names to use in the filters
+    port_fields: List[str] = []
     host_fields: List[str] = []                                                 # Host field names to use in the filters
 
-    def filter_enumeration(self, queryset: QuerySet, name: str, value: int) -> QuerySet:
-        '''Filter queryset by enumeration Id.
+    def filter_port(self, queryset: QuerySet, name: str, value: int) -> QuerySet:
+        '''Filter queryset by port Id.
 
         Args:
             queryset (QuerySet): Finding queryset to be filtered
             name (str): Field name, not used in this case
-            value (int): Enumeration Id
+            value (int): Port Id
 
         Returns:
-            QuerySet: Filtered queryset by enumeration Id
+            QuerySet: Filtered queryset by port Id
         '''
-        return self.multiple_field_filter(queryset, value, self.enumeration_fields)
+        return self.multiple_field_filter(queryset, value, self.port_fields)
 
-    def filter_enumeration_port(self, queryset: QuerySet, name: str, value: int) -> QuerySet:
-        '''Filter queryset by enumeration port.
+    def filter_port_number(self, queryset: QuerySet, name: str, value: int) -> QuerySet:
+        '''Filter queryset by port number.
 
         Args:
             queryset (QuerySet): Finding queryset to be filtered
             name (str): Field name, not used in this case
-            value (int): Enumeration port
+            value (int): Port number
 
         Returns:
-            QuerySet: Filtered queryset by enumeration port
+            QuerySet: Filtered queryset by port number
         '''
-        return self.multiple_field_filter(queryset, value, [f'{f}__port' for f in self.enumeration_fields])
+        return self.multiple_field_filter(queryset, value, [f'{f}__port' for f in self.port_fields])
 
     def filter_host(self, queryset: QuerySet, name: str, value: int) -> QuerySet:
         '''Filter queryset by host Id.
@@ -154,8 +154,8 @@ class HostFilter(FindingFilter):
         })
 
 
-class EnumerationFilter(FindingFilter):
-    '''FilterSet to filter and sort Enumeration entities.'''
+class PortFilter(FindingFilter):
+    '''FilterSet to filter and sort Port entities.'''
 
     # Ordering fields including common ones
     o = OrderingFilter(fields=FINDING_ORDERING + (('host__os_type', 'os_type'), 'host', 'port', 'protocol', 'service'))
@@ -163,7 +163,7 @@ class EnumerationFilter(FindingFilter):
     class Meta:
         '''FilterSet metadata.'''
 
-        model = Enumeration
+        model = Port
         fields = FINDING_FILTERING.copy()                                       # Common filtering fields
         fields.update({                                                         # Include specific filtering fields
             'host': ['exact', 'isnull'],
@@ -180,7 +180,7 @@ class EndpointFilter(FindingFilter):
     '''FilterSet to filter and sort Endpoint entities.'''
 
     # Ordering fields including common ones
-    o = OrderingFilter(fields=FINDING_ORDERING + (('enumeration__host', 'host'), 'enumeration', 'endpoint', 'status'))
+    o = OrderingFilter(fields=FINDING_ORDERING + (('port__host', 'host'), 'port', 'endpoint', 'status'))
 
     class Meta:
         '''FilterSet metadata.'''
@@ -188,11 +188,11 @@ class EndpointFilter(FindingFilter):
         model = Endpoint
         fields = FINDING_FILTERING.copy()                                       # Common filtering fields
         fields.update({                                                         # Include specific filtering fields
-            'enumeration': ['exact', 'isnull'],
-            'enumeration__host': ['exact'],
-            'enumeration__host__address': ['exact', 'icontains'],
-            'enumeration__host__os_type': ['exact'],
-            'enumeration__port': ['exact'],
+            'port': ['exact', 'isnull'],
+            'port__host': ['exact'],
+            'port__host__address': ['exact', 'icontains'],
+            'port__host__os_type': ['exact'],
+            'port__port': ['exact'],
             'endpoint': ['exact', 'icontains'],
             'status': ['exact'],
             'protocol': ['exact'],
@@ -203,7 +203,7 @@ class TechnologyFilter(FindingFilter):
     '''FilterSet to filter and sort Technology entities.'''
 
     # Ordering fields including common ones
-    o = OrderingFilter(fields=FINDING_ORDERING + (('enumeration__host', 'host'), 'enumeration', 'name', 'version'))
+    o = OrderingFilter(fields=FINDING_ORDERING + (('port__host', 'host'), 'port', 'name', 'version'))
 
     class Meta:
         '''FilterSet metadata.'''
@@ -211,11 +211,11 @@ class TechnologyFilter(FindingFilter):
         model = Technology
         fields = FINDING_FILTERING.copy()                                       # Common filtering fields
         fields.update({                                                         # Include specific filtering fields
-            'enumeration': ['exact', 'isnull'],
-            'enumeration__host': ['exact'],
-            'enumeration__host__address': ['exact', 'icontains'],
-            'enumeration__host__os_type': ['exact'],
-            'enumeration__port': ['exact'],
+            'port': ['exact', 'isnull'],
+            'port__host': ['exact'],
+            'port__host__address': ['exact', 'icontains'],
+            'port__host__os_type': ['exact'],
+            'port__port': ['exact'],
             'name': ['exact', 'icontains'],
             'version': ['exact', 'icontains'],
             'related_to': ['exact'],
@@ -234,11 +234,11 @@ class CredentialFilter(FindingFilter):
         fields = FINDING_FILTERING.copy()                                       # Common filtering fields
         fields.update({                                                         # Include specific filtering fields
             'technology': ['exact', 'isnull'],
-            'technology__enumeration': ['exact', 'isnull'],
-            'technology__enumeration__host': ['exact'],
-            'technology__enumeration__host__address': ['exact', 'icontains'],
-            'technology__enumeration__host__os_type': ['exact'],
-            'technology__enumeration__port': ['exact'],
+            'technology__port': ['exact', 'isnull'],
+            'technology__port__host': ['exact'],
+            'technology__port__host__address': ['exact', 'icontains'],
+            'technology__port__host__os_type': ['exact'],
+            'technology__port__port': ['exact'],
             'technology__name': ['exact', 'icontains'],
             'technology__version': ['exact', 'icontains'],
             'email': ['exact', 'icontains'],
@@ -249,12 +249,12 @@ class CredentialFilter(FindingFilter):
 class VulnerabilityFilter(BaseVulnerabilityFilter):
     '''FilterSet to filter and sort Vulnerability entities.'''
 
-    # Enumeration field names to use in the filters
-    enumeration_fields: List[str] = ['technology__enumeration', 'enumeration']
+    # Port field names to use in the filters
+    port_fields: List[str] = ['technology__port', 'port']
     # Host field names to use in the filters
-    host_fields: List[str] = ['technology__enumeration__host', 'enumeration__host']
+    host_fields: List[str] = ['technology__port__host', 'port__host']
     # Ordering fields including common ones
-    o = OrderingFilter(fields=FINDING_ORDERING + ('enumeration', 'technology', 'name', 'severity', 'cve'))
+    o = OrderingFilter(fields=FINDING_ORDERING + ('port', 'technology', 'name', 'severity', 'cve'))
 
     class Meta:
         '''FilterSet metadata.'''
@@ -262,7 +262,7 @@ class VulnerabilityFilter(BaseVulnerabilityFilter):
         model = Vulnerability
         fields = FINDING_FILTERING.copy()                                       # Common filtering fields
         fields.update({                                                         # Include specific filtering fields
-            'enumeration': ['isnull'],
+            'port': ['isnull'],
             'technology': ['exact', 'isnull'],
             'technology__name': ['exact', 'icontains'],
             'technology__version': ['exact', 'icontains'],
@@ -277,15 +277,15 @@ class VulnerabilityFilter(BaseVulnerabilityFilter):
 class ExploitFilter(BaseVulnerabilityFilter):
     '''FilterSet to filter and sort Exploit entities.'''
 
-    # Enumeration field names to use in the filters
-    enumeration_fields: List[str] = [
-        'technology__enumeration', 'vulnerability__enumeration',
-        'vulnerability__technology__enumeration'
+    # Port field names to use in the filters
+    port_fields: List[str] = [
+        'technology__port', 'vulnerability__port',
+        'vulnerability__technology__port'
     ]
     # Host field names to use in the filters
     host_fields: List[str] = [
-        'technology__enumeration__host', 'vulnerability__enumeration__host',
-        'vulnerability__technology__enumeration__host'
+        'technology__port__host', 'vulnerability__port__host',
+        'vulnerability__technology__port__host'
     ]
     # Ordering fields including common ones
     o = OrderingFilter(fields=FINDING_ORDERING + ('vulnerability', 'technology', 'title', 'edb_id'))
@@ -306,11 +306,11 @@ class ExploitFilter(BaseVulnerabilityFilter):
             'technology': ['exact', 'isnull'],
             'technology__name': ['exact', 'icontains'],
             'technology__version': ['exact', 'icontains'],
-            'technology__enumeration': ['exact'],
-            'technology__enumeration__host': ['exact'],
-            'technology__enumeration__host__address': ['exact', 'icontains'],
-            'technology__enumeration__host__os_type': ['exact'],
-            'technology__enumeration__port': ['exact'],
+            'technology__port': ['exact'],
+            'technology__port__host': ['exact'],
+            'technology__port__host__address': ['exact', 'icontains'],
+            'technology__port__host__os_type': ['exact'],
+            'technology__port__port': ['exact'],
             'title': ['exact', 'icontains'],
             'edb_id': ['exact'],
             'reference': ['exact', 'icontains'],

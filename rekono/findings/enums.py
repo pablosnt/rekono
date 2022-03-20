@@ -38,7 +38,7 @@ class OSType(models.TextChoices):
 
 
 class PortStatus(models.TextChoices):
-    '''Port statuses to categorize Enumeration ports.'''
+    '''Port statuses to categorize ports.'''
 
     OPEN = 'Open'
     OPEN_FILTERED = 'Open - Filtered'
@@ -47,7 +47,7 @@ class PortStatus(models.TextChoices):
 
 
 class Protocol(models.TextChoices):
-    '''Protocols to categorize Enumeration services.'''
+    '''Protocols to categorize Port services.'''
 
     UDP = 'UDP'
     TCP = 'TCP'

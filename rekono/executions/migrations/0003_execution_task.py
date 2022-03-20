@@ -10,13 +10,13 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('tasks', '0001_initial'),
-        ('tools', '0001_initial'),
+        ('executions', '0002_execution_step'),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='task',
-            name='configuration',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='tools.configuration'),
+            model_name='execution',
+            name='task',
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='executions', to='tasks.task'),
         ),
     ]

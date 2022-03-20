@@ -21,8 +21,8 @@
         "model": "input_types.inputtype",
         "pk": 3,
         "fields": {
-            "name": "Enumeration",
-            "related_model": "findings.enumeration",
+            "name": "Port",
+            "related_model": "findings.port",
             "callback_target": "targets.targetport"
         }
     },
