@@ -1,6 +1,6 @@
 <template>
   <b-col v-if="findings && findings.length > 0 && (types.length === 0 || types.includes(name.toLowerCase()))">
-    <b-table ref="findingTable" select-mode="single" :selectable="details !== null" hover striped borderless head-variant="dark" :fields="fields" :items="findings" :filter="findingId ? findingId.toString() : null" :filter-function="selectedFilter" @filtered="preventSelection = true" @row-selected="selectRow">
+    <b-table ref="findingTable" select-mode="single" :selectable="details !== null" hover striped borderless head-variant="dark" selected-variant="danger" :fields="fields" :items="findings" :filter="findingId ? findingId.toString() : null" :filter-function="selectedFilter" @filtered="preventSelection = true" @row-selected="selectRow">
       <template #cell(data_type)="row">
         <b-badge variant="primary">{{ row.item.data_type }}</b-badge>
       </template>
