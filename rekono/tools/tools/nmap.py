@@ -6,10 +6,8 @@ from findings.enums import OSType, PathType, PortStatus, Protocol, Severity
 from findings.models import (Credential, Host, Path, Port, Technology,
                              Vulnerability)
 from libnmap.parser import NmapParser
+from security.input_validation import CVE_REGEX
 from tools.tools.base_tool import BaseTool
-
-# CVE regex
-CVE_REGEX = 'CVE-[0-9]{4}-[0-9]{1,7}'
 
 
 class NmapTool(BaseTool):

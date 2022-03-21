@@ -8,6 +8,7 @@ logger = logging.getLogger()                                                    
 NAME_REGEX = r'[\w\s\.\-]*'                                                     # Regex for names validation
 TEXT_REGEX = r'[\w\s\.:,+\-\'"?¿¡!#%$€]*'                                       # Regex for text validation
 PATH_REGEX = r'[\w\./#?&%$\\]*'                                                 # Regex for path validation
+CVE_REGEX = 'CVE-[0-9]{4}-[0-9]{1,7}'                                           # Regex for CVE validation
 
 
 def validate_text_value(value: str, regex: str) -> None:
@@ -75,6 +76,18 @@ def validate_path(value: str) -> None:
         ValidationError: Raised if value doesn't match the expected regex
     '''
     validate_text_value(value, PATH_REGEX)
+
+
+def validate_cve(value: str) -> None:
+    '''Validate if path is valid based on regex.
+
+    Args:
+        value (str): CVE value
+
+    Raises:
+        ValidationError: Raised if value doesn't match the expected regex
+    '''
+    validate_text_value(value, CVE_REGEX)
 
 
 def validate_number(value: int) -> None:

@@ -6,10 +6,14 @@ from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
                                    ListModelMixin, RetrieveModelMixin)
 from rest_framework.viewsets import GenericViewSet
 from targets.filters import (TargetEndpointFilter, TargetFilter,
-                             TargetPortFilter)
-from targets.models import Target, TargetEndpoint, TargetPort
+                             TargetPortFilter, TargetTechnologyFilter,
+                             TargetVulnerabilityFilter)
+from targets.models import (Target, TargetEndpoint, TargetPort,
+                            TargetTechnology, TargetVulnerability)
 from targets.serializers import (TargetEndpointSerializer,
-                                 TargetPortSerializer, TargetSerializer)
+                                 TargetPortSerializer, TargetSerializer,
+                                 TargetTechnologySerializer,
+                                 TargetVulnerabilitySerializer)
 
 # Create your views here.
 
@@ -88,6 +92,52 @@ class TargetEndpointViewSet(TargetViewSet):
     filterset_class = TargetEndpointFilter
     # Fields used to search target endpoints
     search_fields = ['target_port__target__target', 'target_port__port', 'endpoint']
+    # Project members field used for authorization purposes
+    project_members_field = 'target_port__target__project__members'
+
+    def get_project_members(self, data: Dict[str, Any]) -> QuerySet:
+        '''Get project members from serializer validated data.
+
+        Args:
+            data (Dict[str, Any]): Validated data from serializer
+
+        Returns:
+            QuerySet: Project members related to the instance
+        '''
+        return data['target_port'].target.project.members.all()
+
+
+class TargetTechnologyViewSet(TargetViewSet):
+    '''TargetTechnology ViewSet that includes: get, retrieve, create, and delete features.'''
+
+    queryset = TargetTechnology.objects.all().order_by('-id')
+    serializer_class = TargetTechnologySerializer
+    filterset_class = TargetTechnologyFilter
+    # Fields used to search target technologies
+    search_fields = ['target_port__target__target', 'target_port__port', 'name', 'version']
+    # Project members field used for authorization purposes
+    project_members_field = 'target_port__target__project__members'
+
+    def get_project_members(self, data: Dict[str, Any]) -> QuerySet:
+        '''Get project members from serializer validated data.
+
+        Args:
+            data (Dict[str, Any]): Validated data from serializer
+
+        Returns:
+            QuerySet: Project members related to the instance
+        '''
+        return data['target_port'].target.project.members.all()
+
+
+class TargetVulnerabilityViewSet(TargetViewSet):
+    '''TargetVulnerability ViewSet that includes: get, retrieve, create, and delete features.'''
+
+    queryset = TargetVulnerability.objects.all().order_by('-id')
+    serializer_class = TargetVulnerabilitySerializer
+    filterset_class = TargetVulnerabilityFilter
+    # Fields used to search target endpoints
+    search_fields = ['target_port__target__target', 'target_port__port', 'cve']
     # Project members field used for authorization purposes
     project_members_field = 'target_port__target__project__members'
 

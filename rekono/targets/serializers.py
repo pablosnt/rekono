@@ -2,8 +2,72 @@ from typing import Any, Dict
 
 from django.forms import ValidationError
 from rest_framework import serializers
-from targets.models import Target, TargetEndpoint, TargetPort
+from targets.models import (Target, TargetEndpoint, TargetPort,
+                            TargetTechnology, TargetVulnerability)
 from targets.utils import get_target_type
+
+
+class TargetVulnerabilitySerializer(serializers.ModelSerializer):
+    '''Serializer to manage target vulnerabilities via API.'''
+
+    class Meta:
+        '''Serializer metadata.'''
+
+        model = TargetVulnerability
+        # Target vulnerabilities fields exposed via API
+        fields = ('id', 'target_port', 'cve')
+
+    def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
+        '''Validate the provided data before use it.
+
+        Args:
+            attrs (Dict[str, Any]): Provided data
+
+        Raises:
+            ValidationError: Raised if provided data is invalid
+
+        Returns:
+            Dict[str, Any]: Data after validation process
+        '''
+        attrs = super().validate(attrs)
+        if TargetEndpoint.objects.filter(target_port=attrs['target_port'], cve=attrs['cve']).exists():
+            raise ValidationError({'cve': 'This CVE already exists in this target port'})
+        return attrs
+
+
+class TargetTechnologySerializer(serializers.ModelSerializer):
+    '''Serializer to manage target technologies via API.'''
+
+    class Meta:
+        '''Serializer metadata.'''
+
+        model = TargetTechnology
+        # Target technology fields exposed via API
+        fields = ('id', 'target_port', 'name', 'version')
+
+    def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
+        '''Validate the provided data before use it.
+
+        Args:
+            attrs (Dict[str, Any]): Provided data
+
+        Raises:
+            ValidationError: Raised if provided data is invalid
+
+        Returns:
+            Dict[str, Any]: Data after validation process
+        '''
+        attrs = super().validate(attrs)
+        if TargetEndpoint.objects.filter(
+            target_port=attrs['target_port'],
+            name=attrs['name'],
+            version=attrs['version']
+        ).exists():
+            raise ValidationError({
+                'name': 'This name already exists in this target port',
+                'version': 'This version already exists for this technology in this target port'
+            })
+        return attrs
 
 
 class TargetEndpointSerializer(serializers.ModelSerializer):
