@@ -30,7 +30,7 @@ class TargetVulnerabilitySerializer(serializers.ModelSerializer):
             Dict[str, Any]: Data after validation process
         '''
         attrs = super().validate(attrs)
-        if TargetEndpoint.objects.filter(target_port=attrs['target_port'], cve=attrs['cve']).exists():
+        if TargetVulnerability.objects.filter(target_port=attrs['target_port'], cve=attrs['cve']).exists():
             raise ValidationError({'cve': 'This CVE already exists in this target port'})
         return attrs
 
@@ -58,7 +58,7 @@ class TargetTechnologySerializer(serializers.ModelSerializer):
             Dict[str, Any]: Data after validation process
         '''
         attrs = super().validate(attrs)
-        if TargetEndpoint.objects.filter(
+        if TargetTechnology.objects.filter(
             target_port=attrs['target_port'],
             name=attrs['name'],
             version=attrs['version']
@@ -102,12 +102,18 @@ class TargetPortSerializer(serializers.ModelSerializer):
 
     # Target endpoints details for read operations
     target_endpoints = TargetEndpointSerializer(many=True, read_only=True)
+    # Target technologies details for read operations
+    target_technologies = TargetTechnologySerializer(many=True, read_only=True)
+    # Target vulnerabilities details for read operations
+    target_vulnerabilities = TargetVulnerabilitySerializer(many=True, read_only=True)
 
     class Meta:
         '''Serializer metadata.'''
 
         model = TargetPort
-        fields = ('id', 'target', 'port', 'target_endpoints')                   # Target port fields exposed via API
+        fields = (                                                              # Target port fields exposed via API
+            'id', 'target', 'port', 'target_endpoints', 'target_technologies', 'target_vulnerabilities'
+        )
         read_only_fields = ('target_endpoints',)                                # Read only fields
 
     def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:

@@ -78,7 +78,8 @@ export default {
       timeUnits: ['Weeks', 'Days', 'Hours', 'Minutes'],
       nameRegex: /^[\w\s.-]*$/,
       textRegex: /^[\w\s.:,+\-'"?¿¡!#%$€]*$/,
-      pathRegex: /^[\w./#?&%]*$/
+      pathRegex: /^[\w./#?&%]*$/,
+      cveRegex: /^CVE-[0-9]{4}-[0-9]{1,7}$/
     }
   },
   methods: {
@@ -236,14 +237,20 @@ export default {
       }
       window.location.hash = from + url.search
     },
+    validate (value, regex) {
+      return value && value.length && regex.test(value)
+    },
     validateName (value) {
-      return value && value.length > 0 && this.nameRegex.test(value)
+      return this.validate(value, this.nameRegex)
     },
     validateText (value) {
-      return value && value.length > 0 && this.textRegex.test(value)
+      return this.validate(value, this.textRegex)
     },
     validatePath (value) {
-      return value && value.length > 0 && this.pathRegex.test(value)
+      return this.validate(value, this.pathRegex)
+    },
+    validateCve (value) {
+      return this.validate(value, this.cveRegex)
     }
   }
 }

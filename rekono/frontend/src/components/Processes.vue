@@ -13,7 +13,7 @@
         </b-button>
       </template>
       <template #cell(actions)="row">
-        <b-button @click="row.toggleDetails" variant="outline" class="mr-2" v-b-tooltip.hover title="Details">
+        <b-button @click="showProcess(row)" variant="outline" class="mr-2" v-b-tooltip.hover title="Details">
           <b-icon v-if="!row.detailsShowing" variant="dark" icon="eye-fill"/>
           <b-icon v-if="row.detailsShowing" variant="secondary" icon="eye-slash-fill"/>
         </b-button>
@@ -116,7 +116,8 @@ export default {
       showStepModal: false,
       selectedProcess: null,
       selectedStep: null,
-      filters: []
+      filters: [],
+      showProcessId: null
     }
   },
   components: {
@@ -143,7 +144,14 @@ export default {
         .then(response => {
           this.data = response.data.results
           this.total = response.data.count
+          if (this.showProcessId) {
+            this.data.filter(process => process.id === this.showProcessId).forEach(process => process._showDetails = true)
+          }
         })
+    },
+    showProcess (row) {
+      row.toggleDetails()
+      this.showProcessId = row.item._showDetails ? row.item.id : null
     },
     likeProcess (processId) {
       this.post(`/api/processes/${processId}/like/`, { }).then(() => this.fetchData())
@@ -158,7 +166,7 @@ export default {
       this.delete(`/api/processes/${this.selectedProcess.id}/`, this.selectedProcess.name, 'Process deleted successfully').then(() => this.fetchData())
     },
     deleteStep () {
-      this.delete(`/api/steps/${this.selectedStep.id}/`, `${this.processName} - ${this.selectedStep.tool.name}`, 'Step deleted successfully').then(() => this.fetchData())
+      this.delete(`/api/steps/${this.selectedStep.id}/`, `${this.selectedProcess.name} - ${this.selectedStep.tool.name}`, 'Step deleted successfully').then(() => this.fetchData())
     },
     taskModal (process) {
       this.cleanSelection()
