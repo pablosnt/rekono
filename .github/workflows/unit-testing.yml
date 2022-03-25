@@ -30,8 +30,8 @@ jobs:
       
       - name: Install GitLeaks and GitTools to check its installation
         run: |
-          wget https://github.com/zricethezav/gitleaks/releases/latest/download/gitleaks_8.4.0_linux_x64.tar.gz
-          tar -xvf gitleaks_8.4.0_linux_x64.tar.gz
+          wget https://github.com/zricethezav/gitleaks/releases/download/v8.5.1/gitleaks_8.5.1_linux_x64.tar.gz
+          tar -xvf gitleaks_8.5.1_linux_x64.tar.gz
           chmod +x gitleaks
           mv gitleaks /usr/local/bin/
 
