@@ -14,6 +14,10 @@ from telegram_bot.conversations.new_target_endpoint import (
     create_target_endpoint, new_target_endpoint)
 from telegram_bot.conversations.new_target_port import (create_target_port,
                                                         new_target_port)
+from telegram_bot.conversations.new_target_technology import (
+    create_target_technology, new_target_technology)
+from telegram_bot.conversations.new_target_vulnerability import (
+    create_target_vulnerability, new_target_vulnerability)
 from telegram_bot.conversations.select_project import project
 from telegram_bot.conversations.selection import (select_configuration,
                                                   select_intensity,
@@ -88,6 +92,28 @@ def deploy() -> None:
                 SELECT_TARGET: [CallbackQueryHandler(select_target)],
                 SELECT_TARGET_PORT: [CallbackQueryHandler(select_target_port)],
                 CREATE: [MessageHandler(Filters.text, create_target_endpoint)]
+            },
+            fallbacks=[CommandHandler('cancel', cancel)],
+            per_chat=True
+        ))
+        updater.dispatcher.add_handler(ConversationHandler(                     # Create new target technology
+            entry_points=[CommandHandler('newtechnology', new_target_technology)],
+            states={
+                SELECT_PROJECT: [CallbackQueryHandler(select_project)],
+                SELECT_TARGET: [CallbackQueryHandler(select_target)],
+                SELECT_TARGET_PORT: [CallbackQueryHandler(select_target_port)],
+                CREATE: [MessageHandler(Filters.text, create_target_technology)]
+            },
+            fallbacks=[CommandHandler('cancel', cancel)],
+            per_chat=True
+        ))
+        updater.dispatcher.add_handler(ConversationHandler(                     # Create new target vulnerability
+            entry_points=[CommandHandler('newvulnerability', new_target_vulnerability)],
+            states={
+                SELECT_PROJECT: [CallbackQueryHandler(select_project)],
+                SELECT_TARGET: [CallbackQueryHandler(select_target)],
+                SELECT_TARGET_PORT: [CallbackQueryHandler(select_target_port)],
+                CREATE: [MessageHandler(Filters.text, create_target_vulnerability)]
             },
             fallbacks=[CommandHandler('cancel', cancel)],
             per_chat=True

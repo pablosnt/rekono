@@ -19,6 +19,8 @@ HELP = [
     ('newtarget', 'Targets', 'Create new target'),
     ('newport', 'Targets', 'Create new target port'),
     ('newendpoint', 'Targets', 'Create new target endpoint'),
+    ('newtechnology', 'Targets', 'Create new target technology'),
+    ('newvulnerability', 'Targets', 'Create new target vulnerability'),
     ('tool', 'Execution', 'Execute tool'),
     ('process', 'Execution', 'Execute process'),
     ('cancel', 'Common', 'Cancel current operation')
