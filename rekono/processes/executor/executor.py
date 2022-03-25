@@ -8,7 +8,8 @@ from input_types.models import InputType
 from processes.executor.callback import process_callback
 from processes.models import Step
 from rq.job import Job
-from targets.models import TargetEndpoint
+from targets.models import (Target, TargetEndpoint, TargetPort,
+                            TargetTechnology, TargetVulnerability)
 from tasks.models import Task
 from tools.models import Argument, Intensity
 
@@ -83,15 +84,24 @@ def execute(task: Task) -> None:
         covered_targets = [i.callback_target for i in job.dependencies_coverage if i.callback_target is not None]
         # Wordlist never will be covered by dependencies, so they are included directly in targets
         targets = list(task.wordlists.all())
-        if 'Target' not in covered_targets:                                     # Target is not covered by dependencies
+        app_label = Target._meta.app_label
+        if f'{app_label}.{Target._meta.model_name}' not in covered_targets:     # Target is not covered by dependencies
             targets.append(task.target)                                         # Add task target to targets
-        if 'TargetPort' not in covered_targets:
+        if f'{app_label}.{TargetPort._meta.model_name}' not in covered_targets:
             # TargetPort is not covered by dependencies
             targets.extend(list(task.target.target_ports.all()))                # Add task target ports to targets
-        if 'TargetEndpoint' not in covered_targets:
+        if f'{app_label}.{TargetEndpoint._meta.model_name}' not in covered_targets:
             # TargetEndpoint is not covered by dependencies
             # Add task target endpoints to targets
             targets.extend(list(TargetEndpoint.objects.filter(target_port__target=task.target).all()))
+        if f'{app_label}.{TargetTechnology._meta.model_name}' not in covered_targets:
+            # TargetTechnology is not covered by dependencies
+            # Add target technologies to task targets
+            targets.extend(list(TargetTechnology.objects.filter(target_port__target=task.target).all()))
+        if f'{app_label}.{TargetVulnerability._meta.model_name}' not in covered_targets:
+            # TargetVulnerability is not covered by dependencies
+            # Add target vulnerabilities to task targets
+            targets.extend(list(TargetVulnerability.objects.filter(target_port__target=task.target).all()))
         # Get the executions required for this job based on targets and tool arguments.
         # A job can need multiple executions. For example, if the user includes more than one Wordlist and
         # the process includes Dirsearch execution that only accepts one wordlist as argument. Rekono will
