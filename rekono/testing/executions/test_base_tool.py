@@ -118,7 +118,7 @@ class BaseToolTest(TestCase):
         target_endpoint = TargetEndpoint.objects.create(target_port=target_port_http, endpoint='/robots.txt')
         target_technology = TargetTechnology.objects.create(
             target_port=target_port_http,
-            name='WordPress',
+            name='Wordpress',
             version='1.0.0'
         )
         target_vulnerability = TargetVulnerability.objects.create(target_port=target_port_http, cve='CVE-2021-44228')
@@ -270,7 +270,6 @@ class BaseToolTest(TestCase):
         self.arguments.append(argument)
         self.all_findings.extend([filtered, technology])
         self.required_findings.extend([filtered, technology])
-        self.findings_to_use_targets.extend([filtered, technology])
         return technology
 
     def create_credentials(self, technology: Technology) -> None:
@@ -349,7 +348,6 @@ class BaseToolTest(TestCase):
         self.arguments.append(argument)
         self.all_findings.extend([filtered_1, filtered_2, vulnerability])
         self.required_findings.extend([filtered_1, filtered_2, vulnerability])
-        self.findings_to_use_targets.extend([filtered_1, filtered_2, vulnerability])
         return vulnerability
 
     def create_exploits(self, vulnerability: Vulnerability) -> Exploit:
@@ -418,9 +416,9 @@ class BaseToolTest(TestCase):
         arguments = self.tool_instance.get_arguments(self.targets, self.all_findings)
         expected = ' '.join([
             '-T3', '--osint http://scanme.nmap.org/', '--only-host scanme.nmap.org', '--host 10.10.10.10',
-            '--port 443', '--port-commas 22,80,443', '--endpoint /admin', '--tech Joomla',
+            '--port 443', '--port-commas 22,80,443', '--endpoint /admin', '--tech Wordpress',
             '--version 1.0.0', '--email test@test.test', '--username test', '--secret test',
-            '--vuln CVE-1111-1111', '--exploit Test', f'--wordlist {self.wordlist.path}'
+            '--vuln CVE-2021-44228', '--exploit Test', f'--wordlist {self.wordlist.path}'
         ]).split(' ')
         self.assertEqual(expected, arguments)
 
@@ -459,9 +457,9 @@ class BaseToolTest(TestCase):
         arguments = self.tool_instance.get_arguments(self.targets, self.findings_to_use_targets)
         expected = ' '.join([
             '-T3', '--osint http://scanme.nmap.org/', '--only-host scanme.nmap.org', '--host 10.10.10.10',
-            '--port 443', '--port-commas 80,443', '--endpoint /robots.txt', '--tech Joomla',
+            '--port 443', '--port-commas 80,443', '--endpoint /robots.txt', '--tech Wordpress',
             '--version 1.0.0', '--email test@test.test', '--username test', '--secret test',
-            '--vuln CVE-1111-1111', '--exploit Test', f'--wordlist {self.wordlist.path}'
+            '--vuln CVE-2021-44228', '--exploit Test', f'--wordlist {self.wordlist.path}'
         ]).split(' ')
         self.assertEqual(expected, arguments)
 
