@@ -13,7 +13,8 @@ from processes.models import Process, Step
 from projects.models import Project
 from rest_framework.test import APIClient
 from rq import SimpleWorker
-from targets.models import Target, TargetEndpoint, TargetPort
+from targets.models import (Target, TargetEndpoint, TargetPort,
+                            TargetTechnology, TargetVulnerability)
 from tasks.enums import Status
 from tasks.models import Task
 from tools.enums import IntensityRank
@@ -58,6 +59,15 @@ class RekonoTestCase(TestCase):
         self.target = Target.objects.create(project=self.project, target='10.10.10.10')
         self.target_port = TargetPort.objects.create(target=self.target, port=80)
         self.target_endpoint = TargetEndpoint.objects.create(target_port=self.target_port, endpoint='/robots.txt')
+        self.target_technology = TargetTechnology.objects.create(
+            target_port=self.target_port,
+            name='WordPress',
+            version='1.0.0'
+        )
+        self.target_vulnerability = TargetVulnerability.objects.create(
+            target_port=self.target_port,
+            cve='CVE-2021-44228'
+        )
         self.nmap = Tool.objects.get(name='Nmap')
         self.nmap_configuration = Configuration.objects.get(tool=self.nmap, default=True)
         self.dirsearch = Tool.objects.get(name='Dirsearch')
