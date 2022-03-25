@@ -272,9 +272,7 @@ class TargetTechnology(models.Model, BaseInput):
             str: String value that identifies this instance
         '''
         base = f'{self.target_port.__str__()} - {self.name}'
-        if self.version:
-            return f'{base} - {self.version}'
-        return base
+        return f'{base} - {self.version}' if self.version else base
 
     def get_project(self) -> Project:
         '''Get the related project for the instance. This will be used for authorization purposes.

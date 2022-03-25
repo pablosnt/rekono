@@ -15,7 +15,8 @@ from resources.enums import WordlistType
 from resources.models import Wordlist
 from rq import SimpleWorker
 from targets.enums import TargetType
-from targets.models import Target, TargetEndpoint, TargetPort
+from targets.models import (Target, TargetEndpoint, TargetPort,
+                            TargetTechnology, TargetVulnerability)
 from tasks.enums import Status
 from tasks.models import Task
 from tools.enums import IntensityRank, Stage
@@ -115,6 +116,12 @@ class BaseToolTest(TestCase):
         target_port_http = TargetPort.objects.create(target=target, port=80)
         target_port_https = TargetPort.objects.create(target=target, port=443)
         target_endpoint = TargetEndpoint.objects.create(target_port=target_port_http, endpoint='/robots.txt')
+        target_technology = TargetTechnology.objects.create(
+            target_port=target_port_http,
+            name='WordPress',
+            version='1.0.0'
+        )
+        target_vulnerability = TargetVulnerability.objects.create(target_port=target_port_http, cve='CVE-2021-44228')
         user = User.objects.create_superuser('rekono', 'rekono@rekono.rekono', 'rekono')
         task = Task.objects.create(
             target=target,
@@ -133,7 +140,13 @@ class BaseToolTest(TestCase):
             end=timezone.now()
         )
         self.new_execution = Execution.objects.create(task=task, status=Status.REQUESTED)   # New execution for testing
-        self.targets.extend([target_filtered, target, target_port_http, target_port_https, target_endpoint])
+        self.targets.extend([
+            target_filtered, target,
+            target_port_http, target_port_https,
+            target_endpoint,
+            target_technology,
+            target_vulnerability
+        ])
 
     def create_osint(self) -> None:
         '''Create OSINT data for testing.'''
