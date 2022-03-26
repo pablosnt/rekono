@@ -528,7 +528,7 @@ class Vulnerability(Finding):
             return True
         try:
             # If filter is a valid severity, vulnerability will be filtered by severity
-            return cast(models.TextChoices, Severity)[input.filter.capitalize()] == self.severity
+            return cast(models.TextChoices, Severity)[input.filter.upper()] == self.severity
         except KeyError:
             f = input.filter.lower()
             # If filter is a string, vulnerability will be filtered by:
