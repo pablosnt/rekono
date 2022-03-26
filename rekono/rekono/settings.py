@@ -51,13 +51,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 FRONTEND_DIR = os.path.join(BASE_DIR, 'frontend')                               # Frontend directory
 
 # Rekono home directory. By default /opt/rekono
-REKONO_HOME = os.getenv(ENV_REKONO_HOME)
-if not REKONO_HOME or not os.path.isdir(REKONO_HOME):                           # Rekono home doesn't exist
-    for home in ['/usr/share/rekono', '/opt/rekono']:                           # Check default Rekono home
-        if os.path.isdir(home):
-            REKONO_HOME = home
-            break
-if not REKONO_HOME or not os.path.isdir(REKONO_HOME):                           # Rekono home doesn't exist
+REKONO_HOME = os.getenv(ENV_REKONO_HOME, '/opt/rekono')
+if not os.path.isdir(REKONO_HOME):                                              # Rekono home doesn't exist
     REKONO_HOME = str(BASE_DIR.parent)                                          # Use current directory as home
 
 REPORTS_DIR = os.path.join(REKONO_HOME, 'reports')                              # Directory to save tool reports
