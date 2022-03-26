@@ -30,7 +30,8 @@ from rekono.environment import (ENV_REKONO_HOME, RKN_ALLOWED_HOSTS,
                                 RKN_EMAIL_USER, RKN_FRONTEND_URL,
                                 RKN_GITTOOLS_DIR, RKN_LOG4J_SCANNER_DIR,
                                 RKN_RQ_HOST, RKN_RQ_PORT, RKN_SECRET_KEY,
-                                RKN_TELEGRAM_TOKEN, RKN_UPLOAD_FILES_MAX_MB)
+                                RKN_TELEGRAM_TOKEN, RKN_TRUSTED_PROXY,
+                                RKN_UPLOAD_FILES_MAX_MB)
 
 ################################################################################
 # Rekono basic information                                                     #
@@ -50,8 +51,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 FRONTEND_DIR = os.path.join(BASE_DIR, 'frontend')                               # Frontend directory
 
 # Rekono home directory. By default /opt/rekono
-REKONO_HOME = os.getenv(ENV_REKONO_HOME, '/opt/rekono')
-if not os.path.isdir(REKONO_HOME):                                              # Rekono home doesn't exist
+REKONO_HOME = os.getenv(ENV_REKONO_HOME)
+if not REKONO_HOME or not os.path.isdir(REKONO_HOME):                           # Rekono home doesn't exist
+    for home in ['/usr/share/rekono', '/opt/rekono']:                           # Check default Rekono home
+        if os.path.isdir(home):
+            REKONO_HOME = home
+            break
+if not REKONO_HOME or not os.path.isdir(REKONO_HOME):                           # Rekono home doesn't exist
     REKONO_HOME = str(BASE_DIR.parent)                                          # Use current directory as home
 
 REPORTS_DIR = os.path.join(REKONO_HOME, 'reports')                              # Directory to save tool reports
@@ -107,6 +113,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'security.middleware.RekonoSecurityMiddleware',                             # Includes security response headers
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -114,7 +121,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'security.middleware.RekonoSecurityMiddleware',                             # Includes security response headers
 ]
 
 ROOT_URLCONF = 'rekono.urls'
@@ -152,9 +158,13 @@ SECRET_KEY = os.getenv(RKN_SECRET_KEY, CONFIG.SECRET_KEY)                       
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
+TRUSTED_PROXY = os.getenv(RKN_TRUSTED_PROXY) == 'true'
+
 allowed_hosts = os.getenv(RKN_ALLOWED_HOSTS)
 if allowed_hosts and ' ' in allowed_hosts:
     ALLOWED_HOSTS = allowed_hosts.split(' ')                                    # Multiple allowed hosts from env
+elif allowed_hosts and ',' in allowed_hosts:
+    ALLOWED_HOSTS = allowed_hosts.split(',')                                    # Multiple allowed hosts from env
 elif allowed_hosts:
     ALLOWED_HOSTS = [allowed_hosts]                                             # One allowed host from env
 else:

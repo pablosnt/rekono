@@ -4,6 +4,8 @@ from typing import Any
 from rest_framework.request import HttpRequest
 from security.csp_header import add_csp_to_headers
 
+from rekono.settings import TRUSTED_PROXY
+
 # Base response headers for all HTTP responses
 headers = {
     'Server': None,
@@ -37,6 +39,11 @@ class RekonoSecurityMiddleware:
         Returns:
             Any: HTTP response
         '''
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for and TRUSTED_PROXY:
+            if ',' in x_forwarded_for:
+                x_forwarded_for = x_forwarded_for.split(',', 1)[0]
+            request.META['REMOTE_ADDR'] = x_forwarded_for
         response = self.get_response(request)                                   # Process request
         for header, value in add_csp_to_headers(headers, request.path).items():     # Get response headers with CSP
             response[header] = value                                            # Include response headers in response

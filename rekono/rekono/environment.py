@@ -3,7 +3,9 @@
 # Rekono home directory
 ENV_REKONO_HOME = 'REKONO_HOME'
 
-# Rekono frontend configuration: used to include links in notifications
+# Rekono environment: indicate if Rekono is running with a trusted reverse proxy
+RKN_TRUSTED_PROXY = 'RKN_TRUSTED_PROXY'
+# Rekono frontend URL used to include links in notifications
 RKN_FRONTEND_URL = 'RKN_FRONTEND_URL'
 
 # Django configuration
