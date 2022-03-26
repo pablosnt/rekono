@@ -22,6 +22,15 @@ from tasks.enums import Status, TimeUnit
 from tools.enums import IntensityRank
 
 from rekono.config import RekonoConfigLoader
+from rekono.environment import (ENV_REKONO_HOME, RKN_ALLOWED_HOSTS,
+                                RKN_CMSEEK_RESULTS, RKN_DB_HOST, RKN_DB_NAME,
+                                RKN_DB_PASSWORD, RKN_DB_PORT, RKN_DB_USER,
+                                RKN_DD_API_KEY, RKN_DD_URL, RKN_EMAIL_HOST,
+                                RKN_EMAIL_PASSWORD, RKN_EMAIL_PORT,
+                                RKN_EMAIL_USER, RKN_FRONTEND_URL,
+                                RKN_GITTOOLS_DIR, RKN_LOG4J_SCANNER_DIR,
+                                RKN_RQ_HOST, RKN_RQ_PORT, RKN_SECRET_KEY,
+                                RKN_TELEGRAM_TOKEN, RKN_UPLOAD_FILES_MAX_MB)
 
 ################################################################################
 # Rekono basic information                                                     #
@@ -41,7 +50,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 FRONTEND_DIR = os.path.join(BASE_DIR, 'frontend')                               # Frontend directory
 
 # Rekono home directory. By default /opt/rekono
-REKONO_HOME = os.getenv('REKONO_HOME', '/opt/rekono')
+REKONO_HOME = os.getenv(ENV_REKONO_HOME, '/opt/rekono')
 if not os.path.isdir(REKONO_HOME):                                              # Rekono home doesn't exist
     REKONO_HOME = str(BASE_DIR.parent)                                          # Use current directory as home
 
@@ -138,12 +147,12 @@ TESTING = 'test' in sys.argv                                                    
 ################################################################################
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('RKN_SECRET_KEY', CONFIG.SECRET_KEY)                     # Django secret key
+SECRET_KEY = os.getenv(RKN_SECRET_KEY, CONFIG.SECRET_KEY)                       # Django secret key
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-allowed_hosts = os.getenv('RKN_ALLOWED_HOSTS')
+allowed_hosts = os.getenv(RKN_ALLOWED_HOSTS)
 if allowed_hosts and ' ' in allowed_hosts:
     ALLOWED_HOSTS = allowed_hosts.split(' ')                                    # Multiple allowed hosts from env
 elif allowed_hosts:
@@ -192,7 +201,7 @@ SIMPLE_JWT = {
 }
 
 # Max allowed size in MB for upload files
-UPLOAD_FILES_MAX_MB = 1 if TESTING else os.getenv('RKN_UPLOAD_FILES_MAX_MB', CONFIG.UPLOAD_FILES_MAX_MB)
+UPLOAD_FILES_MAX_MB = 1 if TESTING else os.getenv(RKN_UPLOAD_FILES_MAX_MB, CONFIG.UPLOAD_FILES_MAX_MB)
 
 LOGGING = {                                                                     # Logging configuration
     'version': 1,
@@ -314,11 +323,11 @@ else:
     DATABASES = {                                                               # pragma: no cover
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.getenv('RKN_DB_NAME', CONFIG.DB_NAME),
-            'USER': os.getenv('RKN_DB_USER', CONFIG.DB_USER),
-            'PASSWORD': os.getenv('RKN_DB_PASSWORD', CONFIG.DB_PASSWORD),
-            'HOST': os.getenv('RKN_DB_HOST', CONFIG.DB_HOST),
-            'PORT': os.getenv('RKN_DB_PORT', CONFIG.DB_PORT),
+            'NAME': os.getenv(RKN_DB_NAME, CONFIG.DB_NAME),
+            'USER': os.getenv(RKN_DB_USER, CONFIG.DB_USER),
+            'PASSWORD': os.getenv(RKN_DB_PASSWORD, CONFIG.DB_PASSWORD),
+            'HOST': os.getenv(RKN_DB_HOST, CONFIG.DB_HOST),
+            'PORT': os.getenv(RKN_DB_PORT, CONFIG.DB_PORT),
         }
     }
 
@@ -328,26 +337,26 @@ else:
 
 RQ_QUEUES = {
     'tasks-queue': {
-        'HOST': os.getenv('RKN_RQ_HOST', CONFIG.RQ_HOST),
-        'PORT': os.getenv('RKN_RQ_PORT', CONFIG.RQ_PORT),
+        'HOST': os.getenv(RKN_RQ_HOST, CONFIG.RQ_HOST),
+        'PORT': os.getenv(RKN_RQ_PORT, CONFIG.RQ_PORT),
         'DB': 0,
         'DEFAULT_TIMEOUT': 60                                                   # 1 minute
     },
     'executions-queue': {
-        'HOST': os.getenv('RKN_RQ_HOST', CONFIG.RQ_HOST),
-        'PORT': os.getenv('RKN_RQ_PORT', CONFIG.RQ_PORT),
+        'HOST': os.getenv(RKN_RQ_HOST, CONFIG.RQ_HOST),
+        'PORT': os.getenv(RKN_RQ_PORT, CONFIG.RQ_PORT),
         'DB': 0,
         'DEFAULT_TIMEOUT': 7200                                                 # 2 hours
     },
     'findings-queue': {
-        'HOST': os.getenv('RKN_RQ_HOST', CONFIG.RQ_HOST),
-        'PORT': os.getenv('RKN_RQ_PORT', CONFIG.RQ_PORT),
+        'HOST': os.getenv(RKN_RQ_HOST, CONFIG.RQ_HOST),
+        'PORT': os.getenv(RKN_RQ_PORT, CONFIG.RQ_PORT),
         'DB': 0,
         'DEFAULT_TIMEOUT': 300                                                  # 5 minutes
     },
     'emails-queue': {
-        'HOST': os.getenv('RKN_RQ_HOST', CONFIG.RQ_HOST),
-        'PORT': os.getenv('RKN_RQ_PORT', CONFIG.RQ_PORT),
+        'HOST': os.getenv(RKN_RQ_HOST, CONFIG.RQ_HOST),
+        'PORT': os.getenv(RKN_RQ_PORT, CONFIG.RQ_PORT),
         'DB': 0,
         'DEFAULT_TIMEOUT': 300                                                  # 5 minutes
     }
@@ -359,10 +368,10 @@ RQ_QUEUES = {
 ################################################################################
 
 DEFAULT_FROM_EMAIL = 'Rekono <noreply@rekono.com>'                              # Email from address
-EMAIL_HOST = os.getenv('RKN_EMAIL_HOST', CONFIG.EMAIL_HOST)                     # SMTP host
-EMAIL_PORT = os.getenv('RKN_EMAIL_PORT', CONFIG.EMAIL_PORT)                     # SMTP port
-EMAIL_HOST_USER = os.getenv('RKN_EMAIL_USER', CONFIG.EMAIL_USER)                # User for auth in SMTP server
-EMAIL_HOST_PASSWORD = os.getenv('RKN_EMAIL_PASSWORD', CONFIG.EMAIL_PASSWORD)    # Password for auth in SMTP server
+EMAIL_HOST = os.getenv(RKN_EMAIL_HOST, CONFIG.EMAIL_HOST)                       # SMTP host
+EMAIL_PORT = os.getenv(RKN_EMAIL_PORT, CONFIG.EMAIL_PORT)                       # SMTP port
+EMAIL_HOST_USER = os.getenv(RKN_EMAIL_USER, CONFIG.EMAIL_USER)                  # User for auth in SMTP server
+EMAIL_HOST_PASSWORD = os.getenv(RKN_EMAIL_PASSWORD, CONFIG.EMAIL_PASSWORD)      # Password for auth in SMTP server
 EMAIL_USE_TLS = CONFIG.EMAIL_TLS
 
 
@@ -371,7 +380,7 @@ EMAIL_USE_TLS = CONFIG.EMAIL_TLS
 ################################################################################
 
 TELEGRAM_BOT = CONFIG.TELEGRAM_BOT                                              # Telegram bot name
-TELEGRAM_TOKEN = os.getenv('RKN_TELEGRAM_TOKEN', CONFIG.TELEGRAM_TOKEN)         # Telegram token provided by BotFather
+TELEGRAM_TOKEN = os.getenv(RKN_TELEGRAM_TOKEN, CONFIG.TELEGRAM_TOKEN)           # Telegram token provided by BotFather
 
 
 ################################################################################
@@ -379,8 +388,8 @@ TELEGRAM_TOKEN = os.getenv('RKN_TELEGRAM_TOKEN', CONFIG.TELEGRAM_TOKEN)         
 ################################################################################
 
 DEFECT_DOJO = {
-    'URL': os.getenv('RKN_DD_URL', CONFIG.DD_URL),
-    'API_KEY': os.getenv('RKN_DD_API_KEY', CONFIG.DD_API_KEY),                  # Defect-Dojo API key
+    'URL': os.getenv(RKN_DD_URL, CONFIG.DD_URL),
+    'API_KEY': os.getenv(RKN_DD_API_KEY, CONFIG.DD_API_KEY),                    # Defect-Dojo API key
     'VERIFY_TLS': CONFIG.DD_VERIFY_TLS,                                         # Defect-Dojo TLS verification
     'TAGS': CONFIG.DD_TAGS,                                                     # Tags to be included in DD entities
     # Indicate if Defect-Dojo products can be created from Rekono projects
@@ -397,13 +406,13 @@ DEFECT_DOJO = {
 
 TOOLS = {
     'cmseek': {
-        'directory': os.getenv('RKN_CMSEEK_RESULTS', CONFIG.TOOLS_CMSEEK_DIR)   # CMSeeK directory
+        'directory': os.getenv(RKN_CMSEEK_RESULTS, CONFIG.TOOLS_CMSEEK_DIR)     # CMSeeK directory
     },
     'log4j-scanner': {
-        'directory': os.getenv('RKN_LOG4J_SCANNER_DIR', CONFIG.TOOLS_LOG4J_SCANNER_DIR)     # Log4j Scanner directory
+        'directory': os.getenv(RKN_LOG4J_SCANNER_DIR, CONFIG.TOOLS_LOG4J_SCANNER_DIR)     # Log4j Scanner directory
     },
     'gittools': {
-        'directory': os.getenv('RKN_GITTOOLS_DIR', CONFIG.TOOLS_GITTOOLS_DIR)   # GitTools directory
+        'directory': os.getenv(RKN_GITTOOLS_DIR, CONFIG.TOOLS_GITTOOLS_DIR)     # GitTools directory
     }
 }
 
@@ -413,7 +422,7 @@ TOOLS = {
 ################################################################################
 
 # Rekono frontend address. It's used to include links in notifications
-FRONTEND_URL = os.getenv('RKN_FRONTEND_URL', CONFIG.FRONTEND_URL)
+FRONTEND_URL = os.getenv(RKN_FRONTEND_URL, CONFIG.FRONTEND_URL)
 
 
 ################################################################################

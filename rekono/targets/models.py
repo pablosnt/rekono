@@ -309,10 +309,10 @@ class TargetVulnerability(models.Model, BaseInput):
         '''
         return (
             not input.filter or
-            input.filter in cast(models.TextChoices, Severity) or
-            input.filter.startswith('cwe-') or
-            input.filter == 'cve' or
-            (input.filter.startswith('cve-') and input.filter == self.cve)
+            input.filter.capitalize() in cast(models.TextChoices, Severity) or
+            input.filter.lower().startswith('cwe-') or
+            input.filter.lower() == 'cve' or
+            (input.filter.lower().startswith('cve-') and input.filter.lower() == self.cve.lower())
         )
 
     def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
