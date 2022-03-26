@@ -42,3 +42,5 @@ tools:
     directory: /usr/share/cmseek
   log4j-scanner:
     directory: /opt/log4j-scanner
+  gittools:
+    directory: /opt/GitTools
