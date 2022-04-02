@@ -1,9 +1,19 @@
-[![Unit testing](https://github.com/pablosnt/rekono/actions/workflows/unit-testing.yml/badge.svg)](https://github.com/pablosnt/rekono/actions/workflows/unit-testing.yml) 
-[![SCA](https://github.com/pablosnt/rekono/actions/workflows/security-sca.yml/badge.svg)](https://github.com/pablosnt/rekono/actions/workflows/security-sca.yml) 
-[![Secrets scanning](https://github.com/pablosnt/rekono/actions/workflows/security-secrets.yml/badge.svg)](https://github.com/pablosnt/rekono/actions/workflows/security-secrets.yml) 
-[![Code style](https://github.com/pablosnt/rekono/actions/workflows/code-style.yml/badge.svg)](https://github.com/pablosnt/rekono/actions/workflows/code-style.yml)
+<p align="center">
+  <a href="https://github.com/pablosnt/rekono/actions/workflows/unit-testing.yml" alt="Unit testing">
+    <img src="https://github.com/pablosnt/rekono/actions/workflows/unit-testing.yml/badge.svg"/>
+  </a>
+  <a href="https://github.com/pablosnt/rekono/actions/workflows/security-sca.yml" alt="SCA">
+    <img src="https://github.com/pablosnt/rekono/actions/workflows/security-sca.yml/badge.svg"/>
+  </a>
+  <a href="https://github.com/pablosnt/rekono/actions/workflows/security-secrets.yml" alt="Secrets scanning">
+    <img src="https://github.com/pablosnt/rekono/actions/workflows/security-secrets.yml/badge.svg"/>
+  </a>
+  <a href="https://github.com/pablosnt/rekono/actions/workflows/code-style.yml" alt="Code style">
+    <img src="https://github.com/pablosnt/rekono/actions/workflows/code-style.yml/badge.svg"/>
+  </a>
+</p>
 
-# <div style="text-align:center"><img src="rekono/frontend/public/static/logo-black.png" width="500"/></div>
+# <p align="center"><img src="rekono/frontend/public/static/logo-black.png" width="500"/></p>
 
 Do you ever think about the steps that you follow when start a pentesting? Probably you start performing some OSINT tasks to gather public information about the target. Then, maybe you run hosts discovery and ports enumeration tools. When you know what the target exposes, you can execute more specific tools for each service, to get more information and maybe, some vulnerabilities. And finally, if you find the needed information, you will look for a public exploit to get you into the target machine. I know, I know, this is an utopic scenario, and in the most cases the vulnerabilities are found due to the pentester skills and not by scanning tools. But before using your skills, how many time do you spend trying to get as information as possible with hacking tools? Probably, too much.
 
