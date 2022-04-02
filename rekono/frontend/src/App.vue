@@ -1,9 +1,14 @@
 <template>
-  <div>
+  <div class="d-flex flex-column min-vh-100">
     <main-header v-if="$store.state.user != null"/>
-    <div id="app">
+    <div id="app" class="flex-fill">
       <router-view/>
     </div>
+    <footer class="text-muted text-center mb-2">
+      <b-container>
+        <label>© 2022 Rekono Mantainers. All rights reserved</label>
+      </b-container>
+    </footer>
   </div>
 </template>
 
