@@ -86,10 +86,17 @@ Go to http://127.0.0.1:3000/
 1. Install the required technologies:
     - Python 3 & PIP
     - Node & NPM
+    - Vue
     - PostgreSQL
     - Redis
 
-2. Create the `rekono` database. You can do that with `pgAdmin` or with the following commands:
+2. For Kali Linux environments, you need to install the following dependencies:
+
+    ```
+    sudo apt install libpq-dev python3-dev
+    ```
+
+3. Create the `rekono` database. You can do that with `pgAdmin` or with the following commands:
 
     ```
     create user <db username> with encrypted password '<db password>';`
@@ -97,20 +104,20 @@ Go to http://127.0.0.1:3000/
     grant all privileges on database rekono to <db username>;
     ```
 
-3. Install backend requirements:
+4. Install backend requirements:
 
     ```
     python3 -m pip install -r requirements.txt
     ```
 
-4. Install frontend requirements:
+5. Install frontend requirements:
 
     ```
     cd rekono/frontend
     npm install
     ```
 
-5. Initialize the environment:
+6. Initialize the environment:
 
     ```
     cd rekono/
@@ -118,9 +125,10 @@ Go to http://127.0.0.1:3000/
     export RKN_DB_PASSWORD=<db password>
     python3 manage.py migrate
     python3 manage.py createsuperuser
+    python3 manage.py frontend              # Parse the Rekono configuration and apply it to the frontend
     ```
 
-6. Deploy the Rekono services:
+7. Deploy the Rekono services:
 
     - Backend
         ```
@@ -131,7 +139,7 @@ Go to http://127.0.0.1:3000/
         ```
     - Frontend. Only for development environments, for production see the [frontend documentation](rekono/frontend/README.md)
         ```
-        cd rekono/frontend
+        cd rekono/frontend/
         npm run serve
         ```
     - RQ workers
@@ -151,7 +159,7 @@ Go to http://127.0.0.1:3000/
         python3 manage.py telegram_bot
         ```
 
-7. Go to http://127.0.0.1:3000/  
+8. Go to http://127.0.0.1:3000/  
 
 
 ## Configuration
