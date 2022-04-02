@@ -56,6 +56,8 @@ docker-compose up -d
 
 Go to https://127.0.0.1/
 
+> You should check the [Docker documentation](docker/README.md) for environment details.
+
 
 ### Using Rekono CLI
 
