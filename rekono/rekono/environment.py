@@ -8,11 +8,10 @@ RKN_TRUSTED_PROXY = 'RKN_TRUSTED_PROXY'
 # Rekono frontend URL used to include links in notifications
 RKN_FRONTEND_URL = 'RKN_FRONTEND_URL'
 
-# Django configuration
+# Security configuration
 RKN_SECRET_KEY = 'RKN_SECRET_KEY'
 RKN_ALLOWED_HOSTS = 'RKN_ALLOWED_HOSTS'
-
-# Max size for uploaded files
+RKN_OTP_EXPIRATION_HOURS = 'RKN_OTP_EXPIRATION_HOURS'
 RKN_UPLOAD_FILES_MAX_MB = 'RKN_UPLOAD_FILES_MAX_MB'
 
 # Database configuration
@@ -33,6 +32,7 @@ RKN_EMAIL_USER = 'RKN_EMAIL_USER'
 RKN_EMAIL_PASSWORD = 'RKN_EMAIL_PASSWORD'
 
 # Telegram bot configuration
+RKN_TELEGRAM_BOT = 'RKN_TELEGRAM_BOT'
 RKN_TELEGRAM_TOKEN = 'RKN_TELEGRAM_TOKEN'
 
 # Defect-Dojo configuration

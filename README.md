@@ -32,6 +32,7 @@ DEMO
 - Design pentesting process
 - Execute pentesting process
 - Execute pentesting tools
+- Wordlists management
 - Finding management
 - Defect-Dojo integration
 - Execution from Telegram Bot
@@ -53,7 +54,7 @@ Execute the following command in the project root:
 docker-compose up -d
 ```
 
-Visit https://127.0.0.1/
+Go to https://127.0.0.1/
 
 
 ### Using Rekono CLI
@@ -73,7 +74,7 @@ rekono services stop
 rekono services restart
 ```
 
-Visit http://127.0.0.1:3000/
+Go to http://127.0.0.1:3000/
 
 > :warning: Only tested in Kali Linux.  
 
@@ -124,16 +125,20 @@ Visit http://127.0.0.1:3000/
     - Backend
         ```
         cd rekono/
+        export RKN_DB_USER=<db username>
+        export RKN_DB_PASSWORD=<db password>
         python3 manage.py migrate
         ```
-    - Frontend. For production environments, see the [frontend documentation](rekono/frontend/README.md)
+    - Frontend. Only for development environments, for production see the [frontend documentation](rekono/frontend/README.md)
         ```
         cd rekono/frontend
-        npm run serve       # Only for development environments
+        npm run serve
         ```
     - RQ workers
         ```
         cd rekono/
+        export RKN_DB_USER=<db username>
+        export RKN_DB_PASSWORD=<db password>
         python3 manage.py rqworker --with-scheduler tasks-queue
         python3 manage.py rqworker executions-queue
         python3 manage.py rqworker findings-queue
@@ -146,22 +151,64 @@ Visit http://127.0.0.1:3000/
         python3 manage.py telegram_bot
         ```
 
-7. Visit http://127.0.0.1:3000/
+7. Go to http://127.0.0.1:3000/  
 
 
-## Configuration
+## Configuration
+
+You can configure Rekono using two main methods: `config.yaml` file and environemnt variables. The properties will be obtained in the following priority:
+
+1. From environment variables
+2. From configuration file. You can use the `config.yaml` as template
+3. Default value
+
+Rekono supports the following properties:
+
+|Environment Variable|Configuration Property|Default Value|Description|
+|--------------------|----------------------|-------------|-----------|
+|`REKONO_HOME`|N/A|`/opt/rekono` or where the source code lives|Path to the Rekono home|
+|`RKN_FRONTEND_URL`|`frontend.url`|`http://127.0.0.1:3000`|URL used to include links to the Rekono frontend in the notifications|
+|`RKN_DB_NAME`|`database.name`|`rekono`|Database name|
+|`RKN_DB_USER`|`database.user`|N/A|Database user|
+|`RKN_DB_PASSWORD`|`database.password`|N/A|Database password|
+|`RKN_DB_HOST`|`database.host`|`127.0.0.1`|Database host|
+|`RKN_DB_PORT`|`database.port`|`5432`|Database port|
+|`RKN_RQ_HOST`|`rq.host`|`127.0.0.1`|Redis Queue host|
+|`RKN_RQ_PORT`|`rq.port`|`6379`|Redis Queue port|
+|`RKN_EMAIL_HOST`|`email.host`|`127.0.0.1`|SMTP host|
+|`RKN_EMAIL_PORT`|`email.port`|`587`|SMTP port|
+|`RKN_EMAIL_USER`|`email.user`|N/A|SMTP user|
+|`RKN_EMAIL_PASSWORD`|`email.password`|N/A|SMTP password|
+|`RKN_TELEGRAM_BOT`|`telegram.bot`|`Rekono`|Telegram Bot name to be included in the frontend|
+|`RKN_TELEGRAM_TOKEN`|`telegram.token`|N/A|Telegram Bot token|
+|`RKN_DD_URL`|`defect-dojo.url`|`http://127.0.0.1:8080`|Defect-Dojo URL|
+|`RKN_DD_API_KEY`|`defect-dojo.api-key`|N/A|Defect-Dojo API key|
+|N/A|`defect-dojo.verify`|`True`|Indicate if Defect-Dojo certificate should be verified|
+|N/A|`defect-dojo.tags`|[`rekono`]|Tags included in the items created by Rekono in Defect-Dojo|
+|N/A|`defect-dojo.product.auto-creation`|`True`|Indicate if Rekono should create Defect-Dojo products or not|
+|N/A|`defect-dojo.product-type`|`Rekono Project`|Product type naem related to products created by Rekono in Defect-Dojo|
+|N/A|`defect-dojo.test-type`|`Rekono Findings Import`|Test type name related to tests created by Rekono in Defect-Dojo|
+|N/A|`defect-dojo.test`|`Rekono Test`|Test name related to findings imported by Rekono in Defect-Dojo|
+|`RKN_OTP_EXPIRATION_HOURS`|`security.otp-expiration-hours`|`24`|Expiration time in hours for One Time Passwords created by Rekono|
+|`RKN_UPLOAD_FILES_MAX_MB`|`security.upload-files-max-mb`|`500`|MB limit for files uploaded to Rekono. For example, wordlists files|
+|`RKN_TRUSTED_PROXY`|N/A|`False`|Indicate if Rekono is running with a trusted reverse proxy|
+|`RKN_ALLOWED_HOSTS`|`security.allowed-hosts`|[`localhost`, `127.0.0.1`, `::1`]|Hosts allowed to access Rekono|
+|`RKN_SECRET_KEY`|`security.secret-key`|Generated randomly|Security key used to sign JWT tokens|
+
+
+Please, review the configuration of the supported tools [here](docs/TOOLS.md#configuration)
 
 
 ## Contributing
 
-Please, review the Rekono [contributing guidelines](docs/CONTRIBUTING.md)
+Please, review the Rekono [contributing guidelines](docs/CONTRIBUTING.md)  
 
 
 ## Security
 
-Please, review the Rekono [security policy](docs/SECURITY.md)
+Please, review the Rekono [security policy](docs/SECURITY.md)  
 
 
-## License
+## License
 
 Rekono is licensed under the [GNU GENERAL PUBLIC LICENSE Version 3](./LICENSE.md)

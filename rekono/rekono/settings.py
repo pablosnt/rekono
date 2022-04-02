@@ -29,7 +29,8 @@ from rekono.environment import (ENV_REKONO_HOME, RKN_ALLOWED_HOSTS,
                                 RKN_EMAIL_PASSWORD, RKN_EMAIL_PORT,
                                 RKN_EMAIL_USER, RKN_FRONTEND_URL,
                                 RKN_GITTOOLS_DIR, RKN_LOG4J_SCANNER_DIR,
-                                RKN_RQ_HOST, RKN_RQ_PORT, RKN_SECRET_KEY,
+                                RKN_OTP_EXPIRATION_HOURS, RKN_RQ_HOST,
+                                RKN_RQ_PORT, RKN_SECRET_KEY, RKN_TELEGRAM_BOT,
                                 RKN_TELEGRAM_TOKEN, RKN_TRUSTED_PROXY,
                                 RKN_UPLOAD_FILES_MAX_MB)
 
@@ -168,7 +169,7 @@ else:
 AUTH_USER_MODEL = 'users.User'                                                  # User model
 
 # OTP expiration time in hours
-OTP_EXPIRATION_HOURS = CONFIG.OTP_EXPIRATION_HOURS
+OTP_EXPIRATION_HOURS = int(RKN_OTP_EXPIRATION_HOURS, CONFIG.OTP_EXPIRATION_HOURS)
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
@@ -206,7 +207,7 @@ SIMPLE_JWT = {
 }
 
 # Max allowed size in MB for upload files
-UPLOAD_FILES_MAX_MB = 1 if TESTING else os.getenv(RKN_UPLOAD_FILES_MAX_MB, CONFIG.UPLOAD_FILES_MAX_MB)
+UPLOAD_FILES_MAX_MB = int(1 if TESTING else os.getenv(RKN_UPLOAD_FILES_MAX_MB, CONFIG.UPLOAD_FILES_MAX_MB))
 
 LOGGING = {                                                                     # Logging configuration
     'version': 1,
@@ -384,7 +385,7 @@ EMAIL_USE_TLS = CONFIG.EMAIL_TLS
 # Telegram                                                                     #
 ################################################################################
 
-TELEGRAM_BOT = CONFIG.TELEGRAM_BOT                                              # Telegram bot name
+TELEGRAM_BOT = os.getenv(RKN_TELEGRAM_BOT, CONFIG.TELEGRAM_BOT)                 # Telegram bot name
 TELEGRAM_TOKEN = os.getenv(RKN_TELEGRAM_TOKEN, CONFIG.TELEGRAM_TOKEN)           # Telegram token provided by BotFather
 
 
