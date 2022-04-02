@@ -104,25 +104,26 @@ Go to http://127.0.0.1:3000/
     grant all privileges on database rekono to <db username>;
     ```
 
+    > The database credentials should be configured using environment variables (advised) or the `config.yaml` file. See the [configuration section](#configuration) 
+
 4. Install backend requirements:
 
     ```
+    # pwd: root directory
     python3 -m pip install -r requirements.txt
     ```
 
 5. Install frontend requirements:
 
     ```
-    cd rekono/frontend
+    # pwd: rekono/frontend
     npm install
     ```
 
 6. Initialize the environment:
 
     ```
-    cd rekono/
-    export RKN_DB_USER=<db username>
-    export RKN_DB_PASSWORD=<db password>
+    # pwd: rekono/
     python3 manage.py migrate
     python3 manage.py createsuperuser
     python3 manage.py frontend              # Parse the Rekono configuration and apply it to the frontend
@@ -132,21 +133,17 @@ Go to http://127.0.0.1:3000/
 
     - Backend
         ```
-        cd rekono/
-        export RKN_DB_USER=<db username>
-        export RKN_DB_PASSWORD=<db password>
+        # pwd: rekono/
         python3 manage.py migrate
         ```
     - Frontend. Only for development environments, for production see the [frontend documentation](rekono/frontend/README.md)
         ```
-        cd rekono/frontend/
+        # pwd: rekono/frontend/
         npm run serve
         ```
     - RQ workers
         ```
-        cd rekono/
-        export RKN_DB_USER=<db username>
-        export RKN_DB_PASSWORD=<db password>
+        # pwd: rekono/
         python3 manage.py rqworker --with-scheduler tasks-queue
         python3 manage.py rqworker executions-queue
         python3 manage.py rqworker findings-queue
@@ -154,8 +151,7 @@ Go to http://127.0.0.1:3000/
         ```
     - Telegram Bot
         ```
-        cd rekono/
-        export RKN_TELEGRAM_TOKEN=<telegram token>
+        # pwd: rekono/
         python3 manage.py telegram_bot
         ```
 
