@@ -24,20 +24,129 @@ Oh, one more thing, you can execute the entire process from anywhere using the R
 
 ## Quick Start
 
+DEMO
+
 
 ### Main Features
 
+- Design pentesting process
+- Execute pentesting process
+- Execute pentesting tools
+- Finding management
+- Defect-Dojo integration
+- Execution from Telegram Bot
+- Email and Telegram notifications
+
 
 ### Supported Tools
+
+Please, review the supported tools [documentation](docs/TOOLS.md)
 
 
 ## Installation
 
 ### Docker
 
+Execute the following command in the project root:
+
+```
+docker-compose up -d
+```
+
+Visit https://127.0.0.1/
+
+
 ### Using Rekono CLI
 
+If your system is Linux, you can use [rekono-cli](https://github.com/pablosnt/rekono-cli) to install Rekono in your system:
+
+```
+python3 -m pip install rekono-cli
+rekono install
+```
+
+After that, you can manage the Rekono services in that way:
+
+```
+rekono services start
+rekono services stop
+rekono services restart
+```
+
+Visit http://127.0.0.1:3000/
+
+> :warning: Only tested in Kali Linux.  
+
+> :warning: Only use that for local and personal usage. Otherwise Docker is advised.  
+
+
 ### From Source
+
+1. Install the required technologies:
+    - Python 3 & PIP
+    - Node & NPM
+    - PostgreSQL
+    - Redis
+
+2. Create the `rekono` database. You can do that with `pgAdmin` or with the following commands:
+
+    ```
+    create user <db username> with encrypted password '<db password>';`
+    create database rekono;
+    grant all privileges on database rekono to <db username>;
+    ```
+
+3. Install backend requirements:
+
+    ```
+    python3 -m pip install -r requirements.txt
+    ```
+
+4. Install frontend requirements:
+
+    ```
+    cd rekono/frontend
+    npm install
+    ```
+
+5. Initialize the environment:
+
+    ```
+    cd rekono/
+    export RKN_DB_USER=<db username>
+    export RKN_DB_PASSWORD=<db password>
+    python3 manage.py migrate
+    python3 manage.py createsuperuser
+    ```
+
+6. Deploy the Rekono services:
+
+    - Backend
+        ```
+        cd rekono/
+        python3 manage.py migrate
+        ```
+    - Frontend. For production environments, see the [frontend documentation](rekono/frontend/README.md)
+        ```
+        cd rekono/frontend
+        npm run serve       # Only for development environments
+        ```
+    - RQ workers
+        ```
+        cd rekono/
+        python3 manage.py rqworker --with-scheduler tasks-queue
+        python3 manage.py rqworker executions-queue
+        python3 manage.py rqworker findings-queue
+        python3 manage.py rqworker emails-queue
+        ```
+    - Telegram Bot
+        ```
+        cd rekono/
+        export RKN_TELEGRAM_TOKEN=<telegram token>
+        python3 manage.py telegram_bot
+        ```
+
+7. Visit http://127.0.0.1:3000/
 
 
 ## Configuration
@@ -45,8 +154,14 @@ Oh, one more thing, you can execute the entire process from anywhere using the R
 
 ## Contributing
 
+Please, review the Rekono [contributing guidelines](docs/CONTRIBUTING.md)
+
 
 ## Security
 
+Please, review the Rekono [security policy](docs/SECURITY.md)
+
 
 ## License
+
+Rekono is licensed under the [GNU GENERAL PUBLIC LICENSE Version 3](./LICENSE.md)
