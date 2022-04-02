@@ -37,7 +37,7 @@ from rekono.environment import (ENV_REKONO_HOME, RKN_ALLOWED_HOSTS,
 # Rekono basic information                                                     #
 ################################################################################
 
-DESCRIPTION = 'Tool to automate recon tasks during pentesting processes.'       # Rekono description
+DESCRIPTION = 'Execute full pentesting processes combining multiple hacking tools automatically'    # Rekono description
 VERSION = '1.0.0'                                                               # Rekono version
 
 
