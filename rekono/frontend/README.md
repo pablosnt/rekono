@@ -1,4 +1,4 @@
-# frontend
+# Rekono Frontend
 
 ## Project setup
 ```
