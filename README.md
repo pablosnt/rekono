@@ -39,11 +39,6 @@ DEMO
 - Email and Telegram notifications
 
 
-### Supported Tools
-
-Please, review the supported tools [documentation](docs/TOOLS.md)
-
-
 ## Installation
 
 ### Docker
@@ -64,7 +59,7 @@ Go to https://127.0.0.1/
 If your system is Linux, you can use [rekono-cli](https://github.com/pablosnt/rekono-cli) to install Rekono in your system:
 
 ```
-python3 -m pip install rekono-cli
+pip3 install rekono-cli
 rekono install
 ```
 
@@ -112,7 +107,7 @@ Go to http://127.0.0.1:3000/
 
     ```
     # pwd: root directory
-    python3 -m pip install -r requirements.txt
+    pip3 install -r requirements.txt
     ```
 
 5. Install frontend requirements:
@@ -200,19 +195,6 @@ Rekono supports the following properties:
 |`RKN_TRUSTED_PROXY`|N/A|`False`|Indicate if Rekono is running with a trusted reverse proxy|
 |`RKN_ALLOWED_HOSTS`|`security.allowed-hosts`|[`localhost`, `127.0.0.1`, `::1`]|Hosts allowed to access Rekono|
 |`RKN_SECRET_KEY`|`security.secret-key`|Generated randomly|Security key used to sign JWT tokens|
-
-
-Please, review the configuration of the supported tools [here](docs/TOOLS.md#configuration)
-
-
-## Contributing
-
-Please, review the Rekono [contributing guidelines](docs/CONTRIBUTING.md)  
-
-
-## Security
-
-Please, review the Rekono [security policy](docs/SECURITY.md)  
 
 
 ## License
