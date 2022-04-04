@@ -169,7 +169,7 @@ else:
 AUTH_USER_MODEL = 'users.User'                                                  # User model
 
 # OTP expiration time in hours
-OTP_EXPIRATION_HOURS = int(RKN_OTP_EXPIRATION_HOURS, CONFIG.OTP_EXPIRATION_HOURS)
+OTP_EXPIRATION_HOURS = int(os.getenv(RKN_OTP_EXPIRATION_HOURS, CONFIG.OTP_EXPIRATION_HOURS))
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
