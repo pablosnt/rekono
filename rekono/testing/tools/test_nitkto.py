@@ -89,7 +89,7 @@ class NiktoParserTest(ToolParserTest):
             },
             {
                 'model': Vulnerability,
-                'name': 'OSVDB-3268',
+                'name': '/images/: Directory indexing found.',
                 'description': '[GET /images/] /images/: Directory indexing found.',
                 'severity': Severity.MEDIUM,
                 'osvdb': 'OSVDB-3268'
@@ -97,7 +97,7 @@ class NiktoParserTest(ToolParserTest):
             {'model': Path, 'path': '/images/', 'type': PathType.ENDPOINT},
             {
                 'model': Vulnerability,
-                'name': 'OSVDB-3233',
+                'name': '/icons/README: Apache default file found.',
                 'description': '[GET /icons/README] /icons/README: Apache default file found.',
                 'severity': Severity.MEDIUM,
                 'osvdb': 'OSVDB-3233'
