@@ -27,7 +27,7 @@ class NiktoTool(BaseTool):
                     name=description,
                     description=f'[{method} {endpoint}] {description}' if endpoint else f'[{method}] {description}',
                     severity=Severity.MEDIUM,
-                    osvdb=f'OSVDB-{osvdb}' if osvdb else None                   # Get OSVDB name
+                    osvdb=f'OSVDB-{osvdb}'                                      # Get OSVDB name
                 )
             if endpoint and endpoint not in http_endpoints:                     # If it's a new endpoint
                 http_endpoints.add(endpoint)                                    # Add endpoint to HTTP endpoints set
