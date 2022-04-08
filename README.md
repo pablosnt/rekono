@@ -27,10 +27,10 @@ Oh, one more thing, you can execute the entire process from anywhere using the R
 DEMO
 
 
-### Main Features
+### Features
 
-- Design pentesting process
-- Execute pentesting process
+- Design pentesting processes
+- Execute pentesting processes
 - Execute pentesting tools
 - Wordlists management
 - Finding management
