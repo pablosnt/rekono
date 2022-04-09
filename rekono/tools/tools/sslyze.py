@@ -69,10 +69,12 @@ class SslyzeTool(BaseTool):
         with open(self.path_output, 'r', encoding='utf-8') as output_file:
             report = json.load(output_file)                                     # Read output file
         report = report.get('server_scan_results', [])                          # Get scan results
-        # Create generic TLS Technology if scan results found
-        generic_tech = self.create_finding(Technology, name='Generic TLS') if report else None
+        generic_tech = None
         for item in report or []:                                               # For item in report
             r = item['scan_commands_results'] if 'scan_commands_results' in item else item['scan_result']
+            if not generic_tech and len(report) > 1 and r:
+                # Create generic TLS Technology if scan results found
+                generic_tech = self.create_finding(Technology, name='Generic TLS')
             if r['heartbleed']['result']['is_vulnerable_to_heartbleed']:        # If it is vulnerable to Heartbleed
                 # Create Vulnerability with CVE-2014-0160
                 self.create_finding(Vulnerability, technology=generic_tech, name='Heartbleed', cve='CVE-2014-0160')
