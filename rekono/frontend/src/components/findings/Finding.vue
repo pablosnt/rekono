@@ -176,6 +176,20 @@ export default {
       }
       return filter
     },
+    fetchVulnerabilities (filter = null, index = 0) {
+      if (!filter) {
+        this.findings = []
+        filter = this.getFilter()
+      }
+      filter.severity = this.severities[index]
+      this.getAllPages('/api/vulnerabilities/', filter).then(results => {
+        this.findings.push(...results)
+        index += 1
+        if (index < this.severities.length) {
+          this.fetchVulnerabilities(filter, index)
+        }
+      })
+    },
     fetchData () {
       if (this.types && this.types.length > 0 && !this.types.includes(this.name.toLowerCase())) {
         return
@@ -184,12 +198,7 @@ export default {
         if (this.name.toLowerCase() !== 'vulnerabilities') {
           this.getAllPages(`/api/${this.name.toLowerCase()}/`, this.getFilter()).then(results => this.findings = results)
         } else {
-          this.findings = []
-          let filter = this.getFilter()
-          this.severities.forEach(severity => {
-            filter.severity = severity
-            this.getAllPages('/api/vulnerabilities/', filter).then(results => this.findings.push(...results))
-          })
+          this.fetchVulnerabilities()
         }
       }
     },
