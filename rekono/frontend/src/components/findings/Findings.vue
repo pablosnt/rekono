@@ -201,7 +201,7 @@ export default {
   methods: {
     fetchTargets () {
       if (!this.task) {
-        this.getAllPages('/api/targets/?o=target', { project: this.$route.params.id })
+        this.getAllPages('/api/targets/', { project: this.$route.params.id, order: 'target' })
           .then(results => {
             this.targets = results
             if (results.length > 0) {

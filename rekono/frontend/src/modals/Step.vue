@@ -99,7 +99,7 @@ export default {
     initialized (initialized) {
       if (initialized) {
         if (!this.step && !this.tool) {
-          this.getAllPages('/api/tools/?o=stage,name').then(results => this.tools = results)
+          this.getAllPages('/api/tools/', { order: 'stage,name'}).then(results => this.tools = results)
         } else if (this.step && !this.tool) {
           this.priority = this.step.priority
           this.step.tool.configurations = [this.step.configuration]
@@ -108,11 +108,11 @@ export default {
           this.selectTool(this.tool.id, this.tool)
         }
         if (!this.process) {
-          let filter = null
+          let filter = { order: 'name' }
           if (this.$store.state.role !== 'Admin') {
-            filter = { creator: this.$store.state.user }
+            filter.creator = this.$store.state.user
           }
-          this.getAllPages('/api/processes/?o=name', filter).then(results => this.processes = results)
+          this.getAllPages('/api/processes/', filter).then(results => this.processes = results)
         } else {
           this.selectProcess(this.process.id, this.process)
         }

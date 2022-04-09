@@ -181,7 +181,7 @@ export default {
         return
       }
       if (this.target || this.task || this.execution) {
-        this.getAllPages(`/api/${this.name.toLowerCase()}/?o=-creation`, this.getFilter()).then(results => this.findings = results)
+        this.getAllPages(`/api/${this.name.toLowerCase()}/`, this.getFilter()).then(results => this.findings = results)
       }
     },
     enableFinding (finding) {

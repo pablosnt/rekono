@@ -86,12 +86,12 @@ export default {
     getOnePage (endpoint, params = null, requiredAuth = true, extraHeaders = null) {
       return this.get(endpoint, this.getPage(), this.getLimit(), params, requiredAuth, extraHeaders)
     },
-    getAllPages (endpoint, params = null, page = 1, limit = 1000, requiredAuth = true, extraHeaders = null, accumulated = []) {
-      return this.get(endpoint, page, limit, params, requiredAuth, extraHeaders)
+    getAllPages (endpoint, params = null, requiredAuth = true, extraHeaders = null, accumulated = [], page = 1) {
+      return this.get(endpoint, page, 1000, params, requiredAuth, extraHeaders)
         .then(response => {
           accumulated = accumulated.concat(response.data.results)
           if ((page * limit) < response.data.count) {
-            return this.getAllPages(endpoint, params, page + 1, limit, requiredAuth, extraHeaders, accumulated)
+            return this.getAllPages(endpoint, params, requiredAuth, extraHeaders, accumulated, page + 1)
           } else {
             return Promise.resolve(accumulated)
           }
