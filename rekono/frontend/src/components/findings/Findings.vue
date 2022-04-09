@@ -112,7 +112,7 @@ export default {
       targets: [],
       selectedFindings: this.$route.query.types ? this.$route.query.types.split(',') : [],
       selectedTarget: this.$route.query.target ? parseInt(this.$route.query.target) : null,
-      activeFilter: this.$route.query.active ? this.$route.query.active : null,
+      activeFilter: this.$route.query.active ? this.$route.query.active : true,
       search: null,
       selectedHost: null,
       selectedPort: null,
