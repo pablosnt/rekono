@@ -35,8 +35,8 @@
         "fields": {
             "process": 1,
             "tool": 1,
-            "configuration": 3,
-            "priority": 100
+            "configuration": 38,
+            "priority": 1
         }
     },
     {
@@ -164,26 +164,6 @@
         "pk": 17,
         "fields": {
             "process": 1,
-            "tool": 1,
-            "configuration": 37,
-            "priority": 1
-        }
-    },
-    {
-        "model": "processes.step",
-        "pk": 18,
-        "fields": {
-            "process": 1,
-            "tool": 1,
-            "configuration": 14,
-            "priority": 1
-        }
-    },
-    {
-        "model": "processes.step",
-        "pk": 19,
-        "fields": {
-            "process": 1,
             "tool": 9,
             "configuration": 26,
             "priority": 1
@@ -191,7 +171,7 @@
     },
     {
         "model": "processes.step",
-        "pk": 20,
+        "pk": 18,
         "fields": {
             "process": 1,
             "tool": 10,
@@ -201,7 +181,7 @@
     },
     {
         "model": "processes.step",
-        "pk": 21,
+        "pk": 19,
         "fields": {
             "process": 2,
             "tool": 1,
@@ -211,7 +191,7 @@
     },
     {
         "model": "processes.step",
-        "pk": 22,
+        "pk": 20,
         "fields": {
             "process": 2,
             "tool": 2,
@@ -221,7 +201,7 @@
     },
     {
         "model": "processes.step",
-        "pk": 23,
+        "pk": 21,
         "fields": {
             "process": 2,
             "tool": 4,
@@ -231,7 +211,7 @@
     },
     {
         "model": "processes.step",
-        "pk": 24,
+        "pk": 22,
         "fields": {
             "process": 2,
             "tool": 5,
@@ -241,7 +221,7 @@
     },
     {
         "model": "processes.step",
-        "pk": 25,
+        "pk": 23,
         "fields": {
             "process": 2,
             "tool": 6,
@@ -251,7 +231,7 @@
     },
     {
         "model": "processes.step",
-        "pk": 26,
+        "pk": 24,
         "fields": {
             "process": 2,
             "tool": 7,
@@ -261,7 +241,7 @@
     },
     {
         "model": "processes.step",
-        "pk": 27,
+        "pk": 25,
         "fields": {
             "process": 2,
             "tool": 8,
@@ -271,7 +251,7 @@
     },
     {
         "model": "processes.step",
-        "pk": 28,
+        "pk": 26,
         "fields": {
             "process": 2,
             "tool": 11,
@@ -281,7 +261,7 @@
     },
     {
         "model": "processes.step",
-        "pk": 29,
+        "pk": 27,
         "fields": {
             "process": 2,
             "tool": 11,
@@ -291,7 +271,7 @@
     },
     {
         "model": "processes.step",
-        "pk": 30,
+        "pk": 28,
         "fields": {
             "process": 2,
             "tool": 14,
@@ -301,7 +281,7 @@
     },
     {
         "model": "processes.step",
-        "pk": 31,
+        "pk": 29,
         "fields": {
             "process": 2,
             "tool": 15,
@@ -311,7 +291,7 @@
     },
     {
         "model": "processes.step",
-        "pk": 32,
+        "pk": 30,
         "fields": {
             "process": 2,
             "tool": 9,
@@ -321,7 +301,7 @@
     },
     {
         "model": "processes.step",
-        "pk": 33,
+        "pk": 31,
         "fields": {
             "process": 2,
             "tool": 10,
@@ -331,7 +311,7 @@
     },
     {
         "model": "processes.step",
-        "pk": 34,
+        "pk": 32,
         "fields": {
             "process": 3,
             "tool": 1,
@@ -341,7 +321,7 @@
     },
     {
         "model": "processes.step",
-        "pk": 35,
+        "pk": 33,
         "fields": {
             "process": 3,
             "tool": 5,
@@ -351,7 +331,7 @@
     },
     {
         "model": "processes.step",
-        "pk": 36,
+        "pk": 34,
         "fields": {
             "process": 3,
             "tool": 6,
@@ -361,7 +341,7 @@
     },
     {
         "model": "processes.step",
-        "pk": 37,
+        "pk": 35,
         "fields": {
             "process": 3,
             "tool": 9,
@@ -371,7 +351,7 @@
     },
     {
         "model": "processes.step",
-        "pk": 38,
+        "pk": 36,
         "fields": {
             "process": 3,
             "tool": 10,
@@ -381,7 +361,7 @@
     },
     {
         "model": "processes.step",
-        "pk": 39,
+        "pk": 37,
         "fields": {
             "process": 4,
             "tool": 1,
@@ -391,7 +371,7 @@
     },
     {
         "model": "processes.step",
-        "pk": 40,
+        "pk": 38,
         "fields": {
             "process": 4,
             "tool": 16,
@@ -401,7 +381,7 @@
     },
     {
         "model": "processes.step",
-        "pk": 41,
+        "pk": 39,
         "fields": {
             "process": 4,
             "tool": 9,
@@ -411,7 +391,7 @@
     },
     {
         "model": "processes.step",
-        "pk": 42,
+        "pk": 40,
         "fields": {
             "process": 4,
             "tool": 10,
@@ -421,7 +401,7 @@
     },
     {
         "model": "processes.step",
-        "pk": 43,
+        "pk": 41,
         "fields": {
             "process": 5,
             "tool": 1,
@@ -431,7 +411,7 @@
     },
     {
         "model": "processes.step",
-        "pk": 44,
+        "pk": 42,
         "fields": {
             "process": 5,
             "tool": 17,
@@ -441,7 +421,7 @@
     },
     {
         "model": "processes.step",
-        "pk": 45,
+        "pk": 43,
         "fields": {
             "process": 5,
             "tool": 9,
@@ -451,7 +431,7 @@
     },
     {
         "model": "processes.step",
-        "pk": 46,
+        "pk": 44,
         "fields": {
             "process": 5,
             "tool": 10,
@@ -461,7 +441,7 @@
     },
     {
         "model": "processes.step",
-        "pk": 47,
+        "pk": 45,
         "fields": {
             "process": 6,
             "tool": 3,
@@ -471,7 +451,7 @@
     },
     {
         "model": "processes.step",
-        "pk": 48,
+        "pk": 46,
         "fields": {
             "process": 6,
             "tool": 12,
@@ -481,7 +461,7 @@
     },
     {
         "model": "processes.step",
-        "pk": 49,
+        "pk": 47,
         "fields": {
             "process": 6,
             "tool": 13,

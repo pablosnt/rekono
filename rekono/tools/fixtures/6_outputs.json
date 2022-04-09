@@ -622,5 +622,53 @@
             "configuration": 37,
             "type": 7
         }
+    },
+    {
+        "model": "tools.output",
+        "pk": 79,
+        "fields": {
+            "configuration": 38,
+            "type": 2
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 80,
+        "fields": {
+            "configuration": 38,
+            "type": 3
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 81,
+        "fields": {
+            "configuration": 38,
+            "type": 4
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 82,
+        "fields": {
+            "configuration": 38,
+            "type": 5
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 83,
+        "fields": {
+            "configuration": 38,
+            "type": 6
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 84,
+        "fields": {
+            "configuration": 38,
+            "type": 7
+        }
     }
 ]
