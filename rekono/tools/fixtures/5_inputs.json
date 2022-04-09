@@ -23,16 +23,6 @@
         "model": "tools.input",
         "pk": 3,
         "fields": {
-            "argument": 1,
-            "type": 4,
-            "filter": "ENDPOINT",
-            "order": 3
-        }
-    },
-    {
-        "model": "tools.input",
-        "pk": 4,
-        "fields": {
             "argument": 2,
             "type": 3,
             "filter": null,
@@ -41,7 +31,7 @@
     },
     {
         "model": "tools.input",
-        "pk": 5,
+        "pk": 4,
         "fields": {
             "argument": 3,
             "type": 3,
@@ -51,7 +41,7 @@
     },
     {
         "model": "tools.input",
-        "pk": 6,
+        "pk": 5,
         "fields": {
             "argument": 3,
             "type": 2,
@@ -61,7 +51,7 @@
     },
     {
         "model": "tools.input",
-        "pk": 7,
+        "pk": 6,
         "fields": {
             "argument": 4,
             "type": 9,
@@ -71,7 +61,7 @@
     },
     {
         "model": "tools.input",
-        "pk": 8,
+        "pk": 7,
         "fields": {
             "argument": 5,
             "type": 2,
@@ -81,7 +71,7 @@
     },
     {
         "model": "tools.input",
-        "pk": 9,
+        "pk": 8,
         "fields": {
             "argument": 6,
             "type": 3,
@@ -91,7 +81,7 @@
     },
     {
         "model": "tools.input",
-        "pk": 10,
+        "pk": 9,
         "fields": {
             "argument": 6,
             "type": 2,
@@ -101,19 +91,29 @@
     },
     {
         "model": "tools.input",
+        "pk": 10,
+        "fields": {
+            "argument": 7,
+            "type": 3,
+            "filter": null,
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
         "pk": 11,
         "fields": {
-            "argument": 6,
-            "type": 4,
-            "filter": "ENDPOINT",
-            "order": 3
+            "argument": 7,
+            "type": 2,
+            "filter": null,
+            "order": 2
         }
     },
     {
         "model": "tools.input",
         "pk": 12,
         "fields": {
-            "argument": 7,
+            "argument": 8,
             "type": 3,
             "filter": null,
             "order": 1
@@ -123,7 +123,7 @@
         "model": "tools.input",
         "pk": 13,
         "fields": {
-            "argument": 7,
+            "argument": 8,
             "type": 2,
             "filter": null,
             "order": 2
@@ -133,9 +133,9 @@
         "model": "tools.input",
         "pk": 14,
         "fields": {
-            "argument": 8,
+            "argument": 9,
             "type": 3,
-            "filter": null,
+            "filter": "http",
             "order": 1
         }
     },
@@ -143,7 +143,7 @@
         "model": "tools.input",
         "pk": 15,
         "fields": {
-            "argument": 8,
+            "argument": 9,
             "type": 2,
             "filter": null,
             "order": 2
@@ -153,7 +153,7 @@
         "model": "tools.input",
         "pk": 16,
         "fields": {
-            "argument": 9,
+            "argument": 10,
             "type": 3,
             "filter": "http",
             "order": 1
@@ -163,7 +163,7 @@
         "model": "tools.input",
         "pk": 17,
         "fields": {
-            "argument": 9,
+            "argument": 10,
             "type": 2,
             "filter": null,
             "order": 2
@@ -173,46 +173,6 @@
         "model": "tools.input",
         "pk": 18,
         "fields": {
-            "argument": 9,
-            "type": 4,
-            "filter": "ENDPOINT",
-            "order": 3
-        }
-    },
-    {
-        "model": "tools.input",
-        "pk": 19,
-        "fields": {
-            "argument": 10,
-            "type": 3,
-            "filter": "http",
-            "order": 1
-        }
-    },
-    {
-        "model": "tools.input",
-        "pk": 20,
-        "fields": {
-            "argument": 10,
-            "type": 2,
-            "filter": null,
-            "order": 2
-        }
-    },
-    {
-        "model": "tools.input",
-        "pk": 21,
-        "fields": {
-            "argument": 10,
-            "type": 4,
-            "filter": "ENDPOINT",
-            "order": 3
-        }
-    },
-    {
-        "model": "tools.input",
-        "pk": 22,
-        "fields": {
             "argument": 11,
             "type": 5,
             "filter": null,
@@ -221,7 +181,7 @@
     },
     {
         "model": "tools.input",
-        "pk": 23,
+        "pk": 19,
         "fields": {
             "argument": 12,
             "type": 6,
@@ -231,7 +191,7 @@
     },
     {
         "model": "tools.input",
-        "pk": 24,
+        "pk": 20,
         "fields": {
             "argument": 13,
             "type": 3,
@@ -241,7 +201,7 @@
     },
     {
         "model": "tools.input",
-        "pk": 25,
+        "pk": 21,
         "fields": {
             "argument": 13,
             "type": 2,
@@ -251,17 +211,7 @@
     },
     {
         "model": "tools.input",
-        "pk": 26,
-        "fields": {
-            "argument": 13,
-            "type": 4,
-            "filter": "ENDPOINT",
-            "order": 3
-        }
-    },
-    {
-        "model": "tools.input",
-        "pk": 27,
+        "pk": 22,
         "fields": {
             "argument": 14,
             "type": 2,
@@ -271,7 +221,7 @@
     },
     {
         "model": "tools.input",
-        "pk": 28,
+        "pk": 23,
         "fields": {
             "argument": 15,
             "type": 2,
@@ -281,7 +231,7 @@
     },
     {
         "model": "tools.input",
-        "pk": 29,
+        "pk": 24,
         "fields": {
             "argument": 16,
             "type": 3,
@@ -291,7 +241,7 @@
     },
     {
         "model": "tools.input",
-        "pk": 30,
+        "pk": 25,
         "fields": {
             "argument": 16,
             "type": 2,
@@ -301,17 +251,7 @@
     },
     {
         "model": "tools.input",
-        "pk": 31,
-        "fields": {
-            "argument": 16,
-            "type": 4,
-            "filter": "ENDPOINT",
-            "order": 3
-        }
-    },
-    {
-        "model": "tools.input",
-        "pk": 32,
+        "pk": 26,
         "fields": {
             "argument": 17,
             "type": 4,
@@ -321,7 +261,7 @@
     },
     {
         "model": "tools.input",
-        "pk": 33,
+        "pk": 27,
         "fields": {
             "argument": 18,
             "type": 2,
@@ -331,7 +271,7 @@
     },
     {
         "model": "tools.input",
-        "pk": 34,
+        "pk": 28,
         "fields": {
             "argument": 18,
             "type": 3,
@@ -341,7 +281,7 @@
     },
     {
         "model": "tools.input",
-        "pk": 35,
+        "pk": 29,
         "fields": {
             "argument": 19,
             "type": 3,
@@ -351,7 +291,7 @@
     },
     {
         "model": "tools.input",
-        "pk": 36,
+        "pk": 30,
         "fields": {
             "argument": 20,
             "type": 2,
@@ -361,7 +301,7 @@
     },
     {
         "model": "tools.input",
-        "pk": 37,
+        "pk": 31,
         "fields": {
             "argument": 20,
             "type": 3,
@@ -371,7 +311,7 @@
     },
     {
         "model": "tools.input",
-        "pk": 38,
+        "pk": 32,
         "fields": {
             "argument": 21,
             "type": 3,
