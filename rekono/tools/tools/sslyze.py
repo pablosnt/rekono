@@ -72,7 +72,7 @@ class SslyzeTool(BaseTool):
         generic_tech = None
         for item in report or []:                                               # For item in report
             r = item['scan_commands_results'] if 'scan_commands_results' in item else item['scan_result']
-            if not generic_tech and len(report) > 1 and r:
+            if not generic_tech and r:
                 # Create generic TLS Technology if scan results found
                 generic_tech = self.create_finding(Technology, name='Generic TLS')
             if r['heartbleed']['result']['is_vulnerable_to_heartbleed']:        # If it is vulnerable to Heartbleed
