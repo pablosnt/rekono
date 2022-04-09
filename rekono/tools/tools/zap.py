@@ -50,10 +50,22 @@ class ZapTool(BaseTool):
             url_base = site.attrib['name']                                      # Get target URL
             for alert in site.findall('alerts/alertitem'):                      # For each alert
                 name = alert.findtext('alert')                                  # Get alert data
-                description = alert.findtext('desc')
+                description = alert.findtext('desc') or ''
                 severity = alert.findtext('riskcode')
                 cwe = alert.findtext("cweid")
                 reference = alert.findtext('reference')
+                instances = alert.findall('instances/instance')                 # Get instances
+                if instances:
+                    description += '\n\nEvidences:\n'
+                for instance in instances or []:                                # For each instance
+                    url = instance.findtext('uri')                              # Get URL
+                    description += f'[{instance.findtext("method")}] {url}\n'
+                    if url:
+                        http_endpoint = url.replace(url_base, '')               # Get HTTP endpoint
+                        if http_endpoint and http_endpoint not in http_endpoints:   # If it's a new endpoint
+                            http_endpoints.add(http_endpoint)                   # Add endpoint to HTTP endpoints set
+                            # Create Path
+                            self.create_finding(Path, path=http_endpoint, type=PathType.ENDPOINT)
                 if name:                                                        # If alert name exists
                     self.create_finding(                                        # Create Vulnerability
                         Vulnerability,
@@ -63,12 +75,3 @@ class ZapTool(BaseTool):
                         cwe=f'CWE-{cwe}' if cwe else None,
                         reference=self.clean_reference(reference) if reference else None
                     )
-                instances = alert.findall('instances/instance')                 # Get instances
-                for instance in instances or []:                                # For each instance
-                    url = instance.findtext('uri')                              # Get URL
-                    if url:
-                        http_endpoint = url.replace(url_base, '')               # Get HTTP endpoint
-                        if http_endpoint and http_endpoint not in http_endpoints:   # If it's a new endpoint
-                            http_endpoints.add(http_endpoint)                   # Add endpoint to HTTP endpoints set
-                            # Create Path
-                            self.create_finding(Path, path=http_endpoint, type=PathType.ENDPOINT)
