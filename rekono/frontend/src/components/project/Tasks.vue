@@ -93,7 +93,7 @@ export default {
   },
   methods: {
     fetchData (params = { }) {
-      params.project = this.$route.params.id
+      params.target__project = this.$route.params.id
       return this.getOnePage('/api/tasks/', params)
         .then(response => {
           this.data = response.data.results
