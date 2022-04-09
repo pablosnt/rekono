@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="mt-3" v-if="isFound">
+    <div class="mt-3 w-100" style="overflow-x: hidden" v-if="isFound">
       <b-row>
         <b-col>
           <p>{{ currentTask.target.target }}</p>
@@ -46,7 +46,7 @@
       </b-row>
       <b-row class="ml-2 mr-2">
         <b-col>
-          <b-table sticky-header select-mode="single" selectable hover striped borderless head-variant="dark" :fields="executionsFields" :items="executions" @row-selected="selectExecution">
+          <b-table sticky-header="40rem" select-mode="single" selectable hover striped borderless head-variant="dark" :fields="executionsFields" :items="executions" @row-selected="selectExecution">
             <template #cell(tool)="row">
               <div v-if="!row.item.step">
                 <b-link :href="currentTask.tool.reference" target="_blank">
@@ -87,13 +87,13 @@
               <template #title>
                 <b-icon icon="gear-fill"/> Output
               </template>
-              <b-form-textarea class="mt-3 text-light" style="background-color: #212529;" plaintext v-if="selectedExecution && selectedExecution.output_plain" :value="selectedExecution.output_plain" size="md" rows="5" max-rows="30"></b-form-textarea>
+              <b-form-textarea class="mt-3 text-light" style="background-color: #212529;" plaintext v-if="selectedExecution && selectedExecution.output_plain" :value="selectedExecution.output_plain" size="md" rows="5" max-rows="25"></b-form-textarea>
             </b-tab>
             <b-tab title-link-class="text-secondary" v-if="currentTask && selectedExecution && selectedExecution.output_error">
               <template #title>
                 <b-icon icon="exclamation-triangle-fill"/> Error
               </template>
-              <b-form-textarea class="mt-3 text-light" style="background-color: #212529;" plaintext :value="selectedExecution.output_error" size="md" rows="5" max-rows="30"></b-form-textarea>
+              <b-form-textarea class="mt-3 text-light" style="background-color: #212529;" plaintext :value="selectedExecution.output_error" size="md" rows="5" max-rows="25"></b-form-textarea>
             </b-tab>
             <b-tab title-link-class="text-secondary" active :disabled="!currentTask || currentTask.status === 'Requested'">
               <template #title>

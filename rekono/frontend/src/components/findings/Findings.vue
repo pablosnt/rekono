@@ -19,7 +19,7 @@
         </b-button>
       </b-col>
     </b-row>
-    <b-row :cols="cols" class="mt-3">
+    <b-row :cols="cols" class="mt-3" style="height: 40rem; overflow-y: scroll">
       <finding name="hosts" :fields="hosts" :details="hostDetails" @finding-selected="selectFinding" :id="selectedHost" order="address" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="selectedTask" :execution="selectedExecution" :search="search" :active="activeFilter" :reload="reload"/>
       <finding name="ports" :fields="ports" @finding-selected="selectFinding" :id="selectedPort" :filter="hostFilter" order="-status" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="selectedTask" :execution="selectedExecution" :search="search" :active="activeFilter" :reload="reload"/>
       <finding name="paths" :fields="paths" :details="pathDetails" :filter="portFilter" order="-type" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="selectedTask" :execution="selectedExecution" :search="search" :active="activeFilter" :reload="reload"/>
