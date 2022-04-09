@@ -119,7 +119,7 @@ export default {
       selectedTechnology: null,
       selectedVulnerability: null,
       osint: [
-        { key: 'data', sortable: true },
+        { key: 'data', sortable: true, tdClass: 'text-left' },
         { key: 'data_type', label: 'Type', sortable: true }
       ],
       osintDetails: [
@@ -127,7 +127,7 @@ export default {
         { field: 'reference', title: 'Reference', type: 'link' }
       ],
       hosts: [
-        { key: 'address', sortable: true },
+        { key: 'address', sortable: true, tdClass: 'text-left' },
         { key: 'os_type', label: 'OS', sortable: true }
       ],
       hostDetails: [
@@ -137,10 +137,10 @@ export default {
         { key: 'port', sortable: true },
         { key: 'protocol', sortable: true },
         { key: 'port_status', sortable: true },
-        { key: 'service', sortable: true}
+        { key: 'service', sortable: true, tdClass: 'text-left' }
       ],
       paths: [
-        { key: 'path', sortable: true },
+        { key: 'path', sortable: true, tdClass: 'text-left' },
         { key: 'type', sortable: true },
       ],
       pathDetails: [
@@ -148,7 +148,7 @@ export default {
         { field: 'extra', type: 'text' },
       ],
       technologies: [
-        { key: 'name', label: 'Technology', sortable: true },
+        { key: 'name', label: 'Technology', sortable: true, tdClass: 'text-left' },
         { key: 'version', sortable: true }
       ],
       technologyDetails: [
@@ -156,15 +156,15 @@ export default {
         { field: 'reference', title: 'Reference', type: 'link' }
       ],
       credentials: [
-        { key: 'email', sortable: true },
-        { key: 'username', sortable: true },
-        { key: 'secret', sortable: true }
+        { key: 'email', sortable: true, tdClass: 'text-left' },
+        { key: 'username', sortable: true, tdClass: 'text-left' },
+        { key: 'secret', sortable: true, tdClass: 'text-left' }
       ],
       credentialDetails: [
         { field: 'context', type: 'text' },
       ],
       vulnerabilities: [
-        { key: 'name', label: 'Vulnerability', sortable: true },
+        { key: 'name', label: 'Vulnerability', sortable: true, tdClass: 'text-left' },
         { key: 'severity', sortable: true },
         { key: 'cve', label: 'CVE', sortable: true }
       ],
@@ -175,7 +175,7 @@ export default {
         { field: 'reference', title: 'Reference', type: 'link' }
       ],
       exploits: [
-        { key: 'title', label: 'Exploit', sortable: true },
+        { key: 'title', label: 'Exploit', sortable: true, tdClass: 'text-left' },
         { key: 'edb_id', label: 'EDB-ID', sortable: true }
       ],
       exploitDetails: [
