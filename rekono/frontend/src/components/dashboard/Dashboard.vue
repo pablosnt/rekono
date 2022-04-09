@@ -155,7 +155,7 @@ export default {
       this.get('/api/targets/', 1, 1, this.getFilter('project')).then(response => { this.targets = response.data.count })
     },
     countTasks () {
-      let filter = this.getFilter('project', { })
+      let filter = this.getFilter('target__project', { })
       this.statuses.forEach(status => {
         filter.status = status
         this.get('/api/tasks/', 1, 1, filter).then(response => { this[status.toLowerCase()] = response.data.count; this.tasks = (this.tasks ? this.tasks : 0) + response.data.count })
