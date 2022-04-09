@@ -118,6 +118,7 @@ export default {
     search: String,
     active: String,
     filter: Object,
+    order: String,
     details: Array,
     reload: Boolean
   },
@@ -155,6 +156,9 @@ export default {
     },
     getFilter () {
       let filter = {}
+      if (this.order) {
+        filter.order = this.order
+      }
       if (this.execution) {
         filter.executions = this.execution
       } else if (this.task) {
