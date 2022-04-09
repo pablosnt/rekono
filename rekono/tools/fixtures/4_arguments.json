@@ -147,8 +147,8 @@
         "pk": 14,
         "fields": {
             "tool": 12,
-            "name": "domain",
-            "argument": "-d {domain}",
+            "name": "target",
+            "argument": "-d {target}",
             "required": true,
             "multiple": false
         }
@@ -158,8 +158,8 @@
         "pk": 15,
         "fields": {
             "tool": 13,
-            "name": "domain",
-            "argument": "-d {domain}",
+            "name": "target",
+            "argument": "-d {target}",
             "required": true,
             "multiple": false
         }

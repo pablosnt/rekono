@@ -295,7 +295,7 @@
         "fields": {
             "tool": 12,
             "name": "Search emails",
-            "arguments": "{domain}",
+            "arguments": "{target}",
             "default": true
         }
     },
@@ -305,7 +305,7 @@
         "fields": {
             "tool": 13,
             "name": "Search emails",
-            "arguments": "{domain} -s {output}",
+            "arguments": "{target} -s {output}",
             "default": true
         }
     },
