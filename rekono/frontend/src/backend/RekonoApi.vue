@@ -226,17 +226,14 @@ export default {
     },
     changeHashParam (name, value) {
       const url = new URL(window.location.href.replace('#/', ''))
+      const original_params = url.search
       name = name.toLowerCase().replace(' ', '_')
       if (value) {
         url.searchParams.set(name, value);
       } else {
         url.searchParams.delete(name);
       }
-      let from = window.location.hash
-      if (from.includes('?')) {
-        from = from.split('?', 2)[0]
-      }
-      window.location.hash = from + url.search
+      window.location.hash = window.location.hash.replace(original_params, url.search)
     },
     validate (value, regex) {
       return value && value.length && regex.test(value)
