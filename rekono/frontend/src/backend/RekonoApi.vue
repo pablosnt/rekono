@@ -87,7 +87,8 @@ export default {
       return this.get(endpoint, this.getPage(), this.getLimit(), params, requiredAuth, extraHeaders)
     },
     getAllPages (endpoint, params = null, requiredAuth = true, extraHeaders = null, accumulated = [], page = 1) {
-      return this.get(endpoint, page, 1000, params, requiredAuth, extraHeaders)
+      const limit = 1000
+      return this.get(endpoint, page, limit, params, requiredAuth, extraHeaders)
         .then(response => {
           accumulated = accumulated.concat(response.data.results)
           if ((page * limit) < response.data.count) {
