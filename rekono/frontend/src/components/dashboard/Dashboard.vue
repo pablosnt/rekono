@@ -43,10 +43,10 @@
     </b-card-group>
     <b-card-group deck class="mt-3 mb-2">
       <b-card style="min-width: 20rem;">
-        <tasks-by-status :height="height" :requested="requested" :skipped="skipped" :running="running" :cancelled="cancelled" :error="error" :completed="completed"/>
+        <tasks-by-status :height="250" :requested="requested" :skipped="skipped" :running="running" :cancelled="cancelled" :error="error" :completed="completed"/>
       </b-card>
       <b-card style="min-width: 20rem;">
-        <findings-by-type :height="height" :osint="osint" :credentials="credentials" :hosts="hosts" :ports="ports" :paths="paths" :technologies="technologies" :vulnerabilities="vulnerabilities" :exploits="exploits"/>
+        <findings-by-type :height="250" :osint="osint" :credentials="credentials" :hosts="hosts" :ports="ports" :paths="paths" :technologies="technologies" :vulnerabilities="vulnerabilities" :exploits="exploits"/>
       </b-card>
     </b-card-group>
     <hr/>
@@ -62,10 +62,10 @@
     </b-row>
     <b-card-group deck class="mt-3">
       <b-card style="min-width: 20rem;">
-        <vulnerabilities-by-severity :height="height" label="Vulnerabilities by severity" :critical="critical" :high="high" :medium="medium" :low="low" :info="info"/>
+        <vulnerabilities-by-severity :height="500" label="Vulnerabilities by severity" :critical="critical" :high="high" :medium="medium" :low="low" :info="info"/>
       </b-card>
       <b-card style="min-width: 20rem;">
-        <vulnerabilities-by-severity :height="height" label="Vulnerabilities with exploit by severity" :critical="criticalExploit" :high="highExploit" :medium="mediumExploit" :low="lowExploit" :info="infoExploit"/>
+        <vulnerabilities-by-severity :height="500" label="Vulnerabilities with exploit by severity" :critical="criticalExploit" :high="highExploit" :medium="mediumExploit" :low="lowExploit" :info="infoExploit"/>
       </b-card>
     </b-card-group>
   </div>
@@ -87,7 +87,6 @@ export default {
     this.countTargets()
     this.countExecutions()
     return {
-      height: 250,
       timeOptions: [
         { value: 7, text: 'Last 7 days'},
         { value: 15, text: 'Last 15 days'},
