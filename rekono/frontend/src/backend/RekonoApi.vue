@@ -233,7 +233,7 @@ export default {
       } else {
         url.searchParams.delete(name);
       }
-      window.location.hash = window.location.hash.replace(original_params, url.search)
+      window.location.hash =  original_params.length > 0 ? window.location.hash.replace(original_params, url.search) : window.location.hash + url.search
     },
     validate (value, regex) {
       return value && value.length && regex.test(value)
