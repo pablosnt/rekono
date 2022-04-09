@@ -46,7 +46,7 @@
       </b-row>
       <b-row class="ml-2 mr-2">
         <b-col>
-          <b-table select-mode="single" selectable hover striped borderless head-variant="dark" :fields="executionsFields" :items="executions" @row-selected="selectExecution">
+          <b-table sticky-header select-mode="single" selectable hover striped borderless head-variant="dark" :fields="executionsFields" :items="executions" @row-selected="selectExecution">
             <template #cell(tool)="row">
               <div v-if="!row.item.step">
                 <b-link :href="currentTask.tool.reference" target="_blank">
