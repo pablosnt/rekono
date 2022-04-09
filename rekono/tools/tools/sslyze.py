@@ -1,8 +1,9 @@
 import json
-from typing import Any, Dict, List, cast
+from typing import Any, Dict, List, Union
 
+from django.db.models import Model
 from findings.enums import Severity
-from findings.models import Technology, Vulnerability
+from findings.models import Finding, Technology, Vulnerability
 from tools.tools.base_tool import BaseTool
 
 
@@ -14,6 +15,22 @@ class SslyzeTool(BaseTool):
     tls_versions = [                                                            # SSL and TLS versions
         ('ssl', '2.0'), ('ssl', '3.0'), ('tls', '1.0'), ('tls', '1.1'), ('tls', '1.2'), ('tls', '1.3')
     ]
+    generic_tech: Union[Technology, None] = None
+
+    def create_finding(self, finding_type: Model, **fields: Any) -> Finding:
+        '''Create finding from fields.
+
+        Args:
+            finding_type (Model): Finding model
+
+        Returns:
+            Finding: Created finding entity
+        '''
+        if 'technology' in fields and not fields.get('technology'):
+            # Create generic TLS Technology if needed
+            self.generic_tech = super().create_finding(Technology, name='Generic TLS')
+            fields['technology'] = self.generic_tech
+        return super().create_finding(finding_type, **fields)
 
     def analyze_cipher_suites(self, cipher_suites: List[Dict[str, Any]], technology: Technology) -> None:
         '''Get supported RC4 cipher suites.
@@ -34,12 +51,11 @@ class SslyzeTool(BaseTool):
                     cwe='CWE-326'
                 )
 
-    def analyze_protocols(self, data: dict, generic_tech: Technology) -> None:
+    def analyze_protocols(self, data: dict) -> None:
         '''Analyze protocol based on his version and supported cipher suites.
 
         Args:
             data (dict): Original SSLyze data
-            generic_tech (Technology): Related generic TLS Technology
         '''
         for protocol, version in self.tls_versions:                             # For each protocol and version
             cipher_suites = data[f'{protocol.lower()}_{version.replace(".", "_")}_cipher_suites']['result']['accepted_cipher_suites']   # noqa: E501
@@ -49,7 +65,7 @@ class SslyzeTool(BaseTool):
                     Technology,
                     name=protocol.upper(),
                     version=version,
-                    related_to=generic_tech
+                    related_to=self.generic_tech
                 )
                 if protocol.lower() != 'tls' or version not in ['1.2', '1.3']:  # SSL protocol or insecure TLS version
                     self.create_finding(                                        # Create Vulnerability
@@ -69,21 +85,19 @@ class SslyzeTool(BaseTool):
         with open(self.path_output, 'r', encoding='utf-8') as output_file:
             report = json.load(output_file)                                     # Read output file
         report = report.get('server_scan_results', [])                          # Get scan results
-        generic_tech = None
         for item in report or []:                                               # For item in report
             r = item['scan_commands_results'] if 'scan_commands_results' in item else item['scan_result']
-            if not generic_tech and r:
-                # Create generic TLS Technology if scan results found
-                generic_tech = self.create_finding(Technology, name='Generic TLS')
+            if not r:
+                continue
             if r['heartbleed']['result']['is_vulnerable_to_heartbleed']:        # If it is vulnerable to Heartbleed
                 # Create Vulnerability with CVE-2014-0160
-                self.create_finding(Vulnerability, technology=generic_tech, name='Heartbleed', cve='CVE-2014-0160')
+                self.create_finding(Vulnerability, technology=self.generic_tech, name='Heartbleed', cve='CVE-2014-0160')
             if r['openssl_ccs_injection']['result']['is_vulnerable_to_ccs_injection']:
                 # If it is vulnerable to CCS injection
                 # Create Vulnerability with CVE-2014-0224
                 self.create_finding(
                     Vulnerability,
-                    technology=generic_tech,
+                    technology=self.generic_tech,
                     name='OpenSSL CSS Injection',
                     cve='CVE-2014-0224'
                 )
@@ -91,7 +105,7 @@ class SslyzeTool(BaseTool):
                 # If it is vulnerable to ROBOT
                 self.create_finding(                                            # Create Vulnerability
                     Vulnerability,
-                    technology=generic_tech,                                    # Related to generic TLS Technology
+                    technology=self.generic_tech,                               # Related to generic TLS Technology
                     name='ROBOT',
                     description='Return Of the Bleichenbacher Oracle Threat',
                     severity=Severity.MEDIUM,
@@ -105,7 +119,7 @@ class SslyzeTool(BaseTool):
                 # If it is vulnerable to Insecure Renegotiation
                 self.create_finding(                                            # Create Vulnerability
                     Vulnerability,
-                    technology=generic_tech,                                    # Related to generic TLS Technology
+                    technology=self.generic_tech,                               # Related to generic TLS Technology
                     name='Insecure TLS renegotiation supported',
                     description='Insecure TLS renegotiation supported',
                     severity=Severity.MEDIUM,
@@ -114,15 +128,15 @@ class SslyzeTool(BaseTool):
                 )
             if r['tls_compression']['result']['supports_compression']:          # If it is vulnerable to CRIME
                 # Create Vulnerability with CVE-2012-4929
-                self.create_finding(Vulnerability, technology=generic_tech, name='CRIME', cve='CVE-2012-4929')
-            self.analyze_protocols(r, cast(Technology, generic_tech))           # Analyze protocol and version
+                self.create_finding(Vulnerability, technology=self.generic_tech, name='CRIME', cve='CVE-2012-4929')
+            self.analyze_protocols(r)                                           # Analyze protocol and version
             # For each certificate information
             for deploy in r['certificate_info']['result']['certificate_deployments'] or []:
                 if not deploy['leaf_certificate_subject_matches_hostname']:
                     # If certificate subject doesn't match hostname
                     self.create_finding(                                        # Create vulnerability
                         Vulnerability,
-                        technology=generic_tech,                                # Related to generic TLS Technology
+                        technology=self.generic_tech,                           # Related to generic TLS Technology
                         name='Certificate subject error',
                         description="Certificate subject doesn't match hostname",
                         severity=Severity.INFO,

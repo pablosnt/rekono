@@ -11,7 +11,6 @@ class SSLyzeParserTest(ToolParserTest):
     def test_protocols(self) -> None:
         '''Test to parse report with insecure protocols.'''
         expected = [
-            {'model': Technology, 'name': 'Generic TLS'},
             {'model': Technology, 'name': 'TLS', 'version': '1.0'},
             {
                 'model': Vulnerability,
@@ -29,6 +28,7 @@ class SSLyzeParserTest(ToolParserTest):
                 'cwe': 'CWE-326'
             },
             {'model': Technology, 'name': 'TLS', 'version': '1.2'},
+            {'model': Technology, 'name': 'Generic TLS'},
             {
                 'model': Vulnerability,
                 'name': 'Certificate subject error',

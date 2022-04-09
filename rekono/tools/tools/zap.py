@@ -56,7 +56,7 @@ class ZapTool(BaseTool):
                 reference = alert.findtext('reference')
                 instances = alert.findall('instances/instance')                 # Get instances
                 if instances:
-                    description += '\n\nEvidences:\n'
+                    description += '\n\nLocation:\n'
                 for instance in instances or []:                                # For each instance
                     url = instance.findtext('uri')                              # Get URL
                     description += f'[{instance.findtext("method")}] {url}\n'

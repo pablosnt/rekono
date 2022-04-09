@@ -11,27 +11,35 @@ class ZapParserTest(ToolParserTest):
     def test_active_scan(self) -> None:
         '''Test to parse report from active scan.'''
         expected = [
-            {
-                'model': Vulnerability,
-                'name': 'Directory Browsing',
-                'description': (
-                    'It is possible to view the directory listing.  Directory listing may reveal hidden scripts, '
-                    'include files, backup source files, etc. which can be accessed to read sensitive information.'
-                ),
-                'severity': Severity.MEDIUM,
-                'cwe': 'CWE-548',
-                'reference': 'http://httpd.apache.org/docs/mod/core.html#options'
-            },
             {'model': Path, 'path': '/images/', 'type': PathType.ENDPOINT},
             {'model': Path, 'path': '/shared/', 'type': PathType.ENDPOINT},
             {'model': Path, 'path': '/shared/css/', 'type': PathType.ENDPOINT},
             {'model': Path, 'path': '/shared/images/Acunetix/', 'type': PathType.ENDPOINT},
             {
                 'model': Vulnerability,
+                'name': 'Directory Browsing',
+                'description': (
+                    'It is possible to view the directory listing.  Directory listing may reveal hidden scripts, '
+                    'include files, backup source files, etc. which can be accessed to read sensitive information.\n\n'
+                    'Location:\n'
+                    '[GET] http://10.10.10.10/images/\n'
+                    '[GET] http://10.10.10.10/shared/\n'
+                    '[GET] http://10.10.10.10/shared/css/\n'
+                    '[GET] http://10.10.10.10/shared/images/Acunetix/\n'
+                ),
+                'severity': Severity.MEDIUM,
+                'cwe': 'CWE-548',
+                'reference': 'http://httpd.apache.org/docs/mod/core.html#options'
+            },
+            {
+                'model': Vulnerability,
                 'name': 'X-Frame-Options Header Not Set',
                 'description': (
                     'X-Frame-Options header is not included in the HTTP response to protect against '
-                    "'ClickJacking' attacks."
+                    "'ClickJacking' attacks.\n\n"
+                    'Location:\n'
+                    '[GET] http://10.10.10.10\n'
+                    '[GET] http://10.10.10.10/\n'
                 ),
                 'severity': Severity.MEDIUM,
                 'cwe': 'CWE-1021',
@@ -56,7 +64,10 @@ class ZapParserTest(ToolParserTest):
                     'but recent techniques have been discovered to disclose information by gaining access to the '
                     'response. The risk of information disclosure is dramatically increased when the target site '
                     'is vulnerable to XSS, because XSS can be used as a platform for CSRF, allowing the attack to '
-                    'operate within the bounds of the same-origin policy.'
+                    'operate within the bounds of the same-origin policy.\n\n'
+                    'Location:\n'
+                    '[GET] http://10.10.10.10\n'
+                    '[GET] http://10.10.10.10/\n'
                 ),
                 'severity': Severity.LOW,
                 'cwe': 'CWE-352',
@@ -65,23 +76,40 @@ class ZapParserTest(ToolParserTest):
             {
                 'model': Vulnerability,
                 'name': 'Cross-Domain JavaScript Source File Inclusion',
-                'description': 'The page includes one or more script files from a third-party domain.',
+                'description': (
+                    'The page includes one or more script files from a third-party domain.\n\n'
+                    'Location:\n'
+                    '[GET] http://10.10.10.10\n'
+                    '[GET] http://10.10.10.10\n'
+                    '[GET] http://10.10.10.10/\n'
+                    '[GET] http://10.10.10.10/\n'
+                ),
                 'severity': Severity.LOW,
                 'cwe': 'CWE-829'
-            },
-            {
-                'model': Vulnerability,
-                'name': 'Timestamp Disclosure - Unix',
-                'description': 'A timestamp was disclosed by the application/web server - Unix',
-                'severity': Severity.LOW,
-                'cwe': 'CWE-200',
-                'reference': 'http://projects.webappsec.org/w/page/13246936/Information%20Leakage'
             },
             {
                 'model': Path,
                 'path': '/shared/images/Acunetix/acx_Chess-WB.gif',
                 'type': PathType.ENDPOINT
             },
+            {
+                'model': Vulnerability,
+                'name': 'Timestamp Disclosure - Unix',
+                'description': (
+                    'A timestamp was disclosed by the application/web server - Unix\n\n'
+                    'Location:\n'
+                    '[GET] http://10.10.10.10\n'
+                    '[GET] http://10.10.10.10/\n'
+                    '[GET] http://10.10.10.10/shared/images/Acunetix/acx_Chess-WB.gif\n'
+                ),
+                'severity': Severity.LOW,
+                'cwe': 'CWE-200',
+                'reference': 'http://projects.webappsec.org/w/page/13246936/Information%20Leakage'
+            },
+            {'model': Path, 'path': '/images/sitelogo.png', 'type': PathType.ENDPOINT},
+            {'model': Path, 'path': '/shared/css/insecdb.css', 'type': PathType.ENDPOINT},
+            {'model': Path, 'path': '/shared/images/tiny-eyeicon.png', 'type': PathType.ENDPOINT},
+            {'model': Path, 'path': '/shared/images/topleftcurve.gif', 'type': PathType.ENDPOINT},
             {
                 'model': Vulnerability,
                 'name': 'X-Content-Type-Options Header Missing',
@@ -91,15 +119,19 @@ class ZapParserTest(ToolParserTest):
                     'on the response body, potentially causing the response body to be interpreted and '
                     'displayed as a content type other than the declared content type. Current (early 2014) '
                     'and legacy versions of Firefox will use the declared content type (if one is set), '
-                    'rather than performing MIME-sniffing.'
+                    'rather than performing MIME-sniffing.\n\n'
+                    'Location:\n'
+                    '[GET] http://10.10.10.10\n'
+                    '[GET] http://10.10.10.10/\n'
+                    '[GET] http://10.10.10.10/images/sitelogo.png\n'
+                    '[GET] http://10.10.10.10/shared/css/insecdb.css\n'
+                    '[GET] http://10.10.10.10/shared/images/Acunetix/acx_Chess-WB.gif\n'
+                    '[GET] http://10.10.10.10/shared/images/tiny-eyeicon.png\n'
+                    '[GET] http://10.10.10.10/shared/images/topleftcurve.gif\n'
                 ),
                 'severity': Severity.LOW,
                 'cwe': 'CWE-693',
                 'reference': 'http://msdn.microsoft.com/en-us/library/ie/gg622941%28v=vs.85%29.aspx'
-            },
-            {'model': Path, 'path': '/images/sitelogo.png', 'type': PathType.ENDPOINT},
-            {'model': Path, 'path': '/shared/css/insecdb.css', 'type': PathType.ENDPOINT},
-            {'model': Path, 'path': '/shared/images/tiny-eyeicon.png', 'type': PathType.ENDPOINT},
-            {'model': Path, 'path': '/shared/images/topleftcurve.gif', 'type': PathType.ENDPOINT}
+            }
         ]
         super().check_tool_file_parser('active-scan.xml', expected)

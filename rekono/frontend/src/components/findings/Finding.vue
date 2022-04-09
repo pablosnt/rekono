@@ -33,10 +33,10 @@
               <div v-if="row.item[detail.field]">
                 <div v-if="detail.type === 'text' && row.item[detail.field].length > 0" class="text-left">
                   <div v-if="detail.title">
-                    <label class="text-muted">{{ detail.title }}</label><span class="ml-2">{{ row.item[detail.field] }}</span>
+                    <label class="text-muted">{{ detail.title }}</label><span class="ml-2" style="white-space: pre-line">{{ row.item[detail.field] }}</span>
                   </div>
                   <div v-if="!detail.title">
-                    <span>{{ row.item[detail.field] }}</span>
+                    <span style="white-space: pre-line">{{ row.item[detail.field] }}</span>
                   </div> 
                 </div>
                 <div v-if="detail.type === 'link' && row.item[detail.field].length > 0" class="text-left">
