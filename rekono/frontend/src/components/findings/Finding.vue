@@ -181,7 +181,16 @@ export default {
         return
       }
       if (this.target || this.task || this.execution) {
-        this.getAllPages(`/api/${this.name.toLowerCase()}/`, this.getFilter()).then(results => this.findings = results)
+        if (this.name.toLowerCase() !== 'vulnerabilities') {
+          this.getAllPages(`/api/${this.name.toLowerCase()}/`, this.getFilter()).then(results => this.findings = results)
+        } else {
+          this.findings = []
+          let filter = this.getFilter()
+          this.severities.forEach(severity => {
+            filter.severity = severity
+            this.getAllPages('/api/vulnerabilities/', filter).then(results => this.findings.push(...results))
+          })
+        }
       }
     },
     enableFinding (finding) {
