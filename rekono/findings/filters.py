@@ -170,7 +170,7 @@ class PortFilter(FindingFilter):
             'host__address': ['exact', 'icontains'],
             'host__os_type': ['exact'],
             'port': ['exact'],
-            'port_status': ['iexact'],
+            'status': ['iexact'],
             'protocol': ['iexact'],
             'service': ['exact', 'icontains'],
         })

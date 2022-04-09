@@ -21,7 +21,7 @@ class NmapParserTest(ToolParserTest):
             {
                 'model': Port,
                 'port': 22,
-                'port_status': PortStatus.OPEN,
+                'status': PortStatus.OPEN,
                 'protocol': Protocol.TCP,
                 'service': 'ssh'
             },
@@ -34,7 +34,7 @@ class NmapParserTest(ToolParserTest):
             {
                 'model': Port,
                 'port': 80,
-                'port_status': PortStatus.OPEN,
+                'status': PortStatus.OPEN,
                 'protocol': Protocol.TCP,
                 'service': 'http'
             },
@@ -71,7 +71,7 @@ class NmapParserTest(ToolParserTest):
             {
                 'model': Port,
                 'port': 443,
-                'port_status': PortStatus.OPEN,
+                'status': PortStatus.OPEN,
                 'protocol': Protocol.TCP,
                 'service': 'http'
             },
@@ -120,7 +120,7 @@ class NmapParserTest(ToolParserTest):
             {
                 'model': Port,
                 'port': 21,
-                'port_status': PortStatus.OPEN,
+                'status': PortStatus.OPEN,
                 'protocol': Protocol.TCP,
                 'service': 'ftp'
             },
@@ -149,7 +149,7 @@ class NmapParserTest(ToolParserTest):
             {
                 'model': Port,
                 'port': 445,
-                'port_status': PortStatus.OPEN,
+                'status': PortStatus.OPEN,
                 'protocol': Protocol.TCP,
                 'service': 'netbios-ssn'
             },
@@ -203,7 +203,7 @@ class NmapParserTest(ToolParserTest):
             {
                 'model': Port,
                 'port': 445,
-                'port_status': PortStatus.OPEN,
+                'status': PortStatus.OPEN,
                 'protocol': Protocol.TCP,
                 'service': 'netbios-ssn'
             },

@@ -98,7 +98,7 @@ class RekonoTestCase(TestCase):
         self.host = Host.objects.create(address='10.10.10.10', os='Ubuntu', os_type=OSType.LINUX)
         self.host.executions.add(self.execution)
         self.port = Port.objects.create(
-            host=self.host, port=80, port_status=PortStatus.OPEN,
+            host=self.host, port=80, status=PortStatus.OPEN,
             protocol=Protocol.TCP, service='http'
         )
         self.port.executions.add(self.execution)

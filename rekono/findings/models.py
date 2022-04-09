@@ -214,7 +214,7 @@ class Port(Finding):
 
     host = create_finding_foreign_key(Host, 'port')                             # Host where the port is discovered
     port = models.IntegerField()                                                # Port number
-    port_status = models.TextField(max_length=15, choices=PortStatus.choices, default=PortStatus.OPEN)  # Port status
+    status = models.TextField(max_length=15, choices=PortStatus.choices, default=PortStatus.OPEN)   # Port status
     protocol = models.TextField(max_length=5, choices=Protocol.choices, blank=True, null=True)      # Transport protocol
     service = models.TextField(max_length=50, blank=True, null=True)            # Service protocol if found
 
@@ -271,7 +271,7 @@ class Port(Finding):
         Returns:
             Dict[str, Any]: Useful information for Defect-Dojo imports
         '''
-        description = f'{self.port} - {self.port_status} - {self.protocol} - {self.service}'
+        description = f'{self.port} - {self.status} - {self.protocol} - {self.service}'
         if self.host:
             description = f'{self.host.address} - {description}'
         return {

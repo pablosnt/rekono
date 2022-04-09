@@ -24,7 +24,7 @@ PORT_ICON = '🚪'
 PORT = '''
 _Host_          *{host}*
 _Port_          *{port}*
-_Status_        {port_status}
+_Status_        {status}
 _Protocol_      {protocol}
 _Service_       {service}
 '''

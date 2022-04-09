@@ -321,7 +321,7 @@ class NmapTool(BaseTool):
                     Port,
                     host=host,
                     port=s.port,
-                    port_status=cast(TextChoices, PortStatus)[s.state.upper()],
+                    status=cast(TextChoices, PortStatus)[s.state.upper()],
                     protocol=cast(TextChoices, Protocol)[s.protocol.upper()],
                     service=s.service
                 )

@@ -37,7 +37,7 @@ class PortSerializer(serializers.ModelSerializer):
 
         model = Port
         fields = (                                                              # Port fields exposed via API
-            'id', 'executions', 'host', 'port', 'port_status', 'protocol',
+            'id', 'executions', 'host', 'port', 'status', 'protocol',
             'service', 'creation', 'is_active', 'path', 'technology',
             'vulnerability', 'reported_to_defectdojo'
         )

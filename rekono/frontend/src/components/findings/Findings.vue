@@ -21,7 +21,7 @@
     </b-row>
     <b-row :cols="cols" class="mt-3">
       <finding name="hosts" :fields="hosts" :details="hostDetails" @finding-selected="selectFinding" :id="selectedHost" order="address" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="selectedTask" :execution="selectedExecution" :search="search" :active="activeFilter" :reload="reload"/>
-      <finding name="ports" :fields="ports" @finding-selected="selectFinding" :id="selectedPort" :filter="hostFilter" order="-port_status" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="selectedTask" :execution="selectedExecution" :search="search" :active="activeFilter" :reload="reload"/>
+      <finding name="ports" :fields="ports" @finding-selected="selectFinding" :id="selectedPort" :filter="hostFilter" order="-status" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="selectedTask" :execution="selectedExecution" :search="search" :active="activeFilter" :reload="reload"/>
       <finding name="paths" :fields="paths" :details="pathDetails" :filter="portFilter" order="-type" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="selectedTask" :execution="selectedExecution" :search="search" :active="activeFilter" :reload="reload"/>
       <finding name="technologies" :fields="technologies" :details="technologyDetails" @finding-selected="selectFinding" :id="selectedTechnology" :filter="portFilter" order="name" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="selectedTask" :execution="selectedExecution" :search="search" :active="activeFilter" :reload="reload"/>
       <finding name="credentials" :fields="credentials" :details="credentialDetails" :filter="technologyFilter" order="email,username" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="selectedTask" :execution="selectedExecution" :search="search" :active="activeFilter" :reload="reload"/>
@@ -136,7 +136,7 @@ export default {
       ports: [
         { key: 'port', sortable: true },
         { key: 'protocol', sortable: true },
-        { key: 'port_status', sortable: true },
+        { key: 'status', sortable: true },
         { key: 'service', sortable: true, tdClass: 'text-left' }
       ],
       paths: [

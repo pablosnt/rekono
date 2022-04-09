@@ -11,10 +11,10 @@
           </div>
         </div>
       </template>
-      <template #cell(port_status)="row">
+      <template #cell(status)="row">
         <div v-for="variant in portStatusByVariant" :key="variant.value">
-          <div v-if="variant.value === row.item.port_status">
-            <b-badge :variant="variant.variant">{{ row.item.port_status }}</b-badge>
+          <div v-if="variant.value === row.item.status">
+            <b-badge :variant="variant.variant">{{ row.item.status }}</b-badge>
           </div>
         </div>
       </template>
