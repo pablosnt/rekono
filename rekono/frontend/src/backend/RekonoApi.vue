@@ -76,10 +76,10 @@ export default {
       ],
       cancellableStatuses: ['Requested', 'Running'],
       timeUnits: ['Weeks', 'Days', 'Hours', 'Minutes'],
-      nameRegex: /^[\w\s.-]*$/,
-      textRegex: /^[\w\s.:,+\-'"?¿¡!#%$€]*$/,
-      pathRegex: /^[\w./#?&%]*$/,
-      cveRegex: /^CVE-[0-9]{4}-[0-9]{1,7}$/
+      nameRegex: /^[\w\s\.\-\[\]]*$/,
+      textRegex: /^[\w\s\.:,+\-'"?¿¡!#%$€\[\]]*$/,
+      pathRegex: /^[\w\./#?&%]*$/,
+      cveRegex: /^CVE\-[0-9]{4}\-[0-9]{1,7}$/
     }
   },
   methods: {
