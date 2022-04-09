@@ -77,7 +77,7 @@
               </div>
             </template>
             <template #cell(date)="row">
-              {{ row.item.start !== null ? row.item.start.replace('T', ' ').substring(0, 19) : '' }}
+              {{ row.item.end !== null ? row.item.end.replace('T', ' ').substring(0, 19) : '' }}
             </template>
           </b-table>
         </b-col>
