@@ -15,7 +15,7 @@ class OSINTSerializer(serializers.ModelSerializer):
         model = OSINT
         fields = (                                                              # OSINT fields exposed via API
             'id', 'executions', 'data', 'data_type', 'source', 'reference',
-            'detected_by', 'first_seen', 'last_seen', 'is_active', 'reported_to_defectdojo'
+            'detected_by', 'first_seen', 'last_seen', 'is_active'
         )
 
 
@@ -30,7 +30,7 @@ class HostSerializer(serializers.ModelSerializer):
         model = Host
         fields = (                                                              # Host fields exposed via API
             'id', 'executions', 'address', 'os', 'os_type', 'detected_by',
-            'first_seen', 'last_seen', 'is_active', 'port', 'reported_to_defectdojo'
+            'first_seen', 'last_seen', 'is_active', 'port'
         )
 
 
@@ -46,7 +46,7 @@ class PortSerializer(serializers.ModelSerializer):
         fields = (                                                              # Port fields exposed via API
             'id', 'executions', 'host', 'port', 'status', 'protocol', 'service',
             'detected_by', 'first_seen', 'last_seen', 'is_active', 'path', 'technology',
-            'vulnerability', 'reported_to_defectdojo'
+            'vulnerability'
         )
 
 
@@ -61,7 +61,7 @@ class PathSerializer(serializers.ModelSerializer):
         model = Path
         fields = (                                                              # Path fields exposed via API
             'id', 'executions', 'port', 'path', 'status', 'extra', 'type',
-            'detected_by', 'first_seen', 'last_seen', 'is_active', 'reported_to_defectdojo'
+            'detected_by', 'first_seen', 'last_seen', 'is_active'
         )
 
 
@@ -77,7 +77,7 @@ class TechnologySerializer(serializers.ModelSerializer):
         fields = (                                                              # Technology fields exposed via API
             'id', 'executions', 'port', 'name', 'version', 'description', 'reference',
             'related_to', 'related_technologies', 'detected_by', 'first_seen', 'last_seen',
-            'is_active', 'vulnerability', 'exploit', 'reported_to_defectdojo'
+            'is_active', 'vulnerability', 'exploit'
         )
 
 
@@ -93,7 +93,7 @@ class CredentialSerializer(serializers.ModelSerializer):
         # Credential fields exposed via API
         fields = (
             'id', 'technology', 'email', 'username', 'secret', 'context',
-            'detected_by', 'first_seen', 'last_seen', 'is_active', 'reported_to_defectdojo'
+            'detected_by', 'first_seen', 'last_seen', 'is_active'
         )
 
 
@@ -109,7 +109,7 @@ class VulnerabilitySerializer(serializers.ModelSerializer):
         fields = (                                                              # Vulnerability fields exposed via API
             'id', 'executions', 'port', 'technology', 'name', 'description', 'severity',
             'cve', 'cwe', 'reference', 'detected_by', 'first_seen', 'last_seen',
-            'is_active', 'exploit', 'reported_to_defectdojo'
+            'is_active', 'exploit'
         )
 
 
@@ -124,5 +124,5 @@ class ExploitSerializer(serializers.ModelSerializer):
         model = Exploit
         fields = (                                                              # Exploit fields exposed via API
             'id', 'executions', 'vulnerability', 'technology', 'title', 'edb_id',
-            'reference', 'detected_by', 'first_seen', 'last_seen', 'is_active', 'reported_to_defectdojo'
+            'reference', 'detected_by', 'first_seen', 'last_seen', 'is_active'
         )

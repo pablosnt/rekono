@@ -16,6 +16,12 @@ class Project(models.Model):
     description = models.TextField(max_length=300, validators=[validate_text])  # Project description
     # Related product Id in Defect-Dojo
     defectdojo_product_id = models.IntegerField(blank=True, null=True, validators=[validate_number])
+    # Related engagement Id in Defect-Dojo
+    defectdojo_engagement_id = models.IntegerField(blank=True, null=True, validators=[validate_number])
+    # Create one engagement in Defect-Dojo for each target
+    defectdojo_engagement_by_target = models.BooleanField(default=False)
+    # Enable or disable findings synchronization with Defect-Dojo
+    defectdojo_synchronization = models.BooleanField(default=False)
     # User that created the project
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True)
     # Relation with all users that belong to the project

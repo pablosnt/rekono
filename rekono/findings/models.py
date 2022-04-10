@@ -39,8 +39,6 @@ class Finding(models.Model, BaseInput):
     first_seen = models.DateTimeField(auto_now_add=True)                        # First date when the finding appear
     last_seen = models.DateTimeField()                                          # Last date when the finding appear
     is_active = models.BooleanField(default=True)                               # Indicate if the finding is active
-    # Indicate if the finding has been imported in Defect-Dojo
-    reported_to_defectdojo = models.BooleanField(default=False)
 
     key_fields: List[Dict[str, Any]] = []                                       # Unique field list
 

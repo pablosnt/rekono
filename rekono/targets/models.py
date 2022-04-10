@@ -20,6 +20,8 @@ class Target(models.Model, BaseInput):
     project = models.ForeignKey(Project, related_name='targets', on_delete=models.CASCADE)      # Related project
     target = models.TextField(max_length=100)                                   # Target IP, domain or network
     type = models.TextField(max_length=10, choices=TargetType.choices)          # Target type
+    # Related engagement Id in Defect-Dojo
+    defectdojo_engagement_id = models.IntegerField(blank=True, null=True, validators=[validate_number])
 
     class Meta:
         '''Model metadata.'''
