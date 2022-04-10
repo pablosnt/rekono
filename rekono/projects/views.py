@@ -1,6 +1,7 @@
 from typing import Type, cast
 
 from defectdojo.exceptions import DefectDojoException
+from defectdojo.reporter import report
 from django.db.models import QuerySet
 from drf_spectacular.utils import extend_schema
 from executions.models import Execution
@@ -18,8 +19,6 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from users.models import User
-
-from rekono.defectdojo.reporter import report
 
 # Create your views here.
 

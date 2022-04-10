@@ -4,9 +4,7 @@ from typing import Any, Tuple
 
 import requests
 from defectdojo.constants import DD_DATE_FORMAT, DD_DATETIME_FORMAT
-from executions.models import Execution
 from findings.enums import Severity
-from findings.models import Path, Finding
 from projects.models import Project
 from tools.models import Tool
 
@@ -215,7 +213,7 @@ class DefectDojo:
         }
         return self.request('POST', '/tests/', data=data, expected_status=201)
 
-    def create_endpoint(self, product: int, endpoint: Path) -> Tuple[bool, dict]:
+    def create_endpoint(self, product: int, endpoint: Any) -> Tuple[bool, dict]:
         '''Create new Defect-Dojo endpoint from Rekono endpoint.
 
         Args:
@@ -229,7 +227,7 @@ class DefectDojo:
         data.update({'product': product})
         return self.request('POST', '/endpoints/', data=data, expected_status=201)
 
-    def create_finding(self, test: int, finding: Finding) -> Tuple[bool, dict]:
+    def create_finding(self, test: int, finding: Any) -> Tuple[bool, dict]:
         '''Create new Defect-Dojo finding from Rekono finding.
 
         Args:
@@ -247,7 +245,7 @@ class DefectDojo:
         })
         return self.request('POST', '/findings/', data=data, expected_status=201)
 
-    def import_scan(self, engagement: int, execution: Execution, tool: Tool) -> Tuple[bool, dict]:
+    def import_scan(self, engagement: int, execution: Any, tool: Tool) -> Tuple[bool, dict]:
         '''Import Rekono execution output in Defect-Dojo.
 
         Args:

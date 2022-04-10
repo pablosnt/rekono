@@ -9,6 +9,7 @@ from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
                                    ListModelMixin, RetrieveModelMixin)
 from rest_framework.request import Request
 from rest_framework.response import Response
+from rest_framework.viewsets import GenericViewSet
 from targets.models import Target
 from tasks import services
 from tasks.enums import Status
@@ -20,7 +21,7 @@ from tasks.serializers import TaskSerializer
 # Create your views here.
 
 
-class TaskViewSet(CreateModelMixin, ListModelMixin, RetrieveModelMixin, DestroyModelMixin):
+class TaskViewSet(GenericViewSet, CreateModelMixin, ListModelMixin, RetrieveModelMixin, DestroyModelMixin):
     '''Task ViewSet that includes: get, retrieve, create amd cancel features.'''
 
     queryset = Task.objects.all().order_by('-id')

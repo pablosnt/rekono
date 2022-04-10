@@ -3,11 +3,12 @@ from executions.filters import ExecutionFilter
 from executions.models import Execution
 from executions.serializers import ExecutionSerializer
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
+from rest_framework.viewsets import GenericViewSet
 
 # Create your views here.
 
 
-class ExecutionViewSet(ListModelMixin, RetrieveModelMixin):
+class ExecutionViewSet(GenericViewSet, ListModelMixin, RetrieveModelMixin):
     '''Execution ViewSet that includes: get and retrieve features.'''
 
     queryset = Execution.objects.all().order_by('-id')

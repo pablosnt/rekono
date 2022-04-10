@@ -21,12 +21,13 @@ from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.mixins import (DestroyModelMixin, ListModelMixin,
                                    RetrieveModelMixin)
 from rest_framework.response import Response
+from rest_framework.viewsets import GenericViewSet
 from targets.serializers import TargetSerializer
 
 # Create your views here.
 
 
-class FindingBaseView(ListModelMixin, RetrieveModelMixin, DestroyModelMixin):
+class FindingBaseView(GenericViewSet, ListModelMixin, RetrieveModelMixin, DestroyModelMixin):
     '''Common finding ViewSet that includes: get, retrieve, enable and disable features.'''
 
     # Replace DjangoFilterBackend by RekonoFilterBackend to allow filters by N-M relations like 'executions' field.
