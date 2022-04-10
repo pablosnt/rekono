@@ -37,7 +37,7 @@ class Finding(models.Model, BaseInput):
     executions = models.ManyToManyField(Execution, related_name='%(class)s')
     detected_by = models.ForeignKey(Tool, on_delete=models.SET_NULL, blank=True, null=True)
     first_seen = models.DateTimeField(auto_now_add=True)                        # First date when the finding appear
-    last_seen = models.DateTimeField()                                          # Last date when the finding appear
+    last_seen = models.DateTimeField(auto_now_add=True)                         # Last date when the finding appear
     is_active = models.BooleanField(default=True)                               # Indicate if the finding is active
     # Indicate if the finding has been imported in Defect-Dojo
     reported_to_defectdojo = models.BooleanField(default=False)
