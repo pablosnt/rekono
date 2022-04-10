@@ -30,7 +30,7 @@
         <b-row>
           <b-col>
             <div v-for="detail in details" :key="detail.field">
-              <div v-if="row.item[detail.field]">
+              <div v-if="row.item[detail.field]" class="mt-2 mb-2">
                 <div v-if="detail.type === 'text' && row.item[detail.field].length > 0" class="text-left">
                   <div v-if="detail.title">
                     <label class="text-muted">{{ detail.title }}</label><span class="ml-2" style="white-space: pre-line">{{ row.item[detail.field] }}</span>

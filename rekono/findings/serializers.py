@@ -7,7 +7,7 @@ from tools.serializers import SimplyToolSerializer
 class OSINTSerializer(serializers.ModelSerializer):
     '''Serializer to get the OSINT data via API.'''
 
-    detected_by = SimplyToolSerializer(many=False, read_only=True)                # Tool details for read operations
+    detected_by = SimplyToolSerializer(many=False, read_only=True)               # Tool details for read operations
 
     class Meta:
         '''Serializer metadata.'''
@@ -22,7 +22,7 @@ class OSINTSerializer(serializers.ModelSerializer):
 class HostSerializer(serializers.ModelSerializer):
     '''Serializer to get the Host data via API.'''
 
-    detected_by = SimplyToolSerializer(many=False, read_only=True)                # Tool details for read operations
+    detected_by = SimplyToolSerializer(many=False, read_only=True)               # Tool details for read operations
 
     class Meta:
         '''Serializer metadata.'''
@@ -37,7 +37,7 @@ class HostSerializer(serializers.ModelSerializer):
 class PortSerializer(serializers.ModelSerializer):
     '''Serializer to get the Port data via API.'''
 
-    detected_by = SimplyToolSerializer(many=False, read_only=True)                # Tool details for read operations
+    detected_by = SimplyToolSerializer(many=False, read_only=True)              # Tool details for read operations
 
     class Meta:
         '''Serializer metadata.'''
@@ -53,7 +53,7 @@ class PortSerializer(serializers.ModelSerializer):
 class PathSerializer(serializers.ModelSerializer):
     '''Serializer to get the Path data via API.'''
 
-    detected_by = SimplyToolSerializer(many=False, read_only=True)                # Tool details for read operations
+    detected_by = SimplyToolSerializer(many=False, read_only=True)              # Tool details for read operations
 
     class Meta:
         '''Serializer metadata.'''
@@ -68,7 +68,7 @@ class PathSerializer(serializers.ModelSerializer):
 class TechnologySerializer(serializers.ModelSerializer):
     '''Serializer to get the Technology data via API.'''
 
-    detected_by = SimplyToolSerializer(many=False, read_only=True)                # Tool details for read operations
+    detected_by = SimplyToolSerializer(many=False, read_only=True)              # Tool details for read operations
 
     class Meta:
         '''Serializer metadata.'''
@@ -84,7 +84,7 @@ class TechnologySerializer(serializers.ModelSerializer):
 class CredentialSerializer(serializers.ModelSerializer):
     '''Serializer to get the Credential data via API.'''
 
-    detected_by = SimplyToolSerializer(many=False, read_only=True)                # Tool details for read operations
+    detected_by = SimplyToolSerializer(many=False, read_only=True)              # Tool details for read operations
 
     class Meta:
         '''Serializer metadata.'''
@@ -100,7 +100,7 @@ class CredentialSerializer(serializers.ModelSerializer):
 class VulnerabilitySerializer(serializers.ModelSerializer):
     '''Serializer to get the Vulnerability data via API.'''
 
-    detected_by = SimplyToolSerializer(many=False, read_only=True)                # Tool details for read operations
+    detected_by = SimplyToolSerializer(many=False, read_only=True)              # Tool details for read operations
 
     class Meta:
         '''Serializer metadata.'''
@@ -116,7 +116,7 @@ class VulnerabilitySerializer(serializers.ModelSerializer):
 class ExploitSerializer(serializers.ModelSerializer):
     '''Serializer to get the Exploit data via API.'''
 
-    detected_by = SimplyToolSerializer(many=False, read_only=True)                # Tool details for read operations
+    detected_by = SimplyToolSerializer(many=False, read_only=True)              # Tool details for read operations
 
     class Meta:
         '''Serializer metadata.'''
