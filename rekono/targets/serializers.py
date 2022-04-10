@@ -144,7 +144,9 @@ class TargetSerializer(serializers.ModelSerializer):
         '''Serializer metadata.'''
 
         model = Target
-        fields = ('id', 'project', 'target', 'type', 'target_ports', 'tasks')   # Target fields exposed via API
+        fields = (                                                              # Target fields exposed via API
+            'id', 'project', 'target', 'type', 'defectdojo_engagement_id', 'target_ports', 'tasks'
+        )
         read_only_fields = ('type', 'target_ports', 'tasks')                    # Read only fields
 
     def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:

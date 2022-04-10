@@ -1,12 +1,8 @@
-from typing import Any, List, Type
+from typing import Any
 
-from defectdojo.views import DefectDojoFindings, DefectDojoScans
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db.models import QuerySet
 from drf_spectacular.utils import extend_schema
-from executions.models import Execution
-from findings.models import (OSINT, Credential, Path, Port, Exploit,
-                             Finding, Host, Technology, Vulnerability)
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
@@ -24,15 +20,8 @@ from tasks.serializers import TaskSerializer
 # Create your views here.
 
 
-class TaskViewSet(
-    CreateModelMixin,
-    ListModelMixin,
-    RetrieveModelMixin,
-    DestroyModelMixin,
-    DefectDojoScans,
-    DefectDojoFindings
-):
-    '''Task ViewSet that includes: get, retrieve, create, cancel and import Defect-Dojo features.'''
+class TaskViewSet(CreateModelMixin, ListModelMixin, RetrieveModelMixin, DestroyModelMixin):
+    '''Task ViewSet that includes: get, retrieve, create amd cancel features.'''
 
     queryset = Task.objects.all().order_by('-id')
     serializer_class = TaskSerializer
@@ -63,30 +52,6 @@ class TaskViewSet(
             # Current user can't execute tasks against this target
             raise PermissionDenied()
         serializer.save(executor=self.request.user)                             # Include current user as executor
-
-    def get_executions(self) -> List[Execution]:
-        '''Get executions list associated to the current instance. Needed for Defect-Dojo integration.
-
-        Returns:
-            List[Execution]: Executions list associated to the current instance
-        '''
-        return list(self.get_object().executions.all())
-
-    def get_findings(self) -> List[Finding]:
-        '''Get findings list associated to the current instance. Needed for Defect-Dojo integration.
-
-        Returns:
-            List[Finding]: Findings list associated to the current instance
-        '''
-        task = self.get_object()
-        findings: List[Finding] = []
-        finding_models: List[Type[Finding]] = [
-            OSINT, Host, Port, Technology, Path, Vulnerability, Credential, Exploit
-        ]
-        for finding_model in finding_models:
-            # Search active findings related to this task
-            findings.extend(list(finding_model.objects.filter(executions__task=task, is_active=True).distinct().all()))
-        return findings
 
     def destroy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         '''Cancel task.

@@ -1,5 +1,7 @@
+import logging
 from typing import Any, Dict, cast
 
+from defectdojo.api import DefectDojo
 from django.db import models
 from findings.enums import PathType, Severity
 from input_types.base import BaseInput
@@ -12,6 +14,8 @@ from targets.enums import TargetType
 from tools.models import Input
 
 # Create your models here.
+
+logger = logging.getLogger()                                                    # Rekono logger
 
 
 class Target(models.Model, BaseInput):
@@ -77,6 +81,22 @@ class Target(models.Model, BaseInput):
             Project: Related project entity
         '''
         return self.project
+
+    def create_defectdojo_engagement(self, dd_client: DefectDojo) -> None:
+        '''Create Defect-Dojo engagement to import the executions and findings detected for the target.
+
+        Args:
+            dd_client (DefectDojo): Defect-Dojo API client
+        '''
+        name = f'Rekono assessment for {self.target}'
+        # Create engagement in Defect-Dojo
+        success, body = dd_client.create_engagement(self.project.id, name, f'{name} ({self.type})')
+        if success:
+            logger.info(f'[Defect-Dojo] New engagement {body["id"]} related to target {self.id} has been created')
+            self.defectdojo_engagement_id = body['id']                          # Save Defect-Dojo engagement Id
+            self.save(update_fields=['defectdojo_engagement_id'])
+        else:
+            logger.warning(f"[Defect-Dojo] Engagement for the target {self.id} can't be created")
 
 
 class TargetPort(models.Model, BaseInput):

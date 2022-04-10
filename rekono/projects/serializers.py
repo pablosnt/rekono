@@ -29,34 +29,14 @@ class ProjectSerializer(TaggitSerializer, serializers.ModelSerializer):
 
         model = Project
         # Project fields exposed via API
-        fields = ('id', 'name', 'description', 'defectdojo_product_id', 'owner', 'targets', 'members', 'tags')
-        read_only_fields = ('owner', 'members')                                 # Read only fields
-
-    def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
-        '''Validate the provided data before use it.
-
-        Args:
-            attrs (Dict[str, Any]): Provided data
-
-        Raises:
-            ValidationError: Raised if provided data is invalid
-
-        Returns:
-            Dict[str, Any]: Data after validation process
-        '''
-        attrs = super().validate(attrs)
-        if attrs.get('defectdojo_product_id'):
-            dd_client = DefectDojo()
-            if dd_client.is_available():                                        # Check Defect-Dojo integration
-                # Check if product Id exists in Defect-Dojo
-                success, _ = dd_client.get_product(attrs['defectdojo_product_id'])
-                if not success:                                                 # Product Id not found in Defect-Dojo
-                    raise serializers.ValidationError({
-                        'defectdojo_product_id': f'Product ID {attrs.get("defectdojo_product_id")} not found in Defect-Dojo'    # noqa: E501
-                    })
-            else:                                                               # Defect-Dojo is not available
-                raise serializers.ValidationError({'defect-dojo': ['Integration with Defect-Dojo is not available']})
-        return attrs
+        fields = (
+            'id', 'name', 'description', 'defectdojo_product_id', 'defectdojo_engagement_id',
+            'defectdojo_engagement_by_target', 'defectdojo_synchronization', 'owner', 'targets', 'members', 'tags'
+        )
+        read_only_fields = (                                                    # Read only fields
+            'defectdojo_product_id', 'defectdojo_engagement_id', 'defectdojo_engagement_by_target',
+            'defectdojo_synchronization', 'owner', 'targets', 'members'
+        )
 
     @transaction.atomic()
     def create(self, validated_data: Dict[str, Any]) -> Project:
@@ -94,27 +74,7 @@ class ProjectMemberSerializer(serializers.Serializer):
         return instance
 
 
-class DefectDojoSyncSerizlizer(serializers.Serializer):
-    '''Serializer to enable and disable the Defect-Dojo synchronization for one project via API.'''
-
-    synchronization = serializers.BooleanField(required=True)                   # Enable/Disable Defect-Dojo sync
-
-    def update(self, instance: Project, validated_data: Dict[str, Any]) -> Project:
-        '''Update instance from validated data.
-
-        Args:
-            instance (Project): Instance to update
-            validated_data (Dict[str, Any]): Validated data
-
-        Returns:
-            Project: Updated instance
-        '''
-        instance.defectdojo_synchronization = validated_data.get('synchronization')
-        instance.save(update_fields=['defectdojo_synchronization'])
-        return instance
-
-
-class DefectDojoConfigurationSerializer(serializers.Serializer):
+class DefectDojoIntegrationSerializer(serializers.Serializer):
     '''Serializer to configure Defect-Dojo integration for one project via API.'''
 
     product_id = serializers.IntegerField(required=False)                       # Using an existing product
@@ -130,7 +90,7 @@ class DefectDojoConfigurationSerializer(serializers.Serializer):
             data (Any, optional): Data provided for the operations. Defaults to ....
         '''
         super().__init__(instance, data, **kwargs)
-        self.dd = DefectDojo()
+        self.dd_client = DefectDojo()
 
     def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
         '''Validate the provided data before use it.
@@ -144,15 +104,17 @@ class DefectDojoConfigurationSerializer(serializers.Serializer):
         Returns:
             Dict[str, Any]: Data after validation process
         '''
+        if not self.dd_client.is_available():
+            raise serializers.ValidationError({'defect-dojo': ['Integration with Defect-Dojo is not available']})
         attrs = super().validate(attrs)
         if attrs.get('engagement_id'):                                          # If engagement Id provided
-            success, body = self.dd.get_engagement(attrs['engagement_id'])      # Check engagement Id
+            success, body = self.dd_client.get_engagement(attrs['engagement_id'])   # Check engagement Id
             if success:
                 attrs['product_id'] = body.get('product')                       # Save related product Id
             else:
                 raise ValidationError({'engagement_id': 'Engagement not found in Defect-Dojo'})
         elif attrs.get('product_id'):                                           # If not engagement Id but product Id
-            success, body = self.dd.get_product(attrs['product_id'])            # Check product Id
+            success, body = self.dd_client.get_product(attrs['product_id'])     # Check product Id
             if not success:
                 raise ValidationError({'product_id': 'Product not found in Defect-Dojo'})
         if (                                                                    # If new engagement is needed
@@ -185,17 +147,20 @@ class DefectDojoConfigurationSerializer(serializers.Serializer):
         '''
         if not validated_data.get('product_id'):                                # DD product creation required
             product_type = 0
-            success, body = self.dd.get_rekono_product_type()                   # Get Rekono product type in Defect-Dojo
+            success, body = self.dd_client.get_rekono_product_type()            # Get Rekono product type in Defect-Dojo
             if success:
                 product_type = body['results'][0].get('id')                     # Rekono product type found
             else:
-                success, body = self.dd.create_rekono_product_type()            # Create Rekono product type in DD
+                success, body = self.dd_client.create_rekono_product_type()     # Create Rekono product type in DD
                 if not success:
+                    logger.error("[Defect-Dojo] Rekono product type can't be created")
                     raise DefectDojoException({'product_type': ["Rekono product type can't be created in Defect-Dojo"]})
                 logger.info('[Defect-Dojo] Rekono product type has been created')
                 product_type = body['id']
-            success, body = self.dd.create_product(product_type, instance)      # Create product related to the project
+            # Create product related to the project
+            success, body = self.dd_client.create_product(product_type, instance)
             if not success:
+                logger.error(f"[Defect-Dojo] Product related to project {instance.id} can't be created")
                 raise DefectDojoException(
                     {'product': [f"Defect-Dojo product related to project {instance.id} can't be created"]}
                 )
@@ -208,18 +173,44 @@ class DefectDojoConfigurationSerializer(serializers.Serializer):
             validated_data.get('engagement_name') and
             validated_data.get('engagement_description')
         ):
-            success, body = self.dd.create_engagement(                          # Create engagement
+            success, body = self.dd_client.create_engagement(                          # Create engagement
                 validated_data['product_id'],
                 validated_data['engagement_name'],
                 validated_data['engagement_description']
             )
             if not success:
+                logger.error(f"[Defect-Dojo] Engagement related to project {instance.id} can't be created")
                 raise DefectDojoException(
                     {'engagement': [f"Defect-Dojo engagement related to project {instance.id} can't be created"]}
                 )
             logger.info(f'[Defect-Dojo] New engagement {body["id"]} has been created')
             validated_data['engagement_id'] = body.get('id')
         instance.defectdojo_engagement_id = validated_data.get('engagement_id')
+        # If no engagement provided, one engagement for each target will be created
         instance.defectdojo_engagement_by_target = validated_data.get('engagement_id') is None
         instance.save(update_fields=['defectdojo_engagement_id', 'defectdojo_engagement_by_target'])
         return super().update(instance, validated_data)
+
+
+class DefectDojoSyncSerializer(serializers.Serializer):
+    '''Serializer to enable and disable the Defect-Dojo synchronization for one project via API.'''
+
+    synchronization = serializers.BooleanField(required=True)                   # Enable/Disable Defect-Dojo sync
+
+    def update(self, instance: Project, validated_data: Dict[str, Any]) -> Project:
+        '''Update instance from validated data.
+
+        Args:
+            instance (Project): Instance to update
+            validated_data (Dict[str, Any]): Validated data
+
+        Returns:
+            Project: Updated instance
+        '''
+        if not instance.defectdojo_product_id:
+            raise DefectDojoException(
+                {'defectdojo_product_id': [f'Defect-Dojo integration is not configured for project {instance.id}']}
+            )
+        instance.defectdojo_synchronization = validated_data.get('synchronization')
+        instance.save(update_fields=['defectdojo_synchronization'])
+        return instance

@@ -14,6 +14,6 @@ class ExecutionSerializer(serializers.ModelSerializer):
         model = Execution
         fields = (                                                              # Execution fields exposed via API
             'id', 'task', 'step', 'output_plain', 'output_error', 'status', 'start', 'end',
-            'reported_to_defectdojo', 'osint', 'host', 'port', 'path', 'technology',
+            'imported_in_defectdojo', 'osint', 'host', 'port', 'path', 'technology',
             'vulnerability', 'credential', 'exploit'
         )

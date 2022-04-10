@@ -21,7 +21,7 @@ class Execution(models.Model):
     status = models.TextField(max_length=10, choices=Status.choices, default=Status.REQUESTED)      # Execution status
     start = models.DateTimeField(blank=True, null=True)                         # Start date
     end = models.DateTimeField(blank=True, null=True)                           # End date
-    reported_to_defectdojo = models.BooleanField(default=False)                 # Indicate if it has been imported yet
+    imported_in_defectdojo = models.BooleanField(default=False)                 # Indicate if it has been imported yet
 
     def __str__(self) -> str:
         '''Instance representation in text format.

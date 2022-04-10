@@ -1,9 +1,7 @@
-from typing import Any, List
+from typing import Any
 from urllib.request import Request
 
 from api.filters import RekonoFilterBackend
-from defectdojo.serializers import EngagementSerializer
-from defectdojo.views import DefectDojoFindings
 from django.db.models import QuerySet
 from drf_spectacular.utils import extend_schema
 from findings.enums import DataType
@@ -28,8 +26,8 @@ from targets.serializers import TargetSerializer
 # Create your views here.
 
 
-class FindingBaseView(ListModelMixin, RetrieveModelMixin, DestroyModelMixin, DefectDojoFindings):
-    '''Common finding ViewSet that includes: get, retrieve, enable, disable and import in Defect-Dojo features.'''
+class FindingBaseView(ListModelMixin, RetrieveModelMixin, DestroyModelMixin):
+    '''Common finding ViewSet that includes: get, retrieve, enable and disable features.'''
 
     # Replace DjangoFilterBackend by RekonoFilterBackend to allow filters by N-M relations like 'executions' field.
     filter_backends = [RekonoFilterBackend, SearchFilter, OrderingFilter]
@@ -46,14 +44,6 @@ class FindingBaseView(ListModelMixin, RetrieveModelMixin, DestroyModelMixin, Def
         if self.request.user.id:
             return queryset.filter(executions__task__target__project__members=self.request.user)
         return None
-
-    def get_findings(self) -> List[Finding]:
-        '''Get findings list associated to the current instance. Needed for Defect-Dojo integration.
-
-        Returns:
-            List[Finding]: Findings list associated to the current instance
-        '''
-        return [self.get_object()]
 
     def destroy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         '''Disable finding.
@@ -85,20 +75,6 @@ class FindingBaseView(ListModelMixin, RetrieveModelMixin, DestroyModelMixin, Def
         finding.is_active = True
         finding.save(update_fields=['is_active'])
         return Response(status=status.HTTP_201_CREATED)
-
-    @extend_schema(request=EngagementSerializer, responses={200: None})
-    @action(detail=True, methods=['POST'], url_path='defect-dojo', url_name='defect-dojo')
-    def defect_dojo_findings(self, request, pk):
-        '''Import finding in Defect-Dojo.
-
-        Args:
-            request (Request): Received HTTP request
-            pk (str): Instance Id
-
-        Returns:
-            Response: HTTP response
-        '''
-        return super().defect_dojo_findings(request, pk)
 
 
 class OSINTViewSet(FindingBaseView):
