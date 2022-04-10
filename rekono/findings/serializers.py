@@ -37,6 +37,8 @@ class HostSerializer(serializers.ModelSerializer):
 class PortSerializer(serializers.ModelSerializer):
     '''Serializer to get the Port data via API.'''
 
+    detected_by = SimplyToolSerializer(many=False, read_only=True)                # Tool details for read operations
+
     class Meta:
         '''Serializer metadata.'''
 
@@ -50,6 +52,8 @@ class PortSerializer(serializers.ModelSerializer):
 
 class PathSerializer(serializers.ModelSerializer):
     '''Serializer to get the Path data via API.'''
+
+    detected_by = SimplyToolSerializer(many=False, read_only=True)                # Tool details for read operations
 
     class Meta:
         '''Serializer metadata.'''
