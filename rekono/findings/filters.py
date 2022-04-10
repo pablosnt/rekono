@@ -17,7 +17,9 @@ FINDING_ORDERING = (
     ('executions__step__tool', 'step__tool'),
     ('executions__task__executor', 'executor'),
     'executions',
-    'creation',
+    'detected_by',
+    'first_seen',
+    'last_seen',
     'is_active'
 )
 FINDING_FILTERING = {
@@ -31,7 +33,11 @@ FINDING_FILTERING = {
     'executions__task__executor__username': ['exact', 'icontains'],
     'executions__start': ['gte', 'lte', 'exact'],
     'executions__end': ['gte', 'lte', 'exact'],
-    'creation': ['gte', 'lte', 'exact'],
+    'detected_by': ['exact'],
+    'detected_by__name': ['exact', 'icontains'],
+    'detected_by__stage': ['exact'],
+    'first_seen': ['gte', 'lte', 'exact'],
+    'last_seen': ['gte', 'lte', 'exact'],
     'is_active': ['exact'],
 }
 

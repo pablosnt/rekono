@@ -293,6 +293,10 @@ class BaseTool:
         # Get unique filter for this finding model and from this fields
         unique_filter = get_unique_filter(finding_type.key_fields, fields, self.execution.task.target)
         finding = finding_type.objects.filter(**unique_filter).first()          # Check if finding already exists
+        fields.update({
+            'detected_by': self.tool,
+            'last_seen': timezone.now(),
+        })
         if finding:
             updated_fields = []
             for field, value in fields.items():                                 # For each finding field

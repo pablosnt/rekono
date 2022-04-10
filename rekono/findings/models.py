@@ -12,7 +12,7 @@ from input_types.utils import get_url
 from projects.models import Project
 from targets.enums import TargetType
 from targets.utils import get_target_type
-from tools.models import Input
+from tools.models import Input, Tool
 
 # Create your models here.
 
@@ -35,7 +35,9 @@ class Finding(models.Model, BaseInput):
 
     # Execution where the finding is found
     executions = models.ManyToManyField(Execution, related_name='%(class)s')
-    creation = models.DateTimeField(auto_now_add=True)                          # Creation date of the finding
+    detected_by = models.ForeignKey(Tool, on_delete=models.SET_NULL, blank=True, null=True)
+    first_seen = models.DateTimeField(auto_now_add=True)                        # First date when the finding appear
+    last_seen = models.DateTimeField()                                          # Last date when the finding appear
     is_active = models.BooleanField(default=True)                               # Indicate if the finding is active
     # Indicate if the finding has been imported in Defect-Dojo
     reported_to_defectdojo = models.BooleanField(default=False)
@@ -129,7 +131,7 @@ class OSINT(Finding):
             'title': f'{self.data_type} found using OSINT techniques',
             'description': self.data,
             'severity': str(Severity.MEDIUM),
-            'date': self.creation.strftime(DD_DATE_FORMAT)
+            'date': self.last_seen.strftime(DD_DATE_FORMAT)
         }
 
     def __str__(self) -> str:
@@ -197,7 +199,7 @@ class Host(Finding):
             'title': 'Host discovered',
             'description': description,
             'severity': str(Severity.INFO),
-            'date': self.creation.strftime(DD_DATE_FORMAT)
+            'date': self.last_seen.strftime(DD_DATE_FORMAT)
         }
 
     def __str__(self) -> str:
@@ -278,7 +280,7 @@ class Port(Finding):
             'title': 'Port discovered',
             'description': description,
             'severity': str(Severity.INFO),
-            'date': self.creation.strftime(DD_DATE_FORMAT)
+            'date': self.last_seen.strftime(DD_DATE_FORMAT)
         }
 
     def __str__(self) -> str:
@@ -423,7 +425,7 @@ class Technology(Finding):
             'severity': str(Severity.LOW),
             'cwe': 200,     # CWE-200: Exposure of Sensitive Information to Unauthorized Actor
             'references': self.reference,
-            'date': self.creation.strftime(DD_DATE_FORMAT)
+            'date': self.last_seen.strftime(DD_DATE_FORMAT)
         }
 
     def __str__(self) -> str:
@@ -478,7 +480,7 @@ class Credential(Finding):
             'description': description,
             'cwe': 200,     # CWE-200: Exposure of Sensitive Information to Unauthorized Actor
             'severity': str(Severity.HIGH),
-            'date': self.creation.strftime(DD_DATE_FORMAT)
+            'date': self.last_seen.strftime(DD_DATE_FORMAT)
         }
 
     def __str__(self) -> str:
@@ -568,7 +570,7 @@ class Vulnerability(Finding):
             'cve': self.cve,
             'cwe': int(self.cwe.split('-', 1)[1]) if self.cwe else None,
             'references': self.reference,
-            'date': self.creation.strftime(DD_DATE_FORMAT)
+            'date': self.last_seen.strftime(DD_DATE_FORMAT)
         }
 
     def __str__(self) -> str:
@@ -631,7 +633,7 @@ class Exploit(Finding):
             'description': self.title,
             'severity': Severity(self.vulnerability.severity).value if self.vulnerability else str(Severity.MEDIUM),
             'reference': self.reference,
-            'date': self.creation.strftime(DD_DATE_FORMAT)
+            'date': self.last_seen.strftime(DD_DATE_FORMAT)
         }
 
     def __str__(self) -> str:

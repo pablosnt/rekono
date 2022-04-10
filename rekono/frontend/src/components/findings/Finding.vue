@@ -1,6 +1,6 @@
 <template>
   <b-col v-if="findings && findings.length > 0 && (types.length === 0 || types.includes(name.toLowerCase()))">
-    <b-table ref="findingTable" select-mode="single" :selectable="details !== null" hover striped borderless head-variant="dark" selected-variant="danger" :fields="fields" :items="findings" :filter="findingId ? findingId.toString() : null" :filter-function="selectedFilter" @filtered="preventSelection = true" @row-selected="selectRow">
+    <b-table ref="findingTable" select-mode="single" selectable hover striped borderless head-variant="dark" selected-variant="danger" :fields="fields" :items="findings" :filter="findingId ? findingId.toString() : null" :filter-function="selectedFilter" @filtered="preventSelection = true" @row-selected="selectRow">
       <template #cell(data_type)="row">
         <b-badge variant="primary">{{ row.item.data_type }}</b-badge>
       </template>
@@ -66,6 +66,11 @@
                   <label class="text-muted">{{ detail.title }}</label><b-icon class="ml-2" v-if="row.item[detail.field]" icon="check-circle-fill" variant="success"/><b-icon class="ml-2" v-if="!row.item[detail.field]" icon="x-circle-fill" variant="danger"/>
                 </div>
               </div>
+            </div>
+            <div>
+              <label class="text-muted">Detected by</label><span class="ml-2">{{ row.item.detected_by.name }}</span>
+              <label class="text-muted">First seen</label><span class="ml-2">{{ row.item.first_seen !== null ? row.item.first_seen.replace('T', ' ').substring(0, 19) : '' }}</span>
+              <label class="text-muted">Last seen</label><span class="ml-2">{{ row.item.last_seen !== null ? row.item.last_seen.replace('T', ' ').substring(0, 19) : '' }}</span>
             </div>
           </b-col>
           <b-col cols="2" v-if="auditor.includes($store.state.role)">

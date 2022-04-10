@@ -176,7 +176,7 @@ export default {
       if (this.timeFilter) {
         let date = new Date()
         date.setDate(date.getDate() - this.timeFilter)
-        filter.creation__gte = date.toISOString().replace('T', ' ').split('.', 1)[0]
+        filter.last_seen__gte = date.toISOString().replace('T', ' ').split('.', 1)[0]
       }
       this.severities.forEach(severity => {
         filter.severity = severity
