@@ -83,13 +83,13 @@
         </b-col>
         <b-col>
           <b-tabs fill active-nav-item-class="font-weight-bold text-danger">
-            <b-tab title-link-class="text-secondary" :disabled="!selectedExecution || !selectedExecution.output_plain">
+            <b-tab title-link-class="text-secondary" v-if="selectedExecution && selectedExecution.output_plain">
               <template #title>
                 <b-icon icon="gear-fill"/> Output
               </template>
               <b-form-textarea class="mt-3 text-light" style="background-color: #212529;" plaintext v-if="selectedExecution && selectedExecution.output_plain" :value="selectedExecution.output_plain" size="md" rows="5" max-rows="25"></b-form-textarea>
             </b-tab>
-            <b-tab title-link-class="text-secondary" v-if="currentTask && selectedExecution && selectedExecution.output_error">
+            <b-tab title-link-class="text-secondary" v-if="selectedExecution && selectedExecution.output_error">
               <template #title>
                 <b-icon icon="exclamation-triangle-fill"/> Error
               </template>
