@@ -32,8 +32,6 @@ defect-dojo:
   verify: false
   tags:
     - rekono
-  product:
-    auto-creation: true
   product-type: Rekono Project
   test-type: Rekono Findings Import
   test: Rekono Test

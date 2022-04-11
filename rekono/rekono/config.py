@@ -54,7 +54,6 @@ class RekonoConfigLoader:
         self.DD_API_KEY = self.get_config_key(config, ['defect-dojo', 'api-key'], '')
         self.DD_VERIFY_TLS = self.get_config_key(config, ['defect-dojo', 'verify'], True)
         self.DD_TAGS = self.get_config_key(config, ['defect-dojo', 'tags'], ['rekono'])
-        self.DD_PRODUCT_AUTO_CREATION = self.get_config_key(config, ['defect-dojo', 'product', 'auto-creation'], True)
         self.DD_PRODUCT_TYPE = self.get_config_key(config, ['defect-dojo', 'product-type'], 'Rekono Project')
         self.DD_TEST_TYPE = self.get_config_key(config, ['defect-dojo', 'test-type'], 'Rekono Findings Import')
         self.DD_TEST = self.get_config_key(config, ['defect-dojo', 'test'], 'Rekono Test')

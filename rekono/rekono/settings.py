@@ -398,8 +398,6 @@ DEFECT_DOJO = {
     'API_KEY': os.getenv(RKN_DD_API_KEY, CONFIG.DD_API_KEY),                    # Defect-Dojo API key
     'VERIFY_TLS': CONFIG.DD_VERIFY_TLS,                                         # Defect-Dojo TLS verification
     'TAGS': CONFIG.DD_TAGS,                                                     # Tags to be included in DD entities
-    # Indicate if Defect-Dojo products can be created from Rekono projects
-    'PRODUCT_AUTO_CREATION': CONFIG.DD_PRODUCT_AUTO_CREATION,
     'PRODUCT_TYPE': CONFIG.DD_PRODUCT_TYPE,                                     # Product type for new DD products
     'TEST_TYPE': CONFIG.DD_TEST_TYPE,                                           # Rekono test type name in Defect-Dojo
     'TEST': CONFIG.DD_TEST                                                      # Rekono test name in Defect-Dojo

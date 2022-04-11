@@ -31,7 +31,6 @@ class DefectDojo:
         self.api_key = config.get('API_KEY')                                    # Defect-Dojo API key
         self.verify_tls = config.get('VERIFY_TLS')                              # TLS certificate verification
         self.tags = config.get('TAGS')                                          # Tags to use in Rekono items
-        self.product_auto_creation = config.get('PRODUCT_AUTO_CREATION')        # Product creation from Rekono project
         self.product_type = config.get('PRODUCT_TYPE')                          # Product type name for Rekono
         self.test_type = config.get('TEST_TYPE')                                # Test type name for Rekono
         self.test = config.get('TEST')                                          # Test name for Rekono
