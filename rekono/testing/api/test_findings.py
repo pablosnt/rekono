@@ -1,10 +1,7 @@
-from unittest import mock
-
 from findings.enums import DataType, Severity
 from findings.models import (OSINT, Credential, Exploit, Technology,
                              Vulnerability)
 from testing.api.base import RekonoTestCase
-from testing.mocks.defectdojo import defect_dojo_success
 
 
 class FindingsTest(RekonoTestCase):
@@ -134,14 +131,3 @@ class FindingsTest(RekonoTestCase):
                     findings.reverse()                                          # Order findings by creation (so by Id)
                     for index, finding in enumerate(findings):
                         self.assertEqual(finding.id, content['results'][index]['id'])
-
-    @mock.patch('defectdojo.api.DefectDojo.request', defect_dojo_success)       # Mocks Defect-Dojo response
-    def test_import_defect_dojo(self) -> None:
-        '''Test Defect-Dojo import feature.'''
-        engagement_id = {'id': 1}
-        new_engagement = {'name': 'Engagement', 'description': 'Engagement'}
-        for finding, endpoint in self.data:
-            # Import in existing engagement
-            self.api_test(self.client.post, f'/api/{endpoint}/{finding.id}/defect-dojo/', 200, data=engagement_id)
-            # Import in new engagement
-            self.api_test(self.client.post, f'/api/{endpoint}/{finding.id}/defect-dojo/', 200, data=new_engagement)

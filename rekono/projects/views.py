@@ -100,7 +100,7 @@ class ProjectViewSet(ModelViewSet):
         serializer = DefectDojoIntegrationSerializer(data=request.data)
         if serializer.is_valid():
             try:
-                serializer.update(project, serializer.validated_data)           # Update Defect-Dojo configuration
+                project = serializer.update(project, serializer.validated_data)     # Update Defect-Dojo configuration
                 return Response(ProjectSerializer(project).data, status=status.HTTP_200_OK)
             except DefectDojoException as ex:
                 return Response(ex.args[0], status=status.HTTP_400_BAD_REQUEST)     # Error in Defect-Dojo requests
@@ -122,7 +122,7 @@ class ProjectViewSet(ModelViewSet):
         serializer = DefectDojoSyncSerializer(data=request.data)
         if serializer.is_valid():
             try:
-                serializer.update(project, serializer.validated_data)           # Update Defect-Dojo synchronization
+                project = serializer.update(project, serializer.validated_data)     # Update Defect-Dojo synchronization
                 return Response(ProjectSerializer(project).data, status=status.HTTP_200_OK)
             except DefectDojoException as ex:
                 # Defect-Dojo integration is not configured

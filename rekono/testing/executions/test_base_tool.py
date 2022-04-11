@@ -1,5 +1,6 @@
 import os
 from typing import List
+from unittest import mock
 
 import django_rq
 from django.test import TestCase
@@ -19,6 +20,7 @@ from targets.models import (Target, TargetEndpoint, TargetPort,
                             TargetTechnology, TargetVulnerability)
 from tasks.enums import Status
 from tasks.models import Task
+from testing.mocks.defectdojo import defect_dojo_success
 from tools.enums import IntensityRank, Stage
 from tools.exceptions import ToolExecutionException
 from tools.models import Argument, Configuration, Input, Intensity, Tool
@@ -506,6 +508,7 @@ class BaseToolTest(TestCase):
         self.tool_instance.tool_execution(['/'], [], [])                        # Valid ls execution
         self.assertEqual(1, errors_count)
 
+    @mock.patch('defectdojo.api.DefectDojo.request', defect_dojo_success)       # Mocks Defect-Dojo response
     def test_process_findings(self) -> None:
         '''Test process_findings feature using nmap report.'''
         queue = django_rq.get_queue('findings-queue')

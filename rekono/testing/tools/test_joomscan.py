@@ -1,5 +1,5 @@
 from findings.enums import PathType, Severity
-from findings.models import Path, Exploit, Technology, Vulnerability
+from findings.models import Exploit, Path, Technology, Vulnerability
 from testing.tools.base import ToolParserTest
 
 

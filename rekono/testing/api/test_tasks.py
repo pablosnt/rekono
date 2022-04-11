@@ -1,16 +1,14 @@
 from datetime import datetime, timedelta
-from unittest import mock
 
 from executions.models import Execution
 from processes.models import Step
 from tasks.enums import Status, TimeUnit
 from tasks.models import Task
-from testing.api.defect_dojo_base import RekonoTestCaseWithDDImports
-from testing.mocks.defectdojo import defect_dojo_success
+from testing.api.base import RekonoTestCase
 from tools.models import Configuration, Tool
 
 
-class TasksTest(RekonoTestCaseWithDDImports):
+class TasksTest(RekonoTestCase):
     '''Test cases for Tasks module.'''
 
     def setUp(self) -> None:
@@ -36,7 +34,6 @@ class TasksTest(RekonoTestCaseWithDDImports):
             ),
             self.running_task: f'{self.project.name} - {self.target.target} - {self.process.name}',
         }
-        self.dd_model = self.task                                               # Model to test Defect-Dojo integration
 
     def run_task_and_check_status(self, task_id: int, expected_status: str = Status.COMPLETED) -> None:
         '''Run task (launch RQ worker for testing) and check that the task has been completed.'''
@@ -141,19 +138,3 @@ class TasksTest(RekonoTestCaseWithDDImports):
         '''Test repeat task feature with running task.'''
         # It's not possible to repeat a running task
         self.api_test(self.client.post, f'{self.endpoint}{self.running_task.id}/repeat/', 400)
-
-    @mock.patch('defectdojo.api.DefectDojo.request', defect_dojo_success)       # Mocks Defect-Dojo response
-    def test_import_in_defect_dojo_without_executions_and_findings(self) -> None:
-        '''Test Defect-Dojo import feature with no data to import.'''
-        # Try to import executions from running task
-        self.api_test(
-            self.client.post,
-            f'{self.endpoint}{self.running_task.id}/defect-dojo-scans/',
-            400, data={'id': 1}
-        )
-        # Try to import findings from running task
-        self.api_test(
-            self.client.post,
-            f'{self.endpoint}{self.running_task.id}/defect-dojo-findings/',
-            400, data={'id': 1}
-        )

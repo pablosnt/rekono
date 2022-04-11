@@ -2,8 +2,8 @@ from typing import Callable, cast
 
 from django.forms import ValidationError
 from security.csp_header import admin, redoc, swagger
-from security.input_validation import (validate_path, validate_name,
-                                       validate_number, validate_text,
+from security.input_validation import (validate_name, validate_number,
+                                       validate_path, validate_text,
                                        validate_time_amount)
 from security.passwords import PasswordComplexityValidator
 from testing.api.base import RekonoTestCase
