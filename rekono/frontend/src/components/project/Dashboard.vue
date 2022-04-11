@@ -7,7 +7,7 @@
         </b-card>
       </b-col>
       <b-col cols="1" v-if="defectDojoUrl()">
-        <b-link :href="defectDojoUrl" target="_blank">
+        <b-link :href="defectDojoUrl()" target="_blank">
           <b-img src="/static/defect-dojo-favicon.ico" width="30" height="30"/>
         </b-link>
       </b-col>

@@ -2,6 +2,11 @@
   <div>
     <table-header :filters="filters" add="add-target-modal" :showAdd="auditor.includes($store.state.role)" @filter="fetchData"/>
     <b-table striped borderless head-variant="dark" :fields="targetsFields" :items="data">
+      <template #cell(defectdojo_engagement_id)="row">
+        <b-link v-if="row.item.defectdojo_engagement_id !== null" :href="defectDojoUrl(row.item.defectdojo_engagement_id)" target="_blank">
+          <b-img src="/static/defect-dojo-favicon.ico" width="30" height="30"/>
+        </b-link>
+      </template>
       <template #cell(actions)="row">
         <b-button :disabled="row.item.target_ports.length === 0" @click="showTarget(row)" variant="outline" class="mr-2" v-b-tooltip.hover title="Details">
           <b-icon v-if="!row.detailsShowing" variant="dark" icon="eye-fill"/>
@@ -132,6 +137,7 @@ export default {
       targetsFields: [
         { key: 'target', sortable: true },
         { key: 'type', sortable: true },
+        { key: 'defectdojo_engagement_id', label: 'Defect-Dojo', sortable: false },
         { key: 'target_ports.length', label: 'Target Ports', sortable: true },
         { key: 'tasks.length', label: 'Tasks', sortable: true },
         { key: 'actions', sortable: false }
@@ -244,7 +250,10 @@ export default {
       this.selectedTarget = null
       this.selectedTargetPort = null
       this.selectedTargetEndpoint = null
-    }
+    },
+    defectDojoUrl (engagementId) {
+      return `${process.env.VUE_APP_DEFECTDOJO_HOST}/engagement/${engagementId}`
+    },
   }
 }
 </script>
