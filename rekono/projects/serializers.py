@@ -5,7 +5,6 @@ from api.serializers import RekonoTagSerializerField
 from defectdojo.api import DefectDojo
 from defectdojo.exceptions import DefectDojoException
 from django.db import transaction
-from jsonschema import ValidationError
 from projects.models import Project
 from rest_framework import serializers
 from security.input_validation import validate_name, validate_text
@@ -112,11 +111,11 @@ class DefectDojoIntegrationSerializer(serializers.Serializer):
             if success:
                 attrs['product_id'] = body.get('product')                       # Save related product Id
             else:
-                raise ValidationError({'engagement_id': 'Engagement not found in Defect-Dojo'})
+                raise serializers.ValidationError({'engagement_id': 'Engagement not found in Defect-Dojo'})
         elif attrs.get('product_id'):                                           # If not engagement Id but product Id
             success, body = self.dd_client.get_product(attrs['product_id'])     # Check product Id
             if not success:
-                raise ValidationError({'product_id': 'Product not found in Defect-Dojo'})
+                raise serializers.ValidationError({'product_id': 'Product not found in Defect-Dojo'})
         if (                                                                    # If new engagement is needed
             not attrs.get('engagement_id') and
             attrs.get('engagement_name') and
@@ -128,8 +127,8 @@ class DefectDojoIntegrationSerializer(serializers.Serializer):
             ]:
                 try:
                     validator(attrs[field])                                     # Validate name and description fields
-                except ValidationError as ex:
-                    raise ValidationError({field: str(ex)})
+                except serializers.ValidationError as ex:
+                    raise serializers.ValidationError({field: str(ex)})
         return attrs
 
     def update(self, instance: Project, validated_data: Dict[str, Any]) -> Project:
