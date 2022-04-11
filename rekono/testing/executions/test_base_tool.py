@@ -40,7 +40,7 @@ class BaseToolTest(TestCase):
         self.nikto_report = os.path.join(self.data_path, 'reports', 'nikto', 'default.xml')         # Nikto report
         # Tool and related objects
         self.nikto = Tool.objects.get(name='Nikto')
-        self.intensity = Intensity.objects.get(tool=self.nikto, default=True)
+        self.intensity = Intensity.objects.filter(tool=self.nikto).first()
         self.configuration = Configuration.objects.create(                      # Configuration with all argument types
             name='Test',
             tool=self.nikto,
