@@ -79,7 +79,10 @@ export default {
       nameRegex: /^[\w\s.\-[\]]*$/,
       textRegex: /^[\w\s.:,+\-'"?¿¡!#%$€[\]]*$/,
       pathRegex: /^[\w./#?&%]*$/,
-      cveRegex: /^CVE-[0-9]{4}-[0-9]{1,7}$/
+      cveRegex: /^CVE-[0-9]{4}-[0-9]{1,7}$/,
+      defectDojoEnabled: process.env.VUE_APP_DEFECTDOJO.toLowerCase() === 'true',
+      defectDojoHost: process.env.VUE_APP_DEFECTDOJO_HOST,
+      telegramBot: process.env.VUE_APP_TELEGRAM_BOT
     }
   },
   methods: {

@@ -18,8 +18,8 @@ rq:
   host: 127.0.0.1
   port: 6379
 email:
-  host: 127.0.0.1
-  port: 587
+  # host: 
+  # port: 
   # user:
   # password:
   tls: true
@@ -27,7 +27,7 @@ telegram:
   bot: Rekono
   # token: 
 defect-dojo:
-  url: http://127.0.0.1:8080
+  # url: 
   # api-key:
   verify: false
   tags:

@@ -41,17 +41,17 @@ class RekonoConfigLoader:
         self.RQ_HOST = self.get_config_key(config, ['rq', 'host'], '127.0.0.1')
         self.RQ_PORT = self.get_config_key(config, ['rq', 'port'], 6379)
         # Email: SMTP configuration
-        self.EMAIL_HOST = self.get_config_key(config, ['email', 'host'], '127.0.0.1')
-        self.EMAIL_PORT = self.get_config_key(config, ['email', 'port'], 587)
-        self.EMAIL_USER = self.get_config_key(config, ['email', 'user'], None)
-        self.EMAIL_PASSWORD = self.get_config_key(config, ['email', 'password'], None)
+        self.EMAIL_HOST = self.get_config_key(config, ['email', 'host'])
+        self.EMAIL_PORT = self.get_config_key(config, ['email', 'port'])
+        self.EMAIL_USER = self.get_config_key(config, ['email', 'user'])
+        self.EMAIL_PASSWORD = self.get_config_key(config, ['email', 'password'])
         self.EMAIL_TLS = self.get_config_key(config, ['email', 'tls'], True)
         # Telegram Bot token
         self.TELEGRAM_BOT = self.get_config_key(config, ['telegram', 'bot'], 'Rekono')
         self.TELEGRAM_TOKEN = self.get_config_key(config, ['telegram', 'token'], '')
         # Defect-Dojo
-        self.DD_URL = self.get_config_key(config, ['defect-dojo', 'url'], 'http://127.0.0.1:8080')
-        self.DD_API_KEY = self.get_config_key(config, ['defect-dojo', 'api-key'], '')
+        self.DD_URL = self.get_config_key(config, ['defect-dojo', 'url'])
+        self.DD_API_KEY = self.get_config_key(config, ['defect-dojo', 'api-key'])
         self.DD_VERIFY_TLS = self.get_config_key(config, ['defect-dojo', 'verify'], True)
         self.DD_TAGS = self.get_config_key(config, ['defect-dojo', 'tags'], ['rekono'])
         self.DD_PRODUCT_TYPE = self.get_config_key(config, ['defect-dojo', 'product-type'], 'Rekono Project')
@@ -66,13 +66,13 @@ class RekonoConfigLoader:
         )
         self.TOOLS_GITTOOLS_DIR = self.get_config_key(config, ['tools', 'gittools', 'directory'], '/opt/GitTools')
 
-    def get_config_key(self, config: Dict[str, Any], path: List[str], default: Any) -> Any:
+    def get_config_key(self, config: Dict[str, Any], path: List[str], default: Any = None) -> Any:
         '''Get configuration value by dict path. Default value will be returned if value not found or it's null.
 
         Args:
             config (Dict[str, Any]): Configuration data
             path (List[str]): Path to the configuration value
-            default (Any): Default value
+            default (Any): Default value. By default None
 
         Returns:
             Any: Configuration value to apply

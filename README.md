@@ -53,7 +53,7 @@ docker-compose up -d
 
 Go to https://127.0.0.1/
 
-> You can check the details in the [Docker documentation](docker/README.md).
+> You can check the details in the [Docker](docker/README.md) documentation. Specially, the [initial user](docker/README.md#initial-rekono-user) documentation
 
 
 ### Using Rekono CLI

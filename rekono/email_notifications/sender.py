@@ -9,7 +9,7 @@ from django_rq import job
 from email_notifications.constants import DATETIME_FORMAT
 from findings.models import Finding
 
-from rekono.settings import FRONTEND_URL
+from rekono.settings import EMAIL_HOST, EMAIL_PORT, FRONTEND_URL
 
 logger = logging.getLogger()                                                    # Rekono logger
 
@@ -24,15 +24,16 @@ def consumer(addresses: List[str], subject: str, template_name: str, data: Dict[
         template_name (str): HTML template to use
         data (Dict[str, Any]): Data to include in the HTML template
     '''
-    template = get_template(template_name)                                      # Get HTML template
-    data['rekono_url'] = FRONTEND_URL                                           # Include frontend address for links
-    content = template.render(data)                                             # Render HTML template using data
-    try:
-        message = EmailMultiAlternatives(subject, '', None, addresses)          # Create email message
-        message.attach_alternative(content, 'text/html')                        # Add HTML content to email message
-        message.send()                                                          # Send email message
-    except Exception:
-        logger.error('[Email] Error during email message sending')
+    if EMAIL_HOST and EMAIL_PORT:
+        template = get_template(template_name)                                  # Get HTML template
+        data['rekono_url'] = FRONTEND_URL                                       # Include frontend address for links
+        content = template.render(data)                                         # Render HTML template using data
+        try:
+            message = EmailMultiAlternatives(subject, '', None, addresses)      # Create email message
+            message.attach_alternative(content, 'text/html')                    # Add HTML content to email message
+            message.send()                                                      # Send email message
+        except Exception:
+            logger.error('[Email] Error during email message sending')
 
 
 def user_invitation(user: Any) -> None:

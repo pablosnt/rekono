@@ -166,7 +166,6 @@ export default {
   data () {
     this.getProfile()
     return {
-      telegramBot: process.env.VUE_APP_TELEGRAM_BOT,
       showTelegramSteps: false,
       id: null,
       username: null,
