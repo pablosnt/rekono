@@ -83,7 +83,7 @@ export default {
         })
     },
     updateProject (project, tags) {
-      this.put(`/api/projects/${project.id}/`, { name: project.name, description: project.description, defectdojo_product_id: project.defectdojo_product_id, tags: tags })
+      this.put(`/api/projects/${project.id}/`, { name: project.name, description: project.description, tags: tags })
     },
     deleteProject () {
       this.delete(`/api/projects/${this.selectedProject.id}/`, this.selectedProject.name, 'Project deleted successfully').then(() => this.fetchData())

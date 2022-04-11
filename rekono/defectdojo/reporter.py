@@ -24,15 +24,13 @@ def get_product_and_engagement_id(project: Project, target: Target) -> Tuple[int
         Tuple[int, int]: Defect-Dojo product Id and engagement Id
     '''
     product_id = project.defectdojo_product_id
+    to_check = [(dd_client.get_product, product_id, 'product')]
     engagement_id = project.defectdojo_engagement_id
     if project.defectdojo_engagement_by_target:
-        if not target.defectdojo_engagement_id:
-            target.create_defectdojo_engagement(dd_client)
-        engagement_id = target.defectdojo_engagement_id
-    for checker, id, name in [
-        (dd_client.get_product, product_id, 'product'),
-        (dd_client.get_engagement, engagement_id, 'engagement')
-    ]:
+        engagement_id = target.get_defectdojo_engagement(dd_client)
+    else:
+        to_check.append((dd_client.get_engagement, engagement_id, 'engagement'))
+    for checker, id, name in to_check:
         check, _ = checker(id)
         if not check:
             raise DefectDojoException({name.lower(): [f'{name.capitalize()} {id} is not found in Defect-Dojo']})

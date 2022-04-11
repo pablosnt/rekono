@@ -83,10 +83,13 @@ class DefectDojo:
         Returns:
             bool: Indicate if Defect-Dojo integration is available or not
         '''
-        status, _ = self.request('get', '/test_types/', params={'limit': 1})
-        if not status:
+        try:
+            success, _ = self.request('get', '/test_types/', params={'limit': 1})
+        except requests.exceptions.ConnectionError:
+            success = False
+        if not success:
             logger.error('[Defect-Dojo] Integration with Defect-Dojo is not available')
-        return status
+        return success
 
     def get_rekono_product_type(self) -> Tuple[bool, dict]:
         '''Get product type associated to Rekono, based on configurated name.

@@ -1,52 +1,47 @@
 <template>
-  <b-modal :id="id" @close="clean" @hidden="clean" @ok="confirm" :ok-title="okTitle" header-bg-variant="light" header-text-variant="info" ok-variant="info" size="lg">
+  <b-modal :id="id" @close="clean" @hidden="clean" @ok="confirm" ok-title="Update" header-bg-variant="light" header-text-variant="info" ok-variant="info" size="lg">
     <template #modal-title>
       <b-link class="mr-2" :href="defectDojo" target="_blank">
         <b-img src="/static/defect-dojo-favicon.ico" width="30" height="30"/>
       </b-link>
-      Defect-Dojo Import
+      Defect-Dojo
     </template>
-    <b-alert v-model="alreadyReported" variant="warning">
-      <b-icon class="mr-2" icon="exclamation-circle-fill" variant="warning"/>
-      <span v-if="!isFinding">This execution has already been reported to Defect-Dojo</span>
-      <span v-if="isFinding">This finding has already been reported to Defect-Dojo</span>
-    </b-alert>
-    The import will be performed in the associated Defect-Dojo product to the Rekono project. You can choose an existing engagement or creating new one before import findings
-    <b-form class="mt-2">
-      <b-tabs active-nav-item-class="text-info" align="center" @input="changeTab">
-        <b-tab title="Create Engagement" title-link-class="text-secondary">
+    <div class="text-left mb-4">
+      <b-form-checkbox switch v-model="sync" size="md">Defect-Dojo synchronization. When an execution is completed, it will be imported in Defect-Dojo</b-form-checkbox>
+    </div>
+    <b-row class="mt-3">
+      <b-col>
+        <label>Product</label>
+        <div class="text-muted mb-5">
+          <b-form-checkbox switch v-model="autoProduct" size="md">Create a new product automatically</b-form-checkbox>
+        </div>
+        <b-form v-if="!autoProduct">
+          <b-form-group description="Product Id">
+            <b-form-input v-model="productId" :state="productIdState" type="number"/>
+          </b-form-group>
+        </b-form>
+      </b-col>
+      <b-col>
+        <label>Engagement</label>
+        <div class="text-muted mb-3">
+          <b-form-checkbox switch v-model="autoEngagement" size="md">Create a new engagement for each target automatically</b-form-checkbox>
+          <b-form-checkbox switch v-if="!autoEngagement" v-model="newEngagement" size="md">Create a new engagement for all targets</b-form-checkbox>
+        </div>
+        <b-form v-if="!autoEngagement && !newEngagement">
+          <b-form-group description="Engagement Id">
+            <b-form-input v-model="engagementId" :state="engagementIdState" type="number"/>
+          </b-form-group>
+        </b-form>
+        <b-form v-if="!autoEngagement && newEngagement">
           <b-form-group class="mt-3" description="Engagement name" :invalid-feedback="invalidName">
             <b-form-input type="text" v-model="engagementName" :state="nameState" maxlength="100"/>
           </b-form-group>
           <b-form-group description="Engagement description" :invalid-feedback="invalidDescription">
             <b-form-textarea v-model="engagementDescription" :state="descriptionState" rows="4" maxlength="300"/>
           </b-form-group>
-        </b-tab>
-        <b-tab title="Select Engagement" title-link-class="text-secondary">
-          <b-form-group class="mt-3" description="Engagement Id" invalid-feedback="Engagement Id is required">
-            <b-form-input v-model="engagementId" :state="idState" type="number"/>
-          </b-form-group>
-        </b-tab>
-      </b-tabs>
-    </b-form>
-    <b-container v-if="!isFinding">
-      <hr/>
-      <b-row align-v="top">
-        <b-col cols="8">
-          <b-form-group>
-             <b-form-checkbox v-model="importFindings">Import Rekono findings instead of original tool output</b-form-checkbox>
-           </b-form-group>
-        </b-col>
-        <b-col>
-          <b-button variant="outline" v-b-toggle.dd-recomendation v-b-tooltip.hover title="Help me!">
-            <b-icon variant="info" icon="question-circle-fill"/>
-          </b-button>
-        </b-col>
-      </b-row>
-      <b-collapse id="dd-recomendation">
-        <p class="text-muted">You can import the original tool output or the findings parsed by Rekono. It's recommended to import the original tool output, except for Defect-Dojo unsupported tools</p>
-      </b-collapse>
-    </b-container>
+        </b-form>
+      </b-col>
+    </b-row>
   </b-modal>
 </template>
 
@@ -57,83 +52,107 @@ export default {
   mixins: [RekonoApi],
   props: {
     id: String,
-    path: String,
-    itemId: [Number, String],
-    alreadyReported: Boolean
-  },
-  computed: {
-    isFinding () {
-      return (this.path !== 'tasks' && this.path !== 'executions' && this.path !== 'projects')
-    },
-    okTitle () {
-      if (!this.isFinding && !this.importFindings) {
-        return !this.importFindings ? 'Import scans' : 'Import findings'
-      } else {
-        return 'Import finding'
-      }
+    project: Object,
+    initialized: {
+      type: Boolean,
+      default: false
     }
   },
   data () {
     return {
       defectDojo: process.env.VUE_APP_DEFECTDOJO_HOST,
+      sync: null,
+      autoProduct: null,
+      autoEngagement: null,
+      newEngagement: null,
+      productId: null,
       engagementId: null,
       engagementName: null,
       engagementDescription: null,
-      idState: null,
+      productIdState: null,
+      engagementIdState: null,
       nameState: null,
       descriptionState: null,
       invalidName: 'Engagement name is required',
       invalidDescription: 'Engagement description is required',
-      importFindings: false,
-      currentTab: null
+    }
+  },
+  watch: {
+    initialized (initialized) {
+      if (initialized && this.project) {
+        this.sync = this.project.defectdojo_synchronization
+        this.autoProduct = this.project.defectdojo_product_id === null
+        this.autoEngagement = this.project.defectdojo_engagement_by_target
+        this.autoEngagement = this.project.defectdojo_engagement_id === null
+        this.productId = this.project.defectdojo_product_id
+        this.engagementId = this.project.defectdojo_engagement_id
+      }
     }
   },
   methods: {
-    changeTab (index) {
-      this.currentTab = index
-    },
     confirm (event) {
       event.preventDefault()
       if (this.check()) {
-        const element = (!this.isFinding && !this.importFindings) ? 'Scans' : 'Findings'
-        let path = 'defect-dojo'
-        if (!this.isFinding) {
-          path = this.importFindings ? 'defect-dojo-findings' : 'defect-dojo-scans'
+        let data = {}
+        if (!this.autoProduct) {
+          data.product_id = this.productId
         }
-        this.post(
-          `/api/${this.path}/${this.itemId}/${path}/`,
-          this.engagementId ? { id: this.engagementId } : { name: this.engagementName, description: this.engagementDescription },
-          'Defect-Dojo', `${element} imported successfully in Defect-Dojo`
-        )
+        if (!this.autoEngagement && !this.newEngagement) {
+          data.engagement_id = this.engagementId
+        } else if (!this.autoEngagement && this.newEngagement) {
+          data.engagement_name = this.engagementName
+          data.engagement_description = this.engagementDescription
+        }
+        this.put(`/api/projects/${this.project.id}/defect-dojo/`, data, 'Defect-Dojo', `Integration successfully configured for ${this.project.name}`)
+          .then(() => {
+            if (this.sync !== this.project.defectdojo_synchronization) {
+              this.put(`/api/projects/${this.project.id}/defect-dojo/sync/`, { synchronization: this.sync }, 'Defect-Dojo', this.sync ? 'Synchronization has been enabled' : 'Synchronization has been disabled')
+            }
+            this.$emit('confirm', { id: this.id, success: true, reload: true })
+          })
       }
     },
     check () {
-      if (this.currentTab === 0) {
-        this.engagementId = null
-        if (!this.validateName(this.engagementName)) {
-          this.nameState = false
-          this.invalidName = this.engagementName && this.engagementName.length > 0 ? 'Invalid engagement name' : 'Engagement name is required'
-        }
-        if (!this.validateText(this.engagementDescription)) {
-          this.descriptionState = false
-          this.invalidDescription = this.engagementDescription && this.engagementDescription.length > 0 ? 'Invalid engagement description' : 'Engagement description is required'
-        }
-        return this.nameState && this.descriptionState
-      } else if (this.currentTab === 1) {
+      if (this.autoProduct) {
+        this.productId = this.project.defectdojo_product_id
+        this.productIdState = null
+      } else {
+        this.productIdState = (this.productId && this.productId > 0)
+      }
+      if (this.autoEngagement) {
+        this.engagementId = this.project.defectdojo_engagement_id
         this.engagementName = null
         this.engagementDescription = null
-        this.idState = (this.engagementId && this.engagementId > 0)
-        return this.idState
+        this.engagementIdState = null
+        this.nameState = null
+        this.descriptionState = null
+      } else if (this.newEngagement) {
+        this.engagementId = this.project.defectdojo_engagement_id
+        this.engagementIdState = null
+        this.nameState = this.validateName(this.engagementName)
+        this.invalidName = this.engagementName && this.engagementName.length > 0 ? 'Invalid engagement name' : 'Engagement name is required'
+        this.descriptionState = this.validateText(this.engagementDescription)
+        this.invalidDescription = this.engagementDescription && this.engagementDescription.length > 0 ? 'Invalid engagement description' : 'Engagement description is required'
+      } else {
+        this.engagementIdState = (this.engagementId && this.engagementId > 0)
+        this.nameState = null
+        this.descriptionState = null
       }
+      return this.productIdState !== false && this.engagementIdState !== false && this.nameState !== false && this.descriptionState !== false
     },
     clean () {
+      this.sync = null
+      this.autoProduct = null
+      this.autoEngagement = null
+      this.newEngagement = null
+      this.productId = null
       this.engagementId = null
       this.engagementName = null
       this.engagementDescription = null
-      this.idState = null
+      this.productIdState = null
+      this.engagementIdState = null
       this.nameState = null
       this.descriptionState = null
-      this.importFindings = false
       this.$emit('clean')
     }
   }

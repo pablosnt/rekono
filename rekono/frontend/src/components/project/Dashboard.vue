@@ -6,7 +6,7 @@
           <b-card-text class="text-left">{{ project.description }}</b-card-text>
         </b-card>
       </b-col>
-      <b-col cols="1" v-if="defectDojoUrl">
+      <b-col cols="1" v-if="defectDojoUrl()">
         <b-link :href="defectDojoUrl" target="_blank">
           <b-img src="/static/defect-dojo-favicon.ico" width="30" height="30"/>
         </b-link>
@@ -20,9 +20,9 @@
             <b-icon icon="pencil-square"/>
             <label class="ml-1">Edit</label>
           </b-dropdown-item>
-          <b-dropdown-item variant="info" v-b-modal.defect-dojo-modal>
+          <b-dropdown-item variant="info" v-b-modal.defect-dojo-modal @click="showDefectDojo = true">
             <b-img src="/static/defect-dojo-favicon.ico" width="20" height="20"/>
-            <label class="ml-1">Import in Defect-Dojo</label>
+            <label class="ml-1">Defect-Dojo</label>
           </b-dropdown-item>
           <b-dropdown-item variant="danger" v-b-modal.delete-project-modal v-if="$store.state.role === 'Admin'">
             <b-icon icon="trash-fill"/>
@@ -36,7 +36,7 @@
       <span><strong>{{ project.name }}</strong> project</span>
     </deletion>
     <project id="project-modal" :project="project" :initialized="showEditForm" @confirm="confirm" @clean="showEditForm = false"/>
-    <defect-dojo id="defect-dojo-modal" path="projects" :itemId="$route.params.id" :alreadyReported="false" @clean="$bvModal.hide('defect-dojo-modal')" @confirm="$bvModal.hide('defect-dojo-modal')"/>
+    <defect-dojo id="defect-dojo-modal" :project="project" :initialized="showDefectDojo" @confirm="confirm" @clean="showDefectDojo = false"/>
   </div>
 </template>
 
@@ -54,8 +54,8 @@ export default {
   },
   data () {
     return {
-      defectDojoUrl: this.project && this.project.defectdojo_product_id ? `${process.env.VUE_APP_DEFECTDOJO_HOST}/product/${this.project.defectdojo_product_id}` : null,
-      showEditForm: false
+      showEditForm: false,
+      showDefectDojo: false
     }
   },
   components: {
@@ -65,14 +65,21 @@ export default {
     DefectDojo
   },
   methods: {
+    defectDojoUrl () {
+      return this.project && this.project.defectdojo_product_id ? `${process.env.VUE_APP_DEFECTDOJO_HOST}/product/${this.project.defectdojo_product_id}` : null
+    },
     deleteProject () {
       this.delete(`/api/projects/${this.$route.params.id}/`, this.project.name, 'Project deleted successfully').then(() => this.$router.push({ path: '/projects' }))
     },
     confirm (operation) {
       if (operation.success) {
         this.$bvModal.hide(operation.id)
-        this.fetchProject()
+        if (operation.reload) {
+          this.fetchProject()
+        }
       }
+      this.showEditForm = false
+      this.showDefectDojo = false
     }
   }
 }

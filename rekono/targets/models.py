@@ -2,6 +2,7 @@ import logging
 from typing import Any, Dict, cast
 
 from defectdojo.api import DefectDojo
+from defectdojo.exceptions import DefectDojoException
 from django.db import models
 from findings.enums import PathType, Severity
 from input_types.base import BaseInput
@@ -82,6 +83,22 @@ class Target(models.Model, BaseInput):
         '''
         return self.project
 
+    def get_defectdojo_engagement(self, dd_client: DefectDojo) -> int:
+        '''Get Id of the Defect-Dojo engagement associated to the target. If not exists, create a new one.
+
+        Args:
+            dd_client (DefectDojo): dd_client (DefectDojo): Defect-Dojo API client
+
+        Returns:
+            int: Engagement Id in Defect-Dojo
+        '''
+        exists = False
+        if self.defectdojo_engagement_id:
+            exists, _ = dd_client.get_engagement(self.defectdojo_engagement_id)     # Check existing engagement Id
+        if not exists:                                                          # Engagement not found
+            self.create_defectdojo_engagement(dd_client)                        # Create a new engagement
+        return self.defectdojo_engagement_id
+
     def create_defectdojo_engagement(self, dd_client: DefectDojo) -> None:
         '''Create Defect-Dojo engagement to import the executions and findings detected for the target.
 
@@ -97,6 +114,9 @@ class Target(models.Model, BaseInput):
             self.save(update_fields=['defectdojo_engagement_id'])
         else:
             logger.warning(f"[Defect-Dojo] Engagement for the target {self.id} can't be created")
+            raise DefectDojoException(
+                {'engagement': [f"Defect-Dojo engagement related to target {self.id} can't be created"]}
+            )
 
 
 class TargetPort(models.Model, BaseInput):

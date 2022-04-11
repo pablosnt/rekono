@@ -7,16 +7,6 @@
       <b-form-group description="Project description" :invalid-feedback="invalidDescription">
         <b-form-textarea v-model="description" placeholder="Description" :state="descriptionState" maxlength="300" required/>
       </b-form-group>
-      <b-form-group description="Defect-Dojo product Id">
-        <b-input-group>
-          <b-input-group-prepend>
-            <b-button variant="outline" size="sm" v-b-tooltip.hover title="The Defect-Dojo product Id will be used to import the Rekono findings in Defect-Dojo">
-              <b-img src="/static/defect-dojo-favicon.ico" width="30" height="30"/>
-            </b-button>
-          </b-input-group-prepend>
-          <b-form-input v-model="defectDojoId" type="number"/>
-        </b-input-group>
-      </b-form-group>
       <b-form-group description="Tags">
         <b-form-tags no-outer-focus v-model="tags" placeholder="" remove-on-delete size="md" tag-variant="dark"/>
       </b-form-group>
@@ -52,7 +42,6 @@ export default {
     return {
       name: null,
       description: null,
-      defectDojoId: null,
       tags: [],
       nameState: null,
       descriptionState: null,
@@ -65,7 +54,6 @@ export default {
       if (initialized && this.project) {
         this.name = this.project.name
         this.description = this.project.description
-        this.defectDojoId = this.project.defectdojo_product_id
         this.tags = this.project.tags
       }
     }
@@ -93,7 +81,7 @@ export default {
     create () {
       return this.post(
         '/api/projects/',
-        { name: this.name, description: this.description, defectdojo_product_id: this.defectDojoId, tags: this.tags },
+        { name: this.name, description: this.description, tags: this.tags },
         this.name , 'New project created successfully'
       )
         .then(() => { return Promise.resolve(true) })
@@ -102,7 +90,7 @@ export default {
     update () {
       return this.put(
         `/api/projects/${this.project.id}/`,
-        { name: this.name, description: this.description, defectdojo_product_id: this.defectDojoId, tags: this.tags },
+        { name: this.name, description: this.description, tags: this.tags },
         this.name , 'Project updated successfully'
       )
         .then(() => { return Promise.resolve(true) })
@@ -111,7 +99,6 @@ export default {
     clean () {
       this.name = null
       this.description = null
-      this.defectDojoId = null
       this.tags = []
       this.nameState = null
       this.descriptionState = null

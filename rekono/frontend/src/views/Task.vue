@@ -35,13 +35,6 @@
           <b-button variant="outline" v-b-modal.repeat-task-modal v-b-tooltip.hover title="Execute Again" v-if="currentTask && auditor.includes($store.state.role) && currentTask.status !== 'Requested' && currentTask.status !== 'Running'">
             <p class="h5"><b-icon variant="success" icon="play-circle-fill"/></p>
           </b-button>
-          <b-dropdown variant="outline" right v-if="auditor.includes($store.state.role)">
-            <template #button-content>
-              <b-img src="/static/defect-dojo-favicon.ico" width="30" height="30"/>
-            </template>
-            <b-dropdown-item :disabled="!selectedExecution" v-b-modal.defect-dojo-modal @click="ddPath = 'executions'; ddItemId = selectedExecution.id; ddAlreadyReported = selectedExecution.reported_to_defectdojo">Import selected execution</b-dropdown-item>
-            <b-dropdown-item :disabled="!currentTask" v-b-modal.defect-dojo-modal @click="ddPath = 'tasks'; ddItemId = currentTask.id; ddAlreadyReported = false">Import task</b-dropdown-item>
-          </b-dropdown>
         </b-col>
       </b-row>
       <b-row class="ml-2 mr-2">
@@ -108,7 +101,6 @@
       <deletion id="cancel-task-modal" title="Cancel Task" removeWord="cancel" @deletion="cancelTask" v-if="currentTask !== null">
         <span>selected task</span>
       </deletion>
-      <defect-dojo id="defect-dojo-modal" :path="ddPath" :itemId="ddItemId" :alreadyReported="ddAlreadyReported" @clean="cleanDDSelection" @confirm="cleanDDSelection"/>
     </div>
     <not-found back="/projects" v-if="!isFound"/>
   </div>
@@ -118,7 +110,6 @@
 import RekonoApi from '@/backend/RekonoApi'
 import Deletion from '@/common/Deletion'
 import Findings from '@/components/findings/Findings'
-import DefectDojo from '@/modals/DefectDojo'
 import TaskRepeat from '@/modals/TaskRepeat'
 import NotFound from '@/errors/NotFound'
 export default {
@@ -144,16 +135,12 @@ export default {
       ],
       selectedExecution: null,
       autoRefresh: null,
-      ddPath: null,
-      ddItemId: null,
-      ddAlreadyReported: null,
       reloadFindings: false
     }
   },
   components: {
     Findings,
     Deletion,
-    DefectDojo,
     TaskRepeat,
     NotFound
   },
@@ -207,12 +194,6 @@ export default {
       if (items && items.length > 0) {
         this.selectedExecution = items[0]
       }
-    },
-    cleanDDSelection () {
-      this.$bvModal.hide('defect-dojo-modal')
-      this.ddPath = null
-      this.ddItemId = null
-      this.ddAlreadyReported = null
     }
   },
   beforeRouteUpdate(to, from, next) {

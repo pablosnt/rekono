@@ -2,6 +2,7 @@ import logging
 from typing import List
 
 import django_rq
+from defectdojo.exceptions import DefectDojoException
 from defectdojo.reporter import report
 from django_rq import job
 from email_notifications import sender as email_sender
@@ -65,4 +66,9 @@ def consumer(execution: Execution = None, findings: List[Finding] = []) -> None:
             execution,
             findings
         )
-        report(execution, findings)                                             # Import execution in Defect-Dojo
+        try:
+            report(execution, findings)                                         # Import execution in Defect-Dojo
+        except DefectDojoException:
+            # Prevent errors during the import in Defect-Dojo
+            # All the exceptions are managed inside the report function
+            pass

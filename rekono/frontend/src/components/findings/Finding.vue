@@ -88,9 +88,6 @@
               <b-dropdown-item :disabled="!row.item.is_active" @click="selectFinding(row.item)" v-b-modal.disable-finding-modal>
                 <b-icon variant="danger" icon="dash-circle-fill"/> Disable
               </b-dropdown-item>
-              <b-dropdown-item :disabled="!row.item.is_active" @click="selectFinding(row.item)" v-b-modal.defect-dojo-modal>
-                <b-img src="/static/defect-dojo-favicon.ico" width="20" height="20"/> Import in Defect-Dojo
-              </b-dropdown-item>
               <b-dropdown-item v-if="name === 'osint' && (row.item.data_type === 'IP' || row.item.data_type === 'Domain')" :disabled="row.item.active"  @click="selectFinding(row.item)" v-b-modal.confirm-target>
                 <b-icon variant="danger" icon="geo-fill"/> Create target
               </b-dropdown-item>
@@ -105,14 +102,12 @@
     <deletion id="disable-finding-modal" title="Disable Finding" @deletion="disableFinding" @clean="cleanSelection" v-if="selectedFinding !== null">
       <span>selected finding</span>
     </deletion>
-    <defect-dojo id="defect-dojo-modal" :path="name" :itemId="selectedFinding.id" :alreadyReported="selectedFinding.reported_to_defectdojo" @clean="cleanDDSelection" @confirm="cleanDDSelection" v-if="selectedFinding"/>
   </b-col>
 </template>
 
 <script>
 import RekonoApi from '@/backend/RekonoApi'
 import Deletion from '@/common/Deletion'
-import DefectDojo from '@/modals/DefectDojo'
 export default {
   name: 'findingBase',
   mixins: [RekonoApi],
@@ -146,13 +141,11 @@ export default {
     return {
       findings: [],
       selectedFinding: null,
-      preventSelection: false,
-      defectDojo: process.env.VUE_APP_DEFECTDOJO_HOST
+      preventSelection: false
     }
   },
   components: {
-    Deletion,
-    DefectDojo
+    Deletion
   },
   watch: {
     filterChange () {
@@ -236,10 +229,6 @@ export default {
         this.$emit('finding-selected', { type: this.name, finding: row })
       }
       this.preventSelection = false
-    },
-    cleanDDSelection () {
-      this.$bvModal.hide('defect-dojo-modal')
-      this.cleanSelection()
     },
     cleanSelection () {
       this.selectedFinding = null

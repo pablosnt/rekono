@@ -50,17 +50,17 @@
       </b-card>
     </b-card-group>
     <hr/>
-    <b-row align-h="around">
+    <b-row align-h="around" v-if="vulnerabilities > 0">
       <h2>Vulnerabilities</h2>
       <b-col cols="3">
-        <b-form-select v-model="timeFilter" :disabled="vulnerabilities === 0" :options="timeOptions" @change="countVulnerabilities">
+        <b-form-select v-model="timeFilter" :options="timeOptions" @change="countVulnerabilities">
           <template #first>
             <b-form-select-option :value="null">All time</b-form-select-option>
           </template>
         </b-form-select>
       </b-col>
     </b-row>
-    <b-card-group deck class="mt-3">
+    <b-card-group deck class="mt-3" v-if="vulnerabilities > 0">
       <b-card style="min-width: 20rem;">
         <vulnerabilities-by-severity :height="500" label="Vulnerabilities by severity" :critical="critical" :high="high" :medium="medium" :low="low" :info="info"/>
       </b-card>

@@ -148,7 +148,7 @@ class DefectDojoIntegrationSerializer(serializers.Serializer):
         if not validated_data.get('product_id'):                                # DD product creation required
             product_type = 0
             success, body = self.dd_client.get_rekono_product_type()            # Get Rekono product type in Defect-Dojo
-            if success:
+            if success and len(body.get('results') or []) > 0:
                 product_type = body['results'][0].get('id')                     # Rekono product type found
             else:
                 success, body = self.dd_client.create_rekono_product_type()     # Create Rekono product type in DD
@@ -189,7 +189,7 @@ class DefectDojoIntegrationSerializer(serializers.Serializer):
         # If no engagement provided, one engagement for each target will be created
         instance.defectdojo_engagement_by_target = validated_data.get('engagement_id') is None
         instance.save(update_fields=['defectdojo_engagement_id', 'defectdojo_engagement_by_target'])
-        return super().update(instance, validated_data)
+        return instance
 
 
 class DefectDojoSyncSerializer(serializers.Serializer):
