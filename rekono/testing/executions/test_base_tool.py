@@ -68,13 +68,13 @@ class BaseToolTest(TestCase):
         self.exploit = self.create_exploits(self.vulnerability)
         # Expected arguments
         self.all_expected = ' '.join([
-            '-T3', '--osint http://scanme.nmap.org/', '--only-host 10.10.10.10', '--host 10.10.10.10',
+            '--osint http://scanme.nmap.org/', '--only-host 10.10.10.10', '--host 10.10.10.10',
             '--port 443', '--port-commas 80,443', '--endpoint /robots.txt', '--tech Wordpress',
             '--version 1.0.0', '--email test@test.test', '--username test', '--secret test',
             '--vuln CVE-2021-44228', '--exploit Test', f'--wordlist {self.wordlist.path}'
         ]).split(' ')
         self.required_expected = ' '.join([
-            '-T3', '--osint http://scanme.nmap.org/', '--only-host 10.10.10.10', '--host 10.10.10.10',
+            '--osint http://scanme.nmap.org/', '--only-host 10.10.10.10', '--host 10.10.10.10',
             '--port 443', '--port-commas 80,443', '--endpoint /robots.txt', '--tech Wordpress',
             '--version 1.0.0', '--vuln CVE-2021-44228', '--exploit Test', f'--wordlist {self.wordlist.path}'
         ]).split(' ')
@@ -423,7 +423,7 @@ class BaseToolTest(TestCase):
         Input.objects.all().update(filter=None)                                 # Remove all input filters
         arguments = self.tool_instance.get_arguments(self.targets, self.all_findings)
         expected = ' '.join([
-            '-T3', '--osint http://scanme.nmap.org/', '--only-host scanme.nmap.org', '--host 10.10.10.10',
+            '--osint http://scanme.nmap.org/', '--only-host scanme.nmap.org', '--host 10.10.10.10',
             '--port 443', '--port-commas 22,80,443', '--endpoint /admin', '--tech Joomla',
             '--version 1.0.0', '--email test@test.test', '--username test', '--secret test',
             '--vuln CVE-1111-1111', '--exploit Test', f'--wordlist {self.wordlist.path}'
@@ -435,7 +435,7 @@ class BaseToolTest(TestCase):
         self.change_input_filters()                                             # Change filter types
         arguments = self.tool_instance.get_arguments(self.targets, self.all_findings)
         expected = ' '.join([
-            '-T3', '--osint http://scanme.nmap.org/', '--only-host scanme.nmap.org', '--host 10.10.10.10',
+            '--osint http://scanme.nmap.org/', '--only-host scanme.nmap.org', '--host 10.10.10.10',
             '--port 80', '--port-commas 80', '--endpoint /robots.txt', '--tech Wordpress',
             '--version 1.0.0', '--email test@test.test', '--username test', '--secret test',
             '--vuln CVE-2021-44228', '--exploit Test', f'--wordlist {self.wordlist.path}'
@@ -464,7 +464,7 @@ class BaseToolTest(TestCase):
         Input.objects.all().update(filter=None)                                 # Remove all input filters
         arguments = self.tool_instance.get_arguments(self.targets, self.findings_to_use_targets)
         expected = ' '.join([
-            '-T3', '--osint http://scanme.nmap.org/', '--only-host scanme.nmap.org', '--host 10.10.10.10',
+            '--osint http://scanme.nmap.org/', '--only-host scanme.nmap.org', '--host 10.10.10.10',
             '--port 443', '--port-commas 80,443', '--endpoint /robots.txt', '--tech Wordpress',
             '--version 1.0.0', '--email test@test.test', '--username test', '--secret test',
             '--vuln CVE-2021-44228', '--exploit Test', f'--wordlist {self.wordlist.path}'
@@ -476,7 +476,7 @@ class BaseToolTest(TestCase):
         self.change_input_filters()
         arguments = self.tool_instance.get_arguments(self.targets, self.findings_to_use_targets)
         expected = ' '.join([
-            '-T3', '--osint http://scanme.nmap.org/', '--only-host scanme.nmap.org', '--host 10.10.10.10',
+            '--osint http://scanme.nmap.org/', '--only-host scanme.nmap.org', '--host 10.10.10.10',
             '--port 80', '--port-commas 80', '--endpoint /robots.txt', '--tech Wordpress',
             '--version 1.0.0', '--email test@test.test', '--username test', '--secret test',
             '--vuln CVE-2021-44228', '--exploit Test', f'--wordlist {self.wordlist.path}'
@@ -515,7 +515,7 @@ class BaseToolTest(TestCase):
         self.assertEqual(1, errors_count)
 
     def process_findings(self, imported_in_defectdojo: bool) -> None:
-        '''Execute process_findings feature using nmap report.
+        '''Execute process_findings feature using nikto report.
 
         Args:
             imported_in_defectdojo (bool): Indicate if execution is expected to be imported in Defect-Dojo or not
