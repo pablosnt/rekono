@@ -5,6 +5,7 @@ from api.serializers import RekonoTagSerializerField
 from defectdojo.api import DefectDojo
 from defectdojo.exceptions import DefectDojoException
 from django.db import transaction
+from django.forms import ValidationError
 from projects.models import Project
 from rest_framework import serializers
 from security.input_validation import validate_name, validate_text
@@ -127,7 +128,7 @@ class DefectDojoIntegrationSerializer(serializers.Serializer):
             ]:
                 try:
                     validator(attrs[field])                                     # Validate name and description fields
-                except serializers.ValidationError as ex:
+                except ValidationError as ex:
                     raise serializers.ValidationError({field: str(ex)})
         return attrs
 

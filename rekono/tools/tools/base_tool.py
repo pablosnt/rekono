@@ -437,11 +437,11 @@ class BaseTool:
             return
         self.clean_environment()                                                # Clean environment
         self.on_completed(output)                                               # Completed execution
-        logger.error(f'[Tool] {self.tool.name} execution has been completed')
+        logger.info(f'[Tool] {self.tool.name} execution has been completed')
         if self.file_output_enabled and os.path.isfile(self.path_output) and os.stat(self.path_output).st_size > 0:
             # Output file exists
             self.parse_output_file()                                            # Parse output file
         else:                                                                   # Output file not found
             self.parse_plain_output(output)                                     # Parse plain output
-        logger.error(f'[Tool] {len(self.findings)} findings parsed from {self.tool.name} output')
+        logger.info(f'[Tool] {len(self.findings)} findings parsed from {self.tool.name} output')
         self.process_findings()                                                 # Process parsed findings

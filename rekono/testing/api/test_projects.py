@@ -23,23 +23,9 @@ class ProjectsTest(RekonoTestCase):
         # Create new project
         self.api_test(self.client.post, self.endpoint, 201, data=self.new_data, expected=self.new_data)
 
-    # @mock.patch('defectdojo.api.DefectDojo.request', defect_dojo_success)       # Mocks Defect-Dojo response
-    # def test_create_with_defect_dojo_product(self) -> None:
-    #     '''Test project creation feature with valid Defect-Dojo product Id.'''
-    #     self.new_data['defectdojo_product_id'] = 1
-    #     # Create new project
-    #     self.api_test(self.client.post, self.endpoint, 201, data=self.new_data, expected=self.new_data)
-
     def test_invalid_create(self) -> None:
         '''Test project creation feature with invalid data.'''
         self.api_test(self.client.post, self.endpoint, 400, data=self.used_data)    # Project already exists
-
-    # @mock.patch('defectdojo.api.DefectDojo.request', defect_dojo_error)         # Mocks Defect-Dojo response
-    # def test_invalid_create_with_defect_dojo_product_not_found(self) -> None:
-    #     '''Test project creation feature with not found Defect-Dojo product Id.'''
-    #     self.new_data['defectdojo_product_id'] = 1
-    #     # Defect-Dojo product Id doesn't exist
-    #     self.api_test(self.client.post, self.endpoint, 400, data=self.new_data)
 
     def test_update(self) -> None:
         '''Test project update feature.'''
@@ -91,14 +77,15 @@ class ProjectsTest(RekonoTestCase):
 
     @mock.patch('defectdojo.api.DefectDojo.request', defect_dojo_error)         # Mocks Defect-Dojo response
     def test_defectdojo_unavailable(self) -> None:
+        '''Test Defect-Dojo configuration feature with unavailable error.'''
         self.api_test(self.client.put, f'{self.endpoint}{self.project.id}/defect-dojo/', 400)
 
     @mock.patch('defectdojo.api.DefectDojo.request', defect_dojo_success)       # Mocks Defect-Dojo response
-    @mock.patch('defectdojo.api.DefectDojo.get_rekono_product_type', defect_dojo_success_multiple)
     def test_defectdojo_with_ids(self) -> None:
+        '''Test Defect-Dojo configuration feature with product and engagement Ids.'''
         self.api_test(
             self.client.put, f'{self.endpoint}{self.project.id}/defect-dojo/', 200,
-            data={'product_id': 1, 'engagement_id': 1},
+            data={'product_id': 1, 'engagement_id': 1},                         # Both Ids provided
             expected={
                 'defectdojo_product_id': 1,
                 'defectdojo_engagement_id': 1,
@@ -108,9 +95,10 @@ class ProjectsTest(RekonoTestCase):
 
     @mock.patch('defectdojo.api.DefectDojo.request', defect_dojo_success)       # Mocks Defect-Dojo response
     def test_defectdojo_with_new_product(self) -> None:
+        '''Test Defect-Dojo configuration feature with new product creation.'''
         self.api_test(
             self.client.put, f'{self.endpoint}{self.project.id}/defect-dojo/', 200,
-            data={'engagement_id': 1},
+            data={'engagement_id': 1},                                          # Only engagement Id provided
             expected={
                 'defectdojo_product_id': 1,
                 'defectdojo_engagement_id': 1,
@@ -119,10 +107,12 @@ class ProjectsTest(RekonoTestCase):
         )
 
     @mock.patch('defectdojo.api.DefectDojo.request', defect_dojo_success)       # Mocks Defect-Dojo response
+    @mock.patch('defectdojo.api.DefectDojo.get_rekono_product_type', defect_dojo_success_multiple)
     def test_defectdojo_with_new_engagement(self) -> None:
+        '''Test Defect-Dojo configuration feature with new engagement creation.'''
         self.api_test(
             self.client.put, f'{self.endpoint}{self.project.id}/defect-dojo/', 200,
-            data={'product_id': 1, 'engagement_name': 'Test', 'engagement_description': 'Test'},
+            data={'engagement_name': 'Test', 'engagement_description': 'Test'},     # Only engagement data provided
             expected={
                 'defectdojo_product_id': 1,
                 'defectdojo_engagement_id': 1,
@@ -132,11 +122,12 @@ class ProjectsTest(RekonoTestCase):
 
     @mock.patch('defectdojo.api.DefectDojo.request', defect_dojo_success)       # Mocks Defect-Dojo response
     def test_defectdojo_with_new_product_and_engagemnets_per_target(self) -> None:
+        '''Test Defect-Dojo configuration feature with new engagement by target.'''
         self.api_test(
-            self.client.put, f'{self.endpoint}{self.project.id}/defect-dojo/', 200,
+            self.client.put, f'{self.endpoint}{self.project.id}/defect-dojo/', 200,     # No body data provided
             expected={
                 'defectdojo_product_id': 1,
-                'defectdojo_engagement_id': None,
+                'defectdojo_engagement_id': None,                               # No engagement Id for the product
                 'defectdojo_engagement_by_target': True
             }
         )
@@ -144,33 +135,40 @@ class ProjectsTest(RekonoTestCase):
     @mock.patch('defectdojo.api.DefectDojo.request', defect_dojo_success)       # Mocks Defect-Dojo response
     @mock.patch('defectdojo.api.DefectDojo.get_engagement', defect_dojo_error)
     def test_defectdojo_with_engagement_not_found(self) -> None:
+        '''Test Defect-Dojo configuration feature with not found engagement.'''
         self.api_test(self.client.put, f'{self.endpoint}{self.project.id}/defect-dojo/', 400, data={'engagement_id': 1})
 
     @mock.patch('defectdojo.api.DefectDojo.request', defect_dojo_success)       # Mocks Defect-Dojo response
     @mock.patch('defectdojo.api.DefectDojo.get_product', defect_dojo_error)
     def test_defectdojo_with_product_not_found(self) -> None:
+        '''Test Defect-Dojo configuration feature with not found product.'''
         self.api_test(self.client.put, f'{self.endpoint}{self.project.id}/defect-dojo/', 400, data={'product_id': 1})
 
     @mock.patch('defectdojo.api.DefectDojo.request', defect_dojo_success)       # Mocks Defect-Dojo response
     def test_defectdojo_with_invalid_new_engagement(self) -> None:
+        '''Test Defect-Dojo configuration feature with invalid engagement data.'''
         self.api_test(
             self.client.put, f'{self.endpoint}{self.project.id}/defect-dojo/', 400,
+            # Engagement name and description can't include characters like ;
             data={'product_id': 1, 'engagement_name': 'Input;Validation', 'engagement_description': 'Input;Validation'}
         )
 
     @mock.patch('defectdojo.api.DefectDojo.request', defect_dojo_success)       # Mocks Defect-Dojo response
     @mock.patch('defectdojo.api.DefectDojo.create_rekono_product_type', defect_dojo_error)
     def test_defectdojo_with_error_in_product_type_creation(self) -> None:
+        '''Test Defect-Dojo configuration feature with errors during product type creation.'''
         self.api_test(self.client.put, f'{self.endpoint}{self.project.id}/defect-dojo/', 400)
 
     @mock.patch('defectdojo.api.DefectDojo.request', defect_dojo_success)       # Mocks Defect-Dojo response
     @mock.patch('defectdojo.api.DefectDojo.create_product', defect_dojo_error)
     def test_defectdojo_with_error_in_product_creation(self) -> None:
+        '''Test Defect-Dojo configuration feature with errors during product creation.'''
         self.api_test(self.client.put, f'{self.endpoint}{self.project.id}/defect-dojo/', 400)
 
     @mock.patch('defectdojo.api.DefectDojo.request', defect_dojo_success)       # Mocks Defect-Dojo response
     @mock.patch('defectdojo.api.DefectDojo.create_engagement', defect_dojo_error)
     def test_defectdojo_with_error_in_engagement_creation(self) -> None:
+        '''Test Defect-Dojo configuration feature with errors during engagement creation.'''
         self.api_test(
             self.client.put, f'{self.endpoint}{self.project.id}/defect-dojo/', 400,
             data={'product_id': 1, 'engagement_name': 'Test', 'engagement_description': 'Test'}
@@ -178,6 +176,8 @@ class ProjectsTest(RekonoTestCase):
 
     @mock.patch('defectdojo.api.DefectDojo.request', defect_dojo_success)       # Mocks Defect-Dojo response
     def test_defectdojo_sync(self) -> None:
+        '''Test Defect-Dojo synchronization feature.'''
+        # Defect-Dojo integration is required before enable synchronization
         self.api_test(
             self.client.put, f'{self.endpoint}{self.project.id}/defect-dojo/', 200,
             expected={
@@ -189,7 +189,7 @@ class ProjectsTest(RekonoTestCase):
         )
         self.api_test(
             self.client.put, f'{self.endpoint}{self.project.id}/defect-dojo/sync/', 200,
-            data={'synchronization': True},
+            data={'synchronization': True},                                     # Enable Defect-Dojo synchronization
             expected={
                 'defectdojo_product_id': 1,
                 'defectdojo_engagement_id': None,
@@ -199,7 +199,10 @@ class ProjectsTest(RekonoTestCase):
         )
 
     def test_invalid_defectdojo_sync(self) -> None:
+        '''Test Defect-Dojo synchronization feature with errors.'''
+        # No data provided
+        self.api_test(self.client.put, f'{self.endpoint}{self.project.id}/defect-dojo/sync/', 400)
+        # Defect-Dojo integration should be configured before enable synchronization
         self.api_test(
             self.client.put, f'{self.endpoint}{self.project.id}/defect-dojo/sync/', 400, data={'synchronization': True}
         )
-        self.api_test(self.client.put, f'{self.endpoint}{self.project.id}/defect-dojo/sync/', 400)

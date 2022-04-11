@@ -20,7 +20,8 @@ from targets.models import (Target, TargetEndpoint, TargetPort,
                             TargetTechnology, TargetVulnerability)
 from tasks.enums import Status
 from tasks.models import Task
-from testing.mocks.defectdojo import defect_dojo_success
+from testing.mocks.defectdojo import (defect_dojo_error, defect_dojo_success,
+                                      defect_dojo_success_multiple)
 from tools.enums import IntensityRank, Stage
 from tools.exceptions import ToolExecutionException
 from tools.models import Argument, Configuration, Input, Intensity, Tool
@@ -36,13 +37,13 @@ class BaseToolTest(TestCase):
         '''Create initial data before run tests.'''
         super().setUp()
         self.data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'data')    # Testing data path
-        self.nmap_report = os.path.join(self.data_path, 'reports', 'nmap', 'enumeration-vulners.xml')   # Nmap report
+        self.nikto_report = os.path.join(self.data_path, 'reports', 'nikto', 'default.xml')         # Nikto report
         # Tool and related objects
-        self.nmap = Tool.objects.get(name='Nmap')
-        self.intensity = Intensity.objects.get(tool=self.nmap, value=IntensityRank.NORMAL)
+        self.nikto = Tool.objects.get(name='Nikto')
+        self.intensity = Intensity.objects.get(tool=self.nikto, default=True)
         self.configuration = Configuration.objects.create(                      # Configuration with all argument types
             name='Test',
-            tool=self.nmap,
+            tool=self.nikto,
             arguments=(
                 '{intensity} {test_osint} {test_only_host} {test_host} {test_port} {test_path} '
                 '{test_technology} {test_credential} {test_vulnerability} {test_exploit} {test_wordlist}'
@@ -78,10 +79,10 @@ class BaseToolTest(TestCase):
             '--version 1.0.0', '--vuln CVE-2021-44228', '--exploit Test', f'--wordlist {self.wordlist.path}'
         ]).split(' ')
         # Tool instance
-        self.tool_class = get_tool_class_by_name(self.nmap.name)                # Related tool class
+        self.tool_class = get_tool_class_by_name(self.nikto.name)               # Related tool class
         self.tool_instance: BaseTool = self.tool_class(                         # Related tool object
             self.new_execution,
-            self.nmap,
+            self.nikto,
             self.configuration,
             self.intensity,
             self.arguments
@@ -99,7 +100,7 @@ class BaseToolTest(TestCase):
         filtered = Wordlist.objects.create(name='Other', type=WordlistType.PASSWORD, path=endpoints, checksum='invalid')
         wordlist = Wordlist.objects.create(name='Test', type=WordlistType.PASSWORD, path=passwords)
         argument = Argument.objects.create(
-            tool=self.nmap,
+            tool=self.nikto,
             name='test_wordlist',
             argument='--wordlist {wordlist}',
             required=True
@@ -111,10 +112,15 @@ class BaseToolTest(TestCase):
 
     def create_targets(self) -> None:
         '''Create target data for testing.'''
-        project = Project.objects.create(name='Test', description='Test', tags=['test'])
+        self.project = Project.objects.create(
+            name='Test', description='Test', tags=['test'],
+            defectdojo_product_id=1,
+            defectdojo_engagement_by_target=True,
+            defectdojo_synchronization=True
+        )
         # Target filtered due to target type. Private IP required
-        target_filtered = Target.objects.create(project=project, target='scanme.nmap.org', type=TargetType.DOMAIN)
-        target = Target.objects.create(project=project, target='10.10.10.10', type=TargetType.PRIVATE_IP)
+        target_filtered = Target.objects.create(project=self.project, target='scanme.nmap.org', type=TargetType.DOMAIN)
+        target = Target.objects.create(project=self.project, target='10.10.10.10', type=TargetType.PRIVATE_IP)
         target_port_http = TargetPort.objects.create(target=target, port=80)
         target_port_https = TargetPort.objects.create(target=target, port=443)
         target_endpoint = TargetEndpoint.objects.create(target_port=target_port_http, endpoint='/robots.txt')
@@ -127,7 +133,7 @@ class BaseToolTest(TestCase):
         user = User.objects.create_superuser('rekono', 'rekono@rekono.rekono', 'rekono')
         task = Task.objects.create(
             target=target,
-            tool=self.nmap,
+            tool=self.nikto,
             configuration=self.configuration,
             intensity=IntensityRank.NORMAL,
             status=Status.COMPLETED,
@@ -157,7 +163,7 @@ class BaseToolTest(TestCase):
         osint_user.executions.add(self.first_execution)
         osint_domain = OSINT.objects.create(data='scanme.nmap.org', data_type=DataType.DOMAIN, source='Google')
         osint_domain.executions.add(self.first_execution)
-        argument = Argument.objects.create(tool=self.nmap, name='test_osint', argument='--osint {url}', required=True)
+        argument = Argument.objects.create(tool=self.nikto, name='test_osint', argument='--osint {url}', required=True)
         Input.objects.create(argument=argument, type=InputType.objects.get(name='OSINT'))
         self.arguments.append(argument)
         self.all_findings.extend([osint_user, osint_domain])
@@ -177,7 +183,7 @@ class BaseToolTest(TestCase):
         host.executions.add(self.first_execution)
         # Argument with only one input
         argument_only_host = Argument.objects.create(
-            tool=self.nmap,
+            tool=self.nikto,
             name='test_only_host',
             argument='--only-host {host}',
             required=True
@@ -185,7 +191,7 @@ class BaseToolTest(TestCase):
         # Input filtered by host type: Private IP required
         Input.objects.create(argument=argument_only_host, type=InputType.objects.get(name='Host'), filter='PRIVATE_IP')
         # Argument with multiple inputs
-        argument = Argument.objects.create(tool=self.nmap, name='test_host', argument='--host {host}', required=True)
+        argument = Argument.objects.create(tool=self.nikto, name='test_host', argument='--host {host}', required=True)
         Input.objects.create(argument=argument, type=InputType.objects.get(name='Path'), order=1)
         Input.objects.create(argument=argument, type=InputType.objects.get(name='Port'), order=2)
         Input.objects.create(argument=argument, type=InputType.objects.get(name='Host'), order=3)
@@ -211,7 +217,7 @@ class BaseToolTest(TestCase):
         https = Port.objects.create(host=host, port=443, protocol=Protocol.TCP, service='https')
         https.executions.add(self.first_execution)
         argument = Argument.objects.create(
-            tool=self.nmap,
+            tool=self.nikto,
             name='test_port',
             argument='--port {port} --port-commas {ports_commas}',
             required=True,
@@ -233,10 +239,10 @@ class BaseToolTest(TestCase):
         # Path filtered due to HTTP status code. 200 Ok required
         filtered = Path.objects.create(port=port, path='/admin', status=403)
         filtered.executions.add(self.first_execution)
-        path = Path.objects.create(port=port, path='/robots.txt', status=200)
-        path.executions.add(self.first_execution)
+        self.path = Path.objects.create(port=port, path='/robots.txt', status=200)
+        self.path.executions.add(self.first_execution)
         argument = Argument.objects.create(
-            tool=self.nmap,
+            tool=self.nikto,
             name='test_path',
             argument='--endpoint {endpoint}',
             required=True
@@ -244,8 +250,8 @@ class BaseToolTest(TestCase):
         # Input filtered by HTTP status code: HTTP Ok required
         Input.objects.create(argument=argument, type=InputType.objects.get(name='Path'), filter='200')
         self.arguments.append(argument)
-        self.all_findings.extend([filtered, path])
-        self.required_findings.extend([filtered, path])
+        self.all_findings.extend([filtered, self.path])
+        self.required_findings.extend([filtered, self.path])
 
     def create_technologies(self, port: Port) -> Technology:
         '''Create technology data for testing.
@@ -262,7 +268,7 @@ class BaseToolTest(TestCase):
         technology = Technology.objects.create(port=port, name='Wordpress', version='1.0.0')
         technology.executions.add(self.first_execution)
         argument = Argument.objects.create(
-            tool=self.nmap,
+            tool=self.nikto,
             name='test_technology',
             argument='--tech {technology} --version {version}',
             required=True
@@ -288,7 +294,7 @@ class BaseToolTest(TestCase):
         )
         credential.executions.add(self.first_execution)
         argument = Argument.objects.create(
-            tool=self.nmap,
+            tool=self.nikto,
             name='test_credential',
             argument='--email {email} --username {username} --secret {secret}',
             required=False
@@ -336,7 +342,7 @@ class BaseToolTest(TestCase):
         )
         vulnerability.executions.add(self.first_execution)
         argument = Argument.objects.create(
-            tool=self.nmap,
+            tool=self.nikto,
             name='test_vulnerability',
             argument='--vuln {cve}',
             required=True
@@ -364,7 +370,7 @@ class BaseToolTest(TestCase):
         exploit = Exploit.objects.create(vulnerability=vulnerability, title='Test')
         exploit.executions.add(self.first_execution)
         argument = Argument.objects.create(
-            tool=self.nmap,
+            tool=self.nikto,
             name='test_exploit',
             argument='--exploit {exploit}',
             required=True
@@ -498,7 +504,7 @@ class BaseToolTest(TestCase):
         )
         errors_count = 0
         try:
-            self.tool_instance.tool_execution(['/directory-not-found'], [], [])         # Directory not found
+            self.tool_instance.tool_execution(['/directory-not-found'], [], [])     # Directory not found
         except ToolExecutionException as ex:
             self.tool_instance.on_error(stderr=str(ex))                         # Test on_error feature
             execution = Execution.objects.get(pk=self.new_execution.id)         # Check execution data
@@ -508,15 +514,69 @@ class BaseToolTest(TestCase):
         self.tool_instance.tool_execution(['/'], [], [])                        # Valid ls execution
         self.assertEqual(1, errors_count)
 
-    @mock.patch('defectdojo.api.DefectDojo.request', defect_dojo_success)       # Mocks Defect-Dojo response
-    def test_process_findings(self) -> None:
-        '''Test process_findings feature using nmap report.'''
+    def process_findings(self, imported_in_defectdojo: bool) -> None:
+        '''Execute process_findings feature using nmap report.
+
+        Args:
+            imported_in_defectdojo (bool): Indicate if execution is expected to be imported in Defect-Dojo or not
+        '''
         queue = django_rq.get_queue('findings-queue')
         queue.empty()                                                           # Clear findings queue
-        self.tool_instance.path_output = self.nmap_report                       # Set nmap report
+        self.tool_instance.path_output = self.nikto_report                      # Set nikto report
         self.tool_instance.run(self.targets, self.all_findings)                 # Run tool
-        execution = Execution.objects.get(pk=self.new_execution.id)             # Check execution status
-        self.assertEqual(Status.COMPLETED, execution.status)
-        self.assertEqual(self.nmap_report, execution.output_file)
         worker = SimpleWorker([queue], connection=queue.connection)             # Create RQ worker for findings queue
         worker.work(burst=True)                                                 # Launch RQ worker
+        execution = Execution.objects.get(pk=self.new_execution.id)             # Check execution status
+        self.assertEqual(Status.COMPLETED, execution.status)
+        self.assertEqual(self.nikto_report, execution.output_file)
+        self.assertEqual(imported_in_defectdojo, execution.imported_in_defectdojo)
+
+    @mock.patch('defectdojo.api.DefectDojo.request', defect_dojo_success)       # Mocks Defect-Dojo response
+    def test_process_findings_with_defectdojo_target_engagement(self) -> None:
+        '''Test process_findings feature with import in Defect-Dojo using target engagement.'''
+        self.process_findings(True)
+
+    @mock.patch('defectdojo.api.DefectDojo.request', defect_dojo_success)       # Mocks Defect-Dojo response
+    def test_process_findings_with_defectdojo_product_engagement(self) -> None:
+        '''Test process_findings feature with import in Defect-Dojo using product engagement.'''
+        self.project.defectdojo_engagement_id = 1                               # Product engagement Id
+        self.project.defectdojo_engagement_by_target = False                    # Disable engagements by target
+        self.project.save(update_fields=['defectdojo_engagement_id', 'defectdojo_engagement_by_target'])
+        self.process_findings(True)
+
+    @mock.patch('defectdojo.api.DefectDojo.request', defect_dojo_success)       # Mocks Defect-Dojo response
+    @mock.patch('defectdojo.api.DefectDojo.get_product', defect_dojo_error)
+    def test_process_findings_with_defectdojo_engagement_not_found(self) -> None:
+        '''Test process_findings feature with import in Defect-Dojo using not found engagement.'''
+        self.project.defectdojo_engagement_id = 1                               # Product engagement Id
+        self.project.defectdojo_engagement_by_target = False                    # Disable engagements by target
+        self.project.save(update_fields=['defectdojo_engagement_id', 'defectdojo_engagement_by_target'])
+        self.process_findings(False)
+
+    @mock.patch('defectdojo.api.DefectDojo.request', defect_dojo_success)       # Mocks Defect-Dojo response
+    def test_process_findings_with_defectdojo_findings_import(self) -> None:
+        '''Test process_findings feature with import in Defect-Dojo using the Rekono findings.'''
+        self.nikto.defectdojo_scan_type = None                                   # Import findings instead executions
+        self.nikto.save(update_fields=['defectdojo_scan_type'])
+        self.process_findings(True)
+
+    @mock.patch('defectdojo.api.DefectDojo.request', defect_dojo_success)       # Mocks Defect-Dojo response
+    @mock.patch('defectdojo.api.DefectDojo.get_rekono_test_type', defect_dojo_success_multiple)
+    def test_process_findings_with_existing_defectdojo_test_type(self) -> None:
+        '''Test process_findings feature with import in Defect-Dojo using existing test type.'''
+        self.nikto.defectdojo_scan_type = None                                   # Import findings instead executions
+        self.nikto.save(update_fields=['defectdojo_scan_type'])
+        self.process_findings(True)
+
+    @mock.patch('defectdojo.api.DefectDojo.request', defect_dojo_success)       # Mocks Defect-Dojo response
+    @mock.patch('defectdojo.api.DefectDojo.create_rekono_test_type', defect_dojo_error)
+    def test_process_findings_with_errors_in_defectdojo_test_type_creation(self) -> None:
+        '''Test process_findings feature with unexpected error during Defect-Dojo test type creation.'''
+        self.nikto.defectdojo_scan_type = None                                   # Import findings instead executions
+        self.nikto.save(update_fields=['defectdojo_scan_type'])
+        self.process_findings(False)
+
+    @mock.patch('defectdojo.api.DefectDojo.request', defect_dojo_error)         # Mocks Defect-Dojo response
+    def test_process_findings_with_unvailable_defectdojo(self) -> None:
+        '''Test process_findings feature with unavailable Defect-Dojo instance.'''
+        self.process_findings(False)

@@ -66,9 +66,10 @@ def consumer(execution: Execution = None, findings: List[Finding] = []) -> None:
             execution,
             findings
         )
-        try:
-            report(execution, findings)                                         # Import execution in Defect-Dojo
-        except DefectDojoException:
-            # Prevent errors during the import in Defect-Dojo
-            # All the exceptions are managed inside the report function
-            pass
+        if execution.task.target.project.defectdojo_synchronization:
+            try:
+                report(execution, findings)                                         # Import execution in Defect-Dojo
+            except DefectDojoException:
+                # Prevent errors during the import in Defect-Dojo
+                # All the exceptions are managed inside the report function
+                pass
