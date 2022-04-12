@@ -6,8 +6,8 @@
           <b-card-text class="text-left">{{ project.description }}</b-card-text>
         </b-card>
       </b-col>
-      <b-col cols="1" v-if="defectDojoUrl()">
-        <b-link :href="defectDojoUrl()" target="_blank">
+      <b-col cols="1" v-if="getDefectDojoUrl()">
+        <b-link :href="getDefectDojoUrl()" target="_blank">
           <b-img src="/static/defect-dojo-favicon.ico" width="30" height="30"/>
         </b-link>
       </b-col>
@@ -65,7 +65,7 @@ export default {
     DefectDojo
   },
   methods: {
-    defectDojoUrl () {
+    getDefectDojoUrl () {
       return this.project && this.project.defectdojo_product_id && this.defectDojoEnabled ? `${this.defectDojoUrl}/product/${this.project.defectdojo_product_id}` : null
     },
     deleteProject () {
