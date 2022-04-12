@@ -1,5 +1,6 @@
 import logging
 import os
+import re
 import shutil
 import subprocess
 import uuid
@@ -220,7 +221,8 @@ class BaseTool:
                     command[argument.name] = ''                                 # Ignore this argument
         # Format configuration arguments with the built tool arguments
         args = self.configuration.arguments.format(**command)
-        return [arg for arg in args.split(' ') if arg] if ' ' in args else [args]
+        # Split arguments by whitespaces taking into account the arguments between quotes
+        return re.findall(r'[\'"]{1}.+?[\'"]{1}|[^\s]+', args)
 
     def check_arguments(self, targets: List[BaseInput], findings: List[Finding]) -> bool:
         '''Check if given resources (targets, resources and findings) lists are enough to execute the tool.

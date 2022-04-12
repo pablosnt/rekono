@@ -31,7 +31,7 @@
           <b-col>
             <div v-for="detail in details" :key="detail.field">
               <div v-if="row.item[detail.field]" class="mt-1 mb-1">
-                <div v-if="detail.type === 'text' && row.item[detail.field].length > 0" class="text-left">
+                <div v-if="detail.type === 'text' && (row.item[detail.field] > 0 || row.item[detail.field].length > 0)" class="text-left">
                   <div v-if="detail.title">
                     <label class="text-muted">{{ detail.title }}</label><span class="ml-2" style="white-space: pre-line">{{ row.item[detail.field] }}</span>
                   </div>
@@ -78,20 +78,15 @@
             </div>
           </b-col>
           <b-col cols="2" v-if="auditor.includes($store.state.role)">
-            <b-dropdown variant="outline" right>
-              <template #button-content>
-                <b-icon variant="dark" icon="three-dots-vertical"/>
-              </template>
-              <b-dropdown-item :disabled="row.item.is_active" @click="enableFinding(row.item)">
-                <b-icon variant="success" icon="check-circle-fill"/> Enable
-              </b-dropdown-item>
-              <b-dropdown-item :disabled="!row.item.is_active" @click="selectFinding(row.item)" v-b-modal.disable-finding-modal>
-                <b-icon variant="danger" icon="dash-circle-fill"/> Disable
-              </b-dropdown-item>
-              <b-dropdown-item v-if="name === 'osint' && (row.item.data_type === 'IP' || row.item.data_type === 'Domain')" :disabled="row.item.active"  @click="selectFinding(row.item)" v-b-modal.confirm-target>
-                <b-icon variant="danger" icon="geo-fill"/> Create target
-              </b-dropdown-item>
-            </b-dropdown>
+            <b-button variant="outline" v-b-tooltip.hover title="Enable" @click="enableFinding(row.item)" v-if="!row.item.is_active">
+              <b-icon variant="success" icon="check-circle-fill"/>
+            </b-button>
+            <b-button variant="outline" v-b-tooltip.hover title="Disable" @click="selectFinding(row.item)" v-b-modal.disable-finding-modal v-if="row.item.is_active">
+              <b-icon variant="danger" icon="dash-circle-fill"/>
+            </b-button>
+            <b-button variant="outline" v-b-tooltip.hover title="Create Target" @click="selectFinding(row.item)" v-b-modal.confirm-target v-if="name === 'osint' && (row.item.data_type === 'IP' || row.item.data_type === 'Domain') && row.item.is_active">
+              <b-icon variant="danger" icon="geo-fill"/>
+            </b-button>
           </b-col>
         </b-row>
       </template>
