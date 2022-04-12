@@ -23,8 +23,12 @@ def process_callback(job: Any, connection: Any, result: BaseTool, *args: Any, **
     if not bool(pending_executions):                                            # No pending executions found
         # Check if there are error executions associated to this task
         error_executions = Execution.objects.filter(task=task, status=Status.ERROR).exists()
+        # Check if there are cancelled executions associated to this task
+        cancelled_executions = Execution.objects.filter(task=task, status=Status.CANCELLED).exists()
         # Set task status to error if error executions found, completed otherwise
-        task.status = Status.COMPLETED if not bool(error_executions) else Status.ERROR
+        task_status = Status.COMPLETED if not bool(error_executions) else Status.ERROR
+        # Set task status to cancelled if cancelled executions found
+        task.status = task_status if not bool(cancelled_executions) else Status.CANCELLED
         task.end = timezone.now()                                               # Update the task end date
         task.save(update_fields=['status', 'end'])
         logger.info(f'[Task] Task {task.id} has been completed with {task.status} status')
