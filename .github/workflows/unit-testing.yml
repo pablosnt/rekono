@@ -20,8 +20,8 @@ jobs:
           sudo apt install redis-server -y
           sudo systemctl start redis-server
 
-      - name: Install Nikto to check its installation
-        run: sudo apt install nikto -y
+      - name: Install Nmap to check its installation
+        run: sudo apt install nmap -y
 
       - name: Install Dirsearch to check its installation
         run: |

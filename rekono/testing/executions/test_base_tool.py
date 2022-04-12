@@ -22,7 +22,7 @@ from tasks.enums import Status
 from tasks.models import Task
 from testing.mocks.defectdojo import (defect_dojo_error, defect_dojo_success,
                                       defect_dojo_success_multiple)
-from tools.enums import Stage
+from tools.enums import IntensityRank, Stage
 from tools.exceptions import ToolExecutionException
 from tools.models import Argument, Configuration, Input, Intensity, Tool
 from tools.tools.base_tool import BaseTool
@@ -37,13 +37,13 @@ class BaseToolTest(TestCase):
         '''Create initial data before run tests.'''
         super().setUp()
         self.data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'data')    # Testing data path
-        self.nikto_report = os.path.join(self.data_path, 'reports', 'nikto', 'default.xml')         # Nikto report
+        self.nmap_report = os.path.join(self.data_path, 'reports', 'nmap', 'enumeration-vulners.xml')   # Nmap report
         # Tool and related objects
-        self.nikto = Tool.objects.get(name='Nikto')
-        self.intensity = Intensity.objects.filter(tool=self.nikto).first()
+        self.nmap = Tool.objects.get(name='Nmap')
+        self.intensity = Intensity.objects.get(tool=self.nmap, value=IntensityRank.NORMAL)
         self.configuration = Configuration.objects.create(                      # Configuration with all argument types
             name='Test',
-            tool=self.nikto,
+            tool=self.nmap,
             arguments=(
                 '{intensity} {test_osint} {test_only_host} {test_host} {test_port} {test_path} '
                 '{test_technology} {test_credential} {test_vulnerability} {test_exploit} {test_wordlist}'
@@ -68,21 +68,21 @@ class BaseToolTest(TestCase):
         self.exploit = self.create_exploits(self.vulnerability)
         # Expected arguments
         self.all_expected = ' '.join([
-            '--osint http://scanme.nmap.org/', '--only-host 10.10.10.10', '--host 10.10.10.10',
+            '-T3', '--osint http://scanme.nmap.org/', '--only-host 10.10.10.10', '--host 10.10.10.10',
             '--port 443', '--port-commas 80,443', '--endpoint /robots.txt', '--tech Wordpress',
             '--version 1.0.0', '--email test@test.test', '--username test', '--secret test',
             '--vuln CVE-2021-44228', '--exploit Test', f'--wordlist {self.wordlist.path}'
         ]).split(' ')
         self.required_expected = ' '.join([
-            '--osint http://scanme.nmap.org/', '--only-host 10.10.10.10', '--host 10.10.10.10',
+            '-T3', '--osint http://scanme.nmap.org/', '--only-host 10.10.10.10', '--host 10.10.10.10',
             '--port 443', '--port-commas 80,443', '--endpoint /robots.txt', '--tech Wordpress',
             '--version 1.0.0', '--vuln CVE-2021-44228', '--exploit Test', f'--wordlist {self.wordlist.path}'
         ]).split(' ')
         # Tool instance
-        self.tool_class = get_tool_class_by_name(self.nikto.name)               # Related tool class
+        self.tool_class = get_tool_class_by_name(self.nmap.name)                # Related tool class
         self.tool_instance: BaseTool = self.tool_class(                         # Related tool object
             self.new_execution,
-            self.nikto,
+            self.nmap,
             self.configuration,
             self.intensity,
             self.arguments
@@ -100,7 +100,7 @@ class BaseToolTest(TestCase):
         filtered = Wordlist.objects.create(name='Other', type=WordlistType.PASSWORD, path=endpoints, checksum='invalid')
         wordlist = Wordlist.objects.create(name='Test', type=WordlistType.PASSWORD, path=passwords)
         argument = Argument.objects.create(
-            tool=self.nikto,
+            tool=self.nmap,
             name='test_wordlist',
             argument='--wordlist {wordlist}',
             required=True
@@ -133,7 +133,7 @@ class BaseToolTest(TestCase):
         user = User.objects.create_superuser('rekono', 'rekono@rekono.rekono', 'rekono')
         task = Task.objects.create(
             target=target,
-            tool=self.nikto,
+            tool=self.nmap,
             configuration=self.configuration,
             intensity=self.intensity.value,
             status=Status.COMPLETED,
@@ -163,7 +163,7 @@ class BaseToolTest(TestCase):
         osint_user.executions.add(self.first_execution)
         osint_domain = OSINT.objects.create(data='scanme.nmap.org', data_type=DataType.DOMAIN, source='Google')
         osint_domain.executions.add(self.first_execution)
-        argument = Argument.objects.create(tool=self.nikto, name='test_osint', argument='--osint {url}', required=True)
+        argument = Argument.objects.create(tool=self.nmap, name='test_osint', argument='--osint {url}', required=True)
         Input.objects.create(argument=argument, type=InputType.objects.get(name='OSINT'))
         self.arguments.append(argument)
         self.all_findings.extend([osint_user, osint_domain])
@@ -183,7 +183,7 @@ class BaseToolTest(TestCase):
         host.executions.add(self.first_execution)
         # Argument with only one input
         argument_only_host = Argument.objects.create(
-            tool=self.nikto,
+            tool=self.nmap,
             name='test_only_host',
             argument='--only-host {host}',
             required=True
@@ -191,7 +191,7 @@ class BaseToolTest(TestCase):
         # Input filtered by host type: Private IP required
         Input.objects.create(argument=argument_only_host, type=InputType.objects.get(name='Host'), filter='PRIVATE_IP')
         # Argument with multiple inputs
-        argument = Argument.objects.create(tool=self.nikto, name='test_host', argument='--host {host}', required=True)
+        argument = Argument.objects.create(tool=self.nmap, name='test_host', argument='--host {host}', required=True)
         Input.objects.create(argument=argument, type=InputType.objects.get(name='Path'), order=1)
         Input.objects.create(argument=argument, type=InputType.objects.get(name='Port'), order=2)
         Input.objects.create(argument=argument, type=InputType.objects.get(name='Host'), order=3)
@@ -217,7 +217,7 @@ class BaseToolTest(TestCase):
         https = Port.objects.create(host=host, port=443, protocol=Protocol.TCP, service='https')
         https.executions.add(self.first_execution)
         argument = Argument.objects.create(
-            tool=self.nikto,
+            tool=self.nmap,
             name='test_port',
             argument='--port {port} --port-commas {ports_commas}',
             required=True,
@@ -242,7 +242,7 @@ class BaseToolTest(TestCase):
         self.path = Path.objects.create(port=port, path='/robots.txt', status=200)
         self.path.executions.add(self.first_execution)
         argument = Argument.objects.create(
-            tool=self.nikto,
+            tool=self.nmap,
             name='test_path',
             argument='--endpoint {endpoint}',
             required=True
@@ -268,7 +268,7 @@ class BaseToolTest(TestCase):
         technology = Technology.objects.create(port=port, name='Wordpress', version='1.0.0')
         technology.executions.add(self.first_execution)
         argument = Argument.objects.create(
-            tool=self.nikto,
+            tool=self.nmap,
             name='test_technology',
             argument='--tech {technology} --version {version}',
             required=True
@@ -294,7 +294,7 @@ class BaseToolTest(TestCase):
         )
         credential.executions.add(self.first_execution)
         argument = Argument.objects.create(
-            tool=self.nikto,
+            tool=self.nmap,
             name='test_credential',
             argument='--email {email} --username {username} --secret {secret}',
             required=False
@@ -342,7 +342,7 @@ class BaseToolTest(TestCase):
         )
         vulnerability.executions.add(self.first_execution)
         argument = Argument.objects.create(
-            tool=self.nikto,
+            tool=self.nmap,
             name='test_vulnerability',
             argument='--vuln {cve}',
             required=True
@@ -370,7 +370,7 @@ class BaseToolTest(TestCase):
         exploit = Exploit.objects.create(vulnerability=vulnerability, title='Test')
         exploit.executions.add(self.first_execution)
         argument = Argument.objects.create(
-            tool=self.nikto,
+            tool=self.nmap,
             name='test_exploit',
             argument='--exploit {exploit}',
             required=True
@@ -423,7 +423,7 @@ class BaseToolTest(TestCase):
         Input.objects.all().update(filter=None)                                 # Remove all input filters
         arguments = self.tool_instance.get_arguments(self.targets, self.all_findings)
         expected = ' '.join([
-            '--osint http://scanme.nmap.org/', '--only-host scanme.nmap.org', '--host 10.10.10.10',
+            '-T3', '--osint http://scanme.nmap.org/', '--only-host scanme.nmap.org', '--host 10.10.10.10',
             '--port 443', '--port-commas 22,80,443', '--endpoint /admin', '--tech Joomla',
             '--version 1.0.0', '--email test@test.test', '--username test', '--secret test',
             '--vuln CVE-1111-1111', '--exploit Test', f'--wordlist {self.wordlist.path}'
@@ -435,7 +435,7 @@ class BaseToolTest(TestCase):
         self.change_input_filters()                                             # Change filter types
         arguments = self.tool_instance.get_arguments(self.targets, self.all_findings)
         expected = ' '.join([
-            '--osint http://scanme.nmap.org/', '--only-host scanme.nmap.org', '--host 10.10.10.10',
+            '-T3', '--osint http://scanme.nmap.org/', '--only-host scanme.nmap.org', '--host 10.10.10.10',
             '--port 80', '--port-commas 80', '--endpoint /robots.txt', '--tech Wordpress',
             '--version 1.0.0', '--email test@test.test', '--username test', '--secret test',
             '--vuln CVE-2021-44228', '--exploit Test', f'--wordlist {self.wordlist.path}'
@@ -464,7 +464,7 @@ class BaseToolTest(TestCase):
         Input.objects.all().update(filter=None)                                 # Remove all input filters
         arguments = self.tool_instance.get_arguments(self.targets, self.findings_to_use_targets)
         expected = ' '.join([
-            '--osint http://scanme.nmap.org/', '--only-host scanme.nmap.org', '--host 10.10.10.10',
+            '-T3', '--osint http://scanme.nmap.org/', '--only-host scanme.nmap.org', '--host 10.10.10.10',
             '--port 443', '--port-commas 80,443', '--endpoint /robots.txt', '--tech Wordpress',
             '--version 1.0.0', '--email test@test.test', '--username test', '--secret test',
             '--vuln CVE-2021-44228', '--exploit Test', f'--wordlist {self.wordlist.path}'
@@ -476,7 +476,7 @@ class BaseToolTest(TestCase):
         self.change_input_filters()
         arguments = self.tool_instance.get_arguments(self.targets, self.findings_to_use_targets)
         expected = ' '.join([
-            '--osint http://scanme.nmap.org/', '--only-host scanme.nmap.org', '--host 10.10.10.10',
+            '-T3', '--osint http://scanme.nmap.org/', '--only-host scanme.nmap.org', '--host 10.10.10.10',
             '--port 80', '--port-commas 80', '--endpoint /robots.txt', '--tech Wordpress',
             '--version 1.0.0', '--email test@test.test', '--username test', '--secret test',
             '--vuln CVE-2021-44228', '--exploit Test', f'--wordlist {self.wordlist.path}'
@@ -514,20 +514,22 @@ class BaseToolTest(TestCase):
         self.assertEqual(1, errors_count)
 
     def process_findings(self, imported_in_defectdojo: bool) -> None:
-        '''Execute process_findings feature using nikto report.
+        '''Execute process_findings feature using nmap report.
 
         Args:
             imported_in_defectdojo (bool): Indicate if execution is expected to be imported in Defect-Dojo or not
         '''
         queue = django_rq.get_queue('findings-queue')
         queue.empty()                                                           # Clear findings queue
-        self.tool_instance.path_output = self.nikto_report                      # Set nikto report
+        self.tool_instance.path_output = self.nmap_report                       # Set nmap report
+        self.tool_instance.create_finding(Path, path='/test')                   # Save endpoint to improve coverage
         self.tool_instance.run(self.targets, self.all_findings)                 # Run tool
         worker = SimpleWorker([queue], connection=queue.connection)             # Create RQ worker for findings queue
         worker.work(burst=True)                                                 # Launch RQ worker
-        self.assertEqual(Status.COMPLETED, self.new_execution.status)
-        self.assertEqual(self.nikto_report, self.new_execution.output_file)
-        self.assertEqual(imported_in_defectdojo, self.new_execution.imported_in_defectdojo)
+        execution = Execution.objects.get(pk=self.new_execution.id)
+        self.assertEqual(Status.COMPLETED, execution.status)
+        self.assertEqual(self.nmap_report, execution.output_file)
+        self.assertEqual(imported_in_defectdojo, execution.imported_in_defectdojo)
 
     @mock.patch('defectdojo.api.DefectDojo.request', defect_dojo_success)       # Mocks Defect-Dojo response
     def test_process_findings_with_defectdojo_target_engagement(self) -> None:
@@ -554,24 +556,24 @@ class BaseToolTest(TestCase):
     @mock.patch('defectdojo.api.DefectDojo.request', defect_dojo_success)       # Mocks Defect-Dojo response
     def test_process_findings_with_defectdojo_findings_import(self) -> None:
         '''Test process_findings feature with import in Defect-Dojo using the Rekono findings.'''
-        self.nikto.defectdojo_scan_type = None                                   # Import findings instead executions
-        self.nikto.save(update_fields=['defectdojo_scan_type'])
+        self.nmap.defectdojo_scan_type = None                                   # Import findings instead executions
+        self.nmap.save(update_fields=['defectdojo_scan_type'])
         self.process_findings(True)
 
     @mock.patch('defectdojo.api.DefectDojo.request', defect_dojo_success)       # Mocks Defect-Dojo response
     @mock.patch('defectdojo.api.DefectDojo.get_rekono_test_type', defect_dojo_success_multiple)
     def test_process_findings_with_existing_defectdojo_test_type(self) -> None:
         '''Test process_findings feature with import in Defect-Dojo using existing test type.'''
-        self.nikto.defectdojo_scan_type = None                                   # Import findings instead executions
-        self.nikto.save(update_fields=['defectdojo_scan_type'])
+        self.nmap.defectdojo_scan_type = None                                   # Import findings instead executions
+        self.nmap.save(update_fields=['defectdojo_scan_type'])
         self.process_findings(True)
 
     @mock.patch('defectdojo.api.DefectDojo.request', defect_dojo_success)       # Mocks Defect-Dojo response
     @mock.patch('defectdojo.api.DefectDojo.create_rekono_test_type', defect_dojo_error)
     def test_process_findings_with_errors_in_defectdojo_test_type_creation(self) -> None:
         '''Test process_findings feature with unexpected error during Defect-Dojo test type creation.'''
-        self.nikto.defectdojo_scan_type = None                                   # Import findings instead executions
-        self.nikto.save(update_fields=['defectdojo_scan_type'])
+        self.nmap.defectdojo_scan_type = None                                   # Import findings instead executions
+        self.nmap.save(update_fields=['defectdojo_scan_type'])
         self.process_findings(False)
 
     @mock.patch('defectdojo.api.DefectDojo.request', defect_dojo_error)         # Mocks Defect-Dojo response
