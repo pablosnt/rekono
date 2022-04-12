@@ -10,14 +10,8 @@ export default {
     low: Number,
     info: Number
   },
-  computed: {
-    total () {
-      return this.critical + this.high + this.medium + this.low + this.info
-    }
-  },
-  watch: {
-    total () {
-      this.renderChart({
+  mounted () {
+    this.renderChart({
         labels: ['Vulnerabilities'],
         datasets: [
           {
@@ -61,7 +55,6 @@ export default {
           text: this.label
         }
       })
-    }
   }
 }
 </script>
