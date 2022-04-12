@@ -115,7 +115,7 @@ export default {
     task: Number,
     execution: Number,
     search: String,
-    active: String,
+    active: Boolean,
     filter: Object,
     order: String,
     details: Array,
@@ -123,7 +123,7 @@ export default {
   },
   computed: {
     filterChange () {
-      return this.selectedFindingTypes.toString() + this.target + this.task + this.execution + this.search + this.active + JSON.stringify(this.filter) + this.reload
+      return this.selectedFindingTypes.toString() + this.target.toString() + this.task.toString() + this.execution.toString() + this.search + this.active.toString() + JSON.stringify(this.filter) + this.reload.toString()
     },
     types () {
       let types = []
