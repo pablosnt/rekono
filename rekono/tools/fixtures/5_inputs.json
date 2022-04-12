@@ -294,8 +294,8 @@
         "pk": 30,
         "fields": {
             "argument": 20,
-            "type": 2,
-            "filter": null,
+            "type": 3,
+            "filter": "microsoft-ds",
             "order": 1
         }
     },
@@ -304,8 +304,8 @@
         "pk": 31,
         "fields": {
             "argument": 20,
-            "type": 3,
-            "filter": "microsoft-ds",
+            "type": 2,
+            "filter": null,
             "order": 2
         }
     },
