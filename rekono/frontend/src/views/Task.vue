@@ -2,7 +2,7 @@
   <div>
     <div class="mt-3 w-100" style="overflow-x: hidden" v-if="isFound">
       <b-row>
-        <b-col>
+        <b-col v-if="currentTask.target">
           <p>{{ currentTask.target.target }}</p>
           <b-badge variant="secondary">{{ currentTask.target.type }}</b-badge>
         </b-col>

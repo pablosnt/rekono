@@ -123,7 +123,7 @@ export default {
   },
   computed: {
     filterChange () {
-      return this.selectedFindingTypes.toString() + this.target.toString() + this.task.toString() + this.execution.toString() + this.search + this.active.toString() + JSON.stringify(this.filter) + this.reload.toString()
+      return this.selectedFindingTypes.toString() + this.target + this.task + this.execution + this.search + this.active + JSON.stringify(this.filter) + this.reload
     },
     types () {
       let types = []
@@ -132,7 +132,6 @@ export default {
     }
   },
   data () {
-    this.fetchData()
     return {
       findings: [],
       selectedFinding: null,
