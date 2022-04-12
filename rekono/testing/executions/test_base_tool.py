@@ -22,7 +22,7 @@ from tasks.enums import Status
 from tasks.models import Task
 from testing.mocks.defectdojo import (defect_dojo_error, defect_dojo_success,
                                       defect_dojo_success_multiple)
-from tools.enums import IntensityRank, Stage
+from tools.enums import Stage
 from tools.exceptions import ToolExecutionException
 from tools.models import Argument, Configuration, Input, Intensity, Tool
 from tools.tools.base_tool import BaseTool
@@ -135,7 +135,7 @@ class BaseToolTest(TestCase):
             target=target,
             tool=self.nikto,
             configuration=self.configuration,
-            intensity=IntensityRank.NORMAL,
+            intensity=self.intensity.value,
             status=Status.COMPLETED,
             start=timezone.now(),
             end=timezone.now(),
@@ -507,9 +507,8 @@ class BaseToolTest(TestCase):
             self.tool_instance.tool_execution(['/directory-not-found'], [], [])     # Directory not found
         except ToolExecutionException as ex:
             self.tool_instance.on_error(stderr=str(ex))                         # Test on_error feature
-            execution = Execution.objects.get(pk=self.new_execution.id)         # Check execution data
-            self.assertEqual(Status.ERROR, execution.status)
-            self.assertEqual(str(ex).strip(), execution.output_error)
+            self.assertEqual(Status.ERROR, self.new_execution.status)
+            self.assertEqual(str(ex).strip(), self.new_execution.output_error)
             errors_count += 1
         self.tool_instance.tool_execution(['/'], [], [])                        # Valid ls execution
         self.assertEqual(1, errors_count)
@@ -526,10 +525,9 @@ class BaseToolTest(TestCase):
         self.tool_instance.run(self.targets, self.all_findings)                 # Run tool
         worker = SimpleWorker([queue], connection=queue.connection)             # Create RQ worker for findings queue
         worker.work(burst=True)                                                 # Launch RQ worker
-        execution = Execution.objects.get(pk=self.new_execution.id)             # Check execution status
-        self.assertEqual(Status.COMPLETED, execution.status)
-        self.assertEqual(self.nikto_report, execution.output_file)
-        self.assertEqual(imported_in_defectdojo, execution.imported_in_defectdojo)
+        self.assertEqual(Status.COMPLETED, self.new_execution.status)
+        self.assertEqual(self.nikto_report, self.new_execution.output_file)
+        self.assertEqual(imported_in_defectdojo, self.new_execution.imported_in_defectdojo)
 
     @mock.patch('defectdojo.api.DefectDojo.request', defect_dojo_success)       # Mocks Defect-Dojo response
     def test_process_findings_with_defectdojo_target_engagement(self) -> None:

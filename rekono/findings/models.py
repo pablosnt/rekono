@@ -355,9 +355,9 @@ class Path(Finding):
             Dict[str, Any]: Useful information for Defect-Dojo imports
         '''
         return {
-            'protocol': self.port.service,
-            'host': self.port.host.address,
-            'port': self.port.port,
+            'protocol': self.port.service if self.port else None,
+            'host': self.port.host.address if self.port else None,
+            'port': self.port.port if self.port else None,
             'path': self.path
         }
 

@@ -8,6 +8,7 @@ from typing import Any, Dict, List, Tuple, Union, cast
 from django.db.models import Model
 from django.db.models.fields.related_descriptors import \
     ReverseManyToOneDescriptor
+from django.db.models.query_utils import DeferredAttribute
 from django.utils import timezone
 from executions.models import Execution
 from findings.models import Finding, Vulnerability
@@ -342,7 +343,10 @@ class BaseTool:
                     continue
                 if (
                     hasattr(finding, key) and
-                    not isinstance(getattr(finding.__class__, key), ReverseManyToOneDescriptor)
+                    # Discard relations between findings
+                    not isinstance(getattr(finding.__class__, key), ReverseManyToOneDescriptor) and
+                    # Discard standard fields: Text, Number, etc.
+                    not isinstance(getattr(finding.__class__, key), DeferredAttribute)
                 ):
                     # Finding has a field that matches the current relation
                     setattr(finding, key, value)                                # Set relation between findings
