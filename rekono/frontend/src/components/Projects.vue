@@ -6,7 +6,7 @@
         <b-form-tags no-outer-focus :disabled="$store.state.role !== 'Admin'" :value="row.item.tags" placeholder="" remove-on-delete size="md" tag-variant="dark" @input="updateProject(row.item, $event)"/>
       </template>
       <template #cell(defectdojo_product_id)="row">
-        <b-link v-if="row.item.defectdojo_product_id !== null && defectDojoEnabled" :href="`${defectDojoHost}/product/${row.item.defectdojo_product_id}`" target="_blank">
+        <b-link v-if="row.item.defectdojo_product_id !== null && defectDojoEnabled" :href="`${defectDojoUrl}/product/${row.item.defectdojo_product_id}`" target="_blank">
           <b-img src="/static/defect-dojo-favicon.ico" width="30" height="30"/>
         </b-link>
       </template>

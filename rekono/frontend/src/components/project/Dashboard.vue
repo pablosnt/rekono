@@ -66,7 +66,7 @@ export default {
   },
   methods: {
     defectDojoUrl () {
-      return this.project && this.project.defectdojo_product_id && this.defectDojoEnabled ? `${this.defectDojoHost}/product/${this.project.defectdojo_product_id}` : null
+      return this.project && this.project.defectdojo_product_id && this.defectDojoEnabled ? `${this.defectDojoUrl}/product/${this.project.defectdojo_product_id}` : null
     },
     deleteProject () {
       this.delete(`/api/projects/${this.$route.params.id}/`, this.project.name, 'Project deleted successfully').then(() => this.$router.push({ path: '/projects' }))

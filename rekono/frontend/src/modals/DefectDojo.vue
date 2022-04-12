@@ -1,7 +1,7 @@
 <template>
   <b-modal :id="id" @close="clean" @hidden="clean" @ok="confirm" ok-title="Update" header-bg-variant="light" header-text-variant="info" ok-variant="info" size="lg">
     <template #modal-title>
-      <b-link class="mr-2" :href="defectDojoHost" target="_blank">
+      <b-link class="mr-2" :href="defectDojoUrl" target="_blank">
         <b-img src="/static/defect-dojo-favicon.ico" width="30" height="30"/>
       </b-link>
       Defect-Dojo

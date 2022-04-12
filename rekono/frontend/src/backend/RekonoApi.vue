@@ -81,7 +81,7 @@ export default {
       pathRegex: /^[\w./#?&%]*$/,
       cveRegex: /^CVE-[0-9]{4}-[0-9]{1,7}$/,
       defectDojoEnabled: process.env.VUE_APP_DEFECTDOJO.toLowerCase() === 'true',
-      defectDojoHost: process.env.VUE_APP_DEFECTDOJO_HOST,
+      defectDojoUrl: process.env.VUE_APP_DEFECTDOJO_URL,
       telegramBot: process.env.VUE_APP_TELEGRAM_BOT
     }
   },

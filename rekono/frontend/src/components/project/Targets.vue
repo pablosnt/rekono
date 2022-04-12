@@ -3,7 +3,7 @@
     <table-header :filters="filters" add="add-target-modal" :showAdd="auditor.includes($store.state.role)" @filter="fetchData"/>
     <b-table striped borderless head-variant="dark" :fields="targetsFields" :items="data">
       <template #cell(defectdojo_engagement_id)="row">
-        <b-link v-if="row.item.defectdojo_engagement_id !== null && defectDojoEnabled" :href="`${defectDojoHost}/engagement/${row.item.defectdojo_engagement_id}`" target="_blank">
+        <b-link v-if="row.item.defectdojo_engagement_id !== null && defectDojoEnabled" :href="`${defectDojoUrl}/engagement/${row.item.defectdojo_engagement_id}`" target="_blank">
           <b-img src="/static/defect-dojo-favicon.ico" width="30" height="30"/>
         </b-link>
       </template>
