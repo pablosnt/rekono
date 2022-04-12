@@ -134,7 +134,6 @@ export default {
         { key: 'date', sortable: true }
       ],
       selectedExecution: null,
-      autoRefresh: null,
       reloadFindings: false
     }
   },
@@ -146,32 +145,28 @@ export default {
   },
   methods: {
     startAutoRefresh () {
-      if (!this.autoRefresh) {
-        this.autoRefresh = setInterval(this.handleRefresh, 5000)
-      }
+      this.autoRefresh = setInterval(this.handleRefresh, 5000)
     },
     stopAutoRefresh () {
-      if (this.autoRefresh) {
-        clearInterval(this.autoRefresh)
-        this.autoRefresh = null
-      }
+      clearInterval(this.autoRefresh)
+      this.autoRefresh = null
     },
     handleRefresh () {
-      if (this.currentTask) {
-        this.fetchTask(true)
-        this.fetchExecutions()
-        if (!this.selectExecution) {
-          this.reloadFindings = !this.reloadFindings
-        }
-        if (this.currentTask.status !== 'Running' && this.currentTask.status === 'Requested') {
-          this.stopAutoRefresh()
-        }
+      this.fetchTask(true)
+      this.fetchExecutions()
+      if (!this.selectExecution) {
+        this.reloadFindings = !this.reloadFindings
       }
     },
     fetchTask (reload = false) {
       if (!this.task || reload) {
         this.get(`/api/tasks/${this.$route.params.id}/`)
-          .then(response => this.currentTask = response.data)
+          .then(response => {
+            this.currentTask = response.data
+            if (response.data.status !== 'Running' && response.data.status !== 'Requested') {
+              this.stopAutoRefresh()
+            }
+          })
           .catch(error => this.isFound = (error.response.status !== 404))
       }
     },
