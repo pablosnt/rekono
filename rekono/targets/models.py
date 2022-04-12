@@ -107,7 +107,7 @@ class Target(models.Model, BaseInput):
         '''
         name = f'Rekono assessment for {self.target}'
         # Create engagement in Defect-Dojo
-        success, body = dd_client.create_engagement(self.project.id, name, f'{name} ({self.type})')
+        success, body = dd_client.create_engagement(self.project.defectdojo_product_id, name, f'{name} ({self.type})')
         if success:
             logger.info(f'[Defect-Dojo] New engagement {body["id"]} related to target {self.id} has been created')
             self.defectdojo_engagement_id = body['id']                          # Save Defect-Dojo engagement Id
