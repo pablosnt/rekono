@@ -154,15 +154,16 @@ export default {
       if (this.autoRefresh) {
         clearInterval(this.autoRefresh)
         this.autoRefresh = null
-        this.reloadFindings = !this.reloadFindings
       }
     },
     handleRefresh () {
       if (this.currentTask) {
-        if (this.currentTask.status === 'Running' || this.currentTask.status === 'Requested') {
-          this.fetchTask(true)
-          this.fetchExecutions()
-        } else {
+        this.fetchTask(true)
+        this.fetchExecutions()
+        if (!this.selectExecution) {
+          this.reloadFindings = !this.reloadFindings
+        }
+        if (this.currentTask.status !== 'Running' && this.currentTask.status === 'Requested') {
           this.stopAutoRefresh()
         }
       }
