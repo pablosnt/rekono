@@ -140,6 +140,8 @@ services:
       - RKN_DB_PASSWORD=postgres
       - RKN_RQ_HOST=redis
       - RKN_TELEGRAM_TOKEN
+      - RKN_DD_URL
+      - RKN_DD_API_KEY
       - REKONO_HOME=/rekono
       - OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
     
@@ -225,6 +227,7 @@ services:
       - RKN_RQ_HOST=redis
       - RKN_TRUSTED_PROXY=true
       - RKN_ALLOWED_HOSTS=*
+      - RKN_DD_URL
       - RKN_DD_API_KEY
       - REKONO_HOME=/rekono
   
