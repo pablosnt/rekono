@@ -264,8 +264,8 @@
         "pk": 27,
         "fields": {
             "argument": 18,
-            "type": 2,
-            "filter": null,
+            "type": 3,
+            "filter": "ssh",
             "order": 1
         }
     },
@@ -274,8 +274,8 @@
         "pk": 28,
         "fields": {
             "argument": 18,
-            "type": 3,
-            "filter": "ssh",
+            "type": 2,
+            "filter": null,
             "order": 2
         }
     },
