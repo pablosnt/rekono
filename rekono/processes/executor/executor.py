@@ -1,7 +1,7 @@
 import logging
 from typing import List, Set
 
-from django.db.models import Min
+from django.db.models import Max
 from executions import utils
 from executions.models import Execution
 from executions.queue import producer
@@ -53,8 +53,13 @@ def create_plan(task: Task) -> List[ExecutionJob]:
     execution_plan: List[ExecutionJob] = []                                     # Execution plan initialized to empty
     # Get all process steps sort by stage and priority (descendent), so steps from previous steps and
     # with greater priority will be included before in the plan
-    steps = Step.objects.annotate(min_output=Min('configuration__outputs__id')).filter(process=task.process).order_by(
-        'tool__stage', '-priority', 'min_output'
+    steps = Step.objects.annotate(
+        max_input=Max('tool__arguments__inputs__type__id'),
+        max_output=Max('configuration__outputs__type__id')
+    ).filter(
+        process=task.process
+    ).order_by(
+        'tool__stage', '-priority', 'max_input', 'max_output'
     )
     for step in steps:                                                          # For each step
         # Get the greater intensity for this tool, limited to the task intensity
