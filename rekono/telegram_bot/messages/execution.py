@@ -21,8 +21,7 @@ _Configuration_     {configuration}
 _Status_            *{status}*
 _Start_             {start}
 _End_               {end}
-_Executor_          {executor}
-{pagination}
+_Executor_          {executor}{pagination}
 
 {findings}
 '''
@@ -58,6 +57,7 @@ def notification_messages(execution: Execution, findings: List[Finding]) -> List
     '''
     text_messages = []
     text_message = ''
+    entity_title = ''
     finding_models = [OSINT, Host, Port, Path, Technology, Credential, Vulnerability, Exploit]
     for model in finding_models:                                                # For each finding model
         entities = [f for f in findings if isinstance(f, model)]                # Get findings related to current model
@@ -98,6 +98,8 @@ def notification_messages(execution: Execution, findings: List[Finding]) -> List
                 if len(text_message) > 3000:
                     text_messages.append(text_message)
                     text_message = entity_title
+    if text_message != entity_title:
+        text_messages.append(text_message)
     notifications = []
     for index, text_message in enumerate(text_messages):
         # Create text message with execution details and findings message
@@ -113,7 +115,7 @@ def notification_messages(execution: Execution, findings: List[Finding]) -> List
             start=escape_markdown(execution.start.strftime(DATE_FORMAT), version=2),
             end=escape_markdown(execution.end.strftime(DATE_FORMAT), version=2),
             executor=escape_markdown(execution.task.executor.username, version=2),
-            pagination='' if len(text_messages) == 1 else f'Part {index + 1}/{len(text_messages)}',
+            pagination='' if len(text_messages) == 1 else f'\n_Part {index + 1}/{len(text_messages)}_',
             findings=text_message
         ))
     return notifications
