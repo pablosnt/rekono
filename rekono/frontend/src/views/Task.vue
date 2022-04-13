@@ -193,6 +193,7 @@ export default {
     }
   },
   beforeRouteUpdate(to, from, next) {
+    this.startAutoRefresh()
     this.currentTask = to.params.task ? to.params.task : this.fetchTask()
     this.fetchExecutions()
     next()
