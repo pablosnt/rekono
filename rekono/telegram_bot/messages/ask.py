@@ -1,9 +1,7 @@
 '''Telegram Bot messages that ask the user to choose one option.'''
 
 ASK_FOR_PROJECT = 'Choose project'
-NO_PROJECTS = (
-    'You have no projects\. Go to Rekono to create one or ask your administrator for assign you to existing one'
-)
+NO_PROJECTS = 'You have no projects\. Go to Rekono to create one or ask your administrator to assign you one'
 
 ASK_FOR_TARGET = 'Choose target'
 NO_TARGETS = 'There are no targets in this project\. Use the command /newtarget'
