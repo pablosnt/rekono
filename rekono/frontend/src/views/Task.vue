@@ -171,7 +171,7 @@ export default {
       }
     },
     fetchExecutions () {
-      this.getAllPages('/api/executions/', { task: this.$route.params.id, order: 'end' })
+      this.getAllPages('/api/executions/', { task: this.$route.params.id, order: 'end,-status' })
         .then(results => {
           this.executions = results
           if (this.executions.length === 1) {
