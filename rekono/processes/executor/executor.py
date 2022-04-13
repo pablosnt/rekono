@@ -59,7 +59,7 @@ def create_plan(task: Task) -> List[ExecutionJob]:
     ).filter(
         process=task.process
     ).order_by(
-        'tool__stage', '-priority', 'max_input', 'max_output'
+        'tool__stage', '-priority', 'max_output', 'max_input'
     )
     for step in steps:                                                          # For each step
         # Get the greater intensity for this tool, limited to the task intensity
