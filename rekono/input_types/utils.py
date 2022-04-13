@@ -28,7 +28,7 @@ def get_url(host: str, port: int = None, endpoint: str = '', protocols: List[str
     for protocol in protocols:                                                  # For each protocol
         url_to_test = schema.format(protocol=protocol, host=host, port=port, endpoint=endpoint)
         try:
-            requests.get(url_to_test, timeout=2, verify=False)                  # Test URL connection
+            requests.get(url_to_test, timeout=3, verify=False)                  # Test URL connection
             return url_to_test
         except Exception:
             continue

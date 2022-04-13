@@ -10,7 +10,7 @@ from executions.models import Execution
 from findings.models import Finding, Vulnerability
 from findings.nvd_nist import NvdNist
 from telegram_bot import sender as telegram_sender
-from telegram_bot.messages.execution import notification_message
+from telegram_bot.messages.execution import notification_messages
 from users.enums import Notification
 
 logger = logging.getLogger()                                                    # Rekono logger
@@ -56,10 +56,11 @@ def consumer(execution: Execution = None, findings: List[Finding] = []) -> None:
         ).all()
         users_to_notify.extend(list(search_members))                            # Save members in the notify list
         logger.info(f'[Findings] {len(users_to_notify)} will receive a notification with the findings from execution {execution.id}')   # noqa: E501
-        telegram_message = notification_message(execution, findings)            # Create Telegram message
-        for user in [u for u in users_to_notify if u.telegram_notification]:
-            # For each user with enabled Telegram notifications
-            telegram_sender.send_message(user.telegram_chat.chat_id, telegram_message)      # Telegram notification
+        telegram_messages = notification_messages(execution, findings)          # Create Telegram message
+        for user in [u for u in users_to_notify if u.telegram_notification]:    # Sometimes multiple messages are needed
+            for telegram_message in telegram_messages:
+                # For each user with enabled Telegram notifications
+                telegram_sender.send_message(user.telegram_chat.chat_id, telegram_message)  # Telegram notification
         # Email notifications
         email_sender.execution_notifications(
             [u.email for u in users_to_notify if u.email_notification],

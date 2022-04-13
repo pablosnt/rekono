@@ -22,6 +22,7 @@ _Status_            *{status}*
 _Start_             {start}
 _End_               {end}
 _Executor_          {executor}
+{pagination}
 
 {findings}
 '''
@@ -45,7 +46,7 @@ TOOL_CONFIRMATION = '''🛠 _Tool_      *{tool}*
 EXECUTION_LAUNCHED = '✅ Task {id} created successfully!'
 
 
-def notification_message(execution: Execution, findings: List[Finding]) -> str:
+def notification_messages(execution: Execution, findings: List[Finding]) -> List[str]:
     '''Create text message including execution and findings details.
 
     Args:
@@ -55,15 +56,17 @@ def notification_message(execution: Execution, findings: List[Finding]) -> str:
     Returns:
         str: Text message with execution and findings details
     '''
+    text_messages = []
     text_message = ''
     finding_models = [OSINT, Host, Port, Path, Technology, Credential, Vulnerability, Exploit]
     for model in finding_models:                                                # For each finding model
         entities = [f for f in findings if isinstance(f, model)]                # Get findings related to current model
         if entities:                                                            # Findings found
-            text_message += messages.TITLE.format(                              # Create finding name title
+            entity_title = messages.TITLE.format(                               # Create finding name title
                 icon=getattr(messages, f'{model.__name__.upper()}_ICON'),
                 finding=model.__name__.upper()
             )
+            text_message += entity_title
             for entity in entities:                                             # For each finding
                 data = vars(entity)                                             # Get finding data
                 data = {k: v if v else '' for k, v in data.items()}             # Clean null values from finding data
@@ -88,21 +91,32 @@ def notification_message(execution: Execution, findings: List[Finding]) -> str:
                 data = {k: v if not isinstance(v, str) else escape_markdown(v, version=2) for k, v in data.items()}
                 # Add finding data to the text message
                 text_message += getattr(messages, model.__name__.upper()).format(**data)
-    # Create text message with execution details and findings message
-    return EXECUTION_NOTIFICATION.format(
-        project=escape_markdown(execution.task.target.project.name, version=2),
-        target=escape_markdown(execution.task.target.target, version=2),
-        tool=escape_markdown(execution.step.tool.name if execution.step else execution.task.tool.name, version=2),
-        configuration=escape_markdown(
-            execution.step.configuration.name if execution.step else execution.task.configuration.name,
-            version=2
-        ),
-        status=escape_markdown(execution.status, version=2),
-        start=escape_markdown(execution.start.strftime(DATE_FORMAT), version=2),
-        end=escape_markdown(execution.end.strftime(DATE_FORMAT), version=2),
-        executor=escape_markdown(execution.task.executor.username, version=2),
-        findings=text_message
-    )
+                # Telegram has a size limit of 4096 characters for messages
+                # This notifications also includes the Execution title (EXECUTION_NOTIFICATION)
+                # so we split findings in messages of 3000 characters to prevent errors and make
+                # the notifications easy to read
+                if len(text_message) > 3000:
+                    text_messages.append(text_message)
+                    text_message = entity_title
+    notifications = []
+    for index, text_message in enumerate(text_messages):
+        # Create text message with execution details and findings message
+        notifications.append(EXECUTION_NOTIFICATION.format(
+            project=escape_markdown(execution.task.target.project.name, version=2),
+            target=escape_markdown(execution.task.target.target, version=2),
+            tool=escape_markdown(execution.step.tool.name if execution.step else execution.task.tool.name, version=2),
+            configuration=escape_markdown(
+                execution.step.configuration.name if execution.step else execution.task.configuration.name,
+                version=2
+            ),
+            status=escape_markdown(execution.status, version=2),
+            start=escape_markdown(execution.start.strftime(DATE_FORMAT), version=2),
+            end=escape_markdown(execution.end.strftime(DATE_FORMAT), version=2),
+            executor=escape_markdown(execution.task.executor.username, version=2),
+            pagination='' if len(text_messages) == 1 else f'Part {index + 1}/{len(text_messages)}',
+            findings=text_message
+        ))
+    return notifications
 
 
 def confirmation_message(context: CallbackContext) -> str:
