@@ -18,5 +18,5 @@ def send_message(chat_id: int, text: str) -> None:
     try:
         updater = Updater(token=TELEGRAM_TOKEN)                                 # Telegram client
         updater.bot.send_message(chat_id, text=text, parse_mode=ParseMode.MARKDOWN_V2)      # Send Telegram text message
-    except Exception:
-        logger.error('[Telegram] Error during Telegram message sending')
+    except Exception as ex:
+        logger.error(f'[Telegram] Error during Telegram message sending: {str(ex)}')
