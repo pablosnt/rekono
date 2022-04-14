@@ -6,6 +6,10 @@
           <b-icon icon="check-circle-fill" variant="success"/>
           Done! You will receive an email with a<br/> temporal link to change your password
         </b-alert>
+        <b-alert v-if="otp" v-model="passwordError" variant="danger">
+          <b-icon icon="exclamation-circle-fill" variant="danger"></b-icon>
+          {{ invalidPassword }}
+        </b-alert>
         <b-form-group v-if="!otp" invalid-feedback="Email is required">
           <b-input-group size="lg" class="mb-3">
             <b-input-group-prepend is-text>
@@ -14,7 +18,7 @@
             <b-form-input type="email" v-model="email" placeholder="Email" :state="emailState" max-length="150" autofocus/>
           </b-input-group>
         </b-form-group>
-        <b-form-group v-if="otp" :invalid-feedback="invalidPassword">
+        <b-form-group v-if="otp">
           <b-input-group size="lg" class="mb-3">
             <b-input-group-prepend is-text>
               <b-icon icon="key-fill"/>
@@ -22,7 +26,7 @@
             <b-form-input type="password" v-model="password" placeholder="Password" :state="passwordState"/>
           </b-input-group>
         </b-form-group>
-        <b-form-group v-if="otp" :invalid-feedback="invalidPasswordConfirm">
+        <b-form-group v-if="otp">
           <b-input-group size="lg" class="mb-3">
             <b-input-group-prepend is-text>
               <b-icon icon="key-fill"/>
@@ -58,8 +62,8 @@ export default {
       password: null,
       passwordConfirm: null,
       passwordState: null,
-      invalidPassword: 'Password is required',
-      invalidPasswordConfirm: 'Password confirmation is required'
+      passwordError: false,
+      invalidPassword: 'Password is required'
     }
   },
   components: {
@@ -80,9 +84,9 @@ export default {
     check () {
       if (this.otp && this.otp.length > 0) {
         if (!this.password || this.password.length === 0 || this.password !== this.passwordConfirm) {
+          this.passwordError = true
           this.passwordState = false
-          this.invalidPassword = this.password && this.password.length > 0 ? "Password doesn't match confirmation" : 'Password is required'
-          this.invalidPasswordConfirm = this.passwordConfirm && this.passwordConfirm.length > 0 ? "Password doesn't match confirmation" : 'Password confirmation is required'
+          this.invalidPassword = this.password !== this.passwordConfirm ? "Password doesn't match confirmation" : 'Password is required'
         }
         return this.passwordState !== false
       } else {
