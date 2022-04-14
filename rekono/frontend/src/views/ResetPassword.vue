@@ -86,7 +86,7 @@ export default {
         if (!this.password || this.password.length === 0 || this.password !== this.passwordConfirm) {
           this.passwordError = true
           this.passwordState = false
-          this.invalidPassword = this.password !== this.passwordConfirm ? "Password doesn't match confirmation" : 'Password is required'
+          this.invalidPassword = this.password && this.password.length > 0 ? "Password doesn't match confirmation" : 'Password is required'
         }
         return this.passwordState !== false
       } else {
