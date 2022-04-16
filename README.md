@@ -45,10 +45,17 @@ DEMO
 
 ### Docker
 
-Execute the following command in the root directory of the project:
+Execute the following commands in the root directory of the project:
 
 ```
+docker-compose build
 docker-compose up -d
+```
+
+If you need more than one tool running at the same time, you can set the number of executions-worker instances:
+
+```
+docker-compose up -d --scale executions-worker=5
 ```
 
 Go to https://127.0.0.1/

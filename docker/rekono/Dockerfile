@@ -23,7 +23,6 @@ USER rekono
 WORKDIR /code
 
 ENV REKONO_HOME /rekono
-RUN python manage.py frontend
 
 
 FROM node:17.6.0-alpine as frontend
