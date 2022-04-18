@@ -125,8 +125,10 @@ Go to http://127.0.0.1:3000/
     # pwd: rekono/frontend
     npm install
     ```
+  
+6. Configure Rekono following this [guide](#configuration)
 
-6. Initialize the environment:
+7. Initialize the environment:
 
     ```
     # pwd: rekono/
@@ -135,7 +137,7 @@ Go to http://127.0.0.1:3000/
     python3 manage.py frontend              # Parse the Rekono configuration and apply it to the frontend
     ```
 
-7. Deploy the Rekono services:
+8. Deploy the Rekono services:
 
     - Backend
         ```
@@ -161,7 +163,7 @@ Go to http://127.0.0.1:3000/
         python3 manage.py telegram_bot
         ```
 
-8. Go to http://127.0.0.1:3000/  
+9. Go to http://127.0.0.1:3000/  
 
 
 ## Configuration
@@ -203,6 +205,20 @@ Rekono supports the following properties:
 |`RKN_TRUSTED_PROXY`|N/A|`False`|Indicate if Rekono is running with a trusted reverse proxy|
 |`RKN_ALLOWED_HOSTS`|`security.allowed-hosts`|[`localhost`, `127.0.0.1`, `::1`]|Hosts allowed to access Rekono|
 |`RKN_SECRET_KEY`|`security.secret-key`|Generated randomly|Security key used to sign JWT tokens|
+
+To configure also the Rekono frontend based on the previous properties, you can run the following command:
+
+```
+python3 manage.py frontend
+```
+
+This command will add this properties to the `rekono/frontend/.env` file:
+
+- `VUE_APP_DEFECTDOJO`: Enable or disable Defect-Dojo integration features in the frontend
+- `VUE_APP_DEFECTDOJO_URL`: Defect-Dojo URL
+- `VUE_APP_TELEGRAM_BOT`: Name of the Telegram Bot to be displayed in the UI
+
+Of course, you can also configure this properties in the `rekono/frontend/.env` file directly
 
 
 ## License

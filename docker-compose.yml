@@ -50,8 +50,7 @@ services:
     container_name: initialize
     volumes:
       - rekono:/rekono
-      - backend:/code
-      - frontend:/code/frontend
+      - ./rekono/frontend/.env:/code/frontend/.env
       - ./config.yaml:/rekono/config.yaml:ro
     networks:
       - internal
@@ -75,7 +74,6 @@ services:
     hostname: tasks-worker
     volumes:
       - rekono:/rekono
-      - backend:/code
       - ./config.yaml:/rekono/config.yaml:ro
     networks:
       - internal
@@ -100,7 +98,6 @@ services:
     hostname: executions-worker
     volumes:
       - rekono:/rekono
-      - backend:/code
       - ./config.yaml:/rekono/config.yaml:ro
     networks:
       - internal
@@ -125,7 +122,6 @@ services:
     hostname: findings-worker
     volumes:
       - rekono:/rekono
-      - backend:/code
       - ./config.yaml:/rekono/config.yaml:ro
     networks:
       - internal
@@ -151,7 +147,6 @@ services:
     hostname: emails-worker
     volumes:
       - rekono:/rekono
-      - backend:/code
       - ./config.yaml:/rekono/config.yaml:ro
     networks:
       - internal
@@ -180,7 +175,6 @@ services:
     container_name: telegram-bot
     volumes:
       - rekono:/rekono
-      - backend:/code
       - ./config.yaml:/rekono/config.yaml:ro
     networks:
       - internal
@@ -206,11 +200,15 @@ services:
     command: python manage.py runserver 0.0.0.0:8000
     hostname: backend
     container_name: backend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/schema/swagger-ui.html"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
     expose:
       - 8000
     volumes:
       - rekono:/rekono
-      - backend:/code
       - ./config.yaml:/rekono/config.yaml:ro
     networks:
       - internal
@@ -236,13 +234,19 @@ services:
       dockerfile: docker/rekono/Dockerfile
       target: frontend
     image: rekono-frontend:latest
-    command: serve -s dist
+    command: sh -c "npm run build && serve -s dist"
     hostname: frontend
     container_name: frontend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/#/login"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
     expose:
       - 3000
     volumes:
-      - frontend:/frontend
+      - ./rekono/frontend/.env:/frontend/.env:ro
     networks:
       - internal
     depends_on:
@@ -264,8 +268,10 @@ services:
     volumes:
       - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
-      - backend
-      - frontend
+      backend:
+        condition: service_healthy
+      frontend:
+        condition: service_healthy
     networks:
       - internal
       - external
@@ -273,8 +279,6 @@ services:
 volumes:
   postgres:
   rekono:
-  backend:
-  frontend:
 
 networks:
   internal:
