@@ -70,7 +70,7 @@ export default {
         this.post(
           '/api/users/create/',
           { username: this.username, first_name: this.firstName, last_name: this.lastName, password: this.password, otp: this.otp },
-          this.username, 'User created successfully', true
+          this.username, 'User created successfully', false
         ).then(() => this.$store.dispatch('redirectToLogin'))
       }
     },
@@ -98,7 +98,7 @@ export default {
         this.invalidPassword = this.password && this.password.length > 0 ? "Password doesn't match confirmation" : 'Password is required'
         this.invalidPasswordConfirm = this.passwordConfirm && this.passwordConfirm.length > 0 ? "Password doesn't match confirmation" : 'Password confirmation is required'
       }
-      return this.usernameState && this.firstNameState && this.lastNameState && this.passwordState
+      return this.usernameState !== false && this.firstNameState !== false && this.lastNameState !== false && this.passwordState !== false
     }
   }
 }
