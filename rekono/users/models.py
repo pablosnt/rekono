@@ -114,6 +114,7 @@ class RekonoUserManager(UserManager):
         user.set_unusable_password()                                            # Make its password unusable
         user.otp = None                                                         # Remove its OTP
         user.groups.clear()                                                     # Clear its groups
+        user.projects.clear()                                                   # Clear its projects
         user.save(update_fields=['otp', 'is_active'])
         try:
             token = Token.objects.get(user=user)                                # Get user API token

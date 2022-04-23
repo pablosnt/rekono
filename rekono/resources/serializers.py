@@ -62,22 +62,6 @@ class WordlistSerializer(serializers.ModelSerializer, LikeBaseSerializer):
             self.validated_data['size'] = len(wordlist_file.readlines())        # Count entries from uploaded file
         return super().save(**kwargs)
 
-    # def update(self, instance: Wordlist, validated_data: Dict[str, Any]) -> Wordlist:
-    #     '''Update instance from validated data.
-
-    #     Args:
-    #         instance (Wordlist): Instance to update
-    #         validated_data (Dict[str, Any]): Validated data
-
-    #     Returns:
-    #         Wordlist: Updated instance
-    #     '''
-    #     old_path = instance.path                                                # Get original wordlist filepath
-    #     updated_instance = super().update(instance, validated_data)             # Update wordlist
-    #     # Remove original wordlist filepath, since a new wordlist file has been uploaded
-    #     os.remove(old_path)
-    #     return updated_instance
-
 
 class UpdateWordlistSerializer(serializers.ModelSerializer):
     '''Serializer to update wordlists via API.'''

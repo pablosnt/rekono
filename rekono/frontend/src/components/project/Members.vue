@@ -74,7 +74,7 @@ export default {
         })
     },
     deleteMember () {
-      this.delete(`/api/projects/${this.$route.params.id}/members/${this.selectedUser.id}`, this.selectedUser.username, 'Member deleted successfully').then(() => this.fetchData())
+      this.delete(`/api/projects/${this.$route.params.id}/members/${this.selectedUser.id}/`, this.selectedUser.username, 'Member deleted successfully').then(() => this.fetchData())
     },
     selectUser (user) {
       this.selectedUser = user
