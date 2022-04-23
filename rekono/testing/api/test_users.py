@@ -44,7 +44,7 @@ class UsersTest(RekonoTestCase):
             data (Dict[str, str]): User data
             status_code (int, optional): Expected HTTP status code. Defaults to 201.
         '''
-        expected = {'email': data['email'], 'role': data['role'], 'is_active': False}
+        expected = {'email': data['email'], 'role': data['role'], 'is_active': None}
         if status_code == 201:
             # Invite new user. Expected successfull request
             self.api_test(self.client.post, f'{self.endpoint}invite/', status_code, data=data, expected=expected)

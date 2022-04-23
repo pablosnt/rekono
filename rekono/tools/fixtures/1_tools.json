@@ -211,7 +211,7 @@
         "model": "tools.tool",
         "pk": 17,
         "fields": {
-            "name": "smbmap",
+            "name": "SMBMap",
             "command": "smbmap",
             "output_format": null,
             "defectdojo_scan_type": null,

@@ -47,7 +47,10 @@ class UserAdminViewSet(GenericViewSet, ListModelMixin, RetrieveModelMixin, Destr
             Response: HTTP response
         '''
         instance = self.get_object()
-        User.objects.disable_user(instance)
+        if instance.is_active is None:
+            super().destroy(request, *args, **kwargs)
+        else:
+            User.objects.disable_user(instance)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @extend_schema(request=InviteUserSerializer, responses={201: UserSerializer})

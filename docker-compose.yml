@@ -13,7 +13,6 @@ services:
       - postgres:/var/lib/postgresql/data/
     networks:
       - internal
-      - external
     environment:
       - POSTGRES_DB=rekono
       - POSTGRES_USER=postgres
@@ -46,13 +45,12 @@ services:
 
   initialize:
     restart: 'no'
-    build:
-      context: .
-      dockerfile: docker/rekono/Dockerfile
-      target: backend
-    command: sh -c "python manage.py migrate && python manage.py createsuperuser --no-input"
+    image: rekono-backend:latest
+    command: sh -c "python manage.py frontend && python manage.py migrate && python manage.py createsuperuser --no-input"
     container_name: initialize
     volumes:
+      - rekono:/rekono
+      - ./rekono/frontend/.env:/code/frontend/.env
       - ./config.yaml:/rekono/config.yaml:ro
     networks:
       - internal
@@ -62,6 +60,8 @@ services:
       - RKN_DB_HOST=postgres
       - RKN_DB_USER=postgres
       - RKN_DB_PASSWORD=postgres
+      - RKN_DD_URL
+      - RKN_DD_API_KEY
       - REKONO_HOME=/rekono
       - DJANGO_SUPERUSER_EMAIL=${RKN_EMAIL:-rekono@rekono.com}
       - DJANGO_SUPERUSER_USERNAME=${RKN_USERNAME:-rekono}
@@ -69,10 +69,7 @@ services:
   
   tasks-worker:
     restart: always
-    build:
-      context: .
-      dockerfile: docker/rekono/Dockerfile
-      target: backend
+    image: rekono-backend:latest
     command: python manage.py rqworker tasks-queue
     hostname: tasks-worker
     volumes:
@@ -96,6 +93,7 @@ services:
     build:
       context: .
       dockerfile: docker/kali/Dockerfile
+    image: rekono-kali:latest
     command: python manage.py rqworker executions-queue
     hostname: executions-worker
     volumes:
@@ -119,10 +117,7 @@ services:
 
   findings-worker:
     restart: always
-    build:
-      context: .
-      dockerfile: docker/rekono/Dockerfile
-      target: backend
+    image: rekono-backend:latest
     command: python manage.py rqworker findings-queue
     hostname: findings-worker
     volumes:
@@ -147,10 +142,7 @@ services:
     
   emails-worker:
     restart: always
-    build:
-      context: .
-      dockerfile: docker/rekono/Dockerfile
-      target: backend
+    image: rekono-backend:latest
     command: python manage.py rqworker emails-queue
     hostname: emails-worker
     volumes:
@@ -171,15 +163,13 @@ services:
       - RKN_EMAIL_PORT=${RKN_EMAIL_PORT:-25}
       - RKN_EMAIL_USER=${RKN_EMAIL_USER:-postfix}
       - RKN_EMAIL_PASSWORD=${RKN_EMAIL_PASSWORD:-postfix}
+      - RKN_FRONTEND_URL=${RKN_FRONTEND_URL:-httpS://127.0.0.1}
       - REKONO_HOME=/rekono
       - OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
 
   telegram-bot:
     restart: on-failure
-    build:
-      context: .
-      dockerfile: docker/rekono/Dockerfile
-      target: backend
+    image: rekono-backend:latest
     command: python manage.py telegram_bot
     hostname: telegram_bot
     container_name: telegram-bot
@@ -206,9 +196,15 @@ services:
       context: .
       dockerfile: docker/rekono/Dockerfile
       target: backend
+    image: rekono-backend:latest
     command: python manage.py runserver 0.0.0.0:8000
     hostname: backend
     container_name: backend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/schema/swagger-ui.html"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
     expose:
       - 8000
     volumes:
@@ -237,13 +233,24 @@ services:
       context: .
       dockerfile: docker/rekono/Dockerfile
       target: frontend
-    command: serve -s dist
+    image: rekono-frontend:latest
+    command: sh -c "npm run build && serve -s dist"
     hostname: frontend
     container_name: frontend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/#/login"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
     expose:
       - 3000
+    volumes:
+      - ./rekono/frontend/.env:/frontend/.env:ro
     networks:
       - internal
+    depends_on:
+      - initialize
     environment:
       - NODE_OPTIONS=--openssl-legacy-provider
 
@@ -252,6 +259,7 @@ services:
     build:
       context: .
       dockerfile: docker/nginx/Dockerfile
+    image: rekono-nginx:latest
     hostname: nginx
     container_name: nginx
     ports:
@@ -260,8 +268,10 @@ services:
     volumes:
       - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
-      - backend
-      - frontend
+      backend:
+        condition: service_healthy
+      frontend:
+        condition: service_healthy
     networks:
       - internal
       - external

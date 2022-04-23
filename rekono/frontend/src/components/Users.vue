@@ -12,13 +12,19 @@
         <b-button v-if="row.item.is_active" variant="outline" @click="selectUser(row.item)" v-b-modal.disable-user-modal v-b-tooltip.hover title="Disable User" :disabled="row.item.id === $store.state.user">
           <b-icon variant="danger" icon="dash-circle-fill"/>
         </b-button>
-        <b-button v-if="!row.item.is_active" variant="outline" @click="enableUser(row.item)" v-b-tooltip.hover title="Enable User">
+        <b-button v-if="row.item.is_active === null" variant="outline" @click="selectUser(row.item)" v-b-modal.remove-user-modal v-b-tooltip.hover title="Remove User" :disabled="row.item.id === $store.state.user">
+          <b-icon variant="danger" icon="trash-fill"/>
+        </b-button>
+        <b-button v-if="row.item.is_active === false" variant="outline" @click="enableUser(row.item)" v-b-tooltip.hover title="Enable User">
           <b-icon variant="success" icon="check-circle-fill"/>
         </b-button>
       </template>
     </b-table>
     <pagination :page="page" :limit="limit" :limits="limits" :total="total" name="users" @pagination="pagination"/>
     <deletion id="disable-user-modal" title="Disable User" removeWord="disable" @deletion="disableUser" @clean="cleanSelection" v-if="selectedUser !== null">
+      <span><strong>{{ selectedUser.username }}</strong> user</span>
+    </deletion>
+    <deletion id="remove-user-modal" title="Remove User" removeWord="remove" @deletion="disableUser" @clean="cleanSelection" v-if="selectedUser !== null">
       <span><strong>{{ selectedUser.username }}</strong> user</span>
     </deletion>
     <invite-user id="invite-modal" @confirm="confirm"/>
@@ -76,7 +82,7 @@ export default {
       this.put(`/api/users/${this.selectedUser.id}/role/`, { role: role }, this.selectedUser.email, 'User role updated successfully')
     },
     disableUser () {
-      this.delete(`/api/users/${this.selectedUser.id}/`, this.selectedUser.email, 'User disabled successfully').then(() => this.fetchData())
+      this.delete(`/api/users/${this.selectedUser.id}/`, this.selectedUser.email, this.selectedUser.is_active ? 'User disabled successfully' : 'User removed successfully').then(() => this.fetchData())
     },
     enableUser (user) {
       this.post(`/api/users/${user.id}/enable/`, { }, user.email, 'User enabled successfully').then(() => this.fetchData())

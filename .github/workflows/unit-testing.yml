@@ -28,7 +28,7 @@ jobs:
           git clone https://github.com/maurosoria/dirsearch.git
           ln -s dirsearch/dirsearch.py /usr/local/bin/dirsearch
       
-      - name: Install GitLeaks and GitTools to check its installation
+      - name: Install GitLeaks to check its installation
         run: |
           wget https://github.com/zricethezav/gitleaks/releases/download/v8.5.1/gitleaks_8.5.1_linux_x64.tar.gz
           tar -xvf gitleaks_8.5.1_linux_x64.tar.gz

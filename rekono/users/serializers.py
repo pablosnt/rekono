@@ -245,7 +245,7 @@ class CreateUserSerializer(UserPasswordSerializer):
         '''
         try:
             # Search inactive user by otp and check expiration datetime
-            user = User.objects.get(is_active=False, otp=attrs.get('otp'), otp_expiration__gt=timezone.now())
+            user = User.objects.get(is_active=None, otp=attrs.get('otp'), otp_expiration__gt=timezone.now())
         except User.DoesNotExist:                                               # Invalid otp
             raise AuthenticationFailed('Invalid OTP value', code=status.HTTP_401_UNAUTHORIZED)
         attrs = super().validate(attrs)
@@ -341,7 +341,7 @@ class ResetPasswordSerializer(UserPasswordSerializer):
         '''
         try:
             # Search active user by otp and check expiration datetime
-            user = User.objects.get(is_active=True, otp=attrs['otp'], otp_expiration__gt=timezone.now())
+            user = User.objects.get(otp=attrs['otp'], otp_expiration__gt=timezone.now())
         except User.DoesNotExist:                                               # Invalid otp
             raise AuthenticationFailed('Invalid OTP value', code=status.HTTP_401_UNAUTHORIZED)
         attrs = super().validate(attrs)
@@ -358,7 +358,8 @@ class ResetPasswordSerializer(UserPasswordSerializer):
         # Get user that requested the password reset
         self.validated_data['user'].set_password(self.validated_data.get('password'))   # Set password
         self.validated_data['user'].otp = None                                  # Clear OTP
-        self.validated_data['user'].save(update_fields=['password', 'otp'])
+        self.validated_data['user'].is_active = True                            # Active user
+        self.validated_data['user'].save(update_fields=['password', 'otp', 'is_active'])
         logger.info(
             f'[Security] User {self.validated_data["user"].id} changed his password',
             extra={'user': self.validated_data["user"].id}

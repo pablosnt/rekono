@@ -43,7 +43,7 @@ class RekonoUserManager(UserManager):
             Any: Created user
         '''
         # Create new user including an OTP. The user will be inactive while invitation is not accepted
-        user = User.objects.create(email=email, otp=generate(), is_active=False)
+        user = User.objects.create(email=email, otp=generate(), is_active=None)
         self.initialize(user, role)                                             # Initialize user
         user_invitation(user)                                                   # Send email invitation to the user
         logger.info(f'[User] User {user.id} has been invited with role {role}')
@@ -60,6 +60,7 @@ class RekonoUserManager(UserManager):
         Returns:
             Any: Created superuser
         '''
+        extra_fields['is_active'] = True
         user = super().create_superuser(username, email, password, **extra_fields)      # Create new superuser
         self.initialize(user, cast(Role, Role.ADMIN))                           # Initialize user
         logger.info(f'[User] Superuser {user.id} has been created')
@@ -90,9 +91,10 @@ class RekonoUserManager(UserManager):
         Returns:
             Any: Enabled user
         '''
-        user.is_active = True                                                   # Enable user
+        # user.is_active = True                                                   # Enable user
         user.otp = generate()                                                   # Generate its OTP
         user.otp_expiration = get_expiration()                                  # Set OTP expiration
+        user.save(update_fields=['otp', 'otp_expiration'])
         if not Token.objects.filter(user=user).exists():
             Token.objects.create(user=user)                                     # Create a new API token for the user
         user_enable_account(user)                                               # Send email to establish its password
@@ -111,7 +113,7 @@ class RekonoUserManager(UserManager):
         user.is_active = False                                                  # Disable user
         user.set_unusable_password()                                            # Make its password unusable
         user.otp = None                                                         # Remove its OTP
-        user.groups.clear()                                                     # Clear its groups
+        user.projects.clear()                                                   # Clear its projects
         user.save(update_fields=['otp', 'is_active'])
         try:
             token = Token.objects.get(user=user)                                # Get user API token
@@ -146,6 +148,7 @@ class User(AbstractUser):
     first_name = models.TextField(max_length=100, blank=True, null=True, validators=[validate_name])
     last_name = models.TextField(max_length=100, blank=True, null=True, validators=[validate_name])
     email = models.EmailField(max_length=150, unique=True)
+    is_active = models.BooleanField(null=True, blank=True, default=None)
 
     # One Time Password used for invite and enable users, or reset passwords
     otp = models.TextField(max_length=200, unique=True, blank=True, null=True)

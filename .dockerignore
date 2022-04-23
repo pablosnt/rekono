@@ -15,4 +15,5 @@ reports/
 wordlists/
 logs/
 rekono/frontend/node_modules/*
-rekono/frontend/.env/*
+rekono/testing/*
+.DS_Store

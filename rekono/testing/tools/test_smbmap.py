@@ -3,10 +3,10 @@ from findings.models import Path
 from testing.tools.base import ToolParserTest
 
 
-class SmbmapParserTest(ToolParserTest):
-    '''Test cases for Smbmap parser.'''
+class SMBMapParserTest(ToolParserTest):
+    '''Test cases for SMBMap parser.'''
 
-    tool_name = 'smbmap'
+    tool_name = 'SMBMap'
 
     def setUp(self) -> None:
         '''Create initial data before run tests.'''

@@ -25,7 +25,7 @@ class Project(models.Model):
     # User that created the project
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True)
     # Relation with all users that belong to the project
-    members = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='members', blank=True)
+    members = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='projects', blank=True)
     tags = TaggableManager()                                                    # Project tags
 
     def __str__(self) -> str:

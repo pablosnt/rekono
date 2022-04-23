@@ -6,7 +6,7 @@
           <template #title>
             <b-icon icon="bar-chart-line-fill"/> Dashboard
           </template>
-          <dashboard class="mt-3" :project="currentProject"/>
+          <dashboard class="mt-3" :project="currentProject" @reload="fetchProject()"/>
         </b-tab>
         <b-tab lazy :active="path.includes('targets')" @click="changeSubTab('targets')" title-link-class="text-secondary">
           <template #title>
@@ -54,10 +54,9 @@ export default {
     project: Object
   },
   data () {
-    this.fetchProject()
     return {
       path: window.location.hash,
-      currentProject: this.project ? this.project : null,
+      currentProject: this.project ? this.project : this.fetchProject(),
       isFound: true
     }
   },
@@ -78,11 +77,9 @@ export default {
       window.location.hash = `projects/${this.$route.params.id}/${tab}`
     },
     fetchProject () {
-      if (!this.project) {
-        this.get(`/api/projects/${this.$route.params.id}/`)
-          .then(response => this.currentProject = response.data)
-          .catch(error => this.isFound = (error.response.status !== 404))
-      }
+      this.get(`/api/projects/${this.$route.params.id}/`)
+        .then(response => this.currentProject = response.data)
+        .catch(error => this.isFound = (error.response.status !== 404))
     }
   }
 }
