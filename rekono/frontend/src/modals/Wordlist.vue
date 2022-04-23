@@ -2,13 +2,13 @@
   <b-modal :id="id" @hidden="clean" @ok="confirm" :title="title" :ok-title="button" header-bg-variant="dark" header-text-variant="light" ok-variant="dark">
     <b-form ref="wordlist_form">
       <b-form-group description="Name" :invalid-feedback="invalidName">
-        <b-form-input v-model="name" type="text" :state="nameState" maxlength="50" required/>
+        <b-form-input v-model="name" type="text" :state="nameState" maxlength="50"/>
       </b-form-group>
       <b-form-group description="Type">
-        <b-form-select v-model="type" :options="types" required/>
+        <b-form-select v-model="type" :options="types"/>
       </b-form-group>
-      <b-form-group description="File" :invalid-feedback="invalidFile">
-        <b-form-file v-model="file" accept="text/plain" placeholder="Select the wordlist file" drop-placeholder="Drop the wordlist here" :state="fileState" required/>
+      <b-form-group description="File" :invalid-feedback="invalidFile" v-if="!edit">
+        <b-form-file v-model="file" accept="text/plain" placeholder="Select the wordlist file" drop-placeholder="Drop the wordlist here" :state="fileState"/>
       </b-form-group>
     </b-form>
   </b-modal>
@@ -61,18 +61,19 @@ export default {
   },
   methods: {
     check () {
-      const valid = this.$refs.wordlist_form.checkValidity()
       if (!this.validateName(this.name)) {
         this.nameState = false
         this.invalidName = this.name && this.name.length > 0 ? 'Invalid wordlist name' : 'Wordlist name is required'
       }
-      this.fileState = (this.file !== null)
-      this.invalidFile = 'Wordlist file is required'
-      if (this.fileState && this.file.size / (1024 * 1024) > this.fileMaxSize) {
-        this.fileState = false
-        this.invalidFile = "Wordlist file can't be grater than 500 MB"
+      if (!this.edit) {
+        this.fileState = (this.file !== null)
+        this.invalidFile = 'Wordlist file is required'
+        if (this.fileState && this.file.size / (1024 * 1024) > this.fileMaxSize) {
+          this.fileState = false
+          this.invalidFile = "Wordlist file can't be grater than 500 MB"
+        }
       }
-      return valid && this.fileState
+      return this.nameState !== false && this.fileState !== false
     },
     confirm (event) {
       event.preventDefault()
@@ -93,12 +94,7 @@ export default {
       )
     },
     update () {
-      return this.put(
-        `/api/resources/wordlists/${this.wordlist.id}/`,
-        this.getFormData(),
-        this.name, 'New wordlist created successfully',
-        true, { 'Content-Type': 'multipart/form-data' }
-      )
+      return this.put(`/api/resources/wordlists/${this.wordlist.id}/`, { 'name': this.name, 'type': this.type }, this.name, 'Wordlist updated successfully')
     },
     getFormData () {
       const data = new FormData()
