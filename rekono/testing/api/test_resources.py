@@ -72,15 +72,9 @@ class WordlistsTest(RekonoTestCase):
 
     def test_update(self) -> None:
         '''Test wordlist update feature.'''
-        with open(self.endpoints, 'r') as wordlist:
-            updated = self.api_test(                                            # Update wordlist
-                self.client.put, f'{self.endpoint}{self.wordlist.id}/', 200,
-                data={'name': self.name, 'type': 'Endpoint', 'file': wordlist},
-                expected={'name': self.name, 'type': 'Endpoint', 'size': 3},
-                format='multipart'
-            )
-        # Check the updated wordlist data
-        self.api_test(self.client.get, f'{self.endpoint}{self.wordlist.id}/', expected=updated)
+        data = {'name': self.name, 'type': 'Endpoint'}
+        # Update wordlist
+        self.api_test(self.client.put, f'{self.endpoint}{self.wordlist.id}/', 200, data=data, expected=data)
 
     def test_invalid_update(self) -> None:
         '''Test wordlist update feature with invalid data.'''
