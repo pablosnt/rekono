@@ -40,6 +40,26 @@ DEMO
 - Execute `tools` and `processes` from `Telegram Bot`
 - `Wordlists` management
 
+### Supported tools
+
+- [theHarvester](https://github.com/laramies/theHarvester)
+- [EmailHarvester](https://github.com/maldevel/EmailHarvester)
+- [EmailFinder](https://github.com/Josue87/EmailFinder)
+- [Nmap](https://nmap.org/)
+- [Sslscan](https://github.com/rbsec/sslscan)
+- [SSLyze](https://nabla-c0d3.github.io/sslyze/documentation/)
+- [SSH Audit](https://github.com/jtesta/ssh-audit)
+- [SMBMap](https://github.com/ShawnDEvans/smbmap)
+- [Dirsearch](https://github.com/maurosoria/dirsearch)
+- [GitLeaks](https://github.com/zricethezav/gitleaks)
+- [Log4j Scanner](https://github.com/cisagov/log4j-scanner)
+- [CMSeeK](https://github.com/Tuhinshubhra/CMSeeK/)
+- [OWASP JoomScan](https://github.com/OWASP/joomscan)
+- [OWASP ZAP](https://www.zaproxy.org/)
+- [Nikto](https://github.com/sullo/nikto)
+- [SearchSploit](https://www.exploit-db.com/searchsploit)
+- [Metasploit](https://www.metasploit.com/)
+
 
 ## Installation
 
