@@ -245,7 +245,7 @@ class CreateUserSerializer(UserPasswordSerializer):
         '''
         try:
             # Search inactive user by otp and check expiration datetime
-            user = User.objects.get(is_active=False, otp=attrs.get('otp'), otp_expiration__gt=timezone.now())
+            user = User.objects.get(is_active=None, otp=attrs.get('otp'), otp_expiration__gt=timezone.now())
         except User.DoesNotExist:                                               # Invalid otp
             raise AuthenticationFailed('Invalid OTP value', code=status.HTTP_401_UNAUTHORIZED)
         attrs = super().validate(attrs)

@@ -1,6 +1,10 @@
 <template>
   <public-form>
     <template>
+      <b-alert v-model="invalidToken" variant="danger">
+          <b-icon icon="exclamation-circle-fill" variant="danger"></b-icon>
+          Invalid OTP token
+        </b-alert>
       <b-form @submit="handleSignup">
         <b-form-group :invalid-feedback="invalidUsername">
           <b-form-input type="text" v-model="username" :state="usernameState" placeholder="Username"/>
@@ -52,7 +56,8 @@ export default {
       invalidFirstName: 'First name is required',
       invalidLastName: 'Last name is required',
       invalidPassword: 'Password is required',
-      invalidPasswordConfirm: 'Password confirmation is required'
+      invalidPasswordConfirm: 'Password confirmation is required',
+      invalidToken: false
     }
   },
   components: {
@@ -70,8 +75,14 @@ export default {
         this.post(
           '/api/users/create/',
           { username: this.username, first_name: this.firstName, last_name: this.lastName, password: this.password, otp: this.otp },
-          this.username, 'User created successfully', false
-        ).then(() => this.$store.dispatch('redirectToLogin'))
+          this.username, 'User created successfully', false, null, true
+        )
+          .then(() => this.$store.dispatch('redirectToLogin'))
+          .catch(error => {
+            if (error.response.status === 401) {
+              this.invalidToken = true
+            }
+          })
       }
     },
     checkOtp (otp) {
