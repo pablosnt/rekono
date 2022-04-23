@@ -74,9 +74,16 @@ export default {
       event.preventDefault()
       if (this.check()) {
         if (this.otp && this.otp.length > 0) {
-          this.put('/api/reset-password/', { password: this.password, otp: this.otp }, 'Reset Password', 'Password changed successfully', true).then(() => this.$store.dispatch('redirectToLogin'))
+          this.put('/api/reset-password/', { password: this.password, otp: this.otp }, 'Reset Password', 'Password changed successfully', false, null, true)
+            .then(() => this.$store.dispatch('redirectToLogin'))
+            .catch(error => {
+              if (error.response.status === 401) {
+                this.passwordError = true
+                this.invalidPassword = 'Invalid OTP token'
+              }
+            })
         } else {
-          this.post('/api/reset-password/', { email: this.email }, null, null, true)
+          this.post('/api/reset-password/', { email: this.email }, null, null, false)
           this.emailSent = true
         }
       }
