@@ -80,9 +80,9 @@ export default {
     initialized (initialized) {
       if (initialized && this.project) {
         this.sync = this.project.defectdojo_synchronization
-        this.autoProduct = this.project.defectdojo_product_id === null
+        this.autoProduct = false
         this.autoEngagement = this.project.defectdojo_engagement_by_target
-        this.autoEngagement = this.project.defectdojo_engagement_id === null
+        this.newEngagement = false
         this.productId = this.project.defectdojo_product_id
         this.engagementId = this.project.defectdojo_engagement_id
       }
@@ -104,10 +104,13 @@ export default {
         }
         this.put(`/api/projects/${this.project.id}/defect-dojo/`, data, 'Defect-Dojo', `Integration successfully configured for ${this.project.name}`)
           .then(() => {
+            const confirmation = { id: this.id, success: true, reload: true }
             if (this.sync !== this.project.defectdojo_synchronization) {
               this.put(`/api/projects/${this.project.id}/defect-dojo/sync/`, { synchronization: this.sync }, 'Defect-Dojo', this.sync ? 'Synchronization has been enabled' : 'Synchronization has been disabled')
+                .then(() => this.$emit('confirm', confirmation))
+            } else {
+              this.$emit('confirm', confirmation)
             }
-            this.$emit('confirm', { id: this.id, success: true, reload: true })
           })
       }
     },

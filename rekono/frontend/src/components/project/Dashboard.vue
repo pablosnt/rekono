@@ -75,7 +75,7 @@ export default {
       if (operation.success) {
         this.$bvModal.hide(operation.id)
         if (operation.reload) {
-          this.fetchProject()
+          this.$emit('reload')
         }
       }
       this.showEditForm = false
