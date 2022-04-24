@@ -215,9 +215,9 @@ export default {
       const data = {
         target_id: this.targetId,
         intensity_rank: this.intensity,
-        scheduled_at: this.scheduledAtDate && this.scheduledAtTime ? `${this.scheduledAtDate}T${this.scheduledAtTime}Z` : null,
+        scheduled_at: this.scheduledAtDate && this.scheduledAtTime ? new Date(`${this.scheduledAtDate}T${this.scheduledAtTime}`).toISOString() : null,
         scheduled_in: this.scheduledIn,
-        schduled_time_unit: this.scheduledTimeUnit,
+        scheduled_time_unit: this.scheduledTimeUnit,
         repeat_in: this.repeatIn,
         repeat_time_unit: this.repeatTimeUnit,
         wordlists: this.wordlistsItems
