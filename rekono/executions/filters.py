@@ -1,12 +1,11 @@
-from api.filters import BaseToolFilter
+from django_filters.rest_framework import FilterSet
 from django_filters.rest_framework.filters import OrderingFilter
 from executions.models import Execution
 
 
-class ExecutionFilter(BaseToolFilter):
+class ExecutionFilter(FilterSet):
     '''FilterSet to filter and sort executions entities.'''
 
-    tool_fields = ['task__tool', 'step__tool']                                  # Filter by two Tool fields
     o = OrderingFilter(                                                         # Ordering fields
         fields=(
             ('task__target', 'target'),
@@ -14,8 +13,8 @@ class ExecutionFilter(BaseToolFilter):
             ('task__process', 'process'),
             ('task__intensity', 'intensity'),
             ('task__executor', 'executor'),
-            ('step__tool', 'step__tool'),
-            ('task__tool', 'task__tool'),
+            'tool',
+            'configuration',
             'status',
             'start',
             'end'
@@ -36,6 +35,11 @@ class ExecutionFilter(BaseToolFilter):
             'task__intensity': ['exact'],
             'task__executor': ['exact'],
             'task__executor__username': ['exact', 'icontains'],
+            'tool': ['exact'],
+            'tool__name': ['exact', 'icontains'],
+            'tool__stage': ['exact'],
+            'configuration': ['exact'],
+            'configuration__name': ['exact', 'icontains'],
             'status': ['exact'],
             'start': ['gte', 'lte', 'exact'],
             'end': ['gte', 'lte', 'exact']

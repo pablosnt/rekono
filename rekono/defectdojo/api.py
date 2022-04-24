@@ -249,20 +249,19 @@ class DefectDojo:
         })
         return self.request('POST', '/findings/', data=data, expected_status=201)
 
-    def import_scan(self, engagement: int, execution: Any, tool: Tool) -> Tuple[bool, dict]:
+    def import_scan(self, engagement: int, execution: Any) -> Tuple[bool, dict]:
         '''Import Rekono execution output in Defect-Dojo.
 
         Args:
             engagement (int): Engagement Id where the scan will be imported
             execution (Execution): Completed Rekono execution to import in Defect-Dojo
-            tool (Tool): Tool associated to the execution
 
         Returns:
             Tuple[bool, dict]: Indicates if request was successful or not (bool), and return the response body (dict)
         '''
         data = {
             # https://defectdojo.github.io/django-DefectDojo/integrations/parsers/
-            'scan_type': tool.defectdojo_scan_type,
+            'scan_type': execution.tool.defectdojo_scan_type,
             'engagement': engagement,
             'tags': self.tags                                                   # Includes the configurated tags
         }

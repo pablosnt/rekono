@@ -90,6 +90,8 @@ class RekonoTestCase(TestCase):
         )
         self.execution = Execution.objects.create(
             task=self.task,
+            tool=self.task.tool,
+            configuration=self.task.configuration,
             status=Status.COMPLETED,
             output_file=os.path.join(self.data_path, 'reports', 'nmap', 'ftp-vulnerabilities.xml'),
             start=timezone.now(),

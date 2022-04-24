@@ -126,8 +126,8 @@ def execution_notifications(emails: List[str], execution: Any, findings: List[Fi
     '''
     data = {                                                                    # Data to include in notification
         'execution': execution,
-        'tool': execution.step.tool if execution.step else execution.task.tool,
-        'configuration': execution.step.configuration if execution.step else execution.task.configuration
+        'tool': execution.tool,
+        'configuration': execution.configuration
     }
     for finding in findings:                                                    # For each finding
         if finding.__class__.__name__.lower() not in data:

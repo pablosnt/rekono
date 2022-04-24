@@ -11,7 +11,7 @@ from processes.executor.callback import process_callback
 from queues.utils import cancel_and_delete_job
 from rq.job import Job
 from rq.registry import DeferredJobRegistry
-from tools.models import Argument, Intensity, Tool
+from tools.models import Argument, Intensity
 from tools.tools.base_tool import BaseTool
 
 logger = logging.getLogger()                                                    # Rekono logger
@@ -68,7 +68,6 @@ def update_new_dependencies(parent_job: str, new_jobs: list, targets: List[BaseI
 
 def process_dependencies(
     execution: Execution,
-    tool: Tool,
     intensity: Intensity,
     arguments: List[Argument],
     targets: List[BaseInput],
@@ -79,7 +78,6 @@ def process_dependencies(
 
     Args:
         execution (Execution): Execution associated to the current job
-        tool (Tool): Tool to execute
         intensity (Intensity): Intensity to apply in the execution
         arguments (List[Argument]): Arguments implied in the execution
         targets (List[BaseInput]): Targets and resources to include in the execution
@@ -96,7 +94,7 @@ def process_dependencies(
         return []                                                               # No findings found
     new_jobs_ids = []
     # Get required executions to include all previous findings
-    executions: List[List[BaseInput]] = utils.get_executions_from_findings(findings, tool)
+    executions: List[List[BaseInput]] = utils.get_executions_from_findings(findings, execution.tool)
     logger.info(f'[Execution] {len(executions) - 1} new executions from previous findings')
     # Filter executions based on tool arguments
     executions = [
@@ -105,7 +103,11 @@ def process_dependencies(
     # For each executions, except first whose findings will be included in the current jobs
     for findings in executions[1:]:
         # Create a new execution entity from the current execution data
-        new_execution = Execution.objects.create(task=execution.task, step=execution.step)
+        new_execution = Execution.objects.create(
+            task=execution.task,
+            tool=execution.tool,
+            configuration=execution.configuration
+        )
         job = producer.producer(                                                # Enqueue the new execution
             new_execution,
             intensity,

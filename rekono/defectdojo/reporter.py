@@ -80,9 +80,8 @@ def report(execution: Execution, findings: List[Finding]) -> None:
     if not dd_client.is_available():
         raise DefectDojoException({'defect-dojo': ['Integration with Defect-Dojo is not available']})
     product_id, engagement_id = get_product_and_engagement_id(execution.task.target.project, execution.task.target)
-    tool = execution.step.tool if execution.step else execution.task.tool       # Get the associated tool
-    if tool.defectdojo_scan_type:
-        dd_client.import_scan(engagement_id, execution, tool)                   # Import the execution output
+    if execution.tool.defectdojo_scan_type:
+        dd_client.import_scan(engagement_id, execution)                         # Import the execution output
         logger.info(f'[Defect-Dojo] Execution {execution.id} has been imported in engagement {engagement_id}')
     else:
         test_id = None

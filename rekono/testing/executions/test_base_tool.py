@@ -143,11 +143,18 @@ class BaseToolTest(TestCase):
         )
         self.first_execution = Execution.objects.create(                        # Execution related to testing findings
             task=task,
+            tool=task.tool,
+            configuration=task.configuration,
             status=Status.COMPLETED,
             start=timezone.now(),
             end=timezone.now()
         )
-        self.new_execution = Execution.objects.create(task=task, status=Status.REQUESTED)   # New execution for testing
+        self.new_execution = Execution.objects.create(                          # New execution for testing
+            task=task,
+            tool=task.tool,
+            configuration=task.configuration,
+            status=Status.REQUESTED
+        )
         self.targets.extend([
             target_filtered, target,
             target_port_http, target_port_https,

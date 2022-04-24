@@ -42,6 +42,8 @@ class ToolParserTest(TestCase):
             )
             execution = Execution.objects.create(
                 task=task,
+                tool=task.tool,
+                configuration=task.configuration,
                 status=Status.COMPLETED,
                 start=timezone.now(),
                 end=timezone.now()

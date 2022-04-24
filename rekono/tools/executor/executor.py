@@ -38,7 +38,8 @@ def execute(task: Task) -> None:
     executions = utils.get_executions_from_findings(targets, task.tool)
     logger.info(f'[Tool] Task {task.id} requires {len(executions)} executions')
     for execution_targets in executions:                                        # For each job execution
-        execution = Execution.objects.create(task=task)                         # Create the Execution entity
+        # Create the Execution entity
+        execution = Execution.objects.create(task=task, tool=task.tool, configuration=task.configuration)
         # Enqueue the execution in the executions queue
         producer.producer(
             execution=execution,

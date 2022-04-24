@@ -41,28 +41,11 @@
         <b-col>
           <b-table sticky-header="40rem" select-mode="single" selectable hover striped borderless head-variant="dark" :fields="executionsFields" :items="executions" @row-selected="selectExecution">
             <template #cell(tool)="row">
-              <div v-if="!row.item.step">
-                <b-link :href="currentTask.tool.reference" target="_blank">
-                  <b-img v-if="currentTask.tool.icon" :src="currentTask.tool.icon" width="50" height="30"/>
-                  <b-img v-if="!currentTask.tool.icon" src="favicon.ico"/>
-                </b-link>
-                {{ currentTask.tool.name }}
-              </div>
-              <div v-if="row.item.step">
-                <b-link :href="row.item.step.tool.reference" target="_blank">
-                  <b-img v-if="row.item.step.tool.icon" :src="row.item.step.tool.icon" width="50" height="30"/>
-                  <b-img v-if="!row.item.step.tool.icon" src="favicon.ico"/>
-                </b-link>
-                {{ row.item.step.tool.name }}
-              </div>
-            </template>
-            <template #cell(configuration)="row">
-              <p v-if="row.item.step">{{ row.item.step.configuration.name }}</p>
-              <p v-if="!row.item.step">{{ currentTask.configuration.name }}</p>
-            </template>
-            <template #cell(stage)="row">
-              <p v-if="row.item.step">{{ row.item.step.tool.stage_name }}</p>
-              <p v-if="!row.item.step">{{ currentTask.tool.stage_name }}</p>
+              <b-link :href="row.item.tool.reference" target="_blank">
+                <b-img v-if="row.item.tool.icon" :src="row.item.tool.icon" width="50" height="30"/>
+                <b-img v-if="!row.item.tool.icon" src="favicon.ico"/>
+              </b-link>
+              {{ row.item.tool.name }}
             </template>
             <template #cell(status)="row">
               <div v-for="i in statusByVariant" :key="i.value">
@@ -128,8 +111,8 @@ export default {
       executions: [],
       executionsFields: [
         { key: 'tool', sortable: true },
-        { key: 'configuration', sortable: true},
-        { key: 'stage', sortable: true },
+        { key: 'configuration.name', label: 'Configuration', sortable: true},
+        { key: 'tool.stage', label: 'Stage', sortable: true },
         { key: 'status', sortable: true },
         { key: 'date', sortable: true }
       ],

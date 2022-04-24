@@ -18,7 +18,7 @@ from findings.utils import get_unique_filter
 from input_types.base import BaseInput
 from tasks.enums import Status
 from tools.exceptions import ToolExecutionException
-from tools.models import Argument, Configuration, Input, Intensity, Tool
+from tools.models import Argument, Input, Intensity
 
 from rekono.settings import REPORTS_DIR, TESTING
 
@@ -31,26 +31,17 @@ class BaseTool:
     # Indicate if execution must continue even if error occurs during tool execution. By default False.
     ignore_exit_code = False
 
-    def __init__(
-        self,
-        execution: Execution,
-        tool: Tool,
-        configuration: Configuration,
-        intensity: Intensity,
-        arguments: List[Argument]
-    ) -> None:
+    def __init__(self, execution: Execution, intensity: Intensity, arguments: List[Argument]) -> None:
         '''Tool constructor.
 
         Args:
             execution (Execution): Execution entity related to the tool execution
-            tool (Tool): Tool to execute
-            configuration (Configuration): Configuration to apply
             intensity (Intensity): Intensity to apply
             arguments (List[Argument]): Arguments implicated in the tool execution
         '''
         self.execution = execution
-        self.tool = tool
-        self.configuration = configuration
+        self.tool = execution.tool
+        self.configuration = execution.configuration
         self.intensity = intensity
         self.arguments = arguments
         self.command_arguments: List[str] = []                                  # Arguments used for execute tool
