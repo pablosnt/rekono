@@ -21,8 +21,12 @@ class ExecutionsTest(RekonoTestCase):
             end=timezone.now()
         )
         self.models = {                                                         # Models to test __str__ method
-            self.execution: self.task.__str__(),
-            self.step_execution: f'{self.task.__str__()} - {self.step.tool.name} - {self.step.configuration.name}'
+            self.execution: (
+                f'{self.project.name} - {self.target.target} - {self.task.tool.name} - {self.task.configuration.name}'
+            ),
+            self.step_execution: (
+                f'{self.project.name} - {self.target.target} - {self.step.tool.name} - {self.step.configuration.name}'
+            )
         }
 
     def test_get_all(self) -> None:

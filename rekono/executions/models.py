@@ -29,7 +29,7 @@ class Execution(models.Model):
         Returns:
             str: String value that identifies this instance
         '''
-        return f'{self.task.__str__()} - {self.tool.name} - {self.configuration.name}'
+        return f'{self.target.project.name} - {self.target.target} - {self.tool.name} - {self.configuration.name}'
 
     def get_project(self) -> Project:
         '''Get the related project for the instance. This will be used for authorization purposes.
