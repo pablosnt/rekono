@@ -6,7 +6,6 @@ import requests
 from defectdojo.constants import DD_DATE_FORMAT, DD_DATETIME_FORMAT
 from findings.enums import Severity
 from projects.models import Project
-from tools.models import Tool
 
 from rekono.settings import DEFECT_DOJO as config
 
