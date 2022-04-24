@@ -117,7 +117,8 @@ def execute(task: Task) -> None:
         # TargetPort and TargetEndpoint.
         executions = utils.get_executions_from_findings(targets, job.step.tool)
         for execution_targets in executions:                                    # For each job execution
-            execution = Execution.objects.create(task=task, step=job.step)      # Create the Execution entity
+            # Create the Execution entity
+            execution = Execution.objects.create(task=task, tool=job.step.tool, configuration=job.step.configuration)
             # Enqueue the execution in the executions queue, and save the generated job in the planned job
             # It's important to get dependency jobs in the next planned jobs
             job.jobs.append(

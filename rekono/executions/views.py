@@ -14,11 +14,8 @@ class ExecutionViewSet(GenericViewSet, ListModelMixin, RetrieveModelMixin):
     queryset = Execution.objects.all().order_by('-id')
     serializer_class = ExecutionSerializer
     filterset_class = ExecutionFilter
-    search_fields = [                                                           # Fields used to search executions
-        'task__target__target', 'task__process__steps__tool__name',
-        'task__process__steps__configuration__name', 'task__tool__name',
-        'task__configuration__name'
-    ]
+    # Fields used to search executions
+    search_fields = ['task__target__target', 'tool__name', 'configuration__name']
 
     def get_queryset(self) -> QuerySet:
         '''Get the Execution queryset that the user is allowed to get, based on project members.

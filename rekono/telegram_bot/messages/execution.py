@@ -106,11 +106,8 @@ def notification_messages(execution: Execution, findings: List[Finding]) -> List
         notifications.append(EXECUTION_NOTIFICATION.format(
             project=escape_markdown(execution.task.target.project.name, version=2),
             target=escape_markdown(execution.task.target.target, version=2),
-            tool=escape_markdown(execution.step.tool.name if execution.step else execution.task.tool.name, version=2),
-            configuration=escape_markdown(
-                execution.step.configuration.name if execution.step else execution.task.configuration.name,
-                version=2
-            ),
+            tool=escape_markdown(execution.tool.name, version=2),
+            configuration=escape_markdown(execution.configuration.name, version=2),
             status=escape_markdown(execution.status, version=2),
             start=escape_markdown(execution.start.strftime(DATE_FORMAT), version=2),
             end=escape_markdown(execution.end.strftime(DATE_FORMAT), version=2),

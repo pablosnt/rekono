@@ -103,8 +103,10 @@ export default {
         } else if (this.step && !this.tool) {
           this.priority = this.step.priority
           this.step.tool.configurations = [this.step.configuration]
-          this.selectedTool(this.step.tool.id, this.step.tool)
+          this.tools = [this.step.tool]
+          this.selectTool(this.step.tool.id, this.step.tool)
         } else if (this.tool) {
+          this.tools = [this.tool]
           this.selectTool(this.tool.id, this.tool)
         }
         if (!this.process) {

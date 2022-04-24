@@ -36,18 +36,10 @@ def producer(
     Returns:
         Any: Enqueued job in the executions queue
     '''
-    if execution.step:                                                          # Execution came from Process task
-        tool = execution.step.tool
-        configuration = execution.step.configuration
-    else:                                                                       # Execution came from Tool task
-        tool = execution.task.tool
-        configuration = execution.task.configuration
     executions_queue = django_rq.get_queue('executions-queue')                  # Get executions queue
     execution_job = executions_queue.enqueue(                                   # Enqueue the Execution job
         consumer.consumer,
         execution=execution,
-        tool=tool,
-        configuration=configuration,
         intensity=intensity,
         arguments=arguments,
         targets=targets,
@@ -58,7 +50,10 @@ def producer(
         depends_on=dependencies,
         at_front=at_front
     )
-    logger.info(f'[Execution] Execution {execution.id} ({tool.name} - {configuration.name}) has been enqueued')
+    logger.info(
+        f'[Execution] Execution {execution.id} ({execution.tool.name} - '
+        f'{execution.configuration.name}) has been enqueued'
+    )
     # Save important data in job metadata if it is needed later
     execution_job.meta['execution'] = execution
     execution_job.meta['intensity'] = intensity

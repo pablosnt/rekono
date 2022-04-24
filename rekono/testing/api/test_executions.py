@@ -14,14 +14,19 @@ class ExecutionsTest(RekonoTestCase):
         super().initialize_environment()                                        # Initialize testing environment
         self.step_execution = Execution.objects.create(                         # Create execution related to step
             task=self.task,
-            step=self.step,
+            tool=self.step.tool,
+            configuration=self.step.configuration,
             status=Status.COMPLETED,
             start=timezone.now(),
             end=timezone.now()
         )
         self.models = {                                                         # Models to test __str__ method
-            self.execution: self.task.__str__(),
-            self.step_execution: f'{self.task.__str__()} - {self.step.tool.name} - {self.step.configuration.name}'
+            self.execution: (
+                f'{self.project.name} - {self.target.target} - {self.task.tool.name} - {self.task.configuration.name}'
+            ),
+            self.step_execution: (
+                f'{self.project.name} - {self.target.target} - {self.step.tool.name} - {self.step.configuration.name}'
+            )
         }
 
     def test_get_all(self) -> None:

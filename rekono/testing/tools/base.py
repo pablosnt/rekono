@@ -42,12 +42,14 @@ class ToolParserTest(TestCase):
             )
             execution = Execution.objects.create(
                 task=task,
+                tool=task.tool,
+                configuration=task.configuration,
                 status=Status.COMPLETED,
                 start=timezone.now(),
                 end=timezone.now()
             )
             tool_class = get_tool_class_by_name(self.tool_name)                 # Get tool class from name
-            self.tool: BaseTool = tool_class(execution, tool, configuration, intensity, [])     # Create tool instance
+            self.tool: BaseTool = tool_class(execution, intensity, [])          # Create tool instance
 
     def check_expected_findings(self, expected: List[Dict[str, Any]]) -> None:
         '''Check expected findings for tool results.

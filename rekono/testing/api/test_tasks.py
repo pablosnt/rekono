@@ -22,8 +22,18 @@ class TasksTest(RekonoTestCase):
             process=self.process, tool=self.harvester, configuration=self.harvester_config, priority=1
         )
         self.running_task = Task.objects.create(target=self.target, process=self.process, status=Status.RUNNING)
-        Execution.objects.create(task=self.running_task, step=self.harvester_step, status=Status.RUNNING)
-        Execution.objects.create(task=self.running_task, step=self.step, status=Status.REQUESTED)
+        Execution.objects.create(
+            task=self.running_task,
+            tool=self.harvester,
+            configuration=self.harvester_config,
+            status=Status.RUNNING
+        )
+        Execution.objects.create(
+            task=self.running_task,
+            tool=self.step.tool,
+            configuration=self.step.configuration,
+            status=Status.REQUESTED
+        )
         # Data for testing
         self.tool_data = {'target_id': self.target.id, 'tool_id': self.nmap.id}
         self.process_data = {'target_id': self.target.id, 'process_id': self.process.id}

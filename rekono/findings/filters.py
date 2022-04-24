@@ -13,8 +13,6 @@ FINDING_ORDERING = (
     ('executions__task', 'task'),
     ('executions__task__target', 'target'),
     ('executions__task__target__project', 'project'),
-    ('executions__task__tool', 'task__tool'),
-    ('executions__step__tool', 'step__tool'),
     ('executions__task__executor', 'executor'),
     'executions',
     'detected_by',
