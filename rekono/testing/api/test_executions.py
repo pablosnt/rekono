@@ -22,7 +22,7 @@ class ExecutionsTest(RekonoTestCase):
         )
         self.models = {                                                         # Models to test __str__ method
             self.execution: self.task.__str__(),
-            self.step_execution: f'{self.task.__str__()} - {self.tool.name} - {self.configuration.name}'
+            self.step_execution: f'{self.task.__str__()} - {self.step.tool.name} - {self.step.configuration.name}'
         }
 
     def test_get_all(self) -> None:

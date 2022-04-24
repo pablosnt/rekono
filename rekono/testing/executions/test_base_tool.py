@@ -80,13 +80,8 @@ class BaseToolTest(TestCase):
         ]).split(' ')
         # Tool instance
         self.tool_class = get_tool_class_by_name(self.nmap.name)                # Related tool class
-        self.tool_instance: BaseTool = self.tool_class(                         # Related tool object
-            self.new_execution,
-            self.nmap,
-            self.configuration,
-            self.intensity,
-            self.arguments
-        )
+        # Related tool object
+        self.tool_instance: BaseTool = self.tool_class(self.new_execution, self.intensity, self.arguments)
 
     def create_wordlists(self) -> Wordlist:
         '''Create wordlist data for testing.
@@ -501,14 +496,11 @@ class BaseToolTest(TestCase):
         '''Test tool_execution feature using ls command.'''
         # Testing tool with ls command
         tool = Tool.objects.create(name='Test', command='ls', stage=Stage.ENUMERATION)
+        self.new_execution.tool = tool
+        self.new_execution.save(update_fields=['tool'])
         self.tool_class = get_tool_class_by_name(tool.name)                     # Related tool class
-        self.tool_instance = self.tool_class(                                   # Related tool object
-            self.new_execution,
-            tool,
-            self.configuration,
-            self.intensity,
-            self.arguments
-        )
+        # Related tool object
+        self.tool_instance = self.tool_class(self.new_execution, self.intensity, self.arguments)
         errors_count = 0
         try:
             self.tool_instance.tool_execution(['/directory-not-found'], [], [])     # Directory not found
