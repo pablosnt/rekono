@@ -50,15 +50,11 @@
 
 ## Quick Start
 
-<video width="1000" autoplay>
-  <source src="demo/rekono.mp4"/>
-</video>
+[![Rekono Demo](demo/rekono.mp4)]
 
 ### Telegram Bot
 
-<video width="500" autoplay>
-  <source src="demo/rekono-bot.mp4"/>
-</video>
+[![Rekono Bot Demo](demo/rekono-bot.mp4)]
 
 
 ## Why?
