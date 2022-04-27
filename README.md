@@ -27,8 +27,11 @@ Why not automate this process and focus on find vulnerabilities using your skill
 
 ## Quick Start
 
-DEMO
+<video src="demo/rekono.mp4" width="1000" autoplay></video>
 
+### Telegram Bot
+
+<video src="demo/rekono-bot.mp4" width="500" autoplay></video>
 
 ### Features
 
