@@ -50,11 +50,11 @@
 
 ## Quick Start
 
-[![Rekono Demo](demo/rekono.mp4)]
+[![Rekono Demo](demo/rekono.mp4)
 
 ### Telegram Bot
 
-[![Rekono Bot Demo](demo/rekono-bot.mp4)]
+[![Rekono Bot Demo](demo/rekono-bot.mp4)
 
 
 ## Why?
