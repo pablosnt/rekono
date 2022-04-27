@@ -17,22 +17,6 @@
 
 **Rekono** combines other hacking tools and its results to execute complete pentesting processes against a target in an automated way. The findings obtained during the executions will be sent to the user via email or Telegram notifications and also can be reviewed directly in the platform or sent to [Defect-Dojo](https://github.com/DefectDojo/django-DefectDojo) if an advanced vulnerability management is needed. Moreover, Rekono includes a Telegram bot that can be used to perform executions easily from anywhere and using any device.
 
-
-## Why?
-
-Do you ever think about the steps that you follow when start a pentesting? Probably you start performing some OSINT tasks to gather public information about the target. Then, maybe you run hosts discovery and ports enumeration tools. When you know what the target exposes, you can execute more specific tools for each service, to get more information and maybe, some vulnerabilities. And finally, if you find the needed information, you will look for a public exploit to get you into the target machine. I know, I know, this is an utopic scenario, and in the most cases the vulnerabilities are found due to the pentester skills and not by scanning tools. But before using your skills, how many time do you spend trying to get as information as possible with hacking tools? Probably, too much.
-
-Why not automate this process and focus on find vulnerabilities using your skills and the information that Rekono sends you?
-
-
-## Quick Start
-
-<video src="demo/rekono.mp4" width="1000" autoplay></video>
-
-### Telegram Bot
-
-<video src="demo/rekono-bot.mp4" width="500" autoplay></video>
-
 ### Features
 
 - Combine hacking tools to create pentesting `processes`
@@ -62,6 +46,26 @@ Why not automate this process and focus on find vulnerabilities using your skill
 - [Nikto](https://github.com/sullo/nikto)
 - [SearchSploit](https://www.exploit-db.com/searchsploit)
 - [Metasploit](https://www.metasploit.com/)
+
+
+## Quick Start
+
+<video width="1000" autoplay>
+  <source src="demo/rekono.mp4"/>
+</video>
+
+### Telegram Bot
+
+<video width="500" autoplay>
+  <source src="demo/rekono-bot.mp4"/>
+</video>
+
+
+## Why?
+
+Do you ever think about the steps that you follow when start a pentesting? Probably you start performing some OSINT tasks to gather public information about the target. Then, maybe you run hosts discovery and ports enumeration tools. When you know what the target exposes, you can execute more specific tools for each service, to get more information and maybe, some vulnerabilities. And finally, if you find the needed information, you will look for a public exploit to get you into the target machine. I know, I know, this is an utopic scenario, and in the most cases the vulnerabilities are found due to the pentester skills and not by scanning tools. But before using your skills, how many time do you spend trying to get as information as possible with hacking tools? Probably, too much.
+
+Why not automate this process and focus on find vulnerabilities using your skills and the information that Rekono sends you?
 
 
 ## Installation
