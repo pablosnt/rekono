@@ -17,7 +17,8 @@
 
 **Rekono** combines other hacking tools and its results to execute complete pentesting processes against a target in an automated way. The findings obtained during the executions will be sent to the user via email or Telegram notifications and also can be reviewed directly in the platform or sent to [Defect-Dojo](https://github.com/DefectDojo/django-DefectDojo) if an advanced vulnerability management is needed. Moreover, Rekono includes a Telegram bot that can be used to perform executions easily from anywhere and using any device.
 
-### Features
+
+## Features
 
 - Combine hacking tools to create pentesting `processes`
 - Execute pentesting `processes`
@@ -26,6 +27,16 @@
 - Use `Defect-Dojo` integration to keep the findings synchronized between the platforms
 - Execute `tools` and `processes` from `Telegram Bot`
 - `Wordlists` management
+
+
+## Quick Start
+
+[![Rekono]](https://user-images.githubusercontent.com/69458381/165973356-47666e33-e96c-4aee-b4a3-dd99fffe73bd.mp4)
+
+### Telegram Bot
+
+[![Rekono Bot]](https://user-images.githubusercontent.com/69458381/165973380-0f3308b6-f5f9-46a7-8d5b-ab89580eb840.mp4)
+
 
 ### Supported tools
 
@@ -46,15 +57,6 @@
 - [Nikto](https://github.com/sullo/nikto)
 - [SearchSploit](https://www.exploit-db.com/searchsploit)
 - [Metasploit](https://www.metasploit.com/)
-
-
-## Quick Start
-
-[![Rekono Demo](demo/rekono.mp4)
-
-### Telegram Bot
-
-[![Rekono Bot Demo](demo/rekono-bot.mp4)
 
 
 ## Why?
