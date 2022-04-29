@@ -93,7 +93,7 @@ class Target(models.Model, BaseInput):
             int: Engagement Id in Defect-Dojo
         '''
         exists = False
-        if self.defectdojo_engagement_id:
+        if self.defectdojo_engagement_id is not None:
             exists, _ = dd_client.get_engagement(self.defectdojo_engagement_id)     # Check existing engagement Id
         if not exists:                                                          # Engagement not found
             self.create_defectdojo_engagement(dd_client)                        # Create a new engagement
