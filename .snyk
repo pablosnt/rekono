@@ -1,0 +1,10 @@
+# Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
+version: v1.25.0
+# ignores vulnerabilities until expiry date; change duration by modifying expiry date
+ignore:
+  SNYK-PYTHON-PYTHONLIBNMAP-2808864:
+    - '*':
+        reason: python-libnmap is only used to parse nmap output. It's not used to execute nmap. No fix available at the moment
+        expires: 2022-09-04T17:10:10.695Z
+        created: 2022-06-04T17:10:10.697Z
+patch: {}
