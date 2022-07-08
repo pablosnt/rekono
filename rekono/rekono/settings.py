@@ -98,7 +98,6 @@ INSTALLED_APPS = [
     'processes',
     'projects',
     'rekono',
-    # 'rekono_config',
     'resources',
     'security',
     'targets',

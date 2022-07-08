@@ -4,7 +4,14 @@ version: v1.25.0
 ignore:
   SNYK-PYTHON-PYTHONLIBNMAP-2808864:
     - '*':
-        reason: python-libnmap is only used to parse nmap output. It's not used to execute nmap. No fix available at the moment
+        reason: >-
+          python-libnmap is only used to parse nmap output. It's not used to
+          execute nmap. No fix available at the moment
         expires: 2022-09-04T17:10:10.695Z
         created: 2022-06-04T17:10:10.697Z
+  SNYK-JS-MOMENT-2944238:
+    - '*':
+        reason: No fix available yet
+        expires: 2022-09-07T21:30:04.511Z
+        created: 2022-07-08T21:30:04.520Z
 patch: {}
