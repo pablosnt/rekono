@@ -67,7 +67,7 @@ Do you ever think about the steps that you follow when start a pentesting? Proba
 
 Why not automate this process and focus on find vulnerabilities using your skills and the information that Rekono sends you?
 
-> The `Rekono` name comes from the Esperanto language where it means __recon__.
+> The `Rekono` name comes from the Esperanto language where it means _recon_.
 
 
 ## Installation
