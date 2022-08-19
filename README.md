@@ -61,11 +61,13 @@
 Thanks to all the contributors of these amazing tools!
 
 
-## Why?
+## Why Rekono?
 
 Do you ever think about the steps that you follow when start a pentesting? Probably you start performing some OSINT tasks to gather public information about the target. Then, maybe you run hosts discovery and ports enumeration tools. When you know what the target exposes, you can execute more specific tools for each service, to get more information and maybe, some vulnerabilities. And finally, if you find the needed information, you will look for a public exploit to get you into the target machine. I know, I know, this is an utopic scenario, and in the most cases the vulnerabilities are found due to the pentester skills and not by scanning tools. But before using your skills, how many time do you spend trying to get as information as possible with hacking tools? Probably, too much.
 
 Why not automate this process and focus on find vulnerabilities using your skills and the information that Rekono sends you?
+
+> The `Rekono` name comes from the Esperanto language where it means __recon__.
 
 
 ## Installation
