@@ -251,3 +251,8 @@ Of course, you can also configure this properties in the `rekono/frontend/.env` 
 ## License
 
 Rekono is licensed under the [GNU GENERAL PUBLIC LICENSE Version 3](./LICENSE.md)
+
+
+## Support
+
+If you need any help, you can create a new support [Issue](https://github.com/pablosnt/rekono/issues/new?template=support.md) or mail rekono.project@gmail.com
