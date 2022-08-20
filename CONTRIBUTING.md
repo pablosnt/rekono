@@ -15,7 +15,11 @@ In this section you can see how to achieve that and the things that you should t
 
 ### Development environment
 
-You can follow the [`From Source`](https://github.com/pablosnt/rekono#from-source) installation guide to prepare your development environment.
+You can check this Wiki sections to prepare your Rekono contributions:
+
+- Documentation about the database and architecture [Design](https://github.com/pablosnt/rekono/wiki/3.-Design)
+- [From Source](https://github.com/pablosnt/rekono/wiki/4.-Installation#from-source) installation guide
+- [Configuration](https://github.com/pablosnt/rekono/wiki/5.-Configuration) guidelines
 
 Note that you can also execute the unit tests using the following command:
 

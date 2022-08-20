@@ -12,7 +12,7 @@ The following properties can be configured in the `rekono/frontend/.env` file:
 - `VUE_APP_DEFECTDOJO_URL`: Defect-Dojo URL
 - `VUE_APP_TELEGRAM_BOT`: Name of the Telegram Bot to be displayed in the UI
 
-Please, review the [Rekono documentation](../../README.md#configuration) to see all the alternatives.
+Please, review the [Rekono documentation](https://github.com/pablosnt/rekono/wiki/5.-Configuration) to see all the alternatives.
 
 ### Compiles and hot-reloads for development
 ```
