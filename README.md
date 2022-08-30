@@ -84,7 +84,7 @@ docker-compose up -d
 If you need more than one tool running at the same time, you can set the number of executions-worker instances:
 
 ```
-docker-compose up -d --scale executions-worker=5
+docker-compose up -d --scale execution-worker=5
 ```
 
 Go to https://127.0.0.1/
