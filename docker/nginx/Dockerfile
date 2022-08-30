@@ -1,4 +1,4 @@
-FROM nginx:1.21.6-alpine
+FROM nginx:1.22-alpine
 
 COPY docker/nginx/nginx.conf /etc/nginx/nginx.conf
 
