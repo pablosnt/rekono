@@ -4,103 +4,58 @@ from input_types import utils
 from input_types.base import BaseInput
 from input_types.models import InputType
 from stringcase import snakecase
-from tools.models import Argument, Tool
+from tools.models import Argument, Input, Tool
 
 
-def get_related_executions(
-    related_input_types: List[InputType],
-    executions: List[List[BaseInput]]
-) -> Dict[int, Dict[str, Any]]:
-    '''Get executions with related input types.
-
-    Args:
-        related_input_types (List[InputType]): Related input types to search in the execution list
-        executions (List[List[BaseInput]]):  List with the inputs already associated to each execution
-
-    Returns:
-        Dict[int, Dict[str, Any]]: Related executions data, including index, related field name and related inputs
-    '''
-    # Will save the executions (indexes) where the inputs can be assigned based on the related input types
-    relations: Dict[int, Dict[str, Any]] = {}
-    for relation in related_input_types:                                        # For each related input type
-        for index, exec_inputs in enumerate(executions):                        # For each execution
-            for i in exec_inputs:                                               # For each input assigned to execution
-                related_model = relation.get_related_model_class()
-                callback_target = relation.get_callback_target_class()
-                target_field_name = snakecase(cast(Any, callback_target).__name__) if callback_target else None
-                # Input related to the input type model
-                is_model = isinstance(i, cast(Any, related_model)) if related_model else False
-                # Input related to the input type target
-                is_target = isinstance(i, cast(Any, callback_target)) if callback_target else False
-                if is_model or is_target:
-                    if index in relations:
-                        relations[index]['inputs'].append(i)                    # Add input to the relations
-                    else:
-                        relations[index] = {                                    # Create a new relation based on index
-                            # Input field to access the related input
-                            'field': relation.name.lower() if is_model else target_field_name,
-                            'inputs': [i]                                       # Related input list
-                        }
-        if relations:
-            break                                                               # Relations found
-    return relations
-
-
-def is_execution_in_list(to_check: List[BaseInput], executions: List[List[BaseInput]]) -> bool:
-    '''Check if execution is already in the execution list.
-
-    Args:
-        to_check (List[BaseInput]): Execution to check
-        executions (List[List[BaseInput]]): Execution list
-
-    Returns:
-        bool: Indicate if execution already exists or not
-    '''
-    existing = False
-    for execution in executions:                                                # For each execution
-        for index, item in enumerate(execution):                                # For each base input in execution
-            if item != to_check[index]:                                         # Execution doesn't match
-                existing = False
-                break
-            else:                                                               # Execution match
-                existing = True
-        if existing:                                                            # Execution found
-            break
-    return existing
-
-
-def add_input(
-    argument: Argument,
-    base_input: BaseInput,
-    executions: List[List[BaseInput]],
-    indexes: List[int]
-) -> List[List[BaseInput]]:
-    '''Assign base input to the properly executions based on argument 'multiple' field.
-
-    Args:
-        argument (Argument): Argument related to the input type
-        base_input (BaseInput): BaseInput. It can be a Finding, a Resource or a Target
-        executions (List[List[BaseInput]]): List with the inputs already associated to each execution
-        indexes (List[int]): Indexes of the executions list where the base input can be assigned
-
-    Returns:
-        List[List[BaseInput]]: Executions list after assign the base input
-    '''
-    for index in indexes:                                                       # For each selected index
-        if argument.multiple:
-            # Argument multiple is True, so input should be assigned in all selected executions (indexes)
-            executions[index].append(base_input)
+def get_executions_with_relations(base_inputs: Dict[InputType, List[BaseInput]], tool: Tool) -> List[List[BaseInput]]:
+    executions: List[List[BaseInput]] = [[]]                                    # BaseInput list for each execution
+    # It's required because base inputs will be assigned to executions based on relationships between them
+    input_relations = utils.get_relations_between_input_types()                 # Get relations between input types
+    # For each input type, and his related input types
+    for input_type, related_input_types in list(reversed(input_relations.items())):
+        if input_type not in base_inputs:
+            continue
+        argument = Argument.objects.filter(tool=tool, inputs__type=input_type).order_by('inputs__order').first()
+        if related_input_types:
+            for base_input in base_inputs[input_type]:
+                for index, execution_list in enumerate(executions.copy()):
+                    assigned = False
+                    for related_input_type in related_input_types:
+                        base_inputs_by_class = [bi for bi in execution_list if bi.__class__ == base_input.__class__]
+                        related_target = related_input_type.get_callback_target_class()
+                        related_target_field = snakecase(cast(Any, related_target).__name__) if related_target else None
+                        if (
+                            (
+                                hasattr(base_input, related_input_type.name.lower()) and
+                                getattr(base_input, related_input_type.name.lower()) in execution_list
+                            ) or
+                            (
+                                hasattr(base_input, related_target_field) and
+                                getattr(base_input, related_target_field) in execution_list
+                            )
+                        ):
+                            if argument.multiple or len(base_inputs_by_class) == 0:
+                                executions[index].append(base_input)
+                                assigned = True
+                                break
+                            elif not argument.multiple and len(base_inputs_by_class) > 0:
+                                new_execution = execution_list.copy()
+                                new_execution.remove(base_inputs_by_class[0])
+                                new_execution.append(base_input)
+                                executions.append(new_execution)
+                                assigned = True
+                                break
+                    if assigned:
+                        break
+        elif argument.multiple:
+            for item in range(len(executions)):
+                executions[item].extend(base_inputs[input_type])
         else:
-            # Argument multiple is False, so input should be assigned to executions without inputs of same type
-            # Filter inputs in the current index, removing inputs of the same types
-            execution_copy = [f for f in executions[index] if type(f) != type(base_input)]
-            if len(execution_copy) == len(executions[index]):                   # No inputs of same type in this index
-                executions[index].append(base_input)                            # Assign base input to the current index
-            else:                                                               # Inputs with same type in this index
-                # New execution is created from the filtered index and the input
-                execution_copy.append(base_input)
-                if not is_execution_in_list(execution_copy, executions):        # Check if execution exists
-                    executions.append(execution_copy)
+            new_executions: List[List[BaseInput]] = []
+            for base_input in base_inputs[input_type]:
+                for execution_list in executions:
+                    new_executions.append(list(execution_list + [base_input]))
+            executions = new_executions
     return executions
 
 
@@ -108,38 +63,28 @@ def get_executions_from_findings(base_inputs: List[BaseInput], tool: Tool) -> Li
     '''Get needed executions for a tool based on a given a input (Finding, Resource or Target) list.
 
     Args:
-        inputs (List[BaseInput]): BaseInput list
+        base_inputs (List[BaseInput]): BaseInput list
         tool (Tool): Tool that will be executed
 
     Returns:
         List[List[BaseInput]]: List of inputs to be passed for each tool execution
     '''
-    executions: List[List[BaseInput]] = [[]]                                    # BaseInput list for each execution
-    # It's required because base inputs will be assigned to executions based on relationships between them
-    input_relations = utils.get_relations_between_input_types()                 # Get relations between input types
-    # For each input type, and his related input types
-    for input_type, related_input_types in list(reversed(input_relations.items())):
-        # Get properly argument for input type
-        argument = Argument.objects.filter(tool=tool, inputs__type=input_type).order_by('inputs__order').first()
-        if not argument:
-            continue                                                            # No argument found
-        related_model = input_type.get_related_model_class()
-        callback_target = input_type.get_callback_target_class()
-        # Filter base inputs based on the input type model or target
-        filtered = [f for f in base_inputs if (
-            (related_model and isinstance(f, cast(Any, related_model))) or
-            (callback_target and isinstance(f, cast(Any, callback_target)))
-        )]
-        if not filtered:
-            continue                                                            # No base inputs found
-        relations = get_related_executions(related_input_types, executions)     # Get executions with related inputs
-        for base_input in filtered:                                             # For each base input
-            # By default, can be assigned to all executions
-            indexes = list(range(len(executions)))
-            if relations:                                                       # If relations found
-                # Filter relations to get indexes with related inputs to the current base input
-                related = [i for i, v in relations.items() if getattr(base_input, v['field']) in v['inputs']]
-                if len(related) > 0:                                            # Related inputs found
-                    indexes = related
-            executions = add_input(argument, base_input, executions, indexes)   # Assign base input to executions
-    return executions
+    tool_inputs: List[Input] = Input.objects.filter(argument__tool=tool).all()
+    filtered_base_inputs: Dict[InputType, List[BaseInput]] = {}
+    for tool_input in tool_inputs:
+        base_input_list = [
+            bi for bi in base_inputs if bi.__class__ in [
+                c for c in [tool_input.type.get_related_model_class(), tool_input.type.get_callback_target_class()] if c
+            ]
+        ]
+        if base_input_list:
+            filtered_base_inputs[tool_input.type] = base_input_list
+    if len(filtered_base_inputs.keys()) > 1:
+        return get_executions_with_relations(filtered_base_inputs, tool)
+    elif len(filtered_base_inputs.keys()) == 1:
+        argument = Argument.objects.filter(tool=tool, inputs__type=list(filtered_base_inputs.keys())[0]).first()
+        if argument.multiple:
+            return list(filtered_base_inputs.values())
+        else:
+            return cast(List[List[BaseInput]], [[bi] for bi in list(filtered_base_inputs.values())])
+    return [base_inputs]
