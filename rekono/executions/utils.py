@@ -74,7 +74,7 @@ def get_executions_from_findings(base_inputs: List[BaseInput], tool: Tool) -> Li
     for tool_input in tool_inputs:
         base_input_list = [
             bi for bi in base_inputs if bi.__class__ in [
-                c for c in [tool_input.type.get_related_model_class(), tool_input.type.get_callback_target_class()] if c
+                tool_input.type.get_related_model_class(), tool_input.type.get_callback_target_class()
             ]
         ]
         if base_input_list:
@@ -86,5 +86,5 @@ def get_executions_from_findings(base_inputs: List[BaseInput], tool: Tool) -> Li
         if argument.multiple:
             return list(filtered_base_inputs.values())
         else:
-            return cast(List[List[BaseInput]], [[bi] for bi in list(filtered_base_inputs.values())])
+            return [[bi] for bi in list(filtered_base_inputs.values())[0]]
     return [base_inputs]
