@@ -1,4 +1,5 @@
 from findings.models import Exploit
+
 from tools.tools.base_tool import BaseTool
 
 
