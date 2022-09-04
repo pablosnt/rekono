@@ -5,8 +5,8 @@ from django.forms import ValidationError
 
 logger = logging.getLogger()                                                    # Rekono logger
 
-NAME_REGEX = r'[\wÀ-ÿ\s\.\-\[\]]*'                                              # Regex for names validation
-TEXT_REGEX = r'[\wÀ-ÿ\s\.:,+\-\'"?¿¡!#%$€\[\]]*'                                # Regex for text validation
+NAME_REGEX = r'[\wÀ-ÿ\s\.\-\[\]()]*'                                            # Regex for names validation
+TEXT_REGEX = r'[\wÀ-ÿ\s\.:,+\-\'"?¿¡!#%$€\[\]()]*'                              # Regex for text validation
 PATH_REGEX = r'[\w\./#?&%$\\]*'                                                 # Regex for path validation
 CVE_REGEX = 'CVE-[0-9]{4}-[0-9]{1,7}'                                           # Regex for CVE validation
 
