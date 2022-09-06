@@ -54,9 +54,13 @@ The support of external hacking tools in Rekono is based on the following steps:
 
     - Override the method `parse_output_file` or `parse_plain_output` depending on the tool output type.
 
-3. Implement unit tests to check the parser correct working. You can use some [tool reports](https://github.com/pablosnt/rekono/tree/main/rekono/testing/data/reports) as example for that.
+3. Implement [unit tests](https://github.com/pablosnt/rekono/tree/main/rekono/testing/tools) to check the parser correct working. You can add your [tool reports](https://github.com/pablosnt/rekono/tree/main/rekono/testing/data/reports) as example for that.
 
 4. Add the tool reference in the [README.md](https://github.com/pablosnt/rekono#supported-tools).
+
+5. Add tool installation to the [Kali Linux Dockerfile](https://github.com/pablosnt/rekono/blob/main/docker/kali/Dockerfile).
+
+6. Add tool installation to the [Rekono CLI](https://github.com/pablosnt/rekono-cli/blob/main/rekono/installation/tools.py).
 
 ### CI/CD
 
