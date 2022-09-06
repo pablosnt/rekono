@@ -3,6 +3,7 @@ from typing import List, Union
 
 from findings.enums import Severity
 from findings.models import Technology, Vulnerability
+
 from tools.tools.base_tool import BaseTool
 
 
@@ -25,7 +26,10 @@ class SslscanTool(BaseTool):
     def parse_output_file(self) -> None:
         '''Parse tool output file to create finding entities.'''
         technologies: List[Technology] = []
-        root = parser.parse(self.path_output).getroot()                         # Report root
+        try:
+            root = parser.parse(self.path_output).getroot()                     # Report root
+        except parser.ParseError:
+            return
         tests = root.findall('ssltest')                                         # Get test
         for test in tests:                                                      # For each test
             for item in test:                                                   # For each item
