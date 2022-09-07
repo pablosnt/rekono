@@ -78,7 +78,7 @@ services:
     networks:
       - internal
     depends_on:
-      - postgres
+      - initialize
       - redis
     environment:
       - RKN_DB_HOST=postgres
@@ -105,7 +105,7 @@ services:
     cap_add:
       - NET_ADMIN
     depends_on:
-      - postgres
+      - initialize
       - redis
     environment:
       - RKN_DB_HOST=postgres
@@ -127,7 +127,7 @@ services:
       - internal
       - external
     depends_on:
-      - postgres
+      - initialize
       - redis
     environment:
       - RKN_DB_HOST=postgres
@@ -152,6 +152,7 @@ services:
       - internal
       - external
     depends_on:
+      - initialize
       - redis
       - postfix
     environment:
@@ -180,7 +181,7 @@ services:
       - internal
       - external
     depends_on:
-      - postgres
+      - initialize
       - redis
     environment:
       - RKN_DB_HOST=postgres
@@ -214,7 +215,7 @@ services:
       - internal
       - external
     depends_on:
-      - postgres
+      - initialize
       - redis
     environment:
       - RKN_DB_HOST=postgres
