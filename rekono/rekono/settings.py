@@ -357,7 +357,7 @@ RQ_QUEUES = {
         'HOST': os.getenv(RKN_RQ_HOST, CONFIG.RQ_HOST),
         'PORT': os.getenv(RKN_RQ_PORT, CONFIG.RQ_PORT),
         'DB': 0,
-        'DEFAULT_TIMEOUT': 300                                                  # 5 minutes
+        'DEFAULT_TIMEOUT': 1200                                                 # 20 minutes
     },
     'emails-queue': {
         'HOST': os.getenv(RKN_RQ_HOST, CONFIG.RQ_HOST),
