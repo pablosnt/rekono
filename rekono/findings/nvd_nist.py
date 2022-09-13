@@ -1,6 +1,9 @@
 import logging
+from urllib.parse import urlparse
 
 import requests
+from requests.adapters import HTTPAdapter, Retry
+
 from findings.enums import Severity
 
 # Mapping between severity values and CVSS values
@@ -34,6 +37,12 @@ class NvdNist:
         self.cwe = self.parse_cwe() if self.raw_cve_info else None              # CVE weakness as CWE code
         # CVE severity based on CVSS score
         self.severity = self.parse_severity() if self.raw_cve_info else Severity.MEDIUM
+        schema = urlparse(self.api_url_pattern).scheme                          # Get API schema
+        self.http_session = requests.Session()                                  # Create HTTP session
+        # Configure retry protocol to prevent unexpected errors
+        # Free NVD NIST API has a rate limit of 10 requests by second
+        retries = Retry(total=10, backoff_factor=3, status_forcelist=[403, 500, 502, 503, 504])
+        self.http_session.mount(f'{schema}://', HTTPAdapter(max_retries=retries))
 
     def request(self) -> dict:
         '''Get information from a CVE using the NVD NIST API Rest.
@@ -41,9 +50,12 @@ class NvdNist:
         Returns:
             dict: Raw NVD NIST CVE information
         '''
-        res = requests.get(self.api_url_pattern.format(cve=self.cve))
-        logger.info(f'[NVD NIST] GET {self.cve} > HTTP {res.status_code}')
-        return res.json()['result']['CVE_Items'][0] if res.status_code == 200 else {}
+        try:
+            response = self.http_session.get(self.api_url_pattern.format(cve=self.cve))
+        except requests.exceptions.ConnectionError:
+            response = self.http_session.get(self.api_url_pattern.format(cve=self.cve))
+        logger.info(f'[NVD NIST] GET {self.cve} > HTTP {response.status_code}')
+        return response.json()['result']['CVE_Items'][0] if response.status_code == 200 else {}
 
     def parse_description(self) -> str:
         '''Get description from raw CVE information.

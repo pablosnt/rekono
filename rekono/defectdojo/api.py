@@ -1,13 +1,15 @@
 import logging
 from datetime import datetime, timedelta
 from typing import Any, Tuple
+from urllib.parse import urlparse
 
 import requests
-from defectdojo.constants import DD_DATE_FORMAT, DD_DATETIME_FORMAT
 from findings.enums import Severity
 from projects.models import Project
-
 from rekono.settings import DEFECT_DOJO as config
+from requests.adapters import HTTPAdapter, Retry
+
+from defectdojo.constants import DD_DATE_FORMAT, DD_DATETIME_FORMAT
 
 # Mapping between Rekono and Defect-Dojo severities
 SEVERITY_MAPPING = {
@@ -33,6 +35,11 @@ class DefectDojo:
         self.product_type = config.get('PRODUCT_TYPE')                          # Product type name for Rekono
         self.test_type = config.get('TEST_TYPE')                                # Test type name for Rekono
         self.test = config.get('TEST')                                          # Test name for Rekono
+        schema = urlparse(self.api_url_pattern).scheme                          # Get API schema
+        self.http_session = requests.Session()                                  # Create HTTP session
+        # Configure retry protocol to prevent unexpected errors
+        retries = Retry(total=10, backoff_factor=1, status_forcelist=[500, 502, 503, 504])
+        self.http_session.mount(f'{schema}://', HTTPAdapter(max_retries=retries))
 
     def request(
         self,
@@ -60,15 +67,26 @@ class DefectDojo:
             'User-Agent': 'Rekono',                                             # Rekono User-Agent
             'Authorization': f'Token {self.api_key}'                            # Authentication via API key
         }
-        response = requests.request(                                            # Defect-Dojo API request
-            method=method,
-            url=f'{self.url}{endpoint}',
-            headers=headers,
-            params=params,
-            data=data,
-            files=files,
-            verify=self.verify_tls
-        )
+        try:
+            response = self.http_session.request(                               # Defect-Dojo API request
+                method=method,
+                url=f'{self.url}{endpoint}',
+                headers=headers,
+                params=params,
+                data=data,
+                files=files,
+                verify=self.verify_tls
+            )
+        except requests.exceptions.ConnectionError:
+            response = self.http_session.request(                               # Defect-Dojo API request
+                method=method,
+                url=f'{self.url}{endpoint}',
+                headers=headers,
+                params=params,
+                data=data,
+                files=files,
+                verify=self.verify_tls
+            )
         logger.info(f'[Defect-Dojo] {method.upper()} /api/v2{endpoint} > HTTP {response.status_code}')
         if response.status_code == expected_status:
             return True, response.json()                                        # Successful request
