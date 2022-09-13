@@ -35,7 +35,7 @@ class DefectDojo:
         self.product_type = config.get('PRODUCT_TYPE')                          # Product type name for Rekono
         self.test_type = config.get('TEST_TYPE')                                # Test type name for Rekono
         self.test = config.get('TEST')                                          # Test name for Rekono
-        schema = urlparse(self.api_url_pattern).scheme                          # Get API schema
+        schema = urlparse(self.url).scheme                                      # Get API schema
         self.http_session = requests.Session()                                  # Create HTTP session
         # Configure retry protocol to prevent unexpected errors
         retries = Retry(total=10, backoff_factor=1, status_forcelist=[500, 502, 503, 504])
