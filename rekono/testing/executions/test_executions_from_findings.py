@@ -3,8 +3,6 @@ from typing import Any
 from django.db.models import Model
 from django.test import TestCase
 from django.utils import timezone
-from executions.models import Execution
-from executions.utils import get_executions_from_findings
 from findings.models import Host, Path, Port
 from input_types.base import BaseInput
 from input_types.models import InputType
@@ -17,6 +15,9 @@ from tasks.enums import Status
 from tasks.models import Task
 from tools.enums import IntensityRank, Stage
 from tools.models import Argument, Configuration, Input, Tool
+
+from executions.models import Execution
+from executions.utils import get_executions_from_findings
 
 
 class ExecutionsFromFindingsTest(TestCase):
@@ -154,6 +155,17 @@ class ExecutionsFromFindingsTest(TestCase):
             [host_3, port_3_1, port_3_2, port_3_3, port_3_4, port_3_5, path_3_4_1],
             [host_3, port_3_1, port_3_2, port_3_3, port_3_4, port_3_5, path_3_5_1],
         ]
+        executions = get_executions_from_findings(findings, self.tool)
+        self.assertEqual(expected, executions)
+
+    def test_with_only_one_finding_type(self) -> None:
+        '''Test get_executions_from_findings feature with findings. Simulates new executions from previous findings.'''
+        host_1 = self.create_finding(Host, address='10.10.10.1')
+        host_2 = self.create_finding(Host, address='10.10.10.2')
+        host_3 = self.create_finding(Host, address='10.10.10.3')
+        host_4 = self.create_finding(Host, address='10.10.10.4')
+        findings = [host_1, host_2, host_3, host_4]                             # Finding list to pass as argument
+        expected = [[host_1], [host_2], [host_3], [host_4]]                     # Expected executions
         executions = get_executions_from_findings(findings, self.tool)
         self.assertEqual(expected, executions)
 

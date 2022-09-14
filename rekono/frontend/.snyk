@@ -5,6 +5,6 @@ ignore:
   SNYK-JS-MOMENT-2944238:
     - '*':
         reason: No fix available yet
-        expires: 2022-09-07T21:30:04.511Z
-        created: 2022-07-08T21:30:04.520Z
+        expires: 2022-12-13T21:07:02.600Z
+        created: 2022-09-13T21:07:02.607Z
 patch: {}
