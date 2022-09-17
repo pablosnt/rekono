@@ -48,7 +48,7 @@ class NvdNist:
         session = requests.Session()                                            # Create HTTP session
         # Configure retry protocol to prevent unexpected errors
         # Free NVD NIST API has a rate limit of 10 requests by second
-        retries = Retry(total=10, backoff_factor=3, status_forcelist=[403, 500, 502, 503, 504, 599])
+        retries = Retry(total=10, backoff_factor=1, status_forcelist=[403, 500, 502, 503, 504, 599])
         session.mount(f'{schema}://', HTTPAdapter(max_retries=retries))
         try:
             response = session.get(self.api_url_pattern.format(cve=self.cve))

@@ -38,7 +38,7 @@ class DefectDojo:
         schema = urlparse(self.url).scheme                                      # Get API schema
         self.http_session = requests.Session()                                  # Create HTTP session
         # Configure retry protocol to prevent unexpected errors
-        retries = Retry(total=10, backoff_factor=1, status_forcelist=[500, 502, 503, 504, 599])
+        retries = Retry(total=10, backoff_factor=0.5, status_forcelist=[500, 502, 503, 504, 599])
         self.http_session.mount(f'{schema}://', HTTPAdapter(max_retries=retries))
 
     def request(
