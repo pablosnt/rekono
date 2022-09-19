@@ -21,6 +21,6 @@ jobs:
 
       - name: Test default credentials
         run: |
-          RESPONSE=$(curl https://127.0.0.1/api/token --data='{"username": "${RKN_USERNAME}", "password": "{$RKN_PASSWORD}"' -o /dev/null -w '%{http_code}\n' -s)
+          RESPONSE=$(curl -X POST --insecure -H 'Content-Type: application/json' https://127.0.0.1/api/token/ --data='{"username": "${RKN_USERNAME}", "password": "{$RKN_PASSWORD}"' -o /dev/null -w '%{http_code}\n' -s)
           echo $RESPONSE
           if [ RESPONSE != 200]; then exit 10; fi
