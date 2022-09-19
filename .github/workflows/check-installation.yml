@@ -21,8 +21,8 @@ jobs:
 
       - name: Test default credentials
         run: |
-          sleep 2m
-          curl -X POST --insecure -H 'Content-Type: application/json' https://127.0.0.1/api/token/ --data '{"username": "'"${RKN_USERNAME}"'", "password": "'"${RKN_PASSWORD}"'"}'
+          sleep 2ms
           RESPONSE=$(curl -X POST --insecure -H 'Content-Type: application/json' https://127.0.0.1/api/token/ --data '{"username": "'"${RKN_USERNAME}"'", "password": "'"${RKN_PASSWORD}"'"}' -o /dev/null -w '%{http_code}\n' -s)
+          docker logs
           echo $RESPONSE
           if [ $RESPONSE != 200 ]; then exit 10; fi
