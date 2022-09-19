@@ -5,7 +5,6 @@ from unittest import mock
 import django_rq
 from django.test import TestCase
 from django.utils import timezone
-from executions.models import Execution
 from findings.enums import DataType, Protocol, Severity
 from findings.models import (OSINT, Credential, Exploit, Finding, Host, Path,
                              Port, Technology, Vulnerability)
@@ -22,12 +21,15 @@ from tasks.enums import Status
 from tasks.models import Task
 from testing.mocks.defectdojo import (defect_dojo_error, defect_dojo_success,
                                       defect_dojo_success_multiple)
+from testing.mocks.nvd_nist import nvd_nist_success_cvss_3
 from tools.enums import IntensityRank, Stage
 from tools.exceptions import ToolExecutionException
 from tools.models import Argument, Configuration, Input, Intensity, Tool
 from tools.tools.base_tool import BaseTool
 from tools.utils import get_tool_class_by_name
 from users.models import User
+
+from executions.models import Execution
 
 
 class BaseToolTest(TestCase):
@@ -531,11 +533,13 @@ class BaseToolTest(TestCase):
         self.assertEqual(imported_in_defectdojo, execution.imported_in_defectdojo)
 
     @mock.patch('defectdojo.api.DefectDojo.request', defect_dojo_success)       # Mocks Defect-Dojo response
+    @mock.patch('findings.nvd_nist.NvdNist.request', nvd_nist_success_cvss_3)   # Mocks NVD NIST response
     def test_process_findings_with_defectdojo_target_engagement(self) -> None:
         '''Test process_findings feature with import in Defect-Dojo using target engagement.'''
         self.process_findings(True)
 
     @mock.patch('defectdojo.api.DefectDojo.request', defect_dojo_success)       # Mocks Defect-Dojo response
+    @mock.patch('findings.nvd_nist.NvdNist.request', nvd_nist_success_cvss_3)   # Mocks NVD NIST response
     def test_process_findings_with_defectdojo_product_engagement(self) -> None:
         '''Test process_findings feature with import in Defect-Dojo using product engagement.'''
         self.project.defectdojo_engagement_id = 1                               # Product engagement Id
@@ -545,6 +549,7 @@ class BaseToolTest(TestCase):
 
     @mock.patch('defectdojo.api.DefectDojo.request', defect_dojo_success)       # Mocks Defect-Dojo response
     @mock.patch('defectdojo.api.DefectDojo.get_product', defect_dojo_error)
+    @mock.patch('findings.nvd_nist.NvdNist.request', nvd_nist_success_cvss_3)   # Mocks NVD NIST response
     def test_process_findings_with_defectdojo_engagement_not_found(self) -> None:
         '''Test process_findings feature with import in Defect-Dojo using not found engagement.'''
         self.project.defectdojo_engagement_id = 1                               # Product engagement Id
@@ -553,6 +558,7 @@ class BaseToolTest(TestCase):
         self.process_findings(False)
 
     @mock.patch('defectdojo.api.DefectDojo.request', defect_dojo_success)       # Mocks Defect-Dojo response
+    @mock.patch('findings.nvd_nist.NvdNist.request', nvd_nist_success_cvss_3)   # Mocks NVD NIST response
     def test_process_findings_with_defectdojo_findings_import(self) -> None:
         '''Test process_findings feature with import in Defect-Dojo using the Rekono findings.'''
         self.nmap.defectdojo_scan_type = None                                   # Import findings instead executions
@@ -561,6 +567,7 @@ class BaseToolTest(TestCase):
 
     @mock.patch('defectdojo.api.DefectDojo.request', defect_dojo_success)       # Mocks Defect-Dojo response
     @mock.patch('defectdojo.api.DefectDojo.get_rekono_test_type', defect_dojo_success_multiple)
+    @mock.patch('findings.nvd_nist.NvdNist.request', nvd_nist_success_cvss_3)   # Mocks NVD NIST response
     def test_process_findings_with_existing_defectdojo_test_type(self) -> None:
         '''Test process_findings feature with import in Defect-Dojo using existing test type.'''
         self.nmap.defectdojo_scan_type = None                                   # Import findings instead executions
@@ -569,6 +576,7 @@ class BaseToolTest(TestCase):
 
     @mock.patch('defectdojo.api.DefectDojo.request', defect_dojo_success)       # Mocks Defect-Dojo response
     @mock.patch('defectdojo.api.DefectDojo.create_rekono_test_type', defect_dojo_error)
+    @mock.patch('findings.nvd_nist.NvdNist.request', nvd_nist_success_cvss_3)   # Mocks NVD NIST response
     def test_process_findings_with_errors_in_defectdojo_test_type_creation(self) -> None:
         '''Test process_findings feature with unexpected error during Defect-Dojo test type creation.'''
         self.nmap.defectdojo_scan_type = None                                   # Import findings instead executions
@@ -576,6 +584,7 @@ class BaseToolTest(TestCase):
         self.process_findings(False)
 
     @mock.patch('defectdojo.api.DefectDojo.request', defect_dojo_error)         # Mocks Defect-Dojo response
+    @mock.patch('findings.nvd_nist.NvdNist.request', nvd_nist_success_cvss_3)   # Mocks NVD NIST response
     def test_process_findings_with_unvailable_defectdojo(self) -> None:
         '''Test process_findings feature with unavailable Defect-Dojo instance.'''
         self.process_findings(False)
