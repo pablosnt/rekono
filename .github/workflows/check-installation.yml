@@ -21,6 +21,7 @@ jobs:
 
       - name: Test default credentials
         run: |
+          docker ps
           curl -X POST --insecure -H 'Content-Type: application/json' https://127.0.0.1/api/token/ --data '{"username": "'"${RKN_USERNAME}"'", "password": "'"${RKN_PASSWORD}"'"}'
           RESPONSE=$(curl -X POST --insecure -H 'Content-Type: application/json' https://127.0.0.1/api/token/ --data '{"username": "'"${RKN_USERNAME}"'", "password": "'"${RKN_PASSWORD}"'"}' -o /dev/null -w '%{http_code}\n' -s)
           echo $RESPONSE
