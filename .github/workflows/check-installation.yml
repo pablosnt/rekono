@@ -7,8 +7,8 @@ env:
   RKN_PASSWORD: rekono
 
 jobs:
-  docker-environment:
-    name: Test default credentials
+  docker:
+    name: Test Docker environment
     strategy:
       matrix:
         os: ['ubuntu-latest', 'windows-latest', 'macos-latest']
