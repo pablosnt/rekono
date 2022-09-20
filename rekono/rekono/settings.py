@@ -39,7 +39,7 @@ from rekono.environment import (ENV_REKONO_HOME, RKN_ALLOWED_HOSTS,
 ################################################################################
 
 DESCRIPTION = 'Execute full pentesting processes combining multiple hacking tools automatically'    # Rekono description
-VERSION = '1.0.0'                                                               # Rekono version
+VERSION = '1.0.1'                                                               # Rekono version
 
 
 ################################################################################
@@ -357,7 +357,7 @@ RQ_QUEUES = {
         'HOST': os.getenv(RKN_RQ_HOST, CONFIG.RQ_HOST),
         'PORT': os.getenv(RKN_RQ_PORT, CONFIG.RQ_PORT),
         'DB': 0,
-        'DEFAULT_TIMEOUT': 300                                                  # 5 minutes
+        'DEFAULT_TIMEOUT': 1200                                                 # 20 minutes
     },
     'emails-queue': {
         'HOST': os.getenv(RKN_RQ_HOST, CONFIG.RQ_HOST),
