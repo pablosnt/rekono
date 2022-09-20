@@ -9,7 +9,7 @@ Please, don't report security vulnerabilities in GitHub Issues. See our [Securit
 
 ## Contributing to Rekono
 
-You can create Pull Requests to the `develop` branch of this project. All the Pull Requests should be reviewed and approved before been merged. After that, your code will be included on the next Rekono release.
+**You can create Pull Requests to the `develop` branch of this project**. All the Pull Requests should be reviewed and approved before been merged. After that, your code will be included on the next Rekono release.
 
 In this section you can see how to achieve that and the things that you should to take into account.
 
@@ -30,7 +30,7 @@ coverage run manage.py test
 
 ### Add support for a new hacking tool
 
-The support of external hacking tools in Rekono is based on two steps:
+The support of external hacking tools in Rekono is based on the following steps:
 
 1. Define the hacking tools in the [tools/fixture](https://github.com/pablosnt/rekono/tree/main/rekono/tools/fixtures) files. There are one file for each required entity:
     
@@ -53,6 +53,14 @@ The support of external hacking tools in Rekono is based on two steps:
     - Create a new Python class with the tool name (defined in the previous step) capitalized and with the word `Tool` at the end. This class needs to extend the `tools.tools.base_tool.BaseTool` class.
 
     - Override the method `parse_output_file` or `parse_plain_output` depending on the tool output type.
+
+3. Implement [unit tests](https://github.com/pablosnt/rekono/tree/main/rekono/testing/tools) to check the parser correct working. You can add your [tool reports](https://github.com/pablosnt/rekono/tree/main/rekono/testing/data/reports) as example for that.
+
+4. Add the tool reference in the [README.md](https://github.com/pablosnt/rekono#supported-tools).
+
+5. Add tool installation to the [Kali Linux Dockerfile](https://github.com/pablosnt/rekono/blob/main/docker/kali/Dockerfile).
+
+6. Add tool installation to the [Rekono CLI](https://github.com/pablosnt/rekono-cli/blob/main/rekono/installation/tools.py).
 
 ### CI/CD
 
@@ -79,5 +87,5 @@ pre-commit install
 There are some guidelines to keep the code clean and ensure the correct working of the application:
 
 - Comment your code, specially to document the classes and methods.
-- Make unit tests of all your code to ensure its correct working. It's important to keep the testing coverage over a 95% coverage.
+- Make unit tests for all your code to ensure its correct working. It's important to keep the testing coverage over a 95% coverage.
 - Don't include code vulnerabilities or vulnerable libraries.

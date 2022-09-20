@@ -2,6 +2,8 @@ name: Unit testing
 on:
   workflow_dispatch:
   pull_request:
+    paths:
+      - 'rekono/**'
 
 env:
   REQUIRED_COVERAGE: 95
