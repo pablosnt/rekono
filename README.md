@@ -47,7 +47,7 @@ Why not automate this process and focus on find vulnerabilities using your skill
 [![Rekono Bot]](https://user-images.githubusercontent.com/69458381/165973380-0f3308b6-f5f9-46a7-8d5b-ab89580eb840.mp4)
 
 
-### Supported tools
+## Supported tools
 
 - [theHarvester](https://github.com/laramies/theHarvester)
 - [EmailHarvester](https://github.com/maldevel/EmailHarvester)
@@ -73,6 +73,8 @@ Thanks to all the contributors of these amazing tools!
 ## Installation
 
 ### Docker
+
+> :warning: Use non-root user to clone the repository and deploy Docker environment
 
 Execute the following commands in the root directory of the project:
 
@@ -124,6 +126,16 @@ Check the installation from source in [Rekono Wiki](https://github.com/pablosnt/
 ## Configuration
 
 Check the configuration options in [Rekono Wiki](https://github.com/pablosnt/rekono/wiki/5.-Configuration)
+
+
+### Telegram Bot
+
+You can follow this steps to deploy the Telegram bot:
+
+1. Create a new bot in Telegram using this [guide](https://core.telegram.org/bots#how-do-i-create-a-bot) and the [@BotFather](https://t.me/botfather)
+2. The [@BotFather](https://t.me/botfather) will send you an authentication token
+3. Set the token value in the `RKN_TELEGRAM_TOKEN` environment variable or the `telegram.token` property in the config.yaml
+4. Deploy Rekono using the Installation guide
 
 
 ## License
