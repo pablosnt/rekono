@@ -132,7 +132,7 @@ Check the configuration options in [Rekono Wiki](https://github.com/pablosnt/rek
 
 You can follow this steps to deploy the Telegram bot:
 
-1. Create a new bot in Telegram using [this guide]((https://core.telegram.org/bots#how-do-i-create-a-bot)) and the [@BotFather](https://t.me/botfather)
+1. Create a new bot in Telegram using this [guide](https://core.telegram.org/bots#how-do-i-create-a-bot) and the [@BotFather](https://t.me/botfather)
 2. The [@BotFather](https://t.me/botfather) will send you an authentication token
 3. Set the token value in the `RKN_TELEGRAM_TOKEN` environment variable or the `telegram.token` property in the config.yaml
 4. Deploy Rekono using the Installation guide
