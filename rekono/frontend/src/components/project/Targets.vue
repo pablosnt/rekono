@@ -116,11 +116,11 @@
 <script>
 import RekonoApi from '@/backend/RekonoApi'
 import Deletion from '@/common/Deletion'
-import TableHeader from '@/common/TableHeader'
 import Pagination from '@/common/Pagination'
+import TableHeader from '@/common/TableHeader'
 import Target from '@/modals/Target'
-import TargetPort from '@/modals/TargetPort'
 import TargetEndpoint from '@/modals/TargetEndpoint'
+import TargetPort from '@/modals/TargetPort'
 import TargetTechnology from '@/modals/TargetTechnology'
 import TargetVulnerability from '@/modals/TargetVulnerability'
 import Task from '@/modals/Task'
@@ -130,18 +130,25 @@ export default {
   props: {
     project: Object
   },
+  computed: {
+    targetsFields () {
+      var fields = [
+        { key: 'target', sortable: true },
+        { key: 'type', sortable: true },
+        { key: 'target_ports.length', label: 'Target Ports', sortable: true },
+        { key: 'tasks.length', label: 'Tasks', sortable: true },
+        { key: 'actions', sortable: false }
+      ]
+      if (this.defectDojoEnabled) {
+        fields.splice(2, 0, { key: 'defectdojo_engagement_id', label: 'Defect-Dojo', sortable: false })
+      }
+      return fields
+    }
+  },
   data () {
     this.fetchData()
     return {
       data: [],
-      targetsFields: [
-        { key: 'target', sortable: true },
-        { key: 'type', sortable: true },
-        { key: 'defectdojo_engagement_id', label: 'Defect-Dojo', sortable: false },
-        { key: 'target_ports.length', label: 'Target Ports', sortable: true },
-        { key: 'tasks.length', label: 'Tasks', sortable: true },
-        { key: 'actions', sortable: false }
-      ],
       targetPortsFields: [
         { key: 'port', sortable: true },
         { key: 'target_endpoints.length', label: 'Target Endpoints', sortable: false},
