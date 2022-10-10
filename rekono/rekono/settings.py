@@ -68,6 +68,7 @@ CONFIG_FILE = ''                                                                
 for filename in ['config.yaml', 'config.yml', 'rekono.yaml', 'rekono.yml']:     # For each config filename
     if os.path.isfile(os.path.join(REKONO_HOME, filename)):                     # Check if config file exists
         CONFIG_FILE = os.path.join(REKONO_HOME, filename)
+        break
 CONFIG = RekonoConfigLoader(CONFIG_FILE)                                        # Load configuration
 
 
