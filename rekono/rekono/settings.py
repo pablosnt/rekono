@@ -68,6 +68,7 @@ CONFIG_FILE = ''                                                                
 for filename in ['config.yaml', 'config.yml', 'rekono.yaml', 'rekono.yml']:     # For each config filename
     if os.path.isfile(os.path.join(REKONO_HOME, filename)):                     # Check if config file exists
         CONFIG_FILE = os.path.join(REKONO_HOME, filename)
+        break
 CONFIG = RekonoConfigLoader(CONFIG_FILE)                                        # Load configuration
 
 
@@ -445,15 +446,11 @@ USE_L10N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(REKONO_HOME, 'static')
-
-if not os.path.isdir(STATIC_ROOT):
-    os.mkdir(STATIC_ROOT)
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
