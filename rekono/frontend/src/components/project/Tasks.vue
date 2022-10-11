@@ -22,7 +22,7 @@
         </div>
       </template>
       <template #cell(date)="row">
-        {{ row.item.start !== null ? row.item.start.replace('T', ' ').substring(0, 19) : '' }}
+        {{ row.item.start !== null ? formatDate(row.item.start) : '' }}
       </template>
       <template #cell(actions)="row">
         <b-button variant="outline" @click="selectTask(row.item)" v-b-modal.cancel-task-modal v-b-tooltip.hover title="Cancel Task" v-if="auditor.includes($store.state.role) && row.item.status !== 'Cancelled' && (cancellableStatuses.includes(row.item.status) || (row.item.repeat_in && row.item.repeat_time_unit))">
@@ -45,8 +45,8 @@
 <script>
 import RekonoApi from '@/backend/RekonoApi'
 import Deletion from '@/common/Deletion'
-import TableHeader from '@/common/TableHeader'
 import Pagination from '@/common/Pagination'
+import TableHeader from '@/common/TableHeader'
 import Task from '@/modals/Task'
 import TaskRepeat from '@/modals/TaskRepeat'
 export default {
