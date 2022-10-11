@@ -1,9 +1,10 @@
 
 <script>
-import axios from 'axios'
 import RekonoAlerts from '@/backend/RekonoAlerts'
 import RekonoPagination from '@/backend/RekonoPagination'
-import { accessTokenKey, refreshTokenKey, removeTokens, processTokens } from '@/backend/tokens'
+import { accessTokenKey, processTokens, refreshTokenKey, removeTokens } from '@/backend/tokens'
+import axios from 'axios'
+import moment from 'moment'
 export default {
   name: 'rekonoApi',
   mixins: [RekonoAlerts, RekonoPagination],
@@ -252,6 +253,27 @@ export default {
     },
     validateCve (value) {
       return this.validate(value, this.cveRegex)
+    },
+    duration (start, end) {
+      var startDate = moment(start)
+      var endDate = moment(end)
+      var duration = moment.duration(endDate.diff(startDate))
+      var text = ''
+      var values = [
+        {'value': duration.days(), 'text': 'd'},
+        {'value': duration.hours(), 'text': 'h'},
+        {'value': duration.minutes(), 'text': 'm'},
+        {'value': duration.seconds(), 'text': 's'}
+      ]
+      for (var index in values) {
+        if (values[index].value > 0) {
+          text += values[index].value.toString() + ' ' + values[index].text + ' '
+        }
+      }
+      return text
+    },
+    formatDate (date) {
+      return moment(date).format('YYYY-MM-DD HH:mm')
     }
   }
 }
