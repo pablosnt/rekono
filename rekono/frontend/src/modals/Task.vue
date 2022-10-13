@@ -20,12 +20,9 @@
               </template>
             </b-form-select>
           </b-form-group>
-          <b-form-group description="Target" invalid-feedback="Target is required" v-if="!target">
-            <b-form-select v-model="targetId" :options="targets" :disabled="!selectedProject" value-field="id" text-field="target" :state="targetState">
-              <template #first>
-                <b-form-select-option :value="null" disabled>Select target</b-form-select-option>
-              </template>
-            </b-form-select>
+          <b-form-group description="Targets" invalid-feedback="Targets are required" v-if="!target">
+            <b-form-select multiple :select-size="3" v-model="targetIds" :options="targets" :disabled="!selectedProject" value-field="id" text-field="target" :state="targetState"/>
+            <b-form-checkbox switch @change="selectAllTargets" size="md">Select all</b-form-checkbox>
           </b-form-group>
           <b-form-group description="Process" v-if="!process && !tool">
             <b-form-select v-model="processId" :options="processes" @change="selectProcess" value-field="id" text-field="name" :state="processState"/>
@@ -52,7 +49,7 @@
             <b-icon icon="file-earmark-word-fill"/> Wordlists
           </template>
           <b-form-group description="Select wordlists to use">
-            <b-form-select v-model="wordlistsItems" :options="wordlists" multiple value-field="id" text-field="name"/>
+            <b-form-select v-model="wordlistsItems" :options="wordlists" multiple value-field="id" text-field="name" :select-size="10"/>
           </b-form-group>
         </b-tab>
         <b-tab title-link-class="text-secondary">
@@ -93,6 +90,7 @@
         </b-tab>
       </b-tabs>
     </b-form>
+    <b-progress v-if="processed > 0 && targetIds.length > 1" :value="processed" :max="targetIds.length" variant="success" show-value/>
   </b-modal>
 </template>
 
@@ -145,7 +143,7 @@ export default {
       selectedTool: null,
       selectedConfiguration: null,
       projectId: null,
-      targetId: null,
+      targetIds: [],
       processId: null,
       toolId: null,
       configurationId: null,
@@ -162,7 +160,8 @@ export default {
       processState: null,
       toolState: null,
       scheduledAtState: null,
-      minimumDate: new Date()
+      minimumDate: new Date(),
+      processed: 0
     }
   },
   watch: {
@@ -177,7 +176,8 @@ export default {
           this.getAllPages('/api/processes/', { order: 'name' }).then(results => this.processes = results)
         }
         if (this.target) {
-          this.targetId = this.target.id
+          this.targetIds = [this.target.id]
+          this.projectId = this.project ? this.project.id : null
         } else if (this.project) {
           this.get(`/api/projects/${this.project.id}/`).then(response => { this.selectProject(this.project.id, response.data) })
         } else {
@@ -190,7 +190,7 @@ export default {
     check () {
       const valid = this.$refs.execute_form.checkValidity()
       this.projectState = (this.projectId && this.projectId > 0)
-      this.targetState = (this.targetId && this.targetId > 0)
+      this.targetState = this.targetIds.length > 0
       if (!this.processId && !this.toolId) {
         this.processState = false
         this.toolState = false
@@ -203,7 +203,7 @@ export default {
         }
         return valid && this.scheduledAtState !== false
       }
-      return valid
+      return valid && this.projectState && this.targetState
     },
     confirm (event) {
       event.preventDefault()
@@ -213,7 +213,6 @@ export default {
     },
     create () {
       const data = {
-        target_id: this.targetId,
         intensity_rank: this.intensity,
         scheduled_at: this.scheduledAtDate && this.scheduledAtTime ? new Date(`${this.scheduledAtDate}T${this.scheduledAtTime}`).toISOString() : null,
         scheduled_in: this.scheduledIn,
@@ -231,8 +230,27 @@ export default {
       if (this.configurationId) {
         data.configuration_id = this.configurationId
       }
-      return this.post('/api/tasks/', data, this.selectedTool ? this.selectedTool.name : this.selectedProcess.name, 'Execution requested successfully')
-        .then(task => this.$router.push({ name: 'task', params: { id: task.id, task: task } }))
+      for (var index in this.targetIds) {
+        data.target_id = this.targetIds[index]
+        this.post('/api/tasks/', data, this.selectedTool ? this.selectedTool.name : this.selectedProcess.name, 'Execution requested successfully')
+          .catch(task => { return Promise.resolve(task) })
+          .then(task => {
+            this.processed += 1
+            if (this.processed === this.targetIds.length) {
+              if (this.targetIds.length === 1) {
+                this.$router.push({ name: 'task', params: { id: task.id, task: task }})
+              }
+              else if (this.$route.path === `/projects/${this.projectId}/tasks`) {
+                this.$emit('confirm', { id: this.id, success: true, reload: true })
+              }
+              else {
+                this.$router.push({ path: `/projects/${this.projectId}/tasks` })
+              }
+            }
+          })
+      }
+      return 
+        
     },
     clean () {
       this.processes = []
@@ -243,7 +261,7 @@ export default {
       this.selectedTool = null
       this.selectedConfiguration = null
       this.projectId = null
-      this.targetId = null
+      this.targetIds = []
       this.processId = null
       this.toolId = null
       this.configurationId = null
@@ -258,6 +276,7 @@ export default {
       this.projectState = null
       this.targetState = null
       this.scheduledAtState = null
+      this.processed = 0
       this.$emit('clean')
     },
     checkInputType (inputType) {
@@ -324,6 +343,14 @@ export default {
         this.selectedConfiguration = configuration
       } else {
         this.selectedConfiguration = this.selectedTool.configurations.find(c => c.id === configurationId)
+      }
+    },
+    selectAllTargets (checked) {
+      if (checked) {
+        this.targetIds = this.targets.map(target => target.id)
+      }
+      else {
+        this.targetIds = []
       }
     },
     updateWordlists () {
