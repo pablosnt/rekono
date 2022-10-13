@@ -5,7 +5,7 @@
         <b-form-tags v-model="targets" placeholder="New target" :state="targetState" separator=" ,;<>_" tag-variant="danger" remove-on-delete add-on-change/>
       </b-form-group>
     </b-form>
-    <b-progress v-if="processed > 0" :value="processed" :max="targets.length" variant="danger" show-value/>
+    <b-progress v-if="processed > 0 && targets.length > 1" :value="processed" :max="targets.length" variant="danger" show-value/>
   </b-modal>
 </template>
 
@@ -35,7 +35,6 @@ export default {
       if (this.check()) {
         for (var index in this.targets) {
           this.post('/api/targets/', { project: this.projectId, target: this.targets[index] }, this.targets[index], 'New target created successfully')
-            .then(() => { return Promise.resolve(true) })
             .catch(() => { return Promise.resolve(false) })
             .then(() => {
               this.processed += 1

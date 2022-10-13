@@ -38,7 +38,7 @@
     <deletion id="cancel-task-modal" title="Cancel Task" removeWord="cancel" @deletion="cancelTask" @clean="cleanSelection" v-if="selectedTask !== null">
       <span>selected task</span>
     </deletion>
-    <task id="task-modal" :project="project" :reload="true" :initialized="showTaskForm" @clean="cleanSelection"/>
+    <task id="task-modal" :project="project" :reload="true" :initialized="showTaskForm" @clean="cleanSelection" @confirm="confirm"/>
   </div>
 </template>
 
