@@ -19,7 +19,7 @@
     "vue": "^2.6.12",
     "vue-awesome": "^4.5.0",
     "vue-chartjs": "^3.5.1",
-    "vue-router": "^3.5.3",
+    "vue-router": "^3.6.5",
     "vuex": "^3.6.2"
   },
   "devDependencies": {
