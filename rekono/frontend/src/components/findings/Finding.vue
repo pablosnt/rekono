@@ -71,10 +71,10 @@
               <label class="text-muted">Detected by</label><span class="ml-2">{{ row.item.detected_by.name }}</span>
             </div>
             <div class="text-left">
-              <label class="text-muted">First seen</label><span class="ml-2">{{ row.item.first_seen !== null ? row.item.first_seen.replace('T', ' ').substring(0, 19) : '' }}</span>
+              <label class="text-muted">First seen</label><span class="ml-2">{{ row.item.first_seen !== null ? formatDate(row.item.first_seen) : '' }}</span>
             </div>
             <div class="text-left">
-              <label class="text-muted">Last seen</label><span class="ml-2">{{ row.item.last_seen !== null ? row.item.last_seen.replace('T', ' ').substring(0, 19) : '' }}</span>
+              <label class="text-muted">Last seen</label><span class="ml-2">{{ row.item.last_seen !== null ? formatDate(row.item.last_seen) : '' }}</span>
             </div>
           </b-col>
           <b-col cols="2" v-if="auditor.includes($store.state.role)">

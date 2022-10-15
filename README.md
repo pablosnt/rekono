@@ -31,7 +31,7 @@
 
 ## Why Rekono?
 
-Do you ever think about the steps that you follow when start a pentesting? Probably you start performing some OSINT tasks to gather public information about the target. Then, maybe you run hosts discovery and ports enumeration tools. When you know what the target exposes, you can execute more specific tools for each service, to get more information and maybe, some vulnerabilities. And finally, if you find the needed information, you will look for a public exploit to get you into the target machine. I know, I know, this is an utopic scenario, and in the most cases the vulnerabilities are found due to the pentester skills and not by scanning tools. But before using your skills, how many time do you spend trying to get as information as possible with hacking tools? Probably, too much.
+Do you ever think about the steps that you follow when you start pentesting? Probably you start performing some OSINT tasks to gather public information about the target. Then, maybe you run hosts discovery and ports enumeration tools. When you know what the target exposes, you can execute more specific tools for each service, to get more information and maybe, some vulnerabilities. And finally, if you find the needed information, you will look for a public exploit to get you into the target machine. I know, I know, this is an utopic scenario, and in the most cases the vulnerabilities are found due to the pentester skills and not by scanning tools. But before using your skills, how many time do you spend trying to get as information as possible with hacking tools? Probably, too much.
 
 Why not automate this process and focus on find vulnerabilities using your skills and the information that Rekono sends you?
 
@@ -47,7 +47,7 @@ Why not automate this process and focus on find vulnerabilities using your skill
 [![Rekono Bot]](https://user-images.githubusercontent.com/69458381/165973380-0f3308b6-f5f9-46a7-8d5b-ab89580eb840.mp4)
 
 
-### Supported tools
+## Supported tools
 
 - [theHarvester](https://github.com/laramies/theHarvester)
 - [EmailHarvester](https://github.com/maldevel/EmailHarvester)
@@ -73,6 +73,8 @@ Thanks to all the contributors of these amazing tools!
 ## Installation
 
 ### Docker
+
+> :warning: Use non-root user to clone the repository and deploy Docker environment
 
 Execute the following commands in the root directory of the project:
 
@@ -124,6 +126,16 @@ Check the installation from source in [Rekono Wiki](https://github.com/pablosnt/
 ## Configuration
 
 Check the configuration options in [Rekono Wiki](https://github.com/pablosnt/rekono/wiki/5.-Configuration)
+
+
+### Telegram Bot
+
+You can follow this steps to deploy the Telegram bot:
+
+1. Create a new bot in Telegram using this [guide](https://core.telegram.org/bots#how-do-i-create-a-bot) and the [@BotFather](https://t.me/botfather)
+2. The [@BotFather](https://t.me/botfather) will send you an authentication token
+3. Set the token value in the `RKN_TELEGRAM_TOKEN` environment variable or the `telegram.token` property in the config.yaml
+4. Deploy Rekono using the Installation guide
 
 
 ## License

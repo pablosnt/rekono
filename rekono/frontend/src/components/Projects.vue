@@ -37,25 +37,32 @@
 <script>
 import RekonoApi from '@/backend/RekonoApi'
 import Deletion from '@/common/Deletion'
-import TableHeader from '@/common/TableHeader'
 import Pagination from '@/common/Pagination'
+import TableHeader from '@/common/TableHeader'
 import Project from '@/modals/Project'
 export default {
   name: 'projectsPage',
   mixins: [RekonoApi],
-  data () {
-    this.fetchData()
-    return {
-      data: [],
-      projectsFields: [
+  computed: {
+    projectsFields () {
+      var fields = [
         { key: 'name', label: 'Project', sortable: true },
-        { key: 'defectdojo_product_id', label: 'Defect-Dojo', sortable: false },
         { key: 'tags', sortable: true },
         { key: 'targets.length', label: 'Targets', sortable: true },
         { key: 'owner.username', label: 'Owner', sortable: true },
         { key: 'members.length', label: 'Members', sortable: true },
         { key: 'actions', sortable: false }
-      ],
+      ]
+      if (this.defectDojoEnabled) {
+        fields.splice(1, 0, { key: 'defectdojo_product_id', label: 'Defect-Dojo', sortable: false })
+      }
+      return fields
+    }
+  },
+  data () {
+    this.fetchData()
+    return {
+      data: [],
       selectedProject: null,
       filters: []
     }
