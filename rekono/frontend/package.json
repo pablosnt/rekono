@@ -14,7 +14,7 @@
     "chart.js": "^2.9.4",
     "core-js": "^3.25.2",
     "jwt-decode": "^3.1.2",
-    "sass": "^1.45.0",
+    "sass": "^1.55.0",
     "v-clipboard": "^2.2.3",
     "vue": "^2.7.10",
     "vue-awesome": "^4.5.0",
