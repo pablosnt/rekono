@@ -1,10 +1,11 @@
 <template>
-  <b-modal :id="id" @hidden="clean" @ok="confirm" title="New Target" ok-title="Create Target" header-bg-variant="dark" header-text-variant="light" ok-variant="dark">
+  <b-modal :id="id" @hidden="clean" @ok="confirm" title="New Targets" ok-title="Create Targets" header-bg-variant="dark" header-text-variant="light" ok-variant="dark">
     <b-form ref="target_form">
-      <b-form-group invalid-feedback="Target is required">
-        <b-form-input type="text" v-model="target" placeholder="Target" :state="targetState" max-length="100" autofocus/>
+      <b-form-group invalid-feedback="Targets are required">
+        <b-form-tags v-model="targets" placeholder="New target" :state="targetState" separator=" ,;<>_" tag-variant="danger" remove-on-delete add-on-change/>
       </b-form-group>
     </b-form>
+    <b-progress v-if="processed > 0 && targets.length > 1" :value="processed" :max="targets.length" variant="danger" show-value/>
   </b-modal>
 </template>
 
@@ -19,28 +20,35 @@ export default {
   },
   data () {
     return {
-      target: null,
-      targetState: null
+      targets: [],
+      targetState: null,
+      processed: 0
     }
   },
   methods: {
     check () {
-      const valid = this.$refs.target_form.checkValidity()
-      this.targetState = (this.target && this.target.length > 0)
-      return valid && this.targetState
+      this.targetState = this.targets.length > 0
+      return this.targetState
     },
     confirm (event) {
       event.preventDefault()
       if (this.check()) {
-        this.post('/api/targets/', { project: this.projectId, target: this.target }, this.target, 'New target created successfully')
-          .then(() => { return Promise.resolve(true) })
-          .catch(() => { return Promise.resolve(false) })
-          .then(success => this.$emit('confirm', { id: this.id, success: success, reload: true }))
+        for (var index in this.targets) {
+          this.post('/api/targets/', { project: this.projectId, target: this.targets[index] }, this.targets[index], 'New target created successfully')
+            .catch(() => { return Promise.resolve(false) })
+            .then(() => {
+              this.processed += 1
+              if (this.processed === this.targets.length) {
+                this.$emit('confirm', { id: this.id, success: true, reload: true })
+              }
+            })
+        }
       }
     },
     clean () {
-      this.target = null
+      this.targets = []
       this.targetState = null
+      this.processed = 0
     }
   }
 }
