@@ -101,6 +101,7 @@ INSTALLED_APPS = [
     'rekono',
     'resources',
     'security',
+    'settings',
     'targets',
     'tasks',
     'telegram_bot',
@@ -169,6 +170,7 @@ else:
 AUTH_USER_MODEL = 'users.User'                                                  # User model
 
 # OTP expiration time in hours
+# TODO: Move to settins
 OTP_EXPIRATION_HOURS = int(os.getenv(RKN_OTP_EXPIRATION_HOURS, CONFIG.OTP_EXPIRATION_HOURS))
 
 # Password validation
@@ -207,6 +209,7 @@ SIMPLE_JWT = {
 }
 
 # Max allowed size in MB for upload files
+# TODO: Move to settings
 UPLOAD_FILES_MAX_MB = int(1 if TESTING else os.getenv(RKN_UPLOAD_FILES_MAX_MB, CONFIG.UPLOAD_FILES_MAX_MB))
 
 LOGGING = {                                                                     # Logging configuration
@@ -385,6 +388,7 @@ EMAIL_USE_TLS = CONFIG.EMAIL_TLS
 # Telegram                                                                     #
 ################################################################################
 
+# TODO: Move to settings
 TELEGRAM_BOT = os.getenv(RKN_TELEGRAM_BOT, CONFIG.TELEGRAM_BOT)                 # Telegram bot name
 TELEGRAM_TOKEN = os.getenv(RKN_TELEGRAM_TOKEN, CONFIG.TELEGRAM_TOKEN)           # Telegram token provided by BotFather
 
@@ -393,6 +397,7 @@ TELEGRAM_TOKEN = os.getenv(RKN_TELEGRAM_TOKEN, CONFIG.TELEGRAM_TOKEN)           
 # Defect-Dojo                                                                  #
 ################################################################################
 
+# TODO: Move to settings
 DEFECT_DOJO = {
     'URL': os.getenv(RKN_DD_URL, CONFIG.DD_URL),
     'API_KEY': os.getenv(RKN_DD_API_KEY, CONFIG.DD_API_KEY),                    # Defect-Dojo API key
