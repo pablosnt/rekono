@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.1.0] - 2022-10-14
+## [1.1.0] - 2022-10-16
 
 ### Added
 
@@ -14,6 +14,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Fixed
 
 - Show Defect-Dojo fields only when it is configured (https://github.com/pablosnt/rekono/pull/53)
+
+### Changed
+
+- Upgrade `axios` version to `0.27.2` (https://github.com/pablosnt/rekono/pull/62)
+- Upgrade `vue-router` version to `3.6.5` (https://github.com/pablosnt/rekono/pull/61)
+- Upgrade `core-js` version to `3.25.2` (https://github.com/pablosnt/rekono/pull/60)
+- Upgrade `vue` version to `2.7.10` (https://github.com/pablosnt/rekono/pull/59)
+- Upgrade `sass` version to `1.55.0` (https://github.com/pablosnt/rekono/pull/58)
 
 ### Security
 
