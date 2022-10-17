@@ -7,6 +7,7 @@ from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.mixins import (ListModelMixin, RetrieveModelMixin,
                                    UpdateModelMixin)
+from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
@@ -23,6 +24,8 @@ class SettingViewSet(GenericViewSet, ListModelMixin, RetrieveModelMixin, UpdateM
     filterset_class = SettingFilter
     search_fields = ['field']
     http_method_names = ['get', 'put']
+    # Required to remove unneeded ProjectMemberPermission
+    permission_classes = [IsAuthenticated, DjangoModelPermissions]
 
     def perform_update(self, serializer):
         serializer.save(modified_by=self.request.user)
