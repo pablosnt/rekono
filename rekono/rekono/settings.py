@@ -170,7 +170,7 @@ else:
 AUTH_USER_MODEL = 'users.User'                                                  # User model
 
 # OTP expiration time in hours
-# TODO: Move to settins
+# TODO: Set directly by default
 OTP_EXPIRATION_HOURS = int(os.getenv(RKN_OTP_EXPIRATION_HOURS, CONFIG.OTP_EXPIRATION_HOURS))
 
 # Password validation

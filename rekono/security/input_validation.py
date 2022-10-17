@@ -1,5 +1,6 @@
 import logging
 import re
+from urllib.parse import urlparse
 
 from django.forms import ValidationError
 
@@ -8,7 +9,9 @@ logger = logging.getLogger()                                                    
 NAME_REGEX = r'[\wÀ-ÿ\s\.\-\[\]()]*'                                            # Regex for names validation
 TEXT_REGEX = r'[\wÀ-ÿ\s\.:,+\-\'"?¿¡!#%$€\[\]()]*'                              # Regex for text validation
 PATH_REGEX = r'[\w\./#?&%$\\]*'                                                 # Regex for path validation
-CVE_REGEX = 'CVE-[0-9]{4}-[0-9]{1,7}'                                           # Regex for CVE validation
+CVE_REGEX = r'CVE-[0-9]{4}-[0-9]{1,7}'                                          # Regex for CVE validation
+DD_KEY_REGEX = r'[0-9a-z]{40}'                                                  # Regex for Defect-Dojo key validation
+TELEGRAM_TOKEN_REGEX = r'[0-9]{10}:[\w\-]{35}'                                  # Regex for Telegram token validation
 
 
 def validate_text_value(value: str, regex: str) -> None:
@@ -40,6 +43,19 @@ def validate_number_value(value: int, min: int, max: int) -> None:
     if value < min or value > max:
         logger.warning(f'[Security] Invalid number value {value} that is not in the range {min} - {max}')
         raise ValidationError('Number value is not in the allowed range')
+
+
+def validate_boolean_value(value: str) -> None:
+    if value.lower() not in ['true', 'false']:
+        logger.warning(f'[Security] Invalid boolean value {value}')
+        raise ValidationError('Boolean value is invalid')
+
+
+def validate_url(value: str) -> None:
+    url = urlparse(value)
+    if not url.scheme or not url.netloc:
+        logger.warning(f'[Security] Invalid URL value {value}')
+        raise ValidationError('URL value is invalid')
 
 
 def validate_name(value: str) -> None:

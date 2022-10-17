@@ -11,10 +11,14 @@ class SettingSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Setting
-        fields = ('id', 'field', 'value', 'protected')
-        read_only_fields = ('field', 'protected')
+        fields = ('id', 'field', 'value', 'private', 'modified_by')
+        read_only_fields = ('field', 'private', 'modified_by')
     
     def get_value(self, instance: Any) -> str:
-        if instance.protected and instance.value:
-            return '*' * 5
+        if instance.private and instance.value:
+            return '*' * len(instance.value)
         return instance.value
+
+    def update(self, instance, validated_data):
+        instance.validate()
+        return super().update(instance, validated_data)

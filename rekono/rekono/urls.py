@@ -30,6 +30,7 @@ urlpatterns = [
     path('api/', include('projects.urls')),
     path('api/', include('resources.urls')),
     path('api/', include('security.urls')),
+    path('api/', include('settings.urls')),
     path('api/', include('targets.urls')),
     path('api/', include('tasks.urls')),
     path('api/', include('tools.urls')),

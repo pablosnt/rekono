@@ -6,11 +6,11 @@ from settings.models import Setting
 
 class SettingFilter(rest_framework.FilterSet):
 
-    o = OrderingFilter(fields=('field', 'protected'))
+    o = OrderingFilter(fields=('field', 'private'))
 
     class Meta:
         model = Setting
         fields = {
             'field': ['exact', 'icontains'],
-            'protected': ['exact']
+            'private': ['exact']
         }
