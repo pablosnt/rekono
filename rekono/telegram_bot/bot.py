@@ -1,8 +1,10 @@
 import logging
 
+from rekono.settings import TELEGRAM_TOKEN
 from telegram.ext import (CallbackQueryHandler, CommandHandler,
                           ConversationHandler, Filters, MessageHandler,
                           Updater)
+
 from telegram_bot.commands.basic import logout, start
 from telegram_bot.commands.help import help
 from telegram_bot.commands.selection import clear, show
@@ -35,8 +37,6 @@ from telegram_bot.conversations.states import (CREATE, EXECUTE,
                                                SELECT_WORDLIST)
 from telegram_bot.messages.help import get_my_commands
 
-from rekono.settings import TELEGRAM_TOKEN
-
 logger = logging.getLogger()                                                    # Rekono logger
 
 
@@ -47,6 +47,15 @@ def initialize() -> None:
         updater.bot.set_my_commands(get_my_commands())                          # Configure bot commands
     except Exception:
         logger.error('[Telegram Bot] Error during Telegram bot initialization')
+
+
+def get_bot_name() -> str:
+    try:
+        updater = Updater(token=TELEGRAM_TOKEN)                                 # Telegram client
+        return updater.bot.username
+    except Exception:
+        logger.error('[Telegram Bot] Error during Telegram bot name request')
+        return 'RekonoBot'
 
 
 def deploy() -> None:

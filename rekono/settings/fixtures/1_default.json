@@ -14,17 +14,6 @@
         "model": "settings.Setting",
         "pk": 2,
         "fields": {
-            "field": "telegram_bot_name",
-            "value": "Rekono",
-            "private": false,
-            "last_modified": null,
-            "modified_by": null
-        }
-    },
-    {
-        "model": "settings.Setting",
-        "pk": 3,
-        "fields": {
             "field": "telegram_bot_token",
             "value": null,
             "private": true,
@@ -34,7 +23,7 @@
     },
     {
         "model": "settings.Setting",
-        "pk": 4,
+        "pk": 3,
         "fields": {
             "field": "defect_dojo_url",
             "value": null,
@@ -45,7 +34,7 @@
     },
     {
         "model": "settings.Setting",
-        "pk": 5,
+        "pk": 4,
         "fields": {
             "field": "defect_dojo_api_key",
             "value": null,
@@ -56,7 +45,7 @@
     },
     {
         "model": "settings.Setting",
-        "pk": 6,
+        "pk": 5,
         "fields": {
             "field": "defect_dojo_verify_tls",
             "value": "true",
@@ -67,7 +56,7 @@
     },
     {
         "model": "settings.Setting",
-        "pk": 7,
+        "pk": 6,
         "fields": {
             "field": "defect_dojo_tag",
             "value": "rekono",
@@ -78,7 +67,7 @@
     },
     {
         "model": "settings.Setting",
-        "pk": 8,
+        "pk": 7,
         "fields": {
             "field": "defect_dojo_product_type",
             "value": "Rekono Project",
@@ -89,7 +78,7 @@
     },
     {
         "model": "settings.Setting",
-        "pk": 9,
+        "pk": 8,
         "fields": {
             "field": "defect_dojo_test_type",
             "value": "Rekono Findings Import",
@@ -100,7 +89,7 @@
     },
     {
         "model": "settings.Setting",
-        "pk": 10,
+        "pk": 9,
         "fields": {
             "field": "defect_dojo_test",
             "value": "Rekono Test",

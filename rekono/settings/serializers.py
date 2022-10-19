@@ -20,7 +20,7 @@ class SettingValueField(serializers.Field):
             return '*' * len(instance.value)
         return instance.value
 
-    def to_internal_value(self, value: str) -> int:
+    def to_internal_value(self, value: str) -> str:
         return value
 
 
@@ -32,14 +32,12 @@ class SettingSerializer(serializers.ModelSerializer):
         model = Setting
         fields = ('id', 'field', 'value', 'private', 'last_modified')
         read_only_fields = ('field', 'private', 'last_modified')
-    
+
     def validate(self, attrs):
         validated_attrs = super().validate(attrs)
         validators = {
             'otp_expiration_hours': (int, validate_number_value, [1, 72]),
             'upload_files_max_mb': (int, validate_number_value, [100, 1000]),
-            # TODO: Check if can be obtained from API
-            'telegram_bot_name': (str, validate_name, []),
             'telegram_bot_token': (str, validate_text_value, [TELEGRAM_TOKEN_REGEX]),
             'defect_dojo_url': (str, validate_url, []),
             'defect_dojo_api_key': (str, validate_text_value, [DD_KEY_REGEX]),
