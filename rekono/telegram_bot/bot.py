@@ -1,6 +1,5 @@
 import logging
 
-from rekono.settings import TELEGRAM_TOKEN
 from telegram.ext import (CallbackQueryHandler, CommandHandler,
                           ConversationHandler, Filters, MessageHandler,
                           Updater)
@@ -36,6 +35,7 @@ from telegram_bot.conversations.states import (CREATE, EXECUTE,
                                                SELECT_TARGET_PORT, SELECT_TOOL,
                                                SELECT_WORDLIST)
 from telegram_bot.messages.help import get_my_commands
+from telegram_bot.utils import get_telegram_token
 
 logger = logging.getLogger()                                                    # Rekono logger
 
@@ -43,25 +43,16 @@ logger = logging.getLogger()                                                    
 def initialize() -> None:
     '''Initialize Telegram Bot.'''
     try:
-        updater = Updater(token=TELEGRAM_TOKEN)                                 # Telegram client
+        updater = Updater(token=get_telegram_token())                                 # Telegram client
         updater.bot.set_my_commands(get_my_commands())                          # Configure bot commands
     except Exception:
         logger.error('[Telegram Bot] Error during Telegram bot initialization')
 
 
-def get_bot_name() -> str:
-    try:
-        updater = Updater(token=TELEGRAM_TOKEN)                                 # Telegram client
-        return updater.bot.username
-    except Exception:
-        logger.error('[Telegram Bot] Error during Telegram bot name request')
-        return 'RekonoBot'
-
-
 def deploy() -> None:
     '''Start listenning for commands.'''
     try:
-        updater = Updater(token=TELEGRAM_TOKEN)                                 # Telegram client
+        updater = Updater(token=get_telegram_token())                                 # Telegram client
         updater.dispatcher.add_handler(CommandHandler('start', start))          # Start command
         updater.dispatcher.add_handler(CommandHandler('logout', logout))        # Logout command
         updater.dispatcher.add_handler(CommandHandler('help', help))            # Help command

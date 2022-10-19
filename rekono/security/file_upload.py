@@ -5,8 +5,7 @@ from typing import Any, List
 
 import magic
 from django.core.exceptions import ValidationError
-
-from rekono.settings import UPLOAD_FILES_MAX_MB
+from settings.models import Setting
 
 logger = logging.getLogger()                                                    # Rekono logger
 
@@ -22,10 +21,11 @@ def validate(in_memory_file: Any, extensions: List[str], mime_types: List[str]) 
     Raises:
         ValidationError: Raised if file size, extension or MIME type is invalid
     '''
+    max_size = Setting.objects.get(field='upload_files_max_mb')
     size = in_memory_file.size / (1024 * 1024)                                  # Get file size in MB
-    if size > UPLOAD_FILES_MAX_MB:                                              # File size greater than size limit
+    if size > int(max_size.value):                                              # File size greater than size limit
         logger.warning(f'[Security] Attempt of upload too large file with {size} MB')
-        raise ValidationError({'file': f'File size is greater than the max size allowed ({UPLOAD_FILES_MAX_MB} MB)'})
+        raise ValidationError({'file': f'File size is greater than the max size allowed ({max_size.value} MB)'})
     extension = Path(in_memory_file.name).suffix[1:].lower()                    # Get file extension
     if extension not in extensions:                                             # Invalid file extension
         logger.warning(f'[Security] Attempt of upload file with invalid {extension} extension')

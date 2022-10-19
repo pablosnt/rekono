@@ -25,14 +25,11 @@ from rekono.config import RekonoConfigLoader
 from rekono.environment import (ENV_REKONO_HOME, RKN_ALLOWED_HOSTS,
                                 RKN_CMSEEK_RESULTS, RKN_DB_HOST, RKN_DB_NAME,
                                 RKN_DB_PASSWORD, RKN_DB_PORT, RKN_DB_USER,
-                                RKN_DD_API_KEY, RKN_DD_URL, RKN_EMAIL_HOST,
-                                RKN_EMAIL_PASSWORD, RKN_EMAIL_PORT,
-                                RKN_EMAIL_USER, RKN_FRONTEND_URL,
-                                RKN_GITTOOLS_DIR, RKN_LOG4J_SCANNER_DIR,
-                                RKN_OTP_EXPIRATION_HOURS, RKN_RQ_HOST,
-                                RKN_RQ_PORT, RKN_SECRET_KEY, RKN_TELEGRAM_BOT,
-                                RKN_TELEGRAM_TOKEN, RKN_TRUSTED_PROXY,
-                                RKN_UPLOAD_FILES_MAX_MB)
+                                RKN_EMAIL_HOST, RKN_EMAIL_PASSWORD,
+                                RKN_EMAIL_PORT, RKN_EMAIL_USER,
+                                RKN_FRONTEND_URL, RKN_GITTOOLS_DIR,
+                                RKN_LOG4J_SCANNER_DIR, RKN_RQ_HOST,
+                                RKN_RQ_PORT, RKN_SECRET_KEY, RKN_TRUSTED_PROXY)
 
 ################################################################################
 # Rekono basic information                                                     #
@@ -169,9 +166,7 @@ else:
 
 AUTH_USER_MODEL = 'users.User'                                                  # User model
 
-# OTP expiration time in hours
-# TODO: Set directly by default
-OTP_EXPIRATION_HOURS = int(os.getenv(RKN_OTP_EXPIRATION_HOURS, CONFIG.OTP_EXPIRATION_HOURS))
+OTP_EXPIRATION_HOURS = 24                                                       # OTP expiration time in hours
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
@@ -207,10 +202,6 @@ SIMPLE_JWT = {
     'ALGORITHM': 'HS512',
     'SIGNING_KEY': SECRET_KEY
 }
-
-# Max allowed size in MB for upload files
-# TODO: Move to settings
-UPLOAD_FILES_MAX_MB = int(1 if TESTING else os.getenv(RKN_UPLOAD_FILES_MAX_MB, CONFIG.UPLOAD_FILES_MAX_MB))
 
 LOGGING = {                                                                     # Logging configuration
     'version': 1,
@@ -382,31 +373,6 @@ EMAIL_PORT = os.getenv(RKN_EMAIL_PORT, CONFIG.EMAIL_PORT)                       
 EMAIL_HOST_USER = os.getenv(RKN_EMAIL_USER, CONFIG.EMAIL_USER)                  # User for auth in SMTP server
 EMAIL_HOST_PASSWORD = os.getenv(RKN_EMAIL_PASSWORD, CONFIG.EMAIL_PASSWORD)      # Password for auth in SMTP server
 EMAIL_USE_TLS = CONFIG.EMAIL_TLS
-
-
-################################################################################
-# Telegram                                                                     #
-################################################################################
-
-# TODO: Move to settings
-TELEGRAM_BOT = os.getenv(RKN_TELEGRAM_BOT, CONFIG.TELEGRAM_BOT)                 # Telegram bot name
-TELEGRAM_TOKEN = os.getenv(RKN_TELEGRAM_TOKEN, CONFIG.TELEGRAM_TOKEN)           # Telegram token provided by BotFather
-
-
-################################################################################
-# Defect-Dojo                                                                  #
-################################################################################
-
-# TODO: Move to settings
-DEFECT_DOJO = {
-    'URL': os.getenv(RKN_DD_URL, CONFIG.DD_URL),
-    'API_KEY': os.getenv(RKN_DD_API_KEY, CONFIG.DD_API_KEY),                    # Defect-Dojo API key
-    'VERIFY_TLS': CONFIG.DD_VERIFY_TLS,                                         # Defect-Dojo TLS verification
-    'TAGS': CONFIG.DD_TAGS,                                                     # Tags to be included in DD entities
-    'PRODUCT_TYPE': CONFIG.DD_PRODUCT_TYPE,                                     # Product type for new DD products
-    'TEST_TYPE': CONFIG.DD_TEST_TYPE,                                           # Rekono test type name in Defect-Dojo
-    'TEST': CONFIG.DD_TEST                                                      # Rekono test name in Defect-Dojo
-}
 
 
 ################################################################################
