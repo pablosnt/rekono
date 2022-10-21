@@ -1,4 +1,3 @@
-from typing import Generic
 from urllib.request import Request
 
 from defectdojo.api import DefectDojo
@@ -10,6 +9,7 @@ from rest_framework.mixins import (ListModelMixin, RetrieveModelMixin,
 from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
+from telegram_bot.utils import get_bot_name
 
 from settings.filters import SettingFilter
 from settings.models import Setting
@@ -29,7 +29,7 @@ class SettingViewSet(GenericViewSet, ListModelMixin, RetrieveModelMixin, UpdateM
 
     def perform_update(self, serializer):
         serializer.save(modified_by=self.request.user)
-    
+
     @extend_schema(request=None, responses={200: None, 204: None})
     @action(detail=False, methods=['GET'], url_path='defectdojo', url_name='defectdojo')
     def defectdojo(self, request: Request) -> Response:
@@ -38,3 +38,9 @@ class SettingViewSet(GenericViewSet, ListModelMixin, RetrieveModelMixin, UpdateM
             return Response(status=status.HTTP_200_OK)
         else:
             return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @extend_schema(request=None, responses={200: SettingSerializer})
+    @action(detail=False, methods=['GET'], url_path='telegram', url_name='telegram')
+    def telegram(self, request: Request) -> Response:
+        setting = Setting(field='telegram_bot_name', value=get_bot_name())
+        return Response(SettingSerializer(setting).data, status=status.HTTP_200_OK)
