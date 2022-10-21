@@ -1,4 +1,3 @@
-import os
 from typing import Any, Dict, List
 
 import yaml
@@ -7,8 +6,6 @@ from security.crypto import generate_random_value
 
 class RekonoConfigLoader:
     '''Rekono config loader from configuration file.'''
-
-    frontend_env_filename = '.env'                                              # Frontend environment file
 
     def __init__(self, filepath: str) -> None:
         '''Rekono config constructor.
@@ -70,17 +67,3 @@ class RekonoConfigLoader:
                 return default                                                  # Return default value
             value = value.get(key, {})
         return value
-
-    def load_config_in_frontend(self, frontend: str, config: Dict[str, Any]) -> None:
-        '''Load configuration values in frontend .env file.
-
-        Args:
-            frontend (str): Frontend directory
-            config (Dict[str, Any]): Configuration keys and values
-        '''
-        if os.path.isdir(frontend):                                             # If frontend directory is found
-            frontend_env_filepath = os.path.join(frontend, self.frontend_env_filename)      # Path to .env file
-            with open(frontend_env_filepath, 'a') as frontend_env:              # Open .env file
-                frontend_env.truncate(0)                                        # Clear .env content
-                # Save frontend configuration
-                frontend_env.write('\n'.join([f'{key}={value}' for key, value in config.items()]))

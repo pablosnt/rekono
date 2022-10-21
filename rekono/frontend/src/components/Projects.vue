@@ -36,13 +36,14 @@
 
 <script>
 import RekonoApi from '@/backend/RekonoApi'
+import RekonoDefectDojo from '@/backend/RekonoDefectDojo'
 import Deletion from '@/common/Deletion'
 import Pagination from '@/common/Pagination'
 import TableHeader from '@/common/TableHeader'
 import Project from '@/modals/Project'
 export default {
   name: 'projectsPage',
-  mixins: [RekonoApi],
+  mixins: [RekonoApi, RekonoDefectDojo],
   computed: {
     projectsFields () {
       var fields = [

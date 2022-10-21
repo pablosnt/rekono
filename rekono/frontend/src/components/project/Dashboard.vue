@@ -42,13 +42,14 @@
 
 <script>
 import RekonoApi from '@/backend/RekonoApi'
-import Dashboard from '@/components/dashboard/Dashboard'
+import RekonoDefectDojo from '@/backend/RekonoDefectDojo'
 import Deletion from '@/common/Deletion'
-import Project from '@/modals/Project'
+import Dashboard from '@/components/dashboard/Dashboard'
 import DefectDojo from '@/modals/DefectDojo'
+import Project from '@/modals/Project'
 export default {
   name: 'projectDashboardPage',
-  mixins: [RekonoApi],
+  mixins: [RekonoApi, RekonoDefectDojo],
   props: {
     project: Object
   },

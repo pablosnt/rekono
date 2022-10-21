@@ -80,10 +80,7 @@ export default {
       nameRegex: /^[\wÀ-ÿ\s.\-[\]()]*$/,
       textRegex: /^[\wÀ-ÿ\s.:,+\-'"?¿¡!#%$€[\]()]*$/,
       pathRegex: /^[\w./#?&%]*$/,
-      cveRegex: /^CVE-[0-9]{4}-[0-9]{1,7}$/,
-      defectDojoEnabled: process.env.VUE_APP_DEFECTDOJO.toLowerCase() === 'true',
-      defectDojoUrl: process.env.VUE_APP_DEFECTDOJO_URL,
-      telegramBot: process.env.VUE_APP_TELEGRAM_BOT
+      cveRegex: /^CVE-[0-9]{4}-[0-9]{1,7}$/
     }
   },
   methods: {

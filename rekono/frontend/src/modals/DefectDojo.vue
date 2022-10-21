@@ -47,9 +47,10 @@
 
 <script>
 import RekonoApi from '@/backend/RekonoApi'
+import RekonoDefectDojo from '@/backend/RekonoDefectDojo'
 export default {
   name: 'defectDojoModal',
-  mixins: [RekonoApi],
+  mixins: [RekonoApi, RekonoDefectDojo],
   props: {
     id: String,
     project: Object,

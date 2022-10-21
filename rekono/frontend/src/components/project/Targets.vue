@@ -115,6 +115,7 @@
 
 <script>
 import RekonoApi from '@/backend/RekonoApi'
+import RekonoDefectDojo from '@/backend/RekonoDefectDojo'
 import Deletion from '@/common/Deletion'
 import Pagination from '@/common/Pagination'
 import TableHeader from '@/common/TableHeader'
@@ -126,7 +127,7 @@ import TargetVulnerability from '@/modals/TargetVulnerability'
 import Task from '@/modals/Task'
 export default {
   name: 'projectTargetsPage',
-  mixins: [RekonoApi],
+  mixins: [RekonoApi, RekonoDefectDojo],
   props: {
     project: Object
   },

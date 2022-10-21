@@ -31,7 +31,7 @@
             <h4 v-if="telegramConfigured">
               <b-badge variant="outline">
                 <b-icon variant="success" icon="patch-check-fill"/>
-                {{ telegramBot }} Bot is linked!
+                {{ telegramBot }} is linked!
               </b-badge>
             </h4>
             <b-card align="center" v-if="!telegramConfigured">
@@ -53,7 +53,7 @@
                 </div>
                 <b-collapse id="telegram-steps" class="text-left">
                   <h4>Steps</h4>
-                  <p>1. Search the <strong>{{ telegramBot }}</strong> bot in Telegram</p>
+                  <p>1. Search <strong>{{ telegramBot }}</strong> in Telegram</p>
                   <p>2. Send the <strong>/start</strong> message to the bot</p>
                   <p>3. <strong>{{ telegramBot }}</strong> will send you a temporal token</p>
                   <p>4. Copy the token in this form</p>
@@ -190,6 +190,7 @@ export default {
       showTelegramBot: false,
       showRekonoApi: false,
       isCopyHover: false,
+      telegramBot: this.getTelegramBot()
     }
   },
   components: {
@@ -212,6 +213,9 @@ export default {
       if (this.telegramConfigured) {
         this.$root.$emit('bv::disable::tooltip', 'telegram-notification')
       }
+    },
+    getTelegramBot () {
+      this.get('/api/settings/telegram/').then(response => this.telegramBot = response.data.value)
     },
     getProfile () {
       this.get('/api/profile/').then(response => { this.processData(response.data) }) 

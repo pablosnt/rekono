@@ -46,8 +46,6 @@ VERSION = '1.1.0'                                                               
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-FRONTEND_DIR = os.path.join(BASE_DIR, 'frontend')                               # Frontend directory
-
 # Rekono home directory. By default /opt/rekono
 REKONO_HOME = os.getenv(ENV_REKONO_HOME, '/opt/rekono')
 if not os.path.isdir(REKONO_HOME):                                              # Rekono home doesn't exist

@@ -46,11 +46,10 @@ services:
   initialize:
     restart: 'no'
     image: rekono-backend:latest
-    command: sh -c "python manage.py frontend && python manage.py migrate && python manage.py createsuperuser --no-input"
+    command: sh -c "python manage.py migrate && python manage.py createsuperuser --no-input"
     container_name: initialize
     volumes:
       - rekono:/rekono
-      - ./rekono/frontend/.env:/code/frontend/.env
       - ./config.yaml:/rekono/config.yaml:ro
     networks:
       - internal
@@ -238,8 +237,6 @@ services:
       start_period: 30s
     expose:
       - 3000
-    volumes:
-      - ./rekono/frontend/.env:/frontend/.env:ro
     networks:
       - internal
     depends_on:
