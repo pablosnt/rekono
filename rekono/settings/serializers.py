@@ -36,7 +36,6 @@ class SettingSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         validated_attrs = super().validate(attrs)
         validators = {
-            'otp_expiration_hours': (int, validate_number_value, [1, 72]),
             'upload_files_max_mb': (int, validate_number_value, [100, 1000]),
             'telegram_bot_token': (str, validate_text_value, [TELEGRAM_TOKEN_REGEX]),
             'defect_dojo_url': (str, validate_url, []),
