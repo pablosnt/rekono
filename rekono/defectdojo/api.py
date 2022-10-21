@@ -28,14 +28,8 @@ class DefectDojo:
 
     def __init__(self):
         '''Defect-Dojo API constructor.'''
-        self.url = Setting.objects.get(field='defect_dojo_url')                 # Defect-Dojo base URL
-        self.api_key = Setting.objects.get(field='defect_dojo_api_key')         # Defect-Dojo API key
-        self.verify_tls = Setting.objects.get(field='defect_dojo_verify_tls')   # TLS certificate verification
-        self.tag = Setting.objects.get(field='defect_dojo_tag')                 # Tags to use in Rekono items
-        self.product_type = Setting.objects.get(field='defect_dojo_product_type')   # Product type name for Rekono
-        self.test_type = Setting.objects.get(field='defect_dojo_test_type')     # Test type name for Rekono
-        self.test = Setting.objects.get(field='defect_dojo_test')               # Test name for Rekono
-        schema = urlparse(self.url.value).scheme                                      # Get API schema
+        self.setting = Setting.objects.first()
+        schema = urlparse(self.setting.defect_dojo_url).scheme                  # Get API schema
         self.http_session = requests.Session()                                  # Create HTTP session
         # Configure retry protocol to prevent unexpected errors
         retries = Retry(total=10, backoff_factor=0.1, status_forcelist=[500, 502, 503, 504, 599])
@@ -65,27 +59,27 @@ class DefectDojo:
         '''
         headers = {
             'User-Agent': 'Rekono',                                             # Rekono User-Agent
-            'Authorization': f'Token {self.api_key.value}'                      # Authentication via API key
+            'Authorization': f'Token {self.setting.defect_dojo_api_key}'        # Authentication via API key
         }
         try:
             response = self.http_session.request(                               # Defect-Dojo API request
                 method=method,
-                url=f'{self.url.value}/api/v2{endpoint}',
+                url=f'{self.setting.defect_dojo_url}/api/v2{endpoint}',
                 headers=headers,
                 params=params,
                 data=data,
                 files=files,
-                verify=self.verify_tls.value == 'true'
+                verify=self.setting.defect_dojo_verify_tls
             )
         except requests.exceptions.ConnectionError:
             response = self.http_session.request(                               # Defect-Dojo API request
                 method=method,
-                url=f'{self.url.value}/api/v2{endpoint}',
+                url=f'{self.setting.defect_dojo_url}/api/v2{endpoint}',
                 headers=headers,
                 params=params,
                 data=data,
                 files=files,
-                verify=self.verify_tls.value == 'true'
+                verify=self.setting.defect_dojo_verify_tls
             )
         logger.info(f'[Defect-Dojo] {method.upper()} /api/v2{endpoint} > HTTP {response.status_code}')
         if response.status_code == expected_status:
@@ -99,7 +93,7 @@ class DefectDojo:
         Returns:
             bool: Indicate if Defect-Dojo integration is available or not
         '''
-        if not self.url.value:
+        if not self.setting.defect_dojo_url:
             return False
         try:
             success, _ = self.request('get', '/test_types/', params={'limit': 1})
@@ -115,7 +109,7 @@ class DefectDojo:
         Returns:
             Tuple[bool, dict]: Indicates if request was successful or not (bool), and return the response body (dict)
         '''
-        return self.request('GET', '/product_types/', params={'name': self.product_type.value})
+        return self.request('GET', '/product_types/', params={'name': self.setting.defect_dojo_product_type})
 
     def create_rekono_product_type(self) -> Tuple[bool, dict]:
         '''Create new product type associated to Rekono, based on configurated name.
@@ -123,7 +117,7 @@ class DefectDojo:
         Returns:
             Tuple[bool, dict]: Indicates if request was successful or not (bool), and return the response body (dict)
         '''
-        data = {'name': self.product_type.value, 'description': self.product_type.value}
+        data = {'name': self.setting.defect_dojo_product_type, 'description': self.setting.defect_dojo_product_type}
         return self.request('POST', '/product_types/', data=data, expected_status=201)
 
     def get_product(self, id: int) -> Tuple[bool, dict]:
@@ -148,7 +142,7 @@ class DefectDojo:
             Tuple[bool, dict]: Indicates if request was successful or not (bool), and return the response body (dict)
         '''
         data = {
-            'tags': [self.tag.value],                                           # Includes the configurated tags
+            'tags': [self.setting.defect_dojo_tag],                             # Includes the configurated tags
             'name': project.name,
             'description': project.description,
             'prod_type': product_type
@@ -182,7 +176,7 @@ class DefectDojo:
         data = {
             'name': name,
             'description': description,
-            'tags': [self.tag.value],                                           # Includes the configurated tags
+            'tags': [self.setting.defect_dojo_tag],                             # Includes the configurated tags
             'product': product,
             'status': 'In Progress',
             'engagement_type': 'Interactive',                                   # The other option is 'CI/CD'
@@ -197,7 +191,7 @@ class DefectDojo:
         Returns:
             Tuple[bool, dict]: Indicates if request was successful or not (bool), and return the response body (dict)
         '''
-        return self.request('GET', '/test_types/', params={'name': self.test_type.value})
+        return self.request('GET', '/test_types/', params={'name': self.setting.defect_dojo_test_type})
 
     def create_rekono_test_type(self) -> Tuple[bool, dict]:
         '''Create new test type associated to Rekono, based on configurated name.
@@ -206,8 +200,8 @@ class DefectDojo:
             Tuple[bool, dict]: Indicates if request was successful or not (bool), and return the response body (dict)
         '''
         data = {
-            'name': self.test_type.value,
-            'tags': [self.tag.value],                                           # Includes the configurated tags
+            'name': self.setting.defect_dojo_test_type,
+            'tags': [self.setting.defect_dojo_tag],                             # Includes the configurated tags
             'dynamic_tool': True                                                # Cause most Rekono tools are dynamic
         }
         return self.request('POST', '/test_types/', data=data, expected_status=201)
@@ -225,8 +219,8 @@ class DefectDojo:
         data = {
             'engagement': engagement,
             'test_type': test_type,
-            'title': self.test.value,
-            'description': self.test.value,
+            'title': self.setting.defect_dojo_test,
+            'description': self.setting.defect_dojo_test,
             'target_start': datetime.now().strftime(DD_DATETIME_FORMAT),
             'target_end': datetime.now().strftime(DD_DATETIME_FORMAT)           # Because the test is completed
         }
@@ -278,7 +272,7 @@ class DefectDojo:
             # https://defectdojo.github.io/django-DefectDojo/integrations/parsers/
             'scan_type': execution.tool.defectdojo_scan_type,
             'engagement': engagement,
-            'tags': [self.tag.value]                                            # Includes the configurated tags
+            'tags': [self.setting.defect_dojo_tag]                                            # Includes the configurated tags
         }
         files = {
             'file': open(execution.output_file, 'r')                            # Execution output file

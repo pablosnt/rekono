@@ -1,24 +1,17 @@
+from defectdojo.api import DefectDojo
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
-from security.input_validation import (DD_KEY_REGEX, TELEGRAM_TOKEN_REGEX,
-                                       validate_boolean_value, validate_name,
-                                       validate_number_value,
-                                       validate_text_value, validate_url)
+from telegram_bot.utils import get_telegram_bot_name
 
 from settings.models import Setting
 
 
 @extend_schema_field(OpenApiTypes.STR)
-class SettingValueField(serializers.Field):
+class ProtectedValueField(serializers.Field):
 
-    def get_attribute(self, instance):
-        return instance
-
-    def to_representation(self, instance: Setting) -> str:
-        if instance.private and instance.value:
-            return '*' * len(instance.value)
-        return instance.value
+    def to_representation(self, value: str) -> str:
+        return '*' * len(value)
 
     def to_internal_value(self, value: str) -> str:
         return value
@@ -26,28 +19,22 @@ class SettingValueField(serializers.Field):
 
 class SettingSerializer(serializers.ModelSerializer):
 
-    value = SettingValueField()
+    telegram_bot_name = serializers.SerializerMethodField(method_name='get_telegram_bot_name', read_only=True)
+    telegram_bot_token = ProtectedValueField(source='telegram_bot_token')
+    defect_dojo_api_key = ProtectedValueField(source='defect_dojo_api_key')
+    defect_dojo_enabled = serializers.SerializerMethodField(method_name='is_defect_dojo_enabled', read_only=True)
 
     class Meta:
         model = Setting
-        fields = ('id', 'field', 'value', 'private', 'last_modified')
-        read_only_fields = ('field', 'private', 'last_modified')
+        fields = (
+            'id', 'upload_files_max_mb', 'telegram_bot_token', 'defect_dojo_url',
+            'defect_dojo_api_key', 'defect_dojo_verify_tls', 'defect_dojo_tag',
+            'defect_dojo_product_type', 'defect_dojo_test_type', 'defect_dojo_test'
+        )
+    
+    def is_defect_dojo_enabled(self) -> bool:
+        dd_client = DefectDojo()
+        return dd_client.is_available()
 
-    def validate(self, attrs):
-        validated_attrs = super().validate(attrs)
-        validators = {
-            'upload_files_max_mb': (int, validate_number_value, [100, 1000]),
-            'telegram_bot_token': (str, validate_text_value, [TELEGRAM_TOKEN_REGEX]),
-            'defect_dojo_url': (str, validate_url, []),
-            'defect_dojo_api_key': (str, validate_text_value, [DD_KEY_REGEX]),
-            'defect_dojo_verify_tls': (None, validate_boolean_value, []),
-            'defect_dojo_tag': (str, validate_name, []),
-            'defect_dojo_product_type': (str, validate_name, []),
-            'defect_dojo_test_type': (str, validate_name, []),
-            'defect_dojo_test': (str, validate_name, []),
-        }
-        value_type, validator, args = validators[self.instance.field]
-        value = self.value if not value_type else value_type(attrs.get('value'))
-        args.insert(0, value)
-        validator(*args)
-        return validated_attrs
+    def get_telegram_bot_name(self) -> str:
+        return get_telegram_bot_name()

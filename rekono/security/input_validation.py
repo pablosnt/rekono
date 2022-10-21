@@ -45,12 +45,6 @@ def validate_number_value(value: int, min: int, max: int) -> None:
         raise ValidationError('Number value is not in the allowed range')
 
 
-def validate_boolean_value(value: str) -> None:
-    if value.lower() not in ['true', 'false']:
-        logger.warning(f'[Security] Invalid boolean value {value}')
-        raise ValidationError('Boolean value is invalid')
-
-
 def validate_url(value: str) -> None:
     url = urlparse(value)
     if not url.scheme or not url.netloc:
@@ -106,6 +100,14 @@ def validate_cve(value: str) -> None:
     validate_text_value(value, CVE_REGEX)
 
 
+def validate_telegram_token(value: str) -> None:
+    validate_text_value(value, TELEGRAM_TOKEN_REGEX)
+
+
+def validate_defect_dojo_api_key(value: str) -> None:
+    validate_text_value(value, DD_KEY_REGEX)
+
+
 def validate_number(value: int) -> None:
     '''Validate if number is valid based on min and max values.
 
@@ -128,3 +130,7 @@ def validate_time_amount(value: int) -> None:
         ValidationError: Raised if value is lower or greater than the expected range
     '''
     validate_number_value(value, 1, 1000)
+
+
+def validate_upload_file_size(value: int) -> None:
+    validate_number_value(value, 128, 1024)

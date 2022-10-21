@@ -3,99 +3,15 @@
         "model": "settings.Setting",
         "pk": 1,
         "fields": {
-            "field": "upload_files_max_mb",
-            "value": "512",
-            "private": false,
-            "last_modified": null,
-            "modified_by": null
-        }
-    },
-    {
-        "model": "settings.Setting",
-        "pk": 2,
-        "fields": {
-            "field": "telegram_bot_token",
-            "value": null,
-            "private": true,
-            "last_modified": null,
-            "modified_by": null
-        }
-    },
-    {
-        "model": "settings.Setting",
-        "pk": 3,
-        "fields": {
-            "field": "defect_dojo_url",
-            "value": null,
-            "private": false,
-            "last_modified": null,
-            "modified_by": null
-        }
-    },
-    {
-        "model": "settings.Setting",
-        "pk": 4,
-        "fields": {
-            "field": "defect_dojo_api_key",
-            "value": null,
-            "private": true,
-            "last_modified": null,
-            "modified_by": null
-        }
-    },
-    {
-        "model": "settings.Setting",
-        "pk": 5,
-        "fields": {
-            "field": "defect_dojo_verify_tls",
-            "value": "true",
-            "private": false,
-            "last_modified": null,
-            "modified_by": null
-        }
-    },
-    {
-        "model": "settings.Setting",
-        "pk": 6,
-        "fields": {
-            "field": "defect_dojo_tag",
-            "value": "rekono",
-            "private": false,
-            "last_modified": null,
-            "modified_by": null
-        }
-    },
-    {
-        "model": "settings.Setting",
-        "pk": 7,
-        "fields": {
-            "field": "defect_dojo_product_type",
-            "value": "Rekono Project",
-            "private": false,
-            "last_modified": null,
-            "modified_by": null
-        }
-    },
-    {
-        "model": "settings.Setting",
-        "pk": 8,
-        "fields": {
-            "field": "defect_dojo_test_type",
-            "value": "Rekono Findings Import",
-            "private": false,
-            "last_modified": null,
-            "modified_by": null
-        }
-    },
-    {
-        "model": "settings.Setting",
-        "pk": 9,
-        "fields": {
-            "field": "defect_dojo_test",
-            "value": "Rekono Test",
-            "private": false,
-            "last_modified": null,
-            "modified_by": null
+            "upload_files_max_mb": 512,
+            "telegram_bot_token": null,
+            "defect_dojo_url": null,
+            "defect_dojo_api_key": null,
+            "defect_dojo_verify_tls": true,
+            "defect_dojo_tag": "rekono",
+            "defect_dojo_product_type": "Rekono Project",
+            "defect_dojo_test_type": "Rekono Findings Import",
+            "defect_dojo_test": "Rekono Test"
         }
     }
 ]

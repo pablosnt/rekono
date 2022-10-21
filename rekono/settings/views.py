@@ -1,46 +1,26 @@
+from typing import Any
 from urllib.request import Request
 
-from defectdojo.api import DefectDojo
 from drf_spectacular.utils import extend_schema
-from rest_framework import status
-from rest_framework.decorators import action
-from rest_framework.mixins import (ListModelMixin, RetrieveModelMixin,
-                                   UpdateModelMixin)
+from rest_framework.mixins import ListModelMixin, UpdateModelMixin
 from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
-from telegram_bot.utils import get_bot_name
 
-from settings.filters import SettingFilter
 from settings.models import Setting
 from settings.serializers import SettingSerializer
 
 # Create your views here.
 
 
-class SettingViewSet(GenericViewSet, ListModelMixin, RetrieveModelMixin, UpdateModelMixin):
-    queryset = Setting.objects.all().order_by('-id')
+class SettingViewSet(GenericViewSet, ListModelMixin, UpdateModelMixin):
+    queryset = Setting.objects.all()
     serializer_class = SettingSerializer
-    filterset_class = SettingFilter
-    search_fields = ['field']
     http_method_names = ['get', 'put']
     # Required to remove unneeded ProjectMemberPermission
     permission_classes = [IsAuthenticated, DjangoModelPermissions]
 
-    def perform_update(self, serializer):
-        serializer.save(modified_by=self.request.user)
-
-    @extend_schema(request=None, responses={200: None, 204: None})
-    @action(detail=False, methods=['GET'], url_path='defectdojo', url_name='defectdojo')
-    def defectdojo(self, request: Request) -> Response:
-        dd_client = DefectDojo()
-        if dd_client.is_available():
-            return Response(status=status.HTTP_200_OK)
-        else:
-            return Response(status=status.HTTP_204_NO_CONTENT)
-
     @extend_schema(request=None, responses={200: SettingSerializer})
-    @action(detail=False, methods=['GET'], url_path='telegram', url_name='telegram')
-    def telegram(self, request: Request) -> Response:
-        setting = Setting(field='telegram_bot_name', value=get_bot_name())
-        return Response(SettingSerializer(setting).data, status=status.HTTP_200_OK)
+    def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        serializer = SettingSerializer(self.queryset.first(), many=False)
+        return Response(serializer.data)

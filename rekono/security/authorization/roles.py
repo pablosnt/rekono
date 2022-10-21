@@ -35,7 +35,7 @@ ROLES = {
         'view_input',                                                           # Inputs
         'view_output',                                                          # Outputs
         'add_wordlist', 'change_wordlist', 'delete_wordlist', 'view_wordlist',  # Wordlists
-        'view_setting', 'change_setting',                                       # Settings
+        'view_setting', 'change_setting',                                       # Setting
     ],
     Role.AUDITOR: [
         'view_project',                                                         # Projects
@@ -60,7 +60,7 @@ ROLES = {
         'view_input',                                                           # Inputs
         'view_output',                                                          # Outputs
         'add_wordlist', 'change_wordlist', 'delete_wordlist', 'view_wordlist',  # Wordlists
-        'view_setting',                                                         # Settings
+        'view_setting',                                                         # Setting
     ],
     Role.READER: [
         'view_project',                                                         # Projects
@@ -77,6 +77,6 @@ ROLES = {
         'view_vulnerability',                                                   # Vulnerabilities
         'view_credential',                                                      # Credentials
         'view_exploit',                                                         # Exploits
-        'view_setting',                                                         # Settings
+        'view_setting',                                                         # Setting
     ]
 }
