@@ -8,6 +8,7 @@
                         <strong class="ml-2 mr-2">Telegram Bot</strong>
                     </template>
                     <a v-if="telegramBotName" :href="telegramBotLink" target="blank"><strong>@{{ telegramBotName }}</strong></a>
+                    <a v-if="!telegramBotName" href="https://core.telegram.org/bots#how-do-i-create-a-bot" target="blank">How can I get one token?</a>
                     <b-row class="mt-3">
                         <b-col sm="3">
                             <label>Telegram token</label>
