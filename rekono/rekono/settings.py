@@ -148,7 +148,7 @@ TESTING = 'test' in sys.argv                                                    
 SECRET_KEY = os.getenv(RKN_SECRET_KEY, CONFIG.SECRET_KEY)                       # Django secret key
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 TRUSTED_PROXY = os.getenv(RKN_TRUSTED_PROXY) == 'true'
 
@@ -203,7 +203,7 @@ SIMPLE_JWT = {
 
 LOGGING = {                                                                     # Logging configuration
     'version': 1,
-    'disable_existing_loggers': True,                                           # Disable default Django logging system
+    'disable_existing_loggers': False,                                           # Disable default Django logging system
     'formatters': {
         'rekono': {
             'format': '%(asctime)s [%(levelname)s] - %(process)d %(module)s - %(source_ip)s - %(user)s - %(message)s'

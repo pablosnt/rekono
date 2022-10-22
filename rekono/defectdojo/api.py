@@ -30,17 +30,17 @@ class DefectDojo:
         '''Defect-Dojo API constructor.'''
         self.system = None
         self.http_session = None
-    
+
     def get_system(self) -> System:
         if not self.system:
             self.system = System.objects.first()
         return self.system
-    
+
     def get_http_session(self) -> requests.Session:
         if not self.http_session:
-            schema = urlparse(self.get_setting('defect_dojo_url')).scheme       # Get API schema
+            schema = urlparse(self.get_system().defect_dojo_url).scheme         # Get API schema
             # Configure retry protocol to prevent unexpected errors
-            retries = Retry(total=10, backoff_factor=0.1, status_forcelist=[500, 502, 503, 504, 599])
+            retries = Retry(total=5, backoff_factor=0.1, status_forcelist=[500, 502, 503, 504, 599])
             self.http_session = requests.Session()
             self.http_session.mount(f'{schema}://', HTTPAdapter(max_retries=retries))
         return self.http_session
@@ -73,7 +73,7 @@ class DefectDojo:
             'Authorization': f'Token {system.defect_dojo_api_key}'              # Authentication via API key
         }
         try:
-            response = self.http_session.request(                               # Defect-Dojo API request
+            response = self.get_http_session().request(                         # Defect-Dojo API request
                 method=method,
                 url=f'{system.defect_dojo_url}/api/v2{endpoint}',
                 headers=headers,
@@ -83,7 +83,7 @@ class DefectDojo:
                 verify=system.defect_dojo_verify_tls
             )
         except requests.exceptions.ConnectionError:
-            response = self.http_session.request(                               # Defect-Dojo API request
+            response = self.get_http_session().request(                         # Defect-Dojo API request
                 method=method,
                 url=f'{system.defect_dojo_url}/api/v2{endpoint}',
                 headers=headers,
