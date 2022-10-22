@@ -53,9 +53,9 @@
                 </div>
                 <b-collapse id="telegram-steps" class="text-left">
                   <h4>Steps</h4>
-                  <p>1. Search <strong>{{ telegramBotName }}</strong> in Telegram</p>
+                  <p>1. Go to <a :href="telegramBotLink" target="blank"><strong>{{ telegramBotName }}</strong></a></p>
                   <p>2. Send the <strong>/start</strong> message to the bot</p>
-                  <p>3. <strong>{{ telegramBotName }}</strong> will send you a temporal token</p>
+                  <p>3. <a :href="telegramBotLink" target="blank"><strong>{{ telegramBotName }}</strong></a> will send you a temporal token</p>
                   <p>4. Copy the token in this form</p>
                   <p>5. Now you can use the bot and receive notifications. Send the <strong>/help</strong> message to see the usage</p>
                 </b-collapse>

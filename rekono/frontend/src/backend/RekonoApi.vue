@@ -90,6 +90,7 @@ export default {
     getSettings () {
       this.get('/api/system/1/').then(response => {
         this.telegramBotName = response.data.telegram_bot_name
+        this.telegramBotLink = this.telegramBotName ? `https://t.me/${this.telegramBotName}` : null
         this.defectDojoUrl = response.data.defect_dojo_url
         this.defectDojoEnabled = response.data.defect_dojo_enabled
       })
