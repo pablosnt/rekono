@@ -80,10 +80,21 @@ export default {
       nameRegex: /^[\wÀ-ÿ\s.\-[\]()]*$/,
       textRegex: /^[\wÀ-ÿ\s.:,+\-'"?¿¡!#%$€[\]()]*$/,
       pathRegex: /^[\w./#?&%]*$/,
-      cveRegex: /^CVE-[0-9]{4}-[0-9]{1,7}$/
+      cveRegex: /^CVE-[0-9]{4}-[0-9]{1,7}$/,
+      telegramBotName: null,
+      defectDojoUrl: null,
+      defectDojoEnabled: null
     }
   },
   methods: {
+    getSettings () {
+      this.get('/api/system/1/').then(response => {
+        console.log(response)
+        this.telegramBotName = response.data.telegram_bot_name
+        this.defectDojoUrl = response.data.defect_dojo_url
+        this.defectDojoEnabled = response.data.defect_dojo_enabled
+      })
+    },
     getOnePage (endpoint, params = null, requiredAuth = true, extraHeaders = null) {
       return this.get(endpoint, this.getPage(), this.getLimit(), params, requiredAuth, extraHeaders)
     },

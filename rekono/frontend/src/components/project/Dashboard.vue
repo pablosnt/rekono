@@ -42,18 +42,18 @@
 
 <script>
 import RekonoApi from '@/backend/RekonoApi'
-import RekonoDefectDojo from '@/backend/RekonoDefectDojo'
 import Deletion from '@/common/Deletion'
 import Dashboard from '@/components/dashboard/Dashboard'
 import DefectDojo from '@/modals/DefectDojo'
 import Project from '@/modals/Project'
 export default {
   name: 'projectDashboardPage',
-  mixins: [RekonoApi, RekonoDefectDojo],
+  mixins: [RekonoApi],
   props: {
     project: Object
   },
   data () {
+    this.getSettings()
     return {
       showEditForm: false,
       showDefectDojo: false

@@ -8,8 +8,7 @@ logger = logging.getLogger()
 
 
 def get_telegram_token() -> str:
-    telegram_token = System.objects.first().telegram_bot_token
-    return telegram_token.value
+    return System.objects.first().telegram_bot_token
 
 
 def get_telegram_bot_name() -> Optional[str]:
