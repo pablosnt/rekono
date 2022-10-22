@@ -13,7 +13,7 @@
                             <label>Telegram token</label>
                         </b-col>
                         <b-col sm="9">
-                            <b-form-input type="password" v-model="telegramBotToken" placeholder="Telegram token" @change="telegramBotTokenChanged = true"/>
+                            <b-form-input type="password" v-model="telegramBotToken" placeholder="Telegram token" @change="telegramBotTokenChanged = true" :state="telegramBotTokenState"/>
                         </b-col>
                     </b-row>
                 </b-card>
@@ -28,7 +28,7 @@
                             <label>URL</label>
                         </b-col>
                         <b-col sm="7">
-                            <b-form-input type="text" v-model="defectDojoUrl" placeholder="Defect-Dojo URL"/>
+                            <b-form-input type="text" v-model="defectDojoUrl" placeholder="Defect-Dojo URL" :state="defectDojoUrlState"/>
                         </b-col>
                         <b-col sm="3">
                             <b-icon icon="check-circle-fill" variant="success" v-if="defectDojoEnabled"/>
@@ -40,7 +40,7 @@
                             <label>API key</label>
                         </b-col>
                         <b-col sm="7">
-                            <b-form-input type="password" v-model="defectDojoApiKey" placeholder="Defect-Dojo API key"  @change="telegramBotTokenChanged = true"/>
+                            <b-form-input type="password" v-model="defectDojoApiKey" placeholder="Defect-Dojo API key"  @change="telegramBotTokenChanged = true" :state="defectDojoApiKeyState"/>
                         </b-col>
                         <b-col sm="3">
                             <b-form-checkbox v-model="defectDojoVerifyTls">TLS verification</b-form-checkbox>
@@ -54,7 +54,7 @@
                                     <label>Tag</label>
                                 </b-col>
                                 <b-col sm="8">
-                                    <b-form-input type="text" v-model="defectDojoTag" placeholder="Defect-Dojo tag"/>
+                                    <b-form-input type="text" v-model="defectDojoTag" placeholder="Defect-Dojo tag" :state="defectDojoTagState"/>
                                 </b-col>
                             </b-row>
                             <b-row>
@@ -62,7 +62,7 @@
                                     <label>Test type</label>
                                 </b-col>
                                 <b-col sm="8">
-                                    <b-form-input type="text" v-model="defectDojoTestType" placeholder="Defect-Dojo test type"/>
+                                    <b-form-input type="text" v-model="defectDojoTestType" placeholder="Defect-Dojo test type" :state="defectDojoTestTypeState"/>
                                 </b-col>
                             </b-row>
                         </b-col>
@@ -72,7 +72,7 @@
                                     <label>Product type</label>
                                 </b-col>
                                 <b-col sm="8">
-                                    <b-form-input type="text" v-model="defectDojoProductType" placeholder="Defect-Dojo product type"/>
+                                    <b-form-input type="text" v-model="defectDojoProductType" placeholder="Defect-Dojo product type" :state="defectDojoProductTypeState"/>
                                 </b-col>
                             </b-row>
                             <b-row>
@@ -80,7 +80,7 @@
                                     <label>Test</label>
                                 </b-col>
                                 <b-col sm="8">
-                                    <b-form-input type="text" v-model="defectDojoTest" placeholder="Defect-Dojo test"/>
+                                    <b-form-input type="text" v-model="defectDojoTest" placeholder="Defect-Dojo test" :state="defectDojoTestState"/>
                                 </b-col>
                             </b-row>
                         </b-col>
@@ -98,7 +98,7 @@
                         </b-col>
                         <b-col sm="9">
                             <b-input-group :prepend="uploadFilesMaxMb">
-                                <b-form-input v-model="uploadFilesMaxMb" type="range" min="128" max="1024"/>
+                                <b-form-input v-model="uploadFilesMaxMb" type="range" min="128" max="1024" :state="uploadFilesMaxMbState"/>
                             </b-input-group>
                         </b-col>
                     </b-row>
@@ -123,18 +123,26 @@ export default {
     this.getSettings()
     return {
         uploadFilesMaxMb: null,
+        uploadFilesMaxMbState: null,
         telegramBotName: null,
         telegramBotToken: null,
         telegramBotTokenChanged: false,
+        telegramBotTokenState: null,
         telegramBotLink: null,
         defectDojoUrl: null,
+        defectDojoUrlState: null,
         defectDojoApiKey: null,
         defectDojoApiKeyChanged: false,
+        defectDojoApiKeyState: null,
         defectDojoVerifyTls: null,
         defectDojoTag: null,
+        defectDojoTagState: null,
         defectDojoProductType: null,
+        defectDojoProductTypeState: null,
         defectDojoTestType: null,
+        defectDojoTestTypeState: null,
         defectDojoTest: null,
+        defectDojoTestState: null,
         defectDojoEnabled: null,
     }
   },
@@ -157,7 +165,35 @@ export default {
         this.get('/api/system/1/').then(response => this.processResponse(response))
     },
     checkSettings () {
-        return true
+        this.defectDojoUrlState = null
+        this.defectDojoTagState = null
+        this.defectDojoProductTypeState = null
+        this.defectDojoTestTypeState = null
+        this.defectDojoTestState = null
+        this.telegramBotTokenState = null
+        this.defectDojoApiKeyState = null
+        if (this.defectDojoUrl && !this.validateUrl(this.defectDojoUrl)) {
+            this.defectDojoUrlState = false
+        }
+        if (!this.validateName(this.defectDojoTag)) {
+            this.defectDojoTagState = false
+        }
+        if (!this.validateName(this.defectDojoProductType)) {
+            this.defectDojoProductTypeState = false
+        }
+        if (!this.validateName(this.defectDojoTestType)) {
+            this.defectDojoTestTypeState = false
+        }
+        if (!this.validateName(this.defectDojoTest)) {
+            this.defectDojoTestState = false
+        }
+        if (this.telegramBotTokenChanged && !this.validateTelegramToken(this.telegramBotToken)) {
+            this.telegramBotTokenState = false
+        }
+        if (this.defectDojoApiKeyChanged && !this.validateDefectDojoKey(this.defectDojoApiKey)) {
+            this.defectDojoApiKeyState = false
+        }
+        return (this.defectDojoUrlState != false && this.defectDojoTagState != false && this.defectDojoProductTypeState != false && this.defectDojoTestTypeState != false && this.defectDojoTestState != false && this.telegramBotTokenState != false && this.defectDojoApiKeyState != false)
     },
     handleSettings (event) {
         event.preventDefault()

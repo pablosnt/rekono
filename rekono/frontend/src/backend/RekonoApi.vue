@@ -81,6 +81,8 @@ export default {
       textRegex: /^[\wÀ-ÿ\s.:,+\-'"?¿¡!#%$€[\]()]*$/,
       pathRegex: /^[\w./#?&%]*$/,
       cveRegex: /^CVE-[0-9]{4}-[0-9]{1,7}$/,
+      defectDojoKeyRegex: /^[0-9a-z]{40}$/,
+      telegramTokenRegex: /^[0-9]{10}:[\w\-]{35}$/,
       telegramBotName: null,
       defectDojoUrl: null,
       defectDojoEnabled: null
@@ -261,6 +263,20 @@ export default {
     },
     validateCve (value) {
       return this.validate(value, this.cveRegex)
+    },
+    validateDefectDojoKey (value) {
+      return this.validate(value, this.defectDojoKeyRegex)
+    },
+    validateTelegramToken (value) {
+      return this.validate(value, this.telegramTokenRegex)
+    },
+    validateUrl (value) {
+      try {
+        new URL(value);
+        return true
+      } catch (e) {
+        return false;
+      }
     },
     duration (start, end) {
       var startDate = moment(start)
