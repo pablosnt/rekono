@@ -1,13 +1,13 @@
 <template>
     <b-form ref="settings_form" @submit="handleSettings">
-        <b-row class="mr-4 ml-4 mb-5 mt-4" align-h="between">
+        <b-row class="mr-4 ml-4 mb-4 mt-4" align-h="between">
             <b-col md="8" offset-md="2">
                 <b-card>
                     <template #header>
                         <v-icon fill="dodgerblue" name="brands/telegram"/>
                         <strong class="ml-2 mr-2">Telegram Bot</strong>
                     </template>
-                    <b-form-input type="password" v-model="settings[2]" placeholder="Telegram token"/>
+                    <b-form-input type="password" v-model="telegramBotToken" placeholder="Telegram token" @change="telegramBotTokenChanged = true"/>
                 </b-card>
                 <br/>
                 <b-card>
@@ -15,13 +15,13 @@
                         <b-img src="/static/defect-dojo-favicon.ico" width="20" height="20"/>
                         <strong class="ml-2 mr-2">Defect-Dojo</strong>
                     </template>
-                    <b-form-input type="text" v-model="settings[3]" placeholder="Defect-Dojo URL"/>
-                    <b-form-input type="password" v-model="settings[4]" placeholder="Defect-Dojo API key"/>
-                    <b-form-checkbox v-model="settings[5]">Defect-Dojo TLS verification</b-form-checkbox>
-                    <b-form-input type="text" v-model="settings[6]" placeholder="Defect-Dojo tag"/>
-                    <b-form-input type="text" v-model="settings[7]" placeholder="Defect-Dojo product type"/>
-                    <b-form-input type="text" v-model="settings[8]" placeholder="Defect-Dojo test type"/>
-                    <b-form-input type="text" v-model="settings[9]" placeholder="Defect-Dojo test"/>
+                    <b-form-input type="text" v-model="defectDojoUrl" placeholder="Defect-Dojo URL"/>
+                    <b-form-input type="password" v-model="defectDojoApiKey" placeholder="Defect-Dojo API key"  @change="telegramBotTokenChanged = true"/>
+                    <b-form-checkbox v-model="defectDojoVerifyTls">Defect-Dojo TLS verification</b-form-checkbox>
+                    <b-form-input type="text" v-model="defectDojoTag" placeholder="Defect-Dojo tag"/>
+                    <b-form-input type="text" v-model="defectDojoProductType" placeholder="Defect-Dojo product type"/>
+                    <b-form-input type="text" v-model="defectDojoTestType" placeholder="Defect-Dojo test type"/>
+                    <b-form-input type="text" v-model="defectDojoTest" placeholder="Defect-Dojo test"/>
                 </b-card>
                 <br/>
                 <b-card>
@@ -29,13 +29,13 @@
                         <b-icon icon="shield-lock-fill" variant="danger"/>
                         <strong class="ml-2 mr-2">Security</strong>
                     </template>
-                    <b-input-group :prepend="settings[1]">
-                        <b-form-input v-model="settings[1]" type="range" min="100" max="1000"/>
+                    <b-input-group :prepend="uploadFilesMaxMb">
+                        <b-form-input v-model="uploadFilesMaxMb" type="range" min="128" max="1024"/>
                     </b-input-group>
                 </b-card>
             </b-col>
         </b-row>
-        <b-row class="mt-3" align-h="center">
+        <b-row class="mb-3" align-h="center">
             <b-button type="submit" variant="dark" size="lg">Save</b-button>
         </b-row>
     </b-form>
@@ -49,35 +49,62 @@ export default {
   data () {
     this.getSettings()
     return {
-        changes: [],
-        settings: {
-            1: null,
-            2: null,
-            3: null,
-            4: null,
-            5: null,
-            6: null,
-            7: null,
-            8: null,
-            9: null
-        }
+        uploadFilesMaxMb: null,
+        telegramBotName: null,
+        telegramBotToken: null,
+        telegramBotTokenChanged: false,
+        defectDojoUrl: null,
+        defectDojoApiKey: null,
+        defectDojoApiKeyChanged: false,
+        defectDojoVerifyTls: null,
+        defectDojoTag: null,
+        defectDojoProductType: null,
+        defectDojoTestType: null,
+        defectDojoTest: null,
+        defectDojoEnabled: null,
     }
   },
   methods: {
+    processResponse (response) {
+        this.uploadFilesMaxMb = response.data.upload_files_max_mb
+        this.telegramBotName = response.data.telegram_bot_name
+        this.telegramBotToken = response.data.telegram_bot_token
+        this.defectDojoUrl = response.data.defect_dojo_url
+        this.defectDojoApiKey = response.data.defect_dojo_api_key
+        this.defectDojoVerifyTls = response.data.defect_dojo_verify_tls
+        this.defectDojoTag = response.data.defect_dojo_tag
+        this.defectDojoProductType = response.data.defect_dojo_product_type
+        this.defectDojoTestType = response.data.defect_dojo_test_type
+        this.defectDojoTest = response.data.defect_dojo_test
+        this.defectDojoEnabled = response.data.defect_dojo_enabled
+    },
     getSettings () {
-        this.getAllPages('/api/settings/')
-            .then(results => {
-                console.log(results)
-                for (var index in results) {
-                    this.settings[results[index].id] = results[index].value
-                }
-            })
+        this.get('/api/system/1/').then(response => this.processResponse(response))
     },
-    handleSettings () {
-        console.log(this.settings)
+    checkSettings () {
+        return true
     },
-    settingsChanged (id) {
-        this.changes.push(id)
+    handleSettings (event) {
+        event.preventDefault()
+        if (this.checkSettings()) {
+            var data = {
+                upload_files_max_mb: this.uploadFilesMaxMb,
+                defect_dojo_url: this.defectDojoUrl,
+                defect_dojo_verify_tls: this.defectDojoVerifyTls,
+                defect_dojo_tag: this.defectDojoTag,
+                defect_dojo_product_type: this.defectDojoProductType,
+                defect_dojo_test_type: this.defectDojoTestType,
+                defect_dojo_test: this.defectDojoTest
+            }
+            if (this.telegramBotTokenChanged) {
+                data.telegram_bot_token = this.telegramBotToken
+            }
+            if (this.defectDojoApiKeyChanged) {
+                data.defect_dojo_api_key = this.defectDojoApiKey
+            }
+            this.put('/api/system/1/', data, 'Settings', 'Settings updated successfully')
+                .then(response => this.processResponse(response))
+        }
     }
   }
 }

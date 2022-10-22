@@ -89,7 +89,6 @@ export default {
   methods: {
     getSettings () {
       this.get('/api/system/1/').then(response => {
-        console.log(response)
         this.telegramBotName = response.data.telegram_bot_name
         this.defectDojoUrl = response.data.defect_dojo_url
         this.defectDojoEnabled = response.data.defect_dojo_enabled
