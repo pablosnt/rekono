@@ -82,7 +82,7 @@ export default {
       pathRegex: /^[\w./#?&%]*$/,
       cveRegex: /^CVE-[0-9]{4}-[0-9]{1,7}$/,
       defectDojoKeyRegex: /^[0-9a-z]{40}$/,
-      telegramTokenRegex: /^[0-9]{10}:[\w\-]{35}$/,
+      telegramTokenRegex: /^[0-9]{10}:[\w-]{35}$/,
       telegramBotName: null,
       defectDojoUrl: null,
       defectDojoEnabled: null
