@@ -226,7 +226,7 @@ services:
       dockerfile: docker/rekono/Dockerfile
       target: frontend
     image: rekono-frontend:latest
-    command: sh -c "npm run build && serve -s dist"
+    command: sh -c "npx browserslist@latest --update-db && npm run build && serve -s dist"
     hostname: frontend
     container_name: frontend
     healthcheck:
