@@ -96,7 +96,7 @@ INSTALLED_APPS = [
     'rekono',
     'resources',
     'security',
-    'settings',
+    'system',
     'targets',
     'tasks',
     'telegram_bot',

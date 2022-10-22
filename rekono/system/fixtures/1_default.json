@@ -1,6 +1,6 @@
 [
     {
-        "model": "settings.Setting",
+        "model": "system.System",
         "pk": 1,
         "fields": {
             "upload_files_max_mb": 512,

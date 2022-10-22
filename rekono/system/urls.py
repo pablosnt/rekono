@@ -1,10 +1,10 @@
 from rest_framework.routers import SimpleRouter
 
-from settings.views import SettingViewSet
+from system.views import SystemViewSet
 
 # Register your views here.
 
 router = SimpleRouter()
-router.register('settings', SettingViewSet)
+router.register('system', SystemViewSet)
 
 urlpatterns = router.urls

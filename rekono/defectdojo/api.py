@@ -7,7 +7,7 @@ import requests
 from findings.enums import Severity
 from projects.models import Project
 from requests.adapters import HTTPAdapter, Retry
-from settings.models import Setting
+from system.models import System
 
 from defectdojo.constants import DD_DATE_FORMAT, DD_DATETIME_FORMAT
 
@@ -28,12 +28,22 @@ class DefectDojo:
 
     def __init__(self):
         '''Defect-Dojo API constructor.'''
-        self.setting = Setting.objects.first()
-        schema = urlparse(self.setting.defect_dojo_url).scheme                  # Get API schema
-        self.http_session = requests.Session()                                  # Create HTTP session
-        # Configure retry protocol to prevent unexpected errors
-        retries = Retry(total=10, backoff_factor=0.1, status_forcelist=[500, 502, 503, 504, 599])
-        self.http_session.mount(f'{schema}://', HTTPAdapter(max_retries=retries))
+        self.system = None
+        self.http_session = None
+    
+    def get_system(self) -> System:
+        if not self.system:
+            self.system = System.objects.first()
+        return self.system
+    
+    def get_http_session(self) -> requests.Session:
+        if not self.http_session:
+            schema = urlparse(self.get_setting('defect_dojo_url')).scheme       # Get API schema
+            # Configure retry protocol to prevent unexpected errors
+            retries = Retry(total=10, backoff_factor=0.1, status_forcelist=[500, 502, 503, 504, 599])
+            self.http_session = requests.Session()
+            self.http_session.mount(f'{schema}://', HTTPAdapter(max_retries=retries))
+        return self.http_session
 
     def request(
         self,
@@ -57,29 +67,30 @@ class DefectDojo:
         Returns:
             Tuple[bool, dict]: Indicates if request was successful or not (bool), and return the response body (dict)
         '''
+        system = self.get_system()
         headers = {
             'User-Agent': 'Rekono',                                             # Rekono User-Agent
-            'Authorization': f'Token {self.setting.defect_dojo_api_key}'        # Authentication via API key
+            'Authorization': f'Token {system.defect_dojo_api_key}'              # Authentication via API key
         }
         try:
             response = self.http_session.request(                               # Defect-Dojo API request
                 method=method,
-                url=f'{self.setting.defect_dojo_url}/api/v2{endpoint}',
+                url=f'{system.defect_dojo_url}/api/v2{endpoint}',
                 headers=headers,
                 params=params,
                 data=data,
                 files=files,
-                verify=self.setting.defect_dojo_verify_tls
+                verify=system.defect_dojo_verify_tls
             )
         except requests.exceptions.ConnectionError:
             response = self.http_session.request(                               # Defect-Dojo API request
                 method=method,
-                url=f'{self.setting.defect_dojo_url}/api/v2{endpoint}',
+                url=f'{system.defect_dojo_url}/api/v2{endpoint}',
                 headers=headers,
                 params=params,
                 data=data,
                 files=files,
-                verify=self.setting.defect_dojo_verify_tls
+                verify=system.defect_dojo_verify_tls
             )
         logger.info(f'[Defect-Dojo] {method.upper()} /api/v2{endpoint} > HTTP {response.status_code}')
         if response.status_code == expected_status:
@@ -93,7 +104,7 @@ class DefectDojo:
         Returns:
             bool: Indicate if Defect-Dojo integration is available or not
         '''
-        if not self.setting.defect_dojo_url:
+        if not self.get_system().defect_dojo_url:
             return False
         try:
             success, _ = self.request('get', '/test_types/', params={'limit': 1})
@@ -109,7 +120,7 @@ class DefectDojo:
         Returns:
             Tuple[bool, dict]: Indicates if request was successful or not (bool), and return the response body (dict)
         '''
-        return self.request('GET', '/product_types/', params={'name': self.setting.defect_dojo_product_type})
+        return self.request('GET', '/product_types/', params={'name': self.get_system().defect_dojo_product_type})
 
     def create_rekono_product_type(self) -> Tuple[bool, dict]:
         '''Create new product type associated to Rekono, based on configurated name.
@@ -117,7 +128,8 @@ class DefectDojo:
         Returns:
             Tuple[bool, dict]: Indicates if request was successful or not (bool), and return the response body (dict)
         '''
-        data = {'name': self.setting.defect_dojo_product_type, 'description': self.setting.defect_dojo_product_type}
+        system = self.get_system()
+        data = {'name': system.defect_dojo_product_type, 'description': system.defect_dojo_product_type}
         return self.request('POST', '/product_types/', data=data, expected_status=201)
 
     def get_product(self, id: int) -> Tuple[bool, dict]:
@@ -142,7 +154,7 @@ class DefectDojo:
             Tuple[bool, dict]: Indicates if request was successful or not (bool), and return the response body (dict)
         '''
         data = {
-            'tags': [self.setting.defect_dojo_tag],                             # Includes the configurated tags
+            'tags': [self.get_system().defect_dojo_tag],                        # Includes the configurated tags
             'name': project.name,
             'description': project.description,
             'prod_type': product_type
@@ -176,7 +188,7 @@ class DefectDojo:
         data = {
             'name': name,
             'description': description,
-            'tags': [self.setting.defect_dojo_tag],                             # Includes the configurated tags
+            'tags': [self.get_system().defect_dojo_tag],                        # Includes the configurated tags
             'product': product,
             'status': 'In Progress',
             'engagement_type': 'Interactive',                                   # The other option is 'CI/CD'
@@ -191,7 +203,7 @@ class DefectDojo:
         Returns:
             Tuple[bool, dict]: Indicates if request was successful or not (bool), and return the response body (dict)
         '''
-        return self.request('GET', '/test_types/', params={'name': self.setting.defect_dojo_test_type})
+        return self.request('GET', '/test_types/', params={'name': self.get_system().defect_dojo_test_type})
 
     def create_rekono_test_type(self) -> Tuple[bool, dict]:
         '''Create new test type associated to Rekono, based on configurated name.
@@ -199,9 +211,10 @@ class DefectDojo:
         Returns:
             Tuple[bool, dict]: Indicates if request was successful or not (bool), and return the response body (dict)
         '''
+        system = self.get_system()
         data = {
-            'name': self.setting.defect_dojo_test_type,
-            'tags': [self.setting.defect_dojo_tag],                             # Includes the configurated tags
+            'name': system.defect_dojo_test_type,
+            'tags': [system.defect_dojo_tag],                             # Includes the configurated tags
             'dynamic_tool': True                                                # Cause most Rekono tools are dynamic
         }
         return self.request('POST', '/test_types/', data=data, expected_status=201)
@@ -216,11 +229,12 @@ class DefectDojo:
         Returns:
             Tuple[bool, dict]: Indicates if request was successful or not (bool), and return the response body (dict)
         '''
+        system = self.get_system()
         data = {
             'engagement': engagement,
             'test_type': test_type,
-            'title': self.setting.defect_dojo_test,
-            'description': self.setting.defect_dojo_test,
+            'title': system.defect_dojo_test,
+            'description': system.defect_dojo_test,
             'target_start': datetime.now().strftime(DD_DATETIME_FORMAT),
             'target_end': datetime.now().strftime(DD_DATETIME_FORMAT)           # Because the test is completed
         }
@@ -272,7 +286,7 @@ class DefectDojo:
             # https://defectdojo.github.io/django-DefectDojo/integrations/parsers/
             'scan_type': execution.tool.defectdojo_scan_type,
             'engagement': engagement,
-            'tags': [self.setting.defect_dojo_tag]                                            # Includes the configurated tags
+            'tags': [self.get_system().defect_dojo_tag]                         # Includes the configurated tags
         }
         files = {
             'file': open(execution.output_file, 'r')                            # Execution output file

@@ -1,13 +1,13 @@
 import logging
 
-from settings.models import Setting
+from system.models import System
 from telegram.ext import Updater
 
 logger = logging.getLogger()
 
 
 def get_telegram_token() -> str:
-    telegram_token = Setting.objects.first().telegram_bot_token
+    telegram_token = System.objects.first().telegram_bot_token
     return telegram_token.value
 
 

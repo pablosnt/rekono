@@ -1,7 +1,7 @@
 from django.contrib import admin
 
-from settings.models import Setting
+from system.models import System
 
 # Register your models here.
 
-admin.site.register(Setting)
+admin.site.register(System)

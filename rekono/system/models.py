@@ -5,7 +5,7 @@ from security.input_validation import (validate_defect_dojo_api_key,
 
 # Create your models here.
 
-class Setting(models.Model):
+class System(models.Model):
     upload_files_max_mb = models.IntegerField(default=512, validators=[validate_upload_file_size])
     telegram_bot_token = models.TextField(blank=True, null=True, validators=[validate_telegram_token])
     defect_dojo_url = models.TextField(blank=True, null=True, validators=[validate_url])
@@ -22,4 +22,4 @@ class Setting(models.Model):
         Returns:
             str: String value that identifies this instance
         '''
-        return 'Setting'
+        return 'System'

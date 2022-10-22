@@ -8,8 +8,8 @@ from django.core.management.commands import loaddata
 from django.db.models.signals import post_migrate
 
 
-class SettingConfig(AppConfig):
-    name = 'settings'
+class SystemConfig(AppConfig):
+    name = 'system'
 
     def ready(self) -> None:
         '''Run code as soon as the registry is fully populated.'''
