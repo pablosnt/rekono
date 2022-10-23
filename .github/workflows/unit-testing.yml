@@ -46,9 +46,6 @@ jobs:
 
       - name: Run unit tests
         working-directory: rekono
-        env:
-          # Prevent errors testing Defect-Dojo integration
-          RKN_DD_URL: http://127.0.0.1:8080
         run: coverage run manage.py test
       
       - name: Check coverage

@@ -14,6 +14,7 @@ from projects.models import Project
 from resources.enums import WordlistType
 from resources.models import Wordlist
 from rq import SimpleWorker
+from system.models import System
 from targets.enums import TargetType
 from targets.models import (Target, TargetEndpoint, TargetPort,
                             TargetTechnology, TargetVulnerability)
@@ -84,6 +85,9 @@ class BaseToolTest(TestCase):
         self.tool_class = get_tool_class_by_name(self.nmap.name)                # Related tool class
         # Related tool object
         self.tool_instance: BaseTool = self.tool_class(self.new_execution, self.intensity, self.arguments)
+        system = System.objects.first()
+        system.defect_dojo_url = 'http://127.0.0.1:8080'                        # Testing URL due to coverage reasons
+        system.save(update_fields=['defect_dojo_url'])
 
     def create_wordlists(self) -> Wordlist:
         '''Create wordlist data for testing.

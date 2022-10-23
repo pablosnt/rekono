@@ -11,8 +11,10 @@ from findings.enums import OSType, PortStatus, Protocol
 from findings.models import Host, Path, Port
 from processes.models import Process, Step
 from projects.models import Project
+from rekono.settings import RQ_QUEUES
 from rest_framework.test import APIClient
 from rq import SimpleWorker
+from system.models import System
 from targets.models import (Target, TargetEndpoint, TargetPort,
                             TargetTechnology, TargetVulnerability)
 from tasks.enums import Status
@@ -20,8 +22,6 @@ from tasks.models import Task
 from tools.enums import IntensityRank
 from tools.models import Configuration, Tool
 from users.models import User
-
-from rekono.settings import RQ_QUEUES
 
 
 class RekonoTestCase(TestCase):
@@ -52,6 +52,9 @@ class RekonoTestCase(TestCase):
         self.models: Dict[Any, str] = {}                                        # Models to test __str__ method
         # Indicate if environment has been initialized
         self.initialized = False
+        system = System.objects.first()
+        system.defect_dojo_url = 'http://127.0.0.1:8080'                        # Testing URL due to coverage reasons
+        system.save(update_fields=['defect_dojo_url'])
 
     def initialize_environment(self) -> None:
         '''Initialize environment for testing.'''

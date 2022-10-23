@@ -9,8 +9,10 @@ from system.serializers import SystemSerializer
 
 
 class SystemViewSet(GenericViewSet, RetrieveModelMixin, UpdateModelMixin):
+    '''System ViewSet that includes: retrieve and update features.'''
+
     queryset = System.objects.all()
     serializer_class = SystemSerializer
-    http_method_names = ['get', 'put']
+    http_method_names = ['get', 'put']                                          # Required to remove PATCH method
     # Required to remove unneeded ProjectMemberPermission
     permission_classes = [IsAuthenticated, DjangoModelPermissions]

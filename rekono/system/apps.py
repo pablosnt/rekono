@@ -9,6 +9,8 @@ from django.db.models.signals import post_migrate
 
 
 class SystemConfig(AppConfig):
+    '''System Django application.'''
+
     name = 'system'
 
     def ready(self) -> None:

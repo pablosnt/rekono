@@ -32,11 +32,21 @@ class DefectDojo:
         self.http_session = None
 
     def get_system(self) -> System:
+        '''Get system settings instance.
+
+        Returns:
+            System: System settings
+        '''
         if not self.system:
             self.system = System.objects.first()
         return self.system
 
     def get_http_session(self) -> requests.Session:
+        '''Get HTTP session configured to retry requests after unexpected errors.
+
+        Returns:
+            requests.Session: HTTP session properly configured
+        '''
         if not self.http_session:
             schema = urlparse(self.get_system().defect_dojo_url).scheme         # Get API schema
             # Configure retry protocol to prevent unexpected errors
@@ -154,7 +164,7 @@ class DefectDojo:
             Tuple[bool, dict]: Indicates if request was successful or not (bool), and return the response body (dict)
         '''
         data = {
-            'tags': [self.get_system().defect_dojo_tag],                        # Includes the configurated tags
+            'tags': [self.get_system().defect_dojo_tag],                        # Includes the configurated tag
             'name': project.name,
             'description': project.description,
             'prod_type': product_type
@@ -188,7 +198,7 @@ class DefectDojo:
         data = {
             'name': name,
             'description': description,
-            'tags': [self.get_system().defect_dojo_tag],                        # Includes the configurated tags
+            'tags': [self.get_system().defect_dojo_tag],                        # Includes the configurated tag
             'product': product,
             'status': 'In Progress',
             'engagement_type': 'Interactive',                                   # The other option is 'CI/CD'
@@ -214,7 +224,7 @@ class DefectDojo:
         system = self.get_system()
         data = {
             'name': system.defect_dojo_test_type,
-            'tags': [system.defect_dojo_tag],                             # Includes the configurated tags
+            'tags': [system.defect_dojo_tag],                                   # Includes the configurated tag
             'dynamic_tool': True                                                # Cause most Rekono tools are dynamic
         }
         return self.request('POST', '/test_types/', data=data, expected_status=201)
@@ -286,7 +296,7 @@ class DefectDojo:
             # https://defectdojo.github.io/django-DefectDojo/integrations/parsers/
             'scan_type': execution.tool.defectdojo_scan_type,
             'engagement': engagement,
-            'tags': [self.get_system().defect_dojo_tag]                         # Includes the configurated tags
+            'tags': [self.get_system().defect_dojo_tag]                         # Includes the configurated tag
         }
         files = {
             'file': open(execution.output_file, 'r')                            # Execution output file
