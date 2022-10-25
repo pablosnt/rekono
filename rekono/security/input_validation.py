@@ -40,7 +40,7 @@ def validate_number_value(value: int, min: int, max: int) -> None:
     Raises:
         ValidationError: Raised if value is not in the allowed range
     '''
-    if value <= min or value >= max:
+    if value < min or value > max:
         logger.warning(f'[Security] Invalid number value {value} that is not in the range {min} - {max}')
         raise ValidationError('Number value is not in the allowed range')
 
