@@ -50,4 +50,4 @@ jobs:
       
       - name: Check coverage
         working-directory: rekono
-        run: coverage report -m --skip-covered --fail-under=$REQUIRED_COVERAGE
+        run: coverage report -m --skip-covered --omit="telegram_bot/*" --fail-under=$REQUIRED_COVERAGE
