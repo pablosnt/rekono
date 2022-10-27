@@ -3,7 +3,6 @@ from typing import List
 from unittest import mock
 
 import django_rq
-from django.test import TestCase
 from django.utils import timezone
 from findings.enums import DataType, Protocol, Severity
 from findings.models import (OSINT, Credential, Exploit, Finding, Host, Path,
@@ -14,7 +13,6 @@ from projects.models import Project
 from resources.enums import WordlistType
 from resources.models import Wordlist
 from rq import SimpleWorker
-from system.models import System
 from targets.enums import TargetType
 from targets.models import (Target, TargetEndpoint, TargetPort,
                             TargetTechnology, TargetVulnerability)
@@ -23,6 +21,7 @@ from tasks.models import Task
 from testing.mocks.defectdojo import (defect_dojo_error, defect_dojo_success,
                                       defect_dojo_success_multiple)
 from testing.mocks.nvd_nist import nvd_nist_success_cvss_3
+from testing.test_case import RekonoTestCase
 from tools.enums import IntensityRank, Stage
 from tools.exceptions import ToolExecutionException
 from tools.models import Argument, Configuration, Input, Intensity, Tool
@@ -33,7 +32,7 @@ from users.models import User
 from executions.models import Execution
 
 
-class BaseToolTest(TestCase):
+class BaseToolTest(RekonoTestCase):
     '''Test cases for Base Tool operations.'''
 
     def setUp(self) -> None:
@@ -85,9 +84,6 @@ class BaseToolTest(TestCase):
         self.tool_class = get_tool_class_by_name(self.nmap.name)                # Related tool class
         # Related tool object
         self.tool_instance: BaseTool = self.tool_class(self.new_execution, self.intensity, self.arguments)
-        system = System.objects.first()
-        system.defect_dojo_url = 'http://127.0.0.1:8080'                        # Testing URL due to coverage reasons
-        system.save(update_fields=['defect_dojo_url'])
 
     def create_wordlists(self) -> Wordlist:
         '''Create wordlist data for testing.

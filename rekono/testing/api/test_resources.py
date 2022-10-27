@@ -3,11 +3,10 @@ from typing import Any, Dict
 
 from resources.models import Wordlist
 from security.file_upload import check_checksum
-from system.models import System
-from testing.api.base import RekonoTestCase
+from testing.api.base import RekonoApiTestCase
 
 
-class WordlistsTest(RekonoTestCase):
+class WordlistsTest(RekonoApiTestCase):
     '''Test cases for Wordlist entity from Resources module.'''
 
     def setUp(self) -> None:
@@ -63,9 +62,6 @@ class WordlistsTest(RekonoTestCase):
 
     def test_invalid_create(self) -> None:
         '''Test wordlist creation feature with invalid data.'''
-        system = System.objects.first()
-        system.upload_files_max_mb = 1                                          # Reduce max size allowed
-        system.save(update_fields=['upload_files_max_mb'])
         for name, file in [
             (self.name, self.passwords),                                        # Wordlist already exists
             ('Invalid size', self.invalid_size),                                # Invalid file size

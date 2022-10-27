@@ -1,20 +1,21 @@
 import os
 from typing import Any, Dict, List
 
-from django.test import TestCase
 from django.utils import timezone
 from executions.models import Execution
 from projects.models import Project
 from targets.models import Target
 from tasks.enums import Status
 from tasks.models import Task
+from testing.test_case import RekonoTestCase
+
 from tools.enums import IntensityRank
 from tools.models import Configuration, Intensity, Tool
 from tools.tools.base_tool import BaseTool
 from tools.utils import get_tool_class_by_name
 
 
-class ToolParserTest(TestCase):
+class ToolParserTest(RekonoTestCase):
     '''Base test case for tool parsers.'''
 
     tool_name = ''                                                              # Tool name to set by subclasses

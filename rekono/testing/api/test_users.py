@@ -2,11 +2,11 @@ from typing import Dict
 
 from security.otp import generate
 from telegram_bot.models import TelegramChat
-from testing.api.base import RekonoTestCase
+from testing.api.base import RekonoApiTestCase
 from users.models import User
 
 
-class UsersTest(RekonoTestCase):
+class UsersTest(RekonoApiTestCase):
     '''Test cases for Users module.'''
 
     def setUp(self) -> None:

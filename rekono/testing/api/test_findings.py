@@ -1,10 +1,10 @@
 from findings.enums import DataType, Severity
 from findings.models import (OSINT, Credential, Exploit, Technology,
                              Vulnerability)
-from testing.api.base import RekonoTestCase
+from testing.api.base import RekonoApiTestCase
 
 
-class FindingsTest(RekonoTestCase):
+class FindingsTest(RekonoApiTestCase):
     '''Test cases for Findings module.'''
 
     def setUp(self) -> None:

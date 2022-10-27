@@ -4,7 +4,6 @@ from typing import Any, Callable, Dict, List, Tuple
 
 import django_rq
 from django.http import HttpResponse
-from django.test import TestCase
 from django.utils import timezone
 from executions.models import Execution
 from findings.enums import OSType, PortStatus, Protocol
@@ -14,17 +13,17 @@ from projects.models import Project
 from rekono.settings import RQ_QUEUES
 from rest_framework.test import APIClient
 from rq import SimpleWorker
-from system.models import System
 from targets.models import (Target, TargetEndpoint, TargetPort,
                             TargetTechnology, TargetVulnerability)
 from tasks.enums import Status
 from tasks.models import Task
+from testing.test_case import RekonoTestCase
 from tools.enums import IntensityRank
 from tools.models import Configuration, Tool
 from users.models import User
 
 
-class RekonoTestCase(TestCase):
+class RekonoApiTestCase(RekonoTestCase):
     '''Base test case.'''
 
     def setUp(self) -> None:
@@ -52,9 +51,6 @@ class RekonoTestCase(TestCase):
         self.models: Dict[Any, str] = {}                                        # Models to test __str__ method
         # Indicate if environment has been initialized
         self.initialized = False
-        system = System.objects.first()
-        system.defect_dojo_url = 'http://127.0.0.1:8080'                        # Testing URL due to coverage reasons
-        system.save(update_fields=['defect_dojo_url'])
 
     def initialize_environment(self) -> None:
         '''Initialize environment for testing.'''

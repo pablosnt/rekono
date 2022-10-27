@@ -37,7 +37,7 @@ from rekono.environment import (ENV_REKONO_HOME, RKN_ALLOWED_HOSTS,
 
 DESCRIPTION = 'Execute full pentesting processes combining multiple hacking tools automatically'    # Rekono description
 VERSION = '1.1.0'                                                               # Rekono version
-
+TESTING = 'test' in sys.argv                                                    # Tests execution
 
 ################################################################################
 # Paths and directories                                                        #
@@ -46,10 +46,15 @@ VERSION = '1.1.0'                                                               
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Rekono home directory. By default /opt/rekono
-REKONO_HOME = os.getenv(ENV_REKONO_HOME, '/opt/rekono')
-if not os.path.isdir(REKONO_HOME):                                              # Rekono home doesn't exist
-    REKONO_HOME = str(BASE_DIR.parent)                                          # Use current directory as home
+if not TESTING:
+    # Rekono home directory. By default /opt/rekono
+    REKONO_HOME = os.getenv(ENV_REKONO_HOME, '/opt/rekono')
+    if not os.path.isdir(REKONO_HOME):                                          # Rekono home doesn't exist
+        REKONO_HOME = str(BASE_DIR.parent)                                      # Use current directory as home
+else:
+    REKONO_HOME = os.path.join(BASE_DIR, 'testing', 'home')                     # Internal home directory for testing
+    if not os.path.isdir(REKONO_HOME):                                          # Initialize home directory for testing
+        os.mkdir(REKONO_HOME)
 
 REPORTS_DIR = os.path.join(REKONO_HOME, 'reports')                              # Directory to save tool reports
 WORDLIST_DIR = os.path.join(REKONO_HOME, 'wordlists')                           # Directory to save wordlist files
@@ -136,8 +141,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'rekono.wsgi.application'
-
-TESTING = 'test' in sys.argv                                                    # Tests execution
 
 
 ################################################################################
