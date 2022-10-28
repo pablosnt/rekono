@@ -31,7 +31,7 @@ class ToolParserTest(RekonoTestCase):
             configuration = Configuration.objects.get(tool=tool, default=True)
             intensity = Intensity.objects.filter(tool=tool).first()
             project = Project.objects.create(name='Test', description='Test', tags=['test'])
-            self.target = Target.objects.create(project=project, target='10.10.10.10')
+            self.target = Target.objects.create(project=project, target='scanme.nmap.org')
             task = Task.objects.create(
                 target=self.target,
                 tool=tool,

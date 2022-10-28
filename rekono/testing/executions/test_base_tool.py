@@ -70,13 +70,13 @@ class BaseToolTest(RekonoTestCase):
         self.exploit = self.create_exploits(self.vulnerability)
         # Expected arguments
         self.all_expected = ' '.join([
-            '-T3', '--osint http://scanme.nmap.org/', '--only-host 10.10.10.10', '--host 10.10.10.10',
+            '-T3', '--osint http://scanme.nmap.org/', '--only-host 45.33.32.156', '--host 45.33.32.156',
             '--port 443', '--port-commas 80,443', '--endpoint /robots.txt', '--tech Wordpress',
             '--version 1.0.0', '--email test@test.test', '--username test', '--secret test',
             '--vuln CVE-2021-44228', '--exploit Test', f'--wordlist {self.wordlist.path}'
         ]).split(' ')
         self.required_expected = ' '.join([
-            '-T3', '--osint http://scanme.nmap.org/', '--only-host 10.10.10.10', '--host 10.10.10.10',
+            '-T3', '--osint http://scanme.nmap.org/', '--only-host 45.33.32.156', '--host 45.33.32.156',
             '--port 443', '--port-commas 80,443', '--endpoint /robots.txt', '--tech Wordpress',
             '--version 1.0.0', '--vuln CVE-2021-44228', '--exploit Test', f'--wordlist {self.wordlist.path}'
         ]).split(' ')
@@ -117,7 +117,7 @@ class BaseToolTest(RekonoTestCase):
         )
         # Target filtered due to target type. Private IP required
         target_filtered = Target.objects.create(project=self.project, target='scanme.nmap.org', type=TargetType.DOMAIN)
-        target = Target.objects.create(project=self.project, target='10.10.10.10', type=TargetType.PRIVATE_IP)
+        target = Target.objects.create(project=self.project, target='45.33.32.156', type=TargetType.PUBLIC_IP)
         target_port_http = TargetPort.objects.create(target=target, port=80)
         target_port_https = TargetPort.objects.create(target=target, port=443)
         target_endpoint = TargetEndpoint.objects.create(target_port=target_port_http, endpoint='/robots.txt')
@@ -183,7 +183,7 @@ class BaseToolTest(RekonoTestCase):
         # Host filtered due to address type. Private IP required
         filtered = Host.objects.create(address='scanme.nmap.org')
         filtered.executions.add(self.first_execution)
-        host = Host.objects.create(address='10.10.10.10')
+        host = Host.objects.create(address='45.33.32.156')
         host.executions.add(self.first_execution)
         # Argument with only one input
         argument_only_host = Argument.objects.create(
@@ -193,7 +193,7 @@ class BaseToolTest(RekonoTestCase):
             required=True
         )
         # Input filtered by host type: Private IP required
-        Input.objects.create(argument=argument_only_host, type=InputType.objects.get(name='Host'), filter='PRIVATE_IP')
+        Input.objects.create(argument=argument_only_host, type=InputType.objects.get(name='Host'), filter='PUBLIC_IP')
         # Argument with multiple inputs
         argument = Argument.objects.create(tool=self.nmap, name='test_host', argument='--host {host}', required=True)
         Input.objects.create(argument=argument, type=InputType.objects.get(name='Path'), order=1)
@@ -427,7 +427,7 @@ class BaseToolTest(RekonoTestCase):
         Input.objects.all().update(filter=None)                                 # Remove all input filters
         arguments = self.tool_instance.get_arguments(self.targets, self.all_findings)
         expected = ' '.join([
-            '-T3', '--osint http://scanme.nmap.org/', '--only-host scanme.nmap.org', '--host 10.10.10.10',
+            '-T3', '--osint http://scanme.nmap.org/', '--only-host scanme.nmap.org', '--host 45.33.32.156',
             '--port 443', '--port-commas 22,80,443', '--endpoint /admin', '--tech Joomla',
             '--version 1.0.0', '--email test@test.test', '--username test', '--secret test',
             '--vuln CVE-1111-1111', '--exploit Test', f'--wordlist {self.wordlist.path}'
@@ -439,7 +439,7 @@ class BaseToolTest(RekonoTestCase):
         self.change_input_filters()                                             # Change filter types
         arguments = self.tool_instance.get_arguments(self.targets, self.all_findings)
         expected = ' '.join([
-            '-T3', '--osint http://scanme.nmap.org/', '--only-host scanme.nmap.org', '--host 10.10.10.10',
+            '-T3', '--osint http://scanme.nmap.org/', '--only-host scanme.nmap.org', '--host 45.33.32.156',
             '--port 80', '--port-commas 80', '--endpoint /robots.txt', '--tech Wordpress',
             '--version 1.0.0', '--email test@test.test', '--username test', '--secret test',
             '--vuln CVE-2021-44228', '--exploit Test', f'--wordlist {self.wordlist.path}'
@@ -468,7 +468,7 @@ class BaseToolTest(RekonoTestCase):
         Input.objects.all().update(filter=None)                                 # Remove all input filters
         arguments = self.tool_instance.get_arguments(self.targets, self.findings_to_use_targets)
         expected = ' '.join([
-            '-T3', '--osint http://scanme.nmap.org/', '--only-host scanme.nmap.org', '--host 10.10.10.10',
+            '-T3', '--osint http://scanme.nmap.org/', '--only-host scanme.nmap.org', '--host 45.33.32.156',
             '--port 443', '--port-commas 80,443', '--endpoint /robots.txt', '--tech Wordpress',
             '--version 1.0.0', '--email test@test.test', '--username test', '--secret test',
             '--vuln CVE-2021-44228', '--exploit Test', f'--wordlist {self.wordlist.path}'
@@ -480,7 +480,7 @@ class BaseToolTest(RekonoTestCase):
         self.change_input_filters()
         arguments = self.tool_instance.get_arguments(self.targets, self.findings_to_use_targets)
         expected = ' '.join([
-            '-T3', '--osint http://scanme.nmap.org/', '--only-host scanme.nmap.org', '--host 10.10.10.10',
+            '-T3', '--osint http://scanme.nmap.org/', '--only-host scanme.nmap.org', '--host 45.33.32.156',
             '--port 80', '--port-commas 80', '--endpoint /robots.txt', '--tech Wordpress',
             '--version 1.0.0', '--email test@test.test', '--username test', '--secret test',
             '--vuln CVE-2021-44228', '--exploit Test', f'--wordlist {self.wordlist.path}'

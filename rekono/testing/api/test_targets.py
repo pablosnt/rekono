@@ -16,7 +16,7 @@ class TargetsTest(RekonoApiTestCase):
             ('1.1.1.1', 'Public IP'),                                           # Public IP
             ('10.10.10.0/24', 'Network'),                                       # Network
             ('10.10.10.1-20', 'IP range'),                                      # IP range
-            ('scanme.nmap.org', 'Domain')                                       # Domain
+            ('nmap.org', 'Domain')                                              # Domain
         ]
         self.models = {self.target: self.target.target}                         # Models to test __str__ method
 

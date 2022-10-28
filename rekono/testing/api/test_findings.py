@@ -12,7 +12,7 @@ class FindingsTest(RekonoApiTestCase):
         super().setUp()
         super().initialize_environment()
         # Create findings entities
-        self.domain_osint = OSINT.objects.create(data='scanme.nmap.org', data_type=DataType.DOMAIN, source='Google')
+        self.domain_osint = OSINT.objects.create(data='nmap.org', data_type=DataType.DOMAIN, source='Google')
         self.domain_osint.executions.add(self.execution)
         self.user_osint = OSINT.objects.create(data='Test', data_type=DataType.USER, source='DuckDuckGo')
         self.user_osint.executions.add(self.execution)

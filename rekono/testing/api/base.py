@@ -55,7 +55,7 @@ class RekonoApiTestCase(RekonoTestCase):
     def initialize_environment(self) -> None:
         '''Initialize environment for testing.'''
         self.initialized = True
-        self.target = Target.objects.create(project=self.project, target='10.10.10.10')
+        self.target = Target.objects.create(project=self.project, target='scanme.nmap.org')
         self.target_port = TargetPort.objects.create(target=self.target, port=80)
         self.target_endpoint = TargetEndpoint.objects.create(target_port=self.target_port, endpoint='/robots.txt')
         self.target_technology = TargetTechnology.objects.create(
@@ -96,7 +96,7 @@ class RekonoApiTestCase(RekonoTestCase):
             start=timezone.now(),
             end=timezone.now()
         )
-        self.host = Host.objects.create(address='10.10.10.10', os='Ubuntu', os_type=OSType.LINUX)
+        self.host = Host.objects.create(address='45.33.32.156', os='Ubuntu', os_type=OSType.LINUX)
         self.host.executions.add(self.execution)
         self.port = Port.objects.create(
             host=self.host, port=80, status=PortStatus.OPEN,
@@ -173,7 +173,11 @@ class RekonoApiTestCase(RekonoTestCase):
             response = request(endpoint, data=kwargs['data'], format=kwargs.get('format', 'json'))
         else:                                                                   # No HTTP body
             response = request(endpoint)                                        # Make Rekono API request
-        self.assertEqual(status_code, response.status_code)                     # Check HTTP status code
+        try:
+            self.assertEqual(status_code, response.status_code)                     # Check HTTP status code
+        except Exception as ex:
+            input(response.content)
+            raise ex
         content = self.get_content(response)                                    # Get content from HTTP response
         if kwargs.get('expected'):                                              # Expected response content
             self.check_fields(list(kwargs['expected'].keys()), content, kwargs['expected'])     # Check expected data
