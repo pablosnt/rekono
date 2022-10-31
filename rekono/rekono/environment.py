@@ -33,3 +33,15 @@ RKN_EMAIL_PASSWORD = 'RKN_EMAIL_PASSWORD'
 RKN_CMSEEK_RESULTS = 'RKN_CMSEEK_RESULTS'
 RKN_LOG4J_SCANNER_DIR = 'RKN_LOG4J_SCANNER_DIR'
 RKN_GITTOOLS_DIR = 'RKN_GITTOOLS_DIR'
+
+
+# --------------------------------------------------------------------------------------------------------------
+# DEPRECATED
+# The following configurations are mantained for compatibility reasons with the previous version.
+# This support will be removed in the next release, since this settings can be managed using the Settings page.
+# --------------------------------------------------------------------------------------------------------------
+# Telegram bot configuration
+RKN_TELEGRAM_TOKEN = 'RKN_TELEGRAM_TOKEN'
+# Defect-Dojo configuration
+RKN_DD_URL = 'RKN_DD_URL'
+RKN_DD_API_KEY = 'RKN_DD_API_KEY'

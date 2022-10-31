@@ -50,6 +50,17 @@ class RekonoConfigLoader:
         )
         self.TOOLS_GITTOOLS_DIR = self.get_config_key(config, ['tools', 'gittools', 'directory'], '/opt/GitTools')
 
+        # --------------------------------------------------------------------------------------------------------------
+        # DEPRECATED
+        # The following configurations are mantained for compatibility reasons with the previous version.
+        # This support will be removed in the next release, since this settings can be managed using the Settings page.
+        # --------------------------------------------------------------------------------------------------------------
+        # Telegram Bot token
+        self.TELEGRAM_TOKEN = self.get_config_key(config, ['telegram', 'token'])
+        # Defect-Dojo
+        self.DD_URL = self.get_config_key(config, ['defect-dojo', 'url'])
+        self.DD_API_KEY = self.get_config_key(config, ['defect-dojo', 'api-key'])
+
     def get_config_key(self, config: Dict[str, Any], path: List[str], default: Any = None) -> Any:
         '''Get configuration value by dict path. Default value will be returned if value not found or it's null.
 

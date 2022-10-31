@@ -17,6 +17,7 @@ from typing import Any, Dict
 
 from findings.enums import Severity
 from input_types.enums import InputTypeNames
+from system.models import System
 from targets.enums import TargetType
 from tasks.enums import Status, TimeUnit
 from tools.enums import IntensityRank
@@ -25,11 +26,12 @@ from rekono.config import RekonoConfigLoader
 from rekono.environment import (ENV_REKONO_HOME, RKN_ALLOWED_HOSTS,
                                 RKN_CMSEEK_RESULTS, RKN_DB_HOST, RKN_DB_NAME,
                                 RKN_DB_PASSWORD, RKN_DB_PORT, RKN_DB_USER,
-                                RKN_EMAIL_HOST, RKN_EMAIL_PASSWORD,
-                                RKN_EMAIL_PORT, RKN_EMAIL_USER,
-                                RKN_FRONTEND_URL, RKN_GITTOOLS_DIR,
-                                RKN_LOG4J_SCANNER_DIR, RKN_RQ_HOST,
-                                RKN_RQ_PORT, RKN_SECRET_KEY, RKN_TRUSTED_PROXY)
+                                RKN_DD_API_KEY, RKN_DD_URL, RKN_EMAIL_HOST,
+                                RKN_EMAIL_PASSWORD, RKN_EMAIL_PORT,
+                                RKN_EMAIL_USER, RKN_FRONTEND_URL,
+                                RKN_GITTOOLS_DIR, RKN_LOG4J_SCANNER_DIR,
+                                RKN_RQ_HOST, RKN_RQ_PORT, RKN_SECRET_KEY,
+                                RKN_TELEGRAM_TOKEN, RKN_TRUSTED_PROXY)
 
 ################################################################################
 # Rekono basic information                                                     #
@@ -428,3 +430,19 @@ STATIC_ROOT = os.path.join(REKONO_HOME, 'static')
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# --------------------------------------------------------------------------------------------------------------
+# DEPRECATED
+# The following configurations are mantained for compatibility reasons with the previous version.
+# This support will be removed in the next release, since this settings can be managed using the Settings page.
+# --------------------------------------------------------------------------------------------------------------
+system = System.objects.first()
+for environment_variable, file_property, system_field in [
+    (RKN_TELEGRAM_TOKEN, CONFIG.TELEGRAM_TOKEN, 'telegram_bot_token'),
+    (RKN_DD_URL, CONFIG.DD_URL, 'defect_dojo_url'),
+    (RKN_DD_API_KEY, CONFIG.DD_API_KEY, 'defect_dojo_api_key'),
+]:
+    if os.getenv(environment_variable, file_property) and not getattr(system, system_field):
+        setattr(system, system_field, os.getenv(environment_variable, file_property))
+system.save()
