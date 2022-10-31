@@ -9,8 +9,6 @@ from django.db.models.signals import post_migrate
 from rekono.environment import RKN_DD_API_KEY, RKN_DD_URL, RKN_TELEGRAM_TOKEN
 from rekono.settings import CONFIG
 
-from system.models import System
-
 
 class SystemConfig(AppConfig):
     '''System Django application.'''
@@ -38,6 +36,7 @@ class SystemConfig(AppConfig):
         # The following configurations are mantained for compatibility reasons with the previous version.
         # This support will be removed in the next release, since this settings can be managed using the Settings page.
         # --------------------------------------------------------------------------------------------------------------
+        from system.models import System
         system = System.objects.first()
         for environment_variable, file_property, system_field in [
             (RKN_TELEGRAM_TOKEN, CONFIG.TELEGRAM_TOKEN, 'telegram_bot_token'),
