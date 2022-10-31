@@ -4,8 +4,8 @@ const accessTokenKey = 'access-token'
 const refreshTokenKey = 'refresh-token'
 
 function removeTokens () {
-  localStorage.removeItem(accessTokenKey)
-  localStorage.removeItem(refreshTokenKey)
+  sessionStorage.removeItem(accessTokenKey)
+  sessionStorage.removeItem(refreshTokenKey)
 }
 
 function decodeToken (accessToken) {
@@ -17,8 +17,8 @@ function decodeToken (accessToken) {
 }
 
 function processTokens (tokens) {
-  localStorage.setItem(accessTokenKey, tokens.access)
-  localStorage.setItem(refreshTokenKey, tokens.refresh)
+  sessionStorage.setItem(accessTokenKey, tokens.access)
+  sessionStorage.setItem(refreshTokenKey, tokens.refresh)
   return decodeToken(tokens.access)
 }
 

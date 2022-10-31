@@ -40,7 +40,7 @@ export default {
   mixins: [RekonoApi],
   methods: {
     logout () {
-      this.post('/api/logout/', { refresh_token: localStorage[refreshTokenKey] })
+      this.post('/api/logout/', { refresh_token: sessionStorage.getItem(refreshTokenKey) })
       this.$store.dispatch('logout')
     }
   }
