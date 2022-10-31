@@ -173,11 +173,7 @@ class RekonoApiTestCase(RekonoTestCase):
             response = request(endpoint, data=kwargs['data'], format=kwargs.get('format', 'json'))
         else:                                                                   # No HTTP body
             response = request(endpoint)                                        # Make Rekono API request
-        try:
-            self.assertEqual(status_code, response.status_code)                     # Check HTTP status code
-        except Exception as ex:
-            input(response.content)
-            raise ex
+        self.assertEqual(status_code, response.status_code)                     # Check HTTP status code
         content = self.get_content(response)                                    # Get content from HTTP response
         if kwargs.get('expected'):                                              # Expected response content
             self.check_fields(list(kwargs['expected'].keys()), content, kwargs['expected'])     # Check expected data
