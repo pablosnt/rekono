@@ -1,7 +1,7 @@
+import { accessTokenKey, decodeToken, processTokens, removeTokens } from '@/backend/tokens'
+import router from '@/router'
 import Vue from 'vue'
 import Vuex from 'vuex'
-import router from '@/router'
-import { accessTokenKey, removeTokens, decodeToken, processTokens } from '@/backend/tokens'
 
 Vue.use(Vuex)
 
@@ -31,13 +31,13 @@ export default new Vuex.Store({
   },
   actions: {
     checkState ({ state, commit }) {
-      const accessToken = localStorage.getItem(accessTokenKey)
+      const accessToken = sessionStorage.getItem(accessTokenKey)
       if (accessToken) {
         commit('authenticateUser', decodeToken(accessToken))
       } else {
         commit('authenticateUser', { user: null, role: null })
       }
-      if ((localStorage.getItem(showMainTabs) === 'true') !== state.mainTabs) {
+      if ((sessionStorage.getItem(showMainTabs) === 'true') !== state.mainTabs) {
         commit('changeMainTabs')
       }
       commit('setRefreshStatus', false)
@@ -57,7 +57,7 @@ export default new Vuex.Store({
       router.push({ name: 'login' })
     },
     changeMainTabs ({ state, commit }) {
-      localStorage.setItem(showMainTabs, !state.mainTabs)
+      sessionStorage.setItem(showMainTabs, !state.mainTabs)
       commit('changeMainTabs')
     },
     changeRefreshStatus ({ commit }) {

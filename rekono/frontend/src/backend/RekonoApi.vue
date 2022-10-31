@@ -172,7 +172,7 @@ export default {
     refresh () {
       if (!this.$store.state.refreshing) {
         this.$store.dispatch('changeRefreshStatus')
-        return axios.post('/api/token/refresh/', { refresh: localStorage[refreshTokenKey] }, this.headers())
+        return axios.post('/api/token/refresh/', { refresh: sessionStorage.getItem(refreshTokenKey) }, this.headers())
           .then(response => {
             removeTokens()
             processTokens(response.data)
@@ -194,7 +194,7 @@ export default {
         Accept: 'application/json'
       }
       if (this.$store.state.user !== null && requiredAuth) {
-        requestHeaders.Authorization = `Bearer ${localStorage[accessTokenKey]}`
+        requestHeaders.Authorization = `Bearer ${sessionStorage.getItem(accessTokenKey)}`
       }
       if (extraHeaders) {
         requestHeaders = Object.assign({}, requestHeaders, extraHeaders)
