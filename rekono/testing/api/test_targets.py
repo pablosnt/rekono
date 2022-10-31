@@ -1,7 +1,7 @@
-from testing.api.base import RekonoTestCase
+from testing.api.base import RekonoApiTestCase
 
 
-class TargetsTest(RekonoTestCase):
+class TargetsTest(RekonoApiTestCase):
     '''Test cases for Target entity from Targets module.'''
 
     def setUp(self) -> None:
@@ -16,7 +16,7 @@ class TargetsTest(RekonoTestCase):
             ('1.1.1.1', 'Public IP'),                                           # Public IP
             ('10.10.10.0/24', 'Network'),                                       # Network
             ('10.10.10.1-20', 'IP range'),                                      # IP range
-            ('scanme.nmap.org', 'Domain')                                       # Domain
+            ('nmap.org', 'Domain')                                              # Domain
         ]
         self.models = {self.target: self.target.target}                         # Models to test __str__ method
 
@@ -46,7 +46,7 @@ class TargetsTest(RekonoTestCase):
         self.api_test(self.client.get, f'{self.endpoint}{self.target.id}/', 404)        # Check target not found
 
 
-class TargetPortsTest(RekonoTestCase):
+class TargetPortsTest(RekonoApiTestCase):
     '''Test cases for Target Port entity from Targets module.'''
 
     def setUp(self) -> None:
@@ -79,7 +79,7 @@ class TargetPortsTest(RekonoTestCase):
         self.api_test(self.client.get, f'{self.endpoint}{self.target_port.id}/', 404)
 
 
-class TargetEndpointsTest(RekonoTestCase):
+class TargetEndpointsTest(RekonoApiTestCase):
     '''Test cases for Target Endpoint entity from Targets module.'''
 
     def setUp(self) -> None:
@@ -113,7 +113,7 @@ class TargetEndpointsTest(RekonoTestCase):
         self.api_test(self.client.get, f'{self.endpoint}{self.target_endpoint.id}/', 404)
 
 
-class TargetTechnologiesTest(RekonoTestCase):
+class TargetTechnologiesTest(RekonoApiTestCase):
     '''Test cases for Target Technology entity from Targets module.'''
 
     def setUp(self) -> None:
@@ -153,7 +153,7 @@ class TargetTechnologiesTest(RekonoTestCase):
         self.api_test(self.client.get, f'{self.endpoint}{self.target_technology.id}/', 404)
 
 
-class TargetVulnerabilitiesTest(RekonoTestCase):
+class TargetVulnerabilitiesTest(RekonoApiTestCase):
     '''Test cases for Target Vulnerability entity from Targets module.'''
 
     def setUp(self) -> None:

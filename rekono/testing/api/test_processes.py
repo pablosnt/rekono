@@ -1,8 +1,8 @@
-from testing.api.base import RekonoTestCase
+from testing.api.base import RekonoApiTestCase
 from tools.models import Configuration, Tool
 
 
-class ProcessesTest(RekonoTestCase):
+class ProcessesTest(RekonoApiTestCase):
     '''Test cases for Process entity from Processes module.'''
 
     def setUp(self) -> None:
@@ -67,7 +67,7 @@ class ProcessesTest(RekonoTestCase):
         self.api_test(self.client.get, f'{self.endpoint}?liked=false', expected={'count': count})
 
 
-class StepsTest(RekonoTestCase):
+class StepsTest(RekonoApiTestCase):
     '''Test cases for Step entity from Processes module.'''
 
     def setUp(self) -> None:

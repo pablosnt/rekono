@@ -61,6 +61,7 @@ export default {
   },
   data () {
     this.fetchData()
+    this.getSettings()
     return {
       data: [],
       selectedProject: null,

@@ -25,7 +25,7 @@ WORKDIR /code
 ENV REKONO_HOME /rekono
 
 
-FROM node:18.6.0-alpine as frontend
+FROM node:18.9.1-alpine as frontend
 
 RUN mkdir /frontend
 COPY --from=backend /code/frontend /frontend
@@ -37,6 +37,8 @@ ENV NODE_OPTIONS --openssl-legacy-provider
 WORKDIR /frontend
 RUN npm install -g serve
 RUN npm install
+RUN npx browserslist@latest --update-db
+RUN npm run build
 
 RUN adduser --disabled-password rekono
 RUN chown -R rekono /frontend

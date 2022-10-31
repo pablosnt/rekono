@@ -4,6 +4,15 @@ from urllib.request import Request
 from api.filters import RekonoFilterBackend
 from django.db.models import QuerySet
 from drf_spectacular.utils import extend_schema
+from rest_framework import status
+from rest_framework.decorators import action
+from rest_framework.filters import OrderingFilter, SearchFilter
+from rest_framework.mixins import (DestroyModelMixin, ListModelMixin,
+                                   RetrieveModelMixin)
+from rest_framework.response import Response
+from rest_framework.viewsets import GenericViewSet
+from targets.serializers import TargetSerializer
+
 from findings.enums import DataType
 from findings.filters import (CredentialFilter, ExploitFilter, HostFilter,
                               OSINTFilter, PathFilter, PortFilter,
@@ -15,14 +24,6 @@ from findings.serializers import (CredentialSerializer, ExploitSerializer,
                                   PathSerializer, PortSerializer,
                                   TechnologySerializer,
                                   VulnerabilitySerializer)
-from rest_framework import status
-from rest_framework.decorators import action
-from rest_framework.filters import OrderingFilter, SearchFilter
-from rest_framework.mixins import (DestroyModelMixin, ListModelMixin,
-                                   RetrieveModelMixin)
-from rest_framework.response import Response
-from rest_framework.viewsets import GenericViewSet
-from targets.serializers import TargetSerializer
 
 # Create your views here.
 
@@ -104,6 +105,7 @@ class OSINTViewSet(FindingBaseView):
             if serializer.is_valid():
                 target = serializer.create(serializer.validated_data)           # Target creation
                 return Response(TargetSerializer(target).data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         return Response(
             {'data_type': ['Unsupported option for this OSINT data type']}, status=status.HTTP_400_BAD_REQUEST
         )

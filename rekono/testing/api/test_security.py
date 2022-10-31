@@ -6,10 +6,10 @@ from security.input_validation import (validate_name, validate_number,
                                        validate_path, validate_text,
                                        validate_time_amount)
 from security.passwords import PasswordComplexityValidator
-from testing.api.base import RekonoTestCase
+from testing.api.base import RekonoApiTestCase
 
 
-class SecurityTest(RekonoTestCase):
+class SecurityTest(RekonoApiTestCase):
     '''Test cases for Security module.'''
 
     def setUp(self) -> None:

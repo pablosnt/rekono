@@ -147,6 +147,7 @@ export default {
   },
   data () {
     this.fetchData()
+    this.getSettings()
     return {
       data: [],
       targetPortsFields: [

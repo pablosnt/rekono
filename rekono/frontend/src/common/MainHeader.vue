@@ -13,6 +13,10 @@
             <b-icon variant="black" icon="person-fill"/>
             <label class="ml-2">Profile</label>
           </b-dropdown-item>
+          <b-dropdown-item @click="$router.push('/settings')" v-if="$store.state.role === 'Admin'">
+            <b-icon variant="black" icon="sliders"/>
+            <label class="ml-2">Settings</label>
+          </b-dropdown-item>
           <b-dropdown-item href="/api/schema/swagger-ui.html?docExpansion=none" target="_blank">
             <b-icon variant="danger" icon="code-slash"/>
             <label class="ml-2">Rekono API Rest</label>

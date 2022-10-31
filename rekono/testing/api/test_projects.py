@@ -1,12 +1,12 @@
 from typing import Any, Dict
 from unittest import mock
 
-from testing.api.base import RekonoTestCase
+from testing.api.base import RekonoApiTestCase
 from testing.mocks.defectdojo import (defect_dojo_error, defect_dojo_success,
                                       defect_dojo_success_multiple)
 
 
-class ProjectsTest(RekonoTestCase):
+class ProjectsTest(RekonoApiTestCase):
     '''Test cases for Projects module.'''
 
     def setUp(self) -> None:

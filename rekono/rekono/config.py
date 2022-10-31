@@ -1,4 +1,3 @@
-import os
 from typing import Any, Dict, List
 
 import yaml
@@ -7,8 +6,6 @@ from security.crypto import generate_random_value
 
 class RekonoConfigLoader:
     '''Rekono config loader from configuration file.'''
-
-    frontend_env_filename = '.env'                                              # Frontend environment file
 
     def __init__(self, filepath: str) -> None:
         '''Rekono config constructor.
@@ -21,7 +18,7 @@ class RekonoConfigLoader:
             with open(filepath, 'r') as config_file:                            # Read configuration file
                 config = yaml.safe_load(config_file)                            # Load configuration
         # Rekono frontend URL
-        self.FRONTEND_URL = self.get_config_key(config, ['frontend', 'url'], 'http://127.0.0.1:3000')
+        self.FRONTEND_URL = self.get_config_key(config, ['frontend', 'url'], 'https://127.0.0.1')
         # Security
         self.SECRET_KEY = self.get_config_key(config, ['security', 'secret-key'], generate_random_value(3000))
         self.ALLOWED_HOSTS = self.get_config_key(
@@ -29,8 +26,6 @@ class RekonoConfigLoader:
             ['security', 'allowed-hosts'],
             ['localhost', '127.0.0.1', '::1']
         )
-        self.UPLOAD_FILES_MAX_MB = self.get_config_key(config, ['security', 'upload-files-max-mb'], 500)
-        self.OTP_EXPIRATION_HOURS = self.get_config_key(config, ['security', 'otp-expiration-hours'], 24)
         # Database
         self.DB_NAME = self.get_config_key(config, ['database', 'name'], 'rekono')
         self.DB_USER = self.get_config_key(config, ['database', 'user'], '')
@@ -46,17 +41,6 @@ class RekonoConfigLoader:
         self.EMAIL_USER = self.get_config_key(config, ['email', 'user'])
         self.EMAIL_PASSWORD = self.get_config_key(config, ['email', 'password'])
         self.EMAIL_TLS = self.get_config_key(config, ['email', 'tls'], True)
-        # Telegram Bot token
-        self.TELEGRAM_BOT = self.get_config_key(config, ['telegram', 'bot'], 'Rekono')
-        self.TELEGRAM_TOKEN = self.get_config_key(config, ['telegram', 'token'], '')
-        # Defect-Dojo
-        self.DD_URL = self.get_config_key(config, ['defect-dojo', 'url'])
-        self.DD_API_KEY = self.get_config_key(config, ['defect-dojo', 'api-key'])
-        self.DD_VERIFY_TLS = self.get_config_key(config, ['defect-dojo', 'verify'], True)
-        self.DD_TAGS = self.get_config_key(config, ['defect-dojo', 'tags'], ['rekono'])
-        self.DD_PRODUCT_TYPE = self.get_config_key(config, ['defect-dojo', 'product-type'], 'Rekono Project')
-        self.DD_TEST_TYPE = self.get_config_key(config, ['defect-dojo', 'test-type'], 'Rekono Findings Import')
-        self.DD_TEST = self.get_config_key(config, ['defect-dojo', 'test'], 'Rekono Test')
         # Tools
         self.TOOLS_CMSEEK_DIR = self.get_config_key(config, ['tools', 'cmseek', 'directory'], '/usr/share/cmseek')
         self.TOOLS_LOG4J_SCANNER_DIR = self.get_config_key(
@@ -83,17 +67,3 @@ class RekonoConfigLoader:
                 return default                                                  # Return default value
             value = value.get(key, {})
         return value
-
-    def load_config_in_frontend(self, frontend: str, config: Dict[str, Any]) -> None:
-        '''Load configuration values in frontend .env file.
-
-        Args:
-            frontend (str): Frontend directory
-            config (Dict[str, Any]): Configuration keys and values
-        '''
-        if os.path.isdir(frontend):                                             # If frontend directory is found
-            frontend_env_filepath = os.path.join(frontend, self.frontend_env_filename)      # Path to .env file
-            with open(frontend_env_filepath, 'a') as frontend_env:              # Open .env file
-                frontend_env.truncate(0)                                        # Clear .env content
-                # Save frontend configuration
-                frontend_env.write('\n'.join([f'{key}={value}' for key, value in config.items()]))

@@ -59,6 +59,7 @@ export default {
     }
   },
   data () {
+    this.getSettings()
     return {
       sync: null,
       autoProduct: null,

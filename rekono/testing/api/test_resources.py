@@ -3,10 +3,10 @@ from typing import Any, Dict
 
 from resources.models import Wordlist
 from security.file_upload import check_checksum
-from testing.api.base import RekonoTestCase
+from testing.api.base import RekonoApiTestCase
 
 
-class WordlistsTest(RekonoTestCase):
+class WordlistsTest(RekonoApiTestCase):
     '''Test cases for Wordlist entity from Resources module.'''
 
     def setUp(self) -> None:

@@ -1,10 +1,10 @@
 from django.utils import timezone
 from executions.models import Execution
 from tasks.enums import Status
-from testing.api.base import RekonoTestCase
+from testing.api.base import RekonoApiTestCase
 
 
-class ExecutionsTest(RekonoTestCase):
+class ExecutionsTest(RekonoApiTestCase):
     '''Test cases for Executions module.'''
 
     def setUp(self) -> None:

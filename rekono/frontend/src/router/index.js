@@ -1,14 +1,15 @@
-import Vue from 'vue'
-import Router from 'vue-router'
+import NotFound from '@/errors/NotFound'
 import store from '@/store'
 import Login from '@/views/Login'
 import Main from '@/views/Main'
-import Project from '@/views/Project'
-import Signup from '@/views/Signup'
-import ResetPassword from '@/views/ResetPassword'
 import Profile from '@/views/Profile'
+import Project from '@/views/Project'
+import ResetPassword from '@/views/ResetPassword'
+import Settings from '@/views/Settings'
+import Signup from '@/views/Signup'
 import Task from '@/views/Task'
-import NotFound from '@/errors/NotFound'
+import Vue from 'vue'
+import Router from 'vue-router'
 
 Vue.use(Router)
 
@@ -46,6 +47,11 @@ const routes = [
     path: '/profile',
     name: 'profile',
     component: Profile
+  },
+  {
+    path: '/settings',
+    name: 'settings',
+    component: Settings
   },
   {
     path: '/tasks/:id',
