@@ -2,9 +2,6 @@
   <a href="https://github.com/pablosnt/rekono/actions/workflows/unit-testing.yml" alt="Unit testing">
     <img src="https://github.com/pablosnt/rekono/actions/workflows/unit-testing.yml/badge.svg"/>
   </a>
-  <a href="https://github.com/pablosnt/rekono/actions/workflows/security-sca.yml" alt="SCA">
-    <img src="https://github.com/pablosnt/rekono/actions/workflows/security-sca.yml/badge.svg"/>
-  </a>
   <a href="https://github.com/pablosnt/rekono/actions/workflows/security-secrets.yml" alt="Secrets scanning">
     <img src="https://github.com/pablosnt/rekono/actions/workflows/security-secrets.yml/badge.svg"/>
   </a>
@@ -118,7 +115,7 @@ Go to http://127.0.0.1:3000/
 
 ### From Source
 
-Check the installation from source in [Rekono Wiki](https://github.com/pablosnt/rekono/wiki/4.-Installation#from-source)
+Check the installation from source in [Rekono Wiki](https://github.com/pablosnt/rekono/wiki/Installation#from-source)
 
 
 ## Integrations
@@ -147,7 +144,7 @@ You can configure your Defect-Dojo details in the `Settings` page or ask your ad
 
 ## Configuration
 
-Check the configuration options in [Rekono Wiki](https://github.com/pablosnt/rekono/wiki/5.-Configuration)
+Check the configuration options in [Rekono Wiki](https://github.com/pablosnt/rekono/wiki/Configuration)
 
 
 ## License
@@ -157,4 +154,4 @@ Rekono is licensed under the [GNU GENERAL PUBLIC LICENSE Version 3](./LICENSE.md
 
 ## Support
 
-If you need help you can create a new support [Issue](https://github.com/pablosnt/rekono-cli/issues/new?template=support.md) or mail rekono.project@gmail.com
+If you need help you can create a new support [Issue](https://github.com/pablosnt/rekono/issues/new?assignees=&labels=help+wanted%2C+question&template=support.md) or mail rekono.project@gmail.com
