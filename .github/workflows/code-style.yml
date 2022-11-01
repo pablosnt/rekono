@@ -2,6 +2,8 @@ name: Code style
 on:
   workflow_dispatch:
   pull_request:
+    paths:
+      - 'rekono/**'
 
 jobs:
   flake8:

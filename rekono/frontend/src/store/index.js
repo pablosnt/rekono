@@ -37,7 +37,7 @@ export default new Vuex.Store({
       } else {
         commit('authenticateUser', { user: null, role: null })
       }
-      if ((sessionStorage.getItem(showMainTabs) === 'true') !== state.mainTabs) {
+      if ((localStorage.getItem(showMainTabs) === 'true') !== state.mainTabs) {
         commit('changeMainTabs')
       }
       commit('setRefreshStatus', false)
@@ -57,7 +57,7 @@ export default new Vuex.Store({
       router.push({ name: 'login' })
     },
     changeMainTabs ({ state, commit }) {
-      sessionStorage.setItem(showMainTabs, !state.mainTabs)
+      localStorage.setItem(showMainTabs, !state.mainTabs)
       commit('changeMainTabs')
     },
     changeRefreshStatus ({ commit }) {
