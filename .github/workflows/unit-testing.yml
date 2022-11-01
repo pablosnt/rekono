@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'rekono/**'
+      - '!rekono/frontend/**'
 
 env:
   REQUIRED_COVERAGE: 95
