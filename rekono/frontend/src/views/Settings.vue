@@ -41,7 +41,7 @@
                             <label>API key</label>
                         </b-col>
                         <b-col sm="7">
-                            <b-form-input type="password" v-model="defectDojoApiKey" placeholder="Defect-Dojo API key"  @change="telegramBotTokenChanged = true" :state="defectDojoApiKeyState"/>
+                            <b-form-input type="password" v-model="defectDojoApiKey" placeholder="Defect-Dojo API key"  @change="defectDojoApiKeyChanged = true" :state="defectDojoApiKeyState"/>
                         </b-col>
                         <b-col sm="3">
                             <b-form-checkbox v-model="defectDojoVerifyTls">TLS verification</b-form-checkbox>
