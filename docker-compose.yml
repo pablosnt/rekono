@@ -46,11 +46,10 @@ services:
   initialize:
     restart: 'no'
     image: rekono-backend:latest
-    command: sh -c "python manage.py frontend && python manage.py migrate && python manage.py createsuperuser --no-input"
+    command: sh -c "python manage.py migrate && python manage.py createsuperuser --no-input"
     container_name: initialize
     volumes:
       - rekono:/rekono
-      - ./rekono/frontend/.env:/code/frontend/.env
       - ./config.yaml:/rekono/config.yaml:ro
     networks:
       - internal
@@ -60,8 +59,6 @@ services:
       - RKN_DB_HOST=postgres
       - RKN_DB_USER=postgres
       - RKN_DB_PASSWORD=postgres
-      - RKN_DD_URL
-      - RKN_DD_API_KEY
       - REKONO_HOME=/rekono
       - DJANGO_SUPERUSER_EMAIL=${RKN_EMAIL:-rekono@rekono.com}
       - DJANGO_SUPERUSER_USERNAME=${RKN_USERNAME:-rekono}
@@ -134,9 +131,6 @@ services:
       - RKN_DB_USER=postgres
       - RKN_DB_PASSWORD=postgres
       - RKN_RQ_HOST=redis
-      - RKN_TELEGRAM_TOKEN
-      - RKN_DD_URL
-      - RKN_DD_API_KEY
       - REKONO_HOME=/rekono
       - OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
     
@@ -188,7 +182,6 @@ services:
       - RKN_DB_USER=postgres
       - RKN_DB_PASSWORD=postgres
       - RKN_RQ_HOST=redis
-      - RKN_TELEGRAM_TOKEN
       - REKONO_HOME=/rekono
   
   backend:
@@ -224,8 +217,6 @@ services:
       - RKN_RQ_HOST=redis
       - RKN_TRUSTED_PROXY=true
       - RKN_ALLOWED_HOSTS=*
-      - RKN_DD_URL
-      - RKN_DD_API_KEY
       - REKONO_HOME=/rekono
   
   frontend:
@@ -235,7 +226,7 @@ services:
       dockerfile: docker/rekono/Dockerfile
       target: frontend
     image: rekono-frontend:latest
-    command: sh -c "npm run build && serve -s dist"
+    command: sh -c "serve -s dist"
     hostname: frontend
     container_name: frontend
     healthcheck:
@@ -246,8 +237,6 @@ services:
       start_period: 30s
     expose:
       - 3000
-    volumes:
-      - ./rekono/frontend/.env:/frontend/.env:ro
     networks:
       - internal
     depends_on:

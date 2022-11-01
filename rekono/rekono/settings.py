@@ -25,22 +25,19 @@ from rekono.config import RekonoConfigLoader
 from rekono.environment import (ENV_REKONO_HOME, RKN_ALLOWED_HOSTS,
                                 RKN_CMSEEK_RESULTS, RKN_DB_HOST, RKN_DB_NAME,
                                 RKN_DB_PASSWORD, RKN_DB_PORT, RKN_DB_USER,
-                                RKN_DD_API_KEY, RKN_DD_URL, RKN_EMAIL_HOST,
-                                RKN_EMAIL_PASSWORD, RKN_EMAIL_PORT,
-                                RKN_EMAIL_USER, RKN_FRONTEND_URL,
-                                RKN_GITTOOLS_DIR, RKN_LOG4J_SCANNER_DIR,
-                                RKN_OTP_EXPIRATION_HOURS, RKN_RQ_HOST,
-                                RKN_RQ_PORT, RKN_SECRET_KEY, RKN_TELEGRAM_BOT,
-                                RKN_TELEGRAM_TOKEN, RKN_TRUSTED_PROXY,
-                                RKN_UPLOAD_FILES_MAX_MB)
+                                RKN_EMAIL_HOST, RKN_EMAIL_PASSWORD,
+                                RKN_EMAIL_PORT, RKN_EMAIL_USER,
+                                RKN_FRONTEND_URL, RKN_GITTOOLS_DIR,
+                                RKN_LOG4J_SCANNER_DIR, RKN_RQ_HOST,
+                                RKN_RQ_PORT, RKN_SECRET_KEY, RKN_TRUSTED_PROXY)
 
 ################################################################################
 # Rekono basic information                                                     #
 ################################################################################
 
 DESCRIPTION = 'Execute full pentesting processes combining multiple hacking tools automatically'    # Rekono description
-VERSION = '1.1.0'                                                               # Rekono version
-
+VERSION = '1.2.0'                                                               # Rekono version
+TESTING = 'test' in sys.argv                                                    # Tests execution
 
 ################################################################################
 # Paths and directories                                                        #
@@ -49,12 +46,15 @@ VERSION = '1.1.0'                                                               
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-FRONTEND_DIR = os.path.join(BASE_DIR, 'frontend')                               # Frontend directory
-
-# Rekono home directory. By default /opt/rekono
-REKONO_HOME = os.getenv(ENV_REKONO_HOME, '/opt/rekono')
-if not os.path.isdir(REKONO_HOME):                                              # Rekono home doesn't exist
-    REKONO_HOME = str(BASE_DIR.parent)                                          # Use current directory as home
+if not TESTING:
+    # Rekono home directory. By default /opt/rekono
+    REKONO_HOME = os.getenv(ENV_REKONO_HOME, '/opt/rekono')
+    if not os.path.isdir(REKONO_HOME):                                          # Rekono home doesn't exist
+        REKONO_HOME = str(BASE_DIR.parent)                                      # Use current directory as home
+else:
+    REKONO_HOME = os.path.join(BASE_DIR, 'testing', 'home')                     # Internal home directory for testing
+    if not os.path.isdir(REKONO_HOME):                                          # Initialize home directory for testing
+        os.mkdir(REKONO_HOME)
 
 REPORTS_DIR = os.path.join(REKONO_HOME, 'reports')                              # Directory to save tool reports
 WORDLIST_DIR = os.path.join(REKONO_HOME, 'wordlists')                           # Directory to save wordlist files
@@ -101,6 +101,7 @@ INSTALLED_APPS = [
     'rekono',
     'resources',
     'security',
+    'system',
     'targets',
     'tasks',
     'telegram_bot',
@@ -141,8 +142,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'rekono.wsgi.application'
 
-TESTING = 'test' in sys.argv                                                    # Tests execution
-
 
 ################################################################################
 # Security                                                                     #
@@ -168,8 +167,7 @@ else:
 
 AUTH_USER_MODEL = 'users.User'                                                  # User model
 
-# OTP expiration time in hours
-OTP_EXPIRATION_HOURS = int(os.getenv(RKN_OTP_EXPIRATION_HOURS, CONFIG.OTP_EXPIRATION_HOURS))
+OTP_EXPIRATION_HOURS = 24                                                       # OTP expiration time in hours
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
@@ -205,9 +203,6 @@ SIMPLE_JWT = {
     'ALGORITHM': 'HS512',
     'SIGNING_KEY': SECRET_KEY
 }
-
-# Max allowed size in MB for upload files
-UPLOAD_FILES_MAX_MB = int(1 if TESTING else os.getenv(RKN_UPLOAD_FILES_MAX_MB, CONFIG.UPLOAD_FILES_MAX_MB))
 
 LOGGING = {                                                                     # Logging configuration
     'version': 1,
@@ -379,29 +374,6 @@ EMAIL_PORT = os.getenv(RKN_EMAIL_PORT, CONFIG.EMAIL_PORT)                       
 EMAIL_HOST_USER = os.getenv(RKN_EMAIL_USER, CONFIG.EMAIL_USER)                  # User for auth in SMTP server
 EMAIL_HOST_PASSWORD = os.getenv(RKN_EMAIL_PASSWORD, CONFIG.EMAIL_PASSWORD)      # Password for auth in SMTP server
 EMAIL_USE_TLS = CONFIG.EMAIL_TLS
-
-
-################################################################################
-# Telegram                                                                     #
-################################################################################
-
-TELEGRAM_BOT = os.getenv(RKN_TELEGRAM_BOT, CONFIG.TELEGRAM_BOT)                 # Telegram bot name
-TELEGRAM_TOKEN = os.getenv(RKN_TELEGRAM_TOKEN, CONFIG.TELEGRAM_TOKEN)           # Telegram token provided by BotFather
-
-
-################################################################################
-# Defect-Dojo                                                                  #
-################################################################################
-
-DEFECT_DOJO = {
-    'URL': os.getenv(RKN_DD_URL, CONFIG.DD_URL),
-    'API_KEY': os.getenv(RKN_DD_API_KEY, CONFIG.DD_API_KEY),                    # Defect-Dojo API key
-    'VERIFY_TLS': CONFIG.DD_VERIFY_TLS,                                         # Defect-Dojo TLS verification
-    'TAGS': CONFIG.DD_TAGS,                                                     # Tags to be included in DD entities
-    'PRODUCT_TYPE': CONFIG.DD_PRODUCT_TYPE,                                     # Product type for new DD products
-    'TEST_TYPE': CONFIG.DD_TEST_TYPE,                                           # Rekono test type name in Defect-Dojo
-    'TEST': CONFIG.DD_TEST                                                      # Rekono test name in Defect-Dojo
-}
 
 
 ################################################################################

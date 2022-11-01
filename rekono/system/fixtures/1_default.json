@@ -1,0 +1,17 @@
+[
+    {
+        "model": "system.System",
+        "pk": 1,
+        "fields": {
+            "upload_files_max_mb": 512,
+            "telegram_bot_token": null,
+            "defect_dojo_url": null,
+            "defect_dojo_api_key": null,
+            "defect_dojo_verify_tls": true,
+            "defect_dojo_tag": "rekono",
+            "defect_dojo_product_type": "Rekono Project",
+            "defect_dojo_test_type": "Rekono Findings Import",
+            "defect_dojo_test": "Rekono Test"
+        }
+    }
+]

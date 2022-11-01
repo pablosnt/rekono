@@ -4,11 +4,11 @@ from executions.models import Execution
 from processes.models import Step
 from tasks.enums import Status, TimeUnit
 from tasks.models import Task
-from testing.api.base import RekonoTestCase
+from testing.api.base import RekonoApiTestCase
 from tools.models import Configuration, Tool
 
 
-class TasksTest(RekonoTestCase):
+class TasksTest(RekonoApiTestCase):
     '''Test cases for Tasks module.'''
 
     def setUp(self) -> None:

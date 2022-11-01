@@ -3,9 +3,10 @@ from typing import Dict, List, Optional
 import requests
 import urllib3
 from django.db import models
+from urllib3.exceptions import InsecureRequestWarning
+
 from input_types.base import BaseInput
 from input_types.models import InputType
-from urllib3.exceptions import InsecureRequestWarning
 
 urllib3.disable_warnings(category=InsecureRequestWarning)
 

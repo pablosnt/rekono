@@ -45,7 +45,7 @@ class ExecutionsFromFindingsTest(TestCase):
         Input.objects.create(argument=test_word, type=InputType.objects.get(name='Wordlist'))
         # Project > Target > Task > Execution to create findings for testing
         self.project = Project.objects.create(name='Test', description='Test', tags=['test'])
-        self.target = Target.objects.create(project=self.project, target='10.10.10.10', type=TargetType.PRIVATE_IP)
+        self.target = Target.objects.create(project=self.project, target='scanme.nmap.org', type=TargetType.DOMAIN)
         task = Task.objects.create(
             target=self.target,
             tool=self.tool,

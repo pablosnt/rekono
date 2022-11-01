@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'rekono/**'
+      - '!rekono/frontend/**'
 
 env:
   REQUIRED_COVERAGE: 95
@@ -46,11 +47,8 @@ jobs:
 
       - name: Run unit tests
         working-directory: rekono
-        env:
-          # Prevent errors testing Defect-Dojo integration
-          RKN_DD_URL: http://127.0.0.1:8080
         run: coverage run manage.py test
       
       - name: Check coverage
         working-directory: rekono
-        run: coverage report -m --skip-covered --fail-under=$REQUIRED_COVERAGE
+        run: coverage report -m --skip-covered --omit="telegram_bot/*" --fail-under=$REQUIRED_COVERAGE

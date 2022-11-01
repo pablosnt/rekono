@@ -81,12 +81,22 @@ export default {
       textRegex: /^[\wÀ-ÿ\s.:,+\-'"?¿¡!#%$€[\]()]*$/,
       pathRegex: /^[\w./#?&%]*$/,
       cveRegex: /^CVE-[0-9]{4}-[0-9]{1,7}$/,
-      defectDojoEnabled: process.env.VUE_APP_DEFECTDOJO.toLowerCase() === 'true',
-      defectDojoUrl: process.env.VUE_APP_DEFECTDOJO_URL,
-      telegramBot: process.env.VUE_APP_TELEGRAM_BOT
+      defectDojoKeyRegex: /^[0-9a-z]{40}$/,
+      telegramTokenRegex: /^[0-9]{10}:[\w-]{35}$/,
+      telegramBotName: null,
+      defectDojoUrl: null,
+      defectDojoEnabled: null
     }
   },
   methods: {
+    getSettings () {
+      this.get('/api/system/1/').then(response => {
+        this.telegramBotName = response.data.telegram_bot_name
+        this.telegramBotLink = this.telegramBotName ? `https://t.me/${this.telegramBotName}` : null
+        this.defectDojoUrl = response.data.defect_dojo_url
+        this.defectDojoEnabled = response.data.defect_dojo_enabled
+      })
+    },
     getOnePage (endpoint, params = null, requiredAuth = true, extraHeaders = null) {
       return this.get(endpoint, this.getPage(), this.getLimit(), params, requiredAuth, extraHeaders)
     },
@@ -162,7 +172,7 @@ export default {
     refresh () {
       if (!this.$store.state.refreshing) {
         this.$store.dispatch('changeRefreshStatus')
-        return axios.post('/api/token/refresh/', { refresh: localStorage[refreshTokenKey] }, this.headers())
+        return axios.post('/api/token/refresh/', { refresh: sessionStorage.getItem(refreshTokenKey) }, this.headers())
           .then(response => {
             removeTokens()
             processTokens(response.data)
@@ -184,7 +194,7 @@ export default {
         Accept: 'application/json'
       }
       if (this.$store.state.user !== null && requiredAuth) {
-        requestHeaders.Authorization = `Bearer ${localStorage[accessTokenKey]}`
+        requestHeaders.Authorization = `Bearer ${sessionStorage.getItem(accessTokenKey)}`
       }
       if (extraHeaders) {
         requestHeaders = Object.assign({}, requestHeaders, extraHeaders)
@@ -253,6 +263,20 @@ export default {
     },
     validateCve (value) {
       return this.validate(value, this.cveRegex)
+    },
+    validateDefectDojoKey (value) {
+      return this.validate(value, this.defectDojoKeyRegex)
+    },
+    validateTelegramToken (value) {
+      return this.validate(value, this.telegramTokenRegex)
+    },
+    validateUrl (value) {
+      try {
+        new URL(value);
+        return true
+      } catch (e) {
+        return false;
+      }
     },
     duration (start, end) {
       var startDate = moment(start)

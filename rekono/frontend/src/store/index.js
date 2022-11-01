@@ -1,7 +1,7 @@
+import { accessTokenKey, decodeToken, processTokens, removeTokens } from '@/backend/tokens'
+import router from '@/router'
 import Vue from 'vue'
 import Vuex from 'vuex'
-import router from '@/router'
-import { accessTokenKey, removeTokens, decodeToken, processTokens } from '@/backend/tokens'
 
 Vue.use(Vuex)
 
@@ -31,7 +31,7 @@ export default new Vuex.Store({
   },
   actions: {
     checkState ({ state, commit }) {
-      const accessToken = localStorage.getItem(accessTokenKey)
+      const accessToken = sessionStorage.getItem(accessTokenKey)
       if (accessToken) {
         commit('authenticateUser', decodeToken(accessToken))
       } else {

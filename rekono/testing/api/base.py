@@ -4,27 +4,26 @@ from typing import Any, Callable, Dict, List, Tuple
 
 import django_rq
 from django.http import HttpResponse
-from django.test import TestCase
 from django.utils import timezone
 from executions.models import Execution
 from findings.enums import OSType, PortStatus, Protocol
 from findings.models import Host, Path, Port
 from processes.models import Process, Step
 from projects.models import Project
+from rekono.settings import RQ_QUEUES
 from rest_framework.test import APIClient
 from rq import SimpleWorker
 from targets.models import (Target, TargetEndpoint, TargetPort,
                             TargetTechnology, TargetVulnerability)
 from tasks.enums import Status
 from tasks.models import Task
+from testing.test_case import RekonoTestCase
 from tools.enums import IntensityRank
 from tools.models import Configuration, Tool
 from users.models import User
 
-from rekono.settings import RQ_QUEUES
 
-
-class RekonoTestCase(TestCase):
+class RekonoApiTestCase(RekonoTestCase):
     '''Base test case.'''
 
     def setUp(self) -> None:
@@ -56,7 +55,7 @@ class RekonoTestCase(TestCase):
     def initialize_environment(self) -> None:
         '''Initialize environment for testing.'''
         self.initialized = True
-        self.target = Target.objects.create(project=self.project, target='10.10.10.10')
+        self.target = Target.objects.create(project=self.project, target='scanme.nmap.org')
         self.target_port = TargetPort.objects.create(target=self.target, port=80)
         self.target_endpoint = TargetEndpoint.objects.create(target_port=self.target_port, endpoint='/robots.txt')
         self.target_technology = TargetTechnology.objects.create(
@@ -97,7 +96,7 @@ class RekonoTestCase(TestCase):
             start=timezone.now(),
             end=timezone.now()
         )
-        self.host = Host.objects.create(address='10.10.10.10', os='Ubuntu', os_type=OSType.LINUX)
+        self.host = Host.objects.create(address='45.33.32.156', os='Ubuntu', os_type=OSType.LINUX)
         self.host.executions.add(self.execution)
         self.port = Port.objects.create(
             host=self.host, port=80, status=PortStatus.OPEN,

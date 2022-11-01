@@ -1,9 +1,9 @@
-from testing.api.base import RekonoTestCase
+from testing.api.base import RekonoApiTestCase
 from tools.enums import IntensityRank
 from tools.models import Argument, Input, Intensity, Output
 
 
-class ToolsTest(RekonoTestCase):
+class ToolsTest(RekonoApiTestCase):
     '''Test cases for Tools module.'''
 
     def setUp(self) -> None:
