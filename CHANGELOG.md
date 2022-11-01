@@ -3,6 +3,23 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2022-11-01
+
+### Added
+
+- `Settings` page to configure Defect-Dojo, Telegram and security properties (https://github.com/pablosnt/rekono/pull/71)
+
+### Fixed
+
+- Docker environment deployment using privileged users (https://github.com/pablosnt/rekono/pull/71)
+- Optimize the frontend build in Docker environment (https://github.com/pablosnt/rekono/pull/72) 
+
+### Security
+
+- Use `sessionStorage` to store access and refresh tokens in the frontend (https://github.com/pablosnt/rekono/pull/74)
+- Upgrade `node` Docker image version to `18.9.1-alpine` (https://github.com/pablosnt/rekono/pull/72)
+
+
 ## [1.1.0] - 2022-10-16
 
 ### Added
