@@ -177,7 +177,7 @@ export default {
         }
         if (this.target) {
           this.targetIds = [this.target.id]
-          this.projectId = this.project ? this.project.id : null
+          this.get(`/api/projects/${this.target.project}/`).then(response => { this.selectProject(this.target.project, response.data) })
         } else if (this.project) {
           this.get(`/api/projects/${this.project.id}/`).then(response => { this.selectProject(this.project.id, response.data) })
         } else {

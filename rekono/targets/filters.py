@@ -1,5 +1,6 @@
 from django_filters import rest_framework
 from django_filters.rest_framework.filters import OrderingFilter
+
 from targets.models import (Target, TargetEndpoint, TargetPort,
                             TargetTechnology, TargetVulnerability)
 
@@ -19,8 +20,6 @@ class TargetFilter(rest_framework.FilterSet):
             'project__owner': ['exact'],
             'project__owner__username': ['exact', 'icontains'],
             'target': ['exact', 'icontains'],
-            'target_ports__port': ['exact'],
-            'target_ports__target_endpoints__endpoint': ['exact', 'icontains'],
             'type': ['exact'],
         }
 
@@ -41,7 +40,6 @@ class TargetPortFilter(rest_framework.FilterSet):
             'target__project__owner': ['exact'],
             'target__project__owner__username': ['exact', 'icontains'],
             'target__target': ['exact', 'icontains'],
-            'target_endpoints__endpoint': ['exact', 'icontains'],
             'target__type': ['exact'],
             'port': ['exact']
         }
