@@ -1,5 +1,5 @@
 <template>
-  <b-modal :id="id" @hidden="clean" @ok="confirm" title="New Target Port" ok-title="Create Target Port" header-bg-variant="dark" header-text-variant="light" ok-variant="dark" size="lg">
+  <b-modal :id="id" @hidden="clean" @ok="confirm" title="New Target Port" ok-title="Create Target Port" header-bg-variant="dark" header-text-variant="light" ok-variant="dark" size="sm">
     <b-form-group :invalid-feedback="invalidPort">
       <b-form-input type="number" v-model="port" placeholder="Target Port" :state="portState" autofocus/>
     </b-form-group>
