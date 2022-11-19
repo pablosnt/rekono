@@ -3,6 +3,19 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2022-11-19
+
+### Added
+
+- Popup to manage the target ports details (https://github.com/pablosnt/rekono/pull/87)
+- Improve user experience while the findings are obtained via API Rest (https://github.com/pablosnt/rekono/pull/88)
+
+### Security
+
+- Upgrade `node` Docker image version to `19.0.1-alpine` (https://github.com/pablosnt/rekono/pull/85)
+- Upgrade `djangorestframework-simplejwt` version to `5.2.2` (https://github.com/pablosnt/rekono/pull/84)
+
+
 ## [1.2.0] - 2022-11-01
 
 ### Added
