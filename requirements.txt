@@ -1,7 +1,7 @@
 coverage==6.3.1
 Django==3.2.16
 djangorestframework==3.12.4
-djangorestframework-simplejwt==5.0.0
+djangorestframework-simplejwt==5.2.2
 django-filter==21.1
 django-rq==2.4.1
 django-taggit==2.0.0
