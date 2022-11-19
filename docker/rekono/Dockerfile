@@ -25,7 +25,7 @@ WORKDIR /code
 ENV REKONO_HOME /rekono
 
 
-FROM node:18.9.1-alpine as frontend
+FROM node:19.0.1-alpine as frontend
 
 RUN mkdir /frontend
 COPY --from=backend /code/frontend /frontend

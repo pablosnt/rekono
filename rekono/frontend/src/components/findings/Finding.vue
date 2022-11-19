@@ -183,6 +183,8 @@ export default {
         index += 1
         if (index < this.severities.length) {
           this.fetchVulnerabilities(filter, index)
+        } else {
+          this.$emit('end')
         }
       })
     },
@@ -191,8 +193,13 @@ export default {
         return
       }
       if (this.target || this.task || this.execution) {
+        this.$emit('start')
         if (this.name.toLowerCase() !== 'vulnerabilities') {
-          this.getAllPages(`/api/${this.name.toLowerCase()}/`, this.getFilter()).then(results => this.findings = results)
+          this.getAllPages(`/api/${this.name.toLowerCase()}/`, this.getFilter())
+            .then(results => {
+              this.findings = results
+              this.$emit('end')
+            })
         } else {
           this.fetchVulnerabilities()
         }
