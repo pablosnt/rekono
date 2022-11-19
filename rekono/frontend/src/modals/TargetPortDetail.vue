@@ -102,6 +102,10 @@ export default {
         })
     },
     check () {
+      this.endpointState = null
+      this.cveState = null
+      this.techState = null
+      this.versionState = null
       if (this.name === 'endpoint' && !this.validatePath(this.newEndpoint)) {
         this.endpointState = false
         this.invalidEndpoint = this.newEndpoint && this.newEndpoint.length > 0 ? 'Invalid endpoint' : 'Endpoint is required'
