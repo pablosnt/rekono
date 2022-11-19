@@ -9,8 +9,9 @@
       </template>
       <template #cell(actions)="row">
         <b-button :disabled="row.item.target_ports.length === 0" @click="showTarget(row)" variant="outline" class="mr-2" v-b-tooltip.hover title="Details">
-          <b-icon v-if="!row.detailsShowing" variant="dark" icon="eye-fill"/>
-          <b-icon v-if="row.detailsShowing" variant="secondary" icon="eye-slash-fill"/>
+          <b-icon v-if="!row.item._showDetails" variant="dark" icon="eye-fill"/>
+          <b-icon v-if="row.item._showDetails" variant="secondary" icon="eye-slash-fill"/>
+          <label style="display: none">{{ showTargetId }}</label>
         </b-button>
         <b-button variant="outline" class="mr-2" v-b-tooltip.hover title="Execute" @click="selectTarget(row.item)" v-b-modal.task-modal v-if="auditor.includes($store.state.role)">
           <b-icon variant="success" icon="play-circle-fill"/>
@@ -103,6 +104,7 @@ export default {
       ],
       selectedTarget: null,
       selectedTargetPort: null,
+      showTargetId: null,
       showTargetPort: null,
       filters: []
     }
@@ -131,8 +133,7 @@ export default {
           this.data = response.data.results
           this.total = response.data.count
           if (this.showTargetId) {
-            let showedTarget = this.data.filter(target => target.id === this.showTargetId)
-            showedTarget.forEach(target => target._showDetails = true)
+            this.data.filter(target => target.id === this.showTargetId).forEach(target => target._showDetails = true)
           }
         })
     },
