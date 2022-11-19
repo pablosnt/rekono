@@ -19,15 +19,16 @@
         </b-button>
       </b-col>
     </b-row>
+    <b-spinner v-if="loading > 0" variant="danger"/>
     <b-row :cols="cols" class="mt-3" style="height: 40rem; overflow-y: scroll">
-      <finding name="hosts" :fields="hosts" :details="hostDetails" @finding-selected="selectFinding" :id="selectedHost" order="address" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="selectedTask" :execution="selectedExecution" :search="search" :active="activeFilter" :reload="reload"/>
-      <finding name="ports" :fields="ports" @finding-selected="selectFinding" :id="selectedPort" :filter="hostFilter" order="-status" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="selectedTask" :execution="selectedExecution" :search="search" :active="activeFilter" :reload="reload"/>
-      <finding name="paths" :fields="paths" :details="pathDetails" :filter="portFilter" order="type" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="selectedTask" :execution="selectedExecution" :search="search" :active="activeFilter" :reload="reload"/>
-      <finding name="technologies" :fields="technologies" :details="technologyDetails" @finding-selected="selectFinding" :id="selectedTechnology" :filter="portFilter" order="name" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="selectedTask" :execution="selectedExecution" :search="search" :active="activeFilter" :reload="reload"/>
-      <finding name="credentials" :fields="credentials" :details="credentialDetails" :filter="technologyFilter" order="email,username" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="selectedTask" :execution="selectedExecution" :search="search" :active="activeFilter" :reload="reload"/>
-      <finding name="vulnerabilities" :fields="vulnerabilities" :details="vulnerabilityDetails" @finding-selected="selectFinding" :id="selectedVulnerability" :filter="technologyAndPortFilter" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="selectedTask" :execution="selectedExecution" :search="search" :active="activeFilter" :reload="reload"/>
-      <finding name="exploits" :fields="exploits" :details="exploitDetails" :filter="vulnerabilityAndTechnologyFilter" order="title" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="selectedTask" :execution="selectedExecution" :search="search" :active="activeFilter" :reload="reload"/>
-      <finding name="osint" :fields="osint" :details="osintDetails" order="data_type" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="selectedTask" :execution="selectedExecution" :search="search" :active="activeFilter" :reload="reload"/>
+      <finding name="hosts" :fields="hosts" :details="hostDetails" @finding-selected="selectFinding" :id="selectedHost" order="address" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="selectedTask" :execution="selectedExecution" :search="search" :active="activeFilter" :reload="reload" @start="loading += 1" @end="loading -= 1"/>
+      <finding name="ports" :fields="ports" @finding-selected="selectFinding" :id="selectedPort" :filter="hostFilter" order="-status" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="selectedTask" :execution="selectedExecution" :search="search" :active="activeFilter" :reload="reload" @start="loading += 1" @end="loading -= 1"/>
+      <finding name="paths" :fields="paths" :details="pathDetails" :filter="portFilter" order="type" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="selectedTask" :execution="selectedExecution" :search="search" :active="activeFilter" :reload="reload" @start="loading += 1" @end="loading -= 1"/>
+      <finding name="technologies" :fields="technologies" :details="technologyDetails" @finding-selected="selectFinding" :id="selectedTechnology" :filter="portFilter" order="name" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="selectedTask" :execution="selectedExecution" :search="search" :active="activeFilter" :reload="reload" @start="loading += 1" @end="loading -= 1"/>
+      <finding name="credentials" :fields="credentials" :details="credentialDetails" :filter="technologyFilter" order="email,username" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="selectedTask" :execution="selectedExecution" :search="search" :active="activeFilter" :reload="reload" @start="loading += 1" @end="loading -= 1"/>
+      <finding name="vulnerabilities" :fields="vulnerabilities" :details="vulnerabilityDetails" @finding-selected="selectFinding" :id="selectedVulnerability" :filter="technologyAndPortFilter" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="selectedTask" :execution="selectedExecution" :search="search" :active="activeFilter" :reload="reload" @start="loading += 1" @end="loading -= 1"/>
+      <finding name="exploits" :fields="exploits" :details="exploitDetails" :filter="vulnerabilityAndTechnologyFilter" order="title" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="selectedTask" :execution="selectedExecution" :search="search" :active="activeFilter" :reload="reload" @start="loading += 1" @end="loading -= 1"/>
+      <finding name="osint" :fields="osint" :details="osintDetails" order="data_type" :selectedFindingTypes="selectedFindings" :target="selectedTarget" :task="selectedTask" :execution="selectedExecution" :search="search" :active="activeFilter" :reload="reload" @start="loading += 1" @end="loading -= 1"/>
     </b-row>
   </div>
 </template>
@@ -180,7 +181,8 @@ export default {
       ],
       exploitDetails: [
         { field: 'reference', title: 'Reference', type: 'text'}
-      ]
+      ],
+      loading: 0
     }
   },
   components: {
