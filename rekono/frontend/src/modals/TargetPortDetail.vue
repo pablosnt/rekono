@@ -4,24 +4,24 @@
       <b-col cols="10">
         <b-form  v-if="name === 'endpoint'">
           <b-form-group :invalid-feedback="invalidEndpoint">
-            <b-form-input type="text" v-model="newEndpoint" placeholder="Endpoint" :state="endpointState" max-length="500" autofocus/>
+            <b-form-input type="text" v-model="newEndpoint" placeholder="Endpoint" :state="endpointState" autofocus/>
           </b-form-group>
         </b-form>
         <b-form  v-if="name === 'vulnerability'">
           <b-form-group :invalid-feedback="invalidCve">
-            <b-form-input type="text" v-model="newCve" placeholder="CVE" :state="cveState" max-length="20" autofocus/>
+            <b-form-input type="text" v-model="newCve" placeholder="CVE" :state="cveState" autofocus/>
           </b-form-group>
         </b-form>
         <b-form  v-if="name === 'technology'">
           <b-row>
             <b-col cols="6">
               <b-form-group :invalid-feedback="invalidTech">
-                <b-form-input type="text" v-model="newTech" placeholder="Technology Name" :state="techState" max-length="100" autofocus/>
+                <b-form-input type="text" v-model="newTech" placeholder="Technology Name" :state="techState" autofocus/>
               </b-form-group>
             </b-col>
             <b-col cols="6">
               <b-form-group :invalid-feedback="invalidVersion">
-                <b-form-input type="text" v-model="newVersion" placeholder="Technology Version" :state="versionState" max-length="100" autofocus/>
+                <b-form-input type="text" v-model="newVersion" placeholder="Technology Version" :state="versionState" autofocus/>
               </b-form-group>
             </b-col>
           </b-row>

@@ -6,9 +6,9 @@ from django.forms import ValidationError
 
 logger = logging.getLogger()                                                    # Rekono logger
 
-NAME_REGEX = r'[\wÀ-ÿ\s\.\-\[\]()]*'                                            # Regex for names validation
-TEXT_REGEX = r'[\wÀ-ÿ\s\.:,+\-\'"?¿¡!#%$€\[\]()]*'                              # Regex for text validation
-PATH_REGEX = r'[\w\./#?&%$\\]*'                                                 # Regex for path validation
+NAME_REGEX = r'[\wÀ-ÿ\s\.\-\[\]()]{0,100}'                                      # Regex for names validation
+TEXT_REGEX = r'[\wÀ-ÿ\s\.:,+\-\'"?¿¡!#%$€\[\]()]{0,300}'                        # Regex for text validation
+PATH_REGEX = r'[\w\./#?&%$\\]{0,500}'                                           # Regex for path validation
 CVE_REGEX = r'CVE-[0-9]{4}-[0-9]{1,7}'                                          # Regex for CVE validation
 DD_KEY_REGEX = r'[0-9a-z]{40}'                                                  # Regex for Defect-Dojo key validation
 TELEGRAM_TOKEN_REGEX = r'[0-9]{10}:[\w\-]{35}'                                  # Regex for Telegram token validation
