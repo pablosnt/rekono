@@ -1,6 +1,7 @@
-from findings.models import Credential, Path
-from targets.models import TargetEndpoint, TargetPort
+from findings.models import Credential
+from targets.models import TargetPort
 from testing.tools.base import ToolParserTest
+
 from tools.exceptions import ToolExecutionException
 
 
@@ -54,15 +55,7 @@ class GitLeaksParserTest(ToolParserTest):
                 'context': '/.git/ : misc-keys/cert-key.pem -> Line 1'
             }
         ]
-        self.tool.findings_relations = {                                        # Test with Path
-            Path.__name__.lower(): Path.objects.create(path='/.git/', status=200)
+        self.tool.findings_relations = {                                        # Test with TargetPort
+            TargetPort.__name__.lower(): TargetPort.objects.create(target=self.target, port=80)
         }
-        super().check_tool_file_parser('leaky-repo.json', expected)
-        target_port = TargetPort.objects.create(target=self.target, port=80)
-        self.tool.findings_relations = {                                        # Test with TargetEndpoint
-            TargetEndpoint.__name__.lower(): TargetEndpoint.objects.create(target_port=target_port, endpoint='/.git/')
-        }
-        self.tool.findings = []                                                 # Reset tool findings
-        for item in expected:
-            item['model'] = Credential                                          # Reset expected models
         super().check_tool_file_parser('leaky-repo.json', expected)

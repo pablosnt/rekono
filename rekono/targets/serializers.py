@@ -3,8 +3,8 @@ from typing import Any, Dict
 from django.forms import ValidationError
 from rest_framework import serializers
 
-from targets.models import (Target, TargetEndpoint, TargetPort,
-                            TargetTechnology, TargetVulnerability)
+from targets.models import (Target, TargetPort, TargetTechnology,
+                            TargetVulnerability)
 from targets.utils import get_target_type
 
 
@@ -16,10 +16,10 @@ class TargetPortSerializer(serializers.ModelSerializer):
 
         model = TargetPort
         fields = (                                                              # Target port fields exposed via API
-            'id', 'target', 'port', 'target_endpoints', 'target_technologies', 'target_vulnerabilities'
+            'id', 'target', 'port', 'target_technologies', 'target_vulnerabilities'
         )
         # Read only fields
-        read_only_fields = ('target_endpoints', 'target_technologies', 'target_vulnerabilities')
+        read_only_fields = ('target_technologies', 'target_vulnerabilities')
 
     def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
         '''Validate the provided data before use it.
@@ -143,31 +143,4 @@ class TargetTechnologySerializer(serializers.ModelSerializer):
                 'name': 'This name already exists in this target port',
                 'version': 'This version already exists for this technology in this target port'
             })
-        return attrs
-
-
-class TargetEndpointSerializer(serializers.ModelSerializer):
-    '''Serializer to manage target endpoints via API.'''
-
-    class Meta:
-        '''Serializer metadata.'''
-
-        model = TargetEndpoint
-        fields = ('id', 'target_port', 'endpoint')                              # Target endpoint fields exposed via API
-
-    def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
-        '''Validate the provided data before use it.
-
-        Args:
-            attrs (Dict[str, Any]): Provided data
-
-        Raises:
-            ValidationError: Raised if provided data is invalid
-
-        Returns:
-            Dict[str, Any]: Data after validation process
-        '''
-        attrs = super().validate(attrs)
-        if TargetEndpoint.objects.filter(target_port=attrs['target_port'], endpoint=attrs['endpoint']).exists():
-            raise ValidationError({'endpoint': 'This endpoint already exists in this target port'})
         return attrs

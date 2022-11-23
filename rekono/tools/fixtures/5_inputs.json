@@ -254,14 +254,24 @@
         "pk": 26,
         "fields": {
             "argument": 17,
-            "type": 4,
-            "filter": ".git",
+            "type": 3,
+            "filter": null,
             "order": 1
         }
     },
     {
         "model": "tools.input",
         "pk": 27,
+        "fields": {
+            "argument": 17,
+            "type": 2,
+            "filter": null,
+            "order": 2
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 28,
         "fields": {
             "argument": 18,
             "type": 3,
@@ -271,7 +281,7 @@
     },
     {
         "model": "tools.input",
-        "pk": 28,
+        "pk": 29,
         "fields": {
             "argument": 18,
             "type": 2,
@@ -281,7 +291,7 @@
     },
     {
         "model": "tools.input",
-        "pk": 29,
+        "pk": 30,
         "fields": {
             "argument": 19,
             "type": 3,
@@ -291,7 +301,7 @@
     },
     {
         "model": "tools.input",
-        "pk": 30,
+        "pk": 31,
         "fields": {
             "argument": 20,
             "type": 3,
@@ -301,7 +311,7 @@
     },
     {
         "model": "tools.input",
-        "pk": 31,
+        "pk": 32,
         "fields": {
             "argument": 20,
             "type": 2,
@@ -311,7 +321,7 @@
     },
     {
         "model": "tools.input",
-        "pk": 32,
+        "pk": 33,
         "fields": {
             "argument": 21,
             "type": 3,

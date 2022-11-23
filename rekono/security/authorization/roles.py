@@ -16,7 +16,6 @@ ROLES = {
         'add_project', 'change_project', 'delete_project', 'view_project',      # Projects
         'add_target', 'delete_target', 'view_target',                           # Targets
         'add_targetport', 'delete_targetport', 'view_targetport',               # Target ports
-        'add_targetendpoint', 'delete_targetendpoint', 'view_targetendpoint',   # Target endpoints
         'add_task', 'delete_task', 'view_task',                                 # Tasks
         'view_execution',                                                       # Executions
         'add_osint', 'delete_osint', 'view_osint',                              # OSINT
@@ -41,7 +40,6 @@ ROLES = {
         'view_project',                                                         # Projects
         'add_target', 'delete_target', 'view_target',                           # Targets
         'add_targetport', 'delete_targetport', 'view_targetport',               # Target ports
-        'add_targetendpoint', 'delete_targetendpoint', 'view_targetendpoint',   # Target endpoints
         'add_task', 'delete_task', 'view_task',                                 # Tasks
         'view_execution',                                                       # Executions
         'add_osint', 'delete_osint', 'view_osint',                              # OSINT
@@ -66,7 +64,6 @@ ROLES = {
         'view_project',                                                         # Projects
         'view_target',                                                          # Targets
         'view_targetport',                                                      # Target ports
-        'view_targetendpoint',                                                  # Target endpoints
         'view_task',                                                            # Tasks
         'view_execution',                                                       # Executions
         'view_osint',                                                           # OSINT

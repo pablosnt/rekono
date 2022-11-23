@@ -79,40 +79,6 @@ class TargetPortsTest(RekonoApiTestCase):
         self.api_test(self.client.get, f'{self.endpoint}{self.target_port.id}/', 404)
 
 
-class TargetEndpointsTest(RekonoApiTestCase):
-    '''Test cases for Target Endpoint entity from Targets module.'''
-
-    def setUp(self) -> None:
-        '''Create initial data before run tests.'''
-        self.endpoint = '/api/target-endpoints/'                                # Target Endpoints API endpoint
-        super().setUp()
-        super().initialize_environment()                                        # Initialize testing environment
-        # Data for testing
-        self.used_data = {'target_port': self.target_port.id, 'endpoint': self.target_endpoint.endpoint}
-        self.models = {                                                         # Models to test __str__ method
-            self.target_endpoint: f'{self.target_port.__str__()} - {self.target_endpoint.endpoint}'
-        }
-
-    def test_create(self) -> None:
-        '''Test target endpoint creation.'''
-        self.used_data['endpoint'] = '/admin'
-        # Create new target endpoint
-        content = self.api_test(self.client.post, self.endpoint, 201, data=self.used_data, expected=self.used_data)
-        self.api_test(self.client.get, f'{self.endpoint}{content["id"]}/', expected=self.used_data)
-
-    def test_invalid_create(self) -> None:
-        '''Test target endpoint creation with invalid data.'''
-        self.api_test(self.client.post, self.endpoint, 400, data=self.used_data)   # Target endpoint already exists
-        self.used_data['endpoint'] = '/invalid;endpoint;'
-        self.api_test(self.client.post, self.endpoint, 400, data=self.used_data)   # Invalid endpoint value
-
-    def test_delete(self) -> None:
-        '''Test target endpoint deletion feature.'''
-        # Delete target endpoint
-        self.api_test(self.client.delete, f'{self.endpoint}{self.target_endpoint.id}/', 204)
-        self.api_test(self.client.get, f'{self.endpoint}{self.target_endpoint.id}/', 404)
-
-
 class TargetTechnologiesTest(RekonoApiTestCase):
     '''Test cases for Target Technology entity from Targets module.'''
 

@@ -2,11 +2,6 @@
   <div>
     <b-row>
       <b-col cols="10">
-        <b-form  v-if="name === 'endpoint'">
-          <b-form-group :invalid-feedback="invalidEndpoint">
-            <b-form-input type="text" v-model="newEndpoint" placeholder="Endpoint" :state="endpointState" autofocus/>
-          </b-form-group>
-        </b-form>
         <b-form  v-if="name === 'vulnerability'">
           <b-form-group :invalid-feedback="invalidCve">
             <b-form-input type="text" v-model="newCve" placeholder="CVE" :state="cveState" autofocus/>
@@ -106,11 +101,7 @@ export default {
       this.cveState = null
       this.techState = null
       this.versionState = null
-      if (this.name === 'endpoint' && !this.validatePath(this.newEndpoint)) {
-        this.endpointState = false
-        this.invalidEndpoint = this.newEndpoint && this.newEndpoint.length > 0 ? 'Invalid endpoint' : 'Endpoint is required'
-        return false
-      } else if (this.name === 'vulnerability' && !this.validateCve(this.newCve)) {
+      if (this.name === 'vulnerability' && !this.validateCve(this.newCve)) {
         this.cveState = false
         this.invalidCve = this.newCve && this.newCve.length > 0 ? 'Invalid CVE' : 'CVE is required'
         return false
@@ -132,9 +123,7 @@ export default {
         let creationData = {
           target_port: this.targetPortId
         }
-        if (this.name === 'endpoint') {
-          creationData['endpoint'] = this.newEndpoint
-        } else if (this.name === 'vulnerability') {
+        if (this.name === 'vulnerability') {
           creationData['cve'] = this.newCve
         } else if (this.name === 'technology') {
           creationData['name'] = this.newTech

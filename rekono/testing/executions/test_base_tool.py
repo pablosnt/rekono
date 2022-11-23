@@ -14,8 +14,8 @@ from resources.enums import WordlistType
 from resources.models import Wordlist
 from rq import SimpleWorker
 from targets.enums import TargetType
-from targets.models import (Target, TargetEndpoint, TargetPort,
-                            TargetTechnology, TargetVulnerability)
+from targets.models import (Target, TargetPort, TargetTechnology,
+                            TargetVulnerability)
 from tasks.enums import Status
 from tasks.models import Task
 from testing.mocks.defectdojo import (defect_dojo_error, defect_dojo_success,
@@ -120,7 +120,6 @@ class BaseToolTest(RekonoTestCase):
         target = Target.objects.create(project=self.project, target='45.33.32.156', type=TargetType.PUBLIC_IP)
         target_port_http = TargetPort.objects.create(target=target, port=80)
         target_port_https = TargetPort.objects.create(target=target, port=443)
-        target_endpoint = TargetEndpoint.objects.create(target_port=target_port_http, endpoint='/robots.txt')
         target_technology = TargetTechnology.objects.create(
             target_port=target_port_http,
             name='Wordpress',
@@ -155,7 +154,6 @@ class BaseToolTest(RekonoTestCase):
         self.targets.extend([
             target_filtered, target,
             target_port_http, target_port_https,
-            target_endpoint,
             target_technology,
             target_vulnerability
         ])

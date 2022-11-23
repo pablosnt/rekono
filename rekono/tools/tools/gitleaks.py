@@ -2,17 +2,16 @@ import json
 import os
 import subprocess
 import uuid
-from typing import Any, List, Union
+from typing import List
 
 from findings.enums import Severity
-from findings.models import Credential, Finding, Path, Vulnerability
+from findings.models import Credential, Finding, Port, Vulnerability
 from input_types.enums import InputKeyword
 from input_types.models import BaseInput
-from targets.models import TargetEndpoint
+from rekono.settings import REPORTS_DIR, TOOLS
+
 from tools.exceptions import ToolExecutionException
 from tools.tools.base_tool import BaseTool
-
-from rekono.settings import REPORTS_DIR, TOOLS
 
 
 class GitleaksTool(BaseTool):
@@ -36,31 +35,16 @@ class GitleaksTool(BaseTool):
         ):
             raise ToolExecutionException('Tool gitdumper is not installed in the system')
 
-    def get_git_endpoint(self) -> Union[Path, TargetEndpoint]:
-        '''Get .git endpoint from arguments.
-
-        Returns:
-            Union[Path, TargetEndpoint]: Path or TargetEndpoint with .git endpoint
-        '''
-        endpoint: Any = None
-        if Path.__name__.lower() in self.findings_relations:
-            endpoint = self.findings_relations[Path.__name__.lower()]       # Get Path
-        elif TargetEndpoint.__name__.lower() in self.findings_relations:
-            endpoint = self.findings_relations[TargetEndpoint.__name__.lower()]     # Get TargetEndpoint
-        return endpoint
-
     def parse_output_file(self) -> None:
         '''Parse tool output file to create finding entities. This should be implemented by child tool classes.'''
         with open(self.path_output, 'r', encoding='utf-8') as output_file:
             data = json.load(output_file)                                       # Read output file
-        endpoint = self.get_git_endpoint()                                      # Get .git endpoint
         emails = []
         for finding in data:                                                    # For each finding
-            path = endpoint.endpoint if isinstance(endpoint, TargetEndpoint) else endpoint.path
             self.create_finding(                                                # Save secret match
                 Credential,
                 secret=finding.get('Match'),
-                context=f'{path} : {finding.get("File")} -> Line {finding.get("StartLine")}'
+                context=f'/.git/ : {finding.get("File")} -> Line {finding.get("StartLine")}'
             )
             email = finding.get('Email')
             if email and email not in emails:                                   # New commit author email
@@ -68,7 +52,7 @@ class GitleaksTool(BaseTool):
                 self.create_finding(                                            # Save commit author email
                     Credential,
                     email=email,
-                    context=f'{path} : Email of the commit author {finding.get("Author")}'
+                    context=f'/.git/ : Email of the commit author {finding.get("Author")}'
                 )
 
     def tool_execution(self, arguments: List[str], targets: List[BaseInput], previous_findings: List[Finding]) -> str:
@@ -85,11 +69,13 @@ class GitleaksTool(BaseTool):
         Returns:
             str: Plain output of the tool execution
         '''
-        endpoint = self.get_git_endpoint()                                      # Get .git endpoint
-        if endpoint:
-            data = endpoint.parse()                                             # Parse endpoint data
-            if data[InputKeyword.URL.name.lower()] and data[InputKeyword.URL.name.lower()][-1] != '/':
-                data[InputKeyword.URL.name.lower()] += '/'                      # Add last slash to prevent errors
+        _, service = list(self.findings_relations.items())[0]                   # Get http service to scan
+        data = service.parse()
+        if InputKeyword.URL.name.lower() in data and data[InputKeyword.URL.name.lower()]:
+            if data[InputKeyword.URL.name.lower()][-1] != '/':
+                data[InputKeyword.URL.name.lower()] += '/.git/'                 # Add .git path with last slash
+            else:
+                data[InputKeyword.URL.name.lower()] += '.git/'                  # Add .git path with last slash
             self.run_directory = os.path.join(REPORTS_DIR, str(uuid.uuid4()))   # Path where Git repo will be dumped
             exec = subprocess.run(                                              # Dump Git repository
                 [
@@ -109,13 +95,12 @@ class GitleaksTool(BaseTool):
                 git_dumped = len([d for d in dirs if d != '.git']) > 0 or len(files) > 0
                 break
             if git_dumped:                                                      # Git repository has been dumped
-                path = endpoint.endpoint if isinstance(endpoint, TargetEndpoint) else endpoint.path
                 self.create_finding(                                            # Create related vulnerability
                     Vulnerability,
-                    port=endpoint.port if isinstance(endpoint, Path) else None,
+                    port=service if isinstance(service, Port) else None,
                     name='Git source code exposure',
                     description=(
-                        f'Source code is exposed in the endpoint {path} and '
+                        'Source code is exposed in the endpoint /.git/ and '
                         "it's possible to dump it as a git repository"
                     ),
                     severity=Severity.HIGH,
