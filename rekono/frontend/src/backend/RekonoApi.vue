@@ -79,7 +79,6 @@ export default {
       timeUnits: ['Weeks', 'Days', 'Hours', 'Minutes'],
       nameRegex: /^[\wÀ-ÿ\s.\-[\]()]{0,100}$/,
       textRegex: /^[\wÀ-ÿ\s.:,+\-'"?¿¡!#%$€[\]()]{0,300}$/,
-      pathRegex: /^[\w./#?&%]{0,500}$/,
       cveRegex: /^CVE-[0-9]{4}-[0-9]{1,7}$/,
       defectDojoKeyRegex: /^[0-9a-z]{40}$/,
       telegramTokenRegex: /^[0-9]{10}:[\w-]{35}$/,
@@ -257,9 +256,6 @@ export default {
     },
     validateText (value) {
       return this.validate(value, this.textRegex)
-    },
-    validatePath (value) {
-      return this.validate(value, this.pathRegex)
     },
     validateCve (value) {
       return this.validate(value, this.cveRegex)

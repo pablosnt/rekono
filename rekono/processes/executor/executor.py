@@ -9,8 +9,8 @@ from input_types.models import InputType
 from processes.executor.callback import process_callback
 from processes.models import Step
 from rq.job import Job
-from targets.models import (Target, TargetEndpoint, TargetPort,
-                            TargetTechnology, TargetVulnerability)
+from targets.models import (Target, TargetPort, TargetTechnology,
+                            TargetVulnerability)
 from tasks.models import Task
 from tools.models import Argument, Intensity
 
@@ -98,10 +98,6 @@ def execute(task: Task) -> None:
         if f'{app_label}.{TargetPort._meta.model_name}' not in covered_targets:
             # TargetPort is not covered by dependencies
             targets.extend(list(task.target.target_ports.all()))                # Add task target ports to targets
-        if f'{app_label}.{TargetEndpoint._meta.model_name}' not in covered_targets:
-            # TargetEndpoint is not covered by dependencies
-            # Add task target endpoints to targets
-            targets.extend(list(TargetEndpoint.objects.filter(target_port__target=task.target).all()))
         if f'{app_label}.{TargetTechnology._meta.model_name}' not in covered_targets:
             # TargetTechnology is not covered by dependencies
             # Add target technologies to task targets
@@ -114,7 +110,7 @@ def execute(task: Task) -> None:
         # A job can need multiple executions. For example, if the user includes more than one Wordlist and
         # the process includes Dirsearch execution that only accepts one wordlist as argument. Rekono will
         # generate one Dirsearch execution for each wordlist provided by the user. It can also occur with
-        # TargetPort and TargetEndpoint.
+        # TargetPort, TargetTechnology or TargetVulnerability.
         executions = utils.get_executions_from_findings(targets, job.step.tool)
         for execution_targets in executions:                                    # For each job execution
             # Create the Execution entity

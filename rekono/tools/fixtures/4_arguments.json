@@ -180,8 +180,8 @@
         "pk": 17,
         "fields": {
             "tool": 15,
-            "name": "endpoint",
-            "argument": "{endpoint}",
+            "name": "url",
+            "argument": "{url}",
             "required": true,
             "multiple": false
         }

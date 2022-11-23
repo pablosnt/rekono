@@ -5,13 +5,12 @@ from django.db.models import QuerySet
 from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
                                    ListModelMixin, RetrieveModelMixin)
 from rest_framework.viewsets import GenericViewSet
-from targets.filters import (TargetEndpointFilter, TargetFilter,
-                             TargetPortFilter, TargetTechnologyFilter,
-                             TargetVulnerabilityFilter)
-from targets.models import (Target, TargetEndpoint, TargetPort,
-                            TargetTechnology, TargetVulnerability)
-from targets.serializers import (TargetEndpointSerializer,
-                                 TargetPortSerializer, TargetSerializer,
+
+from targets.filters import (TargetFilter, TargetPortFilter,
+                             TargetTechnologyFilter, TargetVulnerabilityFilter)
+from targets.models import (Target, TargetPort, TargetTechnology,
+                            TargetVulnerability)
+from targets.serializers import (TargetPortSerializer, TargetSerializer,
                                  TargetTechnologySerializer,
                                  TargetVulnerabilitySerializer)
 
@@ -25,7 +24,7 @@ class TargetViewSet(GenericViewSet, CreateModelMixin, ListModelMixin, RetrieveMo
     serializer_class = TargetSerializer
     filterset_class = TargetFilter
     # Fields used to search targets
-    search_fields = ['target', 'target_ports__port', 'target_ports__target_endpoints__endpoint']
+    search_fields = ['target']
     # Project members field used for authorization purposes
     project_members_field = 'project__members'
 
@@ -68,7 +67,7 @@ class TargetPortViewSet(TargetViewSet):
     serializer_class = TargetPortSerializer
     filterset_class = TargetPortFilter
     # Fields used to search target ports
-    search_fields = ['target__target', 'port', 'target_endpoints__endpoint']
+    search_fields = ['port']
     # Project members field used for authorization purposes
     project_members_field = 'target__project__members'
 
@@ -82,29 +81,6 @@ class TargetPortViewSet(TargetViewSet):
             QuerySet: Project members related to the instance
         '''
         return data['target'].project.members.all()
-
-
-class TargetEndpointViewSet(TargetViewSet):
-    '''TargetEndpoint ViewSet that includes: get, retrieve, create, and delete features.'''
-
-    queryset = TargetEndpoint.objects.all().order_by('-id')
-    serializer_class = TargetEndpointSerializer
-    filterset_class = TargetEndpointFilter
-    # Fields used to search target endpoints
-    search_fields = ['target_port__target__target', 'target_port__port', 'endpoint']
-    # Project members field used for authorization purposes
-    project_members_field = 'target_port__target__project__members'
-
-    def get_project_members(self, data: Dict[str, Any]) -> QuerySet:
-        '''Get project members from serializer validated data.
-
-        Args:
-            data (Dict[str, Any]): Validated data from serializer
-
-        Returns:
-            QuerySet: Project members related to the instance
-        '''
-        return data['target_port'].target.project.members.all()
 
 
 class TargetTechnologyViewSet(TargetViewSet):

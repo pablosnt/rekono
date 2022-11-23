@@ -13,8 +13,6 @@ from telegram_bot.conversations.cancel import cancel
 from telegram_bot.conversations.execute import (execute, execute_process,
                                                 execute_tool)
 from telegram_bot.conversations.new_target import create_target, new_target
-from telegram_bot.conversations.new_target_endpoint import (
-    create_target_endpoint, new_target_endpoint)
 from telegram_bot.conversations.new_target_port import (create_target_port,
                                                         new_target_port)
 from telegram_bot.conversations.new_target_technology import (
@@ -96,17 +94,6 @@ def deploy() -> None:
                 SELECT_PROJECT: [CallbackQueryHandler(select_project)],
                 SELECT_TARGET: [CallbackQueryHandler(select_target)],
                 CREATE: [MessageHandler(Filters.text, create_target_port)]
-            },
-            fallbacks=[CommandHandler('cancel', cancel)],
-            per_chat=True
-        ))
-        updater.dispatcher.add_handler(ConversationHandler(                     # Create new target endpoint
-            entry_points=[CommandHandler('newendpoint', new_target_endpoint)],
-            states={
-                SELECT_PROJECT: [CallbackQueryHandler(select_project)],
-                SELECT_TARGET: [CallbackQueryHandler(select_target)],
-                SELECT_TARGET_PORT: [CallbackQueryHandler(select_target_port)],
-                CREATE: [MessageHandler(Filters.text, create_target_endpoint)]
             },
             fallbacks=[CommandHandler('cancel', cancel)],
             per_chat=True

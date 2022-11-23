@@ -3,12 +3,6 @@
     <b-tabs fill card active-nav-item-class="text-danger">
       <b-tab title-link-class="text-secondary">
         <template #title>
-          <b-icon icon="slash-lg"/> Endpoints
-        </template>
-        <target-port-detail :targetPortId="targetPort.id" endpoint="endpoints" name="endpoint" field="endpoint" :fields="targetEndpointsFields"/>
-      </b-tab>
-      <b-tab title-link-class="text-secondary">
-        <template #title>
           <b-icon icon="cpu-fill"/> Technologies
         </template>
         <target-port-detail :targetPortId="targetPort.id" endpoint="technologies" name="technology" field="name" :fields="targetTechnologiesFields"/>
@@ -35,9 +29,6 @@ export default {
   },
   data () {
     return {
-      targetEndpointsFields: [
-        { key: 'endpoint' }
-      ],
       targetTechnologiesFields: [
         { key: 'name', label: 'Technology' },
         { key: 'version' }

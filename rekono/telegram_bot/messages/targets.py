@@ -7,9 +7,6 @@ ASK_FOR_NEW_TARGET_PORT = 'What is the target port number?'
 NEW_TARGET_PORT = 'New target port *{port}* for target *{target}*'
 INVALID_TARGET_PORT = 'Port should be a valid number'
 
-ASK_FOR_NEW_TARGET_ENDPOINT = 'What is the target endpoint?'
-NEW_TARGET_ENDPOINT = 'New target endpoint *{endpoint}* for target *{target}*'
-
 ASK_FOR_NEW_TARGET_TECHNOLOGY = 'What is the target technology? Please, in format "<name> - <version>"'
 NEW_TARGET_TECHNOLOGY = 'New target technology *{name}* for target *{target}*'
 

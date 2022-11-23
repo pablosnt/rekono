@@ -97,7 +97,6 @@ export default {
       data: [],
       targetPortsFields: [
         { key: 'port', sortable: true },
-        { key: 'target_endpoints.length', label: 'Endpoints', sortable: false},
         { key: 'target_technologies.length', label: 'Technologies', sortable: false},
         { key: 'target_vulnerabilities.length', label: 'Vulnerabilities', sortable: false},
         { key: 'actions', sortable: false },

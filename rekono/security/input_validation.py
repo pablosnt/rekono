@@ -76,18 +76,6 @@ def validate_text(value: str) -> None:
     validate_text_value(value, TEXT_REGEX)
 
 
-def validate_path(value: str) -> None:
-    '''Validate if path is valid based on regex.
-
-    Args:
-        value (str): Path value
-
-    Raises:
-        ValidationError: Raised if value doesn't match the expected regex
-    '''
-    validate_text_value(value, PATH_REGEX)
-
-
 def validate_cve(value: str) -> None:
     '''Validate if path is valid based on regex.
 

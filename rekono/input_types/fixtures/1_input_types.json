@@ -32,7 +32,7 @@
         "fields": {
             "name": "Path",
             "related_model": "findings.path",
-            "callback_target": "targets.targetendpoint"
+            "callback_target": null
         }
     },
     {
