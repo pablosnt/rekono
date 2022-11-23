@@ -77,7 +77,7 @@ class BaseToolTest(RekonoTestCase):
         ]).split(' ')
         self.required_expected = ' '.join([
             '-T3', '--osint http://scanme.nmap.org/', '--only-host 45.33.32.156', '--host 45.33.32.156',
-            '--port 443', '--port-commas 80,443', '--endpoint /robots.txt', '--tech Wordpress',
+            '--port 443', '--port-commas 80,443', '--tech Wordpress',
             '--version 1.0.0', '--vuln CVE-2021-44228', '--exploit Test', f'--wordlist {self.wordlist.path}'
         ]).split(' ')
         # Tool instance
@@ -253,7 +253,6 @@ class BaseToolTest(RekonoTestCase):
         Input.objects.create(argument=argument, type=InputType.objects.get(name='Path'), filter='200')
         self.arguments.append(argument)
         self.all_findings.extend([filtered, self.path])
-        self.required_findings.extend([filtered, self.path])
 
     def create_technologies(self, port: Port) -> Technology:
         '''Create technology data for testing.
@@ -459,7 +458,13 @@ class BaseToolTest(RekonoTestCase):
     def test_get_arguments_using_targets(self) -> None:
         '''Test get_arguments feature using targets.'''
         arguments = self.tool_instance.get_arguments(self.targets, self.findings_to_use_targets)
-        self.assertEqual(self.all_expected, arguments)
+        expected = ' '.join([
+            '-T3', '--osint http://scanme.nmap.org/', '--only-host 45.33.32.156', '--host 45.33.32.156',
+            '--port 443', '--port-commas 80,443', '--tech Wordpress',
+            '--version 1.0.0', '--email test@test.test', '--username test', '--secret test',
+            '--vuln CVE-2021-44228', '--exploit Test', f'--wordlist {self.wordlist.path}'
+        ]).split(' ')
+        self.assertEqual(expected, arguments)
 
     def test_get_arguments_using_targets_without_filters(self) -> None:
         '''Test get_arguments feature using targets without input filters.'''
@@ -467,7 +472,7 @@ class BaseToolTest(RekonoTestCase):
         arguments = self.tool_instance.get_arguments(self.targets, self.findings_to_use_targets)
         expected = ' '.join([
             '-T3', '--osint http://scanme.nmap.org/', '--only-host scanme.nmap.org', '--host 45.33.32.156',
-            '--port 443', '--port-commas 80,443', '--endpoint /robots.txt', '--tech Wordpress',
+            '--port 443', '--port-commas 80,443', '--tech Wordpress',
             '--version 1.0.0', '--email test@test.test', '--username test', '--secret test',
             '--vuln CVE-2021-44228', '--exploit Test', f'--wordlist {self.wordlist.path}'
         ]).split(' ')
@@ -479,7 +484,7 @@ class BaseToolTest(RekonoTestCase):
         arguments = self.tool_instance.get_arguments(self.targets, self.findings_to_use_targets)
         expected = ' '.join([
             '-T3', '--osint http://scanme.nmap.org/', '--only-host scanme.nmap.org', '--host 45.33.32.156',
-            '--port 80', '--port-commas 80', '--endpoint /robots.txt', '--tech Wordpress',
+            '--port 80', '--port-commas 80', '--tech Wordpress',
             '--version 1.0.0', '--email test@test.test', '--username test', '--secret test',
             '--vuln CVE-2021-44228', '--exploit Test', f'--wordlist {self.wordlist.path}'
         ]).split(' ')
