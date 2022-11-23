@@ -38,7 +38,7 @@ class ExecutionsFromFindingsTest(TestCase):
         Input.objects.create(argument=test_enum, type=InputType.objects.get(name='Technology'), order=2)
         Input.objects.create(argument=test_enum, type=InputType.objects.get(name='Port'), order=3)
         # Path argument
-        test_path = Argument.objects.create(tool=self.tool, name='test_path', required=True)
+        test_path = Argument.objects.create(tool=self.tool, name='test_path', required=False)
         Input.objects.create(argument=test_path, type=InputType.objects.get(name='Path'))
         # Wordlist argument
         test_word = Argument.objects.create(tool=self.tool, name='test_word', required=False)
