@@ -247,7 +247,7 @@ class BaseToolTest(RekonoTestCase):
             tool=self.nmap,
             name='test_path',
             argument='--endpoint {endpoint}',
-            required=True
+            required=False
         )
         # Input filtered by HTTP status code: HTTP Ok required
         Input.objects.create(argument=argument, type=InputType.objects.get(name='Path'), filter='200')
