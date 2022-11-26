@@ -2,7 +2,7 @@ import logging
 from typing import Optional
 
 from system.models import System
-from telegram.error import InvalidToken
+from telegram.error import InvalidToken, Unauthorized
 from telegram.ext import (CallbackQueryHandler, CommandHandler,
                           ConversationHandler, Filters, MessageHandler,
                           Updater)
@@ -60,7 +60,7 @@ def initialize() -> None:
     try:
         updater = Updater(token=System.objects.first().telegram_bot_token)      # Telegram client
         updater.bot.set_my_commands(get_my_commands())                          # Configure bot commands
-    except InvalidToken:
+    except (InvalidToken, Unauthorized):
         handle_invalid_telegram_token(initialize)
     except Exception:
         logger.error('[Telegram Bot] Error during Telegram bot initialization')
@@ -152,7 +152,7 @@ def deploy() -> None:
             per_chat=True
         ))
         updater.start_polling()                                                 # Start Telegram Bot
-    except InvalidToken:
+    except (InvalidToken, Unauthorized):
         handle_invalid_telegram_token(deploy)
     except Exception:
         logger.error('[Telegram Bot] Error during Telegram bot deployment')

@@ -14,6 +14,8 @@ def wait_until_telegram_token_is_configured(sleep_time: int) -> None:
         sleep_time (int): Seconds to sleep
     '''
     token = System.objects.first().telegram_bot_token                           # Check the Telegram token
+    if not token:
+        logger.info('[Telegram Bot] Waiting until Telegram token is configured')
     while not token:
         time.sleep(sleep_time)                                                  # Sleep some time
         token = System.objects.first().telegram_bot_token                       # Check the Telegram token again
