@@ -2,6 +2,7 @@ import logging
 from typing import Optional
 
 from system.models import System
+from telegram.error import InvalidToken, Unauthorized
 from telegram.ext import (CallbackQueryHandler, CommandHandler,
                           ConversationHandler, Filters, MessageHandler,
                           Updater)
@@ -35,6 +36,7 @@ from telegram_bot.conversations.states import (CREATE, EXECUTE,
                                                SELECT_TARGET_PORT, SELECT_TOOL,
                                                SELECT_WORDLIST)
 from telegram_bot.messages.help import get_my_commands
+from telegram_bot.token import handle_invalid_telegram_token
 
 logger = logging.getLogger()                                                    # Rekono logger
 
@@ -58,6 +60,8 @@ def initialize() -> None:
     try:
         updater = Updater(token=System.objects.first().telegram_bot_token)      # Telegram client
         updater.bot.set_my_commands(get_my_commands())                          # Configure bot commands
+    except (InvalidToken, Unauthorized):
+        handle_invalid_telegram_token(initialize)
     except Exception:
         logger.error('[Telegram Bot] Error during Telegram bot initialization')
 
@@ -148,5 +152,7 @@ def deploy() -> None:
             per_chat=True
         ))
         updater.start_polling()                                                 # Start Telegram Bot
+    except (InvalidToken, Unauthorized):
+        handle_invalid_telegram_token(deploy)
     except Exception:
         logger.error('[Telegram Bot] Error during Telegram bot deployment')
