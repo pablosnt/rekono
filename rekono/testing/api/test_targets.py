@@ -39,6 +39,8 @@ class TargetsTest(RekonoApiTestCase):
         self.api_test(self.client.post, self.endpoint, 400, data=self.used_data)    # Target already exists
         self.used_data['target'] = 'invalid'
         self.api_test(self.client.post, self.endpoint, 400, data=self.used_data)    # Invalid target
+        self.used_data['target'] = '127.0.0.1'
+        self.api_test(self.client.post, self.endpoint, 400, data=self.used_data)    # Invalid internal target
 
     def test_delete(self) -> None:
         '''Test target deletion feature.'''
