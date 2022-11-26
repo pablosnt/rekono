@@ -4,6 +4,7 @@ import re
 import socket
 
 from django.core.exceptions import ValidationError
+
 from targets.enums import TargetType
 
 # Regex to match IP ranges like 10.10.10.1-20
@@ -24,6 +25,14 @@ def get_target_type(target: str) -> str:
     Returns:
         str: Target type associated to the target
     '''
+    if target in [
+        '127.0.0.1', 'localhost', 'frontend', 'backend',
+        'postgres', 'redis', 'postfix', 'initialize',
+        'tasks-worker', 'executions-worker', 'findings-worker',
+        'emails-worker', 'telegram-bot', 'nginx'
+    ]:
+        # Target is invalid
+        raise ValidationError({'target': f'Invalid target {target}'})
     try:
         # Check if target is an IP address (IPv4 or IPv6)
         ip = ipaddress.ip_address(target)
