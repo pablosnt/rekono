@@ -17,10 +17,6 @@
                             <b-form-input type="password" v-model="telegramBotToken" placeholder="Telegram token" @change="telegramBotTokenChanged = true" :state="telegramBotTokenState"/>
                         </b-col>
                     </b-row>
-                    <b-alert v-model="telegramBotTokenChanged" variant="warning">
-                        <b-icon icon="exclamation-triangle-fill" variant="warning"></b-icon>
-                        Restarting Telegram bot is needed to apply the new configuration
-                    </b-alert>
                 </b-card>
                 <br/>
                 <b-card>
