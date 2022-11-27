@@ -6,11 +6,13 @@ from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
                                    ListModelMixin, RetrieveModelMixin)
 from rest_framework.viewsets import GenericViewSet
 
-from targets.filters import (TargetFilter, TargetPortFilter,
-                             TargetTechnologyFilter, TargetVulnerabilityFilter)
-from targets.models import (Target, TargetPort, TargetTechnology,
-                            TargetVulnerability)
-from targets.serializers import (TargetPortSerializer, TargetSerializer,
+from targets.filters import (TargetCredentialFilter, TargetFilter,
+                             TargetPortFilter, TargetTechnologyFilter,
+                             TargetVulnerabilityFilter)
+from targets.models import (Target, TargetCredential, TargetPort,
+                            TargetTechnology, TargetVulnerability)
+from targets.serializers import (TargetCredentialSerializer,
+                                 TargetPortSerializer, TargetSerializer,
                                  TargetTechnologySerializer,
                                  TargetVulnerabilitySerializer)
 
@@ -115,6 +117,26 @@ class TargetVulnerabilityViewSet(TargetViewSet):
     # Fields used to search target endpoints
     search_fields = ['target_port__target__target', 'target_port__port', 'cve']
     # Project members field used for authorization purposes
+    project_members_field = 'target_port__target__project__members'
+
+    def get_project_members(self, data: Dict[str, Any]) -> QuerySet:
+        '''Get project members from serializer validated data.
+
+        Args:
+            data (Dict[str, Any]): Validated data from serializer
+
+        Returns:
+            QuerySet: Project members related to the instance
+        '''
+        return data['target_port'].target.project.members.all()
+
+
+class TargetCredentialViewSet(TargetViewSet):
+
+    queryset = TargetCredential.objects.all().order_by('-id')
+    serializer_class = TargetCredentialSerializer
+    filterset_class = TargetCredentialFilter
+    search_fields = ['target_port__target__target', 'target_port__port', 'name', 'type']
     project_members_field = 'target_port__target__project__members'
 
     def get_project_members(self, data: Dict[str, Any]) -> QuerySet:

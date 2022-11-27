@@ -1,10 +1,11 @@
 from typing import Any, Dict
 
+from api.serializers import ProtectedStringValueField
 from django.forms import ValidationError
 from rest_framework import serializers
 
-from targets.models import (Target, TargetPort, TargetTechnology,
-                            TargetVulnerability)
+from targets.models import (Target, TargetCredential, TargetPort,
+                            TargetTechnology, TargetVulnerability)
 from targets.utils import get_target_type
 
 
@@ -144,3 +145,13 @@ class TargetTechnologySerializer(serializers.ModelSerializer):
                 'version': 'This version already exists for this technology in this target port'
             })
         return attrs
+
+
+class TargetCredentialSerializer(serializers.ModelSerializer):
+
+    credential = ProtectedStringValueField(required=True, allow_null=False)
+
+    class Meta:
+
+        model = TargetCredential
+        fields = ('id', 'target_port', 'name', 'credential', 'type')

@@ -35,3 +35,11 @@ class InputKeyword(Enum):
     CVE = 13
     EXPLOIT = 14
     WORDLIST = 15
+    COOKIE = 16
+    COOKIE_NAME = 17
+    BASIC = 18
+    DIGEST = 20
+    BEARER = 21
+    NTLM = 22
+    JWT = 23
+    OAUTH2 = 24

@@ -9,3 +9,15 @@ class TargetType(models.TextChoices):
     NETWORK = 'Network'
     IP_RANGE = 'IP range'
     DOMAIN = 'Domain'
+
+
+class TargetCredentialType(models.TextChoices):
+    '''Supported target credential types.'''
+
+    COOKIE = 'Cookie'
+    DIGEST = 'Digest'
+    BEARER = 'Bearer'
+    NTLM = 'NTLM'
+    JWT = 'JWT'
+    OAUTH2 = 'OAuth2'
+    PASSWORD = 'Password'
