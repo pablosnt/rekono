@@ -197,7 +197,7 @@ class TargetCredentialsTest(RekonoApiTestCase):
     def test_invalid_create(self) -> None:
         '''Test target vulnerability creation with invalid data.'''
         self.api_test(self.client.post, self.endpoint, 400, data=self.used_data)   # Target credential already exists
-        self.used_data['credential'] = 'invalidpassword;reverseshell'
+        self.used_data['credential'] = ';reverseshell'
         self.api_test(self.client.post, self.endpoint, 400, data=self.used_data)   # Invalid credential value
 
     def test_delete(self) -> None:

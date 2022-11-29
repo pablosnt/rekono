@@ -3,6 +3,7 @@ from typing import Any, Dict
 from api.serializers import ProtectedStringValueField
 from django.forms import ValidationError
 from rest_framework import serializers
+from security.input_validation import validate_credential
 
 from targets.models import (Target, TargetCredential, TargetPort,
                             TargetTechnology, TargetVulnerability)
@@ -169,6 +170,7 @@ class TargetCredentialSerializer(serializers.ModelSerializer):
             Dict[str, Any]: Data after validation process
         '''
         attrs = super().validate(attrs)
+        validate_credential(attrs['credential'])
         if TargetCredential.objects.filter(
             target_port=attrs['target_port'],
             name=attrs['name'],
