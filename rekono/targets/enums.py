@@ -14,9 +14,9 @@ class TargetType(models.TextChoices):
 class TargetCredentialType(models.TextChoices):
     '''Supported target credential types.'''
 
+    BASIC = 'Basic'
+    BEARER = 'Bearer'
     COOKIE = 'Cookie'
     DIGEST = 'Digest'
-    BEARER = 'Bearer'
-    NTLM = 'NTLM'
     JWT = 'JWT'
-    PASSWORD = 'Password'
+    NTLM = 'NTLM'

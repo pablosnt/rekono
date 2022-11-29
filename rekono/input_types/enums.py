@@ -42,4 +42,3 @@ class InputKeyword(Enum):
     BEARER = 21
     NTLM = 22
     JWT = 23
-    OAUTH2 = 24
