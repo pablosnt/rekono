@@ -19,5 +19,4 @@ class TargetCredentialType(models.TextChoices):
     BEARER = 'Bearer'
     NTLM = 'NTLM'
     JWT = 'JWT'
-    OAUTH2 = 'OAuth2'
     PASSWORD = 'Password'

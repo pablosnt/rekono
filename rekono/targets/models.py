@@ -9,8 +9,8 @@ from input_types.base import BaseInput
 from input_types.enums import InputKeyword
 from input_types.utils import get_url
 from projects.models import Project
-from security.input_validation import (validate_cve, validate_name,
-                                       validate_number)
+from security.input_validation import (validate_credential, validate_cve,
+                                       validate_name, validate_number)
 from tools.models import Input
 
 from targets.enums import TargetCredentialType, TargetType
@@ -320,7 +320,7 @@ class TargetCredential(models.Model, BaseInput):
 
     target_port = models.ForeignKey(TargetPort, related_name='target_credentials', on_delete=models.CASCADE)
     name = models.TextField(max_length=100, validators=[validate_name])
-    credential = models.TextField(max_length=300)
+    credential = models.TextField(max_length=500, validators=[validate_credential])
     type = models.TextField(max_length=8, choices=TargetCredentialType.choices)
 
     class Meta:
