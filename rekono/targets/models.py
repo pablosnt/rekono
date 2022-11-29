@@ -376,7 +376,7 @@ class TargetCredential(models.Model, BaseInput):
         Returns:
             str: String value that identifies this instance
         '''
-        return self.name
+        return f'{self.target_port.__str__()} - {self.name}'
 
     def get_project(self) -> Project:
         '''Get the related project for the instance. This will be used for authorization purposes.
