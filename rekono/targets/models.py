@@ -318,7 +318,7 @@ class TargetVulnerability(models.Model, BaseInput):
 
 class TargetCredential(models.Model, BaseInput):
 
-    target_port = models.ForeignKey(TargetPort, related_name='target_vulnerabilities', on_delete=models.CASCADE)
+    target_port = models.ForeignKey(TargetPort, related_name='target_credentials', on_delete=models.CASCADE)
     name = models.TextField(max_length=100, validators=[validate_name])
     credential = models.TextField(max_length=300)
     type = models.TextField(max_length=8, choices=TargetCredentialType.choices)
