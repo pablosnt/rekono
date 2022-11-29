@@ -19,7 +19,7 @@
 
 <script>
 import RekonoApi from '@/backend/RekonoApi';
-import TargetPortDetail from './TargetPortDetail';
+import TargetPortDetail from '@/common/TargetPortDetail';
 export default {
   name: 'targetPortModal',
   mixins: [RekonoApi],
