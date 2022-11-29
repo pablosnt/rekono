@@ -162,9 +162,9 @@ class TargetCredentialsTest(RekonoApiTestCase):
 
     def setUp(self) -> None:
         '''Create initial data before run tests.'''
-        self.endpoint = '/api/target-credentials/'                             # Target Technologies API endpoint
+        self.endpoint = '/api/target-credentials/'                              # Target Technologies API endpoint
         super().setUp()
-        super().initialize_environment()                                        # Initialize testing environment
+        self.initialize_environment()                                           # Initialize testing environment
         # Data for testing
         self.used_data = {
             'target_port': self.target_port.id,
@@ -188,9 +188,11 @@ class TargetCredentialsTest(RekonoApiTestCase):
     def test_create(self) -> None:
         '''Test target credential creation.'''
         self.used_data['name'] = 'regularuser'
+        expected = self.used_data.copy()
+        expected['credential'] = len(self.used_data['credential']) * '*'
         # Create new target credential
-        content = self.api_test(self.client.post, self.endpoint, 201, data=self.used_data, expected=self.used_data)
-        self.api_test(self.client.get, f'{self.endpoint}{content["id"]}/', expected=self.used_data)
+        content = self.api_test(self.client.post, self.endpoint, 201, data=self.used_data, expected=expected)
+        self.api_test(self.client.get, f'{self.endpoint}{content["id"]}/', expected=expected)
 
     def test_invalid_create(self) -> None:
         '''Test target vulnerability creation with invalid data.'''
