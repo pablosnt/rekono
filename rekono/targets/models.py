@@ -344,7 +344,9 @@ class TargetCredential(models.Model, BaseInput):
         Returns:
             bool: Indicate if this instance match the input filter or not
         '''
-        return not input.filter or self.type.lower() == input.filter.lower()
+        if input.filter and input.filter[0] == '!':                             # Negative filter
+            return input.filter[1:] != self.type.lower()                        # Check if filter doesn't match the type
+        return not input.filter or self.type.lower() == input.filter.lower()    # Check if filter matches the type
 
     def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
         '''Get useful information from this instance to be used in tool execution as argument.
