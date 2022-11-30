@@ -1,8 +1,10 @@
-from typing import Optional
+from typing import Any, Dict, Optional
 
 from api.serializers import ProtectedStringValueField
 from defectdojo.api import DefectDojo
 from rest_framework import serializers
+from security.input_validation import (validate_defect_dojo_api_key,
+                                       validate_telegram_token)
 from telegram_bot.bot import get_telegram_bot_name
 
 from system.models import System
@@ -53,3 +55,22 @@ class SystemSerializer(serializers.ModelSerializer):
             Optional[str]: Telegram bot name
         '''
         return get_telegram_bot_name()
+
+    def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
+        '''Validate the provided data before use it.
+
+        Args:
+            attrs (Dict[str, Any]): Provided data
+
+        Raises:
+            ValidationError: Raised if provided data is invalid
+
+        Returns:
+            Dict[str, Any]: Data after validation process
+        '''
+        attrs = super().validate(attrs)
+        if 'telegram_bot_token' in attrs:
+            validate_telegram_token(attrs.get('telegram_bot_token', ''))
+        if 'defect_dojo_api_key' in attrs:
+            validate_defect_dojo_api_key(attrs.get('defect_dojo_api_key', ''))
+        return attrs
