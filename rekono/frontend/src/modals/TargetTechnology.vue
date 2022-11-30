@@ -1,6 +1,13 @@
 <template>
   <b-row>
-    <b-col cols="10">
+    <b-col cols="1">
+      <b-input-group-append v-b-tooltip.hover title="SearchSploit needs technology information to look for known exploits when previous executions didn't find any">
+        <b-button variant="outline">
+          <b-icon icon="info-circle-fill" variant="info"/>
+        </b-button>
+      </b-input-group-append>
+    </b-col>
+    <b-col cols="9">
       <b-form>
         <b-row>
           <b-col cols="6">
@@ -61,7 +68,7 @@ export default {
         this.post(
           '/api/target-technologies/',
           { target_port: this.targetPortId, name: this.newTech, version: this.newVersion },
-          this.newTech, `New target ${this.name} created successfully`
+          this.newTech, 'New target technology created successfully'
         )
           .then(() => this.$emit('update'))
         this.clean()

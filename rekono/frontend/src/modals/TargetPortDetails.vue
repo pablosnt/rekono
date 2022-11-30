@@ -3,6 +3,12 @@
     <b-tabs fill card active-nav-item-class="text-danger">
       <b-tab title-link-class="text-secondary">
         <template #title>
+          <b-icon icon="shield-lock-fill"/> Authentication
+        </template>
+        <target-port-detail :targetPortId="targetPort.id" endpoint="credentials" name="credential" field="name" :fields="targetCredentialsFields"/>
+      </b-tab>
+      <b-tab title-link-class="text-secondary">
+        <template #title>
           <b-icon icon="cpu-fill"/> Technologies
         </template>
         <target-port-detail :targetPortId="targetPort.id" endpoint="technologies" name="technology" field="name" :fields="targetTechnologiesFields"/>
@@ -29,6 +35,11 @@ export default {
   },
   data () {
     return {
+      targetCredentialsFields: [
+        { key: 'name', label: 'Credential' },
+        { key: 'credential', label: 'Secret' },
+        { key: 'type' }
+      ],
       targetTechnologiesFields: [
         { key: 'name', label: 'Technology' },
         { key: 'version' }
