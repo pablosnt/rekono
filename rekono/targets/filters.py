@@ -1,7 +1,7 @@
 from django_filters import rest_framework
 from django_filters.rest_framework.filters import OrderingFilter
 
-from targets.models import (Target, TargetCredential, TargetPort,
+from targets.models import (Target, TargetAuthentication, TargetPort,
                             TargetTechnology, TargetVulnerability)
 
 
@@ -92,12 +92,12 @@ class TargetVulnerabilityFilter(rest_framework.FilterSet):
         }
 
 
-class TargetCredentialFilter(rest_framework.FilterSet):
+class TargetAuthenticationFilter(rest_framework.FilterSet):
 
     o = OrderingFilter(fields=('target_port', 'name', 'type'))
 
     class Meta:
-        model = TargetCredential
+        model = TargetAuthentication
         fields = {
             'target_port': ['exact'],
             'target_port__port': ['exact'],

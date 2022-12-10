@@ -1,5 +1,5 @@
-from targets.enums import TargetCredentialType
-from targets.models import TargetCredential
+from targets.enums import TargetAuthenticationType
+from targets.models import TargetAuthentication
 from testing.api.base import RekonoApiTestCase
 
 
@@ -157,12 +157,12 @@ class TargetVulnerabilitiesTest(RekonoApiTestCase):
         self.api_test(self.client.get, f'{self.endpoint}{self.target_vulnerability.id}/', 404)
 
 
-class TargetCredentialsTest(RekonoApiTestCase):
-    '''Test cases for Target Credential entity from Targets module.'''
+class TargetAuthenticationTest(RekonoApiTestCase):
+    '''Test cases for Target Authentication entity from Targets module.'''
 
     def setUp(self) -> None:
         '''Create initial data before run tests.'''
-        self.endpoint = '/api/target-credentials/'                              # Target Technologies API endpoint
+        self.endpoint = '/api/target-authentication/'                           # Target authentication API endpoint
         super().setUp()
         self.initialize_environment()                                           # Initialize testing environment
         # Data for testing
@@ -177,31 +177,32 @@ class TargetCredentialsTest(RekonoApiTestCase):
         }
 
     def initialize_environment(self) -> None:
+        '''Initialize environment for testing.'''
         super().initialize_environment()
-        self.target_credential = TargetCredential.objects.create(
+        self.target_credential = TargetAuthentication.objects.create(
             target_port=self.target_port,
             name='admin',
             credential='admin',
-            type=TargetCredentialType.BASIC
+            type=TargetAuthenticationType.BASIC
         )
 
     def test_create(self) -> None:
-        '''Test target credential creation.'''
+        '''Test target authentication creation.'''
         self.used_data['name'] = 'regularuser'
         expected = self.used_data.copy()
         expected['credential'] = len(self.used_data['credential']) * '*'
-        # Create new target credential
+        # Create new target authentication
         content = self.api_test(self.client.post, self.endpoint, 201, data=self.used_data, expected=expected)
         self.api_test(self.client.get, f'{self.endpoint}{content["id"]}/', expected=expected)
 
     def test_invalid_create(self) -> None:
-        '''Test target vulnerability creation with invalid data.'''
-        self.api_test(self.client.post, self.endpoint, 400, data=self.used_data)   # Target credential already exists
+        '''Test target authentication creation with invalid data.'''
+        self.api_test(self.client.post, self.endpoint, 400, data=self.used_data)  # Target authentication already exists
         self.used_data['credential'] = ';reverseshell'
         self.api_test(self.client.post, self.endpoint, 400, data=self.used_data)   # Invalid credential value
 
     def test_delete(self) -> None:
-        '''Test target credential deletion feature.'''
-        # Delete target credential
+        '''Test target authentication deletion feature.'''
+        # Delete target authentication
         self.api_test(self.client.delete, f'{self.endpoint}{self.target_credential.id}/', 204)
         self.api_test(self.client.get, f'{self.endpoint}{self.target_credential.id}/', 404)

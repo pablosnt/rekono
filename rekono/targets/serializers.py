@@ -5,7 +5,7 @@ from django.forms import ValidationError
 from rest_framework import serializers
 from security.input_validation import validate_credential
 
-from targets.models import (Target, TargetCredential, TargetPort,
+from targets.models import (Target, TargetAuthentication, TargetPort,
                             TargetTechnology, TargetVulnerability)
 from targets.utils import get_target_type
 
@@ -148,13 +148,13 @@ class TargetTechnologySerializer(serializers.ModelSerializer):
         return attrs
 
 
-class TargetCredentialSerializer(serializers.ModelSerializer):
+class TargetAuthenticationSerializer(serializers.ModelSerializer):
 
     credential = ProtectedStringValueField(required=True, allow_null=False)
 
     class Meta:
 
-        model = TargetCredential
+        model = TargetAuthentication
         fields = ('id', 'target_port', 'name', 'credential', 'type')
 
     def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
@@ -171,7 +171,7 @@ class TargetCredentialSerializer(serializers.ModelSerializer):
         '''
         attrs = super().validate(attrs)
         validate_credential(attrs['credential'])
-        if TargetCredential.objects.filter(
+        if TargetAuthentication.objects.filter(
             target_port=attrs['target_port'],
             name=attrs['name'],
             credential=attrs['credential'],

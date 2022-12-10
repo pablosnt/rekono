@@ -70,9 +70,9 @@ export default {
     create () {
       if (this.check()) {
         this.post(
-          '/api/target-credentials/',
+          '/api/target-authentication/',
           { target_port: this.targetPortId, name: this.newName, credential: this.newCredential, type: this.newType },
-          this.newName, 'New target credential created successfully'
+          this.newName, 'New target authentication created successfully'
         )
           .then(() => this.$emit('update'))
         this.clean()

@@ -11,8 +11,8 @@ class TargetType(models.TextChoices):
     DOMAIN = 'Domain'
 
 
-class TargetCredentialType(models.TextChoices):
-    '''Supported target credential types.'''
+class TargetAuthenticationType(models.TextChoices):
+    '''Supported target authentication types.'''
 
     BASIC = 'Basic'
     BEARER = 'Bearer'

@@ -14,7 +14,7 @@ from security.input_validation import (validate_credential, validate_cve,
                                        validate_name, validate_number)
 from tools.models import Input
 
-from targets.enums import TargetCredentialType, TargetType
+from targets.enums import TargetAuthenticationType, TargetType
 
 # Create your models here.
 
@@ -317,12 +317,12 @@ class TargetVulnerability(models.Model, BaseInput):
         return self.target_port.target.project
 
 
-class TargetCredential(models.Model, BaseInput):
+class TargetAuthentication(models.Model, BaseInput):
 
-    target_port = models.ForeignKey(TargetPort, related_name='target_credentials', on_delete=models.CASCADE)
+    target_port = models.ForeignKey(TargetPort, related_name='target_authentications', on_delete=models.CASCADE)
     name = models.TextField(max_length=100, validators=[validate_name])
     credential = models.TextField(max_length=500, validators=[validate_credential])
-    type = models.TextField(max_length=8, choices=TargetCredentialType.choices)
+    type = models.TextField(max_length=8, choices=TargetAuthenticationType.choices)
 
     class Meta:
         '''Model metadata.'''
@@ -331,7 +331,7 @@ class TargetCredential(models.Model, BaseInput):
             # Unique constraint by: TargetPort, Name, Credential and Type
             models.UniqueConstraint(
                 fields=['target_port', 'name', 'credential', 'type'],
-                name='unique target credential'
+                name='unique target authentication'
             )
         ]
 
@@ -359,10 +359,10 @@ class TargetCredential(models.Model, BaseInput):
         '''
         output = self.target_port.parse()
         credential = {
-            InputKeyword.USERNAME.name.lower(): self.name if self.type == TargetCredentialType.BASIC else None,
-            InputKeyword.COOKIE_NAME.name.lower(): self.name if self.type == TargetCredentialType.COOKIE else None,
+            InputKeyword.USERNAME.name.lower(): self.name if self.type == TargetAuthenticationType.BASIC else None,
+            InputKeyword.COOKIE_NAME.name.lower(): self.name if self.type == TargetAuthenticationType.COOKIE else None,
             InputKeyword.SECRET.name.lower(): self.credential,
-            InputKeyword.TOKEN.name.lower(): self.credential if self.type != TargetCredentialType.BASIC else base64.b64encode(f'{self.name}:{self.credential}'.encode()).decode(),  # noqa: E501
+            InputKeyword.TOKEN.name.lower(): self.credential if self.type != TargetAuthenticationType.BASIC else base64.b64encode(f'{self.name}:{self.credential}'.encode()).decode(),  # noqa: E501
             InputKeyword.CREDENTIAL_TYPE.name.lower(): self.type.name.lower()
         }
         output.update(credential)

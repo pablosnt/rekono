@@ -85,7 +85,7 @@
         "pk": 10,
         "fields": {
             "name": "Authentication",
-            "related_model": "targets.targetcredential",
+            "related_model": "targets.targetauthentication",
             "callback_target": null
         }
     }

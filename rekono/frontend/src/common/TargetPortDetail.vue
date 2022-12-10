@@ -1,6 +1,6 @@
 <template>
   <div>
-    <target-credential  v-if="name === 'credential'" :targetPortId="targetPortId" @update="fetchData()"/>
+    <target-authentication  v-if="name === 'authentication'" :targetPortId="targetPortId" @update="fetchData()"/>
     <target-technology  v-if="name === 'technology'" :targetPortId="targetPortId" @update="fetchData()"/>
     <target-vulnerability v-if="name === 'vulnerability'" :targetPortId="targetPortId" @update="fetchData()"/>
     <b-table stripped head-variant="light" :fields="tableFields" :items="data" v-if="data.length > 0">
@@ -21,7 +21,7 @@
 import RekonoApi from '@/backend/RekonoApi'
 import Deletion from '@/common/Deletion'
 import Pagination from '@/common/Pagination'
-import TargetCredential from '@/modals/TargetCredential'
+import TargetAuthentication from '@/modals/TargetAuthentication'
 import TargetTechnology from '@/modals/TargetTechnology'
 import TargetVulnerability from '@/modals/TargetVulnerability'
 export default {
@@ -46,7 +46,7 @@ export default {
     Pagination,
     TargetVulnerability,
     TargetTechnology,
-    TargetCredential
+    TargetAuthentication
   },
   data () {
     this.fetchData()

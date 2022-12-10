@@ -6,12 +6,12 @@ from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
                                    ListModelMixin, RetrieveModelMixin)
 from rest_framework.viewsets import GenericViewSet
 
-from targets.filters import (TargetCredentialFilter, TargetFilter,
+from targets.filters import (TargetAuthenticationFilter, TargetFilter,
                              TargetPortFilter, TargetTechnologyFilter,
                              TargetVulnerabilityFilter)
-from targets.models import (Target, TargetCredential, TargetPort,
+from targets.models import (Target, TargetAuthentication, TargetPort,
                             TargetTechnology, TargetVulnerability)
-from targets.serializers import (TargetCredentialSerializer,
+from targets.serializers import (TargetAuthenticationSerializer,
                                  TargetPortSerializer, TargetSerializer,
                                  TargetTechnologySerializer,
                                  TargetVulnerabilitySerializer)
@@ -131,11 +131,11 @@ class TargetVulnerabilityViewSet(TargetViewSet):
         return data['target_port'].target.project.members.all()
 
 
-class TargetCredentialViewSet(TargetViewSet):
+class TargetAuthenticationViewSet(TargetViewSet):
 
-    queryset = TargetCredential.objects.all().order_by('-id')
-    serializer_class = TargetCredentialSerializer
-    filterset_class = TargetCredentialFilter
+    queryset = TargetAuthentication.objects.all().order_by('-id')
+    serializer_class = TargetAuthenticationSerializer
+    filterset_class = TargetAuthenticationFilter
     search_fields = ['target_port__target__target', 'target_port__port', 'name', 'type']
     project_members_field = 'target_port__target__project__members'
 
