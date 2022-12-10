@@ -18,10 +18,10 @@ class TargetPortSerializer(serializers.ModelSerializer):
 
         model = TargetPort
         fields = (                                                              # Target port fields exposed via API
-            'id', 'target', 'port', 'target_technologies', 'target_vulnerabilities', 'target_credentials'
+            'id', 'target', 'port', 'target_technologies', 'target_vulnerabilities', 'target_authentications'
         )
         # Read only fields
-        read_only_fields = ('target_technologies', 'target_vulnerabilities', 'target_credentials')
+        read_only_fields = ('target_technologies', 'target_vulnerabilities', 'target_authentications')
 
     def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
         '''Validate the provided data before use it.

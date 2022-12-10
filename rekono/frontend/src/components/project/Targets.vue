@@ -97,7 +97,7 @@ export default {
       data: [],
       targetPortsFields: [
         { key: 'port', sortable: true },
-        { key: 'target_credentials.length', label: 'Credentials', sortable: false},
+        { key: 'target_authentications.length', label: 'Credentials', sortable: false},
         { key: 'target_technologies.length', label: 'Technologies', sortable: false},
         { key: 'target_vulnerabilities.length', label: 'Vulnerabilities', sortable: false},
         { key: 'actions', sortable: false },
