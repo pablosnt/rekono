@@ -328,5 +328,45 @@
             "filter": "microsoft-ds",
             "order": 1
         }
+    },
+    {
+        "model": "tools.input",
+        "pk": 34,
+        "fields": {
+            "argument": 22,
+            "type": 10,
+            "filter": "!cookie",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 35,
+        "fields": {
+            "argument": 23,
+            "type": 10,
+            "filter": "cookie",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 36,
+        "fields": {
+            "argument": 24,
+            "type": 10,
+            "filter": "cookie",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 37,
+        "fields": {
+            "argument": 25,
+            "type": 10,
+            "filter": "basic",
+            "order": 1
+        }
     }
 ]

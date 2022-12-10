@@ -360,14 +360,10 @@ class TargetCredential(models.Model, BaseInput):
         output = self.target_port.parse()
         credential = {
             InputKeyword.USERNAME.name.lower(): self.name if self.type == TargetCredentialType.BASIC else None,
-            InputKeyword.SECRET.name.lower(): self.credential if self.type == TargetCredentialType.BASIC else None,
-            InputKeyword.COOKIE.name.lower(): self.credential if self.type == TargetCredentialType.COOKIE else None,
             InputKeyword.COOKIE_NAME.name.lower(): self.name if self.type == TargetCredentialType.COOKIE else None,
-            InputKeyword.BASIC.name.lower(): base64.b64encode(f'{self.name}:{self.credential}'.encode()).decode() if self.type == TargetCredentialType.BASIC else None,     # noqa: E501
-            InputKeyword.DIGEST.name.lower(): self.credential if self.type == TargetCredentialType.DIGEST else None,
-            InputKeyword.BEARER.name.lower(): self.credential if self.type == TargetCredentialType.BEARER else None,
-            InputKeyword.NTLM.name.lower(): self.credential if self.type == TargetCredentialType.NTLM else None,
-            InputKeyword.JWT.name.lower(): self.credential if self.type == TargetCredentialType.JWT else None
+            InputKeyword.SECRET.name.lower(): self.credential,
+            InputKeyword.TOKEN.name.lower(): self.credential if self.type != TargetCredentialType.BASIC else base64.b64encode(f'{self.name}:{self.credential}'.encode()).decode(),  # noqa: E501
+            InputKeyword.CREDENTIAL_TYPE.name.lower(): self.type.name.lower()
         }
         output.update(credential)
         return output

@@ -145,7 +145,7 @@
         "fields": {
             "tool": 2,
             "name": "Standard wordlist",
-            "arguments": "{url} {intensity} -o {output} --format=json {wordlist}",
+            "arguments": "{url} {intensity} -o {output} --format=json {wordlist} {authentication} {cookie}",
             "default": true
         }
     },
@@ -155,7 +155,7 @@
         "fields": {
             "tool": 2,
             "name": "Wordlist with extensions",
-            "arguments": "{url} {intensity} -o {output} --format=json --force-extensions {wordlist}",
+            "arguments": "{url} {intensity} -o {output} --format=json --force-extensions {wordlist} {authentication} {cookie}",
             "default": false
         }
     },
@@ -165,7 +165,7 @@
         "fields": {
             "tool": 2,
             "name": "Recursive",
-            "arguments": "{url} {intensity} -o {output} --format=json --force-recursive --recursion-depth=10 {wordlist}",
+            "arguments": "{url} {intensity} -o {output} --format=json --force-recursive --recursion-depth=10 {wordlist} {authentication} {cookie}",
             "default": false
         }
     },
@@ -175,7 +175,7 @@
         "fields": {
             "tool": 2,
             "name": "Deep recursive",
-            "arguments": "{url} {intensity} -o {output} --format=json --force-recursive --depth-recursive --recursion-depth=10 {wordlist}",
+            "arguments": "{url} {intensity} -o {output} --format=json --force-recursive --depth-recursive --recursion-depth=10 {wordlist} {authentication} {cookie}",
             "default": false
         }
     },
@@ -315,7 +315,7 @@
         "fields": {
             "tool": 14,
             "name": "Joomla scan",
-            "arguments": "{url}",
+            "arguments": "{url} {cookie}",
             "default": true
         }
     },
@@ -345,7 +345,7 @@
         "fields": {
             "tool": 17,
             "name": "List shares",
-            "arguments": "{host} {port}",
+            "arguments": "{host} {port} {authentication}",
             "default": true
         }
     },
@@ -355,7 +355,7 @@
         "fields": {
             "tool": 17,
             "name": "List shares and directories recursively",
-            "arguments": "{host} {port} -R",
+            "arguments": "{host} {port} -R {authentication}",
             "default": false
         }
     },

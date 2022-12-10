@@ -229,5 +229,49 @@
             "required": false,
             "multiple": false
         }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 22,
+        "fields": {
+            "tool": 2,
+            "name": "authentication",
+            "argument": "--auth={token} --auth-type={credential_type}",
+            "required": false,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 23,
+        "fields": {
+            "tool": 2,
+            "name": "cookie",
+            "argument": "--cookie={cookie}",
+            "required": false,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 24,
+        "fields": {
+            "tool": 14,
+            "name": "cookie",
+            "argument": "--cookie {cookie}",
+            "required": false,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 25,
+        "fields": {
+            "tool": 17,
+            "name": "authentication",
+            "argument": "-u {username} -p {secret}",
+            "required": false,
+            "multiple": false
+        }
     }
 ]
