@@ -236,7 +236,7 @@
         "fields": {
             "tool": 2,
             "name": "authentication",
-            "argument": "--auth={token} --auth-type={credential_type}",
+            "argument": "--auth={token} --auth-type={credential_type_lower}",
             "required": false,
             "multiple": false
         }
@@ -292,6 +292,28 @@
             "tool": 4,
             "name": "cookie",
             "argument": "-Option STATIC-COOKIE=\"{cookie_name}={cookie}\"",
+            "required": false,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 28,
+        "fields": {
+            "tool": 4,
+            "name": "authentication",
+            "argument": "ZAP_AUTH_HEADER=\"Authorization\" ZAP_AUTH_HEADER_VALUE=\"{credential_type} {token}\"",
+            "required": false,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 29,
+        "fields": {
+            "tool": 4,
+            "name": "cookie",
+            "argument": "ZAP_AUTH_HEADER=\"Cookie\" ZAP_AUTH_HEADER_VALUE=\"{cookie_name}={cookie}\"",
             "required": false,
             "multiple": false
         }

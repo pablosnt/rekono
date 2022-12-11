@@ -16,11 +16,11 @@ from findings.models import Finding, Vulnerability
 from findings.queue import producer
 from findings.utils import get_unique_filter
 from input_types.base import BaseInput
+from rekono.settings import REPORTS_DIR, TESTING
 from tasks.enums import Status
+
 from tools.exceptions import ToolExecutionException
 from tools.models import Argument, Input, Intensity
-
-from rekono.settings import REPORTS_DIR, TESTING
 
 logger = logging.getLogger()                                                    # Rekono logger
 
@@ -193,6 +193,7 @@ class BaseTool:
             List[str]: List of tool arguments to use in the tool execution
         '''
         command = {
+            'command': self.tool.command,                                       # Add tool command to the arguments
             'intensity': self.intensity.argument,                               # Add intensity config to the arguments
             'output': self.path_output if self.file_output_enabled else ''      # Add output config to the arguments
         }
@@ -263,7 +264,8 @@ class BaseTool:
         Returns:
             str: Plain output of the tool execution
         '''
-        arguments.insert(0, self.tool.command)                                  # Combine tool command with arguments
+        if self.tool.command not in arguments:
+            arguments.insert(0, self.tool.command)                              # Combine tool command with arguments
         logger.info(f'[Tool] Running: {" ".join(arguments)}')
         if hasattr(self, 'run_directory'):
             # Execute the tool in directory

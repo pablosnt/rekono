@@ -388,5 +388,25 @@
             "filter": "cookie",
             "order": 1
         }
+    },
+    {
+        "model": "tools.input",
+        "pk": 40,
+        "fields": {
+            "argument": 28,
+            "type": 10,
+            "filter": "basic,bearer,digest,jwt",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 41,
+        "fields": {
+            "argument": 29,
+            "type": 10,
+            "filter": "cookie",
+            "order": 1
+        }
     }
 ]

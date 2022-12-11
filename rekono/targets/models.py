@@ -345,8 +345,9 @@ class TargetAuthentication(models.Model, BaseInput):
             bool: Indicate if this instance match the input filter or not
         '''
         if input.filter and input.filter[0] == '!':                             # Negative filter
-            return input.filter[1:] != self.type.lower()                        # Check if filter doesn't match the type
-        return not input.filter or self.type.lower() == input.filter.lower()    # Check if filter matches the type
+            return self.type.lower() not in input.filter[1:].split(',')         # Check if filter doesn't match the type
+        # Check if filter matches the type
+        return not input.filter or self.type.lower() in input.filter.lower().split(',')
 
     def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
         '''Get useful information from this instance to be used in tool execution as argument.
@@ -363,7 +364,8 @@ class TargetAuthentication(models.Model, BaseInput):
             InputKeyword.COOKIE_NAME.name.lower(): self.name if self.type == TargetAuthenticationType.COOKIE else None,
             InputKeyword.SECRET.name.lower(): self.credential,
             InputKeyword.TOKEN.name.lower(): self.credential if self.type != TargetAuthenticationType.BASIC else base64.b64encode(f'{self.name}:{self.credential}'.encode()).decode(),  # noqa: E501
-            InputKeyword.CREDENTIAL_TYPE.name.lower(): self.type.name.lower()
+            InputKeyword.CREDENTIAL_TYPE.name.lower(): self.type.name,
+            InputKeyword.CREDENTIAL_TYPE_LOWER.name.lower(): self.type.name.lower(),
         }
         output.update(credential)
         return output

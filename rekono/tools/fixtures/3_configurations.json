@@ -245,7 +245,7 @@
         "fields": {
             "tool": 8,
             "name": "Active scan",
-            "arguments": "-cmd {url} -quickprogress -quickout {output}",
+            "arguments": "{authentication} {cookie} {command} -cmd {url} -quickprogress -quickout {output}",
             "default": true
         }
     },
