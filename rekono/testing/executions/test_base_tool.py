@@ -13,9 +13,9 @@ from projects.models import Project
 from resources.enums import WordlistType
 from resources.models import Wordlist
 from rq import SimpleWorker
-from targets.enums import TargetType
-from targets.models import (Target, TargetPort, TargetTechnology,
-                            TargetVulnerability)
+from targets.enums import TargetAuthenticationType, TargetType
+from targets.models import (Target, TargetAuthentication, TargetPort,
+                            TargetTechnology, TargetVulnerability)
 from tasks.enums import Status
 from tasks.models import Task
 from testing.mocks.defectdojo import (defect_dojo_error, defect_dojo_success,
@@ -48,7 +48,8 @@ class BaseToolTest(RekonoTestCase):
             tool=self.nmap,
             arguments=(
                 '{intensity} {test_osint} {test_only_host} {test_host} {test_port} {test_path} '
-                '{test_technology} {test_credential} {test_vulnerability} {test_exploit} {test_wordlist}'
+                '{test_technology} {test_credential} {test_vulnerability} {test_exploit} {test_wordlist} '
+                '{test_authentication} {test_cookie}'
             )
         )
         # Initialize auxiliary lists to help data usage
@@ -75,6 +76,7 @@ class BaseToolTest(RekonoTestCase):
             '--version 1.0.0', '--email test@test.test', '--username test', '--secret test',
             '--vuln CVE-2021-44228', '--exploit Test', f'--wordlist {self.wordlist.path}'
         ]).split(' ')
+        # Expected required arguments
         self.required_expected = ' '.join([
             '-T3', '--osint http://scanme.nmap.org/', '--only-host 45.33.32.156', '--host 45.33.32.156',
             '--port 443', '--port-commas 80,443', '--tech Wordpress',
@@ -118,14 +120,17 @@ class BaseToolTest(RekonoTestCase):
         # Target filtered due to target type. Private IP required
         target_filtered = Target.objects.create(project=self.project, target='scanme.nmap.org', type=TargetType.DOMAIN)
         target = Target.objects.create(project=self.project, target='45.33.32.156', type=TargetType.PUBLIC_IP)
-        target_port_http = TargetPort.objects.create(target=target, port=80)
-        target_port_https = TargetPort.objects.create(target=target, port=443)
+        self.target_port_http = TargetPort.objects.create(target=target, port=80)
+        self.target_port_https = TargetPort.objects.create(target=target, port=443)
         target_technology = TargetTechnology.objects.create(
-            target_port=target_port_http,
+            target_port=self.target_port_http,
             name='Wordpress',
             version='1.0.0'
         )
-        target_vulnerability = TargetVulnerability.objects.create(target_port=target_port_http, cve='CVE-2021-44228')
+        target_vulnerability = TargetVulnerability.objects.create(
+            target_port=self.target_port_http,
+            cve='CVE-2021-44228'
+        )
         user = User.objects.create_superuser('rekono', 'rekono@rekono.rekono', 'rekono')
         task = Task.objects.create(
             target=target,
@@ -153,10 +158,19 @@ class BaseToolTest(RekonoTestCase):
         )
         self.targets.extend([
             target_filtered, target,
-            target_port_http, target_port_https,
+            self.target_port_http, self.target_port_https,
             target_technology,
             target_vulnerability
         ])
+        argument1 = Argument.objects.create(tool=self.nmap, name='test_authentication', argument='--password {secret}')
+        Input.objects.create(argument=argument1, type=InputType.objects.get(name='Authentication'), filter='!cookie')
+        argument2 = Argument.objects.create(
+            tool=self.nmap,
+            name='test_cookie',
+            argument='--cookie {cookie_name}{cookie}'
+        )
+        Input.objects.create(argument=argument2, type=InputType.objects.get(name='Authentication'), filter='cookie')
+        self.arguments.extend([argument1, argument2])
 
     def create_osint(self) -> None:
         '''Create OSINT data for testing.'''
@@ -463,6 +477,44 @@ class BaseToolTest(RekonoTestCase):
             '--port 443', '--port-commas 80,443', '--tech Wordpress',
             '--version 1.0.0', '--email test@test.test', '--username test', '--secret test',
             '--vuln CVE-2021-44228', '--exploit Test', f'--wordlist {self.wordlist.path}'
+        ]).split(' ')
+        self.assertEqual(expected, arguments)
+
+    def test_get_arguments_using_targets_and_basic_authentication(self) -> None:
+        '''Test get_arguments feature using targets and basic authentication.'''
+        ta = TargetAuthentication.objects.create(
+            target_port=self.target_port_http,
+            name='admin',
+            credential='admin',
+            type=TargetAuthenticationType.BASIC
+        )
+        self.targets.append(ta)
+        arguments = self.tool_instance.get_arguments(self.targets, self.findings_to_use_targets)
+        expected = ' '.join([
+            '-T3', '--osint http://scanme.nmap.org/', '--only-host 45.33.32.156', '--host 45.33.32.156',
+            '--port 443', '--port-commas 80,443', '--tech Wordpress',
+            '--version 1.0.0', '--email test@test.test', '--username test', '--secret test',
+            '--vuln CVE-2021-44228', '--exploit Test', f'--wordlist {self.wordlist.path}',
+            '--password admin'
+        ]).split(' ')
+        self.assertEqual(expected, arguments)
+
+    def test_get_arguments_using_targets_and_cookie_authentication(self) -> None:
+        '''Test get_arguments feature using targets and authentication via Cookie.'''
+        ta = TargetAuthentication.objects.create(
+            target_port=self.target_port_https,
+            name='cookie',
+            credential='sessionid',
+            type=TargetAuthenticationType.COOKIE
+        )
+        self.targets.append(ta)
+        arguments = self.tool_instance.get_arguments(self.targets, self.findings_to_use_targets)
+        expected = ' '.join([
+            '-T3', '--osint http://scanme.nmap.org/', '--only-host 45.33.32.156', '--host 45.33.32.156',
+            '--port 443', '--port-commas 80,443', '--tech Wordpress',
+            '--version 1.0.0', '--email test@test.test', '--username test', '--secret test',
+            '--vuln CVE-2021-44228', '--exploit Test', f'--wordlist {self.wordlist.path}',
+            '--cookie cookie=sessionid'
         ]).split(' ')
         self.assertEqual(expected, arguments)
 
