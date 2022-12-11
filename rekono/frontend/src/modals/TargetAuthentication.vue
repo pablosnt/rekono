@@ -1,7 +1,7 @@
 <template>
   <b-row>
     <b-col cols="1">
-      <b-input-group-append v-b-tooltip.hover title="The following tools accept credentials to perform authenticated analysis: Dirsearch (all authentication types), SMBMap (basic authentication), JoomScan (cookie authentication) and OWASP ZAP">
+      <b-input-group-append v-b-tooltip.hover title="The following tools accept credentials to perform authenticated analysis: Dirsearch (all authentication types), SMBMap (basic authentication), JoomScan (cookie authentication), Nikto (cookie and basic authentication) and OWASP ZAP (all authentication types)">
         <b-button variant="outline">
           <b-icon icon="info-circle-fill" variant="info"/>
         </b-button>

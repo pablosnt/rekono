@@ -395,7 +395,7 @@
         "fields": {
             "argument": 28,
             "type": 10,
-            "filter": "basic,bearer,digest,jwt",
+            "filter": "!cookie",
             "order": 1
         }
     },
