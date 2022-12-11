@@ -300,7 +300,7 @@
         "model": "tools.argument",
         "pk": 28,
         "fields": {
-            "tool": 4,
+            "tool": 8,
             "name": "authentication",
             "argument": "ZAP_AUTH_HEADER=\"Authorization\" ZAP_AUTH_HEADER_VALUE=\"{credential_type} {token}\"",
             "required": false,
@@ -311,7 +311,7 @@
         "model": "tools.argument",
         "pk": 29,
         "fields": {
-            "tool": 4,
+            "tool": 8,
             "name": "cookie",
             "argument": "ZAP_AUTH_HEADER=\"Cookie\" ZAP_AUTH_HEADER_VALUE=\"{cookie_name}={cookie}\"",
             "required": false,
