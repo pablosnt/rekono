@@ -205,7 +205,7 @@
         "fields": {
             "tool": 4,
             "name": "Web scan",
-            "arguments": "{url} -Format xml -output {output}",
+            "arguments": "{url} -Format xml -output {output} {authentication} {cookie}",
             "default": true
         }
     },

@@ -368,5 +368,25 @@
             "filter": "basic",
             "order": 1
         }
+    },
+    {
+        "model": "tools.input",
+        "pk": 38,
+        "fields": {
+            "argument": 26,
+            "type": 10,
+            "filter": "basic",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 39,
+        "fields": {
+            "argument": 27,
+            "type": 10,
+            "filter": "cookie",
+            "order": 1
+        }
     }
 ]

@@ -247,7 +247,7 @@
         "fields": {
             "tool": 2,
             "name": "cookie",
-            "argument": "--cookie={cookie}",
+            "argument": "--cookie=\"{cookie_name}={cookie}\"",
             "required": false,
             "multiple": false
         }
@@ -258,7 +258,7 @@
         "fields": {
             "tool": 14,
             "name": "cookie",
-            "argument": "--cookie {cookie}",
+            "argument": "--cookie \"{cookie_name}={cookie}\"",
             "required": false,
             "multiple": false
         }
@@ -270,6 +270,28 @@
             "tool": 17,
             "name": "authentication",
             "argument": "-u {username} -p {secret}",
+            "required": false,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 26,
+        "fields": {
+            "tool": 4,
+            "name": "authentication",
+            "argument": "-id {username}:{secret}",
+            "required": false,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 27,
+        "fields": {
+            "tool": 4,
+            "name": "cookie",
+            "argument": "-Option STATIC-COOKIE=\"{cookie_name}={cookie}\"",
             "required": false,
             "multiple": false
         }
