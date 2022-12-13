@@ -1,4 +1,3 @@
-import base64
 import logging
 from typing import Any, Dict, cast
 
@@ -10,11 +9,11 @@ from input_types.base import BaseInput
 from input_types.enums import InputKeyword
 from input_types.utils import get_url
 from projects.models import Project
-from security.input_validation import (validate_credential, validate_cve,
-                                       validate_name, validate_number)
+from security.input_validation import (validate_cve, validate_name,
+                                       validate_number)
 from tools.models import Input
 
-from targets.enums import TargetAuthenticationType, TargetType
+from targets.enums import TargetType
 
 # Create your models here.
 
@@ -307,76 +306,6 @@ class TargetVulnerability(models.Model, BaseInput):
             str: String value that identifies this instance
         '''
         return f'{self.target_port.__str__()} - {self.cve}'
-
-    def get_project(self) -> Project:
-        '''Get the related project for the instance. This will be used for authorization purposes.
-
-        Returns:
-            Project: Related project entity
-        '''
-        return self.target_port.target.project
-
-
-class TargetAuthentication(models.Model, BaseInput):
-
-    target_port = models.ForeignKey(TargetPort, related_name='target_authentications', on_delete=models.CASCADE)
-    name = models.TextField(max_length=100, validators=[validate_name])
-    credential = models.TextField(max_length=500, validators=[validate_credential])
-    type = models.TextField(max_length=8, choices=TargetAuthenticationType.choices)
-
-    class Meta:
-        '''Model metadata.'''
-
-        constraints = [
-            # Unique constraint by: TargetPort, Name, Credential and Type
-            models.UniqueConstraint(
-                fields=['target_port', 'name', 'credential', 'type'],
-                name='unique target authentication'
-            )
-        ]
-
-    def filter(self, input: Input) -> bool:
-        '''Check if this instance is valid based on input filter.
-
-        Args:
-            input (Input): Tool input whose filter will be applied
-
-        Returns:
-            bool: Indicate if this instance match the input filter or not
-        '''
-        if input.filter and input.filter[0] == '!':                             # Negative filter
-            return self.type.lower() not in input.filter[1:].split(',')         # Check if filter doesn't match the type
-        # Check if filter matches the type
-        return not input.filter or self.type.lower() in input.filter.lower().split(',')
-
-    def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
-        '''Get useful information from this instance to be used in tool execution as argument.
-
-        Args:
-            accumulated (Dict[str, Any], optional): Information from other instances of the same type. Defaults to {}.
-
-        Returns:
-            Dict[str, Any]: Useful information for tool executions, including accumulated if setted
-        '''
-        output = self.target_port.parse()
-        credential = {
-            InputKeyword.USERNAME.name.lower(): self.name if self.type == TargetAuthenticationType.BASIC else None,
-            InputKeyword.COOKIE_NAME.name.lower(): self.name if self.type == TargetAuthenticationType.COOKIE else None,
-            InputKeyword.SECRET.name.lower(): self.credential,
-            InputKeyword.TOKEN.name.lower(): self.credential if self.type != TargetAuthenticationType.BASIC else base64.b64encode(f'{self.name}:{self.credential}'.encode()).decode(),  # noqa: E501
-            InputKeyword.CREDENTIAL_TYPE.name.lower(): self.type.name,
-            InputKeyword.CREDENTIAL_TYPE_LOWER.name.lower(): self.type.name.lower(),
-        }
-        output.update(credential)
-        return output
-
-    def __str__(self) -> str:
-        '''Instance representation in text format.
-
-        Returns:
-            str: String value that identifies this instance
-        '''
-        return f'{self.target_port.__str__()} - {self.name}'
 
     def get_project(self) -> Project:
         '''Get the related project for the instance. This will be used for authorization purposes.

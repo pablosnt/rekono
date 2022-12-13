@@ -37,7 +37,7 @@
 <script>
 import RekonoApi from '@/backend/RekonoApi';
 export default {
-  name: 'targetTechnology',
+  name: 'authenticationModal',
   mixins: [RekonoApi],
   props: {
     targetPortId: Number,
@@ -70,9 +70,9 @@ export default {
     create () {
       if (this.check()) {
         this.post(
-          '/api/target-authentication/',
+          '/api/authentications/',
           { target_port: this.targetPortId, name: this.newName, credential: this.newCredential, type: this.newType },
-          this.newName, 'New target authentication created successfully'
+          this.newName, 'New authentication created successfully'
         )
           .then(() => this.$emit('update'))
         this.clean()

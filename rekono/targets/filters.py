@@ -1,8 +1,8 @@
 from django_filters import rest_framework
 from django_filters.rest_framework.filters import OrderingFilter
 
-from targets.models import (Target, TargetAuthentication, TargetPort,
-                            TargetTechnology, TargetVulnerability)
+from targets.models import (Target, TargetPort, TargetTechnology,
+                            TargetVulnerability)
 
 
 class TargetFilter(rest_framework.FilterSet):
@@ -89,25 +89,4 @@ class TargetVulnerabilityFilter(rest_framework.FilterSet):
             'target_port__target__target': ['exact', 'icontains'],
             'target_port__target__type': ['exact'],
             'cve': ['exact']
-        }
-
-
-class TargetAuthenticationFilter(rest_framework.FilterSet):
-
-    o = OrderingFilter(fields=('target_port', 'name', 'type'))
-
-    class Meta:
-        model = TargetAuthentication
-        fields = {
-            'target_port': ['exact'],
-            'target_port__port': ['exact'],
-            'target_port__target': ['exact'],
-            'target_port__target__project': ['exact'],
-            'target_port__target__project__name': ['exact', 'icontains'],
-            'target_port__target__project__owner': ['exact'],
-            'target_port__target__project__owner__username': ['exact', 'icontains'],
-            'target_port__target__target': ['exact', 'icontains'],
-            'target_port__target__type': ['exact'],
-            'name': ['exact', 'icontains'],
-            'type': ['exact']
         }

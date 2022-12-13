@@ -1,6 +1,6 @@
 <template>
   <div>
-    <target-authentication  v-if="name === 'authentication'" :targetPortId="targetPortId" @update="fetchData()"/>
+    <authentication  v-if="name === 'authentication'" :targetPortId="targetPortId" @update="fetchData()"/>
     <target-technology  v-if="name === 'technology'" :targetPortId="targetPortId" @update="fetchData()"/>
     <target-vulnerability v-if="name === 'vulnerability'" :targetPortId="targetPortId" @update="fetchData()"/>
     <b-table stripped head-variant="light" :fields="tableFields" :items="data" v-if="data.length > 0">
@@ -13,7 +13,7 @@
     <deletion :id="'delete-' + name + '-modal'" :title="'Delete ' + name.charAt(0).toUpperCase() + name.slice(1)" @deletion="deleteItem" @clean="cleanSelection" v-if="selectedItem !== null">
       <span><strong>{{ selectedItem[field] }}</strong> {{ name.toLowerCase() }}</span>
     </deletion>
-    <pagination :page="page" :limit="limit" :limits="limits" :total="total" :name="endpoint" @pagination="pagination"/>
+    <pagination :page="page" :limit="limit" :limits="limits" :total="total" :name="endpoint.replace('target-', '')" @pagination="pagination"/>
   </div>
 </template>
 
@@ -21,7 +21,7 @@
 import RekonoApi from '@/backend/RekonoApi'
 import Deletion from '@/common/Deletion'
 import Pagination from '@/common/Pagination'
-import TargetAuthentication from '@/modals/TargetAuthentication'
+import Authentication from '@/modals/Authentication'
 import TargetTechnology from '@/modals/TargetTechnology'
 import TargetVulnerability from '@/modals/TargetVulnerability'
 export default {
@@ -46,7 +46,7 @@ export default {
     Pagination,
     TargetVulnerability,
     TargetTechnology,
-    TargetAuthentication
+    Authentication
   },
   data () {
     this.fetchData()
@@ -59,14 +59,14 @@ export default {
   },
   methods: {
     fetchData () {
-      return this.getOnePage(`/api/target-${this.endpoint}/?o=${this.field}`, { target_port: this.targetPortId })
+      return this.getOnePage(`/api/${this.endpoint}/?o=${this.field}`, { target_port: this.targetPortId })
         .then(response => {
           this.data = response.data.results
           this.total = response.data.count
         })
     },
     deleteItem () {
-      this.delete(`/api/target-${this.endpoint}/${this.selectedItem.id}/`).then(() => this.fetchData())
+      this.delete(`/api/${this.endpoint}/${this.selectedItem.id}/`).then(() => this.fetchData())
     },
     selectItem (item) {
       this.selectedItem = item

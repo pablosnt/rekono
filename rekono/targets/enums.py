@@ -9,14 +9,3 @@ class TargetType(models.TextChoices):
     NETWORK = 'Network'
     IP_RANGE = 'IP range'
     DOMAIN = 'Domain'
-
-
-class TargetAuthenticationType(models.TextChoices):
-    '''Supported target authentication types.'''
-
-    BASIC = 'Basic'
-    BEARER = 'Bearer'
-    COOKIE = 'Cookie'
-    DIGEST = 'Digest'
-    JWT = 'JWT'
-    NTLM = 'NTLM'

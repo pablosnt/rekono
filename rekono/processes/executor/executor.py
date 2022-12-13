@@ -9,8 +9,8 @@ from input_types.models import InputType
 from processes.executor.callback import process_callback
 from processes.models import Step
 from rq.job import Job
-from targets.models import (Target, TargetAuthentication, TargetPort,
-                            TargetTechnology, TargetVulnerability)
+from targets.models import (Target, TargetPort, TargetTechnology,
+                            TargetVulnerability)
 from tasks.models import Task
 from tools.models import Argument, Intensity
 
@@ -90,8 +90,8 @@ def execute(task: Task) -> None:
     for job in execution_plan:                                                  # For each planned jobs
         # Check unneeded target types, due to dependencies with previous jobs
         covered_targets = [i.callback_target for i in job.dependencies_coverage if i.callback_target is not None]
-        # Wordlist and target authentication are included in targets because they never will be covered by dependencies
-        targets = list(task.wordlists.all()) + list(TargetAuthentication.objects.filter(target_port__target=task.target).all())     # noqa: E501
+        # Wordlists are included in targets because they never will be covered by dependencies
+        targets = list(task.wordlists.all())
         app_label = Target._meta.app_label
         if f'{app_label}.{Target._meta.model_name}' not in covered_targets:     # Target is not covered by dependencies
             targets.append(task.target)                                         # Add task target to targets

@@ -5,19 +5,19 @@
         <template #title>
           <b-icon icon="shield-lock-fill"/> Authentication
         </template>
-        <target-port-detail :targetPortId="targetPort.id" endpoint="authentication" name="credential" field="name" :fields="targetAuthenticationFields"/>
+        <target-port-detail :targetPortId="targetPort.id" endpoint="authentications" name="authentication" field="name" :fields="targetAuthenticationFields"/>
       </b-tab>
       <b-tab title-link-class="text-secondary">
         <template #title>
           <b-icon icon="cpu-fill"/> Technologies
         </template>
-        <target-port-detail :targetPortId="targetPort.id" endpoint="technologies" name="technology" field="name" :fields="targetTechnologiesFields"/>
+        <target-port-detail :targetPortId="targetPort.id" endpoint="target-technologies" name="technology" field="name" :fields="targetTechnologiesFields"/>
       </b-tab>
       <b-tab title-link-class="text-secondary">
         <template #title>
           <b-icon icon="bug-fill"/> Vulnerabilities
         </template>
-        <target-port-detail :targetPortId="targetPort.id" endpoint="vulnerabilities" name="vulnerability" field="cve" :fields="targetVulnerabilitiesFields"/>
+        <target-port-detail :targetPortId="targetPort.id" endpoint="target-vulnerabilities" name="vulnerability" field="cve" :fields="targetVulnerabilitiesFields"/>
       </b-tab>
     </b-tabs>
   </b-modal>
