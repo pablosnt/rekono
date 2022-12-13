@@ -3,9 +3,9 @@ from typing import Any, Dict
 from django.db.models import QuerySet
 from targets.views import TargetViewSet
 
-from authentication.filters import AuthenticationFilter
-from authentication.models import Authentication
-from authentication.serializers import AuthenticationSerializer
+from authentications.filters import AuthenticationFilter
+from authentications.models import Authentication
+from authentications.serializers import AuthenticationSerializer
 
 # Create your views here.
 

@@ -9,7 +9,7 @@ from security.input_validation import validate_credential, validate_name
 from targets.models import TargetPort
 from tools.models import Input
 
-from authentication.enums import AuthenticationType
+from authentications.enums import AuthenticationType
 
 # Create your models here.
 

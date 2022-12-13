@@ -43,11 +43,6 @@ class ExecutionsFromFindingsTest(TestCase):
         # Wordlist argument
         test_word = Argument.objects.create(tool=self.tool, name='test_word', required=False)
         Input.objects.create(argument=test_word, type=InputType.objects.get(name='Wordlist'))
-        # Authentication arguments
-        test_auth1 = Argument.objects.create(tool=self.tool, name='test_auth1', required=False)
-        Input.objects.create(argument=test_auth1, type=InputType.objects.get(name='Authentication'), filter="!cookie")
-        test_auth2 = Argument.objects.create(tool=self.tool, name='test_auth2', required=False)
-        Input.objects.create(argument=test_auth2, type=InputType.objects.get(name='Authentication'), filter="cookie")
         # Project > Target > Task > Execution to create findings for testing
         self.project = Project.objects.create(name='Test', description='Test', tags=['test'])
         self.target = Target.objects.create(project=self.project, target='scanme.nmap.org', type=TargetType.DOMAIN)
@@ -200,38 +195,3 @@ class ExecutionsFromFindingsTest(TestCase):
         ]
         executions = get_executions_from_findings(targets, self.tool)
         self.assertEqual(expected, executions)
-
-    # def test_with_targets_and_authentication(self) -> None:
-    #     '''Test get_executions_from_findings feature with targets and authentication.'''
-    #     # Target port
-    #     tp_1 = TargetPort.objects.create(target=self.target, port=80)
-    #     tp_2 = TargetPort.objects.create(target=self.target, port=22)
-    #     # Target authentication
-    #     ta_1_1 = TargetAuthentication.objects.create(
-    #         target_port=tp_1,
-    #         name='admin',
-    #         credential='password',
-    #         type=TargetAuthenticationType.BASIC
-    #     )
-    #     ta_1_2 = TargetAuthentication.objects.create(
-    #         target_port=tp_1,
-    #         name='jwt',
-    #         credential='jwt',
-    #         type=TargetAuthenticationType.BEARER
-    #     )
-    #     ta_1_3 = TargetAuthentication.objects.create(
-    #         target_port=tp_1,
-    #         name='cookie',
-    #         credential='sessionid',
-    #         type=TargetAuthenticationType.COOKIE
-    #     )
-    #     # Target list to pass as argument
-    #     targets = [self.target, tp_1, tp_2, ta_1_1, ta_1_2, ta_1_3]
-    #     # Expected executions
-    #     expected = [
-    #         [self.target, tp_1, tp_2, ta_1_1],
-    #         [self.target, tp_1, tp_2, ta_1_2],
-    #         [self.target, tp_1, tp_2, ta_1_3],
-    #     ]
-    #     executions = get_executions_from_findings(targets, self.tool)
-    #     self.assertEqual(expected, executions)

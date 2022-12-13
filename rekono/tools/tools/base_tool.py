@@ -6,7 +6,7 @@ import subprocess
 import uuid
 from typing import Any, Dict, List, Optional, Tuple, Union, cast
 
-from authentication.models import Authentication
+from authentications.models import Authentication
 from django.db.models import Model
 from django.db.models.fields.related_descriptors import \
     ReverseManyToOneDescriptor

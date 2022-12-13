@@ -162,15 +162,6 @@ class BaseToolTest(RekonoTestCase):
             target_technology,
             target_vulnerability
         ])
-        argument1 = Argument.objects.create(tool=self.nmap, name='test_authentication', argument='--password {secret}')
-        Input.objects.create(argument=argument1, type=InputType.objects.get(name='Authentication'), filter='!cookie')
-        argument2 = Argument.objects.create(
-            tool=self.nmap,
-            name='test_cookie',
-            argument='--cookie {cookie_name}={cookie}'
-        )
-        Input.objects.create(argument=argument2, type=InputType.objects.get(name='Authentication'), filter='cookie')
-        self.arguments.extend([argument1, argument2])
 
     def create_osint(self) -> None:
         '''Create OSINT data for testing.'''
@@ -479,44 +470,6 @@ class BaseToolTest(RekonoTestCase):
             '--vuln CVE-2021-44228', '--exploit Test', f'--wordlist {self.wordlist.path}'
         ]).split(' ')
         self.assertEqual(expected, arguments)
-
-    # def test_get_arguments_using_targets_and_basic_authentication(self) -> None:
-    #     '''Test get_arguments feature using targets and basic authentication.'''
-    #     ta = TargetAuthentication.objects.create(
-    #         target_port=self.target_port_http,
-    #         name='admin',
-    #         credential='admin',
-    #         type=TargetAuthenticationType.BASIC
-    #     )
-    #     self.targets.append(ta)
-    #     arguments = self.tool_instance.get_arguments(self.targets, self.findings_to_use_targets)
-    #     expected = ' '.join([
-    #         '-T3', '--osint http://scanme.nmap.org/', '--only-host 45.33.32.156', '--host 45.33.32.156',
-    #         '--port 443', '--port-commas 80,443', '--tech Wordpress',
-    #         '--version 1.0.0', '--email test@test.test', '--username test', '--secret test',
-    #         '--vuln CVE-2021-44228', '--exploit Test', f'--wordlist {self.wordlist.path}',
-    #         '--password admin'
-    #     ]).split(' ')
-    #     self.assertEqual(expected, arguments)
-
-    # def test_get_arguments_using_targets_and_cookie_authentication(self) -> None:
-    #     '''Test get_arguments feature using targets and authentication via Cookie.'''
-    #     ta = TargetAuthentication.objects.create(
-    #         target_port=self.target_port_https,
-    #         name='cookie',
-    #         credential='sessionid',
-    #         type=TargetAuthenticationType.COOKIE
-    #     )
-    #     self.targets.append(ta)
-    #     arguments = self.tool_instance.get_arguments(self.targets, self.findings_to_use_targets)
-    #     expected = ' '.join([
-    #         '-T3', '--osint http://scanme.nmap.org/', '--only-host 45.33.32.156', '--host 45.33.32.156',
-    #         '--port 443', '--port-commas 80,443', '--tech Wordpress',
-    #         '--version 1.0.0', '--email test@test.test', '--username test', '--secret test',
-    #         '--vuln CVE-2021-44228', '--exploit Test', f'--wordlist {self.wordlist.path}',
-    #         '--cookie cookie=sessionid'
-    #     ]).split(' ')
-    #     self.assertEqual(expected, arguments)
 
     def test_get_arguments_using_targets_without_filters(self) -> None:
         '''Test get_arguments feature using targets without input filters.'''

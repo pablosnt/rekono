@@ -5,7 +5,7 @@ from django.forms import ValidationError
 from rest_framework import serializers
 from security.input_validation import validate_credential
 
-from authentication.models import Authentication
+from authentications.models import Authentication
 
 
 class AuthenticationSerializer(serializers.ModelSerializer):

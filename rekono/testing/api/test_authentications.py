@@ -1,5 +1,5 @@
-from authentication.enums import AuthenticationType
-from authentication.models import Authentication
+from authentications.enums import AuthenticationType
+from authentications.models import Authentication
 from testing.api.base import RekonoApiTestCase
 
 

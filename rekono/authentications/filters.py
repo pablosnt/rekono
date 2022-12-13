@@ -1,7 +1,7 @@
 from django_filters import rest_framework
 from django_filters.rest_framework.filters import OrderingFilter
 
-from authentication.models import Authentication
+from authentications.models import Authentication
 
 
 class AuthenticationFilter(rest_framework.FilterSet):

@@ -1,6 +1,6 @@
 from rest_framework.routers import SimpleRouter
 
-from authentication.views import AuthenticationViewSet
+from authentications.views import AuthenticationViewSet
 
 router = SimpleRouter()
 router.register('authentications', AuthenticationViewSet)
