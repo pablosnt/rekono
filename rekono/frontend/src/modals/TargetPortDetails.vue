@@ -5,7 +5,7 @@
         <template #title>
           <b-icon icon="shield-lock-fill"/> Authentication
         </template>
-        <target-port-detail :targetPortId="targetPort.id" endpoint="authentications" name="authentication" field="name" :fields="targetAuthenticationFields"/>
+        <target-port-detail :targetPortId="targetPort.id" endpoint="authentications" name="authentication" field="name" :fields="authenticationFields"/>
       </b-tab>
       <b-tab title-link-class="text-secondary">
         <template #title>
@@ -35,7 +35,7 @@ export default {
   },
   data () {
     return {
-      targetAuthenticationFields: [
+      authenticationFields: [
         { key: 'name' },
         { key: 'credential', label: 'Secret' },
         { key: 'type' }

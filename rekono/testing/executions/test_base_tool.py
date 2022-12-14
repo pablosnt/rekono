@@ -49,7 +49,6 @@ class BaseToolTest(RekonoTestCase):
             arguments=(
                 '{intensity} {test_osint} {test_only_host} {test_host} {test_port} {test_path} '
                 '{test_technology} {test_credential} {test_vulnerability} {test_exploit} {test_wordlist} '
-                '{test_authentication} {test_cookie}'
             )
         )
         # Initialize auxiliary lists to help data usage

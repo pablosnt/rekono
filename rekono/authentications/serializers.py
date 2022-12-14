@@ -32,7 +32,7 @@ class AuthenticationSerializer(serializers.ModelSerializer):
         '''
         attrs = super().validate(attrs)
         validate_credential(attrs['credential'])
-        if Authentication.objects.get(target_port=attrs['target_port']).exists():
+        if Authentication.objects.filter(target_port=attrs['target_port']).exists():
             raise ValidationError({
                 'name': 'This name already exists in this target port',
                 'credential': 'This credential already exists for this technology in this target port',

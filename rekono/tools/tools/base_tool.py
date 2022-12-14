@@ -194,7 +194,7 @@ class BaseTool:
             if len(cast(List[BaseInput], source)) > 0:
                 ports = [p for p in cast(List[BaseInput], source) if isinstance(p, port_type)]
                 if len(ports) == 1:
-                    authentication = Authentication.objects.get(
+                    authentication = Authentication.objects.filter(
                         target_port__target=self.execution.task.target,
                         target_port__port=cast(Union[Port, TargetPort], ports[0]).port
                     )
