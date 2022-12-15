@@ -76,8 +76,8 @@
         "pk": 9,
         "fields": {
             "name": "Wordlist",
-            "related_model": "resources.wordlist",
-            "callback_target": null
+            "related_model": null,
+            "callback_target": "resources.wordlist"
         }
     },
     {
