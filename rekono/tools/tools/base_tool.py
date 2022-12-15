@@ -187,12 +187,11 @@ class BaseTool:
         findings_list: List[Finding]
     ) -> Optional[Authentication]:
         authentication = None
-        for source, port_type in [
-            (findings_list, Port),
-            (targets_list, TargetPort),
+        for ports in [
+            [p for p in findings_list if isinstance(p, Port)],
+            [p for p in targets_list if isinstance(p, TargetPort)],
         ]:
-            if len(cast(List[BaseInput], source)) > 0:
-                ports = [p for p in cast(List[BaseInput], source) if isinstance(p, port_type)]
+            if len(ports) > 0:
                 if len(ports) == 1:
                     authentication = Authentication.objects.filter(
                         target_port__target=self.execution.task.target,
