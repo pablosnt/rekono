@@ -186,19 +186,20 @@ class BaseTool:
         targets_list: List[BaseInput],
         findings_list: List[Finding]
     ) -> Optional[Authentication]:
-        authentication = None
         for ports in [
             [p for p in findings_list if isinstance(p, Port)],
             [p for p in targets_list if isinstance(p, TargetPort)],
         ]:
             if len(ports) > 0:
                 if len(ports) == 1:
-                    authentication = Authentication.objects.filter(
+                    authentications = Authentication.objects.filter(
                         target_port__target=self.execution.task.target,
                         target_port__port=cast(Union[Port, TargetPort], ports[0]).port
                     )
+                    if authentications.exists():
+                        return authentications.first()
                 break
-        return authentication
+        return None
 
     def get_arguments(self, targets: List[BaseInput], previous_findings: List[Finding]) -> List[str]:
         '''Get tool arguments for the tool command.

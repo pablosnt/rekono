@@ -3,6 +3,8 @@ from typing import List
 from unittest import mock
 
 import django_rq
+from authentications.enums import AuthenticationType
+from authentications.models import Authentication
 from django.utils import timezone
 from findings.enums import DataType, Protocol, Severity
 from findings.models import (OSINT, Credential, Exploit, Finding, Host, Path,
@@ -120,7 +122,7 @@ class BaseToolTest(RekonoTestCase):
         target_filtered = Target.objects.create(project=self.project, target='scanme.nmap.org', type=TargetType.DOMAIN)
         target = Target.objects.create(project=self.project, target='45.33.32.156', type=TargetType.PUBLIC_IP)
         self.target_port_http = TargetPort.objects.create(target=target, port=80)
-        self.target_port_https = TargetPort.objects.create(target=target, port=443)
+        target_port_https = TargetPort.objects.create(target=target, port=443)
         target_technology = TargetTechnology.objects.create(
             target_port=self.target_port_http,
             name='Wordpress',
@@ -157,7 +159,7 @@ class BaseToolTest(RekonoTestCase):
         )
         self.targets.extend([
             target_filtered, target,
-            self.target_port_http, self.target_port_https,
+            self.target_port_http, target_port_https,
             target_technology,
             target_vulnerability
         ])
@@ -218,8 +220,8 @@ class BaseToolTest(RekonoTestCase):
         # Port filtered due to service type. HTTP service required
         filtered = Port.objects.create(host=host, port=22, protocol=Protocol.TCP, service='ssh')
         filtered.executions.add(self.first_execution)
-        http = Port.objects.create(host=host, port=80, protocol=Protocol.TCP, service='http')
-        http.executions.add(self.first_execution)
+        self.http = Port.objects.create(host=host, port=80, protocol=Protocol.TCP, service='http')
+        self.http.executions.add(self.first_execution)
         https = Port.objects.create(host=host, port=443, protocol=Protocol.TCP, service='https')
         https.executions.add(self.first_execution)
         argument = Argument.objects.create(
@@ -232,9 +234,9 @@ class BaseToolTest(RekonoTestCase):
         # Input filtered by service type: HTTP service required
         Input.objects.create(argument=argument, type=InputType.objects.get(name='Port'), filter='http')
         self.arguments.append(argument)
-        self.all_findings.extend([filtered, http, https])
-        self.required_findings.extend([filtered, http, https])
-        return http
+        self.all_findings.extend([filtered, self.http, https])
+        self.required_findings.extend([filtered, self.http, https])
+        return self.http
 
     def create_paths(self, port: Port) -> None:
         '''Create path data for testing.
@@ -595,3 +597,17 @@ class BaseToolTest(RekonoTestCase):
     def test_process_findings_with_unvailable_defectdojo(self) -> None:
         '''Test process_findings feature with unavailable Defect-Dojo instance.'''
         self.process_findings(False)
+
+    def test_get_authentication(self) -> None:
+        search = self.tool_instance.get_authentication([self.target_port_http], [self.http])
+        self.assertEqual(None, search)
+        authentication = Authentication.objects.create(
+            target_port=self.target_port_http,
+            name='test',
+            credential='test',
+            type=AuthenticationType.BASIC
+        )
+        search = self.tool_instance.get_authentication([self.target_port_http], [self.http])
+        self.assertEqual(authentication, search)
+        search = self.tool_instance.get_authentication([self.target_port_http], [])
+        self.assertEqual(authentication, search)

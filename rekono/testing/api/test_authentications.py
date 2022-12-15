@@ -1,3 +1,4 @@
+from authentications.enums import AuthenticationType
 from authentications.models import Authentication
 from testing.api.base import RekonoApiTestCase
 
@@ -15,7 +16,7 @@ class AuthenticationTest(RekonoApiTestCase):
             'target_port': self.target_port.id,
             'name': 'admin',
             'credential': 'admin',
-            'type': 'Basic'
+            'type': AuthenticationType.BASIC
         }
 
     def test_create(self) -> None:
