@@ -79,5 +79,14 @@
             "related_model": null,
             "callback_target": "resources.wordlist"
         }
+    },
+    {
+        "model": "input_types.inputtype",
+        "pk": 10,
+        "fields": {
+            "name": "Authentication",
+            "related_model": "authentications.authentication",
+            "callback_target": null
+        }
     }
 ]

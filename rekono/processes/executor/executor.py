@@ -90,7 +90,7 @@ def execute(task: Task) -> None:
     for job in execution_plan:                                                  # For each planned jobs
         # Check unneeded target types, due to dependencies with previous jobs
         covered_targets = [i.callback_target for i in job.dependencies_coverage if i.callback_target is not None]
-        # Wordlist never will be covered by dependencies, so they are included directly in targets
+        # Wordlists are included in targets because they never will be covered by dependencies
         targets = list(task.wordlists.all())
         app_label = Target._meta.app_label
         if f'{app_label}.{Target._meta.model_name}' not in covered_targets:     # Target is not covered by dependencies

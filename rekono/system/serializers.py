@@ -1,39 +1,13 @@
-from typing import Optional
+from typing import Any, Dict, Optional
 
+from api.serializers import ProtectedStringValueField
 from defectdojo.api import DefectDojo
-from drf_spectacular.types import OpenApiTypes
-from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
+from security.input_validation import (validate_defect_dojo_api_key,
+                                       validate_telegram_token)
 from telegram_bot.bot import get_telegram_bot_name
 
 from system.models import System
-
-
-@extend_schema_field(OpenApiTypes.STR)
-class ProtectedValueField(serializers.Field):
-    '''Serializer field to manage protected system values.'''
-
-    def to_representation(self, value: str) -> str:
-        '''Return text value to send to the client.
-
-        Args:
-            value (str): Internal text value
-
-        Returns:
-            str: Text value that contains multiple '*' characters
-        '''
-        return '*' * len(value)
-
-    def to_internal_value(self, value: str) -> str:
-        '''Return text value to be stored in database.
-
-        Args:
-            value (str): Text value provided by the client
-
-        Returns:
-            str: Text value to be stored. Save value than the provided one.
-        '''
-        return value
 
 
 class SystemSerializer(serializers.ModelSerializer):
@@ -42,9 +16,9 @@ class SystemSerializer(serializers.ModelSerializer):
     # Telegram bot name obtained automatically using the Telegram token
     telegram_bot_name = serializers.SerializerMethodField(method_name='get_telegram_bot_name', read_only=True)
     # Telegram token in a protected way
-    telegram_bot_token = ProtectedValueField(required=False, allow_null=True)
+    telegram_bot_token = ProtectedStringValueField(required=False, allow_null=True)
     # Defect-Dojo APi key in a protected way
-    defect_dojo_api_key = ProtectedValueField(required=False, allow_null=True)
+    defect_dojo_api_key = ProtectedStringValueField(required=False, allow_null=True)
     # Indicate if Defect-Dojo integration is available using the URL and the API key
     defect_dojo_enabled = serializers.SerializerMethodField(method_name='is_defect_dojo_enabled', read_only=True)
 
@@ -81,3 +55,22 @@ class SystemSerializer(serializers.ModelSerializer):
             Optional[str]: Telegram bot name
         '''
         return get_telegram_bot_name()
+
+    def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
+        '''Validate the provided data before use it.
+
+        Args:
+            attrs (Dict[str, Any]): Provided data
+
+        Raises:
+            ValidationError: Raised if provided data is invalid
+
+        Returns:
+            Dict[str, Any]: Data after validation process
+        '''
+        attrs = super().validate(attrs)
+        if 'telegram_bot_token' in attrs:
+            validate_telegram_token(attrs.get('telegram_bot_token', ''))
+        if 'defect_dojo_api_key' in attrs:
+            validate_defect_dojo_api_key(attrs.get('defect_dojo_api_key', ''))
+        return attrs

@@ -77,11 +77,13 @@ export default {
       ],
       cancellableStatuses: ['Requested', 'Running'],
       timeUnits: ['Weeks', 'Days', 'Hours', 'Minutes'],
+      credentialTypes: ['Basic', 'Bearer', 'Cookie', 'Digest', 'JWT', 'NTLM'],
       nameRegex: /^[\wÀ-ÿ\s.\-[\]()]{0,100}$/,
       textRegex: /^[\wÀ-ÿ\s.:,+\-'"?¿¡!#%$€[\]()]{0,300}$/,
-      cveRegex: /^CVE-[0-9]{4}-[0-9]{1,7}$/,
-      defectDojoKeyRegex: /^[0-9a-z]{40}$/,
-      telegramTokenRegex: /^[0-9]{10}:[\w-]{35}$/,
+      cveRegex: /^CVE-\d{4}-\d{1,7}$/,
+      defectDojoKeyRegex: /^[\da-z]{40}$/,
+      telegramTokenRegex: /^\d{10}:[\w-]{35}$/,
+      credentialRegex: /^[\d\w./\-=+,:<>¿?¡!#&$()[\]{}*]{1,500}$/,
       telegramBotName: null,
       defectDojoUrl: null,
       defectDojoEnabled: null
@@ -265,6 +267,9 @@ export default {
     },
     validateTelegramToken (value) {
       return this.validate(value, this.telegramTokenRegex)
+    },
+    validateCredential (value) {
+      return this.validate(value, this.credentialRegex)
     },
     validateUrl (value) {
       try {

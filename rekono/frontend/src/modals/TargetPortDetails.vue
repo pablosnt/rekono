@@ -3,15 +3,21 @@
     <b-tabs fill card active-nav-item-class="text-danger">
       <b-tab title-link-class="text-secondary">
         <template #title>
+          <b-icon icon="shield-lock-fill"/> Authentication
+        </template>
+        <target-port-detail :targetPortId="targetPort.id" endpoint="authentications" name="authentication" field="name" :fields="authenticationFields"/>
+      </b-tab>
+      <b-tab title-link-class="text-secondary">
+        <template #title>
           <b-icon icon="cpu-fill"/> Technologies
         </template>
-        <target-port-detail :targetPortId="targetPort.id" endpoint="technologies" name="technology" field="name" :fields="targetTechnologiesFields"/>
+        <target-port-detail :targetPortId="targetPort.id" endpoint="target-technologies" name="technology" field="name" :fields="targetTechnologiesFields"/>
       </b-tab>
       <b-tab title-link-class="text-secondary">
         <template #title>
           <b-icon icon="bug-fill"/> Vulnerabilities
         </template>
-        <target-port-detail :targetPortId="targetPort.id" endpoint="vulnerabilities" name="vulnerability" field="cve" :fields="targetVulnerabilitiesFields"/>
+        <target-port-detail :targetPortId="targetPort.id" endpoint="target-vulnerabilities" name="vulnerability" field="cve" :fields="targetVulnerabilitiesFields"/>
       </b-tab>
     </b-tabs>
   </b-modal>
@@ -19,7 +25,7 @@
 
 <script>
 import RekonoApi from '@/backend/RekonoApi';
-import TargetPortDetail from './TargetPortDetail';
+import TargetPortDetail from '@/common/TargetPortDetail';
 export default {
   name: 'targetPortModal',
   mixins: [RekonoApi],
@@ -29,6 +35,11 @@ export default {
   },
   data () {
     return {
+      authenticationFields: [
+        { key: 'name' },
+        { key: 'credential', label: 'Secret' },
+        { key: 'type' }
+      ],
       targetTechnologiesFields: [
         { key: 'name', label: 'Technology' },
         { key: 'version' }

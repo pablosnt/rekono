@@ -229,5 +229,93 @@
             "required": false,
             "multiple": false
         }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 22,
+        "fields": {
+            "tool": 2,
+            "name": "authentication",
+            "argument": "--auth={token} --auth-type={credential_type_lower}",
+            "required": false,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 23,
+        "fields": {
+            "tool": 2,
+            "name": "cookie",
+            "argument": "--cookie='{cookie_name}={secret}'",
+            "required": false,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 24,
+        "fields": {
+            "tool": 14,
+            "name": "cookie",
+            "argument": "--cookie '{cookie_name}={secret}'",
+            "required": false,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 25,
+        "fields": {
+            "tool": 17,
+            "name": "authentication",
+            "argument": "-u {username} -p {secret}",
+            "required": false,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 26,
+        "fields": {
+            "tool": 4,
+            "name": "authentication",
+            "argument": "-id {username}:{secret}",
+            "required": false,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 27,
+        "fields": {
+            "tool": 4,
+            "name": "cookie",
+            "argument": "-Option STATIC-COOKIE='{cookie_name}={secret}'",
+            "required": false,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 28,
+        "fields": {
+            "tool": 8,
+            "name": "authentication",
+            "argument": "ZAP_AUTH_HEADER='Authorization' ZAP_AUTH_HEADER_VALUE='{credential_type} {token}'",
+            "required": false,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 29,
+        "fields": {
+            "tool": 8,
+            "name": "cookie",
+            "argument": "ZAP_AUTH_HEADER='Cookie' ZAP_AUTH_HEADER_VALUE='{cookie_name}={secret}'",
+            "required": false,
+            "multiple": false
+        }
     }
 ]

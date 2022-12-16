@@ -78,7 +78,7 @@ class ExecutionsFromFindingsTest(TestCase):
         return finding
 
     def test_with_findings(self) -> None:
-        '''Test get_executions_from_findings feature with findings. Simulates new executions from previous findings.'''
+        '''Test get_executions_from_findings feature with findings.'''
         # Host 1 with some endpoints in some ports
         host_1 = self.create_finding(Host, address='10.10.10.1')
         port_1_1 = self.create_finding(Port, host=host_1, port=22)
@@ -159,7 +159,7 @@ class ExecutionsFromFindingsTest(TestCase):
         self.assertEqual(expected, executions)
 
     def test_with_only_one_finding_type(self) -> None:
-        '''Test get_executions_from_findings feature with findings. Simulates new executions from previous findings.'''
+        '''Test get_executions_from_findings feature with findings.'''
         host_1 = self.create_finding(Host, address='10.10.10.1')
         host_2 = self.create_finding(Host, address='10.10.10.2')
         host_3 = self.create_finding(Host, address='10.10.10.3')
@@ -170,8 +170,8 @@ class ExecutionsFromFindingsTest(TestCase):
         self.assertEqual(expected, executions)
 
     def test_with_targets(self) -> None:
-        '''Test get_executions_from_findings feature with targets. Simulates initial new executions.'''
-        # Target ports with some target endpoints
+        '''Test get_executions_from_findings feature with targets.'''
+        # Target ports
         tp_1 = TargetPort.objects.create(target=self.target, port=22)
         tp_2 = TargetPort.objects.create(target=self.target, port=80)
         tp_3 = TargetPort.objects.create(target=self.target, port=443)

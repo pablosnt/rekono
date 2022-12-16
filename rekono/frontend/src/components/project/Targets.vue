@@ -34,9 +34,8 @@
         <b-card>
           <b-table striped borderles head-variant="light" :fields="targetPortsFields" :items="row.item.target_ports">
             <template #cell(actions)="port">
-              <b-button @click="showTargetPort = port.item.id; selectTargetPort(row.item, port.item)" variant="outline" class="mr-2" v-b-tooltip.hover title="Details" v-b-modal.target-port-details>
-                <b-icon v-if="showTargetPort !== port.item.id" variant="dark" icon="eye-fill"/>
-                <b-icon v-if="showTargetPort === port.item.id" variant="dark" icon="eye-slash-fill"/>
+              <b-button @click="selectTargetPort(row.item, port.item)" variant="outline" class="mr-2" v-b-tooltip.hover title="Configuration" v-b-modal.target-port-details>
+                <b-icon variant="dark" icon="nut-fill"/>
               </b-button>
               <b-button variant="outline" @click="selectTargetPort(row.item, port.item)" v-b-tooltip.hover title="Delete Port" v-b-modal.delete-target-port-modal>
                 <b-icon variant="danger" icon="trash-fill"/>
@@ -55,7 +54,7 @@
     </deletion>
     <target id="add-target-modal" :projectId="$route.params.id" @confirm="confirm"/>
     <target-port v-if="selectedTarget !== null" id="add-target-port-modal" :targetId="selectedTarget.id" @confirm="confirm"/>
-    <target-port-details v-if="selectedTargetPort !== null" id="target-port-details" :targetPort="selectedTargetPort" @close="showTargetPort = null; fetchData()"/>
+    <target-port-details v-if="selectedTargetPort !== null" id="target-port-details" :targetPort="selectedTargetPort" @close="fetchData()"/>
     <task id="task-modal" :target="selectedTarget" :initialized="selectedTarget !== null" @clean="cleanSelection"/>
   </div>
 </template>
@@ -104,7 +103,6 @@ export default {
       selectedTarget: null,
       selectedTargetPort: null,
       showTargetId: null,
-      showTargetPort: null,
       filters: []
     }
   },
@@ -156,7 +154,6 @@ export default {
     cleanSelection () {
       this.selectedTarget = null
       this.selectedTargetPort = null
-      this.showTargetPort = null
     }
   }
 }

@@ -4,23 +4,25 @@ import re
 import shutil
 import subprocess
 import uuid
-from typing import Any, Dict, List, Tuple, Union, cast
+from typing import Any, Dict, List, Optional, Tuple, Union, cast
 
+from authentications.models import Authentication
 from django.db.models import Model
 from django.db.models.fields.related_descriptors import \
     ReverseManyToOneDescriptor
 from django.db.models.query_utils import DeferredAttribute
 from django.utils import timezone
 from executions.models import Execution
-from findings.models import Finding, Vulnerability
+from findings.models import Finding, Port, Vulnerability
 from findings.queue import producer
 from findings.utils import get_unique_filter
 from input_types.base import BaseInput
+from rekono.settings import REPORTS_DIR, TESTING
+from targets.models import TargetPort
 from tasks.enums import Status
+
 from tools.exceptions import ToolExecutionException
 from tools.models import Argument, Input, Intensity
-
-from rekono.settings import REPORTS_DIR, TESTING
 
 logger = logging.getLogger()                                                    # Rekono logger
 
@@ -179,6 +181,35 @@ class BaseTool:
                         break
         return found, command
 
+    def get_authentication(
+        self,
+        targets_list: List[BaseInput],
+        findings_list: List[Finding]
+    ) -> Optional[Authentication]:
+        '''Get authentication for a given list of targets and findings.
+
+        Args:
+            targets_list (List[BaseInput]): Targets list
+            findings_list (List[Finding]): Findings list
+
+        Returns:
+            Optional[Authentication]: Authentication entity if found
+        '''
+        for ports in [
+            [p for p in findings_list if isinstance(p, Port)],                  # Get Ports from findings list
+            [p for p in targets_list if isinstance(p, TargetPort)],             # Get TargetPorts from targets list
+        ]:
+            if len(ports) > 0:                                                  # Ports found
+                if len(ports) == 1:                                             # Only one port
+                    authentications = Authentication.objects.filter(            # Look for authentication entity
+                        target_port__target=self.execution.task.target,
+                        target_port__port=cast(Union[Port, TargetPort], ports[0]).port
+                    )
+                    if authentications.exists():                                # Authentication found
+                        return authentications.first()
+                break
+        return None
+
     def get_arguments(self, targets: List[BaseInput], previous_findings: List[Finding]) -> List[str]:
         '''Get tool arguments for the tool command.
 
@@ -193,9 +224,13 @@ class BaseTool:
             List[str]: List of tool arguments to use in the tool execution
         '''
         command = {
+            'command': self.tool.command,                                       # Add tool command to the arguments
             'intensity': self.intensity.argument,                               # Add intensity config to the arguments
             'output': self.path_output if self.file_output_enabled else ''      # Add output config to the arguments
         }
+        authentication = self.get_authentication(targets, previous_findings)    # Search related authentication instance
+        if authentication:                                                      # Authentication exists
+            previous_findings.append(authentication)                            # Add authentication instance
         for argument in self.arguments:                                         # For each tool argument
             found, command = self.process_argument(
                 argument,
@@ -213,7 +248,7 @@ class BaseTool:
         # Format configuration arguments with the built tool arguments
         args = self.configuration.arguments.format(**command)
         # Split arguments by whitespaces taking into account the arguments between quotes
-        return [arg.replace('\'', '').replace('"', '') for arg in re.findall(r'[\'"]{1}.+?[\'"]{1}|[^\s]+', args)]
+        return [arg for arg in re.findall(r'[\'"].+[\'"]|[^\s]+', args)]
 
     def check_arguments(self, targets: List[BaseInput], findings: List[Finding]) -> bool:
         '''Check if given resources (targets, resources and findings) lists are enough to execute the tool.
@@ -263,7 +298,8 @@ class BaseTool:
         Returns:
             str: Plain output of the tool execution
         '''
-        arguments.insert(0, self.tool.command)                                  # Combine tool command with arguments
+        if self.tool.command not in arguments:
+            arguments.insert(0, self.tool.command)                              # Combine tool command with arguments
         logger.info(f'[Tool] Running: {" ".join(arguments)}')
         if hasattr(self, 'run_directory'):
             # Execute the tool in directory
