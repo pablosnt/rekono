@@ -248,7 +248,7 @@ class BaseTool:
         # Format configuration arguments with the built tool arguments
         args = self.configuration.arguments.format(**command)
         # Split arguments by whitespaces taking into account the arguments between quotes
-        return [arg.replace('\'', '').replace('"', '') for arg in re.findall(r'[\'"]{1}.+?[\'"]{1}|[^\s]+', args)]
+        return [arg for arg in re.findall(r'[\'"].+[\'"]|[^\s]+', args)]
 
     def check_arguments(self, targets: List[BaseInput], findings: List[Finding]) -> bool:
         '''Check if given resources (targets, resources and findings) lists are enough to execute the tool.
