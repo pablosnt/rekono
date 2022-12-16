@@ -49,12 +49,18 @@ class BaseToolTest(RekonoTestCase):
             name='Test',
             tool=self.nmap,
             arguments=(
-                '{intensity} {test_osint} {test_only_host} {test_host} {test_port} {test_path} '
-                '{test_technology} {test_credential} {test_vulnerability} {test_exploit} {test_wordlist} '
+                '{intensity} {test_osint} {test_only_host} {test_host} {test_port} {test_path} {test_technology} '
+                '{test_credential} {test_vulnerability} {test_exploit} {test_wordlist} {test_authentication}'
             )
         )
+        self.authentication_argument = Argument.objects.create(
+            tool=self.nmap,
+            name='test_authentication',
+            argument='--credential {secret}',
+            required=False
+        )
         # Initialize auxiliary lists to help data usage
-        self.arguments: List[Argument] = []
+        self.arguments: List[Argument] = [self.authentication_argument]
         self.targets: List[BaseInput] = []
         self.all_findings: List[Finding] = []
         self.required_findings: List[Finding] = []
@@ -220,8 +226,8 @@ class BaseToolTest(RekonoTestCase):
         # Port filtered due to service type. HTTP service required
         filtered = Port.objects.create(host=host, port=22, protocol=Protocol.TCP, service='ssh')
         filtered.executions.add(self.first_execution)
-        self.http = Port.objects.create(host=host, port=80, protocol=Protocol.TCP, service='http')
-        self.http.executions.add(self.first_execution)
+        http = Port.objects.create(host=host, port=80, protocol=Protocol.TCP, service='http')
+        http.executions.add(self.first_execution)
         https = Port.objects.create(host=host, port=443, protocol=Protocol.TCP, service='https')
         https.executions.add(self.first_execution)
         argument = Argument.objects.create(
@@ -234,9 +240,9 @@ class BaseToolTest(RekonoTestCase):
         # Input filtered by service type: HTTP service required
         Input.objects.create(argument=argument, type=InputType.objects.get(name='Port'), filter='http')
         self.arguments.append(argument)
-        self.all_findings.extend([filtered, self.http, https])
-        self.required_findings.extend([filtered, self.http, https])
-        return self.http
+        self.all_findings.extend([filtered, http, https])
+        self.required_findings.extend([filtered, http, https])
+        return http
 
     def create_paths(self, port: Port) -> None:
         '''Create path data for testing.
@@ -449,6 +455,35 @@ class BaseToolTest(RekonoTestCase):
         ]).split(' ')
         self.assertEqual(expected, arguments)
 
+    def test_get_arguments_using_authentication(self) -> None:
+        '''Test get_arguments feature using authentication.'''
+        # Filter targets and findings to include only one port
+        self.targets = [t for t in self.targets if not isinstance(t, TargetPort) or t == self.target_port_http]
+        self.all_findings = [f for f in self.all_findings if not isinstance(f, Port) or f == self.port]
+        authentication_input = Input.objects.create(                            # Create authentication input
+            argument=self.authentication_argument,
+            type=InputType.objects.get(name='Authentication'),
+            filter='!cookie'
+        )
+        Authentication.objects.create(                                          # Create authentication entity
+            target_port=self.target_port_http,
+            name='sessionid', credential='token',
+            type=AuthenticationType.COOKIE
+        )
+        expected_list = [
+            '-T3', '--osint http://scanme.nmap.org/', '--only-host 45.33.32.156', '--host 45.33.32.156',
+            '--port 80', '--port-commas 80', '--endpoint /robots.txt', '--tech Wordpress',
+            '--version 1.0.0', '--email test@test.test', '--username test', '--secret test',
+            '--vuln CVE-2021-44228', '--exploit Test', f'--wordlist {self.wordlist.path}'
+        ]
+        arguments = self.tool_instance.get_arguments(self.targets, self.all_findings)
+        self.assertEqual(' '.join(expected_list).split(' '), arguments)         # Authentication is filter by type
+        authentication_input.filter = 'cookie'                                  # Change input filter to cookie
+        authentication_input.save(update_fields=['filter'])
+        expected_list.append('--credential token')                              # Add expected argument
+        arguments = self.tool_instance.get_arguments(self.targets, self.all_findings)
+        self.assertEqual(' '.join(expected_list).split(' '), arguments)
+
     def test_get_arguments_using_required_findings(self) -> None:
         '''Test get_arguments feature using only the required findings.'''
         # Change findings relations for more test situations
@@ -599,15 +634,22 @@ class BaseToolTest(RekonoTestCase):
         self.process_findings(False)
 
     def test_get_authentication(self) -> None:
-        search = self.tool_instance.get_authentication([self.target_port_http], [self.http])
+        '''Test get_authentication feature'''
+        # No authentication found
+        search = self.tool_instance.get_authentication([self.target_port_http], [self.port])
         self.assertEqual(None, search)
-        authentication = Authentication.objects.create(
+        authentication = Authentication.objects.create(                         # Create authentication for testing
             target_port=self.target_port_http,
             name='test',
             credential='test',
             type=AuthenticationType.BASIC
         )
-        search = self.tool_instance.get_authentication([self.target_port_http], [self.http])
+        # Get authentication based on Port
+        search = self.tool_instance.get_authentication([self.target_port_http], [self.port])
         self.assertEqual(authentication, search)
+        # Get authentication based on TargetPort
         search = self.tool_instance.get_authentication([self.target_port_http], [])
         self.assertEqual(authentication, search)
+        # No authentication found
+        search = self.tool_instance.get_authentication([], [])
+        self.assertEqual(None, search)

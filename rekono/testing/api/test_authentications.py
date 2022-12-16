@@ -23,7 +23,7 @@ class AuthenticationTest(RekonoApiTestCase):
         '''Test authentication creation.'''
         self.data['name'] = 'regularuser'
         expected = self.data.copy()
-        expected['credential'] = len(self.data['credential']) * '*'
+        expected['credential'] = len(self.data['credential']) * '*'             # Credential will be protected
         # Create new authentication
         content = self.api_test(self.client.post, self.endpoint, 201, data=self.data, expected=expected)
         self.api_test(self.client.get, f'{self.endpoint}{content["id"]}/', expected=expected)
@@ -44,11 +44,11 @@ class AuthenticationTest(RekonoApiTestCase):
         '''Test authentication deletion feature.'''
         self.data['target_port'] = self.target_port
         authentication = Authentication.objects.create(**self.data)             # Create authentication
-        # Delete authentication
-        self.api_test(self.client.delete, f'{self.endpoint}{authentication.id}/', 204)
+        self.api_test(self.client.delete, f'{self.endpoint}{authentication.id}/', 204)      # Delete authentication
         self.api_test(self.client.get, f'{self.endpoint}{authentication.id}/', 404)
 
     def test_model_representation(self) -> None:
+        '''Test __str__ method for authentication model.'''
         self.data['target_port'] = self.target_port
         authentication = Authentication.objects.create(**self.data)             # Create authentication
         self.models = {                                                         # Models to test __str__ method

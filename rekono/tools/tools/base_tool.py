@@ -186,17 +186,26 @@ class BaseTool:
         targets_list: List[BaseInput],
         findings_list: List[Finding]
     ) -> Optional[Authentication]:
+        '''Get authentication for a given list of targets and findings.
+
+        Args:
+            targets_list (List[BaseInput]): Targets list
+            findings_list (List[Finding]): Findings list
+
+        Returns:
+            Optional[Authentication]: Authentication entity if found
+        '''
         for ports in [
-            [p for p in findings_list if isinstance(p, Port)],
-            [p for p in targets_list if isinstance(p, TargetPort)],
+            [p for p in findings_list if isinstance(p, Port)],                  # Get Ports from findings list
+            [p for p in targets_list if isinstance(p, TargetPort)],             # Get TargetPorts from targets list
         ]:
-            if len(ports) > 0:
-                if len(ports) == 1:
-                    authentications = Authentication.objects.filter(
+            if len(ports) > 0:                                                  # Ports found
+                if len(ports) == 1:                                             # Only one port
+                    authentications = Authentication.objects.filter(            # Look for authentication entity
                         target_port__target=self.execution.task.target,
                         target_port__port=cast(Union[Port, TargetPort], ports[0]).port
                     )
-                    if authentications.exists():
+                    if authentications.exists():                                # Authentication found
                         return authentications.first()
                 break
         return None

@@ -1,7 +1,6 @@
 from typing import Any, Dict
 
 from api.serializers import ProtectedStringValueField
-from django.forms import ValidationError
 from rest_framework import serializers
 from security.input_validation import validate_credential
 
@@ -11,12 +10,13 @@ from authentications.models import Authentication
 class AuthenticationSerializer(serializers.ModelSerializer):
     '''Serializer to manage authentications via API.'''
 
-    credential = ProtectedStringValueField(required=True, allow_null=False)
+    credential = ProtectedStringValueField(required=True, allow_null=False)     # Credential value in a protected way
 
     class Meta:
+        '''Serializer metadata.'''
 
         model = Authentication
-        fields = ('id', 'target_port', 'name', 'credential', 'type')
+        fields = ('id', 'target_port', 'name', 'credential', 'type')            # Authentication fields exposed via API
 
     def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
         '''Validate the provided data before use it.
@@ -32,10 +32,4 @@ class AuthenticationSerializer(serializers.ModelSerializer):
         '''
         attrs = super().validate(attrs)
         validate_credential(attrs['credential'])
-        if Authentication.objects.filter(target_port=attrs['target_port']).exists():
-            raise ValidationError({
-                'name': 'This name already exists in this target port',
-                'credential': 'This credential already exists for this technology in this target port',
-                'type': 'This credential type already exists for this technology in this target port'
-            })
         return attrs

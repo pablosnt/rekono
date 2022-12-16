@@ -5,12 +5,13 @@ from authentications.models import Authentication
 
 
 class AuthenticationFilter(rest_framework.FilterSet):
+    '''FilterSet to filter and sort authentications entities.'''
 
-    o = OrderingFilter(fields=('target_port', 'name', 'type'))
+    o = OrderingFilter(fields=('target_port', 'name', 'type'))                  # Ordering fields
 
     class Meta:
         model = Authentication
-        fields = {
+        fields = {                                                              # Filter fields
             'target_port': ['exact'],
             'target_port__port': ['exact'],
             'target_port__target': ['exact'],

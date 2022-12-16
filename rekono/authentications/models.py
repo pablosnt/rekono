@@ -19,9 +19,9 @@ class Authentication(models.Model, BaseInput):
 
     # Related target port
     target_port = models.OneToOneField(TargetPort, related_name='authentication', on_delete=models.CASCADE)
-    name = models.TextField(max_length=100, validators=[validate_name])
-    credential = models.TextField(max_length=500, validators=[validate_credential])
-    type = models.TextField(max_length=8, choices=AuthenticationType.choices)
+    name = models.TextField(max_length=100, validators=[validate_name])         # Credential name
+    credential = models.TextField(max_length=500, validators=[validate_credential])     # Credential value
+    type = models.TextField(max_length=8, choices=AuthenticationType.choices)   # Authentication type
 
     def filter(self, input: Input) -> bool:
         '''Check if this instance is valid based on input filter.
@@ -52,8 +52,8 @@ class Authentication(models.Model, BaseInput):
             InputKeyword.COOKIE_NAME.name.lower(): self.name if self.type == AuthenticationType.COOKIE else None,
             InputKeyword.SECRET.name.lower(): self.credential,
             InputKeyword.TOKEN.name.lower(): self.credential if self.type != AuthenticationType.BASIC else base64.b64encode(f'{self.name}:{self.credential}'.encode()).decode(),  # noqa: E501
-            InputKeyword.CREDENTIAL_TYPE.name.lower(): self.type.name,
-            InputKeyword.CREDENTIAL_TYPE_LOWER.name.lower(): self.type.name.lower(),
+            InputKeyword.CREDENTIAL_TYPE.name.lower(): self.type,
+            InputKeyword.CREDENTIAL_TYPE_LOWER.name.lower(): self.type.lower(),
         }
         output.update(credential)
         return output

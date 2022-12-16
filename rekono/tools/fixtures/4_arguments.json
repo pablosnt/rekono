@@ -247,7 +247,7 @@
         "fields": {
             "tool": 2,
             "name": "cookie",
-            "argument": "--cookie=\"{cookie_name}={cookie}\"",
+            "argument": "--cookie='{cookie_name}={secret}'",
             "required": false,
             "multiple": false
         }
@@ -258,7 +258,7 @@
         "fields": {
             "tool": 14,
             "name": "cookie",
-            "argument": "--cookie \"{cookie_name}={cookie}\"",
+            "argument": "--cookie '{cookie_name}={secret}'",
             "required": false,
             "multiple": false
         }
@@ -291,7 +291,7 @@
         "fields": {
             "tool": 4,
             "name": "cookie",
-            "argument": "-Option STATIC-COOKIE=\"{cookie_name}={cookie}\"",
+            "argument": "-Option STATIC-COOKIE='{cookie_name}={secret}'",
             "required": false,
             "multiple": false
         }
@@ -302,7 +302,7 @@
         "fields": {
             "tool": 8,
             "name": "authentication",
-            "argument": "ZAP_AUTH_HEADER=\"Authorization\" ZAP_AUTH_HEADER_VALUE=\"{credential_type} {token}\"",
+            "argument": "ZAP_AUTH_HEADER='Authorization' ZAP_AUTH_HEADER_VALUE='{credential_type} {token}'",
             "required": false,
             "multiple": false
         }
@@ -313,7 +313,7 @@
         "fields": {
             "tool": 8,
             "name": "cookie",
-            "argument": "ZAP_AUTH_HEADER=\"Cookie\" ZAP_AUTH_HEADER_VALUE=\"{cookie_name}={cookie}\"",
+            "argument": "ZAP_AUTH_HEADER='Cookie' ZAP_AUTH_HEADER_VALUE='{cookie_name}={secret}'",
             "required": false,
             "multiple": false
         }

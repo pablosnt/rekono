@@ -11,6 +11,7 @@ from authentications.serializers import AuthenticationSerializer
 
 
 class AuthenticationViewSet(TargetViewSet):
+    '''Authentication ViewSet that includes: get, retrieve, create, and delete features.'''
 
     queryset = Authentication.objects.all().order_by('-id')
     serializer_class = AuthenticationSerializer
