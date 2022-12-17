@@ -1,11 +1,6 @@
+from api.views import CreateWithUserViewSet, GetViewSet
 from defectdojo.exceptions import DefectDojoException
-from django.db.models import QuerySet
 from drf_spectacular.utils import extend_schema
-from projects.filters import ProjectFilter
-from projects.models import Project
-from projects.serializers import (DefectDojoIntegrationSerializer,
-                                  DefectDojoSyncSerializer,
-                                  ProjectMemberSerializer, ProjectSerializer)
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
@@ -14,10 +9,16 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from users.models import User
 
+from projects.filters import ProjectFilter
+from projects.models import Project
+from projects.serializers import (DefectDojoIntegrationSerializer,
+                                  DefectDojoSyncSerializer,
+                                  ProjectMemberSerializer, ProjectSerializer)
+
 # Create your views here.
 
 
-class ProjectViewSet(ModelViewSet):
+class ProjectViewSet(GetViewSet, CreateWithUserViewSet, ModelViewSet):
     '''Project ViewSet that includes: get, retrieve, create, update, delete and Defect-Dojo features.'''
 
     queryset = Project.objects.all().order_by('-id')
@@ -25,22 +26,8 @@ class ProjectViewSet(ModelViewSet):
     filterset_class = ProjectFilter
     search_fields = ['name', 'description']                                     # Fields used to search projects
     http_method_names = ['get', 'post', 'put', 'delete']                        # Required to remove PATCH method
-
-    def get_queryset(self) -> QuerySet:
-        '''Get the Execution queryset that the user is allowed to get, based on project members.
-
-        Returns:
-            QuerySet: Execution queryset
-        '''
-        return super().get_queryset().filter(members=self.request.user)
-
-    def perform_create(self, serializer: ProjectSerializer) -> None:
-        '''Create a new instance using a serializer.
-
-        Args:
-            serializer (ProjectSerializer): Serializer to use in the instance creation
-        '''
-        serializer.save(owner=self.request.user)                                # Include current user as owner
+    members_field = 'members'
+    user_field = 'owner'
 
     @extend_schema(request=ProjectMemberSerializer, responses={201: None})
     @action(detail=True, methods=['POST'], url_path='members', url_name='members')

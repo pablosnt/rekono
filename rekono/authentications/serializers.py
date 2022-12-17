@@ -1,6 +1,6 @@
 from typing import Any, Dict
 
-from api.serializers import ProtectedStringValueField
+from api.fields import ProtectedStringValueField
 from rest_framework import serializers
 from security.input_validation import validate_credential
 

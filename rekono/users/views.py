@@ -12,6 +12,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 from security.authorization.permissions import IsAdmin, IsNotAuthenticated
+
 from users.filters import UserFilter
 from users.models import User
 from users.serializers import (ChangeUserPasswordSerializer,
@@ -33,7 +34,7 @@ class UserAdminViewSet(GenericViewSet, ListModelMixin, RetrieveModelMixin, Destr
     queryset = User.objects.all().order_by('-id')
     filterset_class = UserFilter
     # Fields used to search tasks
-    search_fields = ['username', 'first_name', 'last_name', 'username', 'email']
+    search_fields = ['username', 'first_name', 'last_name', 'email']
     # Required to include the IsAdmin to the base authorization classes and remove unneeded ProjectMemberPermission
     permission_classes = [IsAuthenticated, DjangoModelPermissions, IsAdmin]
 

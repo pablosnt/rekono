@@ -1,6 +1,6 @@
 from typing import List
 
-from api.serializers import IntegerChoicesField
+from api.fields import IntegerChoicesField
 from drf_spectacular.utils import extend_schema_field
 from input_types.serializers import InputTypeSerializer
 from likes.serializers import LikeBaseSerializer
