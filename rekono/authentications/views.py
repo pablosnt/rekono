@@ -1,7 +1,6 @@
 from api.views import CreateViewSet, GetViewSet
 from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
                                    ListModelMixin, RetrieveModelMixin)
-from rest_framework.viewsets import GenericViewSet
 
 from authentications.filters import AuthenticationFilter
 from authentications.models import Authentication
@@ -13,7 +12,6 @@ from authentications.serializers import AuthenticationSerializer
 class AuthenticationViewSet(
     GetViewSet,
     CreateViewSet,
-    GenericViewSet,
     CreateModelMixin,
     ListModelMixin,
     RetrieveModelMixin,

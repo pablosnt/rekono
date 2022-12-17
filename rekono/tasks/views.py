@@ -9,7 +9,6 @@ from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
                                    ListModelMixin, RetrieveModelMixin)
 from rest_framework.request import Request
 from rest_framework.response import Response
-from rest_framework.viewsets import GenericViewSet
 
 from tasks import services
 from tasks.enums import Status
@@ -24,7 +23,6 @@ from tasks.serializers import TaskSerializer
 class TaskViewSet(
     GetViewSet,
     CreateViewSet,
-    GenericViewSet,
     CreateModelMixin,
     ListModelMixin,
     RetrieveModelMixin,

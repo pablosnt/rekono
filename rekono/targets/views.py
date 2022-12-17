@@ -1,7 +1,6 @@
 from api.views import CreateViewSet, GetViewSet
 from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
                                    ListModelMixin, RetrieveModelMixin)
-from rest_framework.viewsets import GenericViewSet
 
 from targets.filters import (TargetFilter, TargetPortFilter,
                              TargetTechnologyFilter, TargetVulnerabilityFilter)
@@ -17,7 +16,6 @@ from targets.serializers import (TargetPortSerializer, TargetSerializer,
 class TargetViewSet(
     GetViewSet,
     CreateViewSet,
-    GenericViewSet,
     CreateModelMixin,
     ListModelMixin,
     RetrieveModelMixin,
@@ -37,7 +35,6 @@ class TargetViewSet(
 class TargetPortViewSet(
     GetViewSet,
     CreateViewSet,
-    GenericViewSet,
     CreateModelMixin,
     ListModelMixin,
     RetrieveModelMixin,
@@ -57,7 +54,6 @@ class TargetPortViewSet(
 class TargetTechnologyViewSet(
     GetViewSet,
     CreateViewSet,
-    GenericViewSet,
     CreateModelMixin,
     ListModelMixin,
     RetrieveModelMixin,
@@ -77,7 +73,6 @@ class TargetTechnologyViewSet(
 class TargetVulnerabilityViewSet(
     GetViewSet,
     CreateViewSet,
-    GenericViewSet,
     CreateModelMixin,
     ListModelMixin,
     RetrieveModelMixin,
