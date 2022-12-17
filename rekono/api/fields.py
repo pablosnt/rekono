@@ -32,7 +32,7 @@ class IntegerChoicesField(serializers.Field):
 
 
 @extend_schema_field({'type': 'array', 'items': {'type': 'string'}})
-class RekonoTagSerializerField(TagListSerializerField):
+class RekonoTagField(TagListSerializerField):
     '''Internal serializer field for TagListSerializerField, including API documentation.'''
 
     pass

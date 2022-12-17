@@ -1,6 +1,6 @@
 from typing import Any, Dict, Optional
 
-from api.serializers import ProtectedStringValueField
+from api.fields import ProtectedStringValueField
 from defectdojo.api import DefectDojo
 from rest_framework import serializers
 from security.input_validation import (validate_defect_dojo_api_key,

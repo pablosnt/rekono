@@ -2,7 +2,6 @@ from typing import Any
 from urllib.request import Request
 
 from api.filters import RekonoFilterBackend
-from django.db.models import QuerySet
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.decorators import action
@@ -33,19 +32,7 @@ class FindingBaseView(GenericViewSet, ListModelMixin, RetrieveModelMixin, Destro
 
     # Replace DjangoFilterBackend by RekonoFilterBackend to allow filters by N-M relations like 'executions' field.
     filter_backends = [RekonoFilterBackend, SearchFilter, OrderingFilter]
-
-    def get_queryset(self) -> QuerySet:
-        '''Get the Finding queryset that the user is allowed to get, based on project members.
-
-        Returns:
-            QuerySet: Execution queryset
-        '''
-        queryset = super().get_queryset()
-        # Prevent warnings when access the API schema in SwaggerUI or Redoc
-        # This is caused by the use of RekonoFilterBackend, that is required for Findings entities
-        if self.request.user.id:
-            return queryset.filter(executions__task__target__project__members=self.request.user)
-        return None
+    members_field = 'executions__task__target__project__members'
 
     def destroy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         '''Disable finding.
@@ -117,20 +104,7 @@ class HostViewSet(FindingBaseView):
     queryset = Host.objects.all().order_by('-id')
     serializer_class = HostSerializer
     filterset_class = HostFilter
-    search_fields = [                                                           # Fields used to search Hosts
-        'address',
-        'port__port', 'port__service',
-        'port__path__path',
-        'port__technology__name', 'port__technology__version',
-        'port__vulnerability__name', 'port__vulnerability__cve',
-        'port__vulnerability__cwe', 'port__vulnerability__severity',
-        'port__technology__vulnerability__name',
-        'port__technology__vulnerability__cve',
-        'port__technology__vulnerability__cwe',
-        'port__technology__vulnerability__severity',
-        'port__vulnerability__exploit__name',
-        'port__technology__vulnerability__exploit__name'
-    ]
+    search_fields = ['address']                                                 # Fields used to search Hosts
 
 
 class PortViewSet(FindingBaseView):
@@ -139,17 +113,7 @@ class PortViewSet(FindingBaseView):
     queryset = Port.objects.all().order_by('-id')
     serializer_class = PortSerializer
     filterset_class = PortFilter
-    search_fields = [                                                           # Fields used to search Ports
-        'host__address',
-        'port', 'service',
-        'path__path',
-        'technology__name', 'technology__version',
-        'vulnerability__name', 'vulnerability__cve',
-        'vulnerability__cwe', 'vulnerability__severity',
-        'technology__vulnerability__name', 'technology__vulnerability__cve',
-        'technology__vulnerability__cwe', 'technology__vulnerability__severity',
-        'vulnerability__exploit__name', 'technology__vulnerability__exploit__name'
-    ]
+    search_fields = ['port', 'service']                                         # Fields used to search Ports
 
 
 class PathViewSet(FindingBaseView):
@@ -158,11 +122,7 @@ class PathViewSet(FindingBaseView):
     queryset = Path.objects.all().order_by('-id')
     serializer_class = PathSerializer
     filterset_class = PathFilter
-    search_fields = [                                                           # Fields used to search Paths
-        'port__host__address',
-        'port__port', 'port__service',
-        'path'
-    ]
+    search_fields = ['path']                                                    # Fields used to search Paths
 
 
 class TechnologyViewSet(FindingBaseView):
@@ -171,15 +131,7 @@ class TechnologyViewSet(FindingBaseView):
     queryset = Technology.objects.all().order_by('-id')
     serializer_class = TechnologySerializer
     filterset_class = TechnologyFilter
-    search_fields = [                                                           # Fields used to search Technologies
-        'port__host__address',
-        'port__port', 'port__service',
-        'port__path__path',
-        'name', 'version',
-        'vulnerability__name', 'vulnerability__cve',
-        'vulnerability__cwe', 'vulnerability__severity',
-        'vulnerability__exploit__name', 'exploit__name'
-    ]
+    search_fields = ['name', 'version']                                         # Fields used to search Technologies
 
 
 class CredentialViewSet(FindingBaseView):
@@ -188,13 +140,7 @@ class CredentialViewSet(FindingBaseView):
     queryset = Credential.objects.all().order_by('-id')
     serializer_class = CredentialSerializer
     filterset_class = CredentialFilter
-    # Fields used to search Credentials
-    search_fields = [
-        'technology__port__host__address',
-        'technology__port__port', 'technology__port__service',
-        'technology__name', 'technology__version',
-        'email', 'username'
-    ]
+    search_fields = ['email', 'username']                                       # Fields used to search Credentials
 
 
 class VulnerabilityViewSet(FindingBaseView):
@@ -203,16 +149,7 @@ class VulnerabilityViewSet(FindingBaseView):
     queryset = Vulnerability.objects.all().order_by('-id')
     serializer_class = VulnerabilitySerializer
     filterset_class = VulnerabilityFilter
-    search_fields = [                                                           # Fields used to search Vulnerabilities
-        'port__host__address', 'technology__port__host__address',
-        'port__port', 'port__service',
-        'technology__port__port', 'technology__port__service',
-        'port__path__path', 'technology__port__path__path',
-        'port__technology__name', 'port__technology__version',
-        'technology__name', 'technology__version',
-        'name', 'cve', 'cwe', 'severity',
-        'exploit__name'
-    ]
+    search_fields = ['name', 'description', 'cve', 'cwe']                       # Fields used to search Vulnerabilities
 
 
 class ExploitViewSet(FindingBaseView):
@@ -221,17 +158,4 @@ class ExploitViewSet(FindingBaseView):
     queryset = Exploit.objects.all().order_by('-id')
     serializer_class = ExploitSerializer
     filterset_class = ExploitFilter
-    search_fields = [                                                           # Fields used to search Exploits
-        'vulnerability__port__host__address', 'technology__port__host__address',
-        'vulnerability__port__port', 'vulnerability__port__service',
-        'technology__port__port', 'technology__port__service',
-        'vulnerability__port__path__path',
-        'technology__port__path__path',
-        'vulnerability__port__technology__name', 'vulnerability__port__technology__version',
-        'technology__name', 'technology__version',
-        'vulnerability__name', 'vulnerability__cve',
-        'vulnerability__cwe', 'vulnerability__severity',
-        'technology__vulnerability__name', 'technology__vulnerability__cve',
-        'technology__vulnerability__cwe', 'technology__vulnerability__severity',
-        'title', 'edb_id'
-    ]
+    search_fields = ['title', 'edb_id', 'reference']                            # Fields used to search Exploits

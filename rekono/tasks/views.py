@@ -1,7 +1,7 @@
 from typing import Any
 
-from django.core.exceptions import PermissionDenied, ValidationError
-from django.db.models import QuerySet
+from api.views import CreateViewSet, GetViewSet
+from django.core.exceptions import ValidationError
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.decorators import action
@@ -10,7 +10,7 @@ from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
-from targets.models import Target
+
 from tasks import services
 from tasks.enums import Status
 from tasks.filters import TaskFilter
@@ -21,7 +21,15 @@ from tasks.serializers import TaskSerializer
 # Create your views here.
 
 
-class TaskViewSet(GenericViewSet, CreateModelMixin, ListModelMixin, RetrieveModelMixin, DestroyModelMixin):
+class TaskViewSet(
+    GetViewSet,
+    CreateViewSet,
+    GenericViewSet,
+    CreateModelMixin,
+    ListModelMixin,
+    RetrieveModelMixin,
+    DestroyModelMixin
+):
     '''Task ViewSet that includes: get, retrieve, create amd cancel features.'''
 
     queryset = Task.objects.all().order_by('-id')
@@ -29,30 +37,7 @@ class TaskViewSet(GenericViewSet, CreateModelMixin, ListModelMixin, RetrieveMode
     filterset_class = TaskFilter
     # Fields used to search tasks
     search_fields = ['target__target', 'process__name', 'process__steps__tool__name', 'tool__name']
-
-    def get_queryset(self) -> QuerySet:
-        '''Get the queryset that the user is allowed to get, based on project members.
-
-        Returns:
-            QuerySet: Queryset
-        '''
-        return super().get_queryset().filter(target__project__members=self.request.user)
-
-    def perform_create(self, serializer: TaskSerializer) -> None:
-        '''Create a new instance using a serializer.
-
-        Args:
-            serializer (TaskSerializer): Serializer to use in the instance creation
-        '''
-        # Check if current user can execute tasks against this target based on project membership
-        project_check = Target.objects.filter(
-            id=serializer.validated_data.get('target').id,
-            project__members=self.request.user
-        ).exists()
-        if not project_check:
-            # Current user can't execute tasks against this target
-            raise PermissionDenied()
-        serializer.save(executor=self.request.user)                             # Include current user as executor
+    members_field = 'target__project__members'
 
     def destroy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         '''Cancel task.
