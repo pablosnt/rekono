@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, cast
+from typing import Any, Dict, List, cast
 
 from django.core.exceptions import PermissionDenied
 from django.db.models import QuerySet
@@ -43,7 +43,7 @@ class CreateWithUserViewSet(GenericViewSet):
 class CreateViewSet(GenericViewSet):
     '''Rekono base ViewSet for POST operations.'''
 
-    def get_project_members(self, data: Dict[str, Any]) -> Optional[List[User]]:
+    def get_project_members(self, data: Dict[str, Any]) -> List[User]:
         '''Get project members related to the current entity.
 
         Args:
@@ -56,7 +56,7 @@ class CreateViewSet(GenericViewSet):
         data = data.get(fields[0], {})                                          # Get first serialized field
         for field in fields[1:]:
             data = getattr(data, field)                                         # Get all fields
-        return cast(QuerySet, data).all() if data else None                     # Return all members
+        return cast(QuerySet, data).all() if data else []                       # Return all members
 
     def perform_create(self, serializer: Serializer) -> None:
         '''Create a new instance using a serializer.
@@ -64,7 +64,7 @@ class CreateViewSet(GenericViewSet):
         Args:
             serializer (Serializer): Serializer to use in the instance creation
         '''
-        if self.request.user not in (self.get_project_members(serializer.validated_data) or []):
+        if self.request.user not in self.get_project_members(serializer.validated_data):
             # Current user can't create a new entity in this project
             raise PermissionDenied()
         super().perform_create(serializer)
