@@ -1,6 +1,6 @@
 import logging
 
-from targets.serializers import TargetVulnerabilitySerializer
+from parameters.serializers import InputTechnologySerializer
 from telegram import ParseMode
 from telegram.ext import CallbackContext, ConversationHandler
 from telegram.update import Update
@@ -12,15 +12,15 @@ from telegram_bot.conversations.cancel import cancel
 from telegram_bot.conversations.selection import clear
 from telegram_bot.conversations.states import CREATE
 from telegram_bot.messages.errors import create_error_message
-from telegram_bot.messages.targets import (ASK_FOR_NEW_TARGET_VULNERABILITY,
-                                           NEW_TARGET_VULNERABILITY)
+from telegram_bot.messages.parameters import (ASK_FOR_NEW_INPUT_TECHNOLOGY,
+                                              NEW_INPUT_TECHNOLOGY)
 from telegram_bot.security import get_chat
 
 logger = logging.getLogger()                                                    # Rekono logger
 
 
-def new_target_vulnerability(update: Update, context: CallbackContext) -> int:
-    '''Request new target vulnerability creation via Telegram Bot.
+def new_input_technology(update: Update, context: CallbackContext) -> int:
+    '''Request new input technology creation via Telegram Bot.
 
     Args:
         update (Update): Telegram Bot update
@@ -33,20 +33,20 @@ def new_target_vulnerability(update: Update, context: CallbackContext) -> int:
     if chat and context.chat_data is not None:
         if PROJECT in context.chat_data:                                        # Project already selected
             # Configure next steps
-            context.chat_data[STATES] = [(None, ask_for_target_port), (CREATE, ASK_FOR_NEW_TARGET_VULNERABILITY)]
+            context.chat_data[STATES] = [(None, ask_for_target_port), (CREATE, ASK_FOR_NEW_INPUT_TECHNOLOGY)]
             return ask_for_target(update, context, chat)                        # Ask for target selection
         else:                                                                   # No selected project
             context.chat_data[STATES] = [                                       # Configure next steps
                 (None, ask_for_target),
                 (None, ask_for_target_port),
-                (CREATE, ASK_FOR_NEW_TARGET_VULNERABILITY)
+                (CREATE, ASK_FOR_NEW_INPUT_TECHNOLOGY)
             ]
             return ask_for_project(update, context, chat)                       # Ask for project creation
     return ConversationHandler.END                                              # Unauthorized: end conversation
 
 
-def create_target_vulnerability(update: Update, context: CallbackContext) -> int:
-    '''Create new target vulnerability via Telegram Bot.
+def create_input_technology(update: Update, context: CallbackContext) -> int:
+    '''Create new input technology via Telegram Bot.
 
     Args:
         update (Update): Telegram Bot update
@@ -60,24 +60,30 @@ def create_target_vulnerability(update: Update, context: CallbackContext) -> int
     if chat and context.chat_data is not None and update.effective_message:
         if update.effective_message.text == '/cancel':                          # Check if cancellation is requested
             return cancel(update, context)                                      # Cancel operation
-        serializer = TargetVulnerabilitySerializer(                             # Prepare target vulnerability data
-            data={'target_port': context.chat_data[TARGET_PORT].id, 'cve': update.effective_message.text}
+        name = update.effective_message.text
+        version = None
+        if name and ' - ' in name:
+            aux = name.split(' - ')
+            name = aux[0]
+            version = aux[1]
+        serializer = InputTechnologySerializer(                                 # Prepare input technology data
+            data={'target_port': context.chat_data[TARGET_PORT].id, 'name': name, 'version': version}
         )
-        if serializer.is_valid():                                               # Target vulnerability is valid
-            target_vulnerability = serializer.save()                            # Create target vulnerability
+        if serializer.is_valid():                                               # Input technology is valid
+            input_technology = serializer.save()                                # Create input technology
             logger.info(
-                f'[Telegram Bot] New target vulnerability {target_vulnerability.id} has been created',
+                f'[Telegram Bot] New input technology {input_technology.id} has been created',
                 extra={'user': chat.user.id}
             )
-            update.effective_message.reply_text(                                # Confirm target vulnerability creation
-                NEW_TARGET_VULNERABILITY.format(
-                    cve=escape_markdown(target_vulnerability.cve, version=2),
-                    target=escape_markdown(target_vulnerability.target_port.target.target, version=2)
+            update.effective_message.reply_text(                                # Confirm input technology creation
+                NEW_INPUT_TECHNOLOGY.format(
+                    name=escape_markdown(input_technology.name, version=2),
+                    target=escape_markdown(input_technology.target_port.target.target, version=2)
                 ), parse_mode=ParseMode.MARKDOWN_V2
             )
-        else:                                                                   # Invalid target vulnerability data
+        else:                                                                   # Invalid input technology data
             logger.info(
-                '[Telegram Bot] Attempt of target vulnerability creation with invalid data',
+                '[Telegram Bot] Attempt of input technology creation with invalid data',
                 extra={'user': chat.user.id}
             )
             # Send error details
@@ -85,8 +91,8 @@ def create_target_vulnerability(update: Update, context: CallbackContext) -> int
                 create_error_message(serializer.errors),
                 parse_mode=ParseMode.MARKDOWN_V2
             )
-            # Re-ask for the new target vulnerability
-            update.effective_message.reply_text(ASK_FOR_NEW_TARGET_VULNERABILITY)
+            # Re-ask for the new input technology
+            update.effective_message.reply_text(ASK_FOR_NEW_INPUT_TECHNOLOGY)
             return CREATE                                                       # Repeat the current state
     clear(context, [TARGET_PORT])                                               # Clear Telegram context
     return ConversationHandler.END                                              # End conversation

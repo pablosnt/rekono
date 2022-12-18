@@ -41,7 +41,7 @@
         "fields": {
             "name": "Technology",
             "related_model": "findings.technology",
-            "callback_target": "targets.targettechnology"
+            "callback_target": "parameters.inputtechnology"
         }
     },
     {
@@ -50,7 +50,7 @@
         "fields": {
             "name": "Vulnerability",
             "related_model": "findings.vulnerability",
-            "callback_target": "targets.targetvulnerability"
+            "callback_target": "parameters.inputvulnerability"
         }
     },
     {

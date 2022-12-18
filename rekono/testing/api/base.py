@@ -8,13 +8,13 @@ from django.utils import timezone
 from executions.models import Execution
 from findings.enums import OSType, PortStatus, Protocol
 from findings.models import Host, Path, Port
+from parameters.models import InputTechnology, InputVulnerability
 from processes.models import Process, Step
 from projects.models import Project
 from rekono.settings import RQ_QUEUES
 from rest_framework.test import APIClient
 from rq import SimpleWorker
-from targets.models import (Target, TargetPort, TargetTechnology,
-                            TargetVulnerability)
+from targets.models import Target, TargetPort
 from tasks.enums import Status
 from tasks.models import Task
 from testing.test_case import RekonoTestCase
@@ -57,13 +57,13 @@ class RekonoApiTestCase(RekonoTestCase):
         self.initialized = True
         self.target = Target.objects.create(project=self.project, target='scanme.nmap.org')
         self.target_port = TargetPort.objects.create(target=self.target, port=80)
-        self.target_technology = TargetTechnology.objects.create(
-            target_port=self.target_port,
+        self.input_technology = InputTechnology.objects.create(
+            target=self.target,
             name='WordPress',
             version='1.0.0'
         )
-        self.target_vulnerability = TargetVulnerability.objects.create(
-            target_port=self.target_port,
+        self.input_vulnerability = InputVulnerability.objects.create(
+            target=self.target,
             cve='CVE-2021-44228'
         )
         self.nmap = Tool.objects.get(name='Nmap')

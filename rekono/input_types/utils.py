@@ -46,14 +46,14 @@ def get_relations_between_input_types() -> Dict[InputType, List[InputType]]:
     input_types = InputType.objects.order_by('-id').all()                       # Get all input types
     for it in input_types:                                                      # For each input type
         relations[it] = []
-        model = it.get_related_model_class()
+        model = it.get_model_class()
         if model:
-            for field in model._meta.get_fields():                              # For each related model field
+            for field in model._meta.get_fields():                              # For each model field
                 # Check if field is a ForeignKey to a BaseInput model
-                if field.__class__ == models.ForeignKey and issubclass(field.related_model, BaseInput):
-                    # Search InputType by related model
+                if field.__class__ == models.ForeignKey and issubclass(field.model, BaseInput):
+                    # Search InputType by model
                     related_type = InputType.objects.filter(
-                        related_model=f'{field.related_model._meta.app_label}.{field.related_model._meta.model_name}'
+                        model=f'{field.model._meta.app_label}.{field.model._meta.model_name}'
                     )
                     if related_type.exists():
                         relations[it].append(related_type.first())

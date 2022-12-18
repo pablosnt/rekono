@@ -6,11 +6,11 @@ from executions import utils
 from executions.models import Execution
 from executions.queue import producer
 from input_types.models import InputType
+from parameters.models import InputTechnology, InputVulnerability
 from processes.executor.callback import process_callback
 from processes.models import Step
 from rq.job import Job
-from targets.models import (Target, TargetPort, TargetTechnology,
-                            TargetVulnerability)
+from targets.models import Target, TargetPort
 from tasks.models import Task
 from tools.models import Argument, Intensity
 
@@ -98,19 +98,19 @@ def execute(task: Task) -> None:
         if f'{app_label}.{TargetPort._meta.model_name}' not in covered_targets:
             # TargetPort is not covered by dependencies
             targets.extend(list(task.target.target_ports.all()))                # Add task target ports to targets
-        if f'{app_label}.{TargetTechnology._meta.model_name}' not in covered_targets:
-            # TargetTechnology is not covered by dependencies
-            # Add target technologies to task targets
-            targets.extend(list(TargetTechnology.objects.filter(target_port__target=task.target).all()))
-        if f'{app_label}.{TargetVulnerability._meta.model_name}' not in covered_targets:
-            # TargetVulnerability is not covered by dependencies
-            # Add target vulnerabilities to task targets
-            targets.extend(list(TargetVulnerability.objects.filter(target_port__target=task.target).all()))
+        if f'{app_label}.{InputTechnology._meta.model_name}' not in covered_targets:
+            # InputTechnology is not covered by dependencies
+            # Add input technologies to task targets
+            targets.extend(list(InputTechnology.objects.filter(targettarget=task.target).all()))
+        if f'{app_label}.{InputVulnerability._meta.model_name}' not in covered_targets:
+            # InputVulnerability is not covered by dependencies
+            # Add input vulnerabilities to task targets
+            targets.extend(list(InputVulnerability.objects.filter(target=task.target).all()))
         # Get the executions required for this job based on targets and tool arguments.
         # A job can need multiple executions. For example, if the user includes more than one Wordlist and
         # the process includes Dirsearch execution that only accepts one wordlist as argument. Rekono will
         # generate one Dirsearch execution for each wordlist provided by the user. It can also occur with
-        # TargetPort, TargetTechnology or TargetVulnerability.
+        # TargetPort, InputTechnology or InputVulnerability.
         executions = utils.get_executions_from_findings(targets, job.step.tool)
         for execution_targets in executions:                                    # For each job execution
             # Create the Execution entity

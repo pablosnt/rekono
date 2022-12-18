@@ -11,13 +11,13 @@ from findings.models import (OSINT, Credential, Exploit, Finding, Host, Path,
                              Port, Technology, Vulnerability)
 from input_types.base import BaseInput
 from input_types.models import InputType
+from parameters.models import InputTechnology, InputVulnerability
 from projects.models import Project
 from resources.enums import WordlistType
 from resources.models import Wordlist
 from rq import SimpleWorker
 from targets.enums import TargetType
-from targets.models import (Target, TargetPort, TargetTechnology,
-                            TargetVulnerability)
+from targets.models import Target, TargetPort
 from tasks.enums import Status
 from tasks.models import Task
 from testing.mocks.defectdojo import (defect_dojo_error, defect_dojo_success,
@@ -129,13 +129,13 @@ class BaseToolTest(RekonoTestCase):
         target = Target.objects.create(project=self.project, target='45.33.32.156', type=TargetType.PUBLIC_IP)
         self.target_port_http = TargetPort.objects.create(target=target, port=80)
         target_port_https = TargetPort.objects.create(target=target, port=443)
-        target_technology = TargetTechnology.objects.create(
-            target_port=self.target_port_http,
+        input_technology = InputTechnology.objects.create(
+            target=target,
             name='Wordpress',
             version='1.0.0'
         )
-        target_vulnerability = TargetVulnerability.objects.create(
-            target_port=self.target_port_http,
+        input_vulnerability = InputVulnerability.objects.create(
+            target=self.target,
             cve='CVE-2021-44228'
         )
         user = User.objects.create_superuser('rekono', 'rekono@rekono.rekono', 'rekono')
@@ -166,8 +166,8 @@ class BaseToolTest(RekonoTestCase):
         self.targets.extend([
             target_filtered, target,
             self.target_port_http, target_port_https,
-            target_technology,
-            target_vulnerability
+            input_technology,
+            input_vulnerability
         ])
 
     def create_osint(self) -> None:

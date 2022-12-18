@@ -6,7 +6,7 @@ from input_types.enums import InputKeyword
 from input_types.models import BaseInput
 from projects.models import Project
 from security.input_validation import validate_cve, validate_name
-from targets.models import TargetPort
+from targets.models import Target
 from tools.models import Input
 
 # Create your models here.
@@ -15,8 +15,7 @@ from tools.models import Input
 class InputTechnology(models.Model, BaseInput):
     '''Input technology model.'''
 
-    # Related target port
-    target_port = models.ForeignKey(TargetPort, related_name='input_technologies', on_delete=models.CASCADE)
+    target = models.ForeignKey(Target, related_name='input_technologies', on_delete=models.CASCADE)     # Related target
     name = models.TextField(max_length=100, validators=[validate_name])         # Technology name
     version = models.TextField(max_length=100, validators=[validate_name], blank=True, null=True)   # Technology version
 
@@ -24,8 +23,8 @@ class InputTechnology(models.Model, BaseInput):
         '''Model metadata.'''
 
         constraints = [
-            # Unique constraint by: TargetPort, Technology and Version
-            models.UniqueConstraint(fields=['target_port', 'name', 'version'], name='unique input technology')
+            # Unique constraint by: Target, Technology and Version
+            models.UniqueConstraint(fields=['target', 'name', 'version'], name='unique input technology')
         ]
 
     def filter(self, input: Input) -> bool:
@@ -48,7 +47,7 @@ class InputTechnology(models.Model, BaseInput):
         Returns:
             Dict[str, Any]: Useful information for tool executions, including accumulated if setted
         '''
-        output = self.target_port.parse()
+        output = self.target.parse()
         output[InputKeyword.TECHNOLOGY.name.lower()] = self.name
         if self.version:
             output[InputKeyword.VERSION.name.lower()] = self.version
@@ -60,7 +59,7 @@ class InputTechnology(models.Model, BaseInput):
         Returns:
             str: String value that identifies this instance
         '''
-        base = f'{self.target_port.__str__()} - {self.name}'
+        base = f'{self.target.__str__()} - {self.name}'
         return f'{base} - {self.version}' if self.version else base
 
     def get_project(self) -> Project:
@@ -69,22 +68,21 @@ class InputTechnology(models.Model, BaseInput):
         Returns:
             Project: Related project entity
         '''
-        return self.target_port.target.project
+        return self.target.project
 
 
 class InputVulnerability(models.Model, BaseInput):
     '''Input vulnerability model.'''
 
-    # Related target port
-    target_port = models.ForeignKey(TargetPort, related_name='input_vulnerabilities', on_delete=models.CASCADE)
+    target = models.ForeignKey(Target, related_name='input_vulnerabilities', on_delete=models.CASCADE)  # Related target
     cve = models.TextField(max_length=20, validators=[validate_cve])            # CVE
 
     class Meta:
         '''Model metadata.'''
 
         constraints = [
-            # Unique constraint by: TargetPort and CVE
-            models.UniqueConstraint(fields=['target_port', 'cve'], name='unique input vulnerability')
+            # Unique constraint by: Target and CVE
+            models.UniqueConstraint(fields=['target', 'cve'], name='unique input vulnerability')
         ]
 
     def filter(self, input: Input) -> bool:
@@ -113,7 +111,7 @@ class InputVulnerability(models.Model, BaseInput):
         Returns:
             Dict[str, Any]: Useful information for tool executions, including accumulated if setted
         '''
-        output = self.target_port.parse()
+        output = self.target.parse()
         output[InputKeyword.CVE.name.lower()] = self.cve
         return output
 
@@ -123,7 +121,7 @@ class InputVulnerability(models.Model, BaseInput):
         Returns:
             str: String value that identifies this instance
         '''
-        return f'{self.target_port.__str__()} - {self.cve}'
+        return f'{self.target.__str__()} - {self.cve}'
 
     def get_project(self) -> Project:
         '''Get the related project for the instance. This will be used for authorization purposes.
@@ -131,4 +129,4 @@ class InputVulnerability(models.Model, BaseInput):
         Returns:
             Project: Related project entity
         '''
-        return self.target_port.target.project
+        return self.target.project
