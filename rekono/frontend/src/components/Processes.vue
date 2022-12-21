@@ -32,7 +32,7 @@
             <b-icon icon="pencil-square"/>
             <label class="ml-1">Edit</label>
           </b-dropdown-item>
-          <b-dropdown-item variant="danger" @click="selectProcess(row.item)" v-b-modal.delete-process-modal :disabled="$store.state.role !== 'Admin' && $store.state.user !== row.item.creator.id">
+          <b-dropdown-item variant="danger" @click="selectedProcess = row.item" v-b-modal.delete-process-modal :disabled="$store.state.role !== 'Admin' && $store.state.user !== row.item.creator.id">
             <b-icon icon="trash-fill"/>
             <label class="ml-1">Delete</label>
           </b-dropdown-item>
@@ -83,8 +83,8 @@
 <script>
 import RekonoApi from '@/backend/RekonoApi'
 import Deletion from '@/common/Deletion'
-import TableHeader from '@/common/TableHeader'
 import Pagination from '@/common/Pagination'
+import TableHeader from '@/common/TableHeader'
 import Process from '@/modals/Process'
 import Step from '@/modals/Step'
 import Task from '@/modals/Task'
@@ -171,12 +171,12 @@ export default {
     taskModal (process) {
       this.cleanSelection()
       this.showTaskModal = true
-      this.selectProcess(process)
+      this.selectedProcess = process
     },
     processModal (process) {
       this.cleanSelection()
       this.showProcessModal = true
-      this.selectProcess(process)
+      this.selectedProcess = process
     },
     stepModal (process, step = null) {
       this.cleanSelection()
@@ -184,14 +184,11 @@ export default {
       if (step !== null) {
         this.selectStep(process, step)
       } else {
-        this.selectProcess(process)
+        this.selectedProcess = process
       }
     },
-    selectProcess (process) {
-      this.selectedProcess = process
-    },
     selectStep (process, step) {
-      this.selectProcess(process)
+      this.selectedProcess = process
       this.selectedStep = step
     },
     cleanSelection () {

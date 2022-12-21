@@ -26,7 +26,7 @@ class InputTechnologyViewSet(
     # Fields used to search input technologies
     search_fields = ['name', 'version']
     # Project members field used for authorization purposes
-    members_field = 'target_port__target__project__members'
+    members_field = 'target__project__members'
 
 
 class InputVulnerabilityViewSet(
@@ -45,4 +45,4 @@ class InputVulnerabilityViewSet(
     # Fields used to search input vulnerabilities
     search_fields = ['cve']
     # Project members field used for authorization purposes
-    members_field = 'target_port__target__project__members'
+    members_field = 'target__project__members'

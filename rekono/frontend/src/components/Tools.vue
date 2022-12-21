@@ -30,14 +30,14 @@
           <b-icon v-if="!row.detailsShowing" variant="dark" icon="eye-fill"/>
           <b-icon v-if="row.detailsShowing" variant="secondary" icon="eye-slash-fill"/>
         </b-button>
-        <b-button variant="outline" class="mr-2" v-b-tooltip.hover title="Execute" @click="taskModal(row.item)" v-b-modal.task-modal>
+        <b-button variant="outline" class="mr-2" v-b-tooltip.hover title="Execute" @click="taskModal(row.item)" v-b-modal.task-modal v-if="auditor.includes($store.state.role)">
           <b-icon variant="success" icon="play-circle-fill"/>
         </b-button>
-        <b-dropdown variant="outline" right v-b-tooltip.hover title="Add to Process">
+        <b-dropdown variant="outline" right v-b-tooltip.hover title="Add to Process" v-if="auditor.includes($store.state.role)">
           <template #button-content>
             <b-icon variant="dark" icon="plus-square"/>
           </template>
-          <b-dropdown-item @click="processModal(row.item)" v-b-modal.new-process-modal >New Process</b-dropdown-item>
+          <b-dropdown-item @click="processModal(row.item)" v-b-modal.new-process-modal>New Process</b-dropdown-item>
           <b-dropdown-item @click="stepModal(row.item)" v-b-modal.new-step-modal>New Step</b-dropdown-item>
         </b-dropdown>
       </template>
@@ -131,19 +131,16 @@ export default {
     taskModal (tool) {
       this.cleanSelection()
       this.showTaskModal = true
-      this.selectTool(tool)
+      this.selectedTool = tool
     },
     processModal (tool) {
       this.cleanSelection()
       this.showProcessModal = true
-      this.selectTool(tool)
+      this.selectedTool = tool
     },
     stepModal (tool) {
       this.cleanSelection()
       this.showStepModal = true
-      this.selectTool(tool)
-    },
-    selectTool (tool) {
       this.selectedTool = tool
     },
     cleanSelection () {

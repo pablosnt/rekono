@@ -1,5 +1,6 @@
 from typing import Any, Dict
 
+from authentications.serializers import AuthenticationSerializer
 from django.forms import ValidationError
 from rest_framework import serializers
 
@@ -51,6 +52,8 @@ class TargetSerializer(serializers.ModelSerializer):
 
 class TargetPortSerializer(serializers.ModelSerializer):
     '''Serializer to manage target ports via API.'''
+
+    authentication = AuthenticationSerializer(many=False, read_only=True)       # Authentication details for read ops
 
     class Meta:
         '''Serializer metadata.'''

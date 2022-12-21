@@ -14,7 +14,7 @@ class InputTechnologySerializer(serializers.ModelSerializer):
 
         model = InputTechnology
         # Input technology fields exposed via API
-        fields = ('id', 'target_port', 'name', 'version')
+        fields = ('id', 'target', 'name', 'version')
 
     def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
         '''Validate the provided data before use it.
@@ -30,7 +30,7 @@ class InputTechnologySerializer(serializers.ModelSerializer):
         '''
         attrs = super().validate(attrs)
         if InputTechnology.objects.filter(
-            target_port=attrs['target_port'],
+            target=attrs['target'],
             name=attrs['name'],
             version=attrs['version']
         ).exists():
@@ -49,7 +49,7 @@ class InputVulnerabilitySerializer(serializers.ModelSerializer):
 
         model = InputVulnerability
         # Input vulnerabilities fields exposed via API
-        fields = ('id', 'target_port', 'cve')
+        fields = ('id', 'target', 'cve')
 
     def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
         '''Validate the provided data before use it.
@@ -64,6 +64,6 @@ class InputVulnerabilitySerializer(serializers.ModelSerializer):
             Dict[str, Any]: Data after validation process
         '''
         attrs = super().validate(attrs)
-        if InputVulnerability.objects.filter(target_port=attrs['target_port'], cve=attrs['cve']).exists():
+        if InputVulnerability.objects.filter(target=attrs['target'], cve=attrs['cve']).exists():
             raise ValidationError({'cve': 'This CVE already exists in this target port'})
         return attrs

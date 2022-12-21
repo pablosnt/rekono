@@ -4,6 +4,6 @@ from parameters.views import InputTechnologyViewSet, InputVulnerabilityViewSet
 
 router = SimpleRouter()
 router.register('parameters/technologies', InputTechnologyViewSet)
-router.register('parameters/technologies', InputVulnerabilityViewSet)
+router.register('parameters/vulnerabilities', InputVulnerabilityViewSet)
 
 urlpatterns = router.urls

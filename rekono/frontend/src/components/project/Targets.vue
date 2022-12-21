@@ -8,54 +8,24 @@
         </b-link>
       </template>
       <template #cell(actions)="row">
-        <b-button :disabled="row.item.target_ports.length === 0" @click="showTarget(row)" variant="outline" class="mr-2" v-b-tooltip.hover title="Details">
-          <b-icon v-if="!row.item._showDetails" variant="dark" icon="eye-fill"/>
-          <b-icon v-if="row.item._showDetails" variant="secondary" icon="eye-slash-fill"/>
-          <label style="display: none">{{ showTargetId }}</label>
+        <b-button variant="outline" class="mr-2" v-b-tooltip.hover title="Configuration" @click="selectedTarget = row.item" v-b-modal.target-details-modal>
+          <b-icon variant="dark" icon="nut-fill"/>
         </b-button>
-        <b-button variant="outline" class="mr-2" v-b-tooltip.hover title="Execute" @click="selectTarget(row.item)" v-b-modal.task-modal v-if="auditor.includes($store.state.role)">
+        <b-button variant="outline" class="mr-2" v-b-tooltip.hover title="Execute" @click="selectedTarget = row.item" v-b-modal.task-modal v-if="auditor.includes($store.state.role)">
           <b-icon variant="success" icon="play-circle-fill"/>
         </b-button>
-        <b-dropdown variant="outline" right v-if="auditor.includes($store.state.role)">
-          <template #button-content>
-            <b-icon variant="dark" icon="three-dots-vertical"/>
-          </template>
-          <b-dropdown-item @click="selectTarget(row.item)" v-b-modal.add-target-port-modal>
-            <b-icon variant="success" icon="plus-square"/>
-            <label class="ml-1" variant="dark">Add Port</label>
-          </b-dropdown-item>
-          <b-dropdown-item variant="danger" @click="selectTarget(row.item)" v-b-modal.delete-target-modal>
-            <b-icon icon="trash-fill"/>
-            <label class="ml-1">Delete Target</label>
-          </b-dropdown-item>
-        </b-dropdown>
-      </template>
-      <template #row-details="row">
-        <b-card>
-          <b-table striped borderles head-variant="light" :fields="targetPortsFields" :items="row.item.target_ports">
-            <template #cell(actions)="port">
-              <b-button @click="selectTargetPort(row.item, port.item)" variant="outline" class="mr-2" v-b-tooltip.hover title="Configuration" v-b-modal.target-port-details>
-                <b-icon variant="dark" icon="nut-fill"/>
-              </b-button>
-              <b-button variant="outline" @click="selectTargetPort(row.item, port.item)" v-b-tooltip.hover title="Delete Port" v-b-modal.delete-target-port-modal>
-                <b-icon variant="danger" icon="trash-fill"/>
-              </b-button>
-            </template>
-          </b-table>
-        </b-card>
+        <b-button variant="outline" class="mr-2" v-b-tooltip.hover title="Delete" @click="selectedTarget = row.item" v-b-modal.delete-target-modal v-if="auditor.includes($store.state.role)">
+          <b-icon variant="danger" icon="trash-fill"/>
+        </b-button>
       </template>
     </b-table>
     <pagination :page="page" :limit="limit" :limits="limits" :total="total" name="targets" @pagination="pagination"/>
-    <deletion id="delete-target-modal" title="Delete Target" @deletion="deleteTarget" @clean="cleanSelection" v-if="selectedTarget !== null">
+    <deletion id="delete-target-modal" title="Delete Target" @deletion="deleteTarget" @clean="selectedTarget = null" v-if="selectedTarget !== null">
       <span><strong>{{ selectedTarget.target }}</strong> target</span>
     </deletion>
-    <deletion id="delete-target-port-modal" title="Delete Target Port" @deletion="deleteTargetPort" @clean="cleanSelection" v-if="selectedTargetPort !== null">
-      <span><strong>{{ selectedTargetPort.port }}</strong> port</span>
-    </deletion>
     <target id="add-target-modal" :projectId="$route.params.id" @confirm="confirm"/>
-    <target-port v-if="selectedTarget !== null" id="add-target-port-modal" :targetId="selectedTarget.id" @confirm="confirm"/>
-    <target-port-details v-if="selectedTargetPort !== null" id="target-port-details" :targetPort="selectedTargetPort" @close="fetchData()"/>
-    <task id="task-modal" :target="selectedTarget" :initialized="selectedTarget !== null" @clean="cleanSelection"/>
+    <target-details v-if="selectedTarget !== null" id="target-details-modal" :target="selectedTarget" @close="fetchData(); selectedTarget = null"/>
+    <task id="task-modal" :target="selectedTarget" :initialized="selectedTarget !== null" @clean="selectedTarget = null"/>
   </div>
 </template>
 
@@ -64,9 +34,8 @@ import RekonoApi from '@/backend/RekonoApi'
 import Deletion from '@/common/Deletion'
 import Pagination from '@/common/Pagination'
 import TableHeader from '@/common/TableHeader'
-import Target from '@/modals/Target'
-import TargetPort from '@/modals/TargetPort'
-import TargetPortDetails from '@/modals/TargetPortDetails'
+import Target from '@/modals/targets/Target'
+import TargetDetails from '@/modals/targets/TargetDetails'
 import Task from '@/modals/Task'
 export default {
   name: 'projectTargetsPage',
@@ -94,15 +63,7 @@ export default {
     this.getSettings()
     return {
       data: [],
-      targetPortsFields: [
-        { key: 'port', sortable: true },
-        { key: 'target_technologies.length', label: 'Technologies', sortable: false},
-        { key: 'target_vulnerabilities.length', label: 'Vulnerabilities', sortable: false},
-        { key: 'actions', sortable: false },
-      ],
       selectedTarget: null,
-      selectedTargetPort: null,
-      showTargetId: null,
       filters: []
     }
   },
@@ -111,8 +72,7 @@ export default {
     TableHeader,
     Pagination,
     Target,
-    TargetPort,
-    TargetPortDetails,
+    TargetDetails,
     Task
   },
   watch: {
@@ -129,31 +89,13 @@ export default {
         .then(response => {
           this.data = response.data.results
           this.total = response.data.count
-          if (this.showTargetId) {
-            this.data.filter(target => target.id === this.showTargetId).forEach(target => target._showDetails = true)
-          }
         })
-    },
-    showTarget (row) {
-      row.toggleDetails()
-      this.showTargetId = row.item._showDetails ? row.item.id : null
     },
     deleteTarget () {
       this.delete(`/api/targets/${this.selectedTarget.id}/`).then(() => this.fetchData())
     },
-    deleteTargetPort () {
-      this.delete(`/api/target-ports/${this.selectedTargetPort.id}/`).then(() => this.fetchData())
-    },
     selectTarget (target) {
       this.selectedTarget = target
-    },
-    selectTargetPort (target, targetPort) {
-      this.selectTarget(target)
-      this.selectedTargetPort = targetPort
-    },
-    cleanSelection () {
-      this.selectedTarget = null
-      this.selectedTargetPort = null
     }
   }
 }
