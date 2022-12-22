@@ -12,13 +12,13 @@
         <b-form>
           <b-row>
             <b-col cols="6">
-              <b-form-group :invalid-feedback="invalidTech">
-                <b-form-input type="text" v-model="newTech" placeholder="Technology Name" :state="techState" autofocus/>
+              <b-form-group :invalid-feedback="invalidName">
+                <b-form-input type="text" v-model="name" placeholder="Technology Name" :state="nameState" autofocus/>
               </b-form-group>
             </b-col>
             <b-col cols="6">
               <b-form-group :invalid-feedback="invalidVersion">
-                <b-form-input type="text" v-model="newVersion" placeholder="Technology Version" :state="versionState" autofocus/>
+                <b-form-input type="text" v-model="version" placeholder="Technology Version" :state="versionState" autofocus/>
               </b-form-group>
             </b-col>
           </b-row>
@@ -73,11 +73,11 @@ export default {
       limits: [10, 25, 50, 100],
       data: [],
       selectedItem: null,
-      newTech: null,
-      newVersion: null,
-      invalidTech: 'Technology name is required',
+      name: null,
+      version: null,
+      invalidName: 'Technology name is required',
       invalidVersion: 'Technology version is required',
-      techState: null,
+      nameState: null,
       versionState: null
     }
   },
@@ -94,24 +94,24 @@ export default {
         })
     },
     check () {
-      this.techState = null
+      this.nameState = null
       this.versionState = null
-      if (!this.validateName(this.newTech)) {
-        this.techState = false
-        this.invalidName = this.newTech && this.newTech.length > 0 ? 'Invalid technology name' : 'Technology name is required'
+      if (!this.validateName(this.name)) {
+        this.nameState = false
+        this.invalidName = this.name && this.name.length > 0 ? 'Invalid technology name' : 'Technology name is required'
       }
-      if (!this.validateName(this.newVersion)) {
+      if (!this.validateName(this.version)) {
         this.versionState = false
-        this.invalidVersion = this.newVersion && this.newVersion.length > 0 ? 'Invalid technology version' : 'Technology version is required'
+        this.invalidVersion = this.version && this.version.length > 0 ? 'Invalid technology version' : 'Technology version is required'
       }
-      return this.techState !== false && this.versionState !== false
+      return this.nameState !== false && this.versionState !== false
     },
     create () {
       if (this.check()) {
         this.post(
           '/api/parameters/technologies/',
-          { target: this.targetId, name: this.newTech, version: this.newVersion },
-          this.newTech, 'New target technology created successfully'
+          { target: this.targetId, name: this.name, version: this.version },
+          this.name, 'New target technology created successfully'
         )
           .then(() => this.fetchData())
         this.clean()
@@ -122,11 +122,11 @@ export default {
     },
     clean () {
       this.selectedItem = null
-      this.newTech = null
-      this.newVersion = null
-      this.invalidTech = 'Technology name is required'
+      this.name = null
+      this.version = null
+      this.invalidName = 'Technology name is required'
       this.invalidVersion = 'Technology version is required'
-      this.techState = null
+      this.nameState = null
       this.versionState = null
     }
   }

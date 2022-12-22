@@ -12,21 +12,21 @@
               </b-input-group-append>
             </b-col>
             <b-col cols="5">
-              <b-form-input type="number" v-model="newPort" placeholder="Target Port" :state="portState" autofocus/>
+              <b-form-input type="number" v-model="port" placeholder="Target Port" :state="portState" autofocus/>
             </b-col>
             <b-col cols="5">
-              <b-form-select v-model="newType" :options="authenticationTypes">Authentication Type</b-form-select>
+              <b-form-select v-model="type" :options="authenticationTypes">Authentication Type</b-form-select>
             </b-col>
           </b-row>
-          <b-row v-if="newType !== 'None'" class="mt-3">
+          <b-row v-if="type !== 'None'" class="mt-3">
             <b-col>
               <b-form-group :invalid-feedback="invalidName">
-                <b-form-input type="text" v-model="newName" :placeholder="newType === 'Basic' ? 'Username' : newType === 'Cookie' ? 'Cookie name' : 'Credential name'" :state="nameState" autofocus/>
+                <b-form-input type="text" v-model="name" :placeholder="type === 'Basic' ? 'Username' : type === 'Cookie' ? 'Cookie name' : 'Credential name'" :state="nameState" autofocus/>
               </b-form-group>
             </b-col>
             <b-col>
               <b-form-group :invalid-feedback="invalidCredential">
-                <b-form-input type="password" v-model="newCredential" :placeholder="newType === 'Basic' ? 'Password' : newType === 'Cookie' ? 'Cookie value' : 'Credential value'" :state="credentialState" autofocus/>
+                <b-form-input type="password" v-model="credential" :placeholder="type === 'Basic' ? 'Password' : type === 'Cookie' ? 'Cookie value' : 'Credential value'" :state="credentialState" autofocus/>
               </b-form-group>
             </b-col>
           </b-row>
@@ -39,7 +39,24 @@
       </b-col>
     </b-row>
     <b-table stripped head-variant="light" :fields="fields" :items="data" v-if="data.length > 0">
+      <template #cell(authentication.type)="row">
+        <b-form-select value="None" :options="authenticationTypes" @input="selectedItemToAddAuth = row.item" @change="selectTypeToAddAuth" v-if="!row.item.authentication"/>
+        <p v-if="row.item.authentication">{{ row.item.authentication.type }}</p>
+      </template>
+      <template #cell(authentication.name)="row">
+        <b-form-input type="text" v-model="nameToAddAuth" :placeholder="typeToAddAuth === 'Basic' ? 'Username' : typeToAddAuth === 'Cookie' ? 'Cookie name' : 'Credential name'" v-if="!row.item.authentication && selectedItemToAddAuth && selectedItemToAddAuth.id === row.item.id"/>
+        <p v-if="!row.item.authentication && (!selectedItemToAddAuth || selectedItemToAddAuth.id !== row.item.id)"></p>
+        <p v-if="row.item.authentication">{{ row.item.authentication.name }}</p>
+      </template>
+      <template #cell(authentication.credential)="row">
+        <b-form-input type="password" v-model="credentialToAddAuth" :placeholder="typeToAddAuth === 'Basic' ? 'Password' : typeToAddAuth === 'Cookie' ? 'Cookie value' : 'Credential value'" v-if="!row.item.authentication && selectedItemToAddAuth && selectedItemToAddAuth.id === row.item.id"/>
+        <p v-if="!row.item.authentication && (!selectedItemToAddAuth || selectedItemToAddAuth.id !== row.item.id)"></p>
+        <p v-if="row.item.authentication">{{ row.item.authentication.credential }}</p>
+      </template>
       <template #cell(actions)="row">
+        <b-button variant="outline" @click="createAuthentication" v-b-tooltip.hover title="Add Authentication" :disabled="!checkAuthentication(typeToAddAuth, nameToAddAuth, credentialToAddAuth, false)" v-if="selectedItemToAddAuth && selectedItemToAddAuth.id === row.item.id">
+          <b-icon variant="success" icon="plus-square-fill"/>
+        </b-button>
         <b-dropdown variant="outline" right v-b-tooltip.hover title="Delete" v-if="row.item.authentication">
           <template #button-content>
             <b-icon variant="danger" icon="trash-fill"/>
@@ -76,9 +93,9 @@ export default {
     fields () {
       let fields = [
         { key: 'port', sortable: true },
-        { key: 'authentication.name', label: 'Authentication', sortable: true },
-        { key: 'authentication.credential', label: 'Credential', sortable: true },
-        { key: 'authentication.type', label: 'Authentication Type', sortable: true }
+        { key: 'authentication.type', label: 'Auth Type', sortable: true },
+        { key: 'authentication.name', label: 'Name', sortable: true },
+        { key: 'authentication.credential', label: 'Credential', sortable: true }
       ]
       if (this.auditor.includes(this.$store.state.role)) {
         fields.push({ key: 'actions', sortable: false })
@@ -93,10 +110,14 @@ export default {
       limits: [10, 25, 50, 100],
       data: [],
       selectedItem: null,
-      newPort: null,
-      newType: 'None',
-      newName: null,
-      newCredential: null,
+      port: null,
+      type: 'None',
+      name: null,
+      credential: null,
+      selectedItemToAddAuth: null,
+      typeToAddAuth: 'None',
+      nameToAddAuth: null,
+      credentialToAddAuth: null,      
       invalidPort: 'Target port is required',
       invalidName: 'Credential name is required',
       invalidCredential: 'Credential value is required',
@@ -117,35 +138,48 @@ export default {
           this.total = response.data.count
         })
     },
-    check () {
+    checkPort () {
       this.portState = null
-      this.nameState = null
-      this.credentialState = null
-      if (!this.newPort || this.newPort < 0 || this.newPort > 999999) {
+      if (!this.port || this.port < 0 || this.port > 999999) {
         this.portState = false
-        this.invalidPort = this.newPort ? 'Invalid port value' : 'Target port is required'
+        this.invalidPort = this.port ? 'Invalid port value' : 'Target port is required'
       }
-      if (this.newType !== 'None') {
-        if (!this.validateName(this.newName)) {
-          this.techState = false
-          this.invalidName = this.newName && this.newName.length > 0 ? 'Invalid credential name' : 'Credential name is required'
+      return this.portState !== false
+    },
+    checkAuthentication (type = this.type, name = this.name, credential = this.credential, changeState = true) {
+      if (changeState) {
+        this.nameState = null
+        this.credentialState = null
+      }
+      if (type !== 'None') {
+        if (!this.validateName(name)) {
+          if (changeState) {
+            this.techState = false
+            this.invalidName = name && name.length > 0 ? 'Invalid credential name' : 'Credential name is required'
+          } else {
+            return false
+          }
         }
-        if (!this.validateCredential(this.newCredential)) {
-          this.credentialState = false
-          this.invalidCredential = this.newCredential && this.newCredential.length > 0 ? 'Invalid credential value' : 'Credential value is required'
+        if (!this.validateCredential(credential)) {
+          if (changeState) {
+            this.credentialState = false
+            this.invalidCredential = credential && credential.length > 0 ? 'Invalid credential value' : 'Credential value is required'
+          } else {
+            return false
+          }
         }
       }
-      return this.portState !== false && this.nameState !== false && this.credentialState !== false
+      return changeState ? this.nameState !== false && this.credentialState !== false : true
     },
     create () {
-      if (this.check()) {
-        this.post('/api/target-ports/', { target: this.targetId, port: this.newPort }, this.newPort, 'New target port created successfully')
+      if (this.checkPort() && this.checkAuthentication()) {
+        this.post('/api/target-ports/', { target: this.targetId, port: this.port }, this.port, 'New target port created successfully')
           .then(data => {
-            if (this.newType !== 'None') {
+            if (this.type !== 'None') {
               this.post(
                 '/api/authentications/',
-                { target_port: data.id, name: this.newName, credential: this.newCredential, type: this.newType},
-                this.newName, 'New authentication created successfully'
+                { target_port: data.id, name: this.name, credential: this.credential, type: this.type},
+                this.name, 'New authentication created successfully'
               )
                 .then(() => this.fetchData())
                 .catch(() => this.fetchData())
@@ -156,6 +190,23 @@ export default {
           })
         .catch(() => this.clean())
       }
+      else {
+        this.clean()
+      }
+    },
+    createAuthentication () {
+      if (this.selectedItemToAddAuth && this.checkAuthentication(this.typeToAddAuth, this.nameToAddAuth, this.credentialToAddAuth, false)) {
+        this.post(
+          '/api/authentications/',
+          { target_port: this.selectedItemToAddAuth.id, name: this.nameToAddAuth, credential: this.credentialToAddAuth, type: this.typeToAddAuth},
+          this.nameToAddAuth, 'New authentication created successfully'
+        )
+          .then(() => this.fetchData())
+        this.selectedItemToAddAuth = null
+        this.typeToAddAuth = null
+        this.nameToAddAuth = null
+        this.credentialToAddAuth = null
+      }
     },
     deletePort () {
       this.delete(`/api/target-ports/${this.selectedItem.id}/`, this.selectedItem.port, 'Port deleted successfully').then(() => this.fetchData())
@@ -163,12 +214,23 @@ export default {
     deleteAuthentication () {
       this.delete(`/api/authentications/${this.selectedItem.id}/`, this.selectedItem.name, 'Authentication deleted successfully').then(() => this.fetchData())
     },
+    selectTypeToAddAuth (type) {
+      if (type === 'None') {
+        this.selectedItemToAddAuth = null
+      } else {
+        this.typeToAddAuth = type
+      }
+    },
     clean () {
       this.selectedItem = null
-      this.newPort = null
-      this.newType = 'None'
-      this.newName = null
-      this.newCredential = null
+      this.port = null
+      this.type = 'None'
+      this.name = null
+      this.credential = null
+      this.selectedItemToAddAuth = null
+      this.typeToAddAuth = null
+      this.nameToAddAuth = null
+      this.credentialToAddAuth = null
       this.portState = null
       this.nameState = null
       this.credentialState = null
