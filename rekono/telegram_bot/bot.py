@@ -25,15 +25,13 @@ from telegram_bot.conversations.selection import (select_configuration,
                                                   select_intensity,
                                                   select_process,
                                                   select_project,
-                                                  select_target,
-                                                  select_target_port,
-                                                  select_tool, select_wordlist)
+                                                  select_target, select_tool,
+                                                  select_wordlist)
 from telegram_bot.conversations.states import (CREATE, EXECUTE,
                                                SELECT_CONFIGURATION,
                                                SELECT_INTENSITY,
                                                SELECT_PROCESS, SELECT_PROJECT,
-                                               SELECT_TARGET,
-                                               SELECT_TARGET_PORT, SELECT_TOOL,
+                                               SELECT_TARGET, SELECT_TOOL,
                                                SELECT_WORDLIST)
 from telegram_bot.messages.help import get_my_commands
 from telegram_bot.token import handle_invalid_telegram_token
@@ -107,7 +105,6 @@ def deploy() -> None:
             states={
                 SELECT_PROJECT: [CallbackQueryHandler(select_project)],
                 SELECT_TARGET: [CallbackQueryHandler(select_target)],
-                SELECT_TARGET_PORT: [CallbackQueryHandler(select_target_port)],
                 CREATE: [MessageHandler(Filters.text, create_input_technology)]
             },
             fallbacks=[CommandHandler('cancel', cancel)],
@@ -118,7 +115,6 @@ def deploy() -> None:
             states={
                 SELECT_PROJECT: [CallbackQueryHandler(select_project)],
                 SELECT_TARGET: [CallbackQueryHandler(select_target)],
-                SELECT_TARGET_PORT: [CallbackQueryHandler(select_target_port)],
                 CREATE: [MessageHandler(Filters.text, create_input_vulnerability)]
             },
             fallbacks=[CommandHandler('cancel', cancel)],
