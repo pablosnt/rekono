@@ -61,9 +61,7 @@ def create_input_technology(update: Update, context: CallbackContext) -> int:
         name = update.effective_message.text
         version = None
         if name and ' - ' in name:
-            aux = name.split(' - ')
-            name = aux[0]
-            version = aux[1]
+            name, version = name.split(' - ', 1)
         serializer = InputTechnologySerializer(                                 # Prepare input technology data
             data={'target': context.chat_data[TARGET].id, 'name': name, 'version': version}
         )
@@ -92,5 +90,5 @@ def create_input_technology(update: Update, context: CallbackContext) -> int:
             # Re-ask for the new input technology
             update.effective_message.reply_text(ASK_FOR_NEW_INPUT_TECHNOLOGY)
             return CREATE                                                       # Repeat the current state
-    clear(context, [TARGET])                                               # Clear Telegram context
+    clear(context, [TARGET])                                                    # Clear Telegram context
     return ConversationHandler.END                                              # End conversation

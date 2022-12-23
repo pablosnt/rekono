@@ -13,6 +13,8 @@ from telegram_bot.commands.selection import clear, show
 from telegram_bot.conversations.cancel import cancel
 from telegram_bot.conversations.execute import (execute, execute_process,
                                                 execute_tool)
+from telegram_bot.conversations.new_authentication import (
+    create_authentication, new_authentication)
 from telegram_bot.conversations.new_input_technology import (
     create_input_technology, new_input_technology)
 from telegram_bot.conversations.new_input_vulnerability import (
@@ -21,17 +23,21 @@ from telegram_bot.conversations.new_target import create_target, new_target
 from telegram_bot.conversations.new_target_port import (create_target_port,
                                                         new_target_port)
 from telegram_bot.conversations.select_project import project
-from telegram_bot.conversations.selection import (select_configuration,
+from telegram_bot.conversations.selection import (select_authentication_type,
+                                                  select_configuration,
                                                   select_intensity,
                                                   select_process,
                                                   select_project,
-                                                  select_target, select_tool,
-                                                  select_wordlist)
-from telegram_bot.conversations.states import (CREATE, EXECUTE,
+                                                  select_target,
+                                                  select_target_port,
+                                                  select_tool, select_wordlist)
+from telegram_bot.conversations.states import (CREATE, CREATE_RELATED, EXECUTE,
+                                               SELECT_AUTHENTICATION_TYPE,
                                                SELECT_CONFIGURATION,
                                                SELECT_INTENSITY,
                                                SELECT_PROCESS, SELECT_PROJECT,
-                                               SELECT_TARGET, SELECT_TOOL,
+                                               SELECT_TARGET,
+                                               SELECT_TARGET_PORT, SELECT_TOOL,
                                                SELECT_WORDLIST)
 from telegram_bot.messages.help import get_my_commands
 from telegram_bot.token import handle_invalid_telegram_token
@@ -95,7 +101,21 @@ def deploy() -> None:
             states={
                 SELECT_PROJECT: [CallbackQueryHandler(select_project)],
                 SELECT_TARGET: [CallbackQueryHandler(select_target)],
-                CREATE: [MessageHandler(Filters.text, create_target_port)]
+                CREATE: [MessageHandler(Filters.text, create_target_port)],
+                SELECT_AUTHENTICATION_TYPE: [CallbackQueryHandler(select_authentication_type)],
+                CREATE_RELATED: [MessageHandler(Filters.text, create_authentication)]
+            },
+            fallbacks=[CommandHandler('cancel', cancel)],
+            per_chat=True
+        ))
+        updater.dispatcher.add_handler(ConversationHandler(                     # Create new authentication
+            entry_points=[CommandHandler('newauth', new_authentication)],
+            states={
+                SELECT_PROJECT: [CallbackQueryHandler(select_project)],
+                SELECT_TARGET: [CallbackQueryHandler(select_target)],
+                SELECT_TARGET_PORT: [CallbackQueryHandler(select_target_port)],
+                SELECT_AUTHENTICATION_TYPE: [CallbackQueryHandler(select_authentication_type)],
+                CREATE_RELATED: [MessageHandler(Filters.text, create_authentication)]
             },
             fallbacks=[CommandHandler('cancel', cancel)],
             per_chat=True

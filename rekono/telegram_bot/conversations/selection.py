@@ -8,8 +8,9 @@ from telegram import ParseMode
 from telegram.ext import CallbackContext, ConversationHandler
 from telegram.update import Update
 from telegram.utils.helpers import escape_markdown
-from telegram_bot.context import (CONFIGURATION, INTENSITY, PROCESS, PROJECT,
-                                  STATES, TARGET, TARGET_PORT, TOOL, WORDLIST)
+from telegram_bot.context import (AUTH_TYPE, CONFIGURATION, INTENSITY, PROCESS,
+                                  PROJECT, STATES, TARGET, TARGET_PORT, TOOL,
+                                  WORDLIST)
 from telegram_bot.conversations.ask import ask_for_wordlist
 from telegram_bot.messages.selection import (SELECTED_CONFIGURATION,
                                              SELECTED_INTENSITY,
@@ -112,6 +113,28 @@ def select_target_port(update: Update, context: CallbackContext) -> int:
         context.chat_data[TARGET_PORT] = target_port                            # Save selected target port
         update.callback_query.answer(SELECTED_TARGET_PORT.format(port=target_port.port))     # Confirm selection
         return next_state(update, context, chat)                                # Go to next state
+    if update.callback_query:
+        update.callback_query.answer()                                          # Empty answer
+    return ConversationHandler.END                                              # End conversation
+
+
+def select_authentication_type(update: Update, context: CallbackContext) -> int:
+    '''Manage selected authentication type.
+
+    Args:
+        update (Update): Telegram Bot update
+        context (CallbackContext): Telegram Bot context
+
+    Returns:
+        int: Conversation state
+    '''
+    chat = get_chat(update)                                                     # Get Telegram chat
+    if chat and context.chat_data is not None and update.callback_query and update.callback_query.data:
+        if update.callback_query.data == 'None':
+            clear(context, [STATES, TARGET, TARGET_PORT])
+        else:
+            context.chat_data[AUTH_TYPE] = update.callback_query.data
+            return next_state(update, context, chat)
     if update.callback_query:
         update.callback_query.answer()                                          # Empty answer
     return ConversationHandler.END                                              # End conversation

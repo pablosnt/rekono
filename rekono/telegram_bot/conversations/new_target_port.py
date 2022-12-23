@@ -5,12 +5,14 @@ from telegram import ParseMode
 from telegram.ext import CallbackContext, ConversationHandler
 from telegram.update import Update
 from telegram.utils.helpers import escape_markdown
-from telegram_bot.context import PROJECT, STATES, TARGET
-from telegram_bot.conversations.ask import ask_for_project, ask_for_target
+from telegram_bot.context import COMMAND, PROJECT, STATES, TARGET, TARGET_PORT
+from telegram_bot.conversations.ask import (ask_for_authentication_type,
+                                            ask_for_project, ask_for_target)
 from telegram_bot.conversations.cancel import cancel
 from telegram_bot.conversations.selection import clear
-from telegram_bot.conversations.states import CREATE
+from telegram_bot.conversations.states import CREATE, CREATE_RELATED
 from telegram_bot.messages.errors import create_error_message
+from telegram_bot.messages.parameters import ASK_FOR_NEW_AUTHENTICATION
 from telegram_bot.messages.targets import (ASK_FOR_NEW_TARGET_PORT,
                                            INVALID_TARGET_PORT,
                                            NEW_TARGET_PORT)
@@ -31,12 +33,20 @@ def new_target_port(update: Update, context: CallbackContext) -> int:
     '''
     chat = get_chat(update)                                                     # Get Telegram chat
     if chat and context.chat_data is not None:
+        context.chat_data[COMMAND] = 'newport'
         if PROJECT in context.chat_data:                                        # Project already selected
-            context.chat_data[STATES] = [(CREATE, ASK_FOR_NEW_TARGET_PORT)]     # Configure next steps
+            context.chat_data[STATES] = [                                       # Configure next steps
+                (CREATE, ASK_FOR_NEW_TARGET_PORT),
+                (CREATE_RELATED, ASK_FOR_NEW_AUTHENTICATION)
+            ]
             return ask_for_target(update, context, chat)                        # Ask for target selection
         else:                                                                   # No selected project
             # Configure next steps
-            context.chat_data[STATES] = [(None, ask_for_target), (CREATE, ASK_FOR_NEW_TARGET_PORT)]
+            context.chat_data[STATES] = [
+                (None, ask_for_target),
+                (CREATE, ASK_FOR_NEW_TARGET_PORT),
+                (CREATE_RELATED, ASK_FOR_NEW_AUTHENTICATION)
+            ]
             return ask_for_project(update, context, chat)                       # Ask for project selection
     return ConversationHandler.END                                              # Unauthorized: end conversation
 
@@ -51,7 +61,6 @@ def create_target_port(update: Update, context: CallbackContext) -> int:
     Returns:
         int: Conversation state
     '''
-    clear(context, [STATES])                                                    # Clear Telegram context
     chat = get_chat(update)                                                     # Get Telegram chat
     if chat and context.chat_data is not None and update.effective_message and update.effective_message.text:
         if update.effective_message.text == '/cancel':                          # Check if cancellation is requested
@@ -76,6 +85,7 @@ def create_target_port(update: Update, context: CallbackContext) -> int:
                     target=escape_markdown(target_port.target.target, version=2)
                 ), parse_mode=ParseMode.MARKDOWN_V2
             )
+            context.chat_data[TARGET_PORT] = target_port
         else:                                                                   # Invalid target port data
             logger.info(
                 '[Telegram Bot] Attempt of target port creation with invalid data',
@@ -88,5 +98,6 @@ def create_target_port(update: Update, context: CallbackContext) -> int:
             )
             update.effective_message.reply_text(ASK_FOR_NEW_TARGET_PORT)        # Re-ask for the new target port
             return CREATE                                                       # Repeat the current state
+        return ask_for_authentication_type(update, context, chat)
     clear(context, [TARGET])                                                    # Clear Telegram context
     return ConversationHandler.END                                              # End conversation

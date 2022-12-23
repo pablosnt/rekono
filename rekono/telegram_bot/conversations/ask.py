@@ -1,5 +1,6 @@
 from typing import List
 
+from authentications.enums import AuthenticationType
 from processes.models import Process
 from projects.models import Project
 from resources.models import Wordlist
@@ -7,14 +8,17 @@ from targets.models import Target, TargetPort
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
 from telegram.ext import CallbackContext, ConversationHandler
 from telegram.update import Update
-from telegram_bot.context import PROJECT, TARGET, TOOL
-from telegram_bot.conversations.states import (EXECUTE, SELECT_CONFIGURATION,
+from telegram_bot.context import COMMAND, PROJECT, TARGET, TOOL
+from telegram_bot.conversations.states import (EXECUTE,
+                                               SELECT_AUTHENTICATION_TYPE,
+                                               SELECT_CONFIGURATION,
                                                SELECT_INTENSITY,
                                                SELECT_PROCESS, SELECT_PROJECT,
                                                SELECT_TARGET,
                                                SELECT_TARGET_PORT, SELECT_TOOL,
                                                SELECT_WORDLIST)
-from telegram_bot.messages.ask import (ASK_FOR_CONFIGURATION,
+from telegram_bot.messages.ask import (ASK_FOR_AUTHENTICATION_TYPE,
+                                       ASK_FOR_CONFIGURATION,
                                        ASK_FOR_INTENSITY, ASK_FOR_PROCESS,
                                        ASK_FOR_PROJECT, ASK_FOR_TARGET,
                                        ASK_FOR_TARGET_PORT, ASK_FOR_TOOL,
@@ -137,8 +141,15 @@ def ask_for_target_port(update: Update, context: CallbackContext, chat: Telegram
     '''
     target_ports = []
     if context.chat_data:
-        # Get target ports by selected target
-        target_ports = TargetPort.objects.filter(target=context.chat_data[TARGET]).order_by('port').all()
+        if context.chat_data[COMMAND] == 'newauth':
+            # Get target ports without authentication by selected target
+            target_ports = TargetPort.objects.filter(
+                target=context.chat_data[TARGET],
+                authentication=None
+            ).order_by('port').all()
+        else:
+            # Get target ports by selected target
+            target_ports = TargetPort.objects.filter(target=context.chat_data[TARGET]).order_by('port').all()
     if not target_ports:                                                        # No target ports found
         send_message(update, chat, NO_TARGET_PORTS)
         return ConversationHandler.END                                          # End conversation
@@ -147,6 +158,15 @@ def ask_for_target_port(update: Update, context: CallbackContext, chat: Telegram
         keyboard = [InlineKeyboardButton(tp.port, callback_data=tp.id) for tp in target_ports]
         send_options(update, chat, ASK_FOR_TARGET_PORT, keyboard, 5)
         return SELECT_TARGET_PORT                                               # Go to selected target port management
+
+
+def ask_for_authentication_type(update: Update, context: CallbackContext, chat: TelegramChat) -> int:
+    authentication_types = AuthenticationType.values
+    if context.chat_data and context.chat_data[COMMAND] == 'newport':
+        authentication_types.append('None')
+    keyboard = [InlineKeyboardButton(t, callback_data=t) for t in authentication_types]
+    send_options(update, chat, ASK_FOR_AUTHENTICATION_TYPE, keyboard, 3)
+    return SELECT_AUTHENTICATION_TYPE
 
 
 def ask_for_process(update: Update, context: CallbackContext, chat: TelegramChat) -> int:
@@ -246,7 +266,7 @@ def ask_for_intensity(update: Update, context: CallbackContext, chat: TelegramCh
     intensities.reverse()                                                       # Show harder intensities first
     # Create keyboard buttons with the intensities data
     keyboard = [InlineKeyboardButton(i.capitalize(), callback_data=i) for i in intensities]
-    send_options(update, chat, ASK_FOR_INTENSITY, keyboard, len(intensities))
+    send_options(update, chat, ASK_FOR_INTENSITY, keyboard, 5)
     return SELECT_INTENSITY                                                     # Go to selected intensity management
 
 

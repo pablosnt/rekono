@@ -17,8 +17,9 @@ HELP = [
     ('clearproject', 'Selection', 'Unselect the selected project'),
     ('newtarget', 'Targets', 'Create new target'),
     ('newport', 'Targets', 'Create new target port'),
-    ('newtechnology', 'Targets', 'Create new input technology'),
-    ('newvulnerability', 'Targets', 'Create new input vulnerability'),
+    ('newauth', 'Targets', 'Create new authentication'),
+    ('newtechnology', 'Parameters', 'Create new input technology'),
+    ('newvulnerability', 'Parameters', 'Create new input vulnerability'),
     ('tool', 'Execution', 'Execute tool'),
     ('process', 'Execution', 'Execute process'),
     ('cancel', 'Common', 'Cancel current operation')
