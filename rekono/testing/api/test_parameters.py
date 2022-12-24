@@ -17,7 +17,7 @@ class InputTechnologiesTest(RekonoApiTestCase):
         }
         self.models = {                                                         # Models to test __str__ method
             self.input_technology: (
-                f'{self.target_port.__str__()} - {self.input_technology.name} - {self.input_technology.version}'
+                f'{self.target.__str__()} - {self.input_technology.name} - {self.input_technology.version}'
             )
         }
 
@@ -50,9 +50,9 @@ class InputVulnerabilitiesTest(RekonoApiTestCase):
         super().setUp()
         super().initialize_environment()                                        # Initialize testing environment
         # Data for testing
-        self.used_data = {'target_port': self.target_port.id, 'cve': self.input_vulnerability.cve}
+        self.used_data = {'target': self.target.id, 'cve': self.input_vulnerability.cve}
         self.models = {                                                         # Models to test __str__ method
-            self.input_vulnerability: f'{self.target_port.__str__()} - {self.input_vulnerability.cve}'
+            self.input_vulnerability: f'{self.target.__str__()} - {self.input_vulnerability.cve}'
         }
 
     def test_create(self) -> None:

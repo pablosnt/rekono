@@ -234,12 +234,12 @@ class BaseTool:
         for argument in self.arguments:                                         # For each tool argument
             found, command = self.process_argument(
                 argument,
-                'get_related_model_class',
+                'get_model_class',
                 cast(List[BaseInput], previous_findings),
                 command
             )
             if not found:
-                _, command = self.process_argument(argument, 'get_callback_target_class', targets, command)
+                _, command = self.process_argument(argument, 'get_callback_model_class', targets, command)
             if argument.name not in command or not command[argument.name]:      # Argument can't be added
                 if argument.required:                                           # Argument is required for the tool
                     raise ToolExecutionException(f'Tool configuration requires {argument.name} argument')

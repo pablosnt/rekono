@@ -37,7 +37,7 @@ def get_executions_from_findings_with_relationships(
                         # Check number of inputs of the same type in this execution
                         base_inputs_by_class = [bi for bi in execution_list if bi.__class__ == base_input.__class__]
                         # Get target class from related input type
-                        related_target = related_input_type.get_callback_target_class()
+                        related_target = related_input_type.get_callback_model_class()
                         # Get field name to the related target
                         related_target_field = snakecase(cast(Any, related_target).__name__) if related_target else None
                         if (
@@ -95,7 +95,7 @@ def get_executions_from_findings(base_inputs: List[BaseInput], tool: Tool) -> Li
     for tool_input in tool_inputs:
         base_input_list = [
             bi for bi in base_inputs if bi.__class__ in [
-                tool_input.type.get_related_model_class(), tool_input.type.get_callback_target_class()
+                tool_input.type.get_model_class(), tool_input.type.get_callback_model_class()
             ]
         ]
         if base_input_list:
