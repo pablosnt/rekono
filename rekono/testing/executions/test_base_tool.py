@@ -135,7 +135,7 @@ class BaseToolTest(RekonoTestCase):
             version='1.0.0'
         )
         input_vulnerability = InputVulnerability.objects.create(
-            target=self.target,
+            target=target,
             cve='CVE-2021-44228'
         )
         user = User.objects.create_superuser('rekono', 'rekono@rekono.rekono', 'rekono')
