@@ -130,11 +130,11 @@ def select_authentication_type(update: Update, context: CallbackContext) -> int:
     '''
     chat = get_chat(update)                                                     # Get Telegram chat
     if chat and context.chat_data is not None and update.callback_query and update.callback_query.data:
-        if update.callback_query.data == 'None':
+        if update.callback_query.data == 'None':                                # Authentication creation is rejected
             clear(context, [STATES, TARGET, TARGET_PORT])
         else:
-            context.chat_data[AUTH_TYPE] = update.callback_query.data
-            return next_state(update, context, chat)
+            context.chat_data[AUTH_TYPE] = update.callback_query.data           # Save selected type
+            return next_state(update, context, chat)                            # Go to next state
     if update.callback_query:
         update.callback_query.answer()                                          # Empty answer
     return ConversationHandler.END                                              # End conversation

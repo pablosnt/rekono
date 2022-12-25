@@ -82,7 +82,7 @@ def send_options(
 
 
 def ask_for_project(update: Update, context: CallbackContext, chat: TelegramChat) -> int:
-    '''Ask the user for choose one project.
+    '''Ask the user to choose one project.
 
     Args:
         update (Update): Telegram Bot update
@@ -104,7 +104,7 @@ def ask_for_project(update: Update, context: CallbackContext, chat: TelegramChat
 
 
 def ask_for_target(update: Update, context: CallbackContext, chat: TelegramChat) -> int:
-    '''Ask the user for choose one target.
+    '''Ask the user to choose one target.
 
     Args:
         update (Update): Telegram Bot update
@@ -129,7 +129,7 @@ def ask_for_target(update: Update, context: CallbackContext, chat: TelegramChat)
 
 
 def ask_for_target_port(update: Update, context: CallbackContext, chat: TelegramChat) -> int:
-    '''Ask the user for choose one target port.
+    '''Ask the user to choose one target port.
 
     Args:
         update (Update): Telegram Bot update
@@ -161,16 +161,27 @@ def ask_for_target_port(update: Update, context: CallbackContext, chat: Telegram
 
 
 def ask_for_authentication_type(update: Update, context: CallbackContext, chat: TelegramChat) -> int:
-    authentication_types = AuthenticationType.values
+    '''Ask the user to choose one authentication type.
+
+    Args:
+        update (Update): Telegram Bot update
+        context (CallbackContext): Telegram Bot context
+        chat (TelegramChat): Telegram chat entity
+
+    Returns:
+        int: Next conversation state or end conversation
+    '''
+    authentication_types = AuthenticationType.values                            # Get authentication types
     if context.chat_data and context.chat_data[COMMAND] == 'newport':
-        authentication_types.append('None')
+        authentication_types.append('None')                                     # New ports could haven't authentication
+    # Create keyboard buttons with the authentication types
     keyboard = [InlineKeyboardButton(t, callback_data=t) for t in authentication_types]
     send_options(update, chat, ASK_FOR_AUTHENTICATION_TYPE, keyboard, 3)
-    return SELECT_AUTHENTICATION_TYPE
+    return SELECT_AUTHENTICATION_TYPE                                           # Go to selected auth type management
 
 
 def ask_for_process(update: Update, context: CallbackContext, chat: TelegramChat) -> int:
-    '''Ask the user for choose one process.
+    '''Ask the user to choose one process.
 
     Args:
         update (Update): Telegram Bot update
@@ -192,7 +203,7 @@ def ask_for_process(update: Update, context: CallbackContext, chat: TelegramChat
 
 
 def ask_for_tool(update: Update, context: CallbackContext, chat: TelegramChat) -> int:
-    '''Ask the user for choose one tool.
+    '''Ask the user to choose one tool.
 
     Args:
         update (Update): Telegram Bot update
@@ -210,7 +221,7 @@ def ask_for_tool(update: Update, context: CallbackContext, chat: TelegramChat) -
 
 
 def ask_for_configuration(update: Update, context: CallbackContext, chat: TelegramChat) -> int:
-    '''Ask the user for choose one configuration.
+    '''Ask the user to choose one configuration.
 
     Args:
         update (Update): Telegram Bot update
@@ -231,7 +242,7 @@ def ask_for_configuration(update: Update, context: CallbackContext, chat: Telegr
 
 
 def ask_for_wordlist(update: Update, context: CallbackContext, chat: TelegramChat) -> int:
-    '''Ask the user for choose one wordlist.
+    '''Ask the user to choose one wordlist.
 
     Args:
         update (Update): Telegram Bot update
@@ -249,7 +260,7 @@ def ask_for_wordlist(update: Update, context: CallbackContext, chat: TelegramCha
 
 
 def ask_for_intensity(update: Update, context: CallbackContext, chat: TelegramChat) -> int:
-    '''Ask the user for choose one intensity rank.
+    '''Ask the user to choose one intensity rank.
 
     Args:
         update (Update): Telegram Bot update

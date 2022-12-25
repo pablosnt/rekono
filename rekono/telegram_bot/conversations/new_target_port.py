@@ -33,7 +33,7 @@ def new_target_port(update: Update, context: CallbackContext) -> int:
     '''
     chat = get_chat(update)                                                     # Get Telegram chat
     if chat and context.chat_data is not None:
-        context.chat_data[COMMAND] = 'newport'
+        context.chat_data[COMMAND] = 'newport'                                  # Save command in the context
         if PROJECT in context.chat_data:                                        # Project already selected
             context.chat_data[STATES] = [                                       # Configure next steps
                 (CREATE, ASK_FOR_NEW_TARGET_PORT),
@@ -41,8 +41,7 @@ def new_target_port(update: Update, context: CallbackContext) -> int:
             ]
             return ask_for_target(update, context, chat)                        # Ask for target selection
         else:                                                                   # No selected project
-            # Configure next steps
-            context.chat_data[STATES] = [
+            context.chat_data[STATES] = [                                       # Configure next steps
                 (None, ask_for_target),
                 (CREATE, ASK_FOR_NEW_TARGET_PORT),
                 (CREATE_RELATED, ASK_FOR_NEW_AUTHENTICATION)
@@ -85,7 +84,7 @@ def create_target_port(update: Update, context: CallbackContext) -> int:
                     target=escape_markdown(target_port.target.target, version=2)
                 ), parse_mode=ParseMode.MARKDOWN_V2
             )
-            context.chat_data[TARGET_PORT] = target_port
+            context.chat_data[TARGET_PORT] = target_port                        # Save new target port in the context
         else:                                                                   # Invalid target port data
             logger.info(
                 '[Telegram Bot] Attempt of target port creation with invalid data',
@@ -98,6 +97,6 @@ def create_target_port(update: Update, context: CallbackContext) -> int:
             )
             update.effective_message.reply_text(ASK_FOR_NEW_TARGET_PORT)        # Re-ask for the new target port
             return CREATE                                                       # Repeat the current state
-        return ask_for_authentication_type(update, context, chat)
+        return ask_for_authentication_type(update, context, chat)               # Create authentication for this port
     clear(context, [TARGET])                                                    # Clear Telegram context
     return ConversationHandler.END                                              # End conversation

@@ -35,8 +35,8 @@ class InputTechnologySerializer(serializers.ModelSerializer):
             version=attrs['version']
         ).exists():
             raise ValidationError({
-                'name': 'This name already exists in this target port',
-                'version': 'This version already exists for this technology in this target port'
+                'name': 'This name already exists in this target',
+                'version': 'This version already exists for this technology in this target'
             })
         return attrs
 
@@ -65,5 +65,5 @@ class InputVulnerabilitySerializer(serializers.ModelSerializer):
         '''
         attrs = super().validate(attrs)
         if InputVulnerability.objects.filter(target=attrs['target'], cve=attrs['cve']).exists():
-            raise ValidationError({'cve': 'This CVE already exists in this target port'})
+            raise ValidationError({'cve': 'This CVE already exists in this target'})
         return attrs
