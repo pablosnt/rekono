@@ -5,7 +5,8 @@
         "fields": {
             "name": "OSINT",
             "model": "findings.osint",
-            "callback_model": null
+            "callback_model": null,
+            "regular": true
         }
     },
     {
@@ -14,7 +15,8 @@
         "fields": {
             "name": "Host",
             "model": "findings.host",
-            "callback_model": "targets.target"
+            "callback_model": "targets.target",
+            "regular": true
         }
     },
     {
@@ -23,7 +25,8 @@
         "fields": {
             "name": "Port",
             "model": "findings.port",
-            "callback_model": "targets.targetport"
+            "callback_model": "targets.targetport",
+            "regular": true
         }
     },
     {
@@ -32,7 +35,8 @@
         "fields": {
             "name": "Path",
             "model": "findings.path",
-            "callback_model": null
+            "callback_model": null,
+            "regular": true
         }
     },
     {
@@ -41,7 +45,8 @@
         "fields": {
             "name": "Technology",
             "model": "findings.technology",
-            "callback_model": "parameters.inputtechnology"
+            "callback_model": "parameters.inputtechnology",
+            "regular": true
         }
     },
     {
@@ -50,7 +55,8 @@
         "fields": {
             "name": "Vulnerability",
             "model": "findings.vulnerability",
-            "callback_model": "parameters.inputvulnerability"
+            "callback_model": "parameters.inputvulnerability",
+            "regular": true
         }
     },
     {
@@ -59,7 +65,8 @@
         "fields": {
             "name": "Credential",
             "model": "findings.credential",
-            "callback_model": null
+            "callback_model": null,
+            "regular": true
         }
     },
     {
@@ -68,7 +75,8 @@
         "fields": {
             "name": "Exploit",
             "model": "findings.exploit",
-            "callback_model": null
+            "callback_model": null,
+            "regular": true
         }
     },
     {
@@ -77,7 +85,8 @@
         "fields": {
             "name": "Wordlist",
             "model": null,
-            "callback_model": "resources.wordlist"
+            "callback_model": "resources.wordlist",
+            "regular": true
         }
     },
     {
@@ -86,7 +95,8 @@
         "fields": {
             "name": "Authentication",
             "model": "authentications.authentication",
-            "callback_model": null
+            "callback_model": null,
+            "regular": false
         }
     }
 ]

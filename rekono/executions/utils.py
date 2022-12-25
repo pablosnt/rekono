@@ -36,10 +36,10 @@ def get_executions_from_findings_with_relationships(
                     for related_input_type in related_input_types:              # For each related input type
                         # Check number of inputs of the same type in this execution
                         base_inputs_by_class = [bi for bi in execution_list if bi.__class__ == base_input.__class__]
-                        # Get target class from related input type
-                        related_target = related_input_type.get_callback_model_class()
-                        # Get field name to the related target
-                        related_target_field = snakecase(cast(Any, related_target).__name__) if related_target else None
+                        # Get callback model class from related input type
+                        callback_model = related_input_type.get_callback_model_class()
+                        # Get field name to the related callback model
+                        callback_model_field = snakecase(cast(Any, callback_model).__name__) if callback_model else ''
                         if (
                             (
                                 # Check if input has a relationship
@@ -47,9 +47,9 @@ def get_executions_from_findings_with_relationships(
                                 getattr(base_input, related_input_type.name.lower()) in execution_list
                             ) or
                             (
-                                # Check if input has a relationship with a target
-                                hasattr(base_input, related_target_field) and
-                                getattr(base_input, related_target_field) in execution_list
+                                # Check if input has a relationship with a callback model
+                                hasattr(base_input, callback_model_field) and
+                                getattr(base_input, callback_model_field) in execution_list
                             )
                         ):
                             if argument.multiple or len(base_inputs_by_class) == 0:

@@ -17,6 +17,8 @@ class InputType(models.Model):
     model = models.TextField(max_length=30, null=True, blank=True)
     # Related callback model name in 'app.Model' format. It will be used when 'model' is not available
     callback_model = models.TextField(max_length=15, null=True, blank=True)
+    # Indicate if the input type should be included to calculate relations between models and executions
+    regular = models.BooleanField(default=True)
 
     def __str__(self) -> str:
         '''Instance representation in text format.

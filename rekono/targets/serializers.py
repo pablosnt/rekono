@@ -29,7 +29,9 @@ class TargetSerializer(serializers.ModelSerializer):
             'id', 'project', 'target', 'type', 'defectdojo_engagement_id',
             'input_technologies', 'input_vulnerabilities', 'tasks'
         )
-        read_only_fields = ('type', 'target_ports', 'tasks')                    # Read only fields
+        read_only_fields = (                                                    # Read only fields
+            'type', 'target_ports', 'input_technologies', 'input_vulnerabilities', 'tasks'
+        )
 
     def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
         '''Validate the provided data before use it.
