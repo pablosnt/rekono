@@ -13,7 +13,7 @@ class NucleiTool(BaseTool):
     def parse_output_file(self) -> None:
         '''Parse tool output file to create finding entities.'''
         with open(self.path_output, 'r', encoding='utf-8') as output_file:
-            report = [json.loads(line) for line in output_file if line]                 # Read output file
+            report = [json.loads(line) for line in output_file if line]         # Read output file
         for item in report:
             name = item.get('info', {}).get('name')
             extracted_results = item.get('extracted-results', [])

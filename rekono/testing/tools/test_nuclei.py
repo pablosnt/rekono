@@ -9,6 +9,7 @@ class NucleiParserTest(ToolParserTest):
     tool_name = 'Nuclei'
 
     def test_tech_and_vulns(self) -> None:
+        '''Test to parse report with technologies and vulnerabilities.'''
         expected = [
             {'model': Technology, 'name': 'PHP Detect', 'version': None, 'description': None, 'reference': None},
             {
