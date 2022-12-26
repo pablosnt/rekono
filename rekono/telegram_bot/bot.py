@@ -146,9 +146,9 @@ def deploy() -> None:
                 SELECT_PROJECT: [CallbackQueryHandler(select_project)],
                 SELECT_TARGET: [CallbackQueryHandler(select_target)],
                 SELECT_TOOL: [CallbackQueryHandler(select_tool)],
-                SELECT_WORDLIST: [CallbackQueryHandler(select_wordlist)],
                 SELECT_CONFIGURATION: [CallbackQueryHandler(select_configuration)],
                 SELECT_INTENSITY: [CallbackQueryHandler(select_intensity)],
+                SELECT_WORDLIST: [CallbackQueryHandler(select_wordlist)],
                 EXECUTE: [CallbackQueryHandler(execute)]
             },
             fallbacks=[CommandHandler('cancel', cancel)],
@@ -160,8 +160,8 @@ def deploy() -> None:
                 SELECT_PROJECT: [CallbackQueryHandler(select_project)],
                 SELECT_TARGET: [CallbackQueryHandler(select_target)],
                 SELECT_PROCESS: [CallbackQueryHandler(select_process)],
-                SELECT_WORDLIST: [CallbackQueryHandler(select_wordlist)],
                 SELECT_INTENSITY: [CallbackQueryHandler(select_intensity)],
+                SELECT_WORDLIST: [CallbackQueryHandler(select_wordlist)],
                 EXECUTE: [CallbackQueryHandler(execute)]
             },
             fallbacks=[CommandHandler('cancel', cancel)],
