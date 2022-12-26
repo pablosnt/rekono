@@ -101,7 +101,7 @@ def execute(task: Task) -> None:
         if f'{app_label}.{InputTechnology._meta.model_name}' not in covered_targets:
             # InputTechnology is not covered by dependencies
             # Add input technologies to task targets
-            targets.extend(list(InputTechnology.objects.filter(targettarget=task.target).all()))
+            targets.extend(list(InputTechnology.objects.filter(target=task.target).all()))
         if f'{app_label}.{InputVulnerability._meta.model_name}' not in covered_targets:
             # InputVulnerability is not covered by dependencies
             # Add input vulnerabilities to task targets

@@ -112,12 +112,7 @@ class RekonoApiTestCase(RekonoTestCase):
 
     def get_rq_queues(self) -> List[Any]:
         '''Get Redis Queues for testing.'''
-        queues = []
-        for queue_name in RQ_QUEUES.keys():
-            queue = django_rq.get_queue(queue_name)
-            if queue_name != 'emails-queue':                                    # Exclude email notifications from tests
-                queues.append(queue)
-        return queues
+        return [django_rq.get_queue(q) for q in RQ_QUEUES.keys() if q != 'emails-queue']
 
     def launch_rq_worker(self) -> None:
         '''Launch Redis Queue worker for testing under demand.'''
