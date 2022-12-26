@@ -2,7 +2,7 @@ import json
 from typing import Dict, cast
 
 from findings.enums import Severity
-from findings.models import Technology, Vulnerability
+from findings.models import Credential, Technology, Vulnerability
 
 from tools.tools.base_tool import BaseTool
 
@@ -23,12 +23,20 @@ class NucleiTool(BaseTool):
                 name = f'{name}: {item.get("matcher-name")}'
             description = item.get('info', {}).get('description')
             reference = item.get('info', {}).get('reference', [])
-            if 'tech' in (item.get('info', {}).get('tags', []) or []):          # Finding is technology
+            tags = item.get('info', {}).get('tags', []) or []
+            if 'tech' in tags:                                                  # Finding is technology
                 self.create_finding(
                     Technology,
                     name=name,
                     description=description.strip() if description else None,
                     reference=reference[0] if reference else None
+                )
+            elif 'default-login' in tags and item.get('meta'):                  # Finding is credential
+                self.create_finding(
+                    Credential,
+                    username=item.get('meta', {}).get('username'),
+                    secret=item.get('meta', {}).get('secret'),
+                    context=name
                 )
             else:                                                               # Finding is vulnerability
                 severity = item.get('info', {}).get('severity')

@@ -1,5 +1,5 @@
 from findings.enums import Severity
-from findings.models import Technology, Vulnerability
+from findings.models import Credential, Technology, Vulnerability
 from testing.tools.base import ToolParserTest
 
 
@@ -86,6 +86,12 @@ class NucleiParserTest(ToolParserTest):
                 'cve': None,
                 'cwe': None,
                 'reference': None
+            },
+            {
+                'model': Credential,
+                'username': 'admin',
+                'password': 'password',
+                'context': 'DVWA Default Login'
             }
         ]
         super().check_tool_file_parser('tech_and_vulns.json', expected)
