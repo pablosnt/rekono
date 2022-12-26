@@ -1,6 +1,7 @@
 import os
 from typing import Any, Dict
 
+from resources.enums import WordlistType
 from resources.models import Wordlist
 from security.file_upload import check_checksum
 from testing.api.base import RekonoApiTestCase
@@ -15,14 +16,14 @@ class WordlistsTest(RekonoApiTestCase):
         super().setUp()
         # Wordlists paths
         self.resources = os.path.join(self.data_path, 'resources')
-        self.passwords = os.path.join(self.resources, 'passwords_wordlist.txt')
-        self.endpoints = os.path.join(self.resources, 'endpoints_wordlist.txt')
+        self.endpoints = os.path.join(self.resources, 'endpoints_wordlist_1.txt')
         self.invalid_size = os.path.join(self.resources, 'invalid_size.txt')
         self.invalid_extension = os.path.join(self.resources, 'invalid_extension.pdf')
         self.invalid_mime_type = os.path.join(self.resources, 'invalid_mime_type.txt')
         # Data for testing
         self.name = 'ZZZ'
-        content = self.create_wordlist(self.name, self.passwords, 'Password')   # Create wordlist for testing
+        # Create wordlist for testing
+        content = self.create_wordlist(self.name, self.endpoints, WordlistType.ENDPOINT)
         self.wordlist = Wordlist.objects.get(pk=content["id"])
         self.models = {self.wordlist: self.name}                                # Models to test __str__ method
 
@@ -63,12 +64,12 @@ class WordlistsTest(RekonoApiTestCase):
     def test_invalid_create(self) -> None:
         '''Test wordlist creation feature with invalid data.'''
         for name, file in [
-            (self.name, self.passwords),                                        # Wordlist already exists
+            (self.name, self.endpoints),                                        # Wordlist already exists
             ('Invalid size', self.invalid_size),                                # Invalid file size
             ('Invalid extension', self.invalid_extension),                      # Invalid file extension
             ('Invalid MIME type', self.invalid_mime_type),                      # Invalid MIME type
         ]:
-            self.create_wordlist(name, file, 'Password', 400)
+            self.create_wordlist(name, file, WordlistType.ENDPOINT, 400)
 
     def test_update(self) -> None:
         '''Test wordlist update feature.'''
@@ -79,9 +80,9 @@ class WordlistsTest(RekonoApiTestCase):
     def test_invalid_update(self) -> None:
         '''Test wordlist update feature with invalid data.'''
         # Create new wordlist
-        new_wordlist = self.create_wordlist(self.name + self.name, self.passwords, 'Password')
-        with open(self.passwords, 'r') as wordlist:
-            data = {'name': new_wordlist['name'], 'type': 'Password', 'file': wordlist}
+        new_wordlist = self.create_wordlist(self.name + self.name, self.endpoints, WordlistType.ENDPOINT)
+        with open(self.endpoints, 'r') as wordlist:
+            data = {'name': new_wordlist['name'], 'type': WordlistType.ENDPOINT, 'file': wordlist}
             # Wordlist name already exists
             self.api_test(self.client.put, f'{self.endpoint}{self.wordlist.id}/', 400, data=data, format='multipart')
 

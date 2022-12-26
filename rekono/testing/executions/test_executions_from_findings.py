@@ -178,8 +178,8 @@ class ExecutionsFromFindingsTest(TestCase):
         tp_4 = TargetPort.objects.create(target=self.target, port=8080)
         tp_5 = TargetPort.objects.create(target=self.target, port=8000)
         # Wordlists
-        wl_1 = Wordlist.objects.create(name='Wordlist 1', type=WordlistType.PASSWORD, path='/some/path/1')
-        wl_2 = Wordlist.objects.create(name='Wordlist 2', type=WordlistType.PASSWORD, path='/some/path/2')
+        wl_1 = Wordlist.objects.create(name='Wordlist 1', type=WordlistType.ENDPOINT, path='/some/path/1')
+        wl_2 = Wordlist.objects.create(name='Wordlist 2', type=WordlistType.ENDPOINT, path='/some/path/2')
         wl_3 = Wordlist.objects.create(name='Wordlist 3', type=WordlistType.ENDPOINT, path='/some/path/3')
         # Target list to pass as argument
         targets = [

@@ -1,15 +1,16 @@
 import os
-from typing import Any, Dict
+from typing import Any, Dict, cast
 
 from django.conf import settings
 from django.db import models
 from input_types.base import BaseInput
 from input_types.enums import InputKeyword
 from likes.models import LikeBase
-from resources.enums import WordlistType
 from security.file_upload import check_checksum
 from security.input_validation import validate_name
 from tools.models import Input
+
+from resources.enums import WordlistType
 
 # Create your models here.
 
@@ -42,10 +43,13 @@ class Wordlist(LikeBase, BaseInput):
         Returns:
             bool: Indicate if this instance match the input filter or not
         '''
-        exist = os.path.isfile(self.path)                                       # Check if wordlist file exists
-        if exist and self.checksum:                                             # If checksum exists
-            return check_checksum(self.path, self.checksum)                     # Check wordlist file hash
-        return exist
+        check = os.path.isfile(self.path)                                       # Check if wordlist file exists
+        if check and self.checksum:                                             # If checksum exists
+            check = check and check_checksum(self.path, self.checksum)          # Check wordlist file hash
+        if input.filter:                                                        # If input filter is established
+            # Check wordlist type
+            check = check and self.type == cast(Dict[str, str], WordlistType)[input.filter.upper()]
+        return check
 
     def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
         '''Get useful information from this instance to be used in tool execution as argument.
