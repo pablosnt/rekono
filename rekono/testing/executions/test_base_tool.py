@@ -100,11 +100,16 @@ class BaseToolTest(RekonoTestCase):
         Returns:
             Wordlist: Valid wordlist instance
         '''
-        passwords = os.path.join(self.data_path, 'resources', 'passwords_wordlist.txt')        # Password wordlist
-        endpoints = os.path.join(self.data_path, 'resources', 'endpoints_wordlist.txt')        # Endpoint wordlist
+        endpoints1 = os.path.join(self.data_path, 'resources', 'endpoints_wordlist_1.txt')        # Endpoint wordlist
+        endpoints2 = os.path.join(self.data_path, 'resources', 'endpoints_wordlist_2.txt')        # Endpoint wordlist
         # Wordlist filtered due to invalid checksum
-        filtered = Wordlist.objects.create(name='Other', type=WordlistType.PASSWORD, path=endpoints, checksum='invalid')
-        wordlist = Wordlist.objects.create(name='Test', type=WordlistType.PASSWORD, path=passwords)
+        filtered = Wordlist.objects.create(
+            name='Other',
+            type=WordlistType.ENDPOINT,
+            path=endpoints1,
+            checksum='invalid'
+        )
+        wordlist = Wordlist.objects.create(name='Test', type=WordlistType.ENDPOINT, path=endpoints2)
         argument = Argument.objects.create(
             tool=self.nmap,
             name='test_wordlist',

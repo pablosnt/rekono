@@ -55,7 +55,7 @@
         "fields": {
             "argument": 4,
             "type": 9,
-            "filter": null,
+            "filter": "endpoint",
             "order": 1
         }
     },

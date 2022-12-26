@@ -5,7 +5,7 @@
         <b-form-input v-model="name" type="text" :state="nameState" maxlength="50"/>
       </b-form-group>
       <b-form-group description="Type">
-        <b-form-select v-model="type" :options="types"/>
+        <b-form-select v-model="type" :options="wordlistTypes"/>
       </b-form-group>
       <b-form-group description="File" :invalid-feedback="invalidFile" v-if="!edit">
         <b-form-file v-model="file" accept="text/plain" placeholder="Select the wordlist file" drop-placeholder="Drop the wordlist here" :state="fileState"/>
@@ -42,7 +42,6 @@ export default {
     return {
       name: null,
       type: 'Endpoint',
-      types: ['Endpoint', 'Password'],
       file: null,
       nameState: null,
       fileState: null,
