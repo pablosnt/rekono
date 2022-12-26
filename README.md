@@ -65,6 +65,7 @@ Why not automate this process and focus on find vulnerabilities using your skill
 - [OWASP JoomScan](https://github.com/OWASP/joomscan)
 - [OWASP ZAP](https://www.zaproxy.org/)
 - [Nikto](https://github.com/sullo/nikto)
+- [Nuclei](https://github.com/projectdiscovery/nuclei)
 - [SearchSploit](https://www.exploit-db.com/searchsploit)
 - [Metasploit](https://www.metasploit.com/)
 

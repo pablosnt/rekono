@@ -219,5 +219,18 @@
             "reference": "https://github.com/ShawnDEvans/smbmap",
             "icon": null
         }
+    },
+    {
+        "model": "tools.tool",
+        "pk": 18,
+        "fields": {
+            "name": "Nuclei",
+            "command": "nuclei",
+            "output_format": "json",
+            "defectdojo_scan_type": "Nuclei",
+            "stage": 4,
+            "reference": "https://nuclei.projectdiscovery.io",
+            "icon": "https://github.com/projectdiscovery/nuclei/raw/main/static/nuclei-logo.png"
+        }
     }
 ]

@@ -4,7 +4,7 @@
         "pk": 1,
         "fields": {
             "name": "All tools",
-            "description": "Run all tools with the most relevant configurations. This process covers all the pentesting stages from OSINT to find exploits."
+            "description": "Run all tools with the most relevant configurations. This process covers all the pentesting stages from OSINT to exploits finding."
         }
     },
     {
@@ -45,6 +45,14 @@
         "fields": {
             "name": "OSINT",
             "description": "Run OSINT tools to gather publicly available information."
+        }
+    },
+    {
+        "model": "processes.process",
+        "pk": 7,
+        "fields": {
+            "name": "Active Analysis",
+            "description": "Run all active tools with the most relevant configurations. This process covers all active pentesting stages from enumeration to exploits finding."
         }
     }
 ]

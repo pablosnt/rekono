@@ -670,5 +670,45 @@
             "configuration": 38,
             "type": 7
         }
+    },
+    {
+        "model": "tools.output",
+        "pk": 85,
+        "fields": {
+            "configuration": 39,
+            "type": 5
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 86,
+        "fields": {
+            "configuration": 39,
+            "type": 6
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 87,
+        "fields": {
+            "configuration": 40,
+            "type": 5
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 88,
+        "fields": {
+            "configuration": 40,
+            "type": 6
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 89,
+        "fields": {
+            "configuration": 41,
+            "type": 6
+        }
     }
 ]

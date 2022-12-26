@@ -317,5 +317,38 @@
             "required": false,
             "multiple": false
         }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 30,
+        "fields": {
+            "tool": 18,
+            "name": "url",
+            "argument": "-u {url}",
+            "required": true,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 31,
+        "fields": {
+            "tool": 18,
+            "name": "authentication",
+            "argument": "-header 'Authorization:{credential_type} {token}'",
+            "required": true,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 32,
+        "fields": {
+            "tool": 18,
+            "name": "cookie",
+            "argument": "-header 'Cookie:{cookie_name}={secret}'",
+            "required": false,
+            "multiple": false
+        }
     }
 ]
