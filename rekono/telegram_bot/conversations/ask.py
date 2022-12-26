@@ -8,7 +8,7 @@ from targets.models import Target, TargetPort
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
 from telegram.ext import CallbackContext, ConversationHandler
 from telegram.update import Update
-from telegram_bot.context import COMMAND, PROJECT, TARGET, TOOL
+from telegram_bot.context import COMMAND, PROCESS, PROJECT, TARGET, TOOL
 from telegram_bot.conversations.states import (EXECUTE,
                                                SELECT_AUTHENTICATION_TYPE,
                                                SELECT_CONFIGURATION,
@@ -28,7 +28,7 @@ from telegram_bot.messages.ask import (ASK_FOR_AUTHENTICATION_TYPE,
 from telegram_bot.messages.execution import confirmation_message
 from telegram_bot.models import TelegramChat
 from tools.enums import IntensityRank
-from tools.models import Configuration, Tool
+from tools.models import Configuration, Input, Tool
 
 
 def send_message(update: Update, chat: TelegramChat, text: str) -> None:
@@ -255,6 +255,18 @@ def ask_for_wordlist(update: Update, context: CallbackContext, chat: TelegramCha
     wordlists = Wordlist.objects.all()                                          # Get all wordlists
     # Create keyboard buttons with the wordlists data
     keyboard = [InlineKeyboardButton(w.name, callback_data=w.id) for w in wordlists]
+    check_if_wordlist_is_required = None
+    if context.chat_data is not None and context.chat_data.get(TOOL):           # Filter inputs by tool
+        check_if_wordlist_is_required = {'argument__tool': context.chat_data[TOOL]}
+    elif context.chat_data is not None and context.chat_data.get(PROCESS):      # Filter inputs by process
+        check_if_wordlist_is_required = {'argument__tool__in': context.chat_data[PROCESS].steps.all().values('tool')}
+    if check_if_wordlist_is_required:
+        check_if_wordlist_is_required.update({                                  # Base arguments to check if required
+            'argument__required': True,
+            'type__name': 'Wordlist'
+        })
+        if not Input.objects.filter(**check_if_wordlist_is_required).exists():  # Check if wordlist is required
+            keyboard.append(InlineKeyboardButton('Default wordlists', callback_data='Default wordlists'))
     send_options(update, chat, ASK_FOR_WORDLIST, keyboard, 2)
     return SELECT_WORDLIST                                                      # Go to selected wordlist management
 

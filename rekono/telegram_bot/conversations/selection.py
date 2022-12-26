@@ -157,7 +157,8 @@ def select_tool(update: Update, context: CallbackContext) -> int:
         update.callback_query.answer(SELECTED_TOOL.format(tool=tool.name))      # Confirm selection
         # Tool with Wordlist input
         if Input.objects.filter(argument__tool=tool, type__name='Wordlist').exists():
-            context.chat_data[STATES].insert(0, (None, ask_for_wordlist))       # Add wordlist question
+            # Add wordlist question
+            context.chat_data[STATES].insert(len(context.chat_data[STATES]) - 1, (None, ask_for_wordlist))
         return next_state(update, context, chat)                                # Go to next state
     if update.callback_query:
         update.callback_query.answer()                                          # Empty answer
@@ -181,7 +182,8 @@ def select_process(update: Update, context: CallbackContext) -> int:
         update.callback_query.answer(SELECTED_PROCESS.format(process=process.name))     # Confirm selection
         # Tool with Wordlist input
         if Input.objects.filter(argument__tool__in=process.steps.all().values('tool'), type__name='Wordlist').exists():
-            context.chat_data[STATES].insert(0, (None, ask_for_wordlist))       # Add wordlist question
+            # Add wordlist question
+            context.chat_data[STATES].insert(len(context.chat_data[STATES]) - 1, (None, ask_for_wordlist))
         return next_state(update, context, chat)                                # go to next state
     if update.callback_query:
         update.callback_query.answer()                                          # Empty answer
@@ -221,14 +223,17 @@ def select_wordlist(update: Update, context: CallbackContext) -> int:
         int: Conversation state
     '''
     chat = get_chat(update)                                                     # Get Telegram chat
-    if chat and context.chat_data is not None and update.callback_query and update.callback_query.data:
+    if (
+        chat and context.chat_data is not None and
+        update.callback_query and update.callback_query.data and
+        update.callback_query.data != 'Default wordlists'
+    ):
         wordlist = Wordlist.objects.get(pk=int(update.callback_query.data))     # Get wordlist by Id
         context.chat_data[WORDLIST] = wordlist                                  # Save selected intensity
         update.callback_query.answer(SELECTED_WORDLIST.format(wordlist=wordlist.name))      # Confirm selection
-        return next_state(update, context, chat)                                # Go to next state
-    if update.callback_query:
+    elif update.callback_query:
         update.callback_query.answer()                                          # Empty answer
-    return ConversationHandler.END                                              # End conversation
+    return next_state(update, context, chat) if chat else ConversationHandler.END       # Go to next state
 
 
 def select_intensity(update: Update, context: CallbackContext) -> int:
