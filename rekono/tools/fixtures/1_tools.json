@@ -230,7 +230,7 @@
             "defectdojo_scan_type": "Nuclei",
             "stage": 4,
             "reference": "https://nuclei.projectdiscovery.io",
-            "icon": "https://github.com/projectdiscovery/nuclei/raw/main/static/nuclei-logo.png"
+            "icon": "https://raw.githubusercontent.com/projectdiscovery/nuclei/main/static/nuclei-logo.png"
         }
     }
 ]
