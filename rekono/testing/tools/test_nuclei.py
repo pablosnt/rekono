@@ -90,7 +90,7 @@ class NucleiParserTest(ToolParserTest):
             {
                 'model': Credential,
                 'username': 'admin',
-                'password': 'password',
+                'secret': 'password',
                 'context': 'DVWA Default Login'
             }
         ]
