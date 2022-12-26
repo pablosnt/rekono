@@ -35,7 +35,7 @@ class NucleiTool(BaseTool):
                 self.create_finding(
                     Credential,
                     username=item.get('meta', {}).get('username'),
-                    secret=item.get('meta', {}).get('secret'),
+                    secret=item.get('meta', {}).get('password'),
                     context=name
                 )
             else:                                                               # Finding is vulnerability
