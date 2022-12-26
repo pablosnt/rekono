@@ -77,7 +77,7 @@ export default {
       ],
       cancellableStatuses: ['Requested', 'Running'],
       timeUnits: ['Weeks', 'Days', 'Hours', 'Minutes'],
-      credentialTypes: ['Basic', 'Bearer', 'Cookie', 'Digest', 'JWT', 'NTLM'],
+      authenticationTypes: ['None', 'Basic', 'Bearer', 'Cookie', 'Digest', 'JWT', 'NTLM'],
       nameRegex: /^[\wÀ-ÿ\s.\-[\]()]{0,100}$/,
       textRegex: /^[\wÀ-ÿ\s.:,+\-'"?¿¡!#%$€[\]()]{0,300}$/,
       cveRegex: /^CVE-\d{4}-\d{1,7}$/,

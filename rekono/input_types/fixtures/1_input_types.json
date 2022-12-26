@@ -4,8 +4,9 @@
         "pk": 1,
         "fields": {
             "name": "OSINT",
-            "related_model": "findings.osint",
-            "callback_target": null
+            "model": "findings.osint",
+            "callback_model": null,
+            "regular": true
         }
     },
     {
@@ -13,8 +14,9 @@
         "pk": 2,
         "fields": {
             "name": "Host",
-            "related_model": "findings.host",
-            "callback_target": "targets.target"
+            "model": "findings.host",
+            "callback_model": "targets.target",
+            "regular": true
         }
     },
     {
@@ -22,8 +24,9 @@
         "pk": 3,
         "fields": {
             "name": "Port",
-            "related_model": "findings.port",
-            "callback_target": "targets.targetport"
+            "model": "findings.port",
+            "callback_model": "targets.targetport",
+            "regular": true
         }
     },
     {
@@ -31,8 +34,9 @@
         "pk": 4,
         "fields": {
             "name": "Path",
-            "related_model": "findings.path",
-            "callback_target": null
+            "model": "findings.path",
+            "callback_model": null,
+            "regular": true
         }
     },
     {
@@ -40,8 +44,9 @@
         "pk": 5,
         "fields": {
             "name": "Technology",
-            "related_model": "findings.technology",
-            "callback_target": "targets.targettechnology"
+            "model": "findings.technology",
+            "callback_model": "parameters.inputtechnology",
+            "regular": true
         }
     },
     {
@@ -49,8 +54,9 @@
         "pk": 6,
         "fields": {
             "name": "Vulnerability",
-            "related_model": "findings.vulnerability",
-            "callback_target": "targets.targetvulnerability"
+            "model": "findings.vulnerability",
+            "callback_model": "parameters.inputvulnerability",
+            "regular": true
         }
     },
     {
@@ -58,8 +64,9 @@
         "pk": 7,
         "fields": {
             "name": "Credential",
-            "related_model": "findings.credential",
-            "callback_target": null
+            "model": "findings.credential",
+            "callback_model": null,
+            "regular": true
         }
     },
     {
@@ -67,8 +74,9 @@
         "pk": 8,
         "fields": {
             "name": "Exploit",
-            "related_model": "findings.exploit",
-            "callback_target": null
+            "model": "findings.exploit",
+            "callback_model": null,
+            "regular": true
         }
     },
     {
@@ -76,8 +84,9 @@
         "pk": 9,
         "fields": {
             "name": "Wordlist",
-            "related_model": null,
-            "callback_target": "resources.wordlist"
+            "model": null,
+            "callback_model": "resources.wordlist",
+            "regular": true
         }
     },
     {
@@ -85,8 +94,9 @@
         "pk": 10,
         "fields": {
             "name": "Authentication",
-            "related_model": "authentications.authentication",
-            "callback_target": null
+            "model": "authentications.authentication",
+            "callback_model": null,
+            "regular": false
         }
     }
 ]

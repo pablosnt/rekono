@@ -7,7 +7,9 @@ ASK_FOR_TARGET = 'Choose target'
 NO_TARGETS = 'There are no targets in this project\. Use the command /newtarget'
 
 ASK_FOR_TARGET_PORT = 'Choose target port'
-NO_TARGET_PORTS = 'There are no target ports in this target\. Use the command /newtargetport'
+NO_TARGET_PORTS = 'There are no target ports in this target\. Use the command /newport'
+
+ASK_FOR_AUTHENTICATION_TYPE = 'Choose authentication type'
 
 ASK_FOR_PROCESS = 'Choose process'
 NO_PROCESSES = 'There are no processes\. Go to Rekono to create one'

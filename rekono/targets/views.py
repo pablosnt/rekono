@@ -2,13 +2,9 @@ from api.views import CreateViewSet, GetViewSet
 from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
                                    ListModelMixin, RetrieveModelMixin)
 
-from targets.filters import (TargetFilter, TargetPortFilter,
-                             TargetTechnologyFilter, TargetVulnerabilityFilter)
-from targets.models import (Target, TargetPort, TargetTechnology,
-                            TargetVulnerability)
-from targets.serializers import (TargetPortSerializer, TargetSerializer,
-                                 TargetTechnologySerializer,
-                                 TargetVulnerabilitySerializer)
+from targets.filters import TargetFilter, TargetPortFilter
+from targets.models import Target, TargetPort
+from targets.serializers import TargetPortSerializer, TargetSerializer
 
 # Create your views here.
 
@@ -49,41 +45,3 @@ class TargetPortViewSet(
     search_fields = ['port']
     # Project members field used for authorization purposes
     members_field = 'target__project__members'
-
-
-class TargetTechnologyViewSet(
-    GetViewSet,
-    CreateViewSet,
-    CreateModelMixin,
-    ListModelMixin,
-    RetrieveModelMixin,
-    DestroyModelMixin
-):
-    '''TargetTechnology ViewSet that includes: get, retrieve, create, and delete features.'''
-
-    queryset = TargetTechnology.objects.all().order_by('-id')
-    serializer_class = TargetTechnologySerializer
-    filterset_class = TargetTechnologyFilter
-    # Fields used to search target technologies
-    search_fields = ['name', 'version']
-    # Project members field used for authorization purposes
-    members_field = 'target_port__target__project__members'
-
-
-class TargetVulnerabilityViewSet(
-    GetViewSet,
-    CreateViewSet,
-    CreateModelMixin,
-    ListModelMixin,
-    RetrieveModelMixin,
-    DestroyModelMixin
-):
-    '''TargetVulnerability ViewSet that includes: get, retrieve, create, and delete features.'''
-
-    queryset = TargetVulnerability.objects.all().order_by('-id')
-    serializer_class = TargetVulnerabilitySerializer
-    filterset_class = TargetVulnerabilityFilter
-    # Fields used to search target endpoints
-    search_fields = ['cve']
-    # Project members field used for authorization purposes
-    members_field = 'target_port__target__project__members'

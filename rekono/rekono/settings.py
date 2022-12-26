@@ -97,6 +97,7 @@ INSTALLED_APPS = [
     'executions',
     'findings',
     'input_types',
+    'parameters',
     'processes',
     'projects',
     'rekono',

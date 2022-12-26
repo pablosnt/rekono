@@ -4,13 +4,11 @@ from typing import Any, Dict, cast
 from defectdojo.api import DefectDojo
 from defectdojo.exceptions import DefectDojoException
 from django.db import models
-from findings.enums import Severity
 from input_types.base import BaseInput
 from input_types.enums import InputKeyword
 from input_types.utils import get_url
 from projects.models import Project
-from security.input_validation import (validate_cve, validate_name,
-                                       validate_number)
+from security.input_validation import validate_number
 from tools.models import Input
 
 from targets.enums import TargetType
@@ -192,125 +190,3 @@ class TargetPort(models.Model, BaseInput):
             Project: Related project entity
         '''
         return self.target.project
-
-
-class TargetTechnology(models.Model, BaseInput):
-    '''Target technology model.'''
-
-    # Related target port
-    target_port = models.ForeignKey(TargetPort, related_name='target_technologies', on_delete=models.CASCADE)
-    name = models.TextField(max_length=100, validators=[validate_name])         # Technology name
-    version = models.TextField(max_length=100, validators=[validate_name], blank=True, null=True)   # Technology version
-
-    class Meta:
-        '''Model metadata.'''
-
-        constraints = [
-            # Unique constraint by: TargetPort, Technology and Version
-            models.UniqueConstraint(fields=['target_port', 'name', 'version'], name='unique target technology')
-        ]
-
-    def filter(self, input: Input) -> bool:
-        '''Check if this instance is valid based on input filter.
-
-        Args:
-            input (Input): Tool input whose filter will be applied
-
-        Returns:
-            bool: Indicate if this instance match the input filter or not
-        '''
-        return not input.filter or input.filter.lower() in self.name.lower()
-
-    def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
-        '''Get useful information from this instance to be used in tool execution as argument.
-
-        Args:
-            accumulated (Dict[str, Any], optional): Information from other instances of the same type. Defaults to {}.
-
-        Returns:
-            Dict[str, Any]: Useful information for tool executions, including accumulated if setted
-        '''
-        output = self.target_port.parse()
-        output[InputKeyword.TECHNOLOGY.name.lower()] = self.name
-        if self.version:
-            output[InputKeyword.VERSION.name.lower()] = self.version
-        return output
-
-    def __str__(self) -> str:
-        '''Instance representation in text format.
-
-        Returns:
-            str: String value that identifies this instance
-        '''
-        base = f'{self.target_port.__str__()} - {self.name}'
-        return f'{base} - {self.version}' if self.version else base
-
-    def get_project(self) -> Project:
-        '''Get the related project for the instance. This will be used for authorization purposes.
-
-        Returns:
-            Project: Related project entity
-        '''
-        return self.target_port.target.project
-
-
-class TargetVulnerability(models.Model, BaseInput):
-    '''Target vulnerability model.'''
-
-    # Related target port
-    target_port = models.ForeignKey(TargetPort, related_name='target_vulnerabilities', on_delete=models.CASCADE)
-    cve = models.TextField(max_length=20, validators=[validate_cve])            # CVE
-
-    class Meta:
-        '''Model metadata.'''
-
-        constraints = [
-            # Unique constraint by: TargetPort and CVE
-            models.UniqueConstraint(fields=['target_port', 'cve'], name='unique target vulnerability')
-        ]
-
-    def filter(self, input: Input) -> bool:
-        '''Check if this instance is valid based on input filter.
-
-        Args:
-            input (Input): Tool input whose filter will be applied
-
-        Returns:
-            bool: Indicate if this instance match the input filter or not
-        '''
-        return (
-            not input.filter or
-            input.filter.capitalize() in cast(models.TextChoices, Severity) or
-            input.filter.lower().startswith('cwe-') or
-            input.filter.lower() == 'cve' or
-            (input.filter.lower().startswith('cve-') and input.filter.lower() == self.cve.lower())
-        )
-
-    def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
-        '''Get useful information from this instance to be used in tool execution as argument.
-
-        Args:
-            accumulated (Dict[str, Any], optional): Information from other instances of the same type. Defaults to {}.
-
-        Returns:
-            Dict[str, Any]: Useful information for tool executions, including accumulated if setted
-        '''
-        output = self.target_port.parse()
-        output[InputKeyword.CVE.name.lower()] = self.cve
-        return output
-
-    def __str__(self) -> str:
-        '''Instance representation in text format.
-
-        Returns:
-            str: String value that identifies this instance
-        '''
-        return f'{self.target_port.__str__()} - {self.cve}'
-
-    def get_project(self) -> Project:
-        '''Get the related project for the instance. This will be used for authorization purposes.
-
-        Returns:
-            Project: Related project entity
-        '''
-        return self.target_port.target.project
