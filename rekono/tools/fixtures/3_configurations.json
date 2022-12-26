@@ -378,5 +378,35 @@
             "arguments": "--privileged {host} {intensity} {ports} -sS -sV -A --script ftp-anon,ftp-proftpd-backdoor,ftp-vsftpd-backdoor,ftp-libopie,ftp-vuln-cve2010-4221,smb-enum-shares,smb-enum-users,smb-enum-groups,smb-enum-sessions,smb-protocols,smb-enum-domains,smb-enum-services,smb-mbenum,smb-ls,smb-security-mode,smb2-security-mode,smb-double-pulsar-backdoor,smb-vuln-webexec,smb2-vuln-uptime,smb-vuln-ms06-025,smb-vuln-ms07-029,smb-vuln-ms10-061,smb-vuln-ms17-010,smb-vuln-cve-2017-7494 -oX {output}",
             "default": false
         }
+    },
+    {
+        "model": "tools.configuration",
+        "pk": 39,
+        "fields": {
+            "tool": 18,
+            "name": "All templates",
+            "arguments": "{url} {authentication} {cookie} -json -output {output}",
+            "default": true
+        }
+    },
+    {
+        "model": "tools.configuration",
+        "pk": 40,
+        "fields": {
+            "tool": 18,
+            "name": "Automatic technology detection",
+            "arguments": "{url} -automatic-scan {authentication} {cookie} -json -output {output}",
+            "default": false
+        }
+    },
+    {
+        "model": "tools.configuration",
+        "pk": 41,
+        "fields": {
+            "tool": 18,
+            "name": "CVE templates",
+            "arguments": "{url} -tags cve {authentication} {cookie} -json -output {output}",
+            "default": false
+        }
     }
 ]

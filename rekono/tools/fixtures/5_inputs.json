@@ -408,5 +408,45 @@
             "filter": "cookie",
             "order": 1
         }
+    },
+    {
+        "model": "tools.input",
+        "pk": 42,
+        "fields": {
+            "argument": 30,
+            "type": 3,
+            "filter": "http",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 43,
+        "fields": {
+            "argument": 30,
+            "type": 2,
+            "filter": null,
+            "order": 2
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 44,
+        "fields": {
+            "argument": 31,
+            "type": 10,
+            "filter": "!cookie",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 45,
+        "fields": {
+            "argument": 32,
+            "type": 10,
+            "filter": "cookie",
+            "order": 1
+        }
     }
 ]

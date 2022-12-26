@@ -88,7 +88,7 @@ def execute(task: Task) -> None:
     logger.info(f'[Process] Execution plan has been created for task {task.id} with {len(execution_plan)} jobs')
     for job in execution_plan:                                                  # For each planned jobs
         # Check unneeded target types, due to dependencies with previous jobs
-        covered_targets = [i.callback_target for i in job.dependencies_coverage if i.callback_target is not None]
+        covered_targets = [i.callback_model for i in job.dependencies_coverage if i.callback_model is not None]
         # Wordlists are included in targets because they never will be covered by dependencies
         targets = list(task.wordlists.all())
         app_label = Target._meta.app_label
