@@ -10,7 +10,7 @@ class Log4jscannerTool(BaseTool):
     '''Log4j Scanner tool class.'''
 
     # Indicate the script path to execute
-    script = os.path.join(TOOLS['log4j-scanner']['directory'], 'log4-scanner', 'log4j-scan.py')
+    script = os.path.join(TOOLS['log4j-scan']['directory'], 'log4j-scan.py')
 
     def parse_plain_output(self, output: str) -> None:
         '''Parse tool plain output to create finding entities. This should be implemented by child tool classes.
