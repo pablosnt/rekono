@@ -9,6 +9,7 @@ from tools.tools.base_tool import BaseTool
 class Log4jscannerTool(BaseTool):
     '''Log4j Scanner tool class.'''
 
+    # Indicate the script path to execute
     script = os.path.join(TOOLS['log4j-scanner']['directory'], 'log4-scanner', 'log4j-scan.py')
 
     def parse_plain_output(self, output: str) -> None:

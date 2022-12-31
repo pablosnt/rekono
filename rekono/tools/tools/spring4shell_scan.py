@@ -9,6 +9,7 @@ from tools.tools.base_tool import BaseTool
 class Spring4shellscanTool(BaseTool):
     '''Spring4Shell Scan tool class.'''
 
+    # Indicate the script path to execute
     script = os.path.join(TOOLS['spring4shell-scan']['directory'], 'spring4shell-scan.py')
 
     def parse_plain_output(self, output: str) -> None:

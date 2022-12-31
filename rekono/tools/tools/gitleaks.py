@@ -19,21 +19,8 @@ class GitleaksTool(BaseTool):
 
     # Exit code ignored because GitLeaks fails when find secrets
     ignore_exit_code = True
-    gitdumper = 'gitdumper.sh'
-    gitdumper_directory = os.path.join(TOOLS['gittools']['directory'], 'Dumper')
-
-    def check_installation(self) -> None:
-        '''Check if tool is installed in the system.
-
-        Raises:
-            ToolExecutionException: Raised if tool isn't installed
-        '''
-        super().check_installation()
-        if (
-            not os.path.isdir(self.gitdumper_directory) or
-            not os.path.isfile(os.path.join(self.gitdumper_directory, self.gitdumper))
-        ):
-            raise ToolExecutionException('Tool gitdumper is not installed in the system')
+    gitdumper_directory = os.path.join(TOOLS['gittools']['directory'], 'Dumper')    # GitDumper directory
+    script = os.path.join(gitdumper_directory, 'gitdumper.sh')                  # Indicate the script path to execute
 
     def parse_output_file(self) -> None:
         '''Parse tool output file to create finding entities. This should be implemented by child tool classes.'''
@@ -78,12 +65,7 @@ class GitleaksTool(BaseTool):
                 data[InputKeyword.URL.name.lower()] += '.git/'                  # Add .git path with last slash
             self.run_directory = os.path.join(REPORTS_DIR, str(uuid.uuid4()))   # Path where Git repo will be dumped
             exec = subprocess.run(                                              # Dump Git repository
-                [
-                    'bash',
-                    os.path.join(self.gitdumper_directory, self.gitdumper),
-                    data[InputKeyword.URL.name.lower()],
-                    self.run_directory
-                ],
+                ['bash', self.script, data[InputKeyword.URL.name.lower()], self.run_directory],
                 capture_output=True,
                 cwd=self.gitdumper_directory
             )

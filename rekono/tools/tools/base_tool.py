@@ -32,8 +32,7 @@ class BaseTool:
 
     # Indicate if execution must continue even if error occurs during tool execution. By default False.
     ignore_exit_code = False
-    # Indicate the script path to execute
-    script = ''
+    script = ''                                                                 # Indicate the script path to execute
 
     def __init__(self, execution: Execution, intensity: Intensity, arguments: List[Argument]) -> None:
         '''Tool constructor.
