@@ -350,5 +350,16 @@
             "required": false,
             "multiple": false
         }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 33,
+        "fields": {
+            "tool": 19,
+            "name": "url",
+            "argument": "-u {url}",
+            "required": true,
+            "multiple": false
+        }
     }
 ]
