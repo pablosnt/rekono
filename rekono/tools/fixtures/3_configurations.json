@@ -414,7 +414,7 @@
         "pk": 42,
         "fields": {
             "tool": 19,
-            "name": "CVE-2022-22965",
+            "name": "SpringShell RCE (CVE-2022-22965)",
             "arguments": "{script} {url}",
             "default": true
         }
@@ -424,7 +424,7 @@
         "pk": 43,
         "fields": {
             "tool": 19,
-            "name": "CVE-2022-22963",
+            "name": "Spring Cloud RCE (CVE-2022-22963)",
             "arguments": "{script} {url} --test-CVE-2022-22963",
             "default": false
         }
@@ -434,7 +434,7 @@
         "pk": 44,
         "fields": {
             "tool": 19,
-            "name": "CVE-2022-22965 with WAF bypass",
+            "name": "SpringShell RCE (CVE-2022-22965) with WAF bypass",
             "arguments": "{script} {url} --waf-bypass",
             "default": false
         }
@@ -444,7 +444,7 @@
         "pk": 45,
         "fields": {
             "tool": 19,
-            "name": "CVE-2022-22963 with WAF bypass",
+            "name": "Spring Cloud RCE (CVE-2022-22963) with WAF bypass",
             "arguments": "{script} {url} --waf-bypass --test-CVE-2022-22963",
             "default": false
         }
