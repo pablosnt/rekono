@@ -61,6 +61,7 @@ Why not automate this process and focus on find vulnerabilities using your skill
 - [Dirsearch](https://github.com/maurosoria/dirsearch)
 - [GitLeaks](https://github.com/zricethezav/gitleaks) & [GitDumper](https://github.com/internetwache/GitTools/tree/master/Dumper)
 - [Log4j Scanner](https://github.com/cisagov/log4j-scanner)
+- [Spring4Shell Scan](https://github.com/fullhunt/spring4shell-scan)
 - [CMSeeK](https://github.com/Tuhinshubhra/CMSeeK/)
 - [OWASP JoomScan](https://github.com/OWASP/joomscan)
 - [OWASP ZAP](https://www.zaproxy.org/)
