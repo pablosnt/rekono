@@ -6,8 +6,8 @@ from rekono.settings import TOOLS
 from tools.tools.base_tool import BaseTool
 
 
-class Log4jscannerTool(BaseTool):
-    '''Log4j Scanner tool class.'''
+class Log4jscanTool(BaseTool):
+    '''Log4j Scan tool class.'''
 
     # Indicate the script path to execute
     script = os.path.join(TOOLS['log4j-scan']['directory'], 'log4j-scan.py')

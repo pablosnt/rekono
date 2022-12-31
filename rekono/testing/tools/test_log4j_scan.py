@@ -3,9 +3,9 @@ from testing.tools.base import ToolParserTest
 
 
 class Log4jScannerParserTest(ToolParserTest):
-    '''Test cases for Log4j Scanner parser.'''
+    '''Test cases for Log4j Scan parser.'''
 
-    tool_name = 'Log4j Scanner'
+    tool_name = 'Log4j Scan'
 
     def test_cve_2021_44228(self) -> None:
         '''Test to parse report with CVE-2021-44228 vulnerability.'''

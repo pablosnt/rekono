@@ -387,7 +387,7 @@ TOOLS = {
     'cmseek': {                                                                 # CMSeeK
         'directory': os.getenv(RKN_CMSEEK_RESULTS, CONFIG.TOOLS_CMSEEK_DIR)
     },
-    'log4j-scan': {                                                             # Log4j Scanner
+    'log4j-scan': {                                                             # Log4j Scan
         'directory': os.getenv(RKN_LOG4J_SCAN_DIR, CONFIG.TOOLS_LOG4J_SCAN_DIR)
     },
     'spring4shell-scan': {                                                      # Spring4Shell Scan
