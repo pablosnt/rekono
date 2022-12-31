@@ -19,5 +19,4 @@ class Log4jscanTool(BaseTool):
             output (str): Plain tool output
         '''
         if '[!!!] Targets Affected' in output:
-            cve = 'CVE-2021-45046' if 'CVE-2021-45046' in output else 'CVE-2021-44228'
-            self.create_finding(Vulnerability, name='Log4Shell', cve=cve)
+            self.create_finding(Vulnerability, name='Log4Shell', cve='CVE-2021-44228')

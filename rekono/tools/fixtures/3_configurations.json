@@ -274,8 +274,8 @@
         "pk": 28,
         "fields": {
             "tool": 11,
-            "name": "CVE-2021-44228",
-            "arguments": "{script} {url} --run-all-tests --waf-bypass",
+            "name": "Log4Shell (CVE-2021-44228)",
+            "arguments": "{script} {url} --dns-callback-provider dnslog.cn --run-all-tests",
             "default": true
         }
     },
@@ -284,8 +284,8 @@
         "pk": 29,
         "fields": {
             "tool": 11,
-            "name": "CVE-2021-45046",
-            "arguments": "{script} {url} --run-all-tests --waf-bypass --test-CVE-2021-45046",
+            "name": "Log4Shell (CVE-2021-44228) with WAF bypass",
+            "arguments": "{script} {url} --dns-callback-provider dnslog.cn --run-all-tests --waf-bypass",
             "default": false
         }
     },
