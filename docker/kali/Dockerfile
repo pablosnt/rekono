@@ -18,10 +18,10 @@ RUN pip install -r /code/requirements.txt
 
 RUN apt install nmap dirsearch theharvester nikto sslscan sslyze cmseek zaproxy exploitdb metasploit-framework emailharvester joomscan gitleaks smbmap nuclei -y
 RUN setcap cap_net_raw,cap_net_admin,cap_net_bind_service+eip $(which nmap)
-RUN git clone https://github.com/cisagov/log4j-scanner.git /opt/log4j-scanner
+RUN git clone https://github.com/fullhunt/log4j-scan /opt/log4j-scan
 RUN git clone https://github.com/fullhunt/spring4shell-scan.git /opt/spring4shell-scan
 RUN git clone https://github.com/internetwache/GitTools.git /opt/GitTools
-RUN pip install -r /opt/log4j-scanner/log4-scanner/requirements.txt
+RUN pip install -r /opt/log4j-scan/requirements.txt
 RUN pip install -r /opt/spring4shell-scan/requirements.txt
 RUN pip install emailfinder ssh-audit
 

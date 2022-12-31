@@ -6,11 +6,12 @@ from rekono.settings import TOOLS
 from tools.tools.base_tool import BaseTool
 
 
-class Log4jscannerTool(BaseTool):
-    '''Log4j Scanner tool class.'''
+class Log4jscanTool(BaseTool):
+    '''Log4j Scan tool class.'''
 
+    run_directory = TOOLS['log4j-scan']['directory']
     # Indicate the script path to execute
-    script = os.path.join(TOOLS['log4j-scanner']['directory'], 'log4-scanner', 'log4j-scan.py')
+    script = os.path.join(run_directory, 'log4j-scan.py')
 
     def parse_plain_output(self, output: str) -> None:
         '''Parse tool plain output to create finding entities. This should be implemented by child tool classes.
@@ -19,5 +20,4 @@ class Log4jscannerTool(BaseTool):
             output (str): Plain tool output
         '''
         if '[!!!] Targets Affected' in output:
-            cve = 'CVE-2021-45046' if 'CVE-2021-45046' in output else 'CVE-2021-44228'
-            self.create_finding(Vulnerability, name='Log4Shell', cve=cve)
+            self.create_finding(Vulnerability, name='Log4Shell', cve='CVE-2021-44228')

@@ -133,13 +133,13 @@
         "model": "tools.tool",
         "pk": 11,
         "fields": {
-            "name": "Log4j Scanner",
+            "name": "Log4j Scan",
             "command": "python3",
             "output_format": null,
             "defectdojo_scan_type": null,
             "stage": 4,
-            "reference": "https://github.com/cisagov/log4j-scanner",
-            "icon": "https://www.lunasec.io/docs/img/log4shell-logo.png"
+            "reference": "https://github.com/fullhunt/log4j-scan",
+            "icon": "https://dkh9ehwkisc4.cloudfront.net/static/images/fullhunt.png"
         }
     },
     {
@@ -243,7 +243,7 @@
             "defectdojo_scan_type": null,
             "stage": 4,
             "reference": "https://github.com/fullhunt/spring4shell-scan",
-            "icon": "https://camo.githubusercontent.com/0a12b8d240465f22465098564f7f432e878e34806640fc682c528431290d58e6/68747470733a2f2f646b68396568776b697363342e636c6f756466726f6e742e6e65742f7374617469632f66696c65732f32626362316262392d376336662d343031332d383361372d3339373734626434306536382d312e706e67"
+            "icon": "https://dkh9ehwkisc4.cloudfront.net/static/images/fullhunt.png"
         }
     }
 ]

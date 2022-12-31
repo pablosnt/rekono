@@ -28,9 +28,9 @@ from rekono.environment import (ENV_REKONO_HOME, RKN_ALLOWED_HOSTS,
                                 RKN_EMAIL_HOST, RKN_EMAIL_PASSWORD,
                                 RKN_EMAIL_PORT, RKN_EMAIL_USER,
                                 RKN_FRONTEND_URL, RKN_GITTOOLS_DIR,
-                                RKN_LOG4J_SCANNER_DIR, RKN_RQ_HOST,
-                                RKN_RQ_PORT, RKN_SECRET_KEY,
-                                RKN_SPRING4SHELL_SCAN_DIR, RKN_TRUSTED_PROXY)
+                                RKN_LOG4J_SCAN_DIR, RKN_RQ_HOST, RKN_RQ_PORT,
+                                RKN_SECRET_KEY, RKN_SPRING4SHELL_SCAN_DIR,
+                                RKN_TRUSTED_PROXY)
 
 ################################################################################
 # Rekono basic information                                                     #
@@ -387,8 +387,8 @@ TOOLS = {
     'cmseek': {                                                                 # CMSeeK
         'directory': os.getenv(RKN_CMSEEK_RESULTS, CONFIG.TOOLS_CMSEEK_DIR)
     },
-    'log4j-scanner': {                                                          # Log4j Scanner
-        'directory': os.getenv(RKN_LOG4J_SCANNER_DIR, CONFIG.TOOLS_LOG4J_SCANNER_DIR)
+    'log4j-scan': {                                                             # Log4j Scan
+        'directory': os.getenv(RKN_LOG4J_SCAN_DIR, CONFIG.TOOLS_LOG4J_SCAN_DIR)
     },
     'spring4shell-scan': {                                                      # Spring4Shell Scan
         'directory': os.getenv(RKN_SPRING4SHELL_SCAN_DIR, CONFIG.TOOLS_SPRING4SHELL_SCAN_DIR)
