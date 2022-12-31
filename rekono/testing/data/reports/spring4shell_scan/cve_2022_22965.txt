@@ -1,0 +1,12 @@
+[•] CVE-2022-22965 - Spring4Shell RCE Scanner
+[•] Scanner provided by FullHunt.io - The Next-Gen Attack Surface Management Platform.
+[•] Secure your External Attack Surface with FullHunt.io.
+[•] URL: http://10.10.10.10
+[%] Checking for Spring4Shell RCE CVE-2022-22965.
+[•] URL: http://10.10.10.10 | PAYLOAD: class.module.classLoader[83p30yu]=83p30yu
+[!!!] Target Affected (CVE-2022-22965)
+[%] Checking for Spring Cloud RCE CVE-2022-22963.
+[•] URL: http://10.10.10.10/functionRouter
+[•] Target does not seem to be vulnerable.
+[!] Total Vulnerable Hosts: 1
+[!] http://10.10.10.10

@@ -26,5 +26,7 @@ tools:
     directory: /usr/share/cmseek
   log4j-scanner:
     directory: /opt/log4j-scanner
+  spring4shell-scan:
+    directory: /opt/spring4shell-scan
   gittools:
     directory: /opt/GitTools

@@ -710,5 +710,37 @@
             "configuration": 41,
             "type": 6
         }
+    },
+    {
+        "model": "tools.output",
+        "pk": 42,
+        "fields": {
+            "configuration": 28,
+            "type": 6
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 43,
+        "fields": {
+            "configuration": 29,
+            "type": 6
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 44,
+        "fields": {
+            "configuration": 28,
+            "type": 6
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 45,
+        "fields": {
+            "configuration": 29,
+            "type": 6
+        }
     }
 ]

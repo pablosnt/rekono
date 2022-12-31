@@ -32,6 +32,8 @@ class BaseTool:
 
     # Indicate if execution must continue even if error occurs during tool execution. By default False.
     ignore_exit_code = False
+    # Indicate the script path to execute
+    script = ''
 
     def __init__(self, execution: Execution, intensity: Intensity, arguments: List[Argument]) -> None:
         '''Tool constructor.
@@ -62,7 +64,10 @@ class BaseTool:
         Raises:
             ToolExecutionException: Raised if tool isn't installed
         '''
-        if self.tool.command and shutil.which(self.tool.command) is None:
+        if (
+            (self.tool.command and shutil.which(self.tool.command) is None) or  # Check command installation
+            (self.script and not os.path.isfile(self.script))                   # Check if script exists
+        ):
             raise ToolExecutionException(f'Tool {self.tool.name} is not installed in the system')
 
     def prepare_environment(self) -> None:
@@ -224,6 +229,7 @@ class BaseTool:
             List[str]: List of tool arguments to use in the tool execution
         '''
         command = {
+            'script': self.script,                                              # Script to execute the tool
             'command': self.tool.command,                                       # Add tool command to the arguments
             'intensity': self.intensity.argument,                               # Add intensity config to the arguments
             'output': self.path_output if self.file_output_enabled else ''      # Add output config to the arguments

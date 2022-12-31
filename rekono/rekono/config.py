@@ -48,6 +48,11 @@ class RekonoConfigLoader:
             ['tools', 'log4j-scanner', 'directory'],
             '/opt/log4j-scanner'
         )
+        self.TOOLS_SPRING4SHELL_SCAN_DIR = self.get_config_key(
+            config,
+            ['tools', 'spring4shell-scan', 'directory'],
+            '/opt/spring4shell-scan'
+        )
         self.TOOLS_GITTOOLS_DIR = self.get_config_key(config, ['tools', 'gittools', 'directory'], '/opt/GitTools')
 
         # --------------------------------------------------------------------------------------------------------------

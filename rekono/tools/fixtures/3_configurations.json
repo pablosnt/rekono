@@ -275,7 +275,7 @@
         "fields": {
             "tool": 11,
             "name": "CVE-2021-44228",
-            "arguments": "{url} --run-all-tests --waf-bypass",
+            "arguments": "{script} {url} --run-all-tests --waf-bypass",
             "default": true
         }
     },
@@ -285,7 +285,7 @@
         "fields": {
             "tool": 11,
             "name": "CVE-2021-45046",
-            "arguments": "{url} --run-all-tests --waf-bypass --test-CVE-2021-45046",
+            "arguments": "{script} {url} --run-all-tests --waf-bypass --test-CVE-2021-45046",
             "default": false
         }
     },
@@ -406,6 +406,46 @@
             "tool": 18,
             "name": "CVE templates",
             "arguments": "{url} -tags cve {authentication} {cookie} -json -output {output}",
+            "default": false
+        }
+    },
+    {
+        "model": "tools.configuration",
+        "pk": 42,
+        "fields": {
+            "tool": 19,
+            "name": "CVE-2022-22965",
+            "arguments": "{script} {url}",
+            "default": true
+        }
+    },
+    {
+        "model": "tools.configuration",
+        "pk": 43,
+        "fields": {
+            "tool": 19,
+            "name": "CVE-2022-22963",
+            "arguments": "{script} {url} --test-CVE-2022-22963",
+            "default": false
+        }
+    },
+    {
+        "model": "tools.configuration",
+        "pk": 44,
+        "fields": {
+            "tool": 19,
+            "name": "CVE-2022-22965 with WAF bypass",
+            "arguments": "{script} {url} --waf-bypass",
+            "default": false
+        }
+    },
+    {
+        "model": "tools.configuration",
+        "pk": 45,
+        "fields": {
+            "tool": 19,
+            "name": "CVE-2022-22963 with WAF bypass",
+            "arguments": "{script} {url} --waf-bypass --test-CVE-2022-22963",
             "default": false
         }
     }
