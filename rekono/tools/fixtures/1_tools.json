@@ -139,7 +139,7 @@
             "defectdojo_scan_type": null,
             "stage": 4,
             "reference": "https://github.com/fullhunt/log4j-scan",
-            "icon": "https://avatars.githubusercontent.com/u/34830403?s=200&v=4"
+            "icon": "https://dkh9ehwkisc4.cloudfront.net/static/images/fullhunt.png"
         }
     },
     {
@@ -230,7 +230,7 @@
             "defectdojo_scan_type": "Nuclei",
             "stage": 4,
             "reference": "https://nuclei.projectdiscovery.io",
-            "icon": "https://nuclei.projectdiscovery.io/static/favicon.png"
+            "icon": "https://raw.githubusercontent.com/projectdiscovery/nuclei/main/static/nuclei-logo.png"
         }
     },
     {
@@ -243,7 +243,7 @@
             "defectdojo_scan_type": null,
             "stage": 4,
             "reference": "https://github.com/fullhunt/spring4shell-scan",
-            "icon": "https://avatars.githubusercontent.com/u/34830403?s=200&v=4"
+            "icon": "https://dkh9ehwkisc4.cloudfront.net/static/images/fullhunt.png"
         }
     }
 ]
