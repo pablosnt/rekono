@@ -36,13 +36,12 @@ def get_findings_from_dependencies(dependencies: list) -> List[BaseInput]:
     return findings
 
 
-def update_new_dependencies(parent_job: str, new_jobs: list, targets: List[BaseInput]) -> None:
+def update_new_dependencies(parent_job: str, new_jobs: list) -> None:
     '''Update on hold jobs dependencies to include new jobs as dependency. Based on the parent job dependents.
 
     Args:
         parent_job (str): Parent job Id, used to get affected on hold jobs
         new_jobs (list): Id list of new jobs
-        targets (List[BaseInput]): Target list. It can include all target types and resources
     '''
     executions_queue = django_rq.get_queue('executions-queue')                  # Get execution list
     registry = DeferredJobRegistry(queue=executions_queue)                      # Get on hold jobs registry
@@ -121,6 +120,6 @@ def process_dependencies(
         new_jobs_ids.append(job.id)                                             # Save new Job Id
     if new_jobs_ids:                                                            # New Jobs has been created
         # Update next jobs dependencies based on current job dependents
-        update_new_dependencies(current_job.id, new_jobs_ids, targets)
+        update_new_dependencies(current_job.id, new_jobs_ids)
     # Return first findings list to be used in the current job
     return executions[0] if executions else []
