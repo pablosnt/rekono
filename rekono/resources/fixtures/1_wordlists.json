@@ -3,94 +3,6 @@
         "model": "resources.wordlist",
         "pk": 1,
         "fields": {
-            "name": "Rockyou",
-            "type": "Password",
-            "path": "/usr/share/wordlists/rockyou.txt",
-            "checksum": null,
-            "creator": null
-        }
-    },
-    {
-        "model": "resources.wordlist",
-        "pk": 2,
-        "fields": {
-            "name": "Most used passwords 2020",
-            "type": "Password",
-            "path": "/usr/share/seclists/Passwords/2020-200_most_used_passwords.txt",
-            "checksum": null,
-            "creator": null
-        }
-    },
-    {
-        "model": "resources.wordlist",
-        "pk": 3,
-        "fields": {
-            "name": "Most 10k common passwords",
-            "type": "Password",
-            "path": "/usr/share/seclists/Passwords/Common-Credentials/10k-most-common.txt",
-            "checksum": null,
-            "creator": null
-        }
-    },
-    {
-        "model": "resources.wordlist",
-        "pk": 4,
-        "fields": {
-            "name": "Top 500 worst passwords",
-            "type": "Password",
-            "path": "/usr/share/seclists/Passwords/Common-Credentials/500-worst-passwords.txt",
-            "checksum": null,
-            "creator": null
-        }
-    },
-    {
-        "model": "resources.wordlist",
-        "pk": 5,
-        "fields": {
-            "name": "Top 10 Dark Web 2017",
-            "type": "Password",
-            "path": "/usr/share/seclists/Passwords/darkweb2017-top10.txt",
-            "checksum": null,
-            "creator": null
-        }
-    },
-    {
-        "model": "resources.wordlist",
-        "pk": 6,
-        "fields": {
-            "name": "Top 100 Dark Web 2017",
-            "type": "Password",
-            "path": "/usr/share/seclists/Passwords/darkweb2017-top100.txt",
-            "checksum": null,
-            "creator": null
-        }
-    },
-    {
-        "model": "resources.wordlist",
-        "pk": 7,
-        "fields": {
-            "name": "Top 1000 Dark Web 2017",
-            "type": "Password",
-            "path": "/usr/share/seclists/Passwords/darkweb2017-top1000.txt",
-            "checksum": null,
-            "creator": null
-        }
-    },
-    {
-        "model": "resources.wordlist",
-        "pk": 8,
-        "fields": {
-            "name": "Top 10000 Dark Web 2017",
-            "type": "Password",
-            "path": "/usr/share/seclists/Passwords/darkweb2017-top10000.txt",
-            "checksum": null,
-            "creator": null
-        }
-    },
-    {
-        "model": "resources.wordlist",
-        "pk": 9,
-        "fields": {
             "name": "Common endpoints",
             "type": "Endpoint",
             "path": "/usr/share/wordlists/dirb/common.txt",
@@ -100,7 +12,7 @@
     },
     {
         "model": "resources.wordlist",
-        "pk": 10,
+        "pk": 2,
         "fields": {
             "name": "Big endpoints list",
             "type": "Endpoint",
@@ -111,7 +23,7 @@
     },
     {
         "model": "resources.wordlist",
-        "pk": 11,
+        "pk": 3,
         "fields": {
             "name": "Backdoor Web Shells",
             "type": "Endpoint",
