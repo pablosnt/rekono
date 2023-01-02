@@ -4,11 +4,9 @@ import re
 import socket
 
 from django.core.exceptions import ValidationError
+from security.input_validation import IP_RANGE_REGEX
 
 from targets.enums import TargetType
-
-# Regex to match IP ranges like 10.10.10.1-20
-IP_RANGE_REGEX = '[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}-[0-9]{1,3}'
 
 logger = logging.getLogger()                                                    # Rekono logger
 

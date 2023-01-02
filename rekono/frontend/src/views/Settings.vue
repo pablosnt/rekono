@@ -201,7 +201,7 @@ export default {
     handleSettings (event) {
         event.preventDefault()
         if (this.checkSettings()) {
-            var data = {
+            let data = {
                 upload_files_max_mb: this.uploadFilesMaxMb,
                 defect_dojo_url: this.defectDojoUrl,
                 defect_dojo_verify_tls: this.defectDojoVerifyTls,

@@ -7,11 +7,12 @@ from defectdojo.reporter import report
 from django_rq import job
 from email_notifications import sender as email_sender
 from executions.models import Execution
-from findings.models import Finding, Vulnerability
-from findings.nvd_nist import NvdNist
 from telegram_bot import sender as telegram_sender
 from telegram_bot.messages.execution import notification_messages
 from users.enums import Notification
+
+from findings.models import Finding, Vulnerability
+from findings.nvd_nist import NvdNist
 
 logger = logging.getLogger()                                                    # Rekono logger
 
@@ -69,7 +70,7 @@ def consumer(execution: Execution = None, findings: List[Finding] = []) -> None:
         )
         if execution.task.target.project.defectdojo_synchronization:
             try:
-                report(execution, findings)                                         # Import execution in Defect-Dojo
+                report(execution, findings)                                     # Import execution in Defect-Dojo
             except DefectDojoException:
                 # Prevent errors during the import in Defect-Dojo
                 # All the exceptions are managed inside the report function

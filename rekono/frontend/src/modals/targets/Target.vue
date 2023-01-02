@@ -33,7 +33,7 @@ export default {
     confirm (event) {
       event.preventDefault()
       if (this.check()) {
-        for (var index in this.targets) {
+        for (let index in this.targets) {
           this.post('/api/targets/', { project: this.projectId, target: this.targets[index] }, this.targets[index], 'New target created successfully')
             .catch(() => { return Promise.resolve(false) })
             .then(() => {

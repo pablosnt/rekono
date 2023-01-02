@@ -230,7 +230,7 @@ export default {
       if (this.configurationId) {
         data.configuration_id = this.configurationId
       }
-      for (var index in this.targetIds) {
+      for (let index in this.targetIds) {
         data.target_id = this.targetIds[index]
         this.post('/api/tasks/', data, this.selectedTool ? this.selectedTool.name : this.selectedProcess.name, 'Execution requested successfully')
           .catch(task => { return Promise.resolve(task) })
@@ -248,9 +248,7 @@ export default {
               }
             }
           })
-      }
-      return 
-        
+      } 
     },
     clean () {
       this.processes = []

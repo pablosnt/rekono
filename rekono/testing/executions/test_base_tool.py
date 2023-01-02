@@ -554,13 +554,13 @@ class BaseToolTest(RekonoTestCase):
         self.tool_instance = self.tool_class(self.new_execution, self.intensity, self.arguments)
         errors_count = 0
         try:
-            self.tool_instance.tool_execution(['/directory-not-found'], [], [])     # Directory not found
+            self.tool_instance.tool_execution(['/directory-not-found'])         # Directory not found
         except ToolExecutionException as ex:
             self.tool_instance.on_error(stderr=str(ex))                         # Test on_error feature
             self.assertEqual(Status.ERROR, self.new_execution.status)
             self.assertEqual(str(ex).strip(), self.new_execution.output_error)
             errors_count += 1
-        self.tool_instance.tool_execution(['/'], [], [])                        # Valid ls execution
+        self.tool_instance.tool_execution(['/'])                                # Valid ls execution
         self.assertEqual(1, errors_count)
 
     def process_findings(self, imported_in_defectdojo: bool) -> None:
