@@ -26,7 +26,6 @@ RUN pip install -r /opt/spring4shell-scan/requirements.txt
 RUN pip install emailfinder ssh-audit
 
 RUN apt install wordlists seclists dirb -y
-RUN gzip -d /usr/share/wordlists/rockyou.txt.gz
 
 RUN adduser --disabled-password rekono
 RUN chown -R rekono:rekono /code
