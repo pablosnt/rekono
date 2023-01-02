@@ -54,7 +54,7 @@ class WordlistsTest(RekonoApiTestCase):
     def test_create(self) -> None:
         '''Test wordlist creation feature.'''
         # Create new wordlist
-        new_wordlist = self.create_wordlist(self.name + self.name, self.endpoints, 'Endpoint')
+        new_wordlist = self.create_wordlist(self.name + self.name, self.endpoints, WordlistType.ENDPOINT)
         content = self.api_test(self.client.get, f'{self.endpoint}?o=-name')    # Get all wordlists
         # Check that the first one is the new wordlist
         self.check_fields(['name', 'type', 'size', 'size', 'creator'], content['results'][0], new_wordlist)
@@ -73,7 +73,7 @@ class WordlistsTest(RekonoApiTestCase):
 
     def test_update(self) -> None:
         '''Test wordlist update feature.'''
-        data = {'name': self.name, 'type': 'Endpoint'}
+        data = {'name': self.name, 'type': WordlistType.ENDPOINT}
         # Update wordlist
         self.api_test(self.client.put, f'{self.endpoint}{self.wordlist.id}/', 200, data=data, expected=data)
 

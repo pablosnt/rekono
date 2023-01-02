@@ -78,7 +78,7 @@ export default {
       cancellableStatuses: ['Requested', 'Running'],
       timeUnits: ['Weeks', 'Days', 'Hours', 'Minutes'],
       authenticationTypes: ['None', 'Basic', 'Bearer', 'Cookie', 'Digest', 'JWT', 'NTLM'],
-      wordlistTypes: ['Endpoint'],
+      wordlistTypes: ['Endpoint', 'Subdomain'],
       nameRegex: /^[\wÀ-ÿ\s.\-[\]()]{0,100}$/,
       textRegex: /^[\wÀ-ÿ\s.:,+\-'"?¿¡!#%$€[\]()]{0,300}$/,
       cveRegex: /^CVE-\d{4}-\d{1,7}$/,
