@@ -45,7 +45,7 @@ export default {
   },
   computed: {
     targetsFields () {
-      var fields = [
+      let fields = [
         { key: 'target', sortable: true },
         { key: 'type', sortable: true },
         { key: 'target_ports.length', label: 'Target Ports', sortable: true },

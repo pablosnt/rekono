@@ -45,7 +45,7 @@ export default {
   mixins: [RekonoApi],
   computed: {
     projectsFields () {
-      var fields = [
+      let fields = [
         { key: 'name', label: 'Project', sortable: true },
         { key: 'tags', sortable: true },
         { key: 'targets.length', label: 'Targets', sortable: true },

@@ -5,9 +5,8 @@ import uuid
 from typing import List
 
 from findings.enums import Severity
-from findings.models import Credential, Finding, Port, Vulnerability
+from findings.models import Credential, Port, Vulnerability
 from input_types.enums import InputKeyword
-from input_types.models import BaseInput
 from rekono.settings import REPORTS_DIR, TOOLS
 
 from tools.exceptions import ToolExecutionException
@@ -42,13 +41,11 @@ class GitleaksTool(BaseTool):
                     context=f'/.git/ : Email of the commit author {finding.get("Author")}'
                 )
 
-    def tool_execution(self, arguments: List[str], targets: List[BaseInput], previous_findings: List[Finding]) -> str:
+    def tool_execution(self, arguments: List[str]) -> str:
         '''Execute the tool.
 
         Args:
             arguments (List[str]): Arguments to include in the tool command
-            targets (List[BaseInput]): List of targets and resources
-            previous_findings (List[Finding]): List of previous findings
 
         Raises:
             ToolExecutionException: Raised if tool execution finishes with an exit code distinct than zero
@@ -64,7 +61,7 @@ class GitleaksTool(BaseTool):
             else:
                 data[InputKeyword.URL.name.lower()] += '.git/'                  # Add .git path with last slash
             self.run_directory = os.path.join(REPORTS_DIR, str(uuid.uuid4()))   # Path where Git repo will be dumped
-            exec = subprocess.run(                                              # Dump Git repository
+            process = subprocess.run(                                           # Dump Git repository
                 ['bash', self.script, data[InputKeyword.URL.name.lower()], self.run_directory],
                 capture_output=True,
                 cwd=self.gitdumper_directory
@@ -92,8 +89,8 @@ class GitleaksTool(BaseTool):
                 )
                 self.execution.extra_data_path = self.run_directory             # Save extra data related to GitLeaks
                 self.execution.save(update_fields=['extra_data_path'])
-                return super().tool_execution(arguments, targets, previous_findings)    # Run GitLeaks
-            if exec.returncode > 0:                                             # Error during gitdumper execution
-                raise ToolExecutionException(exec.stderr.decode('utf-8'))
-            return exec.stdout.decode('utf-8')                                  # Git repository hasn't been dumped
+                return super().tool_execution(arguments)                        # Run GitLeaks
+            if process.returncode > 0:                                          # Error during gitdumper execution
+                raise ToolExecutionException(process.stderr.decode('utf-8'))
+            return process.stdout.decode('utf-8')                               # Git repository hasn't been dumped
         raise ToolExecutionException('Path argument is required')

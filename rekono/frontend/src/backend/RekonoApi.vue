@@ -84,7 +84,7 @@ export default {
       cveRegex: /^CVE-\d{4}-\d{1,7}$/,
       defectDojoKeyRegex: /^[\da-z]{40}$/,
       telegramTokenRegex: /^\d{10}:[\w-]{35}$/,
-      credentialRegex: /^[\d\w./\-=+,:<>¿?¡!#&$()[\]{}*]{1,500}$/,
+      credentialRegex: /^[\w./\-=+,:<>¿?¡!#&$()[\]{}*]{1,500}$/,
       telegramBotName: null,
       defectDojoUrl: null,
       defectDojoEnabled: null
@@ -221,7 +221,7 @@ export default {
     cleanParams (params) {
       if (params) {
         let cleanParams = {}
-        for (var field in params) {
+        for (let field in params) {
           if (![''. null, undefined].includes(params[field])) {
             cleanParams[field] = params[field]
           }
@@ -232,7 +232,7 @@ export default {
     },
     cleanBody (body) {
       if (body) {
-        for (var field in body) {
+        for (let field in body) {
           if (['', null, undefined].includes(body[field])) {
             body[field] = null
           }
@@ -281,17 +281,17 @@ export default {
       }
     },
     duration (start, end) {
-      var startDate = moment(start)
-      var endDate = moment(end)
-      var duration = moment.duration(endDate.diff(startDate))
-      var text = ''
-      var values = [
+      const startDate = moment(start)
+      const endDate = moment(end)
+      const duration = moment.duration(endDate.diff(startDate))
+      let text = ''
+      const values = [
         {'value': duration.days(), 'text': 'd'},
         {'value': duration.hours(), 'text': 'h'},
         {'value': duration.minutes(), 'text': 'm'},
         {'value': duration.seconds(), 'text': 's'}
       ]
-      for (var index in values) {
+      for (let index in values) {
         if (values[index].value > 0) {
           text += values[index].value.toString() + ' ' + values[index].text + ' '
         }

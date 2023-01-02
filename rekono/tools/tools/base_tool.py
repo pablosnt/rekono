@@ -289,13 +289,11 @@ class BaseTool:
             host = host[:-1]                                                    # Remove last slash form URL
         return host
 
-    def tool_execution(self, arguments: List[str], targets: List[BaseInput], previous_findings: List[Finding]) -> str:
+    def tool_execution(self, arguments: List[str]) -> str:
         '''Execute the tool.
 
         Args:
             arguments (List[str]): Arguments to include in the tool command
-            targets (List[BaseInput]): List of targets and resources
-            previous_findings (List[Finding]): List of previous findings
 
         Raises:
             ToolExecutionException: Raised if tool execution finishes with an exit code distinct than zero
@@ -308,13 +306,13 @@ class BaseTool:
         logger.info(f'[Tool] Running: {" ".join(arguments)}')
         if hasattr(self, 'run_directory'):
             # Execute the tool in directory
-            exec = subprocess.run(arguments, capture_output=True, cwd=getattr(self, 'run_directory'))
+            process = subprocess.run(arguments, capture_output=True, cwd=getattr(self, 'run_directory'))
         else:
-            exec = subprocess.run(arguments, capture_output=True)               # Execute the tool
-        if not self.ignore_exit_code and exec.returncode > 0:
+            process = subprocess.run(arguments, capture_output=True)            # Execute the tool
+        if not self.ignore_exit_code and process.returncode > 0:
             # Execution error and ignore exit code is False
-            raise ToolExecutionException(exec.stderr.decode('utf-8'))
-        return exec.stdout.decode('utf-8')
+            raise ToolExecutionException(process.stderr.decode('utf-8'))
+        return process.stdout.decode('utf-8')
 
     def create_finding(self, finding_type: Model, **fields: Any) -> Finding:
         '''Create finding from fields.
@@ -460,7 +458,7 @@ class BaseTool:
             output = ''
             if not TESTING:
                 # Run tool
-                output = self.tool_execution(self.command_arguments, targets, previous_findings)    # pragma: no cover
+                output = self.tool_execution(self.command_arguments)            # pragma: no cover
         except ToolExecutionException as ex:                                    # pragma: no cover
             logger.error(f'[Tool] {self.tool.name} execution finish with errors')
             # Error during tool execution
