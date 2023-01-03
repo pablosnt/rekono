@@ -443,7 +443,7 @@
         "model": "tools.argument",
         "pk": 41,
         "fields": {
-            "tool": 18,
+            "tool": 20,
             "name": "cookie",
             "argument": "--cookie '{cookie_name}={secret}'",
             "required": false,
