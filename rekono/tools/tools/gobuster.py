@@ -58,6 +58,6 @@ class Gobuster(BaseTool):
             elif ' [' in line and ']' in line:
                 subdomain, addresses = line.replace('Found: ', '').split(' [')
                 ips = addresses.replace(']', '').split(',')
-                self.create_finding(OSINT, data=subdomain, data_type=DataType.DOMAIN, source='DNS')
+                self.create_finding(OSINT, data=subdomain.strip(), data_type=DataType.DOMAIN, source='DNS')
                 for ip in ips:
-                    self.create_finding(OSINT, data=ip, data_type=DataType.IP, source='DNS')
+                    self.create_finding(OSINT, data=ip.strip(), data_type=DataType.IP, source='DNS')
