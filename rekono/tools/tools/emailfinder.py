@@ -5,7 +5,7 @@ from findings.models import OSINT
 from tools.tools.base_tool import BaseTool
 
 
-class EmailfinderTool(BaseTool):
+class Emailfinder(BaseTool):
     '''EmailFinder tool class.'''
 
     def parse_plain_output(self, output: str) -> None:

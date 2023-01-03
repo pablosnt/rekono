@@ -245,5 +245,18 @@
             "reference": "https://github.com/fullhunt/spring4shell-scan",
             "icon": "https://dkh9ehwkisc4.cloudfront.net/static/images/fullhunt.png"
         }
+    },
+    {
+        "model": "tools.tool",
+        "pk": 20,
+        "fields": {
+            "name": "Gobuster",
+            "command": "gobuster",
+            "output_format": "txt",
+            "defectdojo_scan_type": null,
+            "stage": 4,
+            "reference": "https://github.com/OJ/gobuster",
+            "icon": null
+        }
     }
 ]

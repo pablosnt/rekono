@@ -7,7 +7,7 @@ from findings.models import Finding, Technology, Vulnerability
 from tools.tools.base_tool import BaseTool
 
 
-class SslyzeTool(BaseTool):
+class Sslyze(BaseTool):
     '''SSLyze tool class.'''
 
     # Exit code ignored because SSLyze can "fail" when find vulnerabilities

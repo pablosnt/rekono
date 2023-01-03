@@ -6,7 +6,7 @@ from findings.models import Path, Vulnerability
 from tools.tools.base_tool import BaseTool
 
 
-class ZapTool(BaseTool):
+class Zap(BaseTool):
     '''OWASP ZAP tool class.'''
 
     # Mapping between OWASP ZAP severity values and Rekono severity values

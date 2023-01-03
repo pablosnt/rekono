@@ -448,5 +448,35 @@
             "arguments": "{script} {url} --waf-bypass --test-CVE-2022-22963",
             "default": false
         }
+    },
+    {
+        "model": "tools.configuration",
+        "pk": 46,
+        "fields": {
+            "tool": 20,
+            "name": "Subdomains enumeration",
+            "arguments": "dns {target} {subdomain_wordlist} {intensity} --wildcard --show-ips --no-color --no-progress --quiet --output {output}",
+            "default": true
+        }
+    },
+    {
+        "model": "tools.configuration",
+        "pk": 47,
+        "fields": {
+            "tool": 20,
+            "name": "VHOST enumeration",
+            "arguments": "vhost {target_url} {subdomain_wordlist} {basic_auth} {token_auth} {cookie} {intensity} --append-domain --no-tls-validation --no-color --no-progress --quiet --output {output}",
+            "default": false
+        }
+    },
+    {
+        "model": "tools.configuration",
+        "pk": 48,
+        "fields": {
+            "tool": 20,
+            "name": "Endpoints enumeration",
+            "arguments": "dir {url} {endpoint_wordlist} {basic_auth} {token_auth} {cookie} {intensity} --no-tls-validation --no-color --no-progress --quiet --output {output}",
+            "default": false
+        }
     }
 ]

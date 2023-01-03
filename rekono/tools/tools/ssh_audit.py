@@ -5,7 +5,7 @@ from findings.models import Technology, Vulnerability
 from tools.tools.base_tool import BaseTool
 
 
-class SshauditTool(BaseTool):
+class Sshaudit(BaseTool):
     '''SSH Audit tool class.'''
 
     # Exit code ignored because SSH Audit fails when find vulnerabilities

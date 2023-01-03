@@ -10,7 +10,7 @@ from security.input_validation import CVE_REGEX
 from tools.tools.base_tool import BaseTool
 
 
-class NmapTool(BaseTool):
+class Nmap(BaseTool):
     '''Nmap tool class.'''
 
     def get_smb_technology(self, technologies: Dict[str, Technology]) -> Union[Technology, None]:

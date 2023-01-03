@@ -3,7 +3,7 @@ from findings.models import Exploit, Path, Technology, Vulnerability
 from tools.tools.base_tool import BaseTool
 
 
-class JoomscanTool(BaseTool):
+class Joomscan(BaseTool):
     '''JoomScan tool class.'''
 
     def parse_plain_output(self, output: str) -> None:

@@ -3,7 +3,7 @@ from findings.models import Path
 from tools.tools.base_tool import BaseTool
 
 
-class SmbmapTool(BaseTool):
+class Smbmap(BaseTool):
     '''Smbmap tool class.'''
 
     def parse_plain_output(self, output: str) -> None:

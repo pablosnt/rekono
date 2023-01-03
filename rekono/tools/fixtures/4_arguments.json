@@ -361,5 +361,93 @@
             "required": true,
             "multiple": false
         }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 34,
+        "fields": {
+            "tool": 20,
+            "name": "target",
+            "argument": "--domain {target}",
+            "required": false,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 35,
+        "fields": {
+            "tool": 20,
+            "name": "target_url",
+            "argument": "--url {target}",
+            "required": false,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 36,
+        "fields": {
+            "tool": 20,
+            "name": "url",
+            "argument": "--url {url}",
+            "required": false,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 37,
+        "fields": {
+            "tool": 20,
+            "name": "subdomain_wordlist",
+            "argument": "--wordlist {wordlist}",
+            "required": false,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 38,
+        "fields": {
+            "tool": 20,
+            "name": "endpoint_wordlist",
+            "argument": "--wordlist {wordlist}",
+            "required": false,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 39,
+        "fields": {
+            "tool": 20,
+            "name": "basic_auth",
+            "argument": "--username {username} --password {secret}",
+            "required": false,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 40,
+        "fields": {
+            "tool": 20,
+            "name": "token_auth",
+            "argument": "--headers 'Authorization: {credential_type} {token}'",
+            "required": false,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 41,
+        "fields": {
+            "tool": 18,
+            "name": "cookie",
+            "argument": "--cookie '{cookie_name}={secret}'",
+            "required": false,
+            "multiple": false
+        }
     }
 ]

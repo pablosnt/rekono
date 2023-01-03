@@ -268,5 +268,50 @@
             "argument": "",
             "value": 4
         }
+    },
+    {
+        "model": "tools.intensity",
+        "pk": 31,
+        "fields": {
+            "tool": 20,
+            "argument": "--threads 1",
+            "value": 1
+        }
+    },
+    {
+        "model": "tools.intensity",
+        "pk": 32,
+        "fields": {
+            "tool": 20,
+            "argument": "--threads 5",
+            "value": 2
+        }
+    },
+    {
+        "model": "tools.intensity",
+        "pk": 33,
+        "fields": {
+            "tool": 20,
+            "argument": "--threads 10",
+            "value": 3
+        }
+    },
+    {
+        "model": "tools.intensity",
+        "pk": 34,
+        "fields": {
+            "tool": 20,
+            "argument": "--threads 20",
+            "value": 4
+        }
+    },
+    {
+        "model": "tools.intensity",
+        "pk": 35,
+        "fields": {
+            "tool": 20,
+            "argument": "--threads 50",
+            "value": 5
+        }
     }
 ]
