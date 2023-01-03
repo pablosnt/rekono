@@ -59,6 +59,7 @@ Why not automate this process and focus on find vulnerabilities using your skill
 - [SSH Audit](https://github.com/jtesta/ssh-audit)
 - [SMBMap](https://github.com/ShawnDEvans/smbmap)
 - [Dirsearch](https://github.com/maurosoria/dirsearch)
+- [Gobuster](https://github.com/OJ/gobuster)
 - [GitLeaks](https://github.com/zricethezav/gitleaks) & [GitDumper](https://github.com/internetwache/GitTools/tree/master/Dumper)
 - [Log4j Scan](https://github.com/fullhunt/log4j-scan)
 - [Spring4Shell Scan](https://github.com/fullhunt/spring4shell-scan)
