@@ -25,7 +25,7 @@ RUN pip install -r /opt/log4j-scan/requirements.txt
 RUN pip install -r /opt/spring4shell-scan/requirements.txt
 RUN pip install emailfinder ssh-audit
 
-RUN apt install wordlists seclists dirb -y
+RUN apt install seclists dirb -y
 
 RUN adduser --disabled-password rekono
 RUN chown -R rekono:rekono /code

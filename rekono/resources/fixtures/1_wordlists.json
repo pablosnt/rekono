@@ -5,7 +5,7 @@
         "fields": {
             "name": "Common endpoints",
             "type": "Endpoint",
-            "path": "/usr/share/wordlists/dirb/common.txt",
+            "path": "/usr/share/dirb/wordlists/common.txt",
             "checksum": null,
             "creator": null
         }
@@ -16,7 +16,7 @@
         "fields": {
             "name": "Big endpoints list",
             "type": "Endpoint",
-            "path": "/usr/share/wordlists/dirb/big.txt",
+            "path": "/usr/share/dirb/wordlists/big.txt",
             "checksum": null,
             "creator": null
         }
