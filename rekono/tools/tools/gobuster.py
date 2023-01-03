@@ -24,10 +24,10 @@ class Gobuster(BaseTool):
         Returns:
             List[str]: List of tool arguments to use in the tool execution
         '''
-        arguments = super().get_arguments(targets, previous_findings)
-        if '--url' not in arguments and '--domain' not in arguments:
+        arguments = super().get_arguments(targets, previous_findings)           # Get arguments
+        if '--url' not in arguments and '--domain' not in arguments:            # URL or domain is required
             raise ToolExecutionException('Tool configuration requires url or domain argument')
-        if '--wordlist' not in arguments:
+        if '--wordlist' not in arguments:                                       # Wordlist is required
             raise ToolExecutionException('Tool configuration requires wordlist argument')
         return arguments
 
@@ -35,8 +35,8 @@ class Gobuster(BaseTool):
         '''Parse tool output file to create finding entities.'''
         with open(self.path_output, 'r', encoding='utf-8') as output_file:
             data = output_file.readlines()                                      # Read output file
-        for line in data:
-            if ' (Status: ' in line and ') [Size: ' in line:
+        for line in data:                                                       # Iterate over lines
+            if ' (Status: ' in line and ') [Size: ' in line:                    # Endpoint format
                 aux = line.split(' (Status: ')
                 self.create_finding(
                     Path,
@@ -44,19 +44,19 @@ class Gobuster(BaseTool):
                     status=int(aux[1].split(')')[0].strip()),
                     type=PathType.ENDPOINT
                 )
-            elif ' Status: ' in line and ' [Size: ' in line:
+            elif ' Status: ' in line and ' [Size: ' in line:                    # VHOST format
                 vhost, status = line.replace('Found: ', '').split(' Status: ')
-                if int(status.split(' [')[0].strip()) == 200:
+                if status.split(' [')[0].strip().startswith('2'):               # Create only VHOST with status 2XX
                     if '://' in vhost:
-                        vhost = vhost.split('://')[1]
+                        vhost = vhost.split('://')[1]                           # Remove schema from VHOST URL
                     self.create_finding(
                         OSINT,
                         data=vhost.strip(),
                         data_type=DataType.VHOST,
                         source='Enumeration'
                     )
-            elif ' [' in line and ']' in line:
-                subdomain, addresses = line.replace('Found: ', '').split(' [')
+            elif ' [' in line and ']' in line:                                  # Subdomain format
+                subdomain, addresses = line.replace('Found: ', '').split(' [')  # Get subdomains and IP addresses
                 ips = addresses.replace(']', '').split(',')
                 self.create_finding(OSINT, data=subdomain.strip(), data_type=DataType.DOMAIN, source='DNS')
                 for ip in ips:

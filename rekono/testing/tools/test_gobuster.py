@@ -9,6 +9,7 @@ class GobusterParserTest(ToolParserTest):
     tool_name = 'Gobuster'
 
     def test_dir(self) -> None:
+        '''Test to parse dir report with endpoints.'''
         expected = [
             {'model': Path, 'path': '/.gitignore', 'status': 200, 'type': PathType.ENDPOINT},
             {'model': Path, 'path': '/.hta', 'status': 403, 'type': PathType.ENDPOINT},
@@ -27,6 +28,7 @@ class GobusterParserTest(ToolParserTest):
         super().check_tool_file_parser('dir.txt', expected)
 
     def test_dns(self) -> None:
+        '''Test to parse dns report with domains and IPs.'''
         expected = [
             {
                 'model': OSINT,
@@ -48,6 +50,7 @@ class GobusterParserTest(ToolParserTest):
         super().check_tool_file_parser('dns.txt', expected)
 
     def test_vhost(self) -> None:
+        '''Test to parse vhost report with VHOSTs.'''
         expected = [
             {
                 'model': OSINT,
