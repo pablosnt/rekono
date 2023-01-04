@@ -494,14 +494,24 @@
         "pk": 50,
         "fields": {
             "argument": 36,
-            "type": 2,
-            "filter": null,
+            "type": 3,
+            "filter": "http",
             "order": 1
         }
     },
     {
         "model": "tools.input",
         "pk": 51,
+        "fields": {
+            "argument": 36,
+            "type": 2,
+            "filter": null,
+            "order": 2
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 52,
         "fields": {
             "argument": 37,
             "type": 9,
@@ -511,7 +521,7 @@
     },
     {
         "model": "tools.input",
-        "pk": 52,
+        "pk": 53,
         "fields": {
             "argument": 38,
             "type": 9,
@@ -521,7 +531,7 @@
     },
     {
         "model": "tools.input",
-        "pk": 53,
+        "pk": 54,
         "fields": {
             "argument": 39,
             "type": 10,
@@ -531,7 +541,7 @@
     },
     {
         "model": "tools.input",
-        "pk": 54,
+        "pk": 55,
         "fields": {
             "argument": 40,
             "type": 10,
@@ -541,7 +551,7 @@
     },
     {
         "model": "tools.input",
-        "pk": 55,
+        "pk": 56,
         "fields": {
             "argument": 41,
             "type": 10,
