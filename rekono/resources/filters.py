@@ -1,5 +1,6 @@
 from django_filters.rest_framework import filters
 from likes.filters import LikeFilter
+
 from resources.models import Wordlist
 
 

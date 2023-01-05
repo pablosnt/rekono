@@ -6,6 +6,7 @@ from input_types.serializers import InputTypeSerializer
 from likes.serializers import LikeBaseSerializer
 from rest_framework import serializers
 from rest_framework.fields import SerializerMethodField
+
 from tools.enums import IntensityRank, Stage
 from tools.models import (Argument, Configuration, Input, Intensity, Output,
                           Tool)
@@ -63,13 +64,15 @@ class OutputSerializer(serializers.ModelSerializer):
 class ConfigurationSerializer(serializers.ModelSerializer):
     '''Serializer to get Configuration data via API.'''
 
+    stage_name = StageField(source='stage')                                     # Stage name for read operations
     outputs = SerializerMethodField(method_name='get_outputs', read_only=True)  # Outputs details for read operations
 
     class Meta:
         '''Serializer metadata.'''
 
         model = Configuration
-        fields = ('id', 'name', 'tool', 'arguments', 'default', 'outputs')      # Configuration fields exposed via API
+        # Configuration fields exposed via API
+        fields = ('id', 'name', 'tool', 'arguments', 'stage_name', 'default', 'outputs')
 
     def get_outputs(self, instance: Configuration) -> OutputSerializer:
         '''Get configuration outputs sorted by Id.
@@ -121,7 +124,6 @@ class ArgumentSerializer(serializers.ModelSerializer):
 class ToolSerializer(serializers.ModelSerializer, LikeBaseSerializer):
     '''Serializer to get Tool data via API.'''
 
-    stage_name = StageField(source='stage')                                     # Stage name for read operations
     # Intensitys details for read operations
     intensities = SerializerMethodField(method_name='get_intensities', read_only=True)
     # Configurations details for read operations
@@ -133,7 +135,7 @@ class ToolSerializer(serializers.ModelSerializer, LikeBaseSerializer):
 
         model = Tool
         fields = (                                                              # Tool fields exposed via API
-            'id', 'name', 'command', 'stage_name', 'reference', 'icon',
+            'id', 'name', 'command', 'reference', 'icon',
             'liked', 'likes', 'intensities', 'configurations', 'arguments'
         )
 
@@ -165,7 +167,6 @@ class ToolSerializer(serializers.ModelSerializer, LikeBaseSerializer):
 class SimplyToolSerializer(serializers.ModelSerializer):
     '''Simply serializer to include tool main data in other serializers.'''
 
-    stage_name = StageField(source='stage')                                     # Stage name
     arguments = ArgumentSerializer(many=True, read_only=True)                   # Arguments details for read operations
 
     class Meta:
@@ -173,4 +174,4 @@ class SimplyToolSerializer(serializers.ModelSerializer):
 
         model = Tool
         # Tool fields exposed via API
-        fields = ('id', 'name', 'command', 'stage_name', 'reference', 'icon', 'arguments')
+        fields = ('id', 'name', 'command', 'reference', 'icon', 'arguments')

@@ -101,15 +101,15 @@ class ProcessSerializer(TaggitSerializer, serializers.ModelSerializer, LikeBaseS
 
     @extend_schema_field(StepSerializer(many=True, read_only=True))
     def get_steps(self, instance: Process) -> List[StepSerializer]:
-        '''Get process steps sorted by tool stage and priority (descendent).
+        '''Get process steps sorted by configuration stage and priority (descendent).
 
         Args:
             instance (Process): Process instance
 
         Returns:
-            List[StepSerializer]: Step list sorted by tool stage and priority (descendent)
+            List[StepSerializer]: Step list sorted by configuration stage and priority (descendent)
         '''
-        return StepSerializer(instance.steps.all().order_by('tool__stage', '-priority'), many=True).data
+        return StepSerializer(instance.steps.all().order_by('configuration__stage', '-priority'), many=True).data
 
 
 class SimplyProcessSerializer(serializers.ModelSerializer):

@@ -7,7 +7,6 @@
             "command": "nmap",
             "output_format": "xml",
             "defectdojo_scan_type": "Nmap Scan",
-            "stage": 2,
             "reference": "https://nmap.org/",
             "icon": "https://www.kali.org/tools/nmap/images/nmap-logo.svg"
         }
@@ -20,7 +19,6 @@
             "command": "dirsearch",
             "output_format": "json",
             "defectdojo_scan_type": null,
-            "stage": 4,
             "reference": "https://github.com/maurosoria/dirsearch",
             "icon": "https://raw.githubusercontent.com/maurosoria/dirsearch/master/static/logo.png"
         }
@@ -33,7 +31,6 @@
             "command": "theHarvester",
             "output_format": "json",
             "defectdojo_scan_type": null,
-            "stage": 1,
             "reference": "https://github.com/laramies/theHarvester",
             "icon": "https://www.kali.org/tools/theharvester/images/theharvester-logo.svg"
         }
@@ -46,7 +43,6 @@
             "command": "nikto",
             "output_format": "xml",
             "defectdojo_scan_type": "Nikto Scan",
-            "stage": 4,
             "reference": "https://github.com/sullo/nikto",
             "icon": "https://www.kali.org/tools/nikto/images/nikto-logo.svg"
         }
@@ -59,7 +55,6 @@
             "command": "sslscan",
             "output_format": "xml",
             "defectdojo_scan_type": "Sslscan",
-            "stage": 4,
             "reference": "https://github.com/rbsec/sslscan",
             "icon": "https://www.kali.org/tools/sslscan/images/sslscan-logo.svg"
         }
@@ -72,7 +67,6 @@
             "command": "sslyze",
             "output_format": "json",
             "defectdojo_scan_type": "SSLyze 3 Scan (JSON)",
-            "stage": 4,
             "reference": "https://nabla-c0d3.github.io/sslyze/documentation/",
             "icon": "https://www.kali.org/tools/sslyze/images/sslyze-logo.svg"
         }
@@ -85,7 +79,6 @@
             "command": "cmseek",
             "output_format": "json",
             "defectdojo_scan_type": null,
-            "stage": 4,
             "reference": "https://github.com/Tuhinshubhra/CMSeeK/",
             "icon": "https://camo.githubusercontent.com/b1864e58e861aa4e938d17d4a50ae1a4bedec9cdb9e8b7ce7ac80a1b5cc711ed/68747470733a2f2f692e696d6775722e636f6d2f35565973316d322e706e67"
         }
@@ -98,7 +91,6 @@
             "command": "zaproxy",
             "output_format": "xml",
             "defectdojo_scan_type": "ZAP Scan",
-            "stage": 4,
             "reference": "https://www.zaproxy.org/",
             "icon": "https://www.kali.org/tools/zaproxy/images/zaproxy-logo.svg"
         }
@@ -111,7 +103,6 @@
             "command": "searchsploit",
             "output_format": "json",
             "defectdojo_scan_type": null,
-            "stage": 5,
             "reference": "https://www.exploit-db.com/searchsploit",
             "icon": "https://www.kali.org/tools/exploitdb/images/exploitdb-logo.svg"
         }
@@ -124,7 +115,6 @@
             "command": "msfconsole",
             "output_format": null,
             "defectdojo_scan_type": null,
-            "stage": 5,
             "reference": "https://www.metasploit.com/",
             "icon": "https://www.kali.org/tools/metasploit-framework/images/metasploit-framework-logo.svg"
         }
@@ -137,7 +127,6 @@
             "command": "python3",
             "output_format": null,
             "defectdojo_scan_type": null,
-            "stage": 4,
             "reference": "https://github.com/fullhunt/log4j-scan",
             "icon": "https://dkh9ehwkisc4.cloudfront.net/static/images/fullhunt.png"
         }
@@ -150,7 +139,6 @@
             "command": "emailfinder",
             "output_format": null,
             "defectdojo_scan_type": null,
-            "stage": 1,
             "reference": "https://github.com/Josue87/EmailFinder",
             "icon": null
         }
@@ -163,7 +151,6 @@
             "command": "emailharvester",
             "output_format": "txt",
             "defectdojo_scan_type": null,
-            "stage": 1,
             "reference": "https://github.com/maldevel/EmailHarvester",
             "icon": null
         }
@@ -176,7 +163,6 @@
             "command": "joomscan",
             "output_format": null,
             "defectdojo_scan_type": null,
-            "stage": 4,
             "reference": "https://github.com/OWASP/joomscan",
             "icon": "https://raw.githubusercontent.com/rezasp/Trash/master/joomscan.png"
         }
@@ -189,7 +175,6 @@
             "command": "gitleaks",
             "output_format": "json",
             "defectdojo_scan_type": "Gitleaks",
-            "stage": 4,
             "reference": "https://github.com/zricethezav/gitleaks",
             "icon": "https://raw.githubusercontent.com/zricethezav/gifs/master/gitleakslogo.png"
         }
@@ -202,7 +187,6 @@
             "command": "ssh-audit",
             "output_format": null,
             "defectdojo_scan_type": null,
-            "stage": 4,
             "reference": "https://github.com/jtesta/ssh-audit",
             "icon": null
         }
@@ -215,7 +199,6 @@
             "command": "smbmap",
             "output_format": null,
             "defectdojo_scan_type": null,
-            "stage": 4,
             "reference": "https://github.com/ShawnDEvans/smbmap",
             "icon": null
         }
@@ -228,7 +211,6 @@
             "command": "nuclei",
             "output_format": "json",
             "defectdojo_scan_type": "Nuclei",
-            "stage": 4,
             "reference": "https://nuclei.projectdiscovery.io",
             "icon": "https://raw.githubusercontent.com/projectdiscovery/nuclei/main/static/nuclei-logo.png"
         }
@@ -241,7 +223,6 @@
             "command": "python3",
             "output_format": null,
             "defectdojo_scan_type": null,
-            "stage": 4,
             "reference": "https://github.com/fullhunt/spring4shell-scan",
             "icon": "https://dkh9ehwkisc4.cloudfront.net/static/images/fullhunt.png"
         }
@@ -254,7 +235,6 @@
             "command": "gobuster",
             "output_format": "txt",
             "defectdojo_scan_type": null,
-            "stage": 4,
             "reference": "https://github.com/OJ/gobuster",
             "icon": null
         }

@@ -33,7 +33,7 @@ class Step(models.Model):
     process = models.ForeignKey(Process, related_name='steps', on_delete=models.CASCADE)    # Associated process
     tool = models.ForeignKey(Tool, on_delete=models.CASCADE)                    # Tool
     configuration = models.ForeignKey(Configuration, on_delete=models.CASCADE, blank=True, null=True)   # Configuration
-    # Priority value. Steps with greater priority will be executed before other of same process and with same tool stage
+    # Priority value. Steps with greater priority will be executed before other of same process and with same stage
     priority = models.IntegerField(default=1, validators=[validate_number])
 
     class Meta:

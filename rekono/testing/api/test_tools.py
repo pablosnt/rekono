@@ -31,13 +31,15 @@ class ToolsTest(RekonoApiTestCase):
         '''Test read tool and configuration data.'''
         for stage_value, stage_name in self.stages:
             # Get tools by stage
-            tools = self.api_test(self.client.get, f'{self.tools}?stage={stage_value}&limit=100')
+            tools = self.api_test(self.client.get, f'{self.tools}?configurations__stage={stage_value}&limit=100')
             for tool in tools['results']:
-                self.assertEqual(stage_name, tool.get('stage_name'))
                 # Get configurations by tool
-                configs = self.api_test(self.client.get, f'{self.configurations}?tool={tool.get("id")}&limit=100')
+                configs = self.api_test(
+                    self.client.get, f'{self.configurations}?tool={tool.get("id")}&stage={stage_value}&limit=100'
+                )
                 for config in configs['results']:
                     self.assertEqual(tool.get('id'), config.get('tool'))
+                    self.assertEqual(stage_name, config.get('stage_name'))
 
     def test_like_dislike(self) -> None:
         '''Test like and dislike features for tools.'''

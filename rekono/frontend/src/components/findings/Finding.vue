@@ -153,7 +153,7 @@ export default {
     getFilter () {
       let filter = {}
       if (this.order) {
-        filter.order = this.order
+        filter.o = this.order
       }
       if (this.execution) {
         filter.executions = this.execution
