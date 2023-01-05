@@ -21,7 +21,6 @@
 
 ## Features
 
-
 - Combine hacking tools to create pentesting `processes`
 - Execute pentesting `processes`
 - Execute pentesting `tools`

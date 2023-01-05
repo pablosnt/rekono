@@ -16,7 +16,7 @@
         </div>
       </template>
       <template #cell(inputs)="row">
-        <p>{{ row.item.arguments.map(argument => { return argument.inputs.find(input => input.order === 1).type.name }).join(', ') }}</p>
+        <p>{{ Array.from(new Set(row.item.arguments.map(argument => { return argument.inputs.find(input => input.order === 1).type.name }))).join(', ') }}</p>
       </template>
       <template #cell(likes)="row">
         {{ row.item.likes }}
