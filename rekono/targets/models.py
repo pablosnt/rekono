@@ -47,7 +47,11 @@ class Target(models.Model, BaseInput):
         if not input.filter:
             return True
         try:
-            return cast(models.TextChoices, TargetType)[input.filter] == self.type
+            distinct = input.filter[0] == '!'
+            filter_types = [
+                cast(models.TextChoices, TargetType)[f.upper()] for f in input.filter.replace('!', '').split(',s')
+            ]
+            return self.type not in filter_types if distinct else self.type in filter_types
         except KeyError:
             return True
 
