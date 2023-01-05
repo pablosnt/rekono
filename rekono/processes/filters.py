@@ -1,5 +1,6 @@
 from django_filters.rest_framework import FilterSet, filters
 from likes.filters import LikeFilter
+
 from processes.models import Process, Step
 
 
@@ -19,9 +20,9 @@ class ProcessFilter(LikeFilter):
             'creator__username': ['exact', 'icontains'],
             'steps__tool': ['exact'],
             'steps__tool__name': ['exact', 'icontains'],
-            'steps__tool__stage': ['exact'],
             'steps__configuration': ['exact'],
             'steps__configuration__name': ['exact', 'icontains'],
+            'steps__configuration__stage': ['exact'],
             'tags__name': ['in'],
         }
 
@@ -42,8 +43,8 @@ class StepFilter(FilterSet):
             'tool': ['exact'],
             'tool__name': ['exact', 'icontains'],
             'tool__command': ['exact', 'icontains'],
-            'tool__stage': ['exact'],
             'configuration': ['exact'],
             'configuration__name': ['exact', 'icontains'],
+            'configuration__stage': ['exact'],
             'priority': ['exact'],
         }

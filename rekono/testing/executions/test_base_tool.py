@@ -51,7 +51,8 @@ class BaseToolTest(RekonoTestCase):
             arguments=(
                 '{intensity} {test_osint} {test_only_host} {test_host} {test_port} {test_path} {test_technology} '
                 '{test_credential} {test_vulnerability} {test_exploit} {test_wordlist} {test_authentication}'
-            )
+            ),
+            stage=Stage.ENUMERATION
         )
         self.authentication_argument = Argument.objects.create(
             tool=self.nmap,
@@ -546,7 +547,7 @@ class BaseToolTest(RekonoTestCase):
     def test_tool_execution(self) -> None:
         '''Test tool_execution feature using ls command.'''
         # Testing tool with ls command
-        tool = Tool.objects.create(name='Test', command='ls', stage=Stage.ENUMERATION)
+        tool = Tool.objects.create(name='Test', command='ls')
         self.new_execution.tool = tool
         self.new_execution.save(update_fields=['tool'])
         self.tool_class = get_tool_class_by_name(tool.name)                     # Related tool class

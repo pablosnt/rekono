@@ -107,7 +107,7 @@ export default {
         { key: 'icon', label: '', sortable: false },
         { key: 'tool.name', label: 'Tool', sortable: true },
         { key: 'configuration.name', label: 'Configuration', sortable: true },
-        { key: 'tool.stage_name', label: 'Stage', sortable: true },
+        { key: 'configuration.stage_name', label: 'Stage', sortable: true },
         { key: 'priority', sortable: true },
         { key: 'actions', sortable: false }
       ],
@@ -132,7 +132,7 @@ export default {
     data () {
       this.filters = [
         { name: 'Tags', filterField: 'tags__name__in', type: 'tags' },
-        { name: 'Stage', values: this.stages, valueField: 'id', textField: 'value', filterField: 'steps__tool__stage' },
+        { name: 'Stage', values: this.stages, valueField: 'id', textField: 'value', filterField: 'steps__configuration__stage' },
         { name: 'Creator', filterField: 'creator__username__icontains', type: 'text' },
         { name: 'Favourities', values: [{ value: true, text: 'True' }, { value: false, text: 'False' }], valueField: 'value', textField: 'text', filterField: 'liked' }
       ]

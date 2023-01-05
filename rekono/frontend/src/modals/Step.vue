@@ -99,7 +99,7 @@ export default {
     initialized (initialized) {
       if (initialized) {
         if (!this.step && !this.tool) {
-          this.getAllPages('/api/tools/', { order: 'stage,name'}).then(results => this.tools = results)
+          this.getAllPages('/api/tools/', { o: 'configurations__stage,name'}).then(results => this.tools = results)
         } else if (this.step && !this.tool) {
           this.priority = this.step.priority
           this.step.tool.configurations = [this.step.configuration]
@@ -110,7 +110,7 @@ export default {
           this.selectTool(this.tool.id, this.tool)
         }
         if (!this.process) {
-          let filter = { order: 'name' }
+          let filter = { o: 'name' }
           if (this.$store.state.role !== 'Admin') {
             filter.creator = this.$store.state.user
           }

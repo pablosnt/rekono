@@ -1,6 +1,7 @@
 from django.db import models
 from input_types.models import InputType
 from likes.models import LikeBase
+
 from tools.enums import IntensityRank, Stage
 
 # Create your models here.
@@ -13,7 +14,6 @@ class Tool(LikeBase):
     command = models.TextField(max_length=30, blank=True, null=True)            # Tool command
     output_format = models.TextField(max_length=5, blank=True, null=True)       # Tool output file format
     defectdojo_scan_type = models.TextField(max_length=50, blank=True, null=True)   # Related Defect-Dojo scan type
-    stage = models.IntegerField(choices=Stage.choices)                          # Related pentesting stage
     reference = models.TextField(max_length=250, blank=True, null=True)         # Tool reference link
     icon = models.TextField(max_length=250, blank=True, null=True)              # Tool icon link
 
@@ -48,6 +48,7 @@ class Configuration(models.Model):
     name = models.TextField(max_length=30)                                      # Configuration name
     tool = models.ForeignKey(Tool, related_name='configurations', on_delete=models.CASCADE)         # Related tool
     arguments = models.TextField(max_length=250, default='', blank=True)
+    stage = models.IntegerField(choices=Stage.choices)                          # Related pentesting stage
     default = models.BooleanField(default=False)                                # Indicate if it's default configuration
 
     class Meta:

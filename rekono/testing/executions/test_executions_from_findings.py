@@ -27,8 +27,13 @@ class ExecutionsFromFindingsTest(TestCase):
         '''Create initial data before run tests.'''
         super().setUp()
         # Tool for testing
-        self.tool = Tool.objects.create(name='Test', command='ls', stage=Stage.ENUMERATION)
-        configuration = Configuration.objects.create(name='Test', tool=self.tool, arguments='-la')
+        self.tool = Tool.objects.create(name='Test', command='ls')
+        configuration = Configuration.objects.create(
+            name='Test',
+            tool=self.tool,
+            arguments='-la',
+            stage=Stage.ENUMERATION
+        )
         # Host argument
         test_host = Argument.objects.create(tool=self.tool, name='test_host', required=True)
         Input.objects.create(argument=test_host, type=InputType.objects.get(name='Host'))
