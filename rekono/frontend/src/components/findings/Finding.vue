@@ -178,15 +178,17 @@ export default {
         filter = this.getFilter()
       }
       filter.severity = this.severities[index]
-      this.getAllPages('/api/vulnerabilities/', filter).then(results => {
-        this.findings.push(...results)
-        index += 1
-        if (index < this.severities.length) {
-          this.fetchVulnerabilities(filter, index)
-        } else {
-          this.$emit('end')
-        }
-      })
+      this.getAllPages('/api/vulnerabilities/', filter)
+        .then(results => {
+          this.findings.push(...results)
+          index += 1
+          if (index < this.severities.length) {
+            this.fetchVulnerabilities(filter, index)
+          } else {
+            this.$emit('end')
+          }
+        })
+        .catch(() => this.$emit('end'))
     },
     fetchData () {
       if (this.types && this.types.length > 0 && !this.types.includes(this.name.toLowerCase())) {
@@ -200,6 +202,7 @@ export default {
               this.findings = results
               this.$emit('end')
             })
+            .catch(() => this.$emit('end'))
         } else {
           this.fetchVulnerabilities()
         }
