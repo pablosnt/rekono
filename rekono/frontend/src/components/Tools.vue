@@ -113,7 +113,7 @@ export default {
         { name: 'Stage', values: this.stages, valueField: 'id', textField: 'value', filterField: 'configurations__stage' },
         { name: 'Input', values: this.inputTypes, valueField: 'value', textField: 'value', filterField: 'arguments__inputs__type__name' },
         { name: 'Output', values: this.inputTypes, valueField: 'value', textField: 'value', filterField: 'configurations__outputs__type__name' },
-        { name: 'Favourities', values: [{ value: true, text: 'True' }, { value: false, text: 'False' }], valueField: 'value', textField: 'text', filterField: 'liked' }
+        { name: 'Favourities', type: 'checkbox', filterField: 'liked' }
       ] 
     }
   },
