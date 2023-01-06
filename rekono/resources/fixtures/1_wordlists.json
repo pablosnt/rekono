@@ -39,7 +39,7 @@
         "model": "resources.wordlist",
         "pk": 4,
         "fields": {
-            "name": "Spanish endpoints",
+            "name": "Spanish",
             "type": "Endpoint",
             "path": "/usr/share/dirb/wordlists/spanish.txt",
             "checksum": null,
@@ -207,7 +207,7 @@
         "model": "resources.wordlist",
         "pk": 18,
         "fields": {
-            "name": "Italian subdomains",
+            "name": "Italian",
             "type": "Subdomain",
             "path": "/usr/share/seclists/Discovery/DNS/italian-subdomains.txt",
             "checksum": null,
