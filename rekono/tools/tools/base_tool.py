@@ -390,11 +390,16 @@ class BaseTool:
         self.execution.start = timezone.now()                                   # Set execution start date
         self.execution.save(update_fields=['start'])
 
-    def on_skipped(self) -> None:
-        '''Perform changes in Execution entity when tool execution is skipped.'''
+    def on_skipped(self, message: str = None) -> None:
+        '''Perform changes in Execution entity when tool execution is skipped.
+
+        Args:
+            message (str, optional): Descriptive message about the execution skipping
+        '''
         self.execution.status = Status.SKIPPED                                  # Set execution status to Skipped
+        self.execution.output_error = message
         self.execution.end = timezone.now()                                     # Set execution end date
-        self.execution.save(update_fields=['status', 'end'])
+        self.execution.save(update_fields=['status', 'end', 'output_error'])
 
     def on_running(self) -> None:
         '''Perform changes in Execution entity when command execution starts.'''
@@ -440,9 +445,9 @@ class BaseTool:
         self.on_start()                                                         # Start execution
         try:
             self.check_installation()                                           # Check tool installation
-        except ToolExecutionException:                                          # Tool installation not found
+        except ToolExecutionException as ex:                                    # Tool installation not found
             logger.error(f'[Tool] Tool {self.tool.name} is not installed in the system. This execution will be skipped')
-            self.on_skipped()                                                   # Skip execution
+            self.on_skipped(str(ex))                                            # Skip execution
             return
         try:
             # Get arguments to include in command
@@ -450,7 +455,7 @@ class BaseTool:
         except ToolExecutionException as ex:
             logger.error(f'[Tool] {str(ex)}')
             # Targets and findings aren't enough to build the command
-            self.on_skipped()                                                   # Skip execution
+            self.on_skipped(str(ex))                                            # Skip execution
             return
         self.prepare_environment()                                              # Prepare environment
         self.on_running()                                                       # Run execution
