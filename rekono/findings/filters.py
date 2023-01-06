@@ -162,7 +162,9 @@ class PortFilter(FindingFilter):
     '''FilterSet to filter and sort Port entities.'''
 
     # Ordering fields including common ones
-    o = OrderingFilter(fields=FINDING_ORDERING + (('host__os_type', 'os_type'), 'host', 'port', 'protocol', 'service'))
+    o = OrderingFilter(
+        fields=FINDING_ORDERING + (('host__os_type', 'os_type'), 'host', 'port', 'protocol', 'service', 'status')
+    )
 
     class Meta:
         '''FilterSet metadata.'''
@@ -184,7 +186,7 @@ class PathFilter(FindingFilter):
     '''FilterSet to filter and sort Path entities.'''
 
     # Ordering fields including common ones
-    o = OrderingFilter(fields=FINDING_ORDERING + (('port__host', 'host'), 'port', 'path', 'status'))
+    o = OrderingFilter(fields=FINDING_ORDERING + (('port__host', 'host'), 'port', 'path', 'status', 'type'))
 
     class Meta:
         '''FilterSet metadata.'''
