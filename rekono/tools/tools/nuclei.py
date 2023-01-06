@@ -7,7 +7,7 @@ from findings.models import Credential, Technology, Vulnerability
 from tools.tools.base_tool import BaseTool
 
 
-class NucleiTool(BaseTool):
+class Nuclei(BaseTool):
     '''Nuclei tool class.'''
 
     def parse_output_file(self) -> None:

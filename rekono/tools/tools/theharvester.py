@@ -2,17 +2,18 @@ import json
 
 from findings.enums import DataType
 from findings.models import OSINT
+
 from tools.tools.base_tool import BaseTool
 
 
-class TheharvesterTool(BaseTool):
+class Theharvester(BaseTool):
     '''theHarvester tool class.'''
 
     # Mapping between theHarvester types and OSINT data types
     data_types = [
         ('ips', DataType.IP),
         ('hosts', DataType.DOMAIN),
-        ('vhosts', DataType.DOMAIN),
+        ('vhosts', DataType.VHOST),
         ('urls', DataType.URL),
         ('trello_urls', DataType.URL),
         ('interesting_urls', DataType.URL),

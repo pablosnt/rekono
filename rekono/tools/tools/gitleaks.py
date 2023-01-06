@@ -13,7 +13,7 @@ from tools.exceptions import ToolExecutionException
 from tools.tools.base_tool import BaseTool
 
 
-class GitleaksTool(BaseTool):
+class Gitleaks(BaseTool):
     '''GitLeaks tool class.'''
 
     # Exit code ignored because GitLeaks fails when find secrets

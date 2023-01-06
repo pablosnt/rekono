@@ -11,7 +11,7 @@ from tools.tools.base_tool import BaseTool
 from rekono.settings import TOOLS
 
 
-class CmseekTool(BaseTool):
+class Cmseek(BaseTool):
     '''CMSeeK tool class.'''
 
     # CMSeeK directory where output files can be stored

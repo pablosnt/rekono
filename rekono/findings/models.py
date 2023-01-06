@@ -165,8 +165,12 @@ class Host(Finding):
         if not input.filter:
             return True
         try:
-            # Filter by address type
-            return cast(models.TextChoices, TargetType)[input.filter] == get_target_type(self.address)
+            distinct = input.filter[0] == '!'
+            filter_types = [
+                cast(models.TextChoices, TargetType)[f.upper()] for f in input.filter.replace('!', '').split(',s')
+            ]
+            host_type = get_target_type(self.address)
+            return host_type not in filter_types if distinct else host_type in filter_types
         except KeyError:
             return True
 

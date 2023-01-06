@@ -31,12 +31,13 @@
         <b-col v-for="ft in filters" :key="ft.name">
           <b-form-group :description="ft.name">
             <b-form-tags :ref="ft.name.toLowerCase().replace(' ', '_')" no-outer-focus v-if="!ft.values && ft.type === 'tags'" :value="$route.query[ft.name.toLowerCase().replace(' ', '_')] ? $route.query[ft.name.toLowerCase().replace(' ', '_')].split(',') : null" placeholder="" remove-on-delete size="md" tag-variant="dark" @input="addFilter(ft.name, ft.filterField, $event)"/>
-            <b-form-input :ref="ft.name.toLowerCase().replace(' ', '_')" v-if="!ft.values && ft.type !== 'tags'" :value="$route.query[ft.name.toLowerCase().replace(' ', '_')] ? $route.query[ft.name.toLowerCase().replace(' ', '_')] : null" :type="ft.type" @input="addFilter(ft.name, ft.filterField, $event)"/>
+            <b-form-input :ref="ft.name.toLowerCase().replace(' ', '_')" v-if="!ft.values && ft.type !== 'tags' && ft.type !== 'checkbox'" :value="$route.query[ft.name.toLowerCase().replace(' ', '_')] ? $route.query[ft.name.toLowerCase().replace(' ', '_')] : null" :type="ft.type" @input="addFilter(ft.name, ft.filterField, $event)"/>
             <b-form-select :ref="ft.name.toLowerCase().replace(' ', '_')" v-if="ft.values" :value="$route.query[ft.name.toLowerCase().replace(' ', '_')] ? $route.query[ft.name.toLowerCase().replace(' ', '_')] : ft.default" :options="ft.values" :value-field="ft.valueField" :text-field="ft.textField" @change="addFilter(ft.name, ft.filterField, $event)">
               <template #first>
                 <b-form-select-option :value="null">Select {{ ft.name.toLowerCase().replace(' ', '_') }}</b-form-select-option>
               </template>
             </b-form-select>
+            <b-form-checkbox :ref="ft.name.toLowerCase().replace(' ', '_')" v-if="ft.type === 'checkbox'" @change="addFilter(ft.name, ft.filterField, $event)"/>
           </b-form-group>
         </b-col>
       </b-row>

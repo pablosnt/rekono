@@ -16,7 +16,7 @@ RUN ln -s /usr/bin/python3 /usr/bin/python
 RUN pip install --upgrade pip
 RUN pip install -r /code/requirements.txt
 
-RUN apt install nmap dirsearch theharvester nikto sslscan sslyze cmseek zaproxy exploitdb metasploit-framework emailharvester joomscan gitleaks smbmap nuclei -y
+RUN apt install nmap dirsearch theharvester nikto sslscan sslyze cmseek zaproxy exploitdb metasploit-framework emailharvester joomscan gitleaks smbmap nuclei gobuster -y
 RUN setcap cap_net_raw,cap_net_admin,cap_net_bind_service+eip $(which nmap)
 RUN git clone https://github.com/fullhunt/log4j-scan /opt/log4j-scan
 RUN git clone https://github.com/fullhunt/spring4shell-scan.git /opt/spring4shell-scan
@@ -25,8 +25,7 @@ RUN pip install -r /opt/log4j-scan/requirements.txt
 RUN pip install -r /opt/spring4shell-scan/requirements.txt
 RUN pip install emailfinder ssh-audit
 
-RUN apt install wordlists seclists dirb -y
-RUN gzip -d /usr/share/wordlists/rockyou.txt.gz
+RUN apt install seclists dirb -y
 
 RUN adduser --disabled-password rekono
 RUN chown -R rekono:rekono /code

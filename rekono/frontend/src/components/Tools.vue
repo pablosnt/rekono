@@ -8,6 +8,9 @@
           <b-img v-if="!row.item.icon" src="favicon.ico"/>
         </b-link>
       </template>
+      <template #cell(stages)="row">
+        <p>{{ Array.from(new Set(row.item.configurations.map(configuration => { return configuration.stage_name }))).join(', ') }}</p>
+      </template>
       <template #cell(intensities)="row">
         <div v-for="base in intensityByVariant" v-bind:key="base.intensity_rank" class="d-inline">
           <div v-for="i in row.item.intensities" v-bind:key="i.intensity_rank" class="d-inline">
@@ -16,7 +19,7 @@
         </div>
       </template>
       <template #cell(inputs)="row">
-        <p>{{ row.item.arguments.map(argument => { return argument.inputs.find(input => input.order === 1).type.name }).join(', ') }}</p>
+        <p>{{ Array.from(new Set(row.item.arguments.map(argument => { return argument.inputs.find(input => input.order === 1).type.name }))).join(', ') }}</p>
       </template>
       <template #cell(likes)="row">
         {{ row.item.likes }}
@@ -79,9 +82,9 @@ export default {
         { key: 'icon', label: '', sortable: false },
         { key: 'name', label: 'Tool', sortable: true },
         { key: 'command', sortable: true },
-        { key: 'stage_name', label: 'Stage', sortable: true },
+        { key: 'stages', label: 'Stages', sortable: false },
         { key: 'intensities', sortable: true },
-        { key: 'inputs', sortable: true },
+        { key: 'inputs', sortable: false },
         { key: 'likes', sortable: true },
         { key: 'actions', sortable: false }
       ],
@@ -107,16 +110,20 @@ export default {
   watch: {
     data () {
       this.filters = [
-        { name: 'Stage', values: this.stages, valueField: 'id', textField: 'value', filterField: 'stage' },
+        { name: 'Stage', values: this.stages, valueField: 'id', textField: 'value', filterField: 'configurations__stage' },
         { name: 'Input', values: this.inputTypes, valueField: 'value', textField: 'value', filterField: 'arguments__inputs__type__name' },
         { name: 'Output', values: this.inputTypes, valueField: 'value', textField: 'value', filterField: 'configurations__outputs__type__name' },
-        { name: 'Favourities', values: [{ value: true, text: 'True' }, { value: false, text: 'False' }], valueField: 'value', textField: 'text', filterField: 'liked' }
+        { name: 'Favourities', type: 'checkbox', filterField: 'liked' }
       ] 
     }
   },
   methods: {
     fetchData (params = null) {
-      return this.getOnePage('/api/tools/?o=stage,name', params)
+      if (!params) {
+        params = {}
+      }
+      params['o'] = 'configurations__stage,name'
+      return this.getOnePage('/api/tools/', params)
         .then(response => {
           this.data = response.data.results
           this.total = response.data.count

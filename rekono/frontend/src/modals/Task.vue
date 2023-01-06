@@ -49,7 +49,9 @@
             <b-icon icon="file-earmark-word-fill"/> Wordlists
           </template>
           <b-form-group description="Select wordlists to use">
-            <b-form-select v-model="wordlistsItems" :options="wordlists" multiple value-field="id" text-field="name" :select-size="10"/>
+            <b-form-select v-model="wordlistsItems" multiple :select-size="10">
+              <option v-for="wordlist in wordlists" :key="wordlist.id" :value="wordlist.id">{{ wordlist.name }} - {{ wordlist.type }}</option>
+            </b-form-select>
           </b-form-group>
         </b-tab>
         <b-tab title-link-class="text-secondary">
@@ -172,8 +174,8 @@ export default {
         } else if (this.process) {
           this.selectProcess(this.process.id, this.process)
         } else if (!this.tool && !this.process) {
-          this.getAllPages('/api/tools/', { order: 'stage,name'}).then(results => this.tools = results)
-          this.getAllPages('/api/processes/', { order: 'name' }).then(results => this.processes = results)
+          this.getAllPages('/api/tools/', { o: 'configurations__stage,name'}).then(results => this.tools = results)
+          this.getAllPages('/api/processes/', { o: 'name' }).then(results => this.processes = results)
         }
         if (this.target) {
           this.targetIds = [this.target.id]
@@ -181,7 +183,7 @@ export default {
         } else if (this.project) {
           this.get(`/api/projects/${this.project.id}/`).then(response => { this.selectProject(this.project.id, response.data) })
         } else {
-          this.getAllPages('/api/projects/', { order: 'name' }).then(results => this.projects = results)
+          this.getAllPages('/api/projects/', { o: 'name' }).then(results => this.projects = results)
         }
       }
     }
@@ -352,7 +354,7 @@ export default {
       }
     },
     updateWordlists () {
-      this.getAllPages('/api/resources/wordlists/', { order: 'type,name' }).then(results => this.wordlists = results)
+      this.getAllPages('/api/resources/wordlists/', { o: 'type,name' }).then(results => this.wordlists = results)
     },
     cleanScheduledIn () {
       this.scheduledIn = null

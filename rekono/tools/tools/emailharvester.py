@@ -3,7 +3,7 @@ from findings.models import OSINT
 from tools.tools.base_tool import BaseTool
 
 
-class EmailharvesterTool(BaseTool):
+class Emailharvester(BaseTool):
     '''EmailHarvester tool class.'''
 
     def parse_output_file(self) -> None:

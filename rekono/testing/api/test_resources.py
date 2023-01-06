@@ -54,8 +54,8 @@ class WordlistsTest(RekonoApiTestCase):
     def test_create(self) -> None:
         '''Test wordlist creation feature.'''
         # Create new wordlist
-        new_wordlist = self.create_wordlist(self.name + self.name, self.endpoints, 'Endpoint')
-        content = self.api_test(self.client.get, f'{self.endpoint}?o=-name')    # Get all wordlists
+        new_wordlist = self.create_wordlist(self.name + self.name, self.endpoints, WordlistType.ENDPOINT)
+        content = self.api_test(self.client.get, f'{self.endpoint}?order=-name')    # Get all wordlists
         # Check that the first one is the new wordlist
         self.check_fields(['name', 'type', 'size', 'size', 'creator'], content['results'][0], new_wordlist)
         db_wordlist = Wordlist.objects.get(pk=new_wordlist['id'])
@@ -73,7 +73,7 @@ class WordlistsTest(RekonoApiTestCase):
 
     def test_update(self) -> None:
         '''Test wordlist update feature.'''
-        data = {'name': self.name, 'type': 'Endpoint'}
+        data = {'name': self.name, 'type': WordlistType.ENDPOINT}
         # Update wordlist
         self.api_test(self.client.put, f'{self.endpoint}{self.wordlist.id}/', 200, data=data, expected=data)
 
@@ -88,10 +88,10 @@ class WordlistsTest(RekonoApiTestCase):
 
     def test_delete(self) -> None:
         '''Test wordlist deletion feature.'''
-        before = self.api_test(self.client.get, f'{self.endpoint}?o=-name')     # Get wordlists
+        before = self.api_test(self.client.get, f'{self.endpoint}?order=-name')     # Get wordlists
         # Delete testing wordlist
         self.api_test(self.client.delete, f'{self.endpoint}{self.wordlist.id}/', 204)
-        self.api_test(self.client.get, f'{self.endpoint}?o=-name', expected={'count': before['count'] - 1})
+        self.api_test(self.client.get, f'{self.endpoint}?order=-name', expected={'count': before['count'] - 1})
 
     def test_unauthorized_delete(self) -> None:
         '''Test wordlist deletion feature without Admin or process creator.'''
@@ -102,7 +102,7 @@ class WordlistsTest(RekonoApiTestCase):
 
     def test_like_dislike(self) -> None:
         '''Test like and dislike features for wordlists.'''
-        count = self.api_test(self.client.get, f'{self.endpoint}?o=-name')['count']     # Get total count of wordlists
+        count = self.api_test(self.client.get, f'{self.endpoint}?order=-name')['count']  # Get total count of wordlists
         # Like testing wordlist
         self.api_test(self.client.post, f'{self.endpoint}{self.wordlist.id}/like/', 201)
         self.api_test(self.client.get, f'{self.endpoint}{self.wordlist.id}/', expected={'liked': True, 'likes': 1})

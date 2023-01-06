@@ -3,7 +3,7 @@ from findings.models import Exploit
 from tools.tools.base_tool import BaseTool
 
 
-class MetasploitTool(BaseTool):
+class Metasploit(BaseTool):
     '''Metasploit tool class.'''
 
     def parse_plain_output(self, output: str) -> None:

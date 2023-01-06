@@ -6,7 +6,7 @@ from rekono.settings import TOOLS
 from tools.tools.base_tool import BaseTool
 
 
-class Spring4shellscanTool(BaseTool):
+class Spring4shellscan(BaseTool):
     '''Spring4Shell Scan tool class.'''
 
     # Indicate the script path to execute

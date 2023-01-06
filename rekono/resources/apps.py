@@ -25,3 +25,13 @@ class ResourcesConfig(AppConfig):
             loaddata.Command(),
             os.path.join(path, '1_wordlists.json')                              # Input type entities
         )
+        self.update_default_wordlists_size()
+
+    def update_default_wordlists_size(self) -> None:
+        '''Update default wordlists size.'''
+        from resources.models import Wordlist
+        for wordlist in Wordlist.objects.all().filter(size=None):               # For each default wordlist
+            if os.path.isfile(wordlist.path):                                   # If wordlist path exist
+                with open(wordlist.path, 'rb+') as wordlist_file:               # Open uploaded file
+                    wordlist.size = len(wordlist_file.readlines())              # Count entries from uploaded file
+                    wordlist.save(update_fields=['size'])

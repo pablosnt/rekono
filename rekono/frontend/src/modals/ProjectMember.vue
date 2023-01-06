@@ -38,7 +38,7 @@ export default {
   },
   methods: {
     fetchUsers () {
-      this.getAllPages('/api/users/', { project__ne: this.projectId, order: 'username' }).then(results => this.users = results)
+      this.getAllPages('/api/users/', { project__ne: this.projectId, o: 'username' }).then(results => this.users = results)
     },
     check () {
       this.memberState = (this.member !== null)

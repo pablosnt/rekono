@@ -6,6 +6,7 @@
             "tool": 1,
             "name": "TCP ports",
             "arguments": "--privileged {host} {intensity} {ports} -sS -oX {output}",
+            "stage": 2,
             "default": false
         }
     },
@@ -16,6 +17,7 @@
             "tool": 1,
             "name": "UDP ports",
             "arguments": "--privileged {host} {intensity} {ports} -sU -oX {output}",
+            "stage": 2,
             "default": false
         }
     },
@@ -26,6 +28,7 @@
             "tool": 1,
             "name": "TCP ports & service versions",
             "arguments": "--privileged {host} {intensity} {ports} -sS -sV -A -oX {output}",
+            "stage": 2,
             "default": true
         }
     },
@@ -36,6 +39,7 @@
             "tool": 1,
             "name": "UDP ports & service versions",
             "arguments": "--privileged {host} {intensity} {ports} -sU -sV -A -oX {output}",
+            "stage": 2,
             "default": false
         }
     },
@@ -46,6 +50,7 @@
             "tool": 1,
             "name": "TCP & UDP ports",
             "arguments": "--privileged {host} {intensity} {ports} -sS -sU -oX {output}",
+            "stage": 2,
             "default": false
         }
     },
@@ -56,6 +61,7 @@
             "tool": 1,
             "name": "TCP & UDP ports & service versions",
             "arguments": "--privileged {host} {intensity} {ports} -sS -sU -sV -A -oX {output}",
+            "stage": 2,
             "default": false
         }
     },
@@ -66,6 +72,7 @@
             "tool": 1,
             "name": "Fast TCP ports",
             "arguments": "--privileged {host} {intensity} {ports} -F -sS -oX {output}",
+            "stage": 2,
             "default": false
         }
     },
@@ -76,6 +83,7 @@
             "tool": 1,
             "name": "Fast UDP ports",
             "arguments": "--privileged {host} {intensity} {ports} -F -sU -oX {output}",
+            "stage": 2,
             "default": false
         }
     },
@@ -86,6 +94,7 @@
             "tool": 1,
             "name": "Fast TCP ports & service versions",
             "arguments": "--privileged {host} {intensity} {ports} -F -sS -sV -A -oX {output}",
+            "stage": 2,
             "default": false
         }
     },
@@ -96,6 +105,7 @@
             "tool": 1,
             "name": "Fast UDP ports & service versions",
             "arguments": "--privileged {host} {intensity} {ports} -F -sU -sV -A -oX {output}",
+            "stage": 2,
             "default": false
         }
     },
@@ -106,6 +116,7 @@
             "tool": 1,
             "name": "Fast TCP & UDP ports",
             "arguments": "--privileged {host} {intensity} {ports} -F -sS -sU -oX {output}",
+            "stage": 2,
             "default": false
         }
     },
@@ -116,6 +127,7 @@
             "tool": 1,
             "name": "Fast TCP & UDP ports & service versions",
             "arguments": "--privileged {host} {intensity} {ports} -F -sS -sU -sV -A -oX {output}",
+            "stage": 2,
             "default": false
         }
     },
@@ -126,6 +138,7 @@
             "tool": 1,
             "name": "Vulners",
             "arguments": "--privileged {host} {intensity} {ports} -sS -sV -A --script vulners -oX {output}",
+            "stage": 2,
             "default": false
         }
     },
@@ -136,6 +149,7 @@
             "tool": 1,
             "name": "FTP NSE scripts",
             "arguments": "--privileged {host} {intensity} {ports} -sS -sV -A --script ftp-anon,ftp-proftpd-backdoor,ftp-vsftpd-backdoor,ftp-libopie,ftp-vuln-cve2010-4221 -oX {output}",
+            "stage": 2,
             "default": false
         }
     },
@@ -146,6 +160,7 @@
             "tool": 2,
             "name": "Standard wordlist",
             "arguments": "{url} {intensity} -o {output} --format=json {wordlist} {authentication} {cookie}",
+            "stage": 4,
             "default": true
         }
     },
@@ -156,6 +171,7 @@
             "tool": 2,
             "name": "Wordlist with extensions",
             "arguments": "{url} {intensity} -o {output} --format=json --force-extensions {wordlist} {authentication} {cookie}",
+            "stage": 4,
             "default": false
         }
     },
@@ -166,6 +182,7 @@
             "tool": 2,
             "name": "Recursive",
             "arguments": "{url} {intensity} -o {output} --format=json --force-recursive --recursion-depth=10 {wordlist} {authentication} {cookie}",
+            "stage": 4,
             "default": false
         }
     },
@@ -176,6 +193,7 @@
             "tool": 2,
             "name": "Deep recursive",
             "arguments": "{url} {intensity} -o {output} --format=json --force-recursive --depth-recursive --recursion-depth=10 {wordlist} {authentication} {cookie}",
+            "stage": 4,
             "default": false
         }
     },
@@ -186,6 +204,7 @@
             "tool": 3,
             "name": "All available sources",
             "arguments": "{target} -b all -f {output}",
+            "stage": 1,
             "default": true
         }
     },
@@ -196,6 +215,7 @@
             "tool": 3,
             "name": "Google & Duckduckgo & Bing & Linkedin & Twitter",
             "arguments": "{target} -b google,duckduckgo,bing,linkedin,linkedin_links,twitter -f {output}",
+            "stage": 1,
             "default": false
         }
     },
@@ -206,6 +226,7 @@
             "tool": 4,
             "name": "Web scan",
             "arguments": "{url} -Format xml -output {output} {authentication} {cookie}",
+            "stage": 4,
             "default": true
         }
     },
@@ -216,6 +237,7 @@
             "tool": 5,
             "name": "SSL/TLS analysis",
             "arguments": "--xml={output} {intensity} {target}",
+            "stage": 4,
             "default": true
         }
     },
@@ -226,6 +248,7 @@
             "tool": 6,
             "name": "SSL/TLS analysis",
             "arguments": "--json_out={output} {target}",
+            "stage": 4,
             "default": true
         }
     },
@@ -236,6 +259,7 @@
             "tool": 7,
             "name": "CMS scan",
             "arguments": "{url} {intensity}",
+            "stage": 4,
             "default": true
         }
     },
@@ -246,6 +270,7 @@
             "tool": 8,
             "name": "Active scan",
             "arguments": "{authentication} {cookie} {command} -cmd {url} -quickprogress -quickout {output}",
+            "stage": 4,
             "default": true
         }
     },
@@ -256,6 +281,7 @@
             "tool": 9,
             "name": "Search by technology",
             "arguments": "{technology} --json > {output}",
+            "stage": 5,
             "default": true
         }
     },
@@ -266,6 +292,7 @@
             "tool": 10,
             "name": "Search by CVE",
             "arguments": "-q -x 'search {cve};quit'",
+            "stage": 5,
             "default": true
         }
     },
@@ -276,6 +303,7 @@
             "tool": 11,
             "name": "Log4Shell (CVE-2021-44228)",
             "arguments": "{script} {url} --dns-callback-provider dnslog.cn --run-all-tests",
+            "stage": 4,
             "default": true
         }
     },
@@ -286,6 +314,7 @@
             "tool": 11,
             "name": "Log4Shell (CVE-2021-44228) with WAF bypass",
             "arguments": "{script} {url} --dns-callback-provider dnslog.cn --run-all-tests --waf-bypass",
+            "stage": 4,
             "default": false
         }
     },
@@ -296,6 +325,7 @@
             "tool": 12,
             "name": "Search emails",
             "arguments": "{target}",
+            "stage": 1,
             "default": true
         }
     },
@@ -306,6 +336,7 @@
             "tool": 13,
             "name": "Search emails",
             "arguments": "{target} -s {output}",
+            "stage": 1,
             "default": true
         }
     },
@@ -316,6 +347,7 @@
             "tool": 14,
             "name": "Joomla scan",
             "arguments": "{url} {cookie}",
+            "stage": 4,
             "default": true
         }
     },
@@ -326,6 +358,7 @@
             "tool": 15,
             "name": "Dump .git and find secrets in all commits",
             "arguments": "detect -f json --report-path {output}",
+            "stage": 4,
             "default": true
         }
     },
@@ -336,6 +369,7 @@
             "tool": 16,
             "name": "SSH scan",
             "arguments": "{host} {port} --batch",
+            "stage": 4,
             "default": true
         }
     },
@@ -346,6 +380,7 @@
             "tool": 17,
             "name": "List shares",
             "arguments": "{host} {port} {authentication}",
+            "stage": 4,
             "default": true
         }
     },
@@ -356,6 +391,7 @@
             "tool": 17,
             "name": "List shares and directories recursively",
             "arguments": "{host} {port} -R {authentication}",
+            "stage": 4,
             "default": false
         }
     },
@@ -366,6 +402,7 @@
             "tool": 1,
             "name": "SMB NSE scripts",
             "arguments": "--privileged {host} {intensity} {ports} -sS -sV -A --script smb-enum-shares,smb-enum-users,smb-enum-groups,smb-enum-sessions,smb-protocols,smb-enum-domains,smb-enum-services,smb-mbenum,smb-ls,smb-security-mode,smb2-security-mode,smb-double-pulsar-backdoor,smb-vuln-webexec,smb2-vuln-uptime,smb-vuln-ms06-025,smb-vuln-ms07-029,smb-vuln-ms10-061,smb-vuln-ms17-010,smb-vuln-cve-2017-7494 -oX {output}",
+            "stage": 2,
             "default": false
         }
     },
@@ -376,6 +413,7 @@
             "tool": 1,
             "name": "FTP & SMB NSE scripts",
             "arguments": "--privileged {host} {intensity} {ports} -sS -sV -A --script ftp-anon,ftp-proftpd-backdoor,ftp-vsftpd-backdoor,ftp-libopie,ftp-vuln-cve2010-4221,smb-enum-shares,smb-enum-users,smb-enum-groups,smb-enum-sessions,smb-protocols,smb-enum-domains,smb-enum-services,smb-mbenum,smb-ls,smb-security-mode,smb2-security-mode,smb-double-pulsar-backdoor,smb-vuln-webexec,smb2-vuln-uptime,smb-vuln-ms06-025,smb-vuln-ms07-029,smb-vuln-ms10-061,smb-vuln-ms17-010,smb-vuln-cve-2017-7494 -oX {output}",
+            "stage": 2,
             "default": false
         }
     },
@@ -386,6 +424,7 @@
             "tool": 18,
             "name": "All templates",
             "arguments": "{url} {authentication} {cookie} -json -output {output}",
+            "stage": 4,
             "default": true
         }
     },
@@ -396,6 +435,7 @@
             "tool": 18,
             "name": "Automatic technology detection",
             "arguments": "{url} -automatic-scan {authentication} {cookie} -json -output {output}",
+            "stage": 4,
             "default": false
         }
     },
@@ -406,6 +446,7 @@
             "tool": 18,
             "name": "CVE templates",
             "arguments": "{url} -tags cve {authentication} {cookie} -json -output {output}",
+            "stage": 4,
             "default": false
         }
     },
@@ -416,6 +457,7 @@
             "tool": 19,
             "name": "SpringShell RCE (CVE-2022-22965)",
             "arguments": "{script} {url}",
+            "stage": 4,
             "default": true
         }
     },
@@ -426,6 +468,7 @@
             "tool": 19,
             "name": "Spring Cloud RCE (CVE-2022-22963)",
             "arguments": "{script} {url} --test-CVE-2022-22963",
+            "stage": 4,
             "default": false
         }
     },
@@ -436,6 +479,7 @@
             "tool": 19,
             "name": "SpringShell RCE (CVE-2022-22965) with WAF bypass",
             "arguments": "{script} {url} --waf-bypass",
+            "stage": 4,
             "default": false
         }
     },
@@ -446,6 +490,40 @@
             "tool": 19,
             "name": "Spring Cloud RCE (CVE-2022-22963) with WAF bypass",
             "arguments": "{script} {url} --waf-bypass --test-CVE-2022-22963",
+            "stage": 4,
+            "default": false
+        }
+    },
+    {
+        "model": "tools.configuration",
+        "pk": 46,
+        "fields": {
+            "tool": 20,
+            "name": "Subdomains enumeration",
+            "arguments": "dns {target} {subdomain_wordlist} {intensity} --wildcard --show-ips --no-color --no-progress --quiet --output {output}",
+            "stage": 1,
+            "default": true
+        }
+    },
+    {
+        "model": "tools.configuration",
+        "pk": 47,
+        "fields": {
+            "tool": 20,
+            "name": "VHOST enumeration",
+            "arguments": "vhost {target_url} {subdomain_wordlist} {basic_auth} {token_auth} {cookie} {intensity} --append-domain --no-tls-validation --no-color --no-progress --quiet --output {output}",
+            "stage": 2,
+            "default": false
+        }
+    },
+    {
+        "model": "tools.configuration",
+        "pk": 48,
+        "fields": {
+            "tool": 20,
+            "name": "Endpoints enumeration",
+            "arguments": "dir {url} {endpoint_wordlist} {basic_auth} {token_auth} {cookie} {intensity} --no-tls-validation --no-color --no-progress --quiet --output {output}",
+            "stage": 4,
             "default": false
         }
     }

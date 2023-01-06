@@ -14,7 +14,7 @@ def get_tool_class_by_name(name: str) -> Any:
     try:
         tools_module = importlib.import_module(f'tools.tools.{name.lower().replace(" ", "_")}')   # Import tool module
         # Get tool class
-        tool_class = getattr(tools_module, f'{name[0].upper()}{name[1:].lower().replace(" ", "")}Tool')
+        tool_class = getattr(tools_module, name[0].upper() + name[1:].lower().replace(' ', ''))
     except (AttributeError, ModuleNotFoundError):                               # Error during import
         tools_module = importlib.import_module('tools.tools.base_tool')         # Get base tool module
         tool_class = getattr(tools_module, 'BaseTool')                          # Get base tool class
