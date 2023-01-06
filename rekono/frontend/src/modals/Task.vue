@@ -49,7 +49,9 @@
             <b-icon icon="file-earmark-word-fill"/> Wordlists
           </template>
           <b-form-group description="Select wordlists to use">
-            <b-form-select v-model="wordlistsItems" :options="wordlists" multiple value-field="id" text-field="name" :select-size="10"/>
+            <b-form-select v-model="wordlistsItems" multiple :select-size="10">
+              <option v-for="wordlist in wordlists" :key="wordlist.id" :value="wordlist.id">{{ wordlist.name }} - {{ wordlist.type }}</option>
+            </b-form-select>
           </b-form-group>
         </b-tab>
         <b-tab title-link-class="text-secondary">

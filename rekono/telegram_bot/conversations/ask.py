@@ -1,6 +1,7 @@
 from typing import List
 
 from authentications.enums import AuthenticationType
+from input_types.enums import InputTypeNames
 from processes.models import Process
 from projects.models import Project
 from resources.models import Wordlist
@@ -216,7 +217,7 @@ def ask_for_tool(update: Update, context: CallbackContext, chat: TelegramChat) -
     tools = Tool.objects.order_by('name').all()                                 # Get all tools
     # Create keyboard buttons with the tools data
     keyboard = [InlineKeyboardButton(t.name, callback_data=t.id) for t in tools]
-    send_options(update, chat, ASK_FOR_TOOL, keyboard, 3)
+    send_options(update, chat, ASK_FOR_TOOL, keyboard, 2)
     return SELECT_TOOL                                                          # Go to selected tool management
 
 
@@ -254,20 +255,32 @@ def ask_for_wordlist(update: Update, context: CallbackContext, chat: TelegramCha
     '''
     wordlists = Wordlist.objects.all()                                          # Get all wordlists
     # Create keyboard buttons with the wordlists data
-    keyboard = [InlineKeyboardButton(w.name, callback_data=w.id) for w in wordlists]
+    keyboard = [InlineKeyboardButton(f'{w.name} - {w.type}', callback_data=w.id) for w in wordlists]
+    tools_with_required_wordlists = ['Gobuster']                                # Tools with required wordlists
     check_if_wordlist_is_required = None
-    if context.chat_data is not None and context.chat_data.get(TOOL):           # Filter inputs by tool
+    if (                                                                        # Filter inputs by tool
+        context.chat_data is not None and
+        context.chat_data.get(TOOL) and
+        context.chat_data.get(TOOL).name not in tools_with_required_wordlists
+    ):
+        print('TOOL')
         check_if_wordlist_is_required = {'argument__tool': context.chat_data[TOOL]}
-    elif context.chat_data is not None and context.chat_data.get(PROCESS):      # Filter inputs by process
+    elif (                                                                      # Filter inputs by process
+        context.chat_data is not None and
+        context.chat_data.get(PROCESS) and
+        not context.chat_data[PROCESS].steps.filter(tool__name__in=tools_with_required_wordlists).exists()
+    ):
+        print('PROCESS')
         check_if_wordlist_is_required = {'argument__tool__in': context.chat_data[PROCESS].steps.all().values('tool')}
+    print(check_if_wordlist_is_required)
     if check_if_wordlist_is_required:
         check_if_wordlist_is_required.update({                                  # Base arguments to check if required
             'argument__required': True,
-            'type__name': 'Wordlist'
+            'type__name': InputTypeNames.WORDLIST
         })
         if not Input.objects.filter(**check_if_wordlist_is_required).exists():  # Check if wordlist is required
-            keyboard.append(InlineKeyboardButton('Default wordlists', callback_data='Default wordlists'))
-    send_options(update, chat, ASK_FOR_WORDLIST, keyboard, 2)
+            keyboard.append(InlineKeyboardButton('Default tools wordlists', callback_data='Default tools wordlists'))
+    send_options(update, chat, ASK_FOR_WORDLIST, keyboard, 1)
     return SELECT_WORDLIST                                                      # Go to selected wordlist management
 
 

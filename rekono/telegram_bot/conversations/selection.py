@@ -226,7 +226,7 @@ def select_wordlist(update: Update, context: CallbackContext) -> int:
     if (
         chat and context.chat_data is not None and
         update.callback_query and update.callback_query.data and
-        update.callback_query.data != 'Default wordlists'
+        update.callback_query.data != 'Default tools wordlists'
     ):
         wordlist = Wordlist.objects.get(pk=int(update.callback_query.data))     # Get wordlist by Id
         context.chat_data[WORDLIST] = wordlist                                  # Save selected intensity
