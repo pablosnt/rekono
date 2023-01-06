@@ -7,6 +7,8 @@ from django.core import management
 from django.core.management.commands import loaddata
 from django.db.models.signals import post_migrate
 
+from resources.models import Wordlist
+
 
 class ResourcesConfig(AppConfig):
     '''Resources Django application.'''
@@ -25,3 +27,12 @@ class ResourcesConfig(AppConfig):
             loaddata.Command(),
             os.path.join(path, '1_wordlists.json')                              # Input type entities
         )
+        self.update_default_wordlists_size()
+
+    def update_default_wordlists_size(self) -> None:
+        '''Update default wordlists size.'''
+        for wordlist in Wordlist.objects.all():                                 # For each default wordlist
+            if os.path.isfile(wordlist.path):                                   # If wordlist path exist
+                with open(wordlist.path, 'rb+') as wordlist_file:               # Open uploaded file
+                    wordlist.size = len(wordlist_file.readlines())              # Count entries from uploaded file
+                    wordlist.save(update_fields=['size'])
