@@ -70,7 +70,7 @@ export default {
         { name: 'Type', values: ['Endpoint', 'Subdomain'], valueField: 'value', textField: 'value', filterField: 'type' },
         { name: 'Max Size', filterField: 'size__lte', type: 'number' },
         { name: 'Creator', filterField: 'creator__username__icontains', type: 'text' },
-        { name: 'Favourities', values: [{ value: true, text: 'True' }, { value: false, text: 'False' }], valueField: 'value', textField: 'text', filterField: 'liked' }
+        { name: 'Favourities', type: 'checkbox', filterField: 'liked' }
       ] 
     }
   },

@@ -134,7 +134,7 @@ export default {
         { name: 'Tags', filterField: 'tags__name__in', type: 'tags' },
         { name: 'Stage', values: this.stages, valueField: 'id', textField: 'value', filterField: 'steps__configuration__stage' },
         { name: 'Creator', filterField: 'creator__username__icontains', type: 'text' },
-        { name: 'Favourities', values: [{ value: true, text: 'True' }, { value: false, text: 'False' }], valueField: 'value', textField: 'text', filterField: 'liked' }
+        { name: 'Favourities', type: 'checkbox', filterField: 'liked' }
       ]
     }
   },
