@@ -1,3 +1,4 @@
+from django.db.models import Min, QuerySet
 from likes.views import LikeManagementView
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
 from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated
@@ -20,6 +21,14 @@ class ToolViewSet(LikeManagementView, ListModelMixin, RetrieveModelMixin):
     search_fields = ['name', 'command']
     # Required to remove unneeded ProjectMemberPermission
     permission_classes = [IsAuthenticated, DjangoModelPermissions]
+
+    def get_queryset(self) -> QuerySet:
+        '''Get the model queryset. It's required for allow the access to the likes count by the child ViewSets.
+
+        Returns:
+            QuerySet: Model queryset
+        '''
+        return super().get_queryset().annotate(stage=Min('configurations__stage'))
 
 
 class ConfigurationViewSet(GenericViewSet, ListModelMixin, RetrieveModelMixin):

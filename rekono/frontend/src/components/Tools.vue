@@ -4,8 +4,8 @@
     <b-table striped borderless head-variant="dark" :fields="toolsFields" :items="data">
       <template #cell(icon)="row">
         <b-link :href="row.item.reference" target="_blank">
-          <b-img v-if="row.item.icon" :src="row.item.icon" width="100" height="50"/>
-          <b-img v-if="!row.item.icon" src="favicon.ico"/>
+          <b-img v-if="row.item.icon" :src="row.item.icon" width="32"/>
+          <b-img v-if="!row.item.icon" src="favicon.ico" width="32"/>
         </b-link>
       </template>
       <template #cell(stages)="row">
@@ -110,7 +110,7 @@ export default {
   watch: {
     data () {
       this.filters = [
-        { name: 'Stage', values: this.stages, valueField: 'id', textField: 'value', filterField: 'configurations__stage' },
+        { name: 'Stage', values: this.stages, valueField: 'id', textField: 'value', filterField: 'stage' },
         { name: 'Input', values: this.inputTypes, valueField: 'value', textField: 'value', filterField: 'arguments__inputs__type__name' },
         { name: 'Output', values: this.inputTypes, valueField: 'value', textField: 'value', filterField: 'configurations__outputs__type__name' },
         { name: 'Favourities', type: 'checkbox', filterField: 'liked' }
@@ -122,7 +122,7 @@ export default {
       if (!params) {
         params = {}
       }
-      params['o'] = 'configurations__stage,name'
+      params['o'] = 'stage,name'
       return this.getOnePage('/api/tools/', params)
         .then(response => {
           this.data = response.data.results

@@ -2,7 +2,7 @@
   <div>
     <b-navbar type="dark" variant="dark">
       <b-navbar-brand href="/" style="margin-left: 15px">
-        <img src="/static/logo-white.png" width="120" height="30" class="d-inline-block align-top" alt="Rekono">
+        <img src="/static/logo-white.png" width="100" class="d-inline-block align-top" alt="Rekono">
       </b-navbar-brand>
       <b-navbar-nav class="ml-auto">
         <b-nav-item-dropdown right>

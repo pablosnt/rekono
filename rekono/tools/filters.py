@@ -7,7 +7,7 @@ from tools.models import Configuration, Tool
 class ToolFilter(LikeFilter):
     '''FilterSet to filter and sort Tool entities.'''
 
-    o = filters.OrderingFilter(fields=('name', 'configurations__stage', 'likes_count'))         # Ordering fields
+    o = filters.OrderingFilter(fields=('name', 'stage', 'likes_count'))         # Ordering fields
 
     class Meta:
         '''FilterSet metadata.'''

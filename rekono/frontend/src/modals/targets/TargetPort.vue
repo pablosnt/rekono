@@ -5,7 +5,7 @@
         <b-form>
           <b-row>
             <b-col cols="2">
-              <b-input-group-append v-b-tooltip.hover title="Ports can be created with and without authentication to perform specific analysis.The following tools accept credentials to perform authenticated analysis: Dirsearch (all authentication types), SMBMap (basic authentication), JoomScan (cookie authentication), Nikto (cookie and basic authentication) and OWASP ZAP (all authentication types)">
+              <b-input-group-append v-b-tooltip.hover title="Ports can be created with and without authentication to perform specific analysis.The following tools accept credentials to perform authenticated analysis: Dirsearch, Gobuster, Nuclei, OWASP ZAP (all authentication types), SMBMap (basic authentication), JoomScan (cookie authentication) and Nikto (cookie and basic authentication)">
                 <b-button variant="outline">
                   <b-icon icon="info-circle-fill" variant="info"/>
                 </b-button>

@@ -2,8 +2,8 @@
   <b-modal :id="id" @hidden="clean" @ok="confirm" :title="title" :ok-title="button" header-bg-variant="dark" header-text-variant="light" ok-variant="dark">
     <template #modal-title v-if="tool">
       <b-link :href="tool.reference" target="_blank">
-        <b-img v-if="tool.icon" :src="tool.icon" width="100" height="50"/>
-        <b-img v-if="!tool.icon" src="favicon.ico"/>
+        <b-img v-if="tool.icon" :src="tool.icon" width="64"/>
+        <b-img v-if="!tool.icon" src="favicon.ico" width="64"/>
       </b-link>
      {{ title }}
     </template>
@@ -20,8 +20,8 @@
           <b-input-group-prepend v-if="selectedTool">
             <b-button variant="outline">
               <b-link :href="selectedTool.reference" target="_blank">
-                <b-img v-if="selectedTool.icon" :src="selectedTool.icon" width="50" height="30"/>
-                <b-img v-if="!selectedTool.icon" src="favicon.ico"/>
+                <b-img v-if="selectedTool.icon" :src="selectedTool.icon" width="32"/>
+                <b-img v-if="!selectedTool.icon" src="favicon.ico" width="32"/>
               </b-link>
             </b-button>
           </b-input-group-prepend>
@@ -99,7 +99,7 @@ export default {
     initialized (initialized) {
       if (initialized) {
         if (!this.step && !this.tool) {
-          this.getAllPages('/api/tools/', { o: 'configurations__stage,name'}).then(results => this.tools = results)
+          this.getAllPages('/api/tools/', { o: 'stage,name'}).then(results => this.tools = results)
         } else if (this.step && !this.tool) {
           this.priority = this.step.priority
           this.step.tool.configurations = [this.step.configuration]
