@@ -99,7 +99,7 @@ export default {
     initialized (initialized) {
       if (initialized) {
         if (!this.step && !this.tool) {
-          this.getAllPages('/api/tools/', { o: 'configurations__stage,name'}).then(results => this.tools = results)
+          this.getAllPages('/api/tools/', { o: 'stage,name'}).then(results => this.tools = results)
         } else if (this.step && !this.tool) {
           this.priority = this.step.priority
           this.step.tool.configurations = [this.step.configuration]

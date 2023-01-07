@@ -174,7 +174,7 @@ export default {
         } else if (this.process) {
           this.selectProcess(this.process.id, this.process)
         } else if (!this.tool && !this.process) {
-          this.getAllPages('/api/tools/', { o: 'configurations__stage,name'}).then(results => this.tools = results)
+          this.getAllPages('/api/tools/', { o: 'stage,name'}).then(results => this.tools = results)
           this.getAllPages('/api/processes/', { o: 'name' }).then(results => this.processes = results)
         }
         if (this.target) {

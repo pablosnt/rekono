@@ -110,7 +110,7 @@ export default {
   watch: {
     data () {
       this.filters = [
-        { name: 'Stage', values: this.stages, valueField: 'id', textField: 'value', filterField: 'configurations__stage' },
+        { name: 'Stage', values: this.stages, valueField: 'id', textField: 'value', filterField: 'stage' },
         { name: 'Input', values: this.inputTypes, valueField: 'value', textField: 'value', filterField: 'arguments__inputs__type__name' },
         { name: 'Output', values: this.inputTypes, valueField: 'value', textField: 'value', filterField: 'configurations__outputs__type__name' },
         { name: 'Favourities', type: 'checkbox', filterField: 'liked' }
@@ -122,7 +122,7 @@ export default {
       if (!params) {
         params = {}
       }
-      params['o'] = 'configurations__stage,name'
+      params['o'] = 'stage,name'
       return this.getOnePage('/api/tools/', params)
         .then(response => {
           this.data = response.data.results
