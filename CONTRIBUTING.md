@@ -17,9 +17,9 @@ In this section you can see how to achieve that and the things that you should t
 
 You can check this Wiki sections to prepare your Rekono contributions:
 
-- Documentation about the database and architecture [Design](https://github.com/pablosnt/rekono/wiki/3.-Design)
-- [From Source](https://github.com/pablosnt/rekono/wiki/4.-Installation#from-source) installation guide
-- [Configuration](https://github.com/pablosnt/rekono/wiki/5.-Configuration) guidelines
+- Documentation about the database and architecture [Design](https://github.com/pablosnt/rekono/wiki/Design)
+- [From Source](https://github.com/pablosnt/rekono/wiki/Installation#from-source) installation guide
+- [Configuration](https://github.com/pablosnt/rekono/wiki/Configuration) guidelines
 
 Note that you can also execute the unit tests using the following command:
 
@@ -48,19 +48,26 @@ The support of external hacking tools in Rekono is based on the following steps:
 
 2. Implement the parser to obtain findings from the tool results. You have to do that in the [tools/tools](https://github.com/pablosnt/rekono/tree/main/rekono/tools/tools) package:
 
-    - Create a new Python file with the tool name (defined in the previous step) in lower case and without whitespaces.
+    - Create a new Python file with the tool name (defined in the previous step) in lower case and replacing whitespaces by `_`.
     
-    - Create a new Python class with the tool name (defined in the previous step) capitalized and with the word `Tool` at the end. This class needs to extend the `tools.tools.base_tool.BaseTool` class.
+    - Create a new Python class with the tool name (defined in the previous step) capitalized. This class needs to extend the `tools.tools.base_tool.BaseTool` class.
 
     - Override the method `parse_output_file` or `parse_plain_output` depending on the tool output type.
 
-3. Implement [unit tests](https://github.com/pablosnt/rekono/tree/main/rekono/testing/tools) to check the parser correct working. You can add your [tool reports](https://github.com/pablosnt/rekono/tree/main/rekono/testing/data/reports) as example for that.
+3. Add tool to default processes like `All tools` in the file [`1_processes.json`](https://github.com/pablosnt/rekono/blob/main/rekono/processes/fixtures/1_processes.json).
 
-4. Add the tool reference in the [README.md](https://github.com/pablosnt/rekono#supported-tools).
+4. Implement [unit tests](https://github.com/pablosnt/rekono/tree/main/rekono/testing/tools) to check the parser correct working. You can add your [tool reports](https://github.com/pablosnt/rekono/tree/main/rekono/testing/data/reports) as example for that.
 
-5. Add tool installation to the [Kali Linux Dockerfile](https://github.com/pablosnt/rekono/blob/main/docker/kali/Dockerfile).
+5. Add tool icon domain to the `Content-Security-Policy` in the following files:
+    
+    - [vue.config.js](https://github.com/pablosnt/rekono/blob/main/rekono/frontend/vue.config.js#L3) for development environments
+    - [nginx.conf](https://github.com/pablosnt/rekono/blob/main/docker/nginx/nginx.conf#L69) for production environments
 
-6. Add tool installation to the [Rekono CLI](https://github.com/pablosnt/rekono-cli/blob/main/rekono/installation/tools.py).
+6. Add tool reference to the [README.md](https://github.com/pablosnt/rekono#supported-tools).
+
+7. Add tool installation to the [Kali Linux Dockerfile](https://github.com/pablosnt/rekono/blob/main/docker/kali/Dockerfile).
+
+8. Add tool installation to the [Rekono CLI](https://github.com/pablosnt/rekono-cli/blob/main/rekono/installation/tools.py).
 
 ### CI/CD
 

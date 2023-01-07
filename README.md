@@ -19,17 +19,6 @@
 **Rekono** combines other hacking tools and its results to execute complete pentesting processes against a target in an automated way. The findings obtained during the executions will be sent to the user via email or Telegram notifications and also can be imported in [Defect-Dojo](https://github.com/DefectDojo/django-DefectDojo) if an advanced vulnerability management is needed. Moreover, Rekono includes a Telegram bot that can be used to perform executions easily from anywhere and using any device.
 
 
-## Features
-
-- Combine hacking tools to create pentesting `processes`
-- Execute pentesting `processes`
-- Execute pentesting `tools`
-- Review `findings` and receive them via `email` or `Telegram` notifications
-- Use `Defect-Dojo` integration to import the findings detected by Rekono
-- Execute `tools` and `processes` from `Telegram Bot`
-- `Wordlists` management
-
-
 ## Why Rekono?
 
 Do you ever think about the steps that you follow when you start pentesting? Probably you start performing some OSINT tasks to gather public information about the target. Then, maybe you run hosts discovery and ports enumeration tools. When you know what the target exposes, you can execute more specific tools for each service, to get more information and maybe, some vulnerabilities. And finally, if you find the needed information, you will look for a public exploit to get you into the target machine. I know, I know, this is an utopic scenario, and in the most cases the vulnerabilities are found due to the pentester skills and not by scanning tools. But before using your skills, how many time do you spend trying to get as information as possible with hacking tools? Probably, too much.
@@ -161,4 +150,4 @@ Rekono is licensed under the [GNU GENERAL PUBLIC LICENSE Version 3](./LICENSE.md
 
 ## Support
 
-If you need help you can create a new support [Issue](https://github.com/pablosnt/rekono/issues/new?assignees=&labels=help+wanted%2C+question&template=support.md) or mail rekono.project@gmail.com
+If you need help you can create a new support [Issue](https://github.com/pablosnt/rekono/issues/new?assignees=&labels=help+wanted%2C+question&template=support.md, mail rekono.project@gmail.com or join the Rekono community on [Discord](https://discord.gg/Zyduu5C7M3)
