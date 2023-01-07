@@ -4,8 +4,8 @@
     <b-table striped borderless head-variant="dark" :fields="toolsFields" :items="data">
       <template #cell(icon)="row">
         <b-link :href="row.item.reference" target="_blank">
-          <b-img v-if="row.item.icon" :src="row.item.icon" width="100" height="50"/>
-          <b-img v-if="!row.item.icon" src="favicon.ico"/>
+          <b-img v-if="row.item.icon" :src="row.item.icon" width="32"/>
+          <b-img v-if="!row.item.icon" src="favicon.ico" width="32"/>
         </b-link>
       </template>
       <template #cell(stages)="row">

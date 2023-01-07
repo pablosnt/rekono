@@ -38,8 +38,8 @@
           <b-table sticky-header="40rem" select-mode="single" selectable hover striped borderless head-variant="dark" :fields="executionsFields" :items="executions" @row-selected="selectExecution">
             <template #cell(tool)="row">
               <b-link :href="row.item.tool.reference" target="_blank">
-                <b-img v-if="row.item.tool.icon" :src="row.item.tool.icon" width="50" height="30"/>
-                <b-img v-if="!row.item.tool.icon" src="favicon.ico"/>
+                <b-img v-if="row.item.tool.icon" :src="row.item.tool.icon" width="32"/>
+                <b-img v-if="!row.item.tool.icon" src="favicon.ico" width="32"/>
               </b-link>
               {{ row.item.tool.name }}
             </template>

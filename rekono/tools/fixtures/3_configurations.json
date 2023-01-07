@@ -511,7 +511,7 @@
         "fields": {
             "tool": 20,
             "name": "VHOST enumeration",
-            "arguments": "vhost {target_url} {subdomain_wordlist} {basic_auth} {token_auth} {cookie} {intensity} --append-domain --no-tls-validation --no-color --no-progress --quiet --output {output}",
+            "arguments": "vhost {target_url} {subdomain_wordlist} {intensity} --append-domain --no-tls-validation --no-color --no-progress --quiet --output {output}",
             "stage": 2,
             "default": false
         }
