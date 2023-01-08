@@ -128,7 +128,7 @@
             "output_format": null,
             "defectdojo_scan_type": null,
             "reference": "https://github.com/fullhunt/log4j-scan",
-            "icon": "https://dkh9ehwkisc4.cloudfront.net/static/images/fullhunt.png"
+            "icon": "https://fullhunt.io/static/theme/images/logo/favicon.ico"
         }
     },
     {
@@ -176,7 +176,7 @@
             "output_format": "json",
             "defectdojo_scan_type": "Gitleaks",
             "reference": "https://github.com/zricethezav/gitleaks",
-            "icon": "https://raw.githubusercontent.com/zricethezav/gifs/master/gitleakslogo.png"
+            "icon": "https://gitleaks.io/favicon.ico"
         }
     },
     {
@@ -212,7 +212,7 @@
             "output_format": "json",
             "defectdojo_scan_type": "Nuclei",
             "reference": "https://nuclei.projectdiscovery.io",
-            "icon": "https://raw.githubusercontent.com/projectdiscovery/nuclei/main/static/nuclei-logo.png"
+            "icon": "https://nuclei.projectdiscovery.io/static/favicon.png"
         }
     },
     {
@@ -224,7 +224,7 @@
             "output_format": null,
             "defectdojo_scan_type": null,
             "reference": "https://github.com/fullhunt/spring4shell-scan",
-            "icon": "https://dkh9ehwkisc4.cloudfront.net/static/images/fullhunt.png"
+            "icon": "https://fullhunt.io/static/theme/images/logo/favicon.ico"
         }
     },
     {
