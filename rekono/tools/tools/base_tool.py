@@ -422,9 +422,9 @@ class BaseTool:
             message (str, optional): Descriptive message about the execution skipping
         '''
         self.execution.status = Status.SKIPPED                                  # Set execution status to Skipped
-        self.execution.output_error = message
+        self.execution.output_plain = message
         self.execution.end = timezone.now()                                     # Set execution end date
-        self.execution.save(update_fields=['status', 'end', 'output_error'])
+        self.execution.save(update_fields=['status', 'end', 'output_plain'])
 
     def on_running(self) -> None:
         '''Perform changes in Execution entity when command execution starts.'''
