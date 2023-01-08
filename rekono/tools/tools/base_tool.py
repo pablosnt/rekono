@@ -253,7 +253,7 @@ class BaseTool:
         # Format configuration arguments with the built tool arguments
         args = self.configuration.arguments.format(**command)
         # Split arguments by whitespaces taking into account the arguments between quotes
-        return [arg for arg in re.findall(r'[\'"].+[\'"]|[^\s]+', args)]
+        return re.findall(r'[^\s\'"]*[\'"][^\'"]+[\'"]|[^\'"\s]+', args)
 
     def check_arguments(self, targets: List[BaseInput], findings: List[Finding]) -> bool:
         '''Check if given resources (targets, resources and findings) lists are enough to execute the tool.
@@ -289,6 +289,28 @@ class BaseTool:
             host = host[:-1]                                                    # Remove last slash form URL
         return host
 
+    def get_environment(self, arguments: List[str]) -> Tuple[List[str], Dict[str, Any]]:
+        '''Get environment variables from tool arguments.
+
+        Args:
+            arguments (List[str]): Tool arguments list
+
+        Returns:
+            Tuple[List[str], Dict[str, Any]]: Updated tool arguments to use and environment variables to apply
+        '''
+        environment = os.environ.copy()                                         # Copy current environment
+        if self.tool.command not in arguments:
+            arguments.insert(0, self.tool.command)                              # Combine tool command with arguments
+        else:
+            index = arguments.index(self.tool.command)                          # Get command index
+            for definition in arguments[:index]:                                # For each previous argument
+                if '=' not in definition:                                       # It isn't an environment variable
+                    continue
+                variable, value = definition.split('=', 1)                      # Parse variable
+                environment[variable] = value.strip().replace('\'', '').replace('"', '')    # Add environment variable
+            arguments = arguments[index:]                                       # Remove environment variable from args
+        return arguments, environment
+
     def tool_execution(self, arguments: List[str]) -> str:
         '''Execute the tool.
 
@@ -301,14 +323,17 @@ class BaseTool:
         Returns:
             str: Plain output of the tool execution
         '''
-        if self.tool.command not in arguments:
-            arguments.insert(0, self.tool.command)                              # Combine tool command with arguments
+        arguments, environment = self.get_environment(arguments)                # Get environment from argument
         logger.info(f'[Tool] Running: {" ".join(arguments)}')
         if hasattr(self, 'run_directory'):
-            # Execute the tool in directory
-            process = subprocess.run(arguments, capture_output=True, cwd=getattr(self, 'run_directory'))
+            process = subprocess.run(                                           # Execute the tool in directory
+                arguments,
+                capture_output=True,
+                env=environment,
+                cwd=getattr(self, 'run_directory')
+            )
         else:
-            process = subprocess.run(arguments, capture_output=True)            # Execute the tool
+            process = subprocess.run(arguments, capture_output=True, env=environment)   # Execute the tool
         if not self.ignore_exit_code and process.returncode > 0:
             # Execution error and ignore exit code is False
             raise ToolExecutionException(process.stderr.decode('utf-8'))
@@ -470,8 +495,9 @@ class BaseTool:
             self.on_error(stderr=str(ex))                                       # Execution error
             self.clean_environment()                                            # Clean environment
             return
-        except Exception:                                                       # pragma: no cover
+        except Exception as ex:                                                 # pragma: no cover
             logger.error(f'[Tool] Unexpected error during {self.tool.name} execution')
+            logger.error(str(ex))
             # Unexpected error during tool execution
             self.on_error()                                                     # Execution error
             self.clean_environment()                                            # Clean environment
