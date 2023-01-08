@@ -258,7 +258,7 @@
         "fields": {
             "tool": 7,
             "name": "CMS scan",
-            "arguments": "{url} {intensity}",
+            "arguments": "{url} {intensity} --follow-redirect --batch",
             "stage": 4,
             "default": true
         }
