@@ -51,18 +51,6 @@
         "model": "resources.wordlist",
         "pk": 5,
         "fields": {
-            "name": "Backdoor Web Shells",
-            "type": "Endpoint",
-            "path": "/usr/share/seclists/Web-Shells/backdoor_list.txt",
-            "checksum": null,
-            "size": null,
-            "creator": null
-        }
-    },
-    {
-        "model": "resources.wordlist",
-        "pk": 6,
-        "fields": {
             "name": "Apache",
             "type": "Endpoint",
             "path": "/usr/share/seclists/Discovery/Web-Content/apache.txt",
@@ -73,7 +61,7 @@
     },
     {
         "model": "resources.wordlist",
-        "pk": 7,
+        "pk": 6,
         "fields": {
             "name": "Big (seclists)",
             "type": "Endpoint",
@@ -85,7 +73,7 @@
     },
     {
         "model": "resources.wordlist",
-        "pk": 8,
+        "pk": 7,
         "fields": {
             "name": "Common (seclists)",
             "type": "Endpoint",
@@ -97,7 +85,7 @@
     },
     {
         "model": "resources.wordlist",
-        "pk": 9,
+        "pk": 8,
         "fields": {
             "name": "Endpoints list for Dirsearch",
             "type": "Endpoint",
@@ -109,7 +97,7 @@
     },
     {
         "model": "resources.wordlist",
-        "pk": 10,
+        "pk": 9,
         "fields": {
             "name": "Nginx",
             "type": "Endpoint",
@@ -121,11 +109,23 @@
     },
     {
         "model": "resources.wordlist",
-        "pk": 11,
+        "pk": 10,
         "fields": {
             "name": "Swagger",
             "type": "Endpoint",
             "path": "/usr/share/seclists/Discovery/Web-Content/swagger.txt",
+            "checksum": null,
+            "size": null,
+            "creator": null
+        }
+    },
+    {
+        "model": "resources.wordlist",
+        "pk": 11,
+        "fields": {
+            "name": "Backdoor Web Shells",
+            "type": "Endpoint",
+            "path": "/usr/share/seclists/Web-Shells/backdoor_list.txt",
             "checksum": null,
             "size": null,
             "creator": null
