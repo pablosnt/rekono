@@ -10,14 +10,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name='targettechnology',
-            name='target_port',
-        ),
-        migrations.RemoveField(
-            model_name='targetvulnerability',
-            name='target_port',
-        ),
         migrations.DeleteModel(
             name='TargetEndpoint',
         ),
