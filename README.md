@@ -148,12 +148,14 @@ Check the configuration options in [Rekono Wiki](https://github.com/pablosnt/rek
 
 ## Support
 
-<p align="center">
+You can reach us on:
+
+<p>
   <a href="https://github.com/pablosnt/rekono/issues/new?labels=help+wanted%2C+question&template=support.md" alt="GitHub Issue">
     <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" width="64"/>
   </a>
   <a href="https://discord.gg/Zyduu5C7M3" alt="Discord">
-    <img src="https://theme.zdassets.com/theme_assets/678183/cc59daa07820943e943c2fc283b9079d7003ff76.svg" width="256"/>
+    <img src="https://assets-global.website-files.com/6257adef93867e50d84d30e2/636e0a69f118df70ad7828d4_icon_clyde_blurple_RGB.svg" width="64"/>
   </a>
 </p>
 
