@@ -1,6 +1,6 @@
 from typing import Any
 
-from api.views import CreateViewSet, GetViewSet
+from api.views import CreateViewSet, CreateWithUserViewSet, GetViewSet
 from django.core.exceptions import ValidationError
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
@@ -23,6 +23,7 @@ from tasks.serializers import TaskSerializer
 class TaskViewSet(
     GetViewSet,
     CreateViewSet,
+    CreateWithUserViewSet,
     CreateModelMixin,
     ListModelMixin,
     RetrieveModelMixin,
@@ -36,6 +37,7 @@ class TaskViewSet(
     # Fields used to search tasks
     search_fields = ['target__target', 'process__name', 'process__steps__tool__name', 'tool__name']
     members_field = 'target__project__members'
+    user_field = 'executor'
 
     def destroy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         '''Cancel task.
