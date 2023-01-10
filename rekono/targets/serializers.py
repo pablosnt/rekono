@@ -27,7 +27,7 @@ class TargetSerializer(serializers.ModelSerializer):
         model = Target
         fields = (                                                              # Target fields exposed via API
             'id', 'project', 'target', 'type', 'defectdojo_engagement_id',
-            'input_technologies', 'input_vulnerabilities', 'tasks'
+            'target_ports', 'input_technologies', 'input_vulnerabilities', 'tasks'
         )
         read_only_fields = (                                                    # Read only fields
             'type', 'target_ports', 'input_technologies', 'input_vulnerabilities', 'tasks'

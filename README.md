@@ -126,7 +126,6 @@ You can follow this steps to deploy the Telegram bot:
 1. Create a new bot in Telegram using this [guide](https://core.telegram.org/bots#how-do-i-create-a-bot) and the [@BotFather](https://t.me/botfather)
 2. The [@BotFather](https://t.me/botfather) will send you an authentication token
 3. Configure the token value in the `Settings` page or ask your administrator for doing it.
-4. Restart the Telegram bot container (Docker) or the Telegram bot service (CLI).
 
 
 ### Defect-Dojo
