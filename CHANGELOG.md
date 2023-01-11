@@ -3,6 +3,46 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2023-01-11
+
+### Added
+
+- Support for authenticated scans using different authentication types (https://github.com/pablosnt/rekono/pull/95)
+- Replace `TargetTechnology` and `TargetVulnerability` entities by `InputTechnology` and `InputVulnerability` entities (https://github.com/pablosnt/rekono/pull/97)
+- New popup for the management of target details: target ports, authentication, input technologies and vulnerabilities (https://github.com/pablosnt/rekono/pull/97)
+- Support for `Nuclei` tool (https://github.com/pablosnt/rekono/pull/100)
+- Support for `Spring4Shell Scan` tool (https://github.com/pablosnt/rekono/pull/102)
+- Support for `Gobuster` tool (https://github.com/pablosnt/rekono/pull/106)
+- New default wordlists (https://github.com/pablosnt/rekono/pull/109)
+- Save default wordlists `size` after database migration (https://github.com/pablosnt/rekono/pull/109)
+- Save the reason of skipped executions in `output_plain` field (https://github.com/pablosnt/rekono/pull/121)
+
+### Changed
+
+- Remove `TargetEndpoint` entity because they are useless for all tools (https://github.com/pablosnt/rekono/pull/92)
+- Optimize API handlers to reduce duplicated code (https://github.com/pablosnt/rekono/pull/96)
+- Remove password wordlists because they are useless for all tools (https://github.com/pablosnt/rekono/pull/101)
+- Replace `cisagov/log4j-scanner` tool by `fullhunt/log4j-scan` (https://github.com/pablosnt/rekono/pull/103)
+- Move `stage` parameter from `Tool` entity to `Configuration` to allow configurations of the same tool to belong to different stages (https://github.com/pablosnt/rekono/pull/108)
+- Improve favourities filters on web interface (https://github.com/pablosnt/rekono/pull/110)
+- Upgrade `requests` to version `2.28.1` (https://github.com/pablosnt/rekono/pull/114)
+
+### Fixed
+
+- Deploy Telegram bot automatically after configuring the Telegram token (https://github.com/pablosnt/rekono/pull/93)
+- Allow the creation of tasks without specific wordlist from the Telegram bot (https://github.com/pablosnt/rekono/pull/98)
+- Only apply input parameters for tool executions (https://github.com/pablosnt/rekono/pull/99)
+- Filter host inputs by distinct address type to prevent errors in tool configurations (https://github.com/pablosnt/rekono/pull/107)
+- Fix icon size and resolution to improve user experience on web interface (https://github.com/pablosnt/rekono/pull/111)
+- Configure `CMSeeK` to don't ask user about anything (https://github.com/pablosnt/rekono/pull/115)
+- Fix usage of specific environment variables for tool executions (https://github.com/pablosnt/rekono/pull/119) 
+
+### Security
+
+- Validate target addresses to prevent scannings of the internal Rekono infrastructure (https://github.com/pablosnt/rekono/pull/94)
+- Upgrade `setuptools` to version `65.6.3` (https://github.com/pablosnt/rekono/pull/105)
+
+
 ## [1.3.0] - 2022-11-19
 
 ### Added
