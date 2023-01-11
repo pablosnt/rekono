@@ -33,11 +33,12 @@ Why not automate this process and focus on find vulnerabilities using your skill
 
 ## Demo
 
-[![Rekono]](https://user-images.githubusercontent.com/69458381/165973356-47666e33-e96c-4aee-b4a3-dd99fffe73bd.mp4)
+[![Rekono]](https://user-images.githubusercontent.com/69458381/211694917-6738e42a-cb44-4d3a-905d-752b3fe25718.mp4)
+
 
 ### Telegram Bot
 
-[![Rekono Bot]](https://user-images.githubusercontent.com/69458381/165973380-0f3308b6-f5f9-46a7-8d5b-ab89580eb840.mp4)
+[![Rekono Bot]](https://user-images.githubusercontent.com/69458381/211692042-d7c38e41-19e9-44fd-842a-59a16f945b6f.mp4)
 
 
 ## Supported tools
