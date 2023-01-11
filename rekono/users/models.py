@@ -9,6 +9,7 @@ from rest_framework.authtoken.models import Token
 from security.authorization.roles import Role
 from security.input_validation import validate_name
 from security.otp import generate, get_expiration
+
 from users.enums import Notification
 
 # Create your models here.
@@ -91,7 +92,6 @@ class RekonoUserManager(UserManager):
         Returns:
             Any: Enabled user
         '''
-        # user.is_active = True                                                   # Enable user
         user.otp = generate()                                                   # Generate its OTP
         user.otp_expiration = get_expiration()                                  # Set OTP expiration
         user.save(update_fields=['otp', 'otp_expiration'])

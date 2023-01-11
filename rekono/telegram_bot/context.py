@@ -1,9 +1,11 @@
 '''Keywords used to save data in Telegram chat context.'''
 
 STATES = 'states'
+COMMAND = 'command'
 PROJECT = 'project'
 TARGET = 'target'
 TARGET_PORT = 'target_port'
+AUTH_TYPE = 'authentication_type'
 PROCESS = 'process'
 TOOL = 'tool'
 CONFIGURATION = 'configuration'

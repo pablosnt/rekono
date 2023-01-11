@@ -670,5 +670,101 @@
             "configuration": 38,
             "type": 7
         }
+    },
+    {
+        "model": "tools.output",
+        "pk": 85,
+        "fields": {
+            "configuration": 39,
+            "type": 5
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 86,
+        "fields": {
+            "configuration": 39,
+            "type": 6
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 87,
+        "fields": {
+            "configuration": 40,
+            "type": 5
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 88,
+        "fields": {
+            "configuration": 40,
+            "type": 6
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 89,
+        "fields": {
+            "configuration": 41,
+            "type": 6
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 90,
+        "fields": {
+            "configuration": 42,
+            "type": 6
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 91,
+        "fields": {
+            "configuration": 43,
+            "type": 6
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 92,
+        "fields": {
+            "configuration": 44,
+            "type": 6
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 93,
+        "fields": {
+            "configuration": 45,
+            "type": 6
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 94,
+        "fields": {
+            "configuration": 46,
+            "type": 1
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 95,
+        "fields": {
+            "configuration": 47,
+            "type": 1
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 96,
+        "fields": {
+            "configuration": 48,
+            "type": 4
+        }
     }
 ]

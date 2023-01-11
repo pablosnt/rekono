@@ -1,35 +1,30 @@
+from api.views import CreateWithUserViewSet
 from likes.views import LikeManagementView
-from processes.filters import ProcessFilter, StepFilter
-from processes.models import Process, Step
-from processes.serializers import (ProcessSerializer, StepPrioritySerializer,
-                                   StepSerializer)
 from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated
 from rest_framework.serializers import Serializer
 from rest_framework.viewsets import ModelViewSet
 from security.authorization.permissions import ProcessCreatorPermission
 
+from processes.filters import ProcessFilter, StepFilter
+from processes.models import Process, Step
+from processes.serializers import (ProcessSerializer, StepPrioritySerializer,
+                                   StepSerializer)
+
 # Create your views here.
 
 
-class ProcessViewSet(ModelViewSet, LikeManagementView):
+class ProcessViewSet(CreateWithUserViewSet, ModelViewSet, LikeManagementView):
     '''Process ViewSet that includes: get, retrieve, create, update, delete, like and dislike features.'''
 
     queryset = Process.objects.all().order_by('-id')
     serializer_class = ProcessSerializer
     filterset_class = ProcessFilter
     # Fields used to search processes
-    search_fields = ['name', 'description', 'steps__tool__name', 'steps__tool__command', 'steps__configuration__name']
+    search_fields = ['name', 'description']
     http_method_names = ['get', 'post', 'put', 'delete']                        # Required to remove PATCH method
     # Required to include the ProcessCreatorPermission and remove unneeded ProjectMemberPermission
     permission_classes = [IsAuthenticated, DjangoModelPermissions, ProcessCreatorPermission]
-
-    def perform_create(self, serializer: ProcessSerializer) -> None:
-        '''Create a new instance using a serializer.
-
-        Args:
-            serializer (ProcessSerializer): Serializer to use in the instance creation
-        '''
-        serializer.save(creator=self.request.user)                              # Include current user as creator
+    user_field = 'creator'
 
 
 class StepViewSet(ModelViewSet):

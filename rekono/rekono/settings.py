@@ -28,15 +28,16 @@ from rekono.environment import (ENV_REKONO_HOME, RKN_ALLOWED_HOSTS,
                                 RKN_EMAIL_HOST, RKN_EMAIL_PASSWORD,
                                 RKN_EMAIL_PORT, RKN_EMAIL_USER,
                                 RKN_FRONTEND_URL, RKN_GITTOOLS_DIR,
-                                RKN_LOG4J_SCANNER_DIR, RKN_RQ_HOST,
-                                RKN_RQ_PORT, RKN_SECRET_KEY, RKN_TRUSTED_PROXY)
+                                RKN_LOG4J_SCAN_DIR, RKN_RQ_HOST, RKN_RQ_PORT,
+                                RKN_SECRET_KEY, RKN_SPRING4SHELL_SCAN_DIR,
+                                RKN_TRUSTED_PROXY)
 
 ################################################################################
 # Rekono basic information                                                     #
 ################################################################################
 
 DESCRIPTION = 'Execute full pentesting processes combining multiple hacking tools automatically'    # Rekono description
-VERSION = '1.3.0'                                                               # Rekono version
+VERSION = '1.4.0'                                                               # Rekono version
 TESTING = 'test' in sys.argv                                                    # Tests execution
 
 ################################################################################
@@ -93,9 +94,11 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
+    'authentications',
     'executions',
     'findings',
     'input_types',
+    'parameters',
     'processes',
     'projects',
     'rekono',
@@ -381,14 +384,17 @@ EMAIL_USE_TLS = CONFIG.EMAIL_TLS
 ################################################################################
 
 TOOLS = {
-    'cmseek': {
-        'directory': os.getenv(RKN_CMSEEK_RESULTS, CONFIG.TOOLS_CMSEEK_DIR)     # CMSeeK directory
+    'cmseek': {                                                                 # CMSeeK
+        'directory': os.getenv(RKN_CMSEEK_RESULTS, CONFIG.TOOLS_CMSEEK_DIR)
     },
-    'log4j-scanner': {
-        'directory': os.getenv(RKN_LOG4J_SCANNER_DIR, CONFIG.TOOLS_LOG4J_SCANNER_DIR)     # Log4j Scanner directory
+    'log4j-scan': {                                                             # Log4j Scan
+        'directory': os.getenv(RKN_LOG4J_SCAN_DIR, CONFIG.TOOLS_LOG4J_SCAN_DIR)
     },
-    'gittools': {
-        'directory': os.getenv(RKN_GITTOOLS_DIR, CONFIG.TOOLS_GITTOOLS_DIR)     # GitTools directory
+    'spring4shell-scan': {                                                      # Spring4Shell Scan
+        'directory': os.getenv(RKN_SPRING4SHELL_SCAN_DIR, CONFIG.TOOLS_SPRING4SHELL_SCAN_DIR)
+    },
+    'gittools': {                                                               # GitTools
+        'directory': os.getenv(RKN_GITTOOLS_DIR, CONFIG.TOOLS_GITTOOLS_DIR)
     }
 }
 

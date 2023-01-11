@@ -1,8 +1,7 @@
 from typing import List, Tuple
 
-from telegram.utils.helpers import escape_markdown
-
 from rekono.settings import DESCRIPTION
+from telegram.utils.helpers import escape_markdown
 
 '''Help messages.'''
 
@@ -18,9 +17,9 @@ HELP = [
     ('clearproject', 'Selection', 'Unselect the selected project'),
     ('newtarget', 'Targets', 'Create new target'),
     ('newport', 'Targets', 'Create new target port'),
-    ('newendpoint', 'Targets', 'Create new target endpoint'),
-    ('newtechnology', 'Targets', 'Create new target technology'),
-    ('newvulnerability', 'Targets', 'Create new target vulnerability'),
+    ('newauth', 'Targets', 'Create new authentication'),
+    ('newtechnology', 'Parameters', 'Create new input technology'),
+    ('newvulnerability', 'Parameters', 'Create new input vulnerability'),
     ('tool', 'Execution', 'Execute tool'),
     ('process', 'Execution', 'Execute process'),
     ('cancel', 'Common', 'Cancel current operation')

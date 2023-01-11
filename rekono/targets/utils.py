@@ -4,10 +4,9 @@ import re
 import socket
 
 from django.core.exceptions import ValidationError
-from targets.enums import TargetType
+from security.input_validation import IP_RANGE_REGEX
 
-# Regex to match IP ranges like 10.10.10.1-20
-IP_RANGE_REGEX = '[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}-[0-9]{1,3}'
+from targets.enums import TargetType
 
 logger = logging.getLogger()                                                    # Rekono logger
 
@@ -24,6 +23,14 @@ def get_target_type(target: str) -> str:
     Returns:
         str: Target type associated to the target
     '''
+    if target in [
+        '127.0.0.1', 'localhost', 'frontend', 'backend',
+        'postgres', 'redis', 'postfix', 'initialize',
+        'tasks-worker', 'executions-worker', 'findings-worker',
+        'emails-worker', 'telegram-bot', 'nginx'
+    ]:
+        # Target is invalid
+        raise ValidationError({'target': f'Invalid target {target}'})
     try:
         # Check if target is an IP address (IPv4 or IPv6)
         ip = ipaddress.ip_address(target)

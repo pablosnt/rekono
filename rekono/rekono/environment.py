@@ -31,8 +31,9 @@ RKN_EMAIL_PASSWORD = 'RKN_EMAIL_PASSWORD'
 
 # Tools configuration
 RKN_CMSEEK_RESULTS = 'RKN_CMSEEK_RESULTS'
-RKN_LOG4J_SCANNER_DIR = 'RKN_LOG4J_SCANNER_DIR'
+RKN_LOG4J_SCAN_DIR = 'RKN_LOG4J_SCAN_DIR'
 RKN_GITTOOLS_DIR = 'RKN_GITTOOLS_DIR'
+RKN_SPRING4SHELL_SCAN_DIR = 'RKN_SPRING4SHELL_SCAN_DIR'
 
 
 # --------------------------------------------------------------------------------------------------------------

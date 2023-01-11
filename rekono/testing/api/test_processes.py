@@ -54,7 +54,7 @@ class ProcessesTest(RekonoApiTestCase):
 
     def test_like_dislike(self) -> None:
         '''Test like and dislike features for processes.'''
-        count = self.api_test(self.client.get, f'{self.endpoint}?o=-name')['count']     # Get total count of processes
+        count = self.api_test(self.client.get, f'{self.endpoint}?order=-name')['count']  # Get total count of processes
         # Like testing process
         self.api_test(self.client.post, f'{self.endpoint}{self.process.id}/like/', 201)
         self.api_test(self.client.get, f'{self.endpoint}{self.process.id}/', expected={'liked': True, 'likes': 1})

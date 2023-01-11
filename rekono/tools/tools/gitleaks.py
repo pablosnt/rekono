@@ -2,65 +2,35 @@ import json
 import os
 import subprocess
 import uuid
-from typing import Any, List, Union
+from typing import List
 
 from findings.enums import Severity
-from findings.models import Credential, Finding, Path, Vulnerability
+from findings.models import Credential, Port, Vulnerability
 from input_types.enums import InputKeyword
-from input_types.models import BaseInput
-from targets.models import TargetEndpoint
+from rekono.settings import REPORTS_DIR, TOOLS
+
 from tools.exceptions import ToolExecutionException
 from tools.tools.base_tool import BaseTool
 
-from rekono.settings import REPORTS_DIR, TOOLS
 
-
-class GitleaksTool(BaseTool):
+class Gitleaks(BaseTool):
     '''GitLeaks tool class.'''
 
     # Exit code ignored because GitLeaks fails when find secrets
     ignore_exit_code = True
-    gitdumper = 'gitdumper.sh'
-    gitdumper_directory = os.path.join(TOOLS['gittools']['directory'], 'Dumper')
-
-    def check_installation(self) -> None:
-        '''Check if tool is installed in the system.
-
-        Raises:
-            ToolExecutionException: Raised if tool isn't installed
-        '''
-        super().check_installation()
-        if (
-            not os.path.isdir(self.gitdumper_directory) or
-            not os.path.isfile(os.path.join(self.gitdumper_directory, self.gitdumper))
-        ):
-            raise ToolExecutionException('Tool gitdumper is not installed in the system')
-
-    def get_git_endpoint(self) -> Union[Path, TargetEndpoint]:
-        '''Get .git endpoint from arguments.
-
-        Returns:
-            Union[Path, TargetEndpoint]: Path or TargetEndpoint with .git endpoint
-        '''
-        endpoint: Any = None
-        if Path.__name__.lower() in self.findings_relations:
-            endpoint = self.findings_relations[Path.__name__.lower()]       # Get Path
-        elif TargetEndpoint.__name__.lower() in self.findings_relations:
-            endpoint = self.findings_relations[TargetEndpoint.__name__.lower()]     # Get TargetEndpoint
-        return endpoint
+    gitdumper_directory = os.path.join(TOOLS['gittools']['directory'], 'Dumper')    # GitDumper directory
+    script = os.path.join(gitdumper_directory, 'gitdumper.sh')                  # Indicate the script path to execute
 
     def parse_output_file(self) -> None:
         '''Parse tool output file to create finding entities. This should be implemented by child tool classes.'''
         with open(self.path_output, 'r', encoding='utf-8') as output_file:
             data = json.load(output_file)                                       # Read output file
-        endpoint = self.get_git_endpoint()                                      # Get .git endpoint
         emails = []
         for finding in data:                                                    # For each finding
-            path = endpoint.endpoint if isinstance(endpoint, TargetEndpoint) else endpoint.path
             self.create_finding(                                                # Save secret match
                 Credential,
                 secret=finding.get('Match'),
-                context=f'{path} : {finding.get("File")} -> Line {finding.get("StartLine")}'
+                context=f'/.git/ : {finding.get("File")} -> Line {finding.get("StartLine")}'
             )
             email = finding.get('Email')
             if email and email not in emails:                                   # New commit author email
@@ -68,16 +38,14 @@ class GitleaksTool(BaseTool):
                 self.create_finding(                                            # Save commit author email
                     Credential,
                     email=email,
-                    context=f'{path} : Email of the commit author {finding.get("Author")}'
+                    context=f'/.git/ : Email of the commit author {finding.get("Author")}'
                 )
 
-    def tool_execution(self, arguments: List[str], targets: List[BaseInput], previous_findings: List[Finding]) -> str:
+    def tool_execution(self, arguments: List[str]) -> str:
         '''Execute the tool.
 
         Args:
             arguments (List[str]): Arguments to include in the tool command
-            targets (List[BaseInput]): List of targets and resources
-            previous_findings (List[Finding]): List of previous findings
 
         Raises:
             ToolExecutionException: Raised if tool execution finishes with an exit code distinct than zero
@@ -85,19 +53,16 @@ class GitleaksTool(BaseTool):
         Returns:
             str: Plain output of the tool execution
         '''
-        endpoint = self.get_git_endpoint()                                      # Get .git endpoint
-        if endpoint:
-            data = endpoint.parse()                                             # Parse endpoint data
-            if data[InputKeyword.URL.name.lower()] and data[InputKeyword.URL.name.lower()][-1] != '/':
-                data[InputKeyword.URL.name.lower()] += '/'                      # Add last slash to prevent errors
+        _, service = list(self.findings_relations.items())[0]                   # Get http service to scan
+        data = service.parse()
+        if InputKeyword.URL.name.lower() in data and data[InputKeyword.URL.name.lower()]:
+            if data[InputKeyword.URL.name.lower()][-1] != '/':
+                data[InputKeyword.URL.name.lower()] += '/.git/'                 # Add .git path with last slash
+            else:
+                data[InputKeyword.URL.name.lower()] += '.git/'                  # Add .git path with last slash
             self.run_directory = os.path.join(REPORTS_DIR, str(uuid.uuid4()))   # Path where Git repo will be dumped
-            exec = subprocess.run(                                              # Dump Git repository
-                [
-                    'bash',
-                    os.path.join(self.gitdumper_directory, self.gitdumper),
-                    data[InputKeyword.URL.name.lower()],
-                    self.run_directory
-                ],
+            process = subprocess.run(                                           # Dump Git repository
+                ['bash', self.script, data[InputKeyword.URL.name.lower()], self.run_directory],
                 capture_output=True,
                 cwd=self.gitdumper_directory
             )
@@ -109,13 +74,12 @@ class GitleaksTool(BaseTool):
                 git_dumped = len([d for d in dirs if d != '.git']) > 0 or len(files) > 0
                 break
             if git_dumped:                                                      # Git repository has been dumped
-                path = endpoint.endpoint if isinstance(endpoint, TargetEndpoint) else endpoint.path
                 self.create_finding(                                            # Create related vulnerability
                     Vulnerability,
-                    port=endpoint.port if isinstance(endpoint, Path) else None,
+                    port=service if isinstance(service, Port) else None,
                     name='Git source code exposure',
                     description=(
-                        f'Source code is exposed in the endpoint {path} and '
+                        'Source code is exposed in the endpoint /.git/ and '
                         "it's possible to dump it as a git repository"
                     ),
                     severity=Severity.HIGH,
@@ -125,8 +89,8 @@ class GitleaksTool(BaseTool):
                 )
                 self.execution.extra_data_path = self.run_directory             # Save extra data related to GitLeaks
                 self.execution.save(update_fields=['extra_data_path'])
-                return super().tool_execution(arguments, targets, previous_findings)    # Run GitLeaks
-            if exec.returncode > 0:                                             # Error during gitdumper execution
-                raise ToolExecutionException(exec.stderr.decode('utf-8'))
-            return exec.stdout.decode('utf-8')                                  # Git repository hasn't been dumped
+                return super().tool_execution(arguments)                        # Run GitLeaks
+            if process.returncode > 0:                                          # Error during gitdumper execution
+                raise ToolExecutionException(process.stderr.decode('utf-8'))
+            return process.stdout.decode('utf-8')                               # Git repository hasn't been dumped
         raise ToolExecutionException('Path argument is required')

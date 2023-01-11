@@ -4,6 +4,7 @@ from api.filters import BaseToolFilter
 from django.db.models import QuerySet
 from django_filters.rest_framework import filters
 from django_filters.rest_framework.filters import OrderingFilter
+
 from findings.enums import OSType
 from findings.models import (OSINT, Credential, Exploit, Host, Path, Port,
                              Technology, Vulnerability)
@@ -33,7 +34,6 @@ FINDING_FILTERING = {
     'executions__end': ['gte', 'lte', 'exact'],
     'detected_by': ['exact'],
     'detected_by__name': ['exact', 'icontains'],
-    'detected_by__stage': ['exact'],
     'first_seen': ['gte', 'lte', 'exact'],
     'last_seen': ['gte', 'lte', 'exact'],
     'is_active': ['exact'],
@@ -162,7 +162,9 @@ class PortFilter(FindingFilter):
     '''FilterSet to filter and sort Port entities.'''
 
     # Ordering fields including common ones
-    o = OrderingFilter(fields=FINDING_ORDERING + (('host__os_type', 'os_type'), 'host', 'port', 'protocol', 'service'))
+    o = OrderingFilter(
+        fields=FINDING_ORDERING + (('host__os_type', 'os_type'), 'host', 'port', 'protocol', 'service', 'status')
+    )
 
     class Meta:
         '''FilterSet metadata.'''
@@ -184,7 +186,7 @@ class PathFilter(FindingFilter):
     '''FilterSet to filter and sort Path entities.'''
 
     # Ordering fields including common ones
-    o = OrderingFilter(fields=FINDING_ORDERING + (('port__host', 'host'), 'port', 'path', 'status'))
+    o = OrderingFilter(fields=FINDING_ORDERING + (('port__host', 'host'), 'port', 'path', 'status', 'type'))
 
     class Meta:
         '''FilterSet metadata.'''

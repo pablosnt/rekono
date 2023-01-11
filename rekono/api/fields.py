@@ -32,7 +32,34 @@ class IntegerChoicesField(serializers.Field):
 
 
 @extend_schema_field({'type': 'array', 'items': {'type': 'string'}})
-class RekonoTagSerializerField(TagListSerializerField):
+class RekonoTagField(TagListSerializerField):
     '''Internal serializer field for TagListSerializerField, including API documentation.'''
 
     pass
+
+
+@extend_schema_field(OpenApiTypes.STR)
+class ProtectedStringValueField(serializers.Field):
+    '''Serializer field to manage protected system values.'''
+
+    def to_representation(self, value: str) -> str:
+        '''Return text value to send to the client.
+
+        Args:
+            value (str): Internal text value
+
+        Returns:
+            str: Text value that contains multiple '*' characters
+        '''
+        return '*' * len(value)
+
+    def to_internal_value(self, value: str) -> str:
+        '''Return text value to be stored in database.
+
+        Args:
+            value (str): Text value provided by the client
+
+        Returns:
+            str: Text value to be stored. Save value than the provided one.
+        '''
+        return value

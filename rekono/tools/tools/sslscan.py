@@ -7,7 +7,7 @@ from findings.models import Technology, Vulnerability
 from tools.tools.base_tool import BaseTool
 
 
-class SslscanTool(BaseTool):
+class Sslscan(BaseTool):
     '''Sslscan tool class.'''
 
     def get_technology(self, technologies: List[Technology], sslversion: str) -> Union[Technology, None]:

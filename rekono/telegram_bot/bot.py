@@ -2,6 +2,7 @@ import logging
 from typing import Optional
 
 from system.models import System
+from telegram.error import InvalidToken, Unauthorized
 from telegram.ext import (CallbackQueryHandler, CommandHandler,
                           ConversationHandler, Filters, MessageHandler,
                           Updater)
@@ -12,24 +13,26 @@ from telegram_bot.commands.selection import clear, show
 from telegram_bot.conversations.cancel import cancel
 from telegram_bot.conversations.execute import (execute, execute_process,
                                                 execute_tool)
+from telegram_bot.conversations.new_authentication import (
+    create_authentication, new_authentication)
+from telegram_bot.conversations.new_input_technology import (
+    create_input_technology, new_input_technology)
+from telegram_bot.conversations.new_input_vulnerability import (
+    create_input_vulnerability, new_input_vulnerability)
 from telegram_bot.conversations.new_target import create_target, new_target
-from telegram_bot.conversations.new_target_endpoint import (
-    create_target_endpoint, new_target_endpoint)
 from telegram_bot.conversations.new_target_port import (create_target_port,
                                                         new_target_port)
-from telegram_bot.conversations.new_target_technology import (
-    create_target_technology, new_target_technology)
-from telegram_bot.conversations.new_target_vulnerability import (
-    create_target_vulnerability, new_target_vulnerability)
 from telegram_bot.conversations.select_project import project
-from telegram_bot.conversations.selection import (select_configuration,
+from telegram_bot.conversations.selection import (select_authentication_type,
+                                                  select_configuration,
                                                   select_intensity,
                                                   select_process,
                                                   select_project,
                                                   select_target,
                                                   select_target_port,
                                                   select_tool, select_wordlist)
-from telegram_bot.conversations.states import (CREATE, EXECUTE,
+from telegram_bot.conversations.states import (CREATE, CREATE_RELATED, EXECUTE,
+                                               SELECT_AUTHENTICATION_TYPE,
                                                SELECT_CONFIGURATION,
                                                SELECT_INTENSITY,
                                                SELECT_PROCESS, SELECT_PROJECT,
@@ -37,6 +40,7 @@ from telegram_bot.conversations.states import (CREATE, EXECUTE,
                                                SELECT_TARGET_PORT, SELECT_TOOL,
                                                SELECT_WORDLIST)
 from telegram_bot.messages.help import get_my_commands
+from telegram_bot.token import handle_invalid_telegram_token
 
 logger = logging.getLogger()                                                    # Rekono logger
 
@@ -60,6 +64,8 @@ def initialize() -> None:
     try:
         updater = Updater(token=System.objects.first().telegram_bot_token)      # Telegram client
         updater.bot.set_my_commands(get_my_commands())                          # Configure bot commands
+    except (InvalidToken, Unauthorized):
+        handle_invalid_telegram_token(initialize)
     except Exception:
         logger.error('[Telegram Bot] Error during Telegram bot initialization')
 
@@ -95,40 +101,41 @@ def deploy() -> None:
             states={
                 SELECT_PROJECT: [CallbackQueryHandler(select_project)],
                 SELECT_TARGET: [CallbackQueryHandler(select_target)],
-                CREATE: [MessageHandler(Filters.text, create_target_port)]
+                CREATE: [MessageHandler(Filters.text, create_target_port)],
+                SELECT_AUTHENTICATION_TYPE: [CallbackQueryHandler(select_authentication_type)],
+                CREATE_RELATED: [MessageHandler(Filters.text, create_authentication)]
             },
             fallbacks=[CommandHandler('cancel', cancel)],
             per_chat=True
         ))
-        updater.dispatcher.add_handler(ConversationHandler(                     # Create new target endpoint
-            entry_points=[CommandHandler('newendpoint', new_target_endpoint)],
+        updater.dispatcher.add_handler(ConversationHandler(                     # Create new authentication
+            entry_points=[CommandHandler('newauth', new_authentication)],
             states={
                 SELECT_PROJECT: [CallbackQueryHandler(select_project)],
                 SELECT_TARGET: [CallbackQueryHandler(select_target)],
                 SELECT_TARGET_PORT: [CallbackQueryHandler(select_target_port)],
-                CREATE: [MessageHandler(Filters.text, create_target_endpoint)]
+                SELECT_AUTHENTICATION_TYPE: [CallbackQueryHandler(select_authentication_type)],
+                CREATE_RELATED: [MessageHandler(Filters.text, create_authentication)]
             },
             fallbacks=[CommandHandler('cancel', cancel)],
             per_chat=True
         ))
-        updater.dispatcher.add_handler(ConversationHandler(                     # Create new target technology
-            entry_points=[CommandHandler('newtechnology', new_target_technology)],
+        updater.dispatcher.add_handler(ConversationHandler(                     # Create new input technology
+            entry_points=[CommandHandler('newtechnology', new_input_technology)],
             states={
                 SELECT_PROJECT: [CallbackQueryHandler(select_project)],
                 SELECT_TARGET: [CallbackQueryHandler(select_target)],
-                SELECT_TARGET_PORT: [CallbackQueryHandler(select_target_port)],
-                CREATE: [MessageHandler(Filters.text, create_target_technology)]
+                CREATE: [MessageHandler(Filters.text, create_input_technology)]
             },
             fallbacks=[CommandHandler('cancel', cancel)],
             per_chat=True
         ))
-        updater.dispatcher.add_handler(ConversationHandler(                     # Create new target vulnerability
-            entry_points=[CommandHandler('newvulnerability', new_target_vulnerability)],
+        updater.dispatcher.add_handler(ConversationHandler(                     # Create new input vulnerability
+            entry_points=[CommandHandler('newvulnerability', new_input_vulnerability)],
             states={
                 SELECT_PROJECT: [CallbackQueryHandler(select_project)],
                 SELECT_TARGET: [CallbackQueryHandler(select_target)],
-                SELECT_TARGET_PORT: [CallbackQueryHandler(select_target_port)],
-                CREATE: [MessageHandler(Filters.text, create_target_vulnerability)]
+                CREATE: [MessageHandler(Filters.text, create_input_vulnerability)]
             },
             fallbacks=[CommandHandler('cancel', cancel)],
             per_chat=True
@@ -139,9 +146,9 @@ def deploy() -> None:
                 SELECT_PROJECT: [CallbackQueryHandler(select_project)],
                 SELECT_TARGET: [CallbackQueryHandler(select_target)],
                 SELECT_TOOL: [CallbackQueryHandler(select_tool)],
-                SELECT_WORDLIST: [CallbackQueryHandler(select_wordlist)],
                 SELECT_CONFIGURATION: [CallbackQueryHandler(select_configuration)],
                 SELECT_INTENSITY: [CallbackQueryHandler(select_intensity)],
+                SELECT_WORDLIST: [CallbackQueryHandler(select_wordlist)],
                 EXECUTE: [CallbackQueryHandler(execute)]
             },
             fallbacks=[CommandHandler('cancel', cancel)],
@@ -153,13 +160,15 @@ def deploy() -> None:
                 SELECT_PROJECT: [CallbackQueryHandler(select_project)],
                 SELECT_TARGET: [CallbackQueryHandler(select_target)],
                 SELECT_PROCESS: [CallbackQueryHandler(select_process)],
-                SELECT_WORDLIST: [CallbackQueryHandler(select_wordlist)],
                 SELECT_INTENSITY: [CallbackQueryHandler(select_intensity)],
+                SELECT_WORDLIST: [CallbackQueryHandler(select_wordlist)],
                 EXECUTE: [CallbackQueryHandler(execute)]
             },
             fallbacks=[CommandHandler('cancel', cancel)],
             per_chat=True
         ))
         updater.start_polling()                                                 # Start Telegram Bot
+    except (InvalidToken, Unauthorized):
+        handle_invalid_telegram_token(deploy)
     except Exception:
         logger.error('[Telegram Bot] Error during Telegram bot deployment')

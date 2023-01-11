@@ -16,6 +16,7 @@ class DataType(models.TextChoices):
 
     IP = 'IP'
     DOMAIN = 'Domain'
+    VHOST = 'VHOST'
     URL = 'Url'
     EMAIL = 'Email'
     LINK = 'Link'

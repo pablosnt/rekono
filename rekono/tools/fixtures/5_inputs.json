@@ -45,7 +45,7 @@
         "fields": {
             "argument": 3,
             "type": 2,
-            "filter": null,
+            "filter": "!ip_range,network",
             "order": 2
         }
     },
@@ -55,7 +55,7 @@
         "fields": {
             "argument": 4,
             "type": 9,
-            "filter": null,
+            "filter": "endpoint",
             "order": 1
         }
     },
@@ -65,7 +65,7 @@
         "fields": {
             "argument": 5,
             "type": 2,
-            "filter": "DOMAIN",
+            "filter": "domain",
             "order": 1
         }
     },
@@ -85,7 +85,7 @@
         "fields": {
             "argument": 6,
             "type": 2,
-            "filter": null,
+            "filter": "!ip_range,network",
             "order": 2
         }
     },
@@ -105,7 +105,7 @@
         "fields": {
             "argument": 7,
             "type": 2,
-            "filter": null,
+            "filter": "!ip_range,network",
             "order": 2
         }
     },
@@ -125,7 +125,7 @@
         "fields": {
             "argument": 8,
             "type": 2,
-            "filter": null,
+            "filter": "!ip_range,network",
             "order": 2
         }
     },
@@ -145,7 +145,7 @@
         "fields": {
             "argument": 9,
             "type": 2,
-            "filter": null,
+            "filter": "!ip_range,network",
             "order": 2
         }
     },
@@ -165,7 +165,7 @@
         "fields": {
             "argument": 10,
             "type": 2,
-            "filter": null,
+            "filter": "!ip_range,network",
             "order": 2
         }
     },
@@ -205,7 +205,7 @@
         "fields": {
             "argument": 13,
             "type": 2,
-            "filter": null,
+            "filter": "!ip_range,network",
             "order": 2
         }
     },
@@ -215,7 +215,7 @@
         "fields": {
             "argument": 14,
             "type": 2,
-            "filter": "DOMAIN",
+            "filter": "domain",
             "order": 1
         }
     },
@@ -225,7 +225,7 @@
         "fields": {
             "argument": 15,
             "type": 2,
-            "filter": "DOMAIN",
+            "filter": "domain",
             "order": 1
         }
     },
@@ -245,7 +245,7 @@
         "fields": {
             "argument": 16,
             "type": 2,
-            "filter": null,
+            "filter": "!ip_range,network",
             "order": 2
         }
     },
@@ -254,14 +254,24 @@
         "pk": 26,
         "fields": {
             "argument": 17,
-            "type": 4,
-            "filter": ".git",
+            "type": 3,
+            "filter": null,
             "order": 1
         }
     },
     {
         "model": "tools.input",
         "pk": 27,
+        "fields": {
+            "argument": 17,
+            "type": 2,
+            "filter": "!ip_range,network",
+            "order": 2
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 28,
         "fields": {
             "argument": 18,
             "type": 3,
@@ -271,17 +281,17 @@
     },
     {
         "model": "tools.input",
-        "pk": 28,
+        "pk": 29,
         "fields": {
             "argument": 18,
             "type": 2,
-            "filter": null,
+            "filter": "!ip_range,network",
             "order": 2
         }
     },
     {
         "model": "tools.input",
-        "pk": 29,
+        "pk": 30,
         "fields": {
             "argument": 19,
             "type": 3,
@@ -291,7 +301,7 @@
     },
     {
         "model": "tools.input",
-        "pk": 30,
+        "pk": 31,
         "fields": {
             "argument": 20,
             "type": 3,
@@ -301,21 +311,251 @@
     },
     {
         "model": "tools.input",
-        "pk": 31,
+        "pk": 32,
         "fields": {
             "argument": 20,
             "type": 2,
-            "filter": null,
+            "filter": "!ip_range,network",
             "order": 2
         }
     },
     {
         "model": "tools.input",
-        "pk": 32,
+        "pk": 33,
         "fields": {
             "argument": 21,
             "type": 3,
             "filter": "microsoft-ds",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 34,
+        "fields": {
+            "argument": 22,
+            "type": 10,
+            "filter": "!cookie",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 35,
+        "fields": {
+            "argument": 23,
+            "type": 10,
+            "filter": "cookie",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 36,
+        "fields": {
+            "argument": 24,
+            "type": 10,
+            "filter": "cookie",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 37,
+        "fields": {
+            "argument": 25,
+            "type": 10,
+            "filter": "basic",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 38,
+        "fields": {
+            "argument": 26,
+            "type": 10,
+            "filter": "basic",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 39,
+        "fields": {
+            "argument": 27,
+            "type": 10,
+            "filter": "cookie",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 40,
+        "fields": {
+            "argument": 28,
+            "type": 10,
+            "filter": "!cookie",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 41,
+        "fields": {
+            "argument": 29,
+            "type": 10,
+            "filter": "cookie",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 42,
+        "fields": {
+            "argument": 30,
+            "type": 3,
+            "filter": "http",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 43,
+        "fields": {
+            "argument": 30,
+            "type": 2,
+            "filter": "!ip_range,network",
+            "order": 2
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 44,
+        "fields": {
+            "argument": 31,
+            "type": 10,
+            "filter": "!cookie",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 45,
+        "fields": {
+            "argument": 32,
+            "type": 10,
+            "filter": "cookie",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 46,
+        "fields": {
+            "argument": 33,
+            "type": 3,
+            "filter": "http",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 47,
+        "fields": {
+            "argument": 33,
+            "type": 2,
+            "filter": "!ip_range,network",
+            "order": 2
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 48,
+        "fields": {
+            "argument": 34,
+            "type": 2,
+            "filter": "domain",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 49,
+        "fields": {
+            "argument": 35,
+            "type": 2,
+            "filter": "domain",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 50,
+        "fields": {
+            "argument": 36,
+            "type": 3,
+            "filter": "http",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 51,
+        "fields": {
+            "argument": 36,
+            "type": 2,
+            "filter": "!ip_range,network",
+            "order": 2
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 52,
+        "fields": {
+            "argument": 37,
+            "type": 9,
+            "filter": "subdomain",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 53,
+        "fields": {
+            "argument": 38,
+            "type": 9,
+            "filter": "endpoint",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 54,
+        "fields": {
+            "argument": 39,
+            "type": 10,
+            "filter": "basic",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 55,
+        "fields": {
+            "argument": 40,
+            "type": 10,
+            "filter": "!cookie,basic",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 56,
+        "fields": {
+            "argument": 41,
+            "type": 10,
+            "filter": "cookie",
             "order": 1
         }
     }

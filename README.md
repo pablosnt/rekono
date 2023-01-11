@@ -12,22 +12,14 @@
   <a href="https://github.com/pablosnt/rekono/actions/workflows/code-style.yml" alt="Code style">
     <img src="https://github.com/pablosnt/rekono/actions/workflows/code-style.yml/badge.svg"/>
   </a>
+  <a href="https://discord.gg/Zyduu5C7M3">
+    <img src="https://img.shields.io/badge/Discord-Join-black?style=social&logo=discord"/>
+  </a>
 </p>
 
 # <p align="center"><img src="rekono/frontend/public/static/logo-black.png" width="500"/></p>
 
 **Rekono** combines other hacking tools and its results to execute complete pentesting processes against a target in an automated way. The findings obtained during the executions will be sent to the user via email or Telegram notifications and also can be imported in [Defect-Dojo](https://github.com/DefectDojo/django-DefectDojo) if an advanced vulnerability management is needed. Moreover, Rekono includes a Telegram bot that can be used to perform executions easily from anywhere and using any device.
-
-
-## Features
-
-- Combine hacking tools to create pentesting `processes`
-- Execute pentesting `processes`
-- Execute pentesting `tools`
-- Review `findings` and receive them via `email` or `Telegram` notifications
-- Use `Defect-Dojo` integration to import the findings detected by Rekono
-- Execute `tools` and `processes` from `Telegram Bot`
-- `Wordlists` management
 
 
 ## Why Rekono?
@@ -41,11 +33,12 @@ Why not automate this process and focus on find vulnerabilities using your skill
 
 ## Demo
 
-[![Rekono]](https://user-images.githubusercontent.com/69458381/165973356-47666e33-e96c-4aee-b4a3-dd99fffe73bd.mp4)
+[![Rekono]](https://user-images.githubusercontent.com/69458381/211694917-6738e42a-cb44-4d3a-905d-752b3fe25718.mp4)
+
 
 ### Telegram Bot
 
-[![Rekono Bot]](https://user-images.githubusercontent.com/69458381/165973380-0f3308b6-f5f9-46a7-8d5b-ab89580eb840.mp4)
+[![Rekono Bot]](https://user-images.githubusercontent.com/69458381/211692042-d7c38e41-19e9-44fd-842a-59a16f945b6f.mp4)
 
 
 ## Supported tools
@@ -59,12 +52,15 @@ Why not automate this process and focus on find vulnerabilities using your skill
 - [SSH Audit](https://github.com/jtesta/ssh-audit)
 - [SMBMap](https://github.com/ShawnDEvans/smbmap)
 - [Dirsearch](https://github.com/maurosoria/dirsearch)
+- [Gobuster](https://github.com/OJ/gobuster)
 - [GitLeaks](https://github.com/zricethezav/gitleaks) & [GitDumper](https://github.com/internetwache/GitTools/tree/master/Dumper)
-- [Log4j Scanner](https://github.com/cisagov/log4j-scanner)
+- [Log4j Scan](https://github.com/fullhunt/log4j-scan)
+- [Spring4Shell Scan](https://github.com/fullhunt/spring4shell-scan)
 - [CMSeeK](https://github.com/Tuhinshubhra/CMSeeK/)
 - [OWASP JoomScan](https://github.com/OWASP/joomscan)
 - [OWASP ZAP](https://www.zaproxy.org/)
 - [Nikto](https://github.com/sullo/nikto)
+- [Nuclei](https://github.com/projectdiscovery/nuclei)
 - [SearchSploit](https://www.exploit-db.com/searchsploit)
 - [Metasploit](https://www.metasploit.com/)
 
@@ -131,7 +127,6 @@ You can follow this steps to deploy the Telegram bot:
 1. Create a new bot in Telegram using this [guide](https://core.telegram.org/bots#how-do-i-create-a-bot) and the [@BotFather](https://t.me/botfather)
 2. The [@BotFather](https://t.me/botfather) will send you an authentication token
 3. Configure the token value in the `Settings` page or ask your administrator for doing it.
-4. Restart the Telegram bot container (Docker) or the Telegram bot service (CLI).
 
 
 ### Defect-Dojo
@@ -151,11 +146,22 @@ You can configure your Defect-Dojo details in the `Settings` page or ask your ad
 Check the configuration options in [Rekono Wiki](https://github.com/pablosnt/rekono/wiki/Configuration)
 
 
+## Support
+
+You can reach us on:
+
+<p>
+  <a href="https://github.com/pablosnt/rekono/issues/new?labels=help+wanted%2C+question&template=support.md" alt="GitHub Issue">
+    <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" width="64"/>
+  </a>
+  <a href="https://discord.gg/Zyduu5C7M3" alt="Discord">
+    <img src="https://assets-global.website-files.com/6257adef93867e50d84d30e2/636e0a69f118df70ad7828d4_icon_clyde_blurple_RGB.svg" width="64"/>
+  </a>
+</p>
+
+If you need more specific help, you can also mail rekono.project@gmail.com.
+
+
 ## License
 
 Rekono is licensed under the [GNU GENERAL PUBLIC LICENSE Version 3](./LICENSE.md)
-
-
-## Support
-
-If you need help you can create a new support [Issue](https://github.com/pablosnt/rekono/issues/new?assignees=&labels=help+wanted%2C+question&template=support.md) or mail rekono.project@gmail.com

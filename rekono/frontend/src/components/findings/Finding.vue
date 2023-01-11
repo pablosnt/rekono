@@ -81,10 +81,10 @@
             <b-button variant="outline" v-b-tooltip.hover title="Enable" @click="enableFinding(row.item)" v-if="!row.item.is_active">
               <b-icon variant="success" icon="check-circle-fill"/>
             </b-button>
-            <b-button variant="outline" v-b-tooltip.hover title="Disable" @click="selectFinding(row.item)" v-b-modal.disable-finding-modal v-if="row.item.is_active">
+            <b-button variant="outline" v-b-tooltip.hover title="Disable" @click="selectedFinding = row.item" v-b-modal.disable-finding-modal v-if="row.item.is_active">
               <b-icon variant="danger" icon="dash-circle-fill"/>
             </b-button>
-            <b-button variant="outline" v-b-tooltip.hover title="Create Target" @click="selectFinding(row.item)" v-b-modal.confirm-target v-if="name === 'osint' && (row.item.data_type === 'IP' || row.item.data_type === 'Domain') && row.item.is_active">
+            <b-button variant="outline" v-b-tooltip.hover title="Create Target" @click="selectedFinding = row.item" v-b-modal.confirm-target v-if="name === 'osint' && (row.item.data_type === 'IP' || row.item.data_type === 'Domain') && row.item.is_active">
               <b-icon variant="danger" icon="geo-fill"/>
             </b-button>
           </b-col>
@@ -94,7 +94,7 @@
     <b-modal id="confirm-target" @ok="createTargetFromOSINT" title="New Target" ok-title="Create Target" header-bg-variant="dark" header-text-variant="light" ok-variant="dark" v-if="name === 'osint' && selectedFinding">
       <p>You will create the target <strong>{{ selectedFinding.target }}</strong>. Are you sure?</p>
     </b-modal>
-    <deletion id="disable-finding-modal" title="Disable Finding" @deletion="disableFinding" @clean="cleanSelection" v-if="selectedFinding !== null">
+    <deletion id="disable-finding-modal" title="Disable Finding" @deletion="disableFinding" @clean="selectedFinding = null" v-if="selectedFinding !== null">
       <span>selected finding</span>
     </deletion>
   </b-col>
@@ -153,7 +153,7 @@ export default {
     getFilter () {
       let filter = {}
       if (this.order) {
-        filter.order = this.order
+        filter.o = this.order
       }
       if (this.execution) {
         filter.executions = this.execution
@@ -178,15 +178,17 @@ export default {
         filter = this.getFilter()
       }
       filter.severity = this.severities[index]
-      this.getAllPages('/api/vulnerabilities/', filter).then(results => {
-        this.findings.push(...results)
-        index += 1
-        if (index < this.severities.length) {
-          this.fetchVulnerabilities(filter, index)
-        } else {
-          this.$emit('end')
-        }
-      })
+      this.getAllPages('/api/vulnerabilities/', filter)
+        .then(results => {
+          this.findings.push(...results)
+          index += 1
+          if (index < this.severities.length) {
+            this.fetchVulnerabilities(filter, index)
+          } else {
+            this.$emit('end')
+          }
+        })
+        .catch(() => this.$emit('end'))
     },
     fetchData () {
       if (this.types && this.types.length > 0 && !this.types.includes(this.name.toLowerCase())) {
@@ -200,6 +202,7 @@ export default {
               this.findings = results
               this.$emit('end')
             })
+            .catch(() => this.$emit('end'))
         } else {
           this.fetchVulnerabilities()
         }
@@ -214,9 +217,6 @@ export default {
     createTargetFromOSINT () {
       this.post(`/api/osint/${this.selectedFinding.id}/target/`, { }, this.selectedFinding.data, 'Target created successfully')
     },
-    selectFinding (finding) {
-      this.selectedFinding = finding
-    },
     selectRow (items) {
       let row = (items && items.length > 0) ? items[0] : null
       if (row && this.findingId && !this.preventSelection) {
@@ -230,9 +230,6 @@ export default {
         this.$emit('finding-selected', { type: this.name, finding: row })
       }
       this.preventSelection = false
-    },
-    cleanSelection () {
-      this.selectedFinding = null
     }
   }
 }

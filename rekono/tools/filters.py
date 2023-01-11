@@ -1,5 +1,6 @@
 from django_filters.rest_framework import FilterSet, filters
 from likes.filters import LikeFilter
+
 from tools.models import Configuration, Tool
 
 
@@ -17,16 +18,16 @@ class ToolFilter(LikeFilter):
             'command': ['exact', 'icontains'],
             'configurations': ['exact'],
             'configurations__name': ['exact', 'icontains'],
+            'configurations__stage': ['exact'],
             'arguments__inputs__type__name': ['exact'],
-            'configurations__outputs__type__name': ['exact'],
-            'stage': ['exact']
+            'configurations__outputs__type__name': ['exact']
         }
 
 
 class ConfigurationFilter(FilterSet):
     '''FilterSet to filter and sort Configuration entities.'''
 
-    o = filters.OrderingFilter(fields=('tool', 'name'))                         # Ordering fields
+    o = filters.OrderingFilter(fields=('tool', 'stage', 'name'))                # Ordering fields
 
     class Meta:
         '''FilterSet metadata.'''
@@ -36,8 +37,8 @@ class ConfigurationFilter(FilterSet):
             'tool': ['exact'],
             'tool__name': ['exact', 'icontains'],
             'tool__command': ['exact', 'icontains'],
-            'tool__stage': ['exact'],
             'name': ['exact', 'icontains'],
+            'stage': ['exact'],
             'default': ['exact'],
             'tool__arguments__inputs__type__name': ['exact'],
             'outputs__type__name': ['exact'],

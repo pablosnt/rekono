@@ -17,10 +17,6 @@
                             <b-form-input type="password" v-model="telegramBotToken" placeholder="Telegram token" @change="telegramBotTokenChanged = true" :state="telegramBotTokenState"/>
                         </b-col>
                     </b-row>
-                    <b-alert v-model="telegramBotTokenChanged" variant="warning">
-                        <b-icon icon="exclamation-triangle-fill" variant="warning"></b-icon>
-                        Restarting Telegram bot is needed to apply the new configuration
-                    </b-alert>
                 </b-card>
                 <br/>
                 <b-card>
@@ -205,7 +201,7 @@ export default {
     handleSettings (event) {
         event.preventDefault()
         if (this.checkSettings()) {
-            var data = {
+            let data = {
                 upload_files_max_mb: this.uploadFilesMaxMb,
                 defect_dojo_url: this.defectDojoUrl,
                 defect_dojo_verify_tls: this.defectDojoVerifyTls,

@@ -8,8 +8,9 @@ from telegram import ParseMode
 from telegram.ext import CallbackContext, ConversationHandler
 from telegram.update import Update
 from telegram.utils.helpers import escape_markdown
-from telegram_bot.context import (CONFIGURATION, INTENSITY, PROCESS, PROJECT,
-                                  STATES, TARGET, TARGET_PORT, TOOL, WORDLIST)
+from telegram_bot.context import (AUTH_TYPE, CONFIGURATION, INTENSITY, PROCESS,
+                                  PROJECT, STATES, TARGET, TARGET_PORT, TOOL,
+                                  WORDLIST)
 from telegram_bot.conversations.ask import ask_for_wordlist
 from telegram_bot.messages.selection import (SELECTED_CONFIGURATION,
                                              SELECTED_INTENSITY,
@@ -117,6 +118,28 @@ def select_target_port(update: Update, context: CallbackContext) -> int:
     return ConversationHandler.END                                              # End conversation
 
 
+def select_authentication_type(update: Update, context: CallbackContext) -> int:
+    '''Manage selected authentication type.
+
+    Args:
+        update (Update): Telegram Bot update
+        context (CallbackContext): Telegram Bot context
+
+    Returns:
+        int: Conversation state
+    '''
+    chat = get_chat(update)                                                     # Get Telegram chat
+    if chat and context.chat_data is not None and update.callback_query and update.callback_query.data:
+        if update.callback_query.data == 'None':                                # Authentication creation is rejected
+            clear(context, [STATES, TARGET, TARGET_PORT])
+        else:
+            context.chat_data[AUTH_TYPE] = update.callback_query.data           # Save selected type
+            return next_state(update, context, chat)                            # Go to next state
+    if update.callback_query:
+        update.callback_query.answer()                                          # Empty answer
+    return ConversationHandler.END                                              # End conversation
+
+
 def select_tool(update: Update, context: CallbackContext) -> int:
     '''Manage selected tool.
 
@@ -134,7 +157,8 @@ def select_tool(update: Update, context: CallbackContext) -> int:
         update.callback_query.answer(SELECTED_TOOL.format(tool=tool.name))      # Confirm selection
         # Tool with Wordlist input
         if Input.objects.filter(argument__tool=tool, type__name='Wordlist').exists():
-            context.chat_data[STATES].insert(0, (None, ask_for_wordlist))       # Add wordlist question
+            # Add wordlist question
+            context.chat_data[STATES].insert(len(context.chat_data[STATES]) - 1, (None, ask_for_wordlist))
         return next_state(update, context, chat)                                # Go to next state
     if update.callback_query:
         update.callback_query.answer()                                          # Empty answer
@@ -158,7 +182,8 @@ def select_process(update: Update, context: CallbackContext) -> int:
         update.callback_query.answer(SELECTED_PROCESS.format(process=process.name))     # Confirm selection
         # Tool with Wordlist input
         if Input.objects.filter(argument__tool__in=process.steps.all().values('tool'), type__name='Wordlist').exists():
-            context.chat_data[STATES].insert(0, (None, ask_for_wordlist))       # Add wordlist question
+            # Add wordlist question
+            context.chat_data[STATES].insert(len(context.chat_data[STATES]) - 1, (None, ask_for_wordlist))
         return next_state(update, context, chat)                                # go to next state
     if update.callback_query:
         update.callback_query.answer()                                          # Empty answer
@@ -198,14 +223,17 @@ def select_wordlist(update: Update, context: CallbackContext) -> int:
         int: Conversation state
     '''
     chat = get_chat(update)                                                     # Get Telegram chat
-    if chat and context.chat_data is not None and update.callback_query and update.callback_query.data:
+    if (
+        chat and context.chat_data is not None and
+        update.callback_query and update.callback_query.data and
+        update.callback_query.data != 'Default tools wordlists'
+    ):
         wordlist = Wordlist.objects.get(pk=int(update.callback_query.data))     # Get wordlist by Id
         context.chat_data[WORDLIST] = wordlist                                  # Save selected intensity
         update.callback_query.answer(SELECTED_WORDLIST.format(wordlist=wordlist.name))      # Confirm selection
-        return next_state(update, context, chat)                                # Go to next state
-    if update.callback_query:
+    elif update.callback_query:
         update.callback_query.answer()                                          # Empty answer
-    return ConversationHandler.END                                              # End conversation
+    return next_state(update, context, chat) if chat else ConversationHandler.END       # Go to next state
 
 
 def select_intensity(update: Update, context: CallbackContext) -> int:

@@ -3,19 +3,21 @@ from typing import List
 from unittest import mock
 
 import django_rq
+from authentications.enums import AuthenticationType
+from authentications.models import Authentication
 from django.utils import timezone
 from findings.enums import DataType, Protocol, Severity
 from findings.models import (OSINT, Credential, Exploit, Finding, Host, Path,
                              Port, Technology, Vulnerability)
 from input_types.base import BaseInput
 from input_types.models import InputType
+from parameters.models import InputTechnology, InputVulnerability
 from projects.models import Project
 from resources.enums import WordlistType
 from resources.models import Wordlist
 from rq import SimpleWorker
 from targets.enums import TargetType
-from targets.models import (Target, TargetEndpoint, TargetPort,
-                            TargetTechnology, TargetVulnerability)
+from targets.models import Target, TargetPort
 from tasks.enums import Status
 from tasks.models import Task
 from testing.mocks.defectdojo import (defect_dojo_error, defect_dojo_success,
@@ -47,12 +49,19 @@ class BaseToolTest(RekonoTestCase):
             name='Test',
             tool=self.nmap,
             arguments=(
-                '{intensity} {test_osint} {test_only_host} {test_host} {test_port} {test_path} '
-                '{test_technology} {test_credential} {test_vulnerability} {test_exploit} {test_wordlist}'
-            )
+                '{intensity} {test_osint} {test_only_host} {test_host} {test_port} {test_path} {test_technology} '
+                '{test_credential} {test_vulnerability} {test_exploit} {test_wordlist} {test_authentication}'
+            ),
+            stage=Stage.ENUMERATION
+        )
+        self.authentication_argument = Argument.objects.create(
+            tool=self.nmap,
+            name='test_authentication',
+            argument='--credential {secret}',
+            required=False
         )
         # Initialize auxiliary lists to help data usage
-        self.arguments: List[Argument] = []
+        self.arguments: List[Argument] = [self.authentication_argument]
         self.targets: List[BaseInput] = []
         self.all_findings: List[Finding] = []
         self.required_findings: List[Finding] = []
@@ -75,9 +84,10 @@ class BaseToolTest(RekonoTestCase):
             '--version 1.0.0', '--email test@test.test', '--username test', '--secret test',
             '--vuln CVE-2021-44228', '--exploit Test', f'--wordlist {self.wordlist.path}'
         ]).split(' ')
+        # Expected required arguments
         self.required_expected = ' '.join([
             '-T3', '--osint http://scanme.nmap.org/', '--only-host 45.33.32.156', '--host 45.33.32.156',
-            '--port 443', '--port-commas 80,443', '--endpoint /robots.txt', '--tech Wordpress',
+            '--port 443', '--port-commas 80,443', '--tech Wordpress',
             '--version 1.0.0', '--vuln CVE-2021-44228', '--exploit Test', f'--wordlist {self.wordlist.path}'
         ]).split(' ')
         # Tool instance
@@ -91,11 +101,16 @@ class BaseToolTest(RekonoTestCase):
         Returns:
             Wordlist: Valid wordlist instance
         '''
-        passwords = os.path.join(self.data_path, 'resources', 'passwords_wordlist.txt')        # Password wordlist
-        endpoints = os.path.join(self.data_path, 'resources', 'endpoints_wordlist.txt')        # Endpoint wordlist
+        endpoints1 = os.path.join(self.data_path, 'resources', 'endpoints_wordlist_1.txt')        # Endpoint wordlist
+        endpoints2 = os.path.join(self.data_path, 'resources', 'endpoints_wordlist_2.txt')        # Endpoint wordlist
         # Wordlist filtered due to invalid checksum
-        filtered = Wordlist.objects.create(name='Other', type=WordlistType.PASSWORD, path=endpoints, checksum='invalid')
-        wordlist = Wordlist.objects.create(name='Test', type=WordlistType.PASSWORD, path=passwords)
+        filtered = Wordlist.objects.create(
+            name='Other',
+            type=WordlistType.ENDPOINT,
+            path=endpoints1,
+            checksum='invalid'
+        )
+        wordlist = Wordlist.objects.create(name='Test', type=WordlistType.ENDPOINT, path=endpoints2)
         argument = Argument.objects.create(
             tool=self.nmap,
             name='test_wordlist',
@@ -118,15 +133,17 @@ class BaseToolTest(RekonoTestCase):
         # Target filtered due to target type. Private IP required
         target_filtered = Target.objects.create(project=self.project, target='scanme.nmap.org', type=TargetType.DOMAIN)
         target = Target.objects.create(project=self.project, target='45.33.32.156', type=TargetType.PUBLIC_IP)
-        target_port_http = TargetPort.objects.create(target=target, port=80)
+        self.target_port_http = TargetPort.objects.create(target=target, port=80)
         target_port_https = TargetPort.objects.create(target=target, port=443)
-        target_endpoint = TargetEndpoint.objects.create(target_port=target_port_http, endpoint='/robots.txt')
-        target_technology = TargetTechnology.objects.create(
-            target_port=target_port_http,
+        input_technology = InputTechnology.objects.create(
+            target=target,
             name='Wordpress',
             version='1.0.0'
         )
-        target_vulnerability = TargetVulnerability.objects.create(target_port=target_port_http, cve='CVE-2021-44228')
+        input_vulnerability = InputVulnerability.objects.create(
+            target=target,
+            cve='CVE-2021-44228'
+        )
         user = User.objects.create_superuser('rekono', 'rekono@rekono.rekono', 'rekono')
         task = Task.objects.create(
             target=target,
@@ -154,10 +171,9 @@ class BaseToolTest(RekonoTestCase):
         )
         self.targets.extend([
             target_filtered, target,
-            target_port_http, target_port_https,
-            target_endpoint,
-            target_technology,
-            target_vulnerability
+            self.target_port_http, target_port_https,
+            input_technology,
+            input_vulnerability
         ])
 
     def create_osint(self) -> None:
@@ -249,13 +265,12 @@ class BaseToolTest(RekonoTestCase):
             tool=self.nmap,
             name='test_path',
             argument='--endpoint {endpoint}',
-            required=True
+            required=False
         )
         # Input filtered by HTTP status code: HTTP Ok required
         Input.objects.create(argument=argument, type=InputType.objects.get(name='Path'), filter='200')
         self.arguments.append(argument)
         self.all_findings.extend([filtered, self.path])
-        self.required_findings.extend([filtered, self.path])
 
     def create_technologies(self, port: Port) -> Technology:
         '''Create technology data for testing.
@@ -446,6 +461,35 @@ class BaseToolTest(RekonoTestCase):
         ]).split(' ')
         self.assertEqual(expected, arguments)
 
+    def test_get_arguments_using_authentication(self) -> None:
+        '''Test get_arguments feature using authentication.'''
+        # Filter targets and findings to include only one port
+        self.targets = [t for t in self.targets if not isinstance(t, TargetPort) or t == self.target_port_http]
+        self.all_findings = [f for f in self.all_findings if not isinstance(f, Port) or f == self.port]
+        authentication_input = Input.objects.create(                            # Create authentication input
+            argument=self.authentication_argument,
+            type=InputType.objects.get(name='Authentication'),
+            filter='!cookie'
+        )
+        Authentication.objects.create(                                          # Create authentication entity
+            target_port=self.target_port_http,
+            name='sessionid', credential='token',
+            type=AuthenticationType.COOKIE
+        )
+        expected_list = [
+            '-T3', '--osint http://scanme.nmap.org/', '--only-host 45.33.32.156', '--host 45.33.32.156',
+            '--port 80', '--port-commas 80', '--endpoint /robots.txt', '--tech Wordpress',
+            '--version 1.0.0', '--email test@test.test', '--username test', '--secret test',
+            '--vuln CVE-2021-44228', '--exploit Test', f'--wordlist {self.wordlist.path}'
+        ]
+        arguments = self.tool_instance.get_arguments(self.targets, self.all_findings)
+        self.assertEqual(' '.join(expected_list).split(' '), arguments)         # Authentication is filter by type
+        authentication_input.filter = 'cookie'                                  # Change input filter to cookie
+        authentication_input.save(update_fields=['filter'])
+        expected_list.append('--credential token')                              # Add expected argument
+        arguments = self.tool_instance.get_arguments(self.targets, self.all_findings)
+        self.assertEqual(' '.join(expected_list).split(' '), arguments)
+
     def test_get_arguments_using_required_findings(self) -> None:
         '''Test get_arguments feature using only the required findings.'''
         # Change findings relations for more test situations
@@ -461,7 +505,13 @@ class BaseToolTest(RekonoTestCase):
     def test_get_arguments_using_targets(self) -> None:
         '''Test get_arguments feature using targets.'''
         arguments = self.tool_instance.get_arguments(self.targets, self.findings_to_use_targets)
-        self.assertEqual(self.all_expected, arguments)
+        expected = ' '.join([
+            '-T3', '--osint http://scanme.nmap.org/', '--only-host 45.33.32.156', '--host 45.33.32.156',
+            '--port 443', '--port-commas 80,443', '--tech Wordpress',
+            '--version 1.0.0', '--email test@test.test', '--username test', '--secret test',
+            '--vuln CVE-2021-44228', '--exploit Test', f'--wordlist {self.wordlist.path}'
+        ]).split(' ')
+        self.assertEqual(expected, arguments)
 
     def test_get_arguments_using_targets_without_filters(self) -> None:
         '''Test get_arguments feature using targets without input filters.'''
@@ -469,7 +519,7 @@ class BaseToolTest(RekonoTestCase):
         arguments = self.tool_instance.get_arguments(self.targets, self.findings_to_use_targets)
         expected = ' '.join([
             '-T3', '--osint http://scanme.nmap.org/', '--only-host scanme.nmap.org', '--host 45.33.32.156',
-            '--port 443', '--port-commas 80,443', '--endpoint /robots.txt', '--tech Wordpress',
+            '--port 443', '--port-commas 80,443', '--tech Wordpress',
             '--version 1.0.0', '--email test@test.test', '--username test', '--secret test',
             '--vuln CVE-2021-44228', '--exploit Test', f'--wordlist {self.wordlist.path}'
         ]).split(' ')
@@ -481,7 +531,7 @@ class BaseToolTest(RekonoTestCase):
         arguments = self.tool_instance.get_arguments(self.targets, self.findings_to_use_targets)
         expected = ' '.join([
             '-T3', '--osint http://scanme.nmap.org/', '--only-host scanme.nmap.org', '--host 45.33.32.156',
-            '--port 80', '--port-commas 80', '--endpoint /robots.txt', '--tech Wordpress',
+            '--port 80', '--port-commas 80', '--tech Wordpress',
             '--version 1.0.0', '--email test@test.test', '--username test', '--secret test',
             '--vuln CVE-2021-44228', '--exploit Test', f'--wordlist {self.wordlist.path}'
         ]).split(' ')
@@ -497,7 +547,7 @@ class BaseToolTest(RekonoTestCase):
     def test_tool_execution(self) -> None:
         '''Test tool_execution feature using ls command.'''
         # Testing tool with ls command
-        tool = Tool.objects.create(name='Test', command='ls', stage=Stage.ENUMERATION)
+        tool = Tool.objects.create(name='Test', command='ls')
         self.new_execution.tool = tool
         self.new_execution.save(update_fields=['tool'])
         self.tool_class = get_tool_class_by_name(tool.name)                     # Related tool class
@@ -505,13 +555,13 @@ class BaseToolTest(RekonoTestCase):
         self.tool_instance = self.tool_class(self.new_execution, self.intensity, self.arguments)
         errors_count = 0
         try:
-            self.tool_instance.tool_execution(['/directory-not-found'], [], [])     # Directory not found
+            self.tool_instance.tool_execution(['/directory-not-found'])         # Directory not found
         except ToolExecutionException as ex:
             self.tool_instance.on_error(stderr=str(ex))                         # Test on_error feature
             self.assertEqual(Status.ERROR, self.new_execution.status)
             self.assertEqual(str(ex).strip(), self.new_execution.output_error)
             errors_count += 1
-        self.tool_instance.tool_execution(['/'], [], [])                        # Valid ls execution
+        self.tool_instance.tool_execution(['/'])                                # Valid ls execution
         self.assertEqual(1, errors_count)
 
     def process_findings(self, imported_in_defectdojo: bool) -> None:
@@ -588,3 +638,24 @@ class BaseToolTest(RekonoTestCase):
     def test_process_findings_with_unvailable_defectdojo(self) -> None:
         '''Test process_findings feature with unavailable Defect-Dojo instance.'''
         self.process_findings(False)
+
+    def test_get_authentication(self) -> None:
+        '''Test get_authentication feature'''
+        # No authentication found
+        search = self.tool_instance.get_authentication([self.target_port_http], [self.port])
+        self.assertEqual(None, search)
+        authentication = Authentication.objects.create(                         # Create authentication for testing
+            target_port=self.target_port_http,
+            name='test',
+            credential='test',
+            type=AuthenticationType.BASIC
+        )
+        # Get authentication based on Port
+        search = self.tool_instance.get_authentication([self.target_port_http], [self.port])
+        self.assertEqual(authentication, search)
+        # Get authentication based on TargetPort
+        search = self.tool_instance.get_authentication([self.target_port_http], [])
+        self.assertEqual(authentication, search)
+        # No authentication found
+        search = self.tool_instance.get_authentication([], [])
+        self.assertEqual(None, search)

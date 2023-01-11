@@ -5,6 +5,7 @@ on:
     paths:
       - 'rekono/**'
       - '!rekono/frontend/**'
+      - 'requirements.txt'
 
 env:
   REQUIRED_COVERAGE: 95

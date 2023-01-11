@@ -1,5 +1,6 @@
-from input_types.models import InputType
 from rest_framework import serializers
+
+from input_types.models import InputType
 
 
 class InputTypeSerializer(serializers.ModelSerializer):
@@ -9,4 +10,4 @@ class InputTypeSerializer(serializers.ModelSerializer):
         '''Serializer metadata.'''
 
         model = InputType
-        fields = ('name', 'callback_target')                                    # Input type fields exposed via API
+        fields = ('name', 'model', 'callback_model')                            # Input type fields exposed via API

@@ -3,16 +3,16 @@
     <table-header :filters="filters" add="invite-modal" @filter="fetchData"/>
     <b-table striped borderless head-variant="dark" :fields="usersFields" :items="data">
       <template #cell(role)="row">
-        <b-form-select v-model="row.item.role" :options="roles" value-field="value" text-field="value" :disabled="row.item.id === $store.state.user" @input="selectUser(row.item)" @change="updateRole"/>
+        <b-form-select v-model="row.item.role" :options="roles" value-field="value" text-field="value" :disabled="row.item.id === $store.state.user" @input="selectedUser = row.item" @change="updateRole"/>
       </template>
       <template #cell(last_login)="row">
         {{ row.item.last_login !== null ? row.item.last_login.split('.', 1)[0].replace('T', ' ') : '' }}
       </template>
       <template #cell(actions)="row">
-        <b-button v-if="row.item.is_active" variant="outline" @click="selectUser(row.item)" v-b-modal.disable-user-modal v-b-tooltip.hover title="Disable User" :disabled="row.item.id === $store.state.user">
+        <b-button v-if="row.item.is_active" variant="outline" @click="selectedUser = row.item" v-b-modal.disable-user-modal v-b-tooltip.hover title="Disable User" :disabled="row.item.id === $store.state.user">
           <b-icon variant="danger" icon="dash-circle-fill"/>
         </b-button>
-        <b-button v-if="row.item.is_active === null" variant="outline" @click="selectUser(row.item)" v-b-modal.remove-user-modal v-b-tooltip.hover title="Remove User" :disabled="row.item.id === $store.state.user">
+        <b-button v-if="row.item.is_active === null" variant="outline" @click="selectedUser = row.item" v-b-modal.remove-user-modal v-b-tooltip.hover title="Remove User" :disabled="row.item.id === $store.state.user">
           <b-icon variant="danger" icon="trash-fill"/>
         </b-button>
         <b-button v-if="row.item.is_active === false" variant="outline" @click="enableUser(row.item)" v-b-tooltip.hover title="Enable User">
@@ -21,10 +21,10 @@
       </template>
     </b-table>
     <pagination :page="page" :limit="limit" :limits="limits" :total="total" name="users" @pagination="pagination"/>
-    <deletion id="disable-user-modal" title="Disable User" removeWord="disable" @deletion="disableUser" @clean="cleanSelection" v-if="selectedUser !== null">
+    <deletion id="disable-user-modal" title="Disable User" removeWord="disable" @deletion="disableUser" @clean="selectedUser = null" v-if="selectedUser !== null">
       <span><strong>{{ selectedUser.username }}</strong> user</span>
     </deletion>
-    <deletion id="remove-user-modal" title="Remove User" removeWord="remove" @deletion="disableUser" @clean="cleanSelection" v-if="selectedUser !== null">
+    <deletion id="remove-user-modal" title="Remove User" removeWord="remove" @deletion="disableUser" @clean="selectedUser = null" v-if="selectedUser !== null">
       <span><strong>{{ selectedUser.username }}</strong> user</span>
     </deletion>
     <invite-user id="invite-modal" @confirm="confirm"/>
@@ -34,8 +34,8 @@
 <script>
 import RekonoApi from '@/backend/RekonoApi'
 import Deletion from '@/common/Deletion'
-import TableHeader from '@/common/TableHeader'
 import Pagination from '@/common/Pagination'
+import TableHeader from '@/common/TableHeader'
 import InviteUser from '@/modals/InviteUser'
 export default {
   name: 'usersPage',
@@ -86,12 +86,6 @@ export default {
     },
     enableUser (user) {
       this.post(`/api/users/${user.id}/enable/`, { }, user.email, 'User enabled successfully').then(() => this.fetchData())
-    },
-    selectUser (user) {
-      this.selectedUser = user
-    },
-    cleanSelection () {
-      this.selectedUser = null
     }
   }
 }

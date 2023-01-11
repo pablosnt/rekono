@@ -6,12 +6,14 @@ from django.forms import ValidationError
 
 logger = logging.getLogger()                                                    # Rekono logger
 
+IP_RANGE_REGEX = r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}-\d{1,3}'                  # Regex for IP ranges like 10.10.10.1-20
 NAME_REGEX = r'[\wÀ-ÿ\s\.\-\[\]()]{0,100}'                                      # Regex for names validation
 TEXT_REGEX = r'[\wÀ-ÿ\s\.:,+\-\'"?¿¡!#%$€\[\]()]{0,300}'                        # Regex for text validation
 PATH_REGEX = r'[\w\./#?&%$\\]{0,500}'                                           # Regex for path validation
-CVE_REGEX = r'CVE-[0-9]{4}-[0-9]{1,7}'                                          # Regex for CVE validation
-DD_KEY_REGEX = r'[0-9a-z]{40}'                                                  # Regex for Defect-Dojo key validation
-TELEGRAM_TOKEN_REGEX = r'[0-9]{10}:[\w\-]{35}'                                  # Regex for Telegram token validation
+CVE_REGEX = r'CVE-\d{4}-\d{1,7}'                                                # Regex for CVE validation
+DD_KEY_REGEX = r'[\da-z]{40}'                                                   # Regex for Defect-Dojo key validation
+TELEGRAM_TOKEN_REGEX = r'\d{10}:[\w\-]{35}'                                     # Regex for Telegram token validation
+CREDENTIAL_REGEX = r'[\w\./\-=\+,:<>¿?¡!#&$()\[\]\{\}\*]{1,500}'                # Regex for credentials validation
 
 
 def validate_text_value(value: str, regex: str) -> None:
@@ -76,18 +78,6 @@ def validate_text(value: str) -> None:
     validate_text_value(value, TEXT_REGEX)
 
 
-def validate_path(value: str) -> None:
-    '''Validate if path is valid based on regex.
-
-    Args:
-        value (str): Path value
-
-    Raises:
-        ValidationError: Raised if value doesn't match the expected regex
-    '''
-    validate_text_value(value, PATH_REGEX)
-
-
 def validate_cve(value: str) -> None:
     '''Validate if path is valid based on regex.
 
@@ -101,11 +91,39 @@ def validate_cve(value: str) -> None:
 
 
 def validate_telegram_token(value: str) -> None:
+    '''Validate if Telegram token is valid based on regex.
+
+    Args:
+        value (str): Telegram token value
+
+    Raises:
+        ValidationError: Raised if value doesn't match the expected regex
+    '''
     validate_text_value(value, TELEGRAM_TOKEN_REGEX)
 
 
 def validate_defect_dojo_api_key(value: str) -> None:
+    '''Validate if Defect-Dojo API key is valid based on regex.
+
+    Args:
+        value (str): Defect-Dojo API key value
+
+    Raises:
+        ValidationError: Raised if value doesn't match the expected regex
+    '''
     validate_text_value(value, DD_KEY_REGEX)
+
+
+def validate_credential(value: str) -> None:
+    '''Validate if credential is valid based on regex.
+
+    Args:
+        value (str): Credential value
+
+    Raises:
+        ValidationError: Raised if value doesn't match the expected regex
+    '''
+    validate_text_value(value, CREDENTIAL_REGEX)
 
 
 def validate_number(value: int) -> None:

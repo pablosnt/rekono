@@ -9,8 +9,7 @@ from input_types.models import InputType
 from processes.executor.callback import process_callback
 from processes.models import Step
 from rq.job import Job
-from targets.models import (Target, TargetEndpoint, TargetPort,
-                            TargetTechnology, TargetVulnerability)
+from targets.models import Target, TargetPort
 from tasks.models import Task
 from tools.models import Argument, Intensity
 
@@ -59,7 +58,7 @@ def create_plan(task: Task) -> List[ExecutionJob]:
     ).filter(
         process=task.process
     ).order_by(
-        'tool__stage', '-priority', 'max_output', 'max_input'
+        'configuration__stage', '-priority', 'max_output', 'max_input'
     )
     for step in steps:                                                          # For each step
         # Get the greater intensity for this tool, limited to the task intensity
@@ -89,8 +88,8 @@ def execute(task: Task) -> None:
     logger.info(f'[Process] Execution plan has been created for task {task.id} with {len(execution_plan)} jobs')
     for job in execution_plan:                                                  # For each planned jobs
         # Check unneeded target types, due to dependencies with previous jobs
-        covered_targets = [i.callback_target for i in job.dependencies_coverage if i.callback_target is not None]
-        # Wordlist never will be covered by dependencies, so they are included directly in targets
+        covered_targets = [i.callback_model for i in job.dependencies_coverage if i.callback_model is not None]
+        # Wordlists are included in targets because they never will be covered by dependencies
         targets = list(task.wordlists.all())
         app_label = Target._meta.app_label
         if f'{app_label}.{Target._meta.model_name}' not in covered_targets:     # Target is not covered by dependencies
@@ -98,23 +97,11 @@ def execute(task: Task) -> None:
         if f'{app_label}.{TargetPort._meta.model_name}' not in covered_targets:
             # TargetPort is not covered by dependencies
             targets.extend(list(task.target.target_ports.all()))                # Add task target ports to targets
-        if f'{app_label}.{TargetEndpoint._meta.model_name}' not in covered_targets:
-            # TargetEndpoint is not covered by dependencies
-            # Add task target endpoints to targets
-            targets.extend(list(TargetEndpoint.objects.filter(target_port__target=task.target).all()))
-        if f'{app_label}.{TargetTechnology._meta.model_name}' not in covered_targets:
-            # TargetTechnology is not covered by dependencies
-            # Add target technologies to task targets
-            targets.extend(list(TargetTechnology.objects.filter(target_port__target=task.target).all()))
-        if f'{app_label}.{TargetVulnerability._meta.model_name}' not in covered_targets:
-            # TargetVulnerability is not covered by dependencies
-            # Add target vulnerabilities to task targets
-            targets.extend(list(TargetVulnerability.objects.filter(target_port__target=task.target).all()))
         # Get the executions required for this job based on targets and tool arguments.
         # A job can need multiple executions. For example, if the user includes more than one Wordlist and
         # the process includes Dirsearch execution that only accepts one wordlist as argument. Rekono will
         # generate one Dirsearch execution for each wordlist provided by the user. It can also occur with
-        # TargetPort and TargetEndpoint.
+        # TargetPort, InputTechnology or InputVulnerability.
         executions = utils.get_executions_from_findings(targets, job.step.tool)
         for execution_targets in executions:                                    # For each job execution
             # Create the Execution entity

@@ -1,15 +1,16 @@
 from typing import Any, Dict, List
 
-from api.serializers import RekonoTagSerializerField
+from api.fields import RekonoTagField
 from drf_spectacular.utils import extend_schema_field
 from likes.serializers import LikeBaseSerializer
-from processes.models import Process, Step
 from rest_framework import serializers
 from rest_framework.fields import SerializerMethodField
 from taggit.serializers import TaggitSerializer
 from tools.models import Configuration, Tool
 from tools.serializers import ConfigurationSerializer, SimplyToolSerializer
 from users.serializers import SimplyUserSerializer
+
+from processes.models import Process, Step
 
 
 class StepPrioritySerializer(serializers.ModelSerializer):
@@ -89,7 +90,7 @@ class ProcessSerializer(TaggitSerializer, serializers.ModelSerializer, LikeBaseS
 
     steps = SerializerMethodField(method_name='get_steps', read_only=True)      # Step details for read operations
     creator = SimplyUserSerializer(many=False, read_only=True)                  # Creator details for read operations
-    tags = RekonoTagSerializerField()                                           # Tags
+    tags = RekonoTagField()                                                     # Tags
 
     class Meta:
         '''Serializer metadata.'''
@@ -100,15 +101,15 @@ class ProcessSerializer(TaggitSerializer, serializers.ModelSerializer, LikeBaseS
 
     @extend_schema_field(StepSerializer(many=True, read_only=True))
     def get_steps(self, instance: Process) -> List[StepSerializer]:
-        '''Get process steps sorted by tool stage and priority (descendent).
+        '''Get process steps sorted by configuration stage and priority (descendent).
 
         Args:
             instance (Process): Process instance
 
         Returns:
-            List[StepSerializer]: Step list sorted by tool stage and priority (descendent)
+            List[StepSerializer]: Step list sorted by configuration stage and priority (descendent)
         '''
-        return StepSerializer(instance.steps.all().order_by('tool__stage', '-priority'), many=True).data
+        return StepSerializer(instance.steps.all().order_by('configuration__stage', '-priority'), many=True).data
 
 
 class SimplyProcessSerializer(serializers.ModelSerializer):

@@ -1,7 +1,7 @@
 import logging
 from typing import Any, Dict
 
-from api.serializers import RekonoTagSerializerField
+from api.fields import RekonoTagField
 from defectdojo.api import DefectDojo
 from defectdojo.exceptions import DefectDojoException
 from django.db import transaction
@@ -23,7 +23,7 @@ class ProjectSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     targets = TargetSerializer(read_only=True, many=True)                       # Targets details for reaad operations
     owner = SimplyUserSerializer(many=False, read_only=True)                    # Owner details for read operations
-    tags = RekonoTagSerializerField()                                           # Tags
+    tags = RekonoTagField()                                                     # Tags
 
     class Meta:
         '''Serializer metadata.'''

@@ -10,16 +10,16 @@
           <b-img src="/static/defect-dojo-favicon.ico" width="30" height="30"/>
         </b-link>
       </template>
-      <template #cell(actions)="row" v-if="$store.state.role === 'Admin'">
+      <template #cell(actions)="row">
         <b-dropdown variant="outline" right>
           <template #button-content>
             <b-icon variant="dark" icon="three-dots-vertical"/>
           </template>
-          <b-dropdown-item variant="dark" @click="selectProject(row.item)" v-b-modal.project-modal>
+          <b-dropdown-item variant="dark" @click="selectedProject = row.item" v-b-modal.project-modal>
             <b-icon icon="pencil-square"/>
             <label class="ml-1">Edit</label>
           </b-dropdown-item>
-          <b-dropdown-item variant="danger" @click="selectProject(row.item)" v-b-modal.delete-project-modal>
+          <b-dropdown-item variant="danger" @click="selectedProject = row.item" v-b-modal.delete-project-modal>
             <b-icon icon="trash-fill"/>
             <label class="ml-1">Delete</label>
           </b-dropdown-item>
@@ -27,10 +27,10 @@
       </template>
     </b-table>
     <pagination :page="page" :limit="limit" :limits="limits" :total="total" name="projects" @pagination="pagination"/>
-    <deletion id="delete-project-modal" title="Delete Project" @deletion="deleteProject" @clean="cleanSelection" v-if="selectedProject !== null">
+    <deletion id="delete-project-modal" title="Delete Project" @deletion="deleteProject" @clean="selectedProject = null" v-if="selectedProject !== null">
       <span><strong>{{ selectedProject.name }}</strong> project</span>
     </deletion>
-    <project id="project-modal" :project="selectedProject" :initialized="selectedProject !== null" @confirm="confirm" @clean="cleanSelection"/>
+    <project id="project-modal" :project="selectedProject" :initialized="selectedProject !== null" @confirm="confirm" @clean="selectedProject = null"/>
   </div>
 </template>
 
@@ -45,16 +45,18 @@ export default {
   mixins: [RekonoApi],
   computed: {
     projectsFields () {
-      var fields = [
+      let fields = [
         { key: 'name', label: 'Project', sortable: true },
         { key: 'tags', sortable: true },
         { key: 'targets.length', label: 'Targets', sortable: true },
         { key: 'owner.username', label: 'Owner', sortable: true },
-        { key: 'members.length', label: 'Members', sortable: true },
-        { key: 'actions', sortable: false }
+        { key: 'members.length', label: 'Members', sortable: true }
       ]
       if (this.defectDojoEnabled) {
         fields.splice(1, 0, { key: 'defectdojo_product_id', label: 'Defect-Dojo', sortable: false })
+      }
+      if (this.$store.state.role === 'Admin') {
+        fields.push({ key: 'actions', sortable: false })
       }
       return fields
     }
@@ -95,12 +97,6 @@ export default {
     },
     deleteProject () {
       this.delete(`/api/projects/${this.selectedProject.id}/`, this.selectedProject.name, 'Project deleted successfully').then(() => this.fetchData())
-    },
-    selectProject (project) {
-      this.selectedProject = project
-    },
-    cleanSelection () {
-      this.selectedProject = null
     },
     navigateToProjectDetails (record) {
       this.$router.push({ name: 'project', params: { id: record.id, project: record } })

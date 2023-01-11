@@ -6,6 +6,7 @@ from django.utils import timezone
 from executions.models import Execution
 from queues.utils import cancel_and_delete_job, cancel_job
 from rq.command import send_stop_job_command
+
 from tasks.enums import Status
 from tasks.models import Task
 
@@ -48,4 +49,4 @@ def cancel_task(task: Task) -> None:
         task.save(update_fields=['status', 'end'])
     else:
         logger.warning(f'[Task] Task {task.id} can\'t be cancelled')
-        raise ValidationError({'id': f'Task {task.id} can not be cancelled'})   # Task is not eligible for cancellation
+        raise ValidationError({'id': f'Task {task.id} can\'t be cancelled'})    # Task is not eligible for cancellation

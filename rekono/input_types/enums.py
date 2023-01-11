@@ -35,3 +35,7 @@ class InputKeyword(Enum):
     CVE = 13
     EXPLOIT = 14
     WORDLIST = 15
+    COOKIE_NAME = 16
+    TOKEN = 17
+    CREDENTIAL_TYPE = 18
+    CREDENTIAL_TYPE_LOWER = 19

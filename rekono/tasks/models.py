@@ -5,9 +5,10 @@ from projects.models import Project
 from resources.models import Wordlist
 from security.input_validation import validate_time_amount
 from targets.models import Target
-from tasks.enums import Status, TimeUnit
 from tools.enums import IntensityRank
 from tools.models import Configuration, Tool
+
+from tasks.enums import Status, TimeUnit
 
 # Create your models here.
 
@@ -23,7 +24,7 @@ class Task(models.Model):
     configuration = models.ForeignKey(Configuration, on_delete=models.SET_NULL, blank=True, null=True)
     # Intensity to be applied in the tool executions
     intensity = models.IntegerField(choices=IntensityRank.choices, default=IntensityRank.NORMAL)
-    # User that requested the task
+    # User that has requested the task
     executor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True)
     status = models.TextField(max_length=10, choices=Status.choices, default=Status.REQUESTED)  # Task status
     scheduled_at = models.DateTimeField(blank=True, null=True)                  # Date when the task will be executed

@@ -4,7 +4,7 @@ from findings.models import Exploit
 from tools.tools.base_tool import BaseTool
 
 
-class SearchsploitTool(BaseTool):
+class Searchsploit(BaseTool):
     '''SearchSploit tool class.'''
 
     def parse_output_file(self) -> None:

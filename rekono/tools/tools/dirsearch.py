@@ -5,7 +5,7 @@ from findings.models import Path
 from tools.tools.base_tool import BaseTool
 
 
-class DirsearchTool(BaseTool):
+class Dirsearch(BaseTool):
     '''Dirsearch tool class.'''
 
     # Exit code ignored because Dirsearch report will include findings until error occurs

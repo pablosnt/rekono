@@ -43,10 +43,15 @@ class RekonoConfigLoader:
         self.EMAIL_TLS = self.get_config_key(config, ['email', 'tls'], True)
         # Tools
         self.TOOLS_CMSEEK_DIR = self.get_config_key(config, ['tools', 'cmseek', 'directory'], '/usr/share/cmseek')
-        self.TOOLS_LOG4J_SCANNER_DIR = self.get_config_key(
+        self.TOOLS_LOG4J_SCAN_DIR = self.get_config_key(
             config,
-            ['tools', 'log4j-scanner', 'directory'],
-            '/opt/log4j-scanner'
+            ['tools', 'log4j-scan', 'directory'],
+            '/opt/log4j-scan'
+        )
+        self.TOOLS_SPRING4SHELL_SCAN_DIR = self.get_config_key(
+            config,
+            ['tools', 'spring4shell-scan', 'directory'],
+            '/opt/spring4shell-scan'
         )
         self.TOOLS_GITTOOLS_DIR = self.get_config_key(config, ['tools', 'gittools', 'directory'], '/opt/GitTools')
 

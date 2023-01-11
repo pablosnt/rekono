@@ -4,23 +4,25 @@ import re
 import shutil
 import subprocess
 import uuid
-from typing import Any, Dict, List, Tuple, Union, cast
+from typing import Any, Dict, List, Optional, Tuple, Union, cast
 
+from authentications.models import Authentication
 from django.db.models import Model
 from django.db.models.fields.related_descriptors import \
     ReverseManyToOneDescriptor
 from django.db.models.query_utils import DeferredAttribute
 from django.utils import timezone
 from executions.models import Execution
-from findings.models import Finding, Vulnerability
+from findings.models import Finding, Port, Vulnerability
 from findings.queue import producer
 from findings.utils import get_unique_filter
 from input_types.base import BaseInput
+from rekono.settings import REPORTS_DIR, TESTING
+from targets.models import TargetPort
 from tasks.enums import Status
+
 from tools.exceptions import ToolExecutionException
 from tools.models import Argument, Input, Intensity
-
-from rekono.settings import REPORTS_DIR, TESTING
 
 logger = logging.getLogger()                                                    # Rekono logger
 
@@ -30,6 +32,7 @@ class BaseTool:
 
     # Indicate if execution must continue even if error occurs during tool execution. By default False.
     ignore_exit_code = False
+    script = ''                                                                 # Indicate the script path to execute
 
     def __init__(self, execution: Execution, intensity: Intensity, arguments: List[Argument]) -> None:
         '''Tool constructor.
@@ -60,7 +63,10 @@ class BaseTool:
         Raises:
             ToolExecutionException: Raised if tool isn't installed
         '''
-        if self.tool.command and shutil.which(self.tool.command) is None:
+        if (
+            (self.tool.command and shutil.which(self.tool.command) is None) or  # Check command installation
+            (self.script and not os.path.isfile(self.script))                   # Check if script exists
+        ):
             raise ToolExecutionException(f'Tool {self.tool.name} is not installed in the system')
 
     def prepare_environment(self) -> None:
@@ -179,6 +185,35 @@ class BaseTool:
                         break
         return found, command
 
+    def get_authentication(
+        self,
+        targets_list: List[BaseInput],
+        findings_list: List[Finding]
+    ) -> Optional[Authentication]:
+        '''Get authentication for a given list of targets and findings.
+
+        Args:
+            targets_list (List[BaseInput]): Targets list
+            findings_list (List[Finding]): Findings list
+
+        Returns:
+            Optional[Authentication]: Authentication entity if found
+        '''
+        for ports in [
+            [p for p in findings_list if isinstance(p, Port)],                  # Get Ports from findings list
+            [p for p in targets_list if isinstance(p, TargetPort)],             # Get TargetPorts from targets list
+        ]:
+            if len(ports) > 0:                                                  # Ports found
+                if len(ports) == 1:                                             # Only one port
+                    authentications = Authentication.objects.filter(            # Look for authentication entity
+                        target_port__target=self.execution.task.target,
+                        target_port__port=cast(Union[Port, TargetPort], ports[0]).port
+                    )
+                    if authentications.exists():                                # Authentication found
+                        return authentications.first()
+                break
+        return None
+
     def get_arguments(self, targets: List[BaseInput], previous_findings: List[Finding]) -> List[str]:
         '''Get tool arguments for the tool command.
 
@@ -193,18 +228,23 @@ class BaseTool:
             List[str]: List of tool arguments to use in the tool execution
         '''
         command = {
+            'script': self.script,                                              # Script to execute the tool
+            'command': self.tool.command,                                       # Add tool command to the arguments
             'intensity': self.intensity.argument,                               # Add intensity config to the arguments
             'output': self.path_output if self.file_output_enabled else ''      # Add output config to the arguments
         }
+        authentication = self.get_authentication(targets, previous_findings)    # Search related authentication instance
+        if authentication:                                                      # Authentication exists
+            previous_findings.append(authentication)                            # Add authentication instance
         for argument in self.arguments:                                         # For each tool argument
             found, command = self.process_argument(
                 argument,
-                'get_related_model_class',
+                'get_model_class',
                 cast(List[BaseInput], previous_findings),
                 command
             )
             if not found:
-                _, command = self.process_argument(argument, 'get_callback_target_class', targets, command)
+                _, command = self.process_argument(argument, 'get_callback_model_class', targets, command)
             if argument.name not in command or not command[argument.name]:      # Argument can't be added
                 if argument.required:                                           # Argument is required for the tool
                     raise ToolExecutionException(f'Tool configuration requires {argument.name} argument')
@@ -213,7 +253,7 @@ class BaseTool:
         # Format configuration arguments with the built tool arguments
         args = self.configuration.arguments.format(**command)
         # Split arguments by whitespaces taking into account the arguments between quotes
-        return [arg.replace('\'', '').replace('"', '') for arg in re.findall(r'[\'"]{1}.+?[\'"]{1}|[^\s]+', args)]
+        return re.findall(r'[^\s\'"]*[\'"][^\'"]+[\'"]|[^\'"\s]+', args)
 
     def check_arguments(self, targets: List[BaseInput], findings: List[Finding]) -> bool:
         '''Check if given resources (targets, resources and findings) lists are enough to execute the tool.
@@ -249,13 +289,33 @@ class BaseTool:
             host = host[:-1]                                                    # Remove last slash form URL
         return host
 
-    def tool_execution(self, arguments: List[str], targets: List[BaseInput], previous_findings: List[Finding]) -> str:
+    def get_environment(self, arguments: List[str]) -> Tuple[List[str], Dict[str, Any]]:
+        '''Get environment variables from tool arguments.
+
+        Args:
+            arguments (List[str]): Tool arguments list
+
+        Returns:
+            Tuple[List[str], Dict[str, Any]]: Updated tool arguments to use and environment variables to apply
+        '''
+        environment = os.environ.copy()                                         # Copy current environment
+        if self.tool.command not in arguments:
+            arguments.insert(0, self.tool.command)                              # Combine tool command with arguments
+        else:
+            index = arguments.index(self.tool.command)                          # Get command index
+            for definition in arguments[:index]:                                # For each previous argument
+                if '=' not in definition:                                       # It isn't an environment variable
+                    continue
+                variable, value = definition.split('=', 1)                      # Parse variable
+                environment[variable] = value.strip().replace('\'', '').replace('"', '')    # Add environment variable
+            arguments = arguments[index:]                                       # Remove environment variable from args
+        return arguments, environment
+
+    def tool_execution(self, arguments: List[str]) -> str:
         '''Execute the tool.
 
         Args:
             arguments (List[str]): Arguments to include in the tool command
-            targets (List[BaseInput]): List of targets and resources
-            previous_findings (List[Finding]): List of previous findings
 
         Raises:
             ToolExecutionException: Raised if tool execution finishes with an exit code distinct than zero
@@ -263,17 +323,21 @@ class BaseTool:
         Returns:
             str: Plain output of the tool execution
         '''
-        arguments.insert(0, self.tool.command)                                  # Combine tool command with arguments
+        arguments, environment = self.get_environment(arguments)                # Get environment from argument
         logger.info(f'[Tool] Running: {" ".join(arguments)}')
         if hasattr(self, 'run_directory'):
-            # Execute the tool in directory
-            exec = subprocess.run(arguments, capture_output=True, cwd=getattr(self, 'run_directory'))
+            process = subprocess.run(                                           # Execute the tool in directory
+                arguments,
+                capture_output=True,
+                env=environment,
+                cwd=getattr(self, 'run_directory')
+            )
         else:
-            exec = subprocess.run(arguments, capture_output=True)               # Execute the tool
-        if not self.ignore_exit_code and exec.returncode > 0:
+            process = subprocess.run(arguments, capture_output=True, env=environment)   # Execute the tool
+        if not self.ignore_exit_code and process.returncode > 0:
             # Execution error and ignore exit code is False
-            raise ToolExecutionException(exec.stderr.decode('utf-8'))
-        return exec.stdout.decode('utf-8')
+            raise ToolExecutionException(process.stderr.decode('utf-8'))
+        return process.stdout.decode('utf-8')
 
     def create_finding(self, finding_type: Model, **fields: Any) -> Finding:
         '''Create finding from fields.
@@ -351,11 +415,16 @@ class BaseTool:
         self.execution.start = timezone.now()                                   # Set execution start date
         self.execution.save(update_fields=['start'])
 
-    def on_skipped(self) -> None:
-        '''Perform changes in Execution entity when tool execution is skipped.'''
+    def on_skipped(self, message: str = None) -> None:
+        '''Perform changes in Execution entity when tool execution is skipped.
+
+        Args:
+            message (str, optional): Descriptive message about the execution skipping
+        '''
         self.execution.status = Status.SKIPPED                                  # Set execution status to Skipped
+        self.execution.output_plain = message
         self.execution.end = timezone.now()                                     # Set execution end date
-        self.execution.save(update_fields=['status', 'end'])
+        self.execution.save(update_fields=['status', 'end', 'output_plain'])
 
     def on_running(self) -> None:
         '''Perform changes in Execution entity when command execution starts.'''
@@ -401,9 +470,9 @@ class BaseTool:
         self.on_start()                                                         # Start execution
         try:
             self.check_installation()                                           # Check tool installation
-        except ToolExecutionException:                                          # Tool installation not found
+        except ToolExecutionException as ex:                                    # Tool installation not found
             logger.error(f'[Tool] Tool {self.tool.name} is not installed in the system. This execution will be skipped')
-            self.on_skipped()                                                   # Skip execution
+            self.on_skipped(str(ex))                                            # Skip execution
             return
         try:
             # Get arguments to include in command
@@ -411,7 +480,7 @@ class BaseTool:
         except ToolExecutionException as ex:
             logger.error(f'[Tool] {str(ex)}')
             # Targets and findings aren't enough to build the command
-            self.on_skipped()                                                   # Skip execution
+            self.on_skipped(str(ex))                                            # Skip execution
             return
         self.prepare_environment()                                              # Prepare environment
         self.on_running()                                                       # Run execution
@@ -419,15 +488,16 @@ class BaseTool:
             output = ''
             if not TESTING:
                 # Run tool
-                output = self.tool_execution(self.command_arguments, targets, previous_findings)    # pragma: no cover
+                output = self.tool_execution(self.command_arguments)            # pragma: no cover
         except ToolExecutionException as ex:                                    # pragma: no cover
             logger.error(f'[Tool] {self.tool.name} execution finish with errors')
             # Error during tool execution
             self.on_error(stderr=str(ex))                                       # Execution error
             self.clean_environment()                                            # Clean environment
             return
-        except Exception:                                                       # pragma: no cover
+        except Exception as ex:                                                 # pragma: no cover
             logger.error(f'[Tool] Unexpected error during {self.tool.name} execution')
+            logger.error(str(ex))
             # Unexpected error during tool execution
             self.on_error()                                                     # Execution error
             self.clean_environment()                                            # Clean environment

@@ -1,5 +1,6 @@
 from django_filters.rest_framework import FilterSet
 from django_filters.rest_framework.filters import OrderingFilter
+
 from executions.models import Execution
 
 
@@ -37,9 +38,9 @@ class ExecutionFilter(FilterSet):
             'task__executor__username': ['exact', 'icontains'],
             'tool': ['exact'],
             'tool__name': ['exact', 'icontains'],
-            'tool__stage': ['exact'],
             'configuration': ['exact'],
             'configuration__name': ['exact', 'icontains'],
+            'configuration__stage': ['exact'],
             'status': ['exact'],
             'start': ['gte', 'lte', 'exact'],
             'end': ['gte', 'lte', 'exact']

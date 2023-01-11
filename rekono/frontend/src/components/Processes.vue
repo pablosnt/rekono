@@ -32,7 +32,7 @@
             <b-icon icon="pencil-square"/>
             <label class="ml-1">Edit</label>
           </b-dropdown-item>
-          <b-dropdown-item variant="danger" @click="selectProcess(row.item)" v-b-modal.delete-process-modal :disabled="$store.state.role !== 'Admin' && $store.state.user !== row.item.creator.id">
+          <b-dropdown-item variant="danger" @click="selectedProcess = row.item" v-b-modal.delete-process-modal :disabled="$store.state.role !== 'Admin' && $store.state.user !== row.item.creator.id">
             <b-icon icon="trash-fill"/>
             <label class="ml-1">Delete</label>
           </b-dropdown-item>
@@ -44,8 +44,8 @@
           <b-table striped borderless small head-variant="light" :fields="stepsFields" :items="row.item.steps">
             <template #cell(icon)="step">
               <b-link :href="step.item.tool.reference" target="_blank">
-                <b-img v-if="step.item.tool.icon" :src="step.item.tool.icon" width="100" height="50"/>
-                <b-img v-if="!step.item.tool.icon" src="favicon.ico"/>
+                <b-img v-if="step.item.tool.icon" :src="step.item.tool.icon" width="32"/>
+                <b-img v-if="!step.item.tool.icon" src="favicon.ico" width="32"/>
               </b-link>
             </template>
             <template #cell(actions)="step">
@@ -83,8 +83,8 @@
 <script>
 import RekonoApi from '@/backend/RekonoApi'
 import Deletion from '@/common/Deletion'
-import TableHeader from '@/common/TableHeader'
 import Pagination from '@/common/Pagination'
+import TableHeader from '@/common/TableHeader'
 import Process from '@/modals/Process'
 import Step from '@/modals/Step'
 import Task from '@/modals/Task'
@@ -107,7 +107,7 @@ export default {
         { key: 'icon', label: '', sortable: false },
         { key: 'tool.name', label: 'Tool', sortable: true },
         { key: 'configuration.name', label: 'Configuration', sortable: true },
-        { key: 'tool.stage_name', label: 'Stage', sortable: true },
+        { key: 'configuration.stage_name', label: 'Stage', sortable: true },
         { key: 'priority', sortable: true },
         { key: 'actions', sortable: false }
       ],
@@ -132,9 +132,9 @@ export default {
     data () {
       this.filters = [
         { name: 'Tags', filterField: 'tags__name__in', type: 'tags' },
-        { name: 'Stage', values: this.stages, valueField: 'id', textField: 'value', filterField: 'steps__tool__stage' },
+        { name: 'Stage', values: this.stages, valueField: 'id', textField: 'value', filterField: 'steps__configuration__stage' },
         { name: 'Creator', filterField: 'creator__username__icontains', type: 'text' },
-        { name: 'Favourities', values: [{ value: true, text: 'True' }, { value: false, text: 'False' }], valueField: 'value', textField: 'text', filterField: 'liked' }
+        { name: 'Favourities', type: 'checkbox', filterField: 'liked' }
       ]
     }
   },
@@ -171,12 +171,12 @@ export default {
     taskModal (process) {
       this.cleanSelection()
       this.showTaskModal = true
-      this.selectProcess(process)
+      this.selectedProcess = process
     },
     processModal (process) {
       this.cleanSelection()
       this.showProcessModal = true
-      this.selectProcess(process)
+      this.selectedProcess = process
     },
     stepModal (process, step = null) {
       this.cleanSelection()
@@ -184,14 +184,11 @@ export default {
       if (step !== null) {
         this.selectStep(process, step)
       } else {
-        this.selectProcess(process)
+        this.selectedProcess = process
       }
     },
-    selectProcess (process) {
-      this.selectedProcess = process
-    },
     selectStep (process, step) {
-      this.selectProcess(process)
+      this.selectedProcess = process
       this.selectedStep = step
     },
     cleanSelection () {

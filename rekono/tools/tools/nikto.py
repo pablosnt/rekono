@@ -5,7 +5,7 @@ from findings.models import Path, Vulnerability
 from tools.tools.base_tool import BaseTool
 
 
-class NiktoTool(BaseTool):
+class Nikto(BaseTool):
     '''Nikto tool class.'''
 
     # Exit code ignored because Nikto report will include findings until error occurs

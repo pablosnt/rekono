@@ -3,10 +3,11 @@
         "model": "resources.wordlist",
         "pk": 1,
         "fields": {
-            "name": "Rockyou",
-            "type": "Password",
-            "path": "/usr/share/wordlists/rockyou.txt",
+            "name": "Common (dirb)",
+            "type": "Endpoint",
+            "path": "/usr/share/dirb/wordlists/common.txt",
             "checksum": null,
+            "size": null,
             "creator": null
         }
     },
@@ -14,10 +15,11 @@
         "model": "resources.wordlist",
         "pk": 2,
         "fields": {
-            "name": "Most used passwords 2020",
-            "type": "Password",
-            "path": "/usr/share/seclists/Passwords/2020-200_most_used_passwords.txt",
+            "name": "Big (dirb)",
+            "type": "Endpoint",
+            "path": "/usr/share/dirb/wordlists/big.txt",
             "checksum": null,
+            "size": null,
             "creator": null
         }
     },
@@ -25,10 +27,11 @@
         "model": "resources.wordlist",
         "pk": 3,
         "fields": {
-            "name": "Most 10k common passwords",
-            "type": "Password",
-            "path": "/usr/share/seclists/Passwords/Common-Credentials/10k-most-common.txt",
+            "name": "Small",
+            "type": "Endpoint",
+            "path": "/usr/share/dirb/wordlists/small.txt",
             "checksum": null,
+            "size": null,
             "creator": null
         }
     },
@@ -36,10 +39,11 @@
         "model": "resources.wordlist",
         "pk": 4,
         "fields": {
-            "name": "Top 500 worst passwords",
-            "type": "Password",
-            "path": "/usr/share/seclists/Passwords/Common-Credentials/500-worst-passwords.txt",
+            "name": "Spanish",
+            "type": "Endpoint",
+            "path": "/usr/share/dirb/wordlists/spanish.txt",
             "checksum": null,
+            "size": null,
             "creator": null
         }
     },
@@ -47,10 +51,11 @@
         "model": "resources.wordlist",
         "pk": 5,
         "fields": {
-            "name": "Top 10 Dark Web 2017",
-            "type": "Password",
-            "path": "/usr/share/seclists/Passwords/darkweb2017-top10.txt",
+            "name": "Apache",
+            "type": "Endpoint",
+            "path": "/usr/share/seclists/Discovery/Web-Content/apache.txt",
             "checksum": null,
+            "size": null,
             "creator": null
         }
     },
@@ -58,10 +63,11 @@
         "model": "resources.wordlist",
         "pk": 6,
         "fields": {
-            "name": "Top 100 Dark Web 2017",
-            "type": "Password",
-            "path": "/usr/share/seclists/Passwords/darkweb2017-top100.txt",
+            "name": "Big (seclists)",
+            "type": "Endpoint",
+            "path": "/usr/share/seclists/Discovery/Web-Content/big.txt",
             "checksum": null,
+            "size": null,
             "creator": null
         }
     },
@@ -69,10 +75,11 @@
         "model": "resources.wordlist",
         "pk": 7,
         "fields": {
-            "name": "Top 1000 Dark Web 2017",
-            "type": "Password",
-            "path": "/usr/share/seclists/Passwords/darkweb2017-top1000.txt",
+            "name": "Common (seclists)",
+            "type": "Endpoint",
+            "path": "/usr/share/seclists/Discovery/Web-Content/common.txt",
             "checksum": null,
+            "size": null,
             "creator": null
         }
     },
@@ -80,10 +87,11 @@
         "model": "resources.wordlist",
         "pk": 8,
         "fields": {
-            "name": "Top 10000 Dark Web 2017",
-            "type": "Password",
-            "path": "/usr/share/seclists/Passwords/darkweb2017-top10000.txt",
+            "name": "Endpoints list for Dirsearch",
+            "type": "Endpoint",
+            "path": "/usr/share/seclists/Discovery/Web-Content/dirsearch.txt",
             "checksum": null,
+            "size": null,
             "creator": null
         }
     },
@@ -91,10 +99,11 @@
         "model": "resources.wordlist",
         "pk": 9,
         "fields": {
-            "name": "Common endpoints",
+            "name": "Nginx",
             "type": "Endpoint",
-            "path": "/usr/share/wordlists/dirb/common.txt",
+            "path": "/usr/share/seclists/Discovery/Web-Content/nginx.txt",
             "checksum": null,
+            "size": null,
             "creator": null
         }
     },
@@ -102,10 +111,11 @@
         "model": "resources.wordlist",
         "pk": 10,
         "fields": {
-            "name": "Big endpoints list",
+            "name": "Swagger",
             "type": "Endpoint",
-            "path": "/usr/share/wordlists/dirb/big.txt",
+            "path": "/usr/share/seclists/Discovery/Web-Content/swagger.txt",
             "checksum": null,
+            "size": null,
             "creator": null
         }
     },
@@ -117,6 +127,211 @@
             "type": "Endpoint",
             "path": "/usr/share/seclists/Web-Shells/backdoor_list.txt",
             "checksum": null,
+            "size": null,
+            "creator": null
+        }
+    },
+    {
+        "model": "resources.wordlist",
+        "pk": 12,
+        "fields": {
+            "name": "WebLogic",
+            "type": "Endpoint",
+            "path": "/usr/share/seclists/Discovery/Web-Content/weblogic.txt",
+            "checksum": null,
+            "size": null,
+            "creator": null
+        }
+    },
+    {
+        "model": "resources.wordlist",
+        "pk": 13,
+        "fields": {
+            "name": "WebSphere",
+            "type": "Endpoint",
+            "path": "/usr/share/seclists/Discovery/Web-Content/websphere.txt",
+            "checksum": null,
+            "size": null,
+            "creator": null
+        }
+    },
+    {
+        "model": "resources.wordlist",
+        "pk": 14,
+        "fields": {
+            "name": "Drupal 7.20",
+            "type": "Endpoint",
+            "path": "/usr/share/seclists/Discovery/Web-Content/URLs/urls-Drupal-7.20.txt",
+            "checksum": null,
+            "size": null,
+            "creator": null
+        }
+    },
+    {
+        "model": "resources.wordlist",
+        "pk": 15,
+        "fields": {
+            "name": "Joomla 3.0.3",
+            "type": "Endpoint",
+            "path": "/usr/share/seclists/Discovery/Web-Content/URLs/urls-joomla-3.0.3.txt",
+            "checksum": null,
+            "size": null,
+            "creator": null
+        }
+    },
+    {
+        "model": "resources.wordlist",
+        "pk": 16,
+        "fields": {
+            "name": "SAP",
+            "type": "Endpoint",
+            "path": "/usr/share/seclists/Discovery/Web-Content/URLs/urls-SAP.txt",
+            "checksum": null,
+            "size": null,
+            "creator": null
+        }
+    },
+    {
+        "model": "resources.wordlist",
+        "pk": 17,
+        "fields": {
+            "name": "WordPress 3.3.1",
+            "type": "Endpoint",
+            "path": "/usr/share/seclists/Discovery/Web-Content/URLs/urls-wordpress-3.3.1.txt",
+            "checksum": null,
+            "size": null,
+            "creator": null
+        }
+    },
+    {
+        "model": "resources.wordlist",
+        "pk": 18,
+        "fields": {
+            "name": "Italian",
+            "type": "Subdomain",
+            "path": "/usr/share/seclists/Discovery/DNS/italian-subdomains.txt",
+            "checksum": null,
+            "size": null,
+            "creator": null
+        }
+    },
+    {
+        "model": "resources.wordlist",
+        "pk": 19,
+        "fields": {
+            "name": "Namelist",
+            "type": "Subdomain",
+            "path": "/usr/share/seclists/Discovery/DNS/namelist.txt",
+            "checksum": null,
+            "size": null,
+            "creator": null
+        }
+    },
+    {
+        "model": "resources.wordlist",
+        "pk": 20,
+        "fields": {
+            "name": "Shubs subdomains",
+            "type": "Subdomain",
+            "path": "/usr/share/seclists/Discovery/DNS/shubs-subdomains.txt",
+            "checksum": null,
+            "size": null,
+            "creator": null
+        }
+    },
+    {
+        "model": "resources.wordlist",
+        "pk": 21,
+        "fields": {
+            "name": "Shubs StackOverflow",
+            "type": "Subdomain",
+            "path": "/usr/share/seclists/Discovery/DNS/shubs-stackoverflow.txt",
+            "checksum": null,
+            "size": null,
+            "creator": null
+        }
+    },
+    {
+        "model": "resources.wordlist",
+        "pk": 22,
+        "fields": {
+            "name": "Top 1 Million: 5000",
+            "type": "Subdomain",
+            "path": "/usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt",
+            "checksum": null,
+            "size": null,
+            "creator": null
+        }
+    },
+    {
+        "model": "resources.wordlist",
+        "pk": 23,
+        "fields": {
+            "name": "Top 1 Million: 20000",
+            "type": "Subdomain",
+            "path": "/usr/share/seclists/Discovery/DNS/subdomains-top1million-20000.txt",
+            "checksum": null,
+            "size": null,
+            "creator": null
+        }
+    },
+    {
+        "model": "resources.wordlist",
+        "pk": 24,
+        "fields": {
+            "name": "Top 1 Million: 110000",
+            "type": "Subdomain",
+            "path": "/usr/share/seclists/Discovery/DNS/subdomains-top1million-110000.txt",
+            "checksum": null,
+            "size": null,
+            "creator": null
+        }
+    },
+    {
+        "model": "resources.wordlist",
+        "pk": 25,
+        "fields": {
+            "name": "Deep Magic: Top 500",
+            "type": "Subdomain",
+            "path": "/usr/share/seclists/Discovery/DNS/deepmagic.com-prefixes-top500.txt",
+            "checksum": null,
+            "size": null,
+            "creator": null
+        }
+    },
+    {
+        "model": "resources.wordlist",
+        "pk": 26,
+        "fields": {
+            "name": "Deep Magic: Top 50000",
+            "type": "Subdomain",
+            "path": "/usr/share/seclists/Discovery/DNS/deepmagic.com-prefixes-top50000.txt",
+            "checksum": null,
+            "size": null,
+            "creator": null
+        }
+    },
+    {
+        "model": "resources.wordlist",
+        "pk": 27,
+        "fields": {
+            "name": "Bitquark: Top 100000",
+            "type": "Subdomain",
+            "path": "/usr/share/seclists/Discovery/DNS/bitquark-subdomains-top100000.txt",
+            "checksum": null,
+            "size": null,
+            "creator": null
+        }
+    },
+    {
+        "model": "resources.wordlist",
+        "pk": 28,
+        "fields": {
+            "name": "Combined subdomains",
+            "type": "Subdomain",
+            "path": "/usr/share/seclists/Discovery/DNS/combined_subdomains.txt",
+            "checksum": null,
+            "size": null,
             "creator": null
         }
     }
