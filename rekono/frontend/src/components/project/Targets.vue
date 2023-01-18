@@ -83,9 +83,10 @@ export default {
     }
   },
   methods: {
-    fetchData (params = { }) {
+    fetchData (params = {}) {
       params.project = this.$route.params.id
-      return this.getOnePage('/api/targets/?o=target', params)
+      params.o = 'target'
+      return this.getOnePage('/api/targets/', params)
         .then(response => {
           this.data = response.data.results
           this.total = response.data.count

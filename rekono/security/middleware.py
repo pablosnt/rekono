@@ -1,7 +1,10 @@
 import logging
 from typing import Any
 
+from rest_framework import status
+from rest_framework.renderers import JSONRenderer
 from rest_framework.request import HttpRequest
+from rest_framework.response import Response
 from security.csp_header import add_csp_to_headers
 
 from rekono.settings import TRUSTED_PROXY
@@ -14,6 +17,9 @@ headers = {
     'X-Content-Type-Options': 'nosniff',
     'X-Frame-Options': 'DENY',
     'X-XSS-Protection': '1; mode=block',
+    'Access-Control-Allow-Origin': 'app//.',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+    'Access-Control-Allow-Headers': 'content-type, authorization',
 }
 
 logger = logging.getLogger()                                                    # Rekono logger
@@ -44,9 +50,22 @@ class RekonoSecurityMiddleware:
             if ',' in x_forwarded_for:
                 x_forwarded_for = x_forwarded_for.split(',', 1)[0]
             request.META['REMOTE_ADDR'] = x_forwarded_for
-        response = self.get_response(request)                                   # Process request
+        if request.method == 'OPTIONS':
+            response = Response(status=status.HTTP_200_OK)
+            response.accepted_renderer = JSONRenderer()
+            response.accepted_media_type = 'application/json'
+            response.renderer_context = {
+                'request': request,
+                'response': response
+            }
+            response = response.render()
+            response['Allow'] = 'GET, POST, PUT, DELETE, OPTIONS'
+        else:
+            response = self.get_response(request)                               # Process request
+        print(response)
         for header, value in add_csp_to_headers(headers, request.path).items():     # Get response headers with CSP
             response[header] = value                                            # Include response headers in response
+        print(response)
         log = logger.info                                                       # Info level by default
         if response.status_code >= 400 and response.status_code < 500:
             log = logger.warning                                                # Warning level for 4XX error responses

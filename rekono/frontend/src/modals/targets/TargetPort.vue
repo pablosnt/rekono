@@ -132,7 +132,7 @@ export default {
   },
   methods: {
     fetchData () {
-      return this.getOnePage('/api/target-ports/?o=port', { target: this.targetId })
+      return this.getOnePage('/api/target-ports/', { o: 'port', target: this.targetId })
         .then(response => {
           this.data = response.data.results
           this.total = response.data.count

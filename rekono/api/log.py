@@ -17,7 +17,8 @@ class RekonoLoggingFilter(logging.Filter):
         if hasattr(record, 'request'):                                          # Record with request data
             record.source_ip = record.request.META.get('REMOTE_ADDR')           # Remote address by default
             record.user = 'anonymous'                                           # Anonymous user by default
-            if record.request.user and record.request.user.id:                  # Authenticated request
+            if hasattr(record.request, 'user') and record.request.user and record.request.user.id:
+                # Authenticated request
                 record.user = record.request.user.id
         else:                                                                   # Record without request data
             record.source_ip = record.source_ip if hasattr(record, 'source_ip') else ''

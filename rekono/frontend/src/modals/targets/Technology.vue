@@ -87,7 +87,7 @@ export default {
   },
   methods: {
     fetchData () {
-      return this.getOnePage('/api/parameters/technologies/?o=name', { target: this.targetId })
+      return this.getOnePage('/api/parameters/technologies/', { o: 'name', target: this.targetId })
         .then(response => {
           this.data = response.data.results
           this.total = response.data.count

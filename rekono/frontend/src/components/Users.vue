@@ -71,8 +71,9 @@ export default {
     }
   },
   methods: {
-    fetchData (params = null) {
-      return this.getOnePage('/api/users/?o=username', params)
+    fetchData (params = {}) {
+      params.o = 'username'
+      return this.getOnePage('/api/users/', params)
         .then(response => {
           this.data = response.data.results
           this.total = response.data.count
