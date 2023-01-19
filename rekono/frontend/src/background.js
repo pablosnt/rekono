@@ -1,8 +1,8 @@
 'use strict'
 
-import { app, protocol, BrowserWindow } from 'electron'
-import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
+import { app, BrowserWindow, protocol } from 'electron'
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
+import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
 // Scheme must be registered before the app is ready
@@ -13,8 +13,8 @@ protocol.registerSchemesAsPrivileged([
 async function createWindow() {
   // Create the browser window.
   const win = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: 1250,
+    height: 1000,
     webPreferences: {
       
       // Use pluginOptions.nodeIntegration, leave this alone
@@ -24,10 +24,15 @@ async function createWindow() {
     }
   })
 
+  win.webContents.on('new-window', function(e, url) {
+    e.preventDefault();
+    require('electron').shell.openExternal(url);
+  });
+
   if (process.env.WEBPACK_DEV_SERVER_URL) {
     // Load the url of the dev server if in development mode
     await win.loadURL(process.env.WEBPACK_DEV_SERVER_URL)
-    if (!process.env.IS_TEST) win.webContents.openDevTools()
+    // if (!process.env.IS_TEST) win.webContents.openDevTools()
   } else {
     createProtocol('app')
     // Load the index.html when not in development
