@@ -1,0 +1,48 @@
+name: Desktop Applications
+on:
+  workflow_dispatch:
+    inputs:
+      backend:
+        description: 'Backend URL to connect Desktop application'
+        required: true
+        default: 'http://127.0.0.1:8080'
+  release:
+    types: [published]
+
+jobs:
+  desktop:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      
+      - name: Configure backend URL
+        if: github.event_name == 'workflow_dispatch'
+        working-directory: rekono/frontend
+        run: echo 'VUE_APP_DESKTOP_BACKEND_URL=${{ github.event.inputs.backend }}' > .env.production
+      
+      - name: Install dependencies
+        working-directory: rekono/frontend
+        run: npm install .
+      
+      - name: Generate Desktop app
+        working-directory: rekono/frontend
+        run: npm run electron:build
+      
+      - name: Check Desktop apps
+        working-directory: rekono/frontend
+        run: ls -la dist_electron
+      
+      # - name: Upload Desktop app as GitHub artifact
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: Rekono  # name by OS
+      #     path: rekono/frontend/dist_electron   # Path by OS
+
+      # Upload to the GitHub release
+
