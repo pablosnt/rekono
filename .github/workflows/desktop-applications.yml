@@ -14,7 +14,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        include:
+          - os: ubuntu-latest
+            name: linux
+            extension: deb
+          - os: windows-latest
+            name: windows
+            extension: exe
+          - os: macos-latest
+            name: macos
+            extension: dmg
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
@@ -45,10 +54,11 @@ jobs:
         working-directory: rekono/frontend
         run: dir dist_electron
       
-      # - name: Upload Desktop app as GitHub artifact
-      #   uses: actions/upload-artifact@v3
-      #   with:
-      #     name: Rekono  # name by OS
-      #     path: rekono/frontend/dist_electron   # Path by OS
+      - name: Upload Desktop app as GitHub artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: rekono_${{ matrix.name }}
+          path: rekono/frontend/dist_electron/*.${{ matrix.extension }}
+          if-no-files-found: warn
 
       # Upload to the GitHub release
