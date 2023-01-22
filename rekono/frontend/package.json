@@ -2,8 +2,7 @@
   "name": "rekono",
   "version": "1.4.0",
   "description": "Execute full pentesting processes combining multiple hacking tools automatically",
-  "author": "Pablo Santiago López",
-  "email": "rekono.project@gmail.com",
+  "author": "Pablo Santiago López <rekono.project@gmail.com>",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
