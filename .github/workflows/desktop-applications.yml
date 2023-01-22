@@ -36,8 +36,14 @@ jobs:
         run: npm run electron:build
       
       - name: Check Desktop apps
+        if: matrix.os != 'windows-latest'
         working-directory: rekono/frontend
         run: ls -la dist_electron
+      
+      - name: Check Desktop apps
+        if: matrix.os == 'windows-latest'
+        working-directory: rekono/frontend
+        run: dir dist_electron
       
       # - name: Upload Desktop app as GitHub artifact
       #   uses: actions/upload-artifact@v3
