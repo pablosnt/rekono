@@ -17,10 +17,13 @@ jobs:
         include:
           - os: ubuntu-latest
             extension: deb
+            arguments: '--linux deb'
           - os: windows-latest
             extension: exe
+            arguments: ''
           - os: macos-latest
             extension: dmg
+            arguments: ''
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
@@ -39,17 +42,7 @@ jobs:
       
       - name: Generate Desktop app
         working-directory: rekono/frontend
-        run: npm run electron:build
-      
-      - name: Check Desktop apps
-        if: matrix.os != 'windows-latest'
-        working-directory: rekono/frontend
-        run: ls -la dist_electron
-      
-      - name: Check Desktop apps
-        if: matrix.os == 'windows-latest'
-        working-directory: rekono/frontend
-        run: dir dist_electron
+        run: npm run electron:build ${{ matrix.arguments }}
       
       - name: Upload Desktop app as GitHub artifact
         uses: actions/upload-artifact@v3
