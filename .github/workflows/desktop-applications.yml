@@ -17,7 +17,7 @@ jobs:
         include:
           - os: ubuntu-latest
             extension: deb
-            arguments: '--target deb'
+            # arguments: '--target deb'
           # - os: windows-latest
           #   extension: exe
           #   arguments: ''
@@ -42,7 +42,8 @@ jobs:
       
       - name: Generate Desktop app
         working-directory: rekono/frontend
-        run: npm run electron:build ${{ matrix.arguments }}
+        run: npm run electron:build
+        # ${{ matrix.arguments }}
       
       - name: Debug
         if: matrix.os == 'ubuntu-latest'

@@ -31,7 +31,10 @@ module.exports = {
       builderOptions: {
         appId: 'com.rekono.app',
         productName: 'Rekono',
-        icon: 'public/favicon'
+        icon: 'public/favicon',
+        linux: {
+          target: 'deb'
+        }
       }
     }
   }
