@@ -6,6 +6,9 @@ on:
         description: 'Backend URL to connect Desktop application'
         required: true
         default: 'http://127.0.0.1:8080'
+  pull_request:
+    paths:
+      - 'rekono/frontend/**'
   release:
     types: [published]
 
