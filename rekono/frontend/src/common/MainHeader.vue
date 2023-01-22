@@ -1,7 +1,7 @@
 <template>
   <div>
     <b-navbar type="dark" variant="dark">
-      <b-navbar-brand href="/" style="margin-left: 15px">
+      <b-navbar-brand to="/dashboard" style="margin-left: 15px">
         <img src="/static/logo-white.png" width="100" class="d-inline-block align-top" alt="Rekono">
       </b-navbar-brand>
       <b-navbar-nav class="ml-auto">
@@ -17,7 +17,7 @@
             <b-icon variant="black" icon="sliders"/>
             <label class="ml-2">Settings</label>
           </b-dropdown-item>
-          <b-dropdown-item :href="getUrl('/api/schema/swagger-ui.html?docExpansion=none')" target="_blank">
+          <b-dropdown-item :href="getUrl('/api/schema/swagger-ui.html')" target="_blank">
             <b-icon variant="danger" icon="code-slash"/>
             <label class="ml-2">Rekono API Rest</label>
           </b-dropdown-item>
