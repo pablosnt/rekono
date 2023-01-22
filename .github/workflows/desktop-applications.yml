@@ -16,13 +16,10 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-            name: linux
             extension: deb
           - os: windows-latest
-            name: windows
             extension: exe
           - os: macos-latest
-            name: macos
             extension: dmg
     runs-on: ${{ matrix.os }}
     steps:
@@ -57,7 +54,7 @@ jobs:
       - name: Upload Desktop app as GitHub artifact
         uses: actions/upload-artifact@v3
         with:
-          name: rekono_${{ matrix.name }}
+          name: rekono_${{ matrix.os }}
           path: rekono/frontend/dist_electron/*.${{ matrix.extension }}
           if-no-files-found: warn
 
