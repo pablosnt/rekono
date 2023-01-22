@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       backend:
-        description: 'Backend URL to connect Desktop application'
+        description: 'Backend URL to connect Desktop app'
         required: true
         default: 'http://127.0.0.1:8080'
   pull_request:

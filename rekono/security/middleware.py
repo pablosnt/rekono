@@ -17,7 +17,7 @@ headers = {
     'X-Content-Type-Options': 'nosniff',
     'X-Frame-Options': 'DENY',
     'X-XSS-Protection': '1; mode=block',
-    'Access-Control-Allow-Origin': 'app//.',
+    'Access-Control-Allow-Origin': 'app://.',
     'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
     'Access-Control-Allow-Headers': 'content-type, authorization',
 }
@@ -62,10 +62,8 @@ class RekonoSecurityMiddleware:
             response['Allow'] = 'GET, POST, PUT, DELETE, OPTIONS'
         else:
             response = self.get_response(request)                               # Process request
-        print(response)
         for header, value in add_csp_to_headers(headers, request.path).items():     # Get response headers with CSP
             response[header] = value                                            # Include response headers in response
-        print(response)
         log = logger.info                                                       # Info level by default
         if response.status_code >= 400 and response.status_code < 500:
             log = logger.warning                                                # Warning level for 4XX error responses
