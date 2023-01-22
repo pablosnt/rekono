@@ -17,7 +17,7 @@
             <b-icon variant="black" icon="sliders"/>
             <label class="ml-2">Settings</label>
           </b-dropdown-item>
-          <b-dropdown-item href="/api/schema/swagger-ui.html?docExpansion=none" target="_blank">
+          <b-dropdown-item :href="getUrl('/api/schema/swagger-ui.html?docExpansion=none')" target="_blank">
             <b-icon variant="danger" icon="code-slash"/>
             <label class="ml-2">Rekono API Rest</label>
           </b-dropdown-item>

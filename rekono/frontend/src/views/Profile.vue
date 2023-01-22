@@ -107,7 +107,7 @@
               </b-card-text>
             </b-collapse>
             <template #footer v-if="showRekonoApi">
-                <b-link class="text-danger" href="/api/schema/swagger-ui.html?docExpansion=none" target="_blank">API documentation</b-link>
+                <b-link class="text-danger" :href="getUrl('/api/schema/swagger-ui.html?docExpansion=none')" target="_blank">API documentation</b-link>
               </template>
           </b-card>
           <b-row class="mt-3" align-h="center">
