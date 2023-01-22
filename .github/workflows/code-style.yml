@@ -8,17 +8,11 @@ on:
 jobs:
   flake8:
     runs-on: ubuntu-latest
-    steps:
+    steps:      
       - name: Checkout
-        if: github.event_name == 'pull_request'
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
-          ref: refs/pull/${{ github.event.pull_request.number }}/merge
-      
-      - name: Checkout
-        if: github.event_name != 'pull_request'
-        uses: actions/checkout@v2
       
       - name: Flake8 check
         uses: valentijnscholten/flake8-your-pr@master
@@ -27,9 +21,11 @@ jobs:
 
   mypy:
     runs-on: ubuntu-latest
-    steps:
+    steps:      
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
       
       - uses: actions/setup-python@v2
         with:
@@ -50,7 +46,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
       
       - name: Install ESLint
         working-directory: rekono/frontend
