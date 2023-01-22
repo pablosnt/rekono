@@ -20,10 +20,10 @@ jobs:
         include:
           - os: ubuntu-latest
             extension: deb
-          # - os: windows-latest
-          #   extension: exe
-          # - os: macos-latest
-          #   extension: dmg
+          - os: windows-latest
+            extension: exe
+          - os: macos-latest
+            extension: dmg
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
@@ -50,5 +50,10 @@ jobs:
           name: rekono_${{ matrix.os }}
           path: rekono/frontend/dist_electron/*.${{ matrix.extension }}
           if-no-files-found: warn
-
-      # Upload to the GitHub release
+      
+      - name: Upload Desktop app to GitHub release
+        if: github.event_name == 'release'
+        working-directory: rekono/frontend/dist_electron
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload --repo pablosnt/rekono ${{ github.event.release.name }} *.${{ matrix.extension }}
