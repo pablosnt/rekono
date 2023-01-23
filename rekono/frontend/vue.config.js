@@ -33,7 +33,8 @@ module.exports = {
         productName: 'Rekono',
         icon: 'public/favicon',
         linux: {
-          target: 'deb'
+          target: 'deb',
+          icon: 'public/favicon'
         }
       }
     }
