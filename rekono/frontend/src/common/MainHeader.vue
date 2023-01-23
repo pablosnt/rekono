@@ -1,7 +1,10 @@
 <template>
   <div>
     <b-navbar type="dark" variant="dark">
-      <b-navbar-brand to="/dashboard" style="margin-left: 15px">
+      <b-button variant="outline" @click="$router.back()" :disabled="!backButton" v-if="showBackButton">
+        <b-icon variant="white" icon="chevron-left"/>
+      </b-button>
+      <b-navbar-brand to="/dashboard" replace style="margin-left: 15px">
         <img src="/static/logo-white.png" width="100" class="d-inline-block align-top" alt="Rekono">
       </b-navbar-brand>
       <b-navbar-nav class="ml-auto">
@@ -42,6 +45,21 @@ export default {
     logout () {
       this.post('/api/logout/', { refresh_token: sessionStorage.getItem(refreshTokenKey) })
       this.$store.dispatch('logout')
+    }
+  },
+  data () {
+    return {
+      backButton: false,
+      showBackButton: process.env.IS_ELECTRON
+    }
+  },
+  watch: {
+    $route (to, from){
+      if (from && from.name) {
+        this.backButton = true
+      } else {
+        this.backButton = false
+      }
     }
   }
 }
