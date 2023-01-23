@@ -50,7 +50,7 @@ class RekonoSecurityMiddleware:
             if ',' in x_forwarded_for:
                 x_forwarded_for = x_forwarded_for.split(',', 1)[0]
             request.META['REMOTE_ADDR'] = x_forwarded_for
-        if request.method == 'OPTIONS':
+        if request.method == 'OPTIONS':                                         # Generic answer for OPTIONS requests
             response = Response(status=status.HTTP_200_OK)
             response.accepted_renderer = JSONRenderer()
             response.accepted_media_type = 'application/json'
