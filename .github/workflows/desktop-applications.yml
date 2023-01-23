@@ -1,0 +1,59 @@
+name: Desktop applications
+on:
+  workflow_dispatch:
+    inputs:
+      backend:
+        description: 'Backend URL to connect Desktop app'
+        required: true
+        default: 'http://127.0.0.1:8000'
+  pull_request:
+    paths:
+      - 'rekono/frontend/**'
+  release:
+    types: [published]
+
+jobs:
+  desktop:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            extension: deb
+          - os: windows-latest
+            extension: exe
+          - os: macos-latest
+            extension: dmg
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      
+      - name: Configure backend URL
+        if: github.event_name == 'workflow_dispatch'
+        working-directory: rekono/frontend
+        run: echo 'VUE_APP_DESKTOP_BACKEND_URL=${{ github.event.inputs.backend }}' > .env.production
+      
+      - name: Install dependencies
+        working-directory: rekono/frontend
+        run: npm install .
+      
+      - name: Generate Desktop app
+        working-directory: rekono/frontend
+        run: npm run electron:build
+      
+      - name: Upload Desktop app as GitHub artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: rekono_${{ matrix.os }}
+          path: rekono/frontend/dist_electron/*.${{ matrix.extension }}
+          if-no-files-found: warn
+      
+      - name: Upload Desktop app to GitHub release
+        if: github.event_name == 'release'
+        working-directory: rekono/frontend/dist_electron
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload --repo pablosnt/rekono ${{ github.event.release.name }} *.${{ matrix.extension }}

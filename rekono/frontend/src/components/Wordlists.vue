@@ -75,8 +75,9 @@ export default {
     }
   },
   methods: {
-    fetchData (params = null) {
-      return this.getOnePage('/api/resources/wordlists/?o=type,name', params)
+    fetchData (params = {}) {
+      params.o = 'type,name'
+      return this.getOnePage('/api/resources/wordlists/', params)
         .then(response => {
           this.data = response.data.results
           this.total = response.data.count

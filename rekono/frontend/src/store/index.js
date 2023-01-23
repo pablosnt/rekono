@@ -13,6 +13,7 @@ export default new Vuex.Store({
     role: null,
     mainTabs: true,
     refreshing: false,
+    backendUrl: process.env.IS_ELECTRON && process.env.NODE_ENV === 'production'? process.env.VUE_APP_DESKTOP_BACKEND_URL : null
   },
   mutations: {
     authenticateUser (state, userData) {

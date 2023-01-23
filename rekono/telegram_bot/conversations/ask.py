@@ -263,16 +263,13 @@ def ask_for_wordlist(update: Update, context: CallbackContext, chat: TelegramCha
         context.chat_data.get(TOOL) and
         context.chat_data.get(TOOL).name not in tools_with_required_wordlists
     ):
-        print('TOOL')
         check_if_wordlist_is_required = {'argument__tool': context.chat_data[TOOL]}
     elif (                                                                      # Filter inputs by process
         context.chat_data is not None and
         context.chat_data.get(PROCESS) and
         not context.chat_data[PROCESS].steps.filter(tool__name__in=tools_with_required_wordlists).exists()
     ):
-        print('PROCESS')
         check_if_wordlist_is_required = {'argument__tool__in': context.chat_data[PROCESS].steps.all().values('tool')}
-    print(check_if_wordlist_is_required)
     if check_if_wordlist_is_required:
         check_if_wordlist_is_required.update({                                  # Base arguments to check if required
             'argument__required': True,

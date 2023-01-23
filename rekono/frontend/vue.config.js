@@ -25,5 +25,18 @@ module.exports = {
         changeOrigin: true
       },
     }
+  },
+  pluginOptions: {
+    electronBuilder: {
+      builderOptions: {
+        appId: 'com.rekono.app',
+        productName: 'Rekono',
+        icon: 'public/favicon',
+        linux: {
+          target: 'deb',
+          icon: 'public/favicon'
+        }
+      }
+    }
   }
 }

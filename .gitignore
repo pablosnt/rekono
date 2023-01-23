@@ -139,6 +139,7 @@ dmypy.json
 
 # Vue.JS
 node_modules/
+dist_electron/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
