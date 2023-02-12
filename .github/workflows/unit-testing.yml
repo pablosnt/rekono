@@ -41,7 +41,7 @@ jobs:
           chmod +x gitleaks
           mv gitleaks /usr/local/bin/
 
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v4
         with:
           python-version: '3.9'
 
