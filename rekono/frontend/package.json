@@ -47,6 +47,9 @@
   "overrides": {
     "vue-cli-plugin-electron-builder": {
       "electron-builder": "^23.0.3"
+    },
+    "@vue/cli-shared-utils": {
+      "@achrinza/node-ipc": "^9.2.6"
     }
   },
   "eslintConfig": {
