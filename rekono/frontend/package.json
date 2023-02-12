@@ -1,7 +1,7 @@
 {
   "name": "rekono",
   "version": "1.4.0",
-  "description": "Execute full pentesting processes combining multiple hacking tools automatically",
+  "description": "Execute complete pentesting processes combining multiple hacking tools automatically",
   "author": "Pablo Santiago López <rekono.project@gmail.com>",
   "homepage": "https://github.com/pablosnt/rekono",
   "private": true,
