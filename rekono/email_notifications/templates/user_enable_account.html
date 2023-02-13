@@ -18,6 +18,7 @@
                     <h3 class="card-title">Welcome {{ user.username }}!</h3>
                 {% endif %}
                 <p class="card-text">Your Rekono user has been enabled. Please, follow this link to establish your password.</p>
+                <!-- nosemgrep: javascript.express.security.audit.xss.mustache.var-in-href.var-in-href, python.django.security.audit.xss.template-href-var.template-href-var, python.flask.security.xss.audit.template-href-var.template-href-var -->
                 <a href="{{ rekono_url }}/#/reset-password?token={{ user.otp }}" class="btn btn-danger"><strong>Set password</strong></a>
             </div>
         </div>

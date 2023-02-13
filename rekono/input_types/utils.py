@@ -3,10 +3,9 @@ from typing import Dict, List, Optional
 import requests
 import urllib3
 from django.db import models
-from urllib3.exceptions import InsecureRequestWarning
-
 from input_types.base import BaseInput
 from input_types.models import InputType
+from urllib3.exceptions import InsecureRequestWarning
 
 urllib3.disable_warnings(category=InsecureRequestWarning)
 
@@ -29,6 +28,7 @@ def get_url(host: str, port: int = None, endpoint: str = '', protocols: List[str
     for protocol in protocols:                                                  # For each protocol
         url_to_test = schema.format(protocol=protocol, host=host, port=port, endpoint=endpoint)
         try:
+            # nosemgrep: python.requests.security.disabled-cert-validation.disabled-cert-validation
             requests.get(url_to_test, timeout=5, verify=False)                  # Test URL connection
             return url_to_test
         except Exception:

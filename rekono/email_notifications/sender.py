@@ -27,6 +27,7 @@ def consumer(addresses: List[str], subject: str, template_name: str, data: Dict[
     if EMAIL_HOST and EMAIL_PORT:
         template = get_template(template_name)                                  # Get HTML template
         data['rekono_url'] = FRONTEND_URL                                       # Include frontend address for links
+        # nosemgrep: python.flask.security.xss.audit.direct-use-of-jinja2.direct-use-of-jinja2
         content = template.render(data)                                         # Render HTML template using data
         try:
             message = EmailMultiAlternatives(subject, '', None, addresses)      # Create email message
