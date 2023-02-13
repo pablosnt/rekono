@@ -30,12 +30,14 @@ jobs:
       
       - name: Scan workflows
         working-directory: rekono
-        run: semgrep --config=auto --error --json -o semgrep_cicd.json .github/workflows/
+        run: |
+          ls -la
+          semgrep --config=auto --error --json -o semgrep_cicd.json .github/workflows/
       
       - name: Upload Semgrep report as GitHub artifact
         if: ${{ always() }}
         uses: actions/upload-artifact@v3
         with:
           name: Semgrep
-          path: semgrep_*.json
+          path: rekono/semgrep_*.json
           if-no-files-found: warn
