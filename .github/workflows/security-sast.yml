@@ -28,7 +28,7 @@ jobs:
         run: semgrep --config=auto --error --json -o semgrep_code.json rekono/rekono
       
       - name: Scan workflows
-        run: semgrep --config=auto --error --json -o semgrep_cicd.json rekono/.github/workflows
+        run: semgrep --verbose --config=auto --error --json -o semgrep_cicd.json rekono/.github/workflows
       
       - name: Upload Semgrep report as GitHub artifact
         uses: actions/upload-artifact@v3
