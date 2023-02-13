@@ -1,4 +1,5 @@
 coverage==6.3.1
+defusedxml==0.7.1
 Django==3.2.17
 djangorestframework==3.12.4
 djangorestframework-simplejwt==5.2.2

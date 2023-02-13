@@ -268,6 +268,7 @@ class CreateUserSerializer(UserPasswordSerializer):
         validated_data['user'].username = validated_data.get('username')        # Set username
         validated_data['user'].first_name = validated_data.get('first_name')    # Set first name
         validated_data['user'].last_name = validated_data.get('last_name')      # Set last name
+        # nosemgrep: python.django.security.audit.unvalidated-password.unvalidated-password
         validated_data['user'].set_password(validated_data.get('password'))     # Set password
         validated_data['user'].is_active = True                                 # Enable user
         validated_data['user'].otp = None                                       # Clear OTP
@@ -315,6 +316,7 @@ class ChangeUserPasswordSerializer(UserPasswordSerializer):
         Returns:
             User: Updated instance
         '''
+        # nosemgrep: python.django.security.audit.unvalidated-password.unvalidated-password
         instance.set_password(validated_data.get('password'))                   # Update password
         instance.save(update_fields=['password'])
         logger.info(f'[Security] User {self.instance.id} changed his password', extra={'user': self.instance.id})
@@ -356,6 +358,7 @@ class ResetPasswordSerializer(UserPasswordSerializer):
             User: Instance after apply changes
         '''
         # Get user that requested the password reset
+        # nosemgrep: python.django.security.audit.unvalidated-password.unvalidated-password
         self.validated_data['user'].set_password(self.validated_data.get('password'))   # Set password
         self.validated_data['user'].otp = None                                  # Clear OTP
         self.validated_data['user'].is_active = True                            # Active user

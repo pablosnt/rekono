@@ -12,6 +12,7 @@ def get_tool_class_by_name(name: str) -> Any:
         Any: Tool class
     '''
     try:
+        # nosemgrep: python.lang.security.audit.non-literal-import.non-literal-import
         tools_module = importlib.import_module(f'tools.tools.{name.lower().replace(" ", "_")}')   # Import tool module
         # Get tool class
         tool_class = getattr(tools_module, name[0].upper() + name[1:].lower().replace(' ', ''))

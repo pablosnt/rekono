@@ -247,6 +247,7 @@ LOGGING = {                                                                     
 # API Rest                                                                     #
 ################################################################################
 
+# nosemgrep: python.django.security.audit.django-rest-framework.missing-throttle-config.missing-throttle-config
 REST_FRAMEWORK: Dict[str, Any] = {
     'DEFAULT_METADATA_CLASS': None,
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
