@@ -1,6 +1,6 @@
-import xml.etree.ElementTree as parser
 from html import unescape
 
+import defusedxml.ElementTree as parser
 from findings.enums import PathType, Severity
 from findings.models import Path, Vulnerability
 from tools.tools.base_tool import BaseTool

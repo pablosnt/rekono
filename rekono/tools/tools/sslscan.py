@@ -1,9 +1,8 @@
-import xml.etree.ElementTree as parser
 from typing import List, Union
 
+import defusedxml.ElementTree as parser
 from findings.enums import Severity
 from findings.models import Technology, Vulnerability
-
 from tools.tools.base_tool import BaseTool
 
 
