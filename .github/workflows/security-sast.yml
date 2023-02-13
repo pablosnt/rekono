@@ -25,10 +25,12 @@ jobs:
         run: pip install semgrep
       
       - name: Scan code
-        run: semgrep --config=auto --error --json -o semgrep_code.json rekono/rekono
+        working-directory: rekono
+        run: semgrep --config=auto --error --json -o semgrep_code.json rekono/
       
       - name: Scan workflows
-        run: semgrep --config=auto --error --json -o semgrep_cicd.json rekono/.github/workflows
+        working-directory: rekono
+        run: semgrep --config=auto --error --json -o semgrep_cicd.json .github/workflows/
       
       - name: Upload Semgrep report as GitHub artifact
         if: ${{ always() }}
