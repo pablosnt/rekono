@@ -25,11 +25,9 @@ jobs:
         run: pip install semgrep
       
       - name: Scan code
-        working-directory: rekono
         run: semgrep --config=auto --error --json -o semgrep_code.json rekono/
       
       - name: Scan workflows
-        working-directory: rekono
         run: |
           ls -la
           semgrep --config=auto --error --json -o semgrep_cicd.json .github/workflows/
@@ -39,5 +37,5 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: Semgrep
-          path: rekono/semgrep_*.json
+          path: semgrep_*.json
           if-no-files-found: warn
