@@ -3,6 +3,18 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.1] - 2023-02-15
+
+### Fixed
+
+- Upgrade `node-ipc` to version `9.2.6` to fix incompatibilities with `Node 19` (https://github.com/pablosnt/rekono/issues/138)
+- Upgrade `psycopg2` to version `2.9.5` to fix incompatibilities with `Python 3.11` (https://github.com/pablosnt/rekono/issues/142)
+
+### Security
+
+- Upgrade `Django` to version `3.2.18` (https://github.com/pablosnt/rekono/issues/143)
+
+
 ## [1.4.0] - 2023-01-11
 
 ### Added
