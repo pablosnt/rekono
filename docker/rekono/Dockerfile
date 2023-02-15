@@ -36,10 +36,11 @@ ENV NODE_OPTIONS --openssl-legacy-provider
 
 WORKDIR /frontend
 RUN npm install -g serve
-RUN npm install
-RUN npx browserslist@latest --update-db
-RUN npm run build
 
 RUN adduser --disabled-password rekono
 RUN chown -R rekono /frontend
 USER rekono
+
+RUN npm install
+RUN npx browserslist@latest --update-db
+RUN npm run build
