@@ -1,5 +1,5 @@
 coverage==6.3.1
-Django==3.2.16
+Django==3.2.18
 djangorestframework==3.12.4
 djangorestframework-simplejwt==5.2.2
 django-filter==21.1
@@ -7,7 +7,7 @@ django-rq==2.4.1
 django-taggit==2.0.0
 drf-spectacular==0.20.1
 pycryptodome==3.11.0
-psycopg2==2.9.1
+psycopg2==2.9.5
 pyjwt==2.4.0
 python-magic==0.4.24
 python-libnmap==0.7.3
