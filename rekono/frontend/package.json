@@ -33,6 +33,11 @@
     "sass-loader": "^10.0.5",
     "vue-template-compiler": "^2.6.11"
   },
+  "overrides": {
+    "@vue/cli-shared-utils": {
+      "@achrinza/node-ipc": "^9.2.6"
+    }
+  },
   "eslintConfig": {
     "root": true,
     "env": {
