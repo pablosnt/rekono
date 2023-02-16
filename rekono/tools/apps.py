@@ -35,6 +35,9 @@ class ToolsConfig(AppConfig):
 
     def load_processes_models(self, **kwargs: Any) -> None:
         '''Load processes fixtures in database.'''
+        from processes.models import Process, Step
+        if Process.objects.exists() or Step.objects.exists():                   # Check if default data is loaded
+            return
         # Path to fixtures directory
         path = os.path.join(Path(__file__).resolve().parent.parent, 'processes', 'fixtures')
         management.call_command(
