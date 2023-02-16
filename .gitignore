@@ -148,3 +148,7 @@ yarn-error.log*
 *.ntvs*
 *.njsproj
 *.sln
+
+# Docker TLS configuration
+*.key
+*.crt

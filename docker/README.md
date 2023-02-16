@@ -11,7 +11,7 @@ Dockerfile used for executions-queue worker. This Docker image is created from `
 
 Dockerfile used to create a reverse proxy to forward Rekono requests to the backend or the frontend. This Docker image is created from `nginx` image.
 
-Note that this Docker image will create an self-signed certificate to establish HTTPS configuration for Rekono.
+You can configure the TLS connection setting up your `certificate.crt` and `privatekey.key` files in the [nginx/tls/](nginx/tls/) directory. If you don't, a self-signed certificate will be generated automatically on Nginx start.
 
 You can check the Nginx configuration [here](nginx/nginx.conf).
 
