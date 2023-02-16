@@ -41,6 +41,6 @@ RUN adduser --disabled-password rekono
 RUN chown -R rekono /frontend
 USER rekono
 
-RUN npm install .
+RUN npm install
 RUN npx browserslist@latest --update-db
 RUN npm run build

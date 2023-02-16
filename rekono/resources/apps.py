@@ -20,6 +20,9 @@ class ResourcesConfig(AppConfig):
 
     def load_resources_model(self, **kwargs: Any) -> None:
         '''Load input types fixtures in database.'''
+        from resources.models import Wordlist
+        if Wordlist.objects.exists():                                           # Check if default data is loaded
+            return
         path = os.path.join(Path(__file__).resolve().parent, 'fixtures')        # Path to fixtures directory
         management.call_command(
             loaddata.Command(),
