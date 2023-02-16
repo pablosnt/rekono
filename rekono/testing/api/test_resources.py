@@ -12,7 +12,7 @@ class WordlistsTest(RekonoApiTestCase):
 
     def setUp(self) -> None:
         '''Create initial data before run tests.'''
-        self.endpoint = '/api/resources/wordlists/'                             # Wordlists API endpoint
+        self.endpoint = '/api/wordlists/'                                       # Wordlists API endpoint
         super().setUp()
         # Wordlists paths
         self.resources = os.path.join(self.data_path, 'resources')
