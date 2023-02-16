@@ -86,14 +86,14 @@ export default {
     },
     create () {
       return this.post(
-        '/api/resources/wordlists/',
+        '/api/wordlists/',
         this.getFormData(),
         this.name, 'New wordlist created successfully',
         true, { 'Content-Type': 'multipart/form-data' }
       )
     },
     update () {
-      return this.put(`/api/resources/wordlists/${this.wordlist.id}/`, { 'name': this.name, 'type': this.type }, this.name, 'Wordlist updated successfully')
+      return this.put(`/api/wordlists/${this.wordlist.id}/`, { 'name': this.name, 'type': this.type }, this.name, 'Wordlist updated successfully')
     },
     getFormData () {
       const data = new FormData()
