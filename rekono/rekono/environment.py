@@ -7,6 +7,8 @@ ENV_REKONO_HOME = 'REKONO_HOME'
 RKN_TRUSTED_PROXY = 'RKN_TRUSTED_PROXY'
 # Rekono frontend URL used to include links in notifications
 RKN_FRONTEND_URL = 'RKN_FRONTEND_URL'
+# Rekono root path to apply in API Rest documentation
+RKN_ROOT_PATH = 'RKN_ROOT_PATH'
 
 # Security configuration
 RKN_SECRET_KEY = 'RKN_SECRET_KEY'

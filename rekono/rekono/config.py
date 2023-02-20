@@ -19,6 +19,8 @@ class RekonoConfigLoader:
                 config = yaml.safe_load(config_file)                            # Load configuration
         # Rekono frontend URL
         self.FRONTEND_URL = self.get_config_key(config, ['frontend', 'url'], 'https://127.0.0.1')
+        # Rekono root path
+        self.ROOT_PATH = self.get_config_key(config, ['rootpath'])
         # Security
         self.SECRET_KEY = self.get_config_key(config, ['security', 'secret-key'], generate_random_value(3000))
         self.ALLOWED_HOSTS = self.get_config_key(

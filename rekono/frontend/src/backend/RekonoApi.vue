@@ -87,7 +87,8 @@ export default {
       credentialRegex: /^[\w./\-=+,:<>¿?¡!#&$()[\]{}*]{1,500}$/,
       telegramBotName: null,
       defectDojoUrl: null,
-      defectDojoEnabled: null
+      defectDojoEnabled: null,
+      backendRootPath: process.env.VUE_APP_ROOT_BACKEND_PATH
     }
   },
   methods: {
@@ -148,6 +149,9 @@ export default {
         })
     },
     getUrl (endpoint) {
+      if (this.backendRootPath) {
+        endpoint = this.backendRootPath + endpoint
+      }
       if (this.$store.state.backendUrl) {
         var endpointUrl = new URL(this.$store.state.backendUrl)
         endpointUrl.pathname = endpoint

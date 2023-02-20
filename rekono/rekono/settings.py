@@ -28,9 +28,9 @@ from rekono.environment import (ENV_REKONO_HOME, RKN_ALLOWED_HOSTS,
                                 RKN_EMAIL_HOST, RKN_EMAIL_PASSWORD,
                                 RKN_EMAIL_PORT, RKN_EMAIL_USER,
                                 RKN_FRONTEND_URL, RKN_GITTOOLS_DIR,
-                                RKN_LOG4J_SCAN_DIR, RKN_RQ_HOST, RKN_RQ_PORT,
-                                RKN_SECRET_KEY, RKN_SPRING4SHELL_SCAN_DIR,
-                                RKN_TRUSTED_PROXY)
+                                RKN_LOG4J_SCAN_DIR, RKN_ROOT_PATH, RKN_RQ_HOST,
+                                RKN_RQ_PORT, RKN_SECRET_KEY,
+                                RKN_SPRING4SHELL_SCAN_DIR, RKN_TRUSTED_PROXY)
 
 ################################################################################
 # Rekono basic information                                                     #
@@ -307,7 +307,8 @@ SPECTACULAR_SETTINGS = {
         'IntensityEnum': IntensityRank.choices,
         'InputTypeNamesEnum': InputTypeNames.choices,
         'TargetTypeEnum': TargetType.choices,
-    }
+    },
+    'SCHEMA_PATH_PREFIX_INSERT': os.getenv(RKN_ROOT_PATH, CONFIG.ROOT_PATH),
 }
 
 
