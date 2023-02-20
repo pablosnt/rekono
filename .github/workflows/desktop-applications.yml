@@ -20,8 +20,6 @@ jobs:
         include:
           - os: ubuntu-latest
             extension: deb
-          - os: windows-latest
-            extension: exe
           - os: macos-latest
             extension: dmg
     runs-on: ${{ matrix.os }}
