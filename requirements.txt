@@ -6,7 +6,7 @@ djangorestframework-simplejwt==5.2.2
 django-filter==21.1
 django-rq==2.4.1
 django-taggit==2.0.0
-drf-spectacular==0.20.1
+drf-spectacular==0.25.1
 pycryptodome==3.11.0
 psycopg2==2.9.5
 pyjwt==2.4.0
