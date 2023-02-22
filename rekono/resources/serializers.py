@@ -29,7 +29,6 @@ class WordlistSerializer(serializers.ModelSerializer, LikeBaseSerializer):
         extra_kwargs = {
             'path': {'write_only': True, 'required': False},
             'checksum': {'write_only': True, 'required': False},
-            'size': {'write_only': True, 'required': False},
         }
 
     def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
