@@ -7,7 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Fixed
 
-- Replace `kalilinux/kali-rolling` by `kalilinux/kali-last-release` as base Docker image (https://github.com/pablosnt/rekono/issues/149)
+- Replace `kalilinux/kali-rolling` by `kalilinux/kali-last-release` as base Docker image (https://github.com/pablosnt/rekono/issues/167)
 
 
 ## [1.4.2] - 2023-02-16
