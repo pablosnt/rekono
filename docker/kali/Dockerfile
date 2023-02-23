@@ -1,4 +1,4 @@
-FROM kalilinux/kali-rolling
+FROM kalilinux/kali-last-release
 
 RUN mkdir /rekono
 COPY config.yaml /rekono
