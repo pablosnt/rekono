@@ -33,7 +33,7 @@ jobs:
       
       - name: Configure backend URL
         if: github.event_name == 'workflow_dispatch'
-        shell: python
+        shell: python3
         working-directory: rekono/frontend
         # nosemgrep: yaml.github-actions.security.run-shell-injection.run-shell-injection
         run: |
