@@ -33,12 +33,13 @@ jobs:
       
       - name: Configure backend URL
         if: github.event_name == 'workflow_dispatch'
-        shell: python3
+        shell: python
         working-directory: rekono/frontend
         # nosemgrep: yaml.github-actions.security.run-shell-injection.run-shell-injection
         run: |
           import re
           import sys
+          print(sys.version)
           urlregex = r'https?://[\w/:.]+'
           if bool(re.fullmatch(urlregex, '${{ github.event.inputs.backend }}')):
             with open('.env.production', 'w') as env_production:
