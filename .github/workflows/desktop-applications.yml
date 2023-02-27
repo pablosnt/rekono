@@ -5,7 +5,7 @@ on:
       backend:
         description: 'Backend URL to connect Desktop app'
         required: true
-        default: 'http://127.0.0.1:8000'
+        default: 'https://127.0.0.1'
   pull_request:
     paths:
       - 'rekono/frontend/**'
@@ -22,6 +22,8 @@ jobs:
             extension: deb
           - os: macos-latest
             extension: dmg
+          - os: windows-latest
+            extension: exe
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
@@ -31,17 +33,20 @@ jobs:
       
       - name: Configure backend URL
         if: github.event_name == 'workflow_dispatch'
+        shell: python
         working-directory: rekono/frontend
         # nosemgrep: yaml.github-actions.security.run-shell-injection.run-shell-injection
         run: |
-          urlregex=^https?://[-[:alnum:]/_:.]+$
-          if [[ ${{ github.event.inputs.backend }} =~ $urlregex ]]                    
-          then
-            echo 'VUE_APP_DESKTOP_BACKEND_URL=${{ github.event.inputs.backend }}' > .env.production
-          else
-            echo 'Invalid URL format'
-            exit 1
-          fi
+          import re
+          import sys
+          urlregex = r'https?://[\w/:.]+'
+          match = re.match(urlregex, '${{ github.event.inputs.backend }}')
+          if match.group(0) == '${{ github.event.inputs.backend }}':
+            with open('.env.production', 'w') as env_production:
+              env_production.write('VUE_APP_DESKTOP_BACKEND_URL=${{ github.event.inputs.backend }}')
+          else:
+            print('Invalid URL format')
+            sys.exit(1)
 
       - name: Install dependencies
         working-directory: rekono/frontend
