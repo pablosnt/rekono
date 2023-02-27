@@ -291,7 +291,7 @@
         "fields": {
             "tool": 10,
             "name": "Search by CVE",
-            "arguments": "-q -x 'search {cve};quit'",
+            "arguments": "-q -x \"search {cve};quit\"",
             "stage": 5,
             "default": true
         }
