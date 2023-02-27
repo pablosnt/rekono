@@ -73,6 +73,6 @@ _Vulnerability_     *{vulnerability}*
 
 EXPLOIT_ICON = '🧨'
 EXPLOIT = '''
-_Name_          *{name}*
+_Title_          *{title}*
 _Reference_     {reference}
 '''
