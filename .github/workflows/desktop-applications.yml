@@ -51,9 +51,7 @@ jobs:
       
       - name: Generate Desktop app
         working-directory: rekono/frontend
-        env:
-          NODE_OPTIONS: --openssl-legacy-provider
-        run: npm run electron:build
+        run: npm run --openssl-legacy-provider electron:build
       
       - name: Upload Desktop app as GitHub artifact
         uses: actions/upload-artifact@v3
