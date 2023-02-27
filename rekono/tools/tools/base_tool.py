@@ -17,12 +17,12 @@ from findings.models import Finding, Port, Vulnerability
 from findings.queue import producer
 from findings.utils import get_unique_filter
 from input_types.base import BaseInput
-from rekono.settings import REPORTS_DIR, TESTING
 from targets.models import TargetPort
 from tasks.enums import Status
-
 from tools.exceptions import ToolExecutionException
 from tools.models import Argument, Input, Intensity
+
+from rekono.settings import REPORTS_DIR, TESTING
 
 logger = logging.getLogger()                                                    # Rekono logger
 
@@ -253,7 +253,7 @@ class BaseTool:
         # Format configuration arguments with the built tool arguments
         args = self.configuration.arguments.format(**command)
         # Split arguments by whitespaces taking into account the arguments between quotes
-        return re.findall(r'[^\s\'"]*[\'"][^\'"]+[\'"]|[^\'"\s]+', args)
+        return [a.replace('"', '') for a in re.findall(r'[^\s\'"]*[\'"][^\'"]+[\'"]|[^\'"\s]+', args)]
 
     def check_arguments(self, targets: List[BaseInput], findings: List[Finding]) -> bool:
         '''Check if given resources (targets, resources and findings) lists are enough to execute the tool.
