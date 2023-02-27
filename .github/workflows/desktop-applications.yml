@@ -33,17 +33,19 @@ jobs:
       
       - name: Configure backend URL
         if: github.event_name == 'workflow_dispatch'
+        shell: python
         working-directory: rekono/frontend
         # nosemgrep: yaml.github-actions.security.run-shell-injection.run-shell-injection
         run: |
-          urlregex=^https?://[-[:alnum:]/_:.]+$
-          if [[ ${{ github.event.inputs.backend }} =~ $urlregex ]]                    
-          then
-            echo 'VUE_APP_DESKTOP_BACKEND_URL=${{ github.event.inputs.backend }}' > .env.production
-          else
-            echo 'Invalid URL format'
-            exit 1
-          fi
+          import re
+          import sys
+          urlregex = r'https?://[\w/:.]+'
+          if bool(re.fullmatch(urlregex, ${{ github.event.inputs.backend }})):
+            with open('.env.production', 'w') as env_production:
+              env_production.write('VUE_APP_DESKTOP_BACKEND_URL=${{ github.event.inputs.backend }}')
+          else:
+            print('Invalid URL format')
+            sys.exit(1)
 
       - name: Install dependencies
         working-directory: rekono/frontend
