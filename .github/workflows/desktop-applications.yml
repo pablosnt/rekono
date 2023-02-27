@@ -39,9 +39,9 @@ jobs:
         run: |
           import re
           import sys
-          print(sys.version)
           urlregex = r'https?://[\w/:.]+'
-          if bool(re.fullmatch(urlregex, '${{ github.event.inputs.backend }}')):
+          match = re.match(urlregex, '${{ github.event.inputs.backend }}')
+          if match.group(0) == '${{ github.event.inputs.backend }}':
             with open('.env.production', 'w') as env_production:
               env_production.write('VUE_APP_DESKTOP_BACKEND_URL=${{ github.event.inputs.backend }}')
           else:
