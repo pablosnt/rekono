@@ -1,4 +1,4 @@
-FROM python:3.9.10-alpine
+FROM python:3.12.0a5-alpine
 
 RUN mkdir /rekono
 COPY config.yaml /rekono
