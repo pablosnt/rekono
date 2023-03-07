@@ -2,7 +2,7 @@
   <a href="https://github.com/pablosnt/rekono/actions/workflows/unit-testing.yml" alt="Unit testing">
     <img src="https://github.com/pablosnt/rekono/actions/workflows/unit-testing.yml/badge.svg"/>
   </a>
-  <a href="https://github.com/pablosnt/rekono/actions/workflows/desktop-applications.yml" alt="Desktop apps">
+  <a href="https://github.com/pablosnt/rekono/actions/workflows/desktop-applications.yml" alt="Desktop applications">
     <img src="https://github.com/pablosnt/rekono/actions/workflows/desktop-applications.yml/badge.svg"/>
   </a>
   <a href="https://github.com/pablosnt/rekono/actions/workflows/security-sast.yml" alt="SAST">
