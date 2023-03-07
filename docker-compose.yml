@@ -77,7 +77,7 @@ services:
       context: .
       dockerfile: docker/kali/Dockerfile
     image: rekono-kali:latest
-    command: python manage.py rqworker executions-queue
+    command: sh -c "python manage.py migrate && python manage.py rqworker executions-queue"
     hostname: executions-worker
     volumes:
       - rekono:/rekono

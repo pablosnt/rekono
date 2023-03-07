@@ -31,6 +31,9 @@ RUN adduser --disabled-password rekono
 RUN chown -R rekono:rekono /code
 RUN chown -R rekono:rekono /rekono
 RUN chown -R rekono:rekono /usr/share/cmseek
+RUN chown -R rekono:rekono /opt/
+RUN chown -R rekono:rekono /usr/share/seclists/
+RUN chown -R rekono:rekono /usr/share/dirb/wordlists/
 
 USER rekono
 WORKDIR /code

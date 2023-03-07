@@ -17,6 +17,7 @@ class ResourcesConfig(AppConfig):
         '''Run code as soon as the registry is fully populated.'''
         # Configure fixtures to be loaded after migration
         post_migrate.connect(self.load_resources_model, sender=self)
+        post_migrate.connect(self.update_default_wordlists_size, sender=self)
 
     def load_resources_model(self, **kwargs: Any) -> None:
         '''Load input types fixtures in database.'''
@@ -30,7 +31,7 @@ class ResourcesConfig(AppConfig):
         )
         self.update_default_wordlists_size()
 
-    def update_default_wordlists_size(self) -> None:
+    def update_default_wordlists_size(self, **kwargs: Any) -> None:
         '''Update default wordlists size.'''
         from resources.models import Wordlist
         for wordlist in Wordlist.objects.all().filter(size=None):               # For each default wordlist
