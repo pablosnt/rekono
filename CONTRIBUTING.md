@@ -1,34 +1,87 @@
-Thank you for making Rekono greater.
-
-## Issues
-
-You can create different kinds of [Issues](https://github.com/pablosnt/rekono/issues/new/choose) to report bugs, request new features or ask for help.
-
-Please, don't report security vulnerabilities in GitHub Issues. See our [Security Policy](https://github.com/pablosnt/rekono/security/policy).
+**Thank you for making Rekono greater!**
 
 
-## Contributing to Rekono
+## Branches
 
-**You can create Pull Requests to the `develop` branch of this project**. All the Pull Requests should be reviewed and approved before been merged. After that, your code will be included on the next Rekono release.
+**Create Pull Requests to the `develop` branch of this project**. All the Pull Requests should be reviewed and approved before been merged and after that, your code will be included in the next release.
 
-In this section you can see how to achieve that and the things that you should to take into account.
+```mermaid
+gitGraph
+    commit
+    commit tag: "1.0.0"
+    branch develop
+    checkout develop
+    commit
+    commit
+    branch feature/new-contribution
+    checkout feature/new-contribution
+    commit
+    checkout develop
+    merge feature/new-contribution
+    commit
+    checkout main
+    merge develop tag: "1.1.0"
+```
 
-### Development environment
 
-You can check this Wiki sections to prepare your Rekono contributions:
 
-- Documentation about the database and architecture [Design](https://github.com/pablosnt/rekono/wiki/Design)
-- [From Source](https://github.com/pablosnt/rekono/wiki/Installation#from-source) installation guide
-- [Configuration](https://github.com/pablosnt/rekono/wiki/Configuration) guidelines
+## Development environment
 
-Note that you can also execute the unit tests using the following command:
+Check documentation to prepare your Rekono contributions:
+
+- [Architecture](https://github.com/pablosnt/rekono/wiki/Architecture)
+- [From source installation](https://github.com/pablosnt/rekono/wiki/Installation#from-source)
+- [Configuration](https://github.com/pablosnt/rekono/wiki/Configuration)
+
+
+### Unit Tests
+
+Unit tests can be executed using this command:
 
 ```
 # pwd: rekono/
 coverage run manage.py test
 ```
 
-### Add support for a new hacking tool
+New Rekono contributions should tested using unit tests.
+
+
+### CI/CD
+
+This project has the following checks in _Continuous Integration_:
+
+1. `Code style`: check the source code style using `mypy`, `flake8` and `eslint`.
+
+2. `Desktop applications`: generate installers for Rekono Desktop in Linux, MacOS and Windows.
+
+3. `SAST`: scan source code using `semgrep` to find vulnerabilities. This is a Static Application Security Testing.
+
+4. `Secrets scanning`: check the source code using `detect-secrets` to find leaked passwords, tokens or other credentials that could be exposed.
+
+5. `Unit testing`: check if the project works executing the unit tests.
+
+6. `Snyk`: check the project dependencies to find libraries with known vulnerabilities. This is a Software Composition Analysis (SCA).
+
+**All CI/CD checks should be passed before merging any Pull Request**, so it's advised to install the pre-commit hooks in your local repositories to check your changes before commit them:
+
+```
+# pwd: root directory
+python3 -m pip install pre-commit
+pre-commit install
+```
+
+### Way of Code
+
+There are some guidelines to keep the code clean and ensure the correct working of the application:
+
+- Keep code style
+- Comment your code, specially classes and methods.
+- Make unit tests for all your code to ensure its correct working.
+- Don't include code vulnerabilities or vulnerable libraries.
+
+
+
+## New hacking tool
 
 The support of external hacking tools in Rekono is based on the following steps:
 
@@ -48,51 +101,22 @@ The support of external hacking tools in Rekono is based on the following steps:
 
 2. Implement the parser to obtain findings from the tool results. You have to do that in the [tools/tools](https://github.com/pablosnt/rekono/tree/main/rekono/tools/tools) package:
 
-    - Create a new Python file with the tool name (defined in the previous step) in lower case and replacing whitespaces by `_`.
+    - Create a new Python file with the tool name in lower case and replacing whitespaces by `_`.
     
-    - Create a new Python class with the tool name (defined in the previous step) capitalized. This class needs to extend the `tools.tools.base_tool.BaseTool` class.
+    - Create a new Python class with the tool name capitalized. This class needs to extend the `tools.tools.base_tool.BaseTool` class.
 
     - Override the method `parse_output_file` or `parse_plain_output` depending on the tool output type.
 
 3. Add tool to default processes like `All tools` in the file [`1_processes.json`](https://github.com/pablosnt/rekono/blob/main/rekono/processes/fixtures/1_processes.json).
 
-4. Implement [unit tests](https://github.com/pablosnt/rekono/tree/main/rekono/testing/tools) to check the parser correct working. You can add your [tool reports](https://github.com/pablosnt/rekono/tree/main/rekono/testing/data/reports) as example for that.
+4. Implement [unit tests](https://github.com/pablosnt/rekono/tree/main/rekono/testing/tools) to check the correct working of the parser. You can include your [testing tool reports](https://github.com/pablosnt/rekono/tree/main/rekono/testing/data/reports) for that.
 
 5. Add tool icon domain to the `Content-Security-Policy` in the following files:
     
     - [vue.config.js](https://github.com/pablosnt/rekono/blob/main/rekono/frontend/vue.config.js#L3) for development environments
+
     - [nginx.conf](https://github.com/pablosnt/rekono/blob/main/docker/nginx/nginx.conf#L69) for production environments
 
 6. Add tool reference to the [README.md](https://github.com/pablosnt/rekono#supported-tools).
 
 7. Add tool installation to the [Kali Linux Dockerfile](https://github.com/pablosnt/rekono/blob/main/docker/kali/Dockerfile).
-
-8. Add tool installation to the [Rekono CLI](https://github.com/pablosnt/rekono-cli/blob/main/rekono/installation/tools.py).
-
-### CI/CD
-
-This project has the following checks in _Continuous Integration_:
-
-1. `Code style`: check the source code style using the tools `mypy`, `flake8` and `eslint`.
-
-2. `SCA`: check the project dependencies to find libraries with known vulnerabilities. Software Composition Analysis.
-
-3. `Secrets scanning`: check the source code to find leaked passwords, tokens or other credentials that could be exposed in the GitHub repository.
-
-4. `Unit testing`: check if the project works executing the unit tests.
-
-**All CI/CD checks should be passed before merging any Pull Request**, so it's advised to install the pre-commit hooks in your local repositories using this commands:
-
-```
-# pwd: root directory
-python3 -m pip install pre-commit
-pre-commit install
-```
-
-### Way of Code
-
-There are some guidelines to keep the code clean and ensure the correct working of the application:
-
-- Comment your code, specially to document the classes and methods.
-- Make unit tests for all your code to ensure its correct working. It's important to keep the testing coverage over a 95% coverage.
-- Don't include code vulnerabilities or vulnerable libraries.
