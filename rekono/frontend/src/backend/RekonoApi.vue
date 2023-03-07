@@ -87,7 +87,8 @@ export default {
       credentialRegex: /^[\w./\-=+,:<>¿?¡!#&$()[\]{}*]{1,500}$/,
       telegramBotName: null,
       defectDojoUrl: null,
-      defectDojoEnabled: null
+      defectDojoEnabled: null,
+      backendRootPath: process.env.VUE_APP_ROOT_BACKEND_PATH
     }
   },
   methods: {
@@ -147,14 +148,25 @@ export default {
           return Promise.reject(error)
         })
     },
+    getUrl (endpoint) {
+      if (this.backendRootPath) {
+        endpoint = this.backendRootPath + endpoint
+      }
+      if (this.$store.state.backendUrl) {
+        var endpointUrl = new URL(this.$store.state.backendUrl)
+        endpointUrl.pathname = endpoint
+        return endpointUrl.href
+      }
+      return endpoint
+    },
     request (method, endpoint, queryData = null, bodyData = null, requiredAuth = true, extraHeaders = null, allowUnauth = false, retry = false) {
       let httpRequest = null
       if (bodyData) {
-        httpRequest = method(endpoint, this.cleanBody(bodyData), { headers: this.headers(requiredAuth, extraHeaders) })
+        httpRequest = method(this.getUrl(endpoint), this.cleanBody(bodyData), { headers: this.headers(requiredAuth, extraHeaders) })
       } else if (queryData) {
-        httpRequest = method(endpoint, { params: this.cleanParams(queryData), headers: this.headers(requiredAuth, extraHeaders) })
+        httpRequest = method(this.getUrl(endpoint), { params: this.cleanParams(queryData), headers: this.headers(requiredAuth, extraHeaders) })
       } else {
-        httpRequest = method(endpoint, { headers: this.headers(requiredAuth, extraHeaders) })
+        httpRequest = method(this.getUrl(endpoint), { headers: this.headers(requiredAuth, extraHeaders) })
       }
       return httpRequest
         .then(response => { return Promise.resolve(response) })
@@ -174,7 +186,7 @@ export default {
     refresh () {
       if (!this.$store.state.refreshing) {
         this.$store.dispatch('changeRefreshStatus')
-        return axios.post('/api/token/refresh/', { refresh: sessionStorage.getItem(refreshTokenKey) }, this.headers())
+        return axios.post(this.getUrl('/api/token/refresh/'), { refresh: sessionStorage.getItem(refreshTokenKey) }, this.headers())
           .then(response => {
             removeTokens()
             processTokens(response.data)

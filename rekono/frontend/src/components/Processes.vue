@@ -139,8 +139,9 @@ export default {
     }
   },
   methods: {
-    fetchData (params = null) {
-      return this.getOnePage('/api/processes/?o=name', params)
+    fetchData (params = {}) {
+      params.o = 'name'
+      return this.getOnePage('/api/processes/', params)
         .then(response => {
           this.data = response.data.results
           this.total = response.data.count

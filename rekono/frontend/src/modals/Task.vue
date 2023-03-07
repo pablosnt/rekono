@@ -354,7 +354,7 @@ export default {
       }
     },
     updateWordlists () {
-      this.getAllPages('/api/resources/wordlists/', { o: 'type,name' }).then(results => this.wordlists = results)
+      this.getAllPages('/api/wordlists/', { o: 'type,name' }).then(results => this.wordlists = results)
     },
     cleanScheduledIn () {
       this.scheduledIn = null

@@ -16,7 +16,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
       
       - name: Install and start Redis server
         run: |
@@ -39,7 +41,7 @@ jobs:
           chmod +x gitleaks
           mv gitleaks /usr/local/bin/
 
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v4
         with:
           python-version: '3.9'
 

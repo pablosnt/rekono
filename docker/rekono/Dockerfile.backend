@@ -1,4 +1,4 @@
-FROM python:3.9.10-alpine as backend
+FROM python:3.9.10-alpine
 
 RUN mkdir /rekono
 COPY config.yaml /rekono
@@ -23,24 +23,3 @@ USER rekono
 WORKDIR /code
 
 ENV REKONO_HOME /rekono
-
-
-FROM node:19.0.1-alpine as frontend
-
-RUN mkdir /frontend
-COPY --from=backend /code/frontend /frontend
-
-RUN apk update && apk add curl
-
-ENV NODE_OPTIONS --openssl-legacy-provider
-
-WORKDIR /frontend
-RUN npm install -g serve
-
-RUN adduser --disabled-password rekono
-RUN chown -R rekono /frontend
-USER rekono
-
-RUN npm install
-RUN npx browserslist@latest --update-db
-RUN npm run build

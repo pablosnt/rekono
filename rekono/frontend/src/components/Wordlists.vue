@@ -75,21 +75,22 @@ export default {
     }
   },
   methods: {
-    fetchData (params = null) {
-      return this.getOnePage('/api/resources/wordlists/?o=type,name', params)
+    fetchData (params = {}) {
+      params.o = 'type,name'
+      return this.getOnePage('/api/wordlists/', params)
         .then(response => {
           this.data = response.data.results
           this.total = response.data.count
         })
     },
     deleteWordlist () {
-      this.delete(`/api/resources/wordlists/${this.selectedWordlist.id}/`, this.selectedWordlist.name, 'Wordlist deleted successfully').then(() => this.fetchData())
+      this.delete(`/api/wordlists/${this.selectedWordlist.id}/`, this.selectedWordlist.name, 'Wordlist deleted successfully').then(() => this.fetchData())
     },
     likeWordlist (wordlistId) {
-      this.post(`/api/resources/wordlists/${wordlistId}/like/`, { }).then(() => this.fetchData())
+      this.post(`/api/wordlists/${wordlistId}/like/`, { }).then(() => this.fetchData())
     },
     dislikeWordlist (wordlistId) {
-      this.post(`/api/resources/wordlists/${wordlistId}/dislike/`, { }).then(() => this.fetchData())
+      this.post(`/api/wordlists/${wordlistId}/dislike/`, { }).then(() => this.fetchData())
     }
   }
 }

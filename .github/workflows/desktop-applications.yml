@@ -1,19 +1,29 @@
-name: Desktop Applications
+name: Desktop applications
 on:
   workflow_dispatch:
     inputs:
       backend:
-        description: 'Backend URL to connect Desktop application'
+        description: 'Backend URL to connect Desktop app'
         required: true
-        default: 'http://127.0.0.1:8080'
+        default: 'https://127.0.0.1'
+  pull_request:
+    paths:
+      - 'rekono/frontend/**'
   release:
     types: [published]
 
 jobs:
   desktop:
     strategy:
+      fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        include:
+          - os: ubuntu-latest
+            extension: deb
+          - os: macos-latest
+            extension: dmg
+          - os: windows-latest
+            extension: exe
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
@@ -23,9 +33,21 @@ jobs:
       
       - name: Configure backend URL
         if: github.event_name == 'workflow_dispatch'
+        shell: python
         working-directory: rekono/frontend
-        run: echo 'VUE_APP_DESKTOP_BACKEND_URL=${{ github.event.inputs.backend }}' > .env.production
-      
+        # nosemgrep: yaml.github-actions.security.run-shell-injection.run-shell-injection
+        run: |
+          import re
+          import sys
+          urlregex = r'https?://[\w/:.]+'
+          match = re.match(urlregex, '${{ github.event.inputs.backend }}')
+          if match.group(0) == '${{ github.event.inputs.backend }}':
+            with open('.env.production', 'w') as env_production:
+              env_production.write('VUE_APP_DESKTOP_BACKEND_URL=${{ github.event.inputs.backend }}')
+          else:
+            print('Invalid URL format')
+            sys.exit(1)
+
       - name: Install dependencies
         working-directory: rekono/frontend
         run: npm install .
@@ -34,15 +56,16 @@ jobs:
         working-directory: rekono/frontend
         run: npm run electron:build
       
-      - name: Check Desktop apps
-        working-directory: rekono/frontend
-        run: ls -la dist_electron
+      - name: Upload Desktop app as GitHub artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: rekono_${{ matrix.os }}
+          path: rekono/frontend/dist_electron/*.${{ matrix.extension }}
+          if-no-files-found: warn
       
-      # - name: Upload Desktop app as GitHub artifact
-      #   uses: actions/upload-artifact@v3
-      #   with:
-      #     name: Rekono  # name by OS
-      #     path: rekono/frontend/dist_electron   # Path by OS
-
-      # Upload to the GitHub release
-
+      - name: Upload Desktop app to GitHub release
+        if: github.event_name == 'release'
+        working-directory: rekono/frontend/dist_electron
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload --repo pablosnt/rekono ${{ github.event.release.name }} *.${{ matrix.extension }}

@@ -3,6 +3,27 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - 2023-03-07
+
+### Added
+
+- New Rekono Desktop applications for Linux, MacOS and Windows (https://github.com/pablosnt/rekono/pull/131)
+- Support for Rekono deployments under specific web path via configuration (https://github.com/pablosnt/rekono/issues/161)
+- Support for TLS customization in Docker environments (https://github.com/pablosnt/rekono/issues/156)
+
+### Fixed
+
+- Unexpected error during Metasploit execution due to bad quote management (https://github.com/pablosnt/rekono/issues/172)
+- Allow SMTP configuration in Docker environments via configuration file (https://github.com/pablosnt/rekono/issues/158)
+- Change wordlists endpoint from `/api/resources/wordlists/` to `/api/wordlists/` (https://github.com/pablosnt/rekono/issues/151)
+- Increase logos quality and improve user experience in login page for some browsers (https://github.com/pablosnt/rekono/issues/133)
+
+### Security
+
+- Upgrade `node` Docker image version to `19.6.1-alpine` (https://github.com/pablosnt/rekono/issues/163)
+- Fix some low risk issues reported by `Semgrep` (https://github.com/pablosnt/rekono/issues/140)
+
+
 ## [1.4.3] - 2023-02-23
 
 ### Fixed

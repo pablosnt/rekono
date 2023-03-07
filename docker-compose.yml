@@ -28,20 +28,6 @@ services:
       - 6379
     networks:
       - internal
-  
-  postfix:
-    restart: always
-    image: catatnight/postfix:latest
-    hostname: postfix
-    container_name: postfix
-    expose:
-      - 25
-    networks:
-      - internal
-      - external
-    environment:
-      - maildomain=rekono.com
-      - smtp_user=postfix:postfix
 
   initialize:
     restart: 'no'
@@ -91,7 +77,7 @@ services:
       context: .
       dockerfile: docker/kali/Dockerfile
     image: rekono-kali:latest
-    command: python manage.py rqworker executions-queue
+    command: sh -c "python manage.py migrate && python manage.py rqworker executions-queue"
     hostname: executions-worker
     volumes:
       - rekono:/rekono
@@ -148,22 +134,16 @@ services:
     depends_on:
       - initialize
       - redis
-      - postfix
     environment:
       - RKN_DB_HOST=postgres
       - RKN_DB_USER=postgres
       - RKN_DB_PASSWORD=postgres
       - RKN_RQ_HOST=redis
-      - RKN_EMAIL_HOST=${RKN_EMAIL_HOST:-postfix}
-      - RKN_EMAIL_PORT=${RKN_EMAIL_PORT:-25}
-      - RKN_EMAIL_USER=${RKN_EMAIL_USER:-postfix}
-      - RKN_EMAIL_PASSWORD=${RKN_EMAIL_PASSWORD:-postfix}
-      - RKN_FRONTEND_URL=${RKN_FRONTEND_URL:-httpS://127.0.0.1}
       - REKONO_HOME=/rekono
       - OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
 
   telegram-bot:
-    restart: on-failure
+    restart: always
     image: rekono-backend:latest
     command: python manage.py telegram_bot
     hostname: telegram_bot
@@ -188,8 +168,7 @@ services:
     restart: always
     build:
       context: .
-      dockerfile: docker/rekono/Dockerfile
-      target: backend
+      dockerfile: docker/rekono/Dockerfile.backend
     image: rekono-backend:latest
     command: python manage.py runserver 0.0.0.0:8000
     hostname: backend
@@ -223,8 +202,7 @@ services:
     restart: always
     build:
       context: .
-      dockerfile: docker/rekono/Dockerfile
-      target: frontend
+      dockerfile: docker/rekono/Dockerfile.frontend
     image: rekono-frontend:latest
     command: sh -c "serve -s dist"
     hostname: frontend
@@ -257,6 +235,7 @@ services:
       - 443:443
     volumes:
       - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./docker/nginx/tls/:/etc/nginx/tls/
     depends_on:
       backend:
         condition: service_healthy

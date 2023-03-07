@@ -1,0 +1,39 @@
+name: SAST
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/**'
+      - 'rekono/**'
+
+jobs:
+  semgrep:
+    name: Semgrep
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      
+      - name: Setup Python 3
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.7
+
+      - name: Install Semgrep
+        run: pip install semgrep
+      
+      - name: Scan code
+        run: semgrep --config=auto --error --json -o semgrep_code.json rekono/
+      
+      - name: Scan workflows
+        run: semgrep --config=auto --error --json -o semgrep_cicd.json .github/workflows/
+      
+      - name: Upload Semgrep report as GitHub artifact
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: Semgrep
+          path: semgrep_*.json
+          if-no-files-found: warn

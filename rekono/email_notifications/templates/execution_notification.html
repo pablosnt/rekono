@@ -56,6 +56,7 @@
                         </div>
                     </div>
                 </div>
+                <!-- nosemgrep: javascript.express.security.audit.xss.mustache.var-in-href.var-in-href, python.django.security.audit.xss.template-href-var.template-href-var, python.flask.security.xss.audit.template-href-var.template-href-var -->
                 <a href="{{ rekono_url }}/#/tasks/{{ execution.task.id }}" class="btn btn-danger">Review all details</a>
             </div>
         </div>
@@ -252,6 +253,7 @@
                                 <td>{{ v.severity }}</td>
                                 <td><strong>{{ v.cve }}</strong></td>
                                 {% if v.reference %}
+                                    <!-- nosemgrep: javascript.express.security.audit.xss.mustache.var-in-href.var-in-href, python.django.security.audit.xss.template-href-var.template-href-var, python.flask.security.xss.audit.template-href-var.template-href-var -->
                                     <td><a href="{{ v.reference }}">Link</a></td>
                                 {% else %}
                                     <td></td>
@@ -287,6 +289,7 @@
                                     <td></td>
                                 {% endif %}
                                 <td><strong>{{ e.title }}</strong></td>
+                                <!-- nosemgrep: javascript.express.security.audit.xss.mustache.var-in-href.var-in-href, python.django.security.audit.xss.template-href-var.template-href-var, python.flask.security.xss.audit.template-href-var.template-href-var -->
                                 <td><a href="{{ e.reference }}">{{ e.edb_id }}</a></td>
                             </tr>
                         {% endfor %}

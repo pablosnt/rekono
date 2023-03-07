@@ -13,7 +13,7 @@
 </template>
 
 <script>
-import MainHeader from './common/MainHeader'
+import MainHeader from './common/MainHeader';
 export default {
   name: 'App',
   components: {
