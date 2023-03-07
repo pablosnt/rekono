@@ -37,8 +37,8 @@ from rekono.environment import (ENV_REKONO_HOME, RKN_ALLOWED_HOSTS,
 ################################################################################
 
 # Rekono description
-DESCRIPTION = 'Execute complete pentesting processes combining multiple hacking tools automatically'
-VERSION = '1.4.3'                                                               # Rekono version
+DESCRIPTION = 'Rekono is an automation platform that combines different hacking tools to complete pentesting processes'
+VERSION = '1.5.0'                                                               # Rekono version
 TESTING = 'test' in sys.argv                                                    # Tests execution
 
 ################################################################################

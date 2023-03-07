@@ -19,7 +19,7 @@
 
 # <p align="center"><img src="rekono/frontend/public/static/logo-black.png" width="500"/></p>
 
-**Rekono** combines other hacking tools and its results to execute complete pentesting processes against a target in an automated way. The findings obtained during the executions will be sent to the user via email or Telegram notifications and also can be imported in [Defect-Dojo](https://github.com/DefectDojo/django-DefectDojo) if an advanced vulnerability management is needed. Moreover, Rekono includes a Telegram bot that can be used to perform executions easily from anywhere and using any device.
+**Rekono** combines other hacking tools and its results to execute complete pentesting processes against a target in an automated way. The findings obtained during the executions will be sent to the user via email or Telegram notifications and also can be imported in [Defect-Dojo](https://www.defectdojo.com) if an advanced vulnerability management is needed. Moreover, Rekono includes a Telegram bot that can be used to perform executions easily from anywhere and using any device.
 
 
 ## Why Rekono?
@@ -41,7 +41,27 @@ Why not automate this process and focus on find vulnerabilities using your skill
 [![Rekono Bot]](https://user-images.githubusercontent.com/69458381/211692042-d7c38e41-19e9-44fd-842a-59a16f945b6f.mp4)
 
 
-## Supported tools
+## Quick Start
+
+Execute the following commands in the root directory of the project:
+
+```
+docker-compose build
+docker-compose up -d --scale executions-worker=5
+```
+
+Go to https://127.0.0.1/
+
+> Default credentials are `rekono:rekono`. For security reasons, **password should be changed** the first time you access the account. Moreover default user details can be changed using [environment variables](https://github.com/pablosnt/rekono/wiki/Configuration#docker).
+
+> The number of workers can be changed using `--scale` option. The number of `executions-worker` determines the number of tools that could be executed at the same time.
+
+Check [**full documentation**](https://github.com/pablosnt/rekono/wiki) for more installation and configuration options, user guides, integrations, Rekono Desktop, Rekono Bot and Rekono CLI details.
+
+
+## Hacking Tools
+
+Rekono supports the execution of this hacking tools:
 
 - [theHarvester](https://github.com/laramies/theHarvester)
 - [EmailHarvester](https://github.com/maldevel/EmailHarvester)
@@ -67,99 +87,19 @@ Why not automate this process and focus on find vulnerabilities using your skill
 Thanks to all the contributors of these amazing tools!
 
 
-## Installation
-
-### Docker
-
-Execute the following commands in the root directory of the project:
-
-```
-docker-compose build
-docker-compose up -d
-```
-
-If you need more than one tool running at the same time, you can set the number of executions-worker instances:
-
-```
-docker-compose up -d --scale executions-worker=5
-```
-
-Go to https://127.0.0.1/
-
-> You can check the details in the [Docker](docker/README.md) documentation. Specially, the [initial user](docker/README.md#initial-rekono-user) documentation
-
-
-### Using Rekono CLI
-
-If your system is Linux, you can use [rekono-cli](https://github.com/pablosnt/rekono-cli) to install Rekono in your system:
-
-```
-pip3 install rekono-cli
-rekono install
-```
-
-After that, you can manage the Rekono services using the following commands:
-
-```
-rekono services start
-rekono services stop
-rekono services restart
-```
-
-Go to http://127.0.0.1:3000/
-
-> :warning: Only for Linux environments.  
-
-> :warning: Docker is advised. Only use that for local and personal usage.
-
-
-### From Source
-
-Check the installation from source in [Rekono Wiki](https://github.com/pablosnt/rekono/wiki/Installation#from-source)
-
-
-## Integrations
-
-### Telegram Bot
-
-You can follow this steps to deploy the Telegram bot:
-
-1. Create a new bot in Telegram using this [guide](https://core.telegram.org/bots#how-do-i-create-a-bot) and the [@BotFather](https://t.me/botfather)
-2. The [@BotFather](https://t.me/botfather) will send you an authentication token
-3. Configure the token value in the `Settings` page or ask your administrator for doing it.
-
-
-### Defect-Dojo
-
-You can configure your Defect-Dojo details in the `Settings` page or ask your administrator for doing it. The following properties can be configured:
-
-- Defect-Dojo URL (`/api/` endpoints will be appended to make API requests)
-- Defect-Dojo API key to authenticate API requests
-- Tag to be assigned to every items created by Rekono in Defect-Dojo
-- Product type name of the products created by Rekono in Defect-Dojo
-- Test type name related to Rekono executions imported in Defect-Dojo
-- Test name related to Rekono executions imported in Defect-Dojo
-
-
-## Configuration
-
-Check the configuration options in [Rekono Wiki](https://github.com/pablosnt/rekono/wiki/Configuration)
-
-
 ## Support
-
-You can reach us on:
 
 <p>
   <a href="https://github.com/pablosnt/rekono/issues/new?labels=help+wanted%2C+question&template=support.md" alt="GitHub Issue">
-    <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" width="64"/>
+    <img src="https://github.com/fluidicon.png" width="64"/>
   </a>
   <a href="https://discord.gg/Zyduu5C7M3" alt="Discord">
     <img src="https://assets-global.website-files.com/6257adef93867e50d84d30e2/636e0a69f118df70ad7828d4_icon_clyde_blurple_RGB.svg" width="64"/>
   </a>
+  <a href="mailto:rekono.project@gmail.com" alt="Mail">
+    <img src="https://www.gstatic.com/images/branding/product/2x/gmail_2020q4_512dp.png" width="64"/>
+  </a>
 </p>
-
-If you need more specific help, you can also mail rekono.project@gmail.com.
 
 
 ## License
