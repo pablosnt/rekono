@@ -2,10 +2,15 @@
   <a href="https://github.com/pablosnt/rekono/actions/workflows/unit-testing.yml" alt="Unit testing">
     <img src="https://github.com/pablosnt/rekono/actions/workflows/unit-testing.yml/badge.svg"/>
   </a>
+  <a href="https://github.com/pablosnt/rekono/actions/workflows/desktop-applications.yml" alt="Desktop apps">
+    <img src="https://github.com/pablosnt/rekono/actions/workflows/desktop-applications.yml/badge.svg"/>
+  </a>
+  <a href="https://github.com/pablosnt/rekono/actions/workflows/security-sast.yml" alt="SAST">
+    <img src="https://github.com/pablosnt/rekono/actions/workflows/security-sast.yml/badge.svg"/>
+  </a>
   <a href="https://snyk.io/test/github/pablosnt/rekono" alt="SCA">
     <img src="https://badgen.net/snyk/pablosnt/rekono?label=Vulnerabilities&labelColor=black&icon=https://snyk.io/wp-content/uploads/patch-white.svg">
   </a>
-  <a href="https://snyk.io/test/github/pablosnt/rekono">
   <a href="https://github.com/pablosnt/rekono/actions/workflows/security-secrets.yml" alt="Secrets scanning">
     <img src="https://github.com/pablosnt/rekono/actions/workflows/security-secrets.yml/badge.svg"/>
   </a>
