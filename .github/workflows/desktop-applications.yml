@@ -68,8 +68,15 @@ jobs:
           if-no-files-found: warn
       
       - name: Upload Desktop app to GitHub release
-        if: github.event_name == 'release'
+        if: github.event_name == 'release' && matrix.os != 'windows-latest'
         working-directory: rekono/frontend/dist_electron
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh release upload --repo pablosnt/rekono ${{ github.event.release.name }} *.${{ matrix.extension }}
+
+      - name: Upload Desktop app to GitHub release
+        if: github.event_name == 'release' && matrix.os == 'windows-latest'
+        working-directory: rekono/frontend/dist_electron
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload --repo pablosnt/rekono ${{ github.event.release.name }} Rekono.Setup.${{ github.event.release.name }}.${{ matrix.extension }}
