@@ -36,7 +36,7 @@ jobs:
 
       - uses: actions/setup-node@v3
         with:
-          node-version: 19.6.1
+          node-version: 16
       
       - name: Configure backend URL
         if: github.event_name == 'workflow_dispatch'
