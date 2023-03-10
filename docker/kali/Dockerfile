@@ -10,7 +10,7 @@ COPY requirements.txt /code
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-RUN apt update && apt install python3-pip libpq-dev python3-dev libmagic1 libcap2-bin -y
+RUN apt update -y && apt upgrade -y && apt dist-upgrade -y && apt install python3-pip libpq-dev python3-dev libmagic1 libcap2-bin -y
 RUN ln -s /usr/bin/python3 /usr/bin/python
 
 RUN pip install --upgrade pip
