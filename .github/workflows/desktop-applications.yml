@@ -79,4 +79,4 @@ jobs:
         working-directory: rekono/frontend/dist_electron
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload --repo pablosnt/rekono ${{ github.event.release.name }} Rekono.Setup.${{ github.event.release.name }}.${{ matrix.extension }}
+        run: gh release upload --repo pablosnt/rekono ${{ github.event.release.name }} "Rekono Setup ${{ github.event.release.name }}.${{ matrix.extension }}"
