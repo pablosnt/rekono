@@ -37,9 +37,6 @@ services:
     volumes:
       - rekono:/rekono
       - ./config.yaml:/rekono/config.yaml:ro
-    healthcheck:
-      test: exit 0
-      start_period: 60s
     networks:
       - internal
     depends_on:
