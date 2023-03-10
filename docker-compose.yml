@@ -32,7 +32,7 @@ services:
   initialize:
     restart: 'no'
     image: rekono-kali:latest
-    command: sh -c "python manage.py migrate && python manage.py createsuperuser --no-input && python manage.py update_resources"
+    command: sh -c "python manage.py migrate && python manage.py createsuperuser --no-input"
     container_name: initialize
     volumes:
       - rekono:/rekono
