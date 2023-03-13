@@ -7,7 +7,7 @@ from django.forms import ValidationError
 logger = logging.getLogger()                                                    # Rekono logger
 
 IP_RANGE_REGEX = r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}-\d{1,3}'                  # Regex for IP ranges like 10.10.10.1-20
-NAME_REGEX = r'[\wÀ-ÿ\s\.\-\[\]()]{0,100}'                                      # Regex for names validation
+NAME_REGEX = r'[\wÀ-ÿ\s\.\-\[\]()@]{0,120}'                                     # Regex for names validation
 TEXT_REGEX = r'[\wÀ-ÿ\s\.:,+\-\'"?¿¡!#%$€\[\]()]{0,300}'                        # Regex for text validation
 PATH_REGEX = r'[\w\./#?&%$\\]{0,500}'                                           # Regex for path validation
 CVE_REGEX = r'CVE-\d{4}-\d{1,7}'                                                # Regex for CVE validation
