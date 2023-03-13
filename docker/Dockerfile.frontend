@@ -17,3 +17,6 @@ USER rekono
 RUN npm install
 RUN npx browserslist@latest --update-db
 RUN npm run build
+
+EXPOSE 3000
+ENTRYPOINT ["serve", "-s", "dist"]
