@@ -1,0 +1,54 @@
+name: Docker images
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'docker/**'
+      - '.dockerignore'
+      - 'docker-compose.yml'
+  release:
+    types: [published]
+
+jobs:
+  docker-compose:
+    if: github.event_name != 'release'
+    name: Docker Compose
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      
+      - name: Build Docker images
+        run: docker-compose build
+
+  docker-hub:
+    name: Docker Hub
+    runs-on: ubuntu-latest
+    environment: docker-hub
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Build Docker image
+        if: github.event_name != 'release'
+        run: docker build --file docker/Dockerfile.hub .
+
+      - name: Build Docker image
+        if: github.event_name == 'release'
+        run: docker build --file docker/Dockerfile.hub --tag ${{ secrets.DOCKER_USER }}/rekono:${{ github.event.release.name }} .
+
+      - name: Docker login
+        if: github.event_name == 'release'
+        run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }}
+
+      - name: Push image to Docker Hub
+        if: github.event_name == 'release'
+        run: docker push ${{ secrets.DOCKER_USER }}/rekono:${{ github.event.release.name }}
+
+      - name: Docker logout
+        if: github.event_name == 'release'
+        run: docker logout
