@@ -84,7 +84,7 @@ export default {
       cveRegex: /^CVE-\d{4}-\d{1,7}$/,
       defectDojoKeyRegex: /^[\da-z]{40}$/,
       telegramTokenRegex: /^\d{10}:[\w-]{35}$/,
-      credentialRegex: /^[\w./\-=+,:<>¿?¡!#&$()[\]{}*]{1,500}$/,
+      credentialRegex: /^[\w./\-=+,:<>¿?¡!#&$()@%[\]{}*]{1,500}$/,
       telegramBotName: null,
       defectDojoUrl: null,
       defectDojoEnabled: null,

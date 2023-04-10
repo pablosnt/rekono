@@ -13,7 +13,7 @@ PATH_REGEX = r'[\w\./#?&%$\\]{0,500}'                                           
 CVE_REGEX = r'CVE-\d{4}-\d{1,7}'                                                # Regex for CVE validation
 DD_KEY_REGEX = r'[\da-z]{40}'                                                   # Regex for Defect-Dojo key validation
 TELEGRAM_TOKEN_REGEX = r'\d{10}:[\w\-]{35}'                                     # Regex for Telegram token validation
-CREDENTIAL_REGEX = r'[\w\./\-=\+,:<>¿?¡!#&$()\[\]\{\}\*]{1,500}'                # Regex for credentials validation
+CREDENTIAL_REGEX = r'[\w\./\-=\+,:<>¿?¡!#&$()@%\[\]\{\}\*]{1,500}'                # Regex for credentials validation
 
 
 def validate_text_value(value: str, regex: str) -> None:
