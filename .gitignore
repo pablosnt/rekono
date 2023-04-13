@@ -152,3 +152,8 @@ yarn-error.log*
 # Docker TLS configuration
 *.key
 *.crt
+
+# Debian package
+*.desktop
+rekono-kbx
+*.kaboxer.yaml
