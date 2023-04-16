@@ -1,6 +1,6 @@
 #! /bin/sh
 
-export RKN_DB_PASSWORD=$(cat /data/rkn_db_password.txt)
+export RKN_DB_PASSWORD=$(cat /config/rkn_db_password.txt)
 
 # Set configuration file
 if [ ! -f $REKONO_HOME/config.yaml ]
@@ -9,12 +9,15 @@ then
 fi
 
 # Set PostgreSQL data directory
-export DEFAULT_PGDATA=$(cat /data/default_pgdata.txt) 
+export DEFAULT_PGDATA=$(cat /config/default_pgdata.txt) 
 export PGDATA="$REKONO_HOME/data"
-sed -i 's:'"$DEFAULT_PGDATA"':'"$PGDATA"':' $(cat /data/postgresql_config.txt)
+sed -i 's:'"$DEFAULT_PGDATA"':'"$PGDATA"':' $(cat /config/postgresql_config.txt)
 if [ ! -d $PGDATA ]
 then
     cp $DEFAULT_PGDATA $PGDATA
+else
+    chown -R postgres:postgres $PGDATA
+    chmod 700 $PGDATA
 fi
 
 # Start services
