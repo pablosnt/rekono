@@ -15,8 +15,10 @@ from datetime import timedelta
 from pathlib import Path
 from typing import Any, Dict
 
-from findings.enums import Severity
+from authentications.enums import AuthenticationType
+from findings.enums import PathType, Severity
 from input_types.enums import InputTypeNames
+from resources.enums import WordlistType
 from targets.enums import TargetType
 from tasks.enums import Status, TimeUnit
 from tools.enums import IntensityRank
@@ -307,6 +309,9 @@ SPECTACULAR_SETTINGS = {
         'IntensityEnum': IntensityRank.choices,
         'InputTypeNamesEnum': InputTypeNames.choices,
         'TargetTypeEnum': TargetType.choices,
+        'AuthenticationTypeEnum': AuthenticationType.choices,
+        'PathTypeEnum': PathType.choices,
+        'WordlistTypeEnum': WordlistType.choices,
     },
     'SCHEMA_PATH_PREFIX_INSERT': os.getenv(RKN_ROOT_PATH, CONFIG.ROOT_PATH),
 }
