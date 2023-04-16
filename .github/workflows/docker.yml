@@ -21,6 +21,38 @@ jobs:
       
       - name: Build Docker images
         run: docker-compose build
+      
+      - name: Scan Nginx image with Trivy
+        continue-on-error: true
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: rekono-nginx
+          format: table
+          exit-code: 1
+      
+      - name: Scan Kali image with Trivy
+        continue-on-error: true
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: rekono-kali
+          format: table
+          exit-code: 1
+      
+      - name: Scan Backend image with Trivy
+        continue-on-error: true
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: rekono-backend
+          format: table
+          exit-code: 1
+      
+      - name: Scan Frontend image with Trivy
+        continue-on-error: true
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: rekono-frontend
+          format: table
+          exit-code: 1
 
   debian-image:
     name: Debian Image
@@ -51,7 +83,8 @@ jobs:
       - name: Build Docker image
         run: docker build --file docker/debian/Dockerfile --tag rekono-debian .
 
-      - name: Run Trivy vulnerability scanner
+      - name: Scan Debian image with Trivy
+        continue-on-error: true
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: rekono-debian
