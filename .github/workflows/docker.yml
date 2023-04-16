@@ -49,11 +49,19 @@ jobs:
         run: npm run electron:build
 
       - name: Build Docker image
-        run: docker build --file docker/debian/Dockerfile --tag ${{ secrets.DOCKER_USER }}/rekono:${{ github.event.release.name }} .
+        run: docker build --file docker/debian/Dockerfile --tag rekono-debian .
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: rekono-debian
+          format: table
+          exit-code: 1
 
       - name: Publish Docker image in Docker Hub
         if: github.event_name == 'release'
         run: |
+          docker tag rekono-debian ${{ secrets.DOCKER_USER }}/rekono:${{ github.event.release.name }}
           docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }}
           docker push ${{ secrets.DOCKER_USER }}/rekono:${{ github.event.release.name }}
           docker logout
