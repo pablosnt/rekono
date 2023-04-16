@@ -70,7 +70,7 @@ jobs:
       - name: Change DEB filename
         if: matrix.os == 'windows-latest'
         working-directory: rekono/frontend/dist_electron
-        run: ren *.${{ matrix.extension }} $DEB_FILENAME.${{ matrix.extension }}
+        run: ren *.${{ matrix.extension }} %DEB_FILENAME%.${{ matrix.extension }}
       
       - name: Upload Desktop app as GitHub artifact
         uses: actions/upload-artifact@v3
@@ -84,4 +84,4 @@ jobs:
         working-directory: rekono/frontend/dist_electron
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload --repo pablosnt/rekono ${{ github.event.release.name }} $DEB_FILENAME.${{ matrix.extension }}
+        run: gh release upload --repo pablosnt/rekono ${{ github.event.release.name }} ${{ env.DEB_FILENAME }}.${{ matrix.extension }}
