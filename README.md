@@ -1,24 +1,27 @@
 <p align="center">
-  <a href="https://github.com/pablosnt/rekono/actions/workflows/unit-testing.yml" alt="Unit testing">
+  <a href="https://github.com/pablosnt/rekono/actions/workflows/unit-testing.yml" alt="Unit testing" target="_blank">
     <img src="https://github.com/pablosnt/rekono/actions/workflows/unit-testing.yml/badge.svg"/>
   </a>
-  <a href="https://github.com/pablosnt/rekono/actions/workflows/desktop-applications.yml" alt="Desktop applications">
+  <a href="https://github.com/pablosnt/rekono/actions/workflows/desktop-applications.yml" alt="Desktop applications" target="_blank">
     <img src="https://github.com/pablosnt/rekono/actions/workflows/desktop-applications.yml/badge.svg"/>
   </a>
-  <a href="https://github.com/pablosnt/rekono/actions/workflows/security-sast.yml" alt="SAST">
+  <a href="https://github.com/pablosnt/rekono/actions/workflows/security-sast.yml" alt="SAST" target="_blank">
     <img src="https://github.com/pablosnt/rekono/actions/workflows/security-sast.yml/badge.svg"/>
   </a>
-  <a href="https://snyk.io/test/github/pablosnt/rekono" alt="SCA">
+  <a href="https://snyk.io/test/github/pablosnt/rekono" alt="SCA" target="_blank">
     <img src="https://badgen.net/snyk/pablosnt/rekono?label=SCA&labelColor=black&icon=https://snyk.io/wp-content/uploads/patch-white.svg">
   </a>
-  <a href="https://github.com/pablosnt/rekono/actions/workflows/security-secrets.yml" alt="Secrets scanning">
+  <a href="https://github.com/pablosnt/rekono/actions/workflows/security-secrets.yml" alt="Secrets scanning" target="_blank">
     <img src="https://github.com/pablosnt/rekono/actions/workflows/security-secrets.yml/badge.svg"/>
   </a>
-  <a href="https://github.com/pablosnt/rekono/actions/workflows/code-style.yml" alt="Code style">
+  <a href="https://github.com/pablosnt/rekono/actions/workflows/code-style.yml" alt="Code style" target="_blank">
     <img src="https://github.com/pablosnt/rekono/actions/workflows/code-style.yml/badge.svg"/>
   </a>
-  <a href="https://discord.gg/Zyduu5C7M3">
+  <a href="https://discord.gg/Zyduu5C7M3" target="_blank">
     <img src="https://img.shields.io/badge/Discord-Join-black?style=social&logo=discord"/>
+  </a>
+  <a href="https://ko-fi.com/pablosnt" target="_blank">
+    <img src="https://ko-fi.com/img/githubbutton_sm.svg" width="160"/>
   </a>
   <a href="https://www.buymeacoffee.com/pablosnt" target="_blank">
     <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" width="75"/>
@@ -113,10 +116,16 @@ You can get support, ask questions, solve doubts or solve problems using:
 
 Rekono is an open source project that we really love to maintain and it's absolutely our pleasure, but we would like to offer the possibility of supporting Rekono's development via donations. At the moment, the project only needs its maintainer's time to stay up to date with new features and fix bugs. However, in the future, it could need more expensive resources like hosting, new web pages for documentation, the inclusion of premium hacking tools, etc. With the help received from our supporters, Rekono will be able to grow fastly and have the resources that it deserves. Of course, you can use the donations just to appreciate our work. Thank you for your help!
 
-<a href="https://www.buymeacoffee.com/pablosnt" target="_blank">
-  <img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=pablosnt&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff"/>
-</a>
+<p>
+  <a href="https://ko-fi.com/pablosnt" target="_blank">
+    <img src="https://storage.ko-fi.com/cdn/brandasset/kofi_s_tag_white.png" width="130"/>
+  </a>
+  <a href="https://www.buymeacoffee.com/pablosnt" target="_blank">
+    <img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=pablosnt&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff"/>
+  </a>
+</p>
 
+> The main differences between them are that BuyMeACoffe charges fees over each donation while Ko-fi doesn't and Ko-fi supports PayPal payments while BuyMeACoffe doesn't
 
 ## License
 
