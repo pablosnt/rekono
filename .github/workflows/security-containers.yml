@@ -1,4 +1,4 @@
-name: Docker images
+name: Containers
 on:
   workflow_dispatch:
   pull_request:
@@ -6,8 +6,6 @@ on:
       - 'docker/**'
       - '.dockerignore'
       - 'docker-compose.yml'
-  release:
-    types: [published]
 
 jobs:
   docker-compose:
@@ -57,7 +55,6 @@ jobs:
   debian-image:
     name: Debian Image
     runs-on: ubuntu-latest
-    environment: docker-hub
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -71,17 +68,14 @@ jobs:
       - name: Install dependencies
         working-directory: rekono/frontend
         run: npm install .
-
-      - name: Configure Rekono backend
-        working-directory: rekono/frontend
-        run: echo "VUE_APP_DESKTOP_BACKEND_URL=http://127.0.0.1:8000" >> .env.production
-      
+    
       - name: Generate Desktop app
         working-directory: rekono/frontend
         run: npm run electron:build
 
+      
       - name: Build Docker image
-        run: docker build --file docker/debian/Dockerfile --tag rekono-debian .
+        run: docker build --build-arg REKONO_VERSION=dev --file docker/debian/Dockerfile --tag rekono-debian .
 
       - name: Scan Debian image with Trivy
         continue-on-error: true
@@ -91,10 +85,4 @@ jobs:
           format: table
           exit-code: 1
 
-      - name: Publish Docker image in Docker Hub
-        if: github.event_name == 'release'
-        run: |
-          docker tag rekono-debian ${{ secrets.DOCKER_USER }}/rekono:${{ github.event.release.name }}
-          docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }}
-          docker push ${{ secrets.DOCKER_USER }}/rekono:${{ github.event.release.name }}
-          docker logout
+      

@@ -1,9 +1,9 @@
-name: Desktop applications
+name: Desktop UI
 on:
   workflow_dispatch:
     inputs:
       backend:
-        description: 'Backend URL to connect Desktop app'
+        description: 'Backend URL to connect Desktop UI'
         required: true
         default: 'https://127.0.0.1'
   pull_request:
@@ -13,7 +13,7 @@ on:
     types: [published]
 
 jobs:
-  desktop:
+  desktop-ui:
     strategy:
       fail-fast: false
       matrix:
@@ -26,7 +26,7 @@ jobs:
             extension: exe
     runs-on: ${{ matrix.os }}
     env:
-      DEB_FILENAME: RekonoDesktop
+      DEB_FILENAME: RekonoUI
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -58,7 +58,7 @@ jobs:
         working-directory: rekono/frontend
         run: npm install .
       
-      - name: Generate Desktop app
+      - name: Generate Desktop UI
         working-directory: rekono/frontend
         run: npm run electron:build
       
@@ -72,14 +72,14 @@ jobs:
         working-directory: rekono/frontend/dist_electron
         run: ren *.${{ matrix.extension }} %DEB_FILENAME%.${{ matrix.extension }}
       
-      - name: Upload Desktop app as GitHub artifact
+      - name: Upload Desktop UI as GitHub artifact
         uses: actions/upload-artifact@v3
         with:
           name: ${{ env.DEB_FILENAME }}_${{ matrix.os }}
           path: rekono/frontend/dist_electron/${{ env.DEB_FILENAME }}.${{ matrix.extension }}
           if-no-files-found: warn
       
-      - name: Upload Desktop app to GitHub release
+      - name: Upload Desktop UI to GitHub release
         if: github.event_name == 'release'
         working-directory: rekono/frontend/dist_electron
         env:
