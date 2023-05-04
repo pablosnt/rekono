@@ -2,35 +2,32 @@
 
 export RKN_DB_PASSWORD=$(cat /config/rkn_db_password.txt)
 
-# Set configuration file
+# Initialize configuration file
 if [ ! -f $REKONO_HOME/config.yaml ]
 then
     cp /code/config.yaml $REKONO_HOME/config.yaml
 fi
 
 # Set PostgreSQL data directory
-export DEFAULT_PGDATA=$(cat /config/default_pgdata.txt) 
-export PGDATA="$REKONO_HOME/data"
-sed -i 's:'"$DEFAULT_PGDATA"':'"$PGDATA"':' $(cat /config/postgresql_config.txt)
 if [ ! -d $PGDATA ]
 then
-    cp $DEFAULT_PGDATA $PGDATA
-else
-    chown -R postgres:postgres $PGDATA
-    chmod 700 $PGDATA
+    cp -r $(cat /config/default_pgdata.txt) $PGDATA
 fi
+
+# Set proper permissions to resources
+sudo REKONO_HOME=$REKONO_HOME PGDATA=$PGDATA /set_permissions.sh
 
 # Start services
 sudo /etc/init.d/postgresql start
 sudo /etc/init.d/redis-server start
 
-# Migrate database to update resources data
+# Migrate database
 python /code/manage.py migrate
 
-# Backend
+# Run backend
 python /code/manage.py runserver 0.0.0.0:8000 &
 
-# RQ workers
+# Run RQ workers
 python /code/manage.py rqworker tasks-queue &
 for worker in $(seq 1 $EXECUTION_WORKERS)
 do
@@ -39,8 +36,8 @@ done
 python /code/manage.py rqworker findings-queue &
 python /code/manage.py rqworker emails-queue &
 
-# Telegram bot
+# Run Telegram bot
 python /code/manage.py telegram_bot &
 
-# Desktop app
+# Run Desktop app
 /usr/bin/rekono --no-sandbox
