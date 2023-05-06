@@ -35,7 +35,7 @@ class ResourcesConfig(AppConfig):
         '''Update default wordlists size.'''
         from resources.models import Wordlist
         for wordlist in Wordlist.objects.all().filter(size=None):               # For each default wordlist
-            if os.path.isfile(wordlist.path):                                   # If wordlist path exist
+            if os.path.isfile(wordlist.path) and os.access(wordlist.path, os.R_OK):     # If wordlist path exist
                 with open(wordlist.path, 'rb+') as wordlist_file:               # Open uploaded file
                     wordlist.size = len(wordlist_file.readlines())              # Count entries from uploaded file
                     wordlist.save(update_fields=['size'])
