@@ -9,8 +9,6 @@ on:
   pull_request:
     paths:
       - 'rekono/frontend/**'
-  release:
-    types: [published]
 
 jobs:
   desktop-ui:
@@ -78,10 +76,3 @@ jobs:
           name: ${{ env.DEB_FILENAME }}_${{ matrix.os }}
           path: rekono/frontend/dist_electron/${{ env.DEB_FILENAME }}.${{ matrix.extension }}
           if-no-files-found: warn
-      
-      - name: Upload Desktop UI to GitHub release
-        if: github.event_name == 'release'
-        working-directory: rekono/frontend/dist_electron
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload --repo pablosnt/rekono ${{ github.event.release.name }} ${{ env.DEB_FILENAME }}.${{ matrix.extension }}
