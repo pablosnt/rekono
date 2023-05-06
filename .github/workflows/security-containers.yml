@@ -72,7 +72,6 @@ jobs:
         working-directory: rekono/frontend
         run: npm run electron:build
 
-      
       - name: Build Docker image
         run: docker build --build-arg REKONO_VERSION=dev --file docker/debian/Dockerfile --tag rekono-debian .
 
