@@ -1,24 +1,30 @@
 <p align="center">
-  <a href="https://github.com/pablosnt/rekono/actions/workflows/unit-testing.yml" alt="Unit testing">
+  <a href="https://github.com/pablosnt/rekono/actions/workflows/unit-testing.yml" alt="Unit testing" target="_blank">
     <img src="https://github.com/pablosnt/rekono/actions/workflows/unit-testing.yml/badge.svg"/>
   </a>
-  <a href="https://github.com/pablosnt/rekono/actions/workflows/desktop-applications.yml" alt="Desktop applications">
+  <a href="https://github.com/pablosnt/rekono/actions/workflows/desktop-applications.yml" alt="Desktop applications" target="_blank">
     <img src="https://github.com/pablosnt/rekono/actions/workflows/desktop-applications.yml/badge.svg"/>
   </a>
-  <a href="https://github.com/pablosnt/rekono/actions/workflows/security-sast.yml" alt="SAST">
+  <a href="https://github.com/pablosnt/rekono/actions/workflows/security-sast.yml" alt="SAST" target="_blank">
     <img src="https://github.com/pablosnt/rekono/actions/workflows/security-sast.yml/badge.svg"/>
   </a>
-  <a href="https://snyk.io/test/github/pablosnt/rekono" alt="SCA">
+  <a href="https://snyk.io/test/github/pablosnt/rekono" alt="SCA" target="_blank">
     <img src="https://badgen.net/snyk/pablosnt/rekono?label=SCA&labelColor=black&icon=https://snyk.io/wp-content/uploads/patch-white.svg">
   </a>
-  <a href="https://github.com/pablosnt/rekono/actions/workflows/security-secrets.yml" alt="Secrets scanning">
+  <a href="https://github.com/pablosnt/rekono/actions/workflows/security-secrets.yml" alt="Secrets scanning" target="_blank">
     <img src="https://github.com/pablosnt/rekono/actions/workflows/security-secrets.yml/badge.svg"/>
   </a>
-  <a href="https://github.com/pablosnt/rekono/actions/workflows/code-style.yml" alt="Code style">
+  <a href="https://github.com/pablosnt/rekono/actions/workflows/code-style.yml" alt="Code style" target="_blank">
     <img src="https://github.com/pablosnt/rekono/actions/workflows/code-style.yml/badge.svg"/>
   </a>
-  <a href="https://discord.gg/Zyduu5C7M3">
+  <a href="https://discord.gg/Zyduu5C7M3" target="_blank">
     <img src="https://img.shields.io/badge/Discord-Join-black?style=social&logo=discord"/>
+  </a>
+  <a href="https://ko-fi.com/pablosnt" target="_blank">
+    <img src="https://ko-fi.com/img/githubbutton_sm.svg" width="160"/>
+  </a>
+  <a href="https://www.buymeacoffee.com/pablosnt" target="_blank">
+    <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" width="75"/>
   </a>
 </p>
 
@@ -48,9 +54,11 @@ Why not automate this process and focus on find vulnerabilities using your skill
 
 ## Quick Start
 
+### Docker
+
 Execute the following commands in the root directory of the project:
 
-```
+```bash
 docker-compose build
 docker-compose up -d --scale executions-worker=5
 ```
@@ -60,6 +68,20 @@ Go to https://127.0.0.1/
 > Default credentials are `rekono:rekono`. For security reasons, **password should be changed** the first time you access the account. Moreover default user details can be changed using [environment variables](https://github.com/pablosnt/rekono/wiki/Configuration#docker).
 
 > The number of workers can be changed using `--scale` option. The number of `executions-worker` determines the number of tools that could be executed at the same time.
+
+
+### Rekono Desktop
+
+Rekono Desktop is a standalone app with all features, that can be installed and executed locally. It's the best and easiest option for personal and local usage. Execue the following command to install it:
+
+```bash
+wget https://github.com/pablosnt/rekono/releases/download/1.6.0/rekono-desktop_1.6.0_amd64.deb && dpkg -i rekono-desktop_1.6.0_amd64.deb || apt -f install -y
+```
+
+> Default credentials are `rekono:rekono`. For security reasons, **password should be changed** the first time you access the account
+
+> :warning: Rekono Desktop only has been tested in Kali Linux and Parrot OS
+
 
 Check [**full documentation**](https://github.com/pablosnt/rekono/wiki) for more installation and configuration options, user guides, integrations, Rekono Desktop, Rekono Bot and Rekono CLI details.
 
@@ -92,7 +114,9 @@ Rekono supports the execution of this hacking tools:
 Thanks to all the contributors of these amazing tools!
 
 
-## Support
+## Reach Us
+
+You can get support, ask questions, solve doubts or solve problems using:
 
 <p>
   <a href="https://github.com/pablosnt/rekono/issues/new?labels=help+wanted%2C+question&template=support.md" alt="GitHub Issue">
@@ -106,6 +130,18 @@ Thanks to all the contributors of these amazing tools!
   </a>
 </p>
 
+Rekono is an open source project that we really love to maintain and it's absolutely our pleasure, but we would like to offer the possibility of supporting Rekono's development via donations. At the moment, the project only needs its maintainer's time to stay up to date with new features and fix bugs. However, in the future, it could need more expensive resources like hosting, new web pages for documentation, the inclusion of premium hacking tools, etc. With the help received from our supporters, Rekono will be able to grow fastly and have the resources that it deserves. Of course, you can use the donations just to appreciate our work. Thank you for your help!
+
+<p>
+  <a href="https://ko-fi.com/pablosnt" target="_blank">
+    <img src="https://storage.ko-fi.com/cdn/brandasset/kofi_s_tag_white.png" width="130"/>
+  </a>
+  <a href="https://www.buymeacoffee.com/pablosnt" target="_blank">
+    <img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=pablosnt&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff"/>
+  </a>
+</p>
+
+> The main differences between them are that BuyMeACoffe charges fees over each donation while Ko-fi doesn't and Ko-fi supports PayPal payments while BuyMeACoffe doesn't
 
 ## License
 

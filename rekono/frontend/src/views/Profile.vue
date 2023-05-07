@@ -29,9 +29,9 @@
         <b-col cols="4">
           <div class="mb-3" v-if="telegramBotName">
             <h4 v-if="telegramConfigured">
-              <b-badge variant="outline">
-                <b-icon variant="success" icon="patch-check-fill"/>
-                {{ telegramBotName }} is linked!
+              <b-badge :href="telegramBotLink" target="blank" variant="outline">
+                <b-icon variant="primary" icon="patch-check-fill"/>
+                @{{ telegramBotName }} is linked!
               </b-badge>
             </h4>
             <b-card align="center" v-if="!telegramConfigured">

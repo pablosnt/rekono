@@ -15,8 +15,10 @@ from datetime import timedelta
 from pathlib import Path
 from typing import Any, Dict
 
-from findings.enums import Severity
+from authentications.enums import AuthenticationType
+from findings.enums import PathType, Severity
 from input_types.enums import InputTypeNames
+from resources.enums import WordlistType
 from targets.enums import TargetType
 from tasks.enums import Status, TimeUnit
 from tools.enums import IntensityRank
@@ -38,7 +40,7 @@ from rekono.environment import (ENV_REKONO_HOME, RKN_ALLOWED_HOSTS,
 
 # Rekono description
 DESCRIPTION = 'Rekono is an automation platform that combines different hacking tools to complete pentesting processes'
-VERSION = '1.5.1'                                                               # Rekono version
+VERSION = '1.6.0'                                                               # Rekono version
 TESTING = 'test' in sys.argv                                                    # Tests execution
 
 ################################################################################
@@ -307,6 +309,9 @@ SPECTACULAR_SETTINGS = {
         'IntensityEnum': IntensityRank.choices,
         'InputTypeNamesEnum': InputTypeNames.choices,
         'TargetTypeEnum': TargetType.choices,
+        'AuthenticationTypeEnum': AuthenticationType.choices,
+        'PathTypeEnum': PathType.choices,
+        'WordlistTypeEnum': WordlistType.choices,
     },
     'SCHEMA_PATH_PREFIX_INSERT': os.getenv(RKN_ROOT_PATH, CONFIG.ROOT_PATH),
 }
@@ -347,25 +352,25 @@ RQ_QUEUES = {
         'HOST': os.getenv(RKN_RQ_HOST, CONFIG.RQ_HOST),
         'PORT': os.getenv(RKN_RQ_PORT, CONFIG.RQ_PORT),
         'DB': 0,
-        'DEFAULT_TIMEOUT': 60                                                   # 1 minute
+        'DEFAULT_TIMEOUT': 3600                                                 # 1 hour
     },
     'executions-queue': {
         'HOST': os.getenv(RKN_RQ_HOST, CONFIG.RQ_HOST),
         'PORT': os.getenv(RKN_RQ_PORT, CONFIG.RQ_PORT),
         'DB': 0,
-        'DEFAULT_TIMEOUT': 7200                                                 # 2 hours
+        'DEFAULT_TIMEOUT': 28800                                                # 8 hours
     },
     'findings-queue': {
         'HOST': os.getenv(RKN_RQ_HOST, CONFIG.RQ_HOST),
         'PORT': os.getenv(RKN_RQ_PORT, CONFIG.RQ_PORT),
         'DB': 0,
-        'DEFAULT_TIMEOUT': 1200                                                 # 20 minutes
+        'DEFAULT_TIMEOUT': 10800                                                # 3 hours
     },
     'emails-queue': {
         'HOST': os.getenv(RKN_RQ_HOST, CONFIG.RQ_HOST),
         'PORT': os.getenv(RKN_RQ_PORT, CONFIG.RQ_PORT),
         'DB': 0,
-        'DEFAULT_TIMEOUT': 300                                                  # 5 minutes
+        'DEFAULT_TIMEOUT': 3600                                                 # 1 hour
     }
 }
 

@@ -5,7 +5,6 @@ const headers = {
   'X-Content-Type-Options': 'nosniff',
   'X-Frame-Options': 'DENY',
   'X-Powered-By': '',
-  'X-XSS-Protection': '1; mode=block'
 }
   
 
@@ -34,7 +33,7 @@ module.exports = {
         icon: 'public/favicon',
         linux: {
           target: 'deb',
-          icon: 'public/favicon'
+          icon: 'public/favicon.icns'
         }
       }
     }

@@ -1,0 +1,42 @@
+name: Desktop app
+on:
+  release:
+    types: [published]
+
+jobs:
+  docker-image:
+    name: Docker Image
+    runs-on: ubuntu-latest
+    environment: docker-hub
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      
+      - name: Install dependencies
+        working-directory: rekono/frontend
+        run: npm install .
+
+      - name: Configure Rekono backend
+        working-directory: rekono/frontend
+        run: echo "VUE_APP_DESKTOP_BACKEND_URL=http://127.0.0.1:8000" > .env.production
+      
+      - name: Generate Desktop UI
+        working-directory: rekono/frontend
+        run: npm run electron:build
+      
+      - name: Build Docker image
+        run: docker build --build-arg REKONO_VERSION=${{ github.event.release.name }} --file docker/debian/Dockerfile --tag ${{ secrets.DOCKER_USER }}/rekono:${{ github.event.release.name }} .
+
+      - name: Publish Docker image in Docker Hub
+        run: |
+          docker tag ${{ secrets.DOCKER_USER }}/rekono:${{ github.event.release.name }} ${{ secrets.DOCKER_USER }}/rekono:latest
+          docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }}
+          docker push ${{ secrets.DOCKER_USER }}/rekono:${{ github.event.release.name }}
+          docker push ${{ secrets.DOCKER_USER }}/rekono:latest
+          docker logout

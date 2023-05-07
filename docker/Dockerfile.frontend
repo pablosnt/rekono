@@ -1,0 +1,27 @@
+FROM node:19.6.1-alpine
+
+# Environment
+ENV NODE_OPTIONS --openssl-legacy-provider
+
+# Install requirements
+RUN apk update && apk add curl
+RUN npm install -g serve
+
+# Source code
+RUN mkdir /code
+COPY /rekono/frontend /code
+
+# Install frontend dependencies
+WORKDIR /code
+RUN npm install
+RUN npx browserslist@latest --update-db
+RUN npm run build
+
+# System user
+RUN adduser --disabled-password rekono
+RUN chown -R rekono /code
+
+# Final system configuration
+USER rekono
+EXPOSE 3000
+ENTRYPOINT ["serve", "-s", "dist"]

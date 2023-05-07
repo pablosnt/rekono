@@ -1,0 +1,32 @@
+FROM python:3.9.10-alpine
+
+# Environment
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+ENV OBJC_DISABLE_INITIALIZE_FORK_SAFETY YES
+ENV REKONO_HOME /rekono
+
+# Install requirements
+RUN apk update && apk add curl postgresql-dev gcc python3-dev musl-dev libmagic --repository=http://dl-cdn.alpinelinux.org/alpine/edge/community
+
+# Home
+RUN mkdir /rekono
+COPY config.yaml /rekono
+
+# Source code
+RUN mkdir /code
+COPY rekono/ /code
+COPY requirements.txt /code
+
+# Install backend dependencies
+RUN pip install --upgrade pip
+RUN pip install -r /code/requirements.txt
+
+# System user
+RUN adduser --disabled-password rekono
+RUN chown -R rekono:rekono /code
+RUN chown -R rekono:rekono /rekono
+
+# Final system configuration
+USER rekono
+WORKDIR /code

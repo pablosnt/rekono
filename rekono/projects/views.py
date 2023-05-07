@@ -1,6 +1,11 @@
 from api.views import CreateWithUserViewSet, GetViewSet
 from defectdojo.exceptions import DefectDojoException
 from drf_spectacular.utils import extend_schema
+from projects.filters import ProjectFilter
+from projects.models import Project
+from projects.serializers import (DefectDojoIntegrationSerializer,
+                                  DefectDojoSyncSerializer,
+                                  ProjectMemberSerializer, ProjectSerializer)
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
@@ -8,12 +13,6 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from users.models import User
-
-from projects.filters import ProjectFilter
-from projects.models import Project
-from projects.serializers import (DefectDojoIntegrationSerializer,
-                                  DefectDojoSyncSerializer,
-                                  ProjectMemberSerializer, ProjectSerializer)
 
 # Create your views here.
 
@@ -71,7 +70,7 @@ class ProjectViewSet(GetViewSet, CreateWithUserViewSet, ModelViewSet):
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
-    @extend_schema(request=DefectDojoIntegrationSerializer, responses={200: Project})
+    @extend_schema(request=DefectDojoIntegrationSerializer, responses={200: ProjectSerializer})
     @action(detail=True, methods=['PUT'], url_path='defect-dojo', url_name='defect-dojo')
     def defect_dojo_integration(self, request: Request, pk: str) -> Response:
         '''Configure Defect-Dojo integration for the project.
@@ -93,7 +92,7 @@ class ProjectViewSet(GetViewSet, CreateWithUserViewSet, ModelViewSet):
                 return Response(ex.args[0], status=status.HTTP_400_BAD_REQUEST)     # Error in Defect-Dojo requests
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    @extend_schema(request=DefectDojoSyncSerializer, responses={200: Project})
+    @extend_schema(request=DefectDojoSyncSerializer, responses={200: ProjectSerializer})
     @action(detail=True, methods=['PUT'], url_path='defect-dojo/sync', url_name='defect-dojo-sync')
     def defect_dojo_synchronization(self, request: Request, pk: str) -> Response:
         '''Enable or disable Defect-Dojo synchronization for the project.

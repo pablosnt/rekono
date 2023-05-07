@@ -34,7 +34,7 @@ services:
     networks:
       - internal
 
-  initialize:
+  initializer:
     restart: 'no'
     image: rekono-kali:latest
     command: sh -c "python manage.py migrate && python manage.py createsuperuser --no-input"
@@ -67,7 +67,7 @@ services:
     networks:
       - internal
     depends_on:
-      - initialize
+      - initializer
       - redis
     environment:
       - RKN_DB_HOST=postgres
@@ -75,13 +75,12 @@ services:
       - RKN_DB_PASSWORD=postgres
       - RKN_RQ_HOST=redis
       - REKONO_HOME=/rekono
-      - OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
 
   executions-worker:
     restart: always
     build:
       context: .
-      dockerfile: docker/kali/Dockerfile
+      dockerfile: docker/Dockerfile.kali
     image: rekono-kali:latest
     command: python manage.py rqworker executions-queue
     hostname: executions-worker
@@ -94,7 +93,7 @@ services:
     cap_add:
       - NET_ADMIN
     depends_on:
-      - initialize
+      - initializer
       - redis
     environment:
       - RKN_DB_HOST=postgres
@@ -102,7 +101,6 @@ services:
       - RKN_DB_PASSWORD=postgres
       - RKN_RQ_HOST=redis
       - REKONO_HOME=/rekono
-      - OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
 
   findings-worker:
     restart: always
@@ -116,7 +114,7 @@ services:
       - internal
       - external
     depends_on:
-      - initialize
+      - initializer
       - redis
     environment:
       - RKN_DB_HOST=postgres
@@ -124,7 +122,6 @@ services:
       - RKN_DB_PASSWORD=postgres
       - RKN_RQ_HOST=redis
       - REKONO_HOME=/rekono
-      - OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
     
   emails-worker:
     restart: always
@@ -138,7 +135,7 @@ services:
       - internal
       - external
     depends_on:
-      - initialize
+      - initializer
       - redis
     environment:
       - RKN_DB_HOST=postgres
@@ -146,7 +143,6 @@ services:
       - RKN_DB_PASSWORD=postgres
       - RKN_RQ_HOST=redis
       - REKONO_HOME=/rekono
-      - OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
 
   telegram-bot:
     restart: always
@@ -161,7 +157,7 @@ services:
       - internal
       - external
     depends_on:
-      - initialize
+      - initializer
       - redis
     environment:
       - RKN_DB_HOST=postgres
@@ -174,7 +170,7 @@ services:
     restart: always
     build:
       context: .
-      dockerfile: docker/rekono/Dockerfile.backend
+      dockerfile: docker/Dockerfile.backend
     image: rekono-backend:latest
     command: python manage.py runserver 0.0.0.0:8000
     hostname: backend
@@ -193,7 +189,7 @@ services:
       - internal
       - external
     depends_on:
-      - initialize
+      - initializer
       - redis
     environment:
       - RKN_DB_HOST=postgres
@@ -208,9 +204,8 @@ services:
     restart: always
     build:
       context: .
-      dockerfile: docker/rekono/Dockerfile.frontend
+      dockerfile: docker/Dockerfile.frontend
     image: rekono-frontend:latest
-    command: sh -c "serve -s dist"
     hostname: frontend
     container_name: frontend
     healthcheck:
@@ -223,8 +218,6 @@ services:
       - 3000
     networks:
       - internal
-    environment:
-      - NODE_OPTIONS=--openssl-legacy-provider
 
   nginx:
     restart: always
