@@ -1,19 +1,17 @@
-name: Desktop applications
+name: Desktop UI
 on:
   workflow_dispatch:
     inputs:
       backend:
-        description: 'Backend URL to connect Desktop app'
+        description: 'Backend URL to connect Desktop UI'
         required: true
         default: 'https://127.0.0.1'
   pull_request:
     paths:
       - 'rekono/frontend/**'
-  release:
-    types: [published]
 
 jobs:
-  desktop:
+  desktop-ui:
     strategy:
       fail-fast: false
       matrix:
@@ -25,6 +23,8 @@ jobs:
           - os: windows-latest
             extension: exe
     runs-on: ${{ matrix.os }}
+    env:
+      DEB_FILENAME: RekonoUI
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -56,27 +56,23 @@ jobs:
         working-directory: rekono/frontend
         run: npm install .
       
-      - name: Generate Desktop app
+      - name: Generate Desktop UI
         working-directory: rekono/frontend
         run: npm run electron:build
       
-      - name: Upload Desktop app as GitHub artifact
+      - name: Change DEB filename
+        if: matrix.os != 'windows-latest'
+        working-directory: rekono/frontend/dist_electron
+        run: mv *.${{ matrix.extension }} $DEB_FILENAME.${{ matrix.extension }}
+      
+      - name: Change DEB filename
+        if: matrix.os == 'windows-latest'
+        working-directory: rekono/frontend/dist_electron
+        run: ren *.${{ matrix.extension }} %DEB_FILENAME%.${{ matrix.extension }}
+      
+      - name: Upload Desktop UI as GitHub artifact
         uses: actions/upload-artifact@v3
         with:
-          name: rekono_${{ matrix.os }}
-          path: rekono/frontend/dist_electron/*.${{ matrix.extension }}
+          name: ${{ env.DEB_FILENAME }}_${{ matrix.os }}
+          path: rekono/frontend/dist_electron/${{ env.DEB_FILENAME }}.${{ matrix.extension }}
           if-no-files-found: warn
-      
-      - name: Upload Desktop app to GitHub release
-        if: github.event_name == 'release' && matrix.os != 'windows-latest'
-        working-directory: rekono/frontend/dist_electron
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload --repo pablosnt/rekono ${{ github.event.release.name }} *.${{ matrix.extension }}
-
-      - name: Upload Desktop app to GitHub release
-        if: github.event_name == 'release' && matrix.os == 'windows-latest'
-        working-directory: rekono/frontend/dist_electron
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload --repo pablosnt/rekono ${{ github.event.release.name }} "Rekono Setup ${{ github.event.release.name }}.${{ matrix.extension }}"

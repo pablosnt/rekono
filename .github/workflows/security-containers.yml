@@ -1,0 +1,86 @@
+name: Containers
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'docker/**'
+      - 'docker-compose.yml'
+
+jobs:
+  docker-compose:
+    name: Docker Compose
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      
+      - name: Build Docker images
+        run: docker-compose build
+      
+      - name: Scan Nginx image with Trivy
+        continue-on-error: true
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: rekono-nginx
+          format: table
+          exit-code: 1
+      
+      - name: Scan Kali image with Trivy
+        continue-on-error: true
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: rekono-kali
+          format: table
+          exit-code: 1
+      
+      - name: Scan Backend image with Trivy
+        continue-on-error: true
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: rekono-backend
+          format: table
+          exit-code: 1
+      
+      - name: Scan Frontend image with Trivy
+        continue-on-error: true
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: rekono-frontend
+          format: table
+          exit-code: 1
+
+  debian-image:
+    name: Debian Image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      
+      - name: Install dependencies
+        working-directory: rekono/frontend
+        run: npm install .
+    
+      - name: Generate Desktop app
+        working-directory: rekono/frontend
+        run: npm run electron:build
+
+      - name: Build Docker image
+        run: docker build --build-arg REKONO_VERSION=dev --file docker/debian/Dockerfile --tag rekono-debian .
+
+      - name: Scan Debian image with Trivy
+        continue-on-error: true
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: rekono-debian
+          format: table
+          exit-code: 1
+
+      

@@ -33,7 +33,7 @@ module.exports = {
         icon: 'public/favicon',
         linux: {
           target: 'deb',
-          icon: 'public/favicon'
+          icon: 'public/favicon.icns'
         }
       }
     }
