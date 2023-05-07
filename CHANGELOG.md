@@ -3,6 +3,26 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] - 2023-05-07
+
+### Added
+
+- Link to Rekono Bot in profile page when it is configured (https://github.com/pablosnt/rekono/issues/198)
+- New standalone desktop app that can be installed using a DEB package (https://github.com/pablosnt/rekono/issues/203)
+
+### Fixed
+
+- Allow some special characters in authentication username values (https://github.com/pablosnt/rekono/issues/192)
+- Allow some special characters in authentication credential values (https://github.com/pablosnt/rekono/issues/194)
+- Fix warnings showed when access API documentation (https://github.com/pablosnt/rekono/issues/201)
+- Increase Redis queues timeout to prevent failures in large tasks (https://github.com/pablosnt/rekono/issues/206)
+
+### Security
+
+- Remove `X-XSS-Protection` header as it could introduce other vulnerabilities (https://github.com/pablosnt/rekono/issues/195)
+- Upgrade `Django` version to `3.2.19` (https://github.com/pablosnt/rekono/issues/209)
+
+
 ## [1.5.1] - 2023-03-10
 
 ### Fixed
