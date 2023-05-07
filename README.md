@@ -54,9 +54,11 @@ Why not automate this process and focus on find vulnerabilities using your skill
 
 ## Quick Start
 
+### Docker
+
 Execute the following commands in the root directory of the project:
 
-```
+```bash
 docker-compose build
 docker-compose up -d --scale executions-worker=5
 ```
@@ -66,6 +68,20 @@ Go to https://127.0.0.1/
 > Default credentials are `rekono:rekono`. For security reasons, **password should be changed** the first time you access the account. Moreover default user details can be changed using [environment variables](https://github.com/pablosnt/rekono/wiki/Configuration#docker).
 
 > The number of workers can be changed using `--scale` option. The number of `executions-worker` determines the number of tools that could be executed at the same time.
+
+
+### Rekono Desktop
+
+Rekono Desktop is a standalone app with all features, that can be installed and executed locally. It's the best and easiest option for personal and local usage. Execue the following command to install it:
+
+```bash
+wget https://github.com/pablosnt/rekono/releases/download/1.6.0/rekono-desktop_1.6.0_amd64.deb && dpkg -i rekono-desktop_1.6.0_amd64.deb || apt -f install -y
+```
+
+> Default credentials are `rekono:rekono`. For security reasons, **password should be changed** the first time you access the account
+
+> :warning: Rekono Desktop only has been tested in Kali Linux and Parrot OS
+
 
 Check [**full documentation**](https://github.com/pablosnt/rekono/wiki) for more installation and configuration options, user guides, integrations, Rekono Desktop, Rekono Bot and Rekono CLI details.
 
