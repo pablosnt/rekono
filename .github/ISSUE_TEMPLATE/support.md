@@ -8,4 +8,3 @@ assignees: ''
 ---
 
 **What do you need?**
-Remember that you can also mail rekono.project@gmail.com
