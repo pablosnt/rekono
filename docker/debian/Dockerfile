@@ -43,6 +43,7 @@ RUN pip install -r /code/requirements.txt && \
 
 # Tools
 RUN apt install nmap dirsearch theharvester nikto sslscan sslyze cmseek zaproxy exploitdb metasploit-framework emailharvester joomscan gitleaks smbmap nuclei gobuster -y && \
+    apt install seclists dirb -y && \
     apt autoremove -y && \
     apt autoclean -y && \
     apt clean -y && \
