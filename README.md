@@ -2,8 +2,8 @@
   <a href="https://github.com/pablosnt/rekono/actions/workflows/unit-testing.yml" alt="Unit testing" target="_blank">
     <img src="https://github.com/pablosnt/rekono/actions/workflows/unit-testing.yml/badge.svg"/>
   </a>
-  <a href="https://github.com/pablosnt/rekono/actions/workflows/desktop-applications.yml" alt="Desktop applications" target="_blank">
-    <img src="https://github.com/pablosnt/rekono/actions/workflows/desktop-applications.yml/badge.svg"/>
+  <a href="https://github.com/pablosnt/rekono/actions/workflows/desktop-ui.yml" alt="Desktop UI" target="_blank">
+    <img src="https://github.com/pablosnt/rekono/actions/workflows/desktop-ui.yml/badge.svg"/>
   </a>
   <a href="https://github.com/pablosnt/rekono/actions/workflows/security-sast.yml" alt="SAST" target="_blank">
     <img src="https://github.com/pablosnt/rekono/actions/workflows/security-sast.yml/badge.svg"/>
@@ -13,6 +13,9 @@
   </a>
   <a href="https://github.com/pablosnt/rekono/actions/workflows/security-secrets.yml" alt="Secrets scanning" target="_blank">
     <img src="https://github.com/pablosnt/rekono/actions/workflows/security-secrets.yml/badge.svg"/>
+  </a>
+  <a href="https://github.com/pablosnt/rekono/actions/workflows/security-containers.yml" alt="Containers" target="_blank">
+    <img src="https://github.com/pablosnt/rekono/actions/workflows/security-containers.yml/badge.svg"/>
   </a>
   <a href="https://github.com/pablosnt/rekono/actions/workflows/code-style.yml" alt="Code style" target="_blank">
     <img src="https://github.com/pablosnt/rekono/actions/workflows/code-style.yml/badge.svg"/>
