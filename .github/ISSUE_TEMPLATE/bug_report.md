@@ -30,7 +30,7 @@ If applicable, add screenshots to help explain your problem.
 
 **Installation method**
 - [ ] Docker
-- [ ] CLI
+- [ ] DEB package
 - [ ] From Source
 
 **Additional context**
