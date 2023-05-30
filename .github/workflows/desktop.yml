@@ -45,6 +45,7 @@ jobs:
     name: Debian Package
     runs-on: ubuntu-latest
     environment: gitlab
+    needs: docker-image
     steps:
       - name: Checkout GitLab repository
         run: git clone https://gitlab.com/pablosnt/rekono.git rekono-deb
@@ -85,6 +86,8 @@ jobs:
       - name: Commit changes to GitLab
         working-directory: rekono-deb
         run: |
+          git config user.name 'Pablo Santiago'
+          git config user.email '${{ secrets.GITLAB_EMAIL }}'
           git checkout -b release/${{ github.event.release.name }}
           git add .
           git commit -m "Update Rekono version to ${{ github.event.release.name }}"
