@@ -101,7 +101,7 @@ jobs:
         run: |
           import requests
           headers = {
-            'PRIVATE-TOKEN': ${{ secrets.GITLAB_TOKEN }}
+            'PRIVATE-TOKEN': '${{ secrets.GITLAB_TOKEN }}'
           }
           data = {
             'title': 'Update Rekono version to ${{ github.event.release.name }}',
