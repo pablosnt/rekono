@@ -109,6 +109,8 @@ jobs:
             'target_branch': 'kali/master',
           }
           response = requests.post('https://gitlab.com/api/v4/projects/${{ env.GITLAB_PROJECT_ID }}/merge_requests')
+          print(response.text)
+          print(response.status_code)
           assert(response.status_code == 201)
       
       - name: Build DEB Package
