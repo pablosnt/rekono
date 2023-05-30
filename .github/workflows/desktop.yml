@@ -44,7 +44,7 @@ jobs:
   debian-package:
     name: Debian Package
     runs-on: ubuntu-latest
-    env: gitlab
+    environment: gitlab
     steps:
       - name: Checkout GitLab repository
         run: git clone https://gitlab.com/pablosnt/rekono.git rekono-deb
