@@ -1,6 +1,6 @@
 {
   "name": "rekono",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "description": "Rekono is an automation platform that combines different hacking tools to complete pentesting processes",
   "author": "Pablo Santiago López <rekono.project@gmail.com>",
   "homepage": "https://github.com/pablosnt/rekono",
