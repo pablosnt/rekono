@@ -40,3 +40,86 @@ jobs:
           docker push ${{ secrets.DOCKER_USER }}/rekono:${{ github.event.release.name }}
           docker push ${{ secrets.DOCKER_USER }}/rekono:latest
           docker logout
+
+  debian-package:
+    name: Debian Package
+    runs-on: ubuntu-latest
+    env: gitlab
+    steps:
+      - name: Checkout GitLab repository
+        run: git clone https://gitlab.com/pablosnt/rekono.git rekono-deb
+      
+      - name: Update README.md
+        working-directory: rekono-deb
+        shell: python
+        run: |
+          import re
+          with open('README.md', 'r') as readme:
+            content = readme.read()
+          line_to_replace = re.search(f'dpkg -i ../rekono_[\d\.]+_amd64.deb', content)
+          if line_to_replace:
+            with open('README.md', 'w') as readme:
+              readme.write(content.replace(line_to_replace.group(0), 'dpkg -i ../rekono_${{ github.event.release.name }}_amd64.deb'))
+
+      - name: Update rekono executable
+        working-directory: rekono-deb
+        run: |
+          echo '#!/bin/sh' > rekono
+          echo 'exec kaboxer run --component default --version ${{ github.event.release.name }} rekono -- "$@"' >> rekono
+
+      - name: Update debian/changelog
+        working-directory: rekono-deb/debian
+        shell: python
+        run: |
+          import pytz
+          from datetime import datetime
+          with open('changelog', 'r') as changelog:
+            old_changes = changelog.read()
+          tz = pytz.timezone('Europe/Madrid')
+          d = tz.localize(datetime.now())
+          change_time = d.strftime('%a, %d %b %Y %H:%M:%S %z')
+          new_changes = f'rekono (${{ github.event.release.name }}) UNRELEASED; urgency=medium\n\n  * Update Rekono version to ${{ github.event.release.name }}.\n\n -- Pablo Santiago López <pablosantiagolopez1@gmail.com> {change_time}\n\n'
+          with open('changelog', 'w') as changelog:
+            changelog.write(new_changes + old_changes)
+      
+      - name: Commit changes to GitLab
+        working-directory: rekono-deb
+        run: |
+          git checkout -b release/${{ github.event.release.name }}
+          git add .
+          git commit -m "Update Rekono version to ${{ github.event.release.name }}"
+          git config credential.helper '!f() { sleep 1; echo "username=${{ secrets.GITLAB_USER }}"; echo "password=${{ secrets.GITLAB_TOKEN }}"; }; f'
+          git push --set-upstream origin release/${{ github.event.release.name }}
+      
+      - name: GitLab merge request
+        shell: python
+        env:
+          GITLAB_PROJECT_ID: 45783845
+        run: |
+          import requests
+          headers = {
+            'PRIVATE-TOKEN': ${{ secrets.GITLAB_TOKEN }}
+          }
+          data = {
+            'title': 'Update Rekono version to ${{ github.event.release.name }}',
+            'source_branch': 'release/${{ github.event.release.name }}',
+            'target_branch': 'kali/master',
+          }
+          response = requests.post('https://gitlab.com/api/v4/projects/${{ env.GITLAB_PROJECT_ID }}/merge_requests')
+          assert(response.status_code == 201)
+      
+      - name: Build DEB Package
+        working-directory: rekono-deb
+        run: dpkg-buildpackage -us -uc
+      
+      - name: Upload DEB package as GitHub artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: rekono_${{ github.event.release.name }}_amd64.deb
+          path: rekono_${{ github.event.release.name }}_amd64.deb
+          if-no-files-found: warn
+      
+      - name: Upload DEB package to GitHub release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload --repo pablosnt/rekono ${{ github.event.release.name }} rekono_${{ github.event.release.name }}_amd64.deb
