@@ -71,10 +71,14 @@ jobs:
         working-directory: rekono-deb/debian
         shell: python
         run: |
+          import pytz
           from datetime import datetime
           with open('changelog', 'r') as changelog:
             old_changes = changelog.read()
-          new_changes = f'rekono (${{ github.event.release.name }}) UNRELEASED; urgency=medium\n\n  * Update Rekono version to ${{ github.event.release.name }}.\n\n -- Pablo Santiago López <pablosantiagolopez1@gmail.com> {datetime.now()}\n\n'
+          tz = pytz.timezone('Europe/Madrid')
+          d = tz.localize(datetime.now())
+          change_time = d.strftime('%a, %d %b %Y %H:%M:%S %z')
+          new_changes = f'rekono (${{ github.event.release.name }}) UNRELEASED; urgency=medium\n\n  * Update Rekono version to ${{ github.event.release.name }}.\n\n -- Pablo Santiago López <pablosantiagolopez1@gmail.com> {change_time}\n\n'
           with open('changelog', 'w') as changelog:
             changelog.write(new_changes + old_changes)
       
@@ -83,11 +87,7 @@ jobs:
         run: |
           git checkout -b release/${{ github.event.release.name }}
           git add .
-          echo "${{ secrets.GITLAB_KEY }}" > gpg_private_key.key
-          gpg --import gpg_private_key.key
-          rm gpg_private_key.key
-          git config user.signingkey ${{ secrets.GITLAB_KEY_ID }}
-          git commit -S -m "Update Rekono version to ${{ github.event.release.name }}"
+          git commit -m "Update Rekono version to ${{ github.event.release.name }}"
           git config credential.helper '!f() { sleep 1; echo "username=${{ secrets.GITLAB_USER }}"; echo "password=${{ secrets.GITLAB_TOKEN }}"; }; f'
           git push --set-upstream origin release/${{ github.event.release.name }}
       
