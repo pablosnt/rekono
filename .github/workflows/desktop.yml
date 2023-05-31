@@ -79,7 +79,7 @@ jobs:
           tz = pytz.timezone('Europe/Madrid')
           d = tz.localize(datetime.now())
           change_time = d.strftime('%a, %d %b %Y %H:%M:%S %z')
-          new_changes = f'rekono (${{ github.event.release.name }}) UNRELEASED; urgency=medium\n\n  * Update Rekono version to ${{ github.event.release.name }}.\n\n -- Pablo Santiago López <pablosantiagolopez1@gmail.com> {change_time}\n\n'
+          new_changes = f'rekono (${{ github.event.release.name }}) UNRELEASED; urgency=medium\n\n  * Update Rekono version to ${{ github.event.release.name }}.\n\n -- Pablo Santiago López <${{ secrets.GITLAB_EMAIL }}>  {change_time}\n\n'
           with open('changelog', 'w') as changelog:
             changelog.write(new_changes + old_changes)
       
@@ -109,9 +109,20 @@ jobs:
             'target_branch': 'kali/master',
           }
           response = requests.post('https://gitlab.com/api/v4/projects/${{ env.GITLAB_PROJECT_ID }}/merge_requests', data=data, headers=headers)
-          print(response.text)
-          print(response.status_code)
+          if response.status_code != 201:
+            print(response.text)
           assert(response.status_code == 201)
+      
+      - name: Kali APT source
+        continue-on-error: true
+        run: |
+          apt install wget gnupg2 -y
+          wget https://archive.kali.org/archive-key.asc
+          apt-key add archive-key.asc
+          rm archive-key.asc
+          echo 'deb http://http.kali.org/kali kali-rolling main contrib non-free non-free-firmware' >> /etc/apt/sources.list
+          apt update -y
+          apt install kaboxer -y
       
       - name: Build DEB Package
         working-directory: rekono-deb
