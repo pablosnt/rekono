@@ -4,48 +4,48 @@ on:
     types: [published]
 
 jobs:
-  # docker-image:
-  #   name: Docker Image
-  #   runs-on: ubuntu-latest
-  #   environment: docker-hub
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v3
-  #       with:
-  #         fetch-depth: 0
+  docker-image:
+    name: Docker Image
+    runs-on: ubuntu-latest
+    environment: docker-hub
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
       
-  #     - uses: actions/setup-node@v3
-  #       with:
-  #         node-version: 16
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
       
-  #     - name: Install dependencies
-  #       working-directory: rekono/frontend
-  #       run: npm install .
+      - name: Install dependencies
+        working-directory: rekono/frontend
+        run: npm install .
 
-  #     - name: Configure Rekono backend
-  #       working-directory: rekono/frontend
-  #       run: echo "VUE_APP_DESKTOP_BACKEND_URL=http://127.0.0.1:8000" > .env.production
+      - name: Configure Rekono backend
+        working-directory: rekono/frontend
+        run: echo "VUE_APP_DESKTOP_BACKEND_URL=http://127.0.0.1:8000" > .env.production
       
-  #     - name: Generate Desktop UI
-  #       working-directory: rekono/frontend
-  #       run: npm run electron:build
+      - name: Generate Desktop UI
+        working-directory: rekono/frontend
+        run: npm run electron:build
       
-  #     - name: Build Docker image
-  #       run: docker build --build-arg REKONO_VERSION=${{ github.event.release.name }} --file docker/debian/Dockerfile --tag ${{ secrets.DOCKER_USER }}/rekono:${{ github.event.release.name }} .
+      - name: Build Docker image
+        run: docker build --build-arg REKONO_VERSION=${{ github.event.release.name }} --file docker/debian/Dockerfile --tag ${{ secrets.DOCKER_USER }}/rekono:${{ github.event.release.name }} .
 
-  #     - name: Publish Docker image in Docker Hub
-  #       run: |
-  #         docker tag ${{ secrets.DOCKER_USER }}/rekono:${{ github.event.release.name }} ${{ secrets.DOCKER_USER }}/rekono:latest
-  #         docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }}
-  #         docker push ${{ secrets.DOCKER_USER }}/rekono:${{ github.event.release.name }}
-  #         docker push ${{ secrets.DOCKER_USER }}/rekono:latest
-  #         docker logout
+      - name: Publish Docker image in Docker Hub
+        run: |
+          docker tag ${{ secrets.DOCKER_USER }}/rekono:${{ github.event.release.name }} ${{ secrets.DOCKER_USER }}/rekono:latest
+          docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }}
+          docker push ${{ secrets.DOCKER_USER }}/rekono:${{ github.event.release.name }}
+          docker push ${{ secrets.DOCKER_USER }}/rekono:latest
+          docker logout
 
   debian-package:
     name: Debian Package
     runs-on: ubuntu-latest
     environment: gitlab
-    # needs: docker-image
+    needs: docker-image
     steps:
       - name: Checkout GitLab repository
         run: git clone https://gitlab.com/pablosnt/rekono.git rekono-deb
@@ -112,30 +112,3 @@ jobs:
           if response.status_code != 201:
             print(response.text)
           assert(response.status_code == 201)
-      
-      - name: Kali APT source
-        continue-on-error: true
-        run: |
-          sudo apt install wget gnupg2 -y
-          wget https://archive.kali.org/archive-key.asc
-          sudo apt-key add archive-key.asc
-          rm archive-key.asc
-          echo 'deb http://http.kali.org/kali kali-rolling main contrib non-free non-free-firmware' | sudo tee --append /etc/apt/sources.list
-          sudo apt update -y
-          sudo apt install kaboxer -y || sudo apt -f install -y
-      
-      - name: Build DEB Package
-        working-directory: rekono-deb
-        run: dpkg-buildpackage -us -uc
-      
-      - name: Upload DEB package as GitHub artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: rekono_${{ github.event.release.name }}_amd64.deb
-          path: rekono_${{ github.event.release.name }}_amd64.deb
-          if-no-files-found: warn
-      
-      - name: Upload DEB package to GitHub release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload --repo pablosnt/rekono ${{ github.event.release.name }} rekono_${{ github.event.release.name }}_amd64.deb
