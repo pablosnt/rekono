@@ -122,7 +122,7 @@ jobs:
           rm archive-key.asc
           echo 'deb http://http.kali.org/kali kali-rolling main contrib non-free non-free-firmware' | sudo tee --append /etc/apt/sources.list
           sudo apt update -y
-          sudo apt install kaboxer -y
+          sudo apt install kaboxer -y || sudo apt -f install -y
       
       - name: Build DEB Package
         working-directory: rekono-deb
