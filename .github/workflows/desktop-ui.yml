@@ -8,7 +8,7 @@ on:
         default: 'https://127.0.0.1'
   pull_request:
     paths:
-      - 'rekono/frontend/**'
+      - 'src/frontend/**'
 
 jobs:
   desktop-ui:
@@ -38,7 +38,7 @@ jobs:
       - name: Configure backend URL
         if: github.event_name == 'workflow_dispatch'
         shell: python
-        working-directory: rekono/frontend
+        working-directory: src/frontend
         # nosemgrep: yaml.github-actions.security.run-shell-injection.run-shell-injection
         run: |
           import re
@@ -53,26 +53,26 @@ jobs:
             sys.exit(1)
 
       - name: Install dependencies
-        working-directory: rekono/frontend
+        working-directory: src/frontend
         run: npm install .
       
       - name: Generate Desktop UI
-        working-directory: rekono/frontend
+        working-directory: src/frontend
         run: npm run electron:build
       
       - name: Change DEB filename
         if: matrix.os != 'windows-latest'
-        working-directory: rekono/frontend/dist_electron
+        working-directory: src/frontend/dist_electron
         run: mv *.${{ matrix.extension }} $DEB_FILENAME.${{ matrix.extension }}
       
       - name: Change DEB filename
         if: matrix.os == 'windows-latest'
-        working-directory: rekono/frontend/dist_electron
+        working-directory: src/frontend/dist_electron
         run: ren *.${{ matrix.extension }} %DEB_FILENAME%.${{ matrix.extension }}
       
       - name: Upload Desktop UI as GitHub artifact
         uses: actions/upload-artifact@v3
         with:
           name: ${{ env.DEB_FILENAME }}_${{ matrix.os }}
-          path: rekono/frontend/dist_electron/${{ env.DEB_FILENAME }}.${{ matrix.extension }}
+          path: src/frontend/dist_electron/${{ env.DEB_FILENAME }}.${{ matrix.extension }}
           if-no-files-found: warn

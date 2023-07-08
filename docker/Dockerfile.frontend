@@ -4,22 +4,23 @@ FROM node:19.6.1-alpine
 ENV NODE_OPTIONS --openssl-legacy-provider
 
 # Install requirements
-RUN apk update && apk add curl
-RUN npm install -g serve
+RUN apk update && \
+    apk add curl && \
+    npm install -g serve && \
+    # Initialize directory
+    mkdir /code
 
 # Source code
-RUN mkdir /code
-COPY /rekono/frontend /code
+COPY src/frontend /code
+WORKDIR /code
 
 # Install frontend dependencies
-WORKDIR /code
-RUN npm install
-RUN npx browserslist@latest --update-db
-RUN npm run build
-
-# System user
-RUN adduser --disabled-password rekono
-RUN chown -R rekono /code
+RUN npm install && \
+    npx browserslist@latest --update-db && \
+    npm run build && \
+    # System user
+    adduser --disabled-password rekono && \
+    chown -R rekono /code
 
 # Final system configuration
 USER rekono

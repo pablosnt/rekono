@@ -1,5 +1,5 @@
 [flake8]
-exclude = .git,__pycache__,*/migrations/*,venv/*,rekono/frontend/*
+exclude = .git,__pycache__,*/migrations/*,venv/*,src/frontend/*
 ignore=W504,W605
 ; W504: Disallow line break after binary operator (and, or, etc.). Inconsistency with W503
 ; W605: Invalid escape characters (needed to send Telegram messages with Markdown style)

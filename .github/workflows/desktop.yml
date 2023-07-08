@@ -19,15 +19,15 @@ jobs:
           node-version: 16
       
       - name: Install dependencies
-        working-directory: rekono/frontend
+        working-directory: src/frontend
         run: npm install .
 
       - name: Configure Rekono backend
-        working-directory: rekono/frontend
+        working-directory: src/frontend
         run: echo "VUE_APP_DESKTOP_BACKEND_URL=http://127.0.0.1:8000" > .env.production
       
       - name: Generate Desktop UI
-        working-directory: rekono/frontend
+        working-directory: src/frontend
         run: npm run electron:build
       
       - name: Build Docker image

@@ -87,17 +87,17 @@ The support of external hacking tools in Rekono is based on the following steps:
 
 1. Define the hacking tools in the [tools/fixture](https://github.com/pablosnt/rekono/tree/main/rekono/tools/fixtures) files. There are one file for each required entity:
     
-    - [`1_tools.json`](https://github.com/pablosnt/rekono/blob/main/rekono/tools/fixtures/1_tools.json): basic definition of the tool including information like name, command or reference link.
+    - [`1_tools.json`](https://github.com/pablosnt/rekono/blob/main/src/backend/tools/fixtures/1_tools.json): basic definition of the tool including information like name, command or reference link.
     
-    - [`2_intensities.json`](https://github.com/pablosnt/rekono/blob/main/rekono/tools/fixtures/2_intensities.json): intensity levels supported by the hacking tools and the related argument needed to configure the executions.
+    - [`2_intensities.json`](https://github.com/pablosnt/rekono/blob/main/src/backend/tools/fixtures/2_intensities.json): intensity levels supported by the hacking tools and the related argument needed to configure the executions.
     
-    - [`3_configurations.json`](https://github.com/pablosnt/rekono/blob/main/rekono/tools/fixtures/3_configurations.json): tool configurations available in Rekono based on an argument pattern and identified by a name.
+    - [`3_configurations.json`](https://github.com/pablosnt/rekono/blob/main/src/backend/tools/fixtures/3_configurations.json): tool configurations available in Rekono based on an argument pattern and identified by a name.
 
-    - [`4_arguments.json`](https://github.com/pablosnt/rekono/blob/main/rekono/tools/fixtures/4_arguments.json): tool arguments whose value should be obtained from an input (previous findings, wordlists or target information).
+    - [`4_arguments.json`](https://github.com/pablosnt/rekono/blob/main/src/backend/tools/fixtures/4_arguments.json): tool arguments whose value should be obtained from an input (previous findings, wordlists or target information).
 
-    - [`5_inputs.json`](https://github.com/pablosnt/rekono/blob/main/rekono/tools/fixtures/5_inputs.json): different input types that could be valid for a tool argument sorted by priority.
+    - [`5_inputs.json`](https://github.com/pablosnt/rekono/blob/main/src/backend/tools/fixtures/5_inputs.json): different input types that could be valid for a tool argument sorted by priority.
 
-    - [`6_outputs.json`](https://github.com/pablosnt/rekono/blob/main/rekono/tools/fixtures/6_outputs.json): different input types that a tool configuration can detect in the target.
+    - [`6_outputs.json`](https://github.com/pablosnt/rekono/blob/main/src/backend/tools/fixtures/6_outputs.json): different input types that a tool configuration can detect in the target.
 
 2. Implement the parser to obtain findings from the tool results. You have to do that in the [tools/tools](https://github.com/pablosnt/rekono/tree/main/rekono/tools/tools) package:
 
@@ -107,13 +107,13 @@ The support of external hacking tools in Rekono is based on the following steps:
 
     - Override the method `parse_output_file` or `parse_plain_output` depending on the tool output type.
 
-3. Add tool to default processes like `All tools` in the file [`1_processes.json`](https://github.com/pablosnt/rekono/blob/main/rekono/processes/fixtures/1_processes.json).
+3. Add tool to default processes like `All tools` in the file [`1_processes.json`](https://github.com/pablosnt/src/backend/blob/main/rekono/processes/fixtures/1_processes.json).
 
 4. Implement [unit tests](https://github.com/pablosnt/rekono/tree/main/rekono/testing/tools) to check the correct working of the parser. You can include your [testing tool reports](https://github.com/pablosnt/rekono/tree/main/rekono/testing/data/reports) for that.
 
 5. Add tool icon domain to the `Content-Security-Policy` in the following files:
     
-    - [vue.config.js](https://github.com/pablosnt/rekono/blob/main/rekono/frontend/vue.config.js#L3) for development environments
+    - [vue.config.js](https://github.com/pablosnt/rekono/blob/main/src/frontend/vue.config.js#L3) for development environments
 
     - [nginx.conf](https://github.com/pablosnt/rekono/blob/main/docker/nginx/nginx.conf#L69) for production environments
 

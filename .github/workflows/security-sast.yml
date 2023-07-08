@@ -4,7 +4,7 @@ on:
   pull_request:
     paths:
       - '.github/workflows/**'
-      - 'rekono/**'
+      - 'src/**'
 
 jobs:
   semgrep:
@@ -25,7 +25,7 @@ jobs:
         run: pip install semgrep
       
       - name: Scan code
-        run: semgrep --config=auto --error --json -o semgrep_code.json rekono/
+        run: semgrep --config=auto --error --json -o semgrep_code.json src/
       
       - name: Scan workflows
         run: semgrep --config=auto --error --json -o semgrep_cicd.json .github/workflows/
