@@ -47,9 +47,9 @@ jobs:
         run: python3 -m pip install -r src/backend/requirements.txt
 
       - name: Run unit tests
-        working-directory: rekono
+        working-directory: src/backend
         run: coverage run manage.py test
       
       - name: Check coverage
-        working-directory: rekono
+        working-directory: src/backend
         run: coverage report -m --skip-covered --omit="telegram_bot/*" --fail-under=$REQUIRED_COVERAGE
