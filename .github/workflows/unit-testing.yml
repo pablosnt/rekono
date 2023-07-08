@@ -44,7 +44,7 @@ jobs:
           python-version: '3.9'
 
       - name: Install Python dependencies
-        run: python3 -m pip install -r requirements.txt
+        run: python3 -m pip install -r src/backend/requirements.txt
 
       - name: Run unit tests
         working-directory: rekono
