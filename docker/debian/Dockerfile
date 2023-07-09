@@ -30,19 +30,19 @@ RUN apt update -y && \
     echo $REKONO_VERSION > /kaboxer/version && \
     echo 1 > /kaboxer/packaging-revision
 
-# Install Rekono
-COPY rekono/ /code
-COPY requirements.txt /code
-COPY config.yaml /code
+# Source code and configuration
+COPY src/backend/ /code
+COPY src/frontend/dist_electron/rekono_*.deb /code
+COPY src/config.yaml /code
 COPY docker/debian/entrypoint.sh /entrypoint.sh
 COPY docker/debian/set_permissions.sh /set_permissions.sh
-RUN pip install -r /code/requirements.txt && \
-    dpkg -i /code/frontend/dist_electron/rekono_*.deb || apt -f install -y && \
-    rm -R /code/frontend/ && \
-    rm -R /code/testing/
 
-# Tools
-RUN apt install nmap dirsearch theharvester nikto sslscan sslyze cmseek zaproxy exploitdb metasploit-framework emailharvester joomscan gitleaks smbmap nuclei gobuster -y && \
+# Install dependencies and Desktop app
+RUN pip install -r /code/requirements.txt && \
+    dpkg -i /code/rekono_*.deb || apt -f install -y && \
+    rm -R /code/testing/ && \
+    # Install security tools
+    apt install nmap dirsearch theharvester nikto sslscan sslyze cmseek zaproxy exploitdb metasploit-framework emailharvester joomscan gitleaks smbmap nuclei gobuster -y && \
     apt install seclists dirb -y && \
     apt autoremove -y && \
     apt autoclean -y && \
@@ -73,10 +73,9 @@ USER root
 RUN export RKN_DB_PASSWORD=$(cat /config/rkn_db_password.txt) && \
     sudo /etc/init.d/postgresql start && \
     python /code/manage.py migrate && \
-    python /code/manage.py createsuperuser --no-input
-
-# System user
-RUN adduser --disabled-password rekono && \
+    python /code/manage.py createsuperuser --no-input && \
+    # System user
+    adduser --disabled-password rekono && \
     usermod -a -G postgres rekono && \
     usermod -a -G postgres root && \
     touch $XDG_CONFIG_HOME && \

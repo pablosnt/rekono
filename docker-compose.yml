@@ -41,7 +41,7 @@ services:
     container_name: initialize
     volumes:
       - rekono:/rekono
-      - ./config.yaml:/rekono/config.yaml:ro
+      - ./src/config.yaml:/rekono/config.yaml:ro
     networks:
       - internal
     depends_on:
@@ -63,7 +63,7 @@ services:
     hostname: tasks-worker
     volumes:
       - rekono:/rekono
-      - ./config.yaml:/rekono/config.yaml:ro
+      - ./src/config.yaml:/rekono/config.yaml:ro
     networks:
       - internal
     depends_on:
@@ -86,7 +86,7 @@ services:
     hostname: executions-worker
     volumes:
       - rekono:/rekono
-      - ./config.yaml:/rekono/config.yaml:ro
+      - ./src/config.yaml:/rekono/config.yaml:ro
     networks:
       - internal
       - external
@@ -109,7 +109,7 @@ services:
     hostname: findings-worker
     volumes:
       - rekono:/rekono
-      - ./config.yaml:/rekono/config.yaml:ro
+      - ./src/config.yaml:/rekono/config.yaml:ro
     networks:
       - internal
       - external
@@ -130,7 +130,7 @@ services:
     hostname: emails-worker
     volumes:
       - rekono:/rekono
-      - ./config.yaml:/rekono/config.yaml:ro
+      - ./src/config.yaml:/rekono/config.yaml:ro
     networks:
       - internal
       - external
@@ -152,7 +152,7 @@ services:
     container_name: telegram-bot
     volumes:
       - rekono:/rekono
-      - ./config.yaml:/rekono/config.yaml:ro
+      - ./src/config.yaml:/rekono/config.yaml:ro
     networks:
       - internal
       - external
@@ -184,7 +184,7 @@ services:
       - 8000
     volumes:
       - rekono:/rekono
-      - ./config.yaml:/rekono/config.yaml:ro
+      - ./src/config.yaml:/rekono/config.yaml:ro
     networks:
       - internal
       - external

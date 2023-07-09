@@ -3,9 +3,7 @@ on:
   workflow_dispatch:
   pull_request:
     paths:
-      - 'rekono/**'
-      - '!rekono/frontend/**'
-      - 'requirements.txt'
+      - 'src/backend/**'
 
 env:
   REQUIRED_COVERAGE: 95
@@ -46,12 +44,12 @@ jobs:
           python-version: '3.9'
 
       - name: Install Python dependencies
-        run: python3 -m pip install -r requirements.txt
+        run: python3 -m pip install -r src/backend/requirements.txt
 
       - name: Run unit tests
-        working-directory: rekono
+        working-directory: src/backend
         run: coverage run manage.py test
       
       - name: Check coverage
-        working-directory: rekono
+        working-directory: src/backend
         run: coverage report -m --skip-covered --omit="telegram_bot/*" --fail-under=$REQUIRED_COVERAGE

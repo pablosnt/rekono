@@ -65,11 +65,11 @@ jobs:
           node-version: 16
       
       - name: Install dependencies
-        working-directory: rekono/frontend
+        working-directory: src/frontend
         run: npm install .
     
       - name: Generate Desktop app
-        working-directory: rekono/frontend
+        working-directory: src/frontend
         run: npm run electron:build
 
       - name: Build Docker image
