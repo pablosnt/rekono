@@ -71,6 +71,7 @@ jobs:
         run: |
           dir
           ren *.${{ matrix.extension }} %DEB_FILENAME%.${{ matrix.extension }}
+          dir
       
       - name: Upload Desktop UI as GitHub artifact
         uses: actions/upload-artifact@v3
