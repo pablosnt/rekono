@@ -68,10 +68,7 @@ jobs:
       - name: Change DEB filename
         if: matrix.os == 'windows-latest'
         working-directory: src/frontend/dist_electron
-        run: |
-          dir
-          ren *.${{ matrix.extension }} %DEB_FILENAME%.${{ matrix.extension }}
-          dir
+        run: ren *.${{ matrix.extension }} ${{ env.DEB_FILENAME }}.${{ matrix.extension }}
       
       - name: Upload Desktop UI as GitHub artifact
         uses: actions/upload-artifact@v3
