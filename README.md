@@ -78,7 +78,7 @@ Go to https://127.0.0.1/
 Rekono Desktop is a standalone app with all features, that can be installed and executed locally. It's the best and easiest option for personal and local usage. Execue the following command to install it:
 
 ```bash
-wget https://github.com/pablosnt/rekono/releases/download/1.6.2/rekono-desktop_1.6.2_amd64.deb && dpkg -i rekono-desktop_1.6.2_amd64.deb || apt -f install -y
+wget https://github.com/pablosnt/rekono/releases/download/1.6.3/rekono-desktop_1.6.3_amd64.deb && dpkg -i rekono-desktop_1.6.3_amd64.deb || apt -f install -y
 ```
 
 > Default credentials are `rekono:rekono`. For security reasons, **password should be changed** the first time you access the account
