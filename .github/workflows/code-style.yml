@@ -15,7 +15,7 @@ jobs:
           fetch-depth: 0
       
       - name: Flake8 check
-        uses: valentijnscholten/flake8-your-pr@master
+        uses: valentijnscholten/flake8-your-pr@8115e1590de049c223a7b629828cfa9354d8856e
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
