@@ -1,11 +1,9 @@
 from rest_framework.routers import SimpleRouter
-
-from targets.views import TargetPortViewSet, TargetViewSet
+from targets.views import TargetViewSet
 
 # Register your views here.
 
 router = SimpleRouter()
-router.register('targets', TargetViewSet)
-router.register('target-ports', TargetPortViewSet)
+router.register("targets", TargetViewSet)
 
 urlpatterns = router.urls

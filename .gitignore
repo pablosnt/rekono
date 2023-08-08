@@ -132,9 +132,9 @@ dmypy.json
 .DS_Store
 .vscode/
 .scannerwork/
-/reports/
-/wordlists/
-/logs/
+src/reports/
+src/wordlists/
+src/logs/
 /static/
 
 # Vue.JS
@@ -157,3 +157,6 @@ yarn-error.log*
 *.desktop
 rekono-kbx
 *.kaboxer.yaml
+
+# Temporal ignore
+src/backend-1.x/

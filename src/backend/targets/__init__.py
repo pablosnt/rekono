@@ -1,1 +1,1 @@
-'''Targets.'''
+"""Targets."""

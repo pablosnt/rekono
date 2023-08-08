@@ -6,7 +6,7 @@ on:
       - 'src/backend/**'
 
 jobs:
-  flake8:
+  black:
     runs-on: ubuntu-latest
     steps:      
       - name: Checkout
@@ -14,10 +14,17 @@ jobs:
         with:
           fetch-depth: 0
       
-      - name: Flake8 check
-        uses: valentijnscholten/flake8-your-pr@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Install Python dependencies
+        run: |
+          python -m pip install -U pip
+          python -m pip install -r src/backend/requirements-dev.txt
+      
+      - name: Black check
+        run: python -m black --check src/backend/
 
   mypy:
     runs-on: ubuntu-latest
@@ -29,15 +36,12 @@ jobs:
       
       - uses: actions/setup-python@v4
         with:
-          python-version: '3.8'
+          python-version: '3.11'
       
       - name: Install Python dependencies
         run: |
           python -m pip install -U pip
-          python -m pip install -r src/backend/requirements.txt
-
-      - name: Install MyPy
-        run: python3 -m pip install mypy==0.931
+          python -m pip install -r src/backend/requirements-dev.txt
       
       - name: MyPy check
         run: mypy --namespace-packages --package rekono --install-types --non-interactive

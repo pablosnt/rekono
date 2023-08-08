@@ -1,1 +1,1 @@
-'''Security authorization module.'''
+"""Security authorization module."""

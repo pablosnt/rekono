@@ -6,7 +6,7 @@
             "name": "OSINT",
             "model": "findings.osint",
             "callback_model": null,
-            "regular": true
+            "relationships": true
         }
     },
     {
@@ -16,7 +16,7 @@
             "name": "Host",
             "model": "findings.host",
             "callback_model": "targets.target",
-            "regular": true
+            "relationships": true
         }
     },
     {
@@ -26,7 +26,7 @@
             "name": "Port",
             "model": "findings.port",
             "callback_model": "targets.targetport",
-            "regular": true
+            "relationships": true
         }
     },
     {
@@ -36,7 +36,7 @@
             "name": "Path",
             "model": "findings.path",
             "callback_model": null,
-            "regular": true
+            "relationships": true
         }
     },
     {
@@ -46,7 +46,7 @@
             "name": "Technology",
             "model": "findings.technology",
             "callback_model": "parameters.inputtechnology",
-            "regular": true
+            "relationships": true
         }
     },
     {
@@ -56,7 +56,7 @@
             "name": "Vulnerability",
             "model": "findings.vulnerability",
             "callback_model": "parameters.inputvulnerability",
-            "regular": true
+            "relationships": true
         }
     },
     {
@@ -66,7 +66,7 @@
             "name": "Credential",
             "model": "findings.credential",
             "callback_model": null,
-            "regular": true
+            "relationships": true
         }
     },
     {
@@ -76,7 +76,7 @@
             "name": "Exploit",
             "model": "findings.exploit",
             "callback_model": null,
-            "regular": true
+            "relationships": true
         }
     },
     {
@@ -86,7 +86,7 @@
             "name": "Wordlist",
             "model": null,
             "callback_model": "resources.wordlist",
-            "regular": true
+            "relationships": true
         }
     },
     {
@@ -96,7 +96,7 @@
             "name": "Authentication",
             "model": "authentications.authentication",
             "callback_model": null,
-            "regular": false
+            "relationships": false
         }
     }
 ]

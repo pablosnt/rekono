@@ -1,1 +1,1 @@
-'''Authentications.'''
+"""Authentications."""

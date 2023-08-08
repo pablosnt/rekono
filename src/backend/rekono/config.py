@@ -1,87 +1,82 @@
-from typing import Any, Dict, List
-
+import os
+from pathlib import Path
+from typing import Any, List, Optional
+from rekono.properties import Property
+import sys
 import yaml
-from security.crypto import generate_random_value
 
 
-class RekonoConfigLoader:
-    '''Rekono config loader from configuration file.'''
+class RekonoConfig:
+    def __init__(self) -> None:
+        self.testing = "test" in sys.argv
+        self.base_dir = Path(__file__).resolve().parent.parent
+        self.home = self._get_home()
+        self.reports = os.path.join(self.home, "reports")
+        self.wordlists = os.path.join(self.home, "wordlists")
+        self.logs = os.path.join(self.home, "logs")
+        self._create_missing_directories([self.reports, self.wordlists, self.logs])
+        self.config_file = self._get_config_file()
+        with open(self.config_file, "r") as file:
+            self._config_properties = yaml.safe_load(file)
+        self.trusted_proxy = self._get_config(Property.TRUSTED_PROXY).lower() == "true"
+        self.allowed_hosts = self._get_allowed_hosts()
+        for property in Property:
+            if not hasattr(self, property.name.lower()) or not getattr(
+                self, property.name.lower()
+            ):
+                setattr(self, property.name.lower(), self._get_config(property))
 
-    def __init__(self, filepath: str) -> None:
-        '''Rekono config constructor.
+    def _get_allowed_hosts(self) -> List[str]:
+        hosts = os.getenv(Property.ALLOWED_HOSTS.value[0])
+        if hosts:
+            if " " in hosts:
+                allowed_hosts = hosts.split(" ")
+            elif "," in hosts:
+                allowed_hosts = hosts.split(",")
+            else:
+                allowed_hosts = [hosts]
+            return allowed_hosts
+        return self._get_config(Property.ALLOWED_HOSTS)
 
-        Args:
-            filepath (str): Configuration filepath
-        '''
-        config = {}
-        if filepath:
-            with open(filepath, 'r') as config_file:                            # Read configuration file
-                config = yaml.safe_load(config_file)                            # Load configuration
-        # Rekono frontend URL
-        self.FRONTEND_URL = self.get_config_key(config, ['frontend', 'url'], 'https://127.0.0.1')
-        # Rekono root path
-        self.ROOT_PATH = self.get_config_key(config, ['rootpath'])
-        # Security
-        self.SECRET_KEY = self.get_config_key(config, ['security', 'secret-key'], generate_random_value(3000))
-        self.ALLOWED_HOSTS = self.get_config_key(
-            config,
-            ['security', 'allowed-hosts'],
-            ['localhost', '127.0.0.1', '::1']
-        )
-        # Database
-        self.DB_NAME = self.get_config_key(config, ['database', 'name'], 'rekono')
-        self.DB_USER = self.get_config_key(config, ['database', 'user'], '')
-        self.DB_PASSWORD = self.get_config_key(config, ['database', 'password'], '')
-        self.DB_HOST = self.get_config_key(config, ['database', 'host'], '127.0.0.1')
-        self.DB_PORT = self.get_config_key(config, ['database', 'port'], 5432)
-        # Redis Queue
-        self.RQ_HOST = self.get_config_key(config, ['rq', 'host'], '127.0.0.1')
-        self.RQ_PORT = self.get_config_key(config, ['rq', 'port'], 6379)
-        # Email: SMTP configuration
-        self.EMAIL_HOST = self.get_config_key(config, ['email', 'host'])
-        self.EMAIL_PORT = self.get_config_key(config, ['email', 'port'])
-        self.EMAIL_USER = self.get_config_key(config, ['email', 'user'])
-        self.EMAIL_PASSWORD = self.get_config_key(config, ['email', 'password'])
-        self.EMAIL_TLS = self.get_config_key(config, ['email', 'tls'], True)
-        # Tools
-        self.TOOLS_CMSEEK_DIR = self.get_config_key(config, ['tools', 'cmseek', 'directory'], '/usr/share/cmseek')
-        self.TOOLS_LOG4J_SCAN_DIR = self.get_config_key(
-            config,
-            ['tools', 'log4j-scan', 'directory'],
-            '/opt/log4j-scan'
-        )
-        self.TOOLS_SPRING4SHELL_SCAN_DIR = self.get_config_key(
-            config,
-            ['tools', 'spring4shell-scan', 'directory'],
-            '/opt/spring4shell-scan'
-        )
-        self.TOOLS_GITTOOLS_DIR = self.get_config_key(config, ['tools', 'gittools', 'directory'], '/opt/GitTools')
+    def _get_config_file(self) -> str:
+        for filename in [
+            "config.yaml",
+            "config.yml",
+            "rekono.yaml",
+            "rekono.yml",
+        ]:
+            path = os.path.join(self.home, filename)
+            if os.path.isfile(path):
+                break
+        return path
 
-        # --------------------------------------------------------------------------------------------------------------
-        # DEPRECATED
-        # The following configurations are mantained for compatibility reasons with the previous version.
-        # This support will be removed in the next release, since this settings can be managed using the Settings page.
-        # --------------------------------------------------------------------------------------------------------------
-        # Telegram Bot token
-        self.TELEGRAM_TOKEN = self.get_config_key(config, ['telegram', 'token'])
-        # Defect-Dojo
-        self.DD_URL = self.get_config_key(config, ['defect-dojo', 'url'])
-        self.DD_API_KEY = self.get_config_key(config, ['defect-dojo', 'api-key'])
+    def _get_home(self) -> str:
+        if self.testing:
+            home = os.path.join(self.base_dir, "testing", "home")
+            self._create_missing_directories([home])
+        else:
+            home = self._get_config(Property.REKONO_HOME)
+            if not os.path.isdir(home):
+                home = str(self.base_dir.parent)
+        return home
 
-    def get_config_key(self, config: Dict[str, Any], path: List[str], default: Any = None) -> Any:
-        '''Get configuration value by dict path. Default value will be returned if value not found or it's null.
+    def _create_missing_directories(self, directories: List[str]) -> None:
+        for directory in directories:
+            if not os.path.isdir(directory):
+                os.mkdir(directory)
 
-        Args:
-            config (Dict[str, Any]): Configuration data
-            path (List[str]): Path to the configuration value
-            default (Any): Default value. By default None
+    def _get_config(self, property: Property) -> Any:
+        value = property.value[2]
+        if property.value[1]:
+            value = self._get_config_from_file(property.value[1]) or value
+        if property.value[0]:
+            value = os.getenv(property.name, value)
+        return value
 
-        Returns:
-            Any: Configuration value to apply
-        '''
-        value = config
-        for key in path:
-            if key not in value or value.get(key) is None:                      # Value not found
-                return default                                                  # Return default value
+    def _get_config_from_file(self, property: str) -> Optional[Any]:
+        value = self._config_properties
+        for key in property.split("."):
+            if key not in value or not value.get(key):
+                return None
             value = value.get(key, {})
         return value

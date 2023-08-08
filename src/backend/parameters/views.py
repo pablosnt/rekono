@@ -1,48 +1,47 @@
-from api.views import CreateViewSet, GetViewSet
-from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
-                                   ListModelMixin, RetrieveModelMixin)
-
+from framework.views import BaseViewSet
 from parameters.filters import InputTechnologyFilter, InputVulnerabilityFilter
 from parameters.models import InputTechnology, InputVulnerability
-from parameters.serializers import (InputTechnologySerializer,
-                                    InputVulnerabilitySerializer)
+from parameters.serializers import (
+    InputTechnologySerializer,
+    InputVulnerabilitySerializer,
+)
 
 # Create your views here.
 
 
-class InputTechnologyViewSet(
-    GetViewSet,
-    CreateViewSet,
-    CreateModelMixin,
-    ListModelMixin,
-    RetrieveModelMixin,
-    DestroyModelMixin
-):
-    '''InputTechnology ViewSet that includes: get, retrieve, create, and delete features.'''
+class InputTechnologyViewSet(BaseViewSet):
+    """InputTechnology ViewSet that includes: get, retrieve, create, and delete features."""
 
-    queryset = InputTechnology.objects.all().order_by('-id')
+    queryset = InputTechnology.objects.all()
     serializer_class = InputTechnologySerializer
     filterset_class = InputTechnologyFilter
     # Fields used to search input technologies
-    search_fields = ['name', 'version']
+    search_fields = ["name", "version"]
+    ordering_fields = ["id", "target", "name"]
+    http_method_names = [
+        "get",
+        "post",
+        "delete",
+    ]
+
     # Project members field used for authorization purposes
-    members_field = 'target__project__members'
+    # members_field = 'target__project__members'
 
 
-class InputVulnerabilityViewSet(
-    GetViewSet,
-    CreateViewSet,
-    CreateModelMixin,
-    ListModelMixin,
-    RetrieveModelMixin,
-    DestroyModelMixin
-):
-    '''InputVulnerability ViewSet that includes: get, retrieve, create, and delete features.'''
+class InputVulnerabilityViewSet(BaseViewSet):
+    """InputVulnerability ViewSet that includes: get, retrieve, create, and delete features."""
 
-    queryset = InputVulnerability.objects.all().order_by('-id')
+    queryset = InputVulnerability.objects.all()
     serializer_class = InputVulnerabilitySerializer
     filterset_class = InputVulnerabilityFilter
     # Fields used to search input vulnerabilities
-    search_fields = ['cve']
+    search_fields = ["cve"]
+    ordering_fields = ["id", "target", "cve"]
+    http_method_names = [
+        "get",
+        "post",
+        "delete",
+    ]
+
     # Project members field used for authorization purposes
-    members_field = 'target__project__members'
+    # members_field = "target__project__members"

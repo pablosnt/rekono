@@ -1,37 +1,31 @@
-from django_filters import rest_framework
-from django_filters.rest_framework.filters import OrderingFilter
-
+from django_filters.rest_framework import FilterSet
 from parameters.models import InputTechnology, InputVulnerability
 
 
-class InputTechnologyFilter(rest_framework.FilterSet):
-    '''FilterSet to filter and sort input Technology entities.'''
-
-    o = OrderingFilter(fields=('target', 'name'))                               # Ordering fields
+class InputTechnologyFilter(FilterSet):
+    """FilterSet to filter and sort input Technology entities."""
 
     class Meta:
-        '''FilterSet metadata.'''
-
         model = InputTechnology
-        fields = {                                                              # Filter fields
-            'target': ['exact'],
-            'target__target': ['exact'],
-            'name': ['exact', 'icontains'],
-            'version': ['exact', 'icontains'],
+        fields = {  # Filter fields
+            "target": ["exact"],
+            "target__project": ["exact"],
+            "target__project__name": ["exact", "icontains"],
+            "target__target": ["exact"],
+            "name": ["exact", "icontains"],
+            "version": ["exact", "icontains"],
         }
 
 
-class InputVulnerabilityFilter(rest_framework.FilterSet):
-    '''FilterSet to filter and sort input Vulnerability entities.'''
-
-    o = OrderingFilter(fields=('target', 'cve'))                                # Ordering fields
+class InputVulnerabilityFilter(FilterSet):
+    """FilterSet to filter and sort input Vulnerability entities."""
 
     class Meta:
-        '''FilterSet metadata.'''
-
         model = InputVulnerability
-        fields = {                                                              # Filter fields
-            'target': ['exact'],
-            'target__target': ['exact'],
-            'cve': ['exact']
+        fields = {  # Filter fields
+            "target": ["exact"],
+            "target__project": ["exact"],
+            "target__project__name": ["exact", "icontains"],
+            "target__target": ["exact"],
+            "cve": ["exact"],
         }
