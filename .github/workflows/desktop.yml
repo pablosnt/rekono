@@ -3,6 +3,10 @@ on:
   release:
     types: [published]
 
+env:
+  GITLAB_REKONO_ID: 45783845
+  GITLAB_KALI_FORK_ID: 48406619
+
 jobs:
   docker-image:
     name: Docker Image
@@ -43,24 +47,26 @@ jobs:
 
   debian-package:
     name: Debian Package
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - git-add-files: .
+            source-proect-id: ${{ env.GITLAB_REKONO_ID }}
+            source-branch: release/${{ github.event.release.name }}
+            target-project-id: ${{ env.GITLAB_REKONO_ID }}
+            target-branch: kali/master
+          - git-add-files: rekono
+            source-project-id: ${{ env.GITLAB_REKONO_ID }}
+            source-branch: kali-release/${{ github.event.release.name }}
+            target-project-id: ${{ env.GITLAB_KALI_FORK_ID }}
+            target-branch: kali/master
     runs-on: ubuntu-latest
     environment: gitlab
     needs: docker-image
     steps:
       - name: Checkout GitLab repository
         run: git clone https://gitlab.com/pablosnt/rekono.git rekono-deb
-      
-      - name: Update README.md
-        working-directory: rekono-deb
-        shell: python
-        run: |
-          import re
-          with open('README.md', 'r') as readme:
-            content = readme.read()
-          line_to_replace = re.search(f'dpkg -i ../rekono_[\d\.]+_amd64.deb', content)
-          if line_to_replace:
-            with open('README.md', 'w') as readme:
-              readme.write(content.replace(line_to_replace.group(0), 'dpkg -i ../rekono_${{ github.event.release.name }}_amd64.deb'))
 
       - name: Update rekono executable
         working-directory: rekono-deb
@@ -79,7 +85,7 @@ jobs:
           tz = pytz.timezone('Europe/Madrid')
           d = tz.localize(datetime.now())
           change_time = d.strftime('%a, %d %b %Y %H:%M:%S %z')
-          new_changes = f'rekono (${{ github.event.release.name }}) UNRELEASED; urgency=medium\n\n  * Update Rekono version to ${{ github.event.release.name }}.\n\n -- Pablo Santiago López <${{ secrets.GITLAB_EMAIL }}>  {change_time}\n\n'
+          new_changes = f'rekono-kbx (${{ github.event.release.name }}) kali-dev; urgency=medium\n\n  * Update Rekono version to ${{ github.event.release.name }}.\n\n -- Pablo Santiago López <${{ secrets.GITLAB_EMAIL }}>  {change_time}\n\n'
           with open('changelog', 'w') as changelog:
             changelog.write(new_changes + old_changes)
       
@@ -88,16 +94,14 @@ jobs:
         run: |
           git config user.name 'Pablo Santiago'
           git config user.email '${{ secrets.GITLAB_EMAIL }}'
-          git checkout -b release/${{ github.event.release.name }}
-          git add .
+          git checkout -b ${{ matrix.source-branch }}
+          git add ${{ matrix.git-add-files }}
           git commit -m "Update Rekono version to ${{ github.event.release.name }}"
           git config credential.helper '!f() { sleep 1; echo "username=${{ secrets.GITLAB_USER }}"; echo "password=${{ secrets.GITLAB_TOKEN }}"; }; f'
-          git push --set-upstream origin release/${{ github.event.release.name }}
+          git push --set-upstream origin ${{ matrix.source-branch }}
       
       - name: GitLab merge request
         shell: python
-        env:
-          GITLAB_PROJECT_ID: 45783845
         run: |
           import requests
           headers = {
@@ -105,10 +109,12 @@ jobs:
           }
           data = {
             'title': 'Update Rekono version to ${{ github.event.release.name }}',
-            'source_branch': 'release/${{ github.event.release.name }}',
-            'target_branch': 'kali/master',
+            'source_project_id': ${{ matrix.source-project-id }},
+            'source_branch': '${{ matrix.source-branch }}',
+            'target_project_id': ${{ matrix.target-project-id }},
+            'target_branch': '${{ matrix.target-branch }}'
           }
-          response = requests.post('https://gitlab.com/api/v4/projects/${{ env.GITLAB_PROJECT_ID }}/merge_requests', data=data, headers=headers)
+          response = requests.post('https://gitlab.com/api/v4/projects/${{ matrix.target-project-id }}/merge_requests', data=data, headers=headers)
           if response.status_code != 201:
             print(response.text)
           assert(response.status_code == 201)
