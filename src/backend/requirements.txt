@@ -1,11 +1,11 @@
 defusedxml==0.7.1
-Django==4.2.3
+Django==4.2.4
 djangorestframework==3.14.0
 djangorestframework-simplejwt==5.2.2
 django-filter==23.2
 django-rq==2.8.1
 django-taggit==4.0.0
-drf-spectacular==0.26.3
+drf-spectacular==0.26.4
 pycryptodome==3.18.0
 psycopg2-binary==2.9.6
 pyjwt==2.7.0

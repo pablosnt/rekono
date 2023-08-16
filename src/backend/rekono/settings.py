@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     "input_types",
     "parameters",
     "projects",
+    "settings",
     "target_ports",
     "targets",
     "wordlists",
@@ -97,8 +98,6 @@ SECRET_KEY = CONFIG.secret_key
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
-TRUSTED_PROXY = CONFIG.trusted_proxy
 
 ALLOWED_HOSTS = CONFIG.allowed_hosts
 
@@ -201,7 +200,6 @@ if not CONFIG.testing:
     )
 
 # Documentation
-
 SPECTACULAR_SETTINGS = {
     "TITLE": "Rekono API Rest",
     "DESCRIPTION": DESCRIPTION,
@@ -255,26 +253,6 @@ RQ_QUEUES = {
 
 RQ_QUEUES["executions-queue"]["DEFAULT_TIMEOUT"] = 28800  # 8 hours
 RQ_QUEUES["findings-queue"]["DEFAULT_TIMEOUT"] = 10800  # 3 hours
-
-
-################################################################################
-# Tools                                                                        #
-################################################################################
-
-TOOLS = {
-    "cmseek": {"directory": CONFIG.cmseek_dir},
-    "log4j-scan": {"directory": CONFIG.log4j_scan_dir},
-    "spring4shell-scan": {"directory": CONFIG.spring4shell_scan_dir},
-    "gittools": {"directory": CONFIG.gittools_dir},
-}
-
-
-################################################################################
-# Frontend                                                                     #
-################################################################################
-
-# Rekono frontend address. It's used to include links in notifications
-FRONTEND_URL = CONFIG.frontend_url
 
 
 ################################################################################

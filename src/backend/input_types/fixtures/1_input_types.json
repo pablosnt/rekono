@@ -85,7 +85,7 @@
         "fields": {
             "name": "Wordlist",
             "model": null,
-            "callback_model": "resources.wordlist",
+            "callback_model": "wordlists.wordlist",
             "relationships": true
         }
     },

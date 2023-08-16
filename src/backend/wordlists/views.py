@@ -2,12 +2,12 @@
 # from likes.views import LikeManagementView
 # from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated
 from framework.views import BaseViewSet
-
-# from security.authorization.permissions import WordlistCreatorPermission
-
+from rest_framework.serializers import Serializer
 from wordlists.filters import WordlistFilter
 from wordlists.models import Wordlist
 from wordlists.serializers import UpdateWordlistSerializer, WordlistSerializer
+
+# from security.authorization.permissions import WordlistCreatorPermission
 
 
 # Create your views here.

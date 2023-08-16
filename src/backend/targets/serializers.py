@@ -41,9 +41,6 @@ class TargetSerializer(ModelSerializer):
         Args:
             attrs (Dict[str, Any]): Provided data
 
-        Raises:
-            ValidationError: Raised if provided data is invalid
-
         Returns:
             Dict[str, Any]: Data after validation process
         """

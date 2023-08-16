@@ -1,9 +1,9 @@
 from rest_framework.routers import SimpleRouter
-from wordlists.views import WordlistViewSet
+from settings.views import SettingsViewSet
 
 # Register your views here.
 
 router = SimpleRouter()
-router.register("wordlists", WordlistViewSet)
+router.register("settings", SettingsViewSet)
 
 urlpatterns = router.urls

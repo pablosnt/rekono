@@ -16,6 +16,7 @@ class TargetPortSerializer(ModelSerializer):
             "id",
             "target",
             "port",
+            "path",
             "authentication",
         )
         # Read only fields

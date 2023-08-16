@@ -15,4 +15,5 @@ class TargetPortFilter(FilterSet):
             "target__project__name": ["exact", "icontains"],
             "target__target": ["exact", "icontains"],
             "port": ["exact"],
+            "path": ["exact", "icontains"],
         }

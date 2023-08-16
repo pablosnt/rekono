@@ -1,9 +1,10 @@
 import os
+import sys
 from pathlib import Path
 from typing import Any, List, Optional
-from rekono.properties import Property
-import sys
+
 import yaml
+from rekono.properties import Property
 
 
 class RekonoConfig:
@@ -19,24 +20,13 @@ class RekonoConfig:
         with open(self.config_file, "r") as file:
             self._config_properties = yaml.safe_load(file)
         self.trusted_proxy = self._get_config(Property.TRUSTED_PROXY).lower() == "true"
-        self.allowed_hosts = self._get_allowed_hosts()
+        self.allowed_hosts = self._get_list_config(Property.ALLOWED_HOSTS)
+        self.base_target_blacklist = self._get_list_config(Property.TARGET_BLACKLIST)
         for property in Property:
             if not hasattr(self, property.name.lower()) or not getattr(
                 self, property.name.lower()
             ):
                 setattr(self, property.name.lower(), self._get_config(property))
-
-    def _get_allowed_hosts(self) -> List[str]:
-        hosts = os.getenv(Property.ALLOWED_HOSTS.value[0])
-        if hosts:
-            if " " in hosts:
-                allowed_hosts = hosts.split(" ")
-            elif "," in hosts:
-                allowed_hosts = hosts.split(",")
-            else:
-                allowed_hosts = [hosts]
-            return allowed_hosts
-        return self._get_config(Property.ALLOWED_HOSTS)
 
     def _get_config_file(self) -> str:
         for filename in [
@@ -64,6 +54,18 @@ class RekonoConfig:
         for directory in directories:
             if not os.path.isdir(directory):
                 os.mkdir(directory)
+
+    def _get_list_config(self, property: Property) -> List[str]:
+        if property.value[0]:
+            value = os.getenv(property.value[0])
+            if value:
+                list_value = []
+                for separator in [" ", ",", ";"]:
+                    if separator in value:
+                        list_value = value.split(separator)
+                        break
+                return list_value if list_value else [value]
+        return self._get_config(property) if property.value[1] else property.value[2]
 
     def _get_config(self, property: Property) -> Any:
         value = property.value[2]

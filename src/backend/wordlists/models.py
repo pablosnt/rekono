@@ -2,20 +2,23 @@ import os
 from typing import Any, Dict
 
 from django.db import models
-from framework.models import BaseInput
 from framework.enums import InputKeyword
+from framework.models import BaseInput
 
 # from likes.models import LikeBase
-from security.file_upload import check_checksum
-from security.input_validation import validate_name
-
+from security.file_handler import FileHandler
+from security.input_validation import Regex, Validator
 from wordlists.enums import WordlistType
 
 # Create your models here.
 
 
 class Wordlist(BaseInput):
-    name = models.TextField(max_length=100, unique=True, validators=[validate_name])
+    name = models.TextField(
+        max_length=100,
+        unique=True,
+        validators=[Validator(Regex.NAME.value, code="name")],
+    )
     type = models.TextField(max_length=10, choices=WordlistType.choices)
     path = models.TextField(max_length=200, unique=True)
     checksum = models.TextField(max_length=128, blank=True, null=True)
@@ -39,9 +42,9 @@ class Wordlist(BaseInput):
         """
         check = os.path.isfile(self.path)  # Check if wordlist file exists
         if check and self.checksum:  # If checksum exists
-            check = check and check_checksum(
+            check = check and FileHandler().validate_filepath_checksum(
                 self.path, self.checksum
-            )  # Check wordlist file hash
+            )
         if input.filter:  # If input filter is established
             return super().filter(input) and check
         return check

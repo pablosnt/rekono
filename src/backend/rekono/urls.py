@@ -26,8 +26,9 @@ from rest_framework.urlpatterns import format_suffix_patterns
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/", include("authentications.urls")),
-    path("api/", include("projects.urls")),
     path("api/", include("parameters.urls")),
+    path("api/", include("projects.urls")),
+    path("api/", include("settings.urls")),
     path("api/", include("target_ports.urls")),
     path("api/", include("targets.urls")),
     path("api/", include("wordlists.urls")),

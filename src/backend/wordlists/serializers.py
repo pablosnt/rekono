@@ -2,17 +2,18 @@ import os
 import uuid
 from typing import Any, Dict
 
+from rekono.settings import CONFIG
+from rest_framework import serializers
+from security.file_handler import FileHandler
+
 # from likes.serializers import LikeBaseSerializer
 from wordlists.models import Wordlist
-from rest_framework import serializers
-from security import file_upload
 
 # from users.serializers import SimplyUserSerializer
 
-from rekono.settings import CONFIG
 
-
-class WordlistSerializer(serializers.ModelSerializer, LikeBaseSerializer):
+# LikeBaseSerializer
+class WordlistSerializer(serializers.ModelSerializer):
     """Serializer to manage wordlists via API."""
 
     # Wordlist file, to allow the wordlist files upload to the server
@@ -47,16 +48,11 @@ class WordlistSerializer(serializers.ModelSerializer, LikeBaseSerializer):
         Args:
             attrs (Dict[str, Any]): Provided data
 
-        Raises:
-            ValidationError: Raised if provided data is invalid
-
         Returns:
             Dict[str, Any]: Data after validation process
         """
         attrs = super().validate(attrs)  # Original data validation
-        file_upload.validate(
-            attrs["file"], ["txt", "text", ""], ["text/plain"]
-        )  # Validate the uploaded file type
+        FileHandler().validate_file(attrs["file"])
         return attrs
 
     def save(self, **kwargs: Any) -> Wordlist:
@@ -65,20 +61,11 @@ class WordlistSerializer(serializers.ModelSerializer, LikeBaseSerializer):
         Returns:
             Wordlist: Instance after apply changes
         """
-        # Generate filename
-        self.validated_data["path"] = os.path.join(
-            CONFIG.wordlists, f"{str(uuid.uuid4())}.txt"
-        )
-        # Store uploaded file in server
-        self.validated_data["checksum"] = file_upload.store_file(
-            self.validated_data.pop("file"), self.validated_data["path"]
-        )
-        with open(
-            self.validated_data["path"], "rb+"
-        ) as wordlist_file:  # Open uploaded file
-            self.validated_data["size"] = len(
-                wordlist_file.readlines()
-            )  # Count entries from uploaded file
+        (
+            self.validated_data["path"],
+            self.validated_data["checksum"],
+            self.validated_data["size"],
+        ) = FileHandler().store_file(self.validated_data.pop("file"))
         return super().save(**kwargs)
 
 

@@ -47,6 +47,8 @@ class BaseInput(models.Model):
             Optional[str]: [description]
         """
         urllib3.disable_warnings(category=urllib3.exceptions.InsecureRequestWarning)
+        if endpoint.startswith("/"):
+            endpoint = endpoint[1:]
         schema = "{protocol}://{host}/{endpoint}"
         if port:
             schema = "{protocol}://{host}:{port}/{endpoint}"  # Include port schema if port exists

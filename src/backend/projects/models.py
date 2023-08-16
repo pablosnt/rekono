@@ -2,7 +2,7 @@ from typing import Any
 
 from django.conf import settings
 from django.db import models
-from security.input_validation import validate_name, validate_text
+from security.input_validation import Regex, Validator
 from taggit.managers import TaggableManager
 
 # Create your models here.
@@ -11,8 +11,14 @@ from taggit.managers import TaggableManager
 class Project(models.Model):
     """Project model."""
 
-    name = models.TextField(max_length=100, unique=True, validators=[validate_name])
-    description = models.TextField(max_length=300, validators=[validate_text])
+    name = models.TextField(
+        max_length=100,
+        unique=True,
+        validators=[Validator(Regex.NAME.value, code="name")],
+    )
+    description = models.TextField(
+        max_length=300, validators=[Validator(Regex.TEXT.value, code="description")]
+    )
     # User that created the project
     # owner = models.ForeignKey(
     #     settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True

@@ -9,7 +9,7 @@ from django.db import models
 from framework.enums import InputKeyword
 from framework.models import BaseInput
 from projects.models import Project
-from security.input_validation import IP_RANGE_REGEX
+from security.input_validation import Regex, TargetValidator
 from targets.enums import TargetType
 
 # Create your models here.
@@ -21,7 +21,9 @@ class Target(BaseInput):
     project = models.ForeignKey(
         Project, related_name="targets", on_delete=models.CASCADE
     )
-    target = models.TextField(max_length=100)  # Target IP, domain or network
+    target = models.TextField(
+        max_length=100, validators=[TargetValidator(Regex.TARGET.value)]
+    )
     type = models.TextField(max_length=10, choices=TargetType.choices)  # Target type
 
     filters = [BaseInput.Filter(type=TargetType, field="type")]
@@ -42,23 +44,6 @@ class Target(BaseInput):
         Returns:
             str: Target type associated to the target
         """
-        if target in [
-            "127.0.0.1",
-            "localhost",
-            "frontend",
-            "backend",
-            "postgres",
-            "redis",
-            "initialize",
-            "tasks-worker",
-            "executions-worker",
-            "findings-worker",
-            "emails-worker",
-            "telegram-bot",
-            "nginx",
-        ]:
-            # Target is invalid
-            raise ValidationError({"target": f"Invalid target {target}"})
         try:
             # Check if target is an IP address (IPv4 or IPv6)
             ip = ipaddress.ip_address(target)
@@ -74,7 +59,7 @@ class Target(BaseInput):
         except ValueError:
             pass  # Target is not a network
         # Check if target is an IP range
-        if bool(re.fullmatch(IP_RANGE_REGEX, target)):
+        if bool(re.fullmatch(Regex.IP_RANGE.value, target)):
             return TargetType.IP_RANGE
         try:
             socket.gethostbyname(target)  # Check if target is a Domain
@@ -84,9 +69,9 @@ class Target(BaseInput):
         logger.warning(f"[Security] Invalid target {target}")
         # Target is invalid or target type is not supported
         raise ValidationError(
-            {
-                "target": f"Invalid target {target}. IP address, IP range or domain is required"
-            }
+            f"Invalid target. IP address, IP range or domain is required",
+            code="target",
+            params={"value": target},
         )
 
     def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:

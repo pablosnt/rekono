@@ -1,6 +1,3 @@
-from typing import Any, Dict
-
-from django.forms import ValidationError
 from parameters.models import InputTechnology, InputVulnerability
 from rest_framework.serializers import ModelSerializer
 

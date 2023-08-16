@@ -4,7 +4,7 @@ from django.db import models
 from framework.enums import InputKeyword
 from framework.models import BaseInput
 from projects.models import Project
-from security.input_validation import validate_cve, validate_name
+from security.input_validation import Regex, Validator
 from targets.models import Target
 
 # Create your models here.
@@ -16,9 +16,14 @@ class InputTechnology(BaseInput):
     target = models.ForeignKey(
         Target, related_name="input_technologies", on_delete=models.CASCADE
     )
-    name = models.TextField(max_length=100, validators=[validate_name])
+    name = models.TextField(
+        max_length=100, validators=[Validator(Regex.NAME.value, code="name")]
+    )
     version = models.TextField(
-        max_length=100, validators=[validate_name], blank=True, null=True
+        max_length=100,
+        validators=[Validator(Regex.NAME.value, code="version")],
+        blank=True,
+        null=True,
     )
 
     filters = [BaseInput.Filter(type=str, field="name", contains=True)]
@@ -65,7 +70,9 @@ class InputVulnerability(BaseInput):
     target = models.ForeignKey(
         Target, related_name="input_vulnerabilities", on_delete=models.CASCADE
     )
-    cve = models.TextField(max_length=20, validators=[validate_cve])
+    cve = models.TextField(
+        max_length=20, validators=[Validator(Regex.CVE.value, code="cve")]
+    )
 
     filters = [
         BaseInput.Filter(type=str, field="cve", processor=lambda v: "cve"),

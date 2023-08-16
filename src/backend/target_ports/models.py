@@ -1,10 +1,11 @@
 from typing import Any, Dict
 
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from framework.enums import InputKeyword
 from framework.models import BaseInput
 from projects.models import Project
-from security.input_validation import validate_number
+from security.input_validation import Regex, Validator
 from targets.models import Target
 
 # Create your models here.
@@ -16,7 +17,15 @@ class TargetPort(BaseInput):
     target = models.ForeignKey(
         Target, related_name="target_ports", on_delete=models.CASCADE
     )
-    port = models.IntegerField(validators=[validate_number])
+    port = models.IntegerField(
+        validators=[MinValueValidator(0), MaxValueValidator(65535)]
+    )
+    path = models.TextField(
+        max_length=100,
+        validators=[Validator(Regex.PATH.value, code="path")],
+        blank=True,
+        null=True,
+    )
 
     filters = [BaseInput.Filter(type=int, field="port")]
 
@@ -37,7 +46,9 @@ class TargetPort(BaseInput):
             InputKeyword.HOST.name.lower(): self.target.target,
             InputKeyword.PORT.name.lower(): self.port,
             InputKeyword.PORTS.name.lower(): [self.port],
-            InputKeyword.URL.name.lower(): self._get_url(self.target.target, self.port),
+            InputKeyword.URL.name.lower(): self._get_url(
+                self.target.target, self.port, self.path
+            ),
         }
         if accumulated and InputKeyword.PORTS.name.lower() in accumulated:
             output[InputKeyword.PORTS.name.lower()] = accumulated[

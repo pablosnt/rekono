@@ -1,0 +1,10 @@
+[
+    {
+        "model": "settings.Settings",
+        "pk": 1,
+        "fields": {
+            "max_uploaded_file_mb": 512,
+            "target_blacklist": null
+        }
+    }
+]

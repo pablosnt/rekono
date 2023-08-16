@@ -6,7 +6,7 @@ from django.db import models
 from framework.enums import InputKeyword
 from framework.models import BaseInput
 from projects.models import Project
-from security.input_validation import validate_secret, validate_name
+from security.input_validation import Regex, Validator
 from target_ports.models import TargetPort
 
 # Create your models here.
@@ -15,12 +15,17 @@ from target_ports.models import TargetPort
 class Authentication(BaseInput):
     """Authentication model."""
 
-    # Related target port
     target_port = models.OneToOneField(
         TargetPort, related_name="authentication", on_delete=models.CASCADE
     )
-    name = models.TextField(max_length=100, validators=[validate_name])
-    secret = models.TextField(max_length=500, validators=[validate_secret])
+    name = models.TextField(
+        max_length=100,
+        validators=[Validator(Regex.NAME.value, code="name")],
+    )
+    secret = models.TextField(
+        max_length=500,
+        validators=[Validator(Regex.SECRET.value, code="secret")],
+    )
     type = models.TextField(max_length=8, choices=AuthenticationType.choices)
 
     filters = [BaseInput.Filter(type=AuthenticationType, field="type")]

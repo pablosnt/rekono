@@ -2,7 +2,7 @@ from django.db import models
 
 
 class InputTypeName(models.TextChoices):
-    """Input type names, related to findings and resources."""
+    """Input type names, related to findings and wordlists."""
 
     OSINT = "OSINT"
     HOST = "Host"

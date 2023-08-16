@@ -13,8 +13,8 @@ class TargetPortViewSet(BaseViewSet):
     serializer_class = TargetPortSerializer
     filterset_class = TargetPortFilter
     # Fields used to search target ports
-    search_fields = ["port"]
-    ordering_fields = ["id", "target", "port"]
+    search_fields = ["port", "path"]
+    ordering_fields = ["id", "target", "port", "path"]
     http_method_names = [
         "get",
         "post",
