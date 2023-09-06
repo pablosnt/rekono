@@ -4,7 +4,7 @@ from django.db import models
 from framework.enums import InputKeyword
 from framework.models import BaseInput
 from projects.models import Project
-from security.input_validation import Regex, Validator
+from security.utils.input_validator import Regex, Validator
 from targets.models import Target
 
 # Create your models here.
@@ -29,7 +29,11 @@ class InputTechnology(BaseInput):
     filters = [BaseInput.Filter(type=str, field="name", contains=True)]
 
     class Meta:
-        unique_together = ["target", "name", "version"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["target", "name", "version"], name="unique_input_technology"
+            )
+        ]
 
     def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
         """Get useful information from this instance to be used in tool execution as argument.
@@ -63,6 +67,10 @@ class InputTechnology(BaseInput):
         """
         return self.target.project
 
+    @classmethod
+    def get_project_field(cls) -> str:
+        return "target__project"
+
 
 class InputVulnerability(BaseInput):
     """Input vulnerability model."""
@@ -80,7 +88,11 @@ class InputVulnerability(BaseInput):
     ]
 
     class Meta:
-        unique_together = ["target", "cve"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["target", "cve"], name="unique_input_vulnerability"
+            )
+        ]
 
     def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
         """Get useful information from this instance to be used in tool execution as argument.
@@ -110,3 +122,7 @@ class InputVulnerability(BaseInput):
             Project: Related project entity
         """
         return self.target.project
+
+    @classmethod
+    def get_project_field(cls) -> str:
+        return "target__project"

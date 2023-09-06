@@ -3,17 +3,16 @@ from typing import Any, Dict
 
 from django.db import models
 from framework.enums import InputKeyword
-from framework.models import BaseInput
-
-# from likes.models import LikeBase
-from security.file_handler import FileHandler
-from security.input_validation import Regex, Validator
+from framework.models import BaseInput, BaseLike
+from rekono.settings import AUTH_USER_MODEL
+from security.utils.file_handler import FileHandler
+from security.utils.input_validator import Regex, Validator
 from wordlists.enums import WordlistType
 
 # Create your models here.
 
 
-class Wordlist(BaseInput):
+class Wordlist(BaseInput, BaseLike):
     name = models.TextField(
         max_length=100,
         unique=True,
@@ -25,9 +24,9 @@ class Wordlist(BaseInput):
     # Number of entries in the wordlist file
     size = models.IntegerField(blank=True, null=True)
     # User that created the wordlist
-    # creator = models.ForeignKey(
-    #     settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True
-    # )
+    owner = models.ForeignKey(
+        AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True
+    )
 
     filters = [BaseInput.Filter(type=WordlistType, field="type")]
 

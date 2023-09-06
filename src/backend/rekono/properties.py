@@ -1,6 +1,6 @@
 from enum import Enum
 
-from security.crypto import generate_random_value
+from security.utils.cryptography import generate_random_value
 
 
 class Property(Enum):
@@ -32,7 +32,8 @@ class Property(Enum):
             "nginx",
         ],
     )
-    TRUSTED_PROXY = ("RKN_TRUSTED_PROXY", None, "false")
+    TRUSTED_PROXY = ("RKN_TRUSTED_PROXY", None, False)
+    OTP_EXPIRATION_HOURS = (None, None, 24)
     DB_NAME = ("RKN_DB_NAME", "database.name", "rekono")
     DB_USER = ("RKN_DB_USER", "database.user", "")
     DB_PASSWORD = ("RKN_DB_PASSWORD", "database.password", "")
@@ -41,10 +42,10 @@ class Property(Enum):
     RQ_HOST = ("RKN_RQ_HOST", "rq.host", "127.0.0.1")
     RQ_PORT = ("RKN_RQ_PORT", "rq.port", 6379)
     SMTP_HOST = ("RKN_SMTP_HOST", "email.host", None)
-    SMTP_PORT = ("RKN_SMTP_PORT", "email.port", None)
+    SMTP_PORT = ("RKN_SMTP_PORT", "email.port", 587)
     SMTP_USER = ("RKN_SMTP_USER", "email.user", None)
     SMTP_PASSWORD = ("RKN_SMTP_PASSWORD", "email.password", None)
-    SMTP_TLS = (None, "email.tls", True)
+    SMTP_TLS = ("RKN_SMTP_TLS", "email.tls", True)
     CMSEEK_DIR = (
         "RKN_CMSEEK_RESULTS",
         "tools.cmseek.directory",

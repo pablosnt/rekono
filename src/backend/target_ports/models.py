@@ -5,7 +5,7 @@ from django.db import models
 from framework.enums import InputKeyword
 from framework.models import BaseInput
 from projects.models import Project
-from security.input_validation import Regex, Validator
+from security.utils.input_validator import Regex, Validator
 from targets.models import Target
 
 # Create your models here.
@@ -30,7 +30,11 @@ class TargetPort(BaseInput):
     filters = [BaseInput.Filter(type=int, field="port")]
 
     class Meta:
-        unique_together = ["target", "port"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["target", "port"], name="unique_target_port"
+            )
+        ]
 
     def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
         """Get useful information from this instance to be used in tool execution as argument.
@@ -75,3 +79,7 @@ class TargetPort(BaseInput):
             Project: Related project entity
         """
         return self.target.project
+
+    @classmethod
+    def get_project_field(cls) -> str:
+        return "target__project"

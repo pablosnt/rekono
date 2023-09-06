@@ -11,9 +11,12 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 import os
+from datetime import timedelta
 from typing import Any, Dict
+from urllib.parse import urlparse
 
 from rekono.config import RekonoConfig
+from security.authorization.roles import Role
 
 ################################################################################
 # Rekono basic information                                                     #
@@ -48,17 +51,21 @@ INSTALLED_APPS = [
     "drf_spectacular",
     "rest_framework",
     "taggit",
+    "api_tokens",
     "authentications",
     "input_types",
     "parameters",
     "projects",
+    "security",
     "settings",
     "target_ports",
     "targets",
+    "users",
     "wordlists",
 ]
 
 MIDDLEWARE = [
+    "security.middleware.SecurityMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -101,6 +108,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = CONFIG.allowed_hosts
 
+AUTH_USER_MODEL = "users.User"
+
 AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
@@ -117,7 +126,21 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
+    {
+        "NAME": "security.utils.input_validator.PasswordValidator",
+    },
 ]
+
+# JWT configuration
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
+    "REFRESH_TOKEN_LIFETIME": timedelta(hours=1),
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
+    "UPDATE_LAST_LOGIN": True,
+    "ALGORITHM": "HS512",
+    "SIGNING_KEY": SECRET_KEY,
+}
 
 LOGGING = {
     "version": 1,
@@ -170,8 +193,17 @@ REST_FRAMEWORK: Dict[str, Any] = {
         "rest_framework.filters.SearchFilter",
     ],
     "DEFAULT_PAGINATION_CLASS": "framework.pagination.Pagination",
-    "DEFAULT_AUTHENTICATION_CLASSES": [],
-    "DEFAULT_PERMISSION_CLASSES": [],
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "security.authentication.api.ApiAuthentication",
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ],
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",
+        "rest_framework.permissions.DjangoModelPermissions",
+        "security.authorization.permissions.ProjectMemberPermission",
+        "security.authorization.permissions.OwnerPermission",
+    ],
+    "EXCEPTION_HANDLER": "framework.exceptions.exceptions_handler",
 }
 if not CONFIG.testing:
     # Rate limit only for production

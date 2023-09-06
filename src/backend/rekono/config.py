@@ -19,9 +19,6 @@ class RekonoConfig:
         self.config_file = self._get_config_file()
         with open(self.config_file, "r") as file:
             self._config_properties = yaml.safe_load(file)
-        self.trusted_proxy = self._get_config(Property.TRUSTED_PROXY).lower() == "true"
-        self.allowed_hosts = self._get_list_config(Property.ALLOWED_HOSTS)
-        self.base_target_blacklist = self._get_list_config(Property.TARGET_BLACKLIST)
         for property in Property:
             if not hasattr(self, property.name.lower()) or not getattr(
                 self, property.name.lower()
@@ -55,24 +52,22 @@ class RekonoConfig:
             if not os.path.isdir(directory):
                 os.mkdir(directory)
 
-    def _get_list_config(self, property: Property) -> List[str]:
-        if property.value[0]:
-            value = os.getenv(property.value[0])
-            if value:
-                list_value = []
-                for separator in [" ", ",", ";"]:
-                    if separator in value:
-                        list_value = value.split(separator)
-                        break
-                return list_value if list_value else [value]
-        return self._get_config(property) if property.value[1] else property.value[2]
-
     def _get_config(self, property: Property) -> Any:
-        value = property.value[2]
+        default_value = value = property.value[2]
         if property.value[1]:
             value = self._get_config_from_file(property.value[1]) or value
         if property.value[0]:
-            value = os.getenv(property.name, value)
+            env_value = os.getenv(property.value[0])
+            value = env_value or value
+            if isinstance(default_value, list) and env_value:
+                list_value = []
+                for separator in [" ", ",", ";"]:
+                    if separator in env_value:
+                        list_value = env_value.split(separator)
+                        break
+                value = list_value or [env_value]
+        if isinstance(default_value, bool) and not isinstance(value, bool):
+            value = str(value).lower() == "true"
         return value
 
     def _get_config_from_file(self, property: str) -> Optional[Any]:

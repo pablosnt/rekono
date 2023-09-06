@@ -3,15 +3,26 @@ from typing import Any, Dict, List, Optional
 import requests
 import urllib3
 from django.db import models
+from rekono.settings import AUTH_USER_MODEL
 
 
-class BaseInput(models.Model):
+class BaseModel(models.Model):
+    class Meta:
+        abstract = True
+
+    def get_project(self) -> Any:
+        return None
+
+    @classmethod
+    def get_project_field(cls) -> str:
+        return None
+
+
+class BaseInput(BaseModel):
     """Class to be extended by all the objects that can be used in tool executions as argument."""
 
     class Meta:
-        """Model metadata."""
-
-        abstract = True  # To be extended by models that can be used in tool executions as argument
+        abstract = True
 
     class Filter:
         def __init__(
@@ -120,3 +131,12 @@ class BaseInput(models.Model):
             Dict[str, Any]: Useful information for tool executions, including accumulated if setted
         """
         return {}  # pragma: no cover
+
+
+class BaseLike(BaseModel):
+    """Common and abstract LikeBase model, to define common fields for all models that user can like."""
+
+    liked_by = models.ManyToManyField(AUTH_USER_MODEL, related_name="liked_%(class)s")
+
+    class Meta:
+        abstract = True

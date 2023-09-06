@@ -2,13 +2,13 @@ from typing import List, Self, Union
 
 from django.apps import apps
 from django.db import models
-from framework.models import BaseInput
+from framework.models import BaseInput, BaseModel
 from input_types.enums import InputTypeName
 
 # Create your models here.
 
 
-class InputType(models.Model):
+class InputType(BaseModel):
     """Input type model, related to each object type that can be included in a tool argument."""
 
     name = models.TextField(max_length=15, choices=InputTypeName.choices)

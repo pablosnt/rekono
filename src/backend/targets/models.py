@@ -9,7 +9,7 @@ from django.db import models
 from framework.enums import InputKeyword
 from framework.models import BaseInput
 from projects.models import Project
-from security.input_validation import Regex, TargetValidator
+from security.utils.input_validator import Regex, TargetValidator
 from targets.enums import TargetType
 
 # Create your models here.
@@ -29,7 +29,9 @@ class Target(BaseInput):
     filters = [BaseInput.Filter(type=TargetType, field="type")]
 
     class Meta:
-        unique_together = ["project", "target"]
+        constraints = [
+            models.UniqueConstraint(fields=["project", "target"], name="unique_target")
+        ]
 
     @staticmethod
     def get_type(target: str) -> str:
@@ -104,3 +106,7 @@ class Target(BaseInput):
             Project: Related project entity
         """
         return self.project
+
+    @classmethod
+    def get_project_field(cls) -> str:
+        return "project"

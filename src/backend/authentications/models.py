@@ -6,7 +6,7 @@ from django.db import models
 from framework.enums import InputKeyword
 from framework.models import BaseInput
 from projects.models import Project
-from security.input_validation import Regex, Validator
+from security.utils.input_validator import Regex, Validator
 from target_ports.models import TargetPort
 
 # Create your models here.
@@ -83,3 +83,7 @@ class Authentication(BaseInput):
             Project: Related project entity
         """
         return self.target_port.target.project
+
+    @classmethod
+    def get_project_field(cls) -> str:
+        return "target_port__target__project"

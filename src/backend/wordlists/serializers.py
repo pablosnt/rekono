@@ -1,24 +1,19 @@
-import os
-import uuid
 from typing import Any, Dict
 
+from framework.serializers import LikeSerializer
 from rekono.settings import CONFIG
-from rest_framework import serializers
-from security.file_handler import FileHandler
-
-# from likes.serializers import LikeBaseSerializer
+from rest_framework.serializers import FileField, ModelSerializer
+from security.utils.file_handler import FileHandler
+from users.serializers import SimpleUserSerializer
 from wordlists.models import Wordlist
 
-# from users.serializers import SimplyUserSerializer
 
-
-# LikeBaseSerializer
-class WordlistSerializer(serializers.ModelSerializer):
+class WordlistSerializer(ModelSerializer, LikeSerializer):
     """Serializer to manage wordlists via API."""
 
     # Wordlist file, to allow the wordlist files upload to the server
-    file = serializers.FileField(required=True, allow_empty_file=False, write_only=True)
-    # creator = SimplyUserSerializer(many=False, read_only=True)                  # Creator details for read operations
+    file = FileField(required=True, allow_empty_file=False, write_only=True)
+    owner = SimpleUserSerializer(many=False, read_only=True)
 
     class Meta:
         model = Wordlist
@@ -27,20 +22,13 @@ class WordlistSerializer(serializers.ModelSerializer):
             "id",
             "name",
             "type",
-            "path",
             "file",
-            "checksum",
             "size",
-            # "creator",
-            # "liked",
-            # "likes",
+            "owner",
+            "liked",
+            "likes",
         )
-        # read_only_fields = ("creator",)  # Read only field
-        # Parameters used in write operations, but they will be generated automatically from uploaded file
-        extra_kwargs = {
-            "path": {"write_only": True, "required": False},
-            "checksum": {"write_only": True, "required": False},
-        }
+        read_only_fields = ("size", "owner", "liked", "likes")
 
     def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
         """Validate the provided data before use it.
@@ -69,7 +57,7 @@ class WordlistSerializer(serializers.ModelSerializer):
         return super().save(**kwargs)
 
 
-class UpdateWordlistSerializer(serializers.ModelSerializer):
+class UpdateWordlistSerializer(ModelSerializer):
     """Serializer to update wordlists via API."""
 
     class Meta:

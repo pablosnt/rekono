@@ -3,7 +3,7 @@ from typing import Any, Dict
 from authentications.models import Authentication
 from framework.fields import ProtectedSecretField
 from rest_framework.serializers import ModelSerializer
-from security.input_validation import Regex, Validator
+from security.utils.input_validator import Regex, Validator
 
 
 class AuthenticationSerializer(ModelSerializer):

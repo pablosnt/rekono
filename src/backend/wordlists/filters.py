@@ -1,9 +1,8 @@
-# from likes.filters import LikeFilter
-from django_filters.rest_framework import FilterSet
+from framework.filters import LikeFilter
 from wordlists.models import Wordlist
 
 
-class WordlistFilter(FilterSet):
+class WordlistFilter(LikeFilter):
     """FilterSet to filter and sort Wordlist entities."""
 
     class Meta:
@@ -11,7 +10,7 @@ class WordlistFilter(FilterSet):
         fields = {  # Filter fields
             "name": ["exact", "icontains"],
             "type": ["exact"],
-            # 'creator': ['exact'],
-            # 'creator__username': ['exact', 'icontains'],
+            "owner": ["exact"],
+            "owner__username": ["exact", "icontains"],
             "size": ["gte", "lte", "exact"],
         }

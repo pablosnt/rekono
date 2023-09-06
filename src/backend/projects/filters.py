@@ -6,12 +6,11 @@ class ProjectFilter(FilterSet):
     """FilterSet to filter Project entities."""
 
     class Meta:
-
         model = Project
         fields = {
             "name": ["exact", "icontains"],
-            # "owner": ["exact"],
-            # "owner__username": ["exact"],
-            # "members": ["exact"],
+            "owner": ["exact"],
+            "owner__username": ["exact"],
+            "members": ["exact"],
             "tags__name": ["in"],
         }

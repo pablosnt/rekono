@@ -1,14 +1,15 @@
 from typing import Any
 
-from django.conf import settings
 from django.db import models
-from security.input_validation import Regex, Validator
+from framework.models import BaseModel
+from rekono.settings import AUTH_USER_MODEL
+from security.utils.input_validator import Regex, Validator
 from taggit.managers import TaggableManager
 
 # Create your models here.
 
 
-class Project(models.Model):
+class Project(BaseModel):
     """Project model."""
 
     name = models.TextField(
@@ -20,13 +21,13 @@ class Project(models.Model):
         max_length=300, validators=[Validator(Regex.TEXT.value, code="description")]
     )
     # User that created the project
-    # owner = models.ForeignKey(
-    #     settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True
-    # )
+    owner = models.ForeignKey(
+        AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True
+    )
     # Relation with all users that belong to the project
-    # members = models.ManyToManyField(
-    #     settings.AUTH_USER_MODEL, related_name="projects", blank=True
-    # )
+    members = models.ManyToManyField(
+        AUTH_USER_MODEL, related_name="projects", blank=True
+    )
     tags = TaggableManager()  # Project tags
 
     def __str__(self) -> str:
