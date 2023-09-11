@@ -28,6 +28,7 @@ urlpatterns = [
     path("api/", include("api_tokens.urls")),
     path("api/", include("authentications.urls")),
     path("api/", include("parameters.urls")),
+    path("api/", include("processes.urls")),
     path("api/", include("projects.urls")),
     path("api/", include("security.authentication.urls")),
     path("api/", include("settings.urls")),

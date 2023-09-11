@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     "authentications",
     "input_types",
     "parameters",
+    "processes",
     "projects",
     "security",
     "settings",

@@ -1,0 +1,58 @@
+[
+    {
+        "model": "processes.process",
+        "pk": 1,
+        "fields": {
+            "name": "All tools",
+            "description": "Run all tools with the most relevant configurations. This process covers all the pentesting stages from OSINT to exploits finding."
+        }
+    },
+    {
+        "model": "processes.process",
+        "pk": 2,
+        "fields": {
+            "name": "HTTP Analysis",
+            "description": "Analysis of HTTP services after port enumeration. Search for endpoints, TLS vulnerabilities, CMS information, Log4Shell, etc."
+        }
+    },
+    {
+        "model": "processes.process",
+        "pk": 3,
+        "fields": {
+            "name": "FTP Analysis",
+            "description": "Analysis of FTP services using nmap with NSE scripts."
+        }
+    },
+    {
+        "model": "processes.process",
+        "pk": 4,
+        "fields": {
+            "name": "SSH Analysis",
+            "description": "Analysis of SSH services after port enumeration, using ssh-audit."
+        }
+    },
+    {
+        "model": "processes.process",
+        "pk": 5,
+        "fields": {
+            "name": "SMB Analysis",
+            "description": "Analysis of SMB services using nmap with NSE scripts and smbmap."
+        }
+    },
+    {
+        "model": "processes.process",
+        "pk": 6,
+        "fields": {
+            "name": "OSINT",
+            "description": "Run OSINT tools to gather publicly available information."
+        }
+    },
+    {
+        "model": "processes.process",
+        "pk": 7,
+        "fields": {
+            "name": "Active Analysis",
+            "description": "Run all active tools with the most relevant configurations. This process covers all active pentesting stages from enumeration to exploits finding."
+        }
+    }
+]

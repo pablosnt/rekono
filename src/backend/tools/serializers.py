@@ -29,15 +29,6 @@ class OutputSerializer(ModelSerializer):
         )
 
 
-class ConfigurationSerializer(ModelSerializer):
-    stage = StageField(model=Stage)
-    outputs = OutputSerializer(many=True)
-
-    class Meta:
-        model = Configuration
-        fields = ("id", "name", "tool", "arguments", "stage", "default", "outputs")
-
-
 class IntensitySerializer(ModelSerializer):
     value = IntegerChoicesField(model=IntensityEnum)
 
@@ -61,9 +52,18 @@ class ArgumentSerializer(ModelSerializer):
         )
 
 
+class SimpleConfigurationSerializer(ModelSerializer):
+    stage = StageField(model=Stage)
+    outputs = OutputSerializer(many=True)
+
+    class Meta:
+        model = Configuration
+        fields = ("id", "name", "tool", "arguments", "stage", "default", "outputs")
+
+
 class ToolSerializer(LikeSerializer):
     intensities = IntensitySerializer(many=True)
-    configurations = ConfigurationSerializer(many=True)
+    configurations = SimpleConfigurationSerializer(many=True)
     arguments = ArgumentSerializer(many=True)
 
     class Meta:
@@ -94,3 +94,7 @@ class SimpleToolSerializer(ModelSerializer):
             "reference",
             "icon",
         )
+
+
+class ConfigurationSerializer(SimpleConfigurationSerializer):
+    tool = SimpleToolSerializer()
