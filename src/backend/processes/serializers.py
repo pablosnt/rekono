@@ -1,9 +1,8 @@
 from framework.fields import TagField
 from framework.serializers import LikeSerializer
 from processes.models import Process, Step
-from rest_framework.serializers import ModelSerializer, PrimaryKeyRelatedField
+from rest_framework.serializers import ModelSerializer
 from taggit.serializers import TaggitSerializer
-from tools.models import Configuration, Tool
 from tools.serializers import ConfigurationSerializer
 from users.serializers import SimpleUserSerializer
 
@@ -15,13 +14,7 @@ class SimpleProcessSerializer(ModelSerializer):
 
 
 class SimpleStepSerializer(ModelSerializer):
-    configuration = ConfigurationSerializer(many=False)  # read_only=True, many=False)
-    # configuration_id = PrimaryKeyRelatedField(
-    #     write_only=True,
-    #     required=True,
-    #     source="configuration",
-    #     queryset=Configuration.objects.all(),
-    # )
+    configuration = ConfigurationSerializer(many=False)
 
     class Meta:
         model = Step
@@ -29,18 +22,11 @@ class SimpleStepSerializer(ModelSerializer):
             "id",
             "process",
             "configuration",
-            # "configuration_id",
         )
 
 
 class StepSerializer(SimpleStepSerializer):
-    process = SimpleProcessSerializer(many=False)  # (read_only=True, many=False)
-    # process_id = PrimaryKeyRelatedField(
-    #     write_only=True,
-    #     required=True,
-    #     source="process",
-    #     queryset=Configuration.objects.all(),
-    # )
+    process = SimpleProcessSerializer(many=False)
 
 
 class ProcessSerializer(TaggitSerializer, LikeSerializer):
