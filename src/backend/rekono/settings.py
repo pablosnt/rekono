@@ -64,6 +64,9 @@ INSTALLED_APPS = [
     "wordlists",
 ]
 
+if CONFIG.saml_enabled:
+    INSTALLED_APPS.append("django_saml2_auth")
+
 MIDDLEWARE = [
     "security.middleware.SecurityMiddleware",
     "django.middleware.security.SecurityMiddleware",
@@ -177,6 +180,36 @@ LOGGING = {
         "propagate": False,
     },
 }
+
+if CONFIG.saml_enabled:
+    SAML2_AUTH = {
+        "METADATA_AUTO_CONF_URL": "https://samltest.id/saml/idp",  # CONFIG.saml_metadata_url,
+        "DEBUG": DEBUG,
+        "LOGGING": LOGGING,
+        "DEFAULT_NEXT_URL": "/",
+        "CREATE_USER": True,
+        "NEW_USER_PROFILE": {
+            "USER_GROUPS": [Role.READER.value],
+            "ACTIVE_STATUS": True,
+            "STAFF_STATUS": False,
+            "SUPERUSER_STATUS": False,
+        },
+        "ATTRIBUTES_MAP": {
+            "email": "user.email",
+            "username": "user.username",
+            "first_name": "user.first_name",
+            "last_name": "user.last_name",
+        },
+        "ASSERTION_URL": CONFIG.backend_url,
+        "ENTITY_ID": f"{CONFIG.backend_url}/saml/acs/",
+        "USE_JWT": True,
+        "JWT_ALGORITHM": "HS512",
+        "JWT_SECRET": SECRET_KEY,
+        "FRONTEND_URL": CONFIG.frontend_url,
+        "ALLOWED_REDIRECT_HOSTS": [urlparse(CONFIG.frontend_url).netloc],
+        "TOKEN_REQUIRED": False,
+        "WANT_ASSERTIONS_SIGNED": False,
+    }
 
 
 ################################################################################

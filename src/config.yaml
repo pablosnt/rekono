@@ -1,12 +1,15 @@
 rootpath: null
-frontend:
-  url: https://127.0.0.1
+frontend: https://127.0.0.1
+backend: https://127.0.0.1
 security:
   # secret-key: 
   allowed-hosts:
     - 127.0.0.1
     - localhost
     - ::1
+  # saml:
+  #   enabled: 
+  #   metadata-url:
 database:
   name: rekono
   # user:

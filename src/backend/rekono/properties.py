@@ -5,7 +5,8 @@ from security.utils.cryptography import generate_random_value
 
 class Property(Enum):
     REKONO_HOME = ("REKONO_HOME", None, "/opt/rekono")
-    FRONTEND_URL = ("RKN_FRONTEND_URL", "frontend.url", "https://127.0.0.1")
+    FRONTEND_URL = ("RKN_FRONTEND_URL", "frontend", "https://127.0.0.1")
+    BACKEND_URL = ("RKN_BACKEND_URL", "backend", "https://127.0.0.1")
     ROOT_PATH = ("RKN_ROOT_PATH", "rootpath", None)
     SECRET_KEY = ("RKN_SECRET_KEY", "security.secret-key", generate_random_value(3000))
     ALLOWED_HOSTS = (
@@ -13,6 +14,8 @@ class Property(Enum):
         "security.allowed-hosts",
         ["localhost", "127.0.0.1", "::1"],
     )
+    SAML_ENABLED = ("RKN_SAML_ENABLED", "security.saml.enabled", False)
+    SAML_METADATA_URL = ("RKN_SAML_METADATA_URL", "security.saml.metadata-url", None)
     TARGET_BLACKLIST = (
         None,
         None,

@@ -21,7 +21,16 @@ from drf_spectacular.views import (
     SpectacularRedocView,
     SpectacularSwaggerView,
 )
+from rekono.settings import CONFIG
 from rest_framework.urlpatterns import format_suffix_patterns
+
+urlpatterns = (
+    [
+        path("saml/", include("django_saml2_auth.urls")),
+    ]
+    if CONFIG.saml_enabled
+    else []
+)
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -50,5 +59,12 @@ urlpatterns = [
         name="redoc",
     ),
 ]
+
+if CONFIG.saml_enabled:
+    from django_saml2_auth.views import signin as saml_signin
+
+    urlpatterns.insert(0, path("saml/", include("django_saml2_auth.urls")))
+    urlpatterns.insert(1, path("api/security/login/", saml_signin))
+
 
 urlpatterns = format_suffix_patterns(urlpatterns)
