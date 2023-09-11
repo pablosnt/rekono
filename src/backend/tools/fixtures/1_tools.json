@@ -1,0 +1,262 @@
+[
+    {
+        "model": "tools.tool",
+        "pk": 1,
+        "fields": {
+            "name": "Nmap",
+            "command": "nmap",
+            "version": null,
+            "version_argument": null,
+            "output_format": "xml",
+            "reference": "https://nmap.org/",
+            "icon": "https://www.kali.org/tools/nmap/images/nmap-logo.svg"
+        }
+    },
+    {
+        "model": "tools.tool",
+        "pk": 2,
+        "fields": {
+            "name": "Dirsearch",
+            "command": "dirsearch",
+            "version": null,
+            "version_argument": null,
+            "output_format": "json",
+            "reference": "https://github.com/maurosoria/dirsearch",
+            "icon": "https://raw.githubusercontent.com/maurosoria/dirsearch/master/static/logo.png"
+        }
+    },
+    {
+        "model": "tools.tool",
+        "pk": 3,
+        "fields": {
+            "name": "theHarvester",
+            "command": "theHarvester",
+            "version": null,
+            "version_argument": null,
+            "output_format": "json",
+            "reference": "https://github.com/laramies/theHarvester",
+            "icon": "https://www.kali.org/tools/theharvester/images/theharvester-logo.svg"
+        }
+    },
+    {
+        "model": "tools.tool",
+        "pk": 4,
+        "fields": {
+            "name": "Nikto",
+            "command": "nikto",
+            "version": null,
+            "version_argument": null,
+            "output_format": "xml",
+            "reference": "https://github.com/sullo/nikto",
+            "icon": "https://www.kali.org/tools/nikto/images/nikto-logo.svg"
+        }
+    },
+    {
+        "model": "tools.tool",
+        "pk": 5,
+        "fields": {
+            "name": "Sslscan",
+            "command": "sslscan",
+            "version": null,
+            "version_argument": null,
+            "output_format": "xml",
+            "reference": "https://github.com/rbsec/sslscan",
+            "icon": "https://www.kali.org/tools/sslscan/images/sslscan-logo.svg"
+        }
+    },
+    {
+        "model": "tools.tool",
+        "pk": 6,
+        "fields": {
+            "name": "SSLyze",
+            "command": "sslyze",
+            "version": null,
+            "version_argument": null,
+            "output_format": "json",
+            "reference": "https://nabla-c0d3.github.io/sslyze/documentation/",
+            "icon": "https://www.kali.org/tools/sslyze/images/sslyze-logo.svg"
+        }
+    },
+    {
+        "model": "tools.tool",
+        "pk": 7,
+        "fields": {
+            "name": "CMSeeK",
+            "command": "cmseek",
+            "version": null,
+            "version_argument": null,
+            "output_format": "json",
+            "reference": "https://github.com/Tuhinshubhra/CMSeeK/",
+            "icon": "https://camo.githubusercontent.com/b1864e58e861aa4e938d17d4a50ae1a4bedec9cdb9e8b7ce7ac80a1b5cc711ed/68747470733a2f2f692e696d6775722e636f6d2f35565973316d322e706e67"
+        }
+    },
+    {
+        "model": "tools.tool",
+        "pk": 8,
+        "fields": {
+            "name": "ZAP",
+            "command": "zaproxy",
+            "version": null,
+            "version_argument": null,
+            "output_format": "xml",
+            "reference": "https://www.zaproxy.org/",
+            "icon": "https://www.kali.org/tools/zaproxy/images/zaproxy-logo.svg"
+        }
+    },
+    {
+        "model": "tools.tool",
+        "pk": 9,
+        "fields": {
+            "name": "SearchSploit",
+            "command": "searchsploit",
+            "version": null,
+            "version_argument": null,
+            "output_format": "json",
+            "reference": "https://www.exploit-db.com/searchsploit",
+            "icon": "https://www.kali.org/tools/exploitdb/images/exploitdb-logo.svg"
+        }
+    },
+    {
+        "model": "tools.tool",
+        "pk": 10,
+        "fields": {
+            "name": "Metasploit",
+            "command": "msfconsole",
+            "version": null,
+            "version_argument": null,
+            "output_format": null,
+            "reference": "https://www.metasploit.com/",
+            "icon": "https://www.kali.org/tools/metasploit-framework/images/metasploit-framework-logo.svg"
+        }
+    },
+    {
+        "model": "tools.tool",
+        "pk": 11,
+        "fields": {
+            "name": "Log4j Scan",
+            "command": "python3",
+            "version": null,
+            "version_argument": null,
+            "output_format": null,
+            "reference": "https://github.com/fullhunt/log4j-scan",
+            "icon": "https://fullhunt.io/static/theme/images/logo/favicon.ico"
+        }
+    },
+    {
+        "model": "tools.tool",
+        "pk": 12,
+        "fields": {
+            "name": "EmailFinder",
+            "command": "emailfinder",
+            "version": null,
+            "version_argument": null,
+            "output_format": null,
+            "reference": "https://github.com/Josue87/EmailFinder",
+            "icon": null
+        }
+    },
+    {
+        "model": "tools.tool",
+        "pk": 13,
+        "fields": {
+            "name": "EmailHarvester",
+            "command": "emailharvester",
+            "version": null,
+            "version_argument": null,
+            "output_format": "txt",
+            "reference": "https://github.com/maldevel/EmailHarvester",
+            "icon": null
+        }
+    },
+    {
+        "model": "tools.tool",
+        "pk": 14,
+        "fields": {
+            "name": "JoomScan",
+            "command": "joomscan",
+            "version": null,
+            "version_argument": null,
+            "output_format": null,
+            "reference": "https://github.com/OWASP/joomscan",
+            "icon": "https://raw.githubusercontent.com/rezasp/Trash/master/joomscan.png"
+        }
+    },
+    {
+        "model": "tools.tool",
+        "pk": 15,
+        "fields": {
+            "name": "GitLeaks",
+            "command": "gitleaks",
+            "version": null,
+            "version_argument": null,
+            "output_format": "json",
+            "reference": "https://github.com/zricethezav/gitleaks",
+            "icon": "https://gitleaks.io/favicon.ico"
+        }
+    },
+    {
+        "model": "tools.tool",
+        "pk": 16,
+        "fields": {
+            "name": "SSH Audit",
+            "command": "ssh-audit",
+            "version": null,
+            "version_argument": null,
+            "output_format": null,
+            "reference": "https://github.com/jtesta/ssh-audit",
+            "icon": null
+        }
+    },
+    {
+        "model": "tools.tool",
+        "pk": 17,
+        "fields": {
+            "name": "SMBMap",
+            "command": "smbmap",
+            "version": null,
+            "version_argument": null,
+            "output_format": null,
+            "reference": "https://github.com/ShawnDEvans/smbmap",
+            "icon": null
+        }
+    },
+    {
+        "model": "tools.tool",
+        "pk": 18,
+        "fields": {
+            "name": "Nuclei",
+            "command": "nuclei",
+            "version": null,
+            "version_argument": null,
+            "output_format": "json",
+            "reference": "https://nuclei.projectdiscovery.io",
+            "icon": "https://nuclei.projectdiscovery.io/static/favicon.png"
+        }
+    },
+    {
+        "model": "tools.tool",
+        "pk": 19,
+        "fields": {
+            "name": "Spring4Shell Scan",
+            "command": "python3",
+            "version": null,
+            "version_argument": null,
+            "output_format": null,
+            "reference": "https://github.com/fullhunt/spring4shell-scan",
+            "icon": "https://fullhunt.io/static/theme/images/logo/favicon.ico"
+        }
+    },
+    {
+        "model": "tools.tool",
+        "pk": 20,
+        "fields": {
+            "name": "Gobuster",
+            "command": "gobuster",
+            "version": null,
+            "version_argument": null,
+            "output_format": "txt",
+            "reference": "https://github.com/OJ/gobuster",
+            "icon": null
+        }
+    }
+]

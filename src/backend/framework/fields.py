@@ -1,4 +1,4 @@
-from typing import List
+from typing import Any, List
 
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema_field
@@ -72,35 +72,10 @@ class ProtectedSecretField(Field):
 
 @extend_schema_field({"type": "array", "items": {"type": "string"}})
 class StringAsListField(Field):
-    def __init__(
-        self,
-        validator: callable = None,
-        separator: str = ",",
-        read_only=False,
-        write_only=False,
-        required=None,
-        source=None,
-        label=None,
-        help_text=None,
-        style=None,
-        error_messages=None,
-        validators=None,
-        allow_null=False,
-    ):
+    def __init__(self, validator: callable = None, separator: str = ",", **kwargs: Any):
         self.validator = validator
         self.separator = separator
-        super().__init__(
-            read_only=read_only,
-            write_only=write_only,
-            required=required,
-            source=source,
-            label=label,
-            help_text=help_text,
-            style=style,
-            error_messages=error_messages,
-            validators=validators,
-            allow_null=allow_null,
-        )
+        super().__init__(**kwargs)
 
     def to_representation(self, value: str) -> List[str]:
         return (value or "").split(self.separator)
@@ -110,3 +85,34 @@ class StringAsListField(Field):
             for item in value:
                 self.validator(item)
         return self.separator.join(value)
+
+
+@extend_schema_field(OpenApiTypes.STR)
+class IntegerChoicesField(Field):
+    """Serializer field to manage IntegerChoices values."""
+
+    def __init__(self, model: Any, **kwargs: Any):
+        self.model = model
+        super().__init__(**kwargs)
+
+    def to_representation(self, value: int) -> str:
+        """Return text value to send to the client.
+
+        Args:
+            value (int): Integer value of the IntegerChoices field
+
+        Returns:
+            str: String value associated to the integer
+        """
+        return self.model(value).name.capitalize()
+
+    def to_internal_value(self, data: str) -> int:
+        """Return integer value to be stored in database.
+
+        Args:
+            data (str): String value of the IntegerChoices field
+
+        Returns:
+            int: Integer value associated to the string
+        """
+        return self.model[data.upper()].value

@@ -197,9 +197,7 @@ class ResetPasswordViewSet(GenericViewSet):
     """User ViewSet that includes reset password feature."""
 
     queryset = User.objects.all()
-    # No class required because all users can reset his password
-    # This operation can be performed from an user session or not
-    permission_classes: List[BasePermission] = []
+    permission_classes = [IsNotAuthenticated]
 
     def _create_or_update(
         self, request: Request, serializer_class: Serializer

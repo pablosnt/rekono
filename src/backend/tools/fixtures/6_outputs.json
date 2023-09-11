@@ -1,0 +1,770 @@
+[
+    {
+        "model": "tools.output",
+        "pk": 1,
+        "fields": {
+            "configuration": 1,
+            "type": 2
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 2,
+        "fields": {
+            "configuration": 1,
+            "type": 3
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 3,
+        "fields": {
+            "configuration": 2,
+            "type": 2
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 4,
+        "fields": {
+            "configuration": 2,
+            "type": 3
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 5,
+        "fields": {
+            "configuration": 3,
+            "type": 2
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 6,
+        "fields": {
+            "configuration": 3,
+            "type": 3
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 7,
+        "fields": {
+            "configuration": 3,
+            "type": 5
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 8,
+        "fields": {
+            "configuration": 4,
+            "type": 2
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 9,
+        "fields": {
+            "configuration": 4,
+            "type": 3
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 10,
+        "fields": {
+            "configuration": 4,
+            "type": 5
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 11,
+        "fields": {
+            "configuration": 5,
+            "type": 2
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 12,
+        "fields": {
+            "configuration": 5,
+            "type": 3
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 13,
+        "fields": {
+            "configuration": 6,
+            "type": 2
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 14,
+        "fields": {
+            "configuration": 6,
+            "type": 3
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 15,
+        "fields": {
+            "configuration": 6,
+            "type": 5
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 16,
+        "fields": {
+            "configuration": 7,
+            "type": 2
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 17,
+        "fields": {
+            "configuration": 7,
+            "type": 3
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 18,
+        "fields": {
+            "configuration": 8,
+            "type": 2
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 19,
+        "fields": {
+            "configuration": 8,
+            "type": 3
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 20,
+        "fields": {
+            "configuration": 9,
+            "type": 2
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 21,
+        "fields": {
+            "configuration": 9,
+            "type": 3
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 22,
+        "fields": {
+            "configuration": 9,
+            "type": 5
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 23,
+        "fields": {
+            "configuration": 10,
+            "type": 2
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 24,
+        "fields": {
+            "configuration": 10,
+            "type": 3
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 25,
+        "fields": {
+            "configuration": 10,
+            "type": 5
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 26,
+        "fields": {
+            "configuration": 11,
+            "type": 2
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 27,
+        "fields": {
+            "configuration": 11,
+            "type": 3
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 28,
+        "fields": {
+            "configuration": 12,
+            "type": 2
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 29,
+        "fields": {
+            "configuration": 12,
+            "type": 3
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 30,
+        "fields": {
+            "configuration": 12,
+            "type": 5
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 31,
+        "fields": {
+            "configuration": 13,
+            "type": 2
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 32,
+        "fields": {
+            "configuration": 13,
+            "type": 3
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 33,
+        "fields": {
+            "configuration": 13,
+            "type": 5
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 34,
+        "fields": {
+            "configuration": 13,
+            "type": 6
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 35,
+        "fields": {
+            "configuration": 14,
+            "type": 2
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 36,
+        "fields": {
+            "configuration": 14,
+            "type": 3
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 37,
+        "fields": {
+            "configuration": 14,
+            "type": 5
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 38,
+        "fields": {
+            "configuration": 14,
+            "type": 6
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 39,
+        "fields": {
+            "configuration": 15,
+            "type": 4
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 40,
+        "fields": {
+            "configuration": 16,
+            "type": 4
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 41,
+        "fields": {
+            "configuration": 17,
+            "type": 4
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 42,
+        "fields": {
+            "configuration": 18,
+            "type": 4
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 43,
+        "fields": {
+            "configuration": 19,
+            "type": 1
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 44,
+        "fields": {
+            "configuration": 20,
+            "type": 1
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 45,
+        "fields": {
+            "configuration": 21,
+            "type": 4
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 46,
+        "fields": {
+            "configuration": 21,
+            "type": 6
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 47,
+        "fields": {
+            "configuration": 22,
+            "type": 5
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 48,
+        "fields": {
+            "configuration": 22,
+            "type": 6
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 49,
+        "fields": {
+            "configuration": 23,
+            "type": 5
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 50,
+        "fields": {
+            "configuration": 23,
+            "type": 6
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 51,
+        "fields": {
+            "configuration": 24,
+            "type": 4
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 52,
+        "fields": {
+            "configuration": 24,
+            "type": 5
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 53,
+        "fields": {
+            "configuration": 24,
+            "type": 6
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 54,
+        "fields": {
+            "configuration": 24,
+            "type": 7
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 55,
+        "fields": {
+            "configuration": 25,
+            "type": 4
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 56,
+        "fields": {
+            "configuration": 25,
+            "type": 6
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 57,
+        "fields": {
+            "configuration": 26,
+            "type": 9
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 58,
+        "fields": {
+            "configuration": 27,
+            "type": 9
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 59,
+        "fields": {
+            "configuration": 28,
+            "type": 6
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 60,
+        "fields": {
+            "configuration": 29,
+            "type": 6
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 61,
+        "fields": {
+            "configuration": 30,
+            "type": 1
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 62,
+        "fields": {
+            "configuration": 31,
+            "type": 1
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 63,
+        "fields": {
+            "configuration": 32,
+            "type": 4
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 64,
+        "fields": {
+            "configuration": 32,
+            "type": 5
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 65,
+        "fields": {
+            "configuration": 32,
+            "type": 6
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 66,
+        "fields": {
+            "configuration": 32,
+            "type": 8
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 67,
+        "fields": {
+            "configuration": 33,
+            "type": 6
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 68,
+        "fields": {
+            "configuration": 33,
+            "type": 7
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 69,
+        "fields": {
+            "configuration": 34,
+            "type": 5
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 70,
+        "fields": {
+            "configuration": 34,
+            "type": 6
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 71,
+        "fields": {
+            "configuration": 35,
+            "type": 4
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 72,
+        "fields": {
+            "configuration": 36,
+            "type": 4
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 73,
+        "fields": {
+            "configuration": 37,
+            "type": 2
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 74,
+        "fields": {
+            "configuration": 37,
+            "type": 3
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 75,
+        "fields": {
+            "configuration": 37,
+            "type": 4
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 76,
+        "fields": {
+            "configuration": 37,
+            "type": 5
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 77,
+        "fields": {
+            "configuration": 37,
+            "type": 6
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 78,
+        "fields": {
+            "configuration": 37,
+            "type": 7
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 79,
+        "fields": {
+            "configuration": 38,
+            "type": 2
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 80,
+        "fields": {
+            "configuration": 38,
+            "type": 3
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 81,
+        "fields": {
+            "configuration": 38,
+            "type": 4
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 82,
+        "fields": {
+            "configuration": 38,
+            "type": 5
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 83,
+        "fields": {
+            "configuration": 38,
+            "type": 6
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 84,
+        "fields": {
+            "configuration": 38,
+            "type": 7
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 85,
+        "fields": {
+            "configuration": 39,
+            "type": 5
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 86,
+        "fields": {
+            "configuration": 39,
+            "type": 6
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 87,
+        "fields": {
+            "configuration": 40,
+            "type": 5
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 88,
+        "fields": {
+            "configuration": 40,
+            "type": 6
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 89,
+        "fields": {
+            "configuration": 41,
+            "type": 6
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 90,
+        "fields": {
+            "configuration": 42,
+            "type": 6
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 91,
+        "fields": {
+            "configuration": 43,
+            "type": 6
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 92,
+        "fields": {
+            "configuration": 44,
+            "type": 6
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 93,
+        "fields": {
+            "configuration": 45,
+            "type": 6
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 94,
+        "fields": {
+            "configuration": 46,
+            "type": 1
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 95,
+        "fields": {
+            "configuration": 47,
+            "type": 1
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 96,
+        "fields": {
+            "configuration": 48,
+            "type": 4
+        }
+    }
+]

@@ -33,6 +33,7 @@ urlpatterns = [
     path("api/", include("settings.urls")),
     path("api/", include("target_ports.urls")),
     path("api/", include("targets.urls")),
+    path("api/", include("tools.urls")),
     path("api/", include("users.urls")),
     path("api/", include("wordlists.urls")),
     # OpenAPI specification

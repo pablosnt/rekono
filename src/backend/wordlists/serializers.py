@@ -8,7 +8,7 @@ from users.serializers import SimpleUserSerializer
 from wordlists.models import Wordlist
 
 
-class WordlistSerializer(ModelSerializer, LikeSerializer):
+class WordlistSerializer(LikeSerializer):
     """Serializer to manage wordlists via API."""
 
     # Wordlist file, to allow the wordlist files upload to the server

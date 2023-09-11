@@ -1,10 +1,10 @@
 from typing import Any
 
-from rest_framework.serializers import Serializer, SerializerMethodField
+from rest_framework.serializers import ModelSerializer, SerializerMethodField
 from users.models import User
 
 
-class LikeSerializer(Serializer):
+class LikeSerializer(ModelSerializer):
     """Common serializer for all models that can be liked."""
 
     liked = SerializerMethodField(method_name="is_liked_by_user", read_only=True)

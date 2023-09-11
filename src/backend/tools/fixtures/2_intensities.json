@@ -1,0 +1,317 @@
+[
+    {
+        "model": "tools.intensity",
+        "pk": 1,
+        "fields": {
+            "tool": 1,
+            "argument": "-T0",
+            "value": 1
+        }
+    },
+    {
+        "model": "tools.intensity",
+        "pk": 2,
+        "fields": {
+            "tool": 1,
+            "argument": "-T2",
+            "value": 2
+        }
+    },
+    {
+        "model": "tools.intensity",
+        "pk": 3,
+        "fields": {
+            "tool": 1,
+            "argument": "-T3",
+            "value": 3
+        }
+    },
+    {
+        "model": "tools.intensity",
+        "pk": 4,
+        "fields": {
+            "tool": 1,
+            "argument": "-T4",
+            "value": 4
+        }
+    },
+    {
+        "model": "tools.intensity",
+        "pk": 5,
+        "fields": {
+            "tool": 1,
+            "argument": "-T5",
+            "value": 5
+        }
+    },
+    {
+        "model": "tools.intensity",
+        "pk": 6,
+        "fields": {
+            "tool": 2,
+            "argument": "-t 1 -s 1",
+            "value": 1
+        }
+    },
+    {
+        "model": "tools.intensity",
+        "pk": 7,
+        "fields": {
+            "tool": 2,
+            "argument": "-t 10 -s 1",
+            "value": 2
+        }
+    },
+    {
+        "model": "tools.intensity",
+        "pk": 8,
+        "fields": {
+            "tool": 2,
+            "argument": "-t 30",
+            "value": 3
+        }
+    },
+    {
+        "model": "tools.intensity",
+        "pk": 9,
+        "fields": {
+            "tool": 2,
+            "argument": "-t 60",
+            "value": 4
+        }
+    },
+    {
+        "model": "tools.intensity",
+        "pk": 10,
+        "fields": {
+            "tool": 2,
+            "argument": "-t 100",
+            "value": 5
+        }
+    },
+    {
+        "model": "tools.intensity",
+        "pk": 11,
+        "fields": {
+            "tool": 3,
+            "argument": "",
+            "value": 1
+        }
+    },
+    {
+        "model": "tools.intensity",
+        "pk": 12,
+        "fields": {
+            "tool": 4,
+            "argument": "",
+            "value": 4
+        }
+    },
+    {
+        "model": "tools.intensity",
+        "pk": 13,
+        "fields": {
+            "tool": 5,
+            "argument": "--sleep=100",
+            "value": 1
+        }
+    },
+    {
+        "model": "tools.intensity",
+        "pk": 14,
+        "fields": {
+            "tool": 5,
+            "argument": "--sleep=50",
+            "value": 2
+        }
+    },
+    {
+        "model": "tools.intensity",
+        "pk": 15,
+        "fields": {
+            "tool": 5,
+            "argument": "",
+            "value": 3
+        }
+    },
+    {
+        "model": "tools.intensity",
+        "pk": 16,
+        "fields": {
+            "tool": 6,
+            "argument": "",
+            "value": 3
+        }
+    },
+    {
+        "model": "tools.intensity",
+        "pk": 17,
+        "fields": {
+            "tool": 7,
+            "argument": "--light-scan",
+            "value": 2
+        }
+    },
+    {
+        "model": "tools.intensity",
+        "pk": 18,
+        "fields": {
+            "tool": 7,
+            "argument": "",
+            "value": 3
+        }
+    },
+    {
+        "model": "tools.intensity",
+        "pk": 19,
+        "fields": {
+            "tool": 8,
+            "argument": "",
+            "value": 4
+        }
+    },
+    {
+        "model": "tools.intensity",
+        "pk": 20,
+        "fields": {
+            "tool": 9,
+            "argument": "",
+            "value": 1
+        }
+    },
+    {
+        "model": "tools.intensity",
+        "pk": 21,
+        "fields": {
+            "tool": 10,
+            "argument": "",
+            "value": 1
+        }
+    },
+    {
+        "model": "tools.intensity",
+        "pk": 22,
+        "fields": {
+            "tool": 11,
+            "argument": "",
+            "value": 4
+        }
+    },
+    {
+        "model": "tools.intensity",
+        "pk": 23,
+        "fields": {
+            "tool": 12,
+            "argument": "",
+            "value": 1
+        }
+    },
+    {
+        "model": "tools.intensity",
+        "pk": 24,
+        "fields": {
+            "tool": 13,
+            "argument": "",
+            "value": 1
+        }
+    },
+    {
+        "model": "tools.intensity",
+        "pk": 25,
+        "fields": {
+            "tool": 14,
+            "argument": "",
+            "value": 3
+        }
+    },
+    {
+        "model": "tools.intensity",
+        "pk": 26,
+        "fields": {
+            "tool": 15,
+            "argument": "",
+            "value": 3
+        }
+    },
+    {
+        "model": "tools.intensity",
+        "pk": 27,
+        "fields": {
+            "tool": 16,
+            "argument": "",
+            "value": 3
+        }
+    },
+    {
+        "model": "tools.intensity",
+        "pk": 28,
+        "fields": {
+            "tool": 17,
+            "argument": "",
+            "value": 3
+        }
+    },
+    {
+        "model": "tools.intensity",
+        "pk": 29,
+        "fields": {
+            "tool": 18,
+            "argument": "",
+            "value": 4
+        }
+    },
+    {
+        "model": "tools.intensity",
+        "pk": 30,
+        "fields": {
+            "tool": 19,
+            "argument": "",
+            "value": 4
+        }
+    },
+    {
+        "model": "tools.intensity",
+        "pk": 31,
+        "fields": {
+            "tool": 20,
+            "argument": "--threads 1",
+            "value": 1
+        }
+    },
+    {
+        "model": "tools.intensity",
+        "pk": 32,
+        "fields": {
+            "tool": 20,
+            "argument": "--threads 5",
+            "value": 2
+        }
+    },
+    {
+        "model": "tools.intensity",
+        "pk": 33,
+        "fields": {
+            "tool": 20,
+            "argument": "--threads 10",
+            "value": 3
+        }
+    },
+    {
+        "model": "tools.intensity",
+        "pk": 34,
+        "fields": {
+            "tool": 20,
+            "argument": "--threads 20",
+            "value": 4
+        }
+    },
+    {
+        "model": "tools.intensity",
+        "pk": 35,
+        "fields": {
+            "tool": 20,
+            "argument": "--threads 50",
+            "value": 5
+        }
+    }
+]

@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     "settings",
     "target_ports",
     "targets",
+    "tools",
     "users",
     "wordlists",
 ]
@@ -194,14 +195,14 @@ REST_FRAMEWORK: Dict[str, Any] = {
     ],
     "DEFAULT_PAGINATION_CLASS": "framework.pagination.Pagination",
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "security.authentication.api.ApiAuthentication",
-        "rest_framework_simplejwt.authentication.JWTAuthentication",
+        # "security.authentication.api.ApiAuthentication",
+        # "rest_framework_simplejwt.authentication.JWTAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
-        "rest_framework.permissions.IsAuthenticated",
-        "rest_framework.permissions.DjangoModelPermissions",
-        "security.authorization.permissions.ProjectMemberPermission",
-        "security.authorization.permissions.OwnerPermission",
+        # "rest_framework.permissions.IsAuthenticated",
+        # "rest_framework.permissions.DjangoModelPermissions",
+        # "security.authorization.permissions.ProjectMemberPermission",
+        # "security.authorization.permissions.OwnerPermission",
     ],
     "EXCEPTION_HANDLER": "framework.exceptions.exceptions_handler",
 }

@@ -74,7 +74,7 @@ class BaseViewSet(ModelViewSet):
         super().perform_create(serializer)
 
 
-class LikeViewSet(GenericViewSet):
+class LikeViewSet(BaseViewSet):
     """Base ViewSet that includes the like and dislike features."""
 
     def get_queryset(self) -> QuerySet:

@@ -1,6 +1,5 @@
 # from api.views import CreateWithUserViewSet
-from framework.views import BaseViewSet, LikeViewSet
-from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated
+from framework.views import LikeViewSet
 from rest_framework.serializers import Serializer
 from wordlists.filters import WordlistFilter
 from wordlists.models import Wordlist
@@ -9,7 +8,7 @@ from wordlists.serializers import UpdateWordlistSerializer, WordlistSerializer
 # Create your views here.
 
 
-class WordlistViewSet(BaseViewSet, LikeViewSet):
+class WordlistViewSet(LikeViewSet):
     """Wordlist ViewSet that includes: get, retrieve, create, update, delete, like and dislike features."""
 
     queryset = Wordlist.objects.all()
