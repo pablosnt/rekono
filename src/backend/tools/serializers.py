@@ -1,5 +1,3 @@
-from typing import List
-
 from framework.fields import IntegerChoicesField
 from framework.serializers import LikeSerializer
 from input_types.serializers import InputTypeSerializer

@@ -1,6 +1,4 @@
 from framework.views import BaseViewSet, LikeViewSet
-from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated
-from security.authorization.permissions import IsAuditor
 from tools.filters import ConfigurationFilter, ToolFilter
 from tools.models import Configuration, Tool
 from tools.serializers import ConfigurationSerializer, ToolSerializer

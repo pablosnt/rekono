@@ -19,5 +19,3 @@ class AuthenticationViewSet(BaseViewSet):
         "post",
         "delete",
     ]
-
-    # members_field = "target_port__target__project__members"

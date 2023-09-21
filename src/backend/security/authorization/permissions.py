@@ -1,12 +1,11 @@
 from typing import Any
 
-# from processes.models import Process, Step
-from wordlists.models import Wordlist
+from processes.models import Process, Step
 from rest_framework.permissions import BasePermission
 from rest_framework.request import Request
 from rest_framework.views import View
 from security.authorization.roles import Role
-
+from wordlists.models import Wordlist
 
 
 class IsNotAuthenticated(BasePermission):
@@ -89,13 +88,10 @@ class OwnerPermission(BasePermission):
         Returns:
             Any: Object with creator user
         """
-        instance = None
-        match obj.__class__:
-            case Wordlist: # | Process:
-                instance = obj
-            # case Step:
-            #     instance = obj.process
-        return instance
+        if obj.__class__ in [Wordlist, Process]:
+            return obj
+        elif obj.__class__ == Step:
+            return obj.process
 
     def has_object_permission(self, request: Request, view: View, obj: Any) -> bool:
         """Check if current user can access an object based on HTTP method and creator user.
@@ -110,8 +106,8 @@ class OwnerPermission(BasePermission):
         """
         instance = self.get_instance(obj)  # Get object with creator user
         return (
-            not instance or
-            request.method == 'GET' or
-            instance.owner == request.user or
-            IsAdmin().has_permission(request, view)
+            not instance
+            or request.method == "GET"
+            or instance.owner == request.user
+            or IsAdmin().has_permission(request, view)
         )

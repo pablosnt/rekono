@@ -11,7 +11,12 @@ class BaseModel(models.Model):
         abstract = True
 
     def get_project(self) -> Any:
-        return None
+        filter_field = self.__class__.get_project_field()
+        if filter_field:
+            project = self
+            for field in filter_field.split("__"):
+                project = getattr(project, field)
+            return project
 
     @classmethod
     def get_project_field(cls) -> str:

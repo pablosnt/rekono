@@ -20,6 +20,3 @@ class TargetViewSet(BaseViewSet):
         "post",
         "delete",
     ]
-
-    # # Project members field used for authorization purposes
-    # members_field = "project__members"

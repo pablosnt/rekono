@@ -76,14 +76,6 @@ class Authentication(BaseInput):
         """
         return f"{self.target_port.__str__()} - {self.name}"
 
-    def get_project(self) -> Project:
-        """Get the related project for the instance. This will be used for authorization purposes.
-
-        Returns:
-            Project: Related project entity
-        """
-        return self.target_port.target.project
-
     @classmethod
     def get_project_field(cls) -> str:
         return "target_port__target__project"

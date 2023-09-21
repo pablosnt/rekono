@@ -7,6 +7,7 @@ from typing import Any
 
 from django.core.validators import RegexValidator
 from django.forms import ValidationError
+from django.utils import timezone
 from framework.fields import StringAsListField
 from rekono.settings import CONFIG
 from settings.models import Settings
@@ -103,6 +104,19 @@ class TargetValidator(RegexValidator):
                         )
                 except ipaddress.AddressValueError:
                     pass
+
+
+class TimeValidator:
+    def __init__(self, code: str):
+        self.code = code
+
+    def future_datetime(self, datetime: Any) -> None:
+        if datetime <= timezone.now():
+            raise ValidationError("Datetime must be future", code=self.code)
+
+    def time_amount(self, amount: int) -> None:
+        if amount > 1000 or amount <= 0:
+            raise ValidationError("Time value is too high", code=self.code)
 
 
 class PasswordValidator:

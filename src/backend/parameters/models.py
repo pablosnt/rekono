@@ -59,14 +59,6 @@ class InputTechnology(BaseInput):
         base = f"{self.target.__str__()} - {self.name}"
         return f"{base} - {self.version}" if self.version else base
 
-    def get_project(self) -> Project:
-        """Get the related project for the instance. This will be used for authorization purposes.
-
-        Returns:
-            Project: Related project entity
-        """
-        return self.target.project
-
     @classmethod
     def get_project_field(cls) -> str:
         return "target__project"
@@ -114,14 +106,6 @@ class InputVulnerability(BaseInput):
             str: String value that identifies this instance
         """
         return f"{self.target.__str__()} - {self.cve}"
-
-    def get_project(self) -> Project:
-        """Get the related project for the instance. This will be used for authorization purposes.
-
-        Returns:
-            Project: Related project entity
-        """
-        return self.target.project
 
     @classmethod
     def get_project_field(cls) -> str:

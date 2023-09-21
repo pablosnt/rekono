@@ -99,14 +99,6 @@ class Target(BaseInput):
         """
         return self.target
 
-    def get_project(self) -> Project:
-        """Get the related project for the instance. This will be used for authorization purposes.
-
-        Returns:
-            Project: Related project entity
-        """
-        return self.project
-
     @classmethod
     def get_project_field(cls) -> str:
         return "project"

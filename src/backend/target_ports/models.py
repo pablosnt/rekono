@@ -72,14 +72,6 @@ class TargetPort(BaseInput):
         """
         return f"{self.target.target} - {self.port}"
 
-    def get_project(self) -> Project:
-        """Get the related project for the instance. This will be used for authorization purposes.
-
-        Returns:
-            Project: Related project entity
-        """
-        return self.target.project
-
     @classmethod
     def get_project_field(cls) -> str:
         return "target__project"
