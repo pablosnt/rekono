@@ -17,6 +17,7 @@ class ToolsConfig(AppConfig):
         """Run code as soon as the registry is fully populated."""
         # Configure fixtures to be loaded after migration
         post_migrate.connect(self.load_tools_models, sender=self)
+        post_migrate.connect(self.update_tools_status, sender=self)
 
     def load_tools_models(self, **kwargs: Any) -> None:
         """Load tools fixtures in database."""
@@ -30,3 +31,9 @@ class ToolsConfig(AppConfig):
             os.path.join(path, "5_inputs.json"),
             os.path.join(path, "6_outputs.json"),
         )
+
+    def update_tools_status(self, **kwargs: Any) -> None:
+        from tools.models import Tool
+
+        for tool in Tool.objects.all():
+            tool.update_status()

@@ -9,6 +9,8 @@ class ToolFilter(LikeFilter):
         fields = {
             "name": ["exact", "icontains"],
             "command": ["exact", "icontains"],
+            "script": ["exact", "icontains"],
+            "is_installed": ["exact"],
             "version": ["exact", "icontains"],
             "configurations": ["exact"],
             "configurations__name": ["exact", "icontains"],

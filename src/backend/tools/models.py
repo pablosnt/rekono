@@ -1,9 +1,14 @@
 import importlib
+import os
+import re
+import shutil
+import subprocess
 from typing import Any
 
 from django.db import models
 from framework.models import BaseLike, BaseModel
 from input_types.models import InputType
+from rekono.settings import CONFIG
 from tools.enums import Intensity as IntensityEnum
 from tools.enums import Stage
 
@@ -13,28 +18,73 @@ from tools.enums import Stage
 class Tool(BaseLike):
     name = models.TextField(max_length=30, unique=True)
     command = models.TextField(max_length=30)
+    script = models.TextField(max_length=100, blank=True, null=True)
+    script_directory_property = models.TextField(max_length=100, blank=True, null=True)
+    run_directory_property = models.TextField(max_length=100, blank=True, null=True)
+    ignore_exit_code = models.BooleanField(default=False)
+    is_installed = models.BooleanField(default=False)
     version = models.TextField(max_length=100, blank=True, null=True)
     version_argument = models.TextField(max_length=30, blank=True, null=True)
     output_format = models.TextField(max_length=5, blank=True, null=True)
     reference = models.TextField(max_length=250, blank=True, null=True)
     icon = models.TextField(max_length=250, blank=True, null=True)
 
-    # TODO: replace typing by BaseParser
     def get_parser_class(self) -> Any:
         try:
             # nosemgrep: python.lang.security.audit.non-literal-import.non-literal-import
-            tools_module = importlib.import_module(
-                f'tools.tools.{self.name.lower().replace(" ", "_")}'
+            parser_module = importlib.import_module(
+                f'tools.parsers.{self.name.lower().replace(" ", "_")}'
             )
-            # Get tool class
-            tool_class = getattr(
-                tools_module,
+            parser_class = getattr(
+                parser_module,
                 self.name[0] + self.name[1:].replace(" ", ""),
             )
         except (AttributeError, ModuleNotFoundError):  # Error during import
-            tools_module = importlib.import_module("tools.parsers.base")
-            tool_class = getattr(tools_module, "BaseParser")
-        return tool_class
+            parser_module = importlib.import_module("tools.parsers.base")
+            parser_class = getattr(parser_module, "BaseParser")
+        return parser_class
+
+    def update_status(self) -> None:
+        self.is_installed = (
+            self.command
+            and shutil.which(self.command) is not None
+            and (
+                (not self.script and not self.script_directory_property)
+                or (
+                    os.path.isdir(
+                        getattr(CONFIG, self.script_directory_property.lower())
+                    )
+                    and os.path.isfile(
+                        os.path.join(
+                            getattr(CONFIG, self.script_directory_property.lower()),
+                            self.script,
+                        )
+                    )
+                )
+            )
+        )
+        update_fields = ["is_installed"]
+        if self.is_installed:
+            self.version = self._parse_version()
+            update_fields.append("version")
+        self.save(update_fields=update_fields)
+
+    def _parse_version(self) -> str:
+        version_regex = r"(?!m)[a-z]?[\d]+\.[\d]+\.[\d]*-?[a-z]*"
+        if self.version_argument:
+            process = subprocess.run(
+                [i for i in [self.command, self.script, self.version_argument] if i],
+                capture_output=True,
+            )
+            if process.returncode == 0:
+                output = (process.stdout or process.stderr).decode("utf-8").lower()
+                version = re.search(
+                    version_regex,
+                    # zaproxy returns the Java version at the first line
+                    re.sub("java version [^\s]*", "", output),
+                )
+                if version:
+                    return version.group()
 
     def __str__(self) -> str:
         """Instance representation in text format.

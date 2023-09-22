@@ -70,6 +70,8 @@ class ToolSerializer(LikeSerializer):
             "id",
             "name",
             "command",
+            "script",
+            "is_installed",
             "version",
             "reference",
             "icon",

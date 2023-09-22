@@ -2,7 +2,7 @@ from typing import Any
 
 from django.apps import AppConfig
 from django.db.models.signals import post_migrate
-from security.authorization.roles import get_roles
+from security.authorization.roles import ROLES
 
 
 class UsersConfig(AppConfig):
@@ -19,11 +19,11 @@ class UsersConfig(AppConfig):
         permission_model = kwargs["apps"].get_model(
             app_label="auth", model_name="permission"
         )
-        for role, permissions in get_roles().items():
-            group, _ = group_model.objects.get_or_create(name=role)
-            group_permissions = []
-            for permission_id in permissions:  # For each permission
-                # Get permission model
-                permission = permission_model.objects.get(codename=permission_id)
-                group_permissions.append(permission)
-            group.permissions.set(group_permissions)
+        for entity, permissions in ROLES.items():
+            for permission, assigned_roles in permissions.items():
+                permission = permission_model.objects.get(
+                    codename=f"{permission}_{entity}"
+                )
+                for assigned_role in assigned_roles:
+                    group, _ = group_model.objects.get_or_create(name=assigned_role)
+                    group.permissions.add(permission)

@@ -14,10 +14,10 @@ class WordlistsConfig(AppConfig):
     def ready(self) -> None:
         """Run code as soon as the registry is fully populated."""
         # Configure fixtures to be loaded after migration
-        post_migrate.connect(self.load_wordlists_model, sender=self)
+        post_migrate.connect(self.load_wordlists_models, sender=self)
         post_migrate.connect(self.update_default_wordlists_size, sender=self)
 
-    def load_wordlists_model(self, **kwargs: Any) -> None:
+    def load_wordlists_models(self, **kwargs: Any) -> None:
         """Load input types fixtures in database."""
         from wordlists.models import Wordlist
 

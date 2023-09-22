@@ -11,7 +11,7 @@ class Role(models.TextChoices):
     READER = "Reader"
 
 
-PERMISSIONS = {
+ROLES = {
     "apitoken": {
         "view": [Role.ADMIN, Role.AUDITOR, Role.READER],
         "add": [Role.ADMIN, Role.AUDITOR, Role.READER],
@@ -102,18 +102,18 @@ PERMISSIONS = {
         "change": [Role.ADMIN, Role.AUDITOR],
         "delete": [],
     },
-    # "process": {
-    #     "view": [Role.ADMIN, Role.AUDITOR],
-    #     "add": [Role.ADMIN, Role.AUDITOR],
-    #     "change": [Role.ADMIN, Role.AUDITOR],
-    #     "delete": [Role.ADMIN, Role.AUDITOR],
-    # },
-    # "step": {
-    #     "view": [Role.ADMIN, Role.AUDITOR],
-    #     "add": [Role.ADMIN, Role.AUDITOR],
-    #     "change": [Role.ADMIN, Role.AUDITOR],
-    #     "delete": [Role.ADMIN, Role.AUDITOR],
-    # },
+    "process": {
+        "view": [Role.ADMIN, Role.AUDITOR],
+        "add": [Role.ADMIN, Role.AUDITOR],
+        "change": [Role.ADMIN, Role.AUDITOR],
+        "delete": [Role.ADMIN, Role.AUDITOR],
+    },
+    "step": {
+        "view": [Role.ADMIN, Role.AUDITOR],
+        "add": [Role.ADMIN, Role.AUDITOR],
+        "change": [Role.ADMIN, Role.AUDITOR],
+        "delete": [Role.ADMIN, Role.AUDITOR],
+    },
     "tool": {
         "view": [Role.ADMIN, Role.AUDITOR],
         "add": [],
@@ -181,16 +181,3 @@ PERMISSIONS = {
         "delete": [Role.ADMIN, Role.AUDITOR],
     },
 }
-
-
-def get_roles() -> Dict[Role, List[str]]:
-    roles = {
-        Role.ADMIN.value: [],
-        Role.AUDITOR.value: [],
-        Role.READER.value: [],
-    }
-    for entity, permissions in PERMISSIONS.items():
-        for permission, assigned_roles in permissions.items():
-            for assigned_role in assigned_roles:
-                roles[assigned_role].append(f"{permission}_{entity}")
-    return roles
