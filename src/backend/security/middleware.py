@@ -67,9 +67,7 @@ class SecurityMiddleware:
     def _get_forwarded_address(self, request: HttpRequest) -> str:
         x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
         if x_forwarded_for and CONFIG.trusted_proxy:
-            if "," in x_forwarded_for:
-                x_forwarded_for = x_forwarded_for.split(",", 1)[0]
-            return x_forwarded_for
+            return x_forwarded_for.split(",", 1)[0]
 
     def _http_options(self, request: HttpRequest) -> Response:
         response = Response(status=status.HTTP_200_OK)

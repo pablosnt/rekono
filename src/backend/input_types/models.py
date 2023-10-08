@@ -15,7 +15,7 @@ class InputType(BaseModel):
     # Related model name in 'app.Model' format. It can be a reference to a Finding
     model = models.TextField(max_length=30, null=True, blank=True)
     # Related callback model name in 'app.Model' format. It will be used when 'model' is not available
-    callback_model = models.TextField(max_length=15, null=True, blank=True)
+    fallback_model = models.TextField(max_length=15, null=True, blank=True)
     # Indicate if the input type should be included to calculate relations between models and executions
     relationships = models.BooleanField(default=True)
 
@@ -38,9 +38,7 @@ class InputType(BaseModel):
         """
         if not reference:
             return None
-        app_label, model_name = reference.split(
-            ".", 1
-        )  # Get model attributes from reference
+        app_label, model_name = reference.split(".", 1)
         return apps.get_model(app_label=app_label, model_name=model_name)
 
     def get_model_class(self) -> Union[BaseInput, None]:
@@ -51,13 +49,13 @@ class InputType(BaseModel):
         """
         return self._get_class_from_reference(self.model)
 
-    def get_callback_model_class(self) -> Union[BaseInput, None]:
-        """Get callback model from 'callback_model' reference.
+    def get_fallback_model_class(self) -> Union[BaseInput, None]:
+        """Get callback model from 'fallback_model' reference.
 
         Returns:
             BaseInput: Callback model of the input type
         """
-        return self._get_class_from_reference(self.callback_model)
+        return self._get_class_from_reference(self.fallback_model)
 
     def get_related_input_types(self) -> List[Self]:
         """Get relations between the different input types.

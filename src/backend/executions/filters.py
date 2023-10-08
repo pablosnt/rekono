@@ -6,7 +6,7 @@ class ExecutionFilter(FilterSet):
     class Meta:
         model = Execution
         fields = {
-            "task": ["exact"],
+            "task": ["exact", "isnull"],
             "task__target": ["exact"],
             "task__target__target": ["exact", "icontains"],
             "task__target__project": ["exact"],

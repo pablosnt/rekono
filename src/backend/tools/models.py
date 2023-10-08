@@ -29,20 +29,26 @@ class Tool(BaseLike):
     reference = models.TextField(max_length=250, blank=True, null=True)
     icon = models.TextField(max_length=250, blank=True, null=True)
 
-    def get_parser_class(self) -> Any:
+    def _get_tool_class(self, type: str) -> Any:
         try:
             # nosemgrep: python.lang.security.audit.non-literal-import.non-literal-import
-            parser_module = importlib.import_module(
-                f'tools.parsers.{self.name.lower().replace(" ", "_")}'
+            module = importlib.import_module(
+                f'tools.{type.lower()}s.{self.name.lower().replace(" ", "_")}'
             )
-            parser_class = getattr(
-                parser_module,
+            cls = getattr(
+                module,
                 self.name[0] + self.name[1:].replace(" ", ""),
             )
-        except (AttributeError, ModuleNotFoundError):  # Error during import
-            parser_module = importlib.import_module("tools.parsers.base")
-            parser_class = getattr(parser_module, "BaseParser")
-        return parser_class
+        except (AttributeError, ModuleNotFoundError):
+            module = importlib.import_module(f"tools.{type.lower()}s.base")
+            cls = getattr(module, f"Base{type[0].upper() + type[:1].lower()}")
+        return cls
+
+    def get_parser_class(self) -> Any:
+        return self._get_tool_class("parser")
+
+    def get_executor_class(self) -> Any:
+        return self._get_tool_class("executor")
 
     def update_status(self) -> None:
         self.is_installed = (

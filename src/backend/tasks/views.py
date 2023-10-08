@@ -5,6 +5,7 @@ import django_rq
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema
 from executions.enums import Status
+from executions.queues import ExecutionsQueue
 from framework.views import BaseViewSet
 from rest_framework import status
 from rest_framework.decorators import action
@@ -13,6 +14,7 @@ from rest_framework.response import Response
 from rq.command import send_stop_job_command
 from tasks.filters import TaskFilter
 from tasks.models import Task
+from tasks.queues import TasksQueue
 from tasks.serializers import TaskSerializer
 
 # Create your views here.
@@ -48,6 +50,8 @@ class TaskViewSet(BaseViewSet):
         "post",
         "delete",
     ]
+    tasks_queue = TasksQueue()
+    executions_queue = ExecutionsQueue()
 
     def destroy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         """Cancel task.
@@ -64,18 +68,18 @@ class TaskViewSet(BaseViewSet):
         ).all()
         if running_executions:
             if task.rq_job_id:
-                # TODO: cancel queue job
+                self.tasks_queue.cancel_job(task.rq_job_id)
+                self.tasks_queue.delete_job(task.rq_job_id)
                 logger.info(f"[Task] Task {task.id} has been cancelled")
             connection = django_rq.get_connection("executions-queue")
             for execution in running_executions:
                 if execution.status == Status.RUNNING:
                     send_stop_job_command(connection, execution.rq_job_id)
                 else:
-                    # TODO: cancel queue job
-                    pass
+                    self.executions_queue.cancel_job(execution.rq_job_id)
                 logger.info(f"[Execution] Execution {execution.id} has been cancelled")
-                execution.status = Status.CANCELLED  # Set execution status to Cancelled
-                execution.end = timezone.now()  # Update execution end date
+                execution.status = Status.CANCELLED
+                execution.end = timezone.now()
                 execution.save(update_fields=["status", "end"])
             task.end = timezone.now()
             task.save(update_fields=["end"])
@@ -112,7 +116,7 @@ class TaskViewSet(BaseViewSet):
             executor=request.user,
         )
         new_task.wordlists.set(task.wordlists.all())  # Add wordlists from original task
-        # TODO: Enqueue new task
+        self.tasks_queue.enqueue(new_task)
         return Response(
             TaskSerializer(instance=new_task).data, status=status.HTTP_201_CREATED
         )

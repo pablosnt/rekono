@@ -6,6 +6,7 @@ from processes.serializers import SimpleProcessSerializer
 from rest_framework.serializers import ModelSerializer
 from targets.serializers import SimpleTargetSerializer
 from tasks.models import Task
+from tasks.queues import TasksQueue
 from tools.enums import Intensity
 from tools.fields import IntegerChoicesField
 from tools.models import Intensity
@@ -96,5 +97,5 @@ class TaskSerializer(ModelSerializer):
             Task: Created instance
         """
         task = super().create(validated_data)
-        # TODO: Enqueue task in tasks queue
+        TasksQueue().enqueue(task)
         return task

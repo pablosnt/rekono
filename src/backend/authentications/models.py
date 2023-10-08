@@ -5,9 +5,9 @@ from authentications.enums import AuthenticationType
 from django.db import models
 from framework.enums import InputKeyword
 from framework.models import BaseInput
-from projects.models import Project
 from security.utils.input_validator import Regex, Validator
 from target_ports.models import TargetPort
+from targets.models import Target
 
 # Create your models here.
 
@@ -30,7 +30,9 @@ class Authentication(BaseInput):
 
     filters = [BaseInput.Filter(type=AuthenticationType, field="type")]
 
-    def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
+    def parse(
+        self, target: Target = None, accumulated: Dict[str, Any] = {}
+    ) -> Dict[str, Any]:
         """Get useful information from this instance to be used in tool execution as argument.
 
         Args:
@@ -39,7 +41,7 @@ class Authentication(BaseInput):
         Returns:
             Dict[str, Any]: Useful information for tool executions, including accumulated if setted
         """
-        output = self.target_port.parse()
+        output = self.target_port.parse(target, accumulated)
         output.update(
             {
                 InputKeyword.COOKIE_NAME.name.lower(): self.name

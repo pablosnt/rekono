@@ -7,6 +7,7 @@ from framework.models import BaseInput, BaseLike
 from rekono.settings import AUTH_USER_MODEL
 from security.utils.file_handler import FileHandler
 from security.utils.input_validator import Regex, Validator
+from targets.models import Target
 from wordlists.enums import WordlistType
 
 # Create your models here.
@@ -48,7 +49,9 @@ class Wordlist(BaseInput, BaseLike):
             return super().filter(input) and check
         return check
 
-    def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
+    def parse(
+        self, target: Target = None, accumulated: Dict[str, Any] = {}
+    ) -> Dict[str, Any]:
         """Get useful information from this instance to be used in tool execution as argument.
 
         Args:

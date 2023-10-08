@@ -36,7 +36,9 @@ class TargetPort(BaseInput):
             )
         ]
 
-    def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
+    def parse(
+        self, target: Target = None, accumulated: Dict[str, Any] = {}
+    ) -> Dict[str, Any]:
         """Get useful information from this instance to be used in tool execution as argument.
 
         Args:

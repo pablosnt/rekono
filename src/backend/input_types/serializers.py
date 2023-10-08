@@ -12,5 +12,5 @@ class InputTypeSerializer(ModelSerializer):
         fields = (
             "name",
             "model",
-            "callback_model",
+            "fallback_model",
         )

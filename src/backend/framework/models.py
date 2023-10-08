@@ -3,6 +3,7 @@ from typing import Any, Dict, List, Optional
 import requests
 import urllib3
 from django.db import models
+from django.db.models import Q
 from rekono.settings import AUTH_USER_MODEL
 
 
@@ -124,7 +125,9 @@ class BaseInput(BaseModel):
                     pass
         return False
 
-    def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
+    def parse(
+        self, target: Any = None, accumulated: Dict[str, Any] = {}
+    ) -> Dict[str, Any]:
         """Get useful information from this instance to be used in tool execution as argument.
 
         To be implemented by subclasses.
@@ -136,6 +139,12 @@ class BaseInput(BaseModel):
             Dict[str, Any]: Useful information for tool executions, including accumulated if setted
         """
         return {}  # pragma: no cover
+
+    def get_input_type(self) -> Any:
+        from input_types.models import InputType
+
+        reference = f"{self._meta.app_label}.{self._meta.model_name}"
+        return InputType.objects.get(Q(model=reference) | Q(fallback_model=reference))
 
 
 class BaseLike(BaseModel):

@@ -11,6 +11,7 @@ from findings.enums import (
 )
 from findings.framework.models import Finding
 from framework.enums import InputKeyword
+from target_ports.models import TargetPort
 from targets.enums import TargetType
 from targets.models import Target
 
@@ -23,7 +24,17 @@ class OSINT(Finding):
     source = models.TextField(max_length=50, blank=True, null=True)
     reference = models.TextField(max_length=250, blank=True, null=True)
 
-    def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["data", "data_type"],
+                name="unique_osint",
+            )
+        ]
+
+    def parse(
+        self, target: Target = None, accumulated: Dict[str, Any] = {}
+    ) -> Dict[str, Any]:
         if self.data_type in [OSINTDataType.IP, OSINTDataType.DOMAIN]:
             return {
                 InputKeyword.TARGET.name.lower(): self.data,
@@ -53,9 +64,14 @@ class Host(Finding):
         max_length=10, choices=HostOS.choices, default=HostOS.OTHER
     )
 
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["address"], name="unique_host")]
+
     filters = [Finding.Filter(TargetType, "address", lambda a: Target.get_type(a))]
 
-    def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
+    def parse(
+        self, target: Target = None, accumulated: Dict[str, Any] = {}
+    ) -> Dict[str, Any]:
         return {
             InputKeyword.TARGET.name.lower(): self.address,
             InputKeyword.HOST.name.lower(): self.address,
@@ -95,7 +111,17 @@ class Port(Finding):
         Finding.Filter(str, "service", contains=True, processor=lambda s: s.lower()),
     ]
 
-    def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["host", "port", "protocol"],
+                name="unique_port",
+            )
+        ]
+
+    def parse(
+        self, target: Target = None, accumulated: Dict[str, Any] = {}
+    ) -> Dict[str, Any]:
         ports = (
             [self.port]
             if not accumulated or InputKeyword.PORTS.name.lower() not in accumulated
@@ -153,13 +179,34 @@ class Path(Finding):
         Finding.Filter(str, "path", contains=True, processor=lambda p: p.lower()),
     ]
 
-    def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
-        output = self.port.parse(accumulated) if self.port else {}
-        output[InputKeyword.ENDPOINT.name.lower()] = self.path
-        if self.port:
-            output[InputKeyword.URL.name.lower()] = self._get_url(
-                self.port.host.address, self.port.port, self.path
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["port", "path"], name="unique_path")
+        ]
+
+    def _clean_path_value(self, value: str) -> str:
+        if value[0] != "/":
+            value = f"/{value}"
+        if value[-1] != "/":
+            value += "/"
+        return value
+
+    def parse(
+        self, target: Target = None, accumulated: Dict[str, Any] = {}
+    ) -> Dict[str, Any]:
+        output = self.port.parse(target, accumulated) if self.port else {}
+        target_port = TargetPort.objects.filter(target=target, port=self.port.port)
+        include_path_data = True
+        if target_port.exists():
+            include_path_data = self._clean_path_value(self.path).startswith(
+                self._clean_path_value(target_port.first().path)
             )
+        if include_path_data:
+            output[InputKeyword.ENDPOINT.name.lower()] = self.path
+            if self.port:
+                output[InputKeyword.URL.name.lower()] = self._get_url(
+                    self.port.host.address, self.port.port, self.path
+                )
         return output
 
     def defect_dojo(self) -> Dict[str, Any]:
@@ -200,7 +247,17 @@ class Technology(Finding):
         Finding.Filter(str, "name", contains=True, processor=lambda n: n.lower())
     ]
 
-    def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["port", "name", "version"],
+                name="unique_technology",
+            )
+        ]
+
+    def parse(
+        self, target: Target = None, accumulated: Dict[str, Any] = {}
+    ) -> Dict[str, Any]:
         """Get useful information from this instance to be used in tool execution as argument.
 
         Args:
@@ -251,8 +308,23 @@ class Credential(Finding):
     secret = models.TextField(max_length=300, blank=True, null=True)
     context = models.TextField(max_length=300, blank=True, null=True)
 
-    def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
-        output = self.technology.parse(accumulated) if self.technology else {}
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=[
+                    "technology",
+                    "email",
+                    "username",
+                    "secret",
+                ],
+                name="unique_credential",
+            )
+        ]
+
+    def parse(
+        self, target: Target = None, accumulated: Dict[str, Any] = {}
+    ) -> Dict[str, Any]:
+        output = self.technology.parse(target, accumulated) if self.technology else {}
         for key, field in [
             (InputKeyword.EMAIL.name.lower(), self.email),
             (InputKeyword.USERNAME.name.lower(), self.username),
@@ -309,12 +381,27 @@ class Vulnerability(Finding):
         Finding.Filter(str, "cwe", contains=True, processor=lambda c: c.lower()),
     ]
 
-    def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=[
+                    "technology",
+                    "port",
+                    "name",
+                    "cve",
+                ],
+                name="unique_vulnerability",
+            ),
+        ]
+
+    def parse(
+        self, target: Target = None, accumulated: Dict[str, Any] = {}
+    ) -> Dict[str, Any]:
         output = {InputKeyword.CVE.name.lower(): self.cve}
         if self.technology:
-            output.update(self.technology.parse(accumulated))
+            output.update(self.technology.parse(target, accumulated))
         elif self.port:
-            output.update(self.port.parse(accumulated))
+            output.update(self.port.parse(target, accumulated))
         return output
 
     def defect_dojo(self) -> Dict[str, Any]:
@@ -360,12 +447,27 @@ class Exploit(Finding):
     edb_id = models.IntegerField(blank=True, null=True)  # Id in Exploit-DB
     reference = models.TextField(max_length=250, blank=True, null=True)
 
-    def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=[
+                    "vulnerability",
+                    "technology",
+                    "edb_id",
+                    "reference",
+                ],
+                name="unique_exploit",
+            ),
+        ]
+
+    def parse(
+        self, target: Target = None, accumulated: Dict[str, Any] = {}
+    ) -> Dict[str, Any]:
         output = {InputKeyword.EXPLOIT.name.lower(): self.title}
         if self.vulnerability:
-            output.update(self.vulnerability.parse(accumulated))
+            output.update(self.vulnerability.parse(target, accumulated))
         elif self.technology:
-            output.update(self.technology.parse(accumulated))
+            output.update(self.technology.parse(target, accumulated))
         return output
 
     def defect_dojo(self) -> Dict[str, Any]:

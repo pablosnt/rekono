@@ -5,7 +5,7 @@
         "fields": {
             "name": "OSINT",
             "model": "findings.osint",
-            "callback_model": null,
+            "fallback_model": null,
             "relationships": true
         }
     },
@@ -15,7 +15,7 @@
         "fields": {
             "name": "Host",
             "model": "findings.host",
-            "callback_model": "targets.target",
+            "fallback_model": "targets.target",
             "relationships": true
         }
     },
@@ -25,7 +25,7 @@
         "fields": {
             "name": "Port",
             "model": "findings.port",
-            "callback_model": "targets.targetport",
+            "fallback_model": "targets.targetport",
             "relationships": true
         }
     },
@@ -35,7 +35,7 @@
         "fields": {
             "name": "Path",
             "model": "findings.path",
-            "callback_model": null,
+            "fallback_model": null,
             "relationships": true
         }
     },
@@ -45,7 +45,7 @@
         "fields": {
             "name": "Technology",
             "model": "findings.technology",
-            "callback_model": "parameters.inputtechnology",
+            "fallback_model": "parameters.inputtechnology",
             "relationships": true
         }
     },
@@ -55,7 +55,7 @@
         "fields": {
             "name": "Vulnerability",
             "model": "findings.vulnerability",
-            "callback_model": "parameters.inputvulnerability",
+            "fallback_model": "parameters.inputvulnerability",
             "relationships": true
         }
     },
@@ -65,7 +65,7 @@
         "fields": {
             "name": "Credential",
             "model": "findings.credential",
-            "callback_model": null,
+            "fallback_model": null,
             "relationships": true
         }
     },
@@ -75,7 +75,7 @@
         "fields": {
             "name": "Exploit",
             "model": "findings.exploit",
-            "callback_model": null,
+            "fallback_model": null,
             "relationships": true
         }
     },
@@ -85,7 +85,7 @@
         "fields": {
             "name": "Wordlist",
             "model": null,
-            "callback_model": "wordlists.wordlist",
+            "fallback_model": "wordlists.wordlist",
             "relationships": true
         }
     },
@@ -95,7 +95,7 @@
         "fields": {
             "name": "Authentication",
             "model": "authentications.authentication",
-            "callback_model": null,
+            "fallback_model": null,
             "relationships": false
         }
     }

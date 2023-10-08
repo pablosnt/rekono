@@ -357,7 +357,7 @@
         "fields": {
             "tool": 15,
             "name": "Dump .git and find secrets in all commits",
-            "arguments": "detect -f json --report-path {output}",
+            "arguments": "GIT_DUMPER_TARGET_URL={url} {command} detect -f json --report-path {output}",
             "stage": 4,
             "default": true
         }
