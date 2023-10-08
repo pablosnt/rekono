@@ -244,6 +244,13 @@ SPECTACULAR_SETTINGS = {
     "PREPROCESSING_HOOKS": ["drf_spectacular.hooks.preprocess_exclude_path_format"],
     "ENUM_NAME_OVERRIDES": {},
     "SCHEMA_PATH_PREFIX_INSERT": CONFIG.root_path,
+    "ENUM_NAME_OVERRIDES": {
+        "AuthenticationType": "authentications.enums.AuthenticationType",
+        "PathType": "findings.enums.PathType",
+        "TargetType": "targets.enums.TargetType",
+        "WordlistType": "wordlists.enums.WordlistType",
+        "TimeUnit": "tasks.enums.TimeUnit",
+    },
 }
 
 
