@@ -1,5 +1,5 @@
-from django.apps import AppConfig
+from framework.apps import BaseApp
 
 
-class ParametersConfig(AppConfig):
+class ParametersConfig(BaseApp):
     name = "parameters"

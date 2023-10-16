@@ -8,7 +8,7 @@ class AuthenticationFilter(FilterSet):
     class Meta:
         model = Authentication
         fields = {
-            "target_port": ["exact"],
+            "target_port": ["exact", "isnull"],
             "target_port__target": ["exact"],
             "target_port__target__project": ["exact"],
             "target_port__target__project__name": ["exact", "icontains"],

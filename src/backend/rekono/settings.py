@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     "executions",
     "findings",
     "input_types",
+    "integrations.defect_dojo",
     "parameters",
     "processes",
     "projects",

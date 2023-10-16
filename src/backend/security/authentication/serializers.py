@@ -1,7 +1,6 @@
 import logging
 from typing import Any, Dict
 
-from django.db.models import Model
 from rest_framework.serializers import CharField, Serializer
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.tokens import RefreshToken

@@ -1,5 +1,5 @@
-from django.apps import AppConfig
+from framework.apps import BaseApp
 
 
-class FindingsConfig(AppConfig):
+class FindingsConfig(BaseApp):
     name = "findings"

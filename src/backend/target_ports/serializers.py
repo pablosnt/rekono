@@ -1,5 +1,3 @@
-from typing import Any, Dict
-
 from authentications.serializers import AuthenticationSerializer
 from rest_framework.serializers import ModelSerializer
 from target_ports.models import TargetPort
@@ -19,5 +17,3 @@ class TargetPortSerializer(ModelSerializer):
             "path",
             "authentication",
         )
-        # Read only fields
-        read_only_fields = ("authentication",)

@@ -1,3 +1,4 @@
+import importlib
 from typing import Any, Dict, List, Optional
 
 import requests
@@ -22,6 +23,22 @@ class BaseModel(models.Model):
     @classmethod
     def get_project_field(cls) -> str:
         return None
+
+    def _get_related_class(self, package: str, name: str) -> Any:
+        try:
+            # nosemgrep: python.lang.security.audit.non-literal-import.non-literal-import
+            module = importlib.import_module(
+                f'{package.lower()}.{name.lower().replace(" ", "_").replace("-", "_")}'
+            )
+            cls = getattr(
+                module,
+                name[0] + name[1:].replace(" ", "").replace("-", ""),
+            )
+        except (AttributeError, ModuleNotFoundError):
+            module = importlib.import_module(f"{package}.base")
+            type = package.split(".")[-1][:-1]
+            cls = getattr(module, f"Base{type[0].upper() + type[:1].lower()}")
+        return cls
 
 
 class BaseInput(BaseModel):

@@ -1,11 +1,11 @@
 from typing import Any
 
-from django.apps import AppConfig
 from django.db.models.signals import post_migrate
+from framework.apps import BaseApp
 from security.authorization.roles import ROLES
 
 
-class UsersConfig(AppConfig):
+class UsersConfig(BaseApp):
     name = "users"
 
     def ready(self) -> None:

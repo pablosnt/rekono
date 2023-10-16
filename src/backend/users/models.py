@@ -208,7 +208,7 @@ class User(AbstractUser, BaseModel):
         validators=[Validator(Regex.NAME.value, code="last_name")],
     )
     email = models.EmailField(max_length=150, unique=True)
-    is_active = models.BooleanField(null=True, blank=True, default=None)
+    is_active = models.BooleanField(blank=True, null=True, default=None)
 
     # One Time Password used to invite and enable users, or reset passwords
     otp = models.TextField(max_length=200, unique=True, blank=True, null=True)

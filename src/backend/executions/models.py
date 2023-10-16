@@ -28,6 +28,7 @@ class Execution(models.Model):
     enqueued_at = models.DateTimeField(blank=True, null=True)
     start = models.DateTimeField(blank=True, null=True)
     end = models.DateTimeField(blank=True, null=True)
+    defect_dojo_test_id = models.IntegerField(blank=True, null=True)
 
     def __str__(self) -> str:
         """Instance representation in text format.

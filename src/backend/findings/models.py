@@ -11,6 +11,7 @@ from findings.enums import (
 )
 from findings.framework.models import Finding
 from framework.enums import InputKeyword
+from integrations.defect_dojo.models import DefectDojoSettings
 from target_ports.models import TargetPort
 from targets.enums import TargetType
 from targets.models import Target
@@ -47,9 +48,10 @@ class OSINT(Finding):
         return {
             "title": f"{self.data_type} found using OSINT techniques",
             "description": self.data,
-            "severity": str(Severity.MEDIUM),
-            # TODO: Defect-Dojo
-            # "date": self.last_seen.strftime(DD_DATE_FORMAT),
+            "severity": Severity.MEDIUM,
+            "date": self.last_seen.strftime(
+                DefectDojoSettings.objects.first().date_format
+            ),
         }
 
     def __str__(self) -> str:
@@ -84,9 +86,8 @@ class Host(Finding):
             "description": " - ".join(
                 [field for field in [self.address, self.os_type] if field]
             ),
-            "severity": str(Severity.INFO),
-            # TODO: Defect-Dojo
-            # "date": self.last_seen.strftime(DD_DATE_FORMAT),
+            "severity": Severity.INFO,
+            "date": self.last_seen.strftime(DefectDojoSettings.objects.first().date_format),
         }
 
     def __str__(self) -> str:
@@ -151,9 +152,8 @@ class Port(Finding):
             "description": f"Host: {self.host.address}\n{description}"
             if self.host
             else description,
-            "severity": str(Severity.INFO),
-            # TODO: Defect-Dojo
-            # "date": self.last_seen.strftime(DD_DATE_FORMAT),
+            "severity": Severity.INFO,
+            "date": self.last_seen.strftime(DefectDojoSettings.objects.first().date_format),
         }
 
     def __str__(self) -> str:
@@ -279,11 +279,10 @@ class Technology(Finding):
             "description": f"{description}\nDetails: {self.description}"
             if self.description
             else description,
-            "severity": str(Severity.LOW),
+            "severity": Severity.LOW,
             "cwe": 200,  # CWE-200: Exposure of Sensitive Information to Unauthorized Actor
             "references": self.reference,
-            # TODO: Defect-Dojo
-            # "date": self.last_seen.strftime(DD_DATE_FORMAT),
+            "date": self.last_seen.strftime(DefectDojoSettings.objects.first().date_format),
         }
 
     def __str__(self) -> str:
@@ -341,9 +340,8 @@ class Credential(Finding):
                 [field for field in [self.email, self.username, self.secret] if field]
             ),
             "cwe": 200,  # CWE-200: Exposure of Sensitive Information to Unauthorized Actor
-            "severity": str(Severity.HIGH),
-            # TODO: Defect-Dojo
-            # "date": self.last_seen.strftime(DD_DATE_FORMAT),
+            "severity": Severity.HIGH,
+            "date": self.last_seen.strftime(DefectDojoSettings.objects.first().date_format),
         }
 
     def __str__(self) -> str:
@@ -408,12 +406,11 @@ class Vulnerability(Finding):
         return {
             "title": self.name,
             "description": self.description,
-            "severity": Severity(self.severity).value,
+            "severity": self.severity,
             "cve": self.cve,
             "cwe": int(self.cwe.split("-", 1)[1]) if self.cwe else None,
             "references": self.reference,
-            # TODO: Defect-Dojo
-            # "date": self.last_seen.strftime(DD_DATE_FORMAT),
+            "date": self.last_seen.strftime(DefectDojoSettings.objects.first().date_format),
         }
 
     def __str__(self) -> str:
@@ -474,12 +471,11 @@ class Exploit(Finding):
         return {
             "title": f"Exploit {self.edb_id} found" if self.edb_id else "Exploit found",
             "description": self.title,
-            "severity": Severity(self.vulnerability.severity).value
+            "severity": self.vulnerability.severity
             if self.vulnerability
-            else str(Severity.MEDIUM),
+            else Severity.MEDIUM,
             "reference": self.reference,
-            # TODO: Defect-Dojo
-            # "date": self.last_seen.strftime(DD_DATE_FORMAT),
+            "date": self.last_seen.strftime(DefectDojoSettings.objects.first().date_format),
         }
 
     def __str__(self) -> str:

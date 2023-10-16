@@ -1,5 +1,3 @@
-from typing import Dict, List
-
 from django.db import models
 
 
@@ -179,5 +177,23 @@ ROLES = {
         "add": [Role.ADMIN, Role.AUDITOR],
         "change": [],
         "delete": [Role.ADMIN, Role.AUDITOR],
+    },
+    "defectdojosettings": {
+        "view": [Role.ADMIN],
+        "add": [],
+        "change": [Role.ADMIN],
+        "delete": [],
+    },
+    "defectdojosync": {
+        "view": [],
+        "add": [Role.ADMIN, Role.AUDITOR],
+        "change": [],
+        "delete": [Role.ADMIN, Role.AUDITOR],
+    },
+    "defectdojotargetsync": {
+        "view": [],
+        "add": [],
+        "change": [],
+        "delete": [],
     },
 }

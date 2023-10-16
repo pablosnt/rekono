@@ -30,6 +30,7 @@ class CreateApiTokenSerializer(ModelSerializer):
 
     def save(self, **kwargs: Any) -> ApiToken:
         plain_key = ApiToken.generate_key()
+        # TODO: Hash and salt key
         self.validated_data["key"] = hash(plain_key)
         api_token = super().save(**kwargs)
         api_token.key = plain_key

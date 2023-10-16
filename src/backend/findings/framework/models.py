@@ -1,4 +1,4 @@
-from typing import Any, List
+from typing import Any, Dict, List
 
 from django.core.exceptions import NON_FIELD_ERRORS
 from django.db import connection, models
@@ -21,6 +21,7 @@ class Finding(BaseInput):
     triage_comment = models.TextField(
         max_length=300, validators=[Validator(Regex.TEXT.value, code="triage_comment")]
     )
+    defect_dojo_id = models.IntegerField(blank=True, null=True)
 
     class Meta:
         abstract = True
@@ -75,3 +76,6 @@ class Finding(BaseInput):
     @classmethod
     def get_project_field(cls) -> str:
         return "executions__task__target__project"
+
+    def defect_dojo(self) -> Dict[str, Any]:
+        pass

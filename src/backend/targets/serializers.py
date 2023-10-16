@@ -1,5 +1,6 @@
 from typing import Any, Dict
 
+from integrations.defect_dojo.serializers import DefectDojoTargetSyncSerializer
 from rest_framework.serializers import ModelSerializer
 from targets.models import Target
 
@@ -15,6 +16,8 @@ class SimpleTargetSerializer(ModelSerializer):
 class TargetSerializer(ModelSerializer):
     """Serializer to manage targets via API."""
 
+    defect_dojo_sync = DefectDojoTargetSyncSerializer(read_only=True, many=False)
+
     class Meta:
         model = Target
         fields = (  # Target fields exposed via API
@@ -25,14 +28,16 @@ class TargetSerializer(ModelSerializer):
             "target_ports",
             "input_technologies",
             "input_vulnerabilities",
-            # "tasks",
+            "tasks",
+            "defect_dojo_sync",
         )
         read_only_fields = (  # Read only fields
             "type",
             "target_ports",
             "input_technologies",
             "input_vulnerabilities",
-            # "tasks",
+            "tasks",
+            "defect_dojo_sync",
         )
 
     def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:

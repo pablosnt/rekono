@@ -13,9 +13,9 @@ class InputType(BaseModel):
 
     name = models.TextField(max_length=15, choices=InputTypeName.choices)
     # Related model name in 'app.Model' format. It can be a reference to a Finding
-    model = models.TextField(max_length=30, null=True, blank=True)
+    model = models.TextField(max_length=30, blank=True, null=True)
     # Related callback model name in 'app.Model' format. It will be used when 'model' is not available
-    fallback_model = models.TextField(max_length=15, null=True, blank=True)
+    fallback_model = models.TextField(max_length=15, blank=True, null=True)
     # Indicate if the input type should be included to calculate relations between models and executions
     relationships = models.BooleanField(default=True)
 

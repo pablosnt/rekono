@@ -1,5 +1,4 @@
 from framework.views import BaseViewSet
-from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated
 from settings.models import Settings
 from settings.serializers import SettingsSerializer
 

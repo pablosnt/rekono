@@ -10,10 +10,8 @@ from security.utils.cryptography import hash
 class ApiAuthentication(TokenAuthentication):
     model = ApiToken
 
-    def authenticate_credentials(self, key):
-        return super().authenticate_credentials(hash(key))
-
     def authenticate_credentials(self, key) -> Tuple[Any, Any]:
+        # TODO: Hash and salt key
         user, token = super().authenticate_credentials(hash(key))
         if token.expiration and token.expiration < timezone.now():
             raise AuthenticationFailed("API token has expired")

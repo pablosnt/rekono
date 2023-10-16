@@ -1,4 +1,3 @@
-import importlib
 import os
 import re
 import shutil
@@ -28,27 +27,13 @@ class Tool(BaseLike):
     output_format = models.TextField(max_length=5, blank=True, null=True)
     reference = models.TextField(max_length=250, blank=True, null=True)
     icon = models.TextField(max_length=250, blank=True, null=True)
-
-    def _get_tool_class(self, type: str) -> Any:
-        try:
-            # nosemgrep: python.lang.security.audit.non-literal-import.non-literal-import
-            module = importlib.import_module(
-                f'tools.{type.lower()}s.{self.name.lower().replace(" ", "_")}'
-            )
-            cls = getattr(
-                module,
-                self.name[0] + self.name[1:].replace(" ", ""),
-            )
-        except (AttributeError, ModuleNotFoundError):
-            module = importlib.import_module(f"tools.{type.lower()}s.base")
-            cls = getattr(module, f"Base{type[0].upper() + type[:1].lower()}")
-        return cls
+    defect_dojo_scan_type = models.TextField(max_length=100, blank=True, null=True)
 
     def get_parser_class(self) -> Any:
-        return self._get_tool_class("parser")
+        return self._get_related_class("tools.parsers", self.name)
 
     def get_executor_class(self) -> Any:
-        return self._get_tool_class("executor")
+        return self._get_related_class("tools.executors", self.name)
 
     def update_status(self) -> None:
         self.is_installed = (

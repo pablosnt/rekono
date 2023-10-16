@@ -6,7 +6,6 @@ from django.db import models
 from framework.enums import InputKeyword
 from framework.models import BaseInput
 from security.utils.input_validator import Regex, Validator
-from target_ports.models import TargetPort
 from targets.models import Target
 
 # Create your models here.
@@ -15,16 +14,18 @@ from targets.models import Target
 class Authentication(BaseInput):
     """Authentication model."""
 
-    target_port = models.OneToOneField(
-        TargetPort, related_name="authentication", on_delete=models.CASCADE
-    )
     name = models.TextField(
         max_length=100,
         validators=[Validator(Regex.NAME.value, code="name")],
+        null=True,
+        blank=True,
     )
+    # TODO: encrypt and decrypt secret for more security
     secret = models.TextField(
         max_length=500,
         validators=[Validator(Regex.SECRET.value, code="secret")],
+        null=True,
+        blank=True,
     )
     type = models.TextField(max_length=8, choices=AuthenticationType.choices)
 
@@ -41,17 +42,14 @@ class Authentication(BaseInput):
         Returns:
             Dict[str, Any]: Useful information for tool executions, including accumulated if setted
         """
-        output = self.target_port.parse(target, accumulated)
-        output.update(
-            {
-                InputKeyword.COOKIE_NAME.name.lower(): self.name
-                if self.type == AuthenticationType.COOKIE
-                else None,
-                InputKeyword.SECRET.name.lower(): self.secret,
-                InputKeyword.CREDENTIAL_TYPE.name.lower(): self.type,
-                InputKeyword.CREDENTIAL_TYPE_LOWER.name.lower(): self.type.lower(),
-            }
-        )
+        output = {
+            InputKeyword.COOKIE_NAME.name.lower(): self.name
+            if self.type == AuthenticationType.COOKIE
+            else None,
+            InputKeyword.SECRET.name.lower(): self.secret,
+            InputKeyword.CREDENTIAL_TYPE.name.lower(): self.type,
+            InputKeyword.CREDENTIAL_TYPE_LOWER.name.lower(): self.type.lower(),
+        }
         if self.type == AuthenticationType.BASIC:
             output.update(
                 {
@@ -76,7 +74,12 @@ class Authentication(BaseInput):
         Returns:
             str: String value that identifies this instance
         """
-        return f"{self.target_port.__str__()} - {self.name}"
+        value = ""
+        if self.target_port:
+            value = f"{self.target_port.__str__()} -"
+        elif self.integration:
+            value = f"{self.integration.__str__()} -"
+        return f"{value}{self.name}"
 
     @classmethod
     def get_project_field(cls) -> str:

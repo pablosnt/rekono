@@ -1,33 +1,25 @@
 import os
-from pathlib import Path
 from typing import Any
 
-from django.apps import AppConfig
-from django.core import management
-from django.core.management.commands import loaddata
 from django.db.models.signals import post_migrate
+from framework.apps import BaseApp
 
 
-class WordlistsConfig(AppConfig):
+class WordlistsConfig(BaseApp):
     name = "wordlists"
 
     def ready(self) -> None:
         """Run code as soon as the registry is fully populated."""
         # Configure fixtures to be loaded after migration
-        post_migrate.connect(self.load_wordlists_models, sender=self)
+        post_migrate.connect(self._load_fixtures, sender=self)
         post_migrate.connect(self.update_default_wordlists_size, sender=self)
 
-    def load_wordlists_models(self, **kwargs: Any) -> None:
-        """Load input types fixtures in database."""
+    def _load_fixtures(self, **kwargs: Any) -> None:
         from wordlists.models import Wordlist
 
-        if Wordlist.objects.exists():  # Check if default data is loaded
+        if Wordlist.objects.exists():
             return
-        path = os.path.join(Path(__file__).resolve().parent, "fixtures")
-        management.call_command(
-            loaddata.Command(),
-            os.path.join(path, "1_wordlists.json"),  # Input type entities
-        )
+        super()._load_fixtures(**kwargs)
         self.update_default_wordlists_size()
 
     def update_default_wordlists_size(self, **kwargs: Any) -> None:

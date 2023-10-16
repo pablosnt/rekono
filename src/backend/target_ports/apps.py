@@ -1,5 +1,5 @@
-from django.apps import AppConfig
+from framework.apps import BaseApp
 
 
-class TargetPortsConfig(AppConfig):
+class TargetPortsConfig(BaseApp):
     name = "target_ports"

@@ -1,0 +1,19 @@
+[
+    {
+        "model": "defect_doo.DefectDojo",
+        "pk": 1,
+        "fields": {
+            "server": null,
+            "api_token": null,
+            "tls_validation": true,
+            "tag": "rekono",
+            "product_type_id": null,
+            "product_type": "Rekono Project",
+            "test_type_id": null,
+            "test_type": "Rekono Findings Import",
+            "test": "Rekono Execution",
+            "date_format": "%Y-%m-%d",
+            "datetime_format": "%Y-%m-%dT%H:%M"
+        }
+    }
+]

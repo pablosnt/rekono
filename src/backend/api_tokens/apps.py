@@ -1,5 +1,5 @@
-from django.apps import AppConfig
+from framework.apps import BaseApp
 
 
-class ApiTokensConfig(AppConfig):
+class ApiTokensConfig(BaseApp):
     name = "api_tokens"

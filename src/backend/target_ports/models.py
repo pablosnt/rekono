@@ -1,10 +1,10 @@
 from typing import Any, Dict
 
+from authentications.models import Authentication
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from framework.enums import InputKeyword
 from framework.models import BaseInput
-from projects.models import Project
 from security.utils.input_validator import Regex, Validator
 from targets.models import Target
 
@@ -23,6 +23,13 @@ class TargetPort(BaseInput):
     path = models.TextField(
         max_length=100,
         validators=[Validator(Regex.PATH.value, code="path")],
+        blank=True,
+        null=True,
+    )
+    authentication = models.OneToOneField(
+        Authentication,
+        related_name="target_port",
+        on_delete=models.SET_NULL,
         blank=True,
         null=True,
     )
@@ -47,22 +54,23 @@ class TargetPort(BaseInput):
         Returns:
             Dict[str, Any]: Useful information for tool executions, including accumulated if setted
         """
-        output = {
-            InputKeyword.TARGET.name.lower(): self.target.target,
-            InputKeyword.HOST.name.lower(): self.target.target,
-            InputKeyword.PORT.name.lower(): self.port,
-            InputKeyword.PORTS.name.lower(): [self.port],
-            InputKeyword.URL.name.lower(): self._get_url(
-                self.target.target, self.port, self.path
-            ),
-        }
-        if accumulated and InputKeyword.PORTS.name.lower() in accumulated:
-            output[InputKeyword.PORTS.name.lower()] = accumulated[
-                InputKeyword.PORTS.name.lower()
-            ]
-            output[InputKeyword.PORTS.name.lower()].append(self.port)
-        output[InputKeyword.PORTS_COMMAS.name.lower()] = ",".join(
-            [str(port) for port in output[InputKeyword.PORTS.name.lower()]]
+        output = self.authentication.parse(target, accumulated)
+        ports = (accumulated or {}).get(InputKeyword.PORTS.name.lower(), []) + [
+            self.port
+        ]
+        output.update(
+            {
+                InputKeyword.TARGET.name.lower(): self.target.target,
+                InputKeyword.HOST.name.lower(): self.target.target,
+                InputKeyword.PORT.name.lower(): self.port,
+                InputKeyword.PORTS.name.lower(): ports,
+                InputKeyword.PORTS_COMMAS.name.lower(): ",".join(
+                    [str(p) for p in ports]
+                ),
+                InputKeyword.URL.name.lower(): self._get_url(
+                    self.target.target, self.port, self.path
+                ),
+            }
         )
         return output
 

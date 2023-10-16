@@ -12,4 +12,8 @@ class TargetFilter(FilterSet):
             "project__name": ["exact", "icontains"],
             "target": ["exact", "icontains"],
             "type": ["exact"],
+            "defect_dojo_sync": ["exact"],
+            "defect_dojo_sync__engagement_id": ["exact"],
+            "defect_dojo_sync__defect_dojo_sync__product_type_id": ["exact"],
+            "defect_dojo_sync__defect_dojo_sync__product_id": ["exact"],
         }
