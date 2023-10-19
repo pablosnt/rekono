@@ -16,12 +16,6 @@ database:
 rq:
   host: 127.0.0.1
   port: 6379
-email:
-  # host:
-  # port:
-  # user:
-  # password:
-  tls: true
 tools:
   cmseek:
     directory: /usr/share/cmseek

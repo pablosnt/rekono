@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en" xml:lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        <title>Rekono</title>
+      </head>
+    <body>
+        <div class="card border-light text-center">
+            <div class="text-center">
+                <img src="{{ rekono_url }}/static/logo-black.png" class="card-img-top" alt="Rekono" style="max-width: 30rem;"/>
+            </div>
+            <div class="card-body">
+                <h3 class="card-title">New login on your Rekono account</h3>
+                <div class="card-text">
+                    <p>A new login on your Rekono account has been detected at {{ time }}.</p>
+                    <!-- nosemgrep: javascript.express.security.audit.xss.mustache.var-in-href.var-in-href -->
+                    <p>If you didn't login in Rekono, please <a href="{{ rekono_url }}/#/reset-password">reset your password</a>.</p>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

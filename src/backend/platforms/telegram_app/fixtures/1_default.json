@@ -1,0 +1,9 @@
+[
+    {
+        "model": "telegram_app.TelegramSettings",
+        "pk": 1,
+        "fields": {
+            "token": null
+        }
+    }
+]

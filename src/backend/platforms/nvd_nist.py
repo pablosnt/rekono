@@ -21,6 +21,7 @@ class NvdNist(BaseIntegration):
         }
 
     def process_findings(self, execution: Execution, findings: List[Finding]) -> None:
+        super().process_findings(execution, findings)
         for finding in findings:
             if isinstance(finding, Vulnerability) and finding.cve:
                 try:

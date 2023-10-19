@@ -196,4 +196,22 @@ ROLES = {
         "change": [],
         "delete": [],
     },
+    "smtpsettings": {
+        "view": [Role.ADMIN],
+        "add": [],
+        "change": [Role.ADMIN],
+        "delete": [],
+    },
+    "telegramsettings": {
+        "view": [Role.ADMIN, Role.AUDITOR, Role.READER],
+        "add": [],
+        "change": [Role.ADMIN],
+        "delete": [],
+    },
+    "telegramchat": {
+        "view": [],
+        "add": [Role.ADMIN, Role.AUDITOR, Role.READER],
+        "change": [],
+        "delete": [Role.ADMIN, Role.AUDITOR, Role.READER],
+    },
 }

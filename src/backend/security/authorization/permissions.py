@@ -1,5 +1,6 @@
-from typing import Any
+from typing import Any, Tuple
 
+from platforms.telegram_app.models import TelegramChat
 from processes.models import Process, Step
 from rest_framework.permissions import BasePermission
 from rest_framework.request import Request
@@ -79,7 +80,7 @@ class ProjectMemberPermission(BasePermission):
 class OwnerPermission(BasePermission):
     """Check if current user can access an object based on HTTP method and creator user."""
 
-    def get_instance(self, obj: Any) -> Any:  # pragma: no cover
+    def get_details(self, obj: Any) -> Tuple[Any, str, bool]:  # pragma: no cover
         """Get object with creator user from object accessed by the current user. To be implemented by subclasses.
 
         Args:
@@ -89,9 +90,11 @@ class OwnerPermission(BasePermission):
             Any: Object with creator user
         """
         if obj.__class__ in [Wordlist, Process]:
-            return obj
+            return obj, "owner", True
         elif obj.__class__ == Step:
-            return obj.process
+            return obj.process, "owner", True
+        elif obj.__class__ == TelegramChat:
+            return obj, "user", "False"
 
     def has_object_permission(self, request: Request, view: View, obj: Any) -> bool:
         """Check if current user can access an object based on HTTP method and creator user.
@@ -104,10 +107,10 @@ class OwnerPermission(BasePermission):
         Returns:
             bool: Indicate if user is authorized to make this request or not
         """
-        instance = self.get_instance(obj)  # Get object with creator user
+        instance, field, allow_admin = self.get_details(obj)
         return (
             not instance
             or request.method == "GET"
-            or instance.owner == request.user
-            or IsAdmin().has_permission(request, view)
+            or getattr(instance, field) == request.user
+            or (allow_admin and IsAdmin().has_permission(request, view))
         )

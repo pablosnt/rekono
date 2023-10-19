@@ -11,7 +11,7 @@ from findings.enums import (
 )
 from findings.framework.models import Finding
 from framework.enums import InputKeyword
-from integrations.defect_dojo.models import DefectDojoSettings
+from platforms.defect_dojo.models import DefectDojoSettings
 from target_ports.models import TargetPort
 from targets.enums import TargetType
 from targets.models import Target

@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List
+from typing import Any, List
 from urllib.parse import urlparse
 
 import requests
@@ -7,14 +7,17 @@ from executions.models import Execution
 from findings.framework.models import Finding
 from requests.adapters import HTTPAdapter, Retry
 from users.enums import Notification
-from users.models import User
 
 logger = logging.getLogger()
 
 
 class BasePlatform:
+    def is_available(self) -> bool:
+        return True
+
     def process_findings(self, execution: Execution, findings: List[Finding]) -> None:
-        pass
+        if not self.is_available():
+            return
 
 
 class BaseIntegration(BasePlatform):
@@ -48,7 +51,7 @@ class BaseIntegration(BasePlatform):
 class BaseNotification(BasePlatform):
     enable_field = ""
 
-    def _get_users_to_notify(self, execution: Execution) -> List[User]:
+    def _get_users_to_notify(self, execution: Execution) -> List[Any]:
         users = set()
         if (
             execution.task.executor.notification_scope != Notification.DISABLED
@@ -66,11 +69,12 @@ class BaseNotification(BasePlatform):
         )
         return users
 
-    def _notify_users(
-        self, users: List[User], execution: Execution, findings: List[Finding]
+    def _notify_execution(
+        self, users: List[Any], execution: Execution, findings: List[Finding]
     ) -> None:
         pass
 
     def process_findings(self, execution: Execution, findings: List[Finding]) -> None:
+        super().process_findings(execution, findings)
         users = self._get_users_to_notify(execution)
-        self._notify_users(users, execution, findings)
+        self._notify_execution(users, execution, findings)

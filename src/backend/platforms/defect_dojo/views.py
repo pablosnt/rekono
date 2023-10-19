@@ -1,6 +1,6 @@
 from framework.views import BaseViewSet
-from integrations.defect_dojo.models import DefectDojoSettings, DefectDojoSync
-from integrations.defect_dojo.serializers import (
+from platforms.defect_dojo.models import DefectDojoSettings, DefectDojoSync
+from platforms.defect_dojo.serializers import (
     DefectDojoEngagementSerializer,
     DefectDojoProductSerializer,
     DefectDojoProductTypeSerializer,

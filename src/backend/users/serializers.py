@@ -103,11 +103,6 @@ class UpdateRoleSerializer(Serializer):
 class ProfileSerializer(UserSerializer):
     """Serializer to manage user profile via API."""
 
-    # Field that indicates if the user has configured Telegram bot yet or not
-    # telegram_configured = SerializerMethodField(method_name="get_telegram_configured")
-
-    # TODO: Telegram link
-
     class Meta:
         model = User
         fields = (
@@ -119,31 +114,19 @@ class ProfileSerializer(UserSerializer):
             "date_joined",
             "last_login",
             "role",
-            # "telegram_configured",
+            "telegram_chat",
             "notification_scope",
             "email_notifications",
             "telegram_notifications",
         )
-        # Read only fields
         read_only_fields = (
             "username",
             "email",
             "date_joined",
             "last_login",
             "role",
-            # "telegram_configured",
+            "telegram_chat",
         )
-
-    # def get_telegram_configured(self, instance: User) -> bool:
-    #     """Check if user has configured Telegam bot yet or not.
-
-    #     Args:
-    #         instance (User): User to check Telegram bot configuration
-
-    #     Returns:
-    #         bool: Indicate if Telegram bot has been configured
-    #     """
-    #     return hasattr(instance, "telegram_chat") and instance.telegram_chat is not None
 
 
 class PasswordSerializer(UserSerializer):
@@ -322,69 +305,3 @@ class RequestPasswordResetSerializer(UserSerializer):
             return user
         except User.DoesNotExist:
             return None
-
-
-# TODO: Telegram link
-
-# class TelegramBotSerializer(Serializer):
-#     """Serializer to configure Telegram Bot via API."""
-
-#     # One Time Password used to link account to the Telegram Bot
-#     otp = CharField(max_length=200, required=True)
-
-#     def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
-#         """Validate the provided data before use it.
-
-#         Args:
-#             attrs (Dict[str, Any]): Provided data
-
-#         Raises:
-#             ValidationError: Raised if provided data is invalid
-#             AuthenticationFailed: Raised if Telegram OTP is invalid
-
-#         Returns:
-#             Dict[str, Any]: Data after validation process
-#         """
-#         attrs = super().validate(attrs)
-#         try:
-#             # Search Telegram chat by otp
-#             attrs["telegram_chat"] = TelegramChat.objects.get(
-#                 otp=attrs.get("otp"), otp_expiration__gt=timezone.now()
-#             )
-#         except TelegramChat.DoesNotExist:  # Invalid otp
-#             raise AuthenticationFailed(
-#                 "Invalid Telegram OTP", code=status.HTTP_401_UNAUTHORIZED
-#             )
-#         return attrs
-
-#     @transaction.atomic()
-#     def update(self, instance: User, validated_data: Dict[str, Any]) -> User:
-#         """Update instance from validated data.
-
-#         Args:
-#             instance (User): Instance to update
-#             validated_data (Dict[str, Any]): Validated data
-
-#         Returns:
-#             User: Updated instance
-#         """
-#         validated_data["telegram_chat"].otp = None  # Set otp to null
-#         validated_data[
-#             "telegram_chat"
-#         ].otp_expiration = None  # Set otp expiration to null
-#         validated_data[
-#             "telegram_chat"
-#         ].user = instance  # Link Telegram chat Id to the user
-#         validated_data["telegram_chat"].save(
-#             update_fields=["otp", "otp_expiration", "user"]
-#         )
-#         user_telegram_linked_notification(
-#             instance
-#         )  # Send email notification to the user
-#         # Send Telegram notification to the user
-#         telegram_sender.send_message(validated_data["telegram_chat"].chat_id, LINKED)
-#         logger.info(
-#             f"[Security] User {instance.id} has logged in the Telegram bot",
-#             extra={"user": instance.id},
-#         )
-#         return instance

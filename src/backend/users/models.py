@@ -6,6 +6,7 @@ from django.contrib.auth.models import AbstractUser, Group, UserManager
 from django.db import models
 from django.utils import timezone
 from framework.models import BaseModel
+from platforms.mail.notifications import SMTP
 from rekono.settings import CONFIG
 from security.authentication.api import ApiToken
 from security.authorization.roles import Role
@@ -24,7 +25,7 @@ class RekonoUserManager(UserManager):
     def _generate_otp(self) -> str:
         return hash(generate_random_value(3000))
 
-    def _get_otp_expiration_time(self) -> datetime:
+    def get_otp_expiration_time(self) -> datetime:
         return timezone.now() + timedelta(hours=CONFIG.otp_expiration_hours)
 
     def assign_role(self, user: Any, role: Role) -> None:
@@ -54,11 +55,11 @@ class RekonoUserManager(UserManager):
         user = User.objects.create(
             email=email,
             otp=self._generate_otp(),
-            otp_expiration=self._get_otp_expiration_time(),
+            otp_expiration=self.get_otp_expiration_time(),
             is_active=None,
         )
         self.assign_role(user, role)
-        # TODO: Send user invitation
+        SMTP().invite_user(user)
         logger.info(f"[User] User {user.id} has been invited with role {role}")
         return user
 
@@ -118,10 +119,10 @@ class RekonoUserManager(UserManager):
             Any: Enabled user
         """
         user.otp = self._generate_otp()  # Generate its OTP
-        user.otp_expiration = self._get_otp_expiration_time()  # Set OTP expiration
+        user.otp_expiration = self.get_otp_expiration_time()  # Set OTP expiration
         user.is_active = True
         user.save(update_fields=["otp", "otp_expiration", "is_active"])
-        # TODO: Send email to enable user
+        SMTP().enable_user_account(user)
         logger.info(f"[User] User {user.id} has been enabled")
         return user
 
@@ -157,9 +158,9 @@ class RekonoUserManager(UserManager):
             Any: User after request password reset
         """
         user.otp = self._generate_otp()  # Generate its OTP
-        user.otp_expiration = self._get_otp_expiration_time()  # Set OTP expiration
+        user.otp_expiration = self.get_otp_expiration_time()  # Set OTP expiration
         user.save(update_fields=["otp", "otp_expiration"])
-        # TODO: Send email to reset password
+        SMTP().reset_password(user)
         logger.info(
             f"[User] User {user.id} requested a password reset", extra={"user": user.id}
         )

@@ -1,6 +1,7 @@
 import logging
 from typing import Any, Dict
 
+from platforms.mail.notifications import SMTP
 from rest_framework.serializers import CharField, Serializer
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -12,8 +13,8 @@ logger = logging.getLogger()  # Rekono logger
 
 class LoginSerializer(TokenObtainPairSerializer):
     def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
-        attrs = super().validate(attrs)  # User login
-        # TODO: Send email notification to the user
+        attrs = super().validate(attrs)
+        SMTP().login_notification(self.user)
         logger.info(
             f"[Security] User {self.user.id} has logged in",
             extra={"user": self.user.id},

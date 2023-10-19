@@ -13,10 +13,8 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 import os
 from datetime import timedelta
 from typing import Any, Dict
-from urllib.parse import urlparse
 
 from rekono.config import RekonoConfig
-from security.authorization.roles import Role
 
 ################################################################################
 # Rekono basic information                                                     #
@@ -56,7 +54,9 @@ INSTALLED_APPS = [
     "executions",
     "findings",
     "input_types",
-    "integrations.defect_dojo",
+    "platforms.defect_dojo",
+    "platforms.mail",
+    "platforms.telegram_app",
     "parameters",
     "processes",
     "projects",
@@ -86,7 +86,7 @@ ROOT_URLCONF = "rekono.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [os.path.join(BASE_DIR, "notifications", "mail", "templates")],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -293,7 +293,8 @@ RQ_QUEUES = {
     "tasks-queue": default_rq_queue,
     "executions-queue": default_rq_queue,
     "findings-queue": default_rq_queue,
-    "emails-queue": default_rq_queue,
+    # TODO: Try to remove
+    # "emails-queue": default_rq_queue,
 }
 
 RQ_QUEUES["executions-queue"]["DEFAULT_TIMEOUT"] = 28800  # 8 hours

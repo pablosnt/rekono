@@ -1,4 +1,4 @@
-from integrations.defect_dojo.views import (
+from platforms.defect_dojo.views import (
     DefectDojoEngagementViewSet,
     DefectDojoProductTypeViewSet,
     DefectDojoProductViewSet,

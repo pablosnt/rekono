@@ -5,6 +5,10 @@ from django_rq import job
 from executions.models import Execution
 from findings.models import Finding
 from framework.queues import BaseQueue
+from platforms.defect_dojo.integrations import DefectDojo
+from platforms.mail.notifications import SMTP
+from platforms.nvd_nist import NvdNist
+from platforms.telegram_app.notifications import Telegram
 from rq.job import Job
 
 logger = logging.getLogger()
@@ -23,5 +27,5 @@ class FindingsQueue(BaseQueue):
 
     @job("findings-queue")
     def consume(self, execution: Execution, findings: List[Finding]) -> List[Finding]:
-        # TODO: Requires the implementation of new integrations
-        pass
+        for platform in [NvdNist, DefectDojo, SMTP, Telegram]:
+            platform.process_findings(execution, findings)

@@ -1,6 +1,6 @@
 [
     {
-        "model": "defect_doo.DefectDojo",
+        "model": "defect_dojo.DefectDojo",
         "pk": 1,
         "fields": {
             "server": null,

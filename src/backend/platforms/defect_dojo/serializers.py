@@ -4,12 +4,12 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.forms import ValidationError
 from django.shortcuts import get_object_or_404
 from framework.fields import ProtectedSecretField
-from integrations.defect_dojo.models import (
+from platforms.defect_dojo.integrations import DefectDojo
+from platforms.defect_dojo.models import (
     DefectDojoSettings,
     DefectDojoSync,
     DefectDojoTargetSync,
 )
-from integrations.defect_dojo.platforms import DefectDojo
 from projects.models import Project
 from rest_framework.serializers import (
     CharField,

@@ -8,7 +8,7 @@ from findings.enums import Severity
 from findings.framework.models import Finding
 from findings.models import Path
 from framework.platforms import BaseIntegration
-from integrations.defect_dojo.models import (
+from platforms.defect_dojo.models import (
     DefectDojoSettings,
     DefectDojoSync,
     DefectDojoTargetSync,
@@ -173,6 +173,7 @@ class DefectDojo(BaseIntegration):
             )
 
     def process_findings(self, execution: Execution, findings: List[Finding]) -> None:
+        super().process_findings(execution, findings)
         target_sync = DefectDojoTargetSync.objects.filter(target=execution.task.target)
         if target_sync.exists():
             sync = target_sync.first()
