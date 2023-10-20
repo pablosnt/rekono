@@ -68,8 +68,6 @@ class SMTP(BaseNotification):
             "execution_notification.html",
             {
                 "execution": execution,
-                "tool": execution.configuration.tool,
-                "configuration": execution.configuration,
                 **findings_by_class,
             },
         )
