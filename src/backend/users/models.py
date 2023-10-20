@@ -8,6 +8,10 @@ from django.utils import timezone
 from framework.models import BaseModel
 from platforms.mail.notifications import SMTP
 from rekono.settings import CONFIG
+from rest_framework_simplejwt.token_blacklist.models import (
+    BlacklistedToken,
+    OutstandingToken,
+)
 from security.authentication.api import ApiToken
 from security.authorization.roles import Role
 from security.utils.cryptography import generate_random_value, hash
@@ -174,6 +178,8 @@ class RekonoUserManager(UserManager):
             f"[Security] User {user.id} changed his password",
             extra={"user": user.id},
         )
+        user.telegram_chat.delete()
+        self.invalidate_all_tokens(user)
         return user
 
     def reset_password(self, user: Any, password: str) -> Any:
@@ -182,6 +188,15 @@ class RekonoUserManager(UserManager):
         user.otp_expiration = None
         user.is_active = True
         user.save(update_fields=["otp", "otp_expiration", "is_active"])
+        return user
+
+    def invalidate_all_tokens(self, user: Any) -> Any:
+        for token in OutstandingToken.objects.filter(user=user).exclude(
+            id__in=BlacklistedToken.objects.filter(token__user=user).values_list(
+                "token_id", flat=True
+            ),
+        ):
+            BlacklistedToken.objects.create(token=token)
         return user
 
 
