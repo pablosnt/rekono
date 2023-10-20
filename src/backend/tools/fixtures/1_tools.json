@@ -110,7 +110,7 @@
             "output_format": "json",
             "reference": "https://nabla-c0d3.github.io/sslyze/documentation/",
             "icon": "https://www.kali.org/tools/sslyze/images/sslyze-logo.svg",
-            "defect_dojo_scan_type": "SSLyze 3 Scan (JSON)"
+            "defect_dojo_scan_type": "SSLyze Scan (JSON)"
         }
     },
     {
@@ -281,7 +281,7 @@
             "output_format": "json",
             "reference": "https://github.com/zricethezav/gitleaks",
             "icon": "https://gitleaks.io/favicon.ico",
-            "defect_dojo_scan_type": "Gitleaks"
+            "defect_dojo_scan_type": "Gitleaks Scan"
         }
     },
     {
@@ -338,7 +338,7 @@
             "output_format": "json",
             "reference": "https://nuclei.projectdiscovery.io",
             "icon": "https://nuclei.projectdiscovery.io/static/favicon.png",
-            "defect_dojo_scan_type": "Nuclei"
+            "defect_dojo_scan_type": "Nuclei Scan"
         }
     },
     {
