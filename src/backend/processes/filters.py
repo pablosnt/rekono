@@ -1,37 +1,33 @@
+from django_filters.filters import CharFilter, ChoiceFilter, ModelChoiceFilter
 from django_filters.rest_framework import FilterSet
 from framework.filters import LikeFilter
 from processes.models import Process, Step
 
 
 class ProcessFilter(LikeFilter):
+    configuration = ModelChoiceFilter(field_name="steps__configuration")
+    tool = ModelChoiceFilter(field_name="steps__configuration__tool")
+    stage = ChoiceFilter(field_name="steps__configuration__stage")
+    tag = CharFilter(field_name="tags__name", lookup_expr="in")
+
     class Meta:
         model = Process
         fields = {
             "name": ["exact", "icontains"],
             "description": ["exact", "icontains"],
             "owner": ["exact"],
-            "owner__username": ["exact", "icontains"],
-            "steps__configuration": ["exact"],
-            "steps__configuration__name": ["exact", "icontains"],
-            "steps__configuration__stage": ["exact"],
-            "steps__configuration__tool": ["exact"],
-            "steps__configuration__tool__name": ["exact", "icontains"],
-            "tags__name": ["in"],
         }
 
 
 class StepFilter(FilterSet):
+    owner = ModelChoiceFilter(field_name="process__owner")
+    tool = ModelChoiceFilter(field_name="configuration__tool")
+    stage = ChoiceFilter(field_name="configuration__stage")
+    tag = CharFilter(field_name="configuration__tool", lookup_expr="in")
+
     class Meta:
         model = Step
         fields = {
             "process": ["exact"],
-            "process__name": ["exact", "icontains"],
-            "process__description": ["exact", "icontains"],
-            "process__owner": ["exact"],
-            "process__tags__name": ["in"],
             "configuration": ["exact"],
-            "configuration__name": ["exact", "icontains"],
-            "configuration__stage": ["exact"],
-            "configuration__tool": ["exact"],
-            "configuration__tool__name": ["exact", "icontains"],
         }

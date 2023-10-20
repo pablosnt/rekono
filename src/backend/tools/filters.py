@@ -1,9 +1,15 @@
+from django_filters.filters import CharFilter, ChoiceFilter
 from django_filters.rest_framework import FilterSet
 from framework.filters import LikeFilter
 from tools.models import Configuration, Tool
 
 
 class ToolFilter(LikeFilter):
+    stage = ChoiceFilter(field_name="configurations__stage")
+    intensity = ChoiceFilter(field_name="intensities__value")
+    input = CharFilter(field_name="arguments__inputs__type__name")
+    output = CharFilter(field_name="configurations__outputs__type__name")
+
     class Meta:
         model = Tool
         fields = {
@@ -13,25 +19,19 @@ class ToolFilter(LikeFilter):
             "is_installed": ["exact"],
             "version": ["exact", "icontains"],
             "configurations": ["exact"],
-            "configurations__name": ["exact", "icontains"],
-            "configurations__stage": ["exact"],
-            "intensities__value": ["exact"],
-            "arguments__inputs__type__name": ["exact"],
-            "configurations__outputs__type__name": ["exact"],
         }
 
 
 class ConfigurationFilter(FilterSet):
+    input = CharFilter(field_name="tool__arguments__inputs__type__name")
+    output = CharFilter(field_name="outputs__type__name")
+
     class Meta:
         model = Configuration
         fields = {
             "name": ["exact", "icontains"],
             "tool": ["exact"],
-            "tool__name": ["exact", "icontains"],
-            "tool__command": ["exact", "icontains"],
             "arguments": ["exact", "icontains"],
             "stage": ["exact"],
             "default": ["exact"],
-            "tool__arguments__inputs__type__name": ["exact"],
-            "outputs__type__name": ["exact"],
         }

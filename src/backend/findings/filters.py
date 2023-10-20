@@ -1,3 +1,4 @@
+from django_filters.filters import ModelChoiceFilter
 from findings.framework.filters import FindingFilter
 from findings.models import (
     OSINT,
@@ -11,7 +12,6 @@ from findings.models import (
 )
 from framework.filters import (
     MultipleCharFilter,
-    MultipleChoiceFilter,
     MultipleFieldFilterSet,
     MultipleNumberFilter,
 )
@@ -50,7 +50,6 @@ class PortFilter(FindingFilter):
         fields.update(
             {
                 "host": ["exact"],
-                "host__address": ["exact", "icontains"],
                 "port": ["exact"],
                 "status": ["exact"],
                 "protocol": ["iexact"],
@@ -60,15 +59,14 @@ class PortFilter(FindingFilter):
 
 
 class PathFilter(FindingFilter):
+    host = ModelChoiceFilter(field_name="port__host")
+
     class Meta:
         model = Path
         fields = FindingFilter.Meta.fields.copy()
         fields.update(
             {
                 "port": ["exact"],
-                "port__host": ["exact"],
-                "port__host__address": ["exact", "icontains"],
-                "port__port": ["exact"],
                 "path": ["exact", "icontains"],
                 "status": ["exact"],
                 "type": ["exact"],
@@ -77,15 +75,14 @@ class PathFilter(FindingFilter):
 
 
 class TechnologyFilter(FindingFilter):
+    host = ModelChoiceFilter(field_name="port__host")
+
     class Meta:
         model = Technology
         fields = FindingFilter.Meta.fields.copy()
         fields.update(
             {
                 "port": ["exact"],
-                "port__host": ["exact"],
-                "port__host__address": ["exact", "icontains"],
-                "port__port": ["exact"],
                 "name": ["exact", "icontains"],
                 "version": ["exact", "icontains"],
                 "description": ["exact", "icontains"],
@@ -95,16 +92,15 @@ class TechnologyFilter(FindingFilter):
 
 
 class CredentialFilter(FindingFilter):
+    port = ModelChoiceFilter(field_name="technology__port")
+    host = ModelChoiceFilter(field_name="technology__port__host")
+
     class Meta:
         model = Credential
         fields = FindingFilter.Meta.fields.copy()
         fields.update(
             {
                 "technology": ["exact"],
-                "technology__port": ["exact"],
-                "technology__port__host": ["exact"],
-                "technology__port__host__address": ["exact", "icontains"],
-                "technology__port__port": ["exact"],
                 "technology__name": ["exact", "icontains"],
                 "technology__version": ["exact", "icontains"],
                 "email": ["exact", "icontains"],
@@ -116,14 +112,7 @@ class CredentialFilter(FindingFilter):
 
 class VulnerabilityFilter(FindingFilter):
     port = MultipleNumberFilter(fields=["technology__port", "port"])
-    port__port = MultipleNumberFilter(fields=["technology__port__port", "port__port"])
     host = MultipleNumberFilter(fields=["technology__port__host", "port__host"])
-    host__address = MultipleCharFilter(
-        fields=["technology__port__host__address", "port__host__address"]
-    )
-    host__os_type = MultipleChoiceFilter(
-        fields=["technology__port__host__os_type", "port__host__os_type"]
-    )
 
     class Meta:
         model = Vulnerability
@@ -151,32 +140,11 @@ class ExploitFilter(FindingFilter):
             "vulnerability__technology__port",
         ]
     )
-    port__port = MultipleNumberFilter(
-        fields=[
-            "technology__port__port",
-            "vulnerability__port__port",
-            "vulnerability__technology__port__port",
-        ]
-    )
     host = MultipleNumberFilter(
         fields=[
             "technology__port__host",
             "vulnerability__port__host",
             "vulnerability__technology__port__host",
-        ]
-    )
-    host__address = MultipleCharFilter(
-        fields=[
-            "technology__port__host__address",
-            "vulnerability__port__host__address",
-            "vulnerability__technology__port__host__address",
-        ]
-    )
-    host__os_type = MultipleChoiceFilter(
-        fields=[
-            "technology__port__host__os_type",
-            "vulnerability__port__host__os_type",
-            "vulnerability__technology__port__host__os_type",
         ]
     )
     technology = MultipleNumberFilter(
@@ -203,12 +171,11 @@ class ExploitFilter(FindingFilter):
         fields = FindingFilter.Meta.fields.copy()
         fields.update(
             {
-                "vulnerability": ["exact"],
-                "vulnerability__name": ["exact", "icontains"],
+                "vulnerability": ["exact", "isnull"],
                 "vulnerability__severity": ["exact"],
-                "vulnerability__cve": ["exact", "contains"],
-                "vulnerability__cwe": ["exact", "contains"],
-                "vulnerability__osvdb": ["exact", "contains"],
+                "vulnerability__cve": ["exact"],
+                "vulnerability__cwe": ["exact"],
+                "vulnerability__osvdb": ["exact"],
                 "title": ["exact", "icontains"],
                 "edb_id": ["exact"],
                 "reference": ["exact", "icontains"],

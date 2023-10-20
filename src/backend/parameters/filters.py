@@ -1,3 +1,4 @@
+from django_filters.filters import ModelChoiceFilter
 from django_filters.rest_framework import FilterSet
 from parameters.models import InputTechnology, InputVulnerability
 
@@ -5,13 +6,12 @@ from parameters.models import InputTechnology, InputVulnerability
 class InputTechnologyFilter(FilterSet):
     """FilterSet to filter and sort input Technology entities."""
 
+    project = ModelChoiceFilter(field_name="target__project")
+
     class Meta:
         model = InputTechnology
-        fields = {  # Filter fields
+        fields = {
             "target": ["exact"],
-            "target__project": ["exact"],
-            "target__project__name": ["exact", "icontains"],
-            "target__target": ["exact"],
             "name": ["exact", "icontains"],
             "version": ["exact", "icontains"],
         }
@@ -20,12 +20,11 @@ class InputTechnologyFilter(FilterSet):
 class InputVulnerabilityFilter(FilterSet):
     """FilterSet to filter and sort input Vulnerability entities."""
 
+    project = ModelChoiceFilter(field_name="target__project")
+
     class Meta:
         model = InputVulnerability
-        fields = {  # Filter fields
+        fields = {
             "target": ["exact"],
-            "target__project": ["exact"],
-            "target__project__name": ["exact", "icontains"],
-            "target__target": ["exact"],
             "cve": ["exact"],
         }

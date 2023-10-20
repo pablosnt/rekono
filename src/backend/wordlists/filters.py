@@ -7,10 +7,9 @@ class WordlistFilter(LikeFilter):
 
     class Meta:
         model = Wordlist
-        fields = {  # Filter fields
+        fields = {
             "name": ["exact", "icontains"],
             "type": ["exact"],
             "owner": ["exact"],
-            "owner__username": ["exact", "icontains"],
             "size": ["gte", "lte", "exact"],
         }
