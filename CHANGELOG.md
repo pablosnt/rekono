@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [1.6.4] - 2023-11-07
 
-### Fixed
+### Security
 
 - Upgrade `Django` version to `3.2.23` (https://github.com/pablosnt/rekono/issues/252)
 
