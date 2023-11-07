@@ -3,10 +3,6 @@ on:
   release:
     types: [published]
 
-env:
-  GITLAB_REKONO_ID: 45783845
-  GITLAB_KALI_FORK_ID: 48406619
-
 jobs:
   docker-image:
     name: Docker Image
@@ -52,14 +48,18 @@ jobs:
       matrix:
         include:
           - git-add-files: .
-            source-proect-id: ${{ env.GITLAB_REKONO_ID }}
+            # GitLab Rekono repository
+            source-project-id: 45783845
             source-branch: release/${{ github.event.release.name }}
-            target-project-id: ${{ env.GITLAB_REKONO_ID }}
+            # GitLab Rekono repository
+            target-project-id: 45783845
             target-branch: kali/master
           - git-add-files: rekono
-            source-project-id: ${{ env.GITLAB_REKONO_ID }}
+            # GitLab Rekono repository
+            source-project-id: 45783845
             source-branch: kali-release/${{ github.event.release.name }}
-            target-project-id: ${{ env.GITLAB_KALI_FORK_ID }}
+            # GitLab Kali fork
+            target-project-id: 48406619
             target-branch: kali/master
     runs-on: ubuntu-latest
     environment: gitlab
