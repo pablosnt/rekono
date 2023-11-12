@@ -1,16 +1,19 @@
-from typing import Any
+from pathlib import Path
+from typing import Any, List
 
-from django.db.models.signals import post_migrate
+from django.apps import AppConfig
 from framework.apps import BaseApp
 
 
-class SettingsConfig(BaseApp):
+class SettingsConfig(BaseApp, AppConfig):
     name = "settings"
+    fixtures_path = Path(__file__).resolve().parent / "fixtures"
+    skip_if_model_exists = True
 
-    def ready(self) -> None:
-        """Run code as soon as the registry is fully populated."""
-        # Configure fixtures to be loaded after migration
-        post_migrate.connect(self._load_fixtures, sender=self)
+    def _get_models(self) -> List[Any]:
+        from settings.models import Settings
+
+        return [Settings]
 
     def _load_fixtures(self, **kwargs: Any) -> None:
         from settings.models import Settings

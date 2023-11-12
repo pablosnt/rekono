@@ -20,7 +20,7 @@ from rekono.config import RekonoConfig
 # Rekono basic information                                                     #
 ################################################################################
 
-DESCRIPTION = "Rekono is an automation platform that combines different hacking tools to complete pentesting processes"
+DESCRIPTION = "Automation platform that combines different hacking tools to complete pentesting processes"
 VERSION = "2.0.0"
 
 
@@ -181,7 +181,7 @@ LOGGING = {
     },
     "root": {
         "handlers": ["console", "file"],
-        "level": "DEBUG" if DEBUG else "INFO",
+        "level": "WARNING",  # "DEBUG" if DEBUG else "INFO",
         "propagate": False,
     },
 }
@@ -202,14 +202,14 @@ REST_FRAMEWORK: Dict[str, Any] = {
     ],
     "DEFAULT_PAGINATION_CLASS": "framework.pagination.Pagination",
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        # "security.authentication.api.ApiAuthentication",
-        # "rest_framework_simplejwt.authentication.JWTAuthentication",
+        "security.authentication.api.ApiAuthentication",
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
-        # "rest_framework.permissions.IsAuthenticated",
-        # "rest_framework.permissions.DjangoModelPermissions",
-        # "security.authorization.permissions.ProjectMemberPermission",
-        # "security.authorization.permissions.OwnerPermission",
+        "rest_framework.permissions.IsAuthenticated",
+        "rest_framework.permissions.DjangoModelPermissions",
+        "security.authorization.permissions.ProjectMemberPermission",
+        "security.authorization.permissions.OwnerPermission",
     ],
     "EXCEPTION_HANDLER": "framework.exceptions.exceptions_handler",
 }

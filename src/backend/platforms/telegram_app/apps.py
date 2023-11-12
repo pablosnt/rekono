@@ -1,20 +1,16 @@
-from typing import Any
+from pathlib import Path
+from typing import Any, List
 
-from django.db.models.signals import post_migrate
+from django.apps import AppConfig
 from framework.apps import BaseApp
 
 
-class TelegramAppConfig(BaseApp):
-    name = "telegram_app"
+class TelegramAppConfig(BaseApp, AppConfig):
+    name = "platforms.telegram_app"
+    # fixtures_path = Path(__file__).resolve().parent / "fixtures"
+    skip_if_model_exists = True
 
-    def ready(self) -> None:
-        """Run code as soon as the registry is fully populated."""
-        # Configure fixtures to be loaded after migration
-        post_migrate.connect(self._load_fixtures, sender=self)
-
-    def _load_fixtures(self, **kwargs: Any) -> None:
+    def _get_models(self) -> List[Any]:
         from platforms.telegram_app.models import TelegramSettings
 
-        if TelegramSettings.objects.exists():
-            return
-        return super()._load_fixtures(**kwargs)
+        return [TelegramSettings]
