@@ -1,6 +1,6 @@
 [
     {
-        "model": "mail.SMTPSettings",
+        "model": "mail.smtpsettings",
         "pk": 1,
         "fields": {
             "host": null,

@@ -11,6 +11,7 @@ from executions.queues import ExecutionsQueue
 from framework.queues import BaseQueue
 from input_types.models import InputType
 from processes.models import Step
+from rq import Callback
 from rq.job import Job
 from tasks.models import Task
 from tools.models import Intensity
@@ -24,24 +25,26 @@ class TasksQueue(BaseQueue):
         self.executions_queue = ExecutionsQueue()
 
     def enqueue(self, task: Task) -> Job:
+        input(type(self._scheduled_callback_as_func))
         if task.scheduled_at:
             task.enqueued_at = task.scheduled_at
             job = self.queue.enqueue_at(
                 task.scheduled_at,
                 self.consume,
                 task=task,
-                on_success=self._scheduled_callback,
+                on_success=Callback(self._scheduled_callback_as_func),
             )
             logger.info(
                 f"[Task] Task {task.id} will be enqueued at {task.scheduled_at}"
             )
         elif task.scheduled_in and task.scheduled_time_unit:
+            delay = {task.scheduled_time_unit.lower(): task.scheduled_in}
             task.enqueued_at = timezone.now() + timedelta(**delay)
             job = self.queue.enqueue_in(
-                timedelta(**{task.scheduled_time_unit.lower(): task.scheduled_in}),
+                timedelta(**delay),
                 self.consume,
                 task=task,
-                on_success=self._scheduled_callback,
+                on_success=Callback(self._scheduled_callback_as_func),
             )
             logger.info(
                 f"[Task] Task {task.id} will be enqueued in {task.scheduled_in} {task.scheduled_time_unit}"
@@ -49,7 +52,9 @@ class TasksQueue(BaseQueue):
         else:
             task.enqueued_at = timezone.now()
             job = self.queue.enqueue(
-                self.consume, task=task, on_success=self._scheduled_callback
+                self.consume,
+                task=task,
+                on_success=Callback(self._scheduled_callback_as_func),
             )
             logger.info(f"[Task] Task {task.id} has been enqueued")
         task.rq_job_id = job.id
@@ -168,8 +173,16 @@ class TasksQueue(BaseQueue):
                 result.enqueued_at,
                 self.consume,
                 task=result,
-                on_success=self._scheduled_callback,
+                on_success=Callback(self._scheduled_callback_as_func),
             )
             logger.info(f"[Task] Scheduled task {result.id} has been enqueued again")
             result.rq_job_id = job.id
             result.save(update_fields=["enqueued_at", "rq_job_id"])
+
+    def _scheduled_callback_as_func(self) -> None:
+        def _inner_scheduled_callback(
+            job: Any, connection: Any, result: Task, *args: Any, **kwargs: Any
+        ) -> None:
+            self._scheduled_callback(job, connection, result, *args, **kwargs)
+
+        return _inner_scheduled_callback

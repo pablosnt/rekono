@@ -11,8 +11,8 @@ logger = logging.getLogger()
 
 class LoginSerializer(TokenObtainPairSerializer):
     def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
-        User.objects.invalidate_all_tokens(self.user)
         attrs = super().validate(attrs)
+        # TODO: Close all the active sessions before creating the new
         SMTP().login_notification(self.user)
         logger.info(
             f"[Security] User {self.user.id} has logged in",

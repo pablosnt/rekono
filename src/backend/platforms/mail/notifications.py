@@ -19,17 +19,21 @@ class SMTP(BaseNotification):
 
     def __init__(self) -> None:
         self.settings = SMTPSettings.objects.first()
-        self.backend = EmailBackend(
-            host=self.settings.host,
-            port=self.settings.port,
-            username=self.settings.username,
-            password=self.settings.password,
-            use_tls=self.settings.tls,
+        self.backend = (
+            EmailBackend(
+                host=self.settings.host,
+                port=self.settings.port,
+                username=self.settings.username,
+                password=self.settings.password,
+                use_tls=self.settings.tls,
+            )
+            if self.settings
+            else None
         )
         self.datetime_format = "%Y-%m-%d %H:%M"
 
     def is_available(self) -> bool:
-        if not self.settings.host or not self.settings.port:
+        if not self.settings or not self.settings.host or not self.settings.port:
             return False
         try:
             self.backend.open()

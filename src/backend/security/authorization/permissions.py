@@ -74,7 +74,7 @@ class ProjectMemberPermission(BasePermission):
             bool: Indicate if user is authorized to make this request or not
         """
         project = obj.get_project()
-        return request.user in project.members.all() or not project
+        return not project or request.user in project.members.all()
 
 
 class OwnerPermission(BasePermission):
@@ -94,7 +94,8 @@ class OwnerPermission(BasePermission):
         elif obj.__class__ == Step:
             return obj.process, "owner", True
         elif obj.__class__ == TelegramChat:
-            return obj, "user", "False"
+            return obj, "user", False
+        return None, "", False
 
     def has_object_permission(self, request: Request, view: View, obj: Any) -> bool:
         """Check if current user can access an object based on HTTP method and creator user.

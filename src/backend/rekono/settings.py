@@ -181,7 +181,7 @@ LOGGING = {
     },
     "root": {
         "handlers": ["console", "file"],
-        "level": "WARNING",  # "DEBUG" if DEBUG else "INFO",
+        "level": "DEBUG" if DEBUG else "INFO",
         "propagate": False,
     },
 }

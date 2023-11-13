@@ -6,11 +6,12 @@ from target_ports.models import TargetPort
 class TargetPortSerializer(ModelSerializer):
     """Serializer to manage target ports via API."""
 
-    authentication = AuthenticationSerializer(many=False, read_only=True)
+    # TODO: Return serializer in READ ops and expect the ID for POST and PUT
+    # authentication = AuthenticationSerializer(many=False, required=False)
 
     class Meta:
         model = TargetPort
-        fields = (  # Target port fields exposed via API
+        fields = (
             "id",
             "target",
             "port",

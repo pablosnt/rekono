@@ -21,7 +21,6 @@ class AuthenticationSerializer(ModelSerializer):
         model = Authentication
         fields = (
             "id",
-            "target_port",
             "name",
             "secret",
             "type",

@@ -26,7 +26,7 @@ logger = logging.getLogger()  # Rekono logger
 class RekonoUserManager(UserManager):
     """Manager for the User model."""
 
-    def _generate_otp(self) -> str:
+    def generate_otp(self) -> str:
         return hash(generate_random_value(3000))
 
     def get_otp_expiration_time(self) -> datetime:
@@ -58,7 +58,7 @@ class RekonoUserManager(UserManager):
         # Create new user including an OTP. The user will be inactive while invitation is not accepted
         user = User.objects.create(
             email=email,
-            otp=self._generate_otp(),
+            otp=self.generate_otp(),
             otp_expiration=self.get_otp_expiration_time(),
             is_active=None,
         )
@@ -122,7 +122,7 @@ class RekonoUserManager(UserManager):
         Returns:
             Any: Enabled user
         """
-        user.otp = self._generate_otp()  # Generate its OTP
+        user.otp = self.generate_otp()  # Generate its OTP
         user.otp_expiration = self.get_otp_expiration_time()  # Set OTP expiration
         user.is_active = True
         user.save(update_fields=["otp", "otp_expiration", "is_active"])
@@ -161,7 +161,7 @@ class RekonoUserManager(UserManager):
         Returns:
             Any: User after request password reset
         """
-        user.otp = self._generate_otp()  # Generate its OTP
+        user.otp = self.generate_otp()  # Generate its OTP
         user.otp_expiration = self.get_otp_expiration_time()  # Set OTP expiration
         user.save(update_fields=["otp", "otp_expiration"])
         SMTP().reset_password(user)

@@ -7,7 +7,7 @@ from rest_framework.serializers import ModelSerializer
 from targets.serializers import SimpleTargetSerializer
 from tasks.models import Task
 from tasks.queues import TasksQueue
-from tools.enums import Intensity
+from tools.enums import Intensity as IntensityEnum
 from tools.fields import IntegerChoicesField
 from tools.models import Intensity
 from tools.serializers import ConfigurationSerializer
@@ -18,12 +18,13 @@ from wordlists.serializers import WordlistSerializer
 class TaskSerializer(ModelSerializer):
     """Serializer to manage tasks via API."""
 
-    target = SimpleTargetSerializer(many=False)
-    process = SimpleProcessSerializer(many=False)
-    configuration = ConfigurationSerializer(many=False)
-    intensity = IntegerChoicesField(model=Intensity, required=False)
+    # TODO: return proper data, and expect just an ID
+    # target = SimpleTargetSerializer(many=False)
+    # process = SimpleProcessSerializer(many=False)
+    # configuration = ConfigurationSerializer(many=False)
+    intensity = IntegerChoicesField(model=IntensityEnum, required=False)
     executor = SimpleUserSerializer(many=False, read_only=True)
-    wordlists = WordlistSerializer(many=False, read_only=True)
+    # wordlists = WordlistSerializer(many=False, required=False)
     executions = ExecutionSerializer(many=False, read_only=True)
 
     class Meta:
@@ -59,7 +60,7 @@ class TaskSerializer(ModelSerializer):
 
     def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
         if not attrs.get("intensity"):
-            attrs["intensity"] = Intensity.NORMAL
+            attrs["intensity"] = IntensityEnum.NORMAL
         if attrs.get("configuration"):
             attrs["process"] = None
             if not Intensity.objects.filter(
@@ -97,5 +98,6 @@ class TaskSerializer(ModelSerializer):
             Task: Created instance
         """
         task = super().create(validated_data)
-        TasksQueue().enqueue(task)
+        # TODO: Fix enqueue errors
+        # TasksQueue().enqueue(task)
         return task

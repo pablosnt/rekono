@@ -5,7 +5,7 @@ from django.utils import timezone
 from framework.fields import ProtectedSecretField
 from platforms.mail.notifications import SMTP
 from platforms.telegram_app.models import TelegramChat, TelegramSettings
-from platforms.telegram_app.notifications import Telegram
+from platforms.telegram_app.notifications.notifications import Telegram
 from rest_framework import status
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
@@ -28,7 +28,9 @@ class TelegramSettingsSerializer(ModelSerializer):
         fields = ("id", "bot", "token")
 
     def get_bot_name(self, instance: TelegramSettings) -> str:
-        return Telegram().get_bot_name()
+        telegram = Telegram()
+        telegram.initialize()
+        return telegram.get_bot_name()
 
     def is_available(self, instance: TelegramSettings) -> bool:
         return Telegram().is_available()
@@ -38,9 +40,12 @@ class TelegramChatSerializer(ModelSerializer):
     class Meta:
         model = TelegramChat
         fields = (
+            "id",
             "otp",
             "user",
         )
+        read_only_fields = ("user",)
+        extra_kwargs = {"otp": {"write_only": True}}
 
     def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
         attrs = super().validate(attrs)
@@ -54,6 +59,7 @@ class TelegramChatSerializer(ModelSerializer):
             raise AuthenticationFailed(
                 "Invalid Telegram OTP", code=status.HTTP_401_UNAUTHORIZED
             )
+        return attrs
 
     def create(self, validated_data: Dict[str, Any]) -> TelegramChat:
         validated_data["telegram_chat"].otp = None

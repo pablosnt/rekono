@@ -13,7 +13,7 @@ class AuthenticationViewSet(BaseViewSet):
     serializer_class = AuthenticationSerializer
     filterset_class = AuthenticationFilter
     search_fields = ["name"]
-    ordering_fields = ["id", "integration", "target_port", "name", "type"]
+    ordering_fields = ["id", "name", "type"]
     http_method_names = [
         "get",
         "post",
