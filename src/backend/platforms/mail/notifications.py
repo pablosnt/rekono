@@ -1,4 +1,5 @@
 import logging
+import threading
 from typing import Any, Dict, List
 
 from django.core.mail import EmailMultiAlternatives
@@ -42,6 +43,13 @@ class SMTP(BaseNotification):
         except:
             return False
 
+    def _send_messages_in_background(
+        self, users: List[Any], subject: str, template: str, data: Dict[str, Any]
+    ) -> None:
+        threading.Thread(
+            target=self._send_messages, args=(users, subject, template, data)
+        )
+
     def _send_messages(
         self, users: List[Any], subject: str, template: str, data: Dict[str, Any]
     ) -> None:
@@ -77,22 +85,22 @@ class SMTP(BaseNotification):
         )
 
     def invite_user(self, user: Any) -> None:
-        self._send_messages(
+        self._send_messages_in_background(
             [user], "Welcome to Rekono", "user_invitation.html", {"user": user}
         )
 
     def reset_password(self, user: Any) -> None:
-        self._send_messages(
+        self._send_messages_in_background(
             [user], "Reset Rekono password", "user_password_reset.html", {"user": user}
         )
 
     def enable_user_account(self, user: Any) -> None:
-        self._send_messages(
+        self._send_messages_in_background(
             [user], "Rekono user enabled", "user_enable_account.html", {"user": user}
         )
 
     def login_notification(self, user: Any) -> None:
-        self._send_messages(
+        self._send_messages_in_background(
             [user],
             "New login in your Rekono account",
             "user_login_notification.html",
@@ -100,7 +108,7 @@ class SMTP(BaseNotification):
         )
 
     def telegram_linked_notification(self, user: Any) -> None:
-        self._send_messages(
+        self._send_messages_in_background(
             [user],
             "Welcome to Rekono Bot",
             "user_telegram_linked_notification.html",
