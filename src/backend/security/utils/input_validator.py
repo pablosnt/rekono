@@ -107,19 +107,15 @@ class TargetValidator(RegexValidator):
                     pass
 
 
-@dataclass
-class TimeValidator:
-    code: str
-    # TODO: Remove
-    # def __init__(self, code: str):
-    #     self.code = code
-
-    def future_datetime(self, datetime: Any) -> None:
-        if datetime <= timezone.now():
+class FutureDatetimeValidator(RegexValidator):
+    def __call__(self, value: Any) -> None:
+        if value <= timezone.now():
             raise ValidationError("Datetime must be future", code=self.code)
 
-    def time_amount(self, amount: int) -> None:
-        if amount > 1000 or amount <= 0:
+
+class TimeAmountValidator(RegexValidator):
+    def __call__(self, value: int) -> None:
+        if value > 1000 or value <= 0:
             raise ValidationError("Time value is too high", code=self.code)
 
 

@@ -1,7 +1,7 @@
 import os
 import sys
 from pathlib import Path
-from typing import Any, List, Optional
+from typing import Any, Optional
 
 import yaml
 from rekono.properties import Property
@@ -11,11 +11,13 @@ class RekonoConfig:
     def __init__(self) -> None:
         self.testing = "test" in sys.argv
         self.base_dir = Path(__file__).resolve().parent.parent
-        self.home = (
-            self.base_dir / "testing" / "home"
-            if self.testing
-            else Path(self._get_config(Property.REKONO_HOME))
-        )
+        if self.testing:
+            self.home = self.base_dir / "testing" / "home"
+        else:
+            home_from_config = Path(self._get_config(Property.REKONO_HOME))
+            self.home = (
+                home_from_config if home_from_config.is_dir() else self.base_dir.parent
+            )
         self.reports = self.home / "reports"
         self.wordlists = self.home / "wordlists"
         self.logs = self.home / "logs"

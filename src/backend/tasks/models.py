@@ -1,8 +1,7 @@
 from django.db import models
-from executions.enums import Status
 from processes.models import Process
 from rekono.settings import AUTH_USER_MODEL
-from security.utils.input_validator import TimeValidator
+from security.utils.input_validator import FutureDatetimeValidator, TimeAmountValidator
 from targets.models import Target
 from tasks.enums import TimeUnit
 from tools.enums import Intensity
@@ -32,13 +31,13 @@ class Task(models.Model):
     scheduled_at = models.DateTimeField(
         blank=True,
         null=True,
-        validators=[TimeValidator("scheduled_at").future_datetime],
+        validators=[FutureDatetimeValidator(code="scheduled_at")],
     )
     # Amount of time before task execution
     scheduled_in = models.IntegerField(
         blank=True,
         null=True,
-        validators=[TimeValidator("scheduled_in").time_amount],
+        validators=[TimeAmountValidator(code="scheduled_in")],
     )
     # Time unit to apply to the 'sheduled in' value
     scheduled_time_unit = models.TextField(
@@ -48,7 +47,7 @@ class Task(models.Model):
     repeat_in = models.IntegerField(
         blank=True,
         null=True,
-        validators=[TimeValidator("repeat_in").time_amount],
+        validators=[TimeAmountValidator(code="repeat_in")],
     )
     # Time unit to apply to the 'repeat in' value
     repeat_time_unit = models.TextField(

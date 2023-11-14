@@ -1,5 +1,5 @@
 defusedxml==0.7.1
-Django==4.2.5
+Django==4.2.7
 djangorestframework==3.14.0
 djangorestframework-simplejwt==5.2.2
 django-filter==23.2

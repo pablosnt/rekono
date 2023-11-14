@@ -7,7 +7,7 @@ from framework.apps import BaseApp
 
 class DefectDojoConfig(BaseApp, AppConfig):
     name = "platforms.defect_dojo"
-    # fixtures_path = Path(__file__).resolve().parent / "fixtures"
+    fixtures_path = Path(__file__).resolve().parent / "fixtures"
     skip_if_model_exists = True
 
     def _get_models(self) -> List[Any]:

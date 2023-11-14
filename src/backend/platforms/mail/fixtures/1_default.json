@@ -5,7 +5,7 @@
         "fields": {
             "host": null,
             "port": 587,
-            "user": null,
+            "username": null,
             "password": null,
             "tls": true
         }

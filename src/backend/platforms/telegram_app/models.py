@@ -31,9 +31,7 @@ class TelegramChat(BaseModel):
     creation = models.DateTimeField(auto_now_add=True)
     # One Time Password to link user account
     otp = models.TextField(max_length=200, blank=True, null=True)
-    otp_expiration = models.DateTimeField(
-        default=User.objects.get_otp_expiration_time, blank=True, null=True
-    )
+    otp_expiration = models.DateTimeField(blank=True, null=True)
 
     def is_auditor(self) -> bool:
         return (

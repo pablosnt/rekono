@@ -58,7 +58,6 @@ INSTALLED_APPS = [
     "platforms.mail",
     "platforms.telegram_app",
     "parameters",
-    "processes",
     "projects",
     "security",
     "settings",
@@ -66,8 +65,11 @@ INSTALLED_APPS = [
     "targets",
     "tasks",
     "tools",
-    "users",
+    # Processes MUST be loaded after tools, as their fixtures need configuration fixtures to be loaded first
+    "processes",
     "wordlists",
+    # Users MUST be loaded at the latest place, as it will load permissions fixtures from all the other models
+    "users",
 ]
 
 MIDDLEWARE = [
@@ -86,7 +88,7 @@ ROOT_URLCONF = "rekono.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / "notifications" / "mail" / "templates"],
+        "DIRS": [BASE_DIR / "platforms" / "mail" / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
