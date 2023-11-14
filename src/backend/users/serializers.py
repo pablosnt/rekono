@@ -16,7 +16,7 @@ from rest_framework.serializers import (
 from security.authorization.roles import Role
 from users.models import User
 
-logger = logging.getLogger()  # Rekono logger
+logger = logging.getLogger()
 
 
 class UserSerializer(ModelSerializer):

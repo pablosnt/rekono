@@ -1,12 +1,11 @@
-import json
-import os
 import subprocess
 import uuid
-from typing import Any, Dict, List
+from pathlib import Path
+from typing import Any, Dict
 
 from executions.models import Execution
 from findings.enums import Severity
-from findings.models import Port, Vulnerability
+from findings.models import Vulnerability
 from rekono.settings import CONFIG
 from tools.executors.base import BaseExecutor
 
@@ -37,8 +36,8 @@ class Gitleaks(BaseExecutor):
         if target_url[-1] != "/":
             target_url += "/"
         target_url += ".git/"
-        gitdumper_directory = os.path.join(CONFIG.gittools_dir, "Dumper")
-        run_directory = os.path.join(CONFIG.reports, str(uuid.uuid4()))
+        gitdumper_directory = Path(CONFIG.gittools_dir) / "Dumper"
+        run_directory = CONFIG.reports / str(uuid.uuid4())
         process = subprocess.run(
             ["bash", gitdumper_directory, "gitdumper.sh", target_url, run_directory],
             capture_output=True,
@@ -49,12 +48,10 @@ class Gitleaks(BaseExecutor):
             capture_output=True,
             cwd=run_directory,
         )
-        for _, dirs, files in os.walk(self.run_directory):
-            # Check if Git repository has been dumped or not
-            self.git_directory_dumped = (
-                len([d for d in dirs if d != ".git"]) > 0 or len(files) > 0
-            )
-            break
+        for path in self.run_directory.iterdir():
+            if path.stem != ".git" or path.is_file():
+                self.git_directory_dumped = True
+                break
         if self.git_directory_dumped:
             return super()._run(environment)
         if process.returncode > 0:

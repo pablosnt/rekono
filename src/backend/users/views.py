@@ -31,7 +31,7 @@ from users.serializers import (
 
 # Create your views here.
 
-logger = logging.getLogger()  # Rekono logger
+logger = logging.getLogger()
 
 
 class UserViewSet(BaseViewSet):
@@ -145,32 +145,6 @@ class ProfileViewSet(GenericViewSet):
     def update_password(self, request: Request) -> Response:
         self._update(request, UpdatePasswordSerializer)
         return Response(status=status.HTTP_200_OK)
-
-    # @extend_schema(request=TelegramBotSerializer, responses={200: None})
-    # @action(
-    #     detail=False,
-    #     methods=["POST"],
-    #     url_path="telegram-token",
-    #     url_name="telegram-token",
-    # )
-    # def telegram_token(self, request: Request) -> Response:
-    #     """Link Telegram bot to the user account.
-
-    #     Args:
-    #         request (Request): Received HTTP request
-
-    #     Returns:
-    #         Response: HTTP response
-    #     """
-    #     serializer = TelegramBotSerializer(request.user, data=request.data)
-    #     if serializer.is_valid():  # Check input data
-    #         serializer.update(
-    #             request.user, serializer.validated_data
-    #         )  # Link Telegram bot to user account
-    #         return Response(status=status.HTTP_200_OK)
-    #     return Response(
-    #         serializer.errors, status=status.HTTP_400_BAD_REQUEST
-    #     )  # Invalid input data
 
 
 class CreateUserViewSet(BaseViewSet):

@@ -3,7 +3,8 @@ import os
 import re
 import subprocess
 import uuid
-from typing import Any, Dict, List, Tuple
+from pathlib import Path
+from typing import Any, Dict, List
 
 from authentications.models import Authentication
 from django.utils import timezone
@@ -31,9 +32,9 @@ class BaseExecutor:
             .order_by("-value")
             .first()
         )
-        self.report = os.path.join(
-            CONFIG.reports,
-            f'{str(uuid.uuid4())}.{execution.configuration.tool.output_format or "txt"}',
+        self.report = (
+            CONFIG.reports
+            / f'{str(uuid.uuid4())}.{execution.configuration.tool.output_format or "txt"}'
         )
         self.arguments = []
         self.findings_used_in_execution: Dict[__class__, BaseInput] = {}
@@ -47,12 +48,14 @@ class BaseExecutor:
         wordlists: List[Wordlist],
     ) -> List[str]:
         parameters = {
-            "script": os.path.join(
-                getattr(
-                    CONFIG,
-                    self.execution.configuration.tool.script_directory_property.lower(),
-                ),
-                self.execution.configuration.tool.script,
+            "script": (
+                Path(
+                    getattr(
+                        CONFIG,
+                        self.execution.configuration.tool.script_directory_property.lower(),
+                    )
+                )
+                / self.execution.configuration.tool.script
             )
             if self.execution.configuration.tool.script_directory_property
             and self.execution.configuration.tool.script
@@ -206,9 +209,7 @@ class BaseExecutor:
     def _on_completed(self, output: str) -> None:
         self.execution.status = Status.COMPLETED
         self.execution.end = timezone.now()
-        if self.execution.configuration.tool.output_format and os.path.isfile(
-            self.report
-        ):
+        if self.execution.configuration.tool.output_format and self.report.is_file():
             self.execution.output_file = self.report.strip()
         self.execution.output_plain = output.replace(
             self.report, f"output.{self.execution.configuration.tool.output_format}"

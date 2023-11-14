@@ -1,5 +1,5 @@
-import os
 from datetime import timedelta
+from pathlib import Path as PathFile
 from typing import Any, Dict, List
 
 from django.utils import timezone
@@ -31,17 +31,19 @@ class DefectDojo(BaseIntegration):
     def _request(
         self, method: callable, url: str, json: bool = True, **kwargs: Any
     ) -> Any:
-        url = f"{self.settings.server}/api/v2{url}"
-        kwargs.update(
+        super()._request(
+            method,
+            f"{self.settings.server}/api/v2{url}",
+            json,
             {
+                **kwargs,
                 "headers": {
                     "User-Agent": "Rekono",
                     "Authorization": f"Token {self.settings.api_token}",
                 },
                 "verify": self.settings.tls_validation,
-            }
+            },
         )
-        super()._request(method, url, json, **kwargs)
 
     def is_available(self) -> bool:
         if not self.settings.server or not self.settings.api_token:
@@ -202,8 +204,9 @@ class DefectDojo(BaseIntegration):
                     engagement_id = sync.engagement_id
             else:
                 return
-        if execution.configuration.tool.defect_dojo_scan_type and os.path.isfile(
-            execution.output_file
+        if (
+            execution.configuration.tool.defect_dojo_scan_type
+            and PathFile(execution.output_file).is_file()
         ):
             new_import = self._import_scan(
                 engagement_id, execution, [self.settings.tag]

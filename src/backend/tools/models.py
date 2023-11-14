@@ -1,7 +1,7 @@
-import os
 import re
 import shutil
 import subprocess
+from pathlib import Path
 from typing import Any
 
 from django.db import models
@@ -42,15 +42,13 @@ class Tool(BaseLike):
             and (
                 (not self.script and not self.script_directory_property)
                 or (
-                    os.path.isdir(
+                    Path(
                         getattr(CONFIG, self.script_directory_property.lower())
-                    )
-                    and os.path.isfile(
-                        os.path.join(
-                            getattr(CONFIG, self.script_directory_property.lower()),
-                            self.script,
-                        )
-                    )
+                    ).is_dir()
+                    and (
+                        Path(getattr(CONFIG, self.script_directory_property.lower()))
+                        / self.script
+                    ).is_file()
                 )
             )
         )

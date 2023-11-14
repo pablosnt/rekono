@@ -11,13 +11,18 @@ class RekonoConfig:
     def __init__(self) -> None:
         self.testing = "test" in sys.argv
         self.base_dir = Path(__file__).resolve().parent.parent
-        self.home = self._get_home()
-        self.reports = os.path.join(self.home, "reports")
-        self.wordlists = os.path.join(self.home, "wordlists")
-        self.logs = os.path.join(self.home, "logs")
-        self._create_missing_directories([self.reports, self.wordlists, self.logs])
+        self.home = (
+            self.base_dir / "testing" / "home"
+            if self.testing
+            else Path(self._get_config(Property.REKONO_HOME))
+        )
+        self.reports = self.home / "reports"
+        self.wordlists = self.home / "wordlists"
+        self.logs = self.home / "logs"
+        for path in [self.home, self.reports, self.wordlists, self.logs]:
+            path.mkdir(exist_ok=True)
         self.config_file = self._get_config_file()
-        with open(self.config_file, "r") as file:
+        with self.config_file.open("r") as file:
             self._config_properties = yaml.safe_load(file)
         for property in Property:
             if not hasattr(self, property.name.lower()) or not getattr(
@@ -25,32 +30,17 @@ class RekonoConfig:
             ):
                 setattr(self, property.name.lower(), self._get_config(property))
 
-    def _get_config_file(self) -> str:
+    def _get_config_file(self) -> Path:
         for filename in [
             "config.yaml",
             "config.yml",
             "rekono.yaml",
             "rekono.yml",
         ]:
-            path = os.path.join(self.home, filename)
-            if os.path.isfile(path):
+            path = self.home / filename
+            if path.is_file():
                 break
         return path
-
-    def _get_home(self) -> str:
-        if self.testing:
-            home = os.path.join(self.base_dir, "testing", "home")
-            self._create_missing_directories([home])
-        else:
-            home = self._get_config(Property.REKONO_HOME)
-            if not os.path.isdir(home):
-                home = str(self.base_dir.parent)
-        return home
-
-    def _create_missing_directories(self, directories: List[str]) -> None:
-        for directory in directories:
-            if not os.path.isdir(directory):
-                os.mkdir(directory)
 
     def _get_config(self, property: Property) -> Any:
         default_value = value = property.value[2]

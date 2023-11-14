@@ -10,7 +10,6 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
-import os
 from datetime import timedelta
 from typing import Any, Dict
 
@@ -87,7 +86,7 @@ ROOT_URLCONF = "rekono.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [os.path.join(BASE_DIR, "notifications", "mail", "templates")],
+        "DIRS": [BASE_DIR / "notifications" / "mail" / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -172,17 +171,19 @@ LOGGING = {
         },
         "file": {
             "class": "logging.handlers.RotatingFileHandler",
-            "filename": os.path.join(CONFIG.logs, "rekono.log"),
+            "filename": CONFIG.logs / "rekono.log",
             "maxBytes": 50 * 1024 * 1024,  # Max. 50 MB per file
             "backupCount": 10,
             "formatter": "rekono",
             "filters": ["rekono"],
         },
     },
-    "root": {
-        "handlers": ["console", "file"],
-        "level": "DEBUG" if DEBUG else "INFO",
-        "propagate": False,
+    "loggers": {
+        "root": {
+            "handlers": ["console", "file"],
+            "level": "DEBUG" if DEBUG else "INFO",
+            "propagate": False,
+        }
     },
 }
 
@@ -322,7 +323,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = "static/"
-STATIC_ROOT = os.path.join(CONFIG.home, "static")
+STATIC_ROOT = CONFIG.home / "static"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field

@@ -1,5 +1,6 @@
 import logging
-from typing import Any, ItemsView
+from dataclasses import dataclass
+from typing import Any
 
 from rekono.settings import CONFIG
 from rest_framework import status
@@ -7,7 +8,7 @@ from rest_framework.renderers import JSONRenderer
 from rest_framework.request import HttpRequest
 from rest_framework.response import Response
 
-logger = logging.getLogger()  # Rekono logger
+logger = logging.getLogger()
 
 CSP = {
     "/admin": (
@@ -53,16 +54,20 @@ SECURITY_HEADERS = {
 }
 
 
+@dataclass
 class SecurityMiddleware:
     """Security middleware that manages all HTTP requests and responses."""
 
-    def __init__(self, get_response: Any) -> None:
-        """Middleware constructor.
+    get_response: Any
 
-        Args:
-            get_response (Any): HTTP request processor
-        """
-        self.get_response = get_response
+    # TODO: Remove
+    # def __init__(self, get_response: Any) -> None:
+    #     """Middleware constructor.
+
+    #     Args:
+    #         get_response (Any): HTTP request processor
+    #     """
+    #     self.get_response = get_response
 
     def _get_forwarded_address(self, request: HttpRequest) -> str:
         x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")

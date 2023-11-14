@@ -18,20 +18,13 @@ class BaseParser:
             executor.report
             if executor.report
             and executor.execution.configuration.tool.output_format
-            and os.path.isfile(executor.report)
-            and os.stat(executor.report).st_size > 0
+            and executor.report.is_file()
+            and executor.report.stat().st_size > 0
             else None
         )
         self.findings: List[Finding] = []
 
     def create_finding(self, finding_type: Finding, **fields: Any) -> Finding:
-        fields.update(
-            {
-                "target": self.executor.execution.task.target,
-                "detected_by": self.executor.execution.configuration.tool,
-                "last_seen": timezone.now(),
-            }
-        )
         for (
             finding_type_used,
             finding_used,
@@ -54,7 +47,15 @@ class BaseParser:
         unique_id = {}
         for field in finding_type.get_unique_fields():
             unique_id[field] = fields[field]
-        finding, _ = finding_type.objects.update_or_create(**unique_id, defaults=fields)
+        finding, _ = finding_type.objects.update_or_create(
+            **unique_id,
+            defaults={
+                **fields,
+                "target": self.executor.execution.task.target,
+                "detected_by": self.executor.execution.configuration.tool,
+                "last_seen": timezone.now(),
+            }
+        )
         self.findings.append(finding)
 
     def _parse_report(self) -> None:

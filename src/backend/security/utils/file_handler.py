@@ -1,6 +1,5 @@
 import hashlib
 import logging
-import os
 import uuid
 from pathlib import Path
 from typing import Any, List, Tuple
@@ -9,7 +8,7 @@ import magic
 from django.core.exceptions import ValidationError
 from rekono.settings import CONFIG
 
-logger = logging.getLogger()  # Rekono logger
+logger = logging.getLogger()
 
 
 class FileHandler:
@@ -65,9 +64,9 @@ class FileHandler:
             return checksum == expected_checksum
 
     def store_file(self, in_memory_file: Any) -> Tuple[str, str, int]:
-        path = os.path.join(CONFIG.wordlists, f"{str(uuid.uuid4())}.txt")
+        path = CONFIG.wordlists / f"{str(uuid.uuid4())}.txt"
         checksum = hashlib.sha512()
-        with open(path, "wb+") as stored_file:
+        with path.open("wb+") as stored_file:
             for chunk in in_memory_file.chunks():
                 stored_file.write(chunk)
                 checksum.update(chunk)

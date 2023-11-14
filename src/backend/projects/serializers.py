@@ -2,6 +2,7 @@ import logging
 from typing import Any, Dict
 
 from django.db import transaction
+from django.shortcuts import get_object_or_404
 from framework.fields import TagField
 from platforms.defect_dojo.serializers import DefectDojoSyncSerializer
 from projects.models import Project
@@ -77,6 +78,7 @@ class ProjectMemberSerializer(Serializer):
         Returns:
             Project: Updated instance
         """
-        user = User.objects.get(pk=validated_data.get("user"), is_active=True)
-        instance.members.add(user)
+        instance.members.add(
+            get_object_or_404(User, pk=validated_data.get("user"), is_active=True)
+        )
         return instance

@@ -87,7 +87,9 @@ class Host(Finding):
                 [field for field in [self.address, self.os_type] if field]
             ),
             "severity": Severity.INFO,
-            "date": self.last_seen.strftime(DefectDojoSettings.objects.first().date_format),
+            "date": self.last_seen.strftime(
+                DefectDojoSettings.objects.first().date_format
+            ),
         }
 
     def __str__(self) -> str:
@@ -153,7 +155,9 @@ class Port(Finding):
             if self.host
             else description,
             "severity": Severity.INFO,
-            "date": self.last_seen.strftime(DefectDojoSettings.objects.first().date_format),
+            "date": self.last_seen.strftime(
+                DefectDojoSettings.objects.first().date_format
+            ),
         }
 
     def __str__(self) -> str:
@@ -266,10 +270,11 @@ class Technology(Finding):
         Returns:
             Dict[str, Any]: Useful information for tool executions, including accumulated if setted
         """
-        output = self.port.parse(accumulated) if self.port else {}
-        output.update({InputKeyword.TECHNOLOGY.name.lower(): self.name})
+        output = {InputKeyword.TECHNOLOGY.name.lower(): self.name}
         if self.version:
             output.update({InputKeyword.VERSION.name.lower(): self.version})
+        if self.port:
+            output.update(self.port.parse(accumulated))
         return output
 
     def defect_dojo(self) -> Dict[str, Any]:
@@ -282,7 +287,9 @@ class Technology(Finding):
             "severity": Severity.LOW,
             "cwe": 200,  # CWE-200: Exposure of Sensitive Information to Unauthorized Actor
             "references": self.reference,
-            "date": self.last_seen.strftime(DefectDojoSettings.objects.first().date_format),
+            "date": self.last_seen.strftime(
+                DefectDojoSettings.objects.first().date_format
+            ),
         }
 
     def __str__(self) -> str:
@@ -341,7 +348,9 @@ class Credential(Finding):
             ),
             "cwe": 200,  # CWE-200: Exposure of Sensitive Information to Unauthorized Actor
             "severity": Severity.HIGH,
-            "date": self.last_seen.strftime(DefectDojoSettings.objects.first().date_format),
+            "date": self.last_seen.strftime(
+                DefectDojoSettings.objects.first().date_format
+            ),
         }
 
     def __str__(self) -> str:
@@ -410,7 +419,9 @@ class Vulnerability(Finding):
             "cve": self.cve,
             "cwe": int(self.cwe.split("-", 1)[1]) if self.cwe else None,
             "references": self.reference,
-            "date": self.last_seen.strftime(DefectDojoSettings.objects.first().date_format),
+            "date": self.last_seen.strftime(
+                DefectDojoSettings.objects.first().date_format
+            ),
         }
 
     def __str__(self) -> str:
@@ -475,7 +486,9 @@ class Exploit(Finding):
             if self.vulnerability
             else Severity.MEDIUM,
             "reference": self.reference,
-            "date": self.last_seen.strftime(DefectDojoSettings.objects.first().date_format),
+            "date": self.last_seen.strftime(
+                DefectDojoSettings.objects.first().date_format
+            ),
         }
 
     def __str__(self) -> str:

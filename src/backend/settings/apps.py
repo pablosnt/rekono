@@ -14,10 +14,3 @@ class SettingsConfig(BaseApp, AppConfig):
         from settings.models import Settings
 
         return [Settings]
-
-    def _load_fixtures(self, **kwargs: Any) -> None:
-        from settings.models import Settings
-
-        if Settings.objects.exists():
-            return
-        return super()._load_fixtures(**kwargs)

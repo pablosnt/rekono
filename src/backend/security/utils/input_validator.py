@@ -1,6 +1,7 @@
 import ipaddress
 import logging
 import re
+from dataclasses import dataclass
 from enum import Enum
 from re import RegexFlag
 from typing import Any
@@ -66,7 +67,7 @@ class TargetValidator(RegexValidator):
         super().__init__(regex, message, code, inverse_match, flags)
         self.target_blacklist = CONFIG.target_blacklist
         try:
-            settings = Settings.objects.filter(pk=1)
+            settings = Settings.objects.first()
             if settings.exists():
                 self.target_blacklist += StringAsListField().to_representation(
                     settings.first().target_blacklist
@@ -106,9 +107,12 @@ class TargetValidator(RegexValidator):
                     pass
 
 
+@dataclass
 class TimeValidator:
-    def __init__(self, code: str):
-        self.code = code
+    code: str
+    # TODO: Remove
+    # def __init__(self, code: str):
+    #     self.code = code
 
     def future_datetime(self, datetime: Any) -> None:
         if datetime <= timezone.now():

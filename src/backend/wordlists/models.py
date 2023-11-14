@@ -1,4 +1,4 @@
-import os
+from pathlib import Path
 from typing import Any, Dict
 
 from django.db import models
@@ -40,7 +40,7 @@ class Wordlist(BaseInput, BaseLike):
         Returns:
             bool: Indicate if this instance match the input filter or not
         """
-        check = os.path.isfile(self.path)  # Check if wordlist file exists
+        check = Path(self.path).is_file()  # Check if wordlist file exists
         if check and self.checksum:  # If checksum exists
             check = check and FileHandler().validate_filepath_checksum(
                 self.path, self.checksum

@@ -14,7 +14,7 @@ from targets.enums import TargetType
 
 # Create your models here.
 
-logger = logging.getLogger()  # Rekono logger
+logger = logging.getLogger()
 
 
 class Target(BaseInput):

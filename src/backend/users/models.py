@@ -20,7 +20,7 @@ from users.enums import Notification
 
 # Create your models here.
 
-logger = logging.getLogger()  # Rekono logger
+logger = logging.getLogger()
 
 
 class RekonoUserManager(UserManager):

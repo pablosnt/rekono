@@ -54,7 +54,11 @@ class TargetPort(BaseInput):
         Returns:
             Dict[str, Any]: Useful information for tool executions, including accumulated if setted
         """
-        output = self.authentication.parse(target, accumulated)
+        output = (
+            self.authentication.parse(target, accumulated)
+            if self.authentication
+            else {}
+        )
         ports = (accumulated or {}).get(InputKeyword.PORTS.name.lower(), []) + [
             self.port
         ]
