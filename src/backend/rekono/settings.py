@@ -298,8 +298,6 @@ RQ_QUEUES = {
     "tasks-queue": default_rq_queue,
     "executions-queue": default_rq_queue,
     "findings-queue": default_rq_queue,
-    # TODO: Try to remove
-    # "emails-queue": default_rq_queue,
 }
 
 RQ_QUEUES["executions-queue"]["DEFAULT_TIMEOUT"] = 28800  # 8 hours

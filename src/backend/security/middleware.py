@@ -60,15 +60,6 @@ class SecurityMiddleware:
 
     get_response: Any
 
-    # TODO: Remove
-    # def __init__(self, get_response: Any) -> None:
-    #     """Middleware constructor.
-
-    #     Args:
-    #         get_response (Any): HTTP request processor
-    #     """
-    #     self.get_response = get_response
-
     def _get_forwarded_address(self, request: HttpRequest) -> str:
         x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
         if x_forwarded_for and CONFIG.trusted_proxy:
