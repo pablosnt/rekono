@@ -9,7 +9,7 @@ from platforms.telegram_app.notifications.notifications import Telegram
 from rest_framework import status
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
-from security.utils.input_validator import Regex, Validator
+from security.input_validator import Regex, Validator
 
 logger = logging.getLogger()
 
@@ -17,8 +17,9 @@ logger = logging.getLogger()
 class TelegramSettingsSerializer(ModelSerializer):
     token = ProtectedSecretField(
         Validator(Regex.SECRET.value, code="password").__call__,
-        required=False,
-        allow_null=True,
+        write_only=True,
+        required=True,
+        source="secret",
     )
     bot = SerializerMethodField(method_name="get_bot_name", read_only=True)
     is_available = SerializerMethodField(method_name="is_available", read_only=True)

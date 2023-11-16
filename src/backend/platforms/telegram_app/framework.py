@@ -18,18 +18,21 @@ class BaseTelegram:
         self.date_format = "%Y-%m-%d %H:%M:%S"
 
     def initialize(self) -> None:
-        asyncio.run(self.app.bot.initialize())
+        if not self.app or not self.app.bot:
+            self.app = self._get_app()
+        if self.app and self.app.bot:
+            asyncio.run(self.app.bot.initialize())
 
     def get_bot_name(self) -> str:
         return self.app.bot.username if self.app and self.app.bot else None
 
     def _get_app(self) -> Any:
-        if self.settings and self.settings.token:
+        if self.settings and self.settings.secret:
             try:
-                return ApplicationBuilder().token(self.settings.token).build()
+                return ApplicationBuilder().token(self.settings.secret).build()
             except (InvalidToken, Forbidden):
                 logger.error("[Telegram] Authentication error")
-                self.settings.token = None
+                self.settings.secret = None
                 self.settings.save(update_fields=["token"])
             except Exception:
                 logger.error("[Telegram] Error creating updater")

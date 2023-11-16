@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime, timedelta
-from typing import Any, cast
+from typing import Any, List, cast
 
 from django.contrib.auth.models import AbstractUser, Group, UserManager
 from django.db import models
@@ -14,8 +14,9 @@ from rest_framework_simplejwt.token_blacklist.models import (
 )
 from security.authentication.api import ApiToken
 from security.authorization.roles import Role
-from security.utils.cryptography import generate_random_value, hash
-from security.utils.input_validator import Regex, Validator
+from security.cryptography.hashing import hash
+from security.cryptography.random import generate_random_value
+from security.input_validator import FutureDatetimeValidator, Regex, Validator
 from users.enums import Notification
 
 # Create your models here.
@@ -190,12 +191,18 @@ class RekonoUserManager(UserManager):
         user.save(update_fields=["otp", "otp_expiration", "is_active"])
         return user
 
-    def invalidate_all_tokens(self, user: Any) -> Any:
-        for token in OutstandingToken.objects.filter(user=user).exclude(
+    def invalidate_all_tokens(self, user: Any, exclude_latest: bool = False) -> Any:
+        user_tokens = OutstandingToken.objects.filter(user=user)
+        tokens_to_remove = user_tokens.exclude(
             id__in=BlacklistedToken.objects.filter(token__user=user).values_list(
                 "token_id", flat=True
-            ),
-        ):
+            )
+        )
+        if exclude_latest:
+            tokens_to_remove = tokens_to_remove.exclude(
+                token=user_tokens.order_by("-created_at").first().token
+            )
+        for token in tokens_to_remove:
             BlacklistedToken.objects.create(token=token)
         return user
 
@@ -231,6 +238,7 @@ class User(AbstractUser, BaseModel):
     otp_expiration = models.DateTimeField(
         blank=True,
         null=True,
+        validators=[FutureDatetimeValidator(code="otp_expiration")],
     )
 
     notification_scope = models.TextField(  # User notification preferences

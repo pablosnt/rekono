@@ -6,6 +6,7 @@ import urllib3
 from django.db import models
 from django.db.models import Q
 from rekono.settings import AUTH_USER_MODEL
+from security.cryptography.encryption import Encryption
 
 
 class BaseModel(models.Model):
@@ -17,7 +18,10 @@ class BaseModel(models.Model):
         if filter_field:
             project = self
             for field in filter_field.split("__"):
-                project = getattr(project, field)
+                if hasattr(project, field):
+                    project = getattr(project, field)
+                else:
+                    return None
             return project
 
     @classmethod
@@ -39,6 +43,28 @@ class BaseModel(models.Model):
             type = package.split(".")[-1][:-1]
             cls = getattr(module, f"Base{type[0].upper() + type[:1].lower()}")
         return cls
+
+
+class BaseEncrypted(BaseModel):
+    class Meta:
+        abstract = True
+
+    _encryption = Encryption()
+    _encrypted_field = "_secret"
+
+    @property
+    def secret(self) -> str:
+        return (
+            self._encryption.decrypt(getattr(self, self._encrypted_field))
+            if hasattr(self, self._encrypted_field)
+            and getattr(self, self._encrypted_field)
+            else None
+        )
+
+    @secret.setter
+    def secret(self, value: str) -> None:
+        if hasattr(self, self._encrypted_field) and value:
+            setattr(self, self._encrypted_field, self._encryption.encrypt(value))
 
 
 class BaseInput(BaseModel):

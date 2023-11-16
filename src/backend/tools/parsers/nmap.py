@@ -4,7 +4,7 @@ from typing import Any, List
 from findings.enums import HostOS, PathType, PortStatus, Protocol, Severity
 from findings.models import Credential, Host, Path, Port, Technology, Vulnerability
 from libnmap.parser import NmapParser
-from security.utils.input_validator import Regex
+from security.input_validator import Regex
 from tools.parsers.base import BaseParser
 
 

@@ -1,12 +1,12 @@
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-from framework.models import BaseModel
-from security.utils.input_validator import Regex, Validator
+from framework.models import BaseEncrypted
+from security.input_validator import Regex, Validator
 
 # Create your models here.
 
 
-class SMTPSettings(BaseModel):
+class SMTPSettings(BaseEncrypted):
     host = models.TextField(
         max_length=100,
         validators=[Validator(Regex.TARGET.value)],
@@ -25,14 +25,16 @@ class SMTPSettings(BaseModel):
         null=True,
         blank=True,
     )
-    # TODO: encrypt and decrypt secret for more security
-    password = models.TextField(
+    _password = models.TextField(
         max_length=200,
         validators=[Validator(Regex.SECRET.value, code="api_token")],
         null=True,
         blank=True,
+        db_column="password",
     )
     tls = models.BooleanField(default=True)
+
+    _encrypted_field = "_password"
 
     def __str__(self) -> str:
         return f"{self.host}:{self.port}"

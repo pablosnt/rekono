@@ -9,7 +9,7 @@ from django.db import models
 from framework.enums import InputKeyword
 from framework.models import BaseInput
 from projects.models import Project
-from security.utils.input_validator import Regex, TargetValidator
+from security.input_validator import Regex, TargetValidator
 from targets.enums import TargetType
 
 # Create your models here.

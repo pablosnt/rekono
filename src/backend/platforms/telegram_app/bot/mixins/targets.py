@@ -19,7 +19,7 @@ class TargetMixin(BaseMixin):
                 "target",
                 3,
                 "Choose target",
-                "There are no targets in the selected project. Use /newtarget to create one",
+                "There are no targets in the selected project\. Use /newtarget to create one",
                 self._get_next_state(self._ask_for_target),
             ),
         )

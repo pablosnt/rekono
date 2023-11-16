@@ -2,7 +2,7 @@ from framework.fields import ProtectedSecretField
 from platforms.mail.models import SMTPSettings
 from platforms.mail.notifications import SMTP
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
-from security.utils.input_validator import Regex, Validator
+from security.input_validator import Regex, Validator
 
 
 class SMTPSettingsSerializer(ModelSerializer):
@@ -10,6 +10,7 @@ class SMTPSettingsSerializer(ModelSerializer):
         Validator(Regex.SECRET.value, code="password").__call__,
         required=False,
         allow_null=True,
+        source="secret",
     )
     is_available = SerializerMethodField(method_name="is_available", read_only=True)
 

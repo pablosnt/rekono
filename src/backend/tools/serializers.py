@@ -36,7 +36,7 @@ class IntensitySerializer(ModelSerializer):
 
 
 class ArgumentSerializer(ModelSerializer):
-    inputs = InputSerializer(many=True)
+    inputs = InputSerializer(many=True, read_only=True)
 
     class Meta:
         model = Argument
@@ -52,7 +52,7 @@ class ArgumentSerializer(ModelSerializer):
 
 class SimpleConfigurationSerializer(ModelSerializer):
     stage = StageField(model=Stage)
-    outputs = OutputSerializer(many=True)
+    outputs = OutputSerializer(many=True, read_only=True)
 
     class Meta:
         model = Configuration
@@ -60,9 +60,9 @@ class SimpleConfigurationSerializer(ModelSerializer):
 
 
 class ToolSerializer(LikeSerializer):
-    intensities = IntensitySerializer(many=True)
-    configurations = SimpleConfigurationSerializer(many=True)
-    arguments = ArgumentSerializer(many=True)
+    intensities = IntensitySerializer(many=True, read_only=True)
+    configurations = SimpleConfigurationSerializer(many=True, read_only=True)
+    arguments = ArgumentSerializer(many=True, read_only=True)
 
     class Meta:
         model = Tool
@@ -97,4 +97,4 @@ class SimpleToolSerializer(ModelSerializer):
 
 
 class ConfigurationSerializer(SimpleConfigurationSerializer):
-    tool = SimpleToolSerializer()
+    tool = SimpleToolSerializer(many=False, read_only=True)

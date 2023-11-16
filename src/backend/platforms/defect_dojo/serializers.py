@@ -18,7 +18,7 @@ from rest_framework.serializers import (
     Serializer,
     SerializerMethodField,
 )
-from security.utils.input_validator import Regex, Validator
+from security.input_validator import Regex, Validator
 
 
 class DefectDojoSettingsSerializer(ModelSerializer):
@@ -26,6 +26,7 @@ class DefectDojoSettingsSerializer(ModelSerializer):
         Validator(Regex.SECRET.value, code="api_token").__call__,
         required=False,
         allow_null=True,
+        source="secret",
     )
     is_available = SerializerMethodField(method_name="is_available", read_only=True)
 

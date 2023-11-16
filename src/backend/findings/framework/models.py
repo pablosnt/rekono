@@ -5,7 +5,7 @@ from django.db import connection, models
 from executions.models import Execution
 from findings.enums import TriageStatus
 from framework.models import BaseInput
-from security.utils.input_validator import Regex, Validator
+from security.input_validator import Regex, Validator
 
 
 class Finding(BaseInput):

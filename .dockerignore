@@ -13,8 +13,8 @@ src/backend/requirements-dev.txt
 src/backend/tests/*
 *.md
 LICENSE.txt
-src/reports/
-src/wordlists/
-src/logs/
+reports/
+wordlists/
+logs/
 src/frontend/node_modules/*
 .DS_Store

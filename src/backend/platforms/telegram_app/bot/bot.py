@@ -51,15 +51,15 @@ class TelegramBot(BaseTelegram):
         super().__init__()
 
     def _wait_for_token(self, sleep_time: int = 60) -> None:
-        if not self.settings or not self.settings.token:
+        if not self.settings or not self.settings.secret:
             logger.info("[Telegram Bot] Waiting while Telegram token is not configured")
-        while not self.settings or not self.settings.token:
+        while not self.settings or not self.settings.secret:
             time.sleep(sleep_time)
             self.settings = TelegramSettings.objects.first()
         self.app = self._get_app()
         if not self.app or not self.app.updater or not self.app.bot:
-            self.settings.token = None
-            self.settings.save(update_fields=["token"])
+            self.settings.secret = None
+            self.settings.save(update_fields=["secret"])
             self._wait_for_token(sleep_time)
 
     def deploy(self) -> None:

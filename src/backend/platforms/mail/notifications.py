@@ -25,7 +25,7 @@ class SMTP(BaseNotification):
                 host=self.settings.host,
                 port=self.settings.port,
                 username=self.settings.username,
-                password=self.settings.password,
+                password=self.settings.secret,
                 use_tls=self.settings.tls,
             )
             if self.settings

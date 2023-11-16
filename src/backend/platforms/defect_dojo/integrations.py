@@ -39,14 +39,14 @@ class DefectDojo(BaseIntegration):
                 **kwargs,
                 "headers": {
                     "User-Agent": "Rekono",
-                    "Authorization": f"Token {self.settings.api_token}",
+                    "Authorization": f"Token {self.settings.secret}",
                 },
                 "verify": self.settings.tls_validation,
             },
         )
 
     def is_available(self) -> bool:
-        if not self.settings.server or not self.settings.api_token:
+        if not self.settings.server or not self.settings.secret:
             return False
         if "/api/v2" in self.settings.server:
             self.settings.server = self.settings.server.replace("/api/v2", "")

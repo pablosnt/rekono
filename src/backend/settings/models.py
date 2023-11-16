@@ -12,11 +12,6 @@ class Settings(BaseModel):
     )
     target_blacklist = models.TextField(blank=True, null=True)
 
-    # Telegram token to deploy the Telegram bot
-    # telegram_bot_token = models.TextField(
-    #     blank=True, null=True, validators=[validate_telegram_token]
-    # )
-
     def __str__(self) -> str:
         """Instance representation in text format.
 

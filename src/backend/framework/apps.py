@@ -1,4 +1,3 @@
-from pathlib import Path
 from typing import Any, List
 
 from django.core import management

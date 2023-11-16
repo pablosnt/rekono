@@ -184,7 +184,7 @@ class BaseMixin(BaseTelegramBot):
     ) -> str:
         return "*ERRORS*\n" + "\n".join(
             [
-                f"_{field}_    {self._escape(messages[0])}"
+                f"_{field.replace('_', '')}_    {self._escape(messages[0])}"
                 for field, messages in serializer_errors.items()
             ]
         )

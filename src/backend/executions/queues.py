@@ -38,7 +38,7 @@ class ExecutionsQueue(BaseQueue):
         at_front: bool = False,
     ) -> Job:
         job = self.queue.enqueue(
-            self.consume,
+            self.consume.__func__,
             execution=execution,
             findings=findings,
             target_ports=target_ports,

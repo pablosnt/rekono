@@ -132,9 +132,9 @@ dmypy.json
 .DS_Store
 .vscode/
 .scannerwork/
-src/reports/
-src/wordlists/
-src/logs/
+./reports/
+./wordlists/
+./logs/
 /static/
 
 # Vue.JS

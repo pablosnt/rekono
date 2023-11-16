@@ -2,7 +2,7 @@ from django.db import models
 from framework.models import BaseModel
 from rekono.settings import AUTH_USER_MODEL
 from rest_framework.authtoken.models import Token
-from security.utils.input_validator import Regex, Validator
+from security.input_validator import FutureDatetimeValidator, Regex, Validator
 
 
 class ApiToken(Token, BaseModel):
@@ -17,8 +17,7 @@ class ApiToken(Token, BaseModel):
         on_delete=models.CASCADE,
     )
     expiration = models.DateTimeField(
-        blank=True,
-        null=True,
+        blank=True, null=True, validators=[FutureDatetimeValidator(code="expiration")]
     )
 
     class Meta:

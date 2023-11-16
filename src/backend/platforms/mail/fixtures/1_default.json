@@ -6,7 +6,7 @@
             "host": null,
             "port": 587,
             "username": null,
-            "password": null,
+            "_password": null,
             "tls": true
         }
     }

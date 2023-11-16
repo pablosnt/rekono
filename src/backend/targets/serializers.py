@@ -16,7 +16,7 @@ class SimpleTargetSerializer(ModelSerializer):
 class TargetSerializer(ModelSerializer):
     """Serializer to manage targets via API."""
 
-    defect_dojo_sync = DefectDojoTargetSyncSerializer(read_only=True, many=False)
+    defect_dojo_sync = DefectDojoTargetSyncSerializer(many=False, read_only=True)
 
     class Meta:
         model = Target

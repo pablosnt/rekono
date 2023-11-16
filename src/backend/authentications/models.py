@@ -4,14 +4,14 @@ from typing import Any, Dict
 from authentications.enums import AuthenticationType
 from django.db import models
 from framework.enums import InputKeyword
-from framework.models import BaseInput
-from security.utils.input_validator import Regex, Validator
+from framework.models import BaseEncrypted, BaseInput
+from security.input_validator import Regex, Validator
 from targets.models import Target
 
 # Create your models here.
 
 
-class Authentication(BaseInput):
+class Authentication(BaseInput, BaseEncrypted):
     """Authentication model."""
 
     name = models.TextField(
@@ -20,16 +20,17 @@ class Authentication(BaseInput):
         null=True,
         blank=True,
     )
-    # TODO: encrypt and decrypt secret for more security
-    secret = models.TextField(
+    _secret = models.TextField(
         max_length=500,
         validators=[Validator(Regex.SECRET.value, code="secret")],
         null=True,
         blank=True,
+        db_column="secret",
     )
     type = models.TextField(max_length=8, choices=AuthenticationType.choices)
 
     filters = [BaseInput.Filter(type=AuthenticationType, field="type")]
+    _encrypted_field = "_secret"
 
     def parse(
         self, target: Target = None, accumulated: Dict[str, Any] = {}
@@ -75,11 +76,9 @@ class Authentication(BaseInput):
             str: String value that identifies this instance
         """
         value = ""
-        if self.target_port:
+        if hasattr(self, "target_port") and self.target_port:
             value = f"{self.target_port.__str__()} -"
-        elif self.integration:
-            value = f"{self.integration.__str__()} -"
-        return f"{value}{self.name}"
+        return value + self.name
 
     @classmethod
     def get_project_field(cls) -> str:

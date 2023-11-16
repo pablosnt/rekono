@@ -1,6 +1,6 @@
 from enum import Enum
 
-from security.utils.cryptography import generate_random_value
+from security.cryptography.random import generate_random_value
 
 
 class Property(Enum):
@@ -8,6 +8,11 @@ class Property(Enum):
     FRONTEND_URL = ("RKN_FRONTEND_URL", "frontend.url", "https://127.0.0.1")
     ROOT_PATH = ("RKN_ROOT_PATH", "rootpath", None)
     SECRET_KEY = ("RKN_SECRET_KEY", "security.secret-key", generate_random_value(3000))
+    ENCRYPTION_KEY = (
+        "RKN_ENCRYPTION_KEY",
+        "security.encryption-key",
+        None,
+    )
     ALLOWED_HOSTS = (
         "RKN_ALLOWED_HOSTS",
         "security.allowed-hosts",

@@ -54,9 +54,8 @@ class BaseTelegramBot(BaseTelegram):
 
     def _remove_all_context_values(self, context: CallbackContext) -> None:
         for key in Context:
-            if key == Context.PROJECT:
-                continue
-            self._remove_context_value(context, key)
+            if key != Context.PROJECT:
+                self._remove_context_value(context, key)
 
     @sync_to_async
     def _get_active_telegram_chat_async(self, chat_id: int) -> TelegramChat:

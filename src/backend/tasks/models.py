@@ -1,7 +1,7 @@
 from django.db import models
 from processes.models import Process
 from rekono.settings import AUTH_USER_MODEL
-from security.utils.input_validator import FutureDatetimeValidator, TimeAmountValidator
+from security.input_validator import FutureDatetimeValidator, TimeAmountValidator
 from targets.models import Target
 from tasks.enums import TimeUnit
 from tools.enums import Intensity

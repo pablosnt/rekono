@@ -1,26 +1,26 @@
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-from framework.models import BaseModel
+from framework.models import BaseEncrypted, BaseModel
 from projects.models import Project
-from security.utils.input_validator import Regex, Validator
+from security.input_validator import Regex, Validator
 from targets.models import Target
 
 # Create your models here.
 
 
-class DefectDojoSettings(BaseModel):
+class DefectDojoSettings(BaseEncrypted):
     server = models.TextField(
         max_length=100,
         validators=[Validator(Regex.TARGET.value)],
         blank=True,
         null=True,
     )
-    # TODO: encrypt and decrypt secret for more security
-    api_token = models.TextField(
+    _api_token = models.TextField(
         max_length=40,
         validators=[Validator(Regex.SECRET.value, code="api_token")],
         null=True,
         blank=True,
+        db_column="api_token",
     )
     tls_validation = models.BooleanField(default=True)
     tag = models.TextField(
@@ -47,6 +47,8 @@ class DefectDojoSettings(BaseModel):
     )
     date_format = models.TextField(max_length=15)
     datetime_format = models.TextField(max_length=15)
+
+    _encrypted_field = "_api_token"
 
 
 class DefectDojoSync(BaseModel):

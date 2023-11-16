@@ -51,17 +51,17 @@ Are you sure?
                 configuration = self._get_context_value(context, Context.CONFIGURATION)
                 wordlist = self._get_context_value(context, Context.WORDLIST)
                 data = {
-                    "target": target.id if target else None,
+                    "target_id": target.id if target else None,
                     "intensity": self._get_context_value(
                         context, Context.INTENSITY
                     ).capitalize(),
                     "executor": chat.user,
-                    "wordlists": [wordlist.id] if wordlist else None,
+                    "wordlists": [wordlist.id] if wordlist else [],
                 }
                 if process:
-                    data["process"] = process.id
+                    data["process_id"] = process.id
                 elif configuration:
-                    data["configuration"] = configuration.id
+                    data["configuration_id"] = configuration.id
                 next_state, instance = await self._create(
                     update,
                     context,

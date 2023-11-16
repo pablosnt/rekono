@@ -32,7 +32,7 @@ class BaseQueue:
             job.delete()
 
     def enqueue(self, **kwargs: Any) -> Job:
-        return self.queue.enqueue(self.consume, **kwargs)
+        return self.queue.enqueue(self.consume.__func__, **kwargs)
 
     def consume(self, **kwargs: Any) -> Any:
         pass

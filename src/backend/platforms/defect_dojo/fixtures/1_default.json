@@ -4,7 +4,7 @@
         "pk": 1,
         "fields": {
             "server": null,
-            "api_token": null,
+            "_api_token": null,
             "tls_validation": true,
             "tag": "rekono",
             "product_type_id": null,
