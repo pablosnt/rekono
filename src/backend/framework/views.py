@@ -11,7 +11,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.serializers import Serializer
-from rest_framework.viewsets import GenericViewSet, ModelViewSet
+from rest_framework.viewsets import ModelViewSet
 from security.authorization.permissions import IsAuditor
 
 
@@ -40,7 +40,10 @@ class BaseViewSet(ModelViewSet):
         fields = project_field.split("__")
         data = data.get(fields[0], {})
         for field in fields[1:]:
-            data = getattr(data, field)
+            if hasattr(data, field):
+                data = getattr(data, field)
+            else:
+                return None
         return data
 
     def get_queryset(self) -> None:
@@ -72,6 +75,12 @@ class BaseViewSet(ModelViewSet):
             serializer.save(**parameters)
             return
         super().perform_create(serializer)
+
+    def _method_not_allowed(self, method: str) -> Response:
+        return Response(
+            {"detail": f'Method "{method.upper()}" not allowed.'},
+            status=status.HTTP_405_METHOD_NOT_ALLOWED,
+        )
 
 
 class LikeViewSet(BaseViewSet):
@@ -108,7 +117,7 @@ class LikeViewSet(BaseViewSet):
             Response: HTTP Response
         """
         self.get_object().liked_by.add(request.user)
-        return Response(status=status.HTTP_201_CREATED)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @extend_schema(request=None, responses={204: None})
     # Permission classes is overrided to IsAuthenticated and IsAuditor, because currently only Tools, Processes and

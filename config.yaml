@@ -15,7 +15,7 @@ security:
   - 127.0.0.1
   - localhost
   - ::1
-  encryption-key: El0oF_4RQWWu5qLCm225xdlKYbxexRNpcJ_DoAY5mmc=
+  encryption-key: null
   secret-key: null
 tools:
   cmseek:

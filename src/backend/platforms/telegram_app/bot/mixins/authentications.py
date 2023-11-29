@@ -37,16 +37,10 @@ class AuthenticationMixin(BaseMixin):
             and update.callback_query.data
             and update.callback_query.data == self.no_authentication
         ):
-            return (
-                await self._go_to_next_state(
-                    update,
-                    context,
-                    self._get_current_state(self._ask_for_new_target_port),
-                )
-                if hasattr(self, "_ask_for_new_target_port")
-                and (self._get_context_value(context, Context.COMMAND) or "").lower()
-                == self.new_port_command
-                else ConversationHandler.END
+            return await self._go_to_next_state(
+                update,
+                context,
+                self._get_next_state(self._create_authentication),
             )
         else:
             return await self._go_to_next_state(
@@ -84,6 +78,7 @@ class AuthenticationMixin(BaseMixin):
         secret = None
         if name and " - " in name:
             name, secret = name.split(" - ", 1)
+        target_port = self._get_context_value(context, Context.TARGET_PORT)
         next_state, instance = await self._create(
             update,
             context,
@@ -92,6 +87,7 @@ class AuthenticationMixin(BaseMixin):
                 "name": name,
                 "secret": secret,
                 "type": self._get_context_value(context, Context.AUTHENTICATION_TYPE),
+                "target_port": target_port.id if target_port else None,
             },
             self._get_previous_state(self._create_authentication),
             self._get_next_state(self._create_authentication),

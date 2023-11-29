@@ -7,6 +7,7 @@ from typing import Any, List, Tuple
 import magic
 from django.core.exceptions import ValidationError
 from rekono.settings import CONFIG
+from settings.models import Settings
 
 logger = logging.getLogger()
 
@@ -21,7 +22,7 @@ class FileHandler:
         self.allowed_mime_types = mime_types
 
     def _validate_size(self, in_memory_file: Any) -> None:
-        max_mb_size = 100
+        max_mb_size = Settings.objects.first().max_uploaded_file_mb
         size = in_memory_file.size / (1024 * 1024)  # Get file size in MB
         if size > max_mb_size:  # File size greater than size limit
             logger.warning(

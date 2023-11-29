@@ -1,5 +1,3 @@
-from typing import Any
-
 from drf_spectacular.utils import extend_schema
 from findings.enums import OSINTDataType
 from findings.filters import (
@@ -78,12 +76,11 @@ class OSINTViewSet(FindingViewSet):
             serializer = TargetSerializer(
                 data={"project": osint.get_project().id, "target": osint.data}
             )
-            if serializer.is_valid():
-                target = serializer.create(serializer.validated_data)  # Target creation
-                return Response(
-                    TargetSerializer(target).data, status=status.HTTP_201_CREATED
-                )
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            serializer.is_valid(raise_exception=True)
+            target = serializer.create(serializer.validated_data)
+            return Response(
+                TargetSerializer(target).data, status=status.HTTP_201_CREATED
+            )
         return Response(
             "Target creation is not available for this OSINT data type",
             status=status.HTTP_400_BAD_REQUEST,

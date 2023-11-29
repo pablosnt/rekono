@@ -1,4 +1,4 @@
-from typing import Any, List
+from typing import Any
 
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema_field
@@ -68,23 +68,6 @@ class ProtectedSecretField(Field):
         if self.validator:
             self.validator(value)
         return value
-
-
-@extend_schema_field({"type": "array", "items": {"type": "string"}})
-class StringAsListField(Field):
-    def __init__(self, validator: callable = None, separator: str = ",", **kwargs: Any):
-        self.validator = validator
-        self.separator = separator
-        super().__init__(**kwargs)
-
-    def to_representation(self, value: str) -> List[str]:
-        return (value or "").split(self.separator)
-
-    def to_internal_value(self, value: List[str]) -> str:
-        if self.validator:
-            for item in value:
-                self.validator(item)
-        return self.separator.join(value)
 
 
 @extend_schema_field(OpenApiTypes.STR)

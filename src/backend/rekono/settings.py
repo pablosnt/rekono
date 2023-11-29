@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     "projects",
     "security",
     "settings",
+    "target_blacklist",
     "target_ports",
     "targets",
     "tasks",
@@ -210,7 +211,7 @@ REST_FRAMEWORK: Dict[str, Any] = {
     ],
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
-        "rest_framework.permissions.DjangoModelPermissions",
+        "security.authorization.permissions.RekonoModelPermission",
         "security.authorization.permissions.ProjectMemberPermission",
         "security.authorization.permissions.OwnerPermission",
     ],

@@ -1,4 +1,5 @@
 import os
+import shutil
 import sys
 from pathlib import Path
 from typing import Any, Optional
@@ -13,12 +14,17 @@ class RekonoConfig:
         self.testing = "test" in sys.argv
         self.base_dir = Path(__file__).resolve().parent.parent
         self.home = self._get_home()
+        self.config_file = self._get_config_file()
+        if self.testing:
+            self.home = self.base_dir / "tests" / "home"
         self.reports = self.home / "reports"
         self.wordlists = self.home / "wordlists"
         self.logs = self.home / "logs"
         for path in [self.home, self.reports, self.wordlists, self.logs]:
             path.mkdir(exist_ok=True)
-        self.config_file = self._get_config_file()
+        if self.testing:
+            shutil.copy(self.config_file, self.home)
+            self.config_file = self._get_config_file()
         with self.config_file.open("r") as file:
             self._config_properties = yaml.safe_load(file)
         self.encryption_key = self._get_config(Property.ENCRYPTION_KEY)
@@ -34,15 +40,12 @@ class RekonoConfig:
                 setattr(self, property.name.lower(), self._get_config(property))
 
     def _get_home(self) -> Path:
-        if self.testing:
-            return self.base_dir / "testing" / "home"
-        else:
-            home_from_config = Path(self._get_config(Property.REKONO_HOME))
-            return (
-                home_from_config
-                if home_from_config.is_dir()
-                else self.base_dir.parent.parent
-            )
+        home_from_config = Path(self._get_config(Property.REKONO_HOME))
+        return (
+            home_from_config
+            if home_from_config.is_dir()
+            else self.base_dir.parent.parent
+        )
 
     def _get_config_file(self) -> Path:
         for filename in [

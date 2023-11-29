@@ -136,6 +136,7 @@ dmypy.json
 ./wordlists/
 ./logs/
 /static/
+/src/backend/tests/home/
 
 # Vue.JS
 node_modules/

@@ -62,7 +62,7 @@ class Start(BaseCommand):
         telegram_chat, _ = TelegramChat.objects.update_or_create(
             defaults={
                 "user": None,
-                "otp": User.objects.generate_otp(),
+                "otp": User.objects.generate_otp(TelegramChat),
                 "otp_expiration": User.objects.get_otp_expiration_time(),
             },
             chat_id=chat_id,

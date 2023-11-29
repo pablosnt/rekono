@@ -25,7 +25,7 @@ class WordlistsConfig(BaseApp, AppConfig):
         """Update default wordlists size."""
         for wordlist in self._get_models()[0].objects.all():
             if Path(wordlist.path).is_file() and os.access(wordlist.path, os.R_OK):
-                with open(wordlist.path, "rb+") as wordlist_file:  # Open uploaded file
+                with open(wordlist.path, "rb+") as wordlist_file:
                     wordlist.size = len(wordlist_file.readlines())
                     wordlist.save(update_fields=["size"])
 

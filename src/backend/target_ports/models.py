@@ -1,6 +1,5 @@
 from typing import Any, Dict
 
-from authentications.models import Authentication
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from framework.enums import InputKeyword
@@ -23,13 +22,6 @@ class TargetPort(BaseInput):
     path = models.TextField(
         max_length=100,
         validators=[Validator(Regex.PATH.value, code="path")],
-        blank=True,
-        null=True,
-    )
-    authentication = models.OneToOneField(
-        Authentication,
-        related_name="target_port",
-        on_delete=models.SET_NULL,
         blank=True,
         null=True,
     )

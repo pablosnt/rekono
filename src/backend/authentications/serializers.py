@@ -1,5 +1,3 @@
-from typing import Any, Dict
-
 from authentications.models import Authentication
 from framework.fields import ProtectedSecretField
 from rest_framework.serializers import ModelSerializer
@@ -19,9 +17,4 @@ class AuthenticationSerializer(ModelSerializer):
         """Serializer metadata."""
 
         model = Authentication
-        fields = (
-            "id",
-            "name",
-            "secret",
-            "type",
-        )
+        fields = ("id", "name", "secret", "type", "target_port")

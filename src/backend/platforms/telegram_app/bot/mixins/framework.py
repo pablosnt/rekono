@@ -36,9 +36,10 @@ class BaseMixin(BaseTelegramBot):
     async def _go_to_next_state(
         self, update: Update, context: CallbackContext, next_state: int
     ) -> int:
-        if next_state != ConversationHandler.END and self._states_methods[
-            next_state
-        ].__name__.startswith("_ask_for_"):
+        if next_state != ConversationHandler.END and (
+            self._states_methods[next_state].__name__.startswith("_ask_for_")
+            or self._states_methods[next_state].__name__.startswith("_reply")
+        ):
             return await self._states_methods[next_state](update, context)
         return next_state
 

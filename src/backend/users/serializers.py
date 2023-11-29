@@ -10,6 +10,7 @@ from rest_framework.fields import SerializerMethodField
 from rest_framework.serializers import (
     CharField,
     ChoiceField,
+    EmailField,
     ModelSerializer,
     Serializer,
 )
@@ -163,13 +164,6 @@ class OTPSerializer(UserSerializer):
 class CreateUserSerializer(PasswordSerializer, OTPSerializer):
     """Serializer to create an user via API after email invitation."""
 
-    # username = CharField(max_length=150, required=True)  # New user username
-    # first_name = CharField(max_length=150, required=True)  # New user first name
-    # last_name = CharField(max_length=150, required=True)  # New user last name
-    # otp = CharField(
-    #     max_length=200, required=True
-    # )  # OTP included in the email invitation
-
     class Meta:
         model = User
         fields = (
@@ -282,12 +276,10 @@ class ResetPasswordSerializer(PasswordSerializer, OTPSerializer):
         )
 
 
-class RequestPasswordResetSerializer(UserSerializer):
+class RequestPasswordResetSerializer(Serializer):
     """Serializer to request the user password reset via API."""
 
-    class Meta:
-        model = User
-        fields = ("email",)
+    email = EmailField(max_length=150, required=True)
 
     @transaction.atomic()
     def save(self, **kwargs: Any) -> User:
@@ -296,12 +288,9 @@ class RequestPasswordResetSerializer(UserSerializer):
         Returns:
             User: Instance after apply changes
         """
-        try:
-            # Get user that requests the password reset
-            user = User.objects.get(
-                email=self.validated_data.get("email"), is_active=True
-            )
-            user = User.objects.request_password_reset(user)  # Request password reset
-            return user
-        except User.DoesNotExist:
-            return None
+        user = User.objects.filter(
+            email=self.validated_data.get("email"), is_active=True
+        )
+        return (
+            User.objects.request_password_reset(user.first()) if user.exists() else None
+        )

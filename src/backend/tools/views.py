@@ -1,4 +1,7 @@
 from framework.views import BaseViewSet, LikeViewSet
+from rest_framework import status
+from rest_framework.request import Request
+from rest_framework.response import Response
 from tools.filters import ConfigurationFilter, ToolFilter
 from tools.models import Configuration, Tool
 from tools.serializers import ConfigurationSerializer, ToolSerializer
@@ -12,7 +15,11 @@ class ToolViewSet(LikeViewSet):
     filterset_class = ToolFilter
     search_fields = ["name", "command"]
     ordering_fields = ["id", "name", "command"]
-    http_method_names = ["get"]
+    # "post" is needed to allow POST requests to like and dislike tools
+    http_method_names = ["get", "post"]
+
+    def create(self, request: Request, *args, **kwargs):
+        return self._method_not_allowed("POST")
 
 
 class ConfigurationViewSet(BaseViewSet):

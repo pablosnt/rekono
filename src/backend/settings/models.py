@@ -8,9 +8,8 @@ from framework.models import BaseModel
 class Settings(BaseModel):
     # Max size in MB for uploaded files
     max_uploaded_file_mb = models.IntegerField(
-        default=512, validators=[MinValueValidator(128), MaxValueValidator(1024)]
+        default=512, validators=[MinValueValidator(128), MaxValueValidator(3072)]
     )
-    target_blacklist = models.TextField(blank=True, null=True)
 
     def __str__(self) -> str:
         """Instance representation in text format.

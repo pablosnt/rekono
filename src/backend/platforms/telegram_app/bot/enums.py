@@ -12,6 +12,7 @@ class Context(Enum):
     COMMAND = "command"
     PROJECT = "project"
     TARGET = "target"
+    TARGET_PORT = "target_port"
     AUTHENTICATION_TYPE = "authentication_type"
     AUTHENTICATION = "authentication"
     TOOL = "tool"

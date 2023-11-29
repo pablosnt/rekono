@@ -20,6 +20,3 @@ class TargetPortViewSet(BaseViewSet):
         "post",
         "delete",
     ]
-
-    # # Project members field used for authorization purposes
-    # members_field = "target__project__members"

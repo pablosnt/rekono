@@ -9,7 +9,8 @@ from django.db import models
 from framework.enums import InputKeyword
 from framework.models import BaseInput
 from projects.models import Project
-from security.input_validator import Regex, TargetValidator
+from security.input_validator import Regex
+from security.target_validator import TargetValidator
 from targets.enums import TargetType
 
 # Create your models here.
@@ -24,7 +25,7 @@ class Target(BaseInput):
     target = models.TextField(
         max_length=100, validators=[TargetValidator(Regex.TARGET.value)]
     )
-    type = models.TextField(max_length=10, choices=TargetType.choices)  # Target type
+    type = models.TextField(max_length=10, choices=TargetType.choices)
 
     filters = [BaseInput.Filter(type=TargetType, field="type")]
 

@@ -37,11 +37,8 @@ class ProjectViewSet(BaseViewSet):
         project = self.get_object()
         serializer = ProjectMemberSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        try:
-            serializer.update(project, serializer.validated_data)
-            return Response(status=status.HTTP_201_CREATED)
-        except User.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+        serializer.update(project, serializer.validated_data)
+        return Response(status=status.HTTP_201_CREATED)
 
     @action(
         detail=True,

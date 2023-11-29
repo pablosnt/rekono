@@ -2,11 +2,19 @@ from typing import Any, Tuple
 
 from platforms.telegram_app.models import TelegramChat
 from processes.models import Process, Step
-from rest_framework.permissions import BasePermission
+from rest_framework.permissions import BasePermission, DjangoModelPermissions
 from rest_framework.request import Request
 from rest_framework.views import View
 from security.authorization.roles import Role
 from wordlists.models import Wordlist
+
+
+class RekonoModelPermission(DjangoModelPermissions):
+    perms_map = {
+        **DjangoModelPermissions.perms_map,
+        "GET": ["%(app_label)s.view_%(model_name)s"],
+        "HEAD": ["%(app_label)s.view_%(model_name)s"],
+    }
 
 
 class IsNotAuthenticated(BasePermission):
@@ -80,22 +88,36 @@ class ProjectMemberPermission(BasePermission):
 class OwnerPermission(BasePermission):
     """Check if current user can access an object based on HTTP method and creator user."""
 
-    def get_details(self, obj: Any) -> Tuple[Any, str, bool]:  # pragma: no cover
-        """Get object with creator user from object accessed by the current user. To be implemented by subclasses.
+    def _has_object_permission(
+        self,
+        request: Request,
+        view: View,
+        instance: Any,
+        owner_field: str,
+        allow_admin: bool,
+    ) -> bool:
+        return (
+            not instance
+            or request.method == "GET"
+            or (
+                hasattr(instance, owner_field)
+                and getattr(instance, owner_field) == request.user
+            )
+            or (allow_admin and IsAdmin().has_permission(request, owner_field))
+        )
 
-        Args:
-            obj (Any): Object that user is accessing
-
-        Returns:
-            Any: Object with creator user
-        """
-        if obj.__class__ in [Wordlist, Process]:
-            return obj, "owner", True
-        elif obj.__class__ == Step:
-            return obj.process, "owner", True
-        elif obj.__class__ == TelegramChat:
-            return obj, "user", False
-        return None, "", False
+    def has_permission(self, request: Request, view: View) -> bool:
+        return (
+            self._has_object_permission(
+                request,
+                view,
+                Process.objects.get(pk=request.data.get("process_id")),
+                "owner",
+                True,
+            )
+            if view.__class__.__name__ == "StepViewSet" and request.method == "POST"
+            else True
+        )
 
     def has_object_permission(self, request: Request, view: View, obj: Any) -> bool:
         """Check if current user can access an object based on HTTP method and creator user.
@@ -108,10 +130,16 @@ class OwnerPermission(BasePermission):
         Returns:
             bool: Indicate if user is authorized to make this request or not
         """
-        instance, field, allow_admin = self.get_details(obj)
-        return (
-            not instance
-            or request.method == "GET"
-            or getattr(instance, field) == request.user
-            or (allow_admin and IsAdmin().has_permission(request, view))
+        instance = None
+        owner_field = ""
+        allow_admin = False
+        if obj.__class__ in [Wordlist, Process, Step]:
+            instance = obj.process if obj.__class__ == Step else obj
+            owner_field = "owner"
+            allow_admin = True
+        elif obj.__class__ == TelegramChat:
+            instance = obj
+            owner_field = "user"
+        return self._has_object_permission(
+            request, view, instance, owner_field, allow_admin
         )

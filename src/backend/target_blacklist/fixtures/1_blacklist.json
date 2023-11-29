@@ -1,0 +1,106 @@
+[
+    {
+        "model": "target_blacklist.targetblacklist",
+        "pk": 1,
+        "fields": {
+            "target": "127.0.0.1",
+            "default": true
+        }
+    },
+    {
+        "model": "target_blacklist.targetblacklist",
+        "pk": 2,
+        "fields": {
+            "target": "::1",
+            "default": true
+        }
+    },
+    {
+        "model": "target_blacklist.targetblacklist",
+        "pk": 3,
+        "fields": {
+            "target": "localhost",
+            "default": true
+        }
+    },
+    {
+        "model": "target_blacklist.targetblacklist",
+        "pk": 4,
+        "fields": {
+            "target": "frontend",
+            "default": true
+        }
+    },
+    {
+        "model": "target_blacklist.targetblacklist",
+        "pk": 5,
+        "fields": {
+            "target": "backend",
+            "default": true
+        }
+    },
+    {
+        "model": "target_blacklist.targetblacklist",
+        "pk": 6,
+        "fields": {
+            "target": "postgres",
+            "default": true
+        }
+    },
+    {
+        "model": "target_blacklist.targetblacklist",
+        "pk": 7,
+        "fields": {
+            "target": "redis",
+            "default": true
+        }
+    },
+    {
+        "model": "target_blacklist.targetblacklist",
+        "pk": 8,
+        "fields": {
+            "target": "initialize",
+            "default": true
+        }
+    },
+    {
+        "model": "target_blacklist.targetblacklist",
+        "pk": 9,
+        "fields": {
+            "target": "tasks-worker",
+            "default": true
+        }
+    },
+    {
+        "model": "target_blacklist.targetblacklist",
+        "pk": 10,
+        "fields": {
+            "target": "executions-worker",
+            "default": true
+        }
+    },
+    {
+        "model": "target_blacklist.targetblacklist",
+        "pk": 11,
+        "fields": {
+            "target": "findings-worker",
+            "default": true
+        }
+    },
+    {
+        "model": "target_blacklist.targetblacklist",
+        "pk": 12,
+        "fields": {
+            "target": "telegram-bot",
+            "default": true
+        }
+    },
+    {
+        "model": "target_blacklist.targetblacklist",
+        "pk": 13,
+        "fields": {
+            "target": "nginx",
+            "default": true
+        }
+    }
+]

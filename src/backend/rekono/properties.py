@@ -18,25 +18,6 @@ class Property(Enum):
         "security.allowed-hosts",
         ["localhost", "127.0.0.1", "::1"],
     )
-    TARGET_BLACKLIST = (
-        None,
-        None,
-        [
-            "127.0.0.1",
-            "localhost",
-            "frontend",
-            "backend",
-            "postgres",
-            "redis",
-            "initialize",
-            "tasks-worker",
-            "executions-worker",
-            "findings-worker",
-            "emails-worker",
-            "telegram-bot",
-            "nginx",
-        ],
-    )
     TRUSTED_PROXY = ("RKN_TRUSTED_PROXY", None, False)
     OTP_EXPIRATION_HOURS = (None, None, 24)
     DB_NAME = ("RKN_DB_NAME", "database.name", "rekono")

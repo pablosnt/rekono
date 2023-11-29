@@ -99,12 +99,13 @@ class NewPort(
             self._save_project,
             self._ask_for_target,
             self._save_target,
+            self._ask_for_new_target_port,
+            self._create_target_port,
             self._ask_for_authentication_type,
             self._save_authentication_type,
             self._ask_for_new_authentication,
             self._create_authentication,
-            self._ask_for_new_target_port,
-            self._create_target_port,
+            self._reply_summary,
         ]
         super().__init__(**kwargs)
 

@@ -10,4 +10,4 @@ class SettingsViewSet(BaseViewSet):
 
     queryset = Settings.objects.all()
     serializer_class = SettingsSerializer
-    http_method_names = ["get", "put"]  # Required to remove PATCH method
+    http_method_names = ["get", "put"]

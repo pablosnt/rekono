@@ -24,9 +24,6 @@ class InputTechnologyViewSet(BaseViewSet):
         "delete",
     ]
 
-    # Project members field used for authorization purposes
-    # members_field = 'target__project__members'
-
 
 class InputVulnerabilityViewSet(BaseViewSet):
     """InputVulnerability ViewSet that includes: get, retrieve, create, and delete features."""
@@ -42,6 +39,3 @@ class InputVulnerabilityViewSet(BaseViewSet):
         "post",
         "delete",
     ]
-
-    # Project members field used for authorization purposes
-    # members_field = "target__project__members"

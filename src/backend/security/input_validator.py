@@ -1,7 +1,5 @@
-import ipaddress
 import logging
 import re
-from dataclasses import dataclass
 from enum import Enum
 from re import RegexFlag
 from typing import Any
@@ -9,9 +7,6 @@ from typing import Any
 from django.core.validators import RegexValidator
 from django.forms import ValidationError
 from django.utils import timezone
-from framework.fields import StringAsListField
-from rekono.settings import CONFIG
-from settings.models import Settings
 
 logger = logging.getLogger()
 
@@ -51,60 +46,6 @@ class Validator(RegexValidator):
                 f"[Security] Invalid value that doesn't match the regex '{self.regex}'"
             )
             raise ValidationError(self.message, code=self.code, params={"value": value})
-
-
-class TargetValidator(RegexValidator):
-    def __init__(
-        self,
-        regex: Any | None = ...,
-        message: Any | None = ...,
-        code: str | None = "target",
-        inverse_match: bool | None = False,
-        flags: RegexFlag | None = None,
-    ) -> None:
-        self.code = code
-        flags = None  # Needed to prevent TypeError
-        super().__init__(regex, message, code, inverse_match, flags)
-        self.target_blacklist = CONFIG.target_blacklist
-        try:
-            settings = Settings.objects.first()
-            if settings.exists():
-                self.target_blacklist += StringAsListField().to_representation(
-                    settings.first().target_blacklist
-                )
-        except:
-            pass
-
-    def __call__(self, value: str | None) -> None:
-        super().__call__(value)
-        if value in self.target_blacklist:
-            raise ValidationError(
-                f"Target is disallowed by policy",
-                code=self.code,
-                params={"value": value},
-            )
-        for denied_value in self.target_blacklist:
-            if re.fullmatch(denied_value, value):
-                raise ValidationError(
-                    f"Target is disallowed by policy",
-                    code=self.code,
-                    params={"value": value},
-                )
-            for address_class, network_class in [
-                (ipaddress.IPv4Address, ipaddress.IPv4Network),
-                (ipaddress.IPv6Address, ipaddress.IPv6Network),
-            ]:
-                try:
-                    address = address_class(value)
-                    network = network_class(denied_value)
-                    if address in network:
-                        raise ValidationError(
-                            f"Target belongs to a network that is disallowed by policy",
-                            code="target",
-                            params={"value": value},
-                        )
-                except ipaddress.AddressValueError:
-                    pass
 
 
 class FutureDatetimeValidator(RegexValidator):

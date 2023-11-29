@@ -1,16 +1,12 @@
 import logging
-from typing import Any, List
+from typing import Any
 
 from django.core.exceptions import PermissionDenied
 from drf_spectacular.utils import extend_schema
 from framework.views import BaseViewSet
 from rest_framework import status
 from rest_framework.decorators import action
-from rest_framework.permissions import (
-    BasePermission,
-    DjangoModelPermissions,
-    IsAuthenticated,
-)
+from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.serializers import Serializer
@@ -147,24 +143,22 @@ class ProfileViewSet(GenericViewSet):
         return Response(status=status.HTTP_200_OK)
 
 
-class CreateUserViewSet(BaseViewSet):
+class CreateUserViewSet(GenericViewSet):
     """User ViewSet that includes user initialization from invitation feature."""
 
     serializer_class = CreateUserSerializer
     queryset = User.objects.all()
-    http_method_names = ["post"]
     # Users can't be initialized from another user session, authentication is based on OTP
     permission_classes = [IsNotAuthenticated]
 
     @extend_schema(request=CreateUserSerializer, responses={201: UserSerializer})
-    def create(self, request, *args, **kwargs):
-        serializer = CreateUserSerializer(data=request.data)
+    @action(detail=False, methods=["POST"])
+    def create(self, request: Request, *args, **kwargs) -> Response:
+        serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.create(serializer.validated_data)
-        headers = self.get_success_headers(serializer.data)
-        return Response(
-            UserSerializer(user).data, status=status.HTTP_201_CREATED, headers=headers
-        )
+        # headers = self.get_success_headers(serializer.data)
+        return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
 
 
 class ResetPasswordViewSet(GenericViewSet):

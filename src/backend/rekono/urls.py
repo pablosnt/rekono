@@ -37,6 +37,7 @@ urlpatterns = [
     path("api/", include("projects.urls")),
     path("api/", include("security.authentication.urls")),
     path("api/", include("settings.urls")),
+    path("api/", include("target_blacklist.urls")),
     path("api/", include("target_ports.urls")),
     path("api/", include("targets.urls")),
     path("api/", include("tasks.urls")),

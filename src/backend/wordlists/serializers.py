@@ -64,4 +64,4 @@ class UpdateWordlistSerializer(ModelSerializer):
         """Serializer metadata."""
 
         model = Wordlist
-        fields = ("id", "name", "type")  # Wordlist fields exposed via API
+        fields = ("id", "name", "type")

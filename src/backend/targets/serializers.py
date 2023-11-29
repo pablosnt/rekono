@@ -10,7 +10,7 @@ class SimpleTargetSerializer(ModelSerializer):
 
     class Meta:
         model = Target
-        fields = ("id", "project", "target", "type")  # Target fields exposed via API
+        fields = ("id", "project", "target", "type")
 
 
 class TargetSerializer(ModelSerializer):
@@ -20,7 +20,7 @@ class TargetSerializer(ModelSerializer):
 
     class Meta:
         model = Target
-        fields = (  # Target fields exposed via API
+        fields = (
             "id",
             "project",
             "target",
@@ -31,7 +31,7 @@ class TargetSerializer(ModelSerializer):
             "tasks",
             "defect_dojo_sync",
         )
-        read_only_fields = (  # Read only fields
+        read_only_fields = (
             "type",
             "target_ports",
             "input_technologies",

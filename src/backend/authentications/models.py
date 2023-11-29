@@ -6,6 +6,7 @@ from django.db import models
 from framework.enums import InputKeyword
 from framework.models import BaseEncrypted, BaseInput
 from security.input_validator import Regex, Validator
+from target_ports.models import TargetPort
 from targets.models import Target
 
 # Create your models here.
@@ -28,6 +29,11 @@ class Authentication(BaseInput, BaseEncrypted):
         db_column="secret",
     )
     type = models.TextField(max_length=8, choices=AuthenticationType.choices)
+    target_port = models.OneToOneField(
+        TargetPort,
+        related_name="authentication",
+        on_delete=models.CASCADE,
+    )
 
     filters = [BaseInput.Filter(type=AuthenticationType, field="type")]
     _encrypted_field = "_secret"
@@ -75,10 +81,9 @@ class Authentication(BaseInput, BaseEncrypted):
         Returns:
             str: String value that identifies this instance
         """
-        value = ""
-        if hasattr(self, "target_port") and self.target_port:
-            value = f"{self.target_port.__str__()} -"
-        return value + self.name
+        return (
+            f"{self.target_port.__str__()} - " if self.target_port else ""
+        ) + self.name
 
     @classmethod
     def get_project_field(cls) -> str:

@@ -27,8 +27,11 @@ logger = logging.getLogger()
 class RekonoUserManager(UserManager):
     """Manager for the User model."""
 
-    def generate_otp(self) -> str:
-        return hash(generate_random_value(3000))
+    def generate_otp(self, model: Any = None) -> str:
+        otp = hash(generate_random_value(3000))
+        if (model or User).objects.filter(otp=otp).exists():
+            return self.generate_otp(model)
+        return otp
 
     def get_otp_expiration_time(self) -> datetime:
         return timezone.now() + timedelta(hours=CONFIG.otp_expiration_hours)
@@ -74,7 +77,7 @@ class RekonoUserManager(UserManager):
         user.username = username
         user.first_name = first_name
         user.last_name = last_name
-        user.set_password = password
+        user.set_password(password)
         user.is_active = True
         user.otp = None
         user.otp_expiration = None
@@ -179,7 +182,8 @@ class RekonoUserManager(UserManager):
             f"[Security] User {user.id} changed his password",
             extra={"user": user.id},
         )
-        user.telegram_chat.delete()
+        if hasattr(user, "telegram_chat"):
+            user.telegram_chat.delete()
         self.invalidate_all_tokens(user)
         return user
 
@@ -234,7 +238,7 @@ class User(AbstractUser, BaseModel):
     is_active = models.BooleanField(blank=True, null=True, default=None)
 
     # One Time Password used to invite and enable users, or reset passwords
-    otp = models.TextField(max_length=200, unique=True, blank=True, null=True)
+    otp = models.TextField(max_length=200, blank=True, null=True)
     otp_expiration = models.DateTimeField(
         blank=True,
         null=True,
@@ -242,7 +246,7 @@ class User(AbstractUser, BaseModel):
     )
 
     notification_scope = models.TextField(  # User notification preferences
-        max_length=18, choices=Notification.choices, default=Notification.OWN_EXECUTIONS
+        max_length=18, choices=Notification.choices, default=Notification.MY_EXECUTIONS
     )
     # Indicate if email notifications are enabled
     email_notifications = models.BooleanField(default=True)
