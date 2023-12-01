@@ -36,12 +36,12 @@ class BaseModel(models.Model):
             )
             cls = getattr(
                 module,
-                name[0] + name[1:].replace(" ", "").replace("-", ""),
+                name[0].upper() + name[1:].lower().replace(" ", "").replace("-", ""),
             )
-        except (AttributeError, ModuleNotFoundError):
+        except (AttributeError, ModuleNotFoundError) as ex:
             module = importlib.import_module(f"{package}.base")
             type = package.split(".")[-1][:-1]
-            cls = getattr(module, f"Base{type[0].upper() + type[:1].lower()}")
+            cls = getattr(module, f"Base{type[0].upper() + type[1:].lower()}")
         return cls
 
 

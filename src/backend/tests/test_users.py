@@ -2,7 +2,7 @@ from typing import Any
 
 from security.authorization.roles import Role
 from tests.cases import ApiTestCase
-from tests.framework import RekonoTest
+from tests.framework import ApiTest
 from users.enums import Notification
 from users.models import User
 
@@ -31,7 +31,7 @@ invalid_user2 = {**user1, "password": new_invalid_password}
 invalid_user3 = {**user1, "first_name": "test;1"}
 
 
-class UserTest(RekonoTest):
+class UserTest(ApiTest):
     endpoint = "/api/users/"
     expected_str = "admin1@rekono.com"
     cases = [
@@ -315,7 +315,7 @@ class UserTest(RekonoTest):
         return self.admin1
 
 
-class Profile(RekonoTest):
+class Profile(ApiTest):
     endpoint = "/api/profile/"
     cases = [
         ApiTestCase(
@@ -380,7 +380,7 @@ class Profile(RekonoTest):
     ]
 
 
-class ResetPasswordTest(RekonoTest):
+class ResetPasswordTest(ApiTest):
     endpoint = "/api/security/reset-password/"
     anonymous_allowed = None
 

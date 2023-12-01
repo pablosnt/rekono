@@ -2,7 +2,7 @@ from typing import Any
 
 from target_blacklist.models import TargetBlacklist
 from tests.cases import ApiTestCase
-from tests.framework import RekonoTest
+from tests.framework import ApiTest
 
 default_blacklist_1 = {"id": 1, "default": True, "target": "127.0.0.1"}
 target_blacklist = {"target": "*.rekono.com"}
@@ -10,7 +10,7 @@ new_target_blacklist = {"target": "*.new.rekono.com"}
 invalid_blacklist = {"target": "*.rekono;com"}
 
 
-class TargetBlacklistTest(RekonoTest):
+class TargetBlacklistTest(ApiTest):
     endpoint = "/api/target-blacklist/"
     expected_str = default_blacklist_1["target"]
     cases = [

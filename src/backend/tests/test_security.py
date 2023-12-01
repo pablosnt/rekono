@@ -4,10 +4,10 @@ from typing import Any, Dict
 
 from django.utils import timezone
 from rest_framework.test import APIClient
-from tests.framework import RekonoTest
+from tests.framework import ApiTest
 
 
-class SecurityTest(RekonoTest):
+class SecurityTest(ApiTest):
     refresh = "/api/security/refresh-token/"
     logout = "/api/security/logout/"
     api_tokens = "/api/api-tokens/"

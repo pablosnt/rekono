@@ -1,0 +1,5 @@
+[+] Guest session       IP: 10.10.10.10:445    Name: 10.10.10.10                                      
+        Disk                                                    Permissions     Comment
+        ----                                                    -----------     -------
+        shared                                                  READ, WRITE
+        IPC$                                                    NO ACCESS       IPC Service (Samba 4.5.4)

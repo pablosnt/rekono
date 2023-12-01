@@ -1,4 +1,4 @@
-from typing import List, Self, Union
+from typing import List, Self
 
 from django.apps import apps
 from django.db import models
@@ -28,20 +28,12 @@ class InputType(BaseModel):
         return self.name
 
     def _get_class_from_reference(self, reference: str) -> BaseInput:
-        """Get model from string reference.
-
-        Args:
-            reference (str): Reference to model
-
-        Returns:
-            Union[BaseInput, None]: Model class related to reference
-        """
         if not reference:
             return None
         app_label, model_name = reference.split(".", 1)
         return apps.get_model(app_label=app_label, model_name=model_name)
 
-    def get_model_class(self) -> Union[BaseInput, None]:
+    def get_model_class(self) -> BaseInput | None:
         """Get related model from 'model' reference.
 
         Returns:
@@ -49,7 +41,7 @@ class InputType(BaseModel):
         """
         return self._get_class_from_reference(self.model)
 
-    def get_fallback_model_class(self) -> Union[BaseInput, None]:
+    def get_fallback_model_class(self) -> BaseInput | None:
         """Get callback model from 'fallback_model' reference.
 
         Returns:

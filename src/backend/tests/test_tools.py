@@ -1,14 +1,14 @@
 from typing import Any
 
 from tests.cases import ApiTestCase
-from tests.framework import RekonoTest
+from tests.framework import ApiTest
 from tools.models import Configuration, Tool
 
 nmap = "Nmap"
 the_harvester = "theHarvester"
 
 
-class ToolTest(RekonoTest):
+class ToolTest(ApiTest):
     endpoint = "/api/tools/"
     expected_str = nmap
     cases = [
@@ -90,7 +90,7 @@ class ToolTest(RekonoTest):
 first_nmap_configuration = "TCP ports"
 
 
-class ConfigurationTest(RekonoTest):
+class ConfigurationTest(ApiTest):
     endpoint = "/api/configurations/"
     expected_str = f"{nmap} - {first_nmap_configuration}"
     cases = [

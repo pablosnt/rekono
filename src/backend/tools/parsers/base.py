@@ -44,19 +44,20 @@ class BaseParser:
                 )
             ):
                 fields[finding_type_used.__name__.lower()] = finding_used
-        unique_id = {}
+        unique_id = {"executions__task__target": self.executor.execution.task.target}
         for field in finding_type.get_unique_fields():
-            unique_id[field] = fields[field]
+            if field in fields:
+                unique_id[field] = fields[field]
         finding, _ = finding_type.objects.update_or_create(
             **unique_id,
             defaults={
                 **fields,
-                "target": self.executor.execution.task.target,
-                "detected_by": self.executor.execution.configuration.tool,
                 "last_seen": timezone.now(),
             }
         )
+        finding.executions.add(self.executor.execution)
         self.findings.append(finding)
+        return finding
 
     def _parse_report(self) -> None:
         pass
@@ -69,7 +70,7 @@ class BaseParser:
             return json.load(report)
 
     def _load_report_as_xml(self) -> Any:
-        return parser.parse(self.path_output).getroot()
+        return parser.parse(self.report).getroot()
 
     def _load_report_by_lines(self) -> List[str]:
         with open(self.report, "r", encoding="utf-8") as report:

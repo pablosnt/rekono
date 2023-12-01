@@ -1,6 +1,6 @@
 from projects.models import Project
 from tests.cases import ApiTestCase
-from tests.framework import RekonoTest
+from tests.framework import ApiTest
 
 project1 = {"name": "test1", "description": "test1", "tags": ["test"]}
 new_project1 = {"name": "new test1", "description": "test1", "tags": ["test"]}
@@ -12,7 +12,7 @@ invalid_project = {
 }
 
 
-class ProjectTest(RekonoTest):
+class ProjectTest(ApiTest):
     endpoint = "/api/projects/"
     expected_str = project1.get("name")
     cases = [

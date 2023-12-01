@@ -3,7 +3,7 @@ from typing import Any
 
 from api_tokens.models import ApiToken
 from tests.cases import ApiTestCase
-from tests.framework import RekonoTest
+from tests.framework import ApiTest
 
 api_token1 = {
     "name": "test1",
@@ -15,7 +15,7 @@ invalid_api_token = {
 }
 
 
-class ApiTokenTest(RekonoTest):
+class ApiTokenTest(ApiTest):
     endpoint = "/api/api-tokens/"
     expected_str = f"admin1@rekono.com - {api_token1['name']}"
     cases = [

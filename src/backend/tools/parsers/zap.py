@@ -20,6 +20,7 @@ class Zap(BaseParser):
         for site in root:
             url_base = site.attrib["name"]
             for alert in site.findall("alerts/alertitem"):
+                name = alert.findtext("alert")
                 description = alert.findtext("desc") or ""
                 severity = alert.findtext("riskcode")
                 cwe = alert.findtext("cweid")
@@ -29,7 +30,6 @@ class Zap(BaseParser):
                     description += "\n\nLocation:\n"
                 for instance in instances or []:
                     url = instance.findtext("uri")
-                    name = alert.findtext("alert")
                     description += f'[{instance.findtext("method")}] {url}\n'
                     if url:
                         endpoint = url.replace(url_base, "")
@@ -38,24 +38,23 @@ class Zap(BaseParser):
                             self.create_finding(
                                 Path, path=endpoint, type=PathType.ENDPOINT
                             )
-                    if name:
-                        self.create_finding(
-                            Vulnerability,
-                            name=self._clean(name),
-                            description=self._clean(description)
-                            if description
-                            else self._clean(name),
-                            severity=self.severity_mapping[int(severity)]
-                            if severity
-                            else Severity.MEDIUM,
-                            cwe=f"CWE-{cwe}" if cwe else None,
-                            reference=self._clean(reference) if reference else None,
-                        )
+                if name:
+                    name = self._clean(name)
+                    self.create_finding(
+                        Vulnerability,
+                        name=name,
+                        description=self._clean(description) if description else name,
+                        severity=self.severity_mapping[int(severity)]
+                        if severity
+                        else Severity.MEDIUM,
+                        cwe=f"CWE-{cwe}" if cwe else None,
+                        reference=self._clean_reference(reference)
+                        if reference
+                        else None,
+                    )
 
     def _clean(self, value: str) -> str:
-        return (
-            unescape(value)
-            .split("</p><p>", 1)[0]
-            .replace("<p>", "")
-            .replace("</p>", "")
-        )
+        return unescape(value).replace("<p>", "").replace("</p>", "")
+
+    def _clean_reference(self, value: str) -> str:
+        return self._clean(value.split("</p><p>", 1)[0])

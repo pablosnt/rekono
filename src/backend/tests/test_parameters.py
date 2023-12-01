@@ -2,10 +2,10 @@ from typing import Any
 
 from parameters.models import InputTechnology, InputVulnerability
 from tests.cases import ApiTestCase
-from tests.framework import RekonoTest
+from tests.framework import ApiTest
 
 
-class ParameterTest(RekonoTest):
+class ParameterTest(ApiTest):
     model = None
     valid = []
     invalid = []

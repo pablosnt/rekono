@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE nmaprun>
+<?xml-stylesheet href="file:///usr/bin/../share/nmap/nmap.xsl" type="text/xsl"?>
+<!-- Nmap 7.92 scan initiated Sat Mar 19 18:14:58 2022 as: nmap -sV -A -p 445 -&#45;script smb-enum-users,smb-enum-shares -oX /home/kali/Desktop/smb-users.xml 10.10.10.10 -->
+<nmaprun scanner="nmap" args="nmap -sV -A -p 445 -&#45;script smb-enum-users,smb-enum-shares -oX /home/kali/Desktop/smb-users.xml 10.10.10.10" start="1647710098" startstr="Sat Mar 19 18:14:58 2022" version="7.92" xmloutputversion="1.05">
+<scaninfo type="syn" protocol="tcp" numservices="1" services="445"/>
+<verbose level="0"/>
+<debugging level="0"/>
+<hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="10.10.10.10" addrtype="ipv4"/>
+<address addr="8C:85:90:45:C5:4E" addrtype="mac" vendor="Apple"/>
+<hostnames>
+</hostnames>
+</hosthint>
+<host starttime="1647710098" endtime="1647710115"><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="10.10.10.10" addrtype="ipv4"/>
+<address addr="8C:85:90:45:C5:4E" addrtype="mac" vendor="Apple"/>
+<hostnames>
+</hostnames>
+<ports><port protocol="tcp" portid="445"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="netbios-ssn" product="Samba smbd" version="3.X - 4.X" extrainfo="workgroup: WORKGROUP" hostname="629F42ED79BB" method="probed" conf="10"><cpe>cpe:/a:samba:samba</cpe></service></port>
+</ports>
+<os><portused state="open" proto="tcp" portid="445"/>
+<portused state="closed" proto="udp" portid="35011"/>
+<osmatch name="Apple macOS 10.13 (High Sierra) - 10.15 (Catalina) or iOS 11.0 - 13.4 (Darwin 17.0.0 - 19.2.0)" accuracy="97" line="3614">
+<osclass type="phone" vendor="Apple" osfamily="iOS" osgen="11.X" accuracy="97"><cpe>cpe:/o:apple:iphone_os:11</cpe></osclass>
+<osclass type="phone" vendor="Apple" osfamily="iOS" osgen="12.X" accuracy="97"><cpe>cpe:/o:apple:iphone_os:12</cpe></osclass>
+<osclass type="phone" vendor="Apple" osfamily="iOS" osgen="13.X" accuracy="97"><cpe>cpe:/o:apple:iphone_os:13</cpe></osclass>
+<osclass type="general purpose" vendor="Apple" osfamily="macOS" osgen="10.13.X" accuracy="97"><cpe>cpe:/o:apple:mac_os_x:10.13</cpe></osclass>
+<osclass type="general purpose" vendor="Apple" osfamily="macOS" osgen="10.14.X" accuracy="97"><cpe>cpe:/o:apple:mac_os_x:10.14</cpe></osclass>
+<osclass type="general purpose" vendor="Apple" osfamily="macOS" osgen="10.15.X" accuracy="97"><cpe>cpe:/o:apple:mac_os_x:10.15</cpe></osclass>
+</osmatch>
+<osmatch name="Apple Mac OS X 10.11 (El Capitan) or iOS 12.4 - 13.0 (Darwin 15.6.0 - 19.0.0)" accuracy="96" line="7506">
+<osclass type="general purpose" vendor="Apple" osfamily="OS X" osgen="10.11.X" accuracy="96"><cpe>cpe:/o:apple:mac_os_x:10.11</cpe></osclass>
+<osclass type="media device" vendor="Apple" osfamily="iOS" osgen="12.X" accuracy="96"><cpe>cpe:/o:apple:iphone_os:12</cpe></osclass>
+</osmatch>
+<osmatch name="Apple TV 5" accuracy="93" line="3341">
+<osclass type="media device" vendor="Apple" osfamily="Apple TV" osgen="5.X" accuracy="93"><cpe>cpe:/o:apple:apple_tv:5</cpe></osclass>
+</osmatch>
+<osmatch name="Apple iPad tablet computer (iOS 4.3.2)" accuracy="90" line="3680">
+<osclass type="media device" vendor="Apple" osfamily="iOS" osgen="4.X" accuracy="90"><cpe>cpe:/o:apple:iphone_os:4.3.2</cpe></osclass>
+</osmatch>
+<osmatch name="Apple iPad tablet computer or iPhone mobile phone (iOS 4.0 - 4.1)" accuracy="90" line="3817">
+<osclass type="phone" vendor="Apple" osfamily="iOS" osgen="4.X" accuracy="90"><cpe>cpe:/o:apple:iphone_os:4</cpe></osclass>
+</osmatch>
+<osmatch name="Apple iPhone mobile phone (iOS 4.3.2)" accuracy="90" line="3853">
+<osclass type="phone" vendor="Apple" osfamily="iOS" osgen="4.X" accuracy="90"><cpe>cpe:/o:apple:iphone_os:4.3.2</cpe></osclass>
+</osmatch>
+<osmatch name="Apple Mac OS X 10.5 (Leopard) - 10.6.8 (Snow Leopard) or iOS 4.0 - 4.2.1 (Darwin 9.0.0b5 - 10.8.0)" accuracy="90" line="3912">
+<osclass type="phone" vendor="Apple" osfamily="iOS" osgen="4.X" accuracy="90"><cpe>cpe:/o:apple:iphone_os:4</cpe></osclass>
+<osclass type="media device" vendor="Apple" osfamily="iOS" osgen="4.X" accuracy="90"><cpe>cpe:/o:apple:iphone_os:4</cpe></osclass>
+<osclass type="general purpose" vendor="Apple" osfamily="Mac OS X" osgen="10.6.X" accuracy="90"><cpe>cpe:/o:apple:mac_os_x:10.6</cpe></osclass>
+</osmatch>
+<osmatch name="Apple iOS 5.0.1" accuracy="90" line="3954">
+<osclass type="media device" vendor="Apple" osfamily="iOS" osgen="5.X" accuracy="90"><cpe>cpe:/o:apple:iphone_os:5.0.1</cpe></osclass>
+<osclass type="phone" vendor="Apple" osfamily="iOS" osgen="5.X" accuracy="90"><cpe>cpe:/o:apple:iphone_os:5.0.1</cpe></osclass>
+</osmatch>
+<osmatch name="Apple Mac OS X 10.7.0 (Lion) - 10.12 (Sierra) or iOS 4.1 - 9.3.3 (Darwin 10.0.0 - 16.4.0)" accuracy="90" line="6485">
+<osclass type="general purpose" vendor="Apple" osfamily="Mac OS X" osgen="10.7.X" accuracy="90"><cpe>cpe:/o:apple:mac_os_x:10.7</cpe></osclass>
+<osclass type="general purpose" vendor="Apple" osfamily="OS X" osgen="10.8.X" accuracy="90"><cpe>cpe:/o:apple:mac_os_x:10.8</cpe></osclass>
+<osclass type="general purpose" vendor="Apple" osfamily="OS X" osgen="10.9.X" accuracy="90"><cpe>cpe:/o:apple:mac_os_x:10.9</cpe></osclass>
+<osclass type="general purpose" vendor="Apple" osfamily="OS X" osgen="10.10.X" accuracy="90"><cpe>cpe:/o:apple:mac_os_x:10.10</cpe></osclass>
+<osclass type="general purpose" vendor="Apple" osfamily="OS X" osgen="10.11.X" accuracy="90"><cpe>cpe:/o:apple:mac_os_x:10.11</cpe></osclass>
+<osclass type="general purpose" vendor="Apple" osfamily="macOS" osgen="10.12.X" accuracy="90"><cpe>cpe:/o:apple:mac_os_x:10.12</cpe></osclass>
+<osclass type="media device" vendor="Apple" osfamily="iOS" osgen="4.X" accuracy="90"><cpe>cpe:/o:apple:iphone_os:4</cpe><cpe>cpe:/a:apple:apple_tv:4</cpe></osclass>
+<osclass type="phone" vendor="Apple" osfamily="iOS" osgen="4.X" accuracy="90"><cpe>cpe:/o:apple:iphone_os:4</cpe></osclass>
+<osclass type="phone" vendor="Apple" osfamily="iOS" osgen="5.X" accuracy="90"><cpe>cpe:/o:apple:iphone_os:5</cpe></osclass>
+<osclass type="phone" vendor="Apple" osfamily="iOS" osgen="6.X" accuracy="90"><cpe>cpe:/o:apple:iphone_os:6</cpe></osclass>
+<osclass type="phone" vendor="Apple" osfamily="iOS" osgen="7.X" accuracy="90"><cpe>cpe:/o:apple:iphone_os:7</cpe></osclass>
+<osclass type="phone" vendor="Apple" osfamily="iOS" osgen="8.X" accuracy="90"><cpe>cpe:/o:apple:iphone_os:8</cpe></osclass>
+<osclass type="phone" vendor="Apple" osfamily="iOS" osgen="9.X" accuracy="90"><cpe>cpe:/o:apple:iphone_os:9</cpe></osclass>
+</osmatch>
+<osmatch name="Apple Mac OS X 10.7.4 - 10.7.5 (Lion) (Darwin 11.4.2)" accuracy="90" line="6884">
+<osclass type="general purpose" vendor="Apple" osfamily="Mac OS X" osgen="10.7.X" accuracy="90"><cpe>cpe:/o:apple:mac_os_x:10.7</cpe></osclass>
+</osmatch>
+</os>
+<uptime seconds="4" lastboot="Sat Mar 19 18:15:11 2022"/>
+<distance value="1"/>
+<tcpsequence index="261" difficulty="Good luck!" values="85FFEB3E,FC002222,1B909B90,74E059F5,60BE3F48,A039C5AF"/>
+<ipidsequence class="All zeros" values="0,0,0,0,0,0"/>
+<tcptssequence class="other" values="DCF61DF9,D06CEAF2,8D627F8E,AC78850,B6DDDC67,FD970FC7"/>
+<hostscript><script id="smb-enum-users" output="&#xa;  629F42ED79BB\test (RID: 1000)&#xa;    Full name:   Linux User&#xa;    Description: &#xa;    Flags:       Password not required, Account disabled, Normal user account&#xa;"/><script id="smb-enum-shares" output="&#xa;  account_used: guest&#xa;  \\10.10.10.10\IPC$: &#xa;    Type: STYPE_IPC_HIDDEN&#xa;    Comment: IPC Service (Samba 4.5.4)&#xa;    Users: 2&#xa;    Max Users: &lt;unlimited&gt;&#xa;    Path: C:\tmp&#xa;    Anonymous access: READ/WRITE&#xa;    Current user access: READ/WRITE&#xa;  \\10.10.10.10\shared: &#xa;    Type: STYPE_DISKTREE&#xa;    Comment: &#xa;    Users: 0&#xa;    Max Users: &lt;unlimited&gt;&#xa;    Path: C:\data\shared&#xa;    Anonymous access: READ/WRITE&#xa;    Current user access: READ/WRITE"><elem key="account_used">guest</elem>
+<table key="\\10.10.10.10\IPC$">
+<elem key="Type">STYPE_IPC_HIDDEN</elem>
+<elem key="Comment">IPC Service (Samba 4.5.4)</elem>
+<elem key="Users">2</elem>
+<elem key="Max Users">&lt;unlimited&gt;</elem>
+<elem key="Path">C:\tmp</elem>
+<elem key="Anonymous access">READ/WRITE</elem>
+<elem key="Current user access">READ/WRITE</elem>
+</table>
+<table key="\\10.10.10.10\shared">
+<elem key="Type">STYPE_DISKTREE</elem>
+<elem key="Comment"></elem>
+<elem key="Users">0</elem>
+<elem key="Max Users">&lt;unlimited&gt;</elem>
+<elem key="Path">C:\data\shared</elem>
+<elem key="Anonymous access">READ/WRITE</elem>
+<elem key="Current user access">READ/WRITE</elem>
+</table>
+</script></hostscript><trace>
+<hop ttl="1" ipaddr="10.10.10.10" rtt="19.54"/>
+</trace>
+<times srtt="19537" rttvar="26444" to="125313"/>
+</host>
+<runstats><finished time="1647710115" timestr="Sat Mar 19 18:15:15 2022" summary="Nmap done at Sat Mar 19 18:15:15 2022; 1 IP address (1 host up) scanned in 17.80 seconds" elapsed="17.80" exit="success"/><hosts up="1" down="0" total="1"/>
+</runstats>
+</nmaprun>

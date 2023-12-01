@@ -9,13 +9,13 @@ class Joomscan(BaseParser):
     def _parse_standard_output(self) -> None:
         technology = None
         vulnerability_name = None
-        endpoints = set()
+        endpoints = set(["/"])
         backups = set()
         configurations = set()
         path_disclosure = set()
         directory_listing = set()
         host = urlparse(
-            self.executor.arguments(self.executor.arguments.index("-u") + 1)
+            self.executor.arguments[self.executor.arguments.index("-u") + 1]
         ).hostname
         lines = self.output.split("\n")
         for index, line in enumerate(lines):

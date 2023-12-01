@@ -34,9 +34,7 @@ class Sshaudit(BaseParser):
                             " ", 1
                         )[0]
                         if algorithm not in algorithms[cryptography_type]:
-                            algorithms[cryptography_type]["algorithms"].append(
-                                algorithm
-                            )
+                            algorithms[cryptography_type].append(algorithm)
                         break
         for name, cve in vulnerabilities_to_create:
             self.create_finding(

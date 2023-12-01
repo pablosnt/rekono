@@ -2,7 +2,7 @@ from typing import Any
 
 from processes.models import Process, Step
 from tests.cases import ApiTestCase
-from tests.framework import RekonoTest
+from tests.framework import ApiTest
 
 first_process_name = "All tools"
 
@@ -14,7 +14,7 @@ invalid_process1 = {"name": "invalid ; test", "description": "test", "tags": ["t
 invalid_process2 = {"name": "test", "description": "invalid ; test", "tags": ["test"]}
 
 
-class ProcessTest(RekonoTest):
+class ProcessTest(ApiTest):
     endpoint = "/api/processes/"
     expected_str = first_process_name
     cases = [
@@ -220,7 +220,7 @@ expected_step1 = {
 }
 
 
-class StepTest(RekonoTest):
+class StepTest(ApiTest):
     endpoint = "/api/steps/"
     expected_str = f"{first_process_name} - theHarvester - All available sources"
     cases = [

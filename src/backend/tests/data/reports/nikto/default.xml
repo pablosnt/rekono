@@ -1,0 +1,78 @@
+<?xml version="1.0" ?>
+<!DOCTYPE niktoscan SYSTEM "/var/lib/nikto/docs/nikto.dtd">
+<niktoscan>
+<niktoscan hoststest="0" options="-h http://10.10.10.10 -Format xml -output /home/kali/Desktop/nikto.xml" version="2.1.6" scanstart="Sat Feb 19 11:07:56 2022" scanend="Thu Jan  1 01:00:00 1970" scanelapsed=" seconds" nxmlversion="1.2">
+
+<scandetails targetip="10.10.10.10" targethostname="10.10.10.10" targetport="80" targetbanner="Apache/2.4.7 (Ubuntu)" starttime="2022-02-19 11:07:58" sitename="http://10.10.10.10:80/" siteip="http://10.10.10.10:80/" hostheader="10.10.10.10" errors="0" checks="6897">
+
+
+<item id="999957" osvdbid="0" osvdblink="http://osvdb.org/0" method="GET">
+<description><![CDATA[The anti-clickjacking X-Frame-Options header is not present.]]></description>
+<uri><![CDATA[/]]></uri>
+<namelink><![CDATA[http://10.10.10.10:80/]]></namelink>
+<iplink><![CDATA[http://10.10.10.10:80/]]></iplink>
+</item>
+
+<item id="999102" osvdbid="0" osvdblink="http://osvdb.org/0" method="GET">
+<description><![CDATA[The X-XSS-Protection header is not defined. This header can hint to the user agent to protect against some forms of XSS]]></description>
+<uri><![CDATA[/]]></uri>
+<namelink><![CDATA[http://10.10.10.10:80/]]></namelink>
+<iplink><![CDATA[http://10.10.10.10:80/]]></iplink>
+</item>
+
+<item id="999103" osvdbid="0" osvdblink="http://osvdb.org/0" method="GET">
+<description><![CDATA[The X-Content-Type-Options header is not set. This could allow the user agent to render the content of the site in a different fashion to the MIME type]]></description>
+<uri><![CDATA[/]]></uri>
+<namelink><![CDATA[http://10.10.10.10:80/]]></namelink>
+<iplink><![CDATA[http://10.10.10.10:80/]]></iplink>
+</item>
+
+<item id="999100" osvdbid="0" osvdblink="http://osvdb.org/0" method="GET">
+<description><![CDATA[Uncommon header 'tcn' found, with contents: list]]></description>
+<uri><![CDATA[/index]]></uri>
+<namelink><![CDATA[http://10.10.10.10:80/index]]></namelink>
+<iplink><![CDATA[http://10.10.10.10:80/index]]></iplink>
+</item>
+
+<item id="999965" osvdbid="0" osvdblink="http://osvdb.org/0" method="GET">
+<description><![CDATA[Apache mod_negotiation is enabled with MultiViews, which allows attackers to easily brute force file names. See http://www.wisec.it/sectou.php?id=4698ebdc59d15. The following alternatives for 'index' were found: index.html]]></description>
+<uri><![CDATA[/index]]></uri>
+<namelink><![CDATA[http://10.10.10.10:80/index]]></namelink>
+<iplink><![CDATA[http://10.10.10.10:80/index]]></iplink>
+</item>
+
+<item id="600050" osvdbid="0" osvdblink="http://osvdb.org/0" method="HEAD">
+<description><![CDATA[Apache/2.4.7 appears to be outdated (current is at least Apache/2.4.37). Apache 2.2.34 is the EOL for the 2.x branch.]]></description>
+<uri><![CDATA[/]]></uri>
+<namelink><![CDATA[http://10.10.10.10:80/]]></namelink>
+<iplink><![CDATA[http://10.10.10.10:80/]]></iplink>
+</item>
+
+<item id="999990" osvdbid="0" osvdblink="http://osvdb.org/0" method="OPTIONS">
+<description><![CDATA[Allowed HTTP Methods: GET, HEAD, POST, OPTIONS ]]></description>
+<uri><![CDATA[/]]></uri>
+<namelink><![CDATA[http://10.10.10.10:80/]]></namelink>
+<iplink><![CDATA[http://10.10.10.10:80/]]></iplink>
+</item>
+
+<item id="750500" osvdbid="3268" osvdblink="http://osvdb.org/3268" method="GET">
+<description><![CDATA[/images/: Directory indexing found.]]></description>
+<uri><![CDATA[/images/]]></uri>
+<namelink><![CDATA[http://10.10.10.10:80/images/]]></namelink>
+<iplink><![CDATA[http://10.10.10.10:80/images/]]></iplink>
+</item>
+
+<item id="003584" osvdbid="3233" osvdblink="http://osvdb.org/3233" method="GET">
+<description><![CDATA[/icons/README: Apache default file found.]]></description>
+<uri><![CDATA[/icons/README]]></uri>
+<namelink><![CDATA[http://10.10.10.10:80/icons/README]]></namelink>
+<iplink><![CDATA[http://10.10.10.10:80/icons/README]]></iplink>
+</item>
+
+<statistics elapsed="2394" itemsfound="9" itemstested="6897" endtime="2022-02-19 11:47:52" />
+</scandetails>
+
+</niktoscan>
+
+
+</niktoscan>

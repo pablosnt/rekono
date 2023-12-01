@@ -1,0 +1,10 @@
+[•] CVE-2022-22965 - Spring4Shell RCE Scanner
+[•] Scanner provided by FullHunt.io - The Next-Gen Attack Surface Management Platform.
+[•] Secure your External Attack Surface with FullHunt.io.
+[•] URL: http://10.10.10.10
+[%] Checking for Spring4Shell RCE CVE-2022-22965.
+[•] URL: http://10.10.10.10 | PAYLOAD: class.module.classLoader[knzqc58]=knzqc58
+EXCEPTION: HTTPConnectionPool(host='10.10.10.10', port=80): Read timed out. (read timeout=4)
+EXCEPTION: HTTPConnectionPool(host='10.10.10.10', port=80): Read timed out. (read timeout=4)
+[•] Target does not seem to be vulnerable.
+[•] No affected targets were discovered.

@@ -1,0 +1,144 @@
+{
+    "info": {
+        "args": "dirsearch.py -u http://10.10.10.10 -o /home/kali/Desktop/testing/dirsearch/default.json --format=json",
+        "time": "Fri Feb 18 16:49:03 2022"
+    },
+    "results": [
+        {
+            "http://10.10.10.10:80/": [
+                {
+                    "content-length": 277,
+                    "path": "/.ht_wsr.txt",
+                    "redirect": null,
+                    "status": 403
+                },
+                {
+                    "content-length": 277,
+                    "path": "/.htaccess.sample",
+                    "redirect": null,
+                    "status": 403
+                },
+                {
+                    "content-length": 277,
+                    "path": "/.htaccess_orig",
+                    "redirect": null,
+                    "status": 403
+                },
+                {
+                    "content-length": 277,
+                    "path": "/.htaccess.bak1",
+                    "redirect": null,
+                    "status": 403
+                },
+                {
+                    "content-length": 277,
+                    "path": "/.htaccess_sc",
+                    "redirect": null,
+                    "status": 403
+                },
+                {
+                    "content-length": 277,
+                    "path": "/.htaccess.save",
+                    "redirect": null,
+                    "status": 403
+                },
+                {
+                    "content-length": 277,
+                    "path": "/.htaccess.orig",
+                    "redirect": null,
+                    "status": 403
+                },
+                {
+                    "content-length": 277,
+                    "path": "/.htaccess_extra",
+                    "redirect": null,
+                    "status": 403
+                },
+                {
+                    "content-length": 277,
+                    "path": "/.htm",
+                    "redirect": null,
+                    "status": 403
+                },
+                {
+                    "content-length": 277,
+                    "path": "/.htaccessBAK",
+                    "redirect": null,
+                    "status": 403
+                },
+                {
+                    "content-length": 277,
+                    "path": "/.httr-oauth",
+                    "redirect": null,
+                    "status": 403
+                },
+                {
+                    "content-length": 277,
+                    "path": "/.htaccessOLD2",
+                    "redirect": null,
+                    "status": 403
+                },
+                {
+                    "content-length": 277,
+                    "path": "/.html",
+                    "redirect": null,
+                    "status": 403
+                },
+                {
+                    "content-length": 277,
+                    "path": "/.htaccessOLD",
+                    "redirect": null,
+                    "status": 403
+                },
+                {
+                    "content-length": 277,
+                    "path": "/.htpasswds",
+                    "redirect": null,
+                    "status": 403
+                },
+                {
+                    "content-length": 277,
+                    "path": "/.htpasswd_test",
+                    "redirect": null,
+                    "status": 403
+                },
+                {
+                    "content-length": 277,
+                    "path": "/.php",
+                    "redirect": null,
+                    "status": 403
+                },
+                {
+                    "content-length": 1691,
+                    "path": "/assets/",
+                    "redirect": null,
+                    "status": 200
+                },
+                {
+                    "content-length": 313,
+                    "path": "/assets",
+                    "redirect": "http://10.10.10.10/assets/",
+                    "status": 301
+                },
+                {
+                    "content-length": 33560,
+                    "path": "/index.html",
+                    "redirect": null,
+                    "status": 200
+                },
+                {
+                    "content-length": 277,
+                    "path": "/server-status",
+                    "redirect": null,
+                    "status": 403
+                },
+                {
+                    "content-length": 277,
+                    "path": "/server-status/",
+                    "redirect": null,
+                    "status": 403
+                }
+            ]
+        }
+    ]
+}

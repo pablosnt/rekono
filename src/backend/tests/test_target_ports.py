@@ -3,7 +3,7 @@ from typing import Any
 from authentications.enums import AuthenticationType
 from target_ports.models import TargetPort
 from tests.cases import ApiTestCase
-from tests.framework import RekonoTest
+from tests.framework import ApiTest
 
 target_port1 = {"target": 1, "port": 80, "path": "/webapp/"}
 target_port2 = {"target": 1, "port": 22}
@@ -17,7 +17,7 @@ invalid_target_port1 = {"target": 1, "port": 99999999999, "path": "/webapp/"}
 invalid_target_port2 = {"target": 1, "port": 443, "path": "/webapp;"}
 
 
-class TargetPortTest(RekonoTest):
+class TargetPortTest(ApiTest):
     endpoint = "/api/target-ports/"
     expected_str = "10.10.10.10 - 80"
     cases = [

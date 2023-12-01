@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE nmaprun>
+<?xml-stylesheet href="file:///usr/bin/../share/nmap/nmap.xsl" type="text/xsl"?>
+<!-- Nmap 7.92 scan initiated Fri Feb 18 18:04:15 2022 as: nmap -p 21 -sS -sV -A -&#45;script ftp-anon,ftp-proftpd-backdoor,ftp-vsftpd-backdoor,ftp-libopie,ftp-vuln-cve2010-4221 -oX nmap/vsftpd-backdoor.xml 10.10.10.10 -->
+<nmaprun scanner="nmap" args="nmap -p 21 -sS -sV -A -&#45;script ftp-anon,ftp-proftpd-backdoor,ftp-vsftpd-backdoor,ftp-libopie,ftp-vuln-cve2010-4221 -oX nmap/vsftpd-backdoor.xml 10.10.10.10" start="1645203855" startstr="Fri Feb 18 18:04:15 2022" version="7.92" xmloutputversion="1.05">
+<scaninfo type="syn" protocol="tcp" numservices="1" services="21"/>
+<verbose level="0"/>
+<debugging level="0"/>
+<hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="10.10.10.10" addrtype="ipv4"/>
+<address addr="AC:AC:AC:AC:AC:AC" addrtype="mac" vendor="Apple"/>
+<hostnames>
+</hostnames>
+</hosthint>
+<host starttime="1645203856" endtime="1645203862"><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="10.10.10.10" addrtype="ipv4"/>
+<address addr="AC:AC:AC:AC:AC:AC" addrtype="mac" vendor="Apple"/>
+<hostnames>
+</hostnames>
+<ports><port protocol="tcp" portid="21"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="ftp" product="vsftpd" version="2.3.4" ostype="Unix" method="probed" conf="10"><cpe>cpe:/a:vsftpd:vsftpd:2.3.4</cpe></service><script id="ftp-vsftpd-backdoor" output="&#xa;  VULNERABLE:&#xa;  vsFTPd version 2.3.4 backdoor&#xa;    State: VULNERABLE (Exploitable)&#xa;    IDs:  BID:48539  CVE:CVE-2011-2523&#xa;      vsFTPd version 2.3.4 backdoor, this was reported on 2011-07-04.&#xa;    Disclosure date: 2011-07-03&#xa;    Exploit results:&#xa;      Shell command: id&#xa;      Results: uid=0(root) gid=0(root) groups=0(root)&#xa;    References:&#xa;      https://github.com/rapid7/metasploit-framework/blob/master/modules/exploits/unix/ftp/vsftpd_234_backdoor.rb&#xa;      https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2011-2523&#xa;      http://scarybeastsecurity.blogspot.com/2011/07/alert-vsftpd-download-backdoored.html&#xa;      https://www.securityfocus.com/bid/48539&#xa;"><table key="CVE-2011-2523">
+<elem key="title">vsFTPd version 2.3.4 backdoor</elem>
+<elem key="state">VULNERABLE (Exploitable)</elem>
+<table key="ids">
+<elem>BID:48539</elem>
+<elem>CVE:CVE-2011-2523</elem>
+</table>
+<table key="description">
+<elem>vsFTPd version 2.3.4 backdoor, this was reported on 2011-07-04.</elem>
+</table>
+<table key="dates">
+<table key="disclosure">
+<elem key="month">07</elem>
+<elem key="year">2011</elem>
+<elem key="day">03</elem>
+</table>
+</table>
+<elem key="disclosure">2011-07-03</elem>
+<table key="exploit_results">
+<elem>Shell command: id</elem>
+<elem>Results: uid=0(root) gid=0(root) groups=0(root)</elem>
+</table>
+<table key="refs">
+<elem>https://github.com/rapid7/metasploit-framework/blob/master/modules/exploits/unix/ftp/vsftpd_234_backdoor.rb</elem>
+<elem>https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2011-2523</elem>
+<elem>http://scarybeastsecurity.blogspot.com/2011/07/alert-vsftpd-download-backdoored.html</elem>
+<elem>https://www.securityfocus.com/bid/48539</elem>
+</table>
+</table>
+</script><script id="ftp-anon" output="Anonymous FTP login allowed (FTP code 230)&#xa;Can&apos;t get directory listing: PASV IP 172.17.0.2 is not the same as 10.10.10.10"/></port>
+</ports>
+<os><portused state="open" proto="tcp" portid="21"/>
+<portused state="closed" proto="udp" portid="30083"/>
+<osmatch name="Apple macOS 10.13 (High Sierra) - 10.15 (Catalina) or iOS 11.0 - 13.4 (Darwin 17.0.0 - 19.2.0)" accuracy="97" line="3614">
+<osclass type="phone" vendor="Apple" osfamily="iOS" osgen="11.X" accuracy="97"><cpe>cpe:/o:apple:iphone_os:11</cpe></osclass>
+<osclass type="phone" vendor="Apple" osfamily="iOS" osgen="12.X" accuracy="97"><cpe>cpe:/o:apple:iphone_os:12</cpe></osclass>
+<osclass type="phone" vendor="Apple" osfamily="iOS" osgen="13.X" accuracy="97"><cpe>cpe:/o:apple:iphone_os:13</cpe></osclass>
+<osclass type="general purpose" vendor="Apple" osfamily="macOS" osgen="10.13.X" accuracy="97"><cpe>cpe:/o:apple:mac_os_x:10.13</cpe></osclass>
+<osclass type="general purpose" vendor="Apple" osfamily="macOS" osgen="10.14.X" accuracy="97"><cpe>cpe:/o:apple:mac_os_x:10.14</cpe></osclass>
+<osclass type="general purpose" vendor="Apple" osfamily="macOS" osgen="10.15.X" accuracy="97"><cpe>cpe:/o:apple:mac_os_x:10.15</cpe></osclass>
+</osmatch>
+<osmatch name="Apple Mac OS X 10.11 (El Capitan) or iOS 12.4 - 13.0 (Darwin 15.6.0 - 19.0.0)" accuracy="96" line="7506">
+<osclass type="general purpose" vendor="Apple" osfamily="OS X" osgen="10.11.X" accuracy="96"><cpe>cpe:/o:apple:mac_os_x:10.11</cpe></osclass>
+<osclass type="media device" vendor="Apple" osfamily="iOS" osgen="12.X" accuracy="96"><cpe>cpe:/o:apple:iphone_os:12</cpe></osclass>
+</osmatch>
+<osmatch name="Apple TV 5" accuracy="93" line="3341">
+<osclass type="media device" vendor="Apple" osfamily="Apple TV" osgen="5.X" accuracy="93"><cpe>cpe:/o:apple:apple_tv:5</cpe></osclass>
+</osmatch>
+<osmatch name="Apple Mac OS X 10.4.8 - 10.4.11 (Tiger) (Darwin 8.8.0 - 8.11.0)" accuracy="90" line="5488">
+<osclass type="general purpose" vendor="Apple" osfamily="Mac OS X" osgen="10.4.X" accuracy="90"><cpe>cpe:/o:apple:mac_os_x:10.4</cpe></osclass>
+</osmatch>
+<osmatch name="Apple iPad tablet computer (iOS 4.3.2)" accuracy="90" line="3680">
+<osclass type="media device" vendor="Apple" osfamily="iOS" osgen="4.X" accuracy="90"><cpe>cpe:/o:apple:iphone_os:4.3.2</cpe></osclass>
+</osmatch>
+<osmatch name="Apple iPad tablet computer or iPhone mobile phone (iOS 4.0 - 4.1)" accuracy="90" line="3817">
+<osclass type="phone" vendor="Apple" osfamily="iOS" osgen="4.X" accuracy="90"><cpe>cpe:/o:apple:iphone_os:4</cpe></osclass>
+</osmatch>
+<osmatch name="Apple iPhone mobile phone (iOS 4.3.2)" accuracy="90" line="3853">
+<osclass type="phone" vendor="Apple" osfamily="iOS" osgen="4.X" accuracy="90"><cpe>cpe:/o:apple:iphone_os:4.3.2</cpe></osclass>
+</osmatch>
+<osmatch name="Apple Mac OS X 10.5 (Leopard) - 10.6.8 (Snow Leopard) or iOS 4.0 - 4.2.1 (Darwin 9.0.0b5 - 10.8.0)" accuracy="90" line="3912">
+<osclass type="phone" vendor="Apple" osfamily="iOS" osgen="4.X" accuracy="90"><cpe>cpe:/o:apple:iphone_os:4</cpe></osclass>
+<osclass type="media device" vendor="Apple" osfamily="iOS" osgen="4.X" accuracy="90"><cpe>cpe:/o:apple:iphone_os:4</cpe></osclass>
+<osclass type="general purpose" vendor="Apple" osfamily="Mac OS X" osgen="10.6.X" accuracy="90"><cpe>cpe:/o:apple:mac_os_x:10.6</cpe></osclass>
+</osmatch>
+<osmatch name="Apple iOS 5.0.1" accuracy="90" line="3954">
+<osclass type="media device" vendor="Apple" osfamily="iOS" osgen="5.X" accuracy="90"><cpe>cpe:/o:apple:iphone_os:5.0.1</cpe></osclass>
+<osclass type="phone" vendor="Apple" osfamily="iOS" osgen="5.X" accuracy="90"><cpe>cpe:/o:apple:iphone_os:5.0.1</cpe></osclass>
+</osmatch>
+<osmatch name="Apple Mac OS X 10.7.0 (Lion) - 10.12 (Sierra) or iOS 4.1 - 9.3.3 (Darwin 10.0.0 - 16.4.0)" accuracy="90" line="6485">
+<osclass type="general purpose" vendor="Apple" osfamily="Mac OS X" osgen="10.7.X" accuracy="90"><cpe>cpe:/o:apple:mac_os_x:10.7</cpe></osclass>
+<osclass type="general purpose" vendor="Apple" osfamily="OS X" osgen="10.8.X" accuracy="90"><cpe>cpe:/o:apple:mac_os_x:10.8</cpe></osclass>
+<osclass type="general purpose" vendor="Apple" osfamily="OS X" osgen="10.9.X" accuracy="90"><cpe>cpe:/o:apple:mac_os_x:10.9</cpe></osclass>
+<osclass type="general purpose" vendor="Apple" osfamily="OS X" osgen="10.10.X" accuracy="90"><cpe>cpe:/o:apple:mac_os_x:10.10</cpe></osclass>
+<osclass type="general purpose" vendor="Apple" osfamily="OS X" osgen="10.11.X" accuracy="90"><cpe>cpe:/o:apple:mac_os_x:10.11</cpe></osclass>
+<osclass type="general purpose" vendor="Apple" osfamily="macOS" osgen="10.12.X" accuracy="90"><cpe>cpe:/o:apple:mac_os_x:10.12</cpe></osclass>
+<osclass type="media device" vendor="Apple" osfamily="iOS" osgen="4.X" accuracy="90"><cpe>cpe:/o:apple:iphone_os:4</cpe><cpe>cpe:/a:apple:apple_tv:4</cpe></osclass>
+<osclass type="phone" vendor="Apple" osfamily="iOS" osgen="4.X" accuracy="90"><cpe>cpe:/o:apple:iphone_os:4</cpe></osclass>
+<osclass type="phone" vendor="Apple" osfamily="iOS" osgen="5.X" accuracy="90"><cpe>cpe:/o:apple:iphone_os:5</cpe></osclass>
+<osclass type="phone" vendor="Apple" osfamily="iOS" osgen="6.X" accuracy="90"><cpe>cpe:/o:apple:iphone_os:6</cpe></osclass>
+<osclass type="phone" vendor="Apple" osfamily="iOS" osgen="7.X" accuracy="90"><cpe>cpe:/o:apple:iphone_os:7</cpe></osclass>
+<osclass type="phone" vendor="Apple" osfamily="iOS" osgen="8.X" accuracy="90"><cpe>cpe:/o:apple:iphone_os:8</cpe></osclass>
+<osclass type="phone" vendor="Apple" osfamily="iOS" osgen="9.X" accuracy="90"><cpe>cpe:/o:apple:iphone_os:9</cpe></osclass>
+</osmatch>
+</os>
+<uptime seconds="5" lastboot="Fri Feb 18 18:04:17 2022"/>
+<distance value="1"/>
+<tcpsequence index="251" difficulty="Good luck!" values="55E3F24A,FF5CDF23,AC9F8972,4CC543EB,D392A335,82EE7CFB"/>
+<ipidsequence class="All zeros" values="0,0,0,0,0,0"/>
+<tcptssequence class="other" values="FCBB8EBF,A10A839F,DF42237E,7A2D1796,75DFF793,BA53A10A"/>
+<trace>
+<hop ttl="1" ipaddr="10.10.10.10" rtt="4.51"/>
+</trace>
+<times srtt="4505" rttvar="986" to="100000"/>
+</host>
+<runstats><finished time="1645203862" timestr="Fri Feb 18 18:04:22 2022" summary="Nmap done at Fri Feb 18 18:04:22 2022; 1 IP address (1 host up) scanned in 6.65 seconds" elapsed="6.65" exit="success"/><hosts up="1" down="0" total="1"/>
+</runstats>
+</nmaprun>

@@ -1,11 +1,14 @@
 import json
 from dataclasses import dataclass
+from pathlib import Path
+from sys import stdout
 from typing import Any, Dict, List, Tuple
 
 from django.db import transaction
 from django.test import TestCase
-from findings.framework.models import Finding
+from executions.models import Execution
 from rest_framework.test import APIClient
+from tools.parsers.base import BaseParser
 
 
 class RekonoTestCase:
@@ -82,10 +85,41 @@ class ApiTestCase(RekonoTestCase):
 
 @dataclass
 class ToolTestCase(RekonoTestCase):
-    tool: str
     report: str
-    expected: List[Finding]
-    stdout: bool
+    expected: List[Dict[str, Any]] = None
+
+    def _get_parser(
+        self, execution: Execution, executor_arguments: List[str], reports: Path
+    ) -> BaseParser:
+        report = reports / self.report
+        executor = execution.configuration.tool.get_executor_class()(execution)
+        executor.arguments = executor_arguments
+        parser = execution.configuration.tool.get_parser_class()(
+            executor,
+            report.read_text()
+            if not execution.configuration.tool.output_format
+            else None,
+        )
+        if execution.configuration.tool.output_format:
+            parser.report = report
+        return parser
 
     def test_case(self, *args: Any, **kwargs: Any) -> None:
-        return super().test_case()
+        parser = self._get_parser(
+            kwargs["execution"],
+            kwargs["executor_arguments"],
+            kwargs["reports"] / kwargs["tool"].lower().replace(" ", "_"),
+        )
+        parser.parse()
+        try:
+            self.tc.assertEqual(len(self.expected or []), len(parser.findings))
+        except Exception as ex:
+            print(self.expected)
+            input(parser.findings)
+            raise ex
+        for index, finding in enumerate(parser.findings):
+            expected = self.expected[index]
+            self.tc.assertTrue(isinstance(finding, expected.get("model")))
+            for field, value in expected.items():
+                if field != "model":
+                    self.tc.assertEqual(value, getattr(finding, field))

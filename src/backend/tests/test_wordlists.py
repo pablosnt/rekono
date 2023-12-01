@@ -2,12 +2,12 @@ from typing import Any
 
 from settings.models import Settings
 from tests.cases import ApiTestCase
-from tests.framework import RekonoTest
+from tests.framework import ApiTest
 from wordlists.enums import WordlistType
 from wordlists.models import Wordlist
 
 # Wordlists paths
-data_dir = RekonoTest.data_dir / "wordlists"
+data_dir = ApiTest.data_dir / "wordlists"
 endpoints_path = data_dir / "endpoints_wordlist.txt"
 invalid_mime_type_path = data_dir / "invalid_mime_type.txt"
 invalid_extension_path = data_dir / "invalid_extension.pdf"
@@ -22,7 +22,7 @@ wordlist_subdomains = {"name": "test 2", "type": WordlistType.SUBDOMAIN.value}
 new_wordlist_subdomains = {"name": "new test 2", "type": WordlistType.SUBDOMAIN.value}
 
 
-class WordlistTest(RekonoTest):
+class WordlistTest(ApiTest):
     endpoint = "/api/wordlists/"
     expected_str = first_wordlist_name
     data_dir = data_dir

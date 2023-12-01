@@ -71,7 +71,7 @@ class Sslscan(BaseParser):
                             lambda: item.tag == "heartbleed"
                             and item.attrib["vulnerable"] == "1",
                             {
-                                "name": f'Heartbleed in {item.attrib["sslversion"]}',
+                                "name": f"Heartbleed in {item.attrib.get('sslversion')}",
                                 "cve": "CVE-2014-0160",
                             },
                         ),
@@ -84,7 +84,7 @@ class Sslscan(BaseParser):
                             ],
                             {
                                 "name": "Insecure cipher suite supported",
-                                "description": f"{item.attrib['sslversion']} {item.attrib['cipher']} status={item.attrib['status']} strength={item.attrib['strength']}",
+                                "description": f"{item.attrib.get('sslversion')} {item.attrib.get('cipher')} status={item.attrib.get('status')} strength={item.attrib.get('strength')}",
                                 "severity": Severity.LOW,
                                 # CWE-326: Inadequate Encryption Strength
                                 "cwe": "CWE-326",

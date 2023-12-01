@@ -36,7 +36,7 @@ class Sslyze(BaseParser):
                     {"name": "Heartbleed", "cve": "CVE-2014-0160"},
                 ),
                 (
-                    lambda: ["openssl_ccs_injection"]["result"][
+                    lambda: result["openssl_ccs_injection"]["result"][
                         "is_vulnerable_to_ccs_injection"
                     ],
                     {"name": "OpenSSL CSS Injection", "cve": "CVE-2014-0224"},
@@ -80,19 +80,24 @@ class Sslyze(BaseParser):
                     self.create_finding(Vulnerability, **fields)
             for protocol, versions in self.protocol_versions.items():
                 for version in versions:
-                    cipher_suites = data[
-                        f'{protocol.lower()}_{version.replace(".", "_")}_cipher_suites'
-                    ]["result"]["accepted_cipher_suites"]
+                    cipher_suites = (
+                        result.get(
+                            f'{protocol.lower()}_{version.replace(".", "_")}_cipher_suites',
+                            {},
+                        )
+                        .get("result", {})
+                        .get("accepted_cipher_suites", [])
+                    )
                     if cipher_suites:
                         technology = self.create_finding(
                             Technology,
-                            name=protocol,
+                            name=protocol.upper(),
                             version=version,
                             related_to=self.generic_tech,
                         )
-                        severity = Severity.MEDIUM
+                        severity = Severity.HIGH
                         if protocol.lower() == "tls":
-                            severity = Severity.HIGH
+                            severity = Severity.MEDIUM
                             for cs in cipher_suites:
                                 if "_RC4_" in cs["cipher_suite"]["name"]:
                                     self.create_finding(

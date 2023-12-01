@@ -19,10 +19,12 @@ class Cmseek(BaseParser):
             base_url = base_url.replace(parser.path, "/")
         cms = self.create_finding(
             Technology,
-            name=data.get("cms_name"),
-            version=version,
+            name=data.get("cms_name").strip(),
+            version=version.strip() if version is not None else None,
             description="CMS",
-            reference=data.get("cms_url"),
+            reference=data.get("cms_url", "").strip()
+            if data.get("cms_url")
+            else data.get("cms_url"),
         )
         for key, value in data.items():
             if key in [
@@ -34,24 +36,26 @@ class Cmseek(BaseParser):
                 "url",
             ]:
                 continue
-            paths = []
-            if isinstance(value, list):
-                paths = [p.replace(base_url, "/") for p in value if p and base_url in p]
-            elif isinstance(value, str) and base_url in value:
-                paths = (
-                    [
-                        p.replace(base_url, "/")
-                        for p in value.split(",")
-                        if base_url in p
-                    ]
-                    if "," in value
-                    else [value]
+            paths = [
+                path.replace(base_url, "/").strip()
+                for path in (
+                    value
+                    if isinstance(value, list)
+                    else (
+                        value.split(",")
+                        if isinstance(value, str) and "," in value
+                        else [value]
+                    )
                 )
+                if base_url in path
+            ]
             if paths:
                 for path in paths:
                     if path and path != "/":
                         self.create_finding(
-                            Path, path=path.replace("//", "/"), type=PathType.ENDPOINT
+                            Path,
+                            path=path.replace("//", "/"),
+                            type=PathType.ENDPOINT,
                         )
                 for search_key, vulnerability_name, severity, cwe in [
                     # CWE-530: Exposure of Backup File to an Unauthorized Control Sphere
@@ -79,7 +83,7 @@ class Cmseek(BaseParser):
                         self.create_finding(
                             Credential,
                             technology=cms,
-                            username=user,
+                            username=user.strip(),
                             context=f"{cms.name} username",
                         )
             elif "_debug_mode" in key and value != "disabled":
@@ -96,10 +100,12 @@ class Cmseek(BaseParser):
                     self.create_finding(
                         Vulnerability,
                         technology=cms,
-                        name=vulnerability.get("name"),
-                        cve=vulnerability.get("cve"),
+                        name=vulnerability.get("name", "").strip(),
+                        cve=vulnerability.get("cve").strip()
+                        if vulnerability.get("cve") is not None
+                        else None,
                     )
-            elif "Version" in value:
+            elif "Version" in value and "," in value:
                 for component in value.split(","):
                     technology = component
                     version = None
@@ -111,8 +117,8 @@ class Cmseek(BaseParser):
                     if technology:
                         self.create_finding(
                             Technology,
-                            name=technology,
-                            version=version,
+                            name=technology.strip(),
+                            version=version.strip() if version is not None else None,
                             related_to=cms,
                             description=f"{cms.name} {name}",
                         )

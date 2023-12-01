@@ -3,35 +3,22 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 from django.test import TestCase
+from executions.models import Execution
 from projects.models import Project
 from rest_framework.test import APIClient
 from security.authorization.roles import Role
 from targets.enums import TargetType
 from targets.models import Target
+from tasks.models import Task
 from tests.cases import RekonoTestCase
+from tools.enums import Intensity
+from tools.models import Tool
 from users.models import User
 
 
 class RekonoTest(TestCase):
-    login = "/api/security/login/"
-    profile = "/api/profile/"
-    endpoint = ""
-    expected_str = ""
     data_dir = Path(__file__).resolve().parent / "data"
     cases: List[RekonoTestCase] = []
-    anonymous_allowed = False
-
-    def _get_object(self) -> Any:
-        return None
-
-    def _get_api_client(self, access: str = None, token: str = None):
-        client = (
-            APIClient(HTTP_AUTHORIZATION=f"Bearer {access}") if access else APIClient()
-        )
-        return APIClient(HTTP_AUTHORIZATION=f"Token {token}") if token else client
-
-    def _get_content(self, raw: Any) -> Dict[str, Any]:
-        return json.loads((raw or "{}".encode()).decode())
 
     def _create_user(self, username: str, role: Role) -> User:
         new_user = User.objects.create(
@@ -64,7 +51,7 @@ class RekonoTest(TestCase):
             self.users[role].append(getattr(self, username))
 
     def _setup_project(self) -> None:
-        self.project = Project.objects.create(
+        self.project, _ = Project.objects.get_or_create(
             name="test", description="test", owner=self.admin1
         )
         for user in [self.admin1, self.auditor1, self.reader1]:
@@ -72,16 +59,40 @@ class RekonoTest(TestCase):
 
     def _setup_target(self) -> None:
         self._setup_project()
-        self.target = Target.objects.create(
+        self.target, _ = Target.objects.get_or_create(
             project=self.project, target="10.10.10.10", type=TargetType.PRIVATE_IP
         )
 
-    def tearDown(self) -> None:
-        pass
+    def _metadata(self) -> Dict[str, Any]:
+        return {}
 
     def test_cases(self) -> None:
         for test_case in self.cases:
-            test_case.test_case(endpoint=self.endpoint)
+            test_case.test_case(**self._metadata())
+
+
+class ApiTest(RekonoTest):
+    endpoint = ""
+    login = "/api/security/login/"
+    profile = "/api/profile/"
+    expected_str = ""
+
+    anonymous_allowed = False
+
+    def _get_object(self) -> Any:
+        return None
+
+    def _get_api_client(self, access: str = None, token: str = None):
+        client = (
+            APIClient(HTTP_AUTHORIZATION=f"Bearer {access}") if access else APIClient()
+        )
+        return APIClient(HTTP_AUTHORIZATION=f"Token {token}") if token else client
+
+    def _get_content(self, raw: Any) -> Dict[str, Any]:
+        return json.loads((raw or "{}".encode()).decode())
+
+    def _metadata(self) -> Dict[str, Any]:
+        return {"endpoint": self.endpoint}
 
     def test_str(self) -> None:
         object = self._get_object()
@@ -94,3 +105,34 @@ class RekonoTest(TestCase):
             self.assertEqual(
                 200 if self.anonymous_allowed else 401, response.status_code
             )
+
+
+class ToolTest(RekonoTest):
+    tool_name = ""
+    execution = None
+    executor_arguments = []
+    data_dir = RekonoTest.data_dir / "reports"
+
+    def setUp(self) -> None:
+        if self.tool_name:
+            super().setUp()
+            self._setup_project()
+            self._setup_target()
+            self.tool = Tool.objects.get(name=self.tool_name)
+            self.configuration = self.tool.configurations.get(default=True)
+            self.task = Task.objects.create(
+                target=self.target,
+                configuration=self.configuration,
+                intensity=Intensity.NORMAL,
+            )
+            self.execution = Execution.objects.create(
+                task=self.task, configuration=self.configuration
+            )
+
+    def _metadata(self) -> Dict[str, Any]:
+        return {
+            "execution": self.execution,
+            "executor_arguments": self.executor_arguments,
+            "reports": self.data_dir,
+            "tool": self.tool_name,
+        }

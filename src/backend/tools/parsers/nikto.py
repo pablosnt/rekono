@@ -5,7 +5,7 @@ from tools.parsers.base import BaseParser
 
 class Nikto(BaseParser):
     def _parse_report(self) -> None:
-        endpoints = set()
+        endpoints = set(["/"])
         root = self._load_report_as_xml()
         for item in (
             root.findall("niktoscan")[-1].findall("scandetails")[0].findall("item")

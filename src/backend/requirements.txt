@@ -13,7 +13,7 @@ pyjwt==2.7.0
 python-magic==0.4.27
 python-libnmap==0.7.3
 python-telegram-bot==20.6
-pyyaml==6.0.0
+pyyaml==6.0.1
 requests==2.31.0
 rq==1.15.1
 setuptools==68.0.0

@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE nmaprun>
+<?xml-stylesheet href="file:///usr/bin/../share/nmap/nmap.xsl" type="text/xsl"?>
+<!-- Nmap 7.92 scan initiated Sat Mar 19 17:03:46 2022 as: nmap -sV -A -p 445 -&#45;script smb-enum-shares,smb-enum-users,smb-enum-groups,smb-enum-sessions,smb-protocols,smb-enum-domains,smb-enum-services,smb-mbenum,smb-ls,smb-security-mode,smb2-security-mode,smb-double-pulsar-backdoor,smb-vuln-webexec,smb2-vuln-uptime,smb-vuln-ms06-025,smb-vuln-ms07-029,smb-vuln-ms10-061,smb-vuln-ms17-010,smb-vuln-cve-2017-7494 -oX /home/kali/Desktop/smb-analysis 10.10.10.10 -->
+<nmaprun scanner="nmap" args="nmap -sV -A -p 445 -&#45;script smb-enum-shares,smb-enum-users,smb-enum-groups,smb-enum-sessions,smb-protocols,smb-enum-domains,smb-enum-services,smb-mbenum,smb-ls,smb-security-mode,smb2-security-mode,smb-double-pulsar-backdoor,smb-vuln-webexec,smb2-vuln-uptime,smb-vuln-ms06-025,smb-vuln-ms07-029,smb-vuln-ms10-061,smb-vuln-ms17-010,smb-vuln-cve-2017-7494 -oX /home/kali/Desktop/smb-analysis 10.10.10.10" start="1647705826" startstr="Sat Mar 19 17:03:46 2022" version="7.92" xmloutputversion="1.05">
+<scaninfo type="syn" protocol="tcp" numservices="1" services="445"/>
+<verbose level="0"/>
+<debugging level="0"/>
+<hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="10.10.10.10" addrtype="ipv4"/>
+<address addr="8C:85:90:45:C5:4E" addrtype="mac" vendor="Apple"/>
+<hostnames>
+</hostnames>
+</hosthint>
+<host starttime="1647705826" endtime="1647706147"><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="10.10.10.10" addrtype="ipv4"/>
+<address addr="8C:85:90:45:C5:4E" addrtype="mac" vendor="Apple"/>
+<hostnames>
+</hostnames>
+<ports><port protocol="tcp" portid="445"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="netbios-ssn" product="Samba smbd" version="3.X - 4.X" extrainfo="workgroup: WORKGROUP" hostname="547CD6A40F36" method="probed" conf="10"><cpe>cpe:/a:samba:samba</cpe></service></port>
+</ports>
+<os><portused state="open" proto="tcp" portid="445"/>
+<portused state="closed" proto="udp" portid="33284"/>
+<osmatch name="Apple macOS 10.13 (High Sierra) - 10.15 (Catalina) or iOS 11.0 - 13.4 (Darwin 17.0.0 - 19.2.0)" accuracy="97" line="3614">
+<osclass type="phone" vendor="Apple" osfamily="iOS" osgen="11.X" accuracy="97"><cpe>cpe:/o:apple:iphone_os:11</cpe></osclass>
+<osclass type="phone" vendor="Apple" osfamily="iOS" osgen="12.X" accuracy="97"><cpe>cpe:/o:apple:iphone_os:12</cpe></osclass>
+<osclass type="phone" vendor="Apple" osfamily="iOS" osgen="13.X" accuracy="97"><cpe>cpe:/o:apple:iphone_os:13</cpe></osclass>
+<osclass type="general purpose" vendor="Apple" osfamily="macOS" osgen="10.13.X" accuracy="97"><cpe>cpe:/o:apple:mac_os_x:10.13</cpe></osclass>
+<osclass type="general purpose" vendor="Apple" osfamily="macOS" osgen="10.14.X" accuracy="97"><cpe>cpe:/o:apple:mac_os_x:10.14</cpe></osclass>
+<osclass type="general purpose" vendor="Apple" osfamily="macOS" osgen="10.15.X" accuracy="97"><cpe>cpe:/o:apple:mac_os_x:10.15</cpe></osclass>
+</osmatch>
+<osmatch name="Apple Mac OS X 10.11 (El Capitan) or iOS 12.4 - 13.0 (Darwin 15.6.0 - 19.0.0)" accuracy="97" line="7506">
+<osclass type="general purpose" vendor="Apple" osfamily="OS X" osgen="10.11.X" accuracy="97"><cpe>cpe:/o:apple:mac_os_x:10.11</cpe></osclass>
+<osclass type="media device" vendor="Apple" osfamily="iOS" osgen="12.X" accuracy="97"><cpe>cpe:/o:apple:iphone_os:12</cpe></osclass>
+</osmatch>
+<osmatch name="Apple TV 5" accuracy="93" line="3341">
+<osclass type="media device" vendor="Apple" osfamily="Apple TV" osgen="5.X" accuracy="93"><cpe>cpe:/o:apple:apple_tv:5</cpe></osclass>
+</osmatch>
+<osmatch name="Apple Mac OS X 10.4.8 - 10.4.11 (Tiger) (Darwin 8.8.0 - 8.11.0)" accuracy="90" line="5488">
+<osclass type="general purpose" vendor="Apple" osfamily="Mac OS X" osgen="10.4.X" accuracy="90"><cpe>cpe:/o:apple:mac_os_x:10.4</cpe></osclass>
+</osmatch>
+<osmatch name="Apple iPad tablet computer (iOS 4.3.2)" accuracy="90" line="3680">
+<osclass type="media device" vendor="Apple" osfamily="iOS" osgen="4.X" accuracy="90"><cpe>cpe:/o:apple:iphone_os:4.3.2</cpe></osclass>
+</osmatch>
+<osmatch name="Apple iPad tablet computer or iPhone mobile phone (iOS 4.0 - 4.1)" accuracy="90" line="3817">
+<osclass type="phone" vendor="Apple" osfamily="iOS" osgen="4.X" accuracy="90"><cpe>cpe:/o:apple:iphone_os:4</cpe></osclass>
+</osmatch>
+<osmatch name="Apple iPhone mobile phone (iOS 4.3.2)" accuracy="90" line="3853">
+<osclass type="phone" vendor="Apple" osfamily="iOS" osgen="4.X" accuracy="90"><cpe>cpe:/o:apple:iphone_os:4.3.2</cpe></osclass>
+</osmatch>
+<osmatch name="Apple Mac OS X 10.5 (Leopard) - 10.6.8 (Snow Leopard) or iOS 4.0 - 4.2.1 (Darwin 9.0.0b5 - 10.8.0)" accuracy="90" line="3912">
+<osclass type="phone" vendor="Apple" osfamily="iOS" osgen="4.X" accuracy="90"><cpe>cpe:/o:apple:iphone_os:4</cpe></osclass>
+<osclass type="media device" vendor="Apple" osfamily="iOS" osgen="4.X" accuracy="90"><cpe>cpe:/o:apple:iphone_os:4</cpe></osclass>
+<osclass type="general purpose" vendor="Apple" osfamily="Mac OS X" osgen="10.6.X" accuracy="90"><cpe>cpe:/o:apple:mac_os_x:10.6</cpe></osclass>
+</osmatch>
+<osmatch name="Apple iOS 5.0.1" accuracy="90" line="3954">
+<osclass type="media device" vendor="Apple" osfamily="iOS" osgen="5.X" accuracy="90"><cpe>cpe:/o:apple:iphone_os:5.0.1</cpe></osclass>
+<osclass type="phone" vendor="Apple" osfamily="iOS" osgen="5.X" accuracy="90"><cpe>cpe:/o:apple:iphone_os:5.0.1</cpe></osclass>
+</osmatch>
+<osmatch name="Apple iPad tablet computer (iPhone OS 3.2)" accuracy="90" line="4805">
+<osclass type="general purpose" vendor="Apple" osfamily="iPhone OS" osgen="3.X" accuracy="90"><cpe>cpe:/o:apple:iphone_os:3.2</cpe></osclass>
+</osmatch>
+</os>
+<uptime seconds="308" lastboot="Sat Mar 19 17:03:59 2022"/>
+<distance value="1"/>
+<tcpsequence index="260" difficulty="Good luck!" values="84E96936,73CF3F22,14B59DFB,651883EE,2184B7DD,ECB74D1"/>
+<ipidsequence class="All zeros" values="0,0,0,0,0,0"/>
+<tcptssequence class="other" values="14082D8A,2ADC7768,ABEC570C,FE4DDA52,7B48A49,2038C6BE"/>
+<hostscript><script id="smb-enum-domains" output="&#xa;  547CD6A40F36&#xa;    Groups: n/a&#xa;    Users: n/a&#xa;    Creation time: unknown&#xa;    Passwords: min length: 5; min age: n/a days; max age: n/a days; history: n/a passwords&#xa;    Account lockout disabled&#xa;  Builtin&#xa;    Groups: n/a&#xa;    Users: n/a&#xa;    Creation time: unknown&#xa;    Passwords: min length: 5; min age: n/a days; max age: n/a days; history: n/a passwords&#xa;    Account lockout disabled&#xa;"/><script id="smb-enum-shares" output="&#xa;  account_used: guest&#xa;  \\10.10.10.10\IPC$: &#xa;    Type: STYPE_IPC_HIDDEN&#xa;    Comment: IPC Service (Samba Server Version 4.6.3)&#xa;    Users: 4&#xa;    Max Users: &lt;unlimited&gt;&#xa;    Path: C:\tmp&#xa;    Anonymous access: READ/WRITE&#xa;    Current user access: READ/WRITE&#xa;  \\10.10.10.10\myshare: &#xa;    Type: STYPE_DISKTREE&#xa;    Comment: &#xa;    Users: 0&#xa;    Max Users: &lt;unlimited&gt;&#xa;    Path: C:\home\share&#xa;    Anonymous access: READ/WRITE&#xa;    Current user access: READ/WRITE"><elem key="account_used">guest</elem>
+<table key="\\10.10.10.10\IPC$">
+<elem key="Type">STYPE_IPC_HIDDEN</elem>
+<elem key="Comment">IPC Service (Samba Server Version 4.6.3)</elem>
+<elem key="Users">4</elem>
+<elem key="Max Users">&lt;unlimited&gt;</elem>
+<elem key="Path">C:\tmp</elem>
+<elem key="Anonymous access">READ/WRITE</elem>
+<elem key="Current user access">READ/WRITE</elem>
+</table>
+<table key="\\10.10.10.10\myshare">
+<elem key="Type">STYPE_DISKTREE</elem>
+<elem key="Comment"></elem>
+<elem key="Users">0</elem>
+<elem key="Max Users">&lt;unlimited&gt;</elem>
+<elem key="Path">C:\home\share</elem>
+<elem key="Anonymous access">READ/WRITE</elem>
+<elem key="Current user access">READ/WRITE</elem>
+</table>
+</script><script id="smb2-security-mode" output="&#xa;  3.1.1: &#xa;    Message signing enabled but not required"><table key="3.1.1">
+<elem>Message signing enabled but not required</elem>
+</table>
+</script><script id="smb-security-mode" output="&#xa;  account_used: guest&#xa;  authentication_level: user&#xa;  challenge_response: supported&#xa;  message_signing: disabled (dangerous, but default)"><elem key="account_used">guest</elem>
+<elem key="authentication_level">user</elem>
+<elem key="challenge_response">supported</elem>
+<elem key="message_signing">disabled</elem>
+</script><script id="smb-ls" output="Volume \\10.10.10.10\myshare&#xa;SIZE   TIME                 FILENAME&#xa;&lt;DIR&gt;  2022-03-19T16:09:12  .&#xa;&lt;DIR&gt;  2017-06-12T16:40:35  ..&#xa;&#xa;"><table key="volumes">
+<table>
+<table key="files">
+<table>
+<elem key="filename">.</elem>
+<elem key="size">&lt;DIR&gt;</elem>
+<elem key="time">2022-03-19T16:09:12</elem>
+</table>
+<table>
+<elem key="filename">..</elem>
+<elem key="size">&lt;DIR&gt;</elem>
+<elem key="time">2017-06-12T16:40:35</elem>
+</table>
+</table>
+<elem key="volume">\\10.10.10.10\myshare</elem>
+</table>
+</table>
+<table key="total">
+<elem key="files">2</elem>
+<elem key="bytes">0</elem>
+</table>
+</script><script id="smb-vuln-ms10-061" output="false">false</script><script id="smb-protocols" output="&#xa;  dialects: &#xa;    NT LM 0.12 (SMBv1) [dangerous, but default]&#xa;    2.0.2&#xa;    2.1&#xa;    3.0&#xa;    3.0.2&#xa;    3.1.1"><table key="dialects">
+<elem>NT LM 0.12 (SMBv1) [dangerous, but default]</elem>
+<elem>2.0.2</elem>
+<elem>2.1</elem>
+<elem>3.0</elem>
+<elem>3.0.2</elem>
+<elem>3.1.1</elem>
+</table>
+</script><script id="smb-enum-sessions" output="&#xa;  &lt;nobody&gt;&#xa;"/></hostscript><trace>
+<hop ttl="1" ipaddr="10.10.10.10" rtt="128.68"/>
+</trace>
+<times srtt="128677" rttvar="203840" to="944037"/>
+</host>
+<runstats><finished time="1647706147" timestr="Sat Mar 19 17:09:07 2022" summary="Nmap done at Sat Mar 19 17:09:07 2022; 1 IP address (1 host up) scanned in 321.38 seconds" elapsed="321.38" exit="success"/><hosts up="1" down="0" total="1"/>
+</runstats>
+</nmaprun>

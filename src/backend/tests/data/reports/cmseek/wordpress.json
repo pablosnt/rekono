@@ -1,0 +1,14 @@
+{
+    "cms_id": "wp",
+    "cms_name": "WordPress",
+    "cms_url": "https://wordpress.org",
+    "detection_param": "generator",
+    "last_scanned": "2022-02-18 17:00:02.449994",
+    "url": "https://10.10.10.10/",
+    "wp_license": "https://10.10.10.10//license.txt",
+    "wp_plugins": "orbisius-simple-notice Version 1.0,qs_site_app Version 1642244787,monarch Version 1.4.14,",
+    "wp_readme_file": "https://10.10.10.10//readme.html",
+    "wp_themes": "primer Version 1590756562,qs-on-primer Version 1617278312,",
+    "wp_users": "wpdemohelper1,superadmin,wpdemo,",
+    "wp_version": "5.8.3"
+}

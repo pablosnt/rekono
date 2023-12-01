@@ -13,7 +13,7 @@ class Dirsearch(BaseParser):
                 for endpoint in item:
                     self.create_finding(
                         Path,
-                        path=endpoint.get("path", ""),
+                        path=endpoint.get("path", "").strip(),
                         status=endpoint.get("status", 0),
                         type=PathType.ENDPOINT,
                     )

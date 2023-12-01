@@ -1,7 +1,7 @@
 from targets.enums import TargetType
 from targets.models import Target
 from tests.cases import ApiTestCase
-from tests.framework import RekonoTest
+from tests.framework import ApiTest
 
 target1 = {"project": 1, "target": "10.10.10.10"}
 target2 = {"project": 1, "target": "scanme.nmap.org"}
@@ -11,7 +11,7 @@ target5 = {"project": 1, "target": "8.8.8.8"}
 invalid_target = {"project": 1, "target": "domain-not-found"}
 
 
-class TargetTest(RekonoTest):
+class TargetTest(ApiTest):
     endpoint = "/api/targets/"
     expected_str = target1.get("target")
     cases = [

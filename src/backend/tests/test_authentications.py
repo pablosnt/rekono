@@ -4,7 +4,7 @@ from authentications.enums import AuthenticationType
 from authentications.models import Authentication
 from target_ports.models import TargetPort
 from tests.cases import ApiTestCase
-from tests.framework import RekonoTest
+from tests.framework import ApiTest
 
 authentication = {
     "name": "admin",
@@ -32,7 +32,7 @@ invalid_authentication3 = {
 }
 
 
-class AuthenticationTest(RekonoTest):
+class AuthenticationTest(ApiTest):
     endpoint = "/api/authentications/"
     expected_str = "10.10.10.10 - 80 - admin"
     cases = [

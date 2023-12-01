@@ -2,7 +2,7 @@ from typing import Any
 
 from settings.models import Settings
 from tests.cases import ApiTestCase
-from tests.framework import RekonoTest
+from tests.framework import ApiTest
 
 settings = {"max_uploaded_file_mb": 512}
 new_settings = {"max_uploaded_file_mb": 1024}
@@ -10,7 +10,7 @@ invalid_settings_1 = {"max_uploaded_file_mb": 1}
 invalid_settings_2 = {"max_uploaded_file_mb": 4096}
 
 
-class SettingsTest(RekonoTest):
+class SettingsTest(ApiTest):
     endpoint = "/api/settings/"
     expected_str = "Settings"
     cases = [
