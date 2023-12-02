@@ -1,12 +1,13 @@
 from django.db import models
 from executions.enums import Status
+from framework.models import BaseModel
 from tasks.models import Task
 from tools.models import Configuration
 
 # Create your models here.
 
 
-class Execution(models.Model):
+class Execution(BaseModel):
     """Execution model."""
 
     task = models.ForeignKey(

@@ -43,6 +43,8 @@ class ApiTestCase(RekonoTestCase):
             if isinstance(value, dict):
                 self._check_response_content(value, response.get(key, {}))
             else:
+                if isinstance(value, list):
+                    self.tc.assertEqual(len(value), len(response.get(key, [])))
                 try:
                     self.tc.assertEqual(value, response.get(key))
                 except Exception as ex:

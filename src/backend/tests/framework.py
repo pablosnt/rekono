@@ -3,7 +3,10 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 from django.test import TestCase
+from executions.enums import Status
 from executions.models import Execution
+from platforms.telegram_app.bot.mixins import process
+from processes.models import Process, Step
 from projects.models import Project
 from rest_framework.test import APIClient
 from security.authorization.roles import Role
@@ -12,7 +15,7 @@ from targets.models import Target
 from tasks.models import Task
 from tests.cases import RekonoTestCase
 from tools.enums import Intensity
-from tools.models import Tool
+from tools.models import Configuration, Tool
 from users.models import User
 
 
@@ -61,6 +64,37 @@ class RekonoTest(TestCase):
         self._setup_project()
         self.target, _ = Target.objects.get_or_create(
             project=self.project, target="10.10.10.10", type=TargetType.PRIVATE_IP
+        )
+
+    def _setup_tasks_and_executions(self) -> None:
+        if not hasattr(self, "target"):
+            self._setup_target()
+        self.running_task = Task.objects.create(
+            target=self.target,
+            process=Process.objects.get(pk=1),
+            executor=self.admin1,
+        )
+        process_step = Step.objects.filter(process__id=1).first()
+        self.execution1 = Execution.objects.create(
+            task=self.running_task,
+            configuration=process_step.configuration,
+            status=Status.COMPLETED,
+        )
+        self.execution2 = Execution.objects.create(
+            task=self.running_task,
+            configuration=process_step.configuration,
+            status=Status.RUNNING,
+        )
+        configuration = Configuration.objects.get(pk=1)
+        self.completed_task = Task.objects.create(
+            target=self.target,
+            configuration=configuration,
+            executor=self.auditor1,
+        )
+        self.execution3 = Execution.objects.create(
+            task=self.completed_task,
+            configuration=configuration,
+            status=Status.COMPLETED,
         )
 
     def _metadata(self) -> Dict[str, Any]:
@@ -116,7 +150,6 @@ class ToolTest(RekonoTest):
     def setUp(self) -> None:
         if self.tool_name:
             super().setUp()
-            self._setup_project()
             self._setup_target()
             self.tool = Tool.objects.get(name=self.tool_name)
             self.configuration = self.tool.configurations.get(default=True)

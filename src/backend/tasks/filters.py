@@ -1,11 +1,17 @@
 from django_filters.filters import ChoiceFilter, ModelChoiceFilter
 from django_filters.rest_framework import FilterSet
+from projects.models import Project
 from tasks.models import Task
+from tools.models import Tool
 
 
 class TaskFilter(FilterSet):
-    project = ModelChoiceFilter(field_name="target__project")
-    tool = ModelChoiceFilter(field_name="configuration__tool")
+    project = ModelChoiceFilter(
+        queryset=Project.objects.all(), field_name="target__project"
+    )
+    tool = ModelChoiceFilter(
+        queryset=Tool.objects.all(), field_name="configuration__tool"
+    )
     stage = ChoiceFilter(field_name="configuration__stage")
 
     class Meta:

@@ -1,7 +1,6 @@
 from typing import Any, Dict
 
 from django.core.exceptions import ValidationError
-from executions.serializers import ExecutionSerializer
 from processes.models import Process
 from processes.serializers import SimpleProcessSerializer
 from rest_framework.serializers import ModelSerializer, PrimaryKeyRelatedField
@@ -43,7 +42,6 @@ class TaskSerializer(ModelSerializer):
     configuration = ConfigurationSerializer(many=False, read_only=True)
     intensity = IntegerChoicesField(model=IntensityEnum, required=False)
     executor = SimpleUserSerializer(many=False, read_only=True)
-    executions = ExecutionSerializer(many=False, read_only=True)
 
     class Meta:
         model = Task

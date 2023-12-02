@@ -1,4 +1,5 @@
 from django.db import models
+from framework.models import BaseModel
 from processes.models import Process
 from rekono.settings import AUTH_USER_MODEL
 from security.input_validator import FutureDatetimeValidator, TimeAmountValidator
@@ -11,7 +12,7 @@ from wordlists.models import Wordlist
 # Create your models here.
 
 
-class Task(models.Model):
+class Task(BaseModel):
     """Task model."""
 
     # Job Id in the tasks queue

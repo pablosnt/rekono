@@ -1,16 +1,29 @@
 from django_filters.filters import ChoiceFilter, ModelChoiceFilter
 from django_filters.rest_framework import FilterSet
 from executions.models import Execution
+from processes.models import Process
+from projects.models import Project
+from targets.models import Target
+from tools.models import Tool
+from users.models import User
 
 
 class ExecutionFilter(FilterSet):
-    target = ModelChoiceFilter(field_name="task__target")
-    project = ModelChoiceFilter(field_name="task__target__project")
-    process = ModelChoiceFilter(field_name="task__process")
-    tool = ModelChoiceFilter(field_name="configuration__tool")
+    target = ModelChoiceFilter(queryset=Target.objects.all(), field_name="task__target")
+    project = ModelChoiceFilter(
+        queryset=Project.objects.all(), field_name="task__target__project"
+    )
+    process = ModelChoiceFilter(
+        queryset=Process.objects.all(), field_name="task__process"
+    )
+    tool = ModelChoiceFilter(
+        queryset=Tool.objects.all(), field_name="configuration__tool"
+    )
     stage = ChoiceFilter(field_name="configuration__stage")
     intensity = ChoiceFilter(field_name="task__intensity")
-    executor = ModelChoiceFilter(field_name="task__executor")
+    executor = ModelChoiceFilter(
+        queryset=User.objects.all(), field_name="task__executor"
+    )
 
     class Meta:
         model = Execution

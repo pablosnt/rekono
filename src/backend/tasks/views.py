@@ -7,6 +7,7 @@ from drf_spectacular.utils import extend_schema
 from executions.enums import Status
 from executions.queues import ExecutionsQueue
 from framework.views import BaseViewSet
+from rekono.settings import CONFIG
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.request import Request
@@ -73,10 +74,11 @@ class TaskViewSet(BaseViewSet):
                 logger.info(f"[Task] Task {task.id} has been cancelled")
             connection = django_rq.get_connection("executions-queue")
             for execution in running_executions:
-                if execution.status == Status.RUNNING:
-                    send_stop_job_command(connection, execution.rq_job_id)
-                else:
-                    self.executions_queue.cancel_job(execution.rq_job_id)
+                if not CONFIG.testing:
+                    if execution.status == Status.RUNNING:
+                        send_stop_job_command(connection, execution.rq_job_id)
+                    else:
+                        self.executions_queue.cancel_job(execution.rq_job_id)
                 logger.info(f"[Execution] Execution {execution.id} has been cancelled")
                 execution.status = Status.CANCELLED
                 execution.end = timezone.now()
@@ -104,7 +106,9 @@ class TaskViewSet(BaseViewSet):
             Response: HTTP response
         """
         task = self.get_object()
-        if task.is_running():
+        if task.executions.filter(
+            status__in=[Status.REQUESTED, Status.RUNNING]
+        ).exists():
             return Response(
                 {"task": "Task is still running"}, status=status.HTTP_400_BAD_REQUEST
             )
