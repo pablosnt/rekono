@@ -137,7 +137,6 @@ dmypy.json
 ./logs/
 /static/
 /src/backend/tests/home/
-config.yaml
 
 # Vue.JS
 node_modules/
@@ -163,3 +162,4 @@ rekono-kbx
 # Temporal ignore
 src/backend-1.x/
 migrations/
+config.yaml
