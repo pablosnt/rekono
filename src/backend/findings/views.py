@@ -55,6 +55,11 @@ class OSINTViewSet(FindingViewSet):
     filterset_class = OSINTFilter
     search_fields = ["data"]
     ordering_fields = ["id", "data", "data_type", "source"]
+    # "post" is needed to allow POST requests to create targets
+    http_method_names = ["get", "put", "post"]
+
+    def create(self, request: Request, *args, **kwargs):
+        return self._method_not_allowed("POST")
 
     @extend_schema(request=None, responses={201: TargetSerializer})
     @action(detail=True, methods=["POST"], url_path="target", url_name="target")
@@ -82,9 +87,8 @@ class OSINTViewSet(FindingViewSet):
                 TargetSerializer(target).data, status=status.HTTP_201_CREATED
             )
         return Response(
-            "Target creation is not available for this OSINT data type",
+            {"data_type": "Target creation is not available for this OSINT data type"},
             status=status.HTTP_400_BAD_REQUEST,
-            code="data_type",
         )
 
 

@@ -60,7 +60,7 @@ ROLES = {
     },
     "osint": {
         "view": [Role.ADMIN, Role.AUDITOR, Role.READER],
-        "add": [],
+        "add": [Role.ADMIN, Role.AUDITOR],
         "change": [Role.ADMIN, Role.AUDITOR],
         "delete": [],
     },

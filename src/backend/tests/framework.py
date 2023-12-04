@@ -5,7 +5,6 @@ from typing import Any, Dict, List
 from django.test import TestCase
 from executions.enums import Status
 from executions.models import Execution
-from platforms.telegram_app.bot.mixins import process
 from processes.models import Process, Step
 from projects.models import Project
 from rest_framework.test import APIClient

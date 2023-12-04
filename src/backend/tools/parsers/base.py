@@ -1,5 +1,4 @@
 import json
-import os
 from typing import Any, Dict, List
 
 import defusedxml.ElementTree as parser
@@ -44,17 +43,20 @@ class BaseParser:
                 )
             ):
                 fields[finding_type_used.__name__.lower()] = finding_used
-        unique_id = {"executions__task__target": self.executor.execution.task.target}
-        for field in finding_type.get_unique_fields():
-            if field in fields:
-                unique_id[field] = fields[field]
-        finding, _ = finding_type.objects.update_or_create(
-            **unique_id,
-            defaults={
-                **fields,
-                "last_seen": timezone.now(),
+        fields["last_seen"] = timezone.now()
+        unique_finding = finding_type.objects.filter(
+            **{
+                **{f: fields[f] for f in finding_type.unique_fields},
+                "executions__task__target": self.executor.execution.task.target,
             }
         )
+        if unique_finding.exists():
+            finding = unique_finding.first()
+            for field, value in fields.items():
+                setattr(finding, field, value)
+            finding.save(update_fields=fields.keys())
+        else:
+            finding = finding_type.objects.create(**fields)
         finding.executions.add(self.executor.execution)
         self.findings.append(finding)
         return finding

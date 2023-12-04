@@ -10,11 +10,7 @@ from findings.models import (
     Technology,
     Vulnerability,
 )
-from framework.filters import (
-    MultipleCharFilter,
-    MultipleFieldFilterSet,
-    MultipleNumberFilter,
-)
+from framework.filters import MultipleCharFilter, MultipleNumberFilter
 
 
 class OSINTFilter(FindingFilter):
@@ -53,7 +49,7 @@ class PortFilter(FindingFilter):
 
 
 class PathFilter(FindingFilter):
-    host = ModelChoiceFilter(field_name="port__host")
+    host = ModelChoiceFilter(queryset=Host.objects.all(), field_name="port__host")
 
     class Meta:
         model = Path
@@ -67,7 +63,7 @@ class PathFilter(FindingFilter):
 
 
 class TechnologyFilter(FindingFilter):
-    host = ModelChoiceFilter(field_name="port__host")
+    host = ModelChoiceFilter(queryset=Host.objects.all(), field_name="port__host")
 
     class Meta:
         model = Technology
@@ -82,8 +78,10 @@ class TechnologyFilter(FindingFilter):
 
 
 class CredentialFilter(FindingFilter):
-    port = ModelChoiceFilter(field_name="technology__port")
-    host = ModelChoiceFilter(field_name="technology__port__host")
+    port = ModelChoiceFilter(queryset=Port.objects.all(), field_name="technology__port")
+    host = ModelChoiceFilter(
+        queryset=Host.objects.all(), field_name="technology__port__host"
+    )
 
     class Meta:
         model = Credential

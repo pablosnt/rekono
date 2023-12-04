@@ -52,4 +52,5 @@ class PathType(models.TextChoices):
 class TriageStatus(models.TextChoices):
     FALSE_POSITIVE = "False Positive"
     TRUE_POSITIVE = "True Positive"
+    WONT_FIX = "Won't Fix"
     UNTRIAGED = "Untriaged"

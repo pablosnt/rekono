@@ -25,13 +25,7 @@ class OSINT(Finding):
     source = models.TextField(max_length=50, blank=True, null=True)
     reference = models.TextField(max_length=250, blank=True, null=True)
 
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=["data", "data_type"],
-                name="unique_osint",
-            )
-        ]
+    unique_fields = ["data", "data_type"]
 
     def parse(
         self, target: Target = None, accumulated: Dict[str, Any] = {}
@@ -66,9 +60,7 @@ class Host(Finding):
         max_length=10, choices=HostOS.choices, default=HostOS.OTHER
     )
 
-    class Meta:
-        constraints = [models.UniqueConstraint(fields=["address"], name="unique_host")]
-
+    unique_fields = ["address"]
     filters = [Finding.Filter(TargetType, "address", lambda a: Target.get_type(a))]
 
     def parse(
@@ -109,18 +101,11 @@ class Port(Finding):
     )
     service = models.TextField(max_length=50, blank=True, null=True)
 
+    unique_fields = ["host", "port", "protocol"]
     filters = [
         Finding.Filter(int, "port"),
         Finding.Filter(str, "service", contains=True, processor=lambda s: s.lower()),
     ]
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=["host", "port", "protocol"],
-                name="unique_port",
-            )
-        ]
 
     def parse(
         self, target: Target = None, accumulated: Dict[str, Any] = {}
@@ -148,7 +133,7 @@ class Port(Finding):
         return output
 
     def defect_dojo(self) -> Dict[str, Any]:
-        description = f"Port: {self.port}\nStatus: {self.status}\nProtocol: {self.protocol}\nService {self.service}"
+        description = f"Port: {self.port}\nStatus: {self.status}\nProtocol: {self.protocol}\nService: {self.service}"
         return {
             "title": "Port discovered",
             "description": f"Host: {self.host.address}\n{description}"
@@ -177,16 +162,12 @@ class Path(Finding):
     # Path type depending on the protocol where it's found
     type = models.TextField(choices=PathType.choices, default=PathType.ENDPOINT)
 
+    unique_fields = ["port", "path"]
     filters = [
         Finding.Filter(PathType, "type"),
         Finding.Filter(int, "status"),
         Finding.Filter(str, "path", contains=True, processor=lambda p: p.lower()),
     ]
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(fields=["port", "path"], name="unique_path")
-        ]
 
     def _clean_path_value(self, value: str) -> str:
         if value[0] != "/":
@@ -216,7 +197,7 @@ class Path(Finding):
     def defect_dojo(self) -> Dict[str, Any]:
         return {
             "protocol": self.port.service if self.port else None,
-            "host": self.port.host.address if self.port else None,
+            "host": self.port.host.address if self.port and self.port.host else None,
             "port": self.port.port if self.port else None,
             "path": self.path,
         }
@@ -247,17 +228,10 @@ class Technology(Finding):
     )
     reference = models.TextField(max_length=250, blank=True, null=True)
 
+    unique_fields = ["port", "name", "version"]
     filters = [
         Finding.Filter(str, "name", contains=True, processor=lambda n: n.lower())
     ]
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=["port", "name", "version"],
-                name="unique_technology",
-            )
-        ]
 
     def parse(
         self, target: Target = None, accumulated: Dict[str, Any] = {}
@@ -314,18 +288,7 @@ class Credential(Finding):
     secret = models.TextField(max_length=300, blank=True, null=True)
     context = models.TextField(max_length=300, blank=True, null=True)
 
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=[
-                    "technology",
-                    "email",
-                    "username",
-                    "secret",
-                ],
-                name="unique_credential",
-            )
-        ]
+    unique_fields = ["technology", "email", "username", "secret"]
 
     def parse(
         self, target: Target = None, accumulated: Dict[str, Any] = {}
@@ -382,24 +345,12 @@ class Vulnerability(Finding):
     osvdb = models.TextField(max_length=20, blank=True, null=True)
     reference = models.TextField(max_length=250, blank=True, null=True)
 
+    unique_fields = ["technology", "port", "name", "cve"]
     filters = [
         Finding.Filter(Severity, "severity"),
         Finding.Filter(str, "cve", contains=True, processor=lambda c: c.lower()),
         Finding.Filter(str, "cwe", contains=True, processor=lambda c: c.lower()),
     ]
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=[
-                    "technology",
-                    "port",
-                    "name",
-                    "cve",
-                ],
-                name="unique_vulnerability",
-            ),
-        ]
 
     def parse(
         self, target: Target = None, accumulated: Dict[str, Any] = {}
@@ -455,18 +406,7 @@ class Exploit(Finding):
     edb_id = models.IntegerField(blank=True, null=True)  # Id in Exploit-DB
     reference = models.TextField(max_length=250, blank=True, null=True)
 
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=[
-                    "vulnerability",
-                    "technology",
-                    "edb_id",
-                    "reference",
-                ],
-                name="unique_exploit",
-            ),
-        ]
+    unique_fields = ["vulnerability", "technology", "edb_id", "reference"]
 
     def parse(
         self, target: Target = None, accumulated: Dict[str, Any] = {}
@@ -485,7 +425,7 @@ class Exploit(Finding):
             "severity": self.vulnerability.severity
             if self.vulnerability
             else Severity.MEDIUM,
-            "reference": self.reference,
+            "references": self.reference,
             "date": self.last_seen.strftime(
                 DefectDojoSettings.objects.first().date_format
             ),
