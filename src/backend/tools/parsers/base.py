@@ -46,7 +46,7 @@ class BaseParser:
         fields["last_seen"] = timezone.now()
         unique_finding = finding_type.objects.filter(
             **{
-                **{f: fields[f] for f in finding_type.unique_fields},
+                **{f: fields.get(f) for f in finding_type.unique_fields},
                 "executions__task__target": self.executor.execution.task.target,
             }
         )
