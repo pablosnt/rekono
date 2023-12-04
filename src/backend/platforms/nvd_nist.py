@@ -53,7 +53,7 @@ class NvdNist(BaseIntegration):
                         break
                 finding.severity = [
                     k
-                    for k, v in self.cvss_mapping
+                    for k, v in self.cvss_mapping.items()
                     if severity >= v[0] and severity < v[1]
                 ][0]
                 finding.reference = self.reference.format(cve=finding.cve)

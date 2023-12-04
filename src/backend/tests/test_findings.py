@@ -1,6 +1,6 @@
 from typing import Any, Dict
 
-from django.db import models, transaction
+from django.db import models
 from executions.models import Execution
 from findings.enums import (
     HostOS,
@@ -23,11 +23,8 @@ from findings.models import (
 )
 from rest_framework.test import APIClient
 from targets.enums import TargetType
-from targets.models import Target
-from tasks.models import Task
 from tests.cases import ApiTestCase
 from tests.framework import ApiTest
-from tools.models import Configuration
 
 findings = [
     (

@@ -21,8 +21,10 @@ class BasePlatform:
 
 
 class BaseIntegration(BasePlatform):
+    url = ""
+
     def __init__(self) -> None:
-        self.session = self._create_session()
+        self.session = self._create_session(self.url)
 
     def _create_session(self, url: str) -> requests.Session:
         session = requests.Session()
