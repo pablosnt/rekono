@@ -12,11 +12,11 @@ class SMTPSettingsSerializer(ModelSerializer):
         allow_null=True,
         source="secret",
     )
-    is_available = SerializerMethodField(method_name="is_available", read_only=True)
+    is_available = SerializerMethodField(read_only=True)
 
     class Meta:
         model = SMTPSettings
-        fields = ("id", "host", "port", "username", "password", "tls")
+        fields = ("id", "host", "port", "username", "password", "tls", "is_available")
 
-    def is_available(self, instance: SMTPSettings) -> bool:
+    def get_is_available(self, instance: SMTPSettings) -> bool:
         return SMTP().is_available()

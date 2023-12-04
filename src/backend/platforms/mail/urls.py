@@ -4,6 +4,6 @@ from rest_framework.routers import SimpleRouter
 # Register your views here.
 
 router = SimpleRouter()
-router.register("smtp/settings", SMTPSettingsViewSet)
+router.register("smtp", SMTPSettingsViewSet)
 
 urlpatterns = router.urls
