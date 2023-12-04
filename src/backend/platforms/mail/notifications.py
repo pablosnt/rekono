@@ -27,6 +27,7 @@ class SMTP(BaseNotification):
                 username=self.settings.username,
                 password=self.settings.secret,
                 use_tls=self.settings.tls,
+                timeout=5,
             )
             if self.settings
             else None
