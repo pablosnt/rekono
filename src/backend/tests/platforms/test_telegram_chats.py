@@ -36,6 +36,7 @@ class TelegramChatTest(ApiTest):
                 otp_expiration=User.objects.get_otp_expiration_time(),
                 chat_id=chat_id,
             )
+            self.assertFalse(chat.is_auditor())
             ApiTestCase(
                 [user.username], "post", 401, {"otp": "invalid token"}
             ).test_case(endpoint=self.endpoint)
@@ -46,6 +47,10 @@ class TelegramChatTest(ApiTest):
                 {"otp": otp},
                 {"id": chat.id, "user": user.id},
             ).test_case(endpoint=self.endpoint)
+            self.assertEqual(
+                user in [self.admin1, self.admin2, self.auditor1, self.auditor2],
+                TelegramChat.objects.get(pk=chat.id).is_auditor(),
+            )
             ApiTestCase(
                 [user.username],
                 "get",
