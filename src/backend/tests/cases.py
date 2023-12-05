@@ -61,7 +61,7 @@ class ApiTestCase(RekonoTestCase):
                 access, _ = self._login(**credentials)
                 api_client = APIClient(HTTP_AUTHORIZATION=f"Bearer {access}")
                 response = getattr(api_client, self.method.lower())(
-                    self.endpoint.format(endpoint=kwargs["endpoint"]),
+                    self.endpoint.format(endpoint=kwargs.get("endpoint", "")),
                     data=self.data or None,
                     format=self.format,
                 )
