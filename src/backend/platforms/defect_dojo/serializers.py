@@ -15,6 +15,7 @@ from rest_framework.serializers import (
     CharField,
     IntegerField,
     ModelSerializer,
+    PrimaryKeyRelatedField,
     Serializer,
     SerializerMethodField,
 )
@@ -47,39 +48,7 @@ class DefectDojoSettingsSerializer(ModelSerializer):
         return DefectDojo().is_available()
 
 
-class DefectDojoSyncSerializer(ModelSerializer):
-    class Meta:
-        model = DefectDojoSync
-        fields = (
-            "id",
-            "project",
-            "product_type_id",
-            "product_id",
-            "engagement_id",
-            "engagement_per_target",
-        )
-
-    def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
-        attrs = super().validate()
-        if not attrs.get("engagement_id") and not attrs.get("engagement_per_target"):
-            raise ValidationError(
-                "Engagement or engagement_per_target is required", code="engagement_id"
-            )
-        return attrs
-
-
-class DefectDojoTargetSyncSerializer(ModelSerializer):
-    class Meta:
-        model = DefectDojoTargetSync
-        fields = (
-            "id",
-            "defect_dojo_sync",
-            "target",
-            "engagement_id",
-        )
-
-
-class BaseDefectDojoSerializer(Serializer):
+class BaseDefectDojoSerializer:
     client = None
 
     def _get_client(self) -> DefectDojo:
@@ -96,18 +65,57 @@ class BaseDefectDojoSerializer(Serializer):
         return super().validate(attrs)
 
 
-class DefectDojoProductTypeSerializer(BaseDefectDojoSerializer):
+class DefectDojoSyncSerializer(ModelSerializer, BaseDefectDojoSerializer):
+    class Meta:
+        model = DefectDojoSync
+        fields = (
+            "id",
+            "project",
+            "product_type_id",
+            "product_id",
+            "engagement_id",
+            "engagement_per_target",
+        )
+
+    def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
+        attrs = super().validate(attrs)
+        if not attrs.get("engagement_id") and not attrs.get("engagement_per_target"):
+            raise ValidationError(
+                "Engagement or engagement_per_target is required", code="engagement_id"
+            )
+        for entity in ["product_type", "product", "engagement"]:
+            id = attrs.get(f"{entity}_id")
+            if id:
+                self._get_client().exists(f"{entity}s", id)
+        return attrs
+
+
+class DefectDojoTargetSyncSerializer(ModelSerializer):
+    class Meta:
+        model = DefectDojoTargetSync
+        fields = (
+            "id",
+            "defect_dojo_sync",
+            "target",
+            "engagement_id",
+        )
+
+
+class DefectDojoProductTypeSerializer(Serializer, BaseDefectDojoSerializer):
+    id = IntegerField(read_only=True)
     name = CharField(
         required=True,
         allow_blank=False,
         max_length=100,
         validators=[Validator(Regex.NAME.value, code="name")],
+        write_only=True,
     )
     description = CharField(
         required=True,
         allow_blank=False,
         max_length=500,
         validators=[Validator(Regex.TEXT.value, code="description")],
+        write_only=True,
     )
 
     def create(self, validated_data: Dict[str, Any]) -> Dict[str, Any]:
@@ -116,66 +124,85 @@ class DefectDojoProductTypeSerializer(BaseDefectDojoSerializer):
         )
 
 
-class DefectDojoProductSerializer(BaseDefectDojoSerializer):
+class DefectDojoProductSerializer(Serializer, BaseDefectDojoSerializer):
+    id = IntegerField(read_only=True)
     product_type = IntegerField(
         required=True,
         validators=[MinValueValidator(1), MaxValueValidator(999999999)],
+        write_only=True,
     )
     name = CharField(
         required=True,
         allow_blank=False,
         max_length=100,
         validators=[Validator(Regex.NAME.value, code="name")],
+        write_only=True,
     )
     description = CharField(
         required=True,
         allow_blank=False,
         max_length=500,
         validators=[Validator(Regex.TEXT.value, code="description")],
+        write_only=True,
     )
-    project_id = IntegerField(
-        required=True, validators=[MinValueValidator(1), MaxValueValidator(999999999)]
+    # Needed to add project tags to Defect-Dojo product
+    project_id = PrimaryKeyRelatedField(
+        required=True,
+        queryset=Project.objects.all(),
+        write_only=True,
     )
 
     def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
-        get_object_or_404(
+        attrs = super().validate(attrs)
+        attrs["project"] = get_object_or_404(
             Project,
-            id=attrs.get("project_id"),
+            id=attrs.get("project_id").id,
             members=self.context.get("request").user.id,
         )
-        return super().validate(attrs)
+        self._get_client().exists("product_types", attrs.get("product_type"))
+        return attrs
 
     def create(self, validated_data: Dict[str, Any]) -> Dict[str, Any]:
         return self._get_client().create_product(
             validated_data["product_type"],
             validated_data["name"],
             validated_data["description"],
-            [self.client.settings.tag] + (validated_data["project"].tags or []),
+            [self._get_client().settings.tag]
+            + list(validated_data["project"].tags.all().values_list("slug", flat=True)),
         )
 
 
-class DefectDojoEngagementSerializer(BaseDefectDojoSerializer):
+class DefectDojoEngagementSerializer(Serializer, BaseDefectDojoSerializer):
+    id = IntegerField(read_only=True)
     product = IntegerField(
         required=True,
         validators=[MinValueValidator(1), MaxValueValidator(999999999)],
+        write_only=True,
     )
     name = CharField(
         required=True,
         allow_blank=False,
         max_length=100,
         validators=[Validator(Regex.NAME.value, code="name")],
+        write_only=True,
     )
     description = CharField(
         required=True,
         allow_blank=False,
         max_length=500,
         validators=[Validator(Regex.TEXT.value, code="description")],
+        write_only=True,
     )
+
+    def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
+        attrs = super().validate(attrs)
+        self._get_client().exists("products", attrs.get("product"))
+        return attrs
 
     def create(self, validated_data: Dict[str, Any]) -> Dict[str, Any]:
         return self._get_client().create_engagement(
             validated_data["product"],
             validated_data["name"],
             validated_data["description"],
-            [self.client.settings.tag] + (validated_data["project"].tags or []),
+            [self._get_client().settings.tag],
         )

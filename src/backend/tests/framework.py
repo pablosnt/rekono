@@ -56,6 +56,7 @@ class RekonoTest(TestCase):
         self.project, _ = Project.objects.get_or_create(
             name="test", description="test", owner=self.admin1
         )
+        self.project.tags.add("test")
         for user in [self.admin1, self.auditor1, self.reader1]:
             self.project.members.add(user)
 

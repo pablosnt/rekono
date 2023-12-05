@@ -59,11 +59,8 @@ class DefectDojo(BaseIntegration):
         except:
             return False
 
-    def get_product_type(self, name: str) -> Dict[str, Any]:
-        search = self._request(
-            self.session.get, "/product_types/", params={"name": name}
-        )
-        return search["results"][0] if search["results"] else None
+    def exists(self, entity_name: str, id: int) -> None:
+        self._request(self.session.get, f"/{entity_name}/{id}/")
 
     def create_product_type(self, name: str, description: str) -> Dict[str, Any]:
         return self._request(
@@ -71,9 +68,6 @@ class DefectDojo(BaseIntegration):
             "/product_types/",
             data={"name": name, "description": description},
         )
-
-    def get_product(self, id: int) -> Dict[str, Any]:
-        return self._request(self.session.get, f"/products/{id}/")
 
     def create_product(
         self, product_type: int, name: str, description: str, tags: List[str]
@@ -88,9 +82,6 @@ class DefectDojo(BaseIntegration):
                 "prod_type": product_type,
             },
         )
-
-    def get_engagement(self, id: int) -> Dict[str, Any]:
-        return self._request(self.session.get, f"/engagements/{id}/")
 
     def create_engagement(
         self, product: int, name: str, description: str, tags: List[str]
@@ -111,10 +102,6 @@ class DefectDojo(BaseIntegration):
                 "target_end": end.strftime(self.settings.date_format),
             },
         )
-
-    def _get_test_type(self, name: str) -> Dict[str, Any]:
-        search = self._request(self.session.get, "/test_types/", params={"name": name})
-        return search["results"][0] if search["results"] else None
 
     def _create_test_type(self, name: str, tags: List[str]) -> Dict[str, Any]:
         return self._request(

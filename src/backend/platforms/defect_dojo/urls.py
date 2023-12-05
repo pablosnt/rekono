@@ -13,15 +13,15 @@ router = SimpleRouter()
 router.register("defect-dojo/settings", DefectDojoSettingsViewSet)
 router.register("defect-dojo/sync", DefectDojoSyncViewSet)
 router.register(
-    "defect-dojo/product-type",
+    "defect-dojo/product-types",
     DefectDojoProductTypeViewSet,
     basename="defect-dojo_product-type",
 )
 router.register(
-    "defect-dojo/product", DefectDojoProductViewSet, basename="defect-dojo_product"
+    "defect-dojo/products", DefectDojoProductViewSet, basename="defect-dojo_product"
 )
 router.register(
-    "defect-dojo/engagement",
+    "defect-dojo/engagements",
     DefectDojoEngagementViewSet,
     basename="defect-dojo_engagement",
 )

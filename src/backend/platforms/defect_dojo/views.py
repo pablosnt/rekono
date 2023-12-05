@@ -7,6 +7,8 @@ from platforms.defect_dojo.serializers import (
     DefectDojoSettingsSerializer,
     DefectDojoSyncSerializer,
 )
+from rest_framework.permissions import IsAuthenticated
+from security.authorization.permissions import IsAuditor
 
 # Create your views here.
 
@@ -32,13 +34,16 @@ class DefectDojoSyncViewSet(BaseViewSet):
 class DefectDojoProductTypeViewSet(BaseViewSet):
     serializer_class = DefectDojoProductTypeSerializer
     http_method_names = ["post"]
+    permission_classes = [IsAuthenticated, IsAuditor]
 
 
 class DefectDojoProductViewSet(BaseViewSet):
     serializer_class = DefectDojoProductSerializer
     http_method_names = ["post"]
+    permission_classes = [IsAuthenticated, IsAuditor]
 
 
 class DefectDojoEngagementViewSet(BaseViewSet):
     serializer_class = DefectDojoEngagementSerializer
     http_method_names = ["post"]
+    permission_classes = [IsAuthenticated, IsAuditor]
