@@ -7,8 +7,6 @@
             "_api_token": null,
             "tls_validation": true,
             "tag": "rekono",
-            "product_type_id": null,
-            "product_type": "Rekono Project",
             "test_type_id": null,
             "test_type": "Rekono Findings Import",
             "test": "Rekono Execution",

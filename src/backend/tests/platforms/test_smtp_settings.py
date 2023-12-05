@@ -4,14 +4,14 @@ from platforms.mail.models import SMTPSettings
 from tests.cases import ApiTestCase
 from tests.framework import ApiTest
 
-config = {
+settings = {
     "host": "smtp.rekono.com",
     "port": 587,
     "username": "rekono",
     "password": "rekono",
     "tls": True,
 }
-invalid_config = {
+invalid_settings = {
     "host": "smtp;rekono.com",
     "port": 999999,
     "username": "reko;no",
@@ -22,7 +22,7 @@ invalid_config = {
 
 class SmtpSettingsTest(ApiTest):
     endpoint = "/api/smtp/1/"
-    expected_str = f"{config['host']}:{config['port']}"
+    expected_str = f"{settings['host']}:{settings['port']}"
     cases = [
         ApiTestCase(["auditor1", "auditor2", "reader1", "reader2"], "get", 403),
         ApiTestCase(
@@ -39,17 +39,19 @@ class SmtpSettingsTest(ApiTest):
                 "is_available": False,
             },
         ),
-        ApiTestCase(["auditor1", "auditor2", "reader1", "reader2"], "put", 403, config),
-        ApiTestCase(["admin1", "admin2"], "put", 400, invalid_config),
+        ApiTestCase(
+            ["auditor1", "auditor2", "reader1", "reader2"], "put", 403, settings
+        ),
+        ApiTestCase(["admin1", "admin2"], "put", 400, invalid_settings),
         ApiTestCase(
             ["admin1", "admin2"],
             "put",
             200,
-            config,
+            settings,
             expected={
                 "id": 1,
-                **config,
-                "password": "*" * len(config["password"]),
+                **settings,
+                "password": "*" * len(settings["password"]),
                 "is_available": False,
             },
         ),
@@ -59,8 +61,8 @@ class SmtpSettingsTest(ApiTest):
             200,
             expected={
                 "id": 1,
-                **config,
-                "password": "*" * len(config["password"]),
+                **settings,
+                "password": "*" * len(settings["password"]),
                 "is_available": False,
             },
         ),
@@ -68,9 +70,9 @@ class SmtpSettingsTest(ApiTest):
 
     def _get_object(self) -> Any:
         settings = SMTPSettings.objects.get(pk=1)
-        config["secret"] = config.pop("password")
-        for field, value in config.items():
+        settings["secret"] = settings.pop("password")
+        for field, value in settings.items():
             setattr(settings, field, value)
-        config["_password"] = config.pop("secret")
-        settings.save(update_fields=config.keys())
+        settings["_password"] = settings.pop("secret")
+        settings.save(update_fields=settings.keys())
         return settings

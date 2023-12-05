@@ -26,14 +26,7 @@ class DefectDojoSettings(BaseEncrypted):
     tag = models.TextField(
         max_length=200, validators=[Validator(Regex.NAME.value, code="tag")]
     )
-    product_type_id = models.IntegerField(
-        validators=[MinValueValidator(1), MaxValueValidator(999999999)],
-        blank=True,
-        null=True,
-    )
-    product_type = models.TextField(
-        max_length=200, validators=[Validator(Regex.NAME.value, code="product_type")]
-    )
+    # Stores Test Type ID to avoid duplicated creation
     test_type_id = models.IntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(999999999)],
         blank=True,

@@ -28,7 +28,7 @@ class DefectDojoSettingsSerializer(ModelSerializer):
         allow_null=True,
         source="secret",
     )
-    is_available = SerializerMethodField(method_name="is_available", read_only=True)
+    is_available = SerializerMethodField(read_only=True)
 
     class Meta:
         model = DefectDojoSettings
@@ -38,12 +38,12 @@ class DefectDojoSettingsSerializer(ModelSerializer):
             "api_token",
             "tls_validation",
             "tag",
-            "product_type",
             "test_type",
             "test",
+            "is_available",
         )
 
-    def is_available(self, instance: DefectDojoSettings) -> bool:
+    def get_is_available(self, instance: DefectDojoSettings) -> bool:
         return DefectDojo().is_available()
 
 
@@ -62,7 +62,9 @@ class DefectDojoSyncSerializer(ModelSerializer):
     def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
         attrs = super().validate()
         if not attrs.get("engagement_id") and not attrs.get("engagement_per_target"):
-            raise ValidationError("Engagement is required", code="engagement_id")
+            raise ValidationError(
+                "Engagement or engagement_per_target is required", code="engagement_id"
+            )
         return attrs
 
 
