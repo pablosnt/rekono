@@ -14,14 +14,17 @@ logger = logging.getLogger()
 class BaseTelegram:
     def __init__(self, **kwargs: Any) -> None:
         self.settings = TelegramSettings.objects.first()
-        self.app = self._get_app()
+        self.app = self.initialize()
         self.date_format = "%Y-%m-%d %H:%M:%S"
 
     def initialize(self) -> None:
-        if not self.app or not self.app.bot:
-            self.app = self._get_app()
+        self.app = self._get_app()
         if self.app and self.app.bot:
-            asyncio.run(self.app.bot.initialize())
+            try:
+                asyncio.run(self.app.bot.initialize())
+            except (InvalidToken, Forbidden):
+                self._handle_invalid_token()
+        return self.app
 
     def get_bot_name(self) -> str:
         return self.app.bot.username if self.app and self.app.bot else None
@@ -31,9 +34,7 @@ class BaseTelegram:
             try:
                 return ApplicationBuilder().token(self.settings.secret).build()
             except (InvalidToken, Forbidden):
-                logger.error("[Telegram] Authentication error")
-                self.settings.secret = None
-                self.settings.save(update_fields=["token"])
+                self._handle_invalid_token()
             except Exception:
                 logger.error("[Telegram] Error creating updater")
 
@@ -52,3 +53,9 @@ class BaseTelegram:
 
     def _escape(self, value: str) -> str:
         return escape_markdown(value, version=2)
+
+    def _handle_invalid_token(self) -> None:
+        logger.error("[Telegram] Authentication error")
+        self.settings.secret = None
+        self.settings.save(update_fields=["_token"])
+        self.app = None

@@ -13,7 +13,8 @@ class Telegram(BaseNotification, BaseTelegram):
     enable_field = "telegram_notifications"
 
     def is_available(self) -> bool:
-        return bool(self.app)
+        self.initialize()
+        return bool(self.settings.secret and self.app and self.app.bot)
 
     def _notify_execution(
         self, users: List[User], execution: Execution, findings: List[Finding]

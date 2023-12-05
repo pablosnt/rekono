@@ -21,19 +21,19 @@ class TelegramSettingsSerializer(ModelSerializer):
         required=True,
         source="secret",
     )
-    bot = SerializerMethodField(method_name="get_bot_name", read_only=True)
-    is_available = SerializerMethodField(method_name="is_available", read_only=True)
+    bot = SerializerMethodField(read_only=True)
+    is_available = SerializerMethodField(read_only=True)
 
     class Meta:
         model = TelegramSettings
-        fields = ("id", "bot", "token")
+        fields = ("id", "token", "bot", "is_available")
 
-    def get_bot_name(self, instance: TelegramSettings) -> str:
+    def get_bot(self, instance: TelegramSettings) -> str:
         telegram = Telegram()
         telegram.initialize()
         return telegram.get_bot_name()
 
-    def is_available(self, instance: TelegramSettings) -> bool:
+    def get_is_available(self, instance: TelegramSettings) -> bool:
         return Telegram().is_available()
 
 

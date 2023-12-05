@@ -56,10 +56,10 @@ class TelegramBot(BaseTelegram):
         while not self.settings or not self.settings.secret:
             time.sleep(sleep_time)
             self.settings = TelegramSettings.objects.first()
-        self.app = self._get_app()
+        self.app = self.initialize()
         if not self.app or not self.app.updater or not self.app.bot:
             self.settings.secret = None
-            self.settings.save(update_fields=["secret"])
+            self.settings.save(update_fields=["_token"])
             self._wait_for_token(sleep_time)
 
     def deploy(self) -> None:
