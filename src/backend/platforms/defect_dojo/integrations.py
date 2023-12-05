@@ -35,7 +35,7 @@ class DefectDojo(BaseIntegration):
             method,
             f"{self.settings.server}/api/v2{url}",
             json,
-            {
+            **{
                 **kwargs,
                 "headers": {
                     "User-Agent": "Rekono",
