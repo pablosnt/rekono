@@ -183,7 +183,7 @@ class RekonoTest(TestCase):
             },
             Exploit: {
                 "vulnerability": 1,
-                "title": "Reverse Shell",
+                "title": "ReverseShell",
                 "edb_id": 1,
                 "reference": "https://www.exploit-db.com/exploits/1",
             },

@@ -112,13 +112,13 @@ class Port(Finding):
     ) -> Dict[str, Any]:
         ports = (
             [self.port]
-            if not accumulated or InputKeyword.PORTS.name.lower() not in accumulated
-            else [self.port] + accumulated[InputKeyword.PORTS.name.lower()]
+            if not accumulated
+            else accumulated.get(InputKeyword.PORTS.name.lower(), []) + [self.port]
         )
         output = {
             InputKeyword.PORT.name.lower(): self.port,
             InputKeyword.PORTS.name.lower(): ports,
-            InputKeyword.PORTS_COMMAS.name.lower(): [str(p) for p in ports],
+            InputKeyword.PORTS_COMMAS.name.lower(): ",".join([str(p) for p in ports]),
         }
         if self.host:
             output.update(
@@ -170,10 +170,11 @@ class Path(Finding):
     ]
 
     def _clean_path_value(self, value: str) -> str:
-        if value[0] != "/":
-            value = f"/{value}"
-        if value[-1] != "/":
-            value += "/"
+        if len(value) > 1:
+            if value[0] != "/":
+                value = f"/{value}"
+            if value[-1] != "/":
+                value += "/"
         return value
 
     def parse(
@@ -184,7 +185,7 @@ class Path(Finding):
         include_path_data = True
         if target_port.exists():
             include_path_data = self._clean_path_value(self.path).startswith(
-                self._clean_path_value(target_port.first().path)
+                self._clean_path_value(target_port.first().path or self.path)
             )
         if include_path_data:
             output[InputKeyword.ENDPOINT.name.lower()] = self.path

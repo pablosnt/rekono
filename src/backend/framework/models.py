@@ -112,6 +112,10 @@ class BaseInput(BaseModel):
         schema = "{protocol}://{host}/{endpoint}"
         if port:
             schema = "{protocol}://{host}:{port}/{endpoint}"  # Include port schema if port exists
+            if port == 80:
+                protocols = ["http"]
+            elif port == 443:
+                protocols = ["https"]
         for protocol in protocols:  # For each protocol
             url_to_test = schema.format(
                 protocol=protocol, host=host, port=port, endpoint=endpoint
@@ -120,7 +124,7 @@ class BaseInput(BaseModel):
                 # nosemgrep: python.requests.security.disabled-cert-validation.disabled-cert-validation
                 requests.get(url_to_test, timeout=5, verify=False)
                 return url_to_test
-            except Exception:
+            except:
                 continue
         return None
 

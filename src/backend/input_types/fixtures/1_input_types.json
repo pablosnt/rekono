@@ -25,7 +25,7 @@
         "fields": {
             "name": "Port",
             "model": "findings.port",
-            "fallback_model": "targets.targetport",
+            "fallback_model": "target_ports.targetport",
             "relationships": true
         }
     },
@@ -35,7 +35,7 @@
         "fields": {
             "name": "Path",
             "model": "findings.path",
-            "fallback_model": null,
+            "fallback_model": "target_ports.targetport",
             "relationships": true
         }
     },

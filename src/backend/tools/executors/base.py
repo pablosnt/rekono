@@ -66,46 +66,54 @@ class BaseExecutor:
             if self.execution.configuration.tool.output_format
             else "",
         }
-        for argument in self.execution.configuration.tool.arguments:
-            for argument_input in argument.inputs.order_by("order"):
+        for argument in self.execution.configuration.tool.arguments.all():
+            for argument_input in argument.inputs.all().order_by("order"):
                 input_model = argument_input.type.get_model_class()
                 input_fallback = argument_input.type.get_fallback_model_class()
                 parsed_data: Dict[str, Any] = {}
                 for base_input in (
                     findings
-                    + wordlists
-                    + Authentication.objects.filter(
-                        target_port__target=self.execution.task.target,
-                        target_port__port__in=[
-                            p.port for p in findings if isinstance(p, Port)
-                        ],
-                    ).all()
+                    + list(wordlists)
+                    + list(
+                        Authentication.objects.filter(
+                            target_port__target=self.execution.task.target,
+                            target_port__port__in=[
+                                p.port for p in findings if isinstance(p, Port)
+                            ],
+                        ).all()
+                    )
                     + [self.execution.task.target]
-                    + target_ports
+                    + list(target_ports)
                     + [p.authentication for p in target_ports]
-                    + input_vulnerabilities
-                    + input_technologies
+                    + list(input_vulnerabilities)
+                    + list(input_technologies)
                 ):
-                    if isinstance(base_input, input_fallback) and parsed_data:
+                    is_input_fallback = input_fallback and isinstance(
+                        base_input, input_fallback
+                    )
+                    if is_input_fallback and parsed_data:
                         break
                     if (
-                        isinstance(base_input, input_model)
-                        or isinstance(base_input, input_fallback)
+                        isinstance(base_input, input_model) or is_input_fallback
                     ) and base_input.filter(argument_input):
                         parsed_data = base_input.parse(
                             self.execution.task.target, parsed_data
                         )
+                        self.findings_used_in_execution[
+                            base_input.__class__
+                        ] = base_input
                         if not argument.multiple:
-                            self.findings_used_in_execution[
-                                base_input.__class__
-                            ] = base_input
                             break
                 if parsed_data:
-                    parameters[argument.name] = argument.argument.format(**parsed_data)
-                elif argument.required:
-                    raise RuntimeError(
-                        f"Argument '{argument.name}' is required to execute tool '{argument.tool.name}'"
-                    )
+                    break
+            if parsed_data:
+                parameters[argument.name] = argument.argument.format(**parsed_data)
+            elif not argument.required:
+                parameters[argument.name] = ""
+            else:
+                raise RuntimeError(
+                    f"Argument '{argument.name}' is required to execute tool '{argument.tool.name}'"
+                )
         return [
             a.replace('"', "")
             for a in re.findall(
@@ -153,7 +161,7 @@ class BaseExecutor:
         pass
 
     def _run(self, environment: Dict[str, Any] = os.environ.copy()) -> str:
-        logger.info(f'[Tool] Running: {" ".join(self.arguments)}')
+        logger.info(f"[Tool] Running: {' '.join(self.arguments)}")
         process = subprocess.run(
             self.arguments,
             capture_output=True,

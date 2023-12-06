@@ -73,10 +73,10 @@ class TasksQueue(BaseQueue):
         executions = self._calculate_executions(
             task.configuration.tool,
             [],
-            task.target.target_ports,
-            task.target.input_vulnerabilities,
-            task.target.input_technologies,
-            task.wordlists,
+            task.target.target_ports.all(),
+            task.target.input_vulnerabilities.all(),
+            task.target.input_technologies.all(),
+            task.wordlists.all(),
         )
         for parameters in executions or [{}]:
             execution = Execution.objects.create(
@@ -135,10 +135,10 @@ class TasksQueue(BaseQueue):
             executions = self._calculate_executions_from_task_parameters(
                 step.configuration.tool,
                 [],
-                task.target.target_ports,
-                task.target.input_vulnerabilities,
-                task.target.input_technologies,
-                task.wordlists,
+                task.target.target_ports.all(),
+                task.target.input_vulnerabilities.all(),
+                task.target.input_technologies.all(),
+                task.wordlists.all(),
             )
             for parameters in executions or [{}]:
                 execution = Execution.objects.create(

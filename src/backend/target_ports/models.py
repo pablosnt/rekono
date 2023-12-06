@@ -60,6 +60,7 @@ class TargetPort(BaseInput):
                 InputKeyword.HOST.name.lower(): self.target.target,
                 InputKeyword.PORT.name.lower(): self.port,
                 InputKeyword.PORTS.name.lower(): ports,
+                InputKeyword.ENDPOINT.name.lower(): self.path,
                 InputKeyword.PORTS_COMMAS.name.lower(): ",".join(
                     [str(p) for p in ports]
                 ),

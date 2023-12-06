@@ -2,7 +2,6 @@ from django.db import models
 from findings.enums import (
     HostOS,
     OSINTDataType,
-    PathType,
     PortStatus,
     Protocol,
     Severity,
@@ -92,11 +91,11 @@ findings_data = {
     Exploit: (
         {
             "title": "Exploit 1 found",
-            "description": "Reverse Shell",
+            "description": "ReverseShell",
             "severity": Severity.CRITICAL,
             "references": "https://www.exploit-db.com/exploits/1",
         },
-        "10.10.10.10 - 80 - WordPress - Test - CVE-2023-1111 - Reverse Shell",
+        "10.10.10.10 - 80 - WordPress - Test - CVE-2023-1111 - ReverseShell",
         "/api/exploits/",
     ),
 }
@@ -230,7 +229,7 @@ class FindingTest(ApiTest):
                 Exploit,
                 {"technology": 1},
                 "vulnerability",
-                "10.10.10.10 - 80 - WordPress - Reverse Shell",
+                "10.10.10.10 - 80 - WordPress - ReverseShell",
             ),
         ]:
             data = {**self.raw_findings[finding_model], **new_data}
