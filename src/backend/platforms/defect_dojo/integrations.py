@@ -183,6 +183,7 @@ class DefectDojo(BaseIntegration):
                         product_id,
                         execution.task.target.target,
                         f"Rekono assessment for {execution.task.target.target}",
+                        [self.settings.tag],
                     )
                     new_sync = DefectDojoTargetSync.objects.create(
                         defect_dojo_sync=sync,
@@ -194,6 +195,7 @@ class DefectDojo(BaseIntegration):
                 return
         if (
             execution.configuration.tool.defect_dojo_scan_type
+            and execution.output_file is not None
             and PathFile(execution.output_file).is_file()
         ):
             new_import = self._import_scan(

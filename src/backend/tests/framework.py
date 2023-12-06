@@ -1,5 +1,5 @@
 import json
-from pathlib import Path as PathLib
+from pathlib import Path as PathFile
 from typing import Any, Dict, List
 
 from django.test import TestCase
@@ -38,7 +38,7 @@ from users.models import User
 
 
 class RekonoTest(TestCase):
-    data_dir = PathLib(__file__).resolve().parent / "data"
+    data_dir = PathFile(__file__).resolve().parent / "data"
     cases: List[RekonoTestCase] = []
 
     def _create_user(self, username: str, role: Role) -> User:
@@ -117,7 +117,7 @@ class RekonoTest(TestCase):
         )
 
     def _create_finding(
-        self, model: Any, data: Dict[str, Any], execution: Execution
+        self, model: Any, data: Dict[str, Any], execution: Execution = None
     ) -> Finding:
         new_finding = model.objects.create(
             **{
@@ -127,7 +127,8 @@ class RekonoTest(TestCase):
                 for k, v in data.items()
             }
         )
-        new_finding.executions.add(execution)
+        if execution:
+            new_finding.executions.add(execution)
         return new_finding
 
     def _setup_findings(self, execution: Execution) -> None:

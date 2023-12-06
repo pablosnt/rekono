@@ -5,6 +5,10 @@ def return_true(*args: Any) -> bool:
     return True
 
 
+def return_id(*args: Any) -> Dict[str, int]:
+    return {"id": 1}
+
+
 def create_product_type(*args: Any) -> Dict[str, Any]:
     return {"id": 1, "name": args[1], "description": args[2]}
 
@@ -29,16 +33,18 @@ def create_engagement(*args: Any) -> Dict[str, Any]:
     }
 
 
-def return_defectdojo_data(field: str, **kwargs: Any) -> Dict[str, Any]:
-    return {"id": 1, **kwargs.get(field).defect_dojo()}
+def create_test_type(*args: Any) -> Dict[str, Any]:
+    return {"id": 1, "name": args[1], "tags": args[2], "dynamic_tool": True}
 
 
-def create_endpoint(**kwargs: Any) -> Dict[str, Any]:
-    return return_defectdojo_data("endpoint", **kwargs)
-
-
-def create_finding(**kwargs: Any) -> Dict[str, Any]:
-    return return_defectdojo_data("finding", **kwargs)
+def create_test(*args: Any) -> Dict[str, Any]:
+    return {
+        "id": 1,
+        "test_type": args[1],
+        "engagement": args[2],
+        "title": args[3],
+        "description": args[4],
+    }
 
 
 def import_scan(*args: Any) -> Dict[str, Any]:

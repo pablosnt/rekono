@@ -241,7 +241,7 @@ class FindingTest(ApiTest):
             )
 
     def test_anonymous_access(self) -> None:
-        for _, _, endpoint in findings_data:
+        for _, _, endpoint in findings_data.values():
             self.assertEqual(401, APIClient().get(endpoint).status_code)
 
     def test_defect_dojo(self) -> None:
@@ -257,13 +257,13 @@ class OSINTTest(ApiTest):
     cases = [
         ApiTestCase(["admin1", "admin2", "auditor1", "auditor2"], "post", 405),
         ApiTestCase(
-            ["reader1", "reader2"], "post", 403, endpoint="{endpoint}1/target/"
+            ["reader1", "reader2"], "post", 403, endpoint="{endpoint}2/target/"
         ),
         ApiTestCase(
-            ["admin2", "auditor2"], "post", 404, endpoint="{endpoint}1/target/"
+            ["admin2", "auditor2"], "post", 404, endpoint="{endpoint}2/target/"
         ),
         ApiTestCase(
-            ["admin1", "auditor1"], "post", 400, endpoint="{endpoint}2/target/"
+            ["admin1", "auditor1"], "post", 400, endpoint="{endpoint}1/target/"
         ),
         ApiTestCase(
             ["auditor1"],
@@ -274,7 +274,7 @@ class OSINTTest(ApiTest):
                 "target": "10.10.10.11",
                 "type": TargetType.PRIVATE_IP.value,
             },
-            endpoint="{endpoint}1/target/",
+            endpoint="{endpoint}2/target/",
         ),
         ApiTestCase(
             ["admin2", "auditor2", "reader2"], "get", 404, endpoint="/api/targets/2/"
@@ -295,9 +295,9 @@ class OSINTTest(ApiTest):
     def setUp(self) -> None:
         super().setUp()
         self._setup_tasks_and_executions()
-        self.osint1 = OSINT.objects.create(
-            data="10.10.10.11", data_type=OSINTDataType.IP, source="Google"
+        self._setup_findings(self.execution3)
+        self.osint1 = self._create_finding(
+            OSINT,
+            {"data": "10.10.10.11", "data_type": OSINTDataType.IP, "source": "Google"},
+            self.execution3,
         )
-        self.osint2 = OSINT.objects.create(**findings[0][1])
-        for osint in [self.osint1, self.osint2]:
-            osint.executions.add(self.execution3)
