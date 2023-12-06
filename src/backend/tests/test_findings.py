@@ -1,7 +1,4 @@
-from typing import Any, Dict
-
 from django.db import models
-from executions.models import Execution
 from findings.enums import (
     HostOS,
     OSINTDataType,
@@ -26,15 +23,8 @@ from targets.enums import TargetType
 from tests.cases import ApiTestCase
 from tests.framework import ApiTest
 
-findings = [
-    (
-        OSINT,
-        {
-            "data": "admin",
-            "data_type": OSINTDataType.USER,
-            "source": "Google",
-            "reference": "https://any.com",
-        },
+findings_data = {
+    OSINT: (
         {
             "title": f"{OSINTDataType.USER.value} found using OSINT techniques",
             "description": "admin",
@@ -43,13 +33,7 @@ findings = [
         "admin",
         "/api/osint/",
     ),
-    (
-        Host,
-        {
-            "address": "10.10.10.10",
-            "os": "some type of Linux",
-            "os_type": HostOS.LINUX,
-        },
+    Host: (
         {
             "title": "Host discovered",
             "description": f"10.10.10.10 - {HostOS.LINUX.value}",
@@ -58,15 +42,7 @@ findings = [
         "10.10.10.10",
         "/api/hosts/",
     ),
-    (
-        Port,
-        {
-            "host": 1,
-            "port": 80,
-            "status": PortStatus.OPEN,
-            "protocol": Protocol.TCP,
-            "service": "http",
-        },
+    Port: (
         {
             "title": "Port discovered",
             "description": f"Host: 10.10.10.10\nPort: 80\nStatus: {PortStatus.OPEN.value}\nProtocol: {Protocol.TCP.value}\nService: http",
@@ -75,28 +51,12 @@ findings = [
         "10.10.10.10 - 80",
         "/api/ports/",
     ),
-    (
-        Path,
-        {
-            "port": 1,
-            "path": "/index.php",
-            "status": 200,
-            "extra_info": "Main path",
-            "type": PathType.ENDPOINT,
-        },
+    Path: (
         {"protocol": "http", "host": "10.10.10.10", "port": 80, "path": "/index.php"},
         "10.10.10.10 - 80 - /index.php",
         "/api/paths/",
     ),
-    (
-        Technology,
-        {
-            "port": 1,
-            "name": "WordPress",
-            "version": "1.0.0",
-            "description": "Typical CMS",
-            "reference": "https://wordpress.org",
-        },
+    Technology: (
         {
             "title": "Technology WordPress detected",
             "description": "Technology: WordPress\nVersion: 1.0.0\nDetails: Typical CMS",
@@ -107,15 +67,7 @@ findings = [
         "10.10.10.10 - 80 - WordPress",
         "/api/technologies/",
     ),
-    (
-        Credential,
-        {
-            "technology": 1,
-            "email": "admin@shop.com",
-            "username": "admin",
-            "secret": "admin",
-            "context": "Default admin credentials",
-        },
+    Credential: (
         {
             "title": "Credentials exposure",
             "description": "admin@shop.com - admin - admin",
@@ -125,17 +77,7 @@ findings = [
         "10.10.10.10 - 80 - WordPress - admin@shop.com - admin - admin",
         "/api/credentials/",
     ),
-    (
-        Vulnerability,
-        {
-            "technology": 1,
-            "name": "Test",
-            "description": "Test",
-            "severity": Severity.CRITICAL,
-            "cve": "CVE-2023-1111",
-            "cwe": "CWE-200",
-            "reference": "https://nvd.nist.gov/vuln/detail/CVE-2023-1111",
-        },
+    Vulnerability: (
         {
             "title": "Test",
             "description": "Test",
@@ -147,14 +89,7 @@ findings = [
         "10.10.10.10 - 80 - WordPress - Test - CVE-2023-1111",
         "/api/vulnerabilities/",
     ),
-    (
-        Exploit,
-        {
-            "vulnerability": 1,
-            "title": "Reverse Shell",
-            "edb_id": 1,
-            "reference": "https://www.exploit-db.com/exploits/1",
-        },
+    Exploit: (
         {
             "title": "Exploit 1 found",
             "description": "Reverse Shell",
@@ -164,7 +99,7 @@ findings = [
         "10.10.10.10 - 80 - WordPress - Test - CVE-2023-1111 - Reverse Shell",
         "/api/exploits/",
     ),
-]
+}
 false_positive = {
     "triage_status": TriageStatus.FALSE_POSITIVE.value,
     "triage_comment": "It isn't exploitable",
@@ -178,34 +113,19 @@ true_positive = {
 class FindingTest(ApiTest):
     endpoint = "/api/findings/"
 
-    def _create_finding(
-        self, model: Any, data: Dict[str, Any], execution: Execution
-    ) -> Any:
-        new_finding = model.objects.create(
-            **{
-                k: getattr(self, k)
-                if isinstance(v, int) and hasattr(self, k) and getattr(self, k).id == v
-                else v
-                for k, v in data.items()
-            }
-        )
-        new_finding.executions.add(execution)
-        return new_finding
-
     def setUp(self) -> None:
         super().setUp()
         self._setup_tasks_and_executions()
+        self._setup_findings(self.execution3)
         self.cases = []
-        for finding_model, finding_data, _, _, endpoint in findings:
-            setattr(
-                self,
-                finding_model.__name__.lower(),
-                self._create_finding(finding_model, finding_data, self.execution3),
-            )
+        for finding in self.findings:
             self.cases.extend(
                 [
                     ApiTestCase(
-                        ["admin2", "auditor2", "reader2"], "get", 200, endpoint=endpoint
+                        ["admin2", "auditor2", "reader2"],
+                        "get",
+                        200,
+                        endpoint=findings_data[finding.__class__][2],
                     ),
                     ApiTestCase(
                         ["admin1", "auditor1", "reader1"],
@@ -220,25 +140,27 @@ class FindingTest(ApiTest):
                                     k: v
                                     if not isinstance(v, models.TextChoices)
                                     else v.value
-                                    for k, v in finding_data.items()
+                                    for k, v in self.raw_findings[
+                                        finding.__class__
+                                    ].items()
                                 },
                             }
                         ],
-                        endpoint=endpoint,
+                        endpoint=findings_data[finding.__class__][2],
                     ),
                     ApiTestCase(
                         ["reader1", "reader2"],
                         "put",
                         403,
                         false_positive,
-                        endpoint=f"{endpoint}1/",
+                        endpoint=f"{findings_data[finding.__class__][2]}1/",
                     ),
                     ApiTestCase(
                         ["admin2", "auditor2"],
                         "put",
                         404,
                         false_positive,
-                        endpoint=f"{endpoint}1/",
+                        endpoint=f"{findings_data[finding.__class__][2]}1/",
                     ),
                     ApiTestCase(
                         ["admin1", "auditor1"],
@@ -246,7 +168,7 @@ class FindingTest(ApiTest):
                         200,
                         false_positive,
                         expected={"id": 1, **false_positive},
-                        endpoint=f"{endpoint}1/",
+                        endpoint=f"{findings_data[finding.__class__][2]}1/",
                     ),
                     ApiTestCase(
                         ["admin1", "auditor1", "reader1"],
@@ -259,10 +181,10 @@ class FindingTest(ApiTest):
                                 k: v
                                 if not isinstance(v, models.TextChoices)
                                 else v.value
-                                for k, v in finding_data.items()
+                                for k, v in self.raw_findings[finding.__class__].items()
                             },
                         },
-                        endpoint=f"{endpoint}1/",
+                        endpoint=f"{findings_data[finding.__class__][2]}1/",
                     ),
                     ApiTestCase(
                         ["admin1", "auditor1"],
@@ -270,7 +192,7 @@ class FindingTest(ApiTest):
                         200,
                         true_positive,
                         expected={"id": 1, **true_positive},
-                        endpoint=f"{endpoint}1/",
+                        endpoint=f"{findings_data[finding.__class__][2]}1/",
                     ),
                     ApiTestCase(
                         ["admin1", "auditor1", "reader1"],
@@ -283,49 +205,49 @@ class FindingTest(ApiTest):
                                 k: v
                                 if not isinstance(v, models.TextChoices)
                                 else v.value
-                                for k, v in finding_data.items()
+                                for k, v in self.raw_findings[finding.__class__].items()
                             },
                         },
-                        endpoint=f"{endpoint}1/",
+                        endpoint=f"{findings_data[finding.__class__][2]}1/",
                     ),
                 ]
             )
 
     def test_str(self) -> None:
-        for finding_model, _, _, expected_str, _ in findings:
+        for finding in self.findings:
             self.assertEqual(
-                expected_str,
-                getattr(self, finding_model.__name__.lower()).__str__(),
+                findings_data[finding.__class__][1],
+                finding.__str__(),
             )
-        for finding_model, finding_data, pop_field, expected_str in [
+        for finding_model, new_data, pop_field, expected_str in [
             (
                 Vulnerability,
-                {**findings[6][1], "port": 1},
+                {"port": 1},
                 "technology",
                 "10.10.10.10 - 80 - Test - CVE-2023-1111",
             ),
             (
                 Exploit,
-                {**findings[7][1], "technology": 1},
+                {"technology": 1},
                 "vulnerability",
                 "10.10.10.10 - 80 - WordPress - Reverse Shell",
             ),
         ]:
-            finding_data.pop(pop_field)
-            aux = self._create_finding(finding_model, finding_data, self.execution3)
-            self.assertEqual(expected_str, aux.__str__())
-
-    def test_anonymous_access(self) -> None:
-        for _, _, _, _, endpoint in findings:
-            response = APIClient().get(endpoint)
+            data = {**self.raw_findings[finding_model], **new_data}
+            data.pop(pop_field)
             self.assertEqual(
-                200 if self.anonymous_allowed else 401, response.status_code
+                expected_str,
+                self._create_finding(finding_model, data, self.execution3).__str__(),
             )
 
+    def test_anonymous_access(self) -> None:
+        for _, _, endpoint in findings_data:
+            self.assertEqual(401, APIClient().get(endpoint).status_code)
+
     def test_defect_dojo(self) -> None:
-        for finding_model, _, expected_data, _, _ in findings:
-            parsed = getattr(self, finding_model.__name__.lower()).defect_dojo()
-            for key, value in expected_data.items():
+        for finding in self.findings:
+            parsed = finding.defect_dojo()
+            for key, value in findings_data[finding.__class__][0].items():
                 self.assertEqual(value, parsed[key])
 
 

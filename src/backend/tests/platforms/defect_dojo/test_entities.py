@@ -2,7 +2,7 @@ from unittest import mock
 
 from tests.cases import ApiTestCase
 from tests.framework import ApiTest
-from tests.platforms.mocks.defect_dojo import (
+from tests.platforms.defect_dojo.mock import (
     create_engagement,
     create_product,
     create_product_type,

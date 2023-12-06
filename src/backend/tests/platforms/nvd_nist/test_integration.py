@@ -4,7 +4,7 @@ from findings.enums import Severity
 from findings.models import Vulnerability
 from platforms.nvd_nist import NvdNist
 from tests.framework import RekonoTest
-from tests.platforms.mocks.nvd_nist import not_found, success_cvss_2, success_cvss_3
+from tests.platforms.nvd_nist.mock import not_found, success_cvss_2, success_cvss_3
 
 
 class NvdNistTest(RekonoTest):

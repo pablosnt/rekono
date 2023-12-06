@@ -1,10 +1,29 @@
 import json
-from pathlib import Path
+from pathlib import Path as PathLib
 from typing import Any, Dict, List
 
 from django.test import TestCase
 from executions.enums import Status
 from executions.models import Execution
+from findings.enums import (
+    HostOS,
+    OSINTDataType,
+    PathType,
+    PortStatus,
+    Protocol,
+    Severity,
+)
+from findings.framework.models import Finding
+from findings.models import (
+    OSINT,
+    Credential,
+    Exploit,
+    Host,
+    Path,
+    Port,
+    Technology,
+    Vulnerability,
+)
 from processes.models import Process, Step
 from projects.models import Project
 from rest_framework.test import APIClient
@@ -19,7 +38,7 @@ from users.models import User
 
 
 class RekonoTest(TestCase):
-    data_dir = Path(__file__).resolve().parent / "data"
+    data_dir = PathLib(__file__).resolve().parent / "data"
     cases: List[RekonoTestCase] = []
 
     def _create_user(self, username: str, role: Role) -> User:
@@ -96,6 +115,83 @@ class RekonoTest(TestCase):
             configuration=configuration,
             status=Status.COMPLETED,
         )
+
+    def _create_finding(
+        self, model: Any, data: Dict[str, Any], execution: Execution
+    ) -> Finding:
+        new_finding = model.objects.create(
+            **{
+                k: getattr(self, k)
+                if isinstance(v, int) and hasattr(self, k) and getattr(self, k).id == v
+                else v
+                for k, v in data.items()
+            }
+        )
+        new_finding.executions.add(execution)
+        return new_finding
+
+    def _setup_findings(self, execution: Execution) -> None:
+        self.raw_findings = {
+            OSINT: {
+                "data": "admin",
+                "data_type": OSINTDataType.USER,
+                "source": "Google",
+                "reference": "https://any.com",
+            },
+            Host: {
+                "address": "10.10.10.10",
+                "os": "some type of Linux",
+                "os_type": HostOS.LINUX,
+            },
+            Port: {
+                "host": 1,
+                "port": 80,
+                "status": PortStatus.OPEN,
+                "protocol": Protocol.TCP,
+                "service": "http",
+            },
+            Path: {
+                "port": 1,
+                "path": "/index.php",
+                "status": 200,
+                "extra_info": "Main path",
+                "type": PathType.ENDPOINT,
+            },
+            Technology: {
+                "port": 1,
+                "name": "WordPress",
+                "version": "1.0.0",
+                "description": "Typical CMS",
+                "reference": "https://wordpress.org",
+            },
+            Credential: {
+                "technology": 1,
+                "email": "admin@shop.com",
+                "username": "admin",
+                "secret": "admin",
+                "context": "Default admin credentials",
+            },
+            Vulnerability: {
+                "technology": 1,
+                "name": "Test",
+                "description": "Test",
+                "severity": Severity.CRITICAL,
+                "cve": "CVE-2023-1111",
+                "cwe": "CWE-200",
+                "reference": "https://nvd.nist.gov/vuln/detail/CVE-2023-1111",
+            },
+            Exploit: {
+                "vulnerability": 1,
+                "title": "Reverse Shell",
+                "edb_id": 1,
+                "reference": "https://www.exploit-db.com/exploits/1",
+            },
+        }
+        self.findings = []
+        for finding_model, finding_data in self.raw_findings.items():
+            new_finding = self._create_finding(finding_model, finding_data, execution)
+            setattr(self, finding_model.__name__.lower(), new_finding)
+            self.findings.append(new_finding)
 
     def _metadata(self) -> Dict[str, Any]:
         return {}

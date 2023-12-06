@@ -2,7 +2,7 @@ from unittest import mock
 
 from tests.cases import ApiTestCase
 from tests.framework import ApiTest
-from tests.platforms.mocks.defect_dojo import return_true
+from tests.platforms.defect_dojo.mock import return_true
 
 sync1 = {"project": 1, "product_type_id": 1, "product_id": 1, "engagement_id": 1}
 sync2 = {"project": 1, "product_type_id": 1, "product_id": 1, "engagement_id": None}
