@@ -1,5 +1,7 @@
 from typing import List
 
+from authentications.enums import AuthenticationType
+from authentications.models import Authentication
 from executions.enums import Status
 from executions.models import Execution
 from findings.enums import OSINTDataType
@@ -9,11 +11,13 @@ from input_types.enums import InputTypeName
 from input_types.models import InputType
 from parameters.models import InputTechnology, InputVulnerability
 from target_ports.models import TargetPort
+from targets.enums import TargetType
 from tasks.models import Task
 from tests.framework import RekonoTest
 from tools.enums import Intensity as IntensityEnum
 from tools.enums import Stage
 from tools.models import Argument, Configuration, Input, Intensity, Tool
+from wordlists.enums import WordlistType
 from wordlists.models import Wordlist
 
 
@@ -35,12 +39,12 @@ class ToolExecutorTest(RekonoTest):
         self.fake_configuration = Configuration.objects.create(
             name="fake",
             tool=self.fake_tool,
-            arguments="{host} {url} {ports_commas} {endpoint} {technology} {secret} {cve} {exploit}",
+            arguments="{host} {url} {ports_commas} {endpoint} {technology} {secret} {cve} {exploit} {username} {wordlist}",
             stage=Stage.ENUMERATION,
             default=True,
         )
         for value, required, multiple, input_type_names in [
-            ("host", True, False, [InputTypeName.OSINT]),
+            ("host", False, False, [InputTypeName.OSINT]),
             (
                 "url",
                 True,
@@ -53,6 +57,8 @@ class ToolExecutorTest(RekonoTest):
             ("secret", False, False, [InputTypeName.CREDENTIAL]),
             ("cve", True, False, [InputTypeName.VULNERABILITY]),
             ("exploit", False, False, [InputTypeName.EXPLOIT]),
+            ("username", False, False, [InputTypeName.AUTHENTICATION]),
+            ("wordlist", False, False, [InputTypeName.WORDLIST]),
         ]:
             new_argument = Argument.objects.create(
                 tool=self.fake_tool,
@@ -130,15 +136,14 @@ class ToolExecutorTest(RekonoTest):
 
     def test_get_arguments_only_required_findings(self) -> None:
         self._success_get_arguments(
-            "-p 10.10.10.11 -p http://45.33.32.156:80/ -p 80 -p WordPress -p CVE-2023-1111",
-            [self.osint, self.host, self.port, self.technology, self.vulnerability],
+            "-p http://45.33.32.156:80/ -p 80 -p WordPress -p CVE-2023-1111",
+            [self.host, self.port, self.technology, self.vulnerability],
         )
 
     def test_get_arguments_multiple_ports(self) -> None:
         self._success_get_arguments(
-            "-p 10.10.10.11 -p http://45.33.32.156:80/ -p 80,443 -p WordPress -p CVE-2023-1111",
+            "-p http://45.33.32.156:80/ -p 80,443 -p WordPress -p CVE-2023-1111",
             [
-                self.osint,
                 self.host,
                 self.port,
                 self._create_finding(
@@ -149,9 +154,40 @@ class ToolExecutorTest(RekonoTest):
             ],
         )
 
-    # TODO: test with target ports, user-provided parameters, wordlists and authentication
-
     def test_get_arguments_no_findings(self) -> None:
+        self.target.target = "scanme.nmap.org"
+        self.target.type = TargetType.DOMAIN
+        self.target.save(update_fields=["target", "type"])
+        target_port = TargetPort.objects.create(
+            target=self.target, port=80, path="/images"
+        )
+        Authentication.objects.create(
+            name="root",
+            secret="root",
+            type=AuthenticationType.BASIC,
+            target_port=target_port,
+        )
+        input_vulnerability = InputVulnerability.objects.create(
+            target=self.target, cve="CVE-2023-2222"
+        )
+        input_technology = InputTechnology.objects.create(
+            target=self.target, name="Joomla", version="2.0.0"
+        )
+        wordlist = Wordlist.objects.create(
+            name="test",
+            type=WordlistType.ENDPOINT,
+            path=self.data_dir / "wordlists" / "endpoints_wordlist.txt",
+        )
+        self._success_get_arguments(
+            f"-p http://scanme.nmap.org:80/images -p 80 -p /images -p Joomla -p CVE-2023-2222 -p root -p {wordlist.path}",
+            [],
+            [target_port],
+            [input_vulnerability],
+            [input_technology],
+            [wordlist],
+        )
+
+    def test_get_arguments_no_base_inputs(self) -> None:
         self.assertFalse(self.executor.check_arguments([], [], [], [], []))
 
     def test_get_arguments_missing_one_required_finding(self) -> None:

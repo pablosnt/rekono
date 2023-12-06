@@ -88,14 +88,13 @@ class BaseExecutor:
                     + list(input_vulnerabilities)
                     + list(input_technologies)
                 ):
-                    is_input_fallback = input_fallback and isinstance(
+                    is_fallback = input_fallback and isinstance(
                         base_input, input_fallback
                     )
-                    if is_input_fallback and parsed_data:
+                    if is_fallback and parsed_data:
                         break
-                    if (
-                        isinstance(base_input, input_model) or is_input_fallback
-                    ) and base_input.filter(argument_input):
+                    is_model = input_model and isinstance(base_input, input_model)
+                    if (is_model or is_fallback) and base_input.filter(argument_input):
                         parsed_data = base_input.parse(
                             self.execution.task.target, parsed_data
                         )

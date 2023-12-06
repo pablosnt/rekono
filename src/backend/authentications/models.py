@@ -62,7 +62,7 @@ class Authentication(BaseInput, BaseEncrypted):
                 {
                     InputKeyword.USERNAME.name.lower(): self.name,
                     InputKeyword.TOKEN.name.lower(): base64.b64encode(
-                        f"{self.name}:{self.credential}".encode()
+                        f"{self.name}:{self.secret}".encode()
                     ).decode(),
                 }
             )
