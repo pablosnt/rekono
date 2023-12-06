@@ -84,8 +84,8 @@
         "pk": 9,
         "fields": {
             "name": "Wordlist",
-            "model": null,
-            "fallback_model": "wordlists.wordlist",
+            "model": "wordlists.wordlist",
+            "fallback_model": null,
             "relationships": true
         }
     },
