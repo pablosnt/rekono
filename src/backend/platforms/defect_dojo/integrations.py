@@ -176,7 +176,9 @@ class DefectDojo(BaseIntegration):
             if project_sync.exists():
                 sync = project_sync.first()
                 product_id = sync.product_id
-                if sync.engagement_per_target:
+                if sync.engagement_id:
+                    engagement_id = sync.engagement_id
+                else:
                     new_engagement = self.create_engagement(
                         product_id,
                         execution.task.target.target,
@@ -188,8 +190,6 @@ class DefectDojo(BaseIntegration):
                         engagement_id=new_engagement.get("id"),
                     )
                     engagement_id = new_sync.engagement_id
-                else:
-                    engagement_id = sync.engagement_id
             else:
                 return
         if (

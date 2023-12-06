@@ -59,7 +59,6 @@ class DefectDojoSync(BaseModel):
         blank=True,
         null=True,
     )
-    engagement_per_target = models.BooleanField(default=False)
 
     @classmethod
     def get_project_field(cls) -> str:

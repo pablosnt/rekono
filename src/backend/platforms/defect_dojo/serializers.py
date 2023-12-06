@@ -79,16 +79,7 @@ class DefectDojoSyncSerializer(BaseDefectDojoSerializer, ModelSerializer):
             "product_type_id",
             "product_id",
             "engagement_id",
-            "engagement_per_target",
         )
-
-    def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
-        attrs = super().validate(attrs)
-        if not attrs.get("engagement_id") and not attrs.get("engagement_per_target"):
-            raise ValidationError(
-                "Engagement or engagement_per_target is required", code="engagement_id"
-            )
-        return attrs
 
 
 class DefectDojoTargetSyncSerializer(ModelSerializer):
