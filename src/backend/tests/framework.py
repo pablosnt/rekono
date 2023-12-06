@@ -101,8 +101,10 @@ class RekonoTest(TestCase):
         return {}
 
     def test_cases(self) -> None:
-        for test_case in self.cases:
-            test_case.test_case(**self._metadata())
+        metadata = self._metadata()
+        if self.cases and metadata:
+            for test_case in self.cases:
+                test_case.test_case(**metadata)
 
 
 class ApiTest(RekonoTest):

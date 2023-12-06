@@ -72,6 +72,7 @@ class DefectDojoSettingsTest(ApiTest):
 
 class DefectDojoEntitiesTest(ApiTest):
     endpoint = "/api/defect-dojo/"
+    cases = []
 
     def setUp(self) -> None:
         super().setUp()
@@ -142,6 +143,7 @@ class DefectDojoEntitiesTest(ApiTest):
                 ]
             )
         super().test_cases()
+        self.cases = []
 
     def test_anonymous_access(self) -> None:
         base = self.endpoint
