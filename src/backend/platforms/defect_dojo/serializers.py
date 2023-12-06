@@ -62,10 +62,15 @@ class BaseDefectDojoSerializer:
                 "Defect-Dojo integration hasn't been configured properly",
                 code="defect-dojo",
             )
-        return super().validate(attrs)
+        attrs = super().validate(attrs)
+        for entity in ["product_type", "product", "engagement"]:
+            value = attrs.get(f"{entity}_id") or attrs.get(entity)
+            if value:
+                self._get_client().exists(f"{entity}s", value)
+        return attrs
 
 
-class DefectDojoSyncSerializer(ModelSerializer, BaseDefectDojoSerializer):
+class DefectDojoSyncSerializer(BaseDefectDojoSerializer, ModelSerializer):
     class Meta:
         model = DefectDojoSync
         fields = (
@@ -83,10 +88,6 @@ class DefectDojoSyncSerializer(ModelSerializer, BaseDefectDojoSerializer):
             raise ValidationError(
                 "Engagement or engagement_per_target is required", code="engagement_id"
             )
-        for entity in ["product_type", "product", "engagement"]:
-            id = attrs.get(f"{entity}_id")
-            if id:
-                self._get_client().exists(f"{entity}s", id)
         return attrs
 
 
@@ -101,7 +102,7 @@ class DefectDojoTargetSyncSerializer(ModelSerializer):
         )
 
 
-class DefectDojoProductTypeSerializer(Serializer, BaseDefectDojoSerializer):
+class DefectDojoProductTypeSerializer(BaseDefectDojoSerializer, Serializer):
     id = IntegerField(read_only=True)
     name = CharField(
         required=True,
@@ -124,7 +125,7 @@ class DefectDojoProductTypeSerializer(Serializer, BaseDefectDojoSerializer):
         )
 
 
-class DefectDojoProductSerializer(Serializer, BaseDefectDojoSerializer):
+class DefectDojoProductSerializer(BaseDefectDojoSerializer, Serializer):
     id = IntegerField(read_only=True)
     product_type = IntegerField(
         required=True,
@@ -159,7 +160,6 @@ class DefectDojoProductSerializer(Serializer, BaseDefectDojoSerializer):
             id=attrs.get("project_id").id,
             members=self.context.get("request").user.id,
         )
-        self._get_client().exists("product_types", attrs.get("product_type"))
         return attrs
 
     def create(self, validated_data: Dict[str, Any]) -> Dict[str, Any]:
@@ -172,7 +172,7 @@ class DefectDojoProductSerializer(Serializer, BaseDefectDojoSerializer):
         )
 
 
-class DefectDojoEngagementSerializer(Serializer, BaseDefectDojoSerializer):
+class DefectDojoEngagementSerializer(BaseDefectDojoSerializer, Serializer):
     id = IntegerField(read_only=True)
     product = IntegerField(
         required=True,
@@ -193,11 +193,6 @@ class DefectDojoEngagementSerializer(Serializer, BaseDefectDojoSerializer):
         validators=[Validator(Regex.TEXT.value, code="description")],
         write_only=True,
     )
-
-    def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
-        attrs = super().validate(attrs)
-        self._get_client().exists("products", attrs.get("product"))
-        return attrs
 
     def create(self, validated_data: Dict[str, Any]) -> Dict[str, Any]:
         return self._get_client().create_engagement(

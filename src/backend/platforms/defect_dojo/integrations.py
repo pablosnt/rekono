@@ -2,6 +2,7 @@ from datetime import timedelta
 from pathlib import Path as PathFile
 from typing import Any, Dict, List
 
+import requests
 from django.utils import timezone
 from executions.models import Execution
 from findings.enums import Severity
@@ -54,7 +55,7 @@ class DefectDojo(BaseIntegration):
             self.settings.server = self.settings.server[:-1]
         self.settings.save(update_fields=["server"])
         try:
-            self._request(self.session.get, "/test_types/")
+            self._request(requests.get, "/test_types/", timeout=5)
             return True
         except:
             return False

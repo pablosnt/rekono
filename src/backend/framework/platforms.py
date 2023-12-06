@@ -31,7 +31,7 @@ class BaseIntegration(BasePlatform):
         retries = Retry(
             total=10,
             backoff_factor=1,
-            status_forcelist=[403, 500, 502, 503, 504, 599],
+            status_forcelist=[403, 429, 500, 502, 503, 504, 599],
         )
         session.mount(f"{urlparse(url).scheme}://", HTTPAdapter(max_retries=retries))
         return session

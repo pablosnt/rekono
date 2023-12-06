@@ -71,6 +71,8 @@ class DefectDojoSettingsTest(ApiTest):
 
 
 class DefectDojoEntitiesTest(ApiTest):
+    endpoint = "/api/defect-dojo/"
+
     def setUp(self) -> None:
         super().setUp()
         self._setup_project()
@@ -91,17 +93,21 @@ class DefectDojoEntitiesTest(ApiTest):
         create_engagement,
     )
     def test_cases(self) -> None:
-        base = "/api/defect-dojo/"
+        input("DD TEST CASES")
         valid = {"name": "test", "description": "test"}
         invalid = {"name": "te;st", "description": "te;st"}
         for endpoint, valid, invalid in [
-            (f"{base}product-types/", valid, invalid),
+            (f"{self.endpoint}product-types/", valid, invalid),
             (
-                f"{base}products/",
+                f"{self.endpoint}products/",
                 {"product_type": 1, "project_id": 1, **valid},
                 {"product_type": 9999999999, "project_id": 1, **invalid},
             ),
-            (f"{base}engagements/", {"product": 1, **valid}, {"product": 1, **invalid}),
+            (
+                f"{self.endpoint}engagements/",
+                {"product": 1, **valid},
+                {"product": 1, **invalid},
+            ),
         ]:
             self.cases.extend(
                 [
@@ -137,3 +143,10 @@ class DefectDojoEntitiesTest(ApiTest):
                 ]
             )
         return super().test_cases()
+
+    def test_anonymous_access(self) -> None:
+        base = self.endpoint
+        for endpoint in ["product-types", "products", "engagements"]:
+            self.endpoint = f"{base}{endpoint}/"
+            super().test_anonymous_access()
+        self.endpoint = base
