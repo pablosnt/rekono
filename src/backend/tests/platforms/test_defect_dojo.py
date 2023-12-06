@@ -93,7 +93,6 @@ class DefectDojoEntitiesTest(ApiTest):
         create_engagement,
     )
     def test_cases(self) -> None:
-        input("DD TEST CASES")
         valid = {"name": "test", "description": "test"}
         invalid = {"name": "te;st", "description": "te;st"}
         for endpoint, valid, invalid in [
@@ -142,7 +141,7 @@ class DefectDojoEntitiesTest(ApiTest):
                     )
                 ]
             )
-        return super().test_cases()
+        super().test_cases()
 
     def test_anonymous_access(self) -> None:
         base = self.endpoint
