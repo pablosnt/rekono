@@ -1,17 +1,24 @@
 from typing import List
 
 from findings.models import Finding
-from input_types.models import BaseInput
+from parameters.models import InputTechnology, InputVulnerability
+from target_ports.models import TargetPort
 from tools.executors.base import BaseExecutor
+from wordlists.models import Wordlist
 
 
 class Gobuster(BaseExecutor):
     def _get_arguments(
         self,
         findings: List[Finding],
-        target_ports_and_parameters: List[BaseInput],
+        target_ports: List[TargetPort],
+        input_vulnerabilities: List[InputVulnerability],
+        input_technologies: List[InputTechnology],
+        wordlists: List[Wordlist],
     ) -> List[str]:
-        arguments = super()._get_arguments(findings, target_ports_and_parameters)
+        arguments = super()._get_arguments(
+            findings, target_ports, input_vulnerabilities, input_technologies, wordlists
+        )
         if "--url" not in arguments and "--domain" not in arguments:
             raise RuntimeError(
                 f"Argument 'url' or 'domain' is required to execute tool '{self.execution.configuration.tool.name}'"

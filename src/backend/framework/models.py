@@ -161,11 +161,14 @@ class BaseInput(BaseModel):
                         and self._compare_filter(
                             filter.type[filter_value.upper()], field_value, negative
                         )
-                    ) or self._compare_filter(
-                        filter.type(getattr(self, filter_value)),
-                        field_value,
-                        negative,
-                        filter.contains,
+                    ) or (
+                        hasattr(self, filter_value)
+                        and self._compare_filter(
+                            filter.type(getattr(self, filter_value)),
+                            field_value,
+                            negative,
+                            filter.contains,
+                        )
                     ):
                         return True
                 except (ValueError, KeyError):
