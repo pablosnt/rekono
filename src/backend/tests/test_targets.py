@@ -109,6 +109,5 @@ class TargetTest(ApiTest):
         self._setup_project()
 
     def _get_object(self) -> Target:
-        return Target.objects.create(
-            **{**target1, "project": self.project, "type": TargetType.PRIVATE_IP}
-        )
+        self._setup_target()
+        return self.target

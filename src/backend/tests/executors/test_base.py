@@ -1,89 +1,23 @@
 from typing import List
 from unittest import mock
 
-from authentications.enums import AuthenticationType
-from authentications.models import Authentication
 from executions.enums import Status
 from executions.models import Execution
 from findings.enums import OSINTDataType
 from findings.framework.models import Finding
 from findings.models import Port
-from input_types.enums import InputTypeName
-from input_types.models import InputType
 from parameters.models import InputTechnology, InputVulnerability
 from target_ports.models import TargetPort
 from tasks.models import Task
 from tests.executors.mock import get_url
 from tests.framework import RekonoTest
-from tools.enums import Intensity as IntensityEnum
-from tools.enums import Stage
-from tools.models import Argument, Configuration, Input, Intensity, Tool
-from wordlists.enums import WordlistType
 from wordlists.models import Wordlist
 
 
 class ToolExecutorTest(RekonoTest):
     def setUp(self) -> None:
         super().setUp()
-        self._setup_target()
-        self.fake_tool = Tool.objects.create(
-            name="fake",
-            command="fake",
-            is_installed=True,
-            version="1.0.0",
-            version_argument="--version",
-        )
-        for index, value in enumerate(IntensityEnum):
-            Intensity.objects.create(
-                tool=self.fake_tool, argument=f"-i {index}", value=value
-            )
-        self.fake_configuration = Configuration.objects.create(
-            name="fake",
-            tool=self.fake_tool,
-            arguments="{host} {url} {ports_commas} {endpoint} {technology} {secret} {cve} {exploit} {username} {wordlist}",
-            stage=Stage.ENUMERATION,
-            default=True,
-        )
-        for value, required, multiple, input_type_names in [
-            ("host", False, False, [InputTypeName.OSINT]),
-            (
-                "url",
-                True,
-                False,
-                [InputTypeName.PATH, InputTypeName.PORT, InputTypeName.HOST],
-            ),
-            ("ports_commas", True, True, [InputTypeName.PORT]),
-            ("endpoint", False, False, [InputTypeName.PATH]),
-            ("technology", True, False, [InputTypeName.TECHNOLOGY]),
-            ("secret", False, False, [InputTypeName.CREDENTIAL]),
-            ("cve", True, False, [InputTypeName.VULNERABILITY]),
-            ("exploit", False, False, [InputTypeName.EXPLOIT]),
-            ("username", False, False, [InputTypeName.AUTHENTICATION]),
-            ("wordlist", False, False, [InputTypeName.WORDLIST]),
-        ]:
-            new_argument = Argument.objects.create(
-                tool=self.fake_tool,
-                name=value,
-                argument="-p {" + value + "}",
-                required=required,
-                multiple=multiple,
-            )
-            for index, input_type_name in enumerate(input_type_names):
-                Input.objects.create(
-                    argument=new_argument,
-                    type=InputType.objects.get(name=input_type_name),
-                    order=index + 1,
-                )
-        self.task = Task.objects.create(
-            target=self.target,
-            configuration=self.fake_configuration,
-            executor=self.auditor1,
-        )
-        self.execution = Execution.objects.create(
-            task=self.task,
-            configuration=self.fake_configuration,
-            status=Status.REQUESTED,
-        )
+        self._setup_fake_tool()
         self._setup_findings(self.execution)
         self.osint.data = "10.10.10.11"
         self.osint.data_type = OSINTDataType.IP
@@ -155,9 +89,9 @@ class ToolExecutorTest(RekonoTest):
 
     @mock.patch("framework.models.BaseInput._get_url", get_url)
     def test_get_arguments_no_findings(self) -> None:
+        self._setup_task_user_provided_entities()
         self.target.target = "10.10.10.12"
         self.target.save(update_fields=["target"])
-        self._setup_task_user_provided_entities()
         self._success_get_arguments(
             f"-p http://10.10.10.12:80/login.php -p 80 -p /login.php -p Joomla -p CVE-2023-2222 -p root -p {self.wordlist.path}",
             [],

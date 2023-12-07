@@ -26,6 +26,8 @@ from findings.models import (
     Technology,
     Vulnerability,
 )
+from input_types.enums import InputTypeName
+from input_types.models import InputType
 from parameters.models import InputTechnology, InputVulnerability
 from processes.models import Process, Step
 from projects.models import Project
@@ -35,9 +37,12 @@ from target_ports.models import TargetPort
 from targets.enums import TargetType
 from targets.models import Target
 from tasks.models import Task
+from tasks.queues import TasksQueue
 from tests.cases import RekonoTestCase
 from tools.enums import Intensity
-from tools.models import Configuration, Tool
+from tools.enums import Intensity as IntensityEnum
+from tools.enums import Stage
+from tools.models import Argument, Configuration, Input, Intensity, Tool
 from users.models import User
 from wordlists.enums import WordlistType
 from wordlists.models import Wordlist
@@ -91,9 +96,69 @@ class RekonoTest(TestCase):
             project=self.project, target="10.10.10.10", type=TargetType.PRIVATE_IP
         )
 
+    def _setup_fake_tool(self) -> None:
+        self._setup_target()
+        self.fake_tool = Tool.objects.create(
+            name="fake",
+            command="fake",
+            is_installed=True,
+            version="1.0.0",
+            version_argument="--version",
+        )
+        for index, value in enumerate(IntensityEnum):
+            Intensity.objects.create(
+                tool=self.fake_tool, argument=f"-i {index}", value=value
+            )
+        self.fake_configuration = Configuration.objects.create(
+            name="fake",
+            tool=self.fake_tool,
+            arguments="{host} {url} {ports_commas} {endpoint} {technology} {secret} {cve} {exploit} {username} {wordlist}",
+            stage=Stage.ENUMERATION,
+            default=True,
+        )
+        for value, required, multiple, input_type_names in [
+            ("host", False, False, [InputTypeName.OSINT]),
+            (
+                "url",
+                True,
+                False,
+                [InputTypeName.PATH, InputTypeName.PORT, InputTypeName.HOST],
+            ),
+            ("ports_commas", True, True, [InputTypeName.PORT]),
+            ("endpoint", False, False, [InputTypeName.PATH]),
+            ("technology", True, False, [InputTypeName.TECHNOLOGY]),
+            ("secret", False, False, [InputTypeName.CREDENTIAL]),
+            ("cve", True, False, [InputTypeName.VULNERABILITY]),
+            ("exploit", False, False, [InputTypeName.EXPLOIT]),
+            ("username", False, False, [InputTypeName.AUTHENTICATION]),
+            ("wordlist", False, False, [InputTypeName.WORDLIST]),
+        ]:
+            new_argument = Argument.objects.create(
+                tool=self.fake_tool,
+                name=value,
+                argument="-p {" + value + "}",
+                required=required,
+                multiple=multiple,
+            )
+            for index, input_type_name in enumerate(input_type_names):
+                Input.objects.create(
+                    argument=new_argument,
+                    type=InputType.objects.get(name=input_type_name),
+                    order=index + 1,
+                )
+        self.task = Task.objects.create(
+            target=self.target,
+            configuration=self.fake_configuration,
+            executor=self.auditor1,
+        )
+        self.execution = Execution.objects.create(
+            task=self.task,
+            configuration=self.fake_configuration,
+            status=Status.REQUESTED,
+        )
+
     def _setup_task_user_provided_entities(self) -> None:
-        if not hasattr(self, "target"):
-            self._setup_target()
+        self._setup_target()
         self.target_port = TargetPort.objects.create(
             target=self.target, port=80, path="/login.php"
         )
@@ -116,8 +181,7 @@ class RekonoTest(TestCase):
         )
 
     def _setup_tasks_and_executions(self) -> None:
-        if not hasattr(self, "target"):
-            self._setup_target()
+        self._setup_target()
         self.running_task = Task.objects.create(
             target=self.target,
             process=Process.objects.get(pk=1),
@@ -298,3 +362,9 @@ class ToolTest(RekonoTest):
             "reports": self.data_dir,
             "tool": self.tool_name,
         }
+
+
+class QueueTest(RekonoTest):
+    def setUp(self) -> None:
+        super().setUp()
+        self.queue = TasksQueue()
