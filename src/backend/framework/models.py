@@ -194,7 +194,9 @@ class BaseInput(BaseModel):
         from input_types.models import InputType
 
         reference = f"{self._meta.app_label}.{self._meta.model_name}"
-        return InputType.objects.get(Q(model=reference) | Q(fallback_model=reference))
+        return InputType.objects.filter(
+            Q(model=reference) | Q(fallback_model=reference)
+        ).first()
 
 
 class BaseLike(BaseModel):

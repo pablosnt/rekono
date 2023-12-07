@@ -157,33 +157,14 @@ class ToolExecutorTest(RekonoTest):
     def test_get_arguments_no_findings(self) -> None:
         self.target.target = "10.10.10.12"
         self.target.save(update_fields=["target"])
-        target_port = TargetPort.objects.create(
-            target=self.target, port=80, path="/login.php"
-        )
-        Authentication.objects.create(
-            name="root",
-            secret="root",
-            type=AuthenticationType.BASIC,
-            target_port=target_port,
-        )
-        input_vulnerability = InputVulnerability.objects.create(
-            target=self.target, cve="CVE-2023-2222"
-        )
-        input_technology = InputTechnology.objects.create(
-            target=self.target, name="Joomla", version="2.0.0"
-        )
-        wordlist = Wordlist.objects.create(
-            name="test",
-            type=WordlistType.ENDPOINT,
-            path=self.data_dir / "wordlists" / "endpoints_wordlist.txt",
-        )
+        self._setup_task_user_provided_entities()
         self._success_get_arguments(
             f"-p http://10.10.10.12:80/login.php -p 80 -p /login.php -p Joomla -p CVE-2023-2222 -p root -p {wordlist.path}",
             [],
-            [target_port],
-            [input_vulnerability],
-            [input_technology],
-            [wordlist],
+            [self.target_port],
+            [self.input_vulnerability],
+            [self.input_technology],
+            [self.wordlist],
         )
 
     def test_get_arguments_no_base_inputs(self) -> None:

@@ -59,17 +59,19 @@ class BaseQueue:
             )
         )
         for index, input_type, source in (
-            [(0, t, list(f)) for t, f in findings_by_type.values() if f]
+            [(0, t, list(f)) for t, f in findings_by_type.items() if f]
             if findings_by_type
             else []
         ) + [
-            (index + 1, None, p)
-            for p in [
-                target_ports,
-                input_vulnerabilities,
-                input_technologies,
-                wordlists,
-            ]
+            (i + 1, None, p)
+            for i, p in enumerate(
+                [
+                    target_ports,
+                    input_vulnerabilities,
+                    input_technologies,
+                    wordlists,
+                ]
+            )
         ]:
             if not source:
                 continue

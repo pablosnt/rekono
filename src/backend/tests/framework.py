@@ -2,6 +2,8 @@ import json
 from pathlib import Path as PathFile
 from typing import Any, Dict, List
 
+from authentications.enums import AuthenticationType
+from authentications.models import Authentication
 from django.test import TestCase
 from executions.enums import Status
 from executions.models import Execution
@@ -24,10 +26,12 @@ from findings.models import (
     Technology,
     Vulnerability,
 )
+from parameters.models import InputTechnology, InputVulnerability
 from processes.models import Process, Step
 from projects.models import Project
 from rest_framework.test import APIClient
 from security.authorization.roles import Role
+from target_ports.models import TargetPort
 from targets.enums import TargetType
 from targets.models import Target
 from tasks.models import Task
@@ -35,6 +39,8 @@ from tests.cases import RekonoTestCase
 from tools.enums import Intensity
 from tools.models import Configuration, Tool
 from users.models import User
+from wordlists.enums import WordlistType
+from wordlists.models import Wordlist
 
 
 class RekonoTest(TestCase):
@@ -83,6 +89,30 @@ class RekonoTest(TestCase):
         self._setup_project()
         self.target, _ = Target.objects.get_or_create(
             project=self.project, target="10.10.10.10", type=TargetType.PRIVATE_IP
+        )
+
+    def _setup_task_user_provided_entities(self) -> None:
+        if not hasattr(self, "target"):
+            self._setup_target()
+        self.target_port = TargetPort.objects.create(
+            target=self.target, port=80, path="/login.php"
+        )
+        self.authentication = Authentication.objects.create(
+            name="root",
+            secret="root",
+            type=AuthenticationType.BASIC,
+            target_port=self.target_port,
+        )
+        self.input_vulnerability = InputVulnerability.objects.create(
+            target=self.target, cve="CVE-2023-2222"
+        )
+        self.input_technology = InputTechnology.objects.create(
+            target=self.target, name="Joomla", version="2.0.0"
+        )
+        self.wordlist = Wordlist.objects.create(
+            name="test",
+            type=WordlistType.ENDPOINT,
+            path=self.data_dir / "wordlists" / "endpoints_wordlist.txt",
         )
 
     def _setup_tasks_and_executions(self) -> None:

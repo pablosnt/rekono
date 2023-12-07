@@ -61,7 +61,7 @@ class ExecutionsQueue(BaseQueue):
         execution.enqueued_at = timezone.now()
         execution.rq_job_id = job.id
         execution.save(update_fields=["rq_job_id"])
-        return Job
+        return job
 
     @job("executions-queue")
     def consume(

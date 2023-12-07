@@ -95,11 +95,13 @@ class TasksQueue(BaseQueue):
         plan = []
         steps = (
             Step.objects.annotate(
-                max_input=Max("tool__arguments__inputs__type__id"),
+                max_input=Max("configuration__tool__arguments__inputs__type__id"),
                 max_output=Max("configuration__outputs__type__id"),
             )
             .filter(process=task.process)
-            .order_by("configuration__stage", "max_output", "max_input")
+            .order_by(
+                "configuration__stage", "max_input", "max_output", "configuration__id"
+            )
         )
         for step in steps:
             item = {
@@ -110,18 +112,22 @@ class TasksQueue(BaseQueue):
                 "outputs": InputType.objects.filter(
                     outputs__configuration=step.configuration
                 ).distinct(),
-                "dependencies": set(),
+                "dependencies": [],
                 "jobs": [],
                 "group": 1,
             }
             if Intensity.objects.filter(
-                tool=step.tool, value__lte=task.intensity
+                tool=step.configuration.tool, value__lte=task.intensity
             ).exists():
                 for job in plan:
                     for output in job.get("outputs"):
                         if output in item.get("inputs"):
                             item["group"] = max([item["group"], job["group"] + 1])
-                            item["dependencies"].add(job)
+                            if job["step"].id not in [
+                                d["step"].id for d in item["dependencies"]
+                            ]:
+                                item["dependencies"].append(job)
+                            break
                 plan.append(item)
             else:
                 Execution.objects.create(
@@ -129,11 +135,11 @@ class TasksQueue(BaseQueue):
                     configuration=step.configuration,
                     group=1,
                     status=Status.SKIPPED,
-                    skipped_reason=f"Tool {step.configuration.tool.name} can't be executed with intensity {task.intensity.value.value}",
+                    skipped_reason=f"Tool {step.configuration.tool.name} can't be executed with intensity {task.intensity.name.capitalize()}",
                 )
         for job in plan:
-            executions = self._calculate_executions_from_task_parameters(
-                step.configuration.tool,
+            executions = self._calculate_executions(
+                job["step"].configuration.tool,
                 [],
                 task.target.target_ports.all(),
                 task.target.input_vulnerabilities.all(),
@@ -143,8 +149,8 @@ class TasksQueue(BaseQueue):
             for parameters in executions or [{}]:
                 execution = Execution.objects.create(
                     task=task,
-                    configuration=job.get("step").configuration,
-                    group=job.get("group"),
+                    configuration=job["step"].configuration,
+                    group=job["group"],
                 )
                 job["jobs"].append(
                     self.executions_queue.enqueue(
@@ -154,9 +160,7 @@ class TasksQueue(BaseQueue):
                         parameters.get(2, []),
                         parameters.get(3, []),
                         parameters.get(4, []),
-                        dependencies=sum(
-                            [j.get("jobs") for j in job.get("dependencies")], []
-                        ),
+                        dependencies=sum([d["jobs"] for d in job["dependencies"]], []),
                     )
                 )
 
