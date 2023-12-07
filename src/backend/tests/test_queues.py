@@ -7,6 +7,31 @@ from tests.framework import RekonoTest
 from tools.enums import Intensity
 from tools.models import Configuration
 
+expected_executions = [
+    (19, 1, 1),  # theHarvester
+    (30, 1, 1),  # EmailFinder
+    (31, 1, 1),  # EmailHarvester
+    (46, 1, 1),  # Gobuster
+    (38, 1, 1),  # Nmap
+    (47, 2, 2),  # Gobuster
+    (22, 2, 2),  # Sslscan
+    (23, 2, None),  # SSLyze
+    (28, 2, None),  # Log4Shell Scan
+    (29, 2, None),  # Log4Shell Scan
+    (34, 2, None),  # SSH Audit
+    (24, 2, None),  # CMSeeK
+    (33, 2, None),  # GitDumper & GitLeaks
+    (15, 2, 2),  # Dirsearch
+    (36, 2, None),  # SMB Map
+    (48, 2, 2),  # Gobuster
+    (21, 2, None),  # Nikto
+    (25, 2, None),  # ZAP
+    (39, 2, None),  # Nuclei
+    (32, 2, None),  # JoomScan
+    (26, 3, 3),  # SearchSploit
+    (27, 3, 3),  # Metasploit
+]
+
 
 class TasksQueueTest(RekonoTest):
     def setUp(self) -> None:
@@ -51,78 +76,33 @@ class TasksQueueTest(RekonoTest):
         self.queue._consume_process_task(self.task)
         self.assertEqual(
             Step.objects.filter(process=process).count(),
-            Execution.objects.count(),
+            Execution.objects.filter(task=self.task).count(),
         )
 
     def test_process_task(self) -> None:
-        self._test_process_task(Intensity.INSANE)
         execution_id = 1
-        for configuration_id, group in [
-            (19, 1),  # theHarvester
-            (30, 1),  # EmailFinder
-            (31, 1),  # EmailHarvester
-            (46, 1),  # Gobuster
-            (38, 1),  # Nmap
-            (47, 2),  # Gobuster
-            (22, 2),  # Sslscan
-            (23, 2),  # SSLyze
-            (28, 2),  # Log4Shell Scan
-            (29, 2),  # Log4Shell Scan
-            (34, 2),  # SSH Audit
-            (24, 2),  # CMSeeK
-            (33, 2),  # GitDumper & GitLeaks
-            (15, 2),  # Dirsearch
-            (36, 2),  # SMB Map
-            (48, 2),  # Gobuster
-            (21, 2),  # Nikto
-            (25, 2),  # ZAP
-            (39, 2),  # Nuclei
-            (32, 2),  # JoomScan
-            (26, 3),  # SearchSploit
-            (27, 3),  # Metasploit
-        ]:
-            self._validate_execution(
-                Execution.objects.get(configuration__id=configuration_id),
-                self.task.id,
-                execution_id,
-                configuration_id,
-                group,
-            )
-            execution_id += 1
+        for intensity, group_index in [(Intensity.INSANE, 1), (Intensity.SNEAKY, 2)]:
+            self._test_process_task(intensity)
+            for configuration_id, group in [
+                (e[0], e[group_index])
+                for e in expected_executions
+                if e[group_index] is None
+            ] + [
+                (e[0], e[group_index])
+                for e in expected_executions
+                if e[group_index] is not None
+            ]:
+                self._validate_execution(
+                    Execution.objects.get(
+                        task=self.task, configuration__id=configuration_id
+                    ),
+                    self.task.id,
+                    execution_id,
+                    configuration_id,
+                    group or 1,
+                    Status.REQUESTED if group is not None else Status.SKIPPED,
+                )
+                execution_id += 1
 
-    def test_process_task_sneaky_intensity(self) -> None:
-        self._test_process_task(Intensity.SNEAKY)
-        execution_id = 1
-        for configuration_id, group in [
-            (23, None),  # SSLyze
-            (28, None),  # Log4Shell Scan
-            (29, None),  # Log4Shell Scan
-            (34, None),  # SSH Audit
-            (24, None),  # CMSeeK
-            (33, None),  # GitDumper & GitLeaks
-            (36, None),  # SMB Map
-            (21, None),  # Nikto
-            (25, None),  # ZAP
-            (39, None),  # Nuclei
-            (32, None),  # JoomScan
-            (19, 1),  # theHarvester
-            (30, 1),  # EmailFinder
-            (31, 1),  # EmailHarvester
-            (46, 1),  # Gobuster
-            (38, 1),  # Nmap
-            (47, 2),  # Gobuster
-            (22, 2),  # Sslscan
-            (15, 2),  # Dirsearch
-            (48, 2),  # Gobuster
-            (26, 3),  # SearchSploit
-            (27, 3),  # Metasploit
-        ]:
-            self._validate_execution(
-                Execution.objects.get(configuration__id=configuration_id),
-                self.task.id,
-                execution_id,
-                configuration_id,
-                group or 1,
-                Status.REQUESTED if group is not None else Status.SKIPPED,
-            )
-            execution_id += 1
+    def test_calculate_executions(self) -> None:
+        pass

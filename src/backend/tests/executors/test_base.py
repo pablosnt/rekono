@@ -159,7 +159,7 @@ class ToolExecutorTest(RekonoTest):
         self.target.save(update_fields=["target"])
         self._setup_task_user_provided_entities()
         self._success_get_arguments(
-            f"-p http://10.10.10.12:80/login.php -p 80 -p /login.php -p Joomla -p CVE-2023-2222 -p root -p {wordlist.path}",
+            f"-p http://10.10.10.12:80/login.php -p 80 -p /login.php -p Joomla -p CVE-2023-2222 -p root -p {self.wordlist.path}",
             [],
             [self.target_port],
             [self.input_vulnerability],
