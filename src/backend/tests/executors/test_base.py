@@ -1,4 +1,5 @@
 from typing import List
+from unittest import mock
 
 from authentications.enums import AuthenticationType
 from authentications.models import Authentication
@@ -11,9 +12,8 @@ from input_types.enums import InputTypeName
 from input_types.models import InputType
 from parameters.models import InputTechnology, InputVulnerability
 from target_ports.models import TargetPort
-from targets.enums import TargetType
-from targets.models import Target
 from tasks.models import Task
+from tests.executors.mock import get_url
 from tests.framework import RekonoTest
 from tools.enums import Intensity as IntensityEnum
 from tools.enums import Stage
@@ -85,11 +85,6 @@ class ToolExecutorTest(RekonoTest):
             status=Status.REQUESTED,
         )
         self._setup_findings(self.execution)
-        # scanme.nmap.org: connectivity is needed to build a valid URL from host, port and path
-        self.host.address = "45.33.32.156"
-        self.host.save(update_fields=["address"])
-        self.path.path = "/images"
-        self.path.save(update_fields=["path"])
         self.osint.data = "10.10.10.11"
         self.osint.data_type = OSINTDataType.IP
         self.osint.save(update_fields=["data", "data_type"])
@@ -129,21 +124,24 @@ class ToolExecutorTest(RekonoTest):
             )
         )
 
+    @mock.patch("framework.models.BaseInput._get_url", get_url)
     def test_get_arguments_only_findings(self) -> None:
         self._success_get_arguments(
-            "-p 10.10.10.11 -p http://45.33.32.156:80/images -p 80 -p /images -p WordPress -p admin -p CVE-2023-1111 -p ReverseShell",
+            "-p 10.10.10.11 -p http://10.10.10.10:80/index.php -p 80 -p /index.php -p WordPress -p admin -p CVE-2023-1111 -p ReverseShell",
             self.findings,
         )
 
+    @mock.patch("framework.models.BaseInput._get_url", get_url)
     def test_get_arguments_only_required_findings(self) -> None:
         self._success_get_arguments(
-            "-p http://45.33.32.156:80/ -p 80 -p WordPress -p CVE-2023-1111",
+            "-p http://10.10.10.10:80/ -p 80 -p WordPress -p CVE-2023-1111",
             [self.host, self.port, self.technology, self.vulnerability],
         )
 
+    @mock.patch("framework.models.BaseInput._get_url", get_url)
     def test_get_arguments_multiple_ports(self) -> None:
         self._success_get_arguments(
-            "-p http://45.33.32.156:80/ -p 80,443 -p WordPress -p CVE-2023-1111",
+            "-p http://10.10.10.10:80/ -p 80,443 -p WordPress -p CVE-2023-1111",
             [
                 self.host,
                 self.port,
@@ -155,12 +153,12 @@ class ToolExecutorTest(RekonoTest):
             ],
         )
 
+    @mock.patch("framework.models.BaseInput._get_url", get_url)
     def test_get_arguments_no_findings(self) -> None:
-        self.target.target = "scanme.nmap.org"
-        self.target.type = TargetType.DOMAIN
-        self.target.save(update_fields=["target", "type"])
+        self.target.target = "10.10.10.12"
+        self.target.save(update_fields=["target"])
         target_port = TargetPort.objects.create(
-            target=self.target, port=80, path="/images"
+            target=self.target, port=80, path="/login.php"
         )
         Authentication.objects.create(
             name="root",
@@ -180,7 +178,7 @@ class ToolExecutorTest(RekonoTest):
             path=self.data_dir / "wordlists" / "endpoints_wordlist.txt",
         )
         self._success_get_arguments(
-            f"-p http://scanme.nmap.org:80/images -p 80 -p /images -p Joomla -p CVE-2023-2222 -p root -p {wordlist.path}",
+            f"-p http://10.10.10.12:80/login.php -p 80 -p /login.php -p Joomla -p CVE-2023-2222 -p root -p {wordlist.path}",
             [],
             [target_port],
             [input_vulnerability],
@@ -191,61 +189,10 @@ class ToolExecutorTest(RekonoTest):
     def test_get_arguments_no_base_inputs(self) -> None:
         self.assertFalse(self.executor.check_arguments([], [], [], [], []))
 
+    @mock.patch("framework.models.BaseInput._get_url", get_url)
     def test_get_arguments_missing_one_required_finding(self) -> None:
         self.assertFalse(
             self.executor.check_arguments(
                 [self.osint, self.host, self.port, self.technology], [], [], [], []
             )
         )
-
-
-class GobusterExecutorTest(RekonoTest):
-    def setUp(self) -> None:
-        super().setUp()
-        self._setup_project()
-        self.endpoints_wordlist = Wordlist.objects.create(
-            name="endpoints",
-            type=WordlistType.ENDPOINT,
-            path=self.data_dir / "wordlists" / "endpoints_wordlist.txt",
-        )
-        self.subdomains_wordlist = Wordlist.objects.create(
-            name="subdomains",
-            type=WordlistType.SUBDOMAIN,
-            path=self.data_dir / "wordlists" / "subdomains_wordlist.txt",
-        )
-
-    def _setup_executor(self, target: str) -> None:
-        self.target = Target.objects.create(
-            project=self.project, target=target, type=Target.get_type(target)
-        )
-        self.configuration = Configuration.objects.get(
-            tool__name="Gobuster", default=True
-        )
-        self.task = Task.objects.create(
-            target=self.target,
-            configuration=self.configuration,
-            executor=self.auditor1,
-        )
-        self.execution = Execution.objects.create(
-            task=self.task,
-            configuration=self.configuration,
-            status=Status.REQUESTED,
-        )
-        self.executor = self.configuration.tool.get_executor_class()(self.execution)
-
-    def _test_check_arguments(
-        self, target: str, wordlist: Wordlist, expected: bool
-    ) -> None:
-        self._setup_executor(target)
-        self.assertEqual(
-            expected, self.executor.check_arguments([], [], [], [], [wordlist])
-        )
-
-    def test_check_arguments_no_domain_target(self) -> None:
-        self._test_check_arguments("10.10.10.10", self.subdomains_wordlist, False)
-
-    def test_check_arguments_no_wordlist(self) -> None:
-        self._test_check_arguments("scanme.nmap.org", self.endpoints_wordlist, False)
-
-    def test_check_arguments(self) -> None:
-        self._test_check_arguments("scanme.nmap.org", self.subdomains_wordlist, True)
