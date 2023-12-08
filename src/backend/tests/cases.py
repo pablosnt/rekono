@@ -45,12 +45,7 @@ class ApiTestCase(RekonoTestCase):
             else:
                 if isinstance(value, list):
                     self.tc.assertEqual(len(value), len(response.get(key, [])))
-                try:
-                    self.tc.assertEqual(value, response.get(key))
-                except Exception as ex:
-                    print(self.__dict__)
-                    input(response)
-                    raise ex
+                self.tc.assertEqual(value, response.get(key))
 
     def test_case(self, *args: Any, **kwargs: Any) -> None:
         for executor in self.executors:
@@ -65,13 +60,7 @@ class ApiTestCase(RekonoTestCase):
                     data=self.data or None,
                     format=self.format,
                 )
-                try:
-                    self.tc.assertEqual(self.status_code, response.status_code)
-                except Exception as ex:
-                    print(self.__dict__)
-                    print(response.status_code)
-                    input(response.content)
-                    raise ex
+                self.tc.assertEqual(self.status_code, response.status_code)
                 content = json.loads((response.content or "{}".encode()).decode())
                 if self.expected is not None:
                     if isinstance(self.expected, dict):
@@ -113,12 +102,7 @@ class ToolTestCase(RekonoTestCase):
             kwargs["reports"] / kwargs["tool"].lower().replace(" ", "_"),
         )
         parser.parse()
-        try:
-            self.tc.assertEqual(len(self.expected or []), len(parser.findings))
-        except Exception as ex:
-            print(self.expected)
-            input(parser.findings)
-            raise ex
+        self.tc.assertEqual(len(self.expected or []), len(parser.findings))
         for index, finding in enumerate(parser.findings):
             expected = self.expected[index]
             self.tc.assertTrue(isinstance(finding, expected.get("model")))
