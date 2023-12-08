@@ -85,19 +85,28 @@ class SMTP(BaseNotification):
             },
         )
 
-    def invite_user(self, user: Any) -> None:
+    def invite_user(self, user: Any, otp: str) -> None:
         self._send_messages_in_background(
-            [user], "Welcome to Rekono", "user_invitation.html", {"user": user}
+            [user],
+            "Welcome to Rekono",
+            "user_invitation.html",
+            {"user": user, "user_otp": otp},
         )
 
-    def reset_password(self, user: Any) -> None:
+    def reset_password(self, user: Any, otp: str) -> None:
         self._send_messages_in_background(
-            [user], "Reset Rekono password", "user_password_reset.html", {"user": user}
+            [user],
+            "Reset Rekono password",
+            "user_password_reset.html",
+            {"user": user, "user_otp": otp},
         )
 
-    def enable_user_account(self, user: Any) -> None:
+    def enable_user_account(self, user: Any, otp: str) -> None:
         self._send_messages_in_background(
-            [user], "Rekono user enabled", "user_enable_account.html", {"user": user}
+            [user],
+            "Rekono user enabled",
+            "user_enable_account.html",
+            {"user": user, "user_otp": otp},
         )
 
     def login_notification(self, user: Any) -> None:

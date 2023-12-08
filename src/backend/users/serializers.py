@@ -15,6 +15,7 @@ from rest_framework.serializers import (
     Serializer,
 )
 from security.authorization.roles import Role
+from security.cryptography.hashing import hash
 from users.models import User
 
 logger = logging.getLogger()
@@ -150,7 +151,7 @@ class OTPSerializer(UserSerializer):
         try:
             # Search inactive user by otp and check expiration datetime
             user = User.objects.get(
-                otp=attrs.get("otp"), otp_expiration__gt=timezone.now()
+                otp=hash(attrs.get("otp")), otp_expiration__gt=timezone.now()
             )
         except User.DoesNotExist:  # Invalid otp
             raise AuthenticationFailed(

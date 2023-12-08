@@ -1,6 +1,7 @@
 from typing import Any
 
 from security.authorization.roles import Role
+from security.cryptography.hashing import hash
 from tests.cases import ApiTestCase
 from tests.framework import ApiTest
 from users.enums import Notification
@@ -269,7 +270,9 @@ class UserTest(ApiTest):
         response = authenticated_client.post(self.endpoint, data=invitation1)
         self.assertEqual(201, response.status_code)
         new_user = User.objects.get(email=invitation1["email"])
-        otp = new_user.otp
+        otp = User.objects.generate_otp()
+        new_user.otp = hash(otp)
+        new_user.save(update_fields=["otp"])
 
         response = authenticated_client.post(
             f"{self.endpoint}create/", data={"otp": otp, **user1}
@@ -402,7 +405,10 @@ class ResetPasswordTest(ApiTest):
         client = self._get_api_client()
         response = client.post(self.endpoint, data={"email": self.admin1.email})
         self.assertEqual(200, response.status_code)
-        otp = User.objects.get(email=self.admin1.email).otp
+        user = User.objects.get(email=self.admin1.email)
+        otp = User.objects.generate_otp()
+        user.otp = hash(otp)
+        user.save(update_fields=["otp"])
 
         response = client.put(
             self.endpoint, data={"otp": "invalid OTP", "password": new_valid_password}

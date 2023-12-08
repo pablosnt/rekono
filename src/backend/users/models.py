@@ -29,7 +29,7 @@ class RekonoUserManager(UserManager):
 
     def generate_otp(self, model: Any = None) -> str:
         otp = hash(generate_random_value(3000))
-        if (model or User).objects.filter(otp=otp).exists():
+        if (model or User).objects.filter(otp=hash(otp)).exists():
             return self.generate_otp(model)
         return otp
 
@@ -60,14 +60,15 @@ class RekonoUserManager(UserManager):
             Any: Created user
         """
         # Create new user including an OTP. The user will be inactive while invitation is not accepted
+        plain_otp = self.generate_otp()
         user = User.objects.create(
             email=email,
-            otp=self.generate_otp(),
+            otp=hash(plain_otp),
             otp_expiration=self.get_otp_expiration_time(),
             is_active=None,
         )
         self.assign_role(user, role)
-        SMTP().invite_user(user)
+        SMTP().invite_user(user, plain_otp)
         logger.info(f"[User] User {user.id} has been invited with role {role}")
         return user
 
@@ -126,11 +127,12 @@ class RekonoUserManager(UserManager):
         Returns:
             Any: Enabled user
         """
-        user.otp = self.generate_otp()  # Generate its OTP
+        plain_otp = self.generate_otp()
+        user.otp = hash(plain_otp)
         user.otp_expiration = self.get_otp_expiration_time()  # Set OTP expiration
         user.is_active = True
         user.save(update_fields=["otp", "otp_expiration", "is_active"])
-        SMTP().enable_user_account(user)
+        SMTP().enable_user_account(user, plain_otp)
         logger.info(f"[User] User {user.id} has been enabled")
         return user
 
@@ -165,10 +167,11 @@ class RekonoUserManager(UserManager):
         Returns:
             Any: User after request password reset
         """
-        user.otp = self.generate_otp()  # Generate its OTP
+        plain_otp = self.generate_otp()
+        user.otp = hash(plain_otp)
         user.otp_expiration = self.get_otp_expiration_time()  # Set OTP expiration
         user.save(update_fields=["otp", "otp_expiration"])
-        SMTP().reset_password(user)
+        SMTP().reset_password(user, plain_otp)
         logger.info(
             f"[User] User {user.id} requested a password reset", extra={"user": user.id}
         )

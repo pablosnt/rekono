@@ -9,6 +9,7 @@ from platforms.telegram_app.notifications.notifications import Telegram
 from rest_framework import status
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
+from security.cryptography.hashing import hash
 from security.input_validator import Regex, Validator
 
 logger = logging.getLogger()
@@ -52,7 +53,7 @@ class TelegramChatSerializer(ModelSerializer):
         attrs = super().validate(attrs)
         try:
             attrs["telegram_chat"] = TelegramChat.objects.get(
-                otp=attrs.get("otp"),
+                otp=hash(attrs.get("otp")),
                 otp_expiration__gt=timezone.now(),
                 user=None,
             )

@@ -6,6 +6,7 @@ from platforms.telegram_app.bot.enums import Context, Section
 from platforms.telegram_app.bot.framework import BaseTelegramBot
 from platforms.telegram_app.models import TelegramChat
 from rekono.settings import DESCRIPTION
+from security.cryptography.hashing import hash
 from telegram import Update
 from telegram.ext import CallbackContext, CommandHandler, ConversationHandler
 from users.models import User
@@ -59,19 +60,20 @@ class Start(BaseCommand):
 
     @sync_to_async
     def _update_or_create_telegram_chat_async(self, chat_id: int) -> TelegramChat:
+        plain_otp = User.objects.generate_otp(TelegramChat)
         telegram_chat, _ = TelegramChat.objects.update_or_create(
             defaults={
                 "user": None,
-                "otp": User.objects.generate_otp(TelegramChat),
+                "otp": hash(plain_otp),
                 "otp_expiration": User.objects.get_otp_expiration_time(),
             },
             chat_id=chat_id,
         )
-        return telegram_chat
+        return telegram_chat, plain_otp
 
     async def _execute_command(self, update: Update, context: CallbackContext) -> None:
         await super()._execute_command(update, context)
-        telegram_chat = await self._update_or_create_telegram_chat_async(
+        telegram_chat, plain_otp = await self._update_or_create_telegram_chat_async(
             update.effective_chat.id
         )
         logger.info(
@@ -88,7 +90,7 @@ Link this chat with your Rekono account by adding the following token to your Re
 
 Then, type /help to start hacking\. Enjoy\!
 """.format(
-                otp=telegram_chat.otp
+                otp=plain_otp
             ),
         )
 
