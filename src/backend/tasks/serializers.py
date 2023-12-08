@@ -85,7 +85,7 @@ class TaskSerializer(ModelSerializer):
                 tool=attrs.get("configuration").tool, value=attrs.get("intensity")
             ).exists():
                 raise ValidationError(
-                    f'Invalid intensity {attrs["intensity"]} for tool {attrs["tool"].name}',
+                    f'Invalid intensity {attrs["intensity"]} for tool {attrs.get("configuration").tool.name}',
                     code="intensity",
                 )
         elif attrs.get("process"):

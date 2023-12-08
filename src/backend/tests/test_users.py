@@ -133,7 +133,50 @@ class UserTest(ApiTest):
             endpoint="{endpoint}?no_project=1",
         ),
         ApiTestCase(["admin2"], "get", 200, endpoint="{endpoint}?project=1"),
-        ApiTestCase(["admin2"], "get", 200, endpoint="{endpoint}?no_project=1"),
+        ApiTestCase(
+            ["admin2"],
+            "get",
+            200,
+            expected=[
+                {
+                    "id": 6,
+                    "username": "reader2",
+                    "role": Role.READER.value,
+                    "is_active": True,
+                },
+                {
+                    "id": 5,
+                    "username": "reader1",
+                    "role": Role.READER.value,
+                    "is_active": True,
+                },
+                {
+                    "id": 4,
+                    "username": "auditor2",
+                    "role": Role.AUDITOR.value,
+                    "is_active": True,
+                },
+                {
+                    "id": 3,
+                    "username": "auditor1",
+                    "role": Role.AUDITOR.value,
+                    "is_active": True,
+                },
+                {
+                    "id": 2,
+                    "username": "admin2",
+                    "role": Role.ADMIN.value,
+                    "is_active": True,
+                },
+                {
+                    "id": 1,
+                    "username": "admin1",
+                    "role": Role.ADMIN.value,
+                    "is_active": True,
+                },
+            ],
+            endpoint="{endpoint}?no_project=1",
+        ),
         ApiTestCase(
             ["auditor1", "auditor2", "reader1", "reader2"], "post", 403, invitation1
         ),

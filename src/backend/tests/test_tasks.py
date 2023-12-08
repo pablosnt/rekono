@@ -5,10 +5,18 @@ from tests.cases import ApiTestCase
 from tests.framework import ApiTest
 from tools.enums import Intensity
 
-task1 = {"target_id": 1, "configuration_id": 1, "intensity": Intensity.HARD.value}
+task1 = {
+    "target_id": 1,
+    "configuration_id": 1,
+    "intensity": Intensity.HARD.name.capitalize(),
+}
 task2 = {"target_id": 1, "process_id": 1}
 invalid_task1 = {"target_id": 1}
-invalid_task2 = {**task1, "configuration_id": 25, "intensity": Intensity.SNEAKY.value}
+invalid_task2 = {
+    **task1,
+    "configuration_id": 25,
+    "intensity": Intensity.SNEAKY.name.capitalize(),
+}
 
 
 class TaskTest(ApiTest):
