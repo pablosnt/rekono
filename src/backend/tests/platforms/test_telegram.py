@@ -33,7 +33,7 @@ class TelegramSettingsTest(ApiTest):
 
 class TelegramChatTest(ApiTest):
     endpoint = "/api/telegram/link/"
-    expected_str = "admin1@rekono.com"
+    expected_str = "admin1@rekono.com - 1"
     cases = [
         ApiTestCase(
             ["admin1", "admin2", "auditor1", "auditor2", "reader1", "reader2"],

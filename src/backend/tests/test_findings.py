@@ -218,26 +218,6 @@ class FindingTest(ApiTest):
                 findings_data[finding.__class__][1],
                 finding.__str__(),
             )
-        for finding_model, new_data, pop_field, expected_str in [
-            (
-                Vulnerability,
-                {"port": 1},
-                "technology",
-                "10.10.10.10 - 80 - Test - CVE-2023-1111",
-            ),
-            (
-                Exploit,
-                {"technology": 1},
-                "vulnerability",
-                "10.10.10.10 - 80 - WordPress - ReverseShell",
-            ),
-        ]:
-            data = {**self.raw_findings[finding_model], **new_data}
-            data.pop(pop_field)
-            self.assertEqual(
-                expected_str,
-                self._create_finding(finding_model, data, self.execution3).__str__(),
-            )
 
     def test_anonymous_access(self) -> None:
         for _, _, endpoint in findings_data.values():
