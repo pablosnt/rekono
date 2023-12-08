@@ -5,7 +5,7 @@ import requests
 import urllib3
 from django.db import models
 from django.db.models import Q
-from rekono.settings import AUTH_USER_MODEL
+from rekono.settings import AUTH_USER_MODEL, CONFIG
 from security.cryptography.encryption import Encryption
 
 
@@ -52,22 +52,29 @@ class BaseEncrypted(BaseModel):
     class Meta:
         abstract = True
 
-    _encryption = Encryption()
+    _encryption = Encryption(CONFIG.encryption_key) if CONFIG.encryption_key else None
     _encrypted_field = "_secret"
 
     @property
     def secret(self) -> str:
         return (
-            self._encryption.decrypt(getattr(self, self._encrypted_field))
+            (
+                self._encryption.decrypt(getattr(self, self._encrypted_field))
+                if self._encryption
+                else getattr(self, self._encrypted_field)
+            )
             if hasattr(self, self._encrypted_field)
-            and getattr(self, self._encrypted_field)
             else None
         )
 
     @secret.setter
     def secret(self, value: str) -> None:
         if hasattr(self, self._encrypted_field) and value:
-            setattr(self, self._encrypted_field, self._encryption.encrypt(value))
+            setattr(
+                self,
+                self._encrypted_field,
+                self._encryption.encrypt(value) if self._encryption else value,
+            )
 
 
 class BaseInput(BaseModel):

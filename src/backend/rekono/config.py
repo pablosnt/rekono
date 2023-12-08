@@ -27,12 +27,6 @@ class RekonoConfig:
             self.config_file = self._get_config_file()
         with self.config_file.open("r") as file:
             self._config_properties = yaml.safe_load(file)
-        self.encryption_key = self._get_config(Property.ENCRYPTION_KEY)
-        if not self.encryption_key:
-            self.encryption_key = Fernet.generate_key().decode()
-            self._update_config_in_file(
-                Property.ENCRYPTION_KEY.value[1], self.encryption_key
-            )
         for property in Property:
             if not hasattr(self, property.name.lower()) or not getattr(
                 self, property.name.lower()

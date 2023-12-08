@@ -162,4 +162,3 @@ rekono-kbx
 # Temporal ignore
 src/backend-1.x/
 migrations/
-config.yaml
