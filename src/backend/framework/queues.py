@@ -117,16 +117,7 @@ class BaseQueue:
                         continue
                 input_types_used.add(input_type)
                 if tool_input.argument.multiple:
-                    try:
-                        executions[execution_index][index].extend(base_inputs)
-                    except Exception as ex:
-                        print(executions)
-                        print()
-                        print(base_inputs)
-                        print()
-                        print(execution_index)
-                        input(index)
-                        raise ex
+                    executions[execution_index][index].extend(base_inputs)
                 else:
                     original_execution = copy.deepcopy(execution)
                     executions[execution_index][index].append(base_inputs[0])

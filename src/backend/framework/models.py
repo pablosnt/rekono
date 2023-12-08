@@ -6,7 +6,7 @@ import urllib3
 from django.db import models
 from django.db.models import Q
 from rekono.settings import AUTH_USER_MODEL, CONFIG
-from security.cryptography.encryption import Encryption
+from security.cryptography.encryption import Encryptor
 
 
 class BaseModel(models.Model):
@@ -52,18 +52,19 @@ class BaseEncrypted(BaseModel):
     class Meta:
         abstract = True
 
-    _encryption = Encryption(CONFIG.encryption_key) if CONFIG.encryption_key else None
+    _encryptor = Encryptor(CONFIG.encryption_key) if CONFIG.encryption_key else None
     _encrypted_field = "_secret"
 
     @property
     def secret(self) -> str:
         return (
             (
-                self._encryption.decrypt(getattr(self, self._encrypted_field))
-                if self._encryption
+                self._encryptor.decrypt(getattr(self, self._encrypted_field))
+                if self._encryptor
                 else getattr(self, self._encrypted_field)
             )
             if hasattr(self, self._encrypted_field)
+            and getattr(self, self._encrypted_field)
             else None
         )
 
@@ -73,7 +74,7 @@ class BaseEncrypted(BaseModel):
             setattr(
                 self,
                 self._encrypted_field,
-                self._encryption.encrypt(value) if self._encryption else value,
+                self._encryptor.encrypt(value) if self._encryptor else value,
             )
 
 
@@ -198,7 +199,7 @@ class BaseInput(BaseModel):
         Returns:
             Dict[str, Any]: Useful information for tool executions, including accumulated if setted
         """
-        return {}  # pragma: no cover
+        return {}
 
     def get_input_type(self) -> Any:
         from input_types.models import InputType

@@ -44,7 +44,7 @@ class DefectDojoSettings(BaseEncrypted):
     _encrypted_field = "_api_token"
 
     def __str__(self) -> str:
-        return self.server
+        return self.server if self.server else super().__str__()
 
 
 class DefectDojoSync(BaseModel):

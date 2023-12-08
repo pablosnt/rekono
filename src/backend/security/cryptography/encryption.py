@@ -1,7 +1,7 @@
 from cryptography.fernet import Fernet
 
 
-class Encryption:
+class Encryptor:
     def __init__(self, encryption_key: str) -> None:
         self.fernet = Fernet(encryption_key.encode())
 
@@ -13,4 +13,4 @@ class Encryption:
 
     @classmethod
     def generate_encryption_key(self) -> str:
-        return self.fernet.generate_key().decode()
+        return Fernet.generate_key().decode()
