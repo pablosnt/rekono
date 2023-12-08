@@ -39,7 +39,7 @@ class TargetValidator(RegexValidator):
             try:
                 match = re.fullmatch(denied_value, value)
             except:
-                continue
+                match = None
             if match:
                 raise ValidationError(
                     f"Target is disallowed by policy",
