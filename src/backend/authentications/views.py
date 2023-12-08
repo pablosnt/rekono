@@ -2,6 +2,11 @@ from authentications.filters import AuthenticationFilter
 from authentications.models import Authentication
 from authentications.serializers import AuthenticationSerializer
 from framework.views import BaseViewSet
+from rest_framework.permissions import IsAuthenticated
+from security.authorization.permissions import (
+    ProjectMemberPermission,
+    RekonoModelPermission,
+)
 
 # Create your views here.
 
@@ -12,6 +17,11 @@ class AuthenticationViewSet(BaseViewSet):
     queryset = Authentication.objects.all()
     serializer_class = AuthenticationSerializer
     filterset_class = AuthenticationFilter
+    permission_classes = [
+        IsAuthenticated,
+        RekonoModelPermission,
+        ProjectMemberPermission,
+    ]
     search_fields = ["name"]
     ordering_fields = ["id", "name", "type"]
     http_method_names = [

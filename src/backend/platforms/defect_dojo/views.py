@@ -8,7 +8,11 @@ from platforms.defect_dojo.serializers import (
     DefectDojoSyncSerializer,
 )
 from rest_framework.permissions import IsAuthenticated
-from security.authorization.permissions import IsAuditor
+from security.authorization.permissions import (
+    IsAuditor,
+    ProjectMemberPermission,
+    RekonoModelPermission,
+)
 
 # Create your views here.
 
@@ -16,6 +20,7 @@ from security.authorization.permissions import IsAuditor
 class DefectDojoSettingsViewSet(BaseViewSet):
     queryset = DefectDojoSettings.objects.all()
     serializer_class = DefectDojoSettingsSerializer
+    permission_classes = [IsAuthenticated, RekonoModelPermission]
     http_method_names = [
         "get",
         "put",
@@ -25,6 +30,11 @@ class DefectDojoSettingsViewSet(BaseViewSet):
 class DefectDojoSyncViewSet(BaseViewSet):
     queryset = DefectDojoSync.objects.all()
     serializer_class = DefectDojoSyncSerializer
+    permission_classes = [
+        IsAuthenticated,
+        RekonoModelPermission,
+        ProjectMemberPermission,
+    ]
     http_method_names = [
         "post",
         "delete",

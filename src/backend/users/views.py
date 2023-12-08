@@ -6,12 +6,16 @@ from drf_spectacular.utils import extend_schema
 from framework.views import BaseViewSet
 from rest_framework import status
 from rest_framework.decorators import action
-from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.serializers import Serializer
 from rest_framework.viewsets import GenericViewSet
-from security.authorization.permissions import IsAdmin, IsNotAuthenticated
+from security.authorization.permissions import (
+    IsAdmin,
+    IsNotAuthenticated,
+    RekonoModelPermission,
+)
 from users.filters import UserFilter
 from users.models import User
 from users.serializers import (
@@ -36,6 +40,8 @@ class UserViewSet(BaseViewSet):
     serializer_class = UserSerializer
     queryset = User.objects.all()
     filterset_class = UserFilter
+    # Required to include the IsAdmin to the base authorization classes and remove unneeded permissions
+    permission_classes = [IsAuthenticated, RekonoModelPermission, IsAdmin]
     # Fields used to search tasks
     search_fields = ["username", "first_name", "last_name", "email"]
     ordering_fields = [
@@ -53,8 +59,6 @@ class UserViewSet(BaseViewSet):
         "put",
         "delete",
     ]
-    # Required to include the IsAdmin to the base authorization classes and remove unneeded permissions
-    permission_classes = [IsAuthenticated, DjangoModelPermissions, IsAdmin]
 
     def _get_object_if_not_current_user(self, request) -> User:
         instance = self.get_object()  # Get user instance

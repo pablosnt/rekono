@@ -1,9 +1,19 @@
 from framework.views import BaseViewSet
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.serializers import Serializer
+from security.authorization.permissions import (
+    ProjectMemberPermission,
+    RekonoModelPermission,
+)
 
 
 class FindingViewSet(BaseViewSet):
     triage_serializer_class = None
+    permission_classes = [
+        IsAuthenticated,
+        RekonoModelPermission,
+        ProjectMemberPermission,
+    ]
     http_method_names = [
         "get",
         "put",

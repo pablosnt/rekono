@@ -6,8 +6,13 @@ from projects.serializers import ProjectMemberSerializer, ProjectSerializer
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
+from security.authorization.permissions import (
+    ProjectMemberPermission,
+    RekonoModelPermission,
+)
 from users.models import User
 
 # Create your views here.
@@ -19,6 +24,11 @@ class ProjectViewSet(BaseViewSet):
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
     filterset_class = ProjectFilter
+    permission_classes = [
+        IsAuthenticated,
+        RekonoModelPermission,
+        ProjectMemberPermission,
+    ]
     search_fields = ["name", "description"]  # Fields used to search projects
     ordering_fields = ["id", "name"]
 

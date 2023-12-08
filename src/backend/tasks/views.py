@@ -10,9 +10,14 @@ from framework.views import BaseViewSet
 from rekono.settings import CONFIG
 from rest_framework import status
 from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rq.command import send_stop_job_command
+from security.authorization.permissions import (
+    ProjectMemberPermission,
+    RekonoModelPermission,
+)
 from tasks.filters import TaskFilter
 from tasks.models import Task
 from tasks.queues import TasksQueue
@@ -27,6 +32,11 @@ class TaskViewSet(BaseViewSet):
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
     filterset_class = TaskFilter
+    permission_classes = [
+        IsAuthenticated,
+        RekonoModelPermission,
+        ProjectMemberPermission,
+    ]
     search_fields = [
         "target__target",
         "process__name",
