@@ -11,7 +11,7 @@ api_token1 = {
 }
 invalid_api_token = {
     "name": "test;1",
-    "expiration": (datetime.now() + timedelta(days=365)).isoformat() + "Z",
+    "expiration": (datetime.now() - timedelta(days=365)).isoformat() + "Z",
 }
 
 

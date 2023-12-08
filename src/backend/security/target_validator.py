@@ -36,12 +36,15 @@ class TargetValidator(RegexValidator):
                 params={"value": value},
             )
         for denied_value in self.target_blacklist:
-            if re.fullmatch(denied_value, value):
-                raise ValidationError(
-                    f"Target is disallowed by policy",
-                    code=self.code,
-                    params={"value": value},
-                )
+            try:
+                if re.fullmatch(denied_value, value):
+                    raise ValidationError(
+                        f"Target is disallowed by policy",
+                        code=self.code,
+                        params={"value": value},
+                    )
+            except:
+                continue
             for address_class, network_class in [
                 (ipaddress.IPv4Address, ipaddress.IPv4Network),
                 (ipaddress.IPv6Address, ipaddress.IPv6Network),

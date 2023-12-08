@@ -19,7 +19,11 @@ new_profile = {
     "telegram_notifications": False,
 }
 new_valid_password = "NeW.Pa$$W0rd"
-new_invalid_password = "new password"
+invalid_password1 = "new;password"
+invalid_password2 = "NEWPASSWORD"
+invalid_password3 = "newpassword"
+invalid_password4 = "NEWpassword"
+invalid_password5 = "NEWpassword5"
 
 user1 = {
     "username": "test1",
@@ -27,9 +31,13 @@ user1 = {
     "last_name": "test",
     "password": new_valid_password,
 }
-invalid_user1 = {**user1, "username": "test;1"}
-invalid_user2 = {**user1, "password": new_invalid_password}
-invalid_user3 = {**user1, "first_name": "test;1"}
+
+invalid_user1 = {**user1, "password": invalid_password1}
+invalid_user2 = {**user1, "password": invalid_password2}
+invalid_user3 = {**user1, "password": invalid_password3}
+invalid_user4 = {**user1, "password": invalid_password4}
+invalid_user5 = {**user1, "password": invalid_password5}
+invalid_user6 = {**user1, "username": "test;1", "first_name": "test;1"}
 
 
 class UserTest(ApiTest):
@@ -385,7 +393,14 @@ class UserTest(ApiTest):
         )
         self.assertEqual(401, response.status_code)
 
-        for invalid_user in [invalid_user1, invalid_user2, invalid_user3]:
+        for invalid_user in [
+            invalid_user1,
+            invalid_user2,
+            invalid_user3,
+            invalid_user4,
+            invalid_user5,
+            invalid_user6,
+        ]:
             response = client.post(
                 f"{self.endpoint}create/", data={"otp": otp, **invalid_user}
             )
@@ -471,7 +486,7 @@ class Profile(ApiTest):
             ["admin1"],
             "put",
             400,
-            {"password": new_invalid_password, "old_password": "admin1"},
+            {"password": invalid_password1, "old_password": "admin1"},
             endpoint="/api/security/update-password/",
         ),
         ApiTestCase(
@@ -525,7 +540,7 @@ class ResetPasswordTest(ApiTest):
 
         response = client.put(
             self.endpoint,
-            data={"otp": otp, "password": new_invalid_password},
+            data={"otp": otp, "password": invalid_password2},
         )
         self.assertEqual(400, response.status_code)
 
