@@ -5,8 +5,8 @@ from pathlib import Path
 from typing import Any, Optional
 
 import yaml
-from cryptography.fernet import Fernet
 from rekono.properties import Property
+from security.cryptography.encryption import Encryptor
 
 
 class RekonoConfig:
@@ -25,6 +25,7 @@ class RekonoConfig:
         if self.testing:
             shutil.copy(self.config_file, self.home)
             self.config_file = self._get_config_file()
+            self.encryption_key = Encryptor.generate_encryption_key()
         with self.config_file.open("r") as file:
             self._config_properties = yaml.safe_load(file)
         for property in Property:

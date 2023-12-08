@@ -148,6 +148,27 @@ class FindingTest(ApiTest):
                         endpoint=findings_data[finding.__class__][2],
                     ),
                     ApiTestCase(
+                        ["admin1", "auditor1", "reader1"],
+                        "get",
+                        200,
+                        expected=[
+                            {
+                                "id": 1,
+                                "triage_status": TriageStatus.UNTRIAGED.value,
+                                "triage_comment": "",
+                                **{
+                                    k: v
+                                    if not isinstance(v, models.TextChoices)
+                                    else v.value
+                                    for k, v in self.raw_findings[
+                                        finding.__class__
+                                    ].items()
+                                },
+                            }
+                        ],
+                        endpoint=f"{findings_data[finding.__class__][2]}?host=1",
+                    ),
+                    ApiTestCase(
                         ["reader1", "reader2"],
                         "put",
                         403,

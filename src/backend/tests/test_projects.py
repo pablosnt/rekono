@@ -14,7 +14,7 @@ invalid_project = {
 
 class ProjectTest(ApiTest):
     endpoint = "/api/projects/"
-    expected_str = project1.get("name")
+    expected_str = "test"
     cases = [
         ApiTestCase(
             ["admin1", "admin2", "auditor1", "auditor2", "reader1", "reader2"],
@@ -156,4 +156,4 @@ class ProjectTest(ApiTest):
     ]
 
     def _get_object(self) -> Project:
-        return Project.objects.create(**project1)
+        return self.project

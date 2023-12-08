@@ -146,6 +146,12 @@ class ProcessTest(ApiTest):
         ),
         ApiTestCase(
             ["admin1", "admin2", "auditor1", "auditor2"],
+            "get",
+            200,
+            endpoint="{endpoint}?like=true",
+        ),
+        ApiTestCase(
+            ["admin1", "admin2", "auditor1", "auditor2"],
             "post",
             204,
             endpoint="{endpoint}8/like/",
@@ -162,6 +168,21 @@ class ProcessTest(ApiTest):
                 "likes": 4,
             },
             endpoint="{endpoint}8/",
+        ),
+        ApiTestCase(
+            ["admin1", "admin2", "auditor1", "auditor2"],
+            "get",
+            200,
+            expected=[
+                {
+                    "id": 8,
+                    **new_process1,
+                    "owner": {"id": 1, "username": "admin1"},
+                    "liked": True,
+                    "likes": 4,
+                }
+            ],
+            endpoint="{endpoint}?like=true",
         ),
         ApiTestCase(
             ["admin1", "admin2", "auditor1", "auditor2"],

@@ -125,6 +125,12 @@ class WordlistTest(ApiTest):
         ),
         ApiTestCase(
             ["admin1", "admin2", "auditor1", "auditor2"],
+            "get",
+            200,
+            endpoint="{endpoint}?like=true",
+        ),
+        ApiTestCase(
+            ["admin1", "admin2", "auditor1", "auditor2"],
             "post",
             204,
             endpoint="{endpoint}29/like/",
@@ -142,6 +148,22 @@ class WordlistTest(ApiTest):
                 "likes": 4,
             },
             endpoint="{endpoint}29/",
+        ),
+        ApiTestCase(
+            ["admin1", "admin2", "auditor1", "auditor2"],
+            "get",
+            200,
+            expected=[
+                {
+                    "id": 29,
+                    **new_wordlist_endpoints,
+                    "size": 3,
+                    "owner": {"id": 1, "username": "admin1"},
+                    "liked": True,
+                    "likes": 4,
+                }
+            ],
+            endpoint="{endpoint}?like=true",
         ),
         ApiTestCase(
             ["admin1", "admin2", "auditor1", "auditor2"],

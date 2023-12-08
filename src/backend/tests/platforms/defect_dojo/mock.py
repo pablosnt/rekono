@@ -5,6 +5,10 @@ def return_true(*args: Any) -> bool:
     return True
 
 
+def return_false(*args: Any) -> bool:
+    return False
+
+
 def return_id(*args: Any) -> Dict[str, int]:
     return {"id": 1}
 

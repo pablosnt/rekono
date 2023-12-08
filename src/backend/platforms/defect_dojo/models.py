@@ -44,7 +44,7 @@ class DefectDojoSettings(BaseEncrypted):
     _encrypted_field = "_api_token"
 
     def __str__(self) -> str:
-        return self.server if self.server else super().__str__()
+        return self.server if self.server else self.__class__.__name__
 
 
 class DefectDojoSync(BaseModel):
@@ -64,7 +64,7 @@ class DefectDojoSync(BaseModel):
     )
 
     def __str__(self) -> str:
-        return f"{self.project.__str__()} - {self.product_type_id} - {self.product_id}{f'- {self.engagement_id}' if self.engagement_id else ''}"
+        return f"{self.project.__str__()} - {self.product_type_id} - {self.product_id}{f' - {self.engagement_id}' if self.engagement_id else ''}"
 
     @classmethod
     def get_project_field(cls) -> str:
@@ -87,4 +87,4 @@ class DefectDojoTargetSync(BaseModel):
 
     @classmethod
     def get_project_field(cls) -> str:
-        return "defect_dojo_sync__project"
+        return "defect_dojo_sync__project"  # pragma: no cover

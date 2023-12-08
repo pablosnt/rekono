@@ -68,7 +68,6 @@ class RekonoTest(TestCase):
         return new_user
 
     def setUp(self) -> None:
-        CONFIG.encryption_key = Encryptor.generate_encryption_key()
         self.users: Dict[Role, List[User]] = {
             Role.ADMIN: [],
             Role.AUDITOR: [],

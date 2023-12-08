@@ -29,6 +29,12 @@ class ToolTest(ApiTest):
         ApiTestCase(["reader1", "reader2"], "post", 403, endpoint="{endpoint}1/like/"),
         ApiTestCase(
             ["admin1", "admin2", "auditor1", "auditor2"],
+            "get",
+            200,
+            endpoint="{endpoint}?like=true",
+        ),
+        ApiTestCase(
+            ["admin1", "admin2", "auditor1", "auditor2"],
             "post",
             204,
             endpoint="{endpoint}1/like/",
@@ -45,6 +51,21 @@ class ToolTest(ApiTest):
                 "liked": True,
             },
             endpoint="{endpoint}1/",
+        ),
+        ApiTestCase(
+            ["admin1", "admin2", "auditor1", "auditor2"],
+            "get",
+            200,
+            expected=[
+                {
+                    "id": 1,
+                    "name": nmap,
+                    "command": nmap.lower(),
+                    "likes": 4,
+                    "liked": True,
+                }
+            ],
+            endpoint="{endpoint}?like=true",
         ),
         ApiTestCase(
             ["admin1", "admin2", "auditor1", "auditor2"],

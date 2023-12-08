@@ -1,3 +1,6 @@
+from typing import Any
+
+from platforms.defect_dojo.models import DefectDojoSettings
 from tests.cases import ApiTestCase
 from tests.framework import ApiTest
 
@@ -29,6 +32,7 @@ invalid_settings = {
 
 class DefectDojoSettingsTest(ApiTest):
     endpoint = "/api/defect-dojo/settings/1/"
+    # expected_str = DefectDojoSettings.__class__.__name__
     cases = [
         ApiTestCase(["auditor1", "auditor2", "reader1", "reader2"], "get", 403),
         ApiTestCase(["admin1", "admin2"], "get", 200, expected={"id": 1, **settings}),
@@ -60,3 +64,6 @@ class DefectDojoSettingsTest(ApiTest):
             },
         ),
     ]
+
+    def _get_object(self) -> Any:
+        return DefectDojoSettings.objects.get(pk=1)
