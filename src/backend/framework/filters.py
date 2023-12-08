@@ -30,7 +30,7 @@ class MultipleFieldFilterSet(FilterSet):
         self, queryset: QuerySet, name: str, value: Any
     ) -> QuerySet:
         query = Q()
-        for field in self.fields:
+        for field in self.filters[name].fields:
             query |= Q(**{field: value})
         return queryset.filter(query)
 
