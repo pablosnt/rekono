@@ -349,7 +349,7 @@ class ToolTest(RekonoTest):
             self.task = Task.objects.create(
                 target=self.target,
                 configuration=self.configuration,
-                intensity=Intensity.NORMAL,
+                intensity=IntensityEnum.NORMAL,
             )
             self.execution = Execution.objects.create(
                 task=self.task, configuration=self.configuration
