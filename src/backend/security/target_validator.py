@@ -29,6 +29,8 @@ class TargetValidator(RegexValidator):
 
     def __call__(self, value: str | None) -> None:
         super().__call__(value)
+        input(TargetBlacklist.objects.all().values_list("target", flat=True))
+        input(self.target_blacklist)
         if value in self.target_blacklist:
             raise ValidationError(
                 f"Target is disallowed by policy",
@@ -37,14 +39,15 @@ class TargetValidator(RegexValidator):
             )
         for denied_value in self.target_blacklist:
             try:
-                if re.fullmatch(denied_value, value):
-                    raise ValidationError(
-                        f"Target is disallowed by policy",
-                        code=self.code,
-                        params={"value": value},
-                    )
+                match = re.fullmatch(denied_value, value)
             except:
                 continue
+            if match:
+                raise ValidationError(
+                    f"Target is disallowed by policy",
+                    code=self.code,
+                    params={"value": value},
+                )
             for address_class, network_class in [
                 (ipaddress.IPv4Address, ipaddress.IPv4Network),
                 (ipaddress.IPv6Address, ipaddress.IPv6Network),

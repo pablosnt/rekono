@@ -29,7 +29,7 @@ class RekonoUserManager(UserManager):
 
     def generate_otp(self, model: Any = None) -> str:
         otp = hash(generate_random_value(3000))
-        if (model or User).objects.filter(otp=hash(otp)).exists():
+        if (model or User).objects.filter(otp=hash(otp)).exists():  # pragma: no cover
             return self.generate_otp(model)
         return otp
 
@@ -151,10 +151,7 @@ class RekonoUserManager(UserManager):
         user.otp_expiration = None
         user.projects.clear()  # Clear its projects
         user.save(update_fields=["otp", "otp_expiration", "is_active"])
-        try:
-            ApiToken.objects.filter(user=user).delete()
-        except ApiToken.DoesNotExist:
-            pass
+        ApiToken.objects.filter(user=user).delete()
         logger.info(f"[User] User {user.id} has been disabled")
         return user
 

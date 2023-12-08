@@ -2,7 +2,8 @@ from typing import Any
 
 from tests.cases import ApiTestCase
 from tests.framework import ApiTest
-from tools.models import Configuration, Tool
+from tools.enums import Intensity as IntensityEnum
+from tools.models import Argument, Configuration, Input, Intensity, Output, Tool
 
 nmap = "Nmap"
 the_harvester = "theHarvester"
@@ -105,7 +106,7 @@ class ToolTest(ApiTest):
     ]
 
     def _get_object(self) -> Any:
-        return Tool.objects.first()
+        return Tool.objects.get(pk=1)
 
 
 first_nmap_configuration = "TCP ports"
@@ -130,4 +131,32 @@ class ConfigurationTest(ApiTest):
     ]
 
     def _get_object(self) -> Any:
-        return Configuration.objects.first()
+        return Configuration.objects.get(pk=1)
+
+
+class IntensityTest(ApiTest):
+    expected_str = f"{nmap} - {IntensityEnum.SNEAKY.name}"
+
+    def _get_object(self) -> Any:
+        return Intensity.objects.get(pk=1)
+
+
+class ArgumentTest(ApiTest):
+    expected_str = f"{nmap} - host"
+
+    def _get_object(self) -> Any:
+        return Argument.objects.get(pk=1)
+
+
+class InputTest(ApiTest):
+    expected_str = f"{nmap} - host - Host"
+
+    def _get_object(self) -> Any:
+        return Input.objects.get(pk=1)
+
+
+class OutputTest(ApiTest):
+    expected_str = f"{nmap} - {first_nmap_configuration} - Host"
+
+    def _get_object(self) -> Any:
+        return Output.objects.get(pk=1)

@@ -16,7 +16,7 @@ logger = logging.getLogger()
 
 
 class SMTP(BaseNotification):
-    enable_field = "email_notification"
+    enable_field = "email_notifications"
 
     def __init__(self) -> None:
         self.settings = SMTPSettings.objects.first()

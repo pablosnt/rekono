@@ -1,5 +1,6 @@
 from typing import Any
 
+from platforms.mail.notifications import SMTP
 from security.authorization.roles import Role
 from security.cryptography.hashing import hash
 from tests.cases import ApiTestCase
@@ -437,6 +438,12 @@ class UserTest(ApiTest):
         response = authenticated_client.get(self.profile)
         self.assertEqual(200, response.status_code)
 
+    def test_create_superuser(self) -> None:
+        value = "superuser"
+        superuser = User.objects.create_superuser(value, f"{value}@rekono.com", value)
+        self.assertTrue(superuser.is_active)
+        self.assertEqual(Role.ADMIN.value, superuser.groups.first().name)
+
     def _get_object(self) -> Any:
         return self.admin1
 
@@ -504,6 +511,30 @@ class Profile(ApiTest):
             expected={"id": 1, "username": "admin1", "role": Role.ADMIN.value},
         ),
     ]
+
+    def test_notification_scope(self) -> None:
+        self._setup_tasks_and_executions()
+        notification = SMTP()
+        users_to_notify = list(notification._get_users_to_notify(self.execution1))
+        self.assertEqual(1, len(users_to_notify))
+        self.assertEqual(self.admin1, users_to_notify[0])
+
+        for user_not_executor in [self.auditor1, self.reader1]:
+            user_not_executor.notification_scope = Notification.ALL_EXECUTIONS
+            user_not_executor.save(update_fields=["notification_scope"])
+
+        users_to_notify = list(notification._get_users_to_notify(self.execution1))
+        self.assertEqual(3, len(users_to_notify))
+        self.assertEqual(self.admin1, users_to_notify[0])
+        self.assertEqual(self.auditor1, users_to_notify[1])
+        self.assertEqual(self.reader1, users_to_notify[2])
+
+        self.admin1.notification_scope = Notification.DISABLED
+        self.admin1.save(update_fields=["notification_scope"])
+        users_to_notify = list(notification._get_users_to_notify(self.execution1))
+        self.assertEqual(2, len(users_to_notify))
+        self.assertEqual(self.auditor1, users_to_notify[0])
+        self.assertEqual(self.reader1, users_to_notify[1])
 
 
 class ResetPasswordTest(ApiTest):

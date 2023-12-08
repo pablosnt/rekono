@@ -60,14 +60,13 @@ class BaseNotification(BasePlatform):
             and getattr(execution.task.executor, self.enable_field)
         ):
             users.add(execution.task.executor)
-        search = {
-            self.enable_field: True,
-            "notification_scope": Notification.ALL_EXECUTIONS,
-        }
         users.update(
-            execution.task.target.project.members.filter(**search).exclude(
-                id=execution.task.executor.id
-            )
+            execution.task.target.project.members.filter(
+                **{
+                    self.enable_field: True,
+                    "notification_scope": Notification.ALL_EXECUTIONS,
+                }
+            ).exclude(id=execution.task.executor.id)
         )
         return users
 
