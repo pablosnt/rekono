@@ -1,9 +1,8 @@
 import time
 from datetime import datetime, timedelta
-from typing import Any, Dict
 
 from django.utils import timezone
-from rest_framework.test import APIClient
+from tests.cases import ApiTestCase
 from tests.framework import ApiTest
 
 
@@ -11,6 +10,14 @@ class SecurityTest(ApiTest):
     refresh = "/api/security/refresh-token/"
     logout = "/api/security/logout/"
     api_tokens = "/api/api-tokens/"
+    cases = [
+        ApiTestCase(
+            ["admin1", "admin2", "auditor1", "auditor2", "reader1", "reader2"],
+            "options",
+            200,
+            endpoint=ApiTest.login,
+        )
+    ]
 
     def test_refresh_and_logout(self) -> None:
         # Login as admin1

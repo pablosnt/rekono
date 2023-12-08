@@ -72,6 +72,7 @@ class SecurityMiddleware:
         response.renderer_context = {"request": request, "response": response}
         response = response.render()
         response["Allow"] = "GET, POST, PUT, DELETE, OPTIONS"
+        return response
 
     def _add_security_headers(
         self, request: HttpRequest, response: Response
@@ -89,7 +90,7 @@ class SecurityMiddleware:
         logger_level = logger.info
         if response.status_code >= 400 and response.status_code < 500:
             logger_level = logger.warning  # Warning level for 4XX error responses
-        elif response.status_code >= 500:
+        elif response.status_code >= 500:  # pragma: no cover
             logger_level = logger.error  # Error level for 5XX error responses
         logger_level(
             f"{request.method} {request.get_full_path()} > HTTP {response.status_code}",

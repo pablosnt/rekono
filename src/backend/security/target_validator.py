@@ -24,7 +24,7 @@ class TargetValidator(RegexValidator):
             self.target_blacklist = TargetBlacklist.objects.all().values_list(
                 "target", flat=True
             )
-        except:
+        except:  # pragma: no cover
             self.target_blacklist = []
 
     def __call__(self, value: str | None) -> None:

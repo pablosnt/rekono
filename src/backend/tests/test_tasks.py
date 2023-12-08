@@ -12,7 +12,8 @@ task1 = {
 }
 task2 = {"target_id": 1, "process_id": 1}
 invalid_task1 = {"target_id": 1, "intensity": 1}
-invalid_task2 = {
+invalid_task2 = {"target_id": 1}
+invalid_task3 = {
     **task1,
     "configuration_id": 25,
     "intensity": Intensity.SNEAKY.name.capitalize(),
@@ -118,6 +119,7 @@ class TaskTest(ApiTest):
         ),
         ApiTestCase(["admin1", "auditor1"], "post", 400, invalid_task1),
         ApiTestCase(["admin1", "auditor1"], "post", 400, invalid_task2),
+        ApiTestCase(["admin1", "auditor1"], "post", 400, invalid_task3),
         ApiTestCase(["admin2", "auditor2", "reader1", "reader2"], "post", 403, task1),
         ApiTestCase(
             ["admin1"],

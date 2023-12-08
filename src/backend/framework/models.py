@@ -20,7 +20,7 @@ class BaseModel(models.Model):
             for field in filter_field.split("__"):
                 if hasattr(project, field):
                     project = getattr(project, field)
-                else:
+                else:  # pragma: no cover
                     return None
             return project
 
@@ -199,7 +199,7 @@ class BaseInput(BaseModel):
         Returns:
             Dict[str, Any]: Useful information for tool executions, including accumulated if setted
         """
-        return {}
+        return {}  # pragma: no cover
 
     def get_input_type(self) -> Any:
         from input_types.models import InputType

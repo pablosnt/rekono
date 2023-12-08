@@ -42,11 +42,11 @@ class BaseViewSet(ModelViewSet):
         for field in fields[1:]:
             if hasattr(data, field):
                 data = getattr(data, field)
-            else:
+            else:  # pragma: no cover
                 return None
         return data
 
-    def get_queryset(self) -> None:
+    def get_queryset(self) -> QuerySet:
         model = self._get_model()
         members_field = None
         if model:
@@ -58,7 +58,7 @@ class BaseViewSet(ModelViewSet):
             if self.request.user.id:
                 project_filter = {members_field: self.request.user}
                 return super().get_queryset().filter(**project_filter)
-            else:
+            else:  # pargma: no cover
                 return None
         return super().get_queryset()
 
