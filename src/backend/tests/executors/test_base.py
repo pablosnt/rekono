@@ -1,14 +1,13 @@
+import base64
 from typing import List
 from unittest import mock
 
-from executions.enums import Status
-from executions.models import Execution
+from authentications.enums import AuthenticationType
 from findings.enums import OSINTDataType
 from findings.framework.models import Finding
 from findings.models import Port
 from parameters.models import InputTechnology, InputVulnerability
 from target_ports.models import TargetPort
-from tasks.models import Task
 from tests.executors.mock import get_url
 from tests.framework import RekonoTest
 from wordlists.models import Wordlist
@@ -87,19 +86,25 @@ class ToolExecutorTest(RekonoTest):
             ],
         )
 
-    @mock.patch("framework.models.BaseInput._get_url", get_url)
-    def test_get_arguments_no_findings(self) -> None:
-        self._setup_task_user_provided_entities()
+    def _test_get_arguments_no_findings(self) -> None:
         self.target.target = "10.10.10.12"
         self.target.save(update_fields=["target"])
         self._success_get_arguments(
-            f"-p http://10.10.10.12:80/login.php -p 80 -p /login.php -p Joomla -p CVE-2023-2222 -p root -p {self.wordlist.path}",
+            f"-p http://10.10.10.12:80/login.php -p 80 -p /login.php -p Joomla -p CVE-2023-2222 -p {base64.b64encode('root:root'.encode()).decode() if self.authentication.type == AuthenticationType.BASIC else 'root'} -p {self.wordlist.path}",
             [],
             [self.target_port],
             [self.input_vulnerability],
             [self.input_technology],
             [self.wordlist],
         )
+
+    @mock.patch("framework.models.BaseInput._get_url", get_url)
+    def test_get_arguments_no_findings(self) -> None:
+        self._setup_task_user_provided_entities()
+        self._test_get_arguments_no_findings()
+        self.authentication.type = AuthenticationType.BASIC
+        self.authentication.save(update_fields=["type"])
+        self._test_get_arguments_no_findings()
 
     def test_get_arguments_no_base_inputs(self) -> None:
         self.assertFalse(self.executor.check_arguments([], [], [], [], []))

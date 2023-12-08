@@ -115,7 +115,7 @@ class RekonoTest(TestCase):
         self.fake_configuration = Configuration.objects.create(
             name="fake",
             tool=self.fake_tool,
-            arguments="{host} {url} {ports_commas} {endpoint} {technology} {secret} {cve} {exploit} {username} {wordlist}",
+            arguments="{host} {url} {ports_commas} {endpoint} {technology} {secret} {cve} {exploit} {token} {wordlist}",
             stage=Stage.ENUMERATION,
             default=True,
         )
@@ -133,7 +133,7 @@ class RekonoTest(TestCase):
             ("secret", False, False, [InputTypeName.CREDENTIAL]),
             ("cve", True, False, [InputTypeName.VULNERABILITY]),
             ("exploit", False, False, [InputTypeName.EXPLOIT]),
-            ("username", False, False, [InputTypeName.AUTHENTICATION]),
+            ("token", False, False, [InputTypeName.AUTHENTICATION]),
             ("wordlist", False, False, [InputTypeName.WORDLIST]),
         ]:
             new_argument = Argument.objects.create(
@@ -168,7 +168,7 @@ class RekonoTest(TestCase):
         self.authentication = Authentication.objects.create(
             name="root",
             secret="root",
-            type=AuthenticationType.BASIC,
+            type=AuthenticationType.TOKEN,
             target_port=self.target_port,
         )
         self.input_vulnerability = InputVulnerability.objects.create(

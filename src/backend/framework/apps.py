@@ -19,7 +19,7 @@ class BaseApp:
         if self.skip_if_model_exists:
             for model in self._get_models():
                 if model and model.objects.exists():
-                    return
+                    return  # pragma: no cover
         management.call_command(
             loaddata.Command(),
             *(
@@ -29,4 +29,4 @@ class BaseApp:
         )
 
     def _get_models(self) -> List[Any]:
-        return []
+        return []  # pragma: no cover

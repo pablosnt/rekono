@@ -35,4 +35,4 @@ class Finding(BaseInput):
         return "executions__task__target__project"
 
     def defect_dojo(self) -> Dict[str, Any]:
-        pass
+        pass  # pragma: no cover
