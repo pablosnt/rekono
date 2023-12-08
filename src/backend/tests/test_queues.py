@@ -1,45 +1,155 @@
+import copy
+from typing import List
+
 from executions.enums import Status
 from executions.models import Execution
-from findings.enums import HostOS
-from findings.models import Host
-from framework.queues import BaseQueue
+from findings.enums import HostOS, PathType, PortStatus, Protocol
+from findings.framework.models import Finding
+from findings.models import Host, Path, Port
+from parameters.models import InputTechnology, InputVulnerability
 from processes.models import Process, Step
+from target_ports.models import TargetPort
 from tasks.models import Task
 from tests.framework import QueueTest
 from tools.enums import Intensity
 from tools.models import Configuration
 
-# class BaseQueueTest(QueueTest):
-#     def setUp(self) -> None:
-#         super().setUp()
-#         self._setup_fake_tool()
 
-#     def test_calculate_executions_findings(self) -> None:
-#         pass
+class BaseQueueTest(QueueTest):
+    number_of_hosts = 10
+    number_of_ports_per_host = 3
+    number_of_paths_per_port = 2
 
-#     def test_calculate_executions_findings_same_type(self) -> None:
-#         number_of_hosts = 10
-#         for host in range(1, number_of_hosts):
-#             setattr(
-#                 self,
-#                 f"host{host}",
-#                 self._create_finding(
-#                     Host,
-#                     {"address": f"10.10.10.{host}", "os_type": HostOS.LINUX},
-#                     self.execution,
-#                 ),
-#             )
-#         findings = [getattr(self, f"host{h}") for h in range(1, number_of_hosts)]
-#         result = self.queue._calculate_executions(
-#             self.fake_tool, findings, [], [], [], []
-#         )
-#         self.assertEqual(
-#             [{0: [getattr(self, f"host{h}")]} for h in range(1, number_of_hosts)],
-#             result,
-#         )
+    def setUp(self) -> None:
+        super().setUp()
+        self._setup_fake_tool()
 
-#     def test_calculate_executions_user_provided_entities(self) -> None:
-#         pass
+    def _setup_multiple_findings(self, create_ports_and_paths: bool) -> List[Finding]:
+        findings = []
+        for host_index in range(1, self.number_of_hosts + 1):
+            new_host = self._create_finding(
+                Host,
+                {"address": f"10.10.10.{host_index}", "os_type": HostOS.LINUX},
+                self.execution,
+            )
+            setattr(self, f"host{host_index}", new_host)
+            findings.append(new_host)
+            if create_ports_and_paths:
+                for port_index in range(1, self.number_of_ports_per_host + 1):
+                    new_port = self._create_finding(
+                        Port,
+                        {
+                            "host": new_host,
+                            "port": int(f"{host_index}{port_index}"),
+                            "status": PortStatus.OPEN,
+                            "protocol": Protocol.TCP,
+                            "service": "http",
+                        },
+                        self.execution,
+                    )
+                    setattr(self, f"port{host_index}{port_index}", new_port)
+                    findings.append(new_port)
+                    for path_index in range(1, self.number_of_paths_per_port + 1):
+                        new_path = self._create_finding(
+                            Path,
+                            {
+                                "port": new_port,
+                                "path": f"/{host_index}{port_index}{path_index}",
+                                "status": 200,
+                                "type": PathType.ENDPOINT,
+                            },
+                            self.execution,
+                        )
+                        setattr(
+                            self, f"path{host_index}{port_index}{path_index}", new_path
+                        )
+                        findings.append(new_path)
+        return findings
+
+    def test_calculate_executions_from_findings(self) -> None:
+        findings = self._setup_multiple_findings(True)
+        executions = self.queue._calculate_executions(
+            self.fake_tool, findings, [], [], [], []
+        )
+        expected = []
+        last_expected = []
+        for host_index in range(1, self.number_of_hosts + 1):
+            item = {0: [getattr(self, f"host{host_index}")]}
+            for port_index in range(1, self.number_of_ports_per_host + 1):
+                item[0].append(getattr(self, f"port{host_index}{port_index}"))
+            new_item = copy.deepcopy(item)
+            new_item[0].append(getattr(self, f"path{host_index}11"))
+            expected.append(new_item)
+            for port_index in range(1, self.number_of_ports_per_host + 1):
+                for path_index in range(1, self.number_of_paths_per_port + 1):
+                    if port_index == 1 and path_index == 1:
+                        continue
+                    new_item = copy.deepcopy(item)
+                    new_item[0].append(
+                        getattr(self, f"path{host_index}{port_index}{path_index}")
+                    )
+                    last_expected.append(new_item)
+        self.assertEqual(expected + last_expected, executions)
+
+    def test_calculate_executions_from_only_hosts(self) -> None:
+        findings = self._setup_multiple_findings(False)
+        executions = self.queue._calculate_executions(
+            self.fake_tool, findings, [], [], [], []
+        )
+        self.assertEqual(
+            [
+                {0: [getattr(self, f"host{h}")]}
+                for h in range(1, self.number_of_hosts + 1)
+            ],
+            executions,
+        )
+
+    def test_calculate_executions_user_provided_entities(self) -> None:
+        self._setup_task_user_provided_entities()
+        number_of_entities = 5
+        target_ports = [self.target_port]
+        vulnerabilities = [self.input_vulnerability]
+        technologies = [self.input_technology]
+        for index in range(1, number_of_entities + 1):
+            target_ports.append(
+                TargetPort.objects.create(
+                    target=self.target, port=self.target_port.port + index
+                )
+            )
+            vulnerabilities.append(
+                InputVulnerability.objects.create(
+                    target=self.target, cve=self.input_vulnerability.cve + f"{index}"
+                )
+            )
+            technologies.append(
+                InputTechnology.objects.create(
+                    target=self.target,
+                    name=self.input_technology.name + f"{index}",
+                    version=self.input_technology.version,
+                )
+            )
+        executions = self.queue._calculate_executions(
+            self.fake_tool,
+            [],
+            target_ports,
+            vulnerabilities,
+            technologies,
+            [self.wordlist],
+        )
+        expected = []
+        last_exected = []
+        base_item = {0: [], 1: target_ports, 4: [self.wordlist]}
+        for vulnerability in vulnerabilities:
+            item = copy.deepcopy(base_item)
+            item[2] = [vulnerability]
+            new_item = copy.deepcopy(item)
+            new_item[3] = [technologies[0]]
+            expected.append(dict(sorted(copy.deepcopy(new_item).items())))
+            for technology in technologies[1:]:
+                new_item = copy.deepcopy(item)
+                new_item[3] = [technology]
+                last_exected.append(dict(sorted(copy.deepcopy(new_item).items())))
+        self.assertEqual(expected + last_exected, executions)
 
 
 class TasksQueueTest(QueueTest):
