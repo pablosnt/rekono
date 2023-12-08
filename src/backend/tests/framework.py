@@ -31,8 +31,10 @@ from input_types.models import InputType
 from parameters.models import InputTechnology, InputVulnerability
 from processes.models import Process, Step
 from projects.models import Project
+from rekono.settings import CONFIG
 from rest_framework.test import APIClient
 from security.authorization.roles import Role
+from security.cryptography.encryption import Encryptor
 from target_ports.models import TargetPort
 from targets.enums import TargetType
 from targets.models import Target
@@ -66,6 +68,7 @@ class RekonoTest(TestCase):
         return new_user
 
     def setUp(self) -> None:
+        CONFIG.encryption_key = Encryptor.generate_encryption_key()
         self.users: Dict[Role, List[User]] = {
             Role.ADMIN: [],
             Role.AUDITOR: [],
