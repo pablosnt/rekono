@@ -22,7 +22,7 @@ class ToolViewSet(LikeViewSet):
     http_method_names = ["get", "post"]
 
     def create(self, request: Request, *args, **kwargs):
-        return self._method_not_allowed("POST")
+        return self._method_not_allowed("POST")  # pragma: no cover
 
 
 class ConfigurationViewSet(BaseViewSet):

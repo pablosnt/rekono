@@ -84,7 +84,7 @@ class TaskViewSet(BaseViewSet):
                 logger.info(f"[Task] Task {task.id} has been cancelled")
             connection = django_rq.get_connection("executions-queue")
             for execution in running_executions:
-                if not CONFIG.testing:
+                if not CONFIG.testing:  # pragma: no cover
                     if execution.status == Status.RUNNING:
                         send_stop_job_command(connection, execution.rq_job_id)
                     else:

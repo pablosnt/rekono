@@ -32,7 +32,7 @@ invalid_settings = {
 
 class DefectDojoSettingsTest(ApiTest):
     endpoint = "/api/defect-dojo/settings/1/"
-    # expected_str = DefectDojoSettings.__class__.__name__
+    expected_str = DefectDojoSettings.__class__.__name__
     cases = [
         ApiTestCase(["auditor1", "auditor2", "reader1", "reader2"], "get", 403),
         ApiTestCase(["admin1", "admin2"], "get", 200, expected={"id": 1, **settings}),

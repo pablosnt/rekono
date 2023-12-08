@@ -5,9 +5,10 @@ from tests.cases import ApiTestCase
 from tests.framework import ApiTest
 from tools.enums import Intensity
 
-task1 = {"target_id": 1, "configuration_id": 1, "intensity": "Hard"}
+task1 = {"target_id": 1, "configuration_id": 1, "intensity": Intensity.HARD.value}
 task2 = {"target_id": 1, "process_id": 1}
-invalid_task = {"target_id": 1}
+invalid_task1 = {"target_id": 1}
+invalid_task2 = {**task1, "configuration_id": 25, "intensity": Intensity.SNEAKY.value}
 
 
 class TaskTest(ApiTest):
@@ -107,7 +108,8 @@ class TaskTest(ApiTest):
             expected={"id": 2, "status": Status.CANCELLED},
             endpoint="/api/executions/2/",
         ),
-        ApiTestCase(["admin1", "auditor1"], "post", 400, invalid_task),
+        ApiTestCase(["admin1", "auditor1"], "post", 400, invalid_task1),
+        ApiTestCase(["admin1", "auditor1"], "post", 400, invalid_task2),
         ApiTestCase(["admin2", "auditor2", "reader1", "reader2"], "post", 403, task1),
         ApiTestCase(
             ["admin1"],
