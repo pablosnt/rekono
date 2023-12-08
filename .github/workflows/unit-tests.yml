@@ -18,11 +18,11 @@ jobs:
         with:
           fetch-depth: 0
       
-      - name: Install and start Redis server
-        run: |
-          sudo apt update -y
-          sudo apt install redis-server -y
-          sudo systemctl start redis-server
+      # - name: Install and start Redis server
+      #   run: |
+      #     sudo apt update -y
+      #     sudo apt install redis-server -y
+      #     sudo systemctl start redis-server
 
       - uses: actions/setup-python@v4
         with:
