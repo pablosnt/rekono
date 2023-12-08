@@ -29,8 +29,6 @@ class TargetValidator(RegexValidator):
 
     def __call__(self, value: str | None) -> None:
         super().__call__(value)
-        input(TargetBlacklist.objects.all().values_list("target", flat=True))
-        input(self.target_blacklist)
         if value in self.target_blacklist:
             raise ValidationError(
                 f"Target is disallowed by policy",
