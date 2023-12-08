@@ -10,11 +10,3 @@ class Settings(BaseModel):
     max_uploaded_file_mb = models.IntegerField(
         default=512, validators=[MinValueValidator(128), MaxValueValidator(3072)]
     )
-
-    def __str__(self) -> str:
-        """Instance representation in text format.
-
-        Returns:
-            str: String value that identifies this instance
-        """
-        return self.__class__.__name__

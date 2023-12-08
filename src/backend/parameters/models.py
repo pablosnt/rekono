@@ -57,8 +57,7 @@ class InputTechnology(BaseInput):
         Returns:
             str: String value that identifies this instance
         """
-        base = f"{self.target.__str__()} - {self.name}"
-        return f"{base} - {self.version}" if self.version else base
+        return f"{self.target.__str__()} - {self.name}{f' - {self.version}' if self.version else ''}"
 
     @classmethod
     def get_project_field(cls) -> str:

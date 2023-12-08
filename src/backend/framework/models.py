@@ -44,6 +44,9 @@ class BaseModel(models.Model):
             cls = getattr(module, f"Base{type[0].upper() + type[1:].lower()}")
         return cls
 
+    def __str__(self) -> str:
+        return self.__class__.__name__
+
 
 class BaseEncrypted(BaseModel):
     class Meta:

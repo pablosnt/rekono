@@ -67,12 +67,7 @@ class Task(BaseModel):
         Returns:
             str: String value that identifies this instance
         """
-        value = f"{self.target.__str__()} - "
-        if self.process:
-            value += self.process.__str__()
-        elif self.configuration:
-            value += self.configuration.__str__()
-        return value
+        return f"{self.target.__str__()} - {(self.process or self.configuration).__str__()}"
 
     @classmethod
     def get_project_field(cls) -> str:

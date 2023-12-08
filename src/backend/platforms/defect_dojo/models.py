@@ -43,6 +43,9 @@ class DefectDojoSettings(BaseEncrypted):
 
     _encrypted_field = "_api_token"
 
+    def __str__(self) -> str:
+        return self.server
+
 
 class DefectDojoSync(BaseModel):
     project = models.OneToOneField(
@@ -60,6 +63,9 @@ class DefectDojoSync(BaseModel):
         null=True,
     )
 
+    def __str__(self) -> str:
+        return f"{self.project.__str__()} - {self.product_type_id} - {self.product_id}{f'- {self.engagement_id}' if self.engagement_id else ''}"
+
     @classmethod
     def get_project_field(cls) -> str:
         return "project"
@@ -75,6 +81,9 @@ class DefectDojoTargetSync(BaseModel):
     engagement_id = models.IntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(999999999)]
     )
+
+    def __str__(self) -> str:
+        return f"{self.defect_dojo_sync.__str__()} - {self.target.target} - {self.engagement_id}"
 
     @classmethod
     def get_project_field(cls) -> str:

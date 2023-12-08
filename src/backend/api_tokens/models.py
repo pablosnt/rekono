@@ -32,5 +32,5 @@ class ApiToken(Token, BaseModel):
             Token.generate_key() if ApiToken.objects.filter(key=key).exists() else key
         )
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.user.__str__()} - {self.name}"

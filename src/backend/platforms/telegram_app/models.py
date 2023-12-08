@@ -49,4 +49,4 @@ class TelegramChat(BaseModel):
         )
 
     def __str__(self) -> str:
-        return self.user.__str__()
+        return f"{self.user.__str__()} - {self.chat_id}"

@@ -146,9 +146,7 @@ class Port(Finding):
         }
 
     def __str__(self) -> str:
-        values = [self.host.__str__()] if self.host else []
-        values.append(str(self.port))
-        return " - ".join(values)
+        return f"{f'{self.host.__str__()} - ' if self.host else ''}{self.port}"
 
 
 class Path(Finding):
@@ -204,9 +202,7 @@ class Path(Finding):
         }
 
     def __str__(self) -> str:
-        values = [self.port.__str__()] if self.port else []
-        values.append(str(self.path))
-        return " - ".join(values)
+        return f"{f'{self.port.__str__()} - ' if self.port else ''}{self.path}"
 
 
 class Technology(Finding):
@@ -268,9 +264,7 @@ class Technology(Finding):
         }
 
     def __str__(self) -> str:
-        values = [self.port.__str__()] if self.port else []
-        values.append(str(self.name))
-        return " - ".join(values)
+        return f"{f'{self.port.__str__()} - ' if self.port else ''}{self.name}"
 
 
 class Credential(Finding):
@@ -377,15 +371,7 @@ class Vulnerability(Finding):
         }
 
     def __str__(self) -> str:
-        values = []
-        if self.technology:
-            values = [self.technology.__str__()]
-        elif self.port:
-            values = [self.port.__str__()]
-        values.append(self.name)
-        if self.cve:
-            values.append(self.cve)
-        return " - ".join(values)
+        return f"{f'{(self.technology or self.port).__str__()} - ' if self.technology or self.port else ''}{self.name}{f' - {self.cve}' if self.cve else ''}"
 
 
 class Exploit(Finding):
@@ -438,10 +424,4 @@ class Exploit(Finding):
         Returns:
             str: String value that identifies this instance
         """
-        values = []
-        if self.vulnerability:
-            values += [self.vulnerability.__str__()]
-        elif self.technology:
-            values += [self.technology.__str__()]
-        values.append(self.title)
-        return " - ".join(values)
+        return f"{f'{(self.vulnerability or self.technology).__str__()} - ' if self.vulnerability or self.technology else ''}{self.title}"

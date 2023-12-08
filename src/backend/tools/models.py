@@ -97,7 +97,7 @@ class Intensity(BaseModel):
         Returns:
             str: String value that identifies this instance
         """
-        return f"{self.tool.name} - {IntensityEnum(self.value).name}"
+        return f"{self.tool.__str__()} - {IntensityEnum(self.value).name}"
 
 
 class Configuration(BaseModel):
@@ -122,7 +122,7 @@ class Configuration(BaseModel):
         Returns:
             str: String value that identifies this instance
         """
-        return f"{self.tool.name} - {self.name}"
+        return f"{self.tool.__str__()} - {self.name}"
 
 
 class Argument(BaseModel):
@@ -146,7 +146,7 @@ class Argument(BaseModel):
         return f"{self.tool.__str__()} - {self.name}"
 
 
-class Input(models.Model):
+class Input(BaseModel):
     argument = models.ForeignKey(
         Argument, related_name="inputs", on_delete=models.CASCADE
     )
@@ -168,7 +168,7 @@ class Input(models.Model):
         return f"{self.argument.__str__()} - {self.type.__str__()}"
 
 
-class Output(models.Model):
+class Output(BaseModel):
     configuration = models.ForeignKey(
         Configuration, related_name="outputs", on_delete=models.CASCADE
     )

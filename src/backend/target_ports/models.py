@@ -77,7 +77,7 @@ class TargetPort(BaseInput):
         Returns:
             str: String value that identifies this instance
         """
-        return f"{self.target.target} - {self.port}"
+        return f"{self.target.__str__()} - {self.port}"
 
     @classmethod
     def get_project_field(cls) -> str:

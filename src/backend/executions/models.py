@@ -37,10 +37,7 @@ class Execution(BaseModel):
         Returns:
             str: String value that identifies this instance
         """
-        if self.task.process:
-            return f"{self.task.__str__()} - {self.configuration.__str__()}"
-        else:
-            return self.task.__str__()
+        return f"{self.task.__str__()}{f' - {self.configuration.__str__()}' if self.task.process else ''}"
 
     @classmethod
     def get_project_field(cls) -> str:
