@@ -1,5 +1,6 @@
 from typing import Any
 
+from django.forms import ValidationError
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema_field
 from rest_framework.serializers import Field
@@ -98,4 +99,7 @@ class IntegerChoicesField(Field):
         Returns:
             int: Integer value associated to the string
         """
-        return self.model[data.upper()].value
+        try:
+            return self.model[data.upper()].value
+        except:
+            raise ValidationError(f"Invalid value", code=self.model.__class__.__name__)

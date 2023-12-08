@@ -11,7 +11,7 @@ task1 = {
     "intensity": Intensity.HARD.name.capitalize(),
 }
 task2 = {"target_id": 1, "process_id": 1}
-invalid_task1 = {"target_id": 1}
+invalid_task1 = {"target_id": 1, "intensity": 1}
 invalid_task2 = {
     **task1,
     "configuration_id": 25,
