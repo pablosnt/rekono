@@ -290,6 +290,13 @@ class UserTest(ApiTest):
             )
             self.assertEqual(400, response.status_code)
 
+        new_user.is_active = True
+        new_user.save(update_fields=["is_active"])
+        response = client.post(f"{self.endpoint}create/", data={"otp": otp, **user1})
+        self.assertEqual(400, response.status_code)
+
+        new_user.is_active = None
+        new_user.save(update_fields=["is_active"])
         response = client.post(f"{self.endpoint}create/", data={"otp": otp, **user1})
         self.assertEqual(201, response.status_code)
         content = self._get_content(response.content)
