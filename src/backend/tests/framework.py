@@ -1,3 +1,4 @@
+import hashlib
 import json
 from pathlib import Path as PathFile
 from typing import Any, Dict, List
@@ -31,10 +32,8 @@ from input_types.models import InputType
 from parameters.models import InputTechnology, InputVulnerability
 from processes.models import Process, Step
 from projects.models import Project
-from rekono.settings import CONFIG
 from rest_framework.test import APIClient
 from security.authorization.roles import Role
-from security.cryptography.encryption import Encryptor
 from target_ports.models import TargetPort
 from targets.enums import TargetType
 from targets.models import Target
@@ -176,10 +175,12 @@ class RekonoTest(TestCase):
         self.input_technology = InputTechnology.objects.create(
             target=self.target, name="Joomla", version="2.0.0"
         )
+        path = self.data_dir / "wordlists" / "endpoints_wordlist.txt"
         self.wordlist = Wordlist.objects.create(
             name="test",
             type=WordlistType.ENDPOINT,
-            path=self.data_dir / "wordlists" / "endpoints_wordlist.txt",
+            path=path,
+            checksum=hashlib.sha512(path.read_bytes()).hexdigest(),
         )
 
     def _setup_tasks_and_executions(self) -> None:

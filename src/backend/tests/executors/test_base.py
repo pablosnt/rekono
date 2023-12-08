@@ -1,5 +1,4 @@
 import base64
-import hashlib
 from typing import List
 from unittest import mock
 
@@ -90,9 +89,6 @@ class ToolExecutorTest(RekonoTest):
     def _test_get_arguments_no_findings(self) -> None:
         self.target.target = "10.10.10.12"
         self.target.save(update_fields=["target"])
-        with open(self.wordlist.path, "rb") as wordlist:
-            self.wordlist.checksum = hashlib.sha512(wordlist.read()).hexdigest()
-            self.wordlist.save(update_fields=["checksum"])
         self._success_get_arguments(
             f"-p http://10.10.10.12:80/login.php -p 80 -p /login.php -p Joomla -p CVE-2023-2222 -p {base64.b64encode('root:root'.encode()).decode() if self.authentication.type == AuthenticationType.BASIC else 'root'} -p {self.wordlist.path}",
             [],

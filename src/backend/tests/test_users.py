@@ -81,6 +81,60 @@ class UserTest(ApiTest):
             ],
         ),
         ApiTestCase(
+            ["admin1"],
+            "get",
+            200,
+            expected=[
+                {
+                    "id": 5,
+                    "username": "reader1",
+                    "role": Role.READER.value,
+                    "is_active": True,
+                },
+                {
+                    "id": 3,
+                    "username": "auditor1",
+                    "role": Role.AUDITOR.value,
+                    "is_active": True,
+                },
+                {
+                    "id": 1,
+                    "username": "admin1",
+                    "role": Role.ADMIN.value,
+                    "is_active": True,
+                },
+            ],
+            endpoint="{endpoint}?project=1",
+        ),
+        ApiTestCase(
+            ["admin1"],
+            "get",
+            200,
+            expected=[
+                {
+                    "id": 6,
+                    "username": "reader2",
+                    "role": Role.READER.value,
+                    "is_active": True,
+                },
+                {
+                    "id": 4,
+                    "username": "auditor2",
+                    "role": Role.AUDITOR.value,
+                    "is_active": True,
+                },
+                {
+                    "id": 2,
+                    "username": "admin2",
+                    "role": Role.ADMIN.value,
+                    "is_active": True,
+                },
+            ],
+            endpoint="{endpoint}?no_project=1",
+        ),
+        ApiTestCase(["admin2"], "get", 200, endpoint="{endpoint}?project=1"),
+        ApiTestCase(["admin2"], "get", 200, endpoint="{endpoint}?no_project=1"),
+        ApiTestCase(
             ["auditor1", "auditor2", "reader1", "reader2"], "post", 403, invitation1
         ),
         ApiTestCase(["admin1", "admin2"], "post", 400, invalid_invitation),
@@ -256,6 +310,10 @@ class UserTest(ApiTest):
         ApiTestCase(["admin1", "admin2"], "get", 404, endpoint="{endpoint}8/"),
     ]
 
+    def setUp(self) -> None:
+        super().setUp()
+        self._setup_project()
+
     def test_invite_and_create(self) -> None:
         client = self._get_api_client()
         response = client.post(
@@ -293,7 +351,7 @@ class UserTest(ApiTest):
         new_user.is_active = True
         new_user.save(update_fields=["is_active"])
         response = client.post(f"{self.endpoint}create/", data={"otp": otp, **user1})
-        self.assertEqual(400, response.status_code)
+        self.assertEqual(401, response.status_code)
 
         new_user.is_active = None
         new_user.save(update_fields=["is_active"])
