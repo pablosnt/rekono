@@ -68,6 +68,13 @@ class TargetBlacklistTest(ApiTest):
             expected={"id": 16, "default": False, **target_blacklist3},
         ),
         ApiTestCase(
+            ["admin1"],
+            "post",
+            201,
+            data=invalid_regex_blacklist,
+            expected={"id": 17, "default": False, **invalid_regex_blacklist},
+        ),
+        ApiTestCase(
             ["admin1", "auditor1"],
             "post",
             400,
@@ -87,13 +94,6 @@ class TargetBlacklistTest(ApiTest):
             400,
             {"project": 1, "target": "10.10.10.1"},
             endpoint="/api/targets/",
-        ),
-        ApiTestCase(
-            ["admin1"],
-            "post",
-            201,
-            data=invalid_regex_blacklist,
-            expected={"id": 17, "default": False, **invalid_regex_blacklist},
         ),
         ApiTestCase(
             ["admin1", "admin2"],
