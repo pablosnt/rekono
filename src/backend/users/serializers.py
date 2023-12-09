@@ -4,6 +4,7 @@ from typing import Any, Dict
 from django.contrib.auth.password_validation import validate_password
 from django.db import transaction
 from django.utils import timezone
+from platforms.telegram_app.notifications.notifications import Telegram
 from rest_framework import status
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.fields import SerializerMethodField
@@ -255,7 +256,9 @@ class UpdatePasswordSerializer(PasswordSerializer):
         Returns:
             User: Updated instance
         """
-        return User.objects.update_password(instance, validated_data.get("password"))
+        user = User.objects.update_password(instance, validated_data.get("password"))
+        Telegram().logout_after_password_change_message()
+        return user
 
 
 class ResetPasswordSerializer(PasswordSerializer, OTPSerializer):

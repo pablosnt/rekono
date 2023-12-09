@@ -63,3 +63,9 @@ class Telegram(BaseNotification, BaseTelegram):
             chat,
             f"Welcome *{self._escape(chat.user.username)}*\! Your Rekono bot is ready",
         )
+
+    def logout_after_password_change_message(self, chat: TelegramChat) -> None:
+        self._send_message(
+            chat,
+            "Your session in the Rekono bot has been closed after your password change. Please, execute /start to link it again",
+        )
