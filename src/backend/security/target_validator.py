@@ -1,7 +1,7 @@
 import ipaddress
 import re
 from re import RegexFlag
-from typing import Any
+from typing import Any, List
 
 from django.core.validators import RegexValidator
 from django.forms import ValidationError
@@ -20,22 +20,17 @@ class TargetValidator(RegexValidator):
         self.code = code
         flags = None  # Needed to prevent TypeError
         super().__init__(regex, message, code, inverse_match, flags)
-        try:
-            self.target_blacklist = TargetBlacklist.objects.all().values_list(
-                "target", flat=True
-            )
-        except:  # pragma: no cover
-            self.target_blacklist = []
 
     def __call__(self, value: str | None) -> None:
         super().__call__(value)
-        if value in self.target_blacklist:
+        blacklist = TargetBlacklist.objects.all().values_list("target", flat=True)
+        if value in blacklist:
             raise ValidationError(
                 f"Target is disallowed by policy",
                 code=self.code,
                 params={"value": value},
             )
-        for denied_value in self.target_blacklist:
+        for denied_value in blacklist:
             try:
                 match = re.fullmatch(denied_value, value)
             except:
