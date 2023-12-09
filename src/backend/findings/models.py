@@ -30,13 +30,11 @@ class OSINT(Finding):
     def parse(
         self, target: Target = None, accumulated: Dict[str, Any] = {}
     ) -> Dict[str, Any]:
-        if self.data_type in [OSINTDataType.IP, OSINTDataType.DOMAIN]:
-            return {
-                InputKeyword.TARGET.name.lower(): self.data,
-                InputKeyword.HOST.name.lower(): self.data,
-                InputKeyword.URL.name.lower(): self._get_url(self.data),
-            }
-        return {}
+        return {
+            InputKeyword.TARGET.name.lower(): self.data,
+            InputKeyword.HOST.name.lower(): self.data,
+            InputKeyword.URL.name.lower(): self._get_url(self.data),
+        } if self.data_type in [OSINTDataType.IP, OSINTDataType.DOMAIN] else {}
 
     def defect_dojo(self) -> Dict[str, Any]:
         return {

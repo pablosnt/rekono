@@ -67,14 +67,14 @@ class ToolExecutorTest(RekonoTest):
     @mock.patch("framework.models.BaseInput._get_url", get_url)
     def test_get_arguments_only_required_findings(self) -> None:
         self._success_get_arguments(
-            "-p http://10.10.10.10:80/ -p 80 -p WordPress -p CVE-2023-1111",
+            "-p 10.10.10.10 -p http://10.10.10.10:80/ -p 80 -p WordPress -p CVE-2023-1111",
             [self.host, self.port, self.technology, self.vulnerability],
         )
 
     @mock.patch("framework.models.BaseInput._get_url", get_url)
     def test_get_arguments_multiple_ports(self) -> None:
         self._success_get_arguments(
-            "-p http://10.10.10.10:80/ -p 80,443 -p WordPress -p CVE-2023-1111",
+            "-p 10.10.10.10 -p http://10.10.10.10:80/ -p 80,443 -p WordPress -p CVE-2023-1111",
             [
                 self.host,
                 self.port,
@@ -90,7 +90,7 @@ class ToolExecutorTest(RekonoTest):
         self.target.target = "10.10.10.12"
         self.target.save(update_fields=["target"])
         self._success_get_arguments(
-            f"-p http://10.10.10.12:80/login.php -p 80 -p /login.php -p Joomla -p CVE-2023-2222 -p {base64.b64encode('root:root'.encode()).decode() if self.authentication.type == AuthenticationType.BASIC else 'root'} -p {self.wordlist.path}",
+            f"-p 10.10.10.10 -p http://10.10.10.12:80/login.php -p 80 -p /login.php -p Joomla -p CVE-2023-2222 -p {base64.b64encode('root:root'.encode()).decode() if self.authentication.type == AuthenticationType.BASIC else 'root'} -p {self.wordlist.path}",
             [],
             [self.target_port],
             [self.input_vulnerability],

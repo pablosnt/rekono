@@ -118,7 +118,7 @@ class RekonoTest(TestCase):
             default=True,
         )
         for value, required, multiple, input_type_names in [
-            ("host", False, False, [InputTypeName.OSINT]),
+            ("host", False, False, [InputTypeName.OSINT, InputTypeName.HOST]),
             (
                 "url",
                 True,
