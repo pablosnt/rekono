@@ -63,6 +63,16 @@ class ToolExecutorTest(RekonoTest):
             "-p 10.10.10.11 -p http://10.10.10.10:80/index.php -p 80 -p /index.php -p WordPress -p admin -p CVE-2023-1111 -p ReverseShell",
             self.findings,
         )
+        self.vulnerability.technology = None
+        self.vulnerability.port = self.port
+        self.vulnerability.save(update_fields=["port", "technology"])
+        self.exploit.vulnerability = None
+        self.exploit.technology = self.technology
+        self.exploit.save(update_fields=["vulnerability", "technology"])
+        self._success_get_arguments(
+            "-p 10.10.10.11 -p http://10.10.10.10:80/index.php -p 80 -p /index.php -p WordPress -p admin -p CVE-2023-1111 -p ReverseShell",
+            self.findings,
+        )
 
     @mock.patch("framework.models.BaseInput._get_url", get_url)
     def test_get_arguments_only_required_findings(self) -> None:
@@ -86,6 +96,23 @@ class ToolExecutorTest(RekonoTest):
             ],
         )
 
+    @mock.patch("framework.models.BaseInput._get_url", get_url)
+    def test_get_arguments_with_path_filter(self) -> None:
+        self._setup_task_user_provided_entities()
+        self._success_get_arguments(
+            "-p 10.10.10.10 -p http://10.10.10.10:80/login.php -p 80 -p /login.php -p WordPress -p CVE-2023-1111 -p root",
+            [self.port, self.path, self.technology, self.vulnerability],
+        )
+        self.path.path = "rootpath/test"
+        self.path.save(update_fields=["path"])
+        self.target_port.path = "rootpath"
+        self.target_port.save(update_fields=["path"])
+        self._success_get_arguments(
+            "-p 10.10.10.10 -p http://10.10.10.10:80/rootpath/test -p 80 -p /rootpath/test -p WordPress -p CVE-2023-1111 -p root",
+            [self.port, self.path, self.technology, self.vulnerability],
+        )
+
+    @mock.patch("framework.models.BaseInput._get_url", get_url)
     def _test_get_arguments_no_findings(self) -> None:
         self.target.target = "10.10.10.12"
         self.target.save(update_fields=["target"])

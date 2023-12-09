@@ -30,11 +30,15 @@ class OSINT(Finding):
     def parse(
         self, target: Target = None, accumulated: Dict[str, Any] = {}
     ) -> Dict[str, Any]:
-        return {
-            InputKeyword.TARGET.name.lower(): self.data,
-            InputKeyword.HOST.name.lower(): self.data,
-            InputKeyword.URL.name.lower(): self._get_url(self.data),
-        } if self.data_type in [OSINTDataType.IP, OSINTDataType.DOMAIN] else {}
+        return (
+            {
+                InputKeyword.TARGET.name.lower(): self.data,
+                InputKeyword.HOST.name.lower(): self.data,
+                InputKeyword.URL.name.lower(): self._get_url(self.data),
+            }
+            if self.data_type in [OSINTDataType.IP, OSINTDataType.DOMAIN]
+            else {}
+        )
 
     def defect_dojo(self) -> Dict[str, Any]:
         return {
@@ -165,31 +169,43 @@ class Path(Finding):
         Finding.Filter(str, "path", contains=True, processor=lambda p: p.lower()),
     ]
 
-    def _clean_path_value(self, value: str) -> str:
+    def _clean_comparison_path(self, value: str) -> str:
         if len(value) > 1:
-            if value[0] != "/":
-                value = f"/{value}"
+            value = self._clean_path(value)
             if value[-1] != "/":
                 value += "/"
         return value
 
+    def _clean_path(self, value: str) -> str:
+        return f"/{value}" if len(value) > 1 and value[0] != "/" else value
+
     def parse(
         self, target: Target = None, accumulated: Dict[str, Any] = {}
     ) -> Dict[str, Any]:
-        output = self.port.parse(target, accumulated) if self.port else {}
         target_port = TargetPort.objects.filter(target=target, port=self.port.port)
-        include_path_data = True
         if target_port.exists():
-            include_path_data = self._clean_path_value(self.path).startswith(
-                self._clean_path_value(target_port.first().path or self.path)
-            )
-        if include_path_data:
-            output[InputKeyword.ENDPOINT.name.lower()] = self.path
-            if self.port:
-                output[InputKeyword.URL.name.lower()] = self._get_url(
-                    self.port.host.address, self.port.port, self.path
+            target_port_path = target_port.first().path
+            path = (
+                self.path
+                if target_port_path
+                and self._clean_comparison_path(self.path).startswith(
+                    self._clean_comparison_path(target_port_path)
                 )
-        return output
+                else target_port_path
+            )
+        else:
+            path = self.path
+        output = (
+            {
+                **self.port.parse(target, accumulated),
+                InputKeyword.URL.name.lower(): self._get_url(
+                    self.port.host.address, self.port.port, self._clean_path(path)
+                ),
+            }
+            if self.port
+            else {}
+        )
+        return {**output, InputKeyword.ENDPOINT.name.lower(): self._clean_path(path)}
 
     def defect_dojo(self) -> Dict[str, Any]:
         return {
