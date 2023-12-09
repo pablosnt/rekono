@@ -256,7 +256,7 @@ class UpdatePasswordSerializer(PasswordSerializer):
         Returns:
             User: Updated instance
         """
-        if hasattr(user, "telegram_chat"):
+        if hasattr(instance, "telegram_chat"):
             Telegram().logout_after_password_change_message(user.telegram_chat)
         return User.objects.update_password(instance, validated_data.get("password"))
 
