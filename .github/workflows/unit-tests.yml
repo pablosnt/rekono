@@ -37,4 +37,4 @@ jobs:
       
       - name: Check coverage
         working-directory: src/backend
-        run: coverage report -m --skip-covered --omit="tests/**" --omit="platforms/telegram_app/bot/**" --omit="platforms/telegram_app/framework.py" --omit="platforms/**/notifications.py" --fail-under=$REQUIRED_COVERAGE
+        run: coverage report -m --skip-covered --omit="tests/*,platforms/telegram_app/bot/*,platforms/telegram_app/framework.py,platforms/**/notifications.py" --fail-under=$REQUIRED_COVERAGE

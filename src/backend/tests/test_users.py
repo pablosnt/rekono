@@ -1,6 +1,7 @@
 from typing import Any
 
 from platforms.mail.notifications import SMTP
+from platforms.telegram_app.models import TelegramChat
 from security.authorization.roles import Role
 from security.cryptography.hashing import hash
 from tests.cases import ApiTestCase
@@ -21,10 +22,10 @@ new_profile = {
 }
 new_valid_password = "NeW.Pa$$W0rd"
 invalid_password1 = "new;password"
-invalid_password2 = "NEWPASSWORD"
-invalid_password3 = "newpassword"
-invalid_password4 = "NEWpassword"
-invalid_password5 = "NEWpassword5"
+invalid_password2 = "ANEWPASSWORD"
+invalid_password3 = "anewpassword"
+invalid_password4 = "aNEWpassword"
+invalid_password5 = "aNEWpassword5"
 
 user1 = {
     "username": "test1",
@@ -512,6 +513,21 @@ class Profile(ApiTest):
         ),
     ]
 
+    def setUp(self) -> None:
+        super().setUp()
+        self.admin1_telegram_chat = TelegramChat.objects.create(
+            user=self.admin1, chat_id=1
+        )
+
+    def test_cases(self) -> None:
+        self.assertEqual(
+            self.admin1_telegram_chat.chat_id, self.admin1.telegram_chat.chat_id
+        )
+        super().test_cases()
+        # Linked Telegram Chats are removed after a password change
+        self.admin1 = User.objects.get(pk=self.admin1.id)
+        self.assertFalse(hasattr(self.admin1, "telegram_chat"))
+
     def test_notification_scope(self) -> None:
         self._setup_tasks_and_executions()
         notification = SMTP()
@@ -535,6 +551,8 @@ class Profile(ApiTest):
         self.assertEqual(2, len(users_to_notify))
         self.assertEqual(self.auditor1, users_to_notify[0])
         self.assertEqual(self.reader1, users_to_notify[1])
+
+        notification.process_findings(self.execution1, [])
 
 
 class ResetPasswordTest(ApiTest):

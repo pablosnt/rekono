@@ -58,7 +58,7 @@ class BaseViewSet(ModelViewSet):
             if self.request.user.id:
                 project_filter = {members_field: self.request.user}
                 return super().get_queryset().filter(**project_filter)
-            else:  # pargma: no cover
+            else:  # pragma: no cover
                 return None
         return super().get_queryset()
 

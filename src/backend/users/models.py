@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime, timedelta
-from typing import Any, List, cast
+from typing import Any, cast
 
 from django.contrib.auth.models import AbstractUser, Group, UserManager
 from django.db import models
