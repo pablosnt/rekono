@@ -68,7 +68,6 @@ class PasswordValidator:
     uppercase = r"[A-Z]"  # At least one uppercase
     digits = r"[0-9]"  # At least one digit
     symbols = r"[\W]"  # At least one symbol
-    message = "Your password must contain at least 1 lowercase, 1 uppercase, 1 digit and 1 symbol"
 
     def validate(self, password: str, user: Any = None) -> None:
         """Validate if password match the complexity requirements.
@@ -81,7 +80,7 @@ class PasswordValidator:
             ValidationError: Raised if password doesn't match the complexity requirements
         """
         if not bool(re.fullmatch(self.full_match, password)):  # Full check
-            raise ValidationError(self.message)
+            raise ValidationError(self.get_help_text())
         if not bool(re.search(self.lowercase, password)):  # Lower case check
             raise ValidationError("Your password must contain at least 1 lowercase")
         if not bool(re.search(self.uppercase, password)):  # Upper case check
@@ -97,4 +96,4 @@ class PasswordValidator:
         Returns:
             str: Help message
         """
-        return self.message
+        return "Your password must contain at least 1 lowercase, 1 uppercase, 1 digit and 1 symbol"

@@ -7,6 +7,7 @@ from tests.framework import ApiTest
 default_blacklist_1 = {"id": 1, "default": True, "target": "127.0.0.1"}
 target_blacklist1 = {"target": "rekono.com"}
 target_blacklist2 = {"target": ".*\.rekono\.com"}
+invalid_regex_blacklist = {"target": ".*.rekono.com"}
 target_blacklist3 = {"target": "10.10.10.0/24"}
 new_target_blacklist = {"target": ".*\.new\.rekono.com"}
 invalid_blacklist = {"target": "*.rekono;com"}
@@ -88,6 +89,13 @@ class TargetBlacklistTest(ApiTest):
             endpoint="/api/targets/",
         ),
         ApiTestCase(
+            ["admin1"],
+            "post",
+            201,
+            data=invalid_regex_blacklist,
+            expected={"id": 17, "default": False, **invalid_regex_blacklist},
+        ),
+        ApiTestCase(
             ["admin1", "admin2"],
             "put",
             404,
@@ -126,6 +134,7 @@ class TargetBlacklistTest(ApiTest):
         ApiTestCase(["admin1"], "delete", 404, endpoint="{endpoint}14/"),
         ApiTestCase(["admin1"], "delete", 204, endpoint="{endpoint}15/"),
         ApiTestCase(["admin2"], "delete", 204, endpoint="{endpoint}16/"),
+        ApiTestCase(["admin1"], "delete", 204, endpoint="{endpoint}17/"),
         ApiTestCase(
             ["admin1", "admin2"],
             "get",

@@ -21,7 +21,7 @@ new_profile = {
     "telegram_notifications": False,
 }
 new_valid_password = "NeW.Pa$$W0rd"
-invalid_password1 = "new;password"
+invalid_password1 = "abcd"
 invalid_password2 = "ANEWPASSWORD"
 invalid_password3 = "anewpassword"
 invalid_password4 = "aNEWpassword"
