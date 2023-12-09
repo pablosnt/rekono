@@ -77,9 +77,7 @@ class Target(BaseInput):
             params={"value": target},
         )
 
-    def parse(
-        self, target: Any = None, accumulated: Dict[str, Any] = {}
-    ) -> Dict[str, Any]:
+    def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
         """Get useful information from this instance to be used in tool execution as argument.
 
         Args:

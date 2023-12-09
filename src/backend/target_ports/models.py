@@ -35,9 +35,7 @@ class TargetPort(BaseInput):
             )
         ]
 
-    def parse(
-        self, target: Target = None, accumulated: Dict[str, Any] = {}
-    ) -> Dict[str, Any]:
+    def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
         """Get useful information from this instance to be used in tool execution as argument.
 
         Args:
@@ -46,30 +44,23 @@ class TargetPort(BaseInput):
         Returns:
             Dict[str, Any]: Useful information for tool executions, including accumulated if setted
         """
-        output = (
-            self.authentication.parse(target, accumulated)
-            if self.authentication
-            else {}
-        )
+        output = self.authentication.parse(accumulated) if self.authentication else {}
         ports = (accumulated or {}).get(InputKeyword.PORTS.name.lower(), []) + [
             self.port
         ]
-        output.update(
-            {
-                InputKeyword.TARGET.name.lower(): self.target.target,
-                InputKeyword.HOST.name.lower(): self.target.target,
-                InputKeyword.PORT.name.lower(): self.port,
-                InputKeyword.PORTS.name.lower(): ports,
-                InputKeyword.ENDPOINT.name.lower(): self.path,
-                InputKeyword.PORTS_COMMAS.name.lower(): ",".join(
-                    [str(p) for p in ports]
-                ),
-                InputKeyword.URL.name.lower(): self._get_url(
-                    self.target.target, self.port, self.path
-                ),
-            }
-        )
-        return output
+        path = self._clean_path(self.path)
+        return {
+            **output,
+            InputKeyword.TARGET.name.lower(): self.target.target,
+            InputKeyword.HOST.name.lower(): self.target.target,
+            InputKeyword.PORT.name.lower(): self.port,
+            InputKeyword.PORTS.name.lower(): ports,
+            InputKeyword.ENDPOINT.name.lower(): self._clean_path(path),
+            InputKeyword.PORTS_COMMAS.name.lower(): ",".join([str(p) for p in ports]),
+            InputKeyword.URL.name.lower(): self._get_url(
+                self.target.target, self.port, path
+            ),
+        }
 
     def __str__(self) -> str:
         """Instance representation in text format.

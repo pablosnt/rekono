@@ -34,9 +34,7 @@ class InputTechnology(BaseInput):
             )
         ]
 
-    def parse(
-        self, target: Target = None, accumulated: Dict[str, Any] = {}
-    ) -> Dict[str, Any]:
+    def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
         """Get useful information from this instance to be used in tool execution as argument.
 
         Args:
@@ -45,7 +43,7 @@ class InputTechnology(BaseInput):
         Returns:
             Dict[str, Any]: Useful information for tool executions, including accumulated if setted
         """
-        output = self.target.parse(target, accumulated)
+        output = self.target.parse(accumulated)
         output[InputKeyword.TECHNOLOGY.name.lower()] = self.name
         if self.version:
             output[InputKeyword.VERSION.name.lower()] = self.version
@@ -86,9 +84,7 @@ class InputVulnerability(BaseInput):
             )
         ]
 
-    def parse(
-        self, target: Target = None, accumulated: Dict[str, Any] = {}
-    ) -> Dict[str, Any]:
+    def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
         """Get useful information from this instance to be used in tool execution as argument.
 
         Args:
@@ -97,9 +93,10 @@ class InputVulnerability(BaseInput):
         Returns:
             Dict[str, Any]: Useful information for tool executions, including accumulated if setted
         """
-        output = self.target.parse(target, accumulated)
-        output[InputKeyword.CVE.name.lower()] = self.cve
-        return output
+        return {
+            **self.target.parse(accumulated),
+            InputKeyword.CVE.name.lower(): self.cve,
+        }
 
     def __str__(self) -> str:
         """Instance representation in text format.

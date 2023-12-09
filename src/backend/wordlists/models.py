@@ -31,7 +31,7 @@ class Wordlist(BaseInput, BaseLike):
 
     filters = [BaseInput.Filter(type=WordlistType, field="type")]
 
-    def filter(self, input: Any) -> bool:
+    def filter(self, input: Any, target: Target = None) -> bool:
         """Check if this instance is valid based on input filter.
 
         Args:
@@ -46,12 +46,10 @@ class Wordlist(BaseInput, BaseLike):
                 self.path, self.checksum
             )
         if input.filter:  # If input filter is established
-            return super().filter(input) and check
+            return super().filter(input, target) and check
         return check
 
-    def parse(
-        self, target: Target = None, accumulated: Dict[str, Any] = {}
-    ) -> Dict[str, Any]:
+    def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
         """Get useful information from this instance to be used in tool execution as argument.
 
         Args:

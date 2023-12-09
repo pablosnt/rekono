@@ -27,9 +27,7 @@ class OSINT(Finding):
 
     unique_fields = ["data", "data_type"]
 
-    def parse(
-        self, target: Target = None, accumulated: Dict[str, Any] = {}
-    ) -> Dict[str, Any]:
+    def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
         return (
             {
                 InputKeyword.TARGET.name.lower(): self.data,
@@ -65,9 +63,7 @@ class Host(Finding):
     unique_fields = ["address"]
     filters = [Finding.Filter(TargetType, "address", lambda a: Target.get_type(a))]
 
-    def parse(
-        self, target: Target = None, accumulated: Dict[str, Any] = {}
-    ) -> Dict[str, Any]:
+    def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
         return {
             InputKeyword.TARGET.name.lower(): self.address,
             InputKeyword.HOST.name.lower(): self.address,
@@ -109,9 +105,7 @@ class Port(Finding):
         Finding.Filter(str, "service", contains=True, processor=lambda s: s.lower()),
     ]
 
-    def parse(
-        self, target: Target = None, accumulated: Dict[str, Any] = {}
-    ) -> Dict[str, Any]:
+    def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
         ports = (
             [self.port]
             if not accumulated
@@ -176,36 +170,34 @@ class Path(Finding):
                 value += "/"
         return value
 
-    def _clean_path(self, value: str) -> str:
-        return f"/{value}" if len(value) > 1 and value[0] != "/" else value
-
-    def parse(
-        self, target: Target = None, accumulated: Dict[str, Any] = {}
-    ) -> Dict[str, Any]:
-        target_port = TargetPort.objects.filter(target=target, port=self.port.port)
-        if target_port.exists():
-            target_port_path = target_port.first().path
-            path = (
-                self.path
-                if target_port_path
-                and self._clean_comparison_path(self.path).startswith(
-                    self._clean_comparison_path(target_port_path)
+    def filter(self, input: Any, target: Target = None) -> bool:
+        filter = super().filter(input, target)
+        if self.port:
+            target_port = TargetPort.objects.filter(
+                target=target, port=self.port.port
+            ).first()
+            if target_port and target_port.path:
+                filter = filter and self._clean_comparison_path(self.path).startswith(
+                    self._clean_comparison_path(target_port.path)
                 )
-                else target_port_path
-            )
-        else:
-            path = self.path
+        return filter
+
+    def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
+        path = self._clean_path(self.path)
         output = (
             {
-                **self.port.parse(target, accumulated),
+                **self.port.parse(accumulated),
                 InputKeyword.URL.name.lower(): self._get_url(
-                    self.port.host.address, self.port.port, self._clean_path(path)
+                    self.port.host.address, self.port.port, path
                 ),
             }
             if self.port
             else {}
         )
-        return {**output, InputKeyword.ENDPOINT.name.lower(): self._clean_path(path)}
+        return {
+            **output,
+            InputKeyword.ENDPOINT.name.lower(): path,
+        }
 
     def defect_dojo(self) -> Dict[str, Any]:
         return {
@@ -244,9 +236,7 @@ class Technology(Finding):
         Finding.Filter(str, "name", contains=True, processor=lambda n: n.lower())
     ]
 
-    def parse(
-        self, target: Target = None, accumulated: Dict[str, Any] = {}
-    ) -> Dict[str, Any]:
+    def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
         """Get useful information from this instance to be used in tool execution as argument.
 
         Args:
@@ -299,10 +289,8 @@ class Credential(Finding):
 
     unique_fields = ["technology", "email", "username", "secret"]
 
-    def parse(
-        self, target: Target = None, accumulated: Dict[str, Any] = {}
-    ) -> Dict[str, Any]:
-        output = self.technology.parse(target, accumulated) if self.technology else {}
+    def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
+        output = self.technology.parse(accumulated) if self.technology else {}
         for key, field in [
             (InputKeyword.EMAIL.name.lower(), self.email),
             (InputKeyword.USERNAME.name.lower(), self.username),
@@ -361,14 +349,12 @@ class Vulnerability(Finding):
         Finding.Filter(str, "cwe", contains=True, processor=lambda c: c.lower()),
     ]
 
-    def parse(
-        self, target: Target = None, accumulated: Dict[str, Any] = {}
-    ) -> Dict[str, Any]:
+    def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
         output = {InputKeyword.CVE.name.lower(): self.cve}
         if self.technology:
-            output.update(self.technology.parse(target, accumulated))
+            output.update(self.technology.parse(accumulated))
         elif self.port:
-            output.update(self.port.parse(target, accumulated))
+            output.update(self.port.parse(accumulated))
         return output
 
     def defect_dojo(self) -> Dict[str, Any]:
@@ -409,14 +395,12 @@ class Exploit(Finding):
 
     unique_fields = ["vulnerability", "technology", "edb_id", "reference"]
 
-    def parse(
-        self, target: Target = None, accumulated: Dict[str, Any] = {}
-    ) -> Dict[str, Any]:
+    def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
         output = {InputKeyword.EXPLOIT.name.lower(): self.title}
         if self.vulnerability:
-            output.update(self.vulnerability.parse(target, accumulated))
+            output.update(self.vulnerability.parse(accumulated))
         elif self.technology:
-            output.update(self.technology.parse(target, accumulated))
+            output.update(self.technology.parse(accumulated))
         return output
 
     def defect_dojo(self) -> Dict[str, Any]:

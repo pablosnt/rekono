@@ -94,10 +94,10 @@ class BaseExecutor:
                     if is_fallback and parsed_data:
                         break
                     is_model = input_model and isinstance(base_input, input_model)
-                    if (is_model or is_fallback) and base_input.filter(argument_input):
-                        parsed_data = base_input.parse(
-                            self.execution.task.target, parsed_data
-                        )
+                    if (is_model or is_fallback) and base_input.filter(
+                        argument_input, self.execution.task.target
+                    ):
+                        parsed_data = base_input.parse(parsed_data)
                         self.findings_used_in_execution[
                             base_input.__class__
                         ] = base_input

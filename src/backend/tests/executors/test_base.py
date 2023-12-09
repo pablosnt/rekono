@@ -100,7 +100,7 @@ class ToolExecutorTest(RekonoTest):
     def test_get_arguments_with_path_filter(self) -> None:
         self._setup_task_user_provided_entities()
         self._success_get_arguments(
-            "-p 10.10.10.10 -p http://10.10.10.10:80/login.php -p 80 -p /login.php -p WordPress -p CVE-2023-1111 -p root",
+            "-p 10.10.10.10 -p http://10.10.10.10:80/ -p 80 -p WordPress -p CVE-2023-1111 -p root",
             [self.port, self.path, self.technology, self.vulnerability],
         )
         self.path.path = "rootpath/test"

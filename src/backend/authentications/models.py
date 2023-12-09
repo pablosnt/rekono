@@ -38,9 +38,7 @@ class Authentication(BaseInput, BaseEncrypted):
     filters = [BaseInput.Filter(type=AuthenticationType, field="type")]
     _encrypted_field = "_secret"
 
-    def parse(
-        self, target: Target = None, accumulated: Dict[str, Any] = {}
-    ) -> Dict[str, Any]:
+    def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
         """Get useful information from this instance to be used in tool execution as argument.
 
         Args:
@@ -49,31 +47,27 @@ class Authentication(BaseInput, BaseEncrypted):
         Returns:
             Dict[str, Any]: Useful information for tool executions, including accumulated if setted
         """
-        output = {
+        return {
             InputKeyword.COOKIE_NAME.name.lower(): self.name
             if self.type == AuthenticationType.COOKIE
             else None,
             InputKeyword.SECRET.name.lower(): self.secret,
             InputKeyword.CREDENTIAL_TYPE.name.lower(): self.type,
             InputKeyword.CREDENTIAL_TYPE_LOWER.name.lower(): self.type.lower(),
-        }
-        if self.type == AuthenticationType.BASIC:
-            output.update(
+            **(
                 {
                     InputKeyword.USERNAME.name.lower(): self.name,
                     InputKeyword.TOKEN.name.lower(): base64.b64encode(
                         f"{self.name}:{self.secret}".encode()
                     ).decode(),
                 }
-            )
-        else:
-            output.update(
-                {
+                if self.type == AuthenticationType.BASIC
+                else {
                     InputKeyword.USERNAME.name.lower(): None,
                     InputKeyword.TOKEN.name.lower(): self.secret,
                 }
-            )
-        return output
+            ),
+        }
 
     def __str__(self) -> str:
         """Instance representation in text format.

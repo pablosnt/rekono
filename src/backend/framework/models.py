@@ -99,6 +99,9 @@ class BaseInput(BaseModel):
 
     filters: List[Filter] = []
 
+    def _clean_path(self, value: str) -> str:
+        return f"/{value}" if len(value) > 1 and value[0] != "/" else value
+
     def _get_url(
         self,
         host: str,
@@ -147,7 +150,7 @@ class BaseInput(BaseModel):
             comparison(filter, value) if not negative else not comparison(filter, value)
         )
 
-    def filter(self, input: Any) -> bool:
+    def filter(self, input: Any, target: Any = None) -> bool:
         """Check if this instance is valid based on input filter.
 
         Args:
@@ -186,9 +189,7 @@ class BaseInput(BaseModel):
                     pass
         return False
 
-    def parse(
-        self, target: Any = None, accumulated: Dict[str, Any] = {}
-    ) -> Dict[str, Any]:
+    def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
         """Get useful information from this instance to be used in tool execution as argument.
 
         To be implemented by subclasses.
