@@ -7,7 +7,7 @@ from tests.framework import ApiTest
 default_blacklist_1 = {"id": 1, "default": True, "target": "127.0.0.1"}
 target_blacklist1 = {"target": "rekono.com"}
 target_blacklist2 = {"target": ".*\.rekono\.com"}
-invalid_regex_blacklist = {"target": ".*.rekono.com"}
+invalid_regex_blacklist = {"target": "*.rekono.com"}
 target_blacklist3 = {"target": "10.10.10.0/24"}
 new_target_blacklist = {"target": ".*\.new\.rekono.com"}
 invalid_blacklist = {"target": "*.rekono;com"}
