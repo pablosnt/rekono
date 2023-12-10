@@ -1,7 +1,9 @@
 import logging
+import os
 import threading
 from typing import Any, Dict, List
 
+import certifi
 from django.core.mail import EmailMultiAlternatives
 from django.core.mail.backends.smtp import EmailBackend
 from django.template.loader import get_template
@@ -32,7 +34,9 @@ class SMTP(BaseNotification):
             if self.settings
             else None
         )
-        self.datetime_format = "%Y-%m-%d %H:%M"
+        self.datetime_format = "%Y-%m-%d %H:%M %Z"
+        # The trusted certificates must be defined
+        os.environ["SSL_CERT_FILE"] = certifi.where()
 
     def is_available(self) -> bool:
         if not self.settings or not self.settings.host or not self.settings.port:
@@ -49,23 +53,22 @@ class SMTP(BaseNotification):
     ) -> None:
         threading.Thread(
             target=self._send_messages, args=(users, subject, template, data)
-        )
+        ).start()
 
     def _send_messages(
         self, users: List[Any], subject: str, template: str, data: Dict[str, Any]
     ) -> None:
-        if self.is_available():
-            try:
-                message = EmailMultiAlternatives(
-                    subject, "", "Rekono <noreply@rekono.com>", [u.email for u in users]
-                )
-                template = get_template(template)
-                data["rekono_url"] = CONFIG.frontend_url
-                # nosemgrep: python.flask.security.xss.audit.direct-use-of-jinja2.direct-use-of-jinja2
-                message.attach_alternative(template.render(data), "text/html")
-                self.backend.send_messages([message])
-            except Exception:
-                logger.error("[Mail] Error sending email message")
+        try:
+            message = EmailMultiAlternatives(
+                subject, "", "Rekono <noreply@rekono.com>", [u.email for u in users]
+            )
+            template = get_template(template)
+            data["rekono_url"] = CONFIG.frontend_url
+            # nosemgrep: python.flask.security.xss.audit.direct-use-of-jinja2.direct-use-of-jinja2
+            message.attach_alternative(template.render(data), "text/html")
+            self.backend.send_messages([message])
+        except:
+            logger.error("[Mail] Error sending email message")
 
     def _notify_execution(
         self, users: List[Any], execution: Execution, findings: List[Finding]
