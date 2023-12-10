@@ -22,6 +22,8 @@ from platforms.telegram_app.bot.conversations import (
 )
 from platforms.telegram_app.framework import BaseTelegram
 from platforms.telegram_app.models import TelegramSettings
+from telegram.error import Forbidden, InvalidToken
+from telegram.ext import Application
 from telegram.warnings import PTBUserWarning
 
 filterwarnings(
@@ -50,27 +52,32 @@ class TelegramBot(BaseTelegram):
         self.commands.append(Help(self.commands + [Cancel()]))
         super().__init__()
 
+    async def _post_init(self, application: Application) -> None:
+        bot_commands = []
+        for command in self.commands:
+            bot_commands.append((command.get_name(), command.help))
+            self.app.add_handler(command)
+        await self.app.bot.set_my_commands(bot_commands)
+
     def _wait_for_token(self, sleep_time: int = 60) -> None:
         if not self.settings or not self.settings.secret:
             logger.info("[Telegram Bot] Waiting while Telegram token is not configured")
         while not self.settings or not self.settings.secret:
             time.sleep(sleep_time)
             self.settings = TelegramSettings.objects.first()
-        self.app = self.initialize()
+        self.app = self._get_app()
         if not self.app or not self.app.updater or not self.app.bot:
-            self.settings.secret = None
-            self.settings.save(update_fields=["_token"])
+            if self.settings.secret:
+                self._handle_invalid_token(False)
             self._wait_for_token(sleep_time)
 
     def deploy(self) -> None:
         self._wait_for_token()
         if not self.app or not self.app.updater or not self.app.bot:
             return self.deploy()
-        bot_commands = []
-        for command in self.commands:
-            bot_commands.append((command.get_name(), command.help))
-            self.app.add_handler(command)
-        asyncio.get_event_loop().run_until_complete(
-            self.app.bot.set_my_commands(bot_commands)
-        )
-        self.app.run_polling()
+        try:
+            asyncio.set_event_loop(asyncio.new_event_loop())
+            self.app.run_polling()
+        except (InvalidToken, Forbidden):
+            self._handle_invalid_token()
+            return self.deploy()

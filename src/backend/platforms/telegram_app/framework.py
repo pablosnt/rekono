@@ -1,11 +1,11 @@
 import asyncio
 import logging
-from typing import Any
+from typing import Any, List
 
 from platforms.telegram_app.models import TelegramChat, TelegramSettings
 from telegram.constants import ParseMode
 from telegram.error import Forbidden, InvalidToken
-from telegram.ext import ApplicationBuilder
+from telegram.ext import Application
 from telegram.helpers import escape_markdown
 
 logger = logging.getLogger()
@@ -32,11 +32,17 @@ class BaseTelegram:
     def _get_app(self) -> Any:
         if self.settings and self.settings.secret:
             try:
-                return ApplicationBuilder().token(self.settings.secret).build()
+                return (
+                    Application.builder()
+                    .token(self.settings.secret)
+                    .post_init(self._post_init)
+                    .build()
+                )
             except (InvalidToken, Forbidden):
                 self._handle_invalid_token()
-            except Exception:
-                logger.error("[Telegram] Error creating updater")
+
+    async def _post_init(self, application: Application) -> None:
+        pass
 
     def _send_message(
         self, chat: TelegramChat, message: str, reply_markup: Any = None
@@ -54,8 +60,9 @@ class BaseTelegram:
     def _escape(self, value: str) -> str:
         return escape_markdown(value, version=2)
 
-    def _handle_invalid_token(self) -> None:
-        logger.error("[Telegram] Authentication error")
+    def _handle_invalid_token(self, log_error: bool = True) -> None:
         self.settings.secret = None
         self.settings.save(update_fields=["_token"])
         self.app = None
+        if log_error:
+            logger.error("[Telegram] Authentication error")

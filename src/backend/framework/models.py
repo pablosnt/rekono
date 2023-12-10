@@ -70,11 +70,13 @@ class BaseEncrypted(BaseModel):
 
     @secret.setter
     def secret(self, value: str) -> None:
-        if hasattr(self, self._encrypted_field) and value:
+        if hasattr(self, self._encrypted_field):
             setattr(
                 self,
                 self._encrypted_field,
-                self._encryptor.encrypt(value) if self._encryptor else value,
+                self._encryptor.encrypt(value)
+                if self._encryptor and value is not None
+                else value,
             )
 
 
