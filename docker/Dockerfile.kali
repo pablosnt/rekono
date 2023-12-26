@@ -16,7 +16,7 @@ RUN apt update -y && \
     mkdir /code
 
 # Configuration
-COPY src/config.yaml /rekono
+COPY config.yaml /rekono
 # Source code
 COPY src/backend/ /code
 

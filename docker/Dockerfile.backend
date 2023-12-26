@@ -14,7 +14,7 @@ RUN apk update && \
     mkdir /code
 
 # Configuration
-COPY src/config.yaml /rekono
+COPY config.yaml /rekono
 # Source code
 COPY src/backend/ /code
 
