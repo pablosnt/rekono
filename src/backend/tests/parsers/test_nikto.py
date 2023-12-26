@@ -15,7 +15,7 @@ class NiktoTest(ToolTest):
                     "name": "The anti-clickjacking X-Frame-Options header is not present.",
                     "description": "[GET /] The anti-clickjacking X-Frame-Options header is not present.",
                     "severity": Severity.MEDIUM,
-                    "osvdb": "OSVDB-0",
+                    "osvdb": None,
                 },
                 {
                     "model": Vulnerability,
@@ -28,7 +28,7 @@ class NiktoTest(ToolTest):
                         "agent to protect against some forms of XSS"
                     ),
                     "severity": Severity.MEDIUM,
-                    "osvdb": "OSVDB-0",
+                    "osvdb": None,
                 },
                 {
                     "model": Vulnerability,
@@ -41,14 +41,14 @@ class NiktoTest(ToolTest):
                         "agent to render the content of the site in a different fashion to the MIME type"
                     ),
                     "severity": Severity.MEDIUM,
-                    "osvdb": "OSVDB-0",
+                    "osvdb": None,
                 },
                 {
                     "model": Vulnerability,
                     "name": "Uncommon header 'tcn' found, with contents: list",
                     "description": "[GET /index] Uncommon header 'tcn' found, with contents: list",
                     "severity": Severity.MEDIUM,
-                    "osvdb": "OSVDB-0",
+                    "osvdb": None,
                 },
                 {"model": Path, "path": "/index", "type": PathType.ENDPOINT},
                 {
@@ -64,7 +64,7 @@ class NiktoTest(ToolTest):
                         "The following alternatives for 'index' were found: index.html"
                     ),
                     "severity": Severity.MEDIUM,
-                    "osvdb": "OSVDB-0",
+                    "osvdb": None,
                 },
                 {
                     "model": Vulnerability,
@@ -77,14 +77,14 @@ class NiktoTest(ToolTest):
                         "Apache 2.2.34 is the EOL for the 2.x branch."
                     ),
                     "severity": Severity.MEDIUM,
-                    "osvdb": "OSVDB-0",
+                    "osvdb": None,
                 },
                 {
                     "model": Vulnerability,
                     "name": "Allowed HTTP Methods: GET, HEAD, POST, OPTIONS ",
                     "description": "[OPTIONS /] Allowed HTTP Methods: GET, HEAD, POST, OPTIONS ",
                     "severity": Severity.MEDIUM,
-                    "osvdb": "OSVDB-0",
+                    "osvdb": None,
                 },
                 {
                     "model": Vulnerability,

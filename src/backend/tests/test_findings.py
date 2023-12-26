@@ -51,7 +51,11 @@ findings_data = {
         "/api/ports/",
     ),
     Path: (
-        {"protocol": "http", "host": "10.10.10.10", "port": 80, "path": "/index.php"},
+        {
+            "title": "Path discovered",
+            "description": "Host: 10.10.10.10\nPort: 80\nPath: /index.php\nType: ENDPOINT\nStatus: 200\nInfo: Main path",
+            "severity": Severity.INFO,
+        },
         "10.10.10.10 - 80 - /index.php",
         "/api/paths/",
     ),
@@ -249,6 +253,15 @@ class FindingTest(ApiTest):
             parsed = finding.defect_dojo()
             for key, value in findings_data[finding.__class__][0].items():
                 self.assertEqual(value, parsed[key])
+        defect_dojo_endpoint = {
+            "protocol": "http",
+            "host": "10.10.10.10",
+            "port": 80,
+            "path": "/index.php",
+        }
+        parsed = self.path.defect_dojo_endpoint(self.target)
+        for key, value in defect_dojo_endpoint.items():
+            self.assertEqual(value, parsed[key])
 
 
 class OSINTTest(ApiTest):
