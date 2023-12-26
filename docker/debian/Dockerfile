@@ -33,7 +33,7 @@ RUN apt update -y && \
 # Source code and configuration
 COPY src/backend/ /code
 COPY src/frontend/dist_electron/rekono_*.deb /code
-COPY config.yaml /code
+COPY config.yaml /rekono
 COPY docker/debian/entrypoint.sh /entrypoint.sh
 COPY docker/debian/set_permissions.sh /set_permissions.sh
 
