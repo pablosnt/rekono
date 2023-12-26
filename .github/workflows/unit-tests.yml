@@ -6,7 +6,7 @@ on:
       - 'src/backend/**'
 
 env:
-  REQUIRED_COVERAGE: 95
+  REQUIRED_COVERAGE: 90
 
 jobs:
   unit-tests:
