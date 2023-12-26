@@ -5,7 +5,7 @@ from typing import Any, Dict, List
 import requests
 from django.utils import timezone
 from executions.models import Execution
-from findings.enums import Severity
+from findings.enums import PathType, Severity
 from findings.framework.models import Finding
 from findings.models import Path
 from framework.platforms import BaseIntegration
@@ -14,6 +14,8 @@ from platforms.defect_dojo.models import (
     DefectDojoSync,
     DefectDojoTargetSync,
 )
+from requests.exceptions import HTTPError
+from targets.models import Target
 
 
 class DefectDojo(BaseIntegration):
@@ -32,7 +34,7 @@ class DefectDojo(BaseIntegration):
     def _request(
         self, method: callable, url: str, json: bool = True, **kwargs: Any
     ) -> Any:
-        super()._request(
+        return super()._request(
             method,
             f"{self.settings.server}/api/v2{url}",
             json,
@@ -60,8 +62,12 @@ class DefectDojo(BaseIntegration):
         except:
             return False
 
-    def exists(self, entity_name: str, id: int) -> None:
-        self._request(self.session.get, f"/{entity_name}/{id}/")
+    def exists(self, entity_name: str, id: int) -> bool:
+        try:
+            self._request(self.session.get, f"/{entity_name}/{id}/")
+            return True
+        except:
+            return False
 
     def create_product_type(self, name: str, description: str) -> Dict[str, Any]:
         return self._request(
@@ -127,12 +133,17 @@ class DefectDojo(BaseIntegration):
             },
         )
 
-    def _create_endpoint(self, product: int, endpoint: Path) -> Dict[str, Any]:
-        return self._request(
-            self.session.post,
-            "/endpoints/",
-            data={**endpoint.defect_dojo(), "product": product},
-        )
+    def _create_endpoint(
+        self, product: int, endpoint: Path, target: Target
+    ) -> Dict[str, Any]:
+        try:
+            return self._request(
+                self.session.post,
+                "/endpoints/",
+                data={**endpoint.defect_dojo_endpoint(target), "product": product},
+            )
+        except HTTPError:
+            return None
 
     def _create_finding(self, test: int, finding: Finding) -> Dict[str, Any]:
         data = finding.defect_dojo()
@@ -206,9 +217,13 @@ class DefectDojo(BaseIntegration):
         else:
             test_id = None
             for finding in findings:
-                if isinstance(finding, Path):
-                    new_endpoint = self._create_endpoint(product_id, finding)
-                    finding.defect_dojo_id = new_endpoint.get("id")
+                if isinstance(finding, Path) and finding.type == PathType.ENDPOINT:
+                    if finding.defect_dojo_id is None:
+                        new_endpoint = self._create_endpoint(
+                            product_id, finding, execution.task.target
+                        )
+                        if new_endpoint is not None:
+                            finding.defect_dojo_id = new_endpoint.get("id")
                 else:
                     if not test_id:
                         if not self.settings.test_type_id:

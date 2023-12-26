@@ -1,7 +1,6 @@
-from typing import Any, Dict, List
+from typing import Any, Dict
 
-from django.core.exceptions import NON_FIELD_ERRORS
-from django.db import connection, models
+from django.db import models
 from executions.models import Execution
 from findings.enums import TriageStatus
 from framework.models import BaseInput

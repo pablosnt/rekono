@@ -19,18 +19,17 @@ logger = logging.getLogger()
 
 
 class TasksQueue(BaseQueue):
-    def __init__(self) -> None:
-        super().__init__("tasks-queue")
-        self.executions_queue = ExecutionsQueue()
+    name = "tasks-queue"
 
     def enqueue(self, task: Task) -> Job:
+        queue = self._get_queue()
         if task.scheduled_at:
             task.enqueued_at = task.scheduled_at
-            job = self.queue.enqueue_at(
+            job = queue.enqueue_at(
                 task.scheduled_at,
-                self.consume.__func__,
+                self.consume,
                 task=task,
-                on_success=self._scheduled_callback.__func__,
+                on_success=self._scheduled_callback,
             )
             logger.info(
                 f"[Task] Task {task.id} will be enqueued at {task.scheduled_at}"
@@ -38,39 +37,41 @@ class TasksQueue(BaseQueue):
         elif task.scheduled_in and task.scheduled_time_unit:
             delay = {task.scheduled_time_unit.lower(): task.scheduled_in}
             task.enqueued_at = timezone.now() + timedelta(**delay)
-            job = self.queue.enqueue_in(
+            job = queue.enqueue_in(
                 timedelta(**delay),
-                self.consume.__func__,
+                self.consume,
                 task=task,
-                on_success=self._scheduled_callback.__func__,
+                on_success=self._scheduled_callback,
             )
             logger.info(
                 f"[Task] Task {task.id} will be enqueued in {task.scheduled_in} {task.scheduled_time_unit}"
             )
         else:
             task.enqueued_at = timezone.now()
-            job = self.queue.enqueue(
-                self.consume.__func__,
+            job = queue.enqueue(
+                self.consume,
                 task=task,
-                on_success=self._scheduled_callback.__func__,
+                on_success=self._scheduled_callback,
             )
             logger.info(f"[Task] Task {task.id} has been enqueued")
         task.rq_job_id = job.id
         task.save(update_fields=["enqueued_at", "rq_job_id"])
         return job
 
+    @staticmethod
     @job("tasks-queue")
-    def consume(self, task: Task) -> Task:
+    def consume(task: Task) -> Task:
         if task.executions:
             task.executions.clear()
         if task.configuration:
-            self._consume_tool_task(task)
+            TasksQueue._consume_tool_task(task)
         elif task.process:
-            self._consume_process_task(task)
+            TasksQueue._consume_process_task(task)
         return task
 
-    def _consume_tool_task(self, task: Task) -> None:
-        executions = self._calculate_executions(
+    @staticmethod
+    def _consume_tool_task(task: Task) -> None:
+        executions = TasksQueue._calculate_executions(
             task.configuration.tool,
             [],
             task.target.target_ports.all(),
@@ -78,11 +79,12 @@ class TasksQueue(BaseQueue):
             task.target.input_technologies.all(),
             task.wordlists.all(),
         )
+        executions_queue = ExecutionsQueue()
         for parameters in executions or [{}]:
             execution = Execution.objects.create(
                 task=task, configuration=task.configuration, group=1
             )
-            self.executions_queue.enqueue(
+            executions_queue.enqueue(
                 execution,
                 [],
                 parameters.get(1, []),
@@ -91,7 +93,8 @@ class TasksQueue(BaseQueue):
                 parameters.get(4, []),
             )
 
-    def _consume_process_task(self, task: Task) -> None:
+    @staticmethod
+    def _consume_process_task(task: Task) -> None:
         plan = []
         steps = (
             Step.objects.annotate(
@@ -103,6 +106,7 @@ class TasksQueue(BaseQueue):
                 "configuration__stage", "max_input", "max_output", "configuration__id"
             )
         )
+        executions_queue = ExecutionsQueue()
         for step in steps:
             item = {
                 "step": step,
@@ -138,7 +142,7 @@ class TasksQueue(BaseQueue):
                     skipped_reason=f"Tool {step.configuration.tool.name} can't be executed with intensity {task.intensity.name.capitalize()}",
                 )
         for job in plan:
-            executions = self._calculate_executions(
+            executions = TasksQueue._calculate_executions(
                 job["step"].configuration.tool,
                 [],
                 task.target.target_ports.all(),
@@ -153,7 +157,7 @@ class TasksQueue(BaseQueue):
                     group=job["group"],
                 )
                 job["jobs"].append(
-                    self.executions_queue.enqueue(
+                    executions_queue.enqueue(
                         execution,
                         parameters.get(0, []),
                         parameters.get(1, []),
@@ -164,18 +168,20 @@ class TasksQueue(BaseQueue):
                     )
                 )
 
+    @staticmethod
     def _scheduled_callback(
-        self, job: Any, connection: Any, result: Task, *args: Any, **kwargs: Any
+        job: Any, connection: Any, result: Task, *args: Any, **kwargs: Any
     ) -> None:
         if result and result.repeat_in and result.repeat_time_unit:
             result.enqueued_at = result.enqueued_at + timedelta(
                 **{result.repeat_time_unit.lower(): result.repeat_in}
             )
-            job = self.queue.enqueue_at(
+            instance = TasksQueue()
+            job = instance._get_queue().enqueue_at(
                 result.enqueued_at,
-                self.consume.__func__,
+                instance.consume,
                 task=result,
-                on_success=self._scheduled_callback.__func__,
+                on_success=instance._scheduled_callback,
             )
             logger.info(f"[Task] Scheduled task {result.id} has been enqueued again")
             result.rq_job_id = job.id

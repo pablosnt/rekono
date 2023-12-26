@@ -22,9 +22,7 @@ logger = logging.getLogger()
 
 
 class ExecutionsQueue(BaseQueue):
-    def __init__(self) -> None:
-        super().__init__("executions-queue")
-        self.findings_queue = FindingsQueue()
+    name = "executions-queue"
 
     def enqueue(
         self,
@@ -37,8 +35,8 @@ class ExecutionsQueue(BaseQueue):
         dependencies: List[Job] = [],
         at_front: bool = False,
     ) -> Job:
-        job = self.queue.enqueue(
-            self.consume.__func__,
+        job = self._get_queue().enqueue(
+            self.consume,
             execution=execution,
             findings=findings,
             target_ports=target_ports,
@@ -63,9 +61,9 @@ class ExecutionsQueue(BaseQueue):
         execution.save(update_fields=["rq_job_id"])
         return job
 
+    @staticmethod
     @job("executions-queue")
     def consume(
-        self,
         execution: Execution,
         findings: List[Finding],
         target_ports: List[TargetPort],
@@ -84,7 +82,7 @@ class ExecutionsQueue(BaseQueue):
                 input_vulnerabilities,
                 input_technologies,
                 wordlists,
-            ) = self._get_findings_from_dependencies(
+            ) = ExecutionsQueue._get_findings_from_dependencies(
                 executor,
                 target_ports,
                 input_vulnerabilities,
@@ -98,11 +96,11 @@ class ExecutionsQueue(BaseQueue):
             executor, execution.output_plain
         )
         parser.parse()
-        self.findings_queue.enqueue(execution, parser.findings)
+        FindingsQueue().enqueue(execution, parser.findings)
         return execution, parser.findings
 
+    @staticmethod
     def _get_findings_from_dependencies(
-        self,
         executor: BaseExecutor,
         target_ports: List[TargetPort],
         input_vulnerabilities: List[InputVulnerability],
@@ -111,15 +109,16 @@ class ExecutionsQueue(BaseQueue):
         current_job: Job,
     ) -> Dict[int, List[BaseInput]]:
         findings = []
+        queue = ExecutionsQueue._get_queue()
         for dependency_id in current_job._dependency_ids:
-            dependency = self.queue.fetch_job(dependency_id)
+            dependency = queue.fetch_job(dependency_id)
             if dependency and dependency.result:
                 findings.extend(dependency.result[1])
         if not findings:
             return findings
         executions = [
             e
-            for e in self._calculate_executions(
+            for e in ExecutionsQueue._calculate_executions(
                 executor.execution.configuration.tool,
                 findings,
                 target_ports,
@@ -141,7 +140,7 @@ class ExecutionsQueue(BaseQueue):
                 configuration=executor.execution.configuration,
                 group=executor.execution.group,
             )
-            job = self.enqueue(
+            job = queue.enqueue(
                 new_execution,
                 execution.get(0, []),
                 execution.get(1, []),
@@ -153,15 +152,16 @@ class ExecutionsQueue(BaseQueue):
             )
             new_jobs.append(job.id)
         if new_jobs:
-            registry = DeferredJobRegistry(queue=self.queue)
+            instance = ExecutionsQueue()
+            registry = DeferredJobRegistry(queue=queue)
             for pending_job_id in registry.get_job_ids():
-                pending_job = self.queue.fetch_job(pending_job_id)
+                pending_job = queue.fetch_job(pending_job_id)
                 if pending_job and current_job.id in pending_job._dependency_ids:
                     dependencies = pending_job._dependency_ids
                     meta = pending_job.get_meta()
-                    self.cancel_job(pending_job_id)
-                    self.delete_job(pending_job_id)
-                    self.enqueue(
+                    instance.cancel_job(pending_job_id)
+                    instance.delete_job(pending_job_id)
+                    instance.enqueue(
                         meta["execution"],
                         [],
                         meta["target_ports"],

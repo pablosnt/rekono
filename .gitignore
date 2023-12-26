@@ -132,9 +132,9 @@ dmypy.json
 .DS_Store
 .vscode/
 .scannerwork/
-./reports/
-./wordlists/
-./logs/
+reports/
+wordlists/
+logs/
 /static/
 /src/backend/tests/home/
 

@@ -152,7 +152,7 @@ class BaseInput(BaseModel):
             comparison(filter, value) if not negative else not comparison(filter, value)
         )
 
-    def filter(self, input: Any, target: Any = None) -> bool:
+    def filter(self, argument_input: Any, target: Any = None) -> bool:
         """Check if this instance is valid based on input filter.
 
         Args:
@@ -161,34 +161,46 @@ class BaseInput(BaseModel):
         Returns:
             bool: Indicate if this instance match the input filter or not
         """
-        if not input.filter:
+        if not argument_input.filter:
             return True
-        for filter_value in input.filter.split(" or "):
-            negative = filter_value.startswith("!")
-            if negative:
-                filter_value = filter_value[1:]
-            for filter in self.filters:
-                field_value = getattr(self, filter.field)
-                if filter.processor:
-                    field_value = filter.processor(field_value)
-                try:
-                    if (
-                        issubclass(filter.type, models.TextChoices)
-                        and self._compare_filter(
-                            filter.type[filter_value.upper()], field_value, negative
-                        )
-                    ) or (
-                        hasattr(self, filter_value)
-                        and self._compare_filter(
-                            filter.type(getattr(self, filter_value)),
-                            field_value,
-                            negative,
-                            filter.contains,
-                        )
-                    ):
+        filter_value = argument_input.filter
+        for split, or_condition in [(" or ", True), (" and ", False)]:
+            if split not in filter_value and or_condition:
+                continue
+            for match_value in filter_value.split(split):
+                negative = match_value.startswith("!")
+                if negative:
+                    match_value = match_value[1:]
+                for filter in self.filters:
+                    and_condition = False
+                    field_value = getattr(self, filter.field)
+                    if filter.processor:
+                        field_value = filter.processor(field_value)
+                    try:
+                        if (
+                            issubclass(filter.type, models.TextChoices)
+                            and self._compare_filter(
+                                filter.type[match_value.upper()], field_value, negative
+                            )
+                        ) or (
+                            hasattr(self, match_value)
+                            and self._compare_filter(
+                                filter.type(getattr(self, match_value)),
+                                field_value,
+                                negative,
+                                filter.contains,
+                            )
+                        ):
+                            if or_condition:
+                                return True
+                            else:
+                                and_condition = True
+                        elif not or_condition:
+                            return False
+                    except (ValueError, KeyError) as ex:
+                        continue
+                    if not or_condition and and_condition:
                         return True
-                except (ValueError, KeyError):
-                    pass
         return False
 
     def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:

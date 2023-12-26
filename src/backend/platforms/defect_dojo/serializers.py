@@ -66,7 +66,8 @@ class BaseDefectDojoSerializer:
         for entity in ["product_type", "product", "engagement"]:
             value = attrs.get(f"{entity}_id") or attrs.get(entity)
             if value:
-                self._get_client().exists(f"{entity}s", value)
+                if not self._get_client().exists(f"{entity}s", value):
+                    raise ValidationError(f"Entity {value} doesn't exist", code=entity)
         return attrs
 
 

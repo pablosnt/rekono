@@ -45,7 +45,7 @@
         "fields": {
             "argument": 3,
             "type": 2,
-            "filter": "!ip_range,network",
+            "filter": "!ip_range and !network",
             "order": 2
         }
     },
@@ -85,7 +85,7 @@
         "fields": {
             "argument": 6,
             "type": 2,
-            "filter": "!ip_range,network",
+            "filter": "!ip_range and !network",
             "order": 2
         }
     },
@@ -105,7 +105,7 @@
         "fields": {
             "argument": 7,
             "type": 2,
-            "filter": "!ip_range,network",
+            "filter": "!ip_range and !network",
             "order": 2
         }
     },
@@ -125,7 +125,7 @@
         "fields": {
             "argument": 8,
             "type": 2,
-            "filter": "!ip_range,network",
+            "filter": "!ip_range and !network",
             "order": 2
         }
     },
@@ -145,7 +145,7 @@
         "fields": {
             "argument": 9,
             "type": 2,
-            "filter": "!ip_range,network",
+            "filter": "!ip_range and !network",
             "order": 2
         }
     },
@@ -165,7 +165,7 @@
         "fields": {
             "argument": 10,
             "type": 2,
-            "filter": "!ip_range,network",
+            "filter": "!ip_range and !network",
             "order": 2
         }
     },
@@ -205,7 +205,7 @@
         "fields": {
             "argument": 13,
             "type": 2,
-            "filter": "!ip_range,network",
+            "filter": "!ip_range and !network",
             "order": 2
         }
     },
@@ -245,7 +245,7 @@
         "fields": {
             "argument": 16,
             "type": 2,
-            "filter": "!ip_range,network",
+            "filter": "!ip_range and !network",
             "order": 2
         }
     },
@@ -265,7 +265,7 @@
         "fields": {
             "argument": 17,
             "type": 2,
-            "filter": "!ip_range,network",
+            "filter": "!ip_range and !network",
             "order": 2
         }
     },
@@ -285,7 +285,7 @@
         "fields": {
             "argument": 18,
             "type": 2,
-            "filter": "!ip_range,network",
+            "filter": "!ip_range and !network",
             "order": 2
         }
     },
@@ -315,7 +315,7 @@
         "fields": {
             "argument": 20,
             "type": 2,
-            "filter": "!ip_range,network",
+            "filter": "!ip_range and !network",
             "order": 2
         }
     },
@@ -425,7 +425,7 @@
         "fields": {
             "argument": 30,
             "type": 2,
-            "filter": "!ip_range,network",
+            "filter": "!ip_range and !network",
             "order": 2
         }
     },
@@ -465,7 +465,7 @@
         "fields": {
             "argument": 33,
             "type": 2,
-            "filter": "!ip_range,network",
+            "filter": "!ip_range and !network",
             "order": 2
         }
     },
@@ -505,7 +505,7 @@
         "fields": {
             "argument": 36,
             "type": 2,
-            "filter": "!ip_range,network",
+            "filter": "!ip_range and !network",
             "order": 2
         }
     },
@@ -545,7 +545,7 @@
         "fields": {
             "argument": 40,
             "type": 10,
-            "filter": "!cookie,basic",
+            "filter": "!cookie and !basic",
             "order": 1
         }
     },

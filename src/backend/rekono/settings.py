@@ -19,7 +19,9 @@ from rekono.config import RekonoConfig
 # Rekono basic information                                                     #
 ################################################################################
 
-DESCRIPTION = "Automation platform that combines different hacking tools to complete pentesting processes"
+DESCRIPTION = (
+    "Pentesting automation platform that combines hacking tools to complete assessments"
+)
 VERSION = "2.0.0"
 
 
@@ -45,6 +47,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django_rq",
     "drf_spectacular",
     "rest_framework",
     "rest_framework_simplejwt.token_blacklist",

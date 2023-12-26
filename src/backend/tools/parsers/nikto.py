@@ -14,14 +14,15 @@ class Nikto(BaseParser):
             endpoint = item.findtext("uri")
             description = item.findtext("description")
             if description:
-                self.create_finding(  # Create Vulnerability
+                osvdb_id = item.attrib.get("osvdbid")
+                self.create_finding(
                     Vulnerability,
                     name=description,
                     description=f"[{method} {endpoint}] {description}"
                     if endpoint
                     else f"[{method}] {description}",
                     severity=Severity.MEDIUM,
-                    osvdb=f"OSVDB-{item.attrib['osvdbid']}",
+                    osvdb=f"OSVDB-{osvdb_id}" if osvdb_id and osvdb_id != "0" else None,
                 )
             if endpoint and endpoint not in endpoints:
                 endpoints.add(endpoint)

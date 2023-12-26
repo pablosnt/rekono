@@ -7,7 +7,10 @@ from platforms.defect_dojo.serializers import (
     DefectDojoSettingsSerializer,
     DefectDojoSyncSerializer,
 )
+from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.request import Request
+from rest_framework.response import Response
 from security.authorization.permissions import (
     IsAuditor,
     ProjectMemberPermission,
@@ -41,19 +44,32 @@ class DefectDojoSyncViewSet(BaseViewSet):
     ]
 
 
-class DefectDojoProductTypeViewSet(BaseViewSet):
+class DefectDojoEntityViewSet(BaseViewSet):
+    http_method_names = ["post"]
+    permission_classes = [IsAuthenticated, IsAuditor]
+
+    def create(self, request: Request) -> Response:
+        serializer = self.get_serializer_class()(
+            data=request.data, context={"request": request}
+        )
+        serializer.is_valid(raise_exception=True)
+        try:
+            response = serializer.create(serializer.validated_data)
+            return Response({"id": response.get("id")}, status=status.HTTP_201_CREATED)
+        except:
+            return Response(
+                {"defect-dojo": "Error creating instance on Defect-Dojo"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+
+class DefectDojoProductTypeViewSet(DefectDojoEntityViewSet):
     serializer_class = DefectDojoProductTypeSerializer
-    http_method_names = ["post"]
-    permission_classes = [IsAuthenticated, IsAuditor]
 
 
-class DefectDojoProductViewSet(BaseViewSet):
+class DefectDojoProductViewSet(DefectDojoEntityViewSet):
     serializer_class = DefectDojoProductSerializer
-    http_method_names = ["post"]
-    permission_classes = [IsAuthenticated, IsAuditor]
 
 
-class DefectDojoEngagementViewSet(BaseViewSet):
+class DefectDojoEngagementViewSet(DefectDojoEntityViewSet):
     serializer_class = DefectDojoEngagementSerializer
-    http_method_names = ["post"]
-    permission_classes = [IsAuthenticated, IsAuditor]

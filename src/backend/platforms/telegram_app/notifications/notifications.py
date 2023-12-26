@@ -1,5 +1,6 @@
 from typing import List
 
+from django.forms.models import model_to_dict
 from executions.models import Execution
 from findings.framework.models import Finding
 from framework.platforms import BaseNotification
@@ -27,11 +28,11 @@ class Telegram(BaseNotification, BaseTelegram):
                 FINDINGS[finding.__class__]
                 .get("template", "")
                 .format(
-                    {
+                    **{
                         k: self._escape(
-                            str(v) or "" if not isinstance(v, Finding) else v.__str__(),
+                            str(v) if not isinstance(v, Finding) else v.__str__(),
                         )
-                        for k, v in finding.__dict__.items()
+                        for k, v in model_to_dict(finding).items()
                     }
                 )
             )

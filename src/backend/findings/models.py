@@ -199,12 +199,32 @@ class Path(Finding):
             InputKeyword.ENDPOINT.name.lower(): path,
         }
 
-    def defect_dojo(self) -> Dict[str, Any]:
+    def defect_dojo_endpoint(self, target: Target) -> Dict[str, Any]:
         return {
             "protocol": self.port.service if self.port else None,
-            "host": self.port.host.address if self.port and self.port.host else None,
+            "host": self.port.host.address
+            if self.port and self.port.host
+            else target.target,
             "port": self.port.port if self.port else None,
             "path": self.path,
+        }
+
+    def defect_dojo(self) -> Dict[str, Any]:
+        description = f"Path: {self.path}\nType: {self.type}"
+        for key, value in [("Status", self.status), ("Info", self.extra_info)]:
+            if value:
+                description = f"{description}\n{key}: {value}"
+        if self.port:
+            description = f"Port: {self.port.port}\n{description}"
+            if self.port.host:
+                description = f"Host: {self.port.host.address}\n{description}"
+        return {
+            "title": "Path discovered",
+            "description": description,
+            "severity": Severity.INFO,
+            "date": self.last_seen.strftime(
+                DefectDojoSettings.objects.first().date_format
+            ),
         }
 
     def __str__(self) -> str:

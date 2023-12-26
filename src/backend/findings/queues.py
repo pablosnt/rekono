@@ -15,8 +15,7 @@ logger = logging.getLogger()
 
 
 class FindingsQueue(BaseQueue):
-    def __init__(self) -> None:
-        super().__init__("findings-queue")
+    name = "findings-queue"
 
     def enqueue(self, execution: Execution, findings: List[Finding]) -> Job:
         job = super().enqueue(execution=execution, findings=findings)
@@ -25,7 +24,9 @@ class FindingsQueue(BaseQueue):
         )
         return job
 
+    @staticmethod
     @job("findings-queue")
-    def consume(self, execution: Execution, findings: List[Finding]) -> List[Finding]:
-        for platform in [NvdNist, DefectDojo, SMTP, Telegram]:
-            platform.process_findings(execution, findings)
+    def consume(execution: Execution, findings: List[Finding]) -> List[Finding]:
+        if findings:
+            for platform in [NvdNist, DefectDojo, SMTP, Telegram]:
+                platform().process_findings(execution, findings)

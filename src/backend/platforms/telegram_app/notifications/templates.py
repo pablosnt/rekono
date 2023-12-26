@@ -65,7 +65,7 @@ _Port_          {port}
 _Type_          {type}
 _Path_          *{path}*
 _Status_        {status}
-_Extra_         {extra}
+_Extra_         {extra_info}
 """,
     },
     Technology: {

@@ -7,7 +7,6 @@ from framework.enums import InputKeyword
 from framework.models import BaseEncrypted, BaseInput
 from security.input_validator import Regex, Validator
 from target_ports.models import TargetPort
-from targets.models import Target
 
 # Create your models here.
 

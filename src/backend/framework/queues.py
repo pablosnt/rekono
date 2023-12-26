@@ -8,6 +8,7 @@ from framework.models import BaseInput
 from input_types.models import InputType
 from parameters.models import InputTechnology, InputVulnerability
 from rq.job import Job
+from rq.queue import Queue
 from target_ports.models import TargetPort
 from tools.models import Input, Tool
 from wordlists.models import Wordlist
@@ -16,30 +17,33 @@ logger = logging.getLogger()
 
 
 class BaseQueue:
-    def __init__(self, name: str) -> None:
-        self.name = name
-        self.queue = django_rq.get_queue(name)
+    name = ""
+
+    def _get_queue(self) -> Queue:
+        return django_rq.get_queue(self.name)
 
     def cancel_job(self, job_id: str) -> Job:
-        job = self.queue.fetch_job(job_id)
+        job = self._get_queue().fetch_job(job_id)
         if job:
             logger.info(f"[{self.name}] Job {job_id} has been cancelled")
             job.cancel()
 
     def delete_job(self, job_id: str) -> Job:
-        job = self.queue.fetch_job(job_id)
+        job = self._get_queue().fetch_job(job_id)
         if job:
             logger.info(f"[{self.name}] Job {job_id} has been deleted")
             job.delete()
 
     def enqueue(self, **kwargs: Any) -> Job:
-        return self.queue.enqueue(self.consume.__func__, **kwargs)
+        return self._get_queue().enqueue(self.consume, **kwargs)
 
-    def consume(self, **kwargs: Any) -> Any:
+    @staticmethod
+    def consume(**kwargs: Any) -> Any:
         pass
 
+    @staticmethod
     def _get_findings_by_type(
-        self, findings: List[Finding]
+        findings: List[Finding],
     ) -> Dict[InputType, List[Finding]]:
         findings_by_type = {}
         for finding in findings:
@@ -55,8 +59,8 @@ class BaseQueue:
             )
         )
 
+    @staticmethod
     def _calculate_executions(
-        self,
         tool: Tool,
         findings: List[Finding],
         target_ports: List[TargetPort],
@@ -66,7 +70,7 @@ class BaseQueue:
     ) -> List[Dict[int, List[BaseInput]]]:
         executions = [{0: []}]
         input_types_used = set()
-        findings_by_type = self._get_findings_by_type(findings)
+        findings_by_type = BaseQueue._get_findings_by_type(findings)
         for index, input_type, source in [
             (0, t, list(f)) for t, f in (findings_by_type or {}).items() if f
         ] + [

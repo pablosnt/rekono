@@ -206,7 +206,8 @@ class BaseExecutor:
     def _on_error(self, error: str) -> None:
         if error:
             self.execution.output_error = error.replace(
-                self.report, f"output.{self.execution.configuration.tool.output_format}"
+                str(self.report),
+                f"output.{self.execution.configuration.tool.output_format}",
             ).strip()
         self.execution.status = Status.ERROR
         self.execution.end = timezone.now()
@@ -217,9 +218,10 @@ class BaseExecutor:
         self.execution.status = Status.COMPLETED
         self.execution.end = timezone.now()
         if self.execution.configuration.tool.output_format and self.report.is_file():
-            self.execution.output_file = self.report.strip()
+            self.execution.output_file = self.report
         self.execution.output_plain = output.replace(
-            self.report, f"output.{self.execution.configuration.tool.output_format}"
+            str(self.report),
+            f"output.{self.execution.configuration.tool.output_format}",
         )
         self.execution.save(
             update_fields=["status", "end", "output_file", "output_plain"]
