@@ -13,7 +13,7 @@ class Finding(BaseInput):
         related_name="%(class)s",
     )
     first_seen = models.DateTimeField(auto_now_add=True)
-    last_seen = models.DateTimeField(auto_now_add=True)
+    last_seen = models.DateTimeField(auto_now=True)
     triage_status = models.TextField(
         max_length=15, choices=TriageStatus.choices, default=TriageStatus.UNTRIAGED
     )
