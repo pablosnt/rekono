@@ -2,38 +2,79 @@ name: SAST
 on:
   workflow_dispatch:
   pull_request:
-    paths:
-      - '.github/workflows/**'
-      - 'src/**'
 
 jobs:
-  semgrep:
-    name: Semgrep
+  gitleaks:
+    name: GitLeaks
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      
+
+      - uses: gitleaks/gitleaks-action@4df650038e2eb9f7329218df929c2780866e61a3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_NOTIFY_USER_LIST: "@pablosnt"
+          GITLEAKS_ENABLE_COMMENTS: true
+          GITLEAKS_ENABLE_UPLOAD_ARTIFACT: true
+          GITLEAKS_ENABLE_SUMMARY: true
+
+  sast:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Semgrep Backend
+            tool: semgrep
+            path: src/backend
+            report: semgrep-backend.json
+            arguments: --config=auto --error --json
+          - name: Semgrep CI/CD
+            tool: semgrep
+            path: .github/workflows
+            report: semgrep-cicd.json
+            arguments: --config=auto --error --json
+          - name: Bandit
+            tool: bandit
+            path: src/backend
+            report: bandit.json
+            arguments: -r -f json
+    name: ${{ matrix.name }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
       - name: Setup Python 3
         uses: actions/setup-python@v4
         with:
           python-version: 3.11
+      
+      - uses: dorny/paths-filter@3c49e64ca26115121162fb767bc6af9e8d059f1a
+        id: changes
+        name: Path filter
+        with:
+          filters: |
+            path:
+              - '${{ matrix.path }}/**'
 
-      - name: Install Semgrep
-        run: pip install semgrep
+      - name: Installation
+        if: ${{ steps.changes.outputs.path == 'true' || github.event_name != 'pull_request' }}
+        run: pip install ${{ matrix.tool }}
       
-      - name: Scan code
-        run: semgrep --config=auto --error --json -o semgrep_code.json src/
+      - name: Scan
+        if: ${{ steps.changes.outputs.path == 'true' || github.event_name != 'pull_request' }}
+        run: ${{ matrix.tool }} ${{ matrix.arguments }} -o ${{ matrix.report }} ${{ matrix.path }}
       
-      - name: Scan workflows
-        run: semgrep --config=auto --error --json -o semgrep_cicd.json .github/workflows/
-      
-      - name: Upload Semgrep report as GitHub artifact
-        if: ${{ always() }}
+      - name: Upload report as GitHub artifact
+        if: ${{ !cancelled() && (steps.changes.outputs.path == 'true' || github.event_name != 'pull_request') }}
         uses: actions/upload-artifact@v3
         with:
-          name: Semgrep
-          path: semgrep_*.json
+          name: ${{ matrix.name }}
+          path: ${{ matrix.report }}
           if-no-files-found: warn
+      
