@@ -1,7 +1,6 @@
 from django.apps import AppConfig
+from framework.apps import BaseApp
 
 
-class TasksConfig(AppConfig):
-    '''Tasks Django application.'''
-
-    name = 'tasks'
+class TasksConfig(BaseApp, AppConfig):
+    name = "tasks"

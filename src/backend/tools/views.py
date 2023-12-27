@@ -1,9 +1,9 @@
-from django.db.models import Min, QuerySet
-from likes.views import LikeManagementView
-from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
-from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated
-from rest_framework.viewsets import GenericViewSet
-
+from framework.views import BaseViewSet, LikeViewSet
+from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.request import Request
+from rest_framework.response import Response
+from security.authorization.permissions import RekonoModelPermission
 from tools.filters import ConfigurationFilter, ToolFilter
 from tools.models import Configuration, Tool
 from tools.serializers import ConfigurationSerializer, ToolSerializer
@@ -11,33 +11,26 @@ from tools.serializers import ConfigurationSerializer, ToolSerializer
 # Create your views here.
 
 
-class ToolViewSet(LikeManagementView, ListModelMixin, RetrieveModelMixin):
-    '''Tool ViewSet that includes: get, retrieve, like and dislike features.'''
-
-    queryset = Tool.objects.all().order_by('-id')
+class ToolViewSet(LikeViewSet):
+    queryset = Tool.objects.all()
     serializer_class = ToolSerializer
     filterset_class = ToolFilter
-    # Fields used to search tools
-    search_fields = ['name', 'command']
-    # Required to remove unneeded ProjectMemberPermission
-    permission_classes = [IsAuthenticated, DjangoModelPermissions]
+    permission_classes = [IsAuthenticated, RekonoModelPermission]
+    search_fields = ["name", "command"]
+    ordering_fields = ["id", "name", "command"]
+    # "post" is needed to allow POST requests to like and dislike tools
+    http_method_names = ["get", "post"]
 
-    def get_queryset(self) -> QuerySet:
-        '''Get the model queryset. It's required for allow the access to the likes count by the child ViewSets.
-
-        Returns:
-            QuerySet: Model queryset
-        '''
-        return super().get_queryset().annotate(stage=Min('configurations__stage'))
+    def create(self, request: Request, *args, **kwargs):
+        return self._method_not_allowed("POST")  # pragma: no cover
 
 
-class ConfigurationViewSet(GenericViewSet, ListModelMixin, RetrieveModelMixin):
-    '''Configuration ViewSet that includes: get and retrieve features.'''
+class ConfigurationViewSet(BaseViewSet):
+    """Configuration ViewSet that includes: get and retrieve features."""
 
-    queryset = Configuration.objects.all().order_by('-id')
+    queryset = Configuration.objects.all()
     serializer_class = ConfigurationSerializer
     filterset_class = ConfigurationFilter
-    # Fields used to search configurations
-    search_fields = ['name']
-    # Required to remove unneeded ProjectMemberPermission
-    permission_classes = [IsAuthenticated, DjangoModelPermissions]
+    permission_classes = [IsAuthenticated, RekonoModelPermission]
+    search_fields = ["name"]
+    http_method_names = ["get"]

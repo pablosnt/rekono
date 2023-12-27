@@ -1,7 +1,6 @@
 from django.apps import AppConfig
+from framework.apps import BaseApp
 
 
-class AuthenticationConfig(AppConfig):
-    '''Authentication Django application.'''
-
-    name = 'authentications'
+class AuthenticationConfig(BaseApp, AppConfig):
+    name = "authentications"

@@ -1,45 +1,37 @@
-from django_filters.rest_framework import FilterSet, filters
-from likes.filters import LikeFilter
-
+from django_filters.filters import CharFilter, ChoiceFilter
+from django_filters.rest_framework import FilterSet
+from framework.filters import LikeFilter
 from tools.models import Configuration, Tool
 
 
 class ToolFilter(LikeFilter):
-    '''FilterSet to filter and sort Tool entities.'''
-
-    o = filters.OrderingFilter(fields=('name', 'stage', 'likes_count'))         # Ordering fields
+    stage = ChoiceFilter(field_name="configurations__stage")
+    intensity = ChoiceFilter(field_name="intensities__value")
+    input = CharFilter(field_name="arguments__inputs__type__name")
+    output = CharFilter(field_name="configurations__outputs__type__name")
 
     class Meta:
-        '''FilterSet metadata.'''
-
         model = Tool
-        fields = {                                                              # Filter fields
-            'name': ['exact', 'icontains'],
-            'command': ['exact', 'icontains'],
-            'configurations': ['exact'],
-            'configurations__name': ['exact', 'icontains'],
-            'configurations__stage': ['exact'],
-            'arguments__inputs__type__name': ['exact'],
-            'configurations__outputs__type__name': ['exact']
+        fields = {
+            "name": ["exact", "icontains"],
+            "command": ["exact", "icontains"],
+            "script": ["exact", "icontains"],
+            "is_installed": ["exact"],
+            "version": ["exact", "icontains"],
+            "configurations": ["exact"],
         }
 
 
 class ConfigurationFilter(FilterSet):
-    '''FilterSet to filter and sort Configuration entities.'''
-
-    o = filters.OrderingFilter(fields=('tool', 'stage', 'name'))                # Ordering fields
+    input = CharFilter(field_name="tool__arguments__inputs__type__name")
+    output = CharFilter(field_name="outputs__type__name")
 
     class Meta:
-        '''FilterSet metadata.'''
-
         model = Configuration
-        fields = {                                                              # Filter fields
-            'tool': ['exact'],
-            'tool__name': ['exact', 'icontains'],
-            'tool__command': ['exact', 'icontains'],
-            'name': ['exact', 'icontains'],
-            'stage': ['exact'],
-            'default': ['exact'],
-            'tool__arguments__inputs__type__name': ['exact'],
-            'outputs__type__name': ['exact'],
+        fields = {
+            "name": ["exact", "icontains"],
+            "tool": ["exact"],
+            "arguments": ["exact", "icontains"],
+            "stage": ["exact"],
+            "default": ["exact"],
         }

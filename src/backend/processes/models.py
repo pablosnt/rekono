@@ -1,53 +1,53 @@
-from django.conf import settings
 from django.db import models
-from likes.models import LikeBase
-from security.input_validation import (validate_name, validate_number,
-                                       validate_text)
+from framework.models import BaseLike, BaseModel
+from rekono.settings import AUTH_USER_MODEL
+from security.input_validator import Regex, Validator
 from taggit.managers import TaggableManager
-from tools.models import Configuration, Tool
+from tools.models import Configuration
 
 # Create your models here.
 
 
-class Process(LikeBase):
-    '''Process model.'''
-
-    name = models.TextField(max_length=100, unique=True, validators=[validate_name])                # Process name
-    description = models.TextField(max_length=300, validators=[validate_text])  # Process description
-    # User that created the process
-    creator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True)
-    tags = TaggableManager()                                                    # Process tags
+class Process(BaseLike):
+    name = models.TextField(
+        max_length=100,
+        unique=True,
+        validators=[Validator(Regex.NAME.value, code="name")],
+    )
+    description = models.TextField(
+        max_length=300, validators=[Validator(Regex.TEXT.value, code="description")]
+    )
+    owner = models.ForeignKey(
+        AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True
+    )
+    tags = TaggableManager()
 
     def __str__(self) -> str:
-        '''Instance representation in text format.
+        """Instance representation in text format.
 
         Returns:
             str: String value that identifies this instance
-        '''
+        """
         return self.name
 
 
-class Step(models.Model):
-    '''Process model.'''
-
-    process = models.ForeignKey(Process, related_name='steps', on_delete=models.CASCADE)    # Associated process
-    tool = models.ForeignKey(Tool, on_delete=models.CASCADE)                    # Tool
-    configuration = models.ForeignKey(Configuration, on_delete=models.CASCADE, blank=True, null=True)   # Configuration
-    # Priority value. Steps with greater priority will be executed before other of same process and with same stage
-    priority = models.IntegerField(default=1, validators=[validate_number])
+class Step(BaseModel):
+    process = models.ForeignKey(Process, related_name="steps", on_delete=models.CASCADE)
+    configuration = models.ForeignKey(
+        Configuration, on_delete=models.CASCADE, blank=True, null=True
+    )
 
     class Meta:
-        '''Model metadata.'''
-
         constraints = [
-            # Unique constraint by: Process, Tool and Configuration
-            models.UniqueConstraint(fields=['process', 'tool', 'configuration'], name='unique step')
+            models.UniqueConstraint(
+                fields=["process", "configuration"], name="unique_step"
+            )
         ]
 
     def __str__(self) -> str:
-        '''Instance representation in text format.
+        """Instance representation in text format.
 
         Returns:
             str: String value that identifies this instance
-        '''
-        return f'{self.process.__str__()} - {self.configuration.__str__()}'
+        """
+        return f"{self.process.__str__()} - {self.configuration.__str__()}"

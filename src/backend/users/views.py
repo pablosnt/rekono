@@ -1,99 +1,101 @@
 import logging
-from typing import Any, List
+from typing import Any
 
+from django.core.exceptions import PermissionDenied
 from drf_spectacular.utils import extend_schema
+from framework.views import BaseViewSet
 from rest_framework import status
 from rest_framework.decorators import action
-from rest_framework.mixins import (DestroyModelMixin, ListModelMixin,
-                                   RetrieveModelMixin)
-from rest_framework.permissions import (BasePermission, DjangoModelPermissions,
-                                        IsAuthenticated)
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
+from rest_framework.serializers import Serializer
 from rest_framework.viewsets import GenericViewSet
-from security.authorization.permissions import IsAdmin, IsNotAuthenticated
-
+from security.authorization.permissions import (
+    IsAdmin,
+    IsNotAuthenticated,
+    RekonoModelPermission,
+)
 from users.filters import UserFilter
 from users.models import User
-from users.serializers import (ChangeUserPasswordSerializer,
-                               ChangeUserRoleSerializer, CreateUserSerializer,
-                               InviteUserSerializer,
-                               RequestPasswordResetSerializer,
-                               ResetPasswordSerializer, TelegramBotSerializer,
-                               UserProfileSerializer, UserSerializer)
+from users.serializers import (
+    CreateUserSerializer,
+    InviteUserSerializer,
+    ProfileSerializer,
+    RequestPasswordResetSerializer,
+    ResetPasswordSerializer,
+    UpdatePasswordSerializer,
+    UpdateRoleSerializer,
+    UserSerializer,
+)
 
 # Create your views here.
 
-logger = logging.getLogger()                                                    # Rekono logger
+logger = logging.getLogger()
 
 
-class UserAdminViewSet(GenericViewSet, ListModelMixin, RetrieveModelMixin, DestroyModelMixin):
-    '''User administration ViewSet that includes: get, retrieve, invite, role change, enable and disable features.'''
+class UserViewSet(BaseViewSet):
+    """User administration ViewSet that includes: get, retrieve, invite, role change, enable and disable features."""
 
     serializer_class = UserSerializer
-    queryset = User.objects.all().order_by('-id')
+    queryset = User.objects.all()
     filterset_class = UserFilter
+    # Required to include the IsAdmin to the base authorization classes and remove unneeded permissions
+    permission_classes = [IsAuthenticated, RekonoModelPermission, IsAdmin]
     # Fields used to search tasks
-    search_fields = ['username', 'first_name', 'last_name', 'email']
-    # Required to include the IsAdmin to the base authorization classes and remove unneeded ProjectMemberPermission
-    permission_classes = [IsAuthenticated, DjangoModelPermissions, IsAdmin]
+    search_fields = ["username", "first_name", "last_name", "email"]
+    ordering_fields = [
+        "id",
+        "username",
+        "first_name",
+        "last_name",
+        "email",
+        "date_joined",
+        "last_login",
+    ]
+    http_method_names = [
+        "get",
+        "post",
+        "put",
+        "delete",
+    ]
+
+    def _get_object_if_not_current_user(self, request) -> User:
+        instance = self.get_object()  # Get user instance
+        if instance.id == request.user.id:
+            raise PermissionDenied()
+        return instance
+
+    @extend_schema(request=InviteUserSerializer, responses={201: UserSerializer})
+    def create(self, request, *args, **kwargs):
+        serializer = InviteUserSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.create(serializer.validated_data)
+        headers = self.get_success_headers(serializer.data)
+        return Response(
+            UserSerializer(user).data, status=status.HTTP_201_CREATED, headers=headers
+        )
+
+    @extend_schema(request=UpdateRoleSerializer, responses={201: UserSerializer})
+    def update(self, request, *args, **kwargs):
+        instance = self._get_object_if_not_current_user(request)
+        serializer = UpdateRoleSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        instance = serializer.update(instance, serializer.validated_data)
+        return Response(UserSerializer(instance).data, status=status.HTTP_200_OK)
 
     def destroy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        '''Disable user.
-
-        Args:
-            request (Request): Received HTTP request
-
-        Returns:
-            Response: HTTP response
-        '''
-        instance = self.get_object()
+        instance = self._get_object_if_not_current_user(request)
         if instance.is_active is None:
             super().destroy(request, *args, **kwargs)
         else:
             User.objects.disable_user(instance)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @extend_schema(request=InviteUserSerializer, responses={201: UserSerializer})
-    @action(detail=False, methods=['POST'], url_path='invite', url_name='invite')
-    def invite(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        '''Invite new user.
-
-        Args:
-            request (Request): Received HTTP request
-
-        Returns:
-            Response: HTTP response
-        '''
-        serializer = InviteUserSerializer(data=request.data)
-        if serializer.is_valid():                                               # Check input data
-            user = serializer.create(serializer.validated_data)                 # Invite user
-            return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)  # Invalid input data
-
-    @extend_schema(request=ChangeUserRoleSerializer, responses={200: UserSerializer})
-    @action(detail=True, methods=['PUT'], url_path='role', url_name='role')
-    def change_user_role(self, request: Request, pk: str) -> Response:
-        '''Change user role.
-
-        Args:
-            request (Request): Received HTTP request
-            pk (str): Instance Id
-
-        Returns:
-            Response: HTTP response
-        '''
-        user = self.get_object()                                                # Get user instance
-        serializer = ChangeUserRoleSerializer(data=request.data)
-        if serializer.is_valid():                                               # Check input data
-            serializer.update(user, serializer.validated_data)                  # Change user role
-            return Response(UserSerializer(user).data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)  # Invalid input data
-
     @extend_schema(request=None, responses={200: UserSerializer})
-    @action(detail=True, methods=['POST'], url_path='enable', url_name='enable')
-    def enable_user(self, request: Request, pk: str) -> Response:
-        '''Enable disabled user.
+    @action(detail=True, methods=["POST"], url_path="enable", url_name="enable")
+    def enable(self, request: Request, pk: str) -> Response:
+        """Enable disabled user.
 
         Args:
             request (Request): Received HTTP request
@@ -101,149 +103,89 @@ class UserAdminViewSet(GenericViewSet, ListModelMixin, RetrieveModelMixin, Destr
 
         Returns:
             Response: HTTP response
-        '''
-        user = self.get_object()                                                # Get user instance
-        User.objects.enable_user(user)
-        return Response(UserSerializer(user).data, status=status.HTTP_200_OK)
+        """
+        instance = self._get_object_if_not_current_user(request)
+        User.objects.enable_user(instance)
+        return Response(UserSerializer(instance).data, status=status.HTTP_200_OK)
 
 
-class UserProfileViewSet(GenericViewSet):
-    '''User profile ViewSet that includes: get, update, password change and Telegram bot configuration features.'''
+class ProfileViewSet(GenericViewSet):
+    """User profile ViewSet that includes: get, update, password change and Telegram bot configuration features."""
 
-    serializer_class = UserProfileSerializer
-    queryset = User.objects.all().order_by('-id')
+    serializer_class = ProfileSerializer
+    queryset = User.objects.all()
     # Only IsAuthenticated class is required because all users can manage its profile
     permission_classes = [IsAuthenticated]
 
-    @action(detail=False, methods=['GET'])
-    def get_profile(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        '''Get user profile.
+    @action(detail=False, methods=["GET"])
+    def get(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return Response(
+            self.serializer_class(request.user, many=False).data,
+            status=status.HTTP_200_OK,
+        )
 
-        Args:
-            request (Request): Received HTTP request
+    def _update(self, request: Request, serializer_class: Serializer) -> Serializer:
+        serializer = serializer_class(request.user, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.update(request.user, serializer.validated_data)
+        return serializer
 
-        Returns:
-            Response: HTTP response
-        '''
-        return Response(self.serializer_class(request.user, many=False).data, status=status.HTTP_200_OK)
+    @action(detail=False, methods=["PUT"])
+    def update(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        serializer = self._update(request, self.serializer_class)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['PUT'])
-    def update_profile(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        '''Update user profile.
-
-        Args:
-            request (Request): Received HTTP request
-
-        Returns:
-            Response: HTTP response
-        '''
-        serializer = self.serializer_class(request.user, data=request.data)
-        if serializer.is_valid():                                               # Check input data
-            serializer.update(request.user, serializer.validated_data)          # Update user profile
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)  # Invalid input data
-
-    @extend_schema(request=ChangeUserPasswordSerializer, responses={200: None})
-    @action(detail=False, methods=['PUT'], url_path='change-password', url_name='change-password')
-    def change_password(self, request: Request) -> Response:
-        '''Change user password.
-
-        Args:
-            request (Request): Received HTTP request
-
-        Returns:
-            Response: HTTP response
-        '''
-        serializer = ChangeUserPasswordSerializer(request.user, data=request.data)
-        if serializer.is_valid():                                               # Check input data
-            serializer.update(request.user, serializer.validated_data)          # Update user password
-            return Response(status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)  # Invalid input data
-
-    @extend_schema(request=TelegramBotSerializer, responses={200: None})
-    @action(detail=False, methods=['POST'], url_path='telegram-token', url_name='telegram-token')
-    def telegram_token(self, request: Request) -> Response:
-        '''Link Telegram bot to the user account.
-
-        Args:
-            request (Request): Received HTTP request
-
-        Returns:
-            Response: HTTP response
-        '''
-        serializer = TelegramBotSerializer(request.user, data=request.data)
-        if serializer.is_valid():                                               # Check input data
-            serializer.update(request.user, serializer.validated_data)          # Link Telegram bot to user account
-            return Response(status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)  # Invalid input data
+    @extend_schema(request=UpdatePasswordSerializer, responses={200: None})
+    @action(
+        detail=False,
+        methods=["PUT"],
+        url_path="update-password",
+        url_name="update-password",
+    )
+    def update_password(self, request: Request) -> Response:
+        self._update(request, UpdatePasswordSerializer)
+        return Response(status=status.HTTP_200_OK)
 
 
 class CreateUserViewSet(GenericViewSet):
-    '''User ViewSet that includes user initialization from invitation feature.'''
+    """User ViewSet that includes user initialization from invitation feature."""
 
     serializer_class = CreateUserSerializer
-    queryset = User.objects.all().order_by('-id')
-    # Only IsNotAuthenticated class is required because, users can be initialized from another user session
+    queryset = User.objects.all()
+    # Users can't be initialized from another user session, authentication is based on OTP
     permission_classes = [IsNotAuthenticated]
 
-    @action(detail=False, methods=['POST'])
-    def create(self, request: Request) -> Response:
-        '''User creation from invitation.
-
-        Args:
-            request (Request): Received HTTP request
-
-        Returns:
-            Response: HTTP response
-        '''
+    @extend_schema(request=CreateUserSerializer, responses={201: UserSerializer})
+    @action(detail=False, methods=["POST"])
+    def create(self, request: Request, *args, **kwargs) -> Response:
         serializer = self.serializer_class(data=request.data)
-        if serializer.is_valid():                                               # Check input data
-            serializer.save()                                                   # Initialize user data
-            return Response(status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)  # Invalid input data
+        serializer.is_valid(raise_exception=True)
+        user = serializer.create(serializer.validated_data)
+        # headers = self.get_success_headers(serializer.data)
+        return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
 
 
 class ResetPasswordViewSet(GenericViewSet):
-    '''User ViewSet that includes reset password feature.'''
+    """User ViewSet that includes reset password feature."""
 
-    queryset = User.objects.all().order_by('-id')
-    # No class required because all users can reset his password
-    # This operation can be performed from an user session or not
-    permission_classes: List[BasePermission] = []
+    queryset = User.objects.all()
+    permission_classes = [IsNotAuthenticated]
+
+    def _create_or_update(
+        self, request: Request, serializer_class: Serializer
+    ) -> Serializer:
+        serializer = serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return serializer
 
     @extend_schema(request=RequestPasswordResetSerializer, responses={200: None})
     def create(self, request: Request) -> Response:
-        '''Request user password reset.
-
-        Args:
-            request (Request): Received HTTP request
-
-        Returns:
-            Response: HTTP response
-        '''
-        serializer = RequestPasswordResetSerializer(data=request.data)
-        if serializer.is_valid():                                               # Check input data
-            try:
-                serializer.save()                                               # Request password reset
-            except User.DoesNotExist:
-                # Ignore User not found errors to prevent user enumeration vulnerabilities
-                pass
-            return Response(status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)  # Invalid input data
+        self._create_or_update(request, RequestPasswordResetSerializer)
+        return Response(status=status.HTTP_200_OK)
 
     @extend_schema(request=ResetPasswordSerializer, responses={200: None})
-    @action(detail=False, methods=['PUT'])
-    def reset_password(self, request: Request) -> Response:
-        '''Reset user password.
-
-        Args:
-            request (Request): Received HTTP request
-
-        Returns:
-            Response: HTTP response
-        '''
-        serializer = ResetPasswordSerializer(data=request.data)
-        if serializer.is_valid():                                               # Check input data
-            serializer.save()                                                   # Reset password
-            return Response(status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)  # Invalid input data
+    @action(detail=False, methods=["PUT"])
+    def update(self, request: Request) -> Response:
+        self._create_or_update(request, ResetPasswordSerializer)
+        return Response(status=status.HTTP_200_OK)

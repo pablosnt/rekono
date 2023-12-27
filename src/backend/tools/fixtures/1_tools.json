@@ -5,10 +5,17 @@
         "fields": {
             "name": "Nmap",
             "command": "nmap",
+            "script": null,
+            "script_directory_property": null,
+            "run_directory_property": null,
+            "ignore_exit_code": false,
+            "is_installed": false,
+            "version": null,
+            "version_argument": "--version",
             "output_format": "xml",
-            "defectdojo_scan_type": "Nmap Scan",
             "reference": "https://nmap.org/",
-            "icon": "https://www.kali.org/tools/nmap/images/nmap-logo.svg"
+            "icon": "https://www.kali.org/tools/nmap/images/nmap-logo.svg",
+            "defect_dojo_scan_type": "Nmap Scan"
         }
     },
     {
@@ -17,10 +24,17 @@
         "fields": {
             "name": "Dirsearch",
             "command": "dirsearch",
+            "script": null,
+            "script_directory_property": null,
+            "run_directory_property": null,
+            "ignore_exit_code": true,
+            "is_installed": false,
+            "version": null,
+            "version_argument": "--version",
             "output_format": "json",
-            "defectdojo_scan_type": null,
             "reference": "https://github.com/maurosoria/dirsearch",
-            "icon": "https://raw.githubusercontent.com/maurosoria/dirsearch/master/static/logo.png"
+            "icon": "https://raw.githubusercontent.com/maurosoria/dirsearch/master/static/logo.png",
+            "defect_dojo_scan_type": null
         }
     },
     {
@@ -29,10 +43,17 @@
         "fields": {
             "name": "theHarvester",
             "command": "theHarvester",
+            "script": null,
+            "script_directory_property": null,
+            "run_directory_property": null,
+            "ignore_exit_code": false,
+            "is_installed": false,
+            "version": null,
+            "version_argument": "--version",
             "output_format": "json",
-            "defectdojo_scan_type": null,
             "reference": "https://github.com/laramies/theHarvester",
-            "icon": "https://www.kali.org/tools/theharvester/images/theharvester-logo.svg"
+            "icon": "https://www.kali.org/tools/theharvester/images/theharvester-logo.svg",
+            "defect_dojo_scan_type": null
         }
     },
     {
@@ -41,10 +62,17 @@
         "fields": {
             "name": "Nikto",
             "command": "nikto",
+            "script": null,
+            "script_directory_property": null,
+            "run_directory_property": null,
+            "ignore_exit_code": true,
+            "is_installed": false,
+            "version": null,
+            "version_argument": "-Version",
             "output_format": "xml",
-            "defectdojo_scan_type": "Nikto Scan",
             "reference": "https://github.com/sullo/nikto",
-            "icon": "https://www.kali.org/tools/nikto/images/nikto-logo.svg"
+            "icon": "https://www.kali.org/tools/nikto/images/nikto-logo.svg",
+            "defect_dojo_scan_type": "Nikto Scan"
         }
     },
     {
@@ -53,10 +81,17 @@
         "fields": {
             "name": "Sslscan",
             "command": "sslscan",
+            "script": null,
+            "script_directory_property": null,
+            "run_directory_property": null,
+            "ignore_exit_code": false,
+            "is_installed": false,
+            "version": null,
+            "version_argument": "--version",
             "output_format": "xml",
-            "defectdojo_scan_type": "Sslscan",
             "reference": "https://github.com/rbsec/sslscan",
-            "icon": "https://www.kali.org/tools/sslscan/images/sslscan-logo.svg"
+            "icon": "https://www.kali.org/tools/sslscan/images/sslscan-logo.svg",
+            "defect_dojo_scan_type": "Sslscan"
         }
     },
     {
@@ -65,10 +100,17 @@
         "fields": {
             "name": "SSLyze",
             "command": "sslyze",
+            "script": null,
+            "script_directory_property": null,
+            "run_directory_property": null,
+            "ignore_exit_code": true,
+            "is_installed": false,
+            "version": null,
+            "version_argument": "--help",
             "output_format": "json",
-            "defectdojo_scan_type": "SSLyze 3 Scan (JSON)",
             "reference": "https://nabla-c0d3.github.io/sslyze/documentation/",
-            "icon": "https://www.kali.org/tools/sslyze/images/sslyze-logo.svg"
+            "icon": "https://www.kali.org/tools/sslyze/images/sslyze-logo.svg",
+            "defect_dojo_scan_type": "SSLyze Scan (JSON)"
         }
     },
     {
@@ -77,10 +119,17 @@
         "fields": {
             "name": "CMSeeK",
             "command": "cmseek",
+            "script": null,
+            "script_directory_property": null,
+            "run_directory_property": null,
+            "ignore_exit_code": false,
+            "is_installed": false,
+            "version": null,
+            "version_argument": "--version",
             "output_format": "json",
-            "defectdojo_scan_type": null,
             "reference": "https://github.com/Tuhinshubhra/CMSeeK/",
-            "icon": "https://camo.githubusercontent.com/b1864e58e861aa4e938d17d4a50ae1a4bedec9cdb9e8b7ce7ac80a1b5cc711ed/68747470733a2f2f692e696d6775722e636f6d2f35565973316d322e706e67"
+            "icon": "https://camo.githubusercontent.com/b1864e58e861aa4e938d17d4a50ae1a4bedec9cdb9e8b7ce7ac80a1b5cc711ed/68747470733a2f2f692e696d6775722e636f6d2f35565973316d322e706e67",
+            "defect_dojo_scan_type": null
         }
     },
     {
@@ -89,10 +138,17 @@
         "fields": {
             "name": "ZAP",
             "command": "zaproxy",
+            "script": null,
+            "script_directory_property": null,
+            "run_directory_property": null,
+            "ignore_exit_code": false,
+            "is_installed": false,
+            "version": null,
+            "version_argument": "-version",
             "output_format": "xml",
-            "defectdojo_scan_type": "ZAP Scan",
             "reference": "https://www.zaproxy.org/",
-            "icon": "https://www.kali.org/tools/zaproxy/images/zaproxy-logo.svg"
+            "icon": "https://www.kali.org/tools/zaproxy/images/zaproxy-logo.svg",
+            "defect_dojo_scan_type": "ZAP Scan"
         }
     },
     {
@@ -101,10 +157,17 @@
         "fields": {
             "name": "SearchSploit",
             "command": "searchsploit",
+            "script": null,
+            "script_directory_property": null,
+            "run_directory_property": null,
+            "ignore_exit_code": false,
+            "is_installed": false,
+            "version": null,
+            "version_argument": null,
             "output_format": "json",
-            "defectdojo_scan_type": null,
             "reference": "https://www.exploit-db.com/searchsploit",
-            "icon": "https://www.kali.org/tools/exploitdb/images/exploitdb-logo.svg"
+            "icon": "https://www.kali.org/tools/exploitdb/images/exploitdb-logo.svg",
+            "defect_dojo_scan_type": null
         }
     },
     {
@@ -113,10 +176,17 @@
         "fields": {
             "name": "Metasploit",
             "command": "msfconsole",
+            "script": null,
+            "script_directory_property": null,
+            "run_directory_property": null,
+            "ignore_exit_code": false,
+            "is_installed": false,
+            "version": null,
+            "version_argument": "--version",
             "output_format": null,
-            "defectdojo_scan_type": null,
             "reference": "https://www.metasploit.com/",
-            "icon": "https://www.kali.org/tools/metasploit-framework/images/metasploit-framework-logo.svg"
+            "icon": "https://www.kali.org/tools/metasploit-framework/images/metasploit-framework-logo.svg",
+            "defect_dojo_scan_type": null
         }
     },
     {
@@ -125,10 +195,17 @@
         "fields": {
             "name": "Log4j Scan",
             "command": "python3",
+            "script": "log4j-scan.py",
+            "script_directory_property": "LOG4J_SCAN_DIR",
+            "run_directory_property": null,
+            "ignore_exit_code": false,
+            "is_installed": false,
+            "version": null,
+            "version_argument": null,
             "output_format": null,
-            "defectdojo_scan_type": null,
             "reference": "https://github.com/fullhunt/log4j-scan",
-            "icon": "https://fullhunt.io/static/theme/images/logo/favicon.ico"
+            "icon": "https://fullhunt.io/static/theme/images/logo/favicon.ico",
+            "defect_dojo_scan_type": null
         }
     },
     {
@@ -137,10 +214,17 @@
         "fields": {
             "name": "EmailFinder",
             "command": "emailfinder",
+            "script": null,
+            "script_directory_property": null,
+            "run_directory_property": null,
+            "ignore_exit_code": false,
+            "is_installed": false,
+            "version": null,
+            "version_argument": "--version",
             "output_format": null,
-            "defectdojo_scan_type": null,
             "reference": "https://github.com/Josue87/EmailFinder",
-            "icon": null
+            "icon": null,
+            "defect_dojo_scan_type": null
         }
     },
     {
@@ -149,10 +233,17 @@
         "fields": {
             "name": "EmailHarvester",
             "command": "emailharvester",
+            "script": null,
+            "script_directory_property": null,
+            "run_directory_property": null,
+            "ignore_exit_code": false,
+            "is_installed": false,
+            "version": null,
+            "version_argument": "--help",
             "output_format": "txt",
-            "defectdojo_scan_type": null,
             "reference": "https://github.com/maldevel/EmailHarvester",
-            "icon": null
+            "icon": null,
+            "defect_dojo_scan_type": null
         }
     },
     {
@@ -161,10 +252,17 @@
         "fields": {
             "name": "JoomScan",
             "command": "joomscan",
+            "script": null,
+            "script_directory_property": null,
+            "run_directory_property": null,
+            "ignore_exit_code": false,
+            "is_installed": false,
+            "version": null,
+            "version_argument": "--version",
             "output_format": null,
-            "defectdojo_scan_type": null,
             "reference": "https://github.com/OWASP/joomscan",
-            "icon": "https://raw.githubusercontent.com/rezasp/Trash/master/joomscan.png"
+            "icon": "https://raw.githubusercontent.com/rezasp/Trash/master/joomscan.png",
+            "defect_dojo_scan_type": null
         }
     },
     {
@@ -173,10 +271,17 @@
         "fields": {
             "name": "GitLeaks",
             "command": "gitleaks",
+            "script": null,
+            "script_directory_property": null,
+            "run_directory_property": null,
+            "ignore_exit_code": true,
+            "is_installed": false,
+            "version": null,
+            "version_argument": null,
             "output_format": "json",
-            "defectdojo_scan_type": "Gitleaks",
             "reference": "https://github.com/zricethezav/gitleaks",
-            "icon": "https://gitleaks.io/favicon.ico"
+            "icon": "https://gitleaks.io/favicon.ico",
+            "defect_dojo_scan_type": "Gitleaks Scan"
         }
     },
     {
@@ -185,10 +290,17 @@
         "fields": {
             "name": "SSH Audit",
             "command": "ssh-audit",
+            "script": null,
+            "script_directory_property": null,
+            "run_directory_property": null,
+            "ignore_exit_code": true,
+            "is_installed": false,
+            "version": null,
+            "version_argument": "--help",
             "output_format": null,
-            "defectdojo_scan_type": null,
             "reference": "https://github.com/jtesta/ssh-audit",
-            "icon": null
+            "icon": null,
+            "defect_dojo_scan_type": null
         }
     },
     {
@@ -197,10 +309,17 @@
         "fields": {
             "name": "SMBMap",
             "command": "smbmap",
+            "script": null,
+            "script_directory_property": null,
+            "run_directory_property": null,
+            "ignore_exit_code": false,
+            "is_installed": false,
+            "version": null,
+            "version_argument": null,
             "output_format": null,
-            "defectdojo_scan_type": null,
             "reference": "https://github.com/ShawnDEvans/smbmap",
-            "icon": null
+            "icon": null,
+            "defect_dojo_scan_type": null
         }
     },
     {
@@ -209,10 +328,17 @@
         "fields": {
             "name": "Nuclei",
             "command": "nuclei",
+            "script": null,
+            "script_directory_property": null,
+            "run_directory_property": null,
+            "ignore_exit_code": false,
+            "is_installed": false,
+            "version": null,
+            "version_argument": "--version",
             "output_format": "json",
-            "defectdojo_scan_type": "Nuclei",
             "reference": "https://nuclei.projectdiscovery.io",
-            "icon": "https://nuclei.projectdiscovery.io/static/favicon.png"
+            "icon": "https://nuclei.projectdiscovery.io/static/favicon.png",
+            "defect_dojo_scan_type": "Nuclei Scan"
         }
     },
     {
@@ -221,10 +347,17 @@
         "fields": {
             "name": "Spring4Shell Scan",
             "command": "python3",
+            "script": "spring4shell-scan.py",
+            "script_directory_property": "SPRING4SHELL_SCAN_DIR",
+            "run_directory_property": null,
+            "ignore_exit_code": false,
+            "is_installed": false,
+            "version": null,
+            "version_argument": null,
             "output_format": null,
-            "defectdojo_scan_type": null,
             "reference": "https://github.com/fullhunt/spring4shell-scan",
-            "icon": "https://fullhunt.io/static/theme/images/logo/favicon.ico"
+            "icon": "https://fullhunt.io/static/theme/images/logo/favicon.ico",
+            "defect_dojo_scan_type": null
         }
     },
     {
@@ -233,10 +366,17 @@
         "fields": {
             "name": "Gobuster",
             "command": "gobuster",
+            "script": null,
+            "script_directory_property": null,
+            "run_directory_property": "LOG4J_SCAN_DIR",
+            "ignore_exit_code": false,
+            "is_installed": false,
+            "version": null,
+            "version_argument": "version",
             "output_format": "txt",
-            "defectdojo_scan_type": null,
             "reference": "https://github.com/OJ/gobuster",
-            "icon": null
+            "icon": null,
+            "defect_dojo_scan_type": null
         }
     }
 ]

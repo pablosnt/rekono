@@ -1,87 +1,92 @@
-from typing import Any, Dict, List
+import os
+import shutil
+import sys
+from pathlib import Path
+from typing import Any, Optional
 
 import yaml
-from security.crypto import generate_random_value
+from rekono.properties import Property
+from security.cryptography.encryption import Encryptor
 
 
-class RekonoConfigLoader:
-    '''Rekono config loader from configuration file.'''
+class RekonoConfig:
+    def __init__(self) -> None:
+        self.testing = "test" in sys.argv
+        self.base_dir = Path(__file__).resolve().parent.parent
+        self.home = self._get_home()
+        self.config_file = self._get_config_file()
+        if self.testing:
+            self.home = self.base_dir / "tests" / "home"
+        self.reports = self.home / "reports"
+        self.wordlists = self.home / "wordlists"
+        self.logs = self.home / "logs"
+        for path in [self.home, self.reports, self.wordlists, self.logs]:
+            path.mkdir(exist_ok=True)
+        if self.testing:
+            shutil.copy(self.config_file, self.home)
+            self.config_file = self._get_config_file()
+            self.encryption_key = Encryptor.generate_encryption_key()
+        with self.config_file.open("r") as file:
+            self._config_properties = yaml.safe_load(file)
+        for property in Property:
+            if not hasattr(self, property.name.lower()) or not getattr(
+                self, property.name.lower()
+            ):
+                setattr(self, property.name.lower(), self._get_config(property))
 
-    def __init__(self, filepath: str) -> None:
-        '''Rekono config constructor.
-
-        Args:
-            filepath (str): Configuration filepath
-        '''
-        config = {}
-        if filepath:
-            with open(filepath, 'r') as config_file:                            # Read configuration file
-                config = yaml.safe_load(config_file)                            # Load configuration
-        # Rekono frontend URL
-        self.FRONTEND_URL = self.get_config_key(config, ['frontend', 'url'], 'https://127.0.0.1')
-        # Rekono root path
-        self.ROOT_PATH = self.get_config_key(config, ['rootpath'])
-        # Security
-        self.SECRET_KEY = self.get_config_key(config, ['security', 'secret-key'], generate_random_value(3000))
-        self.ALLOWED_HOSTS = self.get_config_key(
-            config,
-            ['security', 'allowed-hosts'],
-            ['localhost', '127.0.0.1', '::1']
+    def _get_home(self) -> Path:
+        home_from_config = Path(self._get_config(Property.REKONO_HOME))
+        return (
+            home_from_config
+            if home_from_config.is_dir()
+            else self.base_dir.parent.parent
         )
-        # Database
-        self.DB_NAME = self.get_config_key(config, ['database', 'name'], 'rekono')
-        self.DB_USER = self.get_config_key(config, ['database', 'user'], '')
-        self.DB_PASSWORD = self.get_config_key(config, ['database', 'password'], '')
-        self.DB_HOST = self.get_config_key(config, ['database', 'host'], '127.0.0.1')
-        self.DB_PORT = self.get_config_key(config, ['database', 'port'], 5432)
-        # Redis Queue
-        self.RQ_HOST = self.get_config_key(config, ['rq', 'host'], '127.0.0.1')
-        self.RQ_PORT = self.get_config_key(config, ['rq', 'port'], 6379)
-        # Email: SMTP configuration
-        self.EMAIL_HOST = self.get_config_key(config, ['email', 'host'])
-        self.EMAIL_PORT = self.get_config_key(config, ['email', 'port'])
-        self.EMAIL_USER = self.get_config_key(config, ['email', 'user'])
-        self.EMAIL_PASSWORD = self.get_config_key(config, ['email', 'password'])
-        self.EMAIL_TLS = self.get_config_key(config, ['email', 'tls'], True)
-        # Tools
-        self.TOOLS_CMSEEK_DIR = self.get_config_key(config, ['tools', 'cmseek', 'directory'], '/usr/share/cmseek')
-        self.TOOLS_LOG4J_SCAN_DIR = self.get_config_key(
-            config,
-            ['tools', 'log4j-scan', 'directory'],
-            '/opt/log4j-scan'
-        )
-        self.TOOLS_SPRING4SHELL_SCAN_DIR = self.get_config_key(
-            config,
-            ['tools', 'spring4shell-scan', 'directory'],
-            '/opt/spring4shell-scan'
-        )
-        self.TOOLS_GITTOOLS_DIR = self.get_config_key(config, ['tools', 'gittools', 'directory'], '/opt/GitTools')
 
-        # --------------------------------------------------------------------------------------------------------------
-        # DEPRECATED
-        # The following configurations are mantained for compatibility reasons with the previous version.
-        # This support will be removed in the next release, since this settings can be managed using the Settings page.
-        # --------------------------------------------------------------------------------------------------------------
-        # Telegram Bot token
-        self.TELEGRAM_TOKEN = self.get_config_key(config, ['telegram', 'token'])
-        # Defect-Dojo
-        self.DD_URL = self.get_config_key(config, ['defect-dojo', 'url'])
-        self.DD_API_KEY = self.get_config_key(config, ['defect-dojo', 'api-key'])
+    def _get_config_file(self) -> Path:
+        for filename in [
+            "config.yaml",
+            "config.yml",
+            "rekono.yaml",
+            "rekono.yml",
+        ]:
+            path = self.home / filename
+            if path.is_file():
+                break
+        return path
 
-    def get_config_key(self, config: Dict[str, Any], path: List[str], default: Any = None) -> Any:
-        '''Get configuration value by dict path. Default value will be returned if value not found or it's null.
-
-        Args:
-            config (Dict[str, Any]): Configuration data
-            path (List[str]): Path to the configuration value
-            default (Any): Default value. By default None
-
-        Returns:
-            Any: Configuration value to apply
-        '''
-        value = config
-        for key in path:
-            if key not in value or value.get(key) is None:                      # Value not found
-                return default                                                  # Return default value
-            value = value.get(key, {})
+    def _get_config(self, property: Property) -> Any:
+        default_value = value = property.value[2]
+        if property.value[1]:
+            value = self._get_config_from_file(property.value[1]) or value
+        if property.value[0]:
+            env_value = os.getenv(property.value[0])
+            value = env_value or value
+            if isinstance(default_value, list) and env_value:
+                list_value = []
+                for separator in [" ", ",", ";"]:
+                    if separator in env_value:
+                        list_value = env_value.split(separator)
+                        break
+                value = list_value or [env_value]
+        if isinstance(default_value, bool) and not isinstance(value, bool):
+            value = str(value).lower() == "true"
         return value
+
+    def _get_config_from_file(self, property: str) -> Optional[Any]:
+        properties = self._config_properties
+        for key in property.split("."):
+            if key not in properties or not properties.get(key):
+                return None
+            properties = properties.get(key, {})
+        return properties
+
+    def _update_config_in_file(self, property: str, value: Any) -> None:
+        properties = self._config_properties
+        property_path = property.split(".")
+        for index, key in enumerate(property_path):
+            is_last_path = index + 1 == len(property_path)
+            if key not in properties or is_last_path:
+                properties[key] = value if is_last_path else {}
+            properties = properties[key]
+        with self.config_file.open("w") as config_file:
+            yaml.dump(self._config_properties, config_file, default_flow_style=False)

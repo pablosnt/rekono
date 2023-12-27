@@ -33,14 +33,14 @@ RUN apt update -y && \
 # Source code and configuration
 COPY src/backend/ /code
 COPY src/frontend/dist_electron/rekono_*.deb /code
-COPY src/config.yaml /code
+COPY config.yaml /rekono
 COPY docker/debian/entrypoint.sh /entrypoint.sh
 COPY docker/debian/set_permissions.sh /set_permissions.sh
 
 # Install dependencies and Desktop app
 RUN pip install -r /code/requirements.txt && \
     dpkg -i /code/rekono_*.deb || apt -f install -y && \
-    rm -R /code/testing/ && \
+    rm -R /code/tests/ && \
     # Install security tools
     apt install nmap dirsearch theharvester nikto sslscan sslyze cmseek zaproxy exploitdb metasploit-framework emailharvester joomscan gitleaks smbmap nuclei gobuster -y && \
     apt install seclists dirb -y && \

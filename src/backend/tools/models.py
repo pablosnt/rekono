@@ -1,143 +1,192 @@
-from django.db import models
-from input_types.models import InputType
-from likes.models import LikeBase
+import re
+import shutil
+import subprocess
+from pathlib import Path
+from typing import Any
 
-from tools.enums import IntensityRank, Stage
+from django.db import models
+from framework.models import BaseLike, BaseModel
+from input_types.models import InputType
+from rekono.settings import CONFIG
+from tools.enums import Intensity as IntensityEnum
+from tools.enums import Stage
 
 # Create your models here.
 
 
-class Tool(LikeBase):
-    '''Tool model.'''
+class Tool(BaseLike):
+    name = models.TextField(max_length=30, unique=True)
+    command = models.TextField(max_length=30)
+    script = models.TextField(max_length=100, blank=True, null=True)
+    script_directory_property = models.TextField(max_length=100, blank=True, null=True)
+    run_directory_property = models.TextField(max_length=100, blank=True, null=True)
+    ignore_exit_code = models.BooleanField(default=False)
+    is_installed = models.BooleanField(default=False)
+    version = models.TextField(max_length=100, blank=True, null=True)
+    version_argument = models.TextField(max_length=30, blank=True, null=True)
+    output_format = models.TextField(max_length=5, blank=True, null=True)
+    reference = models.TextField(max_length=250, blank=True, null=True)
+    icon = models.TextField(max_length=250, blank=True, null=True)
+    defect_dojo_scan_type = models.TextField(max_length=100, blank=True, null=True)
 
-    name = models.TextField(max_length=30, unique=True)                         # Tool name
-    command = models.TextField(max_length=30, blank=True, null=True)            # Tool command
-    output_format = models.TextField(max_length=5, blank=True, null=True)       # Tool output file format
-    defectdojo_scan_type = models.TextField(max_length=50, blank=True, null=True)   # Related Defect-Dojo scan type
-    reference = models.TextField(max_length=250, blank=True, null=True)         # Tool reference link
-    icon = models.TextField(max_length=250, blank=True, null=True)              # Tool icon link
+    def get_parser_class(self) -> Any:
+        return self._get_related_class("tools.parsers", self.name)
+
+    def get_executor_class(self) -> Any:
+        return self._get_related_class("tools.executors", self.name)
+
+    def update_status(self) -> None:
+        self.is_installed = (
+            self.command
+            and shutil.which(self.command) is not None
+            and (
+                (not self.script and not self.script_directory_property)
+                or (
+                    Path(
+                        getattr(CONFIG, self.script_directory_property.lower())
+                    ).is_dir()
+                    and (
+                        Path(getattr(CONFIG, self.script_directory_property.lower()))
+                        / self.script
+                    ).is_file()
+                )
+            )
+        )
+        update_fields = ["is_installed"]
+        if self.is_installed:
+            self.version = self._parse_version()
+            update_fields.append("version")
+        self.save(update_fields=update_fields)
+
+    def _parse_version(self) -> str:
+        version_regex = r"(?!m)[a-z]?[\d]+\.[\d]+\.[\d]*-?[a-z]*"
+        if self.version_argument:
+            process = subprocess.run(
+                [i for i in [self.command, self.script, self.version_argument] if i],
+                capture_output=True,
+            )
+            if process.returncode == 0:
+                output = (process.stdout or process.stderr).decode("utf-8").lower()
+                version = re.search(
+                    version_regex,
+                    # zaproxy returns the Java version at the first line
+                    re.sub("java version [^\s]*", "", output),
+                )
+                if version:
+                    return version.group()
 
     def __str__(self) -> str:
-        '''Instance representation in text format.
+        """Instance representation in text format.
 
         Returns:
             str: String value that identifies this instance
-        '''
+        """
         return self.name
 
 
-class Intensity(models.Model):
-    '''Intensity model.'''
-
-    tool = models.ForeignKey(Tool, related_name='intensities', on_delete=models.CASCADE)            # Related tool
-    argument = models.TextField(max_length=50, default='', blank=True)          # Argument needed to apply the intensity
-    value = models.IntegerField(choices=IntensityRank.choices, default=IntensityRank.NORMAL)        # Intensity value
+class Intensity(BaseModel):
+    tool = models.ForeignKey(Tool, related_name="intensities", on_delete=models.CASCADE)
+    argument = models.TextField(max_length=50, default="", blank=True)
+    value = models.IntegerField(
+        choices=IntensityEnum.choices, default=IntensityEnum.NORMAL
+    )
 
     def __str__(self) -> str:
-        '''Instance representation in text format.
+        """Instance representation in text format.
 
         Returns:
             str: String value that identifies this instance
-        '''
-        return f'{self.tool.name} - {IntensityRank(self.value).name}'
+        """
+        return f"{self.tool.__str__()} - {IntensityEnum(self.value).name}"
 
 
-class Configuration(models.Model):
-    '''Configuration model.'''
-
-    name = models.TextField(max_length=30)                                      # Configuration name
-    tool = models.ForeignKey(Tool, related_name='configurations', on_delete=models.CASCADE)         # Related tool
-    arguments = models.TextField(max_length=250, default='', blank=True)
-    stage = models.IntegerField(choices=Stage.choices)                          # Related pentesting stage
-    default = models.BooleanField(default=False)                                # Indicate if it's default configuration
+class Configuration(BaseModel):
+    name = models.TextField(max_length=30)
+    tool = models.ForeignKey(
+        Tool, related_name="configurations", on_delete=models.CASCADE
+    )
+    arguments = models.TextField(max_length=250, default="", blank=True)
+    stage = models.IntegerField(choices=Stage.choices)
+    default = models.BooleanField(default=False)
 
     class Meta:
-        '''Model metadata.'''
-
         constraints = [
-            # Unique constraint by: Tool and Name
-            models.UniqueConstraint(fields=['tool', 'name'], name='unique configuration')
+            models.UniqueConstraint(
+                fields=["tool", "name"], name="unique_configuration"
+            )
         ]
 
     def __str__(self) -> str:
-        '''Instance representation in text format.
+        """Instance representation in text format.
 
         Returns:
             str: String value that identifies this instance
-        '''
-        return f'{self.tool.name} - {self.name}'
+        """
+        return f"{self.tool.__str__()} - {self.name}"
 
 
-class Argument(models.Model):
-    '''Argument model.'''
-
-    tool = models.ForeignKey(Tool, related_name='arguments', on_delete=models.CASCADE)              # Related tool
-    name = models.TextField(max_length=20)                                      # Argument name
-    argument = models.TextField(max_length=50, default='', blank=True)          # Argument value
-    required = models.BooleanField(default=False)                               # Indicate if it's required argument
-    multiple = models.BooleanField(default=False)                               # Accepts multiple BaseInputs or not
+class Argument(BaseModel):
+    tool = models.ForeignKey(Tool, related_name="arguments", on_delete=models.CASCADE)
+    name = models.TextField(max_length=20)
+    argument = models.TextField(max_length=50, default="", blank=True)
+    required = models.BooleanField(default=False)
+    multiple = models.BooleanField(default=False)  # Accepts multiple BaseInputs or not
 
     class Meta:
-        '''Model metadata.'''
-
         constraints = [
-            # Unique constraint by: Tool and Name
-            models.UniqueConstraint(fields=['tool', 'name'], name='unique argument')
+            models.UniqueConstraint(fields=["tool", "name"], name="unique_argument")
         ]
 
     def __str__(self) -> str:
-        '''Instance representation in text format.
+        """Instance representation in text format.
 
         Returns:
             str: String value that identifies this instance
-        '''
-        return f'{self.tool.__str__()} - {self.name}'
+        """
+        return f"{self.tool.__str__()} - {self.name}"
 
 
-class Input(models.Model):
-    '''Input model.'''
-
-    argument = models.ForeignKey(Argument, related_name='inputs', on_delete=models.CASCADE)         # Related argument
-    type = models.ForeignKey(InputType, related_name='inputs', on_delete=models.CASCADE)            # Related input type
-    filter = models.TextField(max_length=250, blank=True, null=True)            # Filter to apply to BaseInputs
-    order = models.IntegerField(default=1)                                      # Preference order
+class Input(BaseModel):
+    argument = models.ForeignKey(
+        Argument, related_name="inputs", on_delete=models.CASCADE
+    )
+    type = models.ForeignKey(InputType, related_name="inputs", on_delete=models.CASCADE)
+    filter = models.TextField(max_length=250, blank=True, null=True)
+    order = models.IntegerField(default=1)
 
     class Meta:
-        '''Model metadata.'''
-
         constraints = [
-            # Unique constraint by: Argument and Order
-            models.UniqueConstraint(fields=['argument', 'order'], name='unique input')
+            models.UniqueConstraint(fields=["argument", "order"], name="unique_input")
         ]
 
     def __str__(self) -> str:
-        '''Instance representation in text format.
+        """Instance representation in text format.
 
         Returns:
             str: String value that identifies this instance
-        '''
-        return f'{self.argument.__str__()} - {self.type.__str__()}'
+        """
+        return f"{self.argument.__str__()} - {self.type.__str__()}"
 
 
-class Output(models.Model):
-    '''Output model.'''
-
-    # Related configuration
-    configuration = models.ForeignKey(Configuration, related_name='outputs', on_delete=models.CASCADE)
-    type = models.ForeignKey(InputType, related_name='outputs', on_delete=models.CASCADE)           # Related input type
+class Output(BaseModel):
+    configuration = models.ForeignKey(
+        Configuration, related_name="outputs", on_delete=models.CASCADE
+    )
+    type = models.ForeignKey(
+        InputType, related_name="outputs", on_delete=models.CASCADE
+    )
 
     class Meta:
-        '''Model metadata.'''
-
         constraints = [
-            # Unique constraint by: Configuration and Input Type
-            models.UniqueConstraint(fields=['configuration', 'type'], name='unique output')
+            models.UniqueConstraint(
+                fields=["configuration", "type"], name="unique_output"
+            )
         ]
 
     def __str__(self) -> str:
-        '''Instance representation in text format.
+        """Instance representation in text format.
 
         Returns:
             str: String value that identifies this instance
-        '''
-        return f'{self.configuration.__str__()} - {self.type.__str__()}'
+        """
+        return f"{self.configuration.__str__()} - {self.type.__str__()}"

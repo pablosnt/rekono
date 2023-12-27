@@ -21,7 +21,7 @@ jobs:
       
       - name: Scan Nginx image with Trivy
         continue-on-error: true
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@91713af97dc80187565512baba96e4364e983601
         with:
           image-ref: rekono-nginx
           format: table
@@ -29,7 +29,7 @@ jobs:
       
       - name: Scan Kali image with Trivy
         continue-on-error: true
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@91713af97dc80187565512baba96e4364e983601
         with:
           image-ref: rekono-kali
           format: table
@@ -37,7 +37,7 @@ jobs:
       
       - name: Scan Backend image with Trivy
         continue-on-error: true
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@91713af97dc80187565512baba96e4364e983601
         with:
           image-ref: rekono-backend
           format: table
@@ -45,7 +45,7 @@ jobs:
       
       - name: Scan Frontend image with Trivy
         continue-on-error: true
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@91713af97dc80187565512baba96e4364e983601
         with:
           image-ref: rekono-frontend
           format: table
@@ -77,7 +77,7 @@ jobs:
 
       - name: Scan Debian image with Trivy
         continue-on-error: true
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@91713af97dc80187565512baba96e4364e983601
         with:
           image-ref: rekono-debian
           format: table

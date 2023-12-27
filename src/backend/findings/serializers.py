@@ -1,128 +1,164 @@
-from findings.models import (OSINT, Credential, Exploit, Host, Path, Port,
-                             Technology, Vulnerability)
-from rest_framework import serializers
-from tools.serializers import SimplyToolSerializer
+from findings.framework.serializers import FindingSerializer, TriageFindingSerializer
+from findings.models import (
+    OSINT,
+    Credential,
+    Exploit,
+    Host,
+    Path,
+    Port,
+    Technology,
+    Vulnerability,
+)
 
 
-class OSINTSerializer(serializers.ModelSerializer):
-    '''Serializer to get the OSINT data via API.'''
-
-    detected_by = SimplyToolSerializer(many=False, read_only=True)               # Tool details for read operations
-
+class OSINTSerializer(FindingSerializer):
     class Meta:
-        '''Serializer metadata.'''
-
         model = OSINT
-        fields = (                                                              # OSINT fields exposed via API
-            'id', 'executions', 'data', 'data_type', 'source', 'reference',
-            'detected_by', 'first_seen', 'last_seen', 'is_active'
+        fields = FindingSerializer.Meta.fields + (
+            "data",
+            "data_type",
+            "source",
+            "reference",
         )
 
 
-class HostSerializer(serializers.ModelSerializer):
-    '''Serializer to get the Host data via API.'''
-
-    detected_by = SimplyToolSerializer(many=False, read_only=True)               # Tool details for read operations
-
+class TriageOSINTSerializer(TriageFindingSerializer):
     class Meta:
-        '''Serializer metadata.'''
+        model = OSINTSerializer.Meta.model
+        fields = TriageFindingSerializer.Meta.fields
 
+
+class HostSerializer(FindingSerializer):
+    class Meta:
         model = Host
-        fields = (                                                              # Host fields exposed via API
-            'id', 'executions', 'address', 'os', 'os_type', 'detected_by',
-            'first_seen', 'last_seen', 'is_active', 'port'
+        fields = FindingSerializer.Meta.fields + (
+            "address",
+            "os",
+            "os_type",
+            "port",
         )
 
 
-class PortSerializer(serializers.ModelSerializer):
-    '''Serializer to get the Port data via API.'''
-
-    detected_by = SimplyToolSerializer(many=False, read_only=True)              # Tool details for read operations
-
+class TriageHostSerializer(TriageFindingSerializer):
     class Meta:
-        '''Serializer metadata.'''
+        model = HostSerializer.Meta.model
+        fields = TriageFindingSerializer.Meta.fields
 
+
+class PortSerializer(FindingSerializer):
+    class Meta:
         model = Port
-        fields = (                                                              # Port fields exposed via API
-            'id', 'executions', 'host', 'port', 'status', 'protocol', 'service',
-            'detected_by', 'first_seen', 'last_seen', 'is_active', 'path', 'technology',
-            'vulnerability'
+        fields = FindingSerializer.Meta.fields + (
+            "host",
+            "port",
+            "status",
+            "protocol",
+            "service",
+            "path",
+            "technology",
+            "vulnerability",
         )
 
 
-class PathSerializer(serializers.ModelSerializer):
-    '''Serializer to get the Path data via API.'''
-
-    detected_by = SimplyToolSerializer(many=False, read_only=True)              # Tool details for read operations
-
+class TriagePortSerializer(TriageFindingSerializer):
     class Meta:
-        '''Serializer metadata.'''
+        model = PortSerializer.Meta.model
+        fields = TriageFindingSerializer.Meta.fields
 
+
+class PathSerializer(FindingSerializer):
+    class Meta:
         model = Path
-        fields = (                                                              # Path fields exposed via API
-            'id', 'executions', 'port', 'path', 'status', 'extra', 'type',
-            'detected_by', 'first_seen', 'last_seen', 'is_active'
+        fields = FindingSerializer.Meta.fields + (
+            "port",
+            "path",
+            "status",
+            "extra_info",
+            "type",
         )
 
 
-class TechnologySerializer(serializers.ModelSerializer):
-    '''Serializer to get the Technology data via API.'''
-
-    detected_by = SimplyToolSerializer(many=False, read_only=True)              # Tool details for read operations
-
+class TriagePathSerializer(TriageFindingSerializer):
     class Meta:
-        '''Serializer metadata.'''
+        model = PathSerializer.Meta.model
+        fields = TriageFindingSerializer.Meta.fields
 
+
+class TechnologySerializer(FindingSerializer):
+    class Meta:
         model = Technology
-        fields = (                                                              # Technology fields exposed via API
-            'id', 'executions', 'port', 'name', 'version', 'description', 'reference',
-            'related_to', 'related_technologies', 'detected_by', 'first_seen', 'last_seen',
-            'is_active', 'vulnerability', 'exploit'
+        fields = FindingSerializer.Meta.fields + (
+            "port",
+            "name",
+            "version",
+            "description",
+            "reference",
+            "related_to",
+            "related_technologies",
+            "vulnerability",
+            "exploit",
         )
 
 
-class CredentialSerializer(serializers.ModelSerializer):
-    '''Serializer to get the Credential data via API.'''
-
-    detected_by = SimplyToolSerializer(many=False, read_only=True)              # Tool details for read operations
-
+class TriageTechnologySerializer(TriageFindingSerializer):
     class Meta:
-        '''Serializer metadata.'''
+        model = TechnologySerializer.Meta.model
+        fields = TriageFindingSerializer.Meta.fields
 
+
+class CredentialSerializer(FindingSerializer):
+    class Meta:
         model = Credential
-        # Credential fields exposed via API
-        fields = (
-            'id', 'technology', 'email', 'username', 'secret', 'context',
-            'detected_by', 'first_seen', 'last_seen', 'is_active'
+        fields = FindingSerializer.Meta.fields + (
+            "technology",
+            "email",
+            "username",
+            "secret",
+            "context",
         )
 
 
-class VulnerabilitySerializer(serializers.ModelSerializer):
-    '''Serializer to get the Vulnerability data via API.'''
-
-    detected_by = SimplyToolSerializer(many=False, read_only=True)              # Tool details for read operations
-
+class TriageCredentialSerializer(TriageFindingSerializer):
     class Meta:
-        '''Serializer metadata.'''
+        model = CredentialSerializer.Meta.model
+        fields = TriageFindingSerializer.Meta.fields
 
+
+class VulnerabilitySerializer(FindingSerializer):
+    class Meta:
         model = Vulnerability
-        fields = (                                                              # Vulnerability fields exposed via API
-            'id', 'executions', 'port', 'technology', 'name', 'description', 'severity',
-            'cve', 'cwe', 'reference', 'detected_by', 'first_seen', 'last_seen',
-            'is_active', 'exploit'
+        fields = FindingSerializer.Meta.fields + (
+            "port",
+            "technology",
+            "name",
+            "description",
+            "severity",
+            "cve",
+            "cwe",
+            "reference",
+            "exploit",
         )
 
 
-class ExploitSerializer(serializers.ModelSerializer):
-    '''Serializer to get the Exploit data via API.'''
-
-    detected_by = SimplyToolSerializer(many=False, read_only=True)              # Tool details for read operations
-
+class TriageVulnerabilitySerializer(TriageFindingSerializer):
     class Meta:
-        '''Serializer metadata.'''
+        model = VulnerabilitySerializer.Meta.model
+        fields = TriageFindingSerializer.Meta.fields
 
+
+class ExploitSerializer(FindingSerializer):
+    class Meta:
         model = Exploit
-        fields = (                                                              # Exploit fields exposed via API
-            'id', 'executions', 'vulnerability', 'technology', 'title', 'edb_id',
-            'reference', 'detected_by', 'first_seen', 'last_seen', 'is_active'
+        fields = FindingSerializer.Meta.fields + (
+            "vulnerability",
+            "technology",
+            "title",
+            "edb_id",
+            "reference",
         )
+
+
+class TriageExploitSerializer(TriageFindingSerializer):
+    class Meta:
+        model = ExploitSerializer.Meta.model
+        fields = TriageFindingSerializer.Meta.fields

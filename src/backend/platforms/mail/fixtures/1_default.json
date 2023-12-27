@@ -1,0 +1,13 @@
+[
+    {
+        "model": "mail.smtpsettings",
+        "pk": 1,
+        "fields": {
+            "host": null,
+            "port": 587,
+            "username": null,
+            "_password": null,
+            "tls": true
+        }
+    }
+]

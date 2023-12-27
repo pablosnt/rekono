@@ -1,26 +1,24 @@
-from django_filters import rest_framework
-from django_filters.rest_framework.filters import OrderingFilter
-
 from authentications.models import Authentication
+from django_filters.filters import ModelChoiceFilter
+from django_filters.rest_framework import FilterSet
+from projects.models import Project
+from targets.models import Target
 
 
-class AuthenticationFilter(rest_framework.FilterSet):
-    '''FilterSet to filter and sort authentications entities.'''
+class AuthenticationFilter(FilterSet):
+    """FilterSet to filter and sort authentications entities."""
 
-    o = OrderingFilter(fields=('target_port', 'name', 'type'))                  # Ordering fields
+    target = ModelChoiceFilter(
+        queryset=Target.objects.all(), field_name="target_port__target"
+    )
+    project = ModelChoiceFilter(
+        queryset=Project.objects.all(), field_name="target_port__target__project"
+    )
 
     class Meta:
         model = Authentication
-        fields = {                                                              # Filter fields
-            'target_port': ['exact'],
-            'target_port__port': ['exact'],
-            'target_port__target': ['exact'],
-            'target_port__target__project': ['exact'],
-            'target_port__target__project__name': ['exact', 'icontains'],
-            'target_port__target__project__owner': ['exact'],
-            'target_port__target__project__owner__username': ['exact', 'icontains'],
-            'target_port__target__target': ['exact', 'icontains'],
-            'target_port__target__type': ['exact'],
-            'name': ['exact', 'icontains'],
-            'type': ['exact']
+        fields = {
+            "target_port": ["exact", "isnull"],
+            "name": ["exact", "icontains"],
+            "type": ["exact"],
         }

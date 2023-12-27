@@ -1,1 +1,0 @@
-'''Rekono main module.'''

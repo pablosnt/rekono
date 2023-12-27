@@ -1,4 +1,4 @@
-FROM python:3.9.10-alpine
+FROM python:3.11.4-alpine
 
 # Environment
 ENV PYTHONDONTWRITEBYTECODE 1
@@ -14,7 +14,7 @@ RUN apk update && \
     mkdir /code
 
 # Configuration
-COPY src/config.yaml /rekono
+COPY config.yaml /rekono
 # Source code
 COPY src/backend/ /code
 

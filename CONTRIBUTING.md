@@ -50,7 +50,7 @@ New Rekono contributions should tested using unit tests.
 
 This project has the following checks in _Continuous Integration_:
 
-1. `Code style`: check the source code style using `mypy`, `flake8` and `eslint`.
+1. `Code style`: check the source code style using `mypy`, `black` and `eslint`.
 
 2. `Desktop applications`: generate installers for Rekono Desktop in Linux, MacOS and Windows.
 

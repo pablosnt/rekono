@@ -1,64 +1,112 @@
+import logging
 from typing import Any
 
-from api.views import CreateViewSet, CreateWithUserViewSet, GetViewSet
-from django.core.exceptions import ValidationError
+import django_rq
+from django.utils import timezone
 from drf_spectacular.utils import extend_schema
+from executions.enums import Status
+from executions.queues import ExecutionsQueue
+from framework.views import BaseViewSet
+from rekono.settings import CONFIG
 from rest_framework import status
 from rest_framework.decorators import action
-from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
-                                   ListModelMixin, RetrieveModelMixin)
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
-
-from tasks import services
-from tasks.enums import Status
+from rq.command import send_stop_job_command
+from security.authorization.permissions import (
+    ProjectMemberPermission,
+    RekonoModelPermission,
+)
 from tasks.filters import TaskFilter
 from tasks.models import Task
-from tasks.queue import producer
+from tasks.queues import TasksQueue
 from tasks.serializers import TaskSerializer
 
 # Create your views here.
 
+logger = logging.getLogger()
 
-class TaskViewSet(
-    GetViewSet,
-    CreateViewSet,
-    CreateWithUserViewSet,
-    CreateModelMixin,
-    ListModelMixin,
-    RetrieveModelMixin,
-    DestroyModelMixin
-):
-    '''Task ViewSet that includes: get, retrieve, create amd cancel features.'''
 
-    queryset = Task.objects.all().order_by('-id')
+class TaskViewSet(BaseViewSet):
+    queryset = Task.objects.all()
     serializer_class = TaskSerializer
     filterset_class = TaskFilter
-    # Fields used to search tasks
-    search_fields = ['target__target', 'process__name', 'process__steps__tool__name', 'tool__name']
-    members_field = 'target__project__members'
-    user_field = 'executor'
+    permission_classes = [
+        IsAuthenticated,
+        RekonoModelPermission,
+        ProjectMemberPermission,
+    ]
+    search_fields = [
+        "target__target",
+        "process__name",
+        "process__steps__configuration__tool__name",
+        "configuration__name",
+        "configuration__tool__name",
+    ]
+    ordering_fields = [
+        "id",
+        "target",
+        "process",
+        "configuration",
+        "configuration__tool",
+        "creation",
+        "enqueued_at",
+        "start",
+        "end",
+    ]
+    owner_field = "executor"
+    http_method_names = [
+        "get",
+        "post",
+        "delete",
+    ]
+    tasks_queue = TasksQueue()
+    executions_queue = ExecutionsQueue()
 
     def destroy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        '''Cancel task.
+        """Cancel task.
 
         Args:
             request (Request): Received HTTP request
 
         Returns:
             Response: HTTP response
-        '''
-        instance = self.get_object()
-        try:
-            services.cancel_task(instance)
+        """
+        task = self.get_object()
+        running_executions = task.executions.filter(
+            status__in=[Status.REQUESTED, Status.RUNNING]
+        ).all()
+        if running_executions:
+            if task.rq_job_id:
+                self.tasks_queue.cancel_job(task.rq_job_id)
+                self.tasks_queue.delete_job(task.rq_job_id)
+                logger.info(f"[Task] Task {task.id} has been cancelled")
+            connection = django_rq.get_connection("executions-queue")
+            for execution in running_executions:
+                if not CONFIG.testing:  # pragma: no cover
+                    if execution.status == Status.RUNNING:
+                        send_stop_job_command(connection, execution.rq_job_id)
+                    else:
+                        self.executions_queue.cancel_job(execution.rq_job_id)
+                logger.info(f"[Execution] Execution {execution.id} has been cancelled")
+                execution.status = Status.CANCELLED
+                execution.end = timezone.now()
+                execution.save(update_fields=["status", "end"])
+            task.end = timezone.now()
+            task.save(update_fields=["end"])
             return Response(status=status.HTTP_204_NO_CONTENT)
-        except ValidationError:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+        else:
+            logger.warning(f"[Task] Task {task.id} can't be cancelled")
+            return Response(
+                {"task": f"Task {task.id} can't be cancelled"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
     @extend_schema(request=None, responses={200: TaskSerializer})
-    @action(detail=True, methods=['POST'], url_path='repeat', url_name='repeat')
+    @action(detail=True, methods=["POST"], url_path="repeat", url_name="repeat")
     def repeat_task(self, request: Request, pk: str) -> Response:
-        '''Repeat task execution.
+        """Repeat task execution.
 
         Args:
             request (Request): Received HTTP request
@@ -66,21 +114,23 @@ class TaskViewSet(
 
         Returns:
             Response: HTTP response
-        '''
+        """
         task = self.get_object()
-        if task.status in [Status.REQUESTED, Status.RUNNING]:
-            # If task status is requested or running, it can't be repeated
-            return Response('Execution is still running', status=status.HTTP_400_BAD_REQUEST)
-        # Create a new task from the original one
+        if task.executions.filter(
+            status__in=[Status.REQUESTED, Status.RUNNING]
+        ).exists():
+            return Response(
+                {"task": "Task is still running"}, status=status.HTTP_400_BAD_REQUEST
+            )
         new_task = Task.objects.create(
             target=task.target,
             process=task.process,
-            tool=task.tool,
             configuration=task.configuration,
             intensity=task.intensity,
-            executor=request.user
+            executor=request.user,
         )
-        new_task.wordlists.set(task.wordlists.all())                            # Add wordlists from original task
-        producer(new_task)                                                      # Enqueue new task
-        serializer = TaskSerializer(instance=new_task)                          # Return new task data
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        new_task.wordlists.set(task.wordlists.all())  # Add wordlists from original task
+        self.tasks_queue.enqueue(new_task)
+        return Response(
+            TaskSerializer(instance=new_task).data, status=status.HTTP_201_CREATED
+        )

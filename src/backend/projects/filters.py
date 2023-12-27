@@ -1,22 +1,23 @@
-from django_filters import rest_framework
-from django_filters.rest_framework.filters import OrderingFilter
+from django_filters.filters import CharFilter, NumberFilter
+from django_filters.rest_framework import FilterSet
 from projects.models import Project
 
 
-class ProjectFilter(rest_framework.FilterSet):
-    '''FilterSet to filter and sort Project entities.'''
+class ProjectFilter(FilterSet):
+    """FilterSet to filter Project entities."""
 
-    o = OrderingFilter(fields=('name', 'owner'))                                # Ordering fields
+    tag = CharFilter(field_name="tags__name", lookup_expr="in")
+    defect_dojo_product_type = NumberFilter(
+        field_name="defect_dojo_sync__product_type_id"
+    )
+    defect_dojo_product = NumberFilter(field_name="defect_dojo_sync__product_id")
+    defect_dojo_engagement = NumberFilter(field_name="defect_dojo_sync__engagement_id")
 
     class Meta:
-        '''FilterSet metadata.'''
-
         model = Project
-        fields = {                                                              # Filter fields
-            'name': ['exact', 'icontains'],
-            'description': ['exact', 'icontains'],
-            'owner': ['exact'],
-            'owner__username': ['exact', 'icontains'],
-            'members': ['exact'],
-            'tags__name': ['in'],
+        fields = {
+            "name": ["exact", "icontains"],
+            "owner": ["exact"],
+            "members": ["exact"],
+            "defect_dojo_sync": ["exact"],
         }

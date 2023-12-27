@@ -1,40 +1,56 @@
 import logging
+from datetime import datetime, timedelta
 from typing import Any, cast
 
 from django.contrib.auth.models import AbstractUser, Group, UserManager
 from django.db import models
-from email_notifications.sender import (user_enable_account, user_invitation,
-                                        user_password_reset)
-from rest_framework.authtoken.models import Token
+from django.utils import timezone
+from framework.models import BaseModel
+from platforms.mail.notifications import SMTP
+from rekono.settings import CONFIG
+from rest_framework_simplejwt.token_blacklist.models import (
+    BlacklistedToken,
+    OutstandingToken,
+)
+from security.authentication.api import ApiToken
 from security.authorization.roles import Role
-from security.input_validation import validate_name
-from security.otp import generate, get_expiration
-
+from security.cryptography.hashing import hash
+from security.cryptography.random import generate_random_value
+from security.input_validator import FutureDatetimeValidator, Regex, Validator
 from users.enums import Notification
 
 # Create your models here.
 
-logger = logging.getLogger()                                                    # Rekono logger
+logger = logging.getLogger()
 
 
 class RekonoUserManager(UserManager):
-    '''Manager for the User model.'''
+    """Manager for the User model."""
 
-    def initialize(self, user: Any, role: Role) -> None:
-        '''Initialize user, assigning it a role and creating its API token.
+    def generate_otp(self, model: Any = None) -> str:
+        otp = hash(generate_random_value(3000))
+        if (model or User).objects.filter(otp=hash(otp)).exists():  # pragma: no cover
+            return self.generate_otp(model)
+        return otp
+
+    def get_otp_expiration_time(self) -> datetime:
+        return timezone.now() + timedelta(hours=CONFIG.otp_expiration_hours)
+
+    def assign_role(self, user: Any, role: Role) -> None:
+        """Initialize user, assigning it a role and creating its API token.
 
         Args:
             user (Any): User to initialize
             role (Role): Role to assign
-        '''
-        group = Group.objects.get(name=role.value)                              # Get user group related to the role
-        user.groups.clear()                                                     # Clean user groups
-        user.groups.set([group])                                                # Set user group
-        if not Token.objects.filter(user=user).exists():
-            Token.objects.create(user=user)                                     # Create a new API token for the user
+        """
+        group = Group.objects.get(name=role.value)  # Get user group related to the role
+        user.groups.clear()  # Clean user groups
+        user.groups.set([group])  # Set user group
+        logger.info(f"[User] Role {role} has been assigned to user {user.id}")
+        return user
 
-    def create_user(self, email: str, role: Role) -> Any:
-        '''Create a new user.
+    def invite_user(self, email: str, role: Role) -> Any:
+        """Create a new user.
 
         Args:
             email (str): New user email
@@ -42,16 +58,51 @@ class RekonoUserManager(UserManager):
 
         Returns:
             Any: Created user
-        '''
+        """
         # Create new user including an OTP. The user will be inactive while invitation is not accepted
-        user = User.objects.create(email=email, otp=generate(), is_active=None)
-        self.initialize(user, role)                                             # Initialize user
-        user_invitation(user)                                                   # Send email invitation to the user
-        logger.info(f'[User] User {user.id} has been invited with role {role}')
+        plain_otp = self.generate_otp()
+        user = User.objects.create(
+            email=email,
+            otp=hash(plain_otp),
+            otp_expiration=self.get_otp_expiration_time(),
+            is_active=None,
+        )
+        self.assign_role(user, role)
+        SMTP().invite_user(user, plain_otp)
+        logger.info(f"[User] User {user.id} has been invited with role {role}")
         return user
 
-    def create_superuser(self, username: str, email: str, password: str, **extra_fields: Any) -> Any:
-        '''Create a new superuser (Admin role, platform administrator and staff).
+    def create_user(
+        self, user: Any, username: str, first_name: str, last_name: str, password: str
+    ) -> Any:
+        user.username = username
+        user.first_name = first_name
+        user.last_name = last_name
+        user.set_password(password)
+        user.is_active = True
+        user.otp = None
+        user.otp_expiration = None
+        user.save(
+            update_fields=[
+                "username",
+                "first_name",
+                "last_name",
+                "password",
+                "is_active",
+                "otp",
+                "otp_expiration",
+            ]
+        )
+        logger.info(
+            f"[User] User {user.id} has been created",
+            extra={"user": user.id},
+        )
+        return user
+
+    def create_superuser(
+        self, username: str, email: str, password: str, **extra_fields: Any
+    ) -> Any:
+        """Create a new superuser (Admin role, platform administrator and staff).
 
         Args:
             username (str): New superuser username
@@ -60,120 +111,157 @@ class RekonoUserManager(UserManager):
 
         Returns:
             Any: Created superuser
-        '''
-        extra_fields['is_active'] = True
-        user = super().create_superuser(username, email, password, **extra_fields)      # Create new superuser
-        self.initialize(user, cast(Role, Role.ADMIN))                           # Initialize user
-        logger.info(f'[User] Superuser {user.id} has been created')
-        return user
-
-    def change_user_role(self, user: Any, role: Role) -> Any:
-        '''Change role for an user.
-
-        Args:
-            user (Any): User whose role will be changed
-            role (Role): Role to assign to the user
-
-        Returns:
-            Any: Updated user
-        '''
-        group = Group.objects.get(name=role.value)                              # Get user group related to the role
-        user.groups.clear()                                                     # Clean user groups
-        user.groups.set([group])                                                # Set user group
-        logger.info(f'[User] Role for user {user.id} has been changed to {role}')
+        """
+        extra_fields["is_active"] = True
+        user = super().create_superuser(username, email, password, **extra_fields)
+        self.assign_role(user, cast(Role, Role.ADMIN))
+        logger.info(f"[User] Superuser {user.id} has been created")
         return user
 
     def enable_user(self, user: Any) -> Any:
-        '''Enable disabled user, assigning it a new role.
+        """Enable disabled user, assigning it a new role.
 
         Args:
             user (Any): User to enable
 
         Returns:
             Any: Enabled user
-        '''
-        user.otp = generate()                                                   # Generate its OTP
-        user.otp_expiration = get_expiration()                                  # Set OTP expiration
-        user.save(update_fields=['otp', 'otp_expiration'])
-        if not Token.objects.filter(user=user).exists():
-            Token.objects.create(user=user)                                     # Create a new API token for the user
-        user_enable_account(user)                                               # Send email to establish its password
-        logger.info(f'[User] User {user.id} has been enabled')
+        """
+        plain_otp = self.generate_otp()
+        user.otp = hash(plain_otp)
+        user.otp_expiration = self.get_otp_expiration_time()  # Set OTP expiration
+        user.is_active = True
+        user.save(update_fields=["otp", "otp_expiration", "is_active"])
+        SMTP().enable_user_account(user, plain_otp)
+        logger.info(f"[User] User {user.id} has been enabled")
         return user
 
     def disable_user(self, user: Any) -> Any:
-        '''Disable user.
+        """Disable user.
 
         Args:
             user (Any): User to disable
 
         Returns:
             Any: Disabled user
-        '''
-        user.is_active = False                                                  # Disable user
-        user.set_unusable_password()                                            # Make its password unusable
-        user.otp = None                                                         # Remove its OTP
-        user.projects.clear()                                                   # Clear its projects
-        user.save(update_fields=['otp', 'is_active'])
-        try:
-            token = Token.objects.get(user=user)                                # Get user API token
-            token.delete()                                                      # Delete user API token
-        except Token.DoesNotExist:
-            pass
-        logger.info(f'[User] User {user.id} has been disabled')
+        """
+        user.is_active = False  # Disable user
+        user.set_unusable_password()  # Make its password unusable
+        user.otp = None  # Remove its OTP
+        user.otp_expiration = None
+        user.projects.clear()  # Clear its projects
+        user.save(update_fields=["otp", "otp_expiration", "is_active"])
+        ApiToken.objects.filter(user=user).delete()
+        logger.info(f"[User] User {user.id} has been disabled")
         return user
 
     def request_password_reset(self, user: Any) -> Any:
-        '''Request a password reset for an user.
+        """Request a password reset for an user.
 
         Args:
             user (Any): User that requests its password reset
 
         Returns:
             Any: User after request password reset
-        '''
-        user.otp = generate()                                                   # Generate its OTP
-        user.otp_expiration = get_expiration()                                  # Set OTP expiration
-        user.save(update_fields=['otp', 'otp_expiration'])
-        user_password_reset(user)                                               # Send password reset email
-        logger.info(f'[User] User {user.id} requested a password reset', extra={'user': user.id})
+        """
+        plain_otp = self.generate_otp()
+        user.otp = hash(plain_otp)
+        user.otp_expiration = self.get_otp_expiration_time()  # Set OTP expiration
+        user.save(update_fields=["otp", "otp_expiration"])
+        SMTP().reset_password(user, plain_otp)
+        logger.info(
+            f"[User] User {user.id} requested a password reset", extra={"user": user.id}
+        )
+        return user
+
+    def update_password(self, user: Any, password: str) -> Any:
+        # nosemgrep: python.django.security.audit.unvalidated-password.unvalidated-password
+        user.set_password(password)
+        user.save(update_fields=["password"])
+        logger.info(
+            f"[Security] User {user.id} changed his password",
+            extra={"user": user.id},
+        )
+        if hasattr(user, "telegram_chat"):
+            user.telegram_chat.delete()
+        self.invalidate_all_tokens(user)
+        return user
+
+    def reset_password(self, user: Any, password: str) -> Any:
+        user = self.update_password(user, password)
+        user.otp = None
+        user.otp_expiration = None
+        user.is_active = True
+        user.save(update_fields=["otp", "otp_expiration", "is_active"])
+        return user
+
+    def invalidate_all_tokens(self, user: Any, exclude_latest: bool = False) -> Any:
+        user_tokens = OutstandingToken.objects.filter(user=user)
+        tokens_to_remove = user_tokens.exclude(
+            id__in=BlacklistedToken.objects.filter(token__user=user).values_list(
+                "token_id", flat=True
+            )
+        )
+        if exclude_latest:
+            tokens_to_remove = tokens_to_remove.exclude(
+                token=user_tokens.order_by("-created_at").first().token
+            )
+        for token in tokens_to_remove:
+            BlacklistedToken.objects.create(token=token)
         return user
 
 
-class User(AbstractUser):
-    '''User model.'''
+class User(AbstractUser, BaseModel):
+    """User model."""
 
     # Main user data
-    username = models.TextField(max_length=100, unique=True, blank=True, null=True, validators=[validate_name])
-    first_name = models.TextField(max_length=100, blank=True, null=True, validators=[validate_name])
-    last_name = models.TextField(max_length=100, blank=True, null=True, validators=[validate_name])
+    username = models.TextField(
+        max_length=100,
+        unique=True,
+        blank=True,
+        null=True,
+        validators=[Validator(Regex.NAME.value, code="username")],
+    )
+    first_name = models.TextField(
+        max_length=100,
+        blank=True,
+        null=True,
+        validators=[Validator(Regex.NAME.value, code="first_name")],
+    )
+    last_name = models.TextField(
+        max_length=100,
+        blank=True,
+        null=True,
+        validators=[Validator(Regex.NAME.value, code="last_name")],
+    )
     email = models.EmailField(max_length=150, unique=True)
-    is_active = models.BooleanField(null=True, blank=True, default=None)
+    is_active = models.BooleanField(blank=True, null=True, default=None)
 
-    # One Time Password used for invite and enable users, or reset passwords
-    otp = models.TextField(max_length=200, unique=True, blank=True, null=True)
-    # Expiration date for the OTP
-    otp_expiration = models.DateTimeField(default=get_expiration, blank=True, null=True)
+    # One Time Password used to invite and enable users, or reset passwords
+    otp = models.TextField(max_length=200, blank=True, null=True)
+    otp_expiration = models.DateTimeField(
+        blank=True,
+        null=True,
+        validators=[FutureDatetimeValidator(code="otp_expiration")],
+    )
 
-    notification_scope = models.TextField(                                      # User notification preferences
-        max_length=18,
-        choices=Notification.choices,
-        default=Notification.OWN_EXECUTIONS
+    notification_scope = models.TextField(  # User notification preferences
+        max_length=18, choices=Notification.choices, default=Notification.MY_EXECUTIONS
     )
     # Indicate if email notifications are enabled
-    email_notification = models.BooleanField(default=True)
+    email_notifications = models.BooleanField(default=True)
     # Indicate if Telegram notifications are enabled
-    telegram_notification = models.BooleanField(default=False)
+    telegram_notifications = models.BooleanField(default=False)
 
-    USERNAME_FIELD = 'username'                                                 # Generic user configuration
-    EMAIL_FIELD = 'email'
-    REQUIRED_FIELDS = ['email']
-    objects = RekonoUserManager()                                               # Model manager
+    USERNAME_FIELD = "username"  # Generic user configuration
+    EMAIL_FIELD = "email"
+    REQUIRED_FIELDS = ["email"]
+    objects = RekonoUserManager()  # Model manager
 
     def __str__(self) -> str:
-        '''Instance representation in text format.
+        """Instance representation in text format.
 
         Returns:
             str: String value that identifies this instance
-        '''
+        """
         return self.email

@@ -1,7 +1,6 @@
 from django.apps import AppConfig
+from framework.apps import BaseApp
 
 
-class SecurityConfig(AppConfig):
-    '''Security Django application.'''
-
-    name = 'security'
+class SecurityConfig(BaseApp, AppConfig):
+    name = "security"

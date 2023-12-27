@@ -1,0 +1,28 @@
+database:
+  host: 127.0.0.1
+  name: rekono
+  password: null
+  port: 5432
+  user: null
+frontend:
+  url: https://127.0.0.1
+rootpath: null
+rq:
+  host: 127.0.0.1
+  port: 6379
+security:
+  allowed-hosts:
+  - 127.0.0.1
+  - localhost
+  - ::1
+  encryption-key: null
+  secret-key: null
+tools:
+  cmseek:
+    directory: /usr/share/cmseek
+  gittools:
+    directory: /opt/GitTools
+  log4j-scan:
+    directory: /opt/log4j-scan
+  spring4shell-scan:
+    directory: /opt/spring4shell-scan

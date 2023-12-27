@@ -1,0 +1,9 @@
+[
+    {
+        "model": "settings.settings",
+        "pk": 1,
+        "fields": {
+            "max_uploaded_file_mb": 512
+        }
+    }
+]

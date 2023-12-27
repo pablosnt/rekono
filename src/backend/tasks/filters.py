@@ -1,33 +1,29 @@
-from django_filters import rest_framework
-from django_filters.rest_framework.filters import OrderingFilter
+from django_filters.filters import ChoiceFilter, ModelChoiceFilter
+from django_filters.rest_framework import FilterSet
+from projects.models import Project
 from tasks.models import Task
+from tools.models import Tool
 
 
-class TaskFilter(rest_framework.FilterSet):
-    '''FilterSet to filter and sort Task entities.'''
-
-    o = OrderingFilter(fields=(                                                 # Ordering fields
-        ('target__project', 'project'),
-        'target', 'process', 'tool', 'intensity', 'executor', 'status', 'start', 'end'
-    ))
+class TaskFilter(FilterSet):
+    project = ModelChoiceFilter(
+        queryset=Project.objects.all(), field_name="target__project"
+    )
+    tool = ModelChoiceFilter(
+        queryset=Tool.objects.all(), field_name="configuration__tool"
+    )
+    stage = ChoiceFilter(field_name="configuration__stage")
 
     class Meta:
-        '''FilterSet metadata.'''
-
         model = Task
-        fields = {                                                              # Filter fields
-            'target': ['exact'],
-            'target__target': ['exact', 'icontains'],
-            'target__project': ['exact'],
-            'target__project__name': ['exact', 'icontains'],
-            'process': ['exact'],
-            'process__name': ['exact', 'icontains'],
-            'tool': ['exact'],
-            'tool__name': ['exact', 'icontains'],
-            'intensity': ['exact'],
-            'executor': ['exact'],
-            'executor__username': ['exact', 'icontains'],
-            'status': ['exact'],
-            'start': ['gte', 'lte', 'exact'],
-            'end': ['gte', 'lte', 'exact']
+        fields = {
+            "target": ["exact"],
+            "process": ["exact"],
+            "configuration": ["exact"],
+            "intensity": ["exact"],
+            "executor": ["exact"],
+            "creation": ["gte", "lte", "exact"],
+            "enqueued_at": ["gte", "lte", "exact"],
+            "start": ["gte", "lte", "exact"],
+            "end": ["gte", "lte", "exact"],
         }

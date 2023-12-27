@@ -1,25 +1,27 @@
 from django.urls import include, path
-from rest_framework.authtoken import views
 from rest_framework.routers import SimpleRouter
-from users.views import (CreateUserViewSet, ResetPasswordViewSet,
-                         UserAdminViewSet, UserProfileViewSet)
+from users.views import (
+    CreateUserViewSet,
+    ProfileViewSet,
+    ResetPasswordViewSet,
+    UserViewSet,
+)
 
 # Register your views here.
 
 router = SimpleRouter()
-router.register('users', UserAdminViewSet)
-
-profile = UserProfileViewSet.as_view({'get': 'get_profile', 'put': 'update_profile'})
-change_password = UserProfileViewSet.as_view({'put': 'change_password'})
-telegram_token = UserProfileViewSet.as_view({'post': 'telegram_token'})
-reset_password = ResetPasswordViewSet.as_view({'post': 'create', 'put': 'reset_password'})
+router.register("users", UserViewSet)
+# router.register("users/create", CreateUserViewSet)
 
 urlpatterns = [
-    path('api-token/', views.obtain_auth_token),
-    path('users/create/', CreateUserViewSet.as_view({'post': 'create'})),
-    path('reset-password/', reset_password),
-    path('profile/', profile),
-    path('profile/change-password/', change_password),
-    path('profile/telegram-token/', telegram_token),
-    path('', include(router.urls)),
+    path("users/create/", CreateUserViewSet.as_view({"post": "create"})),
+    path("profile/", ProfileViewSet.as_view({"get": "get", "put": "update"})),
+    path(
+        "security/update-password/", ProfileViewSet.as_view({"put": "update_password"})
+    ),
+    path(
+        "security/reset-password/",
+        ResetPasswordViewSet.as_view({"post": "create", "put": "update"}),
+    ),
+    path("", include(router.urls)),
 ]

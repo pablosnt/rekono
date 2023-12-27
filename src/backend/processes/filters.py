@@ -1,50 +1,41 @@
-from django_filters.rest_framework import FilterSet, filters
-from likes.filters import LikeFilter
-
+from django_filters.filters import CharFilter, ChoiceFilter, ModelChoiceFilter
+from django_filters.rest_framework import FilterSet
+from framework.filters import LikeFilter
 from processes.models import Process, Step
+from tools.models import Configuration, Tool
+from users.models import User
 
 
 class ProcessFilter(LikeFilter):
-    '''FilterSet to filter and sort Process entities.'''
-
-    o = filters.OrderingFilter(fields=('name', 'creator', 'likes_count'))       # Ordering fields
+    configuration = ModelChoiceFilter(
+        queryset=Configuration.objects.all(), field_name="steps__configuration"
+    )
+    tool = ModelChoiceFilter(
+        queryset=Tool.objects.all(), field_name="steps__configuration__tool"
+    )
+    stage = ChoiceFilter(field_name="steps__configuration__stage")
+    tag = CharFilter(field_name="tags__name", lookup_expr="in")
 
     class Meta:
-        '''FilterSet metadata.'''
-
         model = Process
-        fields = {                                                              # Filter fields
-            'name': ['exact', 'icontains'],
-            'description': ['exact', 'icontains'],
-            'creator': ['exact'],
-            'creator__username': ['exact', 'icontains'],
-            'steps__tool': ['exact'],
-            'steps__tool__name': ['exact', 'icontains'],
-            'steps__configuration': ['exact'],
-            'steps__configuration__name': ['exact', 'icontains'],
-            'steps__configuration__stage': ['exact'],
-            'tags__name': ['in'],
+        fields = {
+            "name": ["exact", "icontains"],
+            "description": ["exact", "icontains"],
+            "owner": ["exact"],
         }
 
 
 class StepFilter(FilterSet):
-    '''FilterSet to filter and sort Step entities.'''
-
-    o = filters.OrderingFilter(fields=('process', 'tool', 'configuration', 'priority'))             # Ordering fields
+    owner = ModelChoiceFilter(queryset=User.objects.all(), field_name="process__owner")
+    tool = ModelChoiceFilter(
+        queryset=Tool.objects.all(), field_name="configuration__tool"
+    )
+    stage = ChoiceFilter(field_name="configuration__stage")
+    tag = CharFilter(field_name="configuration__tool", lookup_expr="in")
 
     class Meta:
-        '''FilterSet metadata.'''
-
         model = Step
-        fields = {                                                              # Filter fields
-            'process__name': ['exact', 'icontains'],
-            'process__description': ['exact', 'icontains'],
-            'process__creator': ['exact'],
-            'tool': ['exact'],
-            'tool__name': ['exact', 'icontains'],
-            'tool__command': ['exact', 'icontains'],
-            'configuration': ['exact'],
-            'configuration__name': ['exact', 'icontains'],
-            'configuration__stage': ['exact'],
-            'priority': ['exact'],
+        fields = {
+            "process": ["exact"],
+            "configuration": ["exact"],
         }

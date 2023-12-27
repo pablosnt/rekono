@@ -3,6 +3,48 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] -
+
+### Added
+
+- Optimize, improve, clean and test source code (https://github.com/pablosnt/rekono/issues/222)
+- Remove tasks status (https://github.com/pablosnt/rekono/issues/222)
+- Remove steps priority (https://github.com/pablosnt/rekono/issues/222)
+- New target ports path to limit executions to it (https://github.com/pablosnt/rekono/issues/222)
+- New skipped reason field for skipped executions (https://github.com/pablosnt/rekono/issues/222)
+- New executions group to aggregate those that can be executed at the same time (https://github.com/pablosnt/rekono/issues/222)
+- Keep tool versions updated from the system in the database (https://github.com/pablosnt/rekono/issues/222)
+- Configure Defect-Dojo product type at Rekono project level (https://github.com/pablosnt/rekono/issues/222)
+- Add Rekono project tags to Defect-Dojo products (https://github.com/pablosnt/rekono/issues/222)
+
+### Security
+
+- New target blacklist configurable by the administrators to prevent scans on Rekono and internal components (https://github.com/pablosnt/rekono/issues/222)
+- New user-handled API tokens (https://github.com/pablosnt/rekono/issues/222)
+- New configuration property to enable the encryption of sensitive data like Defect-Dojo API keys, Telegram tokens, or authentication credentials when stored in the database (https://github.com/pablosnt/rekono/issues/222)
+- Close user sessions and unlink the Telegram bot when the user password changes (https://github.com/pablosnt/rekono/issues/222)
+- Store hashed user One-Time Passwords with SHA-512 in the database (https://github.com/pablosnt/rekono/issues/222)
+
+### Fixed
+
+- [**BREAKING**] Upgrade required `Python` version to `3.11` (https://github.com/pablosnt/rekono/issues/222)
+- [**BREAKING**] Remove deprecated settings (https://github.com/pablosnt/rekono/issues/222)
+- Send emails using a new thread instead of the `emails-queue` (https://github.com/pablosnt/rekono/issues/222)
+- Fix the creation of multiple engagements in Defect-Dojo to import scans from the same target (https://github.com/pablosnt/rekono/issues/222)
+- Remove duplicated API field to sort the data (https://github.com/pablosnt/rekono/issues/222)
+- Upgrade `Django` version to `5.0` (https://github.com/pablosnt/rekono/issues/222)
+- Upgrade `djangorestframework` version to `3.14.0` (https://github.com/pablosnt/rekono/issues/222)
+- Upgrade `djangorestframework-simplejwt` version to `5.3.1` (https://github.com/pablosnt/rekono/issues/222)
+- Upgrade `django-filter` version to `23.5` (https://github.com/pablosnt/rekono/issues/222)
+- Upgrade `django-rq` version to `2.10.1` (https://github.com/pablosnt/rekono/issues/222)
+- Upgrade `django-taggit` version to `5.0.1` (https://github.com/pablosnt/rekono/issues/222)
+- Upgrade `drf-spectacular` version to `0.27.0` (https://github.com/pablosnt/rekono/issues/222)
+- Upgrade `pycryptodome` version to `3.19.0` (https://github.com/pablosnt/rekono/issues/222)
+- Upgrade `psycopg2-binary` version to `2.9.9` (https://github.com/pablosnt/rekono/issues/222)
+- Upgrade `pyjwt` version to `2.8.0` (https://github.com/pablosnt/rekono/issues/222)
+- Upgrade `python-magic` version to `0.4.27` (https://github.com/pablosnt/rekono/issues/222)
+
+
 ## [1.6.1] - 2023-05-31
 
 ### Security

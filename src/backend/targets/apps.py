@@ -1,7 +1,6 @@
 from django.apps import AppConfig
+from framework.apps import BaseApp
 
 
-class TargetsConfig(AppConfig):
-    '''Targets Django application.'''
-
-    name = 'targets'
+class TargetsConfig(BaseApp, AppConfig):
+    name = "targets"

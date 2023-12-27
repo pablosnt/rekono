@@ -9,10 +9,10 @@ repos:
             require_serial: true
             verbose: true
     - repo: https://github.com/gitleaks/gitleaks
-      rev: v8.16.1
+      rev: v8.17.0
       hooks:
         - id: gitleaks
-    - repo: https://github.com/PyCQA/flake8
-      rev: 4.0.1
+    - repo: https://github.com/python/black.git
+      rev: 23.7.0
       hooks:
-          - id: flake8
+        - id: black

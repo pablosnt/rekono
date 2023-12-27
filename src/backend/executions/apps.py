@@ -1,7 +1,6 @@
 from django.apps import AppConfig
+from framework.apps import BaseApp
 
 
-class ExecutionsConfig(AppConfig):
-    '''Executions Django application.'''
-
-    name = 'executions'
+class ExecutionsConfig(BaseApp, AppConfig):
+    name = "executions"
