@@ -1,0 +1,76 @@
+name: Code style
+on:
+  workflow_dispatch:
+  pull_request:
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - tool: black
+            arguments: --check src/backend/
+            working_directory: .
+          - tool: isort
+            arguments: src/backend/ --check-only
+            working_directory: .
+          - tool: mypy
+            arguments: --namespace-packages --package backend --install-types --non-interactive
+            working_directory: ./src
+          - tool: flake8
+            arguments: --ignore=E501 src/backend
+            working_directory: .
+    name: ${{ matrix.tool }}
+    steps:      
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Install Python dependencies
+        run: |
+          python -m pip install -U pip
+          python -m pip install -r src/backend/requirements-dev.txt
+      
+      - uses: dorny/paths-filter@3c49e64ca26115121162fb767bc6af9e8d059f1a
+        id: changes
+        with:
+          filters: |
+            backend:
+              - 'src/backend/**'
+
+      - name: Check
+        working-directory: ${{ matrix.working_directory }}
+        if: ${{ steps.changes.outputs.backend == 'true' || github.event_name != 'pull_request' }}
+        run: ${{ matrix.tool }} ${{ matrix.arguments }}
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      
+      - name: Install ESLint
+        working-directory: src/frontend
+        run: |
+          npm install .
+          npm install -g eslint
+      
+      - uses: dorny/paths-filter@3c49e64ca26115121162fb767bc6af9e8d059f1a
+        id: changes
+        with:
+          filters: |
+            frontend:
+              - 'src/frontend/**'
+      
+      - name: ESLint check
+        if: ${{ steps.changes.outputs.frontend == 'true' || github.event_name != 'pull_request' }} 
+        run: eslint src/frontend/ --ext .js,.jsx,.ts,.tsx
