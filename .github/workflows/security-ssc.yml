@@ -15,3 +15,5 @@ jobs:
         uses: Legit-Labs/legitify@d64d18810d9093458f11731c3a0a36d7e573187e
         with:
           github_token: ${{ secrets.ADMIN_PAT }}
+          analyze_self_only: true
+          artifact_name: legitify
