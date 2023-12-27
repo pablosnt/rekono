@@ -1,4 +1,4 @@
-name: Desktop app
+name: Desktop
 on:
   release:
     types: [published]
