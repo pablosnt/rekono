@@ -1,0 +1,17 @@
+name: Software Supply Chain
+on:
+    workflow_dispatch:
+    schedule:
+      - cron: '0 0 * * *'
+    pull_request:
+
+jobs:
+  legitify:
+    name: Legitify
+    runs-on: ubuntu-latest
+    environment: github
+    steps:
+      - name: Legitify
+        uses: Legit-Labs/legitify@d64d18810d9093458f11731c3a0a36d7e573187e
+        with:
+          github_token: ${{ secrets.ADMIN_PAT }}
