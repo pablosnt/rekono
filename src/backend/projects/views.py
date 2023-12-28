@@ -13,7 +13,6 @@ from security.authorization.permissions import (
     ProjectMemberPermission,
     RekonoModelPermission,
 )
-from users.models import User
 
 # Create your views here.
 

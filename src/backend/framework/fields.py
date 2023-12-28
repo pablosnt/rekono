@@ -101,5 +101,5 @@ class IntegerChoicesField(Field):
         """
         try:
             return self.model[data.upper()].value
-        except:
-            raise ValidationError(f"Invalid value", code=self.model.__class__.__name__)
+        except Exception:
+            raise ValidationError("Invalid value", code=self.model.__class__.__name__)

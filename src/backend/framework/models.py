@@ -38,7 +38,7 @@ class BaseModel(models.Model):
                 module,
                 name[0].upper() + name[1:].lower().replace(" ", "").replace("-", ""),
             )
-        except (AttributeError, ModuleNotFoundError) as ex:
+        except (AttributeError, ModuleNotFoundError):
             module = importlib.import_module(f"{package}.base")
             type = package.split(".")[-1][:-1]
             cls = getattr(module, f"Base{type[0].upper() + type[1:].lower()}")
@@ -140,14 +140,14 @@ class BaseInput(BaseModel):
                 # nosemgrep: python.requests.security.disabled-cert-validation.disabled-cert-validation
                 requests.get(url_to_test, timeout=5, verify=False)
                 return url_to_test
-            except:
+            except Exception:
                 continue
         return None
 
     def _compare_filter(
         self, filter: Any, value: Any, negative: bool = False, contains: bool = False
     ) -> bool:
-        comparison = lambda f, v: f == v if not contains else f in v
+        comparison = lambda f, v: f == v if not contains else f in v  # noqa: E731
         return (
             comparison(filter, value) if not negative else not comparison(filter, value)
         )
@@ -197,7 +197,7 @@ class BaseInput(BaseModel):
                                 and_condition = True
                         elif not or_condition:
                             return False
-                    except (ValueError, KeyError) as ex:
+                    except (ValueError, KeyError):
                         continue
                     if not or_condition and and_condition:
                         return True

@@ -27,7 +27,7 @@ class Sslscan(BaseParser):
     def _parse_report(self) -> None:
         try:
             root = self._load_report_as_xml()
-        except:
+        except Exception:
             return
         for test in root.findall("ssltest"):
             for item in test:

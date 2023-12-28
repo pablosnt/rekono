@@ -1,7 +1,6 @@
 from typing import Any, Dict
 
 from framework.serializers import LikeSerializer
-from rekono.settings import CONFIG
 from rest_framework.serializers import FileField, ModelSerializer
 from security.file_handler import FileHandler
 from users.serializers import SimpleUserSerializer

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from tools.models import Tool, Configuration, Input, Output, Intensity
+from tools.models import Configuration, Input, Intensity, Output, Tool
 
 # Register your models here.
 

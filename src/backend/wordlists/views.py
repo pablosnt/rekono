@@ -1,7 +1,8 @@
 from framework.views import LikeViewSet
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.serializers import Serializer
-from security.authorization.permissions import OwnerPermission, RekonoModelPermission
+from security.authorization.permissions import (OwnerPermission,
+                                                RekonoModelPermission)
 from wordlists.filters import WordlistFilter
 from wordlists.models import Wordlist
 from wordlists.serializers import UpdateWordlistSerializer, WordlistSerializer

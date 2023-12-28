@@ -72,7 +72,7 @@ class Target(BaseInput):
         logger.warning(f"[Security] Invalid target {target}")
         # Target is invalid or target type is not supported
         raise ValidationError(
-            f"Invalid target. IP address, IP range or domain is required",
+            "Invalid target. IP address, IP range or domain is required",
             code="target",
             params={"value": target},
         )

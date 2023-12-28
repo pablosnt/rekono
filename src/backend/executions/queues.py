@@ -14,7 +14,6 @@ from rq.job import Job
 from rq.registry import DeferredJobRegistry
 from target_ports.models import TargetPort
 from tools.executors.base import BaseExecutor
-from tools.models import Input, Tool
 from tools.parsers.base import BaseParser
 from wordlists.models import Wordlist
 

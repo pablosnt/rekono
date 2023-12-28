@@ -1,5 +1,5 @@
 import logging
-from typing import Any, List
+from typing import List
 
 from django_rq import job
 from executions.models import Execution

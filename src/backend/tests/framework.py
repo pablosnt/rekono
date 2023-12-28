@@ -40,7 +40,6 @@ from targets.models import Target
 from tasks.models import Task
 from tasks.queues import TasksQueue
 from tests.cases import RekonoTestCase
-from tools.enums import Intensity
 from tools.enums import Intensity as IntensityEnum
 from tools.enums import Stage
 from tools.models import Argument, Configuration, Input, Intensity, Tool

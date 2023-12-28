@@ -1,7 +1,7 @@
 import ipaddress
 import re
 from re import RegexFlag
-from typing import Any, List
+from typing import Any
 
 from django.core.validators import RegexValidator
 from django.forms import ValidationError
@@ -26,18 +26,18 @@ class TargetValidator(RegexValidator):
         blacklist = TargetBlacklist.objects.all().values_list("target", flat=True)
         if value in blacklist:
             raise ValidationError(
-                f"Target is disallowed by policy",
+                "Target is disallowed by policy",
                 code=self.code,
                 params={"value": value},
             )
         for denied_value in blacklist:
             try:
                 match = re.fullmatch(denied_value, value)
-            except:
+            except Exception:
                 match = None
             if match:
                 raise ValidationError(
-                    f"Target is disallowed by policy",
+                    "Target is disallowed by policy",
                     code=self.code,
                     params={"value": value},
                 )
@@ -50,7 +50,7 @@ class TargetValidator(RegexValidator):
                     network = network_class(denied_value)
                     if address in network:
                         raise ValidationError(
-                            f"Target belongs to a network that is disallowed by policy",
+                            "Target belongs to a network that is disallowed by policy",
                             code="target",
                             params={"value": value},
                         )

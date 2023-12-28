@@ -127,7 +127,7 @@ class ParameterTest(ApiTest):
 class InputTechnologyTest(ParameterTest):
     model = InputTechnology
     endpoint = "/api/parameters/technologies/"
-    expected_str = f"10.10.10.10 - WordPress - 1.0.0"
+    expected_str = "10.10.10.10 - WordPress - 1.0.0"
     valid = [
         {"target": 1, "name": "WordPress", "version": "1.0.0"},
         {"target": 1, "name": "Joomla", "version": "1.0.0"},
@@ -141,7 +141,7 @@ class InputTechnologyTest(ParameterTest):
 class InputVulnerabilityTest(ParameterTest):
     model = InputVulnerability
     endpoint = "/api/parameters/vulnerabilities/"
-    expected_str = f"10.10.10.10 - CVE-2023-1111"
+    expected_str = "10.10.10.10 - CVE-2023-1111"
     valid = [
         {"target": 1, "cve": "CVE-2023-1111"},
         {"target": 1, "cve": "CVE-2023-1112"},

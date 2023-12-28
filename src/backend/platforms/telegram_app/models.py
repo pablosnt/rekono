@@ -4,7 +4,6 @@ from framework.models import BaseEncrypted, BaseModel
 from rekono.settings import AUTH_USER_MODEL
 from security.authorization.roles import Role
 from security.input_validator import FutureDatetimeValidator, Regex, Validator
-from users.models import User
 
 # Create your models here.
 

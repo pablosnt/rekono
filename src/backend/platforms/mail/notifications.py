@@ -45,7 +45,7 @@ class SMTP(BaseNotification):
             self.backend.open()
             self.backend.close()
             return True
-        except:
+        except Exception:
             return False
 
     def _send_messages_in_background(
@@ -67,7 +67,7 @@ class SMTP(BaseNotification):
             # nosemgrep: python.flask.security.xss.audit.direct-use-of-jinja2.direct-use-of-jinja2
             message.attach_alternative(template.render(data), "text/html")
             self.backend.send_messages([message])
-        except:
+        except Exception:
             logger.error("[Mail] Error sending email message")
 
     def _notify_execution(

@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Tuple
+from typing import Any
 
 from asgiref.sync import sync_to_async
 from platforms.telegram_app.bot.enums import Context

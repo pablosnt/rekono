@@ -59,14 +59,14 @@ class DefectDojo(BaseIntegration):
         try:
             self._request(requests.get, "/test_types/", timeout=5)
             return True
-        except:
+        except Exception:
             return False
 
     def exists(self, entity_name: str, id: int) -> bool:
         try:
             self._request(self.session.get, f"/{entity_name}/{id}/")
             return True
-        except:
+        except Exception:
             return False
 
     def create_product_type(self, name: str, description: str) -> Dict[str, Any]:

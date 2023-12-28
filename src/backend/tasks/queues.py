@@ -123,14 +123,16 @@ class TasksQueue(BaseQueue):
             if Intensity.objects.filter(
                 tool=step.configuration.tool, value__lte=task.intensity
             ).exists():
-                for job in plan:
-                    for output in job.get("outputs"):
+                for execution_job in plan:
+                    for output in execution_job.get("outputs"):
                         if output in item.get("inputs"):
-                            item["group"] = max([item["group"], job["group"] + 1])
-                            if job["step"].id not in [
+                            item["group"] = max(
+                                [item["group"], execution_job["group"] + 1]
+                            )
+                            if execution_job["step"].id not in [
                                 d["step"].id for d in item["dependencies"]
                             ]:
-                                item["dependencies"].append(job)
+                                item["dependencies"].append(execution_job)
                             break
                 plan.append(item)
             else:
@@ -141,9 +143,9 @@ class TasksQueue(BaseQueue):
                     status=Status.SKIPPED,
                     skipped_reason=f"Tool {step.configuration.tool.name} can't be executed with intensity {task.intensity.name.capitalize()}",
                 )
-        for job in plan:
+        for execution_job in plan:
             executions = TasksQueue._calculate_executions(
-                job["step"].configuration.tool,
+                execution_job["step"].configuration.tool,
                 [],
                 task.target.target_ports.all(),
                 task.target.input_vulnerabilities.all(),
@@ -153,10 +155,10 @@ class TasksQueue(BaseQueue):
             for parameters in executions or [{}]:
                 execution = Execution.objects.create(
                     task=task,
-                    configuration=job["step"].configuration,
-                    group=job["group"],
+                    configuration=execution_job["step"].configuration,
+                    group=execution_job["group"],
                 )
-                job["jobs"].append(
+                execution_job["jobs"].append(
                     executions_queue.enqueue(
                         execution,
                         parameters.get(0, []),
@@ -164,7 +166,9 @@ class TasksQueue(BaseQueue):
                         parameters.get(2, []),
                         parameters.get(3, []),
                         parameters.get(4, []),
-                        dependencies=sum([d["jobs"] for d in job["dependencies"]], []),
+                        dependencies=sum(
+                            [d["jobs"] for d in execution_job["dependencies"]], []
+                        ),
                     )
                 )
 

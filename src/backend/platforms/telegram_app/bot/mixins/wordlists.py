@@ -1,7 +1,6 @@
 from typing import List
 
 from asgiref.sync import sync_to_async
-from django.db.models import QuerySet
 from input_types.enums import InputTypeName
 from platforms.telegram_app.bot.enums import Context
 from platforms.telegram_app.bot.mixins.framework import BaseMixin
