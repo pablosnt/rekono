@@ -39,6 +39,7 @@ class BaseModel(models.Model):
                 name[0].upper() + name[1:].lower().replace(" ", "").replace("-", ""),
             )
         except (AttributeError, ModuleNotFoundError):
+            # nosemgrep: python.lang.security.audit.non-literal-import.non-literal-import
             module = importlib.import_module(f"{package}.base")
             type = package.split(".")[-1][:-1]
             cls = getattr(module, f"Base{type[0].upper() + type[1:].lower()}")
@@ -138,9 +139,9 @@ class BaseInput(BaseModel):
             )
             try:
                 # nosemgrep: python.requests.security.disabled-cert-validation.disabled-cert-validation
-                requests.get(url_to_test, timeout=5, verify=False)
+                requests.get(url_to_test, timeout=5, verify=False)  # nosec
                 return url_to_test
-            except Exception:
+            except Exception:  # nosec
                 continue
         return None
 

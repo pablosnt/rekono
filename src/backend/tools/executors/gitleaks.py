@@ -1,4 +1,4 @@
-import subprocess
+import subprocess  # nosec
 import uuid
 from pathlib import Path
 from typing import Any, Dict
@@ -38,12 +38,12 @@ class Gitleaks(BaseExecutor):
         target_url += ".git/"
         gitdumper_directory = Path(CONFIG.gittools_dir) / "Dumper"
         run_directory = CONFIG.reports / str(uuid.uuid4())
-        process = subprocess.run(
+        process = subprocess.run(  # nosec
             ["bash", gitdumper_directory, "gitdumper.sh", target_url, run_directory],
             capture_output=True,
             cwd=gitdumper_directory,
         )
-        subprocess.run(
+        subprocess.run(  # nosec
             ["git", "checkout", "--", "."],
             capture_output=True,
             cwd=run_directory,

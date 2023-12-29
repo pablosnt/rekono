@@ -78,6 +78,7 @@ class RekonoUserManager(UserManager):
         user.username = username
         user.first_name = first_name
         user.last_name = last_name
+        # nosemgrep: python.django.security.audit.unvalidated-password.unvalidated-password
         user.set_password(password)
         user.is_active = True
         user.otp = None

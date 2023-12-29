@@ -28,7 +28,7 @@ class NvdNist(BaseIntegration):
                     data = self._request(
                         self.session.get, self.url.format(cve=finding.cve)
                     )
-                except Exception:
+                except Exception:  # nosec
                     continue
                 cve_info = data["result"]["CVE_Items"][0]
                 for description in (

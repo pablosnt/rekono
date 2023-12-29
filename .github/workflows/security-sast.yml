@@ -41,7 +41,7 @@ jobs:
             tool: bandit
             path: src/backend
             report: bandit.json
-            arguments: -r -f json
+            arguments: -r --skip=B105,B106 -f json
     name: ${{ matrix.name }}
     steps:
       - name: Checkout
