@@ -1,10 +1,11 @@
 from executions.models import Execution
-from rest_framework.serializers import ModelSerializer
+from rest_framework.serializers import ModelSerializer, SerializerMethodField
 from tools.serializers import ConfigurationSerializer
 
 
 class ExecutionSerializer(ModelSerializer):
     configuration = ConfigurationSerializer(many=False, read_only=True)
+    has_report = SerializerMethodField()
 
     class Meta:
         model = Execution
@@ -20,3 +21,6 @@ class ExecutionSerializer(ModelSerializer):
             "start",
             "end",
         )
+
+    def get_has_report(self, instance: Execution) -> bool:
+        return instance.output_file is not None
