@@ -29,16 +29,19 @@ jobs:
         include:
           - name: Semgrep Backend
             tool: semgrep
+            version: 1.52.0
             path: src/backend
             report: semgrep-backend.json
             arguments: --config=auto --error --json
           - name: Semgrep CI/CD
             tool: semgrep
+            version: 1.52.0
             path: .github/workflows
             report: semgrep-cicd.json
             arguments: --config=auto --error --json
           - name: Bandit
             tool: bandit
+            version: latest
             path: src/backend
             report: bandit.json
             arguments: -r --skip=B105,B106 -f json
@@ -63,8 +66,12 @@ jobs:
               - '${{ matrix.path }}/**'
 
       - name: Installation
-        if: ${{ steps.changes.outputs.path == 'true' || github.event_name != 'pull_request' }}
+        if: ${{ matrix.version == 'latest' && (steps.changes.outputs.path == 'true' || github.event_name != 'pull_request') }}
         run: pip install ${{ matrix.tool }}
+      
+      - name: Installation
+        if: ${{ matrix.version != 'latest' && (steps.changes.outputs.path == 'true' || github.event_name != 'pull_request') }}
+        run: pip install ${{ matrix.tool }}==${{ matrix.version }}
       
       - name: Scan
         if: ${{ steps.changes.outputs.path == 'true' || github.event_name != 'pull_request' }}
