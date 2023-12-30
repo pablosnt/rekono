@@ -57,7 +57,7 @@ class ApiTestCase(RekonoTestCase):
                 response = getattr(api_client, self.method.lower())(
                     self.endpoint.format(endpoint=kwargs.get("endpoint", "")),
                     # TODO: if unit tests fail, add `or None``
-                    data=self.data,
+                    data=self.data or None,
                     format=self.format,
                 )
                 self.tc.assertEqual(self.status_code, response.status_code)
