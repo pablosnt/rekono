@@ -49,7 +49,7 @@ class DefectDojoSettingsSerializer(ModelSerializer):
 
 
 # TODO: if unit tests fail, remove Serializer parent and add it in the childs
-class BaseDefectDojoSerializer(Serializer):
+class BaseDefectDojoSerializer:
     client = None
 
     def _get_client(self) -> DefectDojo:
@@ -95,7 +95,7 @@ class DefectDojoTargetSyncSerializer(ModelSerializer):
         )
 
 
-class DefectDojoProductTypeSerializer(BaseDefectDojoSerializer):
+class DefectDojoProductTypeSerializer(BaseDefectDojoSerializer, Serializer):
     id = IntegerField(read_only=True)
     name = CharField(
         required=True,
@@ -118,7 +118,7 @@ class DefectDojoProductTypeSerializer(BaseDefectDojoSerializer):
         )
 
 
-class DefectDojoProductSerializer(BaseDefectDojoSerializer):
+class DefectDojoProductSerializer(BaseDefectDojoSerializer, Serializer):
     id = IntegerField(read_only=True)
     product_type = IntegerField(
         required=True,
@@ -166,7 +166,7 @@ class DefectDojoProductSerializer(BaseDefectDojoSerializer):
         )
 
 
-class DefectDojoEngagementSerializer(BaseDefectDojoSerializer):
+class DefectDojoEngagementSerializer(BaseDefectDojoSerializer, Serializer):
     id = IntegerField(read_only=True)
     product = IntegerField(
         required=True,
