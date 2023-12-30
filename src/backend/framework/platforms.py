@@ -1,5 +1,5 @@
 import logging
-from typing import Any, List, Callable, Set
+from typing import Any, List, Callable
 from urllib.parse import urlparse
 
 import requests
