@@ -1,13 +1,11 @@
-from typing import Tuple
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from security.authorization.permissions import IsNotAuthenticated
-from rest_framework.permissions import BasePermission
 
 
 class LoginViewSet(TokenObtainPairView):
     """Token ViewSet that includes the user login (get access and refresh token)."""
 
-    permission_classes: Tuple[BasePermission] = (IsNotAuthenticated,)
+    permission_classes = [IsNotAuthenticated]  # type: ignore
     throttle_scope = "login"
 
 
