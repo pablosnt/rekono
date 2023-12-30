@@ -1,4 +1,5 @@
 import hashlib
+import shutil
 import json
 from pathlib import Path as PathFile
 from typing import Any, Dict, List, Optional
@@ -6,6 +7,7 @@ from typing import Any, Dict, List, Optional
 from authentications.enums import AuthenticationType
 from authentications.models import Authentication
 from django.test import TestCase
+from rekono.settings import CONFIG
 from executions.enums import Status
 from executions.models import Execution
 from findings.enums import (
@@ -194,6 +196,7 @@ class RekonoTest(TestCase):
             task=self.running_task,
             configuration=process_step.configuration,
             status=Status.COMPLETED,
+            output_file="not_found_report.json",
         )
         self.execution2 = Execution.objects.create(
             task=self.running_task,
@@ -206,10 +209,15 @@ class RekonoTest(TestCase):
             configuration=configuration,
             executor=self.auditor1,
         )
+        report_filename = "nmap.xml"
+        execution_report = CONFIG.reports / report_filename
+        test_report = self.data_dir / "reports" / "nmap" / "smb-users.xml"
+        shutil.copy(test_report, execution_report)
         self.execution3 = Execution.objects.create(
             task=self.completed_task,
             configuration=configuration,
             status=Status.COMPLETED,
+            output_file=report_filename,
         )
 
     def _create_finding(

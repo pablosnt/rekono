@@ -66,6 +66,36 @@ class ExecutionTest(ApiTest):
             },
             endpoint="{endpoint}3/",
         ),
+        ApiTestCase(
+            ["admin1", "admin2", "auditor1", "auditor2", "reader1", "reader2"],
+            "get",
+            404,
+            endpoint="{endpoint}1/report/",
+        ),
+        ApiTestCase(
+            ["admin2", "auditor2", "reader2"],
+            "get",
+            404,
+            endpoint="{endpoint}2/report/",
+        ),
+        ApiTestCase(
+            ["admin1", "auditor1", "reader1"],
+            "get",
+            400,
+            endpoint="{endpoint}2/report/",
+        ),
+        ApiTestCase(
+            ["admin2", "auditor2", "reader2"],
+            "get",
+            404,
+            endpoint="{endpoint}3/report/",
+        ),
+        ApiTestCase(
+            ["admin1", "auditor1", "reader1"],
+            "get",
+            200,
+            endpoint="{endpoint}3/report/",
+        ),
     ]
 
     def setUp(self) -> None:

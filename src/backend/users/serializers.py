@@ -25,7 +25,7 @@ logger = logging.getLogger()
 class UserSerializer(ModelSerializer):
     """Serializer to get the users data via API."""
 
-    role = SerializerMethodField(method_name="get_role")
+    role = SerializerMethodField()
 
     class Meta:
         model = User
