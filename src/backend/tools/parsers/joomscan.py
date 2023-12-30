@@ -1,4 +1,5 @@
 from urllib.parse import urlparse
+from typing import Set
 
 from findings.enums import PathType, Severity
 from findings.models import Exploit, Path, Technology, Vulnerability
@@ -10,10 +11,10 @@ class Joomscan(BaseParser):
         technology = None
         vulnerability_name = None
         endpoints = set(["/"])
-        backups = set()
-        configurations = set()
-        path_disclosure = set()
-        directory_listing = set()
+        backups: Set[str] = set()
+        configurations: Set[str] = set()
+        path_disclosure: Set[str] = set()
+        directory_listing: Set[str] = set()
         host = urlparse(
             self.executor.arguments[self.executor.arguments.index("-u") + 1]
         ).hostname

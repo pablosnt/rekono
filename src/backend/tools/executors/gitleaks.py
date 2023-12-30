@@ -1,5 +1,6 @@
 import subprocess  # nosec
 import uuid
+import os
 from pathlib import Path
 from typing import Any, Dict
 
@@ -31,7 +32,7 @@ class Gitleaks(BaseExecutor):
                 reference="https://iosentrix.com/blog/git-source-code-disclosure-vulnerability/",
             )
 
-    def _run(self, environment: Dict[str, Any] = ...) -> str:
+    def _run(self, environment: Dict[str, Any] = os.environ.copy()) -> str:
         target_url = environment.get("GIT_DUMPER_TARGET_URL", "")
         if target_url[-1] != "/":
             target_url += "/"

@@ -1,5 +1,5 @@
 import logging
-from typing import Tuple
+from typing import Tuple, Callable
 
 from django.apps import apps
 from framework.models import BaseEncrypted
@@ -19,7 +19,7 @@ class BaseEncryptionKeyCommand:
         return Encryptor(new_encryption_key), new_encryption_key
 
     def _replace_encrypted_values(
-        self, new_value_processor: callable, old_value_processor: callable
+        self, new_value_processor: Callable, old_value_processor: Callable
     ) -> None:
         for model in apps.get_models():
             if not issubclass(model, BaseEncrypted):

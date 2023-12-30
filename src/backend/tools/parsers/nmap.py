@@ -4,7 +4,7 @@ from typing import Any, List
 from findings.enums import HostOS, PathType, PortStatus, Protocol, Severity
 from findings.models import Credential, Host, Path, Port, Technology, Vulnerability
 from libnmap.parser import NmapParser
-from security.input_validator import Regex
+from security.validators.input_validator import Regex
 from tools.parsers.base import BaseParser
 
 
@@ -64,7 +64,7 @@ class Nmap(BaseParser):
         technology = (
             technologies if isinstance(technologies, Technology) else technologies[0]
         )
-        smb_technology = (
+        smb_technologies = (
             [technologies]
             if isinstance(technologies, Technology)
             else [
@@ -73,7 +73,7 @@ class Nmap(BaseParser):
                 if t.port.service in ["microsoft-ds", "netbios-ssn"]
             ]
         )
-        smb_technology = smb_technology[0] if smb_technology else None
+        smb_technology = smb_technologies[0] if smb_technologies else None
         for script in results:
             match script.get("id"):
                 case "vulners":

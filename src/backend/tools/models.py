@@ -2,7 +2,7 @@ import re
 import shutil
 import subprocess  # nosec
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 from django.db import models
 from framework.models import BaseLike, BaseModel
@@ -58,7 +58,7 @@ class Tool(BaseLike):
             update_fields.append("version")
         self.save(update_fields=update_fields)
 
-    def _parse_version(self) -> str:
+    def _parse_version(self) -> Optional[str]:
         version_regex = r"(?!m)[a-z]?[\d]+\.[\d]+\.[\d]*-?[a-z]*"
         if self.version_argument:
             process = subprocess.run(  # nosec
@@ -74,6 +74,7 @@ class Tool(BaseLike):
                 )
                 if version:
                     return version.group()
+        return None
 
     def __str__(self) -> str:
         """Instance representation in text format.

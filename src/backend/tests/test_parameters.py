@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Dict, List
 
 from parameters.models import InputTechnology, InputVulnerability
 from tests.cases import ApiTestCase
@@ -7,8 +7,8 @@ from tests.framework import ApiTest
 
 class ParameterTest(ApiTest):
     model = None
-    valid = []
-    invalid = []
+    valid: List[Dict[str, Any]] = []
+    invalid: List[Dict[str, Any]] = []
 
     def __init__(self, methodName: str = "runTest") -> None:
         super().__init__(methodName)

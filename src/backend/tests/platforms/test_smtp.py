@@ -49,7 +49,7 @@ class SmtpSettingsTest(ApiTest):
             expected={
                 "id": 1,
                 **config,
-                "password": "*" * len(config["password"]),
+                "password": "*" * len(str(config.get("password", ""))),
                 "is_available": False,
             },
         ),
@@ -60,7 +60,7 @@ class SmtpSettingsTest(ApiTest):
             expected={
                 "id": 1,
                 **config,
-                "password": "*" * len(config["password"]),
+                "password": "*" * len(str(config.get("password", ""))),
                 "is_available": False,
             },
         ),

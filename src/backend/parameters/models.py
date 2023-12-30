@@ -3,7 +3,7 @@ from typing import Any, Dict
 from django.db import models
 from framework.enums import InputKeyword
 from framework.models import BaseInput
-from security.input_validator import Regex, Validator
+from security.validators.input_validator import Regex, Validator
 from targets.models import Target
 
 # Create your models here.

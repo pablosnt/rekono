@@ -11,8 +11,8 @@ from target_blacklist.models import TargetBlacklist
 class TargetValidator(RegexValidator):
     def __init__(
         self,
-        regex: Any | None = ...,
-        message: Any | None = ...,
+        regex: Any | None = None,
+        message: Any | None = None,
         code: str | None = "target",
         inverse_match: bool | None = False,
         flags: RegexFlag | None = None,
@@ -23,6 +23,10 @@ class TargetValidator(RegexValidator):
 
     def __call__(self, value: str | None) -> None:
         super().__call__(value)
+        if not value:
+            raise ValidationError(
+                "Target is required", code=self.code, params={"value": value}
+            )
         blacklist = TargetBlacklist.objects.all().values_list("target", flat=True)
         if value in blacklist:
             raise ValidationError(
@@ -46,9 +50,7 @@ class TargetValidator(RegexValidator):
                 (ipaddress.IPv6Address, ipaddress.IPv6Network),
             ]:
                 try:
-                    address = address_class(value)
-                    network = network_class(denied_value)
-                    if address in network:
+                    if address_class(value) in network_class(denied_value):  # type: ignore
                         raise ValidationError(
                             "Target belongs to a network that is disallowed by policy",
                             code="target",

@@ -2,7 +2,11 @@ from django.db import models
 from framework.models import BaseModel
 from rekono.settings import AUTH_USER_MODEL
 from rest_framework.authtoken.models import Token
-from security.input_validator import FutureDatetimeValidator, Regex, Validator
+from security.validators.input_validator import (
+    FutureDatetimeValidator,
+    Regex,
+    Validator,
+)
 
 
 class ApiToken(Token, BaseModel):

@@ -1,7 +1,7 @@
 import hashlib
 import json
 from pathlib import Path as PathFile
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from authentications.enums import AuthenticationType
 from authentications.models import Authentication
@@ -311,7 +311,9 @@ class ApiTest(RekonoTest):
     def _get_object(self) -> Any:
         return None
 
-    def _get_api_client(self, access: str = None, token: str = None):
+    def _get_api_client(
+        self, access: Optional[str] = None, token: Optional[str] = None
+    ):
         client = (
             APIClient(HTTP_AUTHORIZATION=f"Bearer {access}") if access else APIClient()
         )
@@ -339,7 +341,7 @@ class ApiTest(RekonoTest):
 class ToolTest(RekonoTest):
     tool_name = ""
     execution = None
-    executor_arguments = []
+    executor_arguments: List[str] = []
     data_dir = RekonoTest.data_dir / "reports"
 
     def setUp(self) -> None:

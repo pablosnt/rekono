@@ -1,5 +1,5 @@
 import importlib
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Callable, cast
 
 import requests
 import urllib3
@@ -26,7 +26,7 @@ class BaseModel(models.Model):
 
     @classmethod
     def get_project_field(cls) -> str:
-        return None
+        return ""
 
     def _get_related_class(self, package: str, name: str) -> Any:
         try:
@@ -93,7 +93,7 @@ class BaseInput(BaseModel):
             type: type,
             field: str,
             contains: bool = False,
-            processor: callable = None,
+            processor: Optional[Callable] = None,
         ) -> None:
             self.type = type
             self.field = field
@@ -108,7 +108,7 @@ class BaseInput(BaseModel):
     def _get_url(
         self,
         host: str,
-        port: int = None,
+        port: Optional[int] = None,
         endpoint: str = "",
         protocols: List[str] = ["http", "https"],
     ) -> Optional[str]:
@@ -181,7 +181,11 @@ class BaseInput(BaseModel):
                         if (
                             issubclass(filter.type, models.TextChoices)
                             and self._compare_filter(
-                                filter.type[match_value.upper()], field_value, negative
+                                cast(models.TextChoices, filter.type)[
+                                    match_value.upper()
+                                ],
+                                field_value,
+                                negative,
                             )
                         ) or (
                             hasattr(self, match_value)

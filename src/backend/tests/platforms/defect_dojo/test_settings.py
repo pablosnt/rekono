@@ -48,7 +48,7 @@ class DefectDojoSettingsTest(ApiTest):
             expected={
                 "id": 1,
                 **new_settings,
-                "api_token": "*" * len(new_settings["api_token"]),
+                "api_token": "*" * len(str(new_settings.get("api_token", ""))),
                 "is_available": False,
             },
         ),
@@ -59,7 +59,7 @@ class DefectDojoSettingsTest(ApiTest):
             expected={
                 "id": 1,
                 **new_settings,
-                "api_token": "*" * len(new_settings["api_token"]),
+                "api_token": "*" * len(str(new_settings.get("api_token", ""))),
                 "is_available": False,
             },
         ),

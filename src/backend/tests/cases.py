@@ -1,7 +1,7 @@
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Tuple, Optional, Type
 
 from django.db import transaction
 from django.test import TestCase
@@ -22,8 +22,8 @@ class ApiTestCase(RekonoTestCase):
     executors: List[str]
     method: str
     status_code: int
-    data: Dict[str, Any] = None
-    expected: Dict[str, Any] = None
+    data: Optional[Dict[str, Any]] = None
+    expected: Optional[Dict[str, Any]] = None
     endpoint: str = "{endpoint}"
     format: str = "json"
 
@@ -56,7 +56,8 @@ class ApiTestCase(RekonoTestCase):
                 api_client = APIClient(HTTP_AUTHORIZATION=f"Bearer {access}")
                 response = getattr(api_client, self.method.lower())(
                     self.endpoint.format(endpoint=kwargs.get("endpoint", "")),
-                    data=self.data or None,
+                    # TODO: if unit tests fail, add `or None``
+                    data=self.data,
                     format=self.format,
                 )
                 self.tc.assertEqual(self.status_code, response.status_code)
@@ -76,7 +77,7 @@ class ApiTestCase(RekonoTestCase):
 @dataclass
 class ToolTestCase(RekonoTestCase):
     report: str
-    expected: List[Dict[str, Any]] = None
+    expected: List[Dict[str, Any]] = []
 
     def _get_parser(
         self, execution: Execution, executor_arguments: List[str], reports: Path
@@ -101,10 +102,10 @@ class ToolTestCase(RekonoTestCase):
             kwargs["reports"] / kwargs["tool"].lower().replace(" ", "_"),
         )
         parser.parse()
-        self.tc.assertEqual(len(self.expected or []), len(parser.findings))
+        self.tc.assertEqual(len(self.expected), len(parser.findings))
         for index, finding in enumerate(parser.findings):
             expected = self.expected[index]
-            self.tc.assertTrue(isinstance(finding, expected.get("model")))
+            self.tc.assertTrue(isinstance(finding, expected.get("model", Type[None])))
             for field, value in expected.items():
                 if field != "model":
                     self.tc.assertEqual(value, getattr(finding, field))

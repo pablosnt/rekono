@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Callable, Optional
 
 from django.forms import ValidationError
 from drf_spectacular.types import OpenApiTypes
@@ -20,7 +20,7 @@ class ProtectedSecretField(Field):
 
     def __init__(
         self,
-        validator: callable = None,
+        validator: Optional[Callable] = None,
         read_only=False,
         write_only=False,
         required=None,

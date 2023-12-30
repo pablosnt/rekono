@@ -2,7 +2,7 @@ from framework.fields import ProtectedSecretField
 from platforms.mail.models import SMTPSettings
 from platforms.mail.notifications import SMTP
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
-from security.input_validator import Regex, Validator
+from security.validators.input_validator import Regex, Validator
 
 
 class SMTPSettingsSerializer(ModelSerializer):

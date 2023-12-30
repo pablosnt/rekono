@@ -36,8 +36,8 @@ class BaseExecutor:
             CONFIG.reports
             / f'{str(uuid.uuid4())}.{execution.configuration.tool.output_format or "txt"}'
         )
-        self.arguments = []
-        self.findings_used_in_execution: Dict[__class__, BaseInput] = {}
+        self.arguments: List[str] = []
+        self.findings_used_in_execution: Dict[Any, BaseInput] = {}
 
     def _get_arguments(
         self,

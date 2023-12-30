@@ -30,13 +30,15 @@ class BaseTelegramBot(BaseTelegram):
                 return
 
     def _is_valid_update(self, update: Update) -> bool:
-        return bool(update.effective_chat) and bool(update.effective_message)
+        return (
+            update.effective_chat is not None and update.effective_message is not None
+        )
 
     async def _reply(
         self, update: Update, message: str, reply_markup: Any = None
     ) -> None:
         if self._is_valid_update(update):
-            await update.effective_message.reply_text(
+            await update.effective_message.reply_text(  # type: ignore
                 message, reply_markup=reply_markup, parse_mode=ParseMode.MARKDOWN_V2
             )
 
@@ -46,7 +48,8 @@ class BaseTelegramBot(BaseTelegram):
     def _add_context_value(
         self, context: CallbackContext, key: str, value: Any
     ) -> None:
-        context.chat_data[key] = value
+        if context.chat_data:
+            context.chat_data[key] = value
 
     def _remove_context_value(self, context: CallbackContext, key: str) -> None:
         if context.chat_data and key in context.chat_data:
@@ -74,11 +77,11 @@ class BaseTelegramBot(BaseTelegram):
             return self.chat
         if self._is_valid_update(update):
             self.chat = await self._get_active_telegram_chat_async(
-                update.effective_chat.id
+                update.effective_chat.id  # type: ignore
             )
             if not self.chat:
                 logger.error(
-                    f"[Security] Unauthenticated Telegram bot request from chat {update.effective_chat.id}"
+                    f"[Security] Unauthenticated Telegram bot request from chat {update.effective_chat.id}"  # type: ignore
                 )
                 await self._reply(
                     update,

@@ -1,10 +1,10 @@
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 from django.db import models
 from executions.models import Execution
 from findings.enums import TriageStatus
 from framework.models import BaseInput
-from security.input_validator import Regex, Validator
+from security.validators.input_validator import Regex, Validator
 
 
 class Finding(BaseInput):
@@ -21,7 +21,7 @@ class Finding(BaseInput):
         max_length=300, validators=[Validator(Regex.TEXT.value, code="triage_comment")]
     )
     defect_dojo_id = models.IntegerField(blank=True, null=True)
-    unique_fields = []
+    unique_fields: List[str] = []
 
     class Meta:
         abstract = True
@@ -34,4 +34,4 @@ class Finding(BaseInput):
         return "executions__task__target__project"
 
     def defect_dojo(self) -> Dict[str, Any]:
-        pass  # pragma: no cover
+        return {}  # pragma: no cover

@@ -74,7 +74,7 @@ class Start(BaseCommand):
     async def _execute_command(self, update: Update, context: CallbackContext) -> None:
         await super()._execute_command(update, context)
         telegram_chat, plain_otp = await self._update_or_create_telegram_chat_async(
-            update.effective_chat.id
+            update.effective_chat.id  # type: ignore
         )
         logger.info(
             f"[Security] New login request using the Telegram bot from the chat {telegram_chat.chat_id}"
@@ -113,7 +113,7 @@ class Logout(BaseCommand):
 
     async def _execute_command(self, update: Update, context: CallbackContext) -> None:
         await super()._execute_command(update, context)
-        await self._logout_user_in_telegram_async(update.effective_chat.id)
+        await self._logout_user_in_telegram_async(update.effective_chat.id)  # type: ignore
         await self._reply(update, "Bye\!")
 
 
@@ -121,7 +121,7 @@ class Cancel(BaseCommand):
     help = "Cancel current operation"
     section = Section.BASIC
 
-    async def _execute_command(self, update: Update, context: CallbackContext) -> None:
+    async def _execute_command(self, update: Update, context: CallbackContext) -> int:
         await super()._execute_command(update, context)
         self._remove_all_context_values(context)
         await self._reply(update, "Operation has been cancelled")

@@ -1,6 +1,6 @@
 import logging
 from datetime import timedelta
-from typing import Any
+from typing import Any, Dict, List
 
 from django.db.models import Max
 from django.utils import timezone
@@ -95,7 +95,7 @@ class TasksQueue(BaseQueue):
 
     @staticmethod
     def _consume_process_task(task: Task) -> None:
-        plan = []
+        plan: List[Dict[str, Any]] = []
         steps = (
             Step.objects.annotate(
                 max_input=Max("configuration__tool__arguments__inputs__type__id"),
@@ -124,8 +124,8 @@ class TasksQueue(BaseQueue):
                 tool=step.configuration.tool, value__lte=task.intensity
             ).exists():
                 for execution_job in plan:
-                    for output in execution_job.get("outputs"):
-                        if output in item.get("inputs"):
+                    for output in execution_job.get("outputs", []):
+                        if output in item.get("inputs", []):
                             item["group"] = max(
                                 [item["group"], execution_job["group"] + 1]
                             )

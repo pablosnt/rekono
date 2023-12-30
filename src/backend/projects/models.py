@@ -3,7 +3,7 @@ from typing import Any
 from django.db import models
 from framework.models import BaseModel
 from rekono.settings import AUTH_USER_MODEL
-from security.input_validator import Regex, Validator
+from security.validators.input_validator import Regex, Validator
 from taggit.managers import TaggableManager
 
 # Create your models here.

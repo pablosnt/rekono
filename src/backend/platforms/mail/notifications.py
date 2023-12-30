@@ -56,13 +56,13 @@ class SMTP(BaseNotification):
         ).start()
 
     def _send_messages(
-        self, users: List[Any], subject: str, template: str, data: Dict[str, Any]
+        self, users: List[Any], subject: str, template_path: str, data: Dict[str, Any]
     ) -> None:
         try:
             message = EmailMultiAlternatives(
                 subject, "", "Rekono <noreply@rekono.com>", [u.email for u in users]
             )
-            template = get_template(template)
+            template = get_template(template_path)
             data["rekono_url"] = CONFIG.frontend_url
             # nosemgrep: python.flask.security.xss.audit.direct-use-of-jinja2.direct-use-of-jinja2
             message.attach_alternative(template.render(data), "text/html")
@@ -73,7 +73,7 @@ class SMTP(BaseNotification):
     def _notify_execution(
         self, users: List[Any], execution: Execution, findings: List[Finding]
     ) -> None:
-        findings_by_class = {}
+        findings_by_class: Dict[Any, List[Finding]] = {}
         for finding in findings:
             if findings.__class__.__name__.lower() not in findings_by_class:
                 findings_by_class[findings.__class__.__name__.lower()] = []

@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from typing import Any
+from typing import Any, Optional
 
 from platforms.telegram_app.models import TelegramChat, TelegramSettings
 from telegram.constants import ParseMode
@@ -17,7 +17,7 @@ class BaseTelegram:
         self.app = self.initialize()
         self.date_format = "%Y-%m-%d %H:%M:%S"
 
-    def initialize(self) -> Application:
+    def initialize(self) -> Optional[Application]:
         self.app = self._get_app()
         if self.app and self.app.bot:
             try:
@@ -29,7 +29,7 @@ class BaseTelegram:
     def get_bot_name(self) -> str:
         return self.app.bot.username if self.app and self.app.bot else None
 
-    def _get_app(self) -> Application:
+    def _get_app(self) -> Optional[Application]:
         if self.settings and self.settings.secret:
             try:
                 return (

@@ -100,7 +100,7 @@ class WordlistMixin(BaseMixin):
             and update.callback_query.data
             and update.callback_query.data == self.default_wordlist
         ):
-            update.callback_query.answer()
+            await update.callback_query.answer()
             return await self._go_to_next_state(
                 update, context, self._get_next_state(self._save_wordlist)
             )

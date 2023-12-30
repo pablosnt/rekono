@@ -10,7 +10,7 @@ from rest_framework import status
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
 from security.cryptography.hashing import hash
-from security.input_validator import Regex, Validator
+from security.validators.input_validator import Regex, Validator
 
 logger = logging.getLogger()
 

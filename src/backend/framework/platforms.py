@@ -1,5 +1,5 @@
 import logging
-from typing import Any, List
+from typing import Any, List, Callable, Set
 from urllib.parse import urlparse
 
 import requests
@@ -37,7 +37,7 @@ class BaseIntegration(BasePlatform):
         return session
 
     def _request(
-        self, method: callable, url: str, json: bool = True, **kwargs: Any
+        self, method: Callable, url: str, json: bool = True, **kwargs: Any
     ) -> Any:
         try:
             response = method(url, **kwargs)
@@ -68,7 +68,7 @@ class BaseNotification(BasePlatform):
                 }
             ).exclude(id=execution.task.executor.id)
         )
-        return users
+        return list(users)
 
     def _notify_execution(
         self, users: List[Any], execution: Execution, findings: List[Finding]

@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Callable, List
 
 from platforms.telegram_app.bot.commands import Cancel
 from platforms.telegram_app.bot.enums import Context, Section
@@ -31,7 +31,7 @@ from telegram.ext import (
 
 
 class BaseConversation(ConversationHandler, BaseTelegramBot):
-    _states_methods = []
+    _states_methods: List[Callable] = []
     first_state = 0
 
     def __init__(self, **kwargs: Any) -> None:

@@ -1,3 +1,4 @@
+from typing import Any, Dict
 from unittest import mock
 
 from platforms.defect_dojo.integrations import DefectDojo
@@ -13,7 +14,7 @@ from tests.platforms.defect_dojo.mock import (
     return_true,
 )
 
-sync = {
+sync: Dict[str, Any] = {
     "project": 1,
     "product_type_id": 1,
     "product_id": 1,

@@ -2,7 +2,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from framework.models import BaseEncrypted, BaseModel
 from projects.models import Project
-from security.input_validator import Regex, Validator
+from security.validators.input_validator import Regex, Validator
 from targets.models import Target
 
 # Create your models here.

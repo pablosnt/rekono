@@ -79,7 +79,9 @@ class InputVulnerabilityMixin(BaseMixin):
             InputVulnerabilitySerializer,
             {
                 "target": target.id if target else None,
-                "cve": update.effective_message.text,
+                "cve": update.effective_message.text
+                if update.effective_message
+                else None,
             },
             self._get_previous_state(self._create_input_vulnerability),
             self._get_next_state(self._create_input_vulnerability),
