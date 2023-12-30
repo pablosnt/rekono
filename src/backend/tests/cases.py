@@ -103,9 +103,12 @@ class ToolTestCase(RekonoTestCase):
         )
         parser.parse()
         self.tc.assertEqual(len(self.expected or []), len(parser.findings))
-        for index, finding in enumerate(parser.findings):
-            expected = self.expected[index]
-            self.tc.assertTrue(isinstance(finding, expected.get("model", Type[None])))
-            for field, value in expected.items():
-                if field != "model":
-                    self.tc.assertEqual(value, getattr(finding, field))
+        if self.expected:
+            for index, finding in enumerate(parser.findings):
+                expected = self.expected[index]
+                self.tc.assertTrue(
+                    isinstance(finding, expected.get("model", Type[None]))
+                )
+                for field, value in expected.items():
+                    if field != "model":
+                        self.tc.assertEqual(value, getattr(finding, field))
