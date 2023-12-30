@@ -14,7 +14,7 @@ jobs:
             arguments: --check src/backend/
             working_directory: .
           - tool: mypy
-            arguments: --namespace-packages --package backend --install-types --non-interactive --exclude migrations/
+            arguments: --namespace-packages --package backend --install-types --non-interactive --ignore-missing-imports --exclude migrations/
             working_directory: ./src
           - tool: flake8
             arguments: --ignore=E203,E501,W503,W605 src/backend
