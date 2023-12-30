@@ -16,6 +16,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Keep tool versions updated from the system in the database (https://github.com/pablosnt/rekono/issues/222)
 - Configure Defect-Dojo product type at Rekono project level (https://github.com/pablosnt/rekono/issues/222)
 - Add Rekono project tags to Defect-Dojo products (https://github.com/pablosnt/rekono/issues/222)
+- Download of original tool's reports (https://github.com/pablosnt/rekono/pull/264)
+- Configure custom proxies for executions (https://github.com/pablosnt/rekono/pull/265)
 
 ### Security
 

@@ -5,6 +5,8 @@ import subprocess  # nosec
 import uuid
 from pathlib import Path
 from typing import Any, Dict, List
+from settings.models import Settings
+from django.forms.models import model_to_dict
 
 from authentications.models import Authentication
 from django.utils import timezone
@@ -154,6 +156,10 @@ class BaseExecutor:
                         value.strip().replace("'", "").replace('"', "")
                     )
             self.arguments = self.arguments[index:]
+        settings = Settings.objects.first()
+        for proxy in model_to_dict(Settings).keys():
+            if "_proxy" in proxy and getattr(settings, proxy) is not None:
+                environment[proxy.upper()] = getattr(settings, proxy)
         return environment
 
     def _before_running(self) -> None:
