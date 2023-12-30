@@ -6,7 +6,7 @@ from framework.enums import InputKeyword
 from framework.models import BaseInput, BaseLike
 from rekono.settings import AUTH_USER_MODEL
 from security.file_handler import FileHandler
-from security.input_validator import Regex, Validator
+from security.validators.input_validator import Regex, Validator
 from targets.models import Target
 from wordlists.enums import WordlistType
 
