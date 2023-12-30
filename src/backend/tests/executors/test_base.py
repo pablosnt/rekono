@@ -1,5 +1,5 @@
 import base64
-from typing import List
+from typing import Dict, List, Any
 from unittest import mock
 
 from authentications.enums import AuthenticationType
@@ -11,6 +11,7 @@ from target_ports.models import TargetPort
 from tests.executors.mock import get_url
 from tests.framework import RekonoTest
 from wordlists.models import Wordlist
+from settings.models import Settings
 
 
 class ToolExecutorTest(RekonoTest):
@@ -23,16 +24,37 @@ class ToolExecutorTest(RekonoTest):
         self.osint.save(update_fields=["data", "data_type"])
         self.executor = self.fake_tool.get_executor_class()(self.execution)
 
+    def _test_environment(self, expected: Dict[str, Any]) -> None:
+        environment = self.executor._get_environment()
+        for key, value in expected.items():
+            self.assertIsNotNone(environment.get(key))
+            self.assertEqual(value, environment.get(key))
+
     def test_get_environment(self) -> None:
-        expected_env = [("KEY1", "value1"), ("KEY2", "value2")]
-        self.executor.arguments = [f"{k}={v}" for k, v in expected_env] + [
+        expected_env = {"KEY1": "value1", "KEY2": "value2"}
+        self.executor.arguments = [f"{k}={v}" for k, v in expected_env.items()] + [
             self.fake_tool.command,
             "--foo=bar",
         ]
-        environment = self.executor._get_environment()
-        for key, value in expected_env:
-            self.assertIsNotNone(environment.get(key))
-            self.assertEqual(value, environment.get(key))
+        self._test_environment(expected_env)
+
+    def test_get_environment_with_proxies(self) -> None:
+        expected_env = {
+            "ALL_PROXY": "10.10.10.10:8080",
+            "HTTP_PROXY": "http://10.10.10.10:80",
+            "HTTPS_PROXY": "https://10.10.10.10:443",
+            "FTP_PROXY": "ftp://10.10.10.10:21",
+            "NO_PROXY": "127.0.0.1",
+        }
+        settings = Settings.objects.first()
+        for field, value in expected_env.items():
+            setattr(settings, field.lower(), value)
+        settings.save(update_fields=[f.lower() for f in expected_env.keys()])
+        self.executor.arguments = [
+            self.fake_tool.command,
+            "--foo=bar",
+        ]
+        self._test_environment(expected_env)
 
     def _success_get_arguments(
         self,

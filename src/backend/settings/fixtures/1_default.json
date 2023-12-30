@@ -3,7 +3,12 @@
         "model": "settings.settings",
         "pk": 1,
         "fields": {
-            "max_uploaded_file_mb": 512
+            "max_uploaded_file_mb": 512,
+            "all_proxy": null,
+            "http_proxy": null,
+            "https_proxy": null,
+            "ftp_proxy": null,
+            "no_proxy": null
         }
     }
 ]
