@@ -77,7 +77,7 @@ class ApiTestCase(RekonoTestCase):
 @dataclass
 class ToolTestCase(RekonoTestCase):
     report: str
-    expected: List[Dict[str, Any]] = []
+    expected: Optional[List[Dict[str, Any]]] = None
 
     def _get_parser(
         self, execution: Execution, executor_arguments: List[str], reports: Path
@@ -102,7 +102,7 @@ class ToolTestCase(RekonoTestCase):
             kwargs["reports"] / kwargs["tool"].lower().replace(" ", "_"),
         )
         parser.parse()
-        self.tc.assertEqual(len(self.expected), len(parser.findings))
+        self.tc.assertEqual(len(self.expected or []), len(parser.findings))
         for index, finding in enumerate(parser.findings):
             expected = self.expected[index]
             self.tc.assertTrue(isinstance(finding, expected.get("model", Type[None])))
