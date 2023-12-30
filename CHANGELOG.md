@@ -18,6 +18,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Add Rekono project tags to Defect-Dojo products (https://github.com/pablosnt/rekono/issues/222)
 - Download of original tool's reports (https://github.com/pablosnt/rekono/pull/264)
 - Configure custom proxies for executions (https://github.com/pablosnt/rekono/pull/265)
+- New endpoint to get status and stats about Redis queues (https://github.com/pablosnt/rekono/pull/266)
 
 ### Security
 
