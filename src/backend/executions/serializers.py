@@ -17,6 +17,7 @@ class ExecutionSerializer(ModelSerializer):
             "output_plain",
             "output_error",
             "skipped_reason",
+            "has_report",
             "status",
             "start",
             "end",
