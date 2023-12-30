@@ -2,7 +2,6 @@ from typing import Any, Tuple
 
 from api_tokens.models import ApiToken
 from django.utils import timezone
-from rekono.settings import CONFIG
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.exceptions import AuthenticationFailed
 from security.cryptography.hashing import hash

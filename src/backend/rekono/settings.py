@@ -139,7 +139,7 @@ AUTH_PASSWORD_VALIDATORS = [
         "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
     {
-        "NAME": "security.input_validator.PasswordValidator",
+        "NAME": "security.validators.input_validator.PasswordValidator",
     },
 ]
 
@@ -198,7 +198,7 @@ LOGGING = {
 # API Rest                                                                     #
 ################################################################################
 
-
+# nosemgrep: python.django.security.audit.django-rest-framework.missing-throttle-config.missing-throttle-config
 REST_FRAMEWORK: Dict[str, Any] = {
     "DEFAULT_METADATA_CLASS": None,
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
@@ -252,7 +252,6 @@ SPECTACULAR_SETTINGS = {
     "DESCRIPTION": DESCRIPTION,
     "VERSION": VERSION,
     "PREPROCESSING_HOOKS": ["drf_spectacular.hooks.preprocess_exclude_path_format"],
-    "ENUM_NAME_OVERRIDES": {},
     "SCHEMA_PATH_PREFIX_INSERT": CONFIG.root_path,
     "ENUM_NAME_OVERRIDES": {
         "AuthenticationType": "authentications.enums.AuthenticationType",

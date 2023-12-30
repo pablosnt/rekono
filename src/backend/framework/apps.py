@@ -16,17 +16,18 @@ class BaseApp:
             post_migrate.connect(self._load_fixtures, sender=self)
 
     def _load_fixtures(self, **kwargs: Any) -> None:
-        if self.skip_if_model_exists:
-            for model in self._get_models():
-                if model and model.objects.exists():
-                    return  # pragma: no cover
-        management.call_command(
-            loaddata.Command(),
-            *(
-                self.fixtures_path / fixture
-                for fixture in sorted(self.fixtures_path.rglob("*.json"))
+        if self.fixtures_path:
+            if self.skip_if_model_exists:
+                for model in self._get_models():
+                    if model and model.objects.exists():
+                        return  # pragma: no cover
+            management.call_command(
+                loaddata.Command(),
+                *(
+                    self.fixtures_path / fixture
+                    for fixture in sorted(self.fixtures_path.rglob("*.json"))
+                )
             )
-        )
 
     def _get_models(self) -> List[Any]:
         return []  # pragma: no cover

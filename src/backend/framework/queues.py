@@ -22,13 +22,13 @@ class BaseQueue:
     def _get_queue(self) -> Queue:
         return django_rq.get_queue(self.name)
 
-    def cancel_job(self, job_id: str) -> Job:
+    def cancel_job(self, job_id: str) -> None:
         job = self._get_queue().fetch_job(job_id)
         if job:
             logger.info(f"[{self.name}] Job {job_id} has been cancelled")
             job.cancel()
 
-    def delete_job(self, job_id: str) -> Job:
+    def delete_job(self, job_id: str) -> None:
         job = self._get_queue().fetch_job(job_id)
         if job:
             logger.info(f"[{self.name}] Job {job_id} has been deleted")
@@ -68,7 +68,7 @@ class BaseQueue:
         input_technologies: List[InputTechnology],
         wordlists: List[Wordlist],
     ) -> List[Dict[int, List[BaseInput]]]:
-        executions = [{0: []}]
+        executions: List[Dict[int, List[BaseInput]]] = [{0: []}]
         input_types_used = set()
         findings_by_type = BaseQueue._get_findings_by_type(findings)
         for index, input_type, source in [

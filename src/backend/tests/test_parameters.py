@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Dict, List
 
 from parameters.models import InputTechnology, InputVulnerability
 from tests.cases import ApiTestCase
@@ -7,8 +7,8 @@ from tests.framework import ApiTest
 
 class ParameterTest(ApiTest):
     model = None
-    valid = []
-    invalid = []
+    valid: List[Dict[str, Any]] = []
+    invalid: List[Dict[str, Any]] = []
 
     def __init__(self, methodName: str = "runTest") -> None:
         super().__init__(methodName)
@@ -127,7 +127,7 @@ class ParameterTest(ApiTest):
 class InputTechnologyTest(ParameterTest):
     model = InputTechnology
     endpoint = "/api/parameters/technologies/"
-    expected_str = f"10.10.10.10 - WordPress - 1.0.0"
+    expected_str = "10.10.10.10 - WordPress - 1.0.0"
     valid = [
         {"target": 1, "name": "WordPress", "version": "1.0.0"},
         {"target": 1, "name": "Joomla", "version": "1.0.0"},
@@ -141,7 +141,7 @@ class InputTechnologyTest(ParameterTest):
 class InputVulnerabilityTest(ParameterTest):
     model = InputVulnerability
     endpoint = "/api/parameters/vulnerabilities/"
-    expected_str = f"10.10.10.10 - CVE-2023-1111"
+    expected_str = "10.10.10.10 - CVE-2023-1111"
     valid = [
         {"target": 1, "cve": "CVE-2023-1111"},
         {"target": 1, "cve": "CVE-2023-1112"},

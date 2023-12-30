@@ -1,5 +1,5 @@
 import logging
-from typing import Any, List
+from typing import List
 
 from django_rq import job
 from executions.models import Execution
@@ -26,7 +26,7 @@ class FindingsQueue(BaseQueue):
 
     @staticmethod
     @job("findings-queue")
-    def consume(execution: Execution, findings: List[Finding]) -> List[Finding]:
+    def consume(execution: Execution, findings: List[Finding]) -> None:
         if findings:
             for platform in [NvdNist, DefectDojo, SMTP, Telegram]:
                 platform().process_findings(execution, findings)

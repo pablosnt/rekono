@@ -41,7 +41,7 @@ class FileHandler:
                 f"[Security] Attempt of upload file with invalid extension: {extension}"
             )
             raise ValidationError(
-                f"Invalid extension", code="file", params={"value": extension}
+                "Invalid extension", code="file", params={"value": extension}
             )
 
     def _validate_mime_type(self, in_memory_file: Any) -> None:
@@ -51,7 +51,7 @@ class FileHandler:
                 f"[Security] Attempt of upload file with invalid MIME type: {mime_type}"
             )
             raise ValidationError(
-                f"Invalid MIME type", code="file", params={"value": mime_type}
+                "Invalid MIME type", code="file", params={"value": mime_type}
             )
 
     def validate_file(self, in_memory_file: Any) -> None:
@@ -75,4 +75,4 @@ class FileHandler:
         with open(path, "rb+") as stored_file:
             lines = len(stored_file.readlines())
         logger.warning(f"[Security] New file uploaded to the server in the path {path}")
-        return path, checksum, lines
+        return str(path), str(checksum), lines

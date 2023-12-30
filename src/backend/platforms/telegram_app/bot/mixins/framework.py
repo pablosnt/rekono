@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Tuple, Callable, Optional
 
 from asgiref.sync import sync_to_async
 from django.db import IntegrityError
@@ -16,12 +16,12 @@ logger = logging.getLogger()
 
 
 class BaseMixin(BaseTelegramBot):
-    def _get_current_state(self, method: callable) -> int:
+    def _get_current_state(self, method: Callable) -> int:
         if not hasattr(self, "_states_methods"):
             return ConversationHandler.END
         return self._states_methods.index(method)
 
-    def _get_next_state(self, method: callable) -> int:
+    def _get_next_state(self, method: Callable) -> int:
         current_state = self._get_current_state(method)
         return (
             ConversationHandler.END
@@ -29,7 +29,7 @@ class BaseMixin(BaseTelegramBot):
             else current_state + 1
         )
 
-    def _get_previous_state(self, method: callable) -> int:
+    def _get_previous_state(self, method: Callable) -> int:
         current_state = self._get_current_state(method)
         return current_state if current_state == 0 else current_state - 1
 
@@ -207,11 +207,11 @@ class BaseMixin(BaseTelegramBot):
         previous_state: int,
         next_state: int,
         chat: TelegramChat = None,
-    ) -> int:
+    ) -> Tuple[int, Optional[Any]]:
         chat = chat or await self._get_active_telegram_chat(update)
         if not chat or not update.effective_message:
             return ConversationHandler.END, None
-        if update.effective_message.text.lower() == "/cancel":
+        if (update.effective_message.text or "").lower() == "/cancel":
             return await Cancel()._execute_command(update, context), None
         instance, errors = await self._save_serializer_async(
             serializer_class(data=data)

@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 from unittest import mock
 
 from findings.enums import Severity
@@ -62,8 +62,8 @@ class NvdNistTest(RekonoTest):
     def _test(
         self,
         severity: Severity,
-        reference: str = None,
-        cwe: str = "CWE-200",
+        reference: Optional[str] = None,
+        cwe: Optional[str] = "CWE-200",
         description: str = "description",
     ) -> None:
         self.nvd_nist.process_findings(self.execution3, [self.vulnerability])

@@ -1,5 +1,5 @@
 import importlib
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Callable, cast
 
 import requests
 import urllib3
@@ -26,7 +26,7 @@ class BaseModel(models.Model):
 
     @classmethod
     def get_project_field(cls) -> str:
-        return None
+        return ""
 
     def _get_related_class(self, package: str, name: str) -> Any:
         try:
@@ -38,7 +38,8 @@ class BaseModel(models.Model):
                 module,
                 name[0].upper() + name[1:].lower().replace(" ", "").replace("-", ""),
             )
-        except (AttributeError, ModuleNotFoundError) as ex:
+        except (AttributeError, ModuleNotFoundError):
+            # nosemgrep: python.lang.security.audit.non-literal-import.non-literal-import
             module = importlib.import_module(f"{package}.base")
             type = package.split(".")[-1][:-1]
             cls = getattr(module, f"Base{type[0].upper() + type[1:].lower()}")
@@ -92,7 +93,7 @@ class BaseInput(BaseModel):
             type: type,
             field: str,
             contains: bool = False,
-            processor: callable = None,
+            processor: Optional[Callable] = None,
         ) -> None:
             self.type = type
             self.field = field
@@ -107,7 +108,7 @@ class BaseInput(BaseModel):
     def _get_url(
         self,
         host: str,
-        port: int = None,
+        port: Optional[int] = None,
         endpoint: str = "",
         protocols: List[str] = ["http", "https"],
     ) -> Optional[str]:
@@ -138,16 +139,16 @@ class BaseInput(BaseModel):
             )
             try:
                 # nosemgrep: python.requests.security.disabled-cert-validation.disabled-cert-validation
-                requests.get(url_to_test, timeout=5, verify=False)
+                requests.get(url_to_test, timeout=5, verify=False)  # nosec
                 return url_to_test
-            except:
+            except Exception:  # nosec
                 continue
         return None
 
     def _compare_filter(
         self, filter: Any, value: Any, negative: bool = False, contains: bool = False
     ) -> bool:
-        comparison = lambda f, v: f == v if not contains else f in v
+        comparison = lambda f, v: f == v if not contains else f in v  # noqa: E731
         return (
             comparison(filter, value) if not negative else not comparison(filter, value)
         )
@@ -180,7 +181,11 @@ class BaseInput(BaseModel):
                         if (
                             issubclass(filter.type, models.TextChoices)
                             and self._compare_filter(
-                                filter.type[match_value.upper()], field_value, negative
+                                cast(models.TextChoices, filter.type)[
+                                    match_value.upper()
+                                ],
+                                field_value,
+                                negative,
                             )
                         ) or (
                             hasattr(self, match_value)
@@ -197,7 +202,7 @@ class BaseInput(BaseModel):
                                 and_condition = True
                         elif not or_condition:
                             return False
-                    except (ValueError, KeyError) as ex:
+                    except (ValueError, KeyError):
                         continue
                     if not or_condition and and_condition:
                         return True

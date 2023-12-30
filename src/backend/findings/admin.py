@@ -1,6 +1,14 @@
 from django.contrib import admin
-from findings.models import (OSINT, Credential, Path, Port, Exploit,
-                             Host, Technology, Vulnerability)
+from findings.models import (
+    OSINT,
+    Credential,
+    Exploit,
+    Host,
+    Path,
+    Port,
+    Technology,
+    Vulnerability,
+)
 
 # Register your models here.
 

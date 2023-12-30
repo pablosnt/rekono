@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any, Dict, cast
 
 from django.core.exceptions import ValidationError
 from processes.models import Process
@@ -82,10 +82,11 @@ class TaskSerializer(ModelSerializer):
         if attrs.get("configuration"):
             attrs["process"] = None
             if not Intensity.objects.filter(
-                tool=attrs.get("configuration").tool, value=attrs.get("intensity")
+                tool=cast(Configuration, attrs.get("configuration")).tool,
+                value=attrs.get("intensity"),
             ).exists():
                 raise ValidationError(
-                    f'Invalid intensity {attrs["intensity"]} for tool {attrs.get("configuration").tool.name}',
+                    f'Invalid intensity {attrs["intensity"]} for tool {cast(Configuration, attrs.get("configuration")).tool.name}',
                     code="intensity",
                 )
         elif attrs.get("process"):

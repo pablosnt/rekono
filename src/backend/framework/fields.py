@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Callable, Optional
 
 from django.forms import ValidationError
 from drf_spectacular.types import OpenApiTypes
@@ -20,7 +20,7 @@ class ProtectedSecretField(Field):
 
     def __init__(
         self,
-        validator: callable = None,
+        validator: Optional[Callable] = None,
         read_only=False,
         write_only=False,
         required=None,
@@ -101,5 +101,5 @@ class IntegerChoicesField(Field):
         """
         try:
             return self.model[data.upper()].value
-        except:
-            raise ValidationError(f"Invalid value", code=self.model.__class__.__name__)
+        except Exception:
+            raise ValidationError("Invalid value", code=self.model.__class__.__name__)

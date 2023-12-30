@@ -4,7 +4,7 @@ from tools.views import ConfigurationViewSet, ToolViewSet
 # Register your views here.
 
 router = SimpleRouter()
-router.register('tools', ToolViewSet)
-router.register('configurations', ConfigurationViewSet)
+router.register("tools", ToolViewSet)
+router.register("configurations", ConfigurationViewSet)
 
 urlpatterns = router.urls

@@ -1,7 +1,7 @@
 from authentications.models import Authentication
 from framework.fields import ProtectedSecretField
 from rest_framework.serializers import ModelSerializer
-from security.input_validator import Regex, Validator
+from security.validators.input_validator import Regex, Validator
 
 
 class AuthenticationSerializer(ModelSerializer):

@@ -16,7 +16,11 @@ from security.authentication.api import ApiToken
 from security.authorization.roles import Role
 from security.cryptography.hashing import hash
 from security.cryptography.random import generate_random_value
-from security.input_validator import FutureDatetimeValidator, Regex, Validator
+from security.validators.input_validator import (
+    FutureDatetimeValidator,
+    Regex,
+    Validator,
+)
 from users.enums import Notification
 
 # Create your models here.
@@ -78,6 +82,7 @@ class RekonoUserManager(UserManager):
         user.username = username
         user.first_name = first_name
         user.last_name = last_name
+        # nosemgrep: python.django.security.audit.unvalidated-password.unvalidated-password
         user.set_password(password)
         user.is_active = True
         user.otp = None

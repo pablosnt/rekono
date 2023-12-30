@@ -1,1 +1,1 @@
-'''Management commands.'''
+"""Management commands."""

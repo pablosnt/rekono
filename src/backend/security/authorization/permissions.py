@@ -1,4 +1,4 @@
-from typing import Any, Tuple
+from typing import Any
 
 from platforms.telegram_app.models import TelegramChat
 from processes.models import Process, Step

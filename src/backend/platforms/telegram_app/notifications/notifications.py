@@ -1,4 +1,4 @@
-from typing import List
+from typing import Dict, List, Any
 
 from django.forms.models import model_to_dict
 from executions.models import Execution
@@ -20,7 +20,7 @@ class Telegram(BaseNotification, BaseTelegram):
     def _notify_execution(
         self, users: List[User], execution: Execution, findings: List[Finding]
     ) -> None:
-        texts_by_type = {}
+        texts_by_type: Dict[Any, List[str]] = {}
         for finding in findings:
             if finding.__class__ not in texts_by_type:
                 texts_by_type[finding.__class__] = []

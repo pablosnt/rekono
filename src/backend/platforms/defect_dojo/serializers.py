@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any, Dict, cast
 
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.forms import ValidationError
@@ -19,7 +19,7 @@ from rest_framework.serializers import (
     Serializer,
     SerializerMethodField,
 )
-from security.input_validator import Regex, Validator
+from security.validators.input_validator import Regex, Validator
 
 
 class DefectDojoSettingsSerializer(ModelSerializer):
@@ -48,7 +48,7 @@ class DefectDojoSettingsSerializer(ModelSerializer):
         return DefectDojo().is_available()
 
 
-class BaseDefectDojoSerializer:
+class BaseDefectDojoSerializer(Serializer):
     client = None
 
     def _get_client(self) -> DefectDojo:
@@ -94,7 +94,7 @@ class DefectDojoTargetSyncSerializer(ModelSerializer):
         )
 
 
-class DefectDojoProductTypeSerializer(BaseDefectDojoSerializer, Serializer):
+class DefectDojoProductTypeSerializer(BaseDefectDojoSerializer):
     id = IntegerField(read_only=True)
     name = CharField(
         required=True,
@@ -117,7 +117,7 @@ class DefectDojoProductTypeSerializer(BaseDefectDojoSerializer, Serializer):
         )
 
 
-class DefectDojoProductSerializer(BaseDefectDojoSerializer, Serializer):
+class DefectDojoProductSerializer(BaseDefectDojoSerializer):
     id = IntegerField(read_only=True)
     product_type = IntegerField(
         required=True,
@@ -149,7 +149,7 @@ class DefectDojoProductSerializer(BaseDefectDojoSerializer, Serializer):
         attrs = super().validate(attrs)
         attrs["project"] = get_object_or_404(
             Project,
-            id=attrs.get("project_id").id,
+            id=cast(Project, attrs.get("project_id")).id,
             members=self.context.get("request").user.id,
         )
         return attrs
@@ -164,7 +164,7 @@ class DefectDojoProductSerializer(BaseDefectDojoSerializer, Serializer):
         )
 
 
-class DefectDojoEngagementSerializer(BaseDefectDojoSerializer, Serializer):
+class DefectDojoEngagementSerializer(BaseDefectDojoSerializer):
     id = IntegerField(read_only=True)
     product = IntegerField(
         required=True,

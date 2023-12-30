@@ -14,7 +14,6 @@ from rq.job import Job
 from rq.registry import DeferredJobRegistry
 from target_ports.models import TargetPort
 from tools.executors.base import BaseExecutor
-from tools.models import Input, Tool
 from tools.parsers.base import BaseParser
 from wordlists.models import Wordlist
 
@@ -75,7 +74,7 @@ class ExecutionsQueue(BaseQueue):
             execution
         )
         current_job = rq.get_current_job()
-        if not findings and current_job._dependency_ids:
+        if not findings and current_job and current_job._dependency_ids:
             (
                 findings,
                 target_ports,
@@ -88,6 +87,7 @@ class ExecutionsQueue(BaseQueue):
                 input_vulnerabilities,
                 input_technologies,
                 wordlists,
+                current_job,
             ).values()
         executor.execute(
             findings, target_ports, input_vulnerabilities, input_technologies, wordlists
@@ -115,7 +115,7 @@ class ExecutionsQueue(BaseQueue):
             if dependency and dependency.result:
                 findings.extend(dependency.result[1])
         if not findings:
-            return findings
+            return {}
         executions = [
             e
             for e in ExecutionsQueue._calculate_executions(

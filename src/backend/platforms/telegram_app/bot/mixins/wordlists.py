@@ -1,7 +1,6 @@
 from typing import List
 
 from asgiref.sync import sync_to_async
-from django.db.models import QuerySet
 from input_types.enums import InputTypeName
 from platforms.telegram_app.bot.enums import Context
 from platforms.telegram_app.bot.mixins.framework import BaseMixin
@@ -101,7 +100,7 @@ class WordlistMixin(BaseMixin):
             and update.callback_query.data
             and update.callback_query.data == self.default_wordlist
         ):
-            update.callback_query.answer()
+            await update.callback_query.answer()
             return await self._go_to_next_state(
                 update, context, self._get_next_state(self._save_wordlist)
             )

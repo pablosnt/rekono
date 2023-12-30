@@ -2,7 +2,7 @@ from authentications.enums import AuthenticationType
 from authentications.serializers import AuthenticationSerializer
 from platforms.telegram_app.bot.enums import Context
 from platforms.telegram_app.bot.mixins.framework import BaseMixin
-from telegram import InlineKeyboardButton, Update
+from telegram import Update
 from telegram.ext import CallbackContext, ConversationHandler
 
 

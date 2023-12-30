@@ -20,10 +20,10 @@ from platforms.telegram_app.bot.conversations import (
     SelectProject,
     Tool,
 )
+from telegram.ext import Application
 from platforms.telegram_app.framework import BaseTelegram
 from platforms.telegram_app.models import TelegramSettings
 from telegram.error import Forbidden, InvalidToken
-from telegram.ext import Application
 from telegram.warnings import PTBUserWarning
 
 filterwarnings(
@@ -56,13 +56,18 @@ class TelegramBot(BaseTelegram):
         bot_commands = []
         for command in self.commands:
             bot_commands.append((command.get_name(), command.help))
-            self.app.add_handler(command)
-        await self.app.bot.set_my_commands(bot_commands)
+            application.add_handler(command)
+        await application.bot.set_my_commands(bot_commands)
 
     def _wait_for_token(self, sleep_time: int = 60) -> None:
-        if not self.settings or not self.settings.secret:
-            logger.info("[Telegram Bot] Waiting while Telegram token is not configured")
+        self.settings = TelegramSettings.objects.first()
+        first_iteration = True
         while not self.settings or not self.settings.secret:
+            if first_iteration:
+                logger.info(
+                    "[Telegram Bot] Waiting while Telegram token is not configured"
+                )
+                first_iteration = False
             time.sleep(sleep_time)
             self.settings = TelegramSettings.objects.first()
         self.app = self._get_app()

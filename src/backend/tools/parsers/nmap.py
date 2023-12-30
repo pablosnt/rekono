@@ -4,7 +4,7 @@ from typing import Any, List
 from findings.enums import HostOS, PathType, PortStatus, Protocol, Severity
 from findings.models import Credential, Host, Path, Port, Technology, Vulnerability
 from libnmap.parser import NmapParser
-from security.input_validator import Regex
+from security.validators.input_validator import Regex
 from tools.parsers.base import BaseParser
 
 
@@ -15,8 +15,14 @@ class Nmap(BaseParser):
             if not nmap_host.is_up():
                 continue
             os_detection = nmap_host.os_match_probabilities()
-            selected_os = max(os_detection, key=lambda o: o.accuracy) if os_detection else None
-            selected_class = max(selected_os.osclasses, key=lambda c: c.accuracy) if selected_os else None
+            selected_os = (
+                max(os_detection, key=lambda o: o.accuracy) if os_detection else None
+            )
+            selected_class = (
+                max(selected_os.osclasses, key=lambda c: c.accuracy)
+                if selected_os
+                else None
+            )
             os_type = HostOS.OTHER
             if selected_class:
                 try:
@@ -55,9 +61,19 @@ class Nmap(BaseParser):
     def _parse_nse_scripts(
         self, results: Any, technologies: List[Technology] | Technology
     ) -> None:
-        technology = technologies if isinstance(technologies, Technology) else technologies[0]
-        smb_technology = [technologies] if isinstance(technologies, Technology) else [t for t in technologies if t.port.service in ["microsoft-ds", "netbios-ssn"]]
-        smb_technology = smb_technology[0] if smb_technology else None
+        technology = (
+            technologies if isinstance(technologies, Technology) else technologies[0]
+        )
+        smb_technologies = (
+            [technologies]
+            if isinstance(technologies, Technology)
+            else [
+                t
+                for t in technologies
+                if t.port.service in ["microsoft-ds", "netbios-ssn"]
+            ]
+        )
+        smb_technology = smb_technologies[0] if smb_technologies else None
         for script in results:
             match script.get("id"):
                 case "vulners":
@@ -74,7 +90,7 @@ class Nmap(BaseParser):
                         reference="https://book.hacktricks.xyz/pentesting/pentesting-ftp#anonymous-login",
                     )
                 case "ftp-proftpd-backdoor":
-                     self.create_finding(
+                    self.create_finding(
                         Vulnerability,
                         technology=technology,
                         name="FTP Backdoor",
@@ -140,7 +156,7 @@ class Nmap(BaseParser):
                 case "smb-enum-users":
                     for line in script.get("output").split("\n"):
                         data = line.strip()
-                        if data and ' (RID:' in data:
+                        if data and " (RID:" in data:
                             self.create_finding(
                                 Credential,
                                 technology=smb_technology,
@@ -185,9 +201,9 @@ class Nmap(BaseParser):
 
     def _parse_nse_vulners(self, script: Any, technology: Technology) -> None:
         cves = set()
-        for cve in re.findall(
-            Regex.CVE.value, script.get("output", "")
-        ):
+        for cve in re.findall(Regex.CVE.value, script.get("output", "")):
             if cve not in cves:
                 cves.add(cve)
-                self.create_finding(Vulnerability, technology=technology, name=cve, cve=cve)
+                self.create_finding(
+                    Vulnerability, technology=technology, name=cve, cve=cve
+                )

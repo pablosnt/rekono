@@ -1,6 +1,6 @@
 import logging
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Optional
 
 from rekono.settings import CONFIG
 from rest_framework import status
@@ -60,10 +60,11 @@ class SecurityMiddleware:
 
     get_response: Any
 
-    def _get_forwarded_address(self, request: HttpRequest) -> str:
+    def _get_forwarded_address(self, request: HttpRequest) -> Optional[str]:
         x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
         if x_forwarded_for and CONFIG.trusted_proxy:
             return x_forwarded_for.split(",", 1)[0]
+        return None
 
     def _http_options(self, request: HttpRequest) -> Response:
         response = Response(status=status.HTTP_200_OK)

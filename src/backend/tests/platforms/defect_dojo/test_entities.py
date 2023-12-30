@@ -1,6 +1,7 @@
+from typing import List, cast, Dict
 from unittest import mock
 
-from tests.cases import ApiTestCase
+from tests.cases import ApiTestCase, RekonoTestCase
 from tests.framework import ApiTest
 from tests.platforms.defect_dojo.mock import (
     create_engagement,
@@ -13,7 +14,7 @@ from tests.platforms.defect_dojo.mock import (
 
 class DefectDojoEntitiesTest(ApiTest):
     endpoint = "/api/defect-dojo/"
-    cases = []
+    cases: List[RekonoTestCase] = []
 
     def setUp(self) -> None:
         super().setUp()
@@ -33,17 +34,21 @@ class DefectDojoEntitiesTest(ApiTest):
                 {"product": 1, **invalid},
             ),
         ]
-        for endpoint, valid, invalid in self.entities_cases:
+        for endpoint, valid_data, invalid_data in self.entities_cases:
             self.cases.extend(
                 [
                     ApiTestCase(
-                        ["reader1", "reader2"], "post", 403, valid, endpoint=endpoint
+                        ["reader1", "reader2"],
+                        "post",
+                        403,
+                        valid_data,
+                        endpoint=endpoint,
                     ),
                     ApiTestCase(
                         ["admin1", "admin2", "auditor1", "auditor2"],
                         "post",
                         400,
-                        invalid,
+                        invalid_data,
                         endpoint=endpoint,
                     ),
                 ]
@@ -51,17 +56,22 @@ class DefectDojoEntitiesTest(ApiTest):
             self.cases.extend(
                 [
                     ApiTestCase(
-                        ["admin1", "auditor1"], "post", 201, valid, {"id": 1}, endpoint
+                        ["admin1", "auditor1"],
+                        "post",
+                        201,
+                        valid_data,
+                        {"id": 1},
+                        endpoint,
                     ),
-                    ApiTestCase([], "post", 404, valid, endpoint),
+                    ApiTestCase([], "post", 404, valid_data, endpoint),
                 ]
-                if "project_id" in valid
+                if "project_id" in cast(Dict[str, str], valid_data)
                 else [
                     ApiTestCase(
                         ["admin1", "admin2", "auditor1", "auditor2"],
                         "post",
                         201,
-                        valid,
+                        valid_data,
                         {"id": 1},
                         endpoint,
                     )

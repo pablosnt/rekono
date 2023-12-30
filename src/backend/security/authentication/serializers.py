@@ -21,7 +21,7 @@ class LoginSerializer(TokenObtainPairSerializer):
         return attrs
 
     @classmethod
-    def get_token(cls, user: User) -> Dict[str, Any]:
+    def get_token(cls, user: User) -> Any:
         token = super().get_token(user)
         group = user.groups.first()
         token["role"] = group.name if group else Role.READER.value

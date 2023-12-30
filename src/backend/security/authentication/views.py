@@ -5,7 +5,7 @@ from security.authorization.permissions import IsNotAuthenticated
 class LoginViewSet(TokenObtainPairView):
     """Token ViewSet that includes the user login (get access and refresh token)."""
 
-    permission_classes = [IsNotAuthenticated]
+    permission_classes = [IsNotAuthenticated]  # type: ignore
     throttle_scope = "login"
 
 

@@ -1,6 +1,6 @@
 from datetime import timedelta
 from pathlib import Path as PathFile
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Callable, Optional
 
 import requests
 from django.utils import timezone
@@ -32,7 +32,7 @@ class DefectDojo(BaseIntegration):
         }
 
     def _request(
-        self, method: callable, url: str, json: bool = True, **kwargs: Any
+        self, method: Callable, url: str, json: bool = True, **kwargs: Any
     ) -> Any:
         return super()._request(
             method,
@@ -59,14 +59,14 @@ class DefectDojo(BaseIntegration):
         try:
             self._request(requests.get, "/test_types/", timeout=5)
             return True
-        except:
+        except Exception:
             return False
 
     def exists(self, entity_name: str, id: int) -> bool:
         try:
             self._request(self.session.get, f"/{entity_name}/{id}/")
             return True
-        except:
+        except Exception:
             return False
 
     def create_product_type(self, name: str, description: str) -> Dict[str, Any]:
@@ -135,7 +135,7 @@ class DefectDojo(BaseIntegration):
 
     def _create_endpoint(
         self, product: int, endpoint: Path, target: Target
-    ) -> Dict[str, Any]:
+    ) -> Optional[Dict[str, Any]]:
         try:
             return self._request(
                 self.session.post,
@@ -239,6 +239,7 @@ class DefectDojo(BaseIntegration):
                             self.settings.test,
                         )
                         test_id = new_test.get("id")
-                    new_finding = self._create_finding(test_id, finding)
-                    finding.defect_dojo_id = new_finding.get("id")
+                    if test_id:
+                        new_finding = self._create_finding(test_id, finding)
+                        finding.defect_dojo_id = new_finding.get("id")
                 finding.save(update_fields=["defect_dojo_id"])

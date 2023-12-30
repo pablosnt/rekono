@@ -5,7 +5,7 @@ from authentications.enums import AuthenticationType
 from django.db import models
 from framework.enums import InputKeyword
 from framework.models import BaseEncrypted, BaseInput
-from security.input_validator import Regex, Validator
+from security.validators.input_validator import Regex, Validator
 from target_ports.models import TargetPort
 
 # Create your models here.

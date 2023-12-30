@@ -1,3 +1,4 @@
+from typing import Dict, List
 from findings.enums import Severity
 from findings.models import Technology, Vulnerability
 from tools.parsers.base import BaseParser
@@ -12,7 +13,9 @@ class Sshaudit(BaseParser):
     }
 
     def _parse_standard_output(self) -> None:
-        algorithms = {k: [] for k in self.cryptography_types.keys()}
+        algorithms: Dict[str, List[str]] = {
+            k: [] for k in self.cryptography_types.keys()
+        }
         technology = None
         vulnerabilities_to_create = []
         for line in self.output.split("\n"):  # Get output by lines
