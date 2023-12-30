@@ -39,7 +39,12 @@ class SMTP(BaseNotification):
         os.environ["SSL_CERT_FILE"] = certifi.where()
 
     def is_available(self) -> bool:
-        if not self.settings or not self.settings.host or not self.settings.port:
+        if (
+            not self.settings
+            or not self.settings.host
+            or not self.settings.port
+            or CONFIG.testing
+        ):
             return False
         try:
             self.backend.open()
@@ -58,6 +63,8 @@ class SMTP(BaseNotification):
     def _send_messages(
         self, users: List[Any], subject: str, template_path: str, data: Dict[str, Any]
     ) -> None:
+        if not self.is_available():
+            return
         try:
             message = EmailMultiAlternatives(
                 subject, "", "Rekono <noreply@rekono.com>", [u.email for u in users]

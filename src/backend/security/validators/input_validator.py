@@ -32,7 +32,6 @@ class Validator(RegexValidator):
         inverse_match: bool | None = ...,  # type: ignore
         flags: RegexFlag | None = None,
     ) -> None:
-        # TODO: remove flags = None  # Needed to prevent TypeError
         super().__init__(regex, message, code, inverse_match, flags)
 
     def __call__(self, value: str | None) -> None:

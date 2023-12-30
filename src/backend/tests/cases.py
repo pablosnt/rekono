@@ -56,7 +56,6 @@ class ApiTestCase(RekonoTestCase):
                 api_client = APIClient(HTTP_AUTHORIZATION=f"Bearer {access}")
                 response = getattr(api_client, self.method.lower())(
                     self.endpoint.format(endpoint=kwargs.get("endpoint", "")),
-                    # TODO: if unit tests fail, add `or None``
                     data=self.data,
                     format=self.format,
                 )
