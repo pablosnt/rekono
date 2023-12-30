@@ -1,5 +1,5 @@
 import base64
-from typing import Dict, List, Any, Set
+from typing import Dict, List, Any
 from unittest import mock
 
 from authentications.enums import AuthenticationType
