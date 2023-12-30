@@ -26,14 +26,13 @@ class Regex(Enum):
 class Validator(RegexValidator):
     def __init__(
         self,
-        regex: Any | None = None,
-        message: Any | None = None,
+        regex: Any | None,
+        message: Any | None = "Provided value contains disallowed characters",
         code: str | None = None,
-        inverse_match: bool | None = None,
+        inverse_match: bool | None = ...,  # type: ignore
         flags: RegexFlag | None = None,
     ) -> None:
-        message = "Provided value contains disallowed characters"
-        flags = None  # Needed to prevent TypeError
+        # TODO: remove flags = None  # Needed to prevent TypeError
         super().__init__(regex, message, code, inverse_match, flags)
 
     def __call__(self, value: str | None) -> None:
