@@ -31,6 +31,7 @@ urlpatterns = [
     path("api/", include("authentications.urls")),
     path("api/", include("executions.urls")),
     path("api/", include("findings.urls")),
+    path("api/", include("integrations.urls")),
     path("api/", include("notes.urls")),
     path("api/", include("parameters.urls")),
     path("api/", include("platforms.defect_dojo.urls")),
