@@ -48,3 +48,7 @@ class MultipleNumberFilter(MultipleFieldFilter, filters.NumberFilter):
 
 class MultipleCharFilter(MultipleFieldFilter, filters.CharFilter):
     pass
+
+
+class MultipleModelChoiceFilter(MultipleFieldFilter, filters.ModelChoiceFilter):
+    pass

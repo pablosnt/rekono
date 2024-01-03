@@ -7,6 +7,7 @@ from rest_framework.request import Request
 from rest_framework.views import View
 from security.authorization.roles import Role
 from wordlists.models import Wordlist
+from notes.models import Note
 
 
 class RekonoModelPermission(DjangoModelPermissions):
@@ -91,14 +92,20 @@ class OwnerPermission(BasePermission):
     def _has_object_permission(
         self,
         request: Request,
-        view: View,
         instance: Any,
         owner_field: str,
         allow_admin: bool,
     ) -> bool:
+        if not getattr(instance, owner_field):
+            allow_admin = True
         return (
             not instance
             or request.method == "GET"
+            or (
+                request.method == "POST"
+                and "/fork/" in request.path
+                and isinstance(instance, Note)
+            )
             or (
                 hasattr(instance, owner_field)
                 and getattr(instance, owner_field) == request.user
@@ -110,7 +117,6 @@ class OwnerPermission(BasePermission):
         return (
             self._has_object_permission(
                 request,
-                view,
                 Process.objects.get(pk=request.data.get("process_id")),
                 "owner",
                 True,
@@ -133,13 +139,11 @@ class OwnerPermission(BasePermission):
         instance = None
         owner_field = ""
         allow_admin = False
-        if obj.__class__ in [Wordlist, Process, Step]:
+        if obj.__class__ in [Wordlist, Process, Step, Note]:
             instance = obj.process if obj.__class__ == Step else obj
             owner_field = "owner"
-            allow_admin = True
+            allow_admin = not isinstance(obj, Note)
         elif obj.__class__ == TelegramChat:
             instance = obj
             owner_field = "user"
-        return self._has_object_permission(
-            request, view, instance, owner_field, allow_admin
-        )
+        return self._has_object_permission(request, instance, owner_field, allow_admin)

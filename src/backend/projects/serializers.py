@@ -38,12 +38,14 @@ class ProjectSerializer(TaggitSerializer, ModelSerializer):
             "members",
             "tags",
             "defect_dojo_sync",
+            "notes",
         )
         read_only_fields = (
             "owner",
             "targets",
             "members",
             "defect_dojo_sync",
+            "notes",
         )
 
     @transaction.atomic()

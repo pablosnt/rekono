@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     "executions",
     "findings",
     "input_types",
+    "notes",
     "platforms.defect_dojo",
     "platforms.mail",
     "platforms.telegram_app",

@@ -245,7 +245,7 @@ class Technology(Finding):
     related_to = models.ForeignKey(
         "Technology",
         related_name="related_technologies",
-        on_delete=models.DO_NOTHING,
+        on_delete=models.SET_NULL,
         blank=True,
         null=True,
     )

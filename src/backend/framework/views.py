@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from django.core.exceptions import PermissionDenied
 from django.db.models import Count, QuerySet
@@ -13,6 +13,7 @@ from rest_framework.response import Response
 from rest_framework.serializers import Serializer
 from rest_framework.viewsets import ModelViewSet
 from security.authorization.permissions import IsAuditor
+from notes.models import Note
 
 
 class BaseViewSet(ModelViewSet):
@@ -36,8 +37,10 @@ class BaseViewSet(ModelViewSet):
 
     def _get_project_from_data(
         self, project_field: str, data: Dict[str, Any]
-    ) -> Project:
+    ) -> Optional[Project]:
         fields = project_field.split("__")
+        if not fields:
+            return None
         data = data.get(fields[0], {})
         for field in fields[1:]:
             if hasattr(data, field):
@@ -52,8 +55,10 @@ class BaseViewSet(ModelViewSet):
         if model:
             if model == Project:
                 members_field = "members"
-            elif model.get_project_field():
-                members_field = f"{model.get_project_field()}__members"
+            else:
+                project_field = model.get_project_field()
+                if project_field:
+                    members_field = f"{project_field}__members"
         if members_field:
             if self.request.user.id:
                 project_filter = {members_field: self.request.user}
@@ -64,9 +69,9 @@ class BaseViewSet(ModelViewSet):
 
     def perform_create(self, serializer: Serializer) -> None:
         model = self._get_model()
-        if model and model.get_project_field():
+        if model:
             project = self._get_project_from_data(
-                model.get_project_field(), serializer.validated_data
+                model.get_project_field() or "", serializer.validated_data
             )
             if project and self.request.user not in project.members.all():
                 raise PermissionDenied()

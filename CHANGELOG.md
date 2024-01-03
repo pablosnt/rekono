@@ -7,11 +7,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Added
 
+- [**BREAKING**] Upgrade required `Python` version to `3.11` (https://github.com/pablosnt/rekono/issues/222)
+- [**BREAKING**] Remove deprecated settings (https://github.com/pablosnt/rekono/issues/222)
 - Optimize, improve, clean and test source code (https://github.com/pablosnt/rekono/issues/222)
 - Remove tasks status (https://github.com/pablosnt/rekono/issues/222)
 - Remove steps priority (https://github.com/pablosnt/rekono/issues/222)
-- New target ports path to limit executions to it (https://github.com/pablosnt/rekono/issues/222)
-- New skipped reason field for skipped executions (https://github.com/pablosnt/rekono/issues/222)
+- Target ports path to limit executions to it (https://github.com/pablosnt/rekono/issues/222)
+- Skipped reason field for skipped executions (https://github.com/pablosnt/rekono/issues/222)
 - New executions group to aggregate those that can be executed at the same time (https://github.com/pablosnt/rekono/issues/222)
 - Keep tool versions updated from the system in the database (https://github.com/pablosnt/rekono/issues/222)
 - Configure Defect-Dojo product type at Rekono project level (https://github.com/pablosnt/rekono/issues/222)
@@ -19,6 +21,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Download of original tool's reports (https://github.com/pablosnt/rekono/pull/264)
 - Configure custom proxies for executions (https://github.com/pablosnt/rekono/pull/265)
 - New endpoint to get status and stats about Redis queues (https://github.com/pablosnt/rekono/pull/266)
+- Pentesting notes that are sharable with other users and linkable with a project or a target (https://github.com/pablosnt/rekono/issues/267)
 
 ### Security
 
@@ -30,8 +33,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Fixed
 
-- [**BREAKING**] Upgrade required `Python` version to `3.11` (https://github.com/pablosnt/rekono/issues/222)
-- [**BREAKING**] Remove deprecated settings (https://github.com/pablosnt/rekono/issues/222)
 - Send emails using a new thread instead of the `emails-queue` (https://github.com/pablosnt/rekono/issues/222)
 - Fix the creation of multiple engagements in Defect-Dojo to import scans from the same target (https://github.com/pablosnt/rekono/issues/222)
 - Remove duplicated API field to sort the data (https://github.com/pablosnt/rekono/issues/222)
