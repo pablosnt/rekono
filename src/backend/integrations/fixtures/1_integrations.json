@@ -1,0 +1,24 @@
+[
+    {
+        "model": "integrations.integration",
+        "pk": 1,
+        "fields": {
+            "key": "defectdojo",
+            "name": "Defect-Dojo",
+            "description": "Vulnerability management platform to which Rekono findings will be imported when synchronization is enabled at project level",
+            "enabled": true,
+            "reference": "https://www.defectdojo.com/"
+        }
+    },
+    {
+        "model": "integrations.integration",
+        "pk": 2,
+        "fields": {
+            "key": "nvdnist",
+            "name": "NVD NIST",
+            "description": "National Vulnerability Database from which Rekono will get CVE information to aggregate findings information",
+            "enabled": true,
+            "reference": "https://nvd.nist.gov/"
+        }
+    }
+]

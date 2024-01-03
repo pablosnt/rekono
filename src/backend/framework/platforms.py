@@ -3,6 +3,7 @@ from typing import Any, List, Callable
 from urllib.parse import urlparse
 
 import requests
+from integrations.models import Integration
 from executions.models import Execution
 from findings.framework.models import Finding
 from requests.adapters import HTTPAdapter, Retry
@@ -25,6 +26,7 @@ class BaseIntegration(BasePlatform):
 
     def __init__(self) -> None:
         self.session = self._create_session(self.url)
+        self.integration = Integration.objects.get(key=self.__class__.__name__.lower())
 
     def _create_session(self, url: str) -> requests.Session:
         session = requests.Session()
@@ -48,6 +50,14 @@ class BaseIntegration(BasePlatform):
         )
         response.raise_for_status()
         return response.json() if json else response
+
+    def is_enabled(self) -> bool:
+        return self.integration.enabled if self.integration else False
+
+    def process_findings(self, execution: Execution, findings: List[Finding]) -> None:
+        if not self.is_enabled():
+            return
+        super().process_findings(execution, findings)
 
 
 class BaseNotification(BasePlatform):
