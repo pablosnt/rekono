@@ -1,6 +1,8 @@
 from django.db.models import QuerySet, Q
 
 from framework.views import LikeViewSet
+from typing import cast
+from targets.models import Target
 from notes.models import Note
 from notes.filters import NoteFilter
 from notes.serializers import NoteSerializer
@@ -52,11 +54,9 @@ class NoteViewSet(LikeViewSet):
     def _get_project_from_data(
         self, project_field: str, data: Dict[str, Any]
     ) -> Optional[Project]:
-        if data.get("project"):
-            return data.get("project")
-        if data.get("target"):
-            return data.get("target").project
-        return None
+        return data.get("project") or (
+            cast(Target, data.get("target")).project if data.get("target") else None
+        )
 
     def get_queryset(self) -> QuerySet:
         return (

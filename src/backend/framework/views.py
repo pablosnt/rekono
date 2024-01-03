@@ -13,7 +13,6 @@ from rest_framework.response import Response
 from rest_framework.serializers import Serializer
 from rest_framework.viewsets import ModelViewSet
 from security.authorization.permissions import IsAuditor
-from notes.models import Note
 
 
 class BaseViewSet(ModelViewSet):
