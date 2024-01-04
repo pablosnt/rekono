@@ -12,6 +12,8 @@ class FindingSerializer(ModelSerializer):
             "last_seen",
             "triage_status",
             "triage_comment",
+            "defect_dojo_id",
+            "hacktricks_link",
         )
 
 

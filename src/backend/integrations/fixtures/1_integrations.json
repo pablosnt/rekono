@@ -20,5 +20,16 @@
             "enabled": true,
             "reference": "https://nvd.nist.gov/"
         }
+    },
+    {
+        "model": "integrations.integration",
+        "pk": 3,
+        "fields": {
+            "key": "hacktricks",
+            "name": "HackTricks",
+            "description": "Wiki that includes an extensive documentation about hacking techniques and tricks, and whose resources will be added as findings references by Rekono",
+            "enabled": true,
+            "reference": "https://book.hacktricks.xyz/"
+        }
     }
 ]

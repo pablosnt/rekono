@@ -21,6 +21,7 @@ class Finding(BaseInput):
         max_length=300, validators=[Validator(Regex.TEXT.value, code="triage_comment")]
     )
     defect_dojo_id = models.IntegerField(blank=True, null=True)
+    hacktricks_link = models.TextField(max_length=300, blank=True, null=True)
     unique_fields: List[str] = []
 
     class Meta:
