@@ -305,7 +305,7 @@
         "fields": {
             "argument": 20,
             "type": 3,
-            "filter": "microsoft-ds",
+            "filter": "microsoft-ds or netbios-ssn",
             "order": 1
         }
     },
@@ -325,7 +325,7 @@
         "fields": {
             "argument": 21,
             "type": 3,
-            "filter": "microsoft-ds",
+            "filter": "microsoft-ds or netbios-ssn",
             "order": 1
         }
     },

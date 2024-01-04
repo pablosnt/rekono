@@ -12,7 +12,11 @@ class IntegrationTest(ApiTest):
             ["admin1", "admin2", "auditor1", "auditor2", "reader1", "reader2"],
             "get",
             200,
-            expected=[{"id": 2, "enabled": True}, {"id": 1, "enabled": True}],
+            expected=[
+                {"id": 3, "enabled": True},
+                {"id": 2, "enabled": True},
+                {"id": 1, "enabled": True},
+            ],
         ),
         ApiTestCase(
             ["auditor1", "auditor2", "reader1", "reader2"],
@@ -32,7 +36,11 @@ class IntegrationTest(ApiTest):
             ["admin1", "admin2", "auditor1", "auditor2", "reader1", "reader2"],
             "get",
             200,
-            expected=[{"id": 2, "enabled": True}, {"id": 1, "enabled": False}],
+            expected=[
+                {"id": 3, "enabled": True},
+                {"id": 2, "enabled": True},
+                {"id": 1, "enabled": False},
+            ],
         ),
     ]
 

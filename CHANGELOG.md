@@ -23,6 +23,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - New endpoint to get status and stats about Redis queues (https://github.com/pablosnt/rekono/pull/266)
 - Pentesting notes that are sharable with other users and linkable with a project or a target (https://github.com/pablosnt/rekono/issues/267)
 - Ability to enable and disable integrations (https://github.com/pablosnt/rekono/issues/269)
+- HackTricks integration to link findings to interesing wiki resources (https://github.com/pablosnt/rekono/issues/271)
 
 ### Security
 

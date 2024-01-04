@@ -9,6 +9,7 @@ from platforms.defect_dojo.integrations import DefectDojo
 from platforms.mail.notifications import SMTP
 from platforms.nvd_nist import NvdNist
 from platforms.telegram_app.notifications.notifications import Telegram
+from platforms.hacktricks import HackTricks
 from rq.job import Job
 
 logger = logging.getLogger()
@@ -28,5 +29,5 @@ class FindingsQueue(BaseQueue):
     @job("findings-queue")
     def consume(execution: Execution, findings: List[Finding]) -> None:
         if findings:
-            for platform in [NvdNist, DefectDojo, SMTP, Telegram]:
+            for platform in [NvdNist, HackTricks, DefectDojo, SMTP, Telegram]:
                 platform().process_findings(execution, findings)
