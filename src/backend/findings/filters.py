@@ -1,4 +1,5 @@
 from django_filters.filters import ModelChoiceFilter
+
 from findings.framework.filters import FindingFilter
 from findings.models import (
     OSINT,

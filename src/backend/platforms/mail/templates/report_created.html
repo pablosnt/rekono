@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en" xml:lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        <title>Rekono</title>
+      </head>
+    <body>
+        <div class="card border-light text-center">
+            <div class="text-center">
+                <img src="{{ rekono_url }}/static/logo-black.png" class="card-img-top" alt="Rekono" style="max-width: 30rem;"/>
+            </div>
+            <div class="card-body">
+                <h3 class="card-title">Your Rekono report is ready</h3>
+                {% if e.task %}
+                    <p class="card-text">{{ report.format.upper() }} report with ID {{ report.id }} from task {{ report.task.id }} has been created and it's available to download it</p>
+                    <a href="{{ rekono_url }}/#/projects/{{ report.task.target.project.id }}/reports" class="btn btn-danger"><strong>Reports</strong></a>
+                {% elif e.target %}
+                    <p class="card-text">{{ report.format.upper() }} report with ID {{ report.id }} from target {{ report.target.target }} has been created and it's available to download it <a href="{{ rekono_url }}/#/projects/{{ report.target.project.id }}/reports">here</a></p>
+                    <a href="{{ rekono_url }}/#/projects/{{ report.target.project.id }}/reports" class="btn btn-danger"><strong>Reports</strong></a>
+                {% else %}
+                    <p class="card-text">{{ report.format.upper() }} report with ID {{ report.id }} from project {{ report.project.name }} has been created and it's available to download it <a href="{{ rekono_url }}/#/projects/{{ report.project.id }}/reports">here</a></p>
+                    <a href="{{ rekono_url }}/#/projects/{{ report.project.id }}/reports" class="btn btn-danger"><strong>Reports</strong></a>
+                {% endif %}
+            </div>
+        </div>
+    </body>
+</html>

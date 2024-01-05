@@ -1,8 +1,9 @@
 import logging
 from typing import Any, Dict
 
-from platforms.mail.notifications import SMTP
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
+from platforms.mail.notifications import SMTP
 from security.authorization.roles import Role
 from users.models import User
 

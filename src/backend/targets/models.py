@@ -6,6 +6,7 @@ from typing import Any, Dict
 
 from django.core.exceptions import ValidationError
 from django.db import models
+
 from framework.enums import InputKeyword
 from framework.models import BaseInput
 from projects.models import Project

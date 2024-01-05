@@ -2,13 +2,14 @@ import logging
 from typing import Any, List
 
 from asgiref.sync import sync_to_async
+from telegram import Update
+from telegram.ext import CallbackContext, CommandHandler, ConversationHandler
+
 from platforms.telegram_app.bot.enums import Context, Section
 from platforms.telegram_app.bot.framework import BaseTelegramBot
 from platforms.telegram_app.models import TelegramChat
 from rekono.settings import DESCRIPTION
 from security.cryptography.hashing import hash
-from telegram import Update
-from telegram.ext import CallbackContext, CommandHandler, ConversationHandler
 from users.models import User
 
 logger = logging.getLogger()

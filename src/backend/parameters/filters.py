@@ -1,5 +1,6 @@
 from django_filters.filters import ModelChoiceFilter
 from django_filters.rest_framework import FilterSet
+
 from parameters.models import InputTechnology, InputVulnerability
 from projects.models import Project
 

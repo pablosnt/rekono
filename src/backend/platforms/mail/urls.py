@@ -1,5 +1,6 @@
-from platforms.mail.views import SMTPSettingsViewSet
 from rest_framework.routers import SimpleRouter
+
+from platforms.mail.views import SMTPSettingsViewSet
 
 # Register your views here.
 

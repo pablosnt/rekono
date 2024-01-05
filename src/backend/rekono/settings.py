@@ -64,6 +64,7 @@ INSTALLED_APPS = [
     "platforms.telegram_app",
     "parameters",
     "projects",
+    "reporting",
     "security",
     "settings",
     "target_blacklist",

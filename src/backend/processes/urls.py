@@ -1,5 +1,6 @@
-from processes.views import ProcessViewSet, StepViewSet
 from rest_framework.routers import SimpleRouter
+
+from processes.views import ProcessViewSet, StepViewSet
 
 # Register your views here.
 

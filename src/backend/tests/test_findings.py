@@ -1,4 +1,6 @@
 from django.db import models
+from rest_framework.test import APIClient
+
 from findings.enums import (
     HostOS,
     OSINTDataType,
@@ -17,7 +19,6 @@ from findings.models import (
     Technology,
     Vulnerability,
 )
-from rest_framework.test import APIClient
 from targets.enums import TargetType
 from tests.cases import ApiTestCase
 from tests.framework import ApiTest

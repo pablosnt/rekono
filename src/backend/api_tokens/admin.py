@@ -1,5 +1,6 @@
-from api_tokens.models import ApiToken
 from django.contrib import admin
+
+from api_tokens.models import ApiToken
 
 # Register your models here.
 

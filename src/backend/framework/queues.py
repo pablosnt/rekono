@@ -3,12 +3,13 @@ import logging
 from typing import Any, Dict, List
 
 import django_rq
+from rq.job import Job
+from rq.queue import Queue
+
 from findings.framework.models import Finding
 from framework.models import BaseInput
 from input_types.models import InputType
 from parameters.models import InputTechnology, InputVulnerability
-from rq.job import Job
-from rq.queue import Queue
 from target_ports.models import TargetPort
 from tools.models import Input, Tool
 from wordlists.models import Wordlist

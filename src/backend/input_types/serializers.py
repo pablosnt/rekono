@@ -1,5 +1,6 @@
-from input_types.models import InputType
 from rest_framework.serializers import ModelSerializer
+
+from input_types.models import InputType
 
 
 class InputTypeSerializer(ModelSerializer):

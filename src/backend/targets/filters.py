@@ -1,5 +1,6 @@
 from django_filters.filters import NumberFilter
 from django_filters.rest_framework import FilterSet
+
 from targets.models import Target
 
 

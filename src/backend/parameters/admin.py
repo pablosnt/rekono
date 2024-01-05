@@ -1,4 +1,5 @@
 from django.contrib import admin
+
 from parameters.models import InputTechnology, InputVulnerability
 
 # Register your models here.

@@ -1,9 +1,10 @@
 from typing import Any, Dict, cast
 
 from django.core.exceptions import ValidationError
+from rest_framework.serializers import ModelSerializer, PrimaryKeyRelatedField
+
 from processes.models import Process
 from processes.serializers import SimpleProcessSerializer
-from rest_framework.serializers import ModelSerializer, PrimaryKeyRelatedField
 from targets.models import Target
 from targets.serializers import SimpleTargetSerializer
 from tasks.models import Task

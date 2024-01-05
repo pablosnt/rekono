@@ -1,4 +1,4 @@
-from typing import Dict, List, Any
+from typing import Any, Dict, List
 
 from django.forms.models import model_to_dict
 from executions.models import Execution
@@ -7,6 +7,8 @@ from framework.platforms import BaseNotification
 from platforms.telegram_app.framework import BaseTelegram
 from platforms.telegram_app.models import TelegramChat
 from platforms.telegram_app.notifications.templates import EXECUTION, FINDINGS, HEADER
+from rekono.settings import CONFIG
+from reporting.models import Report
 from users.models import User
 
 
@@ -70,3 +72,10 @@ class Telegram(BaseNotification, BaseTelegram):
             chat,
             "Your session in the Rekono bot has been closed after your password change. Please, execute /start to link it again",
         )
+
+    def report_created(self, report: Any) -> None:
+        if self.is_enabled(report.user):
+            self._send_message(
+                report.user.telegram_chat,
+                f"{report.format.upper()} report with ID {report.id} from {f'project {report.project.name}' if report.project else (f'target {report.target.target}' if report.target else f'task {report.task.id}')} has been created and it's available to download it [here]({CONFIG.frontend_url}/#/projects/{report.get_project().id}/reports)",
+            )

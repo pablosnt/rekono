@@ -1,5 +1,6 @@
-from executions.views import ExecutionViewSet
 from rest_framework.routers import SimpleRouter
+
+from executions.views import ExecutionViewSet
 
 # Register your views here.
 

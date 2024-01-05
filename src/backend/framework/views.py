@@ -3,8 +3,6 @@ from typing import Any, Dict, Optional
 from django.core.exceptions import PermissionDenied
 from django.db.models import Count, QuerySet
 from drf_spectacular.utils import extend_schema
-from framework.models import BaseModel
-from projects.models import Project
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
@@ -12,6 +10,9 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.serializers import Serializer
 from rest_framework.viewsets import ModelViewSet
+
+from framework.models import BaseModel
+from projects.models import Project
 from security.authorization.permissions import IsAuditor
 
 

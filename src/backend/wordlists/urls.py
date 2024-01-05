@@ -1,4 +1,5 @@
 from rest_framework.routers import SimpleRouter
+
 from wordlists.views import WordlistViewSet
 
 # Register your views here.

@@ -1,5 +1,6 @@
-from authentications.models import Authentication
 from django.contrib import admin
+
+from authentications.models import Authentication
 
 # Register your models here.
 

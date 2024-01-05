@@ -2,15 +2,16 @@ import logging
 from typing import List
 
 from django_rq import job
+from rq.job import Job
+
 from executions.models import Execution
 from findings.models import Finding
 from framework.queues import BaseQueue
 from platforms.defect_dojo.integrations import DefectDojo
+from platforms.hacktricks import HackTricks
 from platforms.mail.notifications import SMTP
 from platforms.nvd_nist import NvdNist
 from platforms.telegram_app.notifications.notifications import Telegram
-from platforms.hacktricks import HackTricks
-from rq.job import Job
 
 logger = logging.getLogger()
 

@@ -1,7 +1,8 @@
-from typing import List, Self, Optional
+from typing import List, Optional, Self
 
 from django.apps import apps
 from django.db import models
+
 from framework.models import BaseInput, BaseModel
 from input_types.enums import InputTypeName
 

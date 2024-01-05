@@ -4,14 +4,15 @@ from typing import Dict, List, Tuple
 import rq
 from django.utils import timezone
 from django_rq import job
+from rq.job import Job
+from rq.registry import DeferredJobRegistry
+
 from executions.models import Execution
 from findings.framework.models import Finding
 from findings.queues import FindingsQueue
 from framework.models import BaseInput
 from framework.queues import BaseQueue
 from parameters.models import InputTechnology, InputVulnerability
-from rq.job import Job
-from rq.registry import DeferredJobRegistry
 from target_ports.models import TargetPort
 from tools.executors.base import BaseExecutor
 from tools.parsers.base import BaseParser

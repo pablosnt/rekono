@@ -1,9 +1,11 @@
 from datetime import timedelta
 from pathlib import Path as PathFile
-from typing import Any, Dict, List, Callable, Optional
+from typing import Any, Callable, Dict, List, Optional
 
 import requests
 from django.utils import timezone
+from requests.exceptions import HTTPError
+
 from executions.models import Execution
 from findings.enums import PathType, Severity
 from findings.framework.models import Finding
@@ -14,7 +16,6 @@ from platforms.defect_dojo.models import (
     DefectDojoSync,
     DefectDojoTargetSync,
 )
-from requests.exceptions import HTTPError
 from targets.models import Target
 
 

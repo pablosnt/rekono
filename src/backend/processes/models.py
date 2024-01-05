@@ -1,8 +1,9 @@
 from django.db import models
+from taggit.managers import TaggableManager
+
 from framework.models import BaseLike, BaseModel
 from rekono.settings import AUTH_USER_MODEL
 from security.validators.input_validator import Regex, Validator
-from taggit.managers import TaggableManager
 from tools.models import Configuration
 
 # Create your models here.

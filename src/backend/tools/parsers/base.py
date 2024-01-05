@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Optional
 import defusedxml.ElementTree as parser
 from django.db.models.fields.related_descriptors import ReverseManyToOneDescriptor
 from django.db.models.query_utils import DeferredAttribute
+
 from findings.framework.models import Finding
 from tools.executors.base import BaseExecutor
 

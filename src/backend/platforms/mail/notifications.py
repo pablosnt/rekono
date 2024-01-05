@@ -70,9 +70,11 @@ class SMTP(BaseNotification):
                 subject, "", "Rekono <noreply@rekono.com>", [u.email for u in users]
             )
             template = get_template(template_path)
-            data["rekono_url"] = CONFIG.frontend_url
             # nosemgrep: python.flask.security.xss.audit.direct-use-of-jinja2.direct-use-of-jinja2
-            message.attach_alternative(template.render(data), "text/html")
+            message.attach_alternative(
+                template.render(**{**data, "rekono_url": CONFIG.frontend_url}),
+                "text/html",
+            )
             self.backend.send_messages([message])
         except Exception:
             logger.error("[Mail] Error sending email message")
@@ -124,7 +126,7 @@ class SMTP(BaseNotification):
             [user],
             "New login in your Rekono account",
             "user_login_notification.html",
-            data={"time": timezone.now().strftime(self.datetime_format)},
+            {"time": timezone.now().strftime(self.datetime_format)},
         )
 
     def telegram_linked_notification(self, user: Any) -> None:
@@ -132,5 +134,14 @@ class SMTP(BaseNotification):
             [user],
             "Welcome to Rekono Bot",
             "user_telegram_linked_notification.html",
-            data={"time": timezone.now().strftime(self.datetime_format)},
+            {"time": timezone.now().strftime(self.datetime_format)},
         )
+
+    def report_created(self, report: Any) -> None:
+        if self.is_enabled(report.user):
+            self._send_messages(
+                [report.user],
+                f"{report.format.upper()} report is ready",
+                "report_created.html",
+                {"report": report},
+            )

@@ -1,4 +1,5 @@
 from typing import Dict, List
+
 from findings.enums import Severity
 from findings.models import Technology, Vulnerability
 from tools.parsers.base import BaseParser

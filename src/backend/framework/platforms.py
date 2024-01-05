@@ -1,11 +1,11 @@
 import logging
-from typing import Any, List, Callable
+from typing import Any, Callable, List
 from urllib.parse import urlparse
 
 import requests
-from integrations.models import Integration
 from executions.models import Execution
 from findings.framework.models import Finding
+from integrations.models import Integration
 from requests.adapters import HTTPAdapter, Retry
 from users.enums import Notification
 
@@ -62,6 +62,9 @@ class BaseIntegration(BasePlatform):
 
 class BaseNotification(BasePlatform):
     enable_field = ""
+
+    def is_enabled(self, user: Any) -> bool:
+        return getattr(user, self.enable_field)
 
     def _get_users_to_notify(self, execution: Execution) -> List[Any]:
         users = set()

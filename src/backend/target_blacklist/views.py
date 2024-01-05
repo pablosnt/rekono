@@ -1,6 +1,7 @@
 from django.db.models import QuerySet
-from framework.views import BaseViewSet
 from rest_framework.permissions import IsAuthenticated
+
+from framework.views import BaseViewSet
 from security.authorization.permissions import RekonoModelPermission
 from target_blacklist.filters import TargetBlacklistFilter
 from target_blacklist.models import TargetBlacklist

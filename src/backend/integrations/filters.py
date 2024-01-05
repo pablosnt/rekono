@@ -1,5 +1,6 @@
-from integrations.models import Integration
 from django_filters.rest_framework import FilterSet
+
+from integrations.models import Integration
 
 
 class IntegrationFilter(FilterSet):

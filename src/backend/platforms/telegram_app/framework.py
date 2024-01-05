@@ -2,11 +2,12 @@ import asyncio
 import logging
 from typing import Any, Optional
 
-from platforms.telegram_app.models import TelegramChat, TelegramSettings
 from telegram.constants import ParseMode
 from telegram.error import Forbidden, InvalidToken
 from telegram.ext import Application
 from telegram.helpers import escape_markdown
+
+from platforms.telegram_app.models import TelegramChat, TelegramSettings
 
 logger = logging.getLogger()
 

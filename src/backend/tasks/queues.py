@@ -5,13 +5,14 @@ from typing import Any, Dict, List
 from django.db.models import Max
 from django.utils import timezone
 from django_rq import job
+from rq.job import Job
+
 from executions.enums import Status
 from executions.models import Execution
 from executions.queues import ExecutionsQueue
 from framework.queues import BaseQueue
 from input_types.models import InputType
 from processes.models import Step
-from rq.job import Job
 from tasks.models import Task
 from tools.models import Intensity
 

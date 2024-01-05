@@ -2,11 +2,12 @@ import logging
 from dataclasses import dataclass
 from typing import Any, Optional
 
-from rekono.settings import CONFIG
 from rest_framework import status
 from rest_framework.renderers import JSONRenderer
 from rest_framework.request import HttpRequest
 from rest_framework.response import Response
+
+from rekono.settings import CONFIG
 
 logger = logging.getLogger()
 

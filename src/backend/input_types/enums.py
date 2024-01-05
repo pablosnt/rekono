@@ -1,16 +1,14 @@
-from django.db import models
+from django.db.models import TextChoices
 
 
-class InputTypeName(models.TextChoices):
-    """Input type names, related to findings and wordlists."""
-
+class InputTypeName(TextChoices):
     OSINT = "OSINT"
     HOST = "Host"
     PORT = "Port"
     PATH = "Path"
     TECHNOLOGY = "Technology"
+    CREDENTIAL = "Credential"
     VULNERABILITY = "Vulnerability"
     EXPLOIT = "Exploit"
-    CREDENTIAL = "Credential"
     WORDLIST = "Wordlist"
     AUTHENTICATION = "Authentication"

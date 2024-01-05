@@ -1,8 +1,9 @@
+from rest_framework.serializers import ModelSerializer, PrimaryKeyRelatedField
+from taggit.serializers import TaggitSerializer
+
 from framework.fields import TagField
 from framework.serializers import LikeSerializer
 from processes.models import Process, Step
-from rest_framework.serializers import ModelSerializer, PrimaryKeyRelatedField
-from taggit.serializers import TaggitSerializer
 from tools.models import Configuration
 from tools.serializers import ConfigurationSerializer
 from users.serializers import SimpleUserSerializer

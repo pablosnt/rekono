@@ -1,6 +1,7 @@
-from framework.views import BaseViewSet
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.serializers import Serializer
+
+from framework.views import BaseViewSet
 from security.authorization.permissions import (
     ProjectMemberPermission,
     RekonoModelPermission,
@@ -20,6 +21,8 @@ class FindingViewSet(BaseViewSet):
     ]
 
     def get_serializer_class(self) -> Serializer:
-        if self.request.method == "PUT":
-            return self.triage_serializer_class
-        return super().get_serializer_class()
+        return (
+            self.triage_serializer_class
+            if self.request.method == "PUT"
+            else super().get_serializer_class()
+        )

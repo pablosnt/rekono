@@ -1,10 +1,12 @@
 from typing import List, Optional
-from findings.enums import HostOS
+
+import defusedxml.ElementTree as parser
+
 from executions.models import Execution
+from findings.enums import HostOS
 from findings.framework.models import Finding
 from findings.models import Host, Port, Technology
 from framework.platforms import BaseIntegration
-import defusedxml.ElementTree as parser
 
 
 class HackTricks(BaseIntegration):
@@ -84,7 +86,9 @@ class HackTricks(BaseIntegration):
         self.all_links = self._get_all_hacktricks_links()
 
     def _get_all_hacktricks_links(self) -> List[str]:
-        sitemap = self._request(self.hacktricks_sitemap_url, json=False)
+        sitemap = self._request(
+            self.session.get, self.hacktricks_sitemap_url, json=False
+        )
         return [url[0].text for url in parser.fromstring(sitemap.text).getroot()]
 
     def _get_mapped_value_for_service(self, service: str) -> Optional[str]:

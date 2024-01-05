@@ -1,5 +1,6 @@
 from django_filters.filters import CharFilter, ChoiceFilter, ModelChoiceFilter
 from django_filters.rest_framework import FilterSet
+
 from framework.filters import LikeFilter
 from processes.models import Process, Step
 from tools.models import Configuration, Tool

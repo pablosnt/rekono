@@ -1,9 +1,10 @@
+from telegram import Update
+from telegram.ext import CallbackContext, ConversationHandler
+
 from platforms.telegram_app.bot.commands import Cancel
 from platforms.telegram_app.bot.enums import Context
 from platforms.telegram_app.bot.mixins.framework import BaseMixin
 from target_ports.serializers import TargetPortSerializer
-from telegram import Update
-from telegram.ext import CallbackContext, ConversationHandler
 
 
 class TargetPortMixin(BaseMixin):

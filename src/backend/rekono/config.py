@@ -18,9 +18,16 @@ class RekonoConfig:
         if self.testing:
             self.home = self.base_dir / "tests" / "home"
         self.reports = self.home / "reports"
+        self.generated_reports = self.reports / "generated"
         self.wordlists = self.home / "wordlists"
         self.logs = self.home / "logs"
-        for path in [self.home, self.reports, self.wordlists, self.logs]:
+        for path in [
+            self.home,
+            self.reports,
+            self.generated_reports,
+            self.wordlists,
+            self.logs,
+        ]:
             path.mkdir(exist_ok=True)
         if self.testing:
             shutil.copy(self.config_file, self.home)

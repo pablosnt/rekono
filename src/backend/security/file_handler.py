@@ -6,6 +6,7 @@ from typing import Any, List, Tuple
 
 import magic
 from django.core.exceptions import ValidationError
+
 from rekono.settings import CONFIG
 from settings.models import Settings
 

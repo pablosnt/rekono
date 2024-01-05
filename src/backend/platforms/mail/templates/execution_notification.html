@@ -146,7 +146,6 @@
                             <th scope="col">Type</th>
                             <th scope="col">Path</th>
                             <th scope="col">Status</th>
-                            <th scope="col">Extra</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -162,7 +161,6 @@
                                 <td>{{ p.type }}</td>
                                 <td><strong>{{ p.path }}</strong></td>
                                 <td>{{ p.status }}</td>
-                                <td>{{ p.extra }}</td>
                             </tr>
                         {% endfor %}
                     </tbody>
@@ -227,7 +225,7 @@
                                 <td><strong>{{ c.email }}</strong></td>
                                 <td><strong>{{ c.username }}</strong></td>
                                 <td><strong>{{ c.secret }}</strong></td>
-                                <td>{{ c.secret }}</td>
+                                <td>{{ c.context }}</td>
                             </tr>
                         {% endfor %}
                     </tbody>

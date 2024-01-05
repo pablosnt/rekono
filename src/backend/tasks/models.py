@@ -1,4 +1,5 @@
 from django.db import models
+
 from framework.models import BaseModel
 from processes.models import Process
 from rekono.settings import AUTH_USER_MODEL

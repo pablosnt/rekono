@@ -5,11 +5,11 @@ import subprocess  # nosec
 import uuid
 from pathlib import Path
 from typing import Any, Dict, List
-from settings.models import Settings
+
 from django.forms.models import model_to_dict
+from django.utils import timezone
 
 from authentications.models import Authentication
-from django.utils import timezone
 from executions.enums import Status
 from executions.models import Execution
 from findings.framework.models import Finding
@@ -17,6 +17,7 @@ from findings.models import Port
 from framework.models import BaseInput
 from parameters.models import InputTechnology, InputVulnerability
 from rekono.settings import CONFIG
+from settings.models import Settings
 from target_ports.models import TargetPort
 from tools.models import Intensity
 from wordlists.models import Wordlist

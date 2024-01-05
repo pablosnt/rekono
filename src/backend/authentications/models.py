@@ -1,8 +1,9 @@
 import base64
 from typing import Any, Dict
 
-from authentications.enums import AuthenticationType
 from django.db import models
+
+from authentications.enums import AuthenticationType
 from framework.enums import InputKeyword
 from framework.models import BaseEncrypted, BaseInput
 from security.validators.input_validator import Regex, Validator

@@ -1,6 +1,7 @@
-from framework.views import BaseViewSet, LikeViewSet
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
+
+from framework.views import BaseViewSet, LikeViewSet
 from security.authorization.permissions import RekonoModelPermission
 from tools.filters import ConfigurationFilter, ToolFilter
 from tools.models import Configuration, Tool

@@ -1,5 +1,5 @@
 import base64
-from typing import Dict, List, Any
+from typing import Any, Dict, List
 from unittest import mock
 
 from authentications.enums import AuthenticationType
@@ -7,11 +7,11 @@ from findings.enums import OSINTDataType
 from findings.framework.models import Finding
 from findings.models import Port
 from parameters.models import InputTechnology, InputVulnerability
+from settings.models import Settings
 from target_ports.models import TargetPort
 from tests.executors.mock import get_url
 from tests.framework import RekonoTest
 from wordlists.models import Wordlist
-from settings.models import Settings
 
 
 class ToolExecutorTest(RekonoTest):
