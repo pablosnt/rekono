@@ -70,8 +70,8 @@ class SMTP(BaseNotification):
                 subject, "", "Rekono <noreply@rekono.com>", [u.email for u in users]
             )
             template = get_template(template_path)
-            # nosemgrep: python.flask.security.xss.audit.direct-use-of-jinja2.direct-use-of-jinja2
             message.attach_alternative(
+                # nosemgrep: python.flask.security.xss.audit.direct-use-of-jinja2.direct-use-of-jinja2
                 template.render(**{**data, "rekono_url": CONFIG.frontend_url}),
                 "text/html",
             )

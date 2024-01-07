@@ -8,7 +8,6 @@ from platforms.telegram_app.framework import BaseTelegram
 from platforms.telegram_app.models import TelegramChat
 from platforms.telegram_app.notifications.templates import EXECUTION, FINDINGS, HEADER
 from rekono.settings import CONFIG
-from reporting.models import Report
 from users.models import User
 
 
