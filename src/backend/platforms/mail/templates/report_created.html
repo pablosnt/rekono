@@ -18,11 +18,11 @@
                     <!-- nosemgrep: javascript.express.security.audit.xss.mustache.var-in-href.var-in-href, python.django.security.audit.xss.template-href-var.template-href-var, python.flask.security.xss.audit.template-href-var.template-href-var -->
                     <a href="{{ rekono_url }}/#/projects/{{ report.task.target.project.id }}/reports" class="btn btn-danger"><strong>Reports</strong></a>
                 {% elif e.target %}
-                    <p class="card-text">{{ report.format.upper() }} report with ID {{ report.id }} from target {{ report.target.target }} has been created and it's available to download it <a href="{{ rekono_url }}/#/projects/{{ report.target.project.id }}/reports">here</a></p>
+                    <p class="card-text">{{ report.format.upper() }} report with ID {{ report.id }} from target {{ report.target.target }} has been created and it's available to download it</p>
                     <!-- nosemgrep: javascript.express.security.audit.xss.mustache.var-in-href.var-in-href, python.django.security.audit.xss.template-href-var.template-href-var, python.flask.security.xss.audit.template-href-var.template-href-var -->
                     <a href="{{ rekono_url }}/#/projects/{{ report.target.project.id }}/reports" class="btn btn-danger"><strong>Reports</strong></a>
                 {% else %}
-                    <p class="card-text">{{ report.format.upper() }} report with ID {{ report.id }} from project {{ report.project.name }} has been created and it's available to download it <a href="{{ rekono_url }}/#/projects/{{ report.project.id }}/reports">here</a></p>
+                    <p class="card-text">{{ report.format.upper() }} report with ID {{ report.id }} from project {{ report.project.name }} has been created and it's available to download it</p>
                     <!-- nosemgrep: javascript.express.security.audit.xss.mustache.var-in-href.var-in-href, python.django.security.audit.xss.template-href-var.template-href-var, python.flask.security.xss.audit.template-href-var.template-href-var -->
                     <a href="{{ rekono_url }}/#/projects/{{ report.project.id }}/reports" class="btn btn-danger"><strong>Reports</strong></a>
                 {% endif %}
