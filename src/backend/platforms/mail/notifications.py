@@ -72,7 +72,14 @@ class SMTP(BaseNotification):
         except Exception:
             logger.error("[Mail] Error sending email message")
 
-    def _notify(self, users: List[Any], subject: str, template: str, data: Dict[str, Any], background: bool = True) -> None:
+    def _notify(
+        self,
+        users: List[Any],
+        subject: str,
+        template: str,
+        data: Dict[str, Any],
+        background: bool = True,
+    ) -> None:
         if background:
             threading.Thread(
                 target=self._send_messages, args=(users, subject, template, data)
@@ -96,7 +103,7 @@ class SMTP(BaseNotification):
                 "execution": execution,
                 **findings_by_class,
             },
-            background=False
+            background=False,
         )
 
     def invite_user(self, user: Any, otp: str) -> None:

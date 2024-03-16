@@ -533,7 +533,9 @@ class Profile(ApiTest):
     def test_notification_scope(self) -> None:
         self._setup_tasks_and_executions()
         notification = SMTP()
-        users_to_notify = list(notification._get_users_to_notify_execution(self.execution1))
+        users_to_notify = list(
+            notification._get_users_to_notify_execution(self.execution1)
+        )
         self.assertEqual(1, len(users_to_notify))
         self.assertEqual(self.admin1, users_to_notify[0])
 
@@ -541,7 +543,9 @@ class Profile(ApiTest):
             user_not_executor.notification_scope = Notification.ALL_EXECUTIONS
             user_not_executor.save(update_fields=["notification_scope"])
 
-        users_to_notify = list(notification._get_users_to_notify_execution(self.execution1))
+        users_to_notify = list(
+            notification._get_users_to_notify_execution(self.execution1)
+        )
         self.assertEqual(3, len(users_to_notify))
         self.assertEqual(self.admin1, users_to_notify[0])
         self.assertEqual(self.auditor1, users_to_notify[1])
@@ -549,7 +553,9 @@ class Profile(ApiTest):
 
         self.admin1.notification_scope = Notification.DISABLED
         self.admin1.save(update_fields=["notification_scope"])
-        users_to_notify = list(notification._get_users_to_notify_execution(self.execution1))
+        users_to_notify = list(
+            notification._get_users_to_notify_execution(self.execution1)
+        )
         self.assertEqual(2, len(users_to_notify))
         self.assertEqual(self.auditor1, users_to_notify[0])
         self.assertEqual(self.reader1, users_to_notify[1])
