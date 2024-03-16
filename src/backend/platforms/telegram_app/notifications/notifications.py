@@ -1,11 +1,10 @@
-from typing import Any, Callable, Dict, List
+from typing import Any, Dict, List
 
 from django.forms.models import model_to_dict
 from executions.models import Execution
 from findings.framework.models import Finding
 from framework.platforms import BaseNotification
 from platforms.telegram_app.framework import BaseTelegram
-from platforms.telegram_app.models import TelegramChat
 from platforms.telegram_app.notifications.templates import EXECUTION, FINDINGS, HEADER
 from rekono.settings import CONFIG
 from users.models import User
@@ -17,11 +16,11 @@ class Telegram(BaseNotification, BaseTelegram):
     def is_available(self) -> bool:
         self.initialize()
         return bool(self.settings.secret and self.app and self.app.bot)
-    
+
     def _notify(self, users: List[Any], message: str) -> None:
         for user in users:
             if hasattr(user, "telegram_chat"):
-               self._send_message(user.telegram_chat, message)
+                self._send_message(user.telegram_chat, message)
 
     def _notify_execution(
         self, users: List[User], execution: Execution, findings: List[Finding]

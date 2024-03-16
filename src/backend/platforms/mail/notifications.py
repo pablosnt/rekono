@@ -71,7 +71,7 @@ class SMTP(BaseNotification):
             self.backend.send_messages([message])
         except Exception:
             logger.error("[Mail] Error sending email message")
-    
+
     def _notify(self, users: List[Any], subject: str, template: str, data: Dict[str, Any], background: bool = True) -> None:
         if background:
             threading.Thread(

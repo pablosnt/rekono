@@ -68,11 +68,11 @@ class BaseNotification(BasePlatform):
 
     def _notify(self, users: List[Any], *args: Any, **kwargs: Any) -> None:
         pass
-    
+
     def _notify_if_available(self, users: List[Any], *args: Any, **kwargs: Any) -> None:
         if self.is_available():
             self._notify(users, *args, **kwargs)
-    
+
     def _notify_if_enabled(self, users: List[Any], *args: Any, **kwargs: Any) -> None:
         if self.is_available():
             for user in users:
