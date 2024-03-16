@@ -2,14 +2,13 @@ import logging
 from typing import Any, Dict
 
 from django.utils import timezone
-from rest_framework import status
-from rest_framework.exceptions import AuthenticationFailed
-from rest_framework.serializers import ModelSerializer, SerializerMethodField
-
 from framework.fields import ProtectedSecretField
 from platforms.mail.notifications import SMTP
 from platforms.telegram_app.models import TelegramChat, TelegramSettings
 from platforms.telegram_app.notifications.notifications import Telegram
+from rest_framework import status
+from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.serializers import ModelSerializer, SerializerMethodField
 from security.cryptography.hashing import hash
 from security.validators.input_validator import Regex, Validator
 
@@ -72,7 +71,7 @@ class TelegramChatSerializer(ModelSerializer):
             update_fields=["otp", "otp_expiration", "user"]
         )
         SMTP().telegram_linked_notification(validated_data["user"])
-        Telegram().welcome_message(validated_data["telegram_chat"])
+        Telegram().welcome_message(validated_data["user"])
         logger.info(
             f"[Security] User {validated_data['user'].id} has logged in the Telegram bot",
             extra={"user": validated_data["user"].id},

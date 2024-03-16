@@ -12,18 +12,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Optimize, improve, clean and test source code (https://github.com/pablosnt/rekono/issues/222)
 - Remove tasks status (https://github.com/pablosnt/rekono/issues/222)
 - Remove steps priority (https://github.com/pablosnt/rekono/issues/222)
-- Target ports path to limit executions to it (https://github.com/pablosnt/rekono/issues/222)
+- Target ports path to limit executions scope (https://github.com/pablosnt/rekono/issues/222)
 - Skipped reason field for skipped executions (https://github.com/pablosnt/rekono/issues/222)
 - New executions group to aggregate those that can be executed at the same time (https://github.com/pablosnt/rekono/issues/222)
 - Keep tool versions updated from the system in the database (https://github.com/pablosnt/rekono/issues/222)
+- Support for findings triaging (https://github.com/pablosnt/rekono/issues/222)
 - Configure Defect-Dojo product type at Rekono project level (https://github.com/pablosnt/rekono/issues/222)
 - Add Rekono project tags to Defect-Dojo products (https://github.com/pablosnt/rekono/issues/222)
-- Download of original tool's reports (https://github.com/pablosnt/rekono/pull/264)
+- Download original tool's reports (https://github.com/pablosnt/rekono/pull/264)
 - Configure custom proxies for executions (https://github.com/pablosnt/rekono/pull/265)
 - New endpoint to get status and stats about Redis queues (https://github.com/pablosnt/rekono/pull/266)
 - Pentesting notes that are sharable with other users and linkable with a project or a target (https://github.com/pablosnt/rekono/issues/267)
 - Ability to enable and disable integrations (https://github.com/pablosnt/rekono/issues/269)
 - HackTricks integration to link findings to interesing wiki resources (https://github.com/pablosnt/rekono/issues/271)
+- Creation of reports in JSON, XML and PDF formats (https://github.com/pablosnt/rekono/issues/273)
 
 ### Security
 

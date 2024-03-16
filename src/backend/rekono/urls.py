@@ -22,9 +22,8 @@ from drf_spectacular.views import (
     SpectacularRedocView,
     SpectacularSwaggerView,
 )
-from rest_framework.urlpatterns import format_suffix_patterns
-
 from rekono.views import RQStatsView
+from rest_framework.urlpatterns import format_suffix_patterns
 
 urlpatterns = [
     path("admin/", admin.site.urls),
