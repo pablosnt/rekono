@@ -41,6 +41,7 @@ BASE_DIR = CONFIG.base_dir
 # Application definition
 
 INSTALLED_APPS = [
+    # TODO: Review if all of these default apps are actually needed
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -160,7 +161,7 @@ SIMPLE_JWT = {
 
 LOGGING = {
     "version": 1,
-    # Disable default Django logging system
+    # Disable default Django logging system to avoid noise
     "disable_existing_loggers": False,
     "formatters": {
         "rekono": {
@@ -329,7 +330,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = "static/"
-STATIC_ROOT = CONFIG.home / "static"
+STATICFILES_DIRS = [CONFIG.base_dir.parent / "frontend" / "public" / "static"]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field

@@ -28,6 +28,7 @@ class Property(Enum):
     SMTP_USER = ("RKN_SMTP_USER", "email.user", None)
     SMTP_PASSWORD = ("RKN_SMTP_PASSWORD", "email.password", None)
     SMTP_TLS = ("RKN_SMTP_TLS", "email.tls", True)
+    PDF_REPORT_TEMPLATE = (None, "reports.pdf-template", None)
     CMSEEK_DIR = (
         "RKN_CMSEEK_RESULTS",
         "tools.cmseek.directory",

@@ -40,6 +40,13 @@ class RekonoConfig:
                 self, property.name.lower()
             ):
                 setattr(self, property.name.lower(), self._get_config(property))
+        if not self.pdf_report_template:
+            default_filename = "pdf-report.html"
+            for path in [self.home, self.base_dir / "reporting" / "templates"]:
+                filepath = path / default_filename
+                if filepath.is_file():
+                    self.pdf_report_template = filepath
+                    break
 
     def _get_home(self) -> Path:
         home_from_config = Path(self._get_config(Property.REKONO_HOME))

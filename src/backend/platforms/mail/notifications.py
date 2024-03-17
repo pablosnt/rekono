@@ -69,8 +69,8 @@ class SMTP(BaseNotification):
                 "text/html",
             )
             self.backend.send_messages([message])
-        except Exception:
-            logger.error("[Mail] Error sending email message")
+        except Exception as ex:
+            logger.error(f"[Mail] Error sending email message: {str(ex)}")
 
     def _notify(
         self,

@@ -19,5 +19,6 @@ class ReportFormat(TextChoices):
 
 
 class ReportStatus(TextChoices):
-    CREATED = "Created"
+    READY = "Ready"
     PENDING = "Pending"
+    ERROR = "Error"

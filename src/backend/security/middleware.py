@@ -2,12 +2,11 @@ import logging
 from dataclasses import dataclass
 from typing import Any, Optional
 
+from rekono.settings import CONFIG
 from rest_framework import status
 from rest_framework.renderers import JSONRenderer
 from rest_framework.request import HttpRequest
 from rest_framework.response import Response
-
-from rekono.settings import CONFIG
 
 logger = logging.getLogger()
 
@@ -80,6 +79,8 @@ class SecurityMiddleware:
         self, request: HttpRequest, response: Response
     ) -> Response:
         for header, value in SECURITY_HEADERS.items():
+            if header == "Referrer-Policy" and request.path.startswith("/admin"):
+                value = "strict-origin"
             if header == "Content-Security-Policy":
                 for path, csp in CSP.items():
                     if request.path.startswith(path):

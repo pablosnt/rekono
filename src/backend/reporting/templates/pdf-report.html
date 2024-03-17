@@ -1,0 +1,355 @@
+<!doctype html>
+<html>
+    <head>
+        <style>
+            @page {
+                size: A4 landscape;
+                margin: 2cm;
+            }
+        </style>
+    </head>
+    <body>
+        {% load static %}
+        <img src="{% static 'logo-black.png' %}" alt="My image">
+        <h1>{{  project.name }}</h1>
+        <p class="separator">&nbsp;<p>
+
+        <div id="footer_content">© 2024 Rekono Mantainers. All rights reserved - <pdf:pagenumber> of <pdf:pagecount></div>
+        
+        <!-- TODO: Table of content -->
+        
+        <!-- TODO: Summary of vulnerabilities per severity -->
+
+        <p class="separator">&nbsp;<p>
+
+        {% for target in targets %}
+            <h2>{{ target.target }}</h2>
+
+            <!-- TODO: Per target (if there are more than one): summary of vulnerabilities per severity -->
+
+            {% for key, items in findings.items %}
+                {% if key == target.id %}
+
+                    {% if items.OSINT %}
+                        <h3>OSINT</h3>
+
+                        <table class="table">
+                            <caption>OSINT</caption>
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th scope="col">Data</th>
+                                    <th scope="col">Data type</th>
+                                    <th scope="col">Source</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for o in items.OSINT %}
+                                    <tr>
+                                        <td><strong>{{ o.data }}</strong></td>
+                                        <td>{{ o.data_type }}</td>
+                                        <td>{{ o.source }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+        
+                        <p class="separator">&nbsp;<p></p>
+                    {% endif %}
+
+                    {% if items.Host %}
+                        {% for h in items.Host %}
+                            <h3>Host {{ h.Host.address }}</h3>
+                            <p>OS type: {{ h.Host.os_type }}</p>
+                            <p>OS: {{ h.Host.os }}</p>
+
+                            {% if h.Port %}
+                                <h4>Ports & Technologies</h4>
+                            
+                                <table class="table">
+                                    <caption>Ports</caption>
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th scope="col">Port</th>
+                                            <th scope="col">Status</th>
+                                            <th scope="col">Protocol</th>
+                                            <th scope="col">Service</th>
+                                            <th scope="col">Technologies</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for p in h.Port %}
+                                            <tr>
+                                                <td>{{ p.port }}</td>
+                                                <td>{{ p.status }}</td>
+                                                <td>{{ p.protocol }}</td>
+                                                <td>{{ p.service }}</td>
+                                                <td>
+                                                    <ol>
+                                                    {% for t in h.Technology %}
+                                                        {% if t.port.id == p.id %}
+                                                            <li>
+                                                                {% if t.reference %}
+                                                                    <a href="{{ t.reference }}">{{ t.name }}</a>
+                                                                {% else %}
+                                                                    {{ t.name }}
+                                                                {% endif %}
+                                                                {% if t.reference %}
+                                                                    - {{ t.version }}
+                                                                {% endif %}
+                                                            </li>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                    </ol>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+        
+                                <p class="separator">&nbsp;<p></p>
+                            {% endif %}
+
+                            {% if h.Vulnerability %}
+                                <h4>Vulnerabilities</h4>
+
+                                {% for v in h.Vulnerability %}
+                                    {% if v.severity == "Critical" or v.severity == "High" %}
+                                        <table class="table">
+                                            <tbody>
+                                                <tr>
+                                                    <td>Port</td>
+                                                    {% if v.technology %}
+                                                        <td>{{ v.technology.port }}</td>
+                                                    {% else %}
+                                                        <td>{{ v.port }}</td>
+                                                    {% endif %}
+                                                </tr>
+                                                <tr>
+                                                    <td>Technology</td>
+                                                    <td>
+                                                        {% if v.technology %}
+                                                            {% if v.technology.reference %}
+                                                                <a href="{{ v.technology.reference }}">{{ v.technology.name }}</a>
+                                                            {% else %}
+                                                                {{ v.technology.name }}
+                                                            {% endif %}
+                                                            {% if v.technology.reference %}
+                                                                - {{ v.technology.version }}
+                                                            {% endif %}
+                                                        {% endif %}
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Name</td>
+                                                    <td>{{ v.name }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Description</td>
+                                                    <td>{{ v.description }}</td>
+                                                </tr>
+                                                <!-- TODO add severity with a badge and color -->
+                                                <tr>
+                                                    <td>Severity</td>
+                                                    <td>{{ v.severity }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>CVE</td>
+                                                    <td>{{ v.cve }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>CWE</td>
+                                                    <td>{{ v.cwe }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Exploits</td>
+                                                    <td>
+                                                        {% if h.Exploit %}
+                                                            <ol>
+                                                            {% for e in h.Exploit %}
+                                                                {% if e.vulnerability.id == v.id %}
+                                                                    {% if e.reference %}
+                                                                        <li><a href="{{ e.reference }}">{{ e.title }}</a></li>
+                                                                    {% else %}
+                                                                        <li>{{ e.title }}</li>
+                                                                    {% endif %}
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                            </ol>
+                                                        {% endif %}
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Reference</td>
+                                                    <td>{{ v.reference }}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    {% endif %}
+                                {% endfor %}
+                            {% endif %}
+
+                            {% if h.Credential %}
+                                {% if not h.Vulnerability %}
+                                    <h4>Vulnerabilities</h4>
+                                {% endif %}
+
+                                {% for c in h.Credential %}
+                                    <table class="table">
+                                        <tbody>
+                                            <tr>
+                                                <td>Port</td>
+                                                <td>
+                                                    {% if c.technology %}
+                                                        c.technology.port
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>Technology</td>
+                                                <td>
+                                                    {% if c.technology %}
+                                                        {% if c.technology.reference %}
+                                                            <a href="{{ c.technology.reference }}">{{ c.technology.name }}</a>
+                                                        {% else %}
+                                                            {{ c.technology.name }}
+                                                        {% endif %}
+                                                        {% if c.technology.reference %}
+                                                            - {{ c.technology.version }}
+                                                        {% endif %}
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>Name</td>
+                                                <td>Credential found</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Description</td>
+                                                <td>
+                                                    {% if c.context %}
+                                                        <p>{{ c.context }}</p>
+                                                    {% endif %}
+                                                    <ol>
+                                                        {% if c.email %}
+                                                            <li>Email: {{ c.email }}</li>
+                                                        {% endif %}
+                                                        {% if c.username %}
+                                                            <li>Username: {{ c.username }}</li>
+                                                        {% endif %}
+                                                        {% if c.secret %}
+                                                            <li>Secret: {{ c.secret }}</li>
+                                                        {% endif %}
+                                                    </ol>
+                                                </td>
+                                            </tr>
+                                            <!-- TODO add severity with a badge and color -->
+                                            <tr>
+                                                <td>Severity</td>
+                                                <td>High</td>
+                                            </tr>
+                                            <tr>
+                                                <td>CVE</td>
+                                                <td></td>
+                                            </tr>
+                                            <tr>
+                                                <td>CWE</td>
+                                                <td>CWE-200</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Exploits</td>
+                                                <td></td>
+                                            </tr>
+                                            <tr>
+                                                <td>Reference</td>
+                                                <td></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                {% endfor %}
+                            {% endif %}
+
+                            {% if h.Vulnerability %}
+                                {% for v in h.Vulnerability %}
+                                    {% if v.severity != "Critical" and v.severity != "High" %}
+                                        <table class="table">
+                                            <tbody>
+                                                <tr>
+                                                    <td>Port</td>
+                                                    {% if v.technology %}
+                                                        <td>{{ v.technology.port }}</td>
+                                                    {% else %}
+                                                        <td>{{ v.port }}</td>
+                                                    {% endif %}
+                                                </tr>
+                                                <tr>
+                                                    <td>Technology</td>
+                                                    <td>
+                                                        {% if v.technology %}
+                                                            {% if v.technology.reference %}
+                                                                <a href="{{ v.technology.reference }}">{{ v.technology.name }}</a>
+                                                            {% else %}
+                                                                {{ v.technology.name }}
+                                                            {% endif %}
+                                                            {% if v.technology.reference %}
+                                                                - {{ v.technology.version }}
+                                                            {% endif %}
+                                                        {% endif %}
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Name</td>
+                                                    <td>{{ v.name }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Description</td>
+                                                    <td>{{ v.description }}</td>
+                                                </tr>
+                                                <!-- TODO add severity with a badge and color -->
+                                                <tr>
+                                                    <td>Severity</td>
+                                                    <td>{{ v.severity }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>CVE</td>
+                                                    <td>{{ v.cve }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>CWE</td>
+                                                    <td>{{ v.cwe }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Exploits</td>
+                                                    <td>
+                                                        {% if h.Exploit %}
+                                                            <ol>
+                                                            {% for e in h.Exploit %}
+                                                                {% if e.vulnerability.id == v.id %}
+                                                                    {% if e.reference %}
+                                                                        <li><a href="{{ e.reference }}">{{ e.title }}</a></li>
+                                                                    {% else %}
+                                                                        <li>{{ e.title }}</li>
+                                                                    {% endif %}
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                            </ol>
+                                                        {% endif %}
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Reference</td>
+                                                    <td>{{ v.reference }}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    {% endif %}
+                                {% endfor %}
+                                <p class="separator">&nbsp;<p></p>
+                            {% endif %}
+                            <p class="separator">&nbsp;<p></p>
+                        {% endfor %}
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+        {% endfor %}∂
+    </body>
+</html>
