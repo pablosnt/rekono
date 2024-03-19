@@ -26,7 +26,7 @@ from framework.views import BaseViewSet
 from platforms.mail.notifications import SMTP
 from platforms.telegram_app.notifications.notifications import Telegram
 from projects.models import Project
-from rekono.settings import CONFIG, STATICFILES_DIRS
+from rekono.settings import CONFIG, STATIC_URL, STATICFILES_DIRS
 from reporting.enums import FindingName, ReportFormat, ReportStatus
 from reporting.filters import ReportFilter
 from reporting.models import Report
@@ -140,10 +140,11 @@ class ReportingViewSet(BaseViewSet):
     def download(self, request: Request, pk: str) -> FileResponse:
         report = self.get_object()
         if report.status != ReportStatus.READY:
-            return Response(
-                {"report": "Report is not available yet"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            messages = {
+                ReportStatus.PENDING: "Report is not available yet",
+                ReportStatus.ERROR: "Report generation failed"
+            }
+            return Response({"report": messages[report.status]}, status=status.HTTP_400_BAD_REQUEST)
         path = CONFIG.generated_reports / (report.path or "")
         if not report.path or not path.is_file():
             return Response(status=status.HTTP_404_NOT_FOUND)
@@ -299,8 +300,9 @@ class ReportingViewSet(BaseViewSet):
                 template,
                 dest=filepath,
                 link_callback=lambda uri, rel: str(
-                    STATICFILES_DIRS[0].absolute() / uri.split("/static/", 1)[1]
-                ),
+                    STATICFILES_DIRS[0].absolute() / uri.split(f"/{STATIC_URL}", 1)[1]
+                ) if f"/{STATIC_URL}" in uri else uri,
+                # TODO: Resolve files in static dir in Home
             )
         return not pisa_status.err
 

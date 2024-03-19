@@ -28,6 +28,12 @@ class CreateReportSerializer(ModelSerializer):
     validated_filter = {}
     validated_finding_types = []
 
+    # TODO: Allow PDF encryption with the Rekono password:
+    # - Ask users for password
+    # - Validate Rekono password
+    # - Encrypt file with Rekono password
+    # - Store in database if reports are encrypted or not, and skip them from the querysets of the other users
+
     class Meta:
         model = Report
         fields = (
@@ -54,7 +60,7 @@ class CreateReportSerializer(ModelSerializer):
             value = attrs.get(field)
             if value:
                 no_mandatory_field = False
-                self.validated_filter = {filter_field: value}
+                self.validated_filter = {filter_field: value} if attrs.get("format") != ReportFormat.PDF else {}
                 only_true_positives = attrs.pop("only_true_positives", False)
                 if only_true_positives:
                     self.validated_filter.update(
