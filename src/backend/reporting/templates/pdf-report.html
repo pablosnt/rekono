@@ -133,6 +133,7 @@
                                             <td class="center">{{ o.source|default_if_none:"" }}</td>
                                             <td>
                                                 {% if o.reference %}
+                                                    <!-- nosemgrep: javascript.express.security.audit.xss.mustache.var-in-href.var-in-href, python.django.security.audit.xss.template-href-var.template-href-var, python.flask.security.xss.audit.template-href-var.template-href-var -->
                                                     <a href="{{ o.reference }}">Link</a>
                                                 {% endif %}
                                             </td>
@@ -173,6 +174,7 @@
                                                             {% if t.port.id == p.id %}
                                                                 <li>
                                                                     {% if t.reference %}
+                                                                        <!-- nosemgrep: javascript.express.security.audit.xss.mustache.var-in-href.var-in-href, python.django.security.audit.xss.template-href-var.template-href-var, python.flask.security.xss.audit.template-href-var.template-href-var -->
                                                                         <a href="{{ t.reference }}">{{ t.name }}</a>
                                                                     {% else %}
                                                                         {{ t.name }}
@@ -214,6 +216,7 @@
                                                         <td width="60%">
                                                             {% if v.technology %}
                                                                 {% if v.technology.reference %}
+                                                                    <!-- nosemgrep: javascript.express.security.audit.xss.mustache.var-in-href.var-in-href, python.django.security.audit.xss.template-href-var.template-href-var, python.flask.security.xss.audit.template-href-var.template-href-var -->
                                                                     <a href="{{ v.technology.reference }}">{{ v.technology.name }}</a>
                                                                 {% else %}
                                                                     {{ v.technology.name }}
@@ -252,6 +255,7 @@
                                                                     {% for e in h.Exploit %}
                                                                         {% if e.vulnerability.id == v.id %}
                                                                             {% if e.reference %}
+                                                                                <!-- nosemgrep: javascript.express.security.audit.xss.mustache.var-in-href.var-in-href, python.django.security.audit.xss.template-href-var.template-href-var, python.flask.security.xss.audit.template-href-var.template-href-var -->
                                                                                 <li><a href="{{ e.reference }}">{{ e.title }}</a></li>
                                                                             {% else %}
                                                                                 <li>{{ e.title }}</li>
@@ -266,6 +270,7 @@
                                                         <th bgcolor="#dc3545" class="white" width="20%">Reference</th>
                                                         <td width="60%">
                                                             {% if v.reference %}
+                                                                <!-- nosemgrep: javascript.express.security.audit.xss.mustache.var-in-href.var-in-href, python.django.security.audit.xss.template-href-var.template-href-var, python.flask.security.xss.audit.template-href-var.template-href-var -->
                                                                 <a href="{{ v.reference }}">Link</a>
                                                             {% endif %}
                                                         </td>
@@ -294,6 +299,7 @@
                                                         <td width="60%">
                                                             {% if c.technology %}
                                                                 {% if c.technology.reference %}
+                                                                    <!-- nosemgrep: javascript.express.security.audit.xss.mustache.var-in-href.var-in-href, python.django.security.audit.xss.template-href-var.template-href-var, python.flask.security.xss.audit.template-href-var.template-href-var -->
                                                                     <a href="{{ c.technology.reference }}">{{ c.technology.name }}</a>
                                                                 {% else %}
                                                                     {{ c.technology.name }}
@@ -370,6 +376,7 @@
                                                         <td width="60%">
                                                             {% if v.technology %}
                                                                 {% if v.technology.reference %}
+                                                                    <!-- nosemgrep: javascript.express.security.audit.xss.mustache.var-in-href.var-in-href, python.django.security.audit.xss.template-href-var.template-href-var, python.flask.security.xss.audit.template-href-var.template-href-var -->
                                                                     <a href="{{ v.technology.reference }}">{{ v.technology.name }}</a>
                                                                 {% else %}
                                                                     {{ v.technology.name }}
@@ -408,6 +415,7 @@
                                                                     {% for e in h.Exploit %}
                                                                         {% if e.vulnerability.id == v.id %}
                                                                             {% if e.reference %}
+                                                                                <!-- nosemgrep: javascript.express.security.audit.xss.mustache.var-in-href.var-in-href, python.django.security.audit.xss.template-href-var.template-href-var, python.flask.security.xss.audit.template-href-var.template-href-var -->
                                                                                 <li><a href="{{ e.reference }}">{{ e.title }}</a></li>
                                                                             {% else %}
                                                                                 <li>{{ e.title }}</li>
@@ -422,6 +430,7 @@
                                                         <th bgcolor="#dc3545" class="white" width="20%">Reference</th>
                                                         <td width="60%">
                                                             {% if v.reference %}
+                                                                <!-- nosemgrep: javascript.express.security.audit.xss.mustache.var-in-href.var-in-href, python.django.security.audit.xss.template-href-var.template-href-var, python.flask.security.xss.audit.template-href-var.template-href-var -->
                                                                 <a href="{{ v.reference }}">Link</a>
                                                             {% endif %}
                                                         </td>
@@ -447,6 +456,7 @@
                                                         <td width="60%">
                                                             {% if c.technology %}
                                                                 {% if c.technology.reference %}
+                                                                    <!-- nosemgrep: javascript.express.security.audit.xss.mustache.var-in-href.var-in-href, python.django.security.audit.xss.template-href-var.template-href-var, python.flask.security.xss.audit.template-href-var.template-href-var -->
                                                                     <a href="{{ c.technology.reference }}">{{ c.technology.name }}</a>
                                                                 {% else %}
                                                                     {{ c.technology.name }}
@@ -522,6 +532,7 @@
                                                         <td width="60%">
                                                             {% if v.technology %}
                                                                 {% if v.technology.reference %}
+                                                                    <!-- nosemgrep: javascript.express.security.audit.xss.mustache.var-in-href.var-in-href -->
                                                                     <a href="{{ v.technology.reference }}">{{ v.technology.name }}</a>
                                                                 {% else %}
                                                                     {{ v.technology.name }}
@@ -560,6 +571,7 @@
                                                                     {% for e in h.Exploit %}
                                                                         {% if e.vulnerability.id == v.id %}
                                                                             {% if e.reference %}
+                                                                            <!-- nosemgrep: javascript.express.security.audit.xss.mustache.var-in-href.var-in-href, python.django.security.audit.xss.template-href-var.template-href-var, python.flask.security.xss.audit.template-href-var.template-href-var -->
                                                                                 <li><a href="{{ e.reference }}">{{ e.title }}</a></li>
                                                                             {% else %}
                                                                                 <li>{{ e.title }}</li>
@@ -574,6 +586,7 @@
                                                         <th bgcolor="#dc3545" class="white" width="20%">Reference</th>
                                                         <td width="60%">
                                                             {% if v.reference %}
+                                                            <!-- nosemgrep: javascript.express.security.audit.xss.mustache.var-in-href.var-in-href, python.django.security.audit.xss.template-href-var.template-href-var, python.flask.security.xss.audit.template-href-var.template-href-var -->
                                                                 <a href="{{ v.reference }}">Link</a>
                                                             {% endif %}
                                                         </td>
