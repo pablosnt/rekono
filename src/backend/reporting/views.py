@@ -138,7 +138,7 @@ class ReportingViewSet(BaseViewSet):
         path = (CONFIG.generated_reports / report.path) if report.path else None
         if path and path.exists():
             path.unlink()
-        super().destroy(request, *args, **kwargs)
+        return super().destroy(request, *args, **kwargs)
 
     @extend_schema(
         request=None,
@@ -245,7 +245,11 @@ class ReportingViewSet(BaseViewSet):
                         stats[index] += 1
                         stats_by_target[target.id][index] += 1
                     for credential in host[FindingName.CREDENTIAL.value]:
-                        index = label_index.index(Severity.HIGH.value if credential.secret else Severity.LOW.value)
+                        index = label_index.index(
+                            Severity.HIGH.value
+                            if credential.secret
+                            else Severity.LOW.value
+                        )
                         stats[index] += 1
                         stats_by_target[target.id][index] += 1
         return findings_by_target, stats_by_target, stats

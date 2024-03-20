@@ -81,7 +81,7 @@ class CreateReportSerializer(ModelSerializer):
             )
         self.validated_finding_types = (
             attrs.pop("finding_types")
-            if attrs.get("format") != ReportFormat.PDF
+            if "finding_types" in attrs and attrs.get("format") != ReportFormat.PDF
             else None
         ) or list(FindingName)
         return attrs
