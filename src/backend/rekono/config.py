@@ -21,6 +21,7 @@ class RekonoConfig:
         self.generated_reports = self.reports / "generated"
         self.wordlists = self.home / "wordlists"
         self.logs = self.home / "logs"
+        self.pdf_report_template: Optional[Path] = None
         for path in [
             self.home,
             self.reports,
