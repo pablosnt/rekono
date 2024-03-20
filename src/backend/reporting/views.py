@@ -331,7 +331,7 @@ class ReportingViewSet(BaseViewSet):
                     if report.target
                     else report.task.target.project
                 ),
-                "targets": report.project.targets.all()
+                "targets": (report.project.targets.all() if not CONFIG.testing else [])
                 if report.project
                 else [report.target or report.task.target],
                 "findings": findings_by_target,

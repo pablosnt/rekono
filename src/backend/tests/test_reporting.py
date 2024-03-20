@@ -2,6 +2,8 @@ from typing import Any, List, Optional
 
 from reporting.enums import FindingName, ReportFormat, ReportStatus
 from reporting.models import Report
+from targets.enums import TargetType
+from targets.models import Target
 from tests.cases import ApiTestCase
 from tests.framework import ApiTest
 
@@ -15,6 +17,10 @@ class ReportingTest(ApiTest):
         FindingName.HOST.value,
         FindingName.PORT.value,
         FindingName.PATH.value,
+        FindingName.CREDENTIAL.value,
+        FindingName.TECHNOLOGY.value,
+        FindingName.VULNERABILITY.value,
+        FindingName.EXPLOIT.value,
     ]
 
     def setUp(self) -> None:
@@ -310,11 +316,46 @@ class JsonReportTest(ReportingTest):
     format = ReportFormat.JSON
 
 
+class JsonReportTruePositivesTest(ReportingTest):
+    format = ReportFormat.JSON
+    only_true_positives = False
+
+
 class XmlReportTest(ReportingTest):
     format = ReportFormat.XML
-    only_true_positives = True
+
+
+class XmlReportTruePositivesTest(ReportingTest):
+    format = ReportFormat.XML
+    only_true_positives = False
 
 
 class PdfReportTest(ReportingTest):
     format = ReportFormat.PDF
     finding_types = None
+
+    def setUp(self) -> None:
+        super().setUp()
+        Target.objects.create(
+            project=self.project, target="10.10.10.15", type=TargetType.PRIVATE_IP
+        )
+
+
+class PdfReportWithoutFindingsTest(ApiTest):
+    endpoint = "/api/reports/"
+    cases = [
+        ApiTestCase(
+            ["admin1", "auditor1", "reader1"],
+            "post",
+            404,
+            {
+                "format": ReportFormat.PDF.value,
+                "only_true_positives": True,
+                "project": 1,
+            },
+        )
+    ]
+
+    def setUp(self) -> None:
+        super().setUp()
+        self._setup_tasks_and_executions()
