@@ -1,8 +1,7 @@
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 from django.core.exceptions import ValidationError
 from findings.enums import TriageStatus
-from projects.models import Project
 from reporting.enums import FindingName, ReportFormat
 from reporting.models import Report
 from rest_framework.serializers import (
@@ -10,8 +9,6 @@ from rest_framework.serializers import (
     ModelSerializer,
     MultipleChoiceField,
 )
-from targets.models import Target
-from tasks.models import Task
 
 
 class ReportSerializer(ModelSerializer):
@@ -25,8 +22,8 @@ class CreateReportSerializer(ModelSerializer):
     finding_types = MultipleChoiceField(
         choices=FindingName.choices, required=False, write_only=True
     )
-    validated_filter = {}
-    validated_finding_types = []
+    validated_filter: Dict[str, Any] = {}
+    validated_finding_types: List[FindingName] = []
 
     class Meta:
         model = Report

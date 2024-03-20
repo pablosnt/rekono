@@ -274,7 +274,7 @@ class ReportingViewSet(BaseViewSet):
         filename: str,
         report: Report,
         findings: Dict[Type[Finding], List[Finding]],
-    ) -> None:
+    ) -> bool:
         with (CONFIG.generated_reports / filename).open("w") as filepath:
             json.dump(findings, filepath, ensure_ascii=True, indent=4)
         return True
@@ -294,7 +294,7 @@ class ReportingViewSet(BaseViewSet):
         filename: str,
         report: Report,
         findings: Dict[Type[Finding], List[Finding]],
-    ) -> None:
+    ) -> bool:
         root = ET.Element("findings")
         for finding_type, finding_list in findings.items():
             for finding in finding_list:
@@ -322,7 +322,7 @@ class ReportingViewSet(BaseViewSet):
         findings_by_target: Dict[int, Any],
         stats_by_target: Dict[int, List[int]],
         stats: List[int],
-    ) -> None:
+    ) -> bool:
         template = get_template(CONFIG.pdf_report_template).render(
             {
                 "project": report.project

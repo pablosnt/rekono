@@ -1,6 +1,5 @@
 from typing import Any
 
-from rekono.settings import CONFIG
 from reporting.enums import ReportFormat, ReportStatus
 from reporting.models import Report
 from tests.cases import ApiTestCase
