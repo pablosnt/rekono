@@ -16,9 +16,10 @@
                 }
             }
             h1 { -pdf-outline: false; }
-            pdftoc {
-                color: #666;
-            }
+            h2 { font-size: 35px; }
+            h3 { font-size: 20px; }
+            h4 { font-size: 15px; }
+            pdftoc { color: #666; }
             pdftoc.pdftoclevel1 {
                 font-weight: bold;
                 margin-top: 0.5em;
@@ -30,13 +31,24 @@
                 margin-left: 2em;
                 font-style: italic;
             }
+            .white { color: white; }
+            .center { text-align: center; }
+            .relevant { font-size: 12px }
+            .port { color: orange; }
+            .port.open { color: green; }
+            .port.closed { color: red; }
+            .critical { color: red; }
+            .high { color: orange; }
+            .medium { color: blue; }
+            .badge.low { color: green; }
+            .badge.info { color: black; }
         </style>
     </head>
     <body>
         <div id="footer_content">© 2024 Rekono Mantainers  -  <pdf:pagenumber> of <pdf:pagecount></div>
         <div>
             {% load static %}
-            <div style="text-align:center;">
+            <div class="center">
                 <br>
                 <h1 style="font-size:100px;">{{  project.name }}</h1>
                 <div style="width:1000px; margin-top:150px;">
@@ -49,23 +61,63 @@
                 <pdf:toc />
             </div>
             <pdf:nextpage>
-            <h2 style="font-size:35px">Introduction</h2>
-            <p>{{ project.description|default_if_none:"" }}</p>
-            <!-- TODO: summary of vulnerabilities per severity -->
+            <div>
+                <h2>Summary</h2>
+                <p class="relevant">{{ project.description|default_if_none:"" }}</p>
+            </div>
+            {% if stats|join:"," != "0,0,0,0,0" %}
+                <br>
+                <br>
+                <br>
+                <br>
+                <div>
+                    <canvas type="graph" width="320" height="190">
+                        {
+                                "data": [{{ stats }}],
+                                "labels": ["Critical", "High", "Medium", "Low", "Info"],
+                                "title": {"_text": "Vulnerabilities by Severity", "x": 280, "y": 180},
+                                "type": "verticalbar",
+                                "x": 190, "y": 50,
+                                "barLabelFormat": "%s",
+                                "bars": {"strokeColor": "#f01f34"},
+                                "barLabels": {"nudge": 10}
+                        }
+                    </canvas>
+                </div>
+            {% endif %}
             <pdf:nextpage>
-            <!-- TODO add severity with a badge and color -->
-            <!-- TODO add OS type icon + os field content -->
             {% for target in targets %}
-                <h2 style="font-size:35px">{{ target.target }}</h2>
-                <!-- TODO: if there are more than one target): summary of vulnerabilities per severity per target -->
+                <h2>{{ target.target }}</h2>
+                {% if targets|length > 1 %}
+                    {% for key, items in stats_by_target.items %}
+                        {% if key == target.id and items|join:"," != "0,0,0,0,0" %}
+                            <br>
+                            <br>
+                            <br>
+                            <br>
+                            <canvas type="graph" width="320" height="190">
+                                {
+                                        "data": [{{ items }}],
+                                        "labels": ["Critical", "High", "Medium", "Low", "Info"],
+                                        "title": {"_text": "Vulnerabilities by Severity", "x": 280, "y": 180},
+                                        "type": "verticalbar",
+                                        "x": 190, "y": 50,
+                                        "barLabelFormat": "%s",
+                                        "bars": {"strokeColor": "#f01f34"},
+                                        "barLabels": {"nudge": 10}
+                                }
+                            </canvas>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+                
                 {% for key, items in findings.items %}
                     {% if key == target.id %}
 
                         {% if items.OSINT %}
-                            <h3 style="font-size:20px">OSINT</h3>
-
+                            <h3>OSINT</h3>
                             <table repeat="1" border="1" cellspacing="1" cellpadding="5">
-                                <thead style="color: white;">
+                                <thead class="white">
                                     <tr bgcolor="#dc3545">
                                         <th scope="col">Data</th>
                                         <th scope="col">Data type</th>
@@ -77,8 +129,8 @@
                                     {% for o in items.OSINT %}
                                         <tr>
                                             <td>{{ o.data }}</td>
-                                            <td style="text-align:center;">{{ o.data_type }}</td>
-                                            <td style="text-align:center;">{{ o.source|default_if_none:"" }}</td>
+                                            <td class="center">{{ o.data_type }}</td>
+                                            <td class="center">{{ o.source|default_if_none:"" }}</td>
                                             <td>
                                                 {% if o.reference %}
                                                     <a href="{{ o.reference }}">Link</a>
@@ -91,15 +143,15 @@
                             <br>
                             <br>
                         {% endif %}
+
                         {% if items.Host %}
                             {% for h in items.Host %}
-                                <h3 style="font-size:20px">Host {{ h.Host.address }}</h3>
-                                <p>OS type: {{ h.Host.os_type }}</p>
-                                <p>OS: {{ h.Host.os|default_if_none:"Unknown" }}</p>
+                                <h3>{{ h.Host.address }}</h3>
+                                <p class="relevant">[{{ h.Host.os_type }}] {{ h.Host.os|default_if_none:"Unknown OS" }}</p>
                                 {% if h.Port %}
-                                    <h4 style="font-size:15px">Ports & Technologies</h4>
+                                    <h4>Ports & Technologies</h4>
                                     <table repeat="1" border="1" cellspacing="1" cellpadding="5">
-                                        <thead style="color: white;">
+                                        <thead class="white">
                                             <tr bgcolor="#dc3545">
                                                 <th scope="col">Port</th>
                                                 <th scope="col">Status</th>
@@ -111,10 +163,10 @@
                                         <tbody>
                                             {% for p in h.Port %}
                                                 <tr>
-                                                    <td style="text-align:center;">{{ p.port }}</td>
-                                                    <td style="text-align:center;">{{ p.status }}</td>
-                                                    <td style="text-align:center;">{{ p.protocol|default_if_none:"" }}</td>
-                                                    <td style="text-align:center;">{{ p.service|default_if_none:"" }}</td>
+                                                    <td class="center">{{ p.port }}</td>
+                                                    <td class="center port {{ p.status|lower }}">{{ p.status }}</td>
+                                                    <td class="center">{{ p.protocol|default_if_none:"" }}</td>
+                                                    <td class="center">{{ p.service|default_if_none:"" }}</td>
                                                     <td>
                                                         <ul>
                                                         {% for t in h.Technology %}
@@ -142,23 +194,23 @@
                                 {% endif %}
 
                                 {% if h.Vulnerability %}
-                                    <h4 style="font-size:15px">Vulnerabilities</h4>
+                                    <h4>Vulnerabilities</h4>
                                     {% for v in h.Vulnerability %}
                                         {% if v.severity == "Critical" or v.severity == "High" %}
                                             <table border="1" cellspacing="1" cellpadding="5">
                                                 <tbody>
                                                     <tr>
-                                                        <th bgcolor="#dc3545" style="color: white;" width="20%">Port</th>
+                                                        <th bgcolor="#dc3545" class="white" width="20%">Port</th>
                                                         <td width="60%">
-                                                            {% if v.technology %}
-                                                                {{ v.technology.port }}
+                                                            {% if v.technology and v.technology.port %}
+                                                                {{ v.technology.port.port }}
                                                             {% elif v.port %}
                                                                 {{ v.port.port }}
                                                             {% endif %}
                                                         </td>
                                                     </tr>
                                                     <tr>
-                                                        <th bgcolor="#dc3545" style="color: white;" width="20%">Technology</th>
+                                                        <th bgcolor="#dc3545" class="white" width="20%">Technology</th>
                                                         <td width="60%">
                                                             {% if v.technology %}
                                                                 {% if v.technology.reference %}
@@ -173,27 +225,27 @@
                                                         </td>
                                                     </tr>
                                                     <tr>
-                                                        <th bgcolor="#dc3545" style="color: white;" width="20%">Name</th>
+                                                        <th bgcolor="#dc3545" class="white" width="20%">Name</th>
                                                         <td width="60%">{{ v.name }}</td>
                                                     </tr>
                                                     <tr>
-                                                        <th bgcolor="#dc3545" style="color: white;" width="20%">Description</th>
+                                                        <th bgcolor="#dc3545" class="white" width="20%">Description</th>
                                                         <td width="60%">{{ v.description|default_if_none:"" }}</td>
                                                     </tr>
                                                     <tr>
-                                                        <th bgcolor="#dc3545" style="color: white;" width="20%">Severity</th>
-                                                        <td width="60%">{{ v.severity }}</td>
+                                                        <th bgcolor="#dc3545" class="white" width="20%">Severity</th>
+                                                        <td width="60%" class="{{ v.severity|lower }}">{{ v.severity }}</td>
                                                     </tr>
                                                     <tr>
-                                                        <th bgcolor="#dc3545" style="color: white;" width="20%">CVE</th>
+                                                        <th bgcolor="#dc3545" class="white" width="20%">CVE</th>
                                                         <td width="60%">{{ v.cve|default_if_none:"" }}</td>
                                                     </tr>
                                                     <tr>
-                                                        <th bgcolor="#dc3545" style="color: white;" width="20%">CWE</th>
+                                                        <th bgcolor="#dc3545" class="white" width="20%">CWE</th>
                                                         <td width="60%">{{ v.cwe|default_if_none:"" }}</td>
                                                     </tr>
                                                     <tr>
-                                                        <th bgcolor="#dc3545" style="color: white;" width="20%">Exploits</th>
+                                                        <th bgcolor="#dc3545" class="white" width="20%">Exploits</th>
                                                         <td width="60%">
                                                             {% if h.Exploit %}
                                                                 <ul>
@@ -211,7 +263,7 @@
                                                         </td>
                                                     </tr>
                                                     <tr>
-                                                        <th bgcolor="#dc3545" style="color: white;" width="20%">Reference</th>
+                                                        <th bgcolor="#dc3545" class="white" width="20%">Reference</th>
                                                         <td width="60%">
                                                             {% if v.reference %}
                                                                 <a href="{{ v.reference }}">Link</a>
@@ -227,94 +279,94 @@
 
                                 {% if h.Credential %}
                                     {% if not h.Vulnerability %}
-                                        <h4 style="font-size:15px">Vulnerabilities</h4>
+                                        <h4>Vulnerabilities</h4>
                                     {% endif %}
                                     {% for c in h.Credential %}
-                                        <table border="1" cellspacing="1" cellpadding="5">
-                                            <tbody>
-                                                <tr>
-                                                    <th bgcolor="#dc3545" style="color: white;" width="20%">Port</th>
-                                                    <td width="60%">{{ c.technology.port }}</td>
-                                                </tr>
-                                                <tr>
-                                                    <th bgcolor="#dc3545" style="color: white;" width="20%">Technology</th>
-                                                    <td width="60%">
-                                                        {% if c.technology %}
-                                                            {% if c.technology.reference %}
-                                                                <a href="{{ c.technology.reference }}">{{ c.technology.name }}</a>
-                                                            {% else %}
-                                                                {{ c.technology.name }}
+                                        {% if c.secret %}
+                                            <table border="1" cellspacing="1" cellpadding="5">
+                                                <tbody>
+                                                    <tr>
+                                                        <th bgcolor="#dc3545" class="white" width="20%">Port</th>
+                                                        <td width="60%">{{ c.technology.port.port }}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th bgcolor="#dc3545" class="white" width="20%">Technology</th>
+                                                        <td width="60%">
+                                                            {% if c.technology %}
+                                                                {% if c.technology.reference %}
+                                                                    <a href="{{ c.technology.reference }}">{{ c.technology.name }}</a>
+                                                                {% else %}
+                                                                    {{ c.technology.name }}
+                                                                {% endif %}
+                                                                {% if c.technology.version %}
+                                                                    - {{ c.technology.version }}
+                                                                {% endif %}
                                                             {% endif %}
-                                                            {% if c.technology.version %}
-                                                                - {{ c.technology.version }}
-                                                            {% endif %}
-                                                        {% endif %}
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <th bgcolor="#dc3545" style="color: white;" width="20%">Name</th>
-                                                    <td width="60%">Credential found</td>
-                                                </tr>
-                                                <tr>
-                                                    <th bgcolor="#dc3545" style="color: white;" width="20%">Description</th>
-                                                    <td width="60%">
-                                                        <p>{{ c.context|default_if_none:"" }}</p>
-                                                        <ul>
-                                                            {% if c.email %}
-                                                                <li>Email: {{ c.email }}</li>
-                                                            {% endif %}
-                                                            {% if c.username %}
-                                                                <li>Username: {{ c.username }}</li>
-                                                            {% endif %}
-                                                            {% if c.secret %}
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th bgcolor="#dc3545" class="white" width="20%">Name</th>
+                                                        <td width="60%">Credential found</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th bgcolor="#dc3545" class="white" width="20%">Description</th>
+                                                        <td width="60%">
+                                                            <p>{{ c.context|default_if_none:"" }}</p>
+                                                            <ul>
+                                                                {% if c.email %}
+                                                                    <li>Email: {{ c.email }}</li>
+                                                                {% endif %}
+                                                                {% if c.username %}
+                                                                    <li>Username: {{ c.username }}</li>
+                                                                {% endif %}
                                                                 <li>Secret: {{ c.secret }}</li>
-                                                            {% endif %}
-                                                        </ul>
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <th bgcolor="#dc3545" style="color: white;" width="20%">Severity</th>
-                                                    <td width="60%">High</td>
-                                                </tr>
-                                                <tr>
-                                                    <th bgcolor="#dc3545" style="color: white;" width="20%">CVE</th>
-                                                    <td width="60%"></td>
-                                                </tr>
-                                                <tr>
-                                                    <th bgcolor="#dc3545" style="color: white;" width="20%">CWE</th>
-                                                    <td width="20%">CWE-200</td>
-                                                </tr>
-                                                <tr>
-                                                    <th bgcolor="#dc3545" style="color: white;" width="20%">Exploits</th>
-                                                    <td width="60%"></td>
-                                                </tr>
-                                                <tr>
-                                                    <th bgcolor="#dc3545" style="color: white;" width="20%">Reference</th>
-                                                    <td width="60%"></td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                        <br>
+                                                            </ul>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th bgcolor="#dc3545" class="white" width="20%">Severity</th>
+                                                        <td width="60%" class="high">High</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th bgcolor="#dc3545" class="white" width="20%">CVE</th>
+                                                        <td width="60%"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th bgcolor="#dc3545" class="white" width="20%">CWE</th>
+                                                        <td width="20%">CWE-200</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th bgcolor="#dc3545" class="white" width="20%">Exploits</th>
+                                                        <td width="60%"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th bgcolor="#dc3545" class="white" width="20%">Reference</th>
+                                                        <td width="60%"></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                            <br>
+                                        {% endif %}
                                     {% endfor %}
                                 {% endif %}
 
                                 {% if h.Vulnerability %}
                                     {% for v in h.Vulnerability %}
-                                        {% if v.severity != "Critical" and v.severity != "High" %}
+                                        {% if v.severity == "Medium" or v.severity == "Low" %}
                                             <table border="1" cellspacing="1" cellpadding="5">
                                                 <tbody>
                                                     <tr>
-                                                        <th bgcolor="#dc3545" style="color: white;" width="20%">Port</th>
+                                                        <th bgcolor="#dc3545" class="white" width="20%">Port</th>
                                                         <td width="60%">
-                                                            {% if v.technology %}
-                                                                {{ v.technology.port }}
+                                                            {% if v.technology and v.technology.port %}
+                                                                {{ v.technology.port.port }}
                                                             {% elif v.port %}
                                                                 {{ v.port.port }}
                                                             {% endif %}
                                                         </td>
                                                     </tr>
                                                     <tr>
-                                                        <th bgcolor="#dc3545" style="color: white;" width="20%">Technology</th>
+                                                        <th bgcolor="#dc3545" class="white" width="20%">Technology</th>
                                                         <td width="60%">
                                                             {% if v.technology %}
                                                                 {% if v.technology.reference %}
@@ -329,27 +381,27 @@
                                                         </td>
                                                     </tr>
                                                     <tr>
-                                                        <th bgcolor="#dc3545" style="color: white;" width="20%">Name</th>
+                                                        <th bgcolor="#dc3545" class="white" width="20%">Name</th>
                                                         <td width="60%">{{ v.name }}</td>
                                                     </tr>
                                                     <tr>
-                                                        <th bgcolor="#dc3545" style="color: white;" width="20%">Description</th>
+                                                        <th bgcolor="#dc3545" class="white" width="20%">Description</th>
                                                         <td width="60%">{{ v.description|default_if_none:"" }}</td>
                                                     </tr>
                                                     <tr>
-                                                        <th bgcolor="#dc3545" style="color: white;" width="20%">Severity</th>
-                                                        <td width="60%">{{ v.severity }}</td>
+                                                        <th bgcolor="#dc3545" class="white" width="20%">Severity</th>
+                                                        <td width="60%" class="{{ v.severity|lower }}">{{ v.severity }}</td>
                                                     </tr>
                                                     <tr>
-                                                        <th bgcolor="#dc3545" style="color: white;" width="20%">CVE</th>
+                                                        <th bgcolor="#dc3545" class="white" width="20%">CVE</th>
                                                         <td width="60%">{{ v.cve|default_if_none:"" }}</td>
                                                     </tr>
                                                     <tr>
-                                                        <th bgcolor="#dc3545" style="color: white;" width="20%">CWE</th>
+                                                        <th bgcolor="#dc3545" class="white" width="20%">CWE</th>
                                                         <td width="60%">{{ v.cwe|default_if_none:"" }}</td>
                                                     </tr>
                                                     <tr>
-                                                        <th bgcolor="#dc3545" style="color: white;" width="20%">Exploits</th>
+                                                        <th bgcolor="#dc3545" class="white" width="20%">Exploits</th>
                                                         <td width="60%">
                                                             {% if h.Exploit %}
                                                                 <ul>
@@ -367,7 +419,159 @@
                                                         </td>
                                                     </tr>
                                                     <tr>
-                                                        <th bgcolor="#dc3545" style="color: white;" width="20%">Reference</th>
+                                                        <th bgcolor="#dc3545" class="white" width="20%">Reference</th>
+                                                        <td width="60%">
+                                                            {% if v.reference %}
+                                                                <a href="{{ v.reference }}">Link</a>
+                                                            {% endif %}
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                            <br>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endif %}
+
+                                {% if h.Credential %}
+                                    {% for c in h.Credential %}
+                                        {% if not c.secret %}
+                                            <table border="1" cellspacing="1" cellpadding="5">
+                                                <tbody>
+                                                    <tr>
+                                                        <th bgcolor="#dc3545" class="white" width="20%">Port</th>
+                                                        <td width="60%">{{ c.technology.port.port }}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th bgcolor="#dc3545" class="white" width="20%">Technology</th>
+                                                        <td width="60%">
+                                                            {% if c.technology %}
+                                                                {% if c.technology.reference %}
+                                                                    <a href="{{ c.technology.reference }}">{{ c.technology.name }}</a>
+                                                                {% else %}
+                                                                    {{ c.technology.name }}
+                                                                {% endif %}
+                                                                {% if c.technology.version %}
+                                                                    - {{ c.technology.version }}
+                                                                {% endif %}
+                                                            {% endif %}
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th bgcolor="#dc3545" class="white" width="20%">Name</th>
+                                                        <td width="60%">User found</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th bgcolor="#dc3545" class="white" width="20%">Description</th>
+                                                        <td width="60%">
+                                                            <p>{{ c.context|default_if_none:"" }}</p>
+                                                            <ul>
+                                                                {% if c.email %}
+                                                                    <li>Email: {{ c.email }}</li>
+                                                                {% endif %}
+                                                                {% if c.username %}
+                                                                    <li>Username: {{ c.username }}</li>
+                                                                {% endif %}
+                                                            </ul>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th bgcolor="#dc3545" class="white" width="20%">Severity</th>
+                                                        <td width="60%" class="low">Low</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th bgcolor="#dc3545" class="white" width="20%">CVE</th>
+                                                        <td width="60%"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th bgcolor="#dc3545" class="white" width="20%">CWE</th>
+                                                        <td width="20%">CWE-200</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th bgcolor="#dc3545" class="white" width="20%">Exploits</th>
+                                                        <td width="60%"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th bgcolor="#dc3545" class="white" width="20%">Reference</th>
+                                                        <td width="60%"></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                            <br>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endif %}
+
+                                {% if h.Vulnerability %}
+                                    {% for v in h.Vulnerability %}
+                                        {% if v.severity == "Info" %}
+                                            <table border="1" cellspacing="1" cellpadding="5">
+                                                <tbody>
+                                                    <tr>
+                                                        <th bgcolor="#dc3545" class="white" width="20%">Port</th>
+                                                        <td width="60%">
+                                                            {% if v.technology and v.technology.port %}
+                                                                {{ v.technology.port.port }}
+                                                            {% elif v.port %}
+                                                                {{ v.port.port }}
+                                                            {% endif %}
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th bgcolor="#dc3545" class="white" width="20%">Technology</th>
+                                                        <td width="60%">
+                                                            {% if v.technology %}
+                                                                {% if v.technology.reference %}
+                                                                    <a href="{{ v.technology.reference }}">{{ v.technology.name }}</a>
+                                                                {% else %}
+                                                                    {{ v.technology.name }}
+                                                                {% endif %}
+                                                                {% if v.technology.version %}
+                                                                    - {{ v.technology.version }}
+                                                                {% endif %}
+                                                            {% endif %}
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th bgcolor="#dc3545" class="white" width="20%">Name</th>
+                                                        <td width="60%">{{ v.name }}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th bgcolor="#dc3545" class="white" width="20%">Description</th>
+                                                        <td width="60%">{{ v.description|default_if_none:"" }}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th bgcolor="#dc3545" class="white" width="20%">Severity</th>
+                                                        <td width="60%" class="{{ v.severity|lower }}">{{ v.severity }}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th bgcolor="#dc3545" class="white" width="20%">CVE</th>
+                                                        <td width="60%">{{ v.cve|default_if_none:"" }}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th bgcolor="#dc3545" class="white" width="20%">CWE</th>
+                                                        <td width="60%">{{ v.cwe|default_if_none:"" }}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th bgcolor="#dc3545" class="white" width="20%">Exploits</th>
+                                                        <td width="60%">
+                                                            {% if h.Exploit %}
+                                                                <ul>
+                                                                    {% for e in h.Exploit %}
+                                                                        {% if e.vulnerability.id == v.id %}
+                                                                            {% if e.reference %}
+                                                                                <li><a href="{{ e.reference }}">{{ e.title }}</a></li>
+                                                                            {% else %}
+                                                                                <li>{{ e.title }}</li>
+                                                                            {% endif %}
+                                                                        {% endif %}
+                                                                    {% endfor %}
+                                                                </ul>
+                                                            {% endif %}
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th bgcolor="#dc3545" class="white" width="20%">Reference</th>
                                                         <td width="60%">
                                                             {% if v.reference %}
                                                                 <a href="{{ v.reference }}">Link</a>

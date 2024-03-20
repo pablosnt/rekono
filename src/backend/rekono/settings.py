@@ -41,13 +41,11 @@ BASE_DIR = CONFIG.base_dir
 # Application definition
 
 INSTALLED_APPS = [
-    # TODO: Review if all of these default apps are actually needed
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
-    "django.contrib.staticfiles",
     "django_rq",
     "drf_spectacular",
     "rest_framework",

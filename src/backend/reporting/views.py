@@ -4,7 +4,7 @@ import importlib
 import json
 import threading
 import uuid
-from typing import Any, Dict, List, Optional, Type, cast
+from typing import Any, Dict, List, Optional, Tuple, Type, cast
 from xml.etree import ElementTree as ET  # nosec
 
 from django.db.models import Q, QuerySet
@@ -12,6 +12,7 @@ from django.forms.models import model_to_dict
 from django.http import FileResponse
 from django.template.loader import get_template
 from drf_spectacular.utils import OpenApiResponse, extend_schema
+from findings.enums import Severity
 from findings.framework.models import Finding
 from findings.models import (
     OSINT,
@@ -111,16 +112,26 @@ class ReportingViewSet(BaseViewSet):
             if serializer.validated_data["format"] == ReportFormat.PDF
             else self._get_findings_to_report(serializer)
         )
-        if not findings:
+        if (isinstance(findings, list) and not findings) or (
+            isinstance(findings, tuple) and not findings[0]
+        ):
             return Response(
                 {"findings": "No findings found with this criteria"},
                 status=status.HTTP_404_NOT_FOUND,
             )
         self.perform_create(serializer)
         threading.Thread(
-            target=self._create_report_file, args=(serializer.instance, findings)
+            target=self._create_report_file,
+            args=(serializer.instance,)
+            + (
+                (findings[0], findings[1], findings[2])
+                if isinstance(findings, tuple)
+                else (findings,)
+            ),
         ).start()
-        return Response(ReportSerializer(serializer.instance).data, status=status.HTTP_201_CREATED)
+        return Response(
+            ReportSerializer(serializer.instance).data, status=status.HTTP_201_CREATED
+        )
 
     def destroy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         report = self.get_object()
@@ -142,9 +153,11 @@ class ReportingViewSet(BaseViewSet):
         if report.status != ReportStatus.READY:
             messages = {
                 ReportStatus.PENDING: "Report is not available yet",
-                ReportStatus.ERROR: "Report generation failed"
+                ReportStatus.ERROR: "Report generation failed",
             }
-            return Response({"report": messages[report.status]}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"report": messages[report.status]}, status=status.HTTP_400_BAD_REQUEST
+            )
         path = CONFIG.generated_reports / (report.path or "")
         if not report.path or not path.is_file():
             return Response(status=status.HTTP_404_NOT_FOUND)
@@ -173,8 +186,11 @@ class ReportingViewSet(BaseViewSet):
 
     def _get_findings_to_pdf_report(
         self, serializer: ReportSerializer
-    ) -> Dict[int, Dict[int, Dict[str, List[Dict[str, Any]]]]]:
-        findings = {}
+    ) -> Tuple[Dict[int, Any], Dict[int, List[int]], List[int]]:
+        label_index = [s.value for s in reversed(Severity)]
+        stats = [0] * len(Severity)
+        stats_by_target = {}
+        findings_by_target = {}
         filter = serializer.validated_filter
         for target in (
             serializer.validated_data.get("project").targets.all()
@@ -185,7 +201,8 @@ class ReportingViewSet(BaseViewSet):
             ]
         ):
             filter["executions__task__target"] = target
-            findings[target.id] = {
+            stats_by_target[target.id] = [0] * len(Severity)
+            findings_by_target[target.id] = {
                 FindingName.OSINT.value: OSINT.objects.filter(**filter).all(),
                 FindingName.HOST.value: [
                     {
@@ -217,16 +234,26 @@ class ReportingViewSet(BaseViewSet):
                 ],
             }
             if (
-                len(findings[target.id][FindingName.OSINT.value]) == 0
-                and len(findings[target.id][FindingName.HOST.value]) == 0
+                len(findings_by_target[target.id][FindingName.OSINT.value]) == 0
+                and len(findings_by_target[target.id][FindingName.HOST.value]) == 0
             ):
-                findings.pop(target.id)
-        return findings
+                findings_by_target.pop(target.id)
+            else:
+                for host in findings_by_target[target.id][FindingName.HOST.value]:
+                    for vulnerability in host[FindingName.VULNERABILITY.value]:
+                        index = label_index.index(vulnerability.severity)
+                        stats[index] += 1
+                        stats_by_target[target.id][index] += 1
+                    for credential in host[FindingName.CREDENTIAL.value]:
+                        index = label_index.index(Severity.HIGH.value if credential.secret else Severity.LOW.value)
+                        stats[index] += 1
+                        stats_by_target[target.id][index] += 1
+        return findings_by_target, stats_by_target, stats
 
-    def _create_report_file(self, report: Report, findings: List[Finding]) -> None:
+    def _create_report_file(self, report: Report, *findings: Any) -> None:
         filename = f"{str(uuid.uuid4())}.{report.format.lower()}"
         success = getattr(self, f"_{report.format.lower()}_report")(
-            filename, report, findings
+            filename, report, *findings
         )
         if success:
             report.path = filename
@@ -275,11 +302,22 @@ class ReportingViewSet(BaseViewSet):
             filepath.write(ET.tostring(root, encoding="unicode"))
         return True
 
+    def _pdf_static_content(self, uri: str, rel: str) -> str:
+        if f"/{STATIC_URL}" in uri:
+            filepath = uri.split(f"/{STATIC_URL}", 1)[1]
+            for parent in [STATICFILES_DIRS[0], CONFIG.home]:
+                location = parent / filepath
+                if location.exists():
+                    return str(location)
+        return uri
+
     def _pdf_report(
         self,
         filename: str,
         report: Report,
-        findings: Dict[Type[Finding], List[Finding]],
+        findings_by_target: Dict[int, Any],
+        stats_by_target: Dict[int, List[int]],
+        stats: List[int],
     ) -> None:
         template = get_template(CONFIG.pdf_report_template).render(
             {
@@ -292,19 +330,13 @@ class ReportingViewSet(BaseViewSet):
                 "targets": report.project.targets.all()
                 if report.project
                 else [report.target or report.task.target],
-                "findings": findings,
+                "findings": findings_by_target,
+                "stats_by_target": stats_by_target,
+                "stats": stats,
             }
         )
         with (CONFIG.generated_reports / filename).open("wb") as filepath:
             pisa_status = pisa.CreatePDF(
-                template,
-                dest=filepath,
-                link_callback=lambda uri, rel: str(
-                    STATICFILES_DIRS[0].absolute() / uri.split(f"/{STATIC_URL}", 1)[1]
-                ) if f"/{STATIC_URL}" in uri else uri,
-                # TODO: Resolve files in static dir in Home
+                template, dest=filepath, link_callback=self._pdf_static_content
             )
         return not pisa_status.err
-
-
-# TODO: Create unit tests
