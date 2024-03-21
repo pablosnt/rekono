@@ -27,6 +27,15 @@ jobs:
           format: table
           exit-code: 1
       
+      - name: Scan Nginx image with Dockle
+        uses: goodwithtech/dockle-action@426396fd1cd8feecee31992a6d1482dde8e26515
+        with:
+          image: rekono-nginx
+          format: json
+          output: rekono-nginx-dockle.json
+          exit-code: 1
+          exit-level: warn
+      
       - name: Scan Kali image with Trivy
         continue-on-error: true
         uses: aquasecurity/trivy-action@91713af97dc80187565512baba96e4364e983601
@@ -34,6 +43,15 @@ jobs:
           image-ref: rekono-kali
           format: table
           exit-code: 1
+      
+      - name: Scan Kali image with Dockle
+        uses: goodwithtech/dockle-action@426396fd1cd8feecee31992a6d1482dde8e26515
+        with:
+          image: rekono-kali
+          format: json
+          output: rekono-kali-dockle.json
+          exit-code: 1
+          exit-level: warn
       
       - name: Scan Backend image with Trivy
         continue-on-error: true
@@ -43,6 +61,15 @@ jobs:
           format: table
           exit-code: 1
       
+      - name: Scan Backend image with Dockle
+        uses: goodwithtech/dockle-action@426396fd1cd8feecee31992a6d1482dde8e26515
+        with:
+          image: rekono-backend
+          format: json
+          output: rekono-backend-dockle.json
+          exit-code: 1
+          exit-level: warn
+      
       - name: Scan Frontend image with Trivy
         continue-on-error: true
         uses: aquasecurity/trivy-action@91713af97dc80187565512baba96e4364e983601
@@ -50,6 +77,22 @@ jobs:
           image-ref: rekono-frontend
           format: table
           exit-code: 1
+      
+      - name: Scan Frontend image with Dockle
+        uses: goodwithtech/dockle-action@426396fd1cd8feecee31992a6d1482dde8e26515
+        with:
+          image: rekono-frontend
+          format: json
+          output: rekono-frontend-dockle.json
+          exit-code: 1
+          exit-level: warn
+
+      - name: Upload reports as GitHub artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: dockle
+          path: *-dockle.json
+          if-no-files-found: warn
 
   debian-image:
     name: Debian Image
@@ -82,5 +125,19 @@ jobs:
           image-ref: rekono-debian
           format: table
           exit-code: 1
-
       
+      - name: Scan Debian image with Dockle
+        uses: goodwithtech/dockle-action@426396fd1cd8feecee31992a6d1482dde8e26515
+        with:
+          image: rekono-debian
+          format: json
+          output: dockle.json
+          exit-code: 1
+          exit-level: warn
+
+      - name: Upload report as GitHub artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: rekono-debian
+          path: dockle.json
+          if-no-files-found: warn
