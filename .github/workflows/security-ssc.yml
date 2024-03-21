@@ -17,3 +17,26 @@ jobs:
           github_token: ${{ secrets.ADMIN_PAT }}
           analyze_self_only: true
           artifact_name: legitify
+
+  chain-bench:
+    runs-on: ubuntu-latest
+    name: Chain Bench
+    steps:
+      - name: Chain Bench
+        id: chain-bench
+        uses: aquasecurity/chain-bench-action@vcd35ac2e4470006fc9bbbbcd6c328edb61b72332
+        with:
+          repository-url: ${{ github.server_url }}/${{ github.repository }}
+          github-token: ${{ secrets.ADMIN_PAT }}
+      
+      - name: Save report
+        run: |
+          echo ${{ steps.chain-bench.outputs.chain-bench-result }}
+          echo ${{ steps.chain-bench.outputs.chain-bench-result }} > chain-bench.json
+      
+      - name: Upload report as GitHub artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: chain-bench
+          path: chain-bench.json
+          if-no-files-found: warn
