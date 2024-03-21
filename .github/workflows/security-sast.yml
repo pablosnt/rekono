@@ -29,13 +29,13 @@ jobs:
         include:
           - name: Semgrep Backend
             tool: semgrep
-            version: 1.52.0
+            version: latest
             path: src/backend
             report: semgrep-backend.json
             arguments: --config=auto --error --json
           - name: Semgrep CI/CD
             tool: semgrep
-            version: 1.52.0
+            version: latest
             path: .github/workflows
             report: semgrep-cicd.json
             arguments: --config=auto --error --json
@@ -45,6 +45,12 @@ jobs:
             path: src/backend
             report: bandit.json
             arguments: -r --skip=B105,B106 -f json
+          - name: Njsscan
+            tool: njsscan
+            version: latest
+            path: src/frontend
+            report: njsscan.json
+            arguments: --exit-warning --json
     name: ${{ matrix.name }}
     steps:
       - name: Checkout
