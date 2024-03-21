@@ -24,7 +24,7 @@ jobs:
     steps:
       - name: Chain Bench
         id: chain-bench
-        uses: aquasecurity/chain-bench-action@vcd35ac2e4470006fc9bbbbcd6c328edb61b72332
+        uses: aquasecurity/chain-bench-action@cd35ac2e4470006fc9bbbbcd6c328edb61b72332
         with:
           repository-url: ${{ github.server_url }}/${{ github.repository }}
           github-token: ${{ secrets.ADMIN_PAT }}
