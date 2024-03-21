@@ -31,7 +31,9 @@ jobs:
           github-token: ${{ secrets.ADMIN_PAT }}
       
       - name: Save report
-        run: echo "${{ steps.chain-bench.outputs.chain-bench-result }}" > chain-bench.json
+        run: |
+          echo ${{ steps.chain-bench.outputs.chain-bench-result }}
+          echo ${{ steps.chain-bench.outputs.chain-bench-result }} > chain-bench.json
       
       - name: Upload report as GitHub artifact
         uses: actions/upload-artifact@v3
