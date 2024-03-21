@@ -300,13 +300,13 @@ default_rq_queue = {
 }
 
 RQ_QUEUES = {
-    "tasks-queue": default_rq_queue,
-    "executions-queue": default_rq_queue,
-    "findings-queue": default_rq_queue,
+    "tasks": default_rq_queue,
+    "executions": default_rq_queue,
+    "findings": default_rq_queue,
 }
 
-RQ_QUEUES["executions-queue"]["DEFAULT_TIMEOUT"] = 28800  # 8 hours
-RQ_QUEUES["findings-queue"]["DEFAULT_TIMEOUT"] = 10800  # 3 hours
+RQ_QUEUES["executions"]["DEFAULT_TIMEOUT"] = 28800  # 8 hours
+RQ_QUEUES["findings"]["DEFAULT_TIMEOUT"] = 10800  # 3 hours
 
 
 ################################################################################
