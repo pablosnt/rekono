@@ -1,5 +1,15 @@
 from typing import Any, Callable, List
 
+from telegram import Update
+from telegram.ext import (
+    CallbackContext,
+    CallbackQueryHandler,
+    CommandHandler,
+    ConversationHandler,
+    MessageHandler,
+    filters,
+)
+
 from platforms.telegram_app.bot.commands import Cancel
 from platforms.telegram_app.bot.enums import Context, Section
 from platforms.telegram_app.bot.framework import BaseTelegramBot
@@ -19,15 +29,6 @@ from platforms.telegram_app.bot.mixins.tools import (
     ToolMixin,
 )
 from platforms.telegram_app.bot.mixins.wordlists import WordlistMixin
-from telegram import Update
-from telegram.ext import (
-    CallbackContext,
-    CallbackQueryHandler,
-    CommandHandler,
-    ConversationHandler,
-    MessageHandler,
-    filters,
-)
 
 
 class BaseConversation(ConversationHandler, BaseTelegramBot):

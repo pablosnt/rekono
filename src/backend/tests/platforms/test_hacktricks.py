@@ -1,9 +1,9 @@
-from typing import Dict, List, Any, Optional
-from findings.framework.models import Finding
-from tests.framework import RekonoTest
+from typing import Any, Dict, List, Optional
 from unittest import mock
-from platforms.hacktricks import HackTricks
 
+from findings.framework.models import Finding
+from platforms.hacktricks import HackTricks
+from tests.framework import RekonoTest
 
 base_url = "https://book.hacktricks.xyz/"
 

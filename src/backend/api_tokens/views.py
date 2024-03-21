@@ -1,10 +1,11 @@
+from django.db.models import QuerySet
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.serializers import Serializer
+
 from api_tokens.filters import ApiTokenFilter
 from api_tokens.models import ApiToken
 from api_tokens.serializers import ApiTokenSerializer, CreateApiTokenSerializer
-from django.db.models import QuerySet
 from framework.views import BaseViewSet
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.serializers import Serializer
 
 # Create your views here.
 
@@ -27,6 +28,8 @@ class ApiTokenViewSet(BaseViewSet):
         return super().get_queryset().filter(user=self.request.user).all()
 
     def get_serializer_class(self) -> Serializer:
-        if self.request.method == "POST":
-            return CreateApiTokenSerializer
-        return super().get_serializer_class()
+        return (
+            CreateApiTokenSerializer
+            if self.request.method == "POST"
+            else super().get_serializer_class()
+        )

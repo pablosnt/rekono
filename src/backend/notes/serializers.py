@@ -1,9 +1,11 @@
-from notes.models import Note
 from typing import Any, Dict
+
 from taggit.serializers import TaggitSerializer
-from framework.serializers import LikeSerializer
-from users.serializers import SimpleUserSerializer
+
 from framework.fields import TagField
+from framework.serializers import LikeSerializer
+from notes.models import Note
+from users.serializers import SimpleUserSerializer
 
 
 class NoteSerializer(TaggitSerializer, LikeSerializer):

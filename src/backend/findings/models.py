@@ -1,6 +1,7 @@
 from typing import Any, Dict
 
 from django.db import models
+from django.utils import timezone
 from findings.enums import (
     HostOS,
     OSINTDataType,
@@ -43,9 +44,9 @@ class OSINT(Finding):
             "title": f"{self.data_type} found using OSINT techniques",
             "description": self.data,
             "severity": Severity.MEDIUM,
-            "date": self.last_seen.strftime(
-                DefectDojoSettings.objects.first().date_format
-            ),
+            "date": (
+                self.executions.order_by("-end").first().end or timezone.now()
+            ).strftime(DefectDojoSettings.objects.first().date_format),
         }
 
     def __str__(self) -> str:
@@ -77,9 +78,9 @@ class Host(Finding):
                 [field for field in [self.address, self.os_type] if field]
             ),
             "severity": Severity.INFO,
-            "date": self.last_seen.strftime(
-                DefectDojoSettings.objects.first().date_format
-            ),
+            "date": (
+                self.executions.order_by("-end").first().end or timezone.now()
+            ).strftime(DefectDojoSettings.objects.first().date_format),
         }
 
     def __str__(self) -> str:
@@ -136,9 +137,9 @@ class Port(Finding):
             if self.host
             else description,
             "severity": Severity.INFO,
-            "date": self.last_seen.strftime(
-                DefectDojoSettings.objects.first().date_format
-            ),
+            "date": (
+                self.executions.order_by("-end").first().end or timezone.now()
+            ).strftime(DefectDojoSettings.objects.first().date_format),
         }
 
     def __str__(self) -> str:
@@ -222,9 +223,9 @@ class Path(Finding):
             "title": "Path discovered",
             "description": description,
             "severity": Severity.INFO,
-            "date": self.last_seen.strftime(
-                DefectDojoSettings.objects.first().date_format
-            ),
+            "date": (
+                self.executions.order_by("-end").first().end or timezone.now()
+            ).strftime(DefectDojoSettings.objects.first().date_format),
         }
 
     def __str__(self) -> str:
@@ -282,9 +283,9 @@ class Technology(Finding):
             "severity": Severity.LOW,
             "cwe": 200,  # CWE-200: Exposure of Sensitive Information to Unauthorized Actor
             "references": self.reference,
-            "date": self.last_seen.strftime(
-                DefectDojoSettings.objects.first().date_format
-            ),
+            "date": (
+                self.executions.order_by("-end").first().end or timezone.now()
+            ).strftime(DefectDojoSettings.objects.first().date_format),
         }
 
     def __str__(self) -> str:
@@ -328,9 +329,9 @@ class Credential(Finding):
             ),
             "cwe": 200,  # CWE-200: Exposure of Sensitive Information to Unauthorized Actor
             "severity": Severity.HIGH,
-            "date": self.last_seen.strftime(
-                DefectDojoSettings.objects.first().date_format
-            ),
+            "date": (
+                self.executions.order_by("-end").first().end or timezone.now()
+            ).strftime(DefectDojoSettings.objects.first().date_format),
         }
 
     def __str__(self) -> str:
@@ -385,9 +386,9 @@ class Vulnerability(Finding):
             "cve": self.cve,
             "cwe": int(self.cwe.split("-", 1)[1]) if self.cwe else None,
             "references": self.reference,
-            "date": self.last_seen.strftime(
-                DefectDojoSettings.objects.first().date_format
-            ),
+            "date": (
+                self.executions.order_by("-end").first().end or timezone.now()
+            ).strftime(DefectDojoSettings.objects.first().date_format),
         }
 
     def __str__(self) -> str:
@@ -431,9 +432,9 @@ class Exploit(Finding):
             if self.vulnerability
             else Severity.MEDIUM,
             "references": self.reference,
-            "date": self.last_seen.strftime(
-                DefectDojoSettings.objects.first().date_format
-            ),
+            "date": (
+                self.executions.order_by("-end").first().end or timezone.now()
+            ).strftime(DefectDojoSettings.objects.first().date_format),
         }
 
     def __str__(self) -> str:

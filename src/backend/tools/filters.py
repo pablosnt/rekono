@@ -1,5 +1,6 @@
 from django_filters.filters import CharFilter, ChoiceFilter
 from django_filters.rest_framework import FilterSet
+
 from framework.filters import LikeFilter
 from tools.models import Configuration, Tool
 

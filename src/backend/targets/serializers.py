@@ -1,7 +1,8 @@
 from typing import Any, Dict
 
-from platforms.defect_dojo.serializers import DefectDojoTargetSyncSerializer
 from rest_framework.serializers import ModelSerializer
+
+from platforms.defect_dojo.serializers import DefectDojoTargetSyncSerializer
 from targets.models import Target
 
 

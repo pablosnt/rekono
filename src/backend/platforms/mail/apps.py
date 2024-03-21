@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import Any, List
 
 from django.apps import AppConfig
+
 from framework.apps import BaseApp
 
 

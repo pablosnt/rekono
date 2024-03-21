@@ -12,13 +12,14 @@ class Finding(BaseInput):
         Execution,
         related_name="%(class)s",
     )
-    first_seen = models.DateTimeField(auto_now_add=True)
-    last_seen = models.DateTimeField(auto_now=True)
     triage_status = models.TextField(
         max_length=15, choices=TriageStatus.choices, default=TriageStatus.UNTRIAGED
     )
     triage_comment = models.TextField(
-        max_length=300, validators=[Validator(Regex.TEXT.value, code="triage_comment")]
+        max_length=300,
+        validators=[Validator(Regex.TEXT.value, code="triage_comment")],
+        blank=True,
+        null=True,
     )
     defect_dojo_id = models.IntegerField(blank=True, null=True)
     hacktricks_link = models.TextField(max_length=300, blank=True, null=True)

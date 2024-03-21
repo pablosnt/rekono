@@ -232,4 +232,10 @@ ROLES = {
         "change": [Role.ADMIN],
         "delete": [],
     },
+    "report": {
+        "view": [Role.ADMIN, Role.AUDITOR, Role.READER],
+        "add": [Role.ADMIN, Role.AUDITOR, Role.READER],
+        "change": [],
+        "delete": [Role.ADMIN, Role.AUDITOR, Role.READER],
+    },
 }

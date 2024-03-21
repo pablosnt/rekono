@@ -1,8 +1,8 @@
 from typing import Any
+
 from notes.models import Note
 from tests.cases import ApiTestCase
 from tests.framework import ApiTest
-
 
 private_note = {
     "project": 1,

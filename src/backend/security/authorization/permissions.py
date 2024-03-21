@@ -1,13 +1,14 @@
 from typing import Any
 
+from notes.models import Note
 from platforms.telegram_app.models import TelegramChat
 from processes.models import Process, Step
+from reporting.models import Report
 from rest_framework.permissions import BasePermission, DjangoModelPermissions
 from rest_framework.request import Request
 from rest_framework.views import View
 from security.authorization.roles import Role
 from wordlists.models import Wordlist
-from notes.models import Note
 
 
 class RekonoModelPermission(DjangoModelPermissions):
@@ -138,12 +139,11 @@ class OwnerPermission(BasePermission):
         """
         instance = None
         owner_field = ""
-        allow_admin = False
+        allow_admin = not isinstance(obj, Note) and not isinstance(obj, TelegramChat)
         if obj.__class__ in [Wordlist, Process, Step, Note]:
             instance = obj.process if obj.__class__ == Step else obj
             owner_field = "owner"
-            allow_admin = not isinstance(obj, Note)
-        elif obj.__class__ == TelegramChat:
+        elif obj.__class__ in [TelegramChat, Report]:
             instance = obj
             owner_field = "user"
         return self._has_object_permission(request, instance, owner_field, allow_admin)

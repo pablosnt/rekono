@@ -1,4 +1,5 @@
 from django_filters.rest_framework import FilterSet
+
 from target_blacklist.models import TargetBlacklist
 
 

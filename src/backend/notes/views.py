@@ -1,24 +1,24 @@
-from django.db.models import QuerySet, Q
+from typing import Any, Dict, Optional, cast
 
-from framework.views import LikeViewSet
-from typing import cast
-from targets.models import Target
-from notes.models import Note
-from notes.filters import NoteFilter
-from notes.serializers import NoteSerializer
-from rest_framework.permissions import IsAuthenticated
-from security.authorization.permissions import (
-    OwnerPermission,
-    RekonoModelPermission,
-    ProjectMemberPermission,
-)
+from django.db.models import Q, QuerySet
 from drf_spectacular.utils import extend_schema
-from rest_framework.status import HTTP_201_CREATED
 from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
+from rest_framework.status import HTTP_201_CREATED
+
+from framework.views import LikeViewSet
+from notes.filters import NoteFilter
+from notes.models import Note
+from notes.serializers import NoteSerializer
 from projects.models import Project
-from typing import Dict, Any, Optional
+from security.authorization.permissions import (
+    OwnerPermission,
+    ProjectMemberPermission,
+    RekonoModelPermission,
+)
+from targets.models import Target
 
 # Create your views here.
 

@@ -3,11 +3,12 @@ from typing import Any, Dict
 
 from django.db import transaction
 from django.shortcuts import get_object_or_404
+from rest_framework.serializers import IntegerField, ModelSerializer, Serializer
+from taggit.serializers import TaggitSerializer
+
 from framework.fields import TagField
 from platforms.defect_dojo.serializers import DefectDojoSyncSerializer
 from projects.models import Project
-from rest_framework.serializers import IntegerField, ModelSerializer, Serializer
-from taggit.serializers import TaggitSerializer
 from targets.serializers import SimpleTargetSerializer
 from users.models import User
 from users.serializers import SimpleUserSerializer

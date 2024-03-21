@@ -1,12 +1,12 @@
-from typing import Dict, List, Any
+from typing import Any, Dict, List
 
 from django.forms.models import model_to_dict
 from executions.models import Execution
 from findings.framework.models import Finding
 from framework.platforms import BaseNotification
 from platforms.telegram_app.framework import BaseTelegram
-from platforms.telegram_app.models import TelegramChat
 from platforms.telegram_app.notifications.templates import EXECUTION, FINDINGS, HEADER
+from rekono.settings import CONFIG
 from users.models import User
 
 
@@ -16,6 +16,11 @@ class Telegram(BaseNotification, BaseTelegram):
     def is_available(self) -> bool:
         self.initialize()
         return bool(self.settings.secret and self.app and self.app.bot)
+
+    def _notify(self, users: List[Any], message: str) -> None:
+        for user in users:
+            if hasattr(user, "telegram_chat"):
+                self._send_message(user.telegram_chat, message)
 
     def _notify_execution(
         self, users: List[User], execution: Execution, findings: List[Finding]
@@ -56,17 +61,22 @@ class Telegram(BaseNotification, BaseTelegram):
                 ]
             ),
         )
-        for user in users:
-            self._send_message(user.telegram_chat, message)
+        self._notify_if_available(users, message)
 
-    def welcome_message(self, chat: TelegramChat) -> None:
-        self._send_message(
-            chat,
-            f"Welcome *{self._escape(chat.user.username)}*\! Your Rekono bot is ready",
+    def welcome_message(self, user: User) -> None:
+        self._notify_if_available(
+            [user],
+            f"Welcome *{self._escape(user.username)}*\! Your Rekono bot is ready",
         )
 
-    def logout_after_password_change_message(self, chat: TelegramChat) -> None:
-        self._send_message(
-            chat,
+    def logout_after_password_change_message(self, user: User) -> None:
+        self._notify_if_available(
+            [user],
             "Your session in the Rekono bot has been closed after your password change. Please, execute /start to link it again",
+        )
+
+    def report_created(self, report: Any) -> None:
+        self._notify_if_enabled(
+            [report.user],
+            f"{report.format.upper()} report with ID {report.id} from {f'project {report.project.name}' if report.project else (f'target {report.target.target}' if report.target else f'task {report.task.id}')} has been created and it's available to download it [here]({CONFIG.frontend_url}/#/projects/{report.get_project().id}/reports)",
         )

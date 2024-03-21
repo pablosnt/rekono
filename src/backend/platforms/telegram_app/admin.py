@@ -1,4 +1,5 @@
 from django.contrib import admin
+
 from platforms.telegram_app.models import TelegramChat, TelegramSettings
 
 # Register your models here.

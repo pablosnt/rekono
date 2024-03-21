@@ -1,5 +1,6 @@
-from projects.views import ProjectViewSet
 from rest_framework.routers import SimpleRouter
+
+from projects.views import ProjectViewSet
 
 # Register your views here.
 

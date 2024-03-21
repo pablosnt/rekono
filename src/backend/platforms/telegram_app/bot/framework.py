@@ -2,12 +2,13 @@ import logging
 from typing import Any
 
 from asgiref.sync import sync_to_async
-from platforms.telegram_app.bot.enums import Context
-from platforms.telegram_app.framework import BaseTelegram
-from platforms.telegram_app.models import TelegramChat
 from telegram import Update
 from telegram.constants import ParseMode
 from telegram.ext import CallbackContext
+
+from platforms.telegram_app.bot.enums import Context
+from platforms.telegram_app.framework import BaseTelegram
+from platforms.telegram_app.models import TelegramChat
 
 logger = logging.getLogger()
 

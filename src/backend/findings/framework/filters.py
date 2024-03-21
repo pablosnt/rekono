@@ -27,8 +27,6 @@ class FindingFilter(MultipleFieldFilterSet):
         model = OSINT  # It's needed to define a non-abstract model as default. It will be overwritten
         fields = {
             "executions": ["exact"],
-            "first_seen": ["gte", "lte", "exact"],
-            "last_seen": ["gte", "lte", "exact"],
             "triage_status": ["exact"],
             "triage_comment": ["exact", "icontains"],
         }

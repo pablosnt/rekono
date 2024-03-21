@@ -1,16 +1,17 @@
 import logging
-from typing import Any, Dict, List, Tuple, Callable, Optional
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from asgiref.sync import sync_to_async
 from django.db import IntegrityError
 from django.db.models import QuerySet
+from rest_framework.serializers import Serializer
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram.ext import CallbackContext, ConversationHandler
+
 from platforms.telegram_app.bot.commands import Cancel
 from platforms.telegram_app.bot.enums import Context
 from platforms.telegram_app.bot.framework import BaseTelegramBot
 from platforms.telegram_app.models import TelegramChat
-from rest_framework.serializers import Serializer
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
-from telegram.ext import CallbackContext, ConversationHandler
 
 logger = logging.getLogger()
 

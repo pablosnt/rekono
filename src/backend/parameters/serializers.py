@@ -1,5 +1,6 @@
-from parameters.models import InputTechnology, InputVulnerability
 from rest_framework.serializers import ModelSerializer
+
+from parameters.models import InputTechnology, InputVulnerability
 
 
 class InputTechnologySerializer(ModelSerializer):

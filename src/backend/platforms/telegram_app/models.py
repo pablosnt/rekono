@@ -1,5 +1,6 @@
 from django.db import models
 from django.db.models import Q
+
 from framework.models import BaseEncrypted, BaseModel
 from rekono.settings import AUTH_USER_MODEL
 from security.authorization.roles import Role

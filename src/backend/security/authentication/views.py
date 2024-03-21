@@ -1,4 +1,5 @@
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+
 from security.authorization.permissions import IsNotAuthenticated
 
 

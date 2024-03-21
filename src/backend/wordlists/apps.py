@@ -4,6 +4,7 @@ from typing import Any, List
 
 from django.apps import AppConfig
 from django.db.models.signals import post_migrate
+
 from framework.apps import BaseApp
 
 

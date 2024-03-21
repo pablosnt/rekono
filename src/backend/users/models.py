@@ -5,13 +5,14 @@ from typing import Any, cast
 from django.contrib.auth.models import AbstractUser, Group, UserManager
 from django.db import models
 from django.utils import timezone
-from framework.models import BaseModel
-from platforms.mail.notifications import SMTP
-from rekono.settings import CONFIG
 from rest_framework_simplejwt.token_blacklist.models import (
     BlacklistedToken,
     OutstandingToken,
 )
+
+from framework.models import BaseModel
+from platforms.mail.notifications import SMTP
+from rekono.settings import CONFIG
 from security.authentication.api import ApiToken
 from security.authorization.roles import Role
 from security.cryptography.hashing import hash

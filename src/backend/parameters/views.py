@@ -1,3 +1,5 @@
+from rest_framework.permissions import IsAuthenticated
+
 from framework.views import BaseViewSet
 from parameters.filters import InputTechnologyFilter, InputVulnerabilityFilter
 from parameters.models import InputTechnology, InputVulnerability
@@ -5,7 +7,6 @@ from parameters.serializers import (
     InputTechnologySerializer,
     InputVulnerabilitySerializer,
 )
-from rest_framework.permissions import IsAuthenticated
 from security.authorization.permissions import (
     ProjectMemberPermission,
     RekonoModelPermission,

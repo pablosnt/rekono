@@ -1,10 +1,11 @@
 import importlib
-from typing import Any, Dict, List, Optional, Callable, cast
+from typing import Any, Callable, Dict, List, Optional, cast
 
 import requests
 import urllib3
 from django.db import models
 from django.db.models import Q
+
 from rekono.settings import AUTH_USER_MODEL, CONFIG
 from security.cryptography.encryption import Encryptor
 

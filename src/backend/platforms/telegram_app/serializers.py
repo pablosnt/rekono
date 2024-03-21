@@ -71,7 +71,7 @@ class TelegramChatSerializer(ModelSerializer):
             update_fields=["otp", "otp_expiration", "user"]
         )
         SMTP().telegram_linked_notification(validated_data["user"])
-        Telegram().welcome_message(validated_data["telegram_chat"])
+        Telegram().welcome_message(validated_data["user"])
         logger.info(
             f"[Security] User {validated_data['user'].id} has logged in the Telegram bot",
             extra={"user": validated_data["user"].id},

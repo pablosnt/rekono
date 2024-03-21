@@ -1,5 +1,6 @@
 from django_filters.filters import ChoiceFilter, ModelChoiceFilter
 from django_filters.rest_framework import FilterSet
+
 from executions.models import Execution
 from processes.models import Process
 from projects.models import Project

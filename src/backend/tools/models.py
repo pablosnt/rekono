@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any, Optional
 
 from django.db import models
+
 from framework.models import BaseLike, BaseModel
 from input_types.models import InputType
 from rekono.settings import CONFIG

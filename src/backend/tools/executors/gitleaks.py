@@ -1,6 +1,6 @@
+import os
 import subprocess  # nosec
 import uuid
-import os
 from pathlib import Path
 from typing import Any, Dict
 

@@ -1,4 +1,5 @@
 from rest_framework.serializers import ModelSerializer
+
 from target_blacklist.models import TargetBlacklist
 
 

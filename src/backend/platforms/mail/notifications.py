@@ -53,13 +53,6 @@ class SMTP(BaseNotification):
         except Exception:
             return False
 
-    def _send_messages_in_background(
-        self, users: List[Any], subject: str, template: str, data: Dict[str, Any]
-    ) -> None:
-        threading.Thread(
-            target=self._send_messages, args=(users, subject, template, data)
-        ).start()
-
     def _send_messages(
         self, users: List[Any], subject: str, template_path: str, data: Dict[str, Any]
     ) -> None:
@@ -70,12 +63,29 @@ class SMTP(BaseNotification):
                 subject, "", "Rekono <noreply@rekono.com>", [u.email for u in users]
             )
             template = get_template(template_path)
-            data["rekono_url"] = CONFIG.frontend_url
-            # nosemgrep: python.flask.security.xss.audit.direct-use-of-jinja2.direct-use-of-jinja2
-            message.attach_alternative(template.render(data), "text/html")
+            message.attach_alternative(
+                # nosemgrep: python.flask.security.xss.audit.direct-use-of-jinja2.direct-use-of-jinja2
+                template.render({**data, "rekono_url": CONFIG.frontend_url}),
+                "text/html",
+            )
             self.backend.send_messages([message])
-        except Exception:
-            logger.error("[Mail] Error sending email message")
+        except Exception as ex:
+            logger.error(f"[Mail] Error sending email message: {str(ex)}")
+
+    def _notify(
+        self,
+        users: List[Any],
+        subject: str,
+        template: str,
+        data: Dict[str, Any],
+        background: bool = True,
+    ) -> None:
+        if background:
+            threading.Thread(
+                target=self._send_messages, args=(users, subject, template, data)
+            ).start()
+        else:
+            self._send_messages(users, subject, template, data)
 
     def _notify_execution(
         self, users: List[Any], execution: Execution, findings: List[Finding]
@@ -85,7 +95,7 @@ class SMTP(BaseNotification):
             if findings.__class__.__name__.lower() not in findings_by_class:
                 findings_by_class[findings.__class__.__name__.lower()] = []
             findings_by_class[findings.__class__.__name__.lower()].append(finding)
-        self._send_messages(
+        self._notify_if_available(
             users,
             f"[Rekono] {execution.configuration.tool.name} execution completed",
             "execution_notification.html",
@@ -93,10 +103,11 @@ class SMTP(BaseNotification):
                 "execution": execution,
                 **findings_by_class,
             },
+            background=False,
         )
 
     def invite_user(self, user: Any, otp: str) -> None:
-        self._send_messages_in_background(
+        self._notify_if_available(
             [user],
             "Welcome to Rekono",
             "user_invitation.html",
@@ -104,7 +115,7 @@ class SMTP(BaseNotification):
         )
 
     def reset_password(self, user: Any, otp: str) -> None:
-        self._send_messages_in_background(
+        self._notify_if_available(
             [user],
             "Reset Rekono password",
             "user_password_reset.html",
@@ -112,7 +123,7 @@ class SMTP(BaseNotification):
         )
 
     def enable_user_account(self, user: Any, otp: str) -> None:
-        self._send_messages_in_background(
+        self._notify_if_available(
             [user],
             "Rekono user enabled",
             "user_enable_account.html",
@@ -120,17 +131,25 @@ class SMTP(BaseNotification):
         )
 
     def login_notification(self, user: Any) -> None:
-        self._send_messages_in_background(
+        self._notify_if_available(
             [user],
             "New login in your Rekono account",
             "user_login_notification.html",
-            data={"time": timezone.now().strftime(self.datetime_format)},
+            {"time": timezone.now().strftime(self.datetime_format)},
         )
 
     def telegram_linked_notification(self, user: Any) -> None:
-        self._send_messages_in_background(
+        self._notify_if_available(
             [user],
             "Welcome to Rekono Bot",
             "user_telegram_linked_notification.html",
-            data={"time": timezone.now().strftime(self.datetime_format)},
+            {"time": timezone.now().strftime(self.datetime_format)},
+        )
+
+    def report_created(self, report: Any) -> None:
+        self._notify_if_enabled(
+            [report.user],
+            f"{report.format.upper()} report is ready",
+            "report_created.html",
+            {"report": report},
         )

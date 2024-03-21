@@ -138,7 +138,7 @@ class FindingTest(ApiTest):
                             {
                                 "id": 1,
                                 "triage_status": TriageStatus.UNTRIAGED.value,
-                                "triage_comment": "",
+                                "triage_comment": None,
                                 **{
                                     k: v
                                     if not isinstance(v, models.TextChoices)
@@ -159,7 +159,7 @@ class FindingTest(ApiTest):
                             {
                                 "id": 1,
                                 "triage_status": TriageStatus.UNTRIAGED.value,
-                                "triage_comment": "",
+                                "triage_comment": None,
                                 **{
                                     k: v
                                     if not isinstance(v, models.TextChoices)

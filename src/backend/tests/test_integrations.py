@@ -1,7 +1,8 @@
 from typing import Any
-from tests.framework import ApiTest
-from tests.cases import ApiTestCase
+
 from integrations.models import Integration
+from tests.cases import ApiTestCase
+from tests.framework import ApiTest
 
 
 class IntegrationTest(ApiTest):

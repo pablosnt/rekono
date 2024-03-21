@@ -1,11 +1,12 @@
 from typing import List
 
 from asgiref.sync import sync_to_async
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram.ext import CallbackContext
+
 from input_types.enums import InputTypeName
 from platforms.telegram_app.bot.enums import Context
 from platforms.telegram_app.bot.mixins.framework import BaseMixin
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
-from telegram.ext import CallbackContext
 from tools.models import Input
 from wordlists.models import Wordlist
 

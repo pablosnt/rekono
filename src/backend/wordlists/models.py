@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import Any, Dict
 
 from django.db import models
+
 from framework.enums import InputKeyword
 from framework.models import BaseInput, BaseLike
 from rekono.settings import AUTH_USER_MODEL

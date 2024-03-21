@@ -5,6 +5,7 @@ from typing import Any
 
 from django.core.validators import RegexValidator
 from django.forms import ValidationError
+
 from target_blacklist.models import TargetBlacklist
 
 

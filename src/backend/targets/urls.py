@@ -1,4 +1,5 @@
 from rest_framework.routers import SimpleRouter
+
 from targets.views import TargetViewSet
 
 # Register your views here.

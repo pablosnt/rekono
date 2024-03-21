@@ -1,7 +1,8 @@
+from rest_framework.permissions import IsAuthenticated
+
 from framework.views import BaseViewSet
 from platforms.mail.models import SMTPSettings
 from platforms.mail.serializers import SMTPSettingsSerializer
-from rest_framework.permissions import IsAuthenticated
 from security.authorization.permissions import RekonoModelPermission
 
 # Create your views here.

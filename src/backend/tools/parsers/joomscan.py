@@ -1,5 +1,5 @@
-from urllib.parse import urlparse
 from typing import Set
+from urllib.parse import urlparse
 
 from findings.enums import PathType, Severity
 from findings.models import Exploit, Path, Technology, Vulnerability

@@ -1,5 +1,6 @@
-from platforms.telegram_app.views import TelegramChatViewSet, TelegramSettingsViewSet
 from rest_framework.routers import SimpleRouter
+
+from platforms.telegram_app.views import TelegramChatViewSet, TelegramSettingsViewSet
 
 # Register your views here.
 

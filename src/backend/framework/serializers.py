@@ -1,6 +1,7 @@
 from typing import Any
 
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
+
 from users.models import User
 
 

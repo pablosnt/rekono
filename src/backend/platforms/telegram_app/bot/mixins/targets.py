@@ -1,9 +1,10 @@
+from telegram import Update
+from telegram.ext import CallbackContext
+
 from platforms.telegram_app.bot.enums import Context
 from platforms.telegram_app.bot.mixins.framework import BaseMixin
 from targets.models import Target
 from targets.serializers import TargetSerializer
-from telegram import Update
-from telegram.ext import CallbackContext
 
 
 class TargetMixin(BaseMixin):

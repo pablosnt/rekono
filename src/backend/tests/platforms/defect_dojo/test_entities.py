@@ -1,4 +1,4 @@
-from typing import List, cast, Dict
+from typing import Dict, List, cast
 from unittest import mock
 
 from tests.cases import ApiTestCase, RekonoTestCase

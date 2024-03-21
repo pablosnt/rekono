@@ -1,11 +1,12 @@
-from projects.models import Project
+from django_filters.filters import BooleanFilter, CharFilter
+
 from framework.filters import (
     LikeFilter,
     MultipleFieldFilterSet,
     MultipleModelChoiceFilter,
 )
 from notes.models import Note
-from django_filters.filters import CharFilter, BooleanFilter
+from projects.models import Project
 
 
 class NoteFilter(LikeFilter, MultipleFieldFilterSet):

@@ -1,6 +1,7 @@
-from authentications.models import Authentication
 from django_filters.filters import ModelChoiceFilter
 from django_filters.rest_framework import FilterSet
+
+from authentications.models import Authentication
 from projects.models import Project
 from targets.models import Target
 

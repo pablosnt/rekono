@@ -1,5 +1,6 @@
 from django.core.exceptions import ValidationError
 from django.forms import EmailField
+
 from findings.enums import OSINTDataType
 from findings.models import OSINT
 from tools.parsers.base import BaseParser

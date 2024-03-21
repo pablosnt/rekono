@@ -22,8 +22,8 @@ from drf_spectacular.views import (
     SpectacularRedocView,
     SpectacularSwaggerView,
 )
-from rest_framework.urlpatterns import format_suffix_patterns
 from rekono.views import RQStatsView
+from rest_framework.urlpatterns import format_suffix_patterns
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -39,6 +39,7 @@ urlpatterns = [
     path("api/", include("platforms.telegram_app.urls")),
     path("api/", include("processes.urls")),
     path("api/", include("projects.urls")),
+    path("api/", include("reporting.urls")),
     path("api/", include("security.authentication.urls")),
     path("api/", include("settings.urls")),
     path("api/", include("target_blacklist.urls")),

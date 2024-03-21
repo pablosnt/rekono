@@ -1,13 +1,14 @@
 import hashlib
-import shutil
 import json
+import shutil
 from pathlib import Path as PathFile
 from typing import Any, Dict, List, Optional
 
+from django.test import TestCase
+from rest_framework.test import APIClient
+
 from authentications.enums import AuthenticationType
 from authentications.models import Authentication
-from django.test import TestCase
-from rekono.settings import CONFIG
 from executions.enums import Status
 from executions.models import Execution
 from findings.enums import (
@@ -34,7 +35,7 @@ from input_types.models import InputType
 from parameters.models import InputTechnology, InputVulnerability
 from processes.models import Process, Step
 from projects.models import Project
-from rest_framework.test import APIClient
+from rekono.settings import CONFIG
 from security.authorization.roles import Role
 from target_ports.models import TargetPort
 from targets.enums import TargetType

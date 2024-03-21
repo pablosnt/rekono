@@ -1,5 +1,6 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenBlacklistView
+
 from security.authentication.views import LoginViewSet, RefreshTokenViewSet
 
 # Register your views here.

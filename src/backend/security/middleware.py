@@ -79,6 +79,8 @@ class SecurityMiddleware:
         self, request: HttpRequest, response: Response
     ) -> Response:
         for header, value in SECURITY_HEADERS.items():
+            if header == "Referrer-Policy" and request.path.startswith("/admin"):
+                value = "strict-origin"
             if header == "Content-Security-Policy":
                 for path, csp in CSP.items():
                     if request.path.startswith(path):

@@ -1,12 +1,13 @@
 from typing import Any
-from targets.models import Target
-from framework.models import BaseLike
-from django.db import models
-from projects.models import Project
 
+from django.db import models
 from taggit.managers import TaggableManager
+
+from framework.models import BaseLike
+from projects.models import Project
 from rekono.settings import AUTH_USER_MODEL
 from security.validators.input_validator import Regex, Validator
+from targets.models import Target
 
 
 class Note(BaseLike):

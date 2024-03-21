@@ -1,12 +1,13 @@
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Tuple, Optional, Type
+from typing import Any, Dict, List, Optional, Tuple, Type
 
 from django.db import transaction
 from django.test import TestCase
-from executions.models import Execution
 from rest_framework.test import APIClient
+
+from executions.models import Execution
 from tools.parsers.base import BaseParser
 
 

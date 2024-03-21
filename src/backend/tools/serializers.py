@@ -1,7 +1,8 @@
+from rest_framework.serializers import ModelSerializer
+
 from framework.fields import IntegerChoicesField
 from framework.serializers import LikeSerializer
 from input_types.serializers import InputTypeSerializer
-from rest_framework.serializers import ModelSerializer
 from tools.enums import Intensity as IntensityEnum
 from tools.enums import Stage
 from tools.fields import StageField

@@ -1,8 +1,9 @@
+from rest_framework.permissions import IsAuthenticated
+
 from framework.views import BaseViewSet, LikeViewSet
 from processes.filters import ProcessFilter, StepFilter
 from processes.models import Process, Step
 from processes.serializers import ProcessSerializer, StepSerializer
-from rest_framework.permissions import IsAuthenticated
 from security.authorization.permissions import OwnerPermission, RekonoModelPermission
 
 # Create your views here.

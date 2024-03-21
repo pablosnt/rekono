@@ -1,7 +1,8 @@
 import logging
-from typing import Tuple, Callable
+from typing import Callable, Tuple
 
 from django.apps import apps
+
 from framework.models import BaseEncrypted
 from rekono.properties import Property
 from rekono.settings import CONFIG

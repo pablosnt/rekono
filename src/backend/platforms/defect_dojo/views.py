@@ -1,3 +1,8 @@
+from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.request import Request
+from rest_framework.response import Response
+
 from framework.views import BaseViewSet
 from platforms.defect_dojo.models import DefectDojoSettings, DefectDojoSync
 from platforms.defect_dojo.serializers import (
@@ -7,10 +12,6 @@ from platforms.defect_dojo.serializers import (
     DefectDojoSettingsSerializer,
     DefectDojoSyncSerializer,
 )
-from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.request import Request
-from rest_framework.response import Response
 from security.authorization.permissions import (
     IsAuditor,
     ProjectMemberPermission,

@@ -1,11 +1,11 @@
 import logging
-from typing import Any, List, Callable
+from typing import Any, Callable, List
 from urllib.parse import urlparse
 
 import requests
-from integrations.models import Integration
 from executions.models import Execution
 from findings.framework.models import Finding
+from integrations.models import Integration
 from requests.adapters import HTTPAdapter, Retry
 from users.enums import Notification
 
@@ -63,7 +63,23 @@ class BaseIntegration(BasePlatform):
 class BaseNotification(BasePlatform):
     enable_field = ""
 
-    def _get_users_to_notify(self, execution: Execution) -> List[Any]:
+    def is_enabled(self, user: Any) -> bool:
+        return getattr(user, self.enable_field)
+
+    def _notify(self, users: List[Any], *args: Any, **kwargs: Any) -> None:
+        pass
+
+    def _notify_if_available(self, users: List[Any], *args: Any, **kwargs: Any) -> None:
+        if self.is_available():
+            self._notify(users, *args, **kwargs)
+
+    def _notify_if_enabled(self, users: List[Any], *args: Any, **kwargs: Any) -> None:
+        if self.is_available():
+            for user in users:
+                if self.is_enabled(user):
+                    self._notify([user], *args, **kwargs)
+
+    def _get_users_to_notify_execution(self, execution: Execution) -> List[Any]:
         users = set()
         if (
             execution.task.executor.notification_scope != Notification.DISABLED
@@ -87,5 +103,5 @@ class BaseNotification(BasePlatform):
 
     def process_findings(self, execution: Execution, findings: List[Finding]) -> None:
         super().process_findings(execution, findings)
-        users = self._get_users_to_notify(execution)
+        users = self._get_users_to_notify_execution(execution)
         self._notify_execution(users, execution, findings)

@@ -1,5 +1,6 @@
-from authentications.serializers import AuthenticationSerializer
 from rest_framework.serializers import ModelSerializer
+
+from authentications.serializers import AuthenticationSerializer
 from target_ports.models import TargetPort
 
 

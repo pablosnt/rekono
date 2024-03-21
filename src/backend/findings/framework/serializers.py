@@ -8,8 +8,6 @@ class FindingSerializer(ModelSerializer):
         fields = (
             "id",
             "executions",
-            "first_seen",
-            "last_seen",
             "triage_status",
             "triage_comment",
             "defect_dojo_id",

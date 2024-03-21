@@ -26,3 +26,5 @@ tools:
     directory: /opt/log4j-scan
   spring4shell-scan:
     directory: /opt/spring4shell-scan
+reports:
+  pdf-template: null
