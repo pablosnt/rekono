@@ -6,8 +6,8 @@ on:
     pull_request:
 
 jobs:
-  legitify:
-    name: Legitify
+  scanners:
+    name: Scanners
     runs-on: ubuntu-latest
     environment: github
     steps:
@@ -17,3 +17,10 @@ jobs:
           github_token: ${{ secrets.ADMIN_PAT }}
           analyze_self_only: true
           artifact_name: legitify
+
+      - name: Chain Bench
+        id: chain-bench
+        uses: aquasecurity/chain-bench-action@cd35ac2e4470006fc9bbbbcd6c328edb61b72332
+        with:
+          repository-url: ${{ github.server_url }}/${{ github.repository }}
+          github-token: ${{ secrets.ADMIN_PAT }}

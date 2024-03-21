@@ -6,7 +6,7 @@ const headers = {
   'X-Frame-Options': 'DENY',
   'X-Powered-By': '',
 }
-  
+
 
 module.exports = {
   pages: {
