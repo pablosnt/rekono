@@ -59,7 +59,7 @@ services:
   tasks-worker:
     restart: always
     image: rekono-backend:latest
-    command: python manage.py rqworker tasks-queue
+    command: python manage.py rqworker tasks
     hostname: tasks-worker
     volumes:
       - rekono:/rekono
@@ -82,7 +82,7 @@ services:
       context: .
       dockerfile: docker/Dockerfile.kali
     image: rekono-kali:latest
-    command: python manage.py rqworker executions-queue
+    command: python manage.py rqworker executions
     hostname: executions-worker
     volumes:
       - rekono:/rekono
@@ -105,7 +105,7 @@ services:
   findings-worker:
     restart: always
     image: rekono-backend:latest
-    command: python manage.py rqworker findings-queue
+    command: python manage.py rqworker findings
     hostname: findings-worker
     volumes:
       - rekono:/rekono
@@ -126,7 +126,7 @@ services:
   emails-worker:
     restart: always
     image: rekono-backend:latest
-    command: python manage.py rqworker emails-queue
+    command: python manage.py rqworker emails
     hostname: emails-worker
     volumes:
       - rekono:/rekono

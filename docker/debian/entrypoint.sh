@@ -28,13 +28,13 @@ python /code/manage.py migrate
 python /code/manage.py runserver 0.0.0.0:8000 &
 
 # Run RQ workers
-python /code/manage.py rqworker tasks-queue &
+python /code/manage.py rqworker tasks &
 for worker in $(seq 1 $EXECUTION_WORKERS)
 do
-    python /code/manage.py rqworker executions-queue &
+    python /code/manage.py rqworker executions &
 done
-python /code/manage.py rqworker findings-queue &
-python /code/manage.py rqworker emails-queue &
+python /code/manage.py rqworker findings &
+python /code/manage.py rqworker emails &
 
 # Run Telegram bot
 python /code/manage.py telegram_bot &
