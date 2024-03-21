@@ -91,7 +91,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: dockle
-          path: *-dockle.json
+          path: "*-dockle.json"
           if-no-files-found: warn
 
   debian-image:
