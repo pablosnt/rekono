@@ -5,14 +5,13 @@ from typing import Any, Dict, List
 from django.db.models import Max
 from django.utils import timezone
 from django_rq import job
-from rq.job import Job
-
 from executions.enums import Status
 from executions.models import Execution
 from executions.queues import ExecutionsQueue
 from framework.queues import BaseQueue
 from input_types.models import InputType
 from processes.models import Step
+from rq.job import Job
 from tasks.models import Task
 from tools.models import Intensity
 
@@ -20,7 +19,7 @@ logger = logging.getLogger()
 
 
 class TasksQueue(BaseQueue):
-    name = "tasks-queue"
+    name = "tasks"
 
     def enqueue(self, task: Task) -> Job:
         queue = self._get_queue()
@@ -60,7 +59,7 @@ class TasksQueue(BaseQueue):
         return job
 
     @staticmethod
-    @job("tasks-queue")
+    @job("tasks")
     def consume(task: Task) -> Task:
         if task.executions:
             task.executions.clear()

@@ -2,8 +2,6 @@ import logging
 from typing import List
 
 from django_rq import job
-from rq.job import Job
-
 from executions.models import Execution
 from findings.models import Finding
 from framework.queues import BaseQueue
@@ -12,12 +10,13 @@ from platforms.hacktricks import HackTricks
 from platforms.mail.notifications import SMTP
 from platforms.nvd_nist import NvdNist
 from platforms.telegram_app.notifications.notifications import Telegram
+from rq.job import Job
 
 logger = logging.getLogger()
 
 
 class FindingsQueue(BaseQueue):
-    name = "findings-queue"
+    name = "findings"
 
     def enqueue(self, execution: Execution, findings: List[Finding]) -> Job:
         job = super().enqueue(execution=execution, findings=findings)
@@ -27,7 +26,7 @@ class FindingsQueue(BaseQueue):
         return job
 
     @staticmethod
-    @job("findings-queue")
+    @job("findings")
     def consume(execution: Execution, findings: List[Finding]) -> None:
         if findings:
             for platform in [NvdNist, HackTricks, DefectDojo, SMTP, Telegram]:

@@ -5,7 +5,6 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK
 from rest_framework.views import APIView
-
 from security.authorization.permissions import IsAdmin
 
 exposed_fields = [
@@ -28,15 +27,15 @@ class RQStatsView(APIView):
             200: inline_serializer(
                 name="RQStats",
                 fields={
-                    "executions-queue": inline_serializer(
+                    "executions": inline_serializer(
                         name="QueueStats",
                         fields={k: serializers.IntegerField() for k in exposed_fields},
                     ),
-                    "findings-queue": inline_serializer(
+                    "findings": inline_serializer(
                         name="QueueStats",
                         fields={k: serializers.IntegerField() for k in exposed_fields},
                     ),
-                    "tasks-queue": inline_serializer(
+                    "tasks": inline_serializer(
                         name="QueueStats",
                         fields={k: serializers.IntegerField() for k in exposed_fields},
                     ),
