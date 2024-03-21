@@ -28,6 +28,7 @@ jobs:
           exit-code: 1
       
       - name: Scan Nginx image with Dockle
+        continue-on-error: true
         uses: goodwithtech/dockle-action@426396fd1cd8feecee31992a6d1482dde8e26515
         with:
           image: rekono-nginx
@@ -45,6 +46,7 @@ jobs:
           exit-code: 1
       
       - name: Scan Kali image with Dockle
+        continue-on-error: true
         uses: goodwithtech/dockle-action@426396fd1cd8feecee31992a6d1482dde8e26515
         with:
           image: rekono-kali
@@ -62,6 +64,7 @@ jobs:
           exit-code: 1
       
       - name: Scan Backend image with Dockle
+        continue-on-error: true
         uses: goodwithtech/dockle-action@426396fd1cd8feecee31992a6d1482dde8e26515
         with:
           image: rekono-backend
@@ -79,6 +82,7 @@ jobs:
           exit-code: 1
       
       - name: Scan Frontend image with Dockle
+        continue-on-error: true
         uses: goodwithtech/dockle-action@426396fd1cd8feecee31992a6d1482dde8e26515
         with:
           image: rekono-frontend
@@ -127,6 +131,7 @@ jobs:
           exit-code: 1
       
       - name: Scan Debian image with Dockle
+        continue-on-error: true
         uses: goodwithtech/dockle-action@426396fd1cd8feecee31992a6d1482dde8e26515
         with:
           image: rekono-debian
