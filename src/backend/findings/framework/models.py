@@ -12,25 +12,36 @@ from security.validators.input_validator import Regex, Validator
 
 class FindingManager(models.Manager):
     def _get_related_findings(
-        self, finding: Any, filter: Optional[Dict[str, Any]] = None
+        self,
+        finding: Any,
+        filter: Optional[Dict[str, Any]] = None,
+        input_type: Optional[InputType] = None,
     ) -> List[Any]:
-        related_findings: List[Any] = []
-        input_type = InputType.objects.filter(
-            model=f"findings.{(finding if isinstance(finding, Finding) else finding.first()).__class__.__name__.lower()}"
+        related_findings = []
+        current_input_type = (
+            input_type
+            or InputType.objects.filter(
+                model=f"findings.{(finding if isinstance(finding, Finding) else finding.first()).__class__.__name__.lower()}"
+            ).first()
         )
-        if input_type.exists():
-            for related_input_type in input_type.first().get_related_input_types():
-                finding_type = related_input_type.get_model_class()
+        for input_type in InputType.objects.exclude(id=current_input_type.id).all():
+            related_input_types = input_type.get_related_input_types()
+            if current_input_type in related_input_types:
+                query_filter = (
+                    {current_input_type.name.lower(): finding, **filter}
+                    if filter
+                    else {current_input_type.name.lower(): finding}
+                )
                 new_related_findings = (
-                    finding_type.objects.all()
-                    if not filter
-                    else finding_type.objects.filter(**filter).all()
+                    input_type.get_model_class().objects.filter(**query_filter).all()
                 )
                 if new_related_findings:
                     related_findings.extend(new_related_findings)
                     for new_related_finding in new_related_findings:
                         related_findings.extend(
-                            self._get_related_findings(new_related_finding)
+                            self._get_related_findings(
+                                new_related_finding, filter, input_type
+                            )
                         )
         return related_findings
 
@@ -87,10 +98,17 @@ class FindingManager(models.Manager):
         return updated_finding
 
     def remove_fix(self, finding: Any, fixed_by: Optional[Any]) -> Any:
+        original_fixed_by = finding.fixed_by
         updated_finding = self._update_finding_fix_data(finding, False)
         if fixed_by:
             for related_finding in self._get_related_findings(
-                finding, {"is_fixed": True, "auto_fixed": True, "fixed_by": fixed_by}
+                finding,
+                {
+                    "is_fixed": True,
+                    "auto_fixed": True,
+                    "fixed_by__isnull": False,
+                    "fixed_by": original_fixed_by,
+                },
             ):
                 self._update_finding_fix_data(related_finding, False)
         return updated_finding
