@@ -31,30 +31,26 @@ class FindingViewSet(BaseViewSet):
     def destroy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return self._method_not_allowed("DELETE")   # pragma: no cover
 
-    @extend_schema(request=None, responses={200: FindingSerializer})
-    @action(detail=True, methods=["POST"], url_path="fix", url_name="fix")
+    @extend_schema(request=None, responses={204: None})
+    @action(detail=True, methods=["POST", "DELETE"], url_path="fix", url_name="fix")
     def fix(self, request: Request, pk: str) -> Response:
         finding = self.get_object()
-        if finding.is_fixed:
+        bad_request = None
+        if request.method == "POST":
+            if finding.is_fixed:
+                bad_request = "Finding is already fixed"
+            else:
+                finding.__class__.objects.fix(finding, request.user)
+        else:
+            if not finding.is_fixed or finding.auto_fixed:
+                bad_request = "Finding is not manually fixed"
+            else:
+                finding.__class__.objects.remove_fix(finding, request.user)
+        if bad_request:
             return Response(
-                {"finding": "Finding is already fixed"},
-                status=status.HTTP_400_BAD_REQUEST,
+                {"finding": bad_request},
+                status=status.HTTP_400_BAD_REQUEST
             )
-        finding = finding.__class__.objects.fix(finding, request.user)
-        return Response(
-            self.get_serializer_class()(finding).data, status=status.HTTP_200_OK
-        )
-
-    @action(detail=True, methods=["DELETE"], url_path="fix", url_name="remove_fix")
-    def remove_fix(self, request: Request, pk: str) -> Response:
-        input("UNFIX")
-        finding = self.get_object()
-        if not finding.is_fixed or finding.auto_fixed:
-            return Response(
-                {"finding": "Finding is not manually fixed"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        finding.__class__.objects.remove_fix(finding, request.user)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 

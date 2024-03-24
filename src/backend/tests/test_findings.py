@@ -164,17 +164,7 @@ class FindingTest(ApiTest):
                     ApiTestCase(
                         ["auditor1"],
                         "post",
-                        200,
-                        expected={
-                            "id": 1,
-                            "is_fixed": True,
-                            **{
-                                k: v
-                                if not isinstance(v, models.TextChoices)
-                                else v.value
-                                for k, v in self.raw_findings[finding.__class__].items()
-                            },
-                        },
+                        204,
                         endpoint=f"{findings_data[finding.__class__][2]}1/fix/",
                     ),
                     ApiTestCase(
