@@ -1,13 +1,13 @@
 from typing import Any, Dict
 
 from django.utils import timezone
-from findings.models import OSINT
+from findings.models import OSINT, Host
 from rest_framework.serializers import ModelSerializer
 
 
 class FindingSerializer(ModelSerializer):
     class Meta:
-        model = OSINT  # It's needed to define a non-abstract model as default. It will be overwritten
+        model = Host  # It's needed to define a non-abstract model as default. It will be overwritten
         fields = (
             "id",
             "executions",

@@ -171,10 +171,12 @@ class ReportingViewSet(BaseViewSet):
         models = importlib.import_module("findings.models")
         for finding_type in serializer.validated_finding_types:
             model = getattr(models, finding_type)
-            filter = serializer.validated_filter
-            if hasattr(model, "triage_status"):
-                filter.update(serializer.validated_triage_filter)
-            query = model.objects.filter(**filter).all()
+            query_filter = (
+                {**serializer.validated_filter, **serializer.validated_triage_filter}
+                if hasattr(model, "triage_status")
+                else {**serializer.validated_filter}
+            )
+            query = model.objects.filter(**query_filter).all()
             if model == Vulnerability:
                 query = query.order_by("severity")
             findings[model.__name__.lower()] = [
