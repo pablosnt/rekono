@@ -25,7 +25,11 @@ class FindingViewSet(BaseViewSet):
 
     @extend_schema(exclude=True)
     def create(self, request: Request, *args, **kwargs):
-        return self._method_not_allowed("POST")
+        return self._method_not_allowed("POST") # pragma: no cover
+
+    @extend_schema(exclude=True)
+    def destroy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return self._method_not_allowed("DELETE")   # pragma: no cover
 
     @extend_schema(request=None, responses={200: FindingSerializer})
     @action(detail=True, methods=["POST"], url_path="fix", url_name="fix")
@@ -40,10 +44,6 @@ class FindingViewSet(BaseViewSet):
         return Response(
             self.get_serializer_class()(finding).data, status=status.HTTP_200_OK
         )
-
-    @extend_schema(exclude=True)
-    def destroy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        return self._method_not_allowed("DELETE")
 
     @action(detail=True, methods=["DELETE"], url_path="fix", url_name="remove_fix")
     def remove_fix(self, request: Request, pk: str) -> Response:

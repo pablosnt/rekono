@@ -257,7 +257,9 @@ class ReportingViewSet(BaseViewSet):
                         )
                         .all(),
                     }
-                    for host in Host.objects.filter(**{**target_filter, **serializer.validated_filter})
+                    for host in Host.objects.filter(
+                        **{**target_filter, **serializer.validated_filter}
+                    )
                 ],
             }
             if (

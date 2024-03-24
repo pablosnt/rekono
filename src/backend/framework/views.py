@@ -125,8 +125,8 @@ class LikeViewSet(BaseViewSet):
     # all auditors can make POST requests to resources like these.
     @action(
         detail=True,
-        methods=["POST"],
-        url_path="dislike",
+        methods=["DELETE"],
+        url_path="like",
         url_name="dislike",
         permission_classes=[IsAuthenticated, IsAuditor],
     )
