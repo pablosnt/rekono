@@ -5,10 +5,9 @@ from django.utils import timezone
 from executions.models import Execution
 from findings.enums import TriageStatus
 from framework.models import BaseInput
+from input_types.models import InputType
 from rekono.settings import AUTH_USER_MODEL
 from security.validators.input_validator import Regex, Validator
-
-from backend.input_types.models import InputType
 
 
 class FindingManager(models.Manager):
