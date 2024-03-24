@@ -12,6 +12,7 @@ class FindingSerializer(ModelSerializer):
             "id",
             "executions",
             "is_fixed",
+            "auto_fixed",
             "fixed_date",
             "fixed_by",
             "defect_dojo_id",

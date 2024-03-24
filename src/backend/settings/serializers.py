@@ -13,5 +13,5 @@ class SettingsSerializer(ModelSerializer):
             "https_proxy",
             "ftp_proxy",
             "no_proxy",
-            "auto_fix_findings"
+            "auto_fix_findings",
         )

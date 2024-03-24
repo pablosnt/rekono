@@ -36,7 +36,7 @@ class TriageFindingViewSet(BaseViewSet):
                 {"finding": "Finding is already fixed"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        finding = finding.__class__.objects.fix(finding)
+        finding = finding.__class__.objects.fix(finding, request.user)
         return Response(
             self.get_serializer_class()(finding).data, status=status.HTTP_200_OK
         )
@@ -48,11 +48,12 @@ class TriageFindingViewSet(BaseViewSet):
     @action(detail=True, methods=["DELETE"], url_path="fix", url_name="fix")
     def unfix(self, request: Request, pk: str) -> Response:
         finding = self.get_object()
-        if not finding.is_fixed:
+        if not finding.is_fixed or finding.auto_fixed:
             return Response(
-                {"finding": "Finding is not fixed"}, status=status.HTTP_400_BAD_REQUEST
+                {"finding": "Finding is not manually fixed"},
+                status=status.HTTP_400_BAD_REQUEST,
             )
-        finding.__class__.objects.unfix(finding)
+        finding.__class__.objects.unfix(finding, request.user)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 

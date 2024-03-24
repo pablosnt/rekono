@@ -47,5 +47,21 @@ class FindingsQueue(BaseQueue):
             for finding in findings:
                 if finding.is_fixed:
                     finding.__class__.objects.unfix(finding)
-            for finding_type in [OSINT, Host, Port, Path, Technology, Credential, Vulnerability, Exploit]:
-                finding_type.objects.fix(finding_type.objects.filter(executions__configuration=execution.configuration, executions__task__target=execution.task.target).exclude(executions=execution))
+            for finding_type in [
+                OSINT,
+                Host,
+                Port,
+                Path,
+                Technology,
+                Credential,
+                Vulnerability,
+                Exploit,
+            ]:
+                finding_type.objects.fix(
+                    finding_type.objects.filter(
+                        executions__configuration=execution.configuration,
+                        executions__task__target=execution.task.target,
+                    )
+                    .exclude(executions=execution)
+                    .all()
+                )

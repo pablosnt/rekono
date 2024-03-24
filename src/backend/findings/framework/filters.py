@@ -22,23 +22,20 @@ class FindingFilter(MultipleFieldFilterSet):
     executor = ModelChoiceFilter(
         queryset=User.objects.all(), field_name="executions__task__executor"
     )
-    fixed_by = ModelChoiceFilter(
-        queryset=User.objects.all(), field_name="fixed_by"
-    )
+    fixed_by = ModelChoiceFilter(queryset=User.objects.all(), field_name="fixed_by")
 
     class Meta:
         model = OSINT  # It's needed to define a non-abstract model as default. It will be overwritten
         fields = {
             "executions": ["exact"],
             "is_fixed": ["exact"],
+            "auto_fixed": ["exact"],
             "fixed_date": ["gte", "lte", "exact"],
         }
 
 
 class TriageFindingFilter(FindingFilter):
-    triage_by = ModelChoiceFilter(
-        queryset=User.objects.all(), field_name="triage_by"
-    )
+    triage_by = ModelChoiceFilter(queryset=User.objects.all(), field_name="triage_by")
 
     class Meta:
         model = OSINT
