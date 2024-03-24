@@ -81,11 +81,10 @@ class FindingManager(models.Manager):
             if isinstance(findings, Finding)
             else self._update_findings_fix_data(findings, **args)
         )
-        if fixed_by:
-            args["auto_fixed"] = True
-            for finding in [findings] if isinstance(findings, Finding) else findings:
-                for related_finding in self._get_related_findings(finding):
-                    self._update_finding_fix_data(related_finding, **args)
+        args["auto_fixed"] = True
+        for finding in [findings] if isinstance(findings, Finding) else findings:
+            for related_finding in self._get_related_findings(finding):
+                self._update_finding_fix_data(related_finding, **args)
         return updated_finding
 
     def unfix(self, finding: Any, fixed_by: Optional[Any]) -> Any:
