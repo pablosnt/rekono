@@ -41,7 +41,8 @@ class CreateReportSerializer(ModelSerializer):
 
     def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
         attrs = super().validate(attrs)
-        self.validated_filter = {}
+        self.validated_filter = {"is_fixed": False}
+        self.validated_triage_filter = {}
         no_mandatory_field = True
         for field, filter_field in [
             ("task", "executions__task"),
@@ -51,18 +52,15 @@ class CreateReportSerializer(ModelSerializer):
             value = attrs.get(field)
             if value:
                 no_mandatory_field = False
-                self.validated_filter = (
-                    {filter_field: value}
-                    if attrs.get("format") != ReportFormat.PDF
-                    else {}
-                )
+                if attrs.get("format") != ReportFormat.PDF:
+                    self.validated_filter[filter_field] = value
                 only_true_positives = attrs.pop("only_true_positives", False)
                 if only_true_positives:
-                    self.validated_filter.update(
+                    self.validated_triage_filter.update(
                         {"triage_status": TriageStatus.TRUE_POSITIVE}
                     )
                 else:
-                    self.validated_filter.update(
+                    self.validated_triage_filter.update(
                         {
                             "triage_status__in": [
                                 TriageStatus.UNTRIAGED,

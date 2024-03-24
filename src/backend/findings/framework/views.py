@@ -14,14 +14,14 @@ from security.authorization.permissions import (
 )
 
 
-class TriageFindingViewSet(BaseViewSet):
+class FindingViewSet(BaseViewSet):
     permission_classes = [
         IsAuthenticated,
         RekonoModelPermission,
         ProjectMemberPermission,
     ]
     # "post" and "delete" are needed to allow finding fixes
-    http_method_names = ["get", "put", "post", "delete"]
+    http_method_names = ["get", "post", "delete"]
 
     @extend_schema(exclude=True)
     def create(self, request: Request, *args, **kwargs):
@@ -45,18 +45,19 @@ class TriageFindingViewSet(BaseViewSet):
     def destroy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return self._method_not_allowed("DELETE")
 
-    @action(detail=True, methods=["DELETE"], url_path="fix", url_name="unfix")
-    def unfix(self, request: Request, pk: str) -> Response:
+    @action(detail=True, methods=["DELETE"], url_path="fix", url_name="remove_fix")
+    def remove_fix(self, request: Request, pk: str) -> Response:
+        input("UNFIX")
         finding = self.get_object()
         if not finding.is_fixed or finding.auto_fixed:
             return Response(
                 {"finding": "Finding is not manually fixed"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        finding.__class__.objects.unfix(finding, request.user)
+        finding.__class__.objects.remove_fix(finding, request.user)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class FindingViewSet(TriageFindingViewSet):
-    # Remove "put" method, as it's only used for triaging
-    http_method_names = ["get", "post", "delete"]
+class TriageFindingViewSet(FindingViewSet):
+    # "put" method is needed for triaging
+    http_method_names = ["get", "put", "post", "delete"]

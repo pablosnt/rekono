@@ -86,7 +86,7 @@ class FindingManager(models.Manager):
                 self._update_finding_fix_data(related_finding, **args)
         return updated_finding
 
-    def unfix(self, finding: Any, fixed_by: Optional[Any]) -> Any:
+    def remove_fix(self, finding: Any, fixed_by: Optional[Any]) -> Any:
         updated_finding = self._update_finding_fix_data(finding, False)
         if fixed_by:
             for related_finding in self._get_related_findings(

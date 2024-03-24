@@ -46,7 +46,7 @@ class FindingsQueue(BaseQueue):
         if settings.auto_fix_findings:
             for finding in findings:
                 if finding.is_fixed:
-                    finding.__class__.objects.unfix(finding)
+                    finding.__class__.objects.remove_fix(finding)
             for finding_type in [
                 OSINT,
                 Host,
