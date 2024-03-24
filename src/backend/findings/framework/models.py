@@ -1,4 +1,3 @@
-import uuid
 from typing import Any, Dict, List, Optional, Union
 
 from django.db import models
@@ -14,7 +13,7 @@ from backend.input_types.models import InputType
 
 class FindingManager(models.Manager):
     def _get_related_findings(
-        self, finding: Any, filter: Optional[Dict[str, Any]]
+        self, finding: Any, filter: Optional[Dict[str, Any]] = None
     ) -> List[Any]:
         related_findings: List[Any] = []
         input_type = InputType.objects.filter(
