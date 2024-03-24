@@ -1,7 +1,7 @@
+from drf_spectacular.utils import extend_schema
+from framework.views import BaseViewSet, LikeViewSet
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
-
-from framework.views import BaseViewSet, LikeViewSet
 from security.authorization.permissions import RekonoModelPermission
 from tools.filters import ConfigurationFilter, ToolFilter
 from tools.models import Configuration, Tool
@@ -20,6 +20,7 @@ class ToolViewSet(LikeViewSet):
     # "post" is needed to allow POST requests to like and dislike tools
     http_method_names = ["get", "post"]
 
+    @extend_schema(exclude=True)
     def create(self, request: Request, *args, **kwargs):
         return self._method_not_allowed("POST")  # pragma: no cover
 

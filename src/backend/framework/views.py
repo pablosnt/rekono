@@ -98,7 +98,7 @@ class LikeViewSet(BaseViewSet):
         """
         return super().get_queryset().annotate(likes_count=Count("liked_by"))
 
-    @extend_schema(request=None, responses={201: None})
+    @extend_schema(request=None, responses={204: None})
     # Permission classes are overrided to IsAuthenticated and IsAuditor, because currently only Tools, Processes and
     # Wordlists can be liked, and auditors and admins are the only ones that can see this resources.
     # Permission classes should be overrided here, because if not, the standard permissions would be applied, and not

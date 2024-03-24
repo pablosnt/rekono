@@ -1,6 +1,5 @@
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-
 from framework.models import BaseModel
 from security.validators.input_validator import Regex, Validator
 
@@ -42,3 +41,4 @@ class Settings(BaseModel):
         blank=True,
         null=True,
     )
+    auto_fix_findings = models.BooleanField(default=True)
