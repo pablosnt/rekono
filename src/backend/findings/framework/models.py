@@ -18,19 +18,20 @@ class FindingManager(models.Manager):
         input_type = InputType.objects.filter(
             model=f"findings.{(finding if isinstance(finding, Finding) else finding.first()).__class__.__name__.lower()}"
         )
-        for related_input_type in input_type.get_related_input_types():
-            finding_type = related_input_type.get_model_class()
-            new_related_findings = (
-                finding_type.objects.all()
-                if not filter
-                else finding_type.objects.filter(**filter).all()
-            )
-            if new_related_findings:
-                related_findings.extend(new_related_findings)
-                for new_related_finding in new_related_findings:
-                    related_findings.extend(
-                        self._get_related_findings(new_related_finding)
-                    )
+        if input_type.exists():
+            for related_input_type in input_type.first().get_related_input_types():
+                finding_type = related_input_type.get_model_class()
+                new_related_findings = (
+                    finding_type.objects.all()
+                    if not filter
+                    else finding_type.objects.filter(**filter).all()
+                )
+                if new_related_findings:
+                    related_findings.extend(new_related_findings)
+                    for new_related_finding in new_related_findings:
+                        related_findings.extend(
+                            self._get_related_findings(new_related_finding)
+                        )
         return related_findings
 
     def _update_finding_fix_data(

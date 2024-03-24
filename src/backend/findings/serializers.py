@@ -141,6 +141,7 @@ class VulnerabilitySerializer(TriageFindingSerializer):
                 triage_by=instance.triage_by,
                 triage_date=instance.triage_date,
             )
+        return instance
 
 
 class ExploitSerializer(TriageFindingSerializer):

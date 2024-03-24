@@ -45,7 +45,7 @@ class TriageFindingViewSet(BaseViewSet):
     def destroy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return self._method_not_allowed("DELETE")
 
-    @action(detail=True, methods=["DELETE"], url_path="fix", url_name="fix")
+    @action(detail=True, methods=["DELETE"], url_path="fix", url_name="unfix")
     def unfix(self, request: Request, pk: str) -> Response:
         finding = self.get_object()
         if not finding.is_fixed or finding.auto_fixed:
