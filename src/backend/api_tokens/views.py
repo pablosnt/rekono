@@ -1,11 +1,10 @@
-from django.db.models import QuerySet
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.serializers import Serializer
-
 from api_tokens.filters import ApiTokenFilter
 from api_tokens.models import ApiToken
 from api_tokens.serializers import ApiTokenSerializer, CreateApiTokenSerializer
+from django.db.models import QuerySet
 from framework.views import BaseViewSet
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.serializers import Serializer
 
 # Create your views here.
 
@@ -15,11 +14,7 @@ class ApiTokenViewSet(BaseViewSet):
     serializer_class = ApiTokenSerializer
     filterset_class = ApiTokenFilter
     permission_classes = [IsAuthenticated]
-    http_method_names = [
-        "get",
-        "post",
-        "delete",
-    ]
+    http_method_names = ["get", "post", "delete"]
     search_fields = ["name"]
     ordering_fields = ["id", "name", "expiration"]
     owner_field = "user"

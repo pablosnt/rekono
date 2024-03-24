@@ -1,6 +1,5 @@
-from rest_framework.permissions import IsAuthenticated
-
 from framework.views import BaseViewSet
+from rest_framework.permissions import IsAuthenticated
 from security.authorization.permissions import (
     ProjectMemberPermission,
     RekonoModelPermission,
@@ -26,8 +25,4 @@ class TargetPortViewSet(BaseViewSet):
     # Fields used to search target ports
     search_fields = ["port", "path"]
     ordering_fields = ["id", "target", "port", "path"]
-    http_method_names = [
-        "get",
-        "post",
-        "delete",
-    ]
+    http_method_names = ["get", "post", "delete"]

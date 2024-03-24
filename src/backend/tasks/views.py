@@ -56,11 +56,7 @@ class TaskViewSet(BaseViewSet):
         "end",
     ]
     owner_field = "executor"
-    http_method_names = [
-        "get",
-        "post",
-        "delete",
-    ]
+    http_method_names = ["get", "post", "delete"]
     tasks_queue = TasksQueue()
     executions_queue = ExecutionsQueue()
 

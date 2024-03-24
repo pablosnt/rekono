@@ -18,12 +18,7 @@ from security.authorization.permissions import IsAuditor
 class BaseViewSet(ModelViewSet):
     ordering = ["-id"]
     # Required to remove PATCH method
-    http_method_names = [
-        "get",
-        "post",
-        "put",
-        "delete",
-    ]
+    http_method_names = ["get", "post", "put", "delete"]
     owner_field = "owner"
 
     def _get_model(self) -> BaseModel:

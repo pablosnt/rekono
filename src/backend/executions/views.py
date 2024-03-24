@@ -45,9 +45,7 @@ class ExecutionViewSet(BaseViewSet):
         "start",
         "end",
     ]
-    http_method_names = [
-        "get",
-    ]
+    http_method_names = ["get"]
 
     @extend_schema(
         request=None,

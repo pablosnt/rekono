@@ -59,11 +59,7 @@ class ReportingViewSet(BaseViewSet):
         "user",
         "date",
     ]
-    http_method_names = [
-        "get",
-        "post",
-        "delete",
-    ]
+    http_method_names = ["get", "post", "delete"]
     owner_field = "user"
 
     def _get_project_from_data(

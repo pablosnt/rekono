@@ -3,6 +3,7 @@ from typing import Any
 
 from django.core.exceptions import PermissionDenied
 from drf_spectacular.utils import extend_schema
+from framework.views import BaseViewSet
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
@@ -10,8 +11,6 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.serializers import Serializer
 from rest_framework.viewsets import GenericViewSet
-
-from framework.views import BaseViewSet
 from security.authorization.permissions import (
     IsAdmin,
     IsNotAuthenticated,
@@ -54,12 +53,7 @@ class UserViewSet(BaseViewSet):
         "date_joined",
         "last_login",
     ]
-    http_method_names = [
-        "get",
-        "post",
-        "put",
-        "delete",
-    ]
+    http_method_names = ["get", "post", "put", "delete"]
 
     def _get_object_if_not_current_user(self, request) -> User:
         instance = self.get_object()  # Get user instance

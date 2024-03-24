@@ -1,9 +1,8 @@
-from rest_framework.permissions import IsAuthenticated
-
 from authentications.filters import AuthenticationFilter
 from authentications.models import Authentication
 from authentications.serializers import AuthenticationSerializer
 from framework.views import BaseViewSet
+from rest_framework.permissions import IsAuthenticated
 from security.authorization.permissions import (
     ProjectMemberPermission,
     RekonoModelPermission,
@@ -25,8 +24,4 @@ class AuthenticationViewSet(BaseViewSet):
     ]
     search_fields = ["name"]
     ordering_fields = ["id", "name", "type"]
-    http_method_names = [
-        "get",
-        "post",
-        "delete",
-    ]
+    http_method_names = ["get", "post", "delete"]
