@@ -1,7 +1,6 @@
 from typing import Any
 
 from drf_spectacular.utils import extend_schema
-from findings.framework.serializers import FindingSerializer
 from framework.views import BaseViewSet
 from rest_framework import status
 from rest_framework.decorators import action
@@ -25,11 +24,11 @@ class FindingViewSet(BaseViewSet):
 
     @extend_schema(exclude=True)
     def create(self, request: Request, *args, **kwargs):
-        return self._method_not_allowed("POST") # pragma: no cover
+        return self._method_not_allowed("POST")  # pragma: no cover
 
     @extend_schema(exclude=True)
     def destroy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        return self._method_not_allowed("DELETE")   # pragma: no cover
+        return self._method_not_allowed("DELETE")  # pragma: no cover
 
     @extend_schema(request=None, responses={204: None})
     @action(detail=True, methods=["POST", "DELETE"], url_path="fix", url_name="fix")
@@ -48,8 +47,7 @@ class FindingViewSet(BaseViewSet):
                 finding.__class__.objects.remove_fix(finding, request.user)
         if bad_request:
             return Response(
-                {"finding": bad_request},
-                status=status.HTTP_400_BAD_REQUEST
+                {"finding": bad_request}, status=status.HTTP_400_BAD_REQUEST
             )
         return Response(status=status.HTTP_204_NO_CONTENT)
 

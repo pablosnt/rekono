@@ -29,7 +29,7 @@ class ToolViewSet(LikeViewSet):
 
     @extend_schema(exclude=True)
     def destroy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        return self._method_not_allowed("DELETE")    # pragma: no cover
+        return self._method_not_allowed("DELETE")  # pragma: no cover
 
 
 class ConfigurationViewSet(BaseViewSet):
