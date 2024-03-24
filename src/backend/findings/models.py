@@ -10,7 +10,7 @@ from findings.enums import (
     Protocol,
     Severity,
 )
-from findings.framework.models import Finding
+from findings.framework.models import Finding, TriageFinding
 from framework.enums import InputKeyword
 from platforms.defect_dojo.models import DefectDojoSettings
 from target_ports.models import TargetPort
@@ -20,7 +20,7 @@ from targets.models import Target
 # Create your models here.
 
 
-class OSINT(Finding):
+class OSINT(TriageFinding):
     data = models.TextField(max_length=250)
     data_type = models.TextField(max_length=10, choices=OSINTDataType.choices)
     source = models.TextField(max_length=50, blank=True, null=True)
@@ -292,7 +292,7 @@ class Technology(Finding):
         return f"{f'{self.port.__str__()} - ' if self.port else ''}{self.name}"
 
 
-class Credential(Finding):
+class Credential(TriageFinding):
     """Credential model."""
 
     technology = models.ForeignKey(
@@ -340,7 +340,7 @@ class Credential(Finding):
         return " - ".join(values)
 
 
-class Vulnerability(Finding):
+class Vulnerability(TriageFinding):
     technology = models.ForeignKey(
         Technology,
         related_name="vulnerability",
@@ -395,7 +395,7 @@ class Vulnerability(Finding):
         return f"{f'{(self.technology or self.port).__str__()} - ' if self.technology or self.port else ''}{self.name}{f' - {self.cve}' if self.cve else ''}"
 
 
-class Exploit(Finding):
+class Exploit(TriageFinding):
     vulnerability = models.ForeignKey(
         Vulnerability,
         related_name="exploit",

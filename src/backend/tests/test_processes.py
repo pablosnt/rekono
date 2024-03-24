@@ -142,7 +142,7 @@ class ProcessTest(ApiTest):
         ),
         ApiTestCase(["reader1", "reader2"], "post", 403, endpoint="{endpoint}8/like/"),
         ApiTestCase(
-            ["reader1", "reader2"], "post", 403, endpoint="{endpoint}9/dislike/"
+            ["reader1", "reader2"], "delete", 403, endpoint="{endpoint}9/like/"
         ),
         ApiTestCase(
             ["admin1", "admin2", "auditor1", "auditor2"],
@@ -186,9 +186,9 @@ class ProcessTest(ApiTest):
         ),
         ApiTestCase(
             ["admin1", "admin2", "auditor1", "auditor2"],
-            "post",
+            "delete",
             204,
-            endpoint="{endpoint}8/dislike/",
+            endpoint="{endpoint}8/like/",
         ),
         ApiTestCase(
             ["admin1", "admin2", "auditor1", "auditor2"],

@@ -8,7 +8,8 @@
             "http_proxy": null,
             "https_proxy": null,
             "ftp_proxy": null,
-            "no_proxy": null
+            "no_proxy": null,
+            "auto_fix_findings": true
         }
     }
 ]

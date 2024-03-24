@@ -18,12 +18,7 @@ from security.authorization.permissions import IsAuditor
 class BaseViewSet(ModelViewSet):
     ordering = ["-id"]
     # Required to remove PATCH method
-    http_method_names = [
-        "get",
-        "post",
-        "put",
-        "delete",
-    ]
+    http_method_names = ["get", "post", "put", "delete"]
     owner_field = "owner"
 
     def _get_model(self) -> BaseModel:
@@ -98,14 +93,14 @@ class LikeViewSet(BaseViewSet):
         """
         return super().get_queryset().annotate(likes_count=Count("liked_by"))
 
-    @extend_schema(request=None, responses={201: None})
+    @extend_schema(request=None, responses={204: None})
     # Permission classes are overrided to IsAuthenticated and IsAuditor, because currently only Tools, Processes and
     # Wordlists can be liked, and auditors and admins are the only ones that can see this resources.
     # Permission classes should be overrided here, because if not, the standard permissions would be applied, and not
     # all auditors can make POST requests to resources like these.
     @action(
         detail=True,
-        methods=["POST"],
+        methods=["POST", "DELETE"],
         url_path="like",
         url_name="like",
         permission_classes=[IsAuthenticated, IsAuditor],
@@ -120,30 +115,8 @@ class LikeViewSet(BaseViewSet):
         Returns:
             Response: HTTP Response
         """
-        self.get_object().liked_by.add(request.user)
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-    @extend_schema(request=None, responses={204: None})
-    # Permission classes is overrided to IsAuthenticated and IsAuditor, because currently only Tools, Processes and
-    # Resources (Wordlists) can be liked, and auditors and admins are the only ones that can see this resources.
-    # Permission classes should be overrided here, because if not, the standard permissions would be applied, and not
-    # all auditors can make POST requests to resources like these.
-    @action(
-        detail=True,
-        methods=["POST"],
-        url_path="dislike",
-        url_name="dislike",
-        permission_classes=[IsAuthenticated, IsAuditor],
-    )
-    def dislike(self, request: Request, pk: str) -> Response:
-        """Unmark an instance as liked by the current user.
-
-        Args:
-            request (Request): Received HTTP request
-            pk (str): Instance Id
-
-        Returns:
-            Response: HTTP Response
-        """
-        self.get_object().liked_by.remove(request.user)
+        if request.method == "POST":
+            self.get_object().liked_by.add(request.user)
+        else:
+            self.get_object().liked_by.remove(request.user)
         return Response(status=status.HTTP_204_NO_CONTENT)

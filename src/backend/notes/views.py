@@ -2,17 +2,16 @@ from typing import Any, Dict, Optional, cast
 
 from django.db.models import Q, QuerySet
 from drf_spectacular.utils import extend_schema
-from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.request import Request
-from rest_framework.response import Response
-from rest_framework.status import HTTP_201_CREATED
-
 from framework.views import LikeViewSet
 from notes.filters import NoteFilter
 from notes.models import Note
 from notes.serializers import NoteSerializer
 from projects.models import Project
+from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.request import Request
+from rest_framework.response import Response
+from rest_framework.status import HTTP_201_CREATED
 from security.authorization.permissions import (
     OwnerPermission,
     ProjectMemberPermission,
@@ -44,12 +43,7 @@ class NoteViewSet(LikeViewSet):
         "created_at",
         "updated_at",
     ]
-    http_method_names = [
-        "get",
-        "post",
-        "put",
-        "delete",
-    ]
+    http_method_names = ["get", "post", "put", "delete"]
 
     def _get_project_from_data(
         self, project_field: str, data: Dict[str, Any]

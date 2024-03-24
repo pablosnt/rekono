@@ -103,14 +103,6 @@ findings_data = {
         "/api/exploits/",
     ),
 }
-false_positive = {
-    "triage_status": TriageStatus.FALSE_POSITIVE.value,
-    "triage_comment": "It isn't exploitable",
-}
-true_positive = {
-    "triage_status": TriageStatus.TRUE_POSITIVE.value,
-    "triage_comment": "Exploitation has been confirmed",
-}
 
 
 class FindingTest(ApiTest):
@@ -125,9 +117,16 @@ class FindingTest(ApiTest):
             self.cases.extend(
                 [
                     ApiTestCase(
+                        ["admin1", "admin2", "auditor1", "auditor2"],
+                        "post",
+                        405,
+                        endpoint=findings_data[finding.__class__][2],
+                    ),
+                    ApiTestCase(
                         ["admin2", "auditor2", "reader2"],
                         "get",
                         200,
+                        expected=[],
                         endpoint=findings_data[finding.__class__][2],
                     ),
                     ApiTestCase(
@@ -137,8 +136,7 @@ class FindingTest(ApiTest):
                         expected=[
                             {
                                 "id": 1,
-                                "triage_status": TriageStatus.UNTRIAGED.value,
-                                "triage_comment": None,
+                                "is_fixed": False,
                                 **{
                                     k: v
                                     if not isinstance(v, models.TextChoices)
@@ -150,89 +148,94 @@ class FindingTest(ApiTest):
                             }
                         ],
                         endpoint=findings_data[finding.__class__][2],
-                    ),
-                    ApiTestCase(
-                        ["admin1", "auditor1", "reader1"],
-                        "get",
-                        200,
-                        expected=[
-                            {
-                                "id": 1,
-                                "triage_status": TriageStatus.UNTRIAGED.value,
-                                "triage_comment": None,
-                                **{
-                                    k: v
-                                    if not isinstance(v, models.TextChoices)
-                                    else v.value
-                                    for k, v in self.raw_findings[
-                                        finding.__class__
-                                    ].items()
-                                },
-                            }
-                        ],
-                        endpoint=f"{findings_data[finding.__class__][2]}?host=1",
-                    ),
-                    ApiTestCase(
-                        ["reader1", "reader2"],
-                        "put",
-                        403,
-                        false_positive,
-                        endpoint=f"{findings_data[finding.__class__][2]}1/",
                     ),
                     ApiTestCase(
                         ["admin2", "auditor2"],
-                        "put",
+                        "post",
                         404,
-                        false_positive,
-                        endpoint=f"{findings_data[finding.__class__][2]}1/",
+                        endpoint=f"{findings_data[finding.__class__][2]}1/fix/",
                     ),
                     ApiTestCase(
-                        ["admin1", "auditor1"],
-                        "put",
-                        200,
-                        false_positive,
-                        expected={"id": 1, **false_positive},
-                        endpoint=f"{findings_data[finding.__class__][2]}1/",
+                        ["reader1", "reader2"],
+                        "post",
+                        403,
+                        endpoint=f"{findings_data[finding.__class__][2]}1/fix/",
                     ),
                     ApiTestCase(
-                        ["admin1", "auditor1", "reader1"],
-                        "get",
-                        200,
-                        expected={
-                            "id": 1,
-                            **false_positive,
-                            **{
-                                k: v
-                                if not isinstance(v, models.TextChoices)
-                                else v.value
-                                for k, v in self.raw_findings[finding.__class__].items()
-                            },
-                        },
-                        endpoint=f"{findings_data[finding.__class__][2]}1/",
+                        ["auditor1"],
+                        "post",
+                        204,
+                        endpoint=f"{findings_data[finding.__class__][2]}1/fix/",
                     ),
                     ApiTestCase(
-                        ["admin1", "auditor1"],
-                        "put",
-                        200,
-                        true_positive,
-                        expected={"id": 1, **true_positive},
-                        endpoint=f"{findings_data[finding.__class__][2]}1/",
+                        ["admin1"],
+                        "post",
+                        400,
+                        endpoint=f"{findings_data[finding.__class__][2]}1/fix/",
                     ),
                     ApiTestCase(
                         ["admin1", "auditor1", "reader1"],
                         "get",
                         200,
-                        expected={
-                            "id": 1,
-                            **true_positive,
-                            **{
-                                k: v
-                                if not isinstance(v, models.TextChoices)
-                                else v.value
-                                for k, v in self.raw_findings[finding.__class__].items()
-                            },
-                        },
-                        endpoint=f"{findings_data[finding.__class__][2]}1/",
+                        expected=[
+                            {
+                                "id": 1,
+                                "is_fixed": True,
+                                **{
+                                    k: v
+                                    if not isinstance(v, models.TextChoices)
+                                    else v.value
+                                    for k, v in self.raw_findings[
+                                        finding.__class__
+                                    ].items()
+                                },
+                            }
+                        ],
+                        endpoint=findings_data[finding.__class__][2],
+                    ),
+                    ApiTestCase(
+                        ["admin2", "auditor2"],
+                        "delete",
+                        404,
+                        endpoint=f"{findings_data[finding.__class__][2]}1/fix/",
+                    ),
+                    ApiTestCase(
+                        ["reader1", "reader2"],
+                        "delete",
+                        403,
+                        endpoint=f"{findings_data[finding.__class__][2]}1/fix/",
+                    ),
+                    ApiTestCase(
+                        ["admin1"],
+                        "delete",
+                        204,
+                        endpoint=f"{findings_data[finding.__class__][2]}1/fix/",
+                    ),
+                    ApiTestCase(
+                        ["auditor1"],
+                        "delete",
+                        400,
+                        endpoint=f"{findings_data[finding.__class__][2]}1/fix/",
+                    ),
+                    ApiTestCase(
+                        ["admin1", "auditor1", "reader1"],
+                        "get",
+                        200,
+                        expected=[
+                            {
+                                "id": 1,
+                                "is_fixed": False,
+                                **{
+                                    k: v
+                                    if not isinstance(v, models.TextChoices)
+                                    else v.value
+                                    for k, v in self.raw_findings[
+                                        finding.__class__
+                                    ].items()
+                                },
+                            }
+                        ],
+                        endpoint=findings_data[finding.__class__][2],
                     ),
                 ]
             )
@@ -262,6 +265,145 @@ class FindingTest(ApiTest):
         parsed = self.path.defect_dojo_endpoint(self.target)
         for key, value in defect_dojo_endpoint.items():
             self.assertEqual(value, parsed[key])
+
+
+class TriageFindingTest(ApiTest):
+    endpoint = "/api/findings/"
+    anonymous_allowed = None
+    false_positive = {
+        "triage_status": TriageStatus.FALSE_POSITIVE.value,
+        "triage_comment": "It isn't exploitable",
+    }
+    true_positive = {
+        "triage_status": TriageStatus.TRUE_POSITIVE.value,
+        "triage_comment": "Exploitation has been confirmed",
+    }
+
+    def setUp(self) -> None:
+        super().setUp()
+        self._setup_tasks_and_executions()
+        self._setup_findings(self.execution3)
+        self.cases = []
+        for finding in self.findings:
+            if not hasattr(finding, "triage_status"):
+                continue
+            self.cases.extend(
+                [
+                    ApiTestCase(
+                        ["admin2", "auditor2", "reader2"],
+                        "get",
+                        200,
+                        expected=[],
+                        endpoint=findings_data[finding.__class__][2],
+                    ),
+                    ApiTestCase(
+                        ["admin1", "auditor1", "reader1"],
+                        "get",
+                        200,
+                        expected=[
+                            {
+                                "id": 1,
+                                "triage_status": TriageStatus.FALSE_POSITIVE.value
+                                if isinstance(finding, Exploit)
+                                else TriageStatus.UNTRIAGED.value,
+                                **{
+                                    k: v
+                                    if not isinstance(v, models.TextChoices)
+                                    else v.value
+                                    for k, v in self.raw_findings[
+                                        finding.__class__
+                                    ].items()
+                                },
+                            }
+                        ],
+                        endpoint=findings_data[finding.__class__][2],
+                    ),
+                    ApiTestCase(
+                        ["admin1", "auditor1", "reader1"],
+                        "get",
+                        200,
+                        expected=[
+                            {
+                                "id": 1,
+                                "triage_status": TriageStatus.FALSE_POSITIVE.value
+                                if isinstance(finding, Exploit)
+                                else TriageStatus.UNTRIAGED.value,
+                                **{
+                                    k: v
+                                    if not isinstance(v, models.TextChoices)
+                                    else v.value
+                                    for k, v in self.raw_findings[
+                                        finding.__class__
+                                    ].items()
+                                },
+                            }
+                        ],
+                        endpoint=f"{findings_data[finding.__class__][2]}?host=1",
+                    ),
+                    ApiTestCase(
+                        ["reader1", "reader2"],
+                        "put",
+                        403,
+                        self.false_positive,
+                        endpoint=f"{findings_data[finding.__class__][2]}1/",
+                    ),
+                    ApiTestCase(
+                        ["admin2", "auditor2"],
+                        "put",
+                        404,
+                        self.false_positive,
+                        endpoint=f"{findings_data[finding.__class__][2]}1/",
+                    ),
+                    ApiTestCase(
+                        ["admin1", "auditor1"],
+                        "put",
+                        200,
+                        self.false_positive,
+                        expected={"id": 1, **self.false_positive},
+                        endpoint=f"{findings_data[finding.__class__][2]}1/",
+                    ),
+                    ApiTestCase(
+                        ["admin1", "auditor1", "reader1"],
+                        "get",
+                        200,
+                        expected={
+                            "id": 1,
+                            **self.false_positive,
+                            **{
+                                k: v
+                                if not isinstance(v, models.TextChoices)
+                                else v.value
+                                for k, v in self.raw_findings[finding.__class__].items()
+                            },
+                        },
+                        endpoint=f"{findings_data[finding.__class__][2]}1/",
+                    ),
+                    ApiTestCase(
+                        ["admin1", "auditor1"],
+                        "put",
+                        200,
+                        self.true_positive,
+                        expected={"id": 1, **self.true_positive},
+                        endpoint=f"{findings_data[finding.__class__][2]}1/",
+                    ),
+                    ApiTestCase(
+                        ["admin1", "auditor1", "reader1"],
+                        "get",
+                        200,
+                        expected={
+                            "id": 1,
+                            **self.true_positive,
+                            **{
+                                k: v
+                                if not isinstance(v, models.TextChoices)
+                                else v.value
+                                for k, v in self.raw_findings[finding.__class__].items()
+                            },
+                        },
+                        endpoint=f"{findings_data[finding.__class__][2]}1/",
+                    ),
+                ]
+            )
 
 
 class OSINTTest(ApiTest):

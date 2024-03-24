@@ -1,11 +1,10 @@
-from rest_framework.permissions import IsAuthenticated
-
 from framework.views import BaseViewSet
 from platforms.telegram_app.models import TelegramChat, TelegramSettings
 from platforms.telegram_app.serializers import (
     TelegramChatSerializer,
     TelegramSettingsSerializer,
 )
+from rest_framework.permissions import IsAuthenticated
 from security.authorization.permissions import OwnerPermission, RekonoModelPermission
 
 # Create your views here.
@@ -15,10 +14,7 @@ class TelegramSettingsViewSet(BaseViewSet):
     queryset = TelegramSettings.objects.all()
     serializer_class = TelegramSettingsSerializer
     permission_classes = [IsAuthenticated, RekonoModelPermission]
-    http_method_names = [
-        "get",
-        "put",
-    ]
+    http_method_names = ["get", "put"]
 
 
 class TelegramChatViewSet(BaseViewSet):

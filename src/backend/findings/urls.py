@@ -1,5 +1,3 @@
-from rest_framework.routers import SimpleRouter
-
 from findings.views import (
     CredentialViewSet,
     ExploitViewSet,
@@ -10,6 +8,7 @@ from findings.views import (
     TechnologyViewSet,
     VulnerabilityViewSet,
 )
+from rest_framework.routers import SimpleRouter
 
 # Register your views here.
 

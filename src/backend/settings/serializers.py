@@ -1,5 +1,4 @@
 from rest_framework.serializers import ModelSerializer
-
 from settings.models import Settings
 
 
@@ -14,4 +13,5 @@ class SettingsSerializer(ModelSerializer):
             "https_proxy",
             "ftp_proxy",
             "no_proxy",
+            "auto_fix_findings",
         )

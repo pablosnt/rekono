@@ -1,6 +1,5 @@
 from django_filters.filters import ModelChoiceFilter
-
-from findings.framework.filters import FindingFilter
+from findings.framework.filters import FindingFilter, TriageFindingFilter
 from findings.models import (
     OSINT,
     Credential,
@@ -14,11 +13,11 @@ from findings.models import (
 from framework.filters import MultipleCharFilter, MultipleNumberFilter
 
 
-class OSINTFilter(FindingFilter):
+class OSINTFilter(TriageFindingFilter):
     class Meta:
         model = OSINT
         fields = {
-            **FindingFilter.Meta.fields.copy(),
+            **TriageFindingFilter.Meta.fields.copy(),
             "data": ["exact", "icontains"],
             "data_type": ["exact"],
             "source": ["exact", "icontains"],
@@ -78,7 +77,7 @@ class TechnologyFilter(FindingFilter):
         }
 
 
-class CredentialFilter(FindingFilter):
+class CredentialFilter(TriageFindingFilter):
     port = ModelChoiceFilter(queryset=Port.objects.all(), field_name="technology__port")
     host = ModelChoiceFilter(
         queryset=Host.objects.all(), field_name="technology__port__host"
@@ -87,7 +86,7 @@ class CredentialFilter(FindingFilter):
     class Meta:
         model = Credential
         fields = {
-            **FindingFilter.Meta.fields.copy(),
+            **TriageFindingFilter.Meta.fields.copy(),
             "technology": ["exact"],
             "technology__name": ["exact", "icontains"],
             "technology__version": ["exact", "icontains"],
@@ -97,14 +96,14 @@ class CredentialFilter(FindingFilter):
         }
 
 
-class VulnerabilityFilter(FindingFilter):
+class VulnerabilityFilter(TriageFindingFilter):
     port = MultipleNumberFilter(fields=["technology__port", "port"])
     host = MultipleNumberFilter(fields=["technology__port__host", "port__host"])
 
     class Meta:
         model = Vulnerability
         fields = {
-            **FindingFilter.Meta.fields.copy(),
+            **TriageFindingFilter.Meta.fields.copy(),
             "technology": ["exact"],
             "technology__name": ["exact", "icontains"],
             "technology__version": ["exact", "icontains"],
@@ -117,7 +116,7 @@ class VulnerabilityFilter(FindingFilter):
         }
 
 
-class ExploitFilter(FindingFilter):
+class ExploitFilter(TriageFindingFilter):
     port = MultipleNumberFilter(
         fields=[
             "technology__port",
@@ -154,7 +153,7 @@ class ExploitFilter(FindingFilter):
     class Meta:
         model = Exploit
         fields = {
-            **FindingFilter.Meta.fields.copy(),
+            **TriageFindingFilter.Meta.fields.copy(),
             "vulnerability": ["exact", "isnull"],
             "vulnerability__severity": ["exact"],
             "vulnerability__cve": ["exact"],

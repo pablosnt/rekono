@@ -82,13 +82,13 @@ class ToolTest(ApiTest):
             endpoint="{endpoint}3/",
         ),
         ApiTestCase(
-            ["reader1", "reader2"], "get", 403, endpoint="{endpoint}1/dislike/"
+            ["reader1", "reader2"], "delete", 403, endpoint="{endpoint}1/like/"
         ),
         ApiTestCase(
             ["admin1", "admin2", "auditor1", "auditor2"],
-            "post",
+            "delete",
             204,
-            endpoint="{endpoint}1/dislike/",
+            endpoint="{endpoint}1/like/",
         ),
         ApiTestCase(
             ["admin1", "admin2", "auditor1", "auditor2"],

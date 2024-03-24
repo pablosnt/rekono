@@ -1,3 +1,6 @@
+from typing import Any, Dict
+
+from findings.enums import TriageStatus
 from findings.framework.serializers import FindingSerializer, TriageFindingSerializer
 from findings.models import (
     OSINT,
@@ -11,21 +14,21 @@ from findings.models import (
 )
 
 
-class OSINTSerializer(FindingSerializer):
+class OSINTSerializer(TriageFindingSerializer):
     class Meta:
         model = OSINT
-        fields = FindingSerializer.Meta.fields + (
+        fields = TriageFindingSerializer.Meta.fields + (
             "data",
             "data_type",
             "source",
             "reference",
         )
-
-
-class TriageOSINTSerializer(TriageFindingSerializer):
-    class Meta:
-        model = OSINTSerializer.Meta.model
-        fields = TriageFindingSerializer.Meta.fields
+        read_only_fields = TriageFindingSerializer.Meta.read_only_fields + (
+            "data",
+            "data_type",
+            "source",
+            "reference",
+        )
 
 
 class HostSerializer(FindingSerializer):
@@ -37,12 +40,6 @@ class HostSerializer(FindingSerializer):
             "os_type",
             "port",
         )
-
-
-class TriageHostSerializer(TriageFindingSerializer):
-    class Meta:
-        model = HostSerializer.Meta.model
-        fields = TriageFindingSerializer.Meta.fields
 
 
 class PortSerializer(FindingSerializer):
@@ -60,12 +57,6 @@ class PortSerializer(FindingSerializer):
         )
 
 
-class TriagePortSerializer(TriageFindingSerializer):
-    class Meta:
-        model = PortSerializer.Meta.model
-        fields = TriageFindingSerializer.Meta.fields
-
-
 class PathSerializer(FindingSerializer):
     class Meta:
         model = Path
@@ -76,12 +67,6 @@ class PathSerializer(FindingSerializer):
             "extra_info",
             "type",
         )
-
-
-class TriagePathSerializer(TriageFindingSerializer):
-    class Meta:
-        model = PathSerializer.Meta.model
-        fields = TriageFindingSerializer.Meta.fields
 
 
 class TechnologySerializer(FindingSerializer):
@@ -100,16 +85,17 @@ class TechnologySerializer(FindingSerializer):
         )
 
 
-class TriageTechnologySerializer(TriageFindingSerializer):
-    class Meta:
-        model = TechnologySerializer.Meta.model
-        fields = TriageFindingSerializer.Meta.fields
-
-
-class CredentialSerializer(FindingSerializer):
+class CredentialSerializer(TriageFindingSerializer):
     class Meta:
         model = Credential
-        fields = FindingSerializer.Meta.fields + (
+        fields = TriageFindingSerializer.Meta.fields + (
+            "technology",
+            "email",
+            "username",
+            "secret",
+            "context",
+        )
+        read_only_fields = TriageFindingSerializer.Meta.read_only_fields + (
             "technology",
             "email",
             "username",
@@ -118,16 +104,21 @@ class CredentialSerializer(FindingSerializer):
         )
 
 
-class TriageCredentialSerializer(TriageFindingSerializer):
-    class Meta:
-        model = CredentialSerializer.Meta.model
-        fields = TriageFindingSerializer.Meta.fields
-
-
-class VulnerabilitySerializer(FindingSerializer):
+class VulnerabilitySerializer(TriageFindingSerializer):
     class Meta:
         model = Vulnerability
-        fields = FindingSerializer.Meta.fields + (
+        fields = TriageFindingSerializer.Meta.fields + (
+            "port",
+            "technology",
+            "name",
+            "description",
+            "severity",
+            "cve",
+            "cwe",
+            "reference",
+            "exploit",
+        )
+        read_only_fields = TriageFindingSerializer.Meta.read_only_fields + (
             "port",
             "technology",
             "name",
@@ -139,26 +130,34 @@ class VulnerabilitySerializer(FindingSerializer):
             "exploit",
         )
 
+    def update(
+        self, instance: Vulnerability, validated_data: Dict[str, Any]
+    ) -> Vulnerability:
+        instance = super().update(instance, validated_data)
+        if instance.triage_status == TriageStatus.FALSE_POSITIVE:
+            instance.exploit.all().update(
+                triage_status=instance.triage_status,
+                triage_comment="Automatically triaged after triaging the related vulnerability as a false positive",
+                triage_by=instance.triage_by,
+                triage_date=instance.triage_date,
+            )
+        return instance
 
-class TriageVulnerabilitySerializer(TriageFindingSerializer):
-    class Meta:
-        model = VulnerabilitySerializer.Meta.model
-        fields = TriageFindingSerializer.Meta.fields
 
-
-class ExploitSerializer(FindingSerializer):
+class ExploitSerializer(TriageFindingSerializer):
     class Meta:
         model = Exploit
-        fields = FindingSerializer.Meta.fields + (
+        fields = TriageFindingSerializer.Meta.fields + (
             "vulnerability",
             "technology",
             "title",
             "edb_id",
             "reference",
         )
-
-
-class TriageExploitSerializer(TriageFindingSerializer):
-    class Meta:
-        model = ExploitSerializer.Meta.model
-        fields = TriageFindingSerializer.Meta.fields
+        read_only_fields = TriageFindingSerializer.Meta.read_only_fields + (
+            "vulnerability",
+            "technology",
+            "title",
+            "edb_id",
+            "reference",
+        )

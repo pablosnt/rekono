@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - New executions group to aggregate those that can be executed at the same time (https://github.com/pablosnt/rekono/issues/222)
 - Keep tool versions updated from the system in the database (https://github.com/pablosnt/rekono/issues/222)
 - Support for findings triaging (https://github.com/pablosnt/rekono/issues/222)
+- Support for fixed findings (https://github.com/pablosnt/rekono/issues/284)
 - Configure Defect-Dojo product type at Rekono project level (https://github.com/pablosnt/rekono/issues/222)
 - Add Rekono project tags to Defect-Dojo products (https://github.com/pablosnt/rekono/issues/222)
 - Download original tool's reports (https://github.com/pablosnt/rekono/pull/264)

@@ -2,7 +2,6 @@ from typing import List, Optional, Self
 
 from django.apps import apps
 from django.db import models
-
 from framework.models import BaseInput, BaseModel
 from input_types.enums import InputTypeName
 
@@ -57,6 +56,8 @@ class InputType(BaseModel):
             Dict[InputType, List[InputType]]: Dict with a list of related input types for each input type
         """
         relations: List[InputType] = []
+        if not self.relationships:
+            return relations
         model = self.get_model_class()
         if model:
             for field in model._meta.get_fields():  # For each model field

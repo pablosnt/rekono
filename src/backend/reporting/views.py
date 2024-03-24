@@ -59,11 +59,7 @@ class ReportingViewSet(BaseViewSet):
         "user",
         "date",
     ]
-    http_method_names = [
-        "get",
-        "post",
-        "delete",
-    ]
+    http_method_names = ["get", "post", "delete"]
     owner_field = "user"
 
     def _get_project_from_data(
@@ -175,7 +171,12 @@ class ReportingViewSet(BaseViewSet):
         models = importlib.import_module("findings.models")
         for finding_type in serializer.validated_finding_types:
             model = getattr(models, finding_type)
-            query = model.objects.filter(**serializer.validated_filter).all()
+            query_filter = (
+                {**serializer.validated_filter, **serializer.validated_triage_filter}
+                if hasattr(model, "triage_status")
+                else {**serializer.validated_filter}
+            )
+            query = model.objects.filter(**query_filter).all()
             if model == Vulnerability:
                 query = query.order_by("severity")
             findings[model.__name__.lower()] = [
@@ -191,7 +192,6 @@ class ReportingViewSet(BaseViewSet):
         stats = [0] * len(Severity)
         stats_by_target = {}
         findings_by_target = {}
-        filter = serializer.validated_filter
         for target in (
             serializer.validated_data.get("project").targets.all()
             if serializer.validated_data.get("project")
@@ -200,29 +200,58 @@ class ReportingViewSet(BaseViewSet):
                 or serializer.validated_data.get("task").target
             ]
         ):
-            filter["executions__task__target"] = target
+            target_filter = {"executions__task__target": target}
             stats_by_target[target.id] = [0] * len(Severity)
             findings_by_target[target.id] = {
-                FindingName.OSINT.value: OSINT.objects.filter(**filter).all(),
+                FindingName.OSINT.value: OSINT.objects.filter(
+                    **{
+                        **target_filter,
+                        **serializer.validated_filter,
+                        **serializer.validated_triage_filter,
+                    }
+                ).all(),
                 FindingName.HOST.value: [
                     {
                         FindingName.HOST.value: host,
                         FindingName.PORT.value: Port.objects.filter(
-                            host=host, **filter
+                            **{
+                                **target_filter,
+                                "host": host,
+                                **serializer.validated_filter,
+                            }
                         ).all(),
                         FindingName.TECHNOLOGY.value: Technology.objects.filter(
-                            port__host=host, **filter
+                            **{
+                                **target_filter,
+                                "port__host": host,
+                                **serializer.validated_filter,
+                            }
                         ).all(),
                         FindingName.CREDENTIAL.value: Credential.objects.filter(
-                            technology__port__host=host, **filter
+                            **{
+                                **target_filter,
+                                "technology__port__host": host,
+                                **serializer.validated_filter,
+                                **serializer.validated_triage_filter,
+                            }
                         ).all(),
                         FindingName.VULNERABILITY.value: Vulnerability.objects.filter(
-                            **filter
+                            **{
+                                **target_filter,
+                                **serializer.validated_filter,
+                                **serializer.validated_triage_filter,
+                            }
                         )
                         .filter(Q(technology__port__host=host) | Q(port__host=host))
                         .order_by("severity")
                         .all(),
-                        FindingName.EXPLOIT.value: Exploit.objects.filter(**filter)
+                        FindingName.EXPLOIT.value: Exploit.objects.filter(
+                            **{
+                                **target_filter,
+                                **serializer.validated_filter,
+                                **serializer.validated_triage_filter,
+                            }
+                        )
                         .filter(
                             Q(technology__port__host=host)
                             | Q(vulnerability__technology__port__host=host)
@@ -230,7 +259,9 @@ class ReportingViewSet(BaseViewSet):
                         )
                         .all(),
                     }
-                    for host in Host.objects.filter(**filter)
+                    for host in Host.objects.filter(
+                        **{**target_filter, **serializer.validated_filter}
+                    )
                 ],
             }
             if (

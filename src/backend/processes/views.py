@@ -1,9 +1,8 @@
-from rest_framework.permissions import IsAuthenticated
-
 from framework.views import BaseViewSet, LikeViewSet
 from processes.filters import ProcessFilter, StepFilter
 from processes.models import Process, Step
 from processes.serializers import ProcessSerializer, StepSerializer
+from rest_framework.permissions import IsAuthenticated
 from security.authorization.permissions import OwnerPermission, RekonoModelPermission
 
 # Create your views here.
@@ -16,12 +15,7 @@ class ProcessViewSet(LikeViewSet):
     permission_classes = [IsAuthenticated, RekonoModelPermission, OwnerPermission]
     search_fields = ["name", "description"]
     ordering_fields = ["id", "name", "owner", "likes_count"]
-    http_method_names = [
-        "get",
-        "post",
-        "put",
-        "delete",
-    ]
+    http_method_names = ["get", "post", "put", "delete"]
 
 
 class StepViewSet(BaseViewSet):
@@ -36,8 +30,4 @@ class StepViewSet(BaseViewSet):
         "configuration__name",
     ]
     ordering_fields = ["id", "process", "configuration"]
-    http_method_names = [
-        "get",
-        "post",
-        "delete",
-    ]
+    http_method_names = ["get", "post", "delete"]
