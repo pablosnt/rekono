@@ -4,28 +4,24 @@ from typing import Any
 
 
 nvd_nist_base_success = {                                                       # NVD NIST base Response
-    'cve': {
-        'description': {
-            'description_data': [
-                {
-                    'lang': 'en',
-                    'value': 'description'
-                }
-            ]
-        },
-        'problemtype': {
-            'problemtype_data': [
-                {
-                    'description': [
-                        {
-                            'value': 'CWE-200'
-                        }
-                    ]
-                }
-            ]
+    "vulnerabilities": [
+        {
+            "cve": {
+                "descriptions": [{"lang": "en", "value": "description"}],
+                "weaknesses": [
+                    {
+                        "type": "Primary",
+                        "description": [{"lang": "en", "value": "CWE-200"}],
+                    },
+                    {
+                        "type": "Secondary",
+                        "description": [{"lang": "en", "value": "CWE-300"}],
+                    },
+                ],
+                "metrics": {},
+            }
         }
-    },
-    'impact': {}
+    ]
 }
 
 
@@ -36,12 +32,8 @@ def nvd_nist_success_cvss_3(*args: Any, **kwargs: Any) -> dict:
         dict: NVD NIST response
     '''
     response = nvd_nist_base_success.copy()
-    response['impact'] = {
-        'baseMetricV3': {
-            'cvssV3': {
-                'baseScore': 9
-            }
-        }
+    response['vulnerabilities'][0]["cve"]["metrics"] = {
+        "cvssMetricV31": [{"type": "Primary", "cvssData": {"baseScore": 9}}]
     }
     return response
 
@@ -53,12 +45,8 @@ def nvd_nist_success_cvss_2(*args: Any, **kwargs: Any) -> dict:
         dict: NVD NIST response
     '''
     response = nvd_nist_base_success.copy()
-    response['impact'] = {
-        'baseMetricV2': {
-            'cvssV2': {
-                'baseScore': 8
-            }
-        }
+    response['vulnerabilities'][0]["cve"]["metrics"] = {
+        "cvssMetricV2": [{"type": "Primary", "cvssData": {"baseScore": 9}}]
     }
     return response
 
