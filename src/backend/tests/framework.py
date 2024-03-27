@@ -350,7 +350,6 @@ class ToolTest(RekonoTest):
     tool_name = ""
     execution = None
     executor_arguments: List[str] = []
-    data_dir = RekonoTest.data_dir / "reports"
 
     def setUp(self) -> None:
         if self.tool_name:
@@ -372,7 +371,7 @@ class ToolTest(RekonoTest):
             "execution": self.execution,
             "authentication": self.authentication,
             "executor_arguments": self.executor_arguments,
-            "reports": self.data_dir,
+            "reports": self.data_dir / "reports",
             "tool": self.tool_name,
         }
 
