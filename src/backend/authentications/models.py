@@ -1,9 +1,8 @@
 import base64
 from typing import Any, Dict
 
-from django.db import models
-
 from authentications.enums import AuthenticationType
+from django.db import models
 from framework.enums import InputKeyword
 from framework.models import BaseEncrypted, BaseInput
 from security.validators.input_validator import Regex, Validator
@@ -38,6 +37,13 @@ class Authentication(BaseInput, BaseEncrypted):
     filters = [BaseInput.Filter(type=AuthenticationType, field="type")]
     _encrypted_field = "_secret"
 
+    def get_token(self) -> str:
+        return (
+            base64.b64encode(f"{self.name}:{self.secret}".encode()).decode()
+            if self.type == AuthenticationType.BASIC
+            else self.secret
+        )
+
     def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
         """Get useful information from this instance to be used in tool execution as argument.
 
@@ -54,19 +60,10 @@ class Authentication(BaseInput, BaseEncrypted):
             InputKeyword.SECRET.name.lower(): self.secret,
             InputKeyword.CREDENTIAL_TYPE.name.lower(): self.type,
             InputKeyword.CREDENTIAL_TYPE_LOWER.name.lower(): self.type.lower(),
-            **(
-                {
-                    InputKeyword.USERNAME.name.lower(): self.name,
-                    InputKeyword.TOKEN.name.lower(): base64.b64encode(
-                        f"{self.name}:{self.secret}".encode()
-                    ).decode(),
-                }
-                if self.type == AuthenticationType.BASIC
-                else {
-                    InputKeyword.USERNAME.name.lower(): None,
-                    InputKeyword.TOKEN.name.lower(): self.secret,
-                }
-            ),
+            InputKeyword.TOKEN.name.lower(): self.get_token(),
+            InputKeyword.USERNAME.name.lower(): self.name
+            if self.type == AuthenticationType.BASIC
+            else None,
         }
 
     def __str__(self) -> str:

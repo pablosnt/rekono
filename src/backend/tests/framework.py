@@ -4,11 +4,9 @@ import shutil
 from pathlib import Path as PathFile
 from typing import Any, Dict, List, Optional
 
-from django.test import TestCase
-from rest_framework.test import APIClient
-
 from authentications.enums import AuthenticationType
 from authentications.models import Authentication
+from django.test import TestCase
 from executions.enums import Status
 from executions.models import Execution
 from findings.enums import (
@@ -36,6 +34,7 @@ from parameters.models import InputTechnology, InputVulnerability
 from processes.models import Process, Step
 from projects.models import Project
 from rekono.settings import CONFIG
+from rest_framework.test import APIClient
 from security.authorization.roles import Role
 from target_ports.models import TargetPort
 from targets.enums import TargetType
@@ -350,13 +349,13 @@ class ApiTest(RekonoTest):
 class ToolTest(RekonoTest):
     tool_name = ""
     execution = None
+    authentication = None
     executor_arguments: List[str] = []
-    data_dir = RekonoTest.data_dir / "reports"
 
     def setUp(self) -> None:
         if self.tool_name:
             super().setUp()
-            self._setup_target()
+            self._setup_task_user_provided_entities()
             self.tool = Tool.objects.get(name=self.tool_name)
             self.configuration = self.tool.configurations.get(default=True)
             self.task = Task.objects.create(
@@ -371,8 +370,9 @@ class ToolTest(RekonoTest):
     def _metadata(self) -> Dict[str, Any]:
         return {
             "execution": self.execution,
+            "authentication": self.authentication,
             "executor_arguments": self.executor_arguments,
-            "reports": self.data_dir,
+            "reports": self.data_dir / "reports",
             "tool": self.tool_name,
         }
 
