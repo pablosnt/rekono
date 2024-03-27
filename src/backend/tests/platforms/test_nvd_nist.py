@@ -7,41 +7,41 @@ from platforms.nvd_nist import NvdNist
 from tests.framework import RekonoTest
 
 success = {
-    "result": {
-        "CVE_Items": [
-            {
-                "cve": {
-                    "description": {
-                        "description_data": [{"lang": "en", "value": "description"}]
+    "vulnerabilities": [
+        {
+            "cve": {
+                "descriptions": [{"lang": "en", "value": "description"}],
+                "weaknesses": [
+                    {
+                        "type": "Primary",
+                        "description": [{"lang": "en", "value": "CWE-200"}],
                     },
-                    "problemtype": {
-                        "problemtype_data": [{"description": [{"value": "CWE-200"}]}]
+                    {
+                        "type": "Secondary",
+                        "description": [{"lang": "en", "value": "CWE-300"}],
                     },
-                }
+                ],
+                "metrics": {},
             }
-        ]
-    }
+        }
+    ]
 }
 
 
 def _success(impact_value: Dict[str, Any]) -> Dict[str, Any]:
-    success["result"]["CVE_Items"][0]["impact"] = impact_value
+    success["vulnerabilities"][0]["cve"]["metrics"] = impact_value
     return success
 
 
 def success_cvss_3(*args: Any, **kwargs: Any) -> Dict[str, Any]:
     return _success(
-        {
-            "baseMetricV3": {"cvssV3": {"baseScore": 9}},
-        }
+        {"cvssMetricV31": [{"type": "Primary", "cvssData": {"baseScore": 9}}]}
     )
 
 
 def success_cvss_2(*args: Any, **kwargs: Any) -> Dict[str, Any]:
     return _success(
-        {
-            "baseMetricV2": {"cvssV2": {"baseScore": 8}},
-        }
+        {"cvssMetricV2": [{"type": "Primary", "cvssData": {"baseScore": 8}}]}
     )
 
 
