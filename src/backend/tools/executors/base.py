@@ -4,12 +4,11 @@ import re
 import subprocess  # nosec
 import uuid
 from pathlib import Path
-from typing import Any, Dict, List
-
-from django.forms.models import model_to_dict
-from django.utils import timezone
+from typing import Any, Dict, List, Optional
 
 from authentications.models import Authentication
+from django.forms.models import model_to_dict
+from django.utils import timezone
 from executions.enums import Status
 from executions.models import Execution
 from findings.framework.models import Finding
@@ -41,6 +40,7 @@ class BaseExecutor:
         )
         self.arguments: List[str] = []
         self.findings_used_in_execution: Dict[Any, BaseInput] = {}
+        self.authentication: Optional[Authentication] = None
 
     def _get_arguments(
         self,
@@ -104,6 +104,8 @@ class BaseExecutor:
                         self.findings_used_in_execution[
                             base_input.__class__
                         ] = base_input
+                        if isinstance(base_input, Authentication):
+                            self.authentication = base_input
                         if not argument.multiple:
                             break
                 if parsed_data:
@@ -203,19 +205,16 @@ class BaseExecutor:
             self.execution.task.save(update_fields=["end"])
             logger.info(f"[Task] Task {self.execution.task.id} has finished")
 
-    def _on_skip(self, reson: str) -> None:
+    def _on_skip(self, reason: str) -> None:
         self.execution.status = Status.SKIPPED
-        self.execution.skipped_reason = reson
+        self.execution.skipped_reason = reason
         self.execution.end = timezone.now()
         self.execution.save(update_fields=["status", "end", "skipped_reason"])
         self._on_task_end()
 
     def _on_error(self, error: str) -> None:
         if error:
-            self.execution.output_error = error.replace(
-                str(self.report),
-                f"output.{self.execution.configuration.tool.output_format}",
-            ).strip()
+            self.execution.output_error = error
         self.execution.status = Status.ERROR
         self.execution.end = timezone.now()
         self.execution.save(update_fields=["output_error", "status", "end"])
@@ -226,10 +225,7 @@ class BaseExecutor:
         self.execution.end = timezone.now()
         if self.execution.configuration.tool.output_format and self.report.is_file():
             self.execution.output_file = self.report
-        self.execution.output_plain = output.replace(
-            str(self.report),
-            f"output.{self.execution.configuration.tool.output_format}",
-        )
+        self.execution.output_plain = output
         self.execution.save(
             update_fields=["status", "end", "output_file", "output_plain"]
         )
