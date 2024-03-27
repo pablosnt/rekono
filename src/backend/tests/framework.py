@@ -349,6 +349,7 @@ class ApiTest(RekonoTest):
 class ToolTest(RekonoTest):
     tool_name = ""
     execution = None
+    authentication = None
     executor_arguments: List[str] = []
 
     def setUp(self) -> None:
