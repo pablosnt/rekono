@@ -80,7 +80,11 @@ class ToolTestCase(RekonoTestCase):
     expected: Optional[List[Dict[str, Any]]] = None
 
     def _get_parser(
-        self, execution: Execution, authentication: Authentication, executor_arguments: List[str], reports: Path
+        self,
+        execution: Execution,
+        authentication: Authentication,
+        executor_arguments: List[str],
+        reports: Path,
     ) -> BaseParser:
         report = reports / self.report
         executor = execution.configuration.tool.get_executor_class()(execution)
