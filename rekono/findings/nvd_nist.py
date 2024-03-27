@@ -96,15 +96,14 @@ class NvdNist:
             "cvssMetricV3",
             "cvssMetricV2",
         ]:
-            metrics = cvss_metrics.get(field) or sum(
+            for cvss in cvss_metrics.get(field) or sum(
                 [
                     list(items)
                     for key, items in cvss_metrics.items()
                     if key.lower().startswith(field)
                 ],
                 []
-            )
-            for cvss in metrics:
+            ):
                 if cvss.get("type") == "Primary":
                     base_score = cvss.get("cvssData", {}).get("baseScore")
                     if base_score:

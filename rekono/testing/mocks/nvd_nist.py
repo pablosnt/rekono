@@ -46,7 +46,7 @@ def nvd_nist_success_cvss_2(*args: Any, **kwargs: Any) -> dict:
     '''
     response = nvd_nist_base_success.copy()
     response['vulnerabilities'][0]["cve"]["metrics"] = {
-        "cvssMetricV2": [{"type": "Primary", "cvssData": {"baseScore": 9}}]
+        "cvssMetricV2": [{"type": "Primary", "cvssData": {"baseScore": 8}}]
     }
     return response
 
