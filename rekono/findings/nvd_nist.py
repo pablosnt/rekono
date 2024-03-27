@@ -32,6 +32,7 @@ class NvdNist:
         self.cve = cve
         self.reference = self.cve_reference_pattern.format(cve=cve)             # CVE reference
         self.raw_cve_info = self.request()                                      # CVE raw information
+        print(self.raw_cve_info)
         self.description = self.parse_description() if self.raw_cve_info else ''    # CVE description
         self.cwe = self.parse_cwe() if self.raw_cve_info else None              # CVE weakness as CWE code
         # CVE severity based on CVSS score
