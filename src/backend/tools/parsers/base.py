@@ -97,7 +97,7 @@ class BaseParser:
         self.executor.execution.output_error = self._protect_value(
             self.executor.execution.output_error
         )
-        if self.report:
+        if self.report and self.report.is_file():
             with self.report.open("r") as read_report:
                 data = read_report.read()
             with self.report.open("w") as write_report:
