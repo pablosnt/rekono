@@ -75,18 +75,29 @@ class BaseParser:
     def _load_report_by_lines(self) -> List[str]:
         with open(self.report, "r", encoding="utf-8") as report:
             return report.readlines()
-    
+
     def _protect_value(self, value: Optional[str]) -> str:
         if not value:
             return value
         if self.executor.authentication:
-            for sensitive_value in [self.executor.authentication.name, self.executor.authentication.secret, self.executor.authentication.get_token()]:
+            for sensitive_value in [
+                self.executor.authentication.name,
+                self.executor.authentication.secret,
+                self.executor.authentication.get_token(),
+            ]:
                 value = value.replace(sensitive_value, "*****")
-        return value.replace(str(self.report), f"output.{self.execution.configuration.tool.output_format}").strip()
+        return value.replace(
+            str(self.report),
+            f"output.{self.execution.configuration.tool.output_format}",
+        ).strip()
 
     def _protect_execution(self) -> None:
-        self.executor.execution.output_plain = self._protect_value(self.executor.execution.output_plain)
-        self.executor.execution.output_error = self._protect_value(self.executor.execution.output_error)
+        self.executor.execution.output_plain = self._protect_value(
+            self.executor.execution.output_plain
+        )
+        self.executor.execution.output_error = self._protect_value(
+            self.executor.execution.output_error
+        )
         if self.report:
             with self.report.open("r") as read_report:
                 data = read_report.read()

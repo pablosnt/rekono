@@ -38,7 +38,11 @@ class Authentication(BaseInput, BaseEncrypted):
     _encrypted_field = "_secret"
 
     def get_token(self) -> str:
-        return base64.b64encode(f"{self.name}:{self.secret}".encode()).decode() if self.type == AuthenticationType.BASIC else self.secret
+        return (
+            base64.b64encode(f"{self.name}:{self.secret}".encode()).decode()
+            if self.type == AuthenticationType.BASIC
+            else self.secret
+        )
 
     def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
         """Get useful information from this instance to be used in tool execution as argument.
@@ -57,7 +61,9 @@ class Authentication(BaseInput, BaseEncrypted):
             InputKeyword.CREDENTIAL_TYPE.name.lower(): self.type,
             InputKeyword.CREDENTIAL_TYPE_LOWER.name.lower(): self.type.lower(),
             InputKeyword.TOKEN.name.lower(): self.get_token(),
-            InputKeyword.USERNAME.name.lower(): self.name if self.type == AuthenticationType.BASIC else None
+            InputKeyword.USERNAME.name.lower(): self.name
+            if self.type == AuthenticationType.BASIC
+            else None,
         }
 
     def __str__(self) -> str:
