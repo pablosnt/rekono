@@ -76,7 +76,7 @@ class BaseParser:
         with open(self.report, "r", encoding="utf-8") as report:
             return report.readlines()
 
-    def _protect_value(self, value: Optional[str]) -> str:
+    def _protect_value(self, value: Optional[str]) -> Optional[str]:
         if not value:
             return value
         if self.executor.authentication:
@@ -88,7 +88,7 @@ class BaseParser:
                 value = value.replace(sensitive_value, "*****")
         return value.replace(
             str(self.report),
-            f"output.{self.execution.configuration.tool.output_format}",
+            f"output.{self.executor.execution.configuration.tool.output_format}",
         ).strip()
 
     def _protect_execution(self) -> None:
