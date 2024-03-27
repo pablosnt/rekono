@@ -5,10 +5,11 @@ from typing import Any, Dict, List, Optional, Tuple, Type
 
 from django.db import transaction
 from django.test import TestCase
-from rest_framework.test import APIClient
-
 from executions.models import Execution
+from rest_framework.test import APIClient
 from tools.parsers.base import BaseParser
+
+from backend.security import authentication
 
 
 class RekonoTestCase:
@@ -84,6 +85,7 @@ class ToolTestCase(RekonoTestCase):
     ) -> BaseParser:
         report = reports / self.report
         executor = execution.configuration.tool.get_executor_class()(execution)
+        executor.authentication = authentication
         executor.arguments = executor_arguments
         parser = execution.configuration.tool.get_parser_class()(
             executor,
@@ -98,6 +100,7 @@ class ToolTestCase(RekonoTestCase):
     def test_case(self, *args: Any, **kwargs: Any) -> None:
         parser = self._get_parser(
             kwargs["execution"],
+            kwargs["authentication"],
             kwargs["executor_arguments"],
             kwargs["reports"] / kwargs["tool"].lower().replace(" ", "_"),
         )

@@ -81,7 +81,6 @@ class BaseParser:
             return value
         if self.executor.authentication:
             for sensitive_value in [
-                self.executor.authentication.name,
                 self.executor.authentication.secret,
                 self.executor.authentication.get_token(),
             ]:
