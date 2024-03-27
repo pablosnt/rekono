@@ -3,13 +3,12 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Type
 
+from authentications.models import Authentication
 from django.db import transaction
 from django.test import TestCase
 from executions.models import Execution
 from rest_framework.test import APIClient
 from tools.parsers.base import BaseParser
-
-from backend.security import authentication
 
 
 class RekonoTestCase:
@@ -81,7 +80,7 @@ class ToolTestCase(RekonoTestCase):
     expected: Optional[List[Dict[str, Any]]] = None
 
     def _get_parser(
-        self, execution: Execution, executor_arguments: List[str], reports: Path
+        self, execution: Execution, authentication: Authentication, executor_arguments: List[str], reports: Path
     ) -> BaseParser:
         report = reports / self.report
         executor = execution.configuration.tool.get_executor_class()(execution)
