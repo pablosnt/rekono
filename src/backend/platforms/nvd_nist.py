@@ -9,7 +9,7 @@ from framework.platforms import BaseIntegration
 
 class NvdNist(BaseIntegration):
     def __init__(self) -> None:
-        self.url = "https://services.nvd.nist.gov/rest/json/cve/1.0/{cve}"
+        self.url = "https://services.nvd.nist.gov/rest/json/cves/2.0?cveId={cve}"
         super().__init__()
         self.reference = "https://nvd.nist.gov/vuln/detail/{cve}"
         self.cvss_mapping = {
@@ -30,26 +30,49 @@ class NvdNist(BaseIntegration):
                     )
                 except Exception:  # nosec
                     continue
-                cve_info = data["result"]["CVE_Items"][0]
-                for description in (
-                    cve_info["cve"]["description"]["description_data"] or []
-                ):
+                if len(data.get("vulnerabilities", []) or []) == 0:
+                    continue
+                cve_info = data.get("vulnerabilities")[0].get("cve", {})
+                for description in cve_info.get("descriptions", []) or []:
                     if description.get("lang") == "en":
                         finding.description = description.get("value")
                         break
-                for problem in cve_info["cve"]["problemtype"]["problemtype_data"] or []:
-                    for description in problem.get("description") or []:
-                        if description.get("value") and description.get(
-                            "value"
-                        ).lower().startswith("cwe-"):
+                cwe_assigned = False
+                for weakness in cve_info.get("weaknesses", []) or []:
+                    if weakness.get("type") != "Primary":
+                        continue
+                    for description in weakness.get("description") or []:
+                        if description.get("value", "").lower().startswith("cwe-"):
                             finding.cwe = description.get("value")
+                            cwe_assigned = True
                             break
+                    if cwe_assigned:
+                        break
                 severity = 5
-                for field in ["baseMetricV3", "baseMetricV2"]:
-                    if field in cve_info["impact"]:
-                        severity = cve_info["impact"][field][
-                            f"cvss{field.replace('baseMetric', '')}"
-                        ]["baseScore"]
+                severity_assigned = False
+                cvss_metrics = cve_info.get("metrics", {}) or {}
+                for field in [
+                    "cvssMetricV31",
+                    "cvssMetricV30",
+                    "cvssMetricV3",
+                    "cvssMetricV2",
+                ]:
+                    metrics = cvss_metrics.get(field) or sum(
+                        [
+                            list(items)
+                            for key, items in cvss_metrics.items()
+                            if key.lower().startswith(field)
+                        ],
+                        [],
+                    )
+                    for cvss in metrics:
+                        if cvss.get("type") == "Primary":
+                            base_score = cvss.get("cvssData", {}).get("baseScore")
+                            if base_score:
+                                severity = base_score
+                                severity_assigned = True
+                                break
+                    if severity_assigned:
                         break
                 finding.severity = [
                     k
