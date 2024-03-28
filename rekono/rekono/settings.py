@@ -24,15 +24,29 @@ from tasks.enums import Status, TimeUnit
 from tools.enums import IntensityRank
 
 from rekono.config import RekonoConfigLoader
-from rekono.environment import (ENV_REKONO_HOME, RKN_ALLOWED_HOSTS,
-                                RKN_CMSEEK_RESULTS, RKN_DB_HOST, RKN_DB_NAME,
-                                RKN_DB_PASSWORD, RKN_DB_PORT, RKN_DB_USER,
-                                RKN_EMAIL_HOST, RKN_EMAIL_PASSWORD,
-                                RKN_EMAIL_PORT, RKN_EMAIL_USER,
-                                RKN_FRONTEND_URL, RKN_GITTOOLS_DIR,
-                                RKN_LOG4J_SCAN_DIR, RKN_ROOT_PATH, RKN_RQ_HOST,
-                                RKN_RQ_PORT, RKN_SECRET_KEY,
-                                RKN_SPRING4SHELL_SCAN_DIR, RKN_TRUSTED_PROXY)
+from rekono.environment import (
+    ENV_REKONO_HOME,
+    RKN_ALLOWED_HOSTS,
+    RKN_CMSEEK_RESULTS,
+    RKN_DB_HOST,
+    RKN_DB_NAME,
+    RKN_DB_PASSWORD,
+    RKN_DB_PORT,
+    RKN_DB_USER,
+    RKN_EMAIL_HOST,
+    RKN_EMAIL_PASSWORD,
+    RKN_EMAIL_PORT,
+    RKN_EMAIL_USER,
+    RKN_FRONTEND_URL,
+    RKN_GITTOOLS_DIR,
+    RKN_LOG4J_SCAN_DIR,
+    RKN_ROOT_PATH,
+    RKN_RQ_HOST,
+    RKN_RQ_PORT,
+    RKN_SECRET_KEY,
+    RKN_SPRING4SHELL_SCAN_DIR,
+    RKN_TRUSTED_PROXY,
+)
 
 ################################################################################
 # Rekono basic information                                                     #
@@ -40,7 +54,7 @@ from rekono.environment import (ENV_REKONO_HOME, RKN_ALLOWED_HOSTS,
 
 # Rekono description
 DESCRIPTION = 'Automation platform that combines different hacking tools to complete pentesting processes'
-VERSION = '1.6.4'                                                               # Rekono version
+VERSION = '1.6.5'                                                               # Rekono version
 TESTING = 'test' in sys.argv                                                    # Tests execution
 
 ################################################################################
