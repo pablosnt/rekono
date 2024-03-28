@@ -46,11 +46,8 @@ jobs:
     runs-on: ubuntu-latest
     environment: gitlab
     needs: docker-image
-    env:
-      GL_REKONO_ID: 45783845
-      GL_KALI_ID: 48406619
     steps:
-      - name: Checkout Rekono repository from GitLab
+      - name: Checkout GitLab repository
         run: git clone https://gitlab.com/pablosnt/rekono.git rekono-deb
 
       - name: Update debian/changelog
@@ -64,11 +61,11 @@ jobs:
           tz = pytz.timezone('Europe/Madrid')
           d = tz.localize(datetime.now())
           change_time = d.strftime('%a, %d %b %Y %H:%M:%S %z')
-          new_changes = f'rekono-kbx (${{ github.event.release.name }}) kali-dev; urgency=medium\n\n  * Update Rekono version to ${{ github.event.release.name }}.\n\n -- Pablo Santiago López <${{ secrets.GITLAB_EMAIL }}>  {change_time}\n\n'
+          new_changes = f'rekono (${{ github.event.release.name }}) kali-dev; urgency=medium\n\n  * Update Rekono version to ${{ github.event.release.name }}.\n\n -- Pablo Santiago López <${{ secrets.GITLAB_EMAIL }}>  {change_time}\n\n'
           with open('changelog', 'w') as changelog:
             changelog.write(new_changes + old_changes)
       
-      - name: Commit changes to Rekono repository in GitLab
+      - name: Commit changes to GitLab
         working-directory: rekono-deb
         run: |
           git config user.name 'Pablo Santiago'
@@ -79,32 +76,29 @@ jobs:
           git config credential.helper '!f() { sleep 1; echo "username=${{ secrets.GITLAB_USER }}"; echo "password=${{ secrets.GITLAB_TOKEN }}"; }; f'
           git push --set-upstream origin release/${{ github.event.release.name }}
       
-      - name: Create merge request on Rekono repository in GitLab
-        id: gitlab-merge-request
+      - name: GitLab merge request
         shell: python
+        env:
+          GITLAB_PROJECT_ID: 45783845
         run: |
           import requests
-          from pathlib import Path
           headers = {
             'PRIVATE-TOKEN': '${{ secrets.GITLAB_TOKEN }}'
           }
           data = {
             'title': 'Update Rekono version to ${{ github.event.release.name }}',
-            'source_project_id': ${{ env.GL_REKONO_ID }},
             'source_branch': 'release/${{ github.event.release.name }}',
-            'target_project_id': ${{ env.GL_REKONO_ID }},
-            'target_branch': 'kali/master'
+            'target_branch': 'kali/master',
           }
-          response = requests.post('https://gitlab.com/api/v4/projects/${{ env.GL_REKONO_ID }}/merge_requests', data=data, headers=headers)
+          response = requests.post('https://gitlab.com/api/v4/projects/${{ env.GITLAB_PROJECT_ID }}/merge_requests', data=data, headers=headers)
+          if response.status_code != 201:
+            print(response.text)
           response.raise_for_status()
-          response_data = response.json()
-          if response_data and response_data.get('web_url'):
-            with Path(os.getenv('GITHUB_OUTPUT')).open('a') as github_output:
-              github_output.write(f'url={response_data.get("web_url")}\n')
-            print(response_data.get('web_url'))
 
-      - name: Create issue on Kali Linux repository in GitLab
+      - name: GitLab issue in Kali Linux repository
         shell: python
+        env:
+          GITLAB_PROJECT_ID: 48406619
         run: |
           import requests
           headers = {
@@ -113,20 +107,14 @@ jobs:
           data = {
             'title': 'New Rekono version ${{ github.event.release.name }}',
             'description': '''Please, upgrade the `rekono-kbx` Kali Linux package to the latest version `${{ github.event.release.name }}`.
-            
-            It's needed to upgrade the version references to `${{ github.event.release.name }}` in the files:
-            - [debian/changelog](https://gitlab.com/kalilinux/packages/rekono-kbx/-/blob/kali/master/debian/changelog)
 
             New version details:
-            - [Rekono package MR](${{ steps.gitlab-merge-request.outputs.url }})
             - [GitHub release](https://github.com/pablosnt/rekono/releases/tag/${{ github.event.release.name }})
             - [Rekono changelog](https://github.com/pablosnt/rekono/blob/main/CHANGELOG.md)
 
             Thank you very much!
             ''',
           }
-          response = requests.post('https://gitlab.com/api/v4/projects/${{ env.GL_KALI_ID }}/issues', data=data, headers=headers)
+          response = requests.post('https://gitlab.com/api/v4/projects/${{ env.GITLAB_PROJECT_ID }}/issues', data=data, headers=headers)
           response.raise_for_status()
-          response_data = response.json()
-          if response_data and response_data.get('web_url'):
-            print(response_data.get('web_url'))
+        

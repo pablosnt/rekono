@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [1.6.5] - 2024-03-29
+
+### Fixed
+
+- Upgrade NVD NIST API version to 2.0 after [decommissioning of version 1.0](https://nvd.nist.gov/general/news/api-20-announcements) (https://github.com/pablosnt/rekono/issues/287)
+
+### Security
+
+- Upgrade `Django` version to `3.2.25` (https://github.com/pablosnt/rekono/issues/286)
+- Upgrade `pycryptodome` version to `3.19.1` (https://github.com/pablosnt/rekono/issues/286)
+- Upgrade `axios` version to `0.28.0` (https://github.com/pablosnt/rekono/issues/286)
+
+
 ## [1.6.4] - 2023-11-07
 
 ### Security

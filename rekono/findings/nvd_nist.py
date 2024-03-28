@@ -2,9 +2,8 @@ import logging
 from urllib.parse import urlparse
 
 import requests
-from requests.adapters import HTTPAdapter, Retry
-
 from findings.enums import Severity
+from requests.adapters import HTTPAdapter, Retry
 
 # Mapping between severity values and CVSS values
 CVSS_RANGES = {
@@ -21,7 +20,7 @@ logger = logging.getLogger()                                                    
 class NvdNist:
     '''NVD NIST API handler to get information for a CVE code.'''
 
-    api_url_pattern = 'https://services.nvd.nist.gov/rest/json/cve/1.0/{cve}'   # API Rest URL
+    api_url_pattern = 'https://services.nvd.nist.gov/rest/json/cves/2.0?cveId={cve}'   # API Rest URL
     cve_reference_pattern = 'https://nvd.nist.gov/vuln/detail/{cve}'            # CVE reference format
 
     def __init__(self, cve: str) -> None:
@@ -55,7 +54,7 @@ class NvdNist:
         except requests.exceptions.ConnectionError:
             response = session.get(self.api_url_pattern.format(cve=self.cve))
         logger.info(f'[NVD NIST] GET {self.cve} > HTTP {response.status_code}')
-        return response.json()['result']['CVE_Items'][0] if response.status_code == 200 else {}
+        return response.json().get("vulnerabilities")[0].get("cve", {}) if response.status_code == 200 else {}
 
     def parse_description(self) -> str:
         '''Get description from raw CVE information.
@@ -63,7 +62,7 @@ class NvdNist:
         Returns:
             str: CVE description
         '''
-        for d in self.raw_cve_info['cve']['description']['description_data'] or []:
+        for d in self.raw_cve_info.get("descriptions", []) or []:
             if d.get('lang') == 'en':
                 return d.get('value')
         return ''
@@ -74,15 +73,12 @@ class NvdNist:
         Returns:
             str: CWE code
         '''
-        for item in self.raw_cve_info['cve']['problemtype']['problemtype_data'] or []:
-            descriptions = item.get('description')
-            if descriptions:
-                for desc in descriptions:
-                    cwe = desc.get('value')
-                    if not cwe:
-                        continue
-                    if cwe.lower().startswith('cwe-'):
-                        return cwe
+        for item in self.raw_cve_info.get("weaknesses", []) or []:
+            if item.get("type") != "Primary":
+                continue
+            for desc in item.get("description") or []:
+                if desc.get('value', '').lower().startswith('cwe-'):
+                    return desc.get('value')
         return ''
 
     def parse_severity(self) -> str:
@@ -92,12 +88,30 @@ class NvdNist:
             Optional[str]: Severity value
         '''
         score = 5                                                               # Score by default: MEDIUM
-        if 'baseMetricV3' in self.raw_cve_info['impact']:
-            # Get CVSS version 3 if exists
-            score = self.raw_cve_info['impact']['baseMetricV3']['cvssV3']['baseScore']
-        elif 'baseMetricV2' in self.raw_cve_info['impact']:
-            # Get CVSS version 2 if version 3 not found
-            score = self.raw_cve_info['impact']['baseMetricV2']['cvssV2']['baseScore']
+        score_assigned = False
+        cvss_metrics = self.raw_cve_info.get("metrics", {}) or {}
+        for field in [
+            "cvssMetricV31",
+            "cvssMetricV30",
+            "cvssMetricV3",
+            "cvssMetricV2",
+        ]:
+            for cvss in cvss_metrics.get(field) or sum(
+                [
+                    list(items)
+                    for key, items in cvss_metrics.items()
+                    if key.lower().startswith(field)
+                ],
+                []
+            ):
+                if cvss.get("type") == "Primary":
+                    base_score = cvss.get("cvssData", {}).get("baseScore")
+                    if base_score:
+                        score = base_score
+                        score_assigned = True
+                        break
+            if score_assigned:
+                break
         for severity in CVSS_RANGES.keys():
             down, up = CVSS_RANGES[severity]
             # Search severity value based on CVSS ranges
