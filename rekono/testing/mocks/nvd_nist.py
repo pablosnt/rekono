@@ -35,7 +35,7 @@ def nvd_nist_success_cvss_3(*args: Any, **kwargs: Any) -> dict:
     response['vulnerabilities'][0]["cve"]["metrics"] = {
         "cvssMetricV31": [{"type": "Primary", "cvssData": {"baseScore": 9}}]
     }
-    return response
+    return response.get("vulnerabilities")[0].get("cve", {})
 
 
 def nvd_nist_success_cvss_2(*args: Any, **kwargs: Any) -> dict:
@@ -48,7 +48,7 @@ def nvd_nist_success_cvss_2(*args: Any, **kwargs: Any) -> dict:
     response['vulnerabilities'][0]["cve"]["metrics"] = {
         "cvssMetricV2": [{"type": "Primary", "cvssData": {"baseScore": 8}}]
     }
-    return response
+    return response.get("vulnerabilities")[0].get("cve", {})
 
 
 def nvd_nist_not_found(*args: Any, **kwargs: Any) -> dict:
