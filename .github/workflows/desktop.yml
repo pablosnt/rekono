@@ -53,12 +53,6 @@ jobs:
       - name: Checkout Rekono repository from GitLab
         run: git clone https://gitlab.com/pablosnt/rekono.git rekono-deb
 
-      - name: Update rekono executable
-        working-directory: rekono-deb
-        run: |
-          echo '#!/bin/sh' > rekono
-          echo 'exec kaboxer run --component default --version ${{ github.event.release.name }} rekono -- "$@"' >> rekono
-
       - name: Update debian/changelog
         working-directory: rekono-deb/debian
         shell: python
@@ -121,7 +115,6 @@ jobs:
             'description': '''Please, upgrade the `rekono-kbx` Kali Linux package to the latest version `${{ github.event.release.name }}`.
             
             It's needed to upgrade the version references to `${{ github.event.release.name }}` in the files:
-            - [rekono](https://gitlab.com/kalilinux/packages/rekono-kbx/-/blob/kali/master/rekono)
             - [debian/changelog](https://gitlab.com/kalilinux/packages/rekono-kbx/-/blob/kali/master/debian/changelog)
 
             New version details:
