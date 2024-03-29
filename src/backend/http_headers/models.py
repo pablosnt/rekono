@@ -37,24 +37,32 @@ class HttpHeader(BaseInput):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=["target", "user", "key"], name="unique_http_headers_1", condition=models.Q(user__isnull=False, target__isnull=False)
+                fields=["target", "user", "key"],
+                name="unique_http_headers_1",
+                condition=models.Q(user__isnull=False, target__isnull=False),
             ),
             models.UniqueConstraint(
-                fields=["user", "key"], name="unique_http_headers_2", condition=models.Q(target__isnull=True)
+                fields=["user", "key"],
+                name="unique_http_headers_2",
+                condition=models.Q(target__isnull=True),
             ),
             models.UniqueConstraint(
-                fields=["target", "key"], name="unique_http_headers_3", condition=models.Q(user__isnull=True)
+                fields=["target", "key"],
+                name="unique_http_headers_3",
+                condition=models.Q(user__isnull=True),
             ),
             models.UniqueConstraint(
-                fields=["key"], name="unique_http_headers_4", condition=models.Q(user__isnull=True, target__isnull=True)
-            )
+                fields=["key"],
+                name="unique_http_headers_4",
+                condition=models.Q(user__isnull=True, target__isnull=True),
+            ),
         ]
 
     def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
         return {
             InputKeyword.HEADERS.name.lower(): {
                 **accumulated.get(InputKeyword.HEADERS.name.lower(), {}),
-                self.key: self.value
+                self.key: self.value,
             }
         }
 

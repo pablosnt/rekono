@@ -121,7 +121,19 @@ class BaseExecutor:
                     break
             if parsed_data:
                 if InputKeyword.HEADERS.name.lower() in parsed_data:
-                    parameters[argument.name] = " ".join([argument.argument.format(**{InputKeyword.HEADER_KEY.name.lower(): k, InputKeyword.HEADER_VALUE.name.lower(): v}) for k, v in parsed_data.get(InputKeyword.HEADERS.name.lower(), {}).items()])
+                    parameters[argument.name] = " ".join(
+                        [
+                            argument.argument.format(
+                                **{
+                                    InputKeyword.HEADER_KEY.name.lower(): k,
+                                    InputKeyword.HEADER_VALUE.name.lower(): v,
+                                }
+                            )
+                            for k, v in parsed_data.get(
+                                InputKeyword.HEADERS.name.lower(), {}
+                            ).items()
+                        ]
+                    )
                 else:
                     parameters[argument.name] = argument.argument.format(**parsed_data)
             elif not argument.required:

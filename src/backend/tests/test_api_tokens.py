@@ -48,7 +48,7 @@ class ApiTokenTest(ApiTest):
             ["admin1", "admin2", "auditor1", "auditor2", "reader1", "reader2"],
             "post",
             400,
-            api_token1
+            api_token1,
         ),
         ApiTestCase(
             ["admin1", "admin2", "auditor1", "auditor2", "reader1", "reader2"],

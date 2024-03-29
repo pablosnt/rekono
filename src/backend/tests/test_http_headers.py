@@ -22,9 +22,7 @@ class HttpHeaderTest(ApiTest):
             expected=[],
         ),
         ApiTestCase(["admin2", "auditor2", "reader1", "reader2"], "post", 403, target),
-        ApiTestCase(
-            ["auditor1"], "post", 400,{**target, **invalid_data}
-        ),
+        ApiTestCase(["auditor1"], "post", 400, {**target, **invalid_data}),
         ApiTestCase(
             ["auditor1"], "post", 201, target, {"id": 1, "user": None, **target}
         ),
