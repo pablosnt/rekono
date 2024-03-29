@@ -27,6 +27,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Ability to enable and disable integrations (https://github.com/pablosnt/rekono/issues/269)
 - HackTricks integration to link findings to interesing wiki resources (https://github.com/pablosnt/rekono/issues/271)
 - Creation of reports in JSON, XML and PDF formats (https://github.com/pablosnt/rekono/issues/273)
+- Customization of HTTP headers sent by tools (https://github.com/pablosnt/rekono/issues/297)
 
 ### Security
 
