@@ -93,6 +93,7 @@ class OwnerPermission(BasePermission):
     def _has_object_permission(
         self,
         request: Request,
+        view: View,
         instance: Any,
         owner_field: str,
         allow_admin: bool,
@@ -111,13 +112,14 @@ class OwnerPermission(BasePermission):
                 hasattr(instance, owner_field)
                 and getattr(instance, owner_field) == request.user
             )
-            or (allow_admin and IsAdmin().has_permission(request, owner_field))
+            or (allow_admin and IsAdmin().has_permission(request, view))
         )
 
     def has_permission(self, request: Request, view: View) -> bool:
         return (
             self._has_object_permission(
                 request,
+                view,
                 Process.objects.get(pk=request.data.get("process_id")),
                 "owner",
                 True,
@@ -146,4 +148,6 @@ class OwnerPermission(BasePermission):
         elif obj.__class__ in [TelegramChat, Report]:
             instance = obj
             owner_field = "user"
-        return self._has_object_permission(request, instance, owner_field, allow_admin)
+        return self._has_object_permission(
+            request, view, instance, owner_field, allow_admin
+        )

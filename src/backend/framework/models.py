@@ -5,7 +5,6 @@ import requests
 import urllib3
 from django.db import models
 from django.db.models import Q
-
 from rekono.settings import AUTH_USER_MODEL, CONFIG
 from security.cryptography.encryption import Encryptor
 
@@ -19,9 +18,9 @@ class BaseModel(models.Model):
         if filter_field:
             project = self
             for field in filter_field.split("__"):
-                if hasattr(project, field):
+                if hasattr(project, field) and getattr(project, field):
                     project = getattr(project, field)
-                else:  # pragma: no cover
+                else:
                     return None
             return project
 

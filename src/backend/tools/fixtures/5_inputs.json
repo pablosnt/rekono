@@ -558,5 +558,55 @@
             "filter": "cookie",
             "order": 1
         }
+    },
+    {
+        "model": "tools.input",
+        "pk": 57,
+        "fields": {
+            "argument": 42,
+            "type": 11,
+            "filter": null,
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 58,
+        "fields": {
+            "argument": 43,
+            "type": 11,
+            "filter": "Host",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 59,
+        "fields": {
+            "argument": 44,
+            "type": 11,
+            "filter": "User-Agent",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 60,
+        "fields": {
+            "argument": 45,
+            "type": 11,
+            "filter": null,
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 61,
+        "fields": {
+            "argument": 46,
+            "type": 11,
+            "filter": null,
+            "order": 1
+        }
     }
 ]

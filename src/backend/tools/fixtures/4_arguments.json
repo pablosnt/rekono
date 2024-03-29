@@ -449,5 +449,60 @@
             "required": false,
             "multiple": false
         }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 42,
+        "fields": {
+            "tool": 2,
+            "name": "headers",
+            "argument": "--header='{header_key}: {header_value}'",
+            "required": false,
+            "multiple": true
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 43,
+        "fields": {
+            "tool": 4,
+            "name": "headers",
+            "argument": "-vhost {header_value}",
+            "required": false,
+            "multiple": true
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 44,
+        "fields": {
+            "tool": 14,
+            "name": "headers",
+            "argument": "--user-agent {header_value}",
+            "required": false,
+            "multiple": true
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 45,
+        "fields": {
+            "tool": 18,
+            "name": "headers",
+            "argument": "-header '{header_key}:{header_value}'",
+            "required": false,
+            "multiple": true
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 46,
+        "fields": {
+            "tool": 20,
+            "name": "headers",
+            "argument": "--headers '{header_key}: {header_value}'",
+            "required": false,
+            "multiple": true
+        }
     }
 ]

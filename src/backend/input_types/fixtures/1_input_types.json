@@ -98,5 +98,15 @@
             "fallback_model": null,
             "relationships": false
         }
+    },
+    {
+        "model": "input_types.inputtype",
+        "pk": 11,
+        "fields": {
+            "name": "Http Header",
+            "model": "http_headers.httpheader",
+            "fallback_model": null,
+            "relationships": false
+        }
     }
 ]
