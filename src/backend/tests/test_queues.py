@@ -167,11 +167,11 @@ class TasksQueueTest(QueueTest):
         (34, 2, None),  # SSH Audit
         (24, 2, None),  # CMSeeK
         (33, 2, None),  # GitDumper & GitLeaks
-        (15, 2, 2),  # Dirsearch
         (36, 2, None),  # SMB Map
+        (25, 2, None),  # ZAP
+        (15, 2, 2),  # Dirsearch
         (48, 2, 2),  # Gobuster
         (21, 2, None),  # Nikto
-        (25, 2, None),  # ZAP
         (39, 2, None),  # Nuclei
         (32, 2, None),  # JoomScan
         (26, 3, 3),  # SearchSploit
