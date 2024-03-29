@@ -159,7 +159,7 @@
         "fields": {
             "tool": 2,
             "name": "Standard wordlist",
-            "arguments": "{url} {intensity} -o {output} --format=json {wordlist} {authentication} {cookie}",
+            "arguments": "{url} {intensity} -o {output} --format=json {headers} {wordlist} {authentication} {cookie}",
             "stage": 4,
             "default": true
         }
@@ -170,7 +170,7 @@
         "fields": {
             "tool": 2,
             "name": "Wordlist with extensions",
-            "arguments": "{url} {intensity} -o {output} --format=json --force-extensions {wordlist} {authentication} {cookie}",
+            "arguments": "{url} {intensity} -o {output} --format=json --force-extensions {headers} {wordlist} {authentication} {cookie}",
             "stage": 4,
             "default": false
         }
@@ -181,7 +181,7 @@
         "fields": {
             "tool": 2,
             "name": "Recursive",
-            "arguments": "{url} {intensity} -o {output} --format=json --force-recursive --recursion-depth=10 {wordlist} {authentication} {cookie}",
+            "arguments": "{url} {intensity} -o {output} --format=json --force-recursive --recursion-depth=10 {headers} {wordlist} {authentication} {cookie}",
             "stage": 4,
             "default": false
         }
@@ -192,7 +192,7 @@
         "fields": {
             "tool": 2,
             "name": "Deep recursive",
-            "arguments": "{url} {intensity} -o {output} --format=json --force-recursive --depth-recursive --recursion-depth=10 {wordlist} {authentication} {cookie}",
+            "arguments": "{url} {intensity} -o {output} --format=json --force-recursive --depth-recursive --recursion-depth=10 {headers} {wordlist} {authentication} {cookie}",
             "stage": 4,
             "default": false
         }
@@ -225,7 +225,7 @@
         "fields": {
             "tool": 4,
             "name": "Web scan",
-            "arguments": "{url} -Format xml -output {output} {authentication} {cookie}",
+            "arguments": "{url} -Format xml -output {output} {authentication} {cookie} {headers}",
             "stage": 4,
             "default": true
         }
@@ -346,7 +346,7 @@
         "fields": {
             "tool": 14,
             "name": "Joomla scan",
-            "arguments": "{url} {cookie}",
+            "arguments": "{url} {cookie} {headers}",
             "stage": 4,
             "default": true
         }
@@ -423,7 +423,7 @@
         "fields": {
             "tool": 18,
             "name": "All templates",
-            "arguments": "{url} {authentication} {cookie} -json -output {output}",
+            "arguments": "{url} {authentication} {cookie} {headers} -json -output {output}",
             "stage": 4,
             "default": true
         }
@@ -434,7 +434,7 @@
         "fields": {
             "tool": 18,
             "name": "Automatic technology detection",
-            "arguments": "{url} -automatic-scan {authentication} {cookie} -json -output {output}",
+            "arguments": "{url} -automatic-scan {authentication} {cookie} {headers} -json -output {output}",
             "stage": 4,
             "default": false
         }
@@ -445,7 +445,7 @@
         "fields": {
             "tool": 18,
             "name": "CVE templates",
-            "arguments": "{url} -tags cve {authentication} {cookie} -json -output {output}",
+            "arguments": "{url} -tags cve {authentication} {cookie} {headers} -json -output {output}",
             "stage": 4,
             "default": false
         }
@@ -511,7 +511,7 @@
         "fields": {
             "tool": 20,
             "name": "VHOST enumeration",
-            "arguments": "vhost {target_url} {subdomain_wordlist} {intensity} --append-domain --no-tls-validation --no-color --no-progress --quiet --output {output}",
+            "arguments": "vhost {target_url} {subdomain_wordlist} {basic_auth} {token_auth} {cookie} {headers} {intensity} --append-domain --no-tls-validation --no-color --no-progress --quiet --output {output}",
             "stage": 2,
             "default": false
         }
@@ -522,7 +522,7 @@
         "fields": {
             "tool": 20,
             "name": "Endpoints enumeration",
-            "arguments": "dir {url} {endpoint_wordlist} {basic_auth} {token_auth} {cookie} {intensity} --no-tls-validation --no-color --no-progress --quiet --output {output}",
+            "arguments": "dir {url} {endpoint_wordlist} {basic_auth} {token_auth} {cookie} {headers} {intensity} --no-tls-validation --no-color --no-progress --quiet --output {output}",
             "stage": 4,
             "default": false
         }

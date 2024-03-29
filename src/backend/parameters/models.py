@@ -1,7 +1,6 @@
 from typing import Any, Dict
 
 from django.db import models
-
 from framework.enums import InputKeyword
 from framework.models import BaseInput
 from security.validators.input_validator import Regex, Validator
@@ -31,7 +30,7 @@ class InputTechnology(BaseInput):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=["target", "name", "version"], name="unique_input_technology"
+                fields=["target", "name"], name="unique_input_technology"
             )
         ]
 
