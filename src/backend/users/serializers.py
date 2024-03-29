@@ -2,8 +2,8 @@ import logging
 from typing import Any, Dict
 
 from django.contrib.auth.password_validation import validate_password
-from django.db import transaction
 from django.utils import timezone
+from http_headers.serializers import SimpleHttpHeaderSerializer
 from platforms.telegram_app.notifications.notifications import Telegram
 from rest_framework import status
 from rest_framework.exceptions import AuthenticationFailed
@@ -106,6 +106,8 @@ class UpdateRoleSerializer(Serializer):
 class ProfileSerializer(UserSerializer):
     """Serializer to manage user profile via API."""
 
+    http_headers = SimpleHttpHeaderSerializer(many=True, read_only=True)
+
     class Meta:
         model = User
         fields = (
@@ -121,6 +123,7 @@ class ProfileSerializer(UserSerializer):
             "notification_scope",
             "email_notifications",
             "telegram_notifications",
+            "http_headers",
         )
         read_only_fields = (
             "username",
@@ -129,6 +132,7 @@ class ProfileSerializer(UserSerializer):
             "last_login",
             "role",
             "telegram_chat",
+            "http_headers",
         )
 
 
@@ -196,7 +200,6 @@ class CreateUserSerializer(PasswordSerializer, OTPSerializer):
             )
         return attrs
 
-    @transaction.atomic()
     def create(self, validated_data: Dict[str, Any]) -> User:
         """Create instance from validated data.
 
@@ -267,7 +270,6 @@ class ResetPasswordSerializer(PasswordSerializer, OTPSerializer):
         model = User
         fields = ("otp", "password")
 
-    @transaction.atomic()
     def save(self, **kwargs: Any) -> User:
         """Save changes in instance.
 
@@ -284,7 +286,6 @@ class RequestPasswordResetSerializer(Serializer):
 
     email = EmailField(max_length=150, required=True)
 
-    @transaction.atomic()
     def save(self, **kwargs: Any) -> User:
         """Save changes in instance.
 

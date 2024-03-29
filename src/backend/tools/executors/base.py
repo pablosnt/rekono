@@ -13,7 +13,9 @@ from executions.enums import Status
 from executions.models import Execution
 from findings.framework.models import Finding
 from findings.models import Port
+from framework.enums import InputKeyword
 from framework.models import BaseInput
+from http_headers.models import HttpHeader
 from parameters.models import InputTechnology, InputVulnerability
 from rekono.settings import CONFIG
 from settings.models import Settings
@@ -90,6 +92,13 @@ class BaseExecutor:
                     + [p.authentication for p in target_ports]
                     + list(input_vulnerabilities)
                     + list(input_technologies)
+                    + list(
+                        HttpHeader.objects.filter(
+                            target__isnull=True, user__isnull=True
+                        ).all()
+                    )
+                    + list(self.execution.task.executor.http_headers.all())
+                    + list(self.execution.task.target.http_headers.all())
                 ):
                     is_fallback = input_fallback and isinstance(
                         base_input, input_fallback
@@ -111,7 +120,10 @@ class BaseExecutor:
                 if parsed_data:
                     break
             if parsed_data:
-                parameters[argument.name] = argument.argument.format(**parsed_data)
+                if InputKeyword.HEADERS.name.lower() in parsed_data:
+                    parameters[argument.name] = " ".join([argument.argument.format(**{InputKeyword.HEADER_KEY.name.lower(): k, InputKeyword.HEADER_VALUE.name.lower(): v}) for k, v in parsed_data.get(InputKeyword.HEADERS.name.lower(), {}).items()])
+                else:
+                    parameters[argument.name] = argument.argument.format(**parsed_data)
             elif not argument.required:
                 parameters[argument.name] = ""
             else:

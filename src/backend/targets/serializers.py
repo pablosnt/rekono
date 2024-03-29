@@ -1,8 +1,8 @@
 from typing import Any, Dict
 
-from rest_framework.serializers import ModelSerializer
-
+from http_headers.serializers import SimpleHttpHeaderSerializer
 from platforms.defect_dojo.serializers import DefectDojoTargetSyncSerializer
+from rest_framework.serializers import ModelSerializer
 from targets.models import Target
 
 
@@ -18,6 +18,7 @@ class TargetSerializer(ModelSerializer):
     """Serializer to manage targets via API."""
 
     defect_dojo_sync = DefectDojoTargetSyncSerializer(many=False, read_only=True)
+    http_headers = SimpleHttpHeaderSerializer(many=True, read_only=True)
 
     class Meta:
         model = Target
@@ -32,6 +33,7 @@ class TargetSerializer(ModelSerializer):
             "tasks",
             "defect_dojo_sync",
             "notes",
+            "http_headers",
         )
         read_only_fields = (
             "type",
@@ -41,6 +43,7 @@ class TargetSerializer(ModelSerializer):
             "tasks",
             "defect_dojo_sync",
             "notes",
+            "http_headers",
         )
 
     def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:

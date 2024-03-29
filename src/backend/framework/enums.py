@@ -23,3 +23,6 @@ class InputKeyword(Enum):
     TOKEN = 17
     CREDENTIAL_TYPE = 18
     CREDENTIAL_TYPE_LOWER = 19
+    HEADERS = 20
+    HEADER_KEY = 21
+    HEADER_VALUE = 22

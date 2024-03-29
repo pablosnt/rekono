@@ -49,24 +49,6 @@ jobs:
     steps:
       - name: Checkout GitLab repository
         run: git clone https://gitlab.com/pablosnt/rekono.git rekono-deb
-      
-      - name: Update README.md
-        working-directory: rekono-deb
-        shell: python
-        run: |
-          import re
-          with open('README.md', 'r') as readme:
-            content = readme.read()
-          line_to_replace = re.search(f'dpkg -i ../rekono_[\d\.]+_amd64.deb', content)
-          if line_to_replace:
-            with open('README.md', 'w') as readme:
-              readme.write(content.replace(line_to_replace.group(0), 'dpkg -i ../rekono_${{ github.event.release.name }}_amd64.deb'))
-
-      - name: Update rekono executable
-        working-directory: rekono-deb
-        run: |
-          echo '#!/bin/sh' > rekono
-          echo 'exec kaboxer run --component default --version ${{ github.event.release.name }} rekono -- "$@"' >> rekono
 
       - name: Update debian/changelog
         working-directory: rekono-deb/debian
@@ -79,7 +61,7 @@ jobs:
           tz = pytz.timezone('Europe/Madrid')
           d = tz.localize(datetime.now())
           change_time = d.strftime('%a, %d %b %Y %H:%M:%S %z')
-          new_changes = f'rekono (${{ github.event.release.name }}) UNRELEASED; urgency=medium\n\n  * Update Rekono version to ${{ github.event.release.name }}.\n\n -- Pablo Santiago López <${{ secrets.GITLAB_EMAIL }}>  {change_time}\n\n'
+          new_changes = f'rekono-kbx (${{ github.event.release.name }}) kali-dev; urgency=medium\n\n  * Update Rekono version to ${{ github.event.release.name }}.\n\n -- Pablo Santiago López <${{ secrets.GITLAB_EMAIL }}>  {change_time}\n\n'
           with open('changelog', 'w') as changelog:
             changelog.write(new_changes + old_changes)
       
@@ -111,4 +93,27 @@ jobs:
           response = requests.post('https://gitlab.com/api/v4/projects/${{ env.GITLAB_PROJECT_ID }}/merge_requests', data=data, headers=headers)
           if response.status_code != 201:
             print(response.text)
-          assert(response.status_code == 201)
+          response.raise_for_status()
+
+      - name: GitLab issue in Kali Linux repository
+        shell: python
+        env:
+          GITLAB_PROJECT_ID: 48406619
+        run: |
+          import requests
+          headers = {
+            'PRIVATE-TOKEN': '${{ secrets.GITLAB_TOKEN }}'
+          }
+          data = {
+            'title': 'New Rekono version ${{ github.event.release.name }}',
+            'description': '''Please, upgrade the `rekono-kbx` Kali Linux package to the latest version `${{ github.event.release.name }}`.
+
+            New version details:
+            - [GitHub release](https://github.com/pablosnt/rekono/releases/tag/${{ github.event.release.name }})
+            - [Rekono changelog](https://github.com/pablosnt/rekono/blob/main/CHANGELOG.md)
+
+            Thank you very much!
+            ''',
+          }
+          response = requests.post('https://gitlab.com/api/v4/projects/${{ env.GITLAB_PROJECT_ID }}/issues', data=data, headers=headers)
+          response.raise_for_status()

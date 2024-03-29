@@ -1,0 +1,67 @@
+from typing import Any, Dict
+
+from django.db import models
+from framework.enums import InputKeyword
+from framework.models import BaseInput
+from rekono.settings import AUTH_USER_MODEL
+from security.validators.input_validator import Regex, Validator
+from targets.models import Target
+
+# Create your models here.
+
+
+class HttpHeader(BaseInput):
+    target = models.ForeignKey(
+        Target,
+        related_name="http_headers",
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+    )
+    user = models.ForeignKey(
+        AUTH_USER_MODEL,
+        related_name="http_headers",
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+    )
+    key = models.TextField(
+        max_length=100, validators=[Validator(Regex.NAME.value, code="key")]
+    )
+    value = models.TextField(
+        max_length=500, validators=[Validator(Regex.TEXT.value, code="value")]
+    )
+
+    filters = [BaseInput.Filter(type=str, field="key")]
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["target", "user", "key"], name="unique_http_headers_1", condition=models.Q(user__isnull=False, target__isnull=False)
+            ),
+            models.UniqueConstraint(
+                fields=["user", "key"], name="unique_http_headers_2", condition=models.Q(target__isnull=True)
+            ),
+            models.UniqueConstraint(
+                fields=["target", "key"], name="unique_http_headers_3", condition=models.Q(user__isnull=True)
+            ),
+            models.UniqueConstraint(
+                fields=["key"], name="unique_http_headers_4", condition=models.Q(user__isnull=True, target__isnull=True)
+            )
+        ]
+
+    def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
+        return {
+            InputKeyword.HEADERS.name.lower(): {
+                **accumulated.get(InputKeyword.HEADERS.name.lower(), {}),
+                self.key: self.value
+            }
+        }
+
+    def __str__(self) -> str:
+        parent = self.target or self.user
+        return f"{parent.__str__()} - {self.key}" if parent else self.key
+
+    @classmethod
+    def get_project_field(cls) -> str:
+        return "target__project"

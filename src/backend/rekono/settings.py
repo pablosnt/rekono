@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     "authentications",
     "executions",
     "findings",
+    "http_headers",
     "input_types",
     "integrations",
     "notes",
