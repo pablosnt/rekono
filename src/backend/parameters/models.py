@@ -16,11 +16,11 @@ class InputTechnology(BaseInput):
         Target, related_name="input_technologies", on_delete=models.CASCADE
     )
     name = models.TextField(
-        max_length=100, validators=[Validator(Regex.NAME.value, code="name")]
+        max_length=100, validators=[Validator(Regex.NAME.value, code="name", deny_injections=True)]
     )
     version = models.TextField(
         max_length=100,
-        validators=[Validator(Regex.NAME.value, code="version")],
+        validators=[Validator(Regex.NAME.value, code="version", deny_injections=True)],
         blank=True,
         null=True,
     )
@@ -69,7 +69,7 @@ class InputVulnerability(BaseInput):
         Target, related_name="input_vulnerabilities", on_delete=models.CASCADE
     )
     cve = models.TextField(
-        max_length=20, validators=[Validator(Regex.CVE.value, code="cve")]
+        max_length=20, validators=[Validator(Regex.CVE.value, code="cve", deny_injections=True)]
     )
 
     filters = [
