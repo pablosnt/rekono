@@ -1,10 +1,9 @@
 from typing import Any, Dict, cast
 
 from django.core.exceptions import ValidationError
-from rest_framework.serializers import ModelSerializer, PrimaryKeyRelatedField
-
 from processes.models import Process
 from processes.serializers import SimpleProcessSerializer
+from rest_framework.serializers import ModelSerializer, PrimaryKeyRelatedField
 from targets.models import Target
 from targets.serializers import SimpleTargetSerializer
 from tasks.models import Task
@@ -57,8 +56,6 @@ class TaskSerializer(ModelSerializer):
             "intensity",
             "executor",
             "scheduled_at",
-            "scheduled_in",
-            "scheduled_time_unit",
             "repeat_in",
             "repeat_time_unit",
             "creation",
@@ -99,13 +96,9 @@ class TaskSerializer(ModelSerializer):
                     "process": "Invalid task. Process or configuration is required",
                 }
             )
-        for field, unit in [
-            ("scheduled_in", "scheduled_time_unit"),
-            ("repeat_in", "repeat_time_unit"),
-        ]:
-            if not attrs.get(field) or not attrs.get(unit):
-                attrs[field] = None
-                attrs[unit] = None
+        if not attrs.get("repeat_in") or not attrs.get("repeat_time_unit"):
+            attrs["repeat_in"] = None
+            attrs["repeat_time_unit"] = None
         return super().validate(attrs)
 
     def create(self, validated_data: Dict[str, Any]) -> Task:

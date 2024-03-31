@@ -34,18 +34,6 @@ class TasksQueue(BaseQueue):
             logger.info(
                 f"[Task] Task {task.id} will be enqueued at {task.scheduled_at}"
             )
-        elif task.scheduled_in and task.scheduled_time_unit:
-            delay = {task.scheduled_time_unit.lower(): task.scheduled_in}
-            task.enqueued_at = timezone.now() + timedelta(**delay)
-            job = queue.enqueue_in(
-                timedelta(**delay),
-                self.consume,
-                task=task,
-                on_success=self._scheduled_callback,
-            )
-            logger.info(
-                f"[Task] Task {task.id} will be enqueued in {task.scheduled_in} {task.scheduled_time_unit}"
-            )
         else:
             task.enqueued_at = timezone.now()
             job = queue.enqueue(
