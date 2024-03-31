@@ -60,11 +60,7 @@ class ApiTestCase(RekonoTestCase):
                     data=self.data,
                     format=self.format,
                 )
-                try:
-                    self.tc.assertEqual(self.status_code, response.status_code)
-                except Exception as ex:
-                    input(response.content)
-                    raise ex
+                self.tc.assertEqual(self.status_code, response.status_code)
                 if self.expected is not None:
                     content = json.loads((response.content or "{}".encode()).decode())
                     if isinstance(self.expected, dict):
