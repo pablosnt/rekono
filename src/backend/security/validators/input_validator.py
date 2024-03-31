@@ -47,7 +47,7 @@ class Validator(RegexValidator):
             not bool(regex_matches) if self.inverse_match else bool(regex_matches)
         )
         is_injection = (
-            bool(re.fullmatch(Regex.IS_INJECTIO.value, value))
+            bool(re.fullmatch(Regex.IS_INJECTION.value, value))
             if self.deny_injections
             else False
         )
