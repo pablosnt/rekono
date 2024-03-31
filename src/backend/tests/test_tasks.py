@@ -1,7 +1,6 @@
 from typing import Any
 
 from executions.enums import Status
-from tasks.enums import TimeUnit
 from tests.cases import ApiTestCase
 from tests.framework import ApiTest
 from tools.enums import Intensity
