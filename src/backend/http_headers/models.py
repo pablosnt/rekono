@@ -26,10 +26,12 @@ class HttpHeader(BaseInput):
         null=True,
     )
     key = models.TextField(
-        max_length=100, validators=[Validator(Regex.NAME.value, code="key", deny_injections=True)]
+        max_length=100,
+        validators=[Validator(Regex.NAME.value, code="key", deny_injections=True)],
     )
     value = models.TextField(
-        max_length=500, validators=[Validator(Regex.TEXT.value, code="value", deny_injections=True)]
+        max_length=500,
+        validators=[Validator(Regex.TEXT.value, code="value", deny_injections=True)],
     )
 
     filters = [BaseInput.Filter(type=str, field="key")]

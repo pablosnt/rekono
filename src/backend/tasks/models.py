@@ -1,5 +1,4 @@
 from django.db import models
-
 from framework.models import BaseModel
 from processes.models import Process
 from rekono.settings import AUTH_USER_MODEL
@@ -37,16 +36,6 @@ class Task(BaseModel):
         blank=True,
         null=True,
         validators=[FutureDatetimeValidator(code="scheduled_at")],
-    )
-    # Amount of time before task execution
-    scheduled_in = models.IntegerField(
-        blank=True,
-        null=True,
-        validators=[TimeAmountValidator(code="scheduled_in")],
-    )
-    # Time unit to apply to the 'sheduled in' value
-    scheduled_time_unit = models.TextField(
-        max_length=10, choices=TimeUnit.choices, blank=True, null=True
     )
     # Amount of time to wait until repeating the task execution
     repeat_in = models.IntegerField(

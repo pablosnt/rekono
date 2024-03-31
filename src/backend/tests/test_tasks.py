@@ -1,7 +1,6 @@
 from typing import Any
 
 from executions.enums import Status
-from tasks.enums import TimeUnit
 from tests.cases import ApiTestCase
 from tests.framework import ApiTest
 from tools.enums import Intensity
@@ -19,7 +18,6 @@ invalid_task3 = {
     "configuration_id": 25,
     "intensity": Intensity.SNEAKY.name.capitalize(),
 }
-invalid_task4 = {**task1, "scheduled_in": -1, "scheduled_time_unit": TimeUnit.MINUTES}
 
 
 class TaskTest(ApiTest):
@@ -122,7 +120,6 @@ class TaskTest(ApiTest):
         ApiTestCase(["admin1", "auditor1"], "post", 400, invalid_task1),
         ApiTestCase(["admin1", "auditor1"], "post", 400, invalid_task2),
         ApiTestCase(["admin1", "auditor1"], "post", 400, invalid_task3),
-        ApiTestCase(["admin1", "auditor1"], "post", 400, invalid_task4),
         ApiTestCase(["admin2", "auditor2", "reader1", "reader2"], "post", 403, task1),
         ApiTestCase(
             ["admin1"],

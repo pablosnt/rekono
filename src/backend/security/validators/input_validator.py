@@ -21,7 +21,7 @@ class Regex(Enum):
     PATH_WITH_QUERYPARAMS = r"[\w\.\-_/\\#?&%$]{0,500}"
     CVE = r"CVE-\d{4}-\d{1,7}"
     SECRET = r"[\w\./\-=\+,:<>¿?¡!#&$()@%\[\]\{\}\*]{1,500}"
-    IS_INJECTION = r"[^;\"&</>$]*"
+    INJECTION = r"[;\"&</>$]+"
 
 
 class Validator(RegexValidator):
@@ -32,7 +32,7 @@ class Validator(RegexValidator):
         code: str | None = None,
         inverse_match: bool | None = ...,  # type: ignore
         flags: RegexFlag | None = None,
-        deny_injections: bool = False
+        deny_injections: bool = False,
     ) -> None:
         self.deny_injections = deny_injections
         super().__init__(regex, message, code, inverse_match, flags)
@@ -46,10 +46,14 @@ class Validator(RegexValidator):
         invalid_input = (
             not bool(regex_matches) if self.inverse_match else bool(regex_matches)
         )
-        is_injection = bool(re.fullmatch(Regex.IS_INJECTION, value)) if self.deny_injections else False
+        is_injection = (
+            bool(re.findall(Regex.INJECTION.value, value))
+            if self.deny_injections
+            else False
+        )
         if invalid_input or is_injection:
             logger.warning(
-                f"[Security] Invalid value that doesn't match the regex '{self.regex}'"
+                f"[Security] Value '{value}' doesn't match the allowed regex"
             )
             raise ValidationError(self.message, code=self.code, params={"value": value})
 
