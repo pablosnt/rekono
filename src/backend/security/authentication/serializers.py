@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 from django.core.exceptions import ValidationError
 from framework.serializers import MfaSerializer
