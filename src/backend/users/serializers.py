@@ -289,7 +289,7 @@ class RequestPasswordResetSerializer(Serializer):
             email=self.validated_data.get("email"), is_active=True
         )
         if user.exists():
-            otp = User.objects.setup_otp(user)
+            otp = User.objects.setup_otp(user.first())
             SMTP().reset_password(user, otp)
             logger.info(
                 f"[User] User {user.id} requested a password reset",
