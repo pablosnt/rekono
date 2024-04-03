@@ -50,6 +50,11 @@ class MfaSerializer(Serializer):
 
     def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
         attrs = super().validate(attrs)
-        if not self.validator(attrs.get("mfa"), self.user if hasattr(self, "user") and getattr(self, "user") else self.context.get("request").user):
+        if not self.validator(
+            attrs.get("mfa"),
+            self.user
+            if hasattr(self, "user") and getattr(self, "user")
+            else self.context.get("request").user,
+        ):
             raise AuthenticationFailed(code=status.HTTP_401_UNAUTHORIZED)
         return attrs

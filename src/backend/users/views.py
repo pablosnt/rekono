@@ -158,9 +158,9 @@ class MfaViewSet(BaseProfileViewSet):
             RegisterMfaSerializer(
                 {"url": User.objects.register_mfa(request.user)}
             ).data,
-            status=status.HTTP_200_OK
+            status=status.HTTP_200_OK,
         )
-    
+
     def _update_mfa(self, request: Request, serializer: Serializer) -> None:
         serializer = serializer(data=request.data, context={"request": request})
         serializer.is_valid(raise_exception=True)

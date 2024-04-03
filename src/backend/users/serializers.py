@@ -313,7 +313,6 @@ class EnableMfaSerializer(MfaSerializer):
 
 
 class DisableMfaSerializer(MfaSerializer):
-
     def save(self, **kwargs: Any) -> User:
         self.context.get("request").user.mfa = False
         self.context.get("request").user.save(update_fields=["mfa"])

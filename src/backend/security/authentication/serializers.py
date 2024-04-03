@@ -22,7 +22,6 @@ logger = logging.getLogger()
 
 
 class JwtAuthentication:
-
     def _login(self) -> Dict[str, str]:
         User.objects.invalidate_all_tokens(self.user)
         token = self.__class__.get_token(self.user)
@@ -68,14 +67,16 @@ class BaseMfaRequiredSerializer(Serializer):
                 raise AuthenticationFailed(code=status.HTTP_401_UNAUTHORIZED)
         if not self.user.mfa:
             raise ValidationError("MFA is not enabled yet for this user", code="mfa")
-        return {}
+        return attrs
 
 
 class SendMfaEmailSerializer(BaseMfaRequiredSerializer):
     token = CharField(required=False)
 
     def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
-        is_authenticated = IsAuthenticated().has_permission(self.context.get("request"), None)
+        is_authenticated = IsAuthenticated().has_permission(
+            self.context.get("request"), None
+        )
         if not is_authenticated and not attrs.get("token"):
             raise ValidationError("Token is required", code="token")
         elif is_authenticated:
@@ -91,11 +92,6 @@ class SendMfaEmailSerializer(BaseMfaRequiredSerializer):
 
 
 class MfaLoginSerializer(MfaSerializer, BaseMfaRequiredSerializer, JwtAuthentication):
-
-    def __init__(self, *args: Any, **kwargs: Any):
-        super().__init__(*args, **kwargs)
-        self.fields = {k: v for k, v in self.fields.items() if k in ["token", "mfa"]}
-
     def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
         super().validate(attrs)
         if self.user.otp:

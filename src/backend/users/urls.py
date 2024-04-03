@@ -21,6 +21,8 @@ urlpatterns = [
         "profile/",
         ProfileViewSet.as_view({"get": "get_profile", "put": "update_profile"}),
     ),
-    path("profile/update-password/", ProfileViewSet.as_view({"put": "update_password"})),
+    path(
+        "profile/update-password/", ProfileViewSet.as_view({"put": "update_password"})
+    ),
     path("", include(router.urls)),
 ]
