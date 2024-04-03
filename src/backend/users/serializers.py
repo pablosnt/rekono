@@ -156,10 +156,8 @@ class OTPSerializer(UserSerializer):
         fields = ("otp",)
 
     def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
-        try:
-            # Search inactive user by otp and check expiration datetime
-            user = User.objects.verify_otp(attrs.get("otp"))
-        except User.DoesNotExist:  # Invalid otp
+        user = User.objects.verify_otp(attrs.get("otp"))
+        if not user:
             raise AuthenticationFailed(code=status.HTTP_401_UNAUTHORIZED)
         attrs = super().validate(attrs)
         attrs["user"] = user

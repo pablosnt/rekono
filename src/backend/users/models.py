@@ -192,7 +192,7 @@ class RekonoUserManager(UserManager):
         filter = {"otp": hash(otp), "otp_expiration__gt": timezone.now()}
         if user:
             filter["id"] = user.id
-        return User.objects.get(**filter)
+        return User.objects.filter(**filter).first()
 
     def update_password(self, user: Any, password: str) -> Any:
         # nosemgrep: python.django.security.audit.unvalidated-password.unvalidated-password
@@ -237,10 +237,7 @@ class RekonoUserManager(UserManager):
     def verify_mfa_or_otp(self, otp: str, user: Any) -> bool:
         mfa_verification = self.verify_mfa(otp, user)
         if not mfa_verification and user.mfa:
-            try:
-                return self.verify_otp(otp, user) is not None
-            except Exception:
-                pass
+            return self.verify_otp(otp, user) is not None
         return mfa_verification
 
 
