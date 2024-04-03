@@ -2,7 +2,6 @@ import logging
 from typing import Any, Dict
 
 from django.contrib.auth.password_validation import validate_password
-from django.utils import timezone
 from framework.serializers import MfaSerializer
 from http_headers.serializers import SimpleHttpHeaderSerializer
 from platforms.mail.notifications import SMTP
@@ -19,7 +18,6 @@ from rest_framework.serializers import (
     URLField,
 )
 from security.authorization.roles import Role
-from security.cryptography.hashing import hash
 from users.models import User
 
 logger = logging.getLogger()

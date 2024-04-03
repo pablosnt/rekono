@@ -41,7 +41,6 @@ class RekonoUserManager(UserManager):
     def get_otp_expiration_time(
         self, time: Dict[str, int] = {"hours": CONFIG.otp_expiration_hours}
     ) -> datetime:
-        input(time)
         return timezone.now() + timedelta(**time)
 
     def assign_role(self, user: Any, role: Role) -> None:
@@ -176,7 +175,6 @@ class RekonoUserManager(UserManager):
         return user
 
     def setup_otp(self, user: Any, time: Optional[Dict[str, int]] = None) -> str:
-        input(time)
         plain_otp = self.generate_otp()
         user = self._update_otp(
             user,
@@ -241,7 +239,7 @@ class RekonoUserManager(UserManager):
         if not mfa_verification and user.mfa:
             try:
                 return self.verify_otp(otp, user) is not None
-            except:
+            except Exception:
                 pass
         return mfa_verification
 

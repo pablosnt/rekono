@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from django.core.exceptions import ValidationError
 from framework.serializers import MfaSerializer
@@ -22,6 +22,8 @@ logger = logging.getLogger()
 
 
 class JwtAuthentication:
+    user: Optional[User] = None
+
     def _login(self) -> Dict[str, str]:
         User.objects.invalidate_all_tokens(self.user)
         token = self.__class__.get_token(self.user)
