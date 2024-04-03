@@ -14,7 +14,7 @@ from security.authorization.permissions import IsNotAuthenticated
 
 
 class LoginView(TokenObtainPairView):
-    permission_classes = (IsNotAuthenticated,)
+    permission_classes = [IsNotAuthenticated]  # type: ignore
     throttle_scope = "login"
 
 
@@ -24,7 +24,7 @@ class MfaLoginView(LoginView):
 
 
 class SendEmailMfaView(GenericAPIView):
-    permission_classes = ()
+    permission_classes = []  # type: ignore
     throttle_scope = "mfa"
 
     @extend_schema(request=SendMfaEmailSerializer, responses={204: None})

@@ -22,7 +22,7 @@ logger = logging.getLogger()
 
 
 class JwtAuthentication:
-    user: Optional[User] = None
+    user: User = None
 
     def _login(self) -> Dict[str, str]:
         User.objects.invalidate_all_tokens(self.user)
