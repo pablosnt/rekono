@@ -11,6 +11,7 @@ drf-spectacular==0.27.0
 pycryptodome==3.19.0
 psycopg2-binary==2.9.9
 pyjwt==2.8.0
+pyotp==2.9.0
 python-magic==0.4.27
 python-libnmap==0.7.3
 python-telegram-bot==20.7

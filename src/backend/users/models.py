@@ -1,18 +1,18 @@
 import logging
 from datetime import datetime, timedelta
-from typing import Any, cast
+from typing import Any, Dict, Optional, cast
 
+import pyotp
 from django.contrib.auth.models import AbstractUser, Group, UserManager
 from django.db import models
 from django.utils import timezone
+from framework.models import BaseEncrypted
+from platforms.mail.notifications import SMTP
+from rekono.settings import CONFIG
 from rest_framework_simplejwt.token_blacklist.models import (
     BlacklistedToken,
     OutstandingToken,
 )
-
-from framework.models import BaseModel
-from platforms.mail.notifications import SMTP
-from rekono.settings import CONFIG
 from security.authentication.api import ApiToken
 from security.authorization.roles import Role
 from security.cryptography.hashing import hash
@@ -38,8 +38,10 @@ class RekonoUserManager(UserManager):
             return self.generate_otp(model)
         return otp
 
-    def get_otp_expiration_time(self) -> datetime:
-        return timezone.now() + timedelta(hours=CONFIG.otp_expiration_hours)
+    def get_otp_expiration_time(
+        self, time: Dict[str, int] = {"hours": CONFIG.otp_expiration_hours}
+    ) -> datetime:
+        return timezone.now() + timedelta(**time)
 
     def assign_role(self, user: Any, role: Role) -> None:
         """Initialize user, assigning it a role and creating its API token.
@@ -161,24 +163,36 @@ class RekonoUserManager(UserManager):
         logger.info(f"[User] User {user.id} has been disabled")
         return user
 
-    def request_password_reset(self, user: Any) -> Any:
-        """Request a password reset for an user.
-
-        Args:
-            user (Any): User that requests its password reset
-
-        Returns:
-            Any: User after request password reset
-        """
-        plain_otp = self.generate_otp()
-        user.otp = hash(plain_otp)
-        user.otp_expiration = self.get_otp_expiration_time()  # Set OTP expiration
+    def _update_otp(
+        self,
+        user: Any,
+        otp: Optional[str] = None,
+        otp_expiration: Optional[datetime] = None,
+    ) -> Any:
+        user.otp = otp
+        user.otp_expiration = otp_expiration
         user.save(update_fields=["otp", "otp_expiration"])
-        SMTP().reset_password(user, plain_otp)
-        logger.info(
-            f"[User] User {user.id} requested a password reset", extra={"user": user.id}
-        )
         return user
+
+    def setup_otp(self, user: Any, time: Optional[Dict[str, int]] = None) -> str:
+        plain_otp = self.generate_otp()
+        user = self._update_otp(
+            user,
+            hash(plain_otp),
+            self.get_otp_expiration_time()
+            if time is not None
+            else self.get_otp_expiration_time(time),
+        )
+        return plain_otp
+
+    def remove_otp(self, user: Any) -> Any:
+        return self._update_otp(user)
+
+    def verify_otp(self, otp: str, user: Optional[Any]) -> bool:
+        filter = {"otp": hash(otp), "otp_expiration__gt": timezone.now()}
+        if user:
+            filter["id"] = user.id
+        return User.objects.get(**filter)
 
     def update_password(self, user: Any, password: str) -> Any:
         # nosemgrep: python.django.security.audit.unvalidated-password.unvalidated-password
@@ -201,23 +215,36 @@ class RekonoUserManager(UserManager):
         user.save(update_fields=["otp", "otp_expiration", "is_active"])
         return user
 
-    def invalidate_all_tokens(self, user: Any, exclude_latest: bool = False) -> Any:
-        user_tokens = OutstandingToken.objects.filter(user=user)
-        tokens_to_remove = user_tokens.exclude(
+    def invalidate_all_tokens(self, user: Any) -> Any:
+        for token in OutstandingToken.objects.filter(user=user).exclude(
             id__in=BlacklistedToken.objects.filter(token__user=user).values_list(
                 "token_id", flat=True
             )
-        )
-        if exclude_latest:
-            tokens_to_remove = tokens_to_remove.exclude(
-                token=user_tokens.order_by("-created_at").first().token
-            )
-        for token in tokens_to_remove:
+        ):
             BlacklistedToken.objects.create(token=token)
         return user
 
+    def register_mfa(self, user: Any) -> str:
+        user.secret = pyotp.random_base32()
+        user.save(update_fields=["_mfa_key"])
+        return pyotp.totp.TOTP(user.secret).provisioning_uri(
+            user.email, issuer_name="Rekono"
+        )
 
-class User(AbstractUser, BaseModel):
+    def verify_mfa(self, otp: str, user: Any) -> bool:
+        return pyotp.TOTP(user.secret).verify(otp)
+
+    def verify_mfa_or_otp(self, otp: str, user: Any) -> bool:
+        mfa_verification = self.verify_mfa(otp, user)
+        if not mfa_verification and user.mfa:
+            try:
+                return self.verify_otp(otp, user) is not None
+            except:
+                pass
+        return mfa_verification
+
+
+class User(AbstractUser, BaseEncrypted):
     """User model."""
 
     # Main user data
@@ -243,13 +270,18 @@ class User(AbstractUser, BaseModel):
     email = models.EmailField(max_length=150, unique=True)
     is_active = models.BooleanField(blank=True, null=True, default=None)
 
-    # One Time Password used to invite and enable users, or reset passwords
+    # One Time Password used to invite and enable users or reset passwords and MFA via email
     otp = models.TextField(max_length=200, blank=True, null=True)
     otp_expiration = models.DateTimeField(
         blank=True,
         null=True,
         validators=[FutureDatetimeValidator(code="otp_expiration")],
     )
+
+    _mfa_key = models.TextField(
+        max_length=40, blank=True, null=True, db_column="mfa_key"
+    )
+    mfa = models.BooleanField(default=False)
 
     notification_scope = models.TextField(  # User notification preferences
         max_length=18, choices=Notification.choices, default=Notification.MY_EXECUTIONS
@@ -263,6 +295,7 @@ class User(AbstractUser, BaseModel):
     EMAIL_FIELD = "email"
     REQUIRED_FIELDS = ["email"]
     objects = RekonoUserManager()  # Model manager
+    _encrypted_field = "_mfa_key"
 
     def __str__(self) -> str:
         """Instance representation in text format.
