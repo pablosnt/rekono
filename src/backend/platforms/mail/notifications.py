@@ -122,6 +122,14 @@ class SMTP(BaseNotification):
             {"user": user, "user_otp": otp},
         )
 
+    def mfa(self, user: Any, otp: str) -> None:
+        self._notify_if_available(
+            [user],
+            "[Rekono] One Time Password",
+            "user_mfa.html",
+            {"user": user, "user_otp": otp},
+        )
+
     def enable_user_account(self, user: Any, otp: str) -> None:
         self._notify_if_available(
             [user],

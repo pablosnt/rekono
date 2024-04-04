@@ -58,9 +58,7 @@ class TelegramChatSerializer(ModelSerializer):
                 user=None,
             )
         except TelegramChat.DoesNotExist:
-            raise AuthenticationFailed(
-                "Invalid Telegram OTP", code=status.HTTP_401_UNAUTHORIZED
-            )
+            raise AuthenticationFailed(code=status.HTTP_401_UNAUTHORIZED)
         return attrs
 
     def create(self, validated_data: Dict[str, Any]) -> TelegramChat:

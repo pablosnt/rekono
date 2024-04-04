@@ -29,11 +29,17 @@ class ApiTestCase(RekonoTestCase):
     format: str = "json"
 
     def _login(self, username: str, password: str) -> Tuple[str, str]:
-        response = APIClient().post(
-            "/api/security/login/",
-            data={"username": username, "password": password},
+        content = json.loads(
+            (
+                APIClient()
+                .post(
+                    "/api/security/login/",
+                    data={"username": username, "password": password},
+                )
+                .content
+                or "{}".encode()
+            ).decode()
         )
-        content = json.loads((response.content or "{}".encode()).decode())
         return content.get("access"), content.get("refresh")
 
     def _check_response_content(
