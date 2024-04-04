@@ -188,7 +188,7 @@ class RekonoUserManager(UserManager):
     def remove_otp(self, user: Any) -> Any:
         return self._update_otp(user)
 
-    def verify_otp(self, otp: str, user: Optional[Any]) -> bool:
+    def verify_otp(self, otp: str, user: Optional[Any] = None) -> bool:
         filter = {"otp": hash(otp), "otp_expiration__gt": timezone.now()}
         if user:
             filter["id"] = user.id

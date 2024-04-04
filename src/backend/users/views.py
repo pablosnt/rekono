@@ -65,21 +65,58 @@ class UserViewSet(BaseViewSet):
             raise PermissionDenied()
         return instance
 
+    def _is_valid(self, serializer: Serializer, request: Request) -> Serializer:
+        serializer = serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        return serializer
+
+    def _create(self, serializer: Serializer, request: Request) -> Response:
+        serializer = self._is_valid(serializer, request)
+        return Response(
+            UserSerializer(serializer.create(serializer.validated_data)).data,
+            status=status.HTTP_201_CREATED,
+        )
+
     @extend_schema(request=InviteUserSerializer, responses={201: UserSerializer})
     def create(self, request, *args, **kwargs):
-        serializer = InviteUserSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user = serializer.create(serializer.validated_data)
-        headers = self.get_success_headers(serializer.data)
-        return Response(
-            UserSerializer(user).data, status=status.HTTP_201_CREATED, headers=headers
+        return self._create(InviteUserSerializer, request)
+
+    @extend_schema(request=CreateUserSerializer, responses={201: UserSerializer})
+    @action(
+        detail=False,
+        methods=["POST"],
+        url_path="create",
+        permission_classes=[IsNotAuthenticated],
+    )
+    def create_after_invitation(self, request: Request, *args, **kwargs) -> Response:
+        return self._create(CreateUserSerializer, request)
+
+    @extend_schema(
+        request=RequestPasswordResetSerializer, responses={200: None}, methods=["POST"]
+    )
+    @extend_schema(
+        request=ResetPasswordSerializer, responses={200: None}, methods=["PUT"]
+    )
+    @action(
+        detail=False,
+        methods=["POST", "PUT"],
+        url_path="reset-password",
+        permission_classes=[IsNotAuthenticated],
+    )
+    def reset_password(self, request: Request, *args, **kwargs) -> Response:
+        serializer = self._is_valid(
+            RequestPasswordResetSerializer
+            if request.method.lower() == "post"
+            else ResetPasswordSerializer,
+            request,
         )
+        serializer.save()
+        return Response(status=status.HTTP_200_OK)
 
     @extend_schema(request=UpdateRoleSerializer, responses={201: UserSerializer})
     def update(self, request, *args, **kwargs):
         instance = self._get_object_if_not_current_user(request)
-        serializer = UpdateRoleSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        serializer = self._is_valid(UpdateRoleSerializer, request)
         instance = serializer.update(instance, serializer.validated_data)
         return Response(UserSerializer(instance).data, status=status.HTTP_200_OK)
 
@@ -187,47 +224,3 @@ class MfaViewSet(BaseProfileViewSet):
             )
         self._update_mfa(request, DisableMfaSerializer)
         return self._get(request)
-
-
-class CreateUserViewSet(GenericViewSet):
-    """User ViewSet that includes user initialization from invitation feature."""
-
-    serializer_class = CreateUserSerializer
-    queryset = User.objects.all()
-    # Users can't be initialized from another user session, authentication is based on OTP
-    permission_classes = [IsNotAuthenticated]
-
-    @extend_schema(request=CreateUserSerializer, responses={201: UserSerializer})
-    def create(self, request: Request, *args, **kwargs) -> Response:
-        serializer = self.serializer_class(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user = serializer.create(serializer.validated_data)
-        # headers = self.get_success_headers(serializer.data)
-        return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
-
-
-class ResetPasswordViewSet(GenericViewSet):
-    """User ViewSet that includes reset password feature."""
-
-    queryset = User.objects.all()
-    permission_classes = [IsNotAuthenticated]
-
-    def _create_or_update(
-        self, request: Request, serializer_class: Serializer
-    ) -> Serializer:
-        serializer = serializer_class(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return serializer
-
-    @extend_schema(request=RequestPasswordResetSerializer, responses={200: None})
-    @action(detail=False, methods=["POST"], url_path="reset-password")
-    def request_reset_password(self, request: Request) -> Response:
-        self._create_or_update(request, RequestPasswordResetSerializer)
-        return Response(status=status.HTTP_200_OK)
-
-    @extend_schema(request=ResetPasswordSerializer, responses={200: None})
-    @action(detail=False, methods=["PUT"], url_path="reset-password")
-    def reset_password(self, request: Request) -> Response:
-        self._create_or_update(request, ResetPasswordSerializer)
-        return Response(status=status.HTTP_200_OK)

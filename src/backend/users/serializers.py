@@ -156,15 +156,15 @@ class OTPSerializer(UserSerializer):
         fields = ("otp",)
 
     def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
+        attrs = super().validate(attrs)
         user = User.objects.verify_otp(attrs.get("otp"))
         if not user:
             raise AuthenticationFailed(code=status.HTTP_401_UNAUTHORIZED)
-        attrs = super().validate(attrs)
         attrs["user"] = user
         return attrs
 
 
-class CreateUserSerializer(PasswordSerializer, OTPSerializer):
+class CreateUserSerializer(OTPSerializer, PasswordSerializer):
     """Serializer to create an user via API after email invitation."""
 
     class Meta:
@@ -287,9 +287,9 @@ class RequestPasswordResetSerializer(Serializer):
         """
         user = User.objects.filter(
             email=self.validated_data.get("email"), is_active=True
-        )
-        if user.exists():
-            otp = User.objects.setup_otp(user.first())
+        ).first()
+        if user:
+            otp = User.objects.setup_otp(user)
             SMTP().reset_password(user, otp)
             logger.info(
                 f"[User] User {user.id} requested a password reset",

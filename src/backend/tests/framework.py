@@ -340,9 +340,9 @@ class ApiTest(RekonoTest):
 
     def test_anonymous_access(self) -> None:
         if self.anonymous_allowed is not None and self.endpoint:
-            response = APIClient().get(self.endpoint)
             self.assertEqual(
-                200 if self.anonymous_allowed else 401, response.status_code
+                200 if self.anonymous_allowed else 401,
+                APIClient().get(self.endpoint).status_code,
             )
 
 

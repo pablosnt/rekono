@@ -1,20 +1,12 @@
 from django.urls import include, path
 from rest_framework.routers import SimpleRouter
-from users.views import (
-    CreateUserViewSet,
-    MfaViewSet,
-    ProfileViewSet,
-    ResetPasswordViewSet,
-    UserViewSet,
-)
+from users.views import MfaViewSet, ProfileViewSet, UserViewSet
 
 # Register your views here.
 
 router = SimpleRouter()
 router.register("users", UserViewSet)
-router.register("users/create", CreateUserViewSet)
 router.register("profile/mfa", MfaViewSet)
-router.register("security", ResetPasswordViewSet)
 
 urlpatterns = [
     path(
