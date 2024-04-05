@@ -2,8 +2,9 @@ import logging
 from typing import Any, Dict
 
 from django.contrib.auth.password_validation import validate_password
-from django.utils import timezone
+from framework.serializers import MfaSerializer
 from http_headers.serializers import SimpleHttpHeaderSerializer
+from platforms.mail.notifications import SMTP
 from platforms.telegram_app.notifications.notifications import Telegram
 from rest_framework import status
 from rest_framework.exceptions import AuthenticationFailed
@@ -14,9 +15,9 @@ from rest_framework.serializers import (
     EmailField,
     ModelSerializer,
     Serializer,
+    URLField,
 )
 from security.authorization.roles import Role
-from security.cryptography.hashing import hash
 from users.models import User
 
 logger = logging.getLogger()
@@ -118,6 +119,7 @@ class ProfileSerializer(UserSerializer):
             "email",
             "date_joined",
             "last_login",
+            "mfa",
             "role",
             "telegram_chat",
             "notification_scope",
@@ -130,6 +132,7 @@ class ProfileSerializer(UserSerializer):
             "email",
             "date_joined",
             "last_login",
+            "mfa",
             "role",
             "telegram_chat",
             "http_headers",
@@ -153,21 +156,15 @@ class OTPSerializer(UserSerializer):
         fields = ("otp",)
 
     def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
-        try:
-            # Search inactive user by otp and check expiration datetime
-            user = User.objects.get(
-                otp=hash(attrs.get("otp")), otp_expiration__gt=timezone.now()
-            )
-        except User.DoesNotExist:  # Invalid otp
-            raise AuthenticationFailed(
-                "Invalid OTP value", code=status.HTTP_401_UNAUTHORIZED
-            )
         attrs = super().validate(attrs)
+        user = User.objects.verify_otp(attrs.get("otp"))
+        if not user:
+            raise AuthenticationFailed(code=status.HTTP_401_UNAUTHORIZED)
         attrs["user"] = user
         return attrs
 
 
-class CreateUserSerializer(PasswordSerializer, OTPSerializer):
+class CreateUserSerializer(OTPSerializer, PasswordSerializer):
     """Serializer to create an user via API after email invitation."""
 
     class Meta:
@@ -195,9 +192,7 @@ class CreateUserSerializer(PasswordSerializer, OTPSerializer):
         """
         attrs = super().validate(attrs)
         if attrs["user"].is_active is not None:
-            raise AuthenticationFailed(
-                "Invalid OTP value", code=status.HTTP_401_UNAUTHORIZED
-            )
+            raise AuthenticationFailed(code=status.HTTP_401_UNAUTHORIZED)
         return attrs
 
     def create(self, validated_data: Dict[str, Any]) -> User:
@@ -244,9 +239,7 @@ class UpdatePasswordSerializer(PasswordSerializer):
             Dict[str, Any]: Data after validation process
         """
         if not self.instance.check_password(attrs.get("old_password")):
-            raise AuthenticationFailed(
-                "Invalid password", code=status.HTTP_401_UNAUTHORIZED
-            )
+            raise AuthenticationFailed(code=status.HTTP_401_UNAUTHORIZED)
         return super().validate(attrs)
 
     def update(self, instance: User, validated_data: Dict[str, Any]) -> User:
@@ -294,7 +287,33 @@ class RequestPasswordResetSerializer(Serializer):
         """
         user = User.objects.filter(
             email=self.validated_data.get("email"), is_active=True
-        )
-        return (
-            User.objects.request_password_reset(user.first()) if user.exists() else None
-        )
+        ).first()
+        if user:
+            otp = User.objects.setup_otp(user)
+            SMTP().reset_password(user, otp)
+            logger.info(
+                f"[User] User {user.id} requested a password reset",
+                extra={"user": user.id},
+            )
+            return user
+        return None
+
+
+class EnableMfaSerializer(MfaSerializer):
+    validator = User.objects.verify_mfa
+
+    def save(self, **kwargs: Any) -> User:
+        self.context.get("request").user.mfa = True
+        self.context.get("request").user.save(update_fields=["mfa"])
+        return self.context.get("request").user
+
+
+class DisableMfaSerializer(MfaSerializer):
+    def save(self, **kwargs: Any) -> User:
+        self.context.get("request").user.mfa = False
+        self.context.get("request").user.save(update_fields=["mfa"])
+        return self.context.get("request").user
+
+
+class RegisterMfaSerializer(Serializer):
+    url = URLField(max_length=200, read_only=True)

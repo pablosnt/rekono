@@ -159,6 +159,7 @@ SIMPLE_JWT = {
     "UPDATE_LAST_LOGIN": True,
     "ALGORITHM": "HS512",
     "SIGNING_KEY": SECRET_KEY,
+    "ISSUER": "Rekono",
 }
 
 LOGGING = {
@@ -248,6 +249,8 @@ if not CONFIG.testing:
                 "login": "30/min",
                 # The frontend can generate many refresh requests for the same user
                 "refresh": "30/min",
+                # It has to be hard enough to prevent brute force attacks
+                "mfa": "5/min",
             },
         }
     )

@@ -3,7 +3,6 @@ from typing import Any, cast
 from platforms.mail.notifications import SMTP
 from platforms.telegram_app.models import TelegramChat
 from security.authorization.roles import Role
-from security.cryptography.hashing import hash
 from tests.cases import ApiTestCase
 from tests.framework import ApiTest
 from users.enums import Notification
@@ -378,22 +377,25 @@ class UserTest(ApiTest):
             self._get_content(response.content)["access"]
         )
 
-        response = authenticated_client.post(self.endpoint, data=invitation1)
-        self.assertEqual(201, response.status_code)
+        self.assertEqual(
+            201, authenticated_client.post(self.endpoint, data=invitation1).status_code
+        )
         new_user = User.objects.get(email=invitation1["email"])
-        otp = User.objects.generate_otp()
-        new_user.otp = hash(otp)
-        new_user.save(update_fields=["otp"])
+        otp = User.objects.setup_otp(new_user)
 
-        response = authenticated_client.post(
-            f"{self.endpoint}create/", data={"otp": otp, **user1}
+        self.assertEqual(
+            403,
+            authenticated_client.post(
+                f"{self.endpoint}create/", data={"otp": otp, **user1}
+            ).status_code,
         )
-        self.assertEqual(403, response.status_code)
 
-        response = client.post(
-            f"{self.endpoint}create/", data={"otp": "invalid otp", **user1}
+        self.assertEqual(
+            401,
+            client.post(
+                f"{self.endpoint}create/", data={"otp": "invalid otp", **user1}
+            ).status_code,
         )
-        self.assertEqual(401, response.status_code)
 
         for invalid_user in [
             invalid_user1,
@@ -403,15 +405,21 @@ class UserTest(ApiTest):
             invalid_user5,
             invalid_user6,
         ]:
-            response = client.post(
-                f"{self.endpoint}create/", data={"otp": otp, **invalid_user}
+            self.assertEqual(
+                400,
+                client.post(
+                    f"{self.endpoint}create/", data={"otp": otp, **invalid_user}
+                ).status_code,
             )
-            self.assertEqual(400, response.status_code)
 
         new_user.is_active = True
         new_user.save(update_fields=["is_active"])
-        response = client.post(f"{self.endpoint}create/", data={"otp": otp, **user1})
-        self.assertEqual(401, response.status_code)
+        self.assertEqual(
+            401,
+            client.post(
+                f"{self.endpoint}create/", data={"otp": otp, **user1}
+            ).status_code,
+        )
 
         new_user.is_active = None
         new_user.save(update_fields=["is_active"])
@@ -421,11 +429,13 @@ class UserTest(ApiTest):
         self.assertEqual(7, content["id"])
         self.assertTrue(content["is_active"])
 
-        response = client.post(
-            f"{self.endpoint}create/",
-            data={"otp": otp, **user1, "username": "unique new test"},
+        self.assertEqual(
+            401,
+            client.post(
+                f"{self.endpoint}create/",
+                data={"otp": otp, **user1, "username": "unique new test"},
+            ).status_code,
         )
-        self.assertEqual(401, response.status_code)
 
         response = client.post(
             self.login,
@@ -436,8 +446,7 @@ class UserTest(ApiTest):
             self._get_content(response.content)["access"]
         )
 
-        response = authenticated_client.get(self.profile)
-        self.assertEqual(200, response.status_code)
+        self.assertEqual(200, authenticated_client.get(self.profile).status_code)
 
     def test_create_superuser(self) -> None:
         value = "superuser"
@@ -488,21 +497,21 @@ class Profile(ApiTest):
             "put",
             401,
             {"password": new_valid_password, "old_password": "invalid password"},
-            endpoint="/api/security/update-password/",
+            endpoint="/api/profile/update-password/",
         ),
         ApiTestCase(
             ["admin1"],
             "put",
             400,
             {"password": invalid_password1, "old_password": "admin1"},
-            endpoint="/api/security/update-password/",
+            endpoint="/api/profile/update-password/",
         ),
         ApiTestCase(
             ["admin1"],
             "put",
             200,
             {"password": new_valid_password, "old_password": "admin1"},
-            endpoint="/api/security/update-password/",
+            endpoint="/api/profile/update-password/",
         ),
         ApiTestCase(["admin1"], "get", 401),
         ApiTestCase(
@@ -564,11 +573,12 @@ class Profile(ApiTest):
 
 
 class ResetPasswordTest(ApiTest):
-    endpoint = "/api/security/reset-password/"
+    endpoint = "/api/users/reset-password/"
     anonymous_allowed = None
 
     def test_reset_password(self) -> None:
-        response = self._get_api_client().post(
+        client = self._get_api_client()
+        response = client.post(
             self.login,
             data={"username": self.admin1.username, "password": self.admin1.username},
         )
@@ -577,55 +587,74 @@ class ResetPasswordTest(ApiTest):
             self._get_content(response.content)["access"]
         )
 
-        response = authenticated_client.post(
-            self.endpoint, data={"email": self.admin1.email}
+        self.assertEqual(
+            403,
+            authenticated_client.post(
+                self.endpoint, data={"email": self.admin1.email}
+            ).status_code,
         )
-        self.assertEqual(403, response.status_code)
 
-        client = self._get_api_client()
-        response = client.post(self.endpoint, data={"email": self.admin1.email})
-        self.assertEqual(200, response.status_code)
-        user = User.objects.get(email=self.admin1.email)
-        otp = User.objects.generate_otp()
-        user.otp = hash(otp)
-        user.save(update_fields=["otp"])
-
-        response = client.put(
-            self.endpoint, data={"otp": "invalid OTP", "password": new_valid_password}
+        self.assertEqual(
+            200,
+            client.post(
+                self.endpoint, data={"email": "notfound@rekono.com"}
+            ).status_code,
         )
-        self.assertEqual(401, response.status_code)
 
-        response = client.put(
-            self.endpoint,
-            data={"otp": otp, "password": invalid_password2},
+        self.assertEqual(
+            200,
+            client.post(self.endpoint, data={"email": self.admin1.email}).status_code,
         )
-        self.assertEqual(400, response.status_code)
+        otp = User.objects.setup_otp(User.objects.get(email=self.admin1.email))
 
-        response = authenticated_client.put(
-            self.endpoint,
-            data={"otp": otp, "password": new_valid_password},
+        self.assertEqual(
+            401,
+            client.put(
+                self.endpoint,
+                data={"otp": "invalid OTP", "password": new_valid_password},
+            ).status_code,
         )
-        self.assertEqual(403, response.status_code)
 
-        response = client.put(
-            self.endpoint,
-            data={"otp": otp, "password": new_valid_password},
+        self.assertEqual(
+            400,
+            client.put(
+                self.endpoint,
+                data={"otp": otp, "password": invalid_password2},
+            ).status_code,
         )
-        self.assertEqual(200, response.status_code)
 
-        response = client.put(
-            self.endpoint,
-            data={"otp": otp, "password": new_valid_password},
+        self.assertEqual(
+            403,
+            authenticated_client.put(
+                self.endpoint,
+                data={"otp": otp, "password": new_valid_password},
+            ).status_code,
         )
-        self.assertEqual(401, response.status_code)
+
+        self.assertEqual(
+            200,
+            client.put(
+                self.endpoint,
+                data={"otp": otp, "password": new_valid_password},
+            ).status_code,
+        )
+
+        self.assertEqual(
+            401,
+            client.put(
+                self.endpoint,
+                data={"otp": otp, "password": new_valid_password},
+            ).status_code,
+        )
 
         response = self._get_api_client().post(
             self.login,
             data={"username": self.admin1.username, "password": new_valid_password},
         )
         self.assertEqual(200, response.status_code)
-        authenticated_client = self._get_api_client(
-            self._get_content(response.content)["access"]
+        self.assertEqual(
+            200,
+            self._get_api_client(self._get_content(response.content)["access"])
+            .get(self.profile)
+            .status_code,
         )
-        response = authenticated_client.get(self.profile)
-        self.assertEqual(200, response.status_code)

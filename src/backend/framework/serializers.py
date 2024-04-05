@@ -1,7 +1,13 @@
-from typing import Any
+from typing import Any, Dict
 
-from rest_framework.serializers import ModelSerializer, SerializerMethodField
-
+from rest_framework import status
+from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.serializers import (
+    CharField,
+    ModelSerializer,
+    Serializer,
+    SerializerMethodField,
+)
 from users.models import User
 
 
@@ -36,3 +42,19 @@ class LikeSerializer(ModelSerializer):
             int: Number of likes for this instance
         """
         return instance.liked_by.count()
+
+
+class MfaSerializer(Serializer):
+    mfa = CharField(max_length=200, required=True, write_only=True)
+    validator = User.objects.verify_mfa_or_otp
+
+    def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
+        attrs = super().validate(attrs)
+        if not self.validator(
+            attrs.get("mfa"),
+            self.user
+            if hasattr(self, "user") and getattr(self, "user")
+            else self.context.get("request").user,
+        ):
+            raise AuthenticationFailed(code=status.HTTP_401_UNAUTHORIZED)
+        return attrs

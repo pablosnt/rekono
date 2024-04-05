@@ -16,6 +16,7 @@ class Property(Enum):
     )
     TRUSTED_PROXY = ("RKN_TRUSTED_PROXY", None, False)
     OTP_EXPIRATION_HOURS = (None, None, 24)
+    MFA_EXPIRATION_MINUTES = (None, None, 15)
     DB_NAME = ("RKN_DB_NAME", "database.name", "rekono")
     DB_USER = ("RKN_DB_USER", "database.user", "")
     DB_PASSWORD = ("RKN_DB_PASSWORD", "database.password", "")
