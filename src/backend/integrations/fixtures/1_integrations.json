@@ -31,5 +31,16 @@
             "enabled": true,
             "reference": "https://book.hacktricks.xyz/"
         }
+    },
+    {
+        "model": "integrations.integration",
+        "pk": 4,
+        "fields": {
+            "key": "cvecrowd",
+            "name": "CVE Crowd",
+            "description": "Platform that identifies the most trending CVEs at the moment based on their impact on social networks, and whose API will be used by Rekono to check if the CVEs detected on the targets are trending or not",
+            "enabled": true,
+            "reference": "https://cvecrowd.com/"
+        }
     }
 ]

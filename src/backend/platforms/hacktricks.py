@@ -1,7 +1,6 @@
 from typing import List, Optional
 
 import defusedxml.ElementTree as parser
-
 from executions.models import Execution
 from findings.enums import HostOS
 from findings.framework.models import Finding
@@ -97,8 +96,7 @@ class HackTricks(BaseIntegration):
                 return mapped_value
         return None  # TOTEST
 
-    def process_findings(self, execution: Execution, findings: List[Finding]) -> None:
-        super().process_findings(execution, findings)
+    def _process_findings(self, execution: Execution, findings: List[Finding]) -> None:
         for finding in findings:
             hacktricks_link = None
             if isinstance(finding, Host) and finding.os_type in self.host_type_mapping:

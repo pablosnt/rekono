@@ -1,3 +1,4 @@
+from alerts.enums import AlertMode
 from findings.models import (
     OSINT,
     Credential,
@@ -55,7 +56,7 @@ _Host_          {host}
 _Port_          *{port}*
 _Status_        {status}
 _Protocol_      {protocol}
-_Service_       {service}
+_Service_       *{service}*
 """,
     },
     Path: {
@@ -106,4 +107,10 @@ _Title_             *{title}*
 _Reference_         {reference}
 """,
     },
+}
+
+ALERTS = {
+    AlertMode.NEW.value: "[ALERT] New {finding} detected",
+    AlertMode.FILTER.value: "[ALERT] New {finding} matches the criteria",
+    AlertMode.MONITOR.value: "[ALERT] New trending CVE 🔥",
 }

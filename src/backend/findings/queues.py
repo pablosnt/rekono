@@ -54,8 +54,7 @@ class FindingsQueue(BaseQueue):
                 ):
                     if alert._must_be_triggered(execution, finding):
                         for platform in [SMTP, Telegram]:
-                            # TODO: Trigger alert notification
-                            pass
+                            platform.process_alert(alert, finding)
                         break
         if settings.auto_fix_findings:
             for finding_type in [

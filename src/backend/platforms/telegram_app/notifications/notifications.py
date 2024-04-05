@@ -1,11 +1,17 @@
 from typing import Any, Dict, List
 
+from alerts.models import Alert
 from django.forms.models import model_to_dict
 from executions.models import Execution
 from findings.framework.models import Finding
 from framework.platforms import BaseNotification
 from platforms.telegram_app.framework import BaseTelegram
-from platforms.telegram_app.notifications.templates import EXECUTION, FINDINGS, HEADER
+from platforms.telegram_app.notifications.templates import (
+    ALERTS,
+    EXECUTION,
+    FINDINGS,
+    HEADER,
+)
 from rekono.settings import CONFIG
 from users.models import User
 
@@ -61,7 +67,28 @@ class Telegram(BaseNotification, BaseTelegram):
                 ]
             ),
         )
-        self._notify_if_available(users, message)
+        self._notify(users, message)
+
+    def _notify_alert(self, users: List[User], alert: Alert, finding: Finding) -> None:
+        self._notify(
+            users,
+            HEADER.format(
+                icon=FINDINGS[finding.__class__].get("icon", ""),
+                title=ALERTS.get(alert.mode, "").format(
+                    finding=finding.__class__.__name__.lower()
+                ),
+                details=FINDINGS[finding.__class__]
+                .get("template", "")
+                .format(
+                    **{
+                        k: self._escape(
+                            str(v) if not isinstance(v, Finding) else v.__str__()
+                        )
+                        for k, v in model_to_dict(finding).items()
+                    }
+                ),
+            ),
+        )
 
     def welcome_message(self, user: User) -> None:
         self._notify_if_available(

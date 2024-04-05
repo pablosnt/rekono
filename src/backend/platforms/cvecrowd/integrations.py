@@ -33,8 +33,7 @@ class CVECrowd(BaseIntegration):
                 pass
         return []
 
-    def process_findings(self, execution: Execution, findings: List[Finding]) -> None:
-        super().process_findings(execution, findings)
+    def _process_findings(self, execution: Execution, findings: List[Finding]) -> None:
         if not self.settings.execute_per_execution:
             return
         trending_cves = self._get_trending_cves()
@@ -61,6 +60,7 @@ class CVECrowd(BaseIntegration):
         Vulnerability.objects.filter(trending=False, cve__in=trending_cves).update(
             trending=True
         )
+        notified_vulnerabilities = []
         for alert in Alert.objects.filter(
             item=AlertItem.CVE, mode=AlertMode.MONITOR, enabled=True
         ).all():
@@ -71,15 +71,14 @@ class CVECrowd(BaseIntegration):
                     is_fixed=False,
                     trending=True,
                 )
-                .exclude(
-                    triage_status=TriageStatus.FALSE_POSITIVE,
-                    cve__in=already_trending_cves.values("cve"),
-                )
+                .exclude(triage_status=TriageStatus.FALSE_POSITIVE)
+                .exclude(cve__in=already_trending_cves.values("cve"))
+                .exclude(id__in=notified_vulnerabilities)
                 .all()
             )
             for vulnerability in vulnerabilities:
                 if alert._must_be_triggered(None, vulnerability):
+                    notified_vulnerabilities.append(vulnerability.id)
                     for platform in [SMTP, Telegram]:
-                        # TODO: Trigger alert notification
-                        pass
+                        platform.process_alert(alert, vulnerability)
         logger.info(f"[CVE Crowd - Monitor] Cron job has finished")

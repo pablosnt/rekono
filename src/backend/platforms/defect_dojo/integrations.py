@@ -4,8 +4,6 @@ from typing import Any, Callable, Dict, List, Optional
 
 import requests
 from django.utils import timezone
-from requests.exceptions import HTTPError
-
 from executions.models import Execution
 from findings.enums import PathType, Severity
 from findings.framework.models import Finding
@@ -16,6 +14,7 @@ from platforms.defect_dojo.models import (
     DefectDojoSync,
     DefectDojoTargetSync,
 )
+from requests.exceptions import HTTPError
 from targets.models import Target
 
 
@@ -174,8 +173,7 @@ class DefectDojo(BaseIntegration):
                 files={"file": report},
             )
 
-    def process_findings(self, execution: Execution, findings: List[Finding]) -> None:
-        super().process_findings(execution, findings)
+    def _process_findings(self, execution: Execution, findings: List[Finding]) -> None:
         target_sync = DefectDojoTargetSync.objects.filter(target=execution.task.target)
         if target_sync.exists():
             sync = target_sync.first()
