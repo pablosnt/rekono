@@ -15,10 +15,11 @@ from findings.models import (
     Vulnerability,
 )
 from framework.queues import BaseQueue
+from platforms.cvecrowd.integrations import CVECrowd
 from platforms.defect_dojo.integrations import DefectDojo
 from platforms.hacktricks import HackTricks
 from platforms.mail.notifications import SMTP
-from platforms.nvd_nist import NvdNist
+from platforms.nvdnist import NvdNist
 from platforms.telegram_app.notifications.notifications import Telegram
 from rq.job import Job
 from settings.models import Settings
@@ -39,14 +40,24 @@ class FindingsQueue(BaseQueue):
     @staticmethod
     @job("findings")
     def consume(execution: Execution, findings: List[Finding]) -> None:
-        if findings:
-            for platform in [NvdNist, HackTricks, DefectDojo, SMTP, Telegram]:
-                platform().process_findings(execution, findings)
         settings = Settings.objects.first()
-        if settings.auto_fix_findings:
-            for finding in findings:
-                if finding.is_fixed:
+        if findings:
+            for platform in [NvdNist, HackTricks, CVECrowd, DefectDojo, SMTP, Telegram]:
+                platform().process_findings(execution, findings)
+            for finding in finding:
+                if settings.auto_fix_findings and finding.is_fixed:
                     finding.__class__.objects.remove_fix(finding)
+                for alert in (
+                    execution.task.target.project.alerts.filter(enabled=True)
+                    .sort("-item")
+                    .all()
+                ):
+                    if alert._must_be_triggered(execution, finding):
+                        for platform in [SMTP, Telegram]:
+                            # TODO: Trigger alert notification
+                            pass
+                        break
+        if settings.auto_fix_findings:
             for finding_type in [
                 OSINT,
                 Host,

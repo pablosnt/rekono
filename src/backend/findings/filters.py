@@ -113,6 +113,7 @@ class VulnerabilityFilter(TriageFindingFilter):
             "cve": ["exact", "contains"],
             "cwe": ["exact", "contains"],
             "osvdb": ["exact", "contains"],
+            "trending": ["exact"],
         }
 
 

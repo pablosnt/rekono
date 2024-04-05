@@ -28,15 +28,15 @@ class RQStatsView(APIView):
                 name="RQStats",
                 fields={
                     "executions": inline_serializer(
-                        name="QueueStats",
+                        name="ExecutionsStats",
                         fields={k: serializers.IntegerField() for k in exposed_fields},
                     ),
                     "findings": inline_serializer(
-                        name="QueueStats",
+                        name="FindingsStats",
                         fields={k: serializers.IntegerField() for k in exposed_fields},
                     ),
                     "tasks": inline_serializer(
-                        name="QueueStats",
+                        name="TasksStats",
                         fields={k: serializers.IntegerField() for k in exposed_fields},
                     ),
                 },

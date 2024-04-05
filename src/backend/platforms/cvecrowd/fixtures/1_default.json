@@ -1,0 +1,11 @@
+[
+    {
+        "model": "cvecrowd.cvecrowdsettings",
+        "pk": 1,
+        "fields": {
+            "_api_token": null,
+            "trending_span_days": 7,
+            "execute_per_execution": true
+        }
+    }
+]

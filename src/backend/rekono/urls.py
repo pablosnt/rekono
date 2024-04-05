@@ -27,6 +27,7 @@ from rest_framework.urlpatterns import format_suffix_patterns
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("api/", include("alerts.urls")),
     path("api/", include("api_tokens.urls")),
     path("api/", include("authentications.urls")),
     path("api/", include("executions.urls")),
@@ -35,6 +36,7 @@ urlpatterns = [
     path("api/", include("integrations.urls")),
     path("api/", include("notes.urls")),
     path("api/", include("parameters.urls")),
+    path("api/", include("platforms.cvecrowd.urls")),
     path("api/", include("platforms.defect_dojo.urls")),
     path("api/", include("platforms.mail.urls")),
     path("api/", include("platforms.telegram_app.urls")),

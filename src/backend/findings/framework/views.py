@@ -31,7 +31,7 @@ class FindingViewSet(BaseViewSet):
         return self._method_not_allowed("DELETE")  # pragma: no cover
 
     @extend_schema(request=None, responses={204: None})
-    @action(detail=True, methods=["POST", "DELETE"], url_path="fix", url_name="fix")
+    @action(detail=True, methods=["POST", "DELETE"])
     def fix(self, request: Request, pk: str) -> Response:
         finding = self.get_object()
         bad_request = None

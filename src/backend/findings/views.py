@@ -48,7 +48,7 @@ class OSINTViewSet(TriageFindingViewSet):
     ordering_fields = ["id", "data", "data_type", "source"]
 
     @extend_schema(request=None, responses={201: TargetSerializer})
-    @action(detail=True, methods=["POST"], url_path="target", url_name="target")
+    @action(detail=True, methods=["POST"])
     def target(self, request: Request, pk: str) -> Response:
         """Target creation from OSINT data.
 

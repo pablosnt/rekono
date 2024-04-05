@@ -70,8 +70,16 @@ class NoteViewSet(LikeViewSet):
         )
 
     @extend_schema(request=None, responses={201: NoteSerializer})
-    @action(detail=True, methods=["POST"], url_path="fork", url_name="fork")
-    def target(self, request: Request, pk: str) -> Response:
+    @action(
+        detail=True,
+        methods=["POST"],
+        permission_classes=[
+            IsAuthenticated,
+            RekonoModelPermission,
+            ProjectMemberPermission,
+        ],
+    )
+    def fork(self, request: Request, pk: str) -> Response:
         note = self.get_object()
         fork = Note.objects.create(
             project=note.project,

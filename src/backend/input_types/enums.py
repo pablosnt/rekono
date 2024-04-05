@@ -12,3 +12,4 @@ class InputTypeName(TextChoices):
     EXPLOIT = "Exploit"
     WORDLIST = "Wordlist"
     AUTHENTICATION = "Authentication"
+    HTTP_HEADER = "Http Header"

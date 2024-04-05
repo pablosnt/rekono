@@ -88,7 +88,7 @@ class UserViewSet(BaseViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @extend_schema(request=None, responses={200: UserSerializer})
-    @action(detail=True, methods=["POST"], url_path="enable", url_name="enable")
+    @action(detail=True, methods=["POST"])
     def enable(self, request: Request, pk: str) -> Response:
         """Enable disabled user.
 

@@ -1,15 +1,14 @@
 from drf_spectacular.utils import extend_schema
+from framework.views import BaseViewSet
+from projects.filters import ProjectFilter
+from projects.models import Project
+from projects.serializers import ProjectMemberSerializer, ProjectSerializer
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
-
-from framework.views import BaseViewSet
-from projects.filters import ProjectFilter
-from projects.models import Project
-from projects.serializers import ProjectMemberSerializer, ProjectSerializer
 from security.authorization.permissions import (
     ProjectMemberPermission,
     RekonoModelPermission,
@@ -33,8 +32,8 @@ class ProjectViewSet(BaseViewSet):
     ordering_fields = ["id", "name"]
 
     @extend_schema(request=ProjectMemberSerializer, responses={201: None})
-    @action(detail=True, methods=["POST"], url_path="members", url_name="members")
-    def add_member(self, request: Request, pk: str) -> Response:
+    @action(detail=True, methods=["POST"])
+    def members(self, request: Request, pk: str) -> Response:
         """Add user to the project members.
 
         Args:
@@ -72,6 +71,8 @@ class ProjectViewSet(BaseViewSet):
         if int(member_id) != project.owner.id:
             # Member found and it isn't the project owner
             project.members.remove(member)  # Remove project member
+            for alert in project.alerts.filter(suscribers=member).all():
+                alert.suscribers.remove(member)
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(
             {"user": ["The project owner can't be removed"]},

@@ -1,5 +1,6 @@
 from typing import Any
 
+from alerts.models import Alert
 from notes.models import Note
 from platforms.telegram_app.models import TelegramChat
 from processes.models import Process, Step
@@ -90,6 +91,24 @@ class ProjectMemberPermission(BasePermission):
 class OwnerPermission(BasePermission):
     """Check if current user can access an object based on HTTP method and creator user."""
 
+    # By default: instance returns the same object, allow_admin is True and owner_field is owner
+    mapping = {
+        Wordlist: {},
+        Process: {},
+        Step: {
+            "instance": lambda o: o.process,
+        },
+        Note: {
+            "allow_admin": False,
+        },
+        Alert: {},
+        TelegramChat: {
+            "owner_field": "user",
+            "allow_admin": False,
+        },
+        Report: {"owner_field": "user"},
+    }
+
     def _has_object_permission(
         self,
         request: Request,
@@ -103,11 +122,6 @@ class OwnerPermission(BasePermission):
         return (
             not instance
             or request.method == "GET"
-            or (
-                request.method == "POST"
-                and "/fork/" in request.path
-                and isinstance(instance, Note)
-            )
             or (
                 hasattr(instance, owner_field)
                 and getattr(instance, owner_field) == request.user
@@ -139,15 +153,11 @@ class OwnerPermission(BasePermission):
         Returns:
             bool: Indicate if user is authorized to make this request or not
         """
-        instance = None
-        owner_field = ""
-        allow_admin = not isinstance(obj, Note) and not isinstance(obj, TelegramChat)
-        if obj.__class__ in [Wordlist, Process, Step, Note]:
-            instance = obj.process if obj.__class__ == Step else obj
-            owner_field = "owner"
-        elif obj.__class__ in [TelegramChat, Report]:
-            instance = obj
-            owner_field = "user"
+        security = self.mapping.get(obj.__class__)
         return self._has_object_permission(
-            request, view, instance, owner_field, allow_admin
+            request,
+            view,
+            security.get("instance", lambda o: o)(obj),
+            security.get("owner_field", "owner"),
+            security.get("allow_admin", True),
         )

@@ -28,3 +28,6 @@ tools:
     directory: /opt/spring4shell-scan
 reports:
   pdf-template: null
+monitor:
+  cvecrowd:
+    hour: 0

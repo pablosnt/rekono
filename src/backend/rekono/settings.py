@@ -46,11 +46,13 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
+    "django_crontab",
     "django_rq",
     "drf_spectacular",
     "rest_framework",
     "rest_framework_simplejwt.token_blacklist",
     "taggit",
+    "alerts",
     "api_tokens",
     "authentications",
     "executions",
@@ -59,6 +61,7 @@ INSTALLED_APPS = [
     "input_types",
     "integrations",
     "notes",
+    "platforms.cvecrowd",
     "platforms.defect_dojo",
     "platforms.mail",
     "platforms.telegram_app",
@@ -308,6 +311,19 @@ RQ_QUEUES = {
 
 RQ_QUEUES["executions"]["DEFAULT_TIMEOUT"] = 28800  # 8 hours
 RQ_QUEUES["findings"]["DEFAULT_TIMEOUT"] = 10800  # 3 hours
+
+
+################################################################################
+# Cron Jobs                                                                    #
+################################################################################
+
+CRONJOBS = [
+    (
+        f"0 {CONFIG.cve_monitor_hour} * * *",
+        "platforms.cvecrowd.integrations.CVECrowd.monitor",
+        f">> {LOGGING.get('handlers', {}).get('file', {}).get('filename')}",
+    )
+]
 
 
 ################################################################################

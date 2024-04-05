@@ -1,6 +1,8 @@
 import logging
 from typing import Any, Dict
 
+from alerts.enums import AlertItem, AlertMode
+from alerts.models import Alert
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from framework.fields import TagField
@@ -61,6 +63,14 @@ class ProjectSerializer(TaggitSerializer, ModelSerializer):
         project = super().create(validated_data)  # Create project
         # Add project owner also in member list
         project.members.add(validated_data.get("owner"))
+        alert = Alert.objects.create(
+            project=project,
+            item=AlertItem.CVE,
+            mode=AlertMode.MONITOR,
+            enabled=True,
+            owner=validated_data.get("owner"),
+        )
+        alert.suscribers.add(validated_data.get("owner"))
         return project
 
 
@@ -79,7 +89,10 @@ class ProjectMemberSerializer(Serializer):
         Returns:
             Project: Updated instance
         """
-        instance.members.add(
-            get_object_or_404(User, pk=validated_data.get("user"), is_active=True)
-        )
+        user = get_object_or_404(User, pk=validated_data.get("user"), is_active=True)
+        instance.members.add(user)
+        for alert in Alert.objects.filter(
+            project=instance, suscribe_all_members=True, enabled=True
+        ).all():
+            alert.suscribers.add(user)
         return instance
