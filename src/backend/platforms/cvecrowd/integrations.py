@@ -29,14 +29,18 @@ class CVECrowd(BaseIntegration):
         return False
 
     def _get_trending_cves(self) -> List[str]:
-        if self.integration.enabled and self.settings.secret and len(self.trending_cves) == 0:
+        if (
+            self.integration.enabled
+            and self.settings.secret
+            and len(self.trending_cves) == 0
+        ):
             try:
                 self.trending_cves = self._request(
                     self.url,
                     headers={"Authorization": f"Bearer {self.settings.secret}"},
                     params={"days": self.settings.trending_span_days},
                 )
-            except Exception:
+            except Exception:  # nosec
                 pass
         return self.trending_cves
 
@@ -64,7 +68,9 @@ class CVECrowd(BaseIntegration):
             logger.warn("[CVE Crowd - Monitor] No trending CVEs found")
             return
         already_trending_queryset = Vulnerability.objects.filter(trending=True).all()
-        already_trending_cves = list(already_trending_queryset.values_list("cve", flat=True))
+        already_trending_cves = list(
+            already_trending_queryset.values_list("cve", flat=True)
+        )
         already_trending_queryset.exclude(cve__in=trending_cves).update(trending=False)
         Vulnerability.objects.filter(trending=False, cve__in=trending_cves).update(
             trending=True

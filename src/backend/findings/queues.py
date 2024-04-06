@@ -43,7 +43,12 @@ class FindingsQueue(BaseQueue):
         settings = Settings.objects.first()
         if findings:
             notifications = [SMTP(), Telegram()]
-            for platform in [NvdNist(), HackTricks(), CVECrowd(), DefectDojo()] + notifications:
+            for platform in [
+                NvdNist(),
+                HackTricks(),
+                CVECrowd(),
+                DefectDojo(),
+            ] + notifications:
                 platform.process_findings(execution, findings)
             for finding in findings:
                 if settings.auto_fix_findings and finding.is_fixed:
