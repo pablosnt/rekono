@@ -162,7 +162,7 @@ SIMPLE_JWT = {
     "ISSUER": "Rekono",
 }
 
-LOGGING = {
+LOGGING: Dict[str, Any] = {
     "version": 1,
     # Disable default Django logging system to avoid noise
     "disable_existing_loggers": False,

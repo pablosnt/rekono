@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Dict
 
 from alerts.models import Alert
 from notes.models import Note
@@ -92,7 +92,7 @@ class OwnerPermission(BasePermission):
     """Check if current user can access an object based on HTTP method and creator user."""
 
     # By default: instance returns the same object, allow_admin is True and owner_field is owner
-    mapping = {
+    mapping: Dict[Any, Dict[str, Any]] = {
         Wordlist: {},
         Process: {},
         Step: {
@@ -153,11 +153,10 @@ class OwnerPermission(BasePermission):
         Returns:
             bool: Indicate if user is authorized to make this request or not
         """
-        security = self.mapping.get(obj.__class__)
         return self._has_object_permission(
             request,
             view,
-            security.get("instance", lambda o: o)(obj),
-            security.get("owner_field", "owner"),
-            security.get("allow_admin", True),
+            self.mapping[obj.__class__].get("instance", lambda o: o)(obj),
+            self.mapping[obj.__class__].get("owner_field", "owner"),
+            self.mapping[obj.__class__].get("allow_admin", True),
         )

@@ -106,22 +106,24 @@ class Alert(BaseModel):
     def _must_be_triggered(self, execution: Execution, finding: Finding) -> bool:
         data = self.mapping[self.item]
         if (
-            not isinstance(finding, data.get("model"))
+            not isinstance(finding, data["model"])
             or finding.is_fixed
             or (
                 hasattr(finding, "triage_status")
                 and finding.triage_status == TriageStatus.FALSE_POSITIVE
             )
             or not data.get(self.mode)
-            or (data.get("filter") is not None and not data.get("filter")(finding))
+            or (data.get("filter") and not data["filter"](finding))
         ):
-            return
+            return False
         if self.mode == AlertMode.NEW.value:
             return not finding.executions.exclude(id=execution.id).exists()
         elif self.mode == AlertMode.FILTER.value:
             return (
-                getattr(finding, data.get(AlertMode.FILTER.value).lower())
+                getattr(finding, data.get(AlertMode.FILTER.value, "").lower())
                 == self.value.lower()
             )
         else:
-            return getattr(finding, data.get(AlertMode.MONITOR.value).lower()) is True
+            return (
+                getattr(finding, data.get(AlertMode.MONITOR.value, "").lower()) is True
+            )

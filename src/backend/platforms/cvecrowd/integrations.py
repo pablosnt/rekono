@@ -19,7 +19,7 @@ class CVECrowd(BaseIntegration):
     def __init__(self) -> None:
         self.settings = CVECrowdSettings.objects.first()
         self.url = "https://api.cvecrowd.com/api/v1/cves"
-        self.trending_cves = []
+        self.trending_cves: List[str] = []
         super().__init__()
 
     def is_available(self) -> bool:
@@ -75,7 +75,7 @@ class CVECrowd(BaseIntegration):
         Vulnerability.objects.filter(trending=False, cve__in=trending_cves).update(
             trending=True
         )
-        notified_vulnerabilities = []
+        notified_vulnerabilities: List[int] = []
         for alert in Alert.objects.filter(
             item=AlertItem.CVE, mode=AlertMode.MONITOR, enabled=True
         ).all():
