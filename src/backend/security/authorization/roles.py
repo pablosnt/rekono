@@ -250,4 +250,10 @@ ROLES = {
         "change": [Role.ADMIN, Role.AUDITOR, Role.READER],
         "delete": [Role.ADMIN, Role.AUDITOR, Role.READER],
     },
+    "cvecrowdsettings": {
+        "view": [Role.ADMIN],
+        "add": [],
+        "change": [Role.ADMIN],
+        "delete": [],
+    },
 }

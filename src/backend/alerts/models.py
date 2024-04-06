@@ -94,14 +94,17 @@ class Alert(BaseModel):
     }
 
     def __str__(self) -> str:
-        return f"{self.project.__str__()} - {self.mode} - {self.item} - {self.value}"
+        values = [self.project.__str__(), self.mode, self.item]
+        if self.value:
+            values.append(self.value)
+        return " - ".join(values)
 
     @classmethod
     def get_project_field(cls) -> str:
         return "project"
 
     def _must_be_triggered(self, execution: Execution, finding: Finding) -> bool:
-        data = self.mapping[self.item.value]
+        data = self.mapping[self.item]
         if (
             not isinstance(finding, data.get("model"))
             or finding.is_fixed
@@ -109,13 +112,13 @@ class Alert(BaseModel):
                 hasattr(finding, "triage_status")
                 and finding.triage_status == TriageStatus.FALSE_POSITIVE
             )
-            or not data.get(self.mode.value)
+            or not data.get(self.mode)
             or (data.get("filter") is not None and not data.get("filter")(finding))
         ):
             return
-        if self.mode == AlertMode.NEW:
+        if self.mode == AlertMode.NEW.value:
             return not finding.executions.exclude(id=execution.id).exists()
-        elif self.mode == AlertMode.FILTER:
+        elif self.mode == AlertMode.FILTER.value:
             return (
                 getattr(finding, data.get(AlertMode.FILTER.value).lower())
                 == self.value.lower()

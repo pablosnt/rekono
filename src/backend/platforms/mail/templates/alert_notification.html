@@ -102,6 +102,7 @@
                                     <div class="row">
                                         <p class="text-muted mr-2">Reference</p>
                                         {% if finding.reference %}
+                                            <!-- nosemgrep: javascript.express.security.audit.xss.mustache.var-in-href.var-in-href, python.django.security.audit.xss.template-href-var.template-href-var, python.flask.security.xss.audit.template-href-var.template-href-var -->
                                             <a href="{{ finding.reference }}">Link</a>
                                         {% endif %}
                                     </div>
@@ -178,6 +179,7 @@
                                     <div class="row">
                                         <p class="text-muted mr-2">Reference</p>
                                         {% if finding.reference %}
+                                            <!-- nosemgrep: javascript.express.security.audit.xss.mustache.var-in-href.var-in-href, python.django.security.audit.xss.template-href-var.template-href-var, python.flask.security.xss.audit.template-href-var.template-href-var -->
                                             <a href="{{ finding.reference }}">Link</a>
                                         {% endif %}
                                     </div>

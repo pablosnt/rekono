@@ -9,7 +9,7 @@ class AlertFilter(FilterSet):
             "project": ["exact"],
             "item": ["exact"],
             "mode": ["exact"],
-            "item": ["exact", "icontains"],
+            "value": ["exact", "icontains"],
             "enabled": ["exact"],
             "owner": ["exact"],
             "suscribers": ["exact"],

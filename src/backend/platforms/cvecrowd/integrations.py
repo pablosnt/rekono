@@ -19,44 +19,53 @@ class CVECrowd(BaseIntegration):
     def __init__(self) -> None:
         self.settings = CVECrowdSettings.objects.first()
         self.url = "https://api.cvecrowd.com/api/v1/cves"
+        self.trending_cves = []
         super().__init__()
 
+    def is_available(self) -> bool:
+        if self.settings.secret:
+            self._get_trending_cves()
+            return len(self.trending_cves) > 0
+        return False
+
     def _get_trending_cves(self) -> List[str]:
-        if self.integration.enabled and self.settings.secret:
+        if self.integration.enabled and self.settings.secret and len(self.trending_cves) == 0:
             try:
-                return self._request(
+                self.trending_cves = self._request(
                     self.url,
                     headers={"Authorization": f"Bearer {self.settings.secret}"},
                     params={"days": self.settings.trending_span_days},
                 )
-            except:
+            except Exception:
                 pass
-        return []
+        return self.trending_cves
 
     def _process_findings(self, execution: Execution, findings: List[Finding]) -> None:
         if not self.settings.execute_per_execution:
             return
-        trending_cves = self._get_trending_cves()
-        if not trending_cves:
+        self._get_trending_cves()
+        if not self.trending_cves:
             return
         for finding in findings:
             if (
                 isinstance(finding, Vulnerability)
                 and finding.cve is not None
-                and finding.cve in trending_cves
+                and finding.cve in self.trending_cves
             ):
                 finding.trending = True
                 finding.save(update_fields=["trending"])
 
+    # TODO: Test it
     @classmethod
     def monitor(cls) -> None:
-        logger.info(f"[CVE Crowd - Monitor] Cron job has started")
+        logger.info("[CVE Crowd - Monitor] Cron job has started")
         trending_cves = cls()._get_trending_cves()
         if not trending_cves:
-            logger.warn(f"[CVE Crowd - Monitor] No trending CVEs found")
+            logger.warn("[CVE Crowd - Monitor] No trending CVEs found")
             return
-        already_trending_cves = Vulnerability.objects.filter(trending=True).all()
-        already_trending_cves.exclude(cve__in=trending_cves).update(trending=False)
+        already_trending_queryset = Vulnerability.objects.filter(trending=True).all()
+        already_trending_cves = list(already_trending_queryset.values_list("cve", flat=True))
+        already_trending_queryset.exclude(cve__in=trending_cves).update(trending=False)
         Vulnerability.objects.filter(trending=False, cve__in=trending_cves).update(
             trending=True
         )
@@ -72,7 +81,7 @@ class CVECrowd(BaseIntegration):
                     trending=True,
                 )
                 .exclude(triage_status=TriageStatus.FALSE_POSITIVE)
-                .exclude(cve__in=already_trending_cves.values("cve"))
+                .exclude(cve__in=already_trending_cves)
                 .exclude(id__in=notified_vulnerabilities)
                 .all()
             )
@@ -80,5 +89,5 @@ class CVECrowd(BaseIntegration):
                 if alert._must_be_triggered(None, vulnerability):
                     notified_vulnerabilities.append(vulnerability.id)
                     for platform in [SMTP, Telegram]:
-                        platform.process_alert(alert, vulnerability)
-        logger.info(f"[CVE Crowd - Monitor] Cron job has finished")
+                        platform().process_alert(alert, vulnerability)
+        logger.info("[CVE Crowd - Monitor] Cron job has finished")

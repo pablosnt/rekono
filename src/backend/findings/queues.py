@@ -42,9 +42,10 @@ class FindingsQueue(BaseQueue):
     def consume(execution: Execution, findings: List[Finding]) -> None:
         settings = Settings.objects.first()
         if findings:
-            for platform in [NvdNist, HackTricks, CVECrowd, DefectDojo, SMTP, Telegram]:
-                platform().process_findings(execution, findings)
-            for finding in finding:
+            notifications = [SMTP(), Telegram()]
+            for platform in [NvdNist(), HackTricks(), CVECrowd(), DefectDojo()] + notifications:
+                platform.process_findings(execution, findings)
+            for finding in findings:
                 if settings.auto_fix_findings and finding.is_fixed:
                     finding.__class__.objects.remove_fix(finding)
                 for alert in (
@@ -53,7 +54,7 @@ class FindingsQueue(BaseQueue):
                     .all()
                 ):
                     if alert._must_be_triggered(execution, finding):
-                        for platform in [SMTP, Telegram]:
+                        for platform in notifications:
                             platform.process_alert(alert, finding)
                         break
         if settings.auto_fix_findings:

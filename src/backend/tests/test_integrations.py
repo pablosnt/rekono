@@ -14,6 +14,7 @@ class IntegrationTest(ApiTest):
             "get",
             200,
             expected=[
+                {"id": 4, "enabled": True},
                 {"id": 3, "enabled": True},
                 {"id": 2, "enabled": True},
                 {"id": 1, "enabled": True},
@@ -38,6 +39,7 @@ class IntegrationTest(ApiTest):
             "get",
             200,
             expected=[
+                {"id": 4, "enabled": True},
                 {"id": 3, "enabled": True},
                 {"id": 2, "enabled": True},
                 {"id": 1, "enabled": False},
