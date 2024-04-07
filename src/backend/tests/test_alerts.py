@@ -213,7 +213,9 @@ class AlertTest(ApiTest):
                 },
             ],
         ),
-        ApiTestCase(["reader1"], "put", 403, {"value": "http"}, endpoint="{endpoint}2/"),
+        ApiTestCase(
+            ["reader1"], "put", 403, {"value": "http"}, endpoint="{endpoint}2/"
+        ),
         ApiTestCase(
             ["auditor1"],
             "put",
