@@ -63,6 +63,7 @@ class EditAlertSerializer(AlertSerializer):
             "mode",
             "value",
             "enabled",
+            "owner",
             "suscribed",
             "suscribers",
         )
@@ -72,6 +73,7 @@ class EditAlertSerializer(AlertSerializer):
             "item",
             "mode",
             "enabled",
+            "owner",
             "suscribed",
             "suscribers",
         )
