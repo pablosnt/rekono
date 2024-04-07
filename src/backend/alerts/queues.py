@@ -27,7 +27,7 @@ class MonitorQueue(BaseQueue):
     @staticmethod
     @job("monitor")
     def consume() -> None:
-        logger.info(f"[Monitor] Monitor job has started")
+        logger.info("[Monitor] Monitor job has started")
         settings = MonitorSettings.objects.first()
         settings.last_monitor = timezone.now()
         settings.save(update_fields=["last_monitor"])
