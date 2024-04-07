@@ -219,7 +219,7 @@ class AlertTest(ApiTest):
         ApiTestCase(
             ["auditor1"],
             "put",
-            204,
+            200,
             {"value": "http"},
             {
                 "id": 2,
@@ -235,7 +235,7 @@ class AlertTest(ApiTest):
         ApiTestCase(
             ["admin1"],
             "put",
-            204,
+            200,
             {"value": "https"},
             {
                 "id": 2,
