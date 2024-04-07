@@ -64,7 +64,7 @@ class CVECrowdTest(RekonoTest):
 
     @mock.patch("platforms.cvecrowd.integrations.CVECrowd._request", success)
     def test_monitor(self) -> None:
-        CVECrowd.monitor()
+        self.cvecrowd.monitor()
         for vulnerability, trending in [
             (self.trending, True),
             (self.not_trending, False),
