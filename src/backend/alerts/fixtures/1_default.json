@@ -1,0 +1,11 @@
+[
+    {
+        "model": "alerts.monitorsettings",
+        "pk": 1,
+        "fields": {
+            "rq_job_id": null,
+            "last_monitor": null,
+            "hour_span": 24
+        }
+    }
+]

@@ -1,6 +1,10 @@
 from alerts.filters import AlertFilter
-from alerts.models import Alert
-from alerts.serializers import AlertSerializer, EditAlertSerializer
+from alerts.models import Alert, MonitorSettings
+from alerts.serializers import (
+    AlertSerializer,
+    EditAlertSerializer,
+    MonitorSettingsSerializer,
+)
 from django.db.models import QuerySet
 from drf_spectacular.utils import extend_schema
 from framework.views import BaseViewSet
@@ -88,3 +92,10 @@ class AlertViewSet(BaseViewSet):
                 alert.enabled = new_value
                 alert.save(update_fields=["enabled"])
                 return Response(AlertSerializer(alert).data, status=status.HTTP_200_OK)
+
+
+class MonitorSettingsViewSet(BaseViewSet):
+    queryset = MonitorSettings.objects.all()
+    serializer_class = MonitorSettingsSerializer
+    permission_classes = [IsAuthenticated, RekonoModelPermission]
+    http_method_names = ["get", "put"]

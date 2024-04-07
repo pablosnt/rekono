@@ -46,4 +46,3 @@ class Property(Enum):
         "/opt/spring4shell-scan",
     )
     GITTOOLS_DIR = ("RKN_GITTOOLS_DIR", "tools.gittools.directory", "/opt/GitTools")
-    CVE_MONITOR_HOUR = (None, "monitor.cvecrowd.hour", "0")

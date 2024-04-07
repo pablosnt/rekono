@@ -1,4 +1,5 @@
 from alerts.enums import AlertItem, AlertMode
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from executions.models import Execution
 from findings.enums import PortStatus, TriageStatus
@@ -127,3 +128,14 @@ class Alert(BaseModel):
             return (
                 getattr(finding, data.get(AlertMode.MONITOR.value, "").lower()) is True
             )
+
+
+class MonitorSettings(BaseModel):
+    rq_job_id = models.TextField(max_length=50, blank=True, null=True)
+    last_monitor = models.DateTimeField(blank=True, null=True)
+    hour_span = models.IntegerField(
+        default=7, validators=[MinValueValidator(24), MaxValueValidator(168)]
+    )
+
+    def __str__(self) -> str:
+        return f"Last monitor was at {self.last_monitor}. Next one in {self.hour_span} hours"

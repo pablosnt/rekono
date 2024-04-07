@@ -46,7 +46,6 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
-    "django_crontab",
     "django_rq",
     "drf_spectacular",
     "rest_framework",
@@ -310,23 +309,11 @@ RQ_QUEUES = {
     "tasks": default_rq_queue,
     "executions": default_rq_queue,
     "findings": default_rq_queue,
+    "monitor": default_rq_queue,
 }
 
 RQ_QUEUES["executions"]["DEFAULT_TIMEOUT"] = 28800  # 8 hours
 RQ_QUEUES["findings"]["DEFAULT_TIMEOUT"] = 10800  # 3 hours
-
-
-################################################################################
-# Cron Jobs                                                                    #
-################################################################################
-
-CRONJOBS = [
-    (
-        f"0 {CONFIG.cve_monitor_hour} * * *",
-        "platforms.cvecrowd.integrations.CVECrowd.monitor",
-        f">> {LOGGING.get('handlers', {}).get('file', {}).get('filename')}",
-    )
-]
 
 
 ################################################################################

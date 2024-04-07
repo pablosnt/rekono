@@ -28,7 +28,7 @@ class CVECrowd(BaseIntegration):
             return len(self.trending_cves) > 0
         return False
 
-    def _get_trending_cves(self) -> List[str]:
+    def _get_trending_cves(self) -> None:
         if (
             self.integration.enabled
             and self.settings.secret
@@ -42,7 +42,6 @@ class CVECrowd(BaseIntegration):
                 )
             except Exception:  # nosec
                 pass
-        return self.trending_cves
 
     def _process_findings(self, execution: Execution, findings: List[Finding]) -> None:
         if not self.settings.execute_per_execution:
@@ -59,20 +58,19 @@ class CVECrowd(BaseIntegration):
                 finding.trending = True
                 finding.save(update_fields=["trending"])
 
-    # TODO: Test it
-    @classmethod
-    def monitor(cls) -> None:
-        logger.info("[CVE Crowd - Monitor] Cron job has started")
-        trending_cves = cls()._get_trending_cves()
-        if not trending_cves:
-            logger.warn("[CVE Crowd - Monitor] No trending CVEs found")
+    def monitor(self) -> None:
+        self._get_trending_cves()
+        if not self.trending_cves:
+            logger.warn("[CVE Crowd] No trending CVEs found")
             return
         already_trending_queryset = Vulnerability.objects.filter(trending=True).all()
         already_trending_cves = list(
             already_trending_queryset.values_list("cve", flat=True)
         )
-        already_trending_queryset.exclude(cve__in=trending_cves).update(trending=False)
-        Vulnerability.objects.filter(trending=False, cve__in=trending_cves).update(
+        already_trending_queryset.exclude(cve__in=self.trending_cves).update(
+            trending=False
+        )
+        Vulnerability.objects.filter(trending=False, cve__in=self.trending_cves).update(
             trending=True
         )
         notified_vulnerabilities: List[int] = []
@@ -91,9 +89,11 @@ class CVECrowd(BaseIntegration):
                 .exclude(id__in=notified_vulnerabilities)
                 .all()
             )
+            logger.info(
+                f"[CVE Crowd] New {vulnerabilities.count()} trending vulnerabilities found in project {alert.project.id}"
+            )
             for vulnerability in vulnerabilities:
                 if alert._must_be_triggered(None, vulnerability):
                     notified_vulnerabilities.append(vulnerability.id)
                     for platform in [SMTP, Telegram]:
                         platform().process_alert(alert, vulnerability)
-        logger.info("[CVE Crowd - Monitor] Cron job has finished")
