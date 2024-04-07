@@ -10,7 +10,7 @@ from users.serializers import SimpleUserSerializer
 
 class AlertSerializer(ModelSerializer):
     suscribed = SerializerMethodField(read_only=True)
-    suscribers = SimpleUserSerializer(many=False, read_only=True)
+    owner = SimpleUserSerializer(many=False, read_only=True)
 
     class Meta:
         model = Alert
@@ -21,6 +21,7 @@ class AlertSerializer(ModelSerializer):
             "mode",
             "value",
             "enabled",
+            "owner",
             "suscribed",
             "suscribers",
             "suscribe_all_members",
@@ -74,9 +75,6 @@ class EditAlertSerializer(AlertSerializer):
             "suscribed",
             "suscribers",
         )
-
-    def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
-        return super(ModelSerializer).validate(attrs)
 
 
 class MonitorSettingsSerializer(ModelSerializer):

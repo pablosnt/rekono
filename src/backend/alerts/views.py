@@ -35,6 +35,7 @@ class AlertViewSet(BaseViewSet):
     ]
     search_fields = ["value"]
     ordering_fields = ["id", "item", "mode"]
+    http_method_names = ["get", "post", "put", "delete"]
 
     def get_serializer_class(self) -> Serializer:
         return (
@@ -63,16 +64,15 @@ class AlertViewSet(BaseViewSet):
     )
     def suscription(self, request: Request, pk: str) -> Response:
         alert = self.get_object()
-        if request.method == "POST":
-            if alert.suscribers.filter(id=request.user.id).exists():
-                return Response({"suscribe": "You are already suscribed to this alert"})
-            alert.suscribers.add(request.user)
-        else:
-            if not alert.suscribers.filter(id=request.user.id).exists():
-                return Response(
-                    {"suscribe": "You are already not suscribed to this alert"}
-                )
-            alert.suscribers.remove(request.user)
+        for method, expected_exists, error, operation in [
+            ("POST", False, "You are already suscribed to this alert", alert.suscribers.add),
+            ("DELETE", True, "You are already not suscribed to this alert", alert.suscribers.remove)
+        ]:
+            if request.method == method:
+                if alert.suscribers.filter(id=request.user.id).exists() is not expected_exists:
+                    return Response({"suscribe": error}, status=status.HTTP_400_BAD_REQUEST)
+                operation(request.user)
+                break
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @extend_schema(request=None, responses={200: AlertSerializer})
@@ -91,7 +91,10 @@ class AlertViewSet(BaseViewSet):
                     )
                 alert.enabled = new_value
                 alert.save(update_fields=["enabled"])
-                return Response(AlertSerializer(alert).data, status=status.HTTP_200_OK)
+                return Response(
+                    AlertSerializer(alert, context={"request": request}).data,
+                    status=status.HTTP_200_OK,
+                )
 
 
 class MonitorSettingsViewSet(BaseViewSet):

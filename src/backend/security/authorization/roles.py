@@ -256,4 +256,10 @@ ROLES = {
         "change": [Role.ADMIN],
         "delete": [],
     },
+    "monitorsettings": {
+        "view": [Role.ADMIN],
+        "add": [],
+        "change": [Role.ADMIN],
+        "delete": [],
+    },
 }
