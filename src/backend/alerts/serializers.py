@@ -36,7 +36,7 @@ class AlertSerializer(ModelSerializer):
 
     def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
         attrs = super().validate(attrs)
-        if attrs["mode"] == AlertMode.FILTER and not attrs.get("value"):
+        if attrs.get("mode") == AlertMode.FILTER and not attrs.get("value"):
             raise ValidationError(
                 "Value is required when the alert mode is 'filter'", code="value"
             )
