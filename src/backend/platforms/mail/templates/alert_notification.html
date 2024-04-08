@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en" xml:lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        <title>Rekono</title>
+      </head>
+    <body>
+        <div class="card text-center">
+            <div class="text-center">
+                <img src="{{ rekono_url }}/static/logo-black.png" class="card-img-top" alt="Rekono" style="max-width: 30rem;"/>
+            </div>
+            <div class="card-body">
+                <h3 class="card-title">{{ finding.__class__.__name__ }}</h3>
+                <div class="card-text">
+                    <div class="container">
+                        <div class="row justify-content-around">
+                            {% if finding.__class__.__name__ == "OSINT" %}
+                                <div class="col-6">
+                                    <div class="row">
+                                        <p class="text-muted mr-2">Data</p>
+                                        <p><strong>{{ finding.data }}</strong></p>
+                                    </div>
+                                    <div class="row">
+                                        <p class="text-muted mr-2">Data Type</p>
+                                        <p>{{ finding.data_type }}</p>
+                                    </div>
+                                    <div class="row">
+                                        <p class="text-muted mr-2">Source</p>
+                                        <p>{{ finding.source }}</p>
+                                    </div>
+                                </div>
+                            {% endif %}
+
+                            {% if finding.__class__.__name__ == "Host" %}
+                                <div class="col-6">
+                                    <div class="row">
+                                        <p class="text-muted mr-2">Address</p>
+                                        <p><strong>{{ finding.address }}</strong></p>
+                                    </div>
+                                    <div class="row">
+                                        <p class="text-muted mr-2">OS</p>
+                                        <p>{{ finding.os }}</p>
+                                    </div>
+                                    <div class="row">
+                                        <p class="text-muted mr-2">OS Type</p>
+                                        <p>{{ finding.os_type }}</p>
+                                    </div>
+                                </div>
+                            {% endif %}
+
+                            {% if finding.__class__.__name__ == "Port" %}
+                                <div class="col-6">
+                                    <div class="row">
+                                        <p class="text-muted mr-2">Host</p>
+                                        {% if finding.host %}
+                                            <p>{{ finding.host.address }}</p>
+                                        {% endif %}
+                                    </div>
+                                    <div class="row">
+                                        <p class="text-muted mr-2">Port</p>
+                                        <p><strong>{{ finding.port }}</strong></p>
+                                    </div>
+                                    <div class="row">
+                                        <p class="text-muted mr-2">Status</p>
+                                        <p>{{ finding.status }}</p>
+                                    </div>
+                                    <div class="row">
+                                        <p class="text-muted mr-2">Protocol</p>
+                                        <p>{{ finding.protocol }}</p>
+                                    </div>
+                                    <div class="row">
+                                        <p class="text-muted mr-2">Service</p>
+                                        <p><strong>{{ finding.service }}</strong></p>
+                                    </div>
+                                </div>
+                            {% endif %}
+
+                            {% if finding.__class__.__name__ == "Technology" %}
+                                <div class="col-6">
+                                    <div class="row">
+                                        <p class="text-muted mr-2">Host</p>
+                                        {% if finding.port and finding.port.host %}
+                                            <p>{{ finding.port.host.address }}</p>
+                                        {% endif %}
+                                    </div>
+                                    <div class="row">
+                                        <p class="text-muted mr-2">Port</p>
+                                        {% if finding.port %}
+                                            <p>{{ finding.port.port }}</p>
+                                        {% endif %}
+                                    </div>
+                                    <div class="row">
+                                        <p class="text-muted mr-2">Technology</p>
+                                        <p><strong>{{ finding.name }}</strong></p>
+                                    </div>
+                                    <div class="row">
+                                        <p class="text-muted mr-2">Technology</p>
+                                        <p>{{ finding.version }}</p>
+                                    </div>
+                                    <div class="row">
+                                        <p class="text-muted mr-2">Reference</p>
+                                        {% if finding.reference %}
+                                            <!-- nosemgrep: javascript.express.security.audit.xss.mustache.var-in-href.var-in-href, python.django.security.audit.xss.template-href-var.template-href-var, python.flask.security.xss.audit.template-href-var.template-href-var -->
+                                            <a href="{{ finding.reference }}">Link</a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endif %}
+
+                            {% if finding.__class__.__name__ == "Credential" %}
+                                <div class="col-6">
+                                    <div class="row">
+                                        <p class="text-muted mr-2">Technology</p>
+                                        {% if finding.technology %}
+                                            <p>{{ finding.technology.name }}</p>
+                                        {% endif %}
+                                    </div>
+                                    <div class="row">
+                                        <p class="text-muted mr-2">Email</p>
+                                        <p><strong>{{ finding.email }}</strong></p>
+                                    </div>
+                                    <div class="row">
+                                        <p class="text-muted mr-2">Username</p>
+                                        <p><strong>{{ finding.username }}</strong></p>
+                                    </div>
+                                    <div class="row">
+                                        <p class="text-muted mr-2">Secret</p>
+                                        <p><strong>{{ finding.secret }}</strong></p>
+                                    </div>
+                                    <div class="row">
+                                        <p class="text-muted mr-2">Context</p>
+                                        <p>{{ finding.context }}</p>
+                                    </div>
+                                </div>
+                            {% endif %}
+
+                            {% if finding.__class__.__name__ == "Vulnerability" %}
+                                <div class="col-6">
+                                    <div class="row">
+                                        <p class="text-muted mr-2">Host</p>
+                                        {% if finding.port and finding.port.host %}
+                                            <p>{{ finding.port.host.address }}</p>
+                                        {% endif %}
+                                    </div>
+                                    <div class="row">
+                                        <p class="text-muted mr-2">Port</p>
+                                        {% if finding.port %}
+                                            <p>{{ finding.port.port }}</p>
+                                        {% endif %}
+                                    </div>
+                                    <div class="row">
+                                        <p class="text-muted mr-2">Technology</p>
+                                        {% if finding.technology %}
+                                            <p>{{ finding.technology.name }}</p>
+                                        {% endif %}
+                                    </div>
+                                    <div class="row">
+                                        <p class="text-muted mr-2">Name</p>
+                                        <p><strong>{{ finding.name }}</strong></p>
+                                    </div>
+                                    <div class="row">
+                                        <p class="text-muted mr-2">Description</p>
+                                        <p><strong>{{ finding.description }}</strong></p>
+                                    </div>
+                                    <div class="row">
+                                        <p class="text-muted mr-2">Severity</p>
+                                        <p>{{ finding.severity }}</p>
+                                    </div>
+                                    <div class="row">
+                                        <p class="text-muted mr-2">CVE</p>
+                                        <p><strong>{{ finding.cve }}</strong></p>
+                                    </div>
+                                    <div class="row">
+                                        <p class="text-muted mr-2">CWE</p>
+                                        <p>{{ finding.cwe }}</p>
+                                    </div>
+                                    <div class="row">
+                                        <p class="text-muted mr-2">Reference</p>
+                                        {% if finding.reference %}
+                                            <!-- nosemgrep: javascript.express.security.audit.xss.mustache.var-in-href.var-in-href, python.django.security.audit.xss.template-href-var.template-href-var, python.flask.security.xss.audit.template-href-var.template-href-var -->
+                                            <a href="{{ finding.reference }}">Link</a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <!-- nosemgrep: javascript.express.security.audit.xss.mustache.var-in-href.var-in-href, python.django.security.audit.xss.template-href-var.template-href-var, python.flask.security.xss.audit.template-href-var.template-href-var -->
+                <a href="{{ rekono_url }}/#/projects/{{ alert.project.id }}/findings" class="btn btn-danger">Review all details</a>
+            </div>
+        </div>
+    </body>
+</html>

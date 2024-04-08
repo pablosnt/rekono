@@ -244,4 +244,22 @@ ROLES = {
         "change": [Role.ADMIN, Role.AUDITOR],
         "delete": [Role.ADMIN, Role.AUDITOR],
     },
+    "alert": {
+        "view": [Role.ADMIN, Role.AUDITOR, Role.READER],
+        "add": [Role.ADMIN, Role.AUDITOR, Role.READER],
+        "change": [Role.ADMIN, Role.AUDITOR, Role.READER],
+        "delete": [Role.ADMIN, Role.AUDITOR, Role.READER],
+    },
+    "cvecrowdsettings": {
+        "view": [Role.ADMIN],
+        "add": [],
+        "change": [Role.ADMIN],
+        "delete": [],
+    },
+    "monitorsettings": {
+        "view": [Role.ADMIN],
+        "add": [],
+        "change": [Role.ADMIN],
+        "delete": [],
+    },
 }

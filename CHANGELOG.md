@@ -28,6 +28,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - HackTricks integration to link findings to interesing wiki resources (https://github.com/pablosnt/rekono/issues/271)
 - Creation of reports in JSON, XML and PDF formats (https://github.com/pablosnt/rekono/issues/273)
 - Customization of HTTP headers sent by tools (https://github.com/pablosnt/rekono/issues/297)
+- Multi Factor Authentication (MFA) (https://github.com/pablosnt/rekono/issues/303)
+- Customization of alerts to be notified when a finding under certain circumstances has been found (https://github.com/pablosnt/rekono/issues/301)
+- CVE Crowd integration to identify trending CVEs on social networks (https://github.com/pablosnt/rekono/issues/301)
 
 ### Security
 

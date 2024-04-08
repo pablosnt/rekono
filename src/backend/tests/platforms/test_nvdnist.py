@@ -3,7 +3,7 @@ from unittest import mock
 
 from findings.enums import Severity
 from findings.models import Vulnerability
-from platforms.nvd_nist import NvdNist
+from platforms.nvdnist import NvdNist
 from tests.framework import RekonoTest
 
 success = {
@@ -57,7 +57,7 @@ class NvdNistTest(RekonoTest):
             name="test", description="test", cve="CVE-2023-1111", severity=Severity.LOW
         )
         self.vulnerability.executions.add(self.execution3)
-        self.nvd_nist = NvdNist()
+        self.nvdnist = NvdNist()
 
     def _test(
         self,
@@ -66,25 +66,25 @@ class NvdNistTest(RekonoTest):
         cwe: Optional[str] = "CWE-200",
         description: str = "description",
     ) -> None:
-        self.nvd_nist.process_findings(self.execution3, [self.vulnerability])
+        self.nvdnist.process_findings(self.execution3, [self.vulnerability])
         self.assertEqual(reference, self.vulnerability.reference)
         self.assertEqual(cwe, self.vulnerability.cwe)
         self.assertEqual(description, self.vulnerability.description)
         self.assertEqual(severity, self.vulnerability.severity)
 
-    @mock.patch("platforms.nvd_nist.NvdNist._request", success_cvss_3)
+    @mock.patch("platforms.nvdnist.NvdNist._request", success_cvss_3)
     def test_integration_cvss_3(self) -> None:
         self._test(
             Severity.CRITICAL,
-            self.nvd_nist.reference.format(cve=self.vulnerability.cve),
+            self.nvdnist.reference.format(cve=self.vulnerability.cve),
         )
 
-    @mock.patch("platforms.nvd_nist.NvdNist._request", success_cvss_2)
+    @mock.patch("platforms.nvdnist.NvdNist._request", success_cvss_2)
     def test_integration_cvss_2(self) -> None:
         self._test(
-            Severity.HIGH, self.nvd_nist.reference.format(cve=self.vulnerability.cve)
+            Severity.HIGH, self.nvdnist.reference.format(cve=self.vulnerability.cve)
         )
 
-    @mock.patch("platforms.nvd_nist.NvdNist._request", not_found)
+    @mock.patch("platforms.nvdnist.NvdNist._request", not_found)
     def test_integration_not_found(self) -> None:
         self._test(Severity.LOW, None, None, "test")

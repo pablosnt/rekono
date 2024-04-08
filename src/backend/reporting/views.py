@@ -143,7 +143,7 @@ class ReportingViewSet(BaseViewSet):
             404: None,
         },
     )
-    @action(detail=True, methods=["GET"], url_path="download", url_name="download")
+    @action(detail=True, methods=["GET"])
     def download(self, request: Request, pk: str) -> FileResponse:
         report = self.get_object()
         if report.status != ReportStatus.READY:

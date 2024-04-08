@@ -4,6 +4,8 @@ import threading
 from typing import Any, Dict, List
 
 import certifi
+from alerts.enums import AlertMode
+from alerts.models import Alert
 from django.core.mail import EmailMultiAlternatives
 from django.core.mail.backends.smtp import EmailBackend
 from django.template.loader import get_template
@@ -95,7 +97,7 @@ class SMTP(BaseNotification):
             if findings.__class__.__name__.lower() not in findings_by_class:
                 findings_by_class[findings.__class__.__name__.lower()] = []
             findings_by_class[findings.__class__.__name__.lower()].append(finding)
-        self._notify_if_available(
+        self._notify(
             users,
             f"[Rekono] {execution.configuration.tool.name} execution completed",
             "execution_notification.html",
@@ -103,6 +105,20 @@ class SMTP(BaseNotification):
                 "execution": execution,
                 **findings_by_class,
             },
+            background=False,
+        )
+
+    def _notify_alert(self, users: List[Any], alert: Alert, finding: Finding) -> None:
+        subjects = {
+            AlertMode.NEW: f"New {finding.__class__.__name__.lower()} detected",
+            AlertMode.FILTER.value: f"New {finding.__class__.__name__.lower()} matches alert criteria",
+            AlertMode.MONITOR.value: "New trending CVE",
+        }
+        self._notify(
+            users,
+            f"[Rekono] {subjects[alert.mode]}",
+            "alert_notification.html",
+            {"alert": alert, "finding": finding},
             background=False,
         )
 

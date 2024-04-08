@@ -116,6 +116,7 @@ class VulnerabilitySerializer(TriageFindingSerializer):
             "cve",
             "cwe",
             "reference",
+            "trending",
             "exploit",
         )
         read_only_fields = TriageFindingSerializer.Meta.read_only_fields + (
@@ -127,6 +128,7 @@ class VulnerabilitySerializer(TriageFindingSerializer):
             "cve",
             "cwe",
             "reference",
+            "trending",
             "exploit",
         )
 

@@ -101,8 +101,6 @@ class LikeViewSet(BaseViewSet):
     @action(
         detail=True,
         methods=["POST", "DELETE"],
-        url_path="like",
-        url_name="like",
         permission_classes=[IsAuthenticated, IsAuditor],
     )
     def like(self, request: Request, pk: str) -> Response:

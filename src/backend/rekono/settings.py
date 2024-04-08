@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework_simplejwt.token_blacklist",
     "taggit",
+    "alerts",
     "api_tokens",
     "authentications",
     "executions",
@@ -59,6 +60,7 @@ INSTALLED_APPS = [
     "input_types",
     "integrations",
     "notes",
+    "platforms.cvecrowd",
     "platforms.defect_dojo",
     "platforms.mail",
     "platforms.telegram_app",
@@ -159,7 +161,7 @@ SIMPLE_JWT = {
     "ISSUER": "Rekono",
 }
 
-LOGGING = {
+LOGGING: Dict[str, Any] = {
     "version": 1,
     # Disable default Django logging system to avoid noise
     "disable_existing_loggers": False,
@@ -307,6 +309,7 @@ RQ_QUEUES = {
     "tasks": default_rq_queue,
     "executions": default_rq_queue,
     "findings": default_rq_queue,
+    "monitor": default_rq_queue,
 }
 
 RQ_QUEUES["executions"]["DEFAULT_TIMEOUT"] = 28800  # 8 hours

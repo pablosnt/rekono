@@ -1,7 +1,6 @@
 from typing import List, Optional
 
 import defusedxml.ElementTree as parser
-
 from executions.models import Execution
 from findings.enums import HostOS
 from findings.framework.models import Finding
@@ -95,10 +94,9 @@ class HackTricks(BaseIntegration):
         for mapped_value, services in self.services_mapping.items():
             if service in services:
                 return mapped_value
-        return None  # TOTEST
+        return None
 
-    def process_findings(self, execution: Execution, findings: List[Finding]) -> None:
-        super().process_findings(execution, findings)
+    def _process_findings(self, execution: Execution, findings: List[Finding]) -> None:
         for finding in findings:
             hacktricks_link = None
             if isinstance(finding, Host) and finding.os_type in self.host_type_mapping:
@@ -108,7 +106,7 @@ class HackTricks(BaseIntegration):
                 mapped_value = self._get_mapped_value_for_service(service_comparator)
                 if self.url in (mapped_value or ""):
                     hacktricks_link = mapped_value
-                elif mapped_value:  # TOTEST
+                elif mapped_value:
                     service_comparator = mapped_value
                 if not hacktricks_link:
                     for link in self.all_links:

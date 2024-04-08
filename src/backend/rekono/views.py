@@ -28,7 +28,7 @@ class RQStatsView(APIView):
                 name="RQStats",
                 fields={
                     "executions": inline_serializer(
-                        name="ExecutionStats",
+                        name="ExecutionsStats",
                         fields={k: serializers.IntegerField() for k in exposed_fields},
                     ),
                     "findings": inline_serializer(

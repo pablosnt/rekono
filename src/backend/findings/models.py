@@ -362,6 +362,7 @@ class Vulnerability(TriageFinding):
     cwe = models.TextField(max_length=20, blank=True, null=True)
     osvdb = models.TextField(max_length=20, blank=True, null=True)
     reference = models.TextField(max_length=250, blank=True, null=True)
+    trending = models.BooleanField(default=False)
 
     unique_fields = ["technology", "port", "name", "cve"]
     filters = [

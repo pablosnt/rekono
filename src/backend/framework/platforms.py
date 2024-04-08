@@ -3,6 +3,7 @@ from typing import Any, Callable, List
 from urllib.parse import urlparse
 
 import requests
+from alerts.models import Alert
 from executions.models import Execution
 from findings.framework.models import Finding
 from integrations.models import Integration
@@ -15,10 +16,6 @@ logger = logging.getLogger()
 class BasePlatform:
     def is_available(self) -> bool:
         return True
-
-    def process_findings(self, execution: Execution, findings: List[Finding]) -> None:
-        if not self.is_available():
-            return
 
 
 class BaseIntegration(BasePlatform):
@@ -54,10 +51,13 @@ class BaseIntegration(BasePlatform):
     def is_enabled(self) -> bool:
         return self.integration.enabled if self.integration else False
 
+    def _process_findings(self, execution: Execution, findings: List[Finding]) -> None:
+        pass
+
     def process_findings(self, execution: Execution, findings: List[Finding]) -> None:
         if not self.is_enabled():
             return
-        super().process_findings(execution, findings)
+        self._process_findings(execution, findings)
 
 
 class BaseNotification(BasePlatform):
@@ -96,12 +96,26 @@ class BaseNotification(BasePlatform):
         )
         return list(users)
 
+    def _get_users_to_notify_alert(self, alert: Alert) -> List[Any]:
+        return alert.suscribers.filter(**{self.enable_field: True}).all()
+
     def _notify_execution(
         self, users: List[Any], execution: Execution, findings: List[Finding]
     ) -> None:
         pass
 
+    def _notify_alert(self, users: List[Any], alert: Alert, finding: Finding) -> None:
+        pass
+
     def process_findings(self, execution: Execution, findings: List[Finding]) -> None:
-        super().process_findings(execution, findings)
+        if not self.is_available():
+            return
         users = self._get_users_to_notify_execution(execution)
         self._notify_execution(users, execution, findings)
+
+    def process_alert(self, alert: Alert, finding: Finding) -> None:
+        if not self.is_available():
+            return
+        self._notify_alert(
+            alert.suscribers.filter(**{self.enable_field: True}).all(), alert, finding
+        )
