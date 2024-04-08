@@ -104,7 +104,7 @@ class Alert(BaseModel):
     def get_project_field(cls) -> str:
         return "project"
 
-    def _must_be_triggered(self, execution: Execution, finding: Finding) -> bool:
+    def must_be_triggered(self, execution: Execution, finding: Finding) -> bool:
         data = self.mapping[self.item]
         if (
             not isinstance(finding, data["model"])

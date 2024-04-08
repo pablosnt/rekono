@@ -29,7 +29,7 @@ monitor_alert = {
 
 class AlertTest(ApiTest):
     endpoint = "/api/alerts/"
-    expected_str = "test - Monitor - CVE"
+    expected_str = "test - Filter - CVE - CVE-2020-1111"
     cases = [
         ApiTestCase(
             ["admin1", "admin2", "auditor1", "auditor2", "reader1", "reader2"],
@@ -294,18 +294,76 @@ class AlertTest(ApiTest):
                 },
             ],
         ),
-        ApiTestCase(["auditor1"], "delete", 403, endpoint="{endpoint}2/"),
-        ApiTestCase(["admin1"], "delete", 204, endpoint="{endpoint}2/"),
+        ApiTestCase(["auditor1"], "delete", 403, endpoint="{endpoint}3/"),
+        ApiTestCase(["admin1"], "delete", 204, endpoint="{endpoint}3/"),
     ]
 
     def setUp(self) -> None:
         super().setUp()
-        self._setup_project()
+        self._setup_tasks_and_executions()
+        self._setup_findings(self.execution3)
 
     def _get_object(self) -> Any:
         return Alert.objects.create(
-            project=self.project, mode=AlertMode.MONITOR, item=AlertItem.CVE
+            project=self.project,
+            mode=AlertMode.FILTER,
+            item=AlertItem.CVE,
+            value="CVE-2020-1111",
         )
+
+    def test_must_be_triggered(self) -> None:
+        for alert, finding, expected in [
+            (
+                Alert.objects.create(
+                    project=self.execution3.task.target.project,
+                    mode=AlertMode.MONITOR,
+                    item=AlertItem.CVE,
+                ),
+                self.vulnerability,
+                False,
+            ),
+            (
+                Alert.objects.create(
+                    project=self.execution3.task.target.project,
+                    mode=AlertMode.NEW,
+                    item=AlertItem.HOST,
+                ),
+                self.host,
+                True,
+            ),
+            (
+                Alert.objects.create(
+                    project=self.execution3.task.target.project,
+                    mode=AlertMode.NEW,
+                    item=AlertItem.OPEN_PORT,
+                ),
+                self.host,
+                False,
+            ),
+            (
+                Alert.objects.create(
+                    project=self.execution3.task.target.project,
+                    mode=AlertMode.FILTER,
+                    item=AlertItem.SERVICE,
+                    value="ssh",
+                ),
+                self.port,
+                False,
+            ),
+            (
+                Alert.objects.create(
+                    project=self.execution3.task.target.project,
+                    mode=AlertMode.FILTER,
+                    item=AlertItem.SERVICE,
+                    value="http",
+                ),
+                self.port,
+                True,
+            ),
+        ]:
+            self.assertEqual(
+                expected, alert.must_be_triggered(self.execution3, finding)
+            )
 
 
 new_monitor = {"hour_span": 48}

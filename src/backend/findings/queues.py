@@ -58,7 +58,7 @@ class FindingsQueue(BaseQueue):
                     .sort("-item")
                     .all()
                 ):
-                    if alert._must_be_triggered(execution, finding):
+                    if alert.must_be_triggered(execution, finding):
                         for platform in notifications:
                             platform.process_alert(alert, finding)
                         break

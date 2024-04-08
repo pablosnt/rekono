@@ -93,7 +93,7 @@ class CVECrowd(BaseIntegration):
                 f"[CVE Crowd] New {vulnerabilities.count()} trending vulnerabilities found in project {alert.project.id}"
             )
             for vulnerability in vulnerabilities:
-                if alert._must_be_triggered(None, vulnerability):
+                if alert.must_be_triggered(None, vulnerability):
                     notified_vulnerabilities.append(vulnerability.id)
                     for platform in [SMTP, Telegram]:
                         platform().process_alert(alert, vulnerability)
