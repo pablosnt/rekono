@@ -1,82 +1,23 @@
-import NotFound from '@/errors/NotFound'
-import store from '@/store'
-import Login from '@/views/Login'
-import Main from '@/views/Main'
-import Profile from '@/views/Profile'
-import Project from '@/views/Project'
-import ResetPassword from '@/views/ResetPassword'
-import Settings from '@/views/Settings'
-import Signup from '@/views/Signup'
-import Task from '@/views/Task'
-import Vue from 'vue'
-import Router from 'vue-router'
+import { createRouter, createWebHistory } from 'vue-router'
+import HomeView from '../views/HomeView.vue'
 
-Vue.use(Router)
-
-const publicRoutes = ['login', 'signup', 'resetPassword']
-const routes = [
-  {
-    path: '/login',
-    name: 'login',
-    component: Login
-  },
-  {
-    path: '/(dashboard|projects|tools|processes|wordlists|users|)',
-    name: 'main',
-    component: Main
-  },
-  {
-    path: '/projects/:id/(details|targets|tasks|findings|members)?',
-    name: 'project',
-    component: Project,
-    props: true
-  },
-  {
-    path: '/signup',
-    name: 'signup',
-    component: Signup,
-    props: route => ({ otp: route.query.token })
-  },
-  {
-    path: '/reset-password',
-    name: 'resetPassword',
-    component: ResetPassword,
-    props: route => ({ otp: route.query.token })
-  },
-  {
-    path: '/profile',
-    name: 'profile',
-    component: Profile
-  },
-  {
-    path: '/settings',
-    name: 'settings',
-    component: Settings
-  },
-  {
-    path: '/tasks/:id',
-    name: 'task',
-    component: Task,
-    props: true
-  },
-  {
-    path: '*',
-    name: 'notFound',
-    component: NotFound
-  }
-]
-
-const router = new Router({ routes: routes })
-
-router.beforeEach((to, from, next) => {
-  store.dispatch('checkState')
-  if (publicRoutes.includes(to.name) && store.state.user !== null) {
-    next({ name: 'main' })
-  } else if (!publicRoutes.includes(to.name) && store.state.user === null) {
-    next({ name: 'login' })
-  } else {
-    next()
-  }
+const router = createRouter({
+  history: createWebHistory(import.meta.env.BASE_URL),
+  routes: [
+    {
+      path: '/',
+      name: 'home',
+      component: HomeView
+    },
+    {
+      path: '/about',
+      name: 'about',
+      // route level code-splitting
+      // this generates a separate chunk (About.[hash].js) for this route
+      // which is lazy-loaded when the route is visited.
+      component: () => import('../views/AboutView.vue')
+    }
+  ]
 })
 
 export default router
