@@ -57,9 +57,7 @@ jobs:
       
       - name: Install ESLint
         working-directory: src/frontend
-        run: |
-          npm install .
-          npm install -g eslint
+        run: npm install .
       
       - uses: dorny/paths-filter@3c49e64ca26115121162fb767bc6af9e8d059f1a
         id: changes
@@ -68,6 +66,7 @@ jobs:
             frontend:
               - 'src/frontend/**'
       
-      - name: ESLint check
+      - name: StyleLint check
+        working-directory: src/frontend/
         if: ${{ steps.changes.outputs.frontend == 'true' || github.event_name != 'pull_request' }} 
-        run: eslint src/frontend/ --ext .js,.jsx,.ts,.tsx
+        run: npm run stylelint

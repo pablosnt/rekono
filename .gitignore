@@ -144,6 +144,7 @@ dist_electron/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+.nuxt/
 # Editor directories and files
 *.suo
 *.ntvs*
