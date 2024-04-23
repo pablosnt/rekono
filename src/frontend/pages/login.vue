@@ -1,13 +1,13 @@
 <template>
     <NuxtLayout name="public-form">
         <v-form @submit.prevent="login">
-            <v-text-field
-                v-model="username"
+            <v-text-field v-model="username"
                 density="compact"
                 label="Username"
                 prepend-inner-icon="mdi-account"
                 variant="outlined"
                 :rules="[u => !!u || 'Username is required']"
+                validate-on="blur"
             />
 
             <div class="text-subtitle-1 text-medium-emphasis d-flex align-center justify-space-between">
@@ -25,6 +25,7 @@
                 variant="outlined"
                 @click:append-inner="visible = !visible"
                 :rules="[p => !!p || 'Password is required']"
+                validate-on="blur"
             />
             
             <v-card-actions class="justify-center">

@@ -14,8 +14,7 @@ export default defineNuxtConfig({
         config.plugins.push(vuetify({ autoImport: true }))
       })
     },
-    '@pinia/nuxt',
-    '@nuxtjs/stylelint-module',
+    '@pinia/nuxt'
   ],
   runtimeConfig: {
     backendUrl: process.env.BACKEND_URL,

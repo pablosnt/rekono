@@ -1,4 +1,5 @@
 import logging
+import threading
 from typing import Any, Dict
 
 from django.contrib.auth.password_validation import validate_password
@@ -279,23 +280,20 @@ class RequestPasswordResetSerializer(Serializer):
 
     email = EmailField(max_length=150, required=True)
 
-    def save(self, **kwargs: Any) -> User:
-        """Save changes in instance.
-
-        Returns:
-            User: Instance after apply changes
-        """
-        user = User.objects.filter(
-            email=self.validated_data.get("email"), is_active=True
-        ).first()
-        if user:
+    def _save_in_thread(self, email: str) -> None:
+        user = User.objects.filter(email=email, is_active=True).first()
+        if email and user:
             otp = User.objects.setup_otp(user)
             SMTP().reset_password(user, otp)
             logger.info(
                 f"[User] User {user.id} requested a password reset",
                 extra={"user": user.id},
             )
-            return user
+
+    def save(self, **kwargs: Any) -> None:
+        threading.Thread(
+            target=self._save_in_thread, args=(self.validated_data.get("email"),)
+        ).start()
         return None
 
 

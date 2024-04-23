@@ -16,7 +16,6 @@
 </template>
 
 <script setup lang="ts">
-// TODO: should this be defined as layout?
 // TODO forward user to main page if they are authenticated
 </script>
 

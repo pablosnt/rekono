@@ -46,11 +46,10 @@ export function useApi(endpoint: string, authentication: boolean = true, refresh
                 let message = 'Unexpected error'
                 switch (error.statusCode) {
                     case 400:
-                        // TODO
-                        console.log(error.data)
-                        // const value = Object.values(data)[0][0]
-                        // message = `${Object.keys(data)[0]}: ${value.charAt(0).toUpperCase}${value.slice(1)}`
-                        message = error.data
+                        const value = Object.values(error.data)[0][0]
+                        const field = Object.keys(error.data)[0]
+                        const body = `${value.charAt(0).toUpperCase()}${value.slice(1)}`
+                        message = field !== 'non_field_errors' ? `${field}: ${body}` : body
                         break
                     case 401:
                         if (endpoint === '/api/security/refresh/') {
@@ -93,7 +92,7 @@ export function useApi(endpoint: string, authentication: boolean = true, refresh
         }
     }
 
-    function get(id: number): Promise<any> {
+    function get(id?: number): Promise<any> {
         return request(id ? `${endpoint}${id}/` : endpoint, { method: 'GET', headers: headers(authentication) })
             .then((response) => {
                 data = response
@@ -135,7 +134,7 @@ export function useApi(endpoint: string, authentication: boolean = true, refresh
             })
     }
 
-    function update(id: number, body: object) {
+    function update(body: object, id?: number) {
         return request(id ? `${endpoint}${id}/` : endpoint, { method: 'PUT', headers: headers(authentication), body: body })
             .then((response) => {
                 if (response) {
@@ -155,7 +154,7 @@ export function useApi(endpoint: string, authentication: boolean = true, refresh
             })
     }
 
-    function remove(id: number) {
+    function remove(id?: number) {
         return request(id ? `${endpoint}${id}/` : endpoint, { method: 'DELETE', headers: headers(authentication) })
             .then((response) => {
                 if (response) {
