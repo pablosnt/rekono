@@ -16,7 +16,7 @@ export const userStore = defineStore('user', {
       const { getTokens, saveTokens, removeTokens } = useTokens()
       const token = getTokens().access
       if (token !== null && this.user === null) {
-        login(token)
+        this.login(token)
       }
     }
   }

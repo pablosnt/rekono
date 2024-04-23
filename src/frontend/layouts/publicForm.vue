@@ -15,10 +15,6 @@
     </div>
 </template>
 
-<script setup lang="ts">
-// TODO forward user to main page if they are authenticated
-</script>
-
 <style>
 #public-page {
     height: 100%;

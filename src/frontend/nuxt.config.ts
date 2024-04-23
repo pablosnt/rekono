@@ -7,15 +7,6 @@ export default defineNuxtConfig({
   build: {
     transpile: ['vuetify'],
   },
-  modules: [
-    (_options, nuxt) => {
-      nuxt.hooks.hook('vite:extendConfig', (config) => {
-        // @ts-expect-error
-        config.plugins.push(vuetify({ autoImport: true }))
-      })
-    },
-    '@pinia/nuxt'
-  ],
   runtimeConfig: {
     backendUrl: process.env.BACKEND_URL,
     backendRootPath: process.env.BACKEND_ROOT_PATH,
@@ -42,5 +33,14 @@ export default defineNuxtConfig({
         }
       }
     }
-  }
+  },
+  modules: [
+    (_options, nuxt) => {
+      nuxt.hooks.hook('vite:extendConfig', (config) => {
+        // @ts-expect-error
+        config.plugins.push(vuetify({ autoImport: true }))
+      })
+    },
+    '@pinia/nuxt'
+  ]
 })

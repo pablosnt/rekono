@@ -67,6 +67,9 @@ export function useApi(endpoint: string, authentication: boolean = true, refresh
                     case 404:
                         message = 'Resource not found'
                         break
+                    case 429:
+                        message = 'Too many requests'
+                        break
                 }
                 if (message) {
                     alert(message, 'error')
