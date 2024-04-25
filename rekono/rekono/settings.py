@@ -54,7 +54,7 @@ from rekono.environment import (
 
 # Rekono description
 DESCRIPTION = 'Automation platform that combines different hacking tools to complete pentesting processes'
-VERSION = '1.6.5'                                                               # Rekono version
+VERSION = '1.6.6'                                                               # Rekono version
 TESTING = 'test' in sys.argv                                                    # Tests execution
 
 ################################################################################
