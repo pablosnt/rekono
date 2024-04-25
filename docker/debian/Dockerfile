@@ -1,4 +1,4 @@
-FROM kalilinux/kali-last-release:latest
+FROM debian:bookworm-20240423
 
 # Environment
 ENV PYTHONDONTWRITEBYTECODE 1
@@ -21,8 +21,8 @@ ENV EXECUTION_WORKERS 5
 ARG REKONO_VERSION
 
 # Install requirements
-RUN apt update -y && \
-    apt install python3-pip libpq-dev python3-dev libmagic1 libcap2-bin redis-server firefox-esr sudo libgbm-dev libasound2 postgresql -y && \
+RUN apt update && \
+    apt install python3-pip libpq-dev python3-dev libmagic1 redis-server firefox-esr sudo libgbm-dev libasound2 postgresql-15 wget libcap2-bin -y && \
     ln -s /usr/bin/python3 /usr/bin/python && \
     mkdir -p $REKONO_HOME $PGDATA /code /config /kaboxer && \
     chown -R postgres:postgres /config && \
@@ -36,25 +36,11 @@ COPY requirements.txt /code
 COPY config.yaml /code
 COPY docker/debian/entrypoint.sh /entrypoint.sh
 COPY docker/debian/set_permissions.sh /set_permissions.sh
-RUN pip install -r /code/requirements.txt && \
+COPY docker/debian/downgrade_postgresql_16.sh /downgrade_postgresql_16.sh
+RUN pip install --break-system-packages -r /code/requirements.txt && \
     dpkg -i /code/frontend/dist_electron/rekono_*.deb || apt -f install -y && \
     rm -R /code/frontend/ && \
     rm -R /code/testing/
-
-# Tools
-RUN apt install nmap dirsearch theharvester nikto sslscan sslyze cmseek zaproxy exploitdb metasploit-framework emailharvester joomscan gitleaks smbmap nuclei gobuster -y && \
-    apt install seclists dirb -y && \
-    apt autoremove -y && \
-    apt autoclean -y && \
-    apt clean -y && \
-    rm -rf /var/lib/apt/lists/* && \
-    setcap cap_net_raw,cap_net_admin,cap_net_bind_service+eip $(which nmap) && \
-    git clone https://github.com/fullhunt/log4j-scan /opt/log4j-scan && \
-    git clone https://github.com/fullhunt/spring4shell-scan.git /opt/spring4shell-scan && \
-    git clone https://github.com/internetwache/GitTools.git /opt/GitTools && \
-    pip install -r /opt/log4j-scan/requirements.txt && \
-    pip install -r /opt/spring4shell-scan/requirements.txt && \
-    pip install emailfinder ssh-audit
 
 # Initialize database
 USER postgres
@@ -69,9 +55,32 @@ RUN export RKN_DB_PASSWORD=$(cat /config/rkn_db_password.txt) && \
     psql ${RKN_DB_NAME} -c "GRANT ALL ON ALL TABLES IN SCHEMA public to ${RKN_DB_USER};" && \
     psql ${RKN_DB_NAME} -c "GRANT ALL ON ALL SEQUENCES IN SCHEMA public to ${RKN_DB_USER};" && \
     psql ${RKN_DB_NAME} -c "GRANT ALL ON ALL FUNCTIONS IN SCHEMA public to ${RKN_DB_USER};"
+
+# Tools
 USER root
+RUN wget https://archive.kali.org/archive-key.asc -O /etc/apt/trusted.gpg.d/kali-archive-keyring.asc && \
+    echo 'deb http://http.kali.org/kali kali-rolling main contrib non-free non-free-firmware' >> /etc/apt/sources.list && \
+    apt update && \
+    apt install nmap dirsearch theharvester nikto sslscan sslyze cmseek zaproxy exploitdb metasploit-framework emailharvester joomscan gitleaks smbmap nuclei gobuster -y && \
+    apt install seclists dirb -y && \
+    apt autoremove -y && \
+    apt autoclean -y && \
+    apt clean -y && \
+    rm -rf /var/lib/apt/lists/* && \
+    sed -i '$ d' /etc/apt/sources.list && \
+    rm /etc/apt/trusted.gpg.d/kali-archive-keyring.asc && \
+    setcap cap_net_raw,cap_net_admin,cap_net_bind_service+eip $(which nmap) && \
+    git clone https://github.com/fullhunt/log4j-scan /opt/log4j-scan && \
+    git clone https://github.com/fullhunt/spring4shell-scan.git /opt/spring4shell-scan && \
+    git clone https://github.com/internetwache/GitTools.git /opt/GitTools && \
+    pip install -r /opt/log4j-scan/requirements.txt && \
+    pip install -r /opt/spring4shell-scan/requirements.txt && \
+    pip install emailfinder ssh-audit && \
+    mkdir -p /home/kali
+
+# Migrate database
 RUN export RKN_DB_PASSWORD=$(cat /config/rkn_db_password.txt) && \
-    sudo /etc/init.d/postgresql start && \
+    /etc/init.d/postgresql start 15 && \
     python /code/manage.py migrate && \
     python /code/manage.py createsuperuser --no-input
 
@@ -86,14 +95,18 @@ RUN adduser --disabled-password rekono && \
     chown rekono:rekono /set_permissions.sh && \
     chmod 700 /set_permissions.sh && \
     /set_permissions.sh && \
+    chown rekono:rekono /downgrade_postgresql_16.sh && \
+    chmod 700 /downgrade_postgresql_16.sh && \
     chown -R rekono:rekono /code && \
     chown -R rekono:rekono /config && \
     chown -R rekono:rekono /opt && \
-    echo "rekono ALL=(ALL) NOPASSWD:SETENV:/etc/init.d/postgresql,/var/run/postgresql,/etc/init.d/redis-server,/set_permissions.sh" >> /etc/sudoers && \
+    chown -R rekono:rekono /home/kali && \
+    chown -R rekono:rekono /usr/share && \
+    echo "rekono ALL=(ALL) NOPASSWD:SETENV:/etc/init.d/postgresql,/var/run/postgresql,/etc/init.d/redis-server,/set_permissions.sh,/downgrade_postgresql_16.sh" >> /etc/sudoers && \
     export DEFAULT_PGDATA=$(cat /config/default_pgdata.txt) && \
     chown -R rekono:rekono $DEFAULT_PGDATA && \
     sed -i 's:'"$DEFAULT_PGDATA"':'"$PGDATA"':' $(cat /config/postgresql_config.txt) && \
     rm /config/postgresql_config.txt
 
-USER rekono
+USER root
 WORKDIR /code
