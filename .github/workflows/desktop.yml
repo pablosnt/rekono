@@ -61,7 +61,7 @@ jobs:
           tz = pytz.timezone('Europe/Madrid')
           d = tz.localize(datetime.now())
           change_time = d.strftime('%a, %d %b %Y %H:%M:%S %z')
-          new_changes = f'rekono (${{ github.event.release.name }}) kali-dev; urgency=medium\n\n  * Update Rekono version to ${{ github.event.release.name }}.\n\n -- Pablo Santiago López <${{ secrets.GITLAB_EMAIL }}>  {change_time}\n\n'
+          new_changes = f'rekono-kbx (${{ github.event.release.name }}) kali-dev; urgency=medium\n\n  * Update Rekono version to ${{ github.event.release.name }}.\n\n -- Pablo Santiago López <${{ secrets.GITLAB_EMAIL }}>  {change_time}\n\n'
           with open('changelog', 'w') as changelog:
             changelog.write(new_changes + old_changes)
       
