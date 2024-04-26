@@ -1,6 +1,6 @@
 <template>
     <NuxtLayout name="public-form">
-        <v-form @submit.prevent="login">
+        <v-form @submit.prevent="login({ username: username, password: password })">
             <v-text-field v-model="username"
                 density="compact"
                 label="Username"
@@ -50,8 +50,8 @@
     const router = useRouter()
     const { getTokens, saveTokens, removeTokens } = useTokens()
     const { data, items, get, list, create, update, remove } = useApi('/api/security/login/', false, false)
-    function login() {
-        create({ username: username, password: password })
+    function login(body: object) {
+        create(body)
             .then((response) => {
                 const isLogin = saveTokens(response)
                 if (isLogin) {

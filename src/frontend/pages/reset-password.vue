@@ -1,6 +1,7 @@
 <template>
     <NuxtLayout name="public-form">
-        <v-form @submit.prevent="resetPassword">
+        <v-card-text class="text-center">You will receive via email a link to reset your password</v-card-text>
+        <v-form @submit.prevent="resetPassword(otp ? { otp: otp._value, password: password } : { email: email })">
             <v-text-field v-if="!otp"
                 v-model="email"
                 density="compact"
@@ -65,12 +66,12 @@
     const router = useRouter()
     const otp = ref(route.query.otp ? route.query.otp : null)
     const { data, items, get, list, create, update, remove } = useApi('/api/users/reset-password/', false, false)
-    function resetPassword() {
-        if (otp._value) {
-            update({ otp: otp._value, password: password })
+    function resetPassword(body: object) {
+        if (body.otp) {
+            update(body)
                 .then(() => { router.push({ name: 'login' })})
         } else {
-            create({ email: email })
+            create(body)
                 .then(() => { alert('Done! You will receive via email a temporal link to change your password', 'success') })
         }
     }
