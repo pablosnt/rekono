@@ -1,3 +1,7 @@
 <template>
-    <h1>Hello World!</h1>
+   <NuxtLayout name="main"></NuxtLayout>
 </template>
+
+<script setup lang="ts">
+    definePageMeta({layout: false})
+</script>

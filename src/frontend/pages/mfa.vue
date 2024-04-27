@@ -1,8 +1,10 @@
 <template>
     <NuxtLayout name="public-form">
         <v-card-title class="text-center">Multi Factor Authentication</v-card-title>
+
         <v-card-text v-if="app" class="text-center">Type your OTP from your authentication app</v-card-text>
         <v-card-text v-if="!app" class="text-center">Type the OTP sent to your email</v-card-text>
+        
         <v-form @submit.prevent="login(mfa)">
             <v-otp-input v-if="app"
                 v-model="mfa"
@@ -11,6 +13,7 @@
                 validate-on="blur"
                 :rules="[o => !!o || 'OTP is required']"
             />
+            
             <v-text-field v-if="!app"
                 v-model="mfa"
                 density="compact"
@@ -20,6 +23,7 @@
                 :rules="[o => !!o || 'OTP is required', o => o.length === 128 || 'Invalid OTP']"
                 validate-on="blur"
             />
+
             <v-card-actions class="justify-center">
                 <v-btn class="mb-8"
                     color="red"

@@ -7,9 +7,9 @@
             rounded="lg"
             style="margin-top: 120px;"
         >
-            <v-img src="/static/logo-black.png"
-                class="mx-auto ma-4"
-            ></v-img>
+            <v-img class="mx-auto ma-4"
+                src="/static/logo-black.png"
+            />
             <slot />
         </v-card>
     </div>
