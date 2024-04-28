@@ -1,5 +1,5 @@
 <template>
-    <NuxtLayout name="main"></NuxtLayout>
+    <NuxtLayout name="header"></NuxtLayout>
  </template>
  
  <script setup lang="ts">

@@ -49,7 +49,7 @@
     const password = ref(null)
     const router = useRouter()
     const { getTokens, saveTokens, removeTokens } = useTokens()
-    const { data, items, get, list, create, update, remove } = useApi('/api/security/login/', false, false)
+    const { get, list, create, update, remove } = useApi('/api/security/login/', false, false)
     function login(body: object) {
         create(body)
             .then((response) => {

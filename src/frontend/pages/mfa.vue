@@ -6,6 +6,7 @@
         <v-card-text v-if="!app" class="text-center">Type the OTP sent to your email</v-card-text>
         
         <v-form @submit.prevent="login(mfa)">
+            <!-- TODO: Default focus -->
             <v-otp-input v-if="app"
                 v-model="mfa"
                 variant="solo"
@@ -51,12 +52,12 @@
     const { getTokens, saveTokens, removeTokens } = useTokens()
     function changeMethod() {
         if (!app._value) {
-            const { data, items, get, list, create, update, remove } = useApi('/api/security/mfa/email/', false, false)
+            const { get, list, create, update, remove } = useApi('/api/security/mfa/email/', false, false)
             create({ token: getTokens().mfa })
         }
     }
     function login(value: string) {
-        const { data, items, get, list, create, update, remove } = useApi('/api/security/mfa/', false, false)
+        const { get, list, create, update, remove } = useApi('/api/security/mfa/', false, false)
         create({ token: getTokens().mfa, mfa: value })
             .then((response) => {
                 const isLogin = saveTokens(response)

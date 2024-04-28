@@ -65,7 +65,7 @@
     const route = useRoute()
     const router = useRouter()
     const otp = ref(route.query.otp ? route.query.otp : null)
-    const { data, items, get, list, create, update, remove } = useApi('/api/users/reset-password/', false, false)
+    const { get, list, create, update, remove } = useApi('/api/users/reset-password/', false, false)
     function resetPassword(body: object) {
         if (body.otp) {
             update(body)

@@ -33,7 +33,7 @@
             "version_argument": "--version",
             "output_format": "json",
             "reference": "https://github.com/maurosoria/dirsearch",
-            "icon": "https://raw.githubusercontent.com/maurosoria/dirsearch/master/static/logo.png",
+            "icon": "https://www.kali.org/tools/dirsearch/images/dirsearch-logo.svg",
             "defect_dojo_scan_type": null
         }
     },
@@ -49,7 +49,7 @@
             "ignore_exit_code": false,
             "is_installed": false,
             "version": null,
-            "version_argument": "--version",
+            "version_argument": "--help",
             "output_format": "json",
             "reference": "https://github.com/laramies/theHarvester",
             "icon": "https://www.kali.org/tools/theharvester/images/theharvester-logo.svg",
@@ -128,7 +128,7 @@
             "version_argument": "--version",
             "output_format": "json",
             "reference": "https://github.com/Tuhinshubhra/CMSeeK/",
-            "icon": "https://camo.githubusercontent.com/b1864e58e861aa4e938d17d4a50ae1a4bedec9cdb9e8b7ce7ac80a1b5cc711ed/68747470733a2f2f692e696d6775722e636f6d2f35565973316d322e706e67",
+            "icon": null,
             "defect_dojo_scan_type": null
         }
     },
@@ -261,7 +261,7 @@
             "version_argument": "--version",
             "output_format": null,
             "reference": "https://github.com/OWASP/joomscan",
-            "icon": "https://raw.githubusercontent.com/rezasp/Trash/master/joomscan.png",
+            "icon": "https://owasp.org/www--site-theme/favicon.ico",
             "defect_dojo_scan_type": null
         }
     },
@@ -277,7 +277,7 @@
             "ignore_exit_code": true,
             "is_installed": false,
             "version": null,
-            "version_argument": null,
+            "version_argument": "version",
             "output_format": "json",
             "reference": "https://github.com/zricethezav/gitleaks",
             "icon": "https://gitleaks.io/favicon.ico",
@@ -318,7 +318,7 @@
             "version_argument": null,
             "output_format": null,
             "reference": "https://github.com/ShawnDEvans/smbmap",
-            "icon": null,
+            "icon": "https://www.kali.org/tools/smbmap/images/smbmap-logo.svg",
             "defect_dojo_scan_type": null
         }
     },
@@ -337,7 +337,7 @@
             "version_argument": "--version",
             "output_format": "json",
             "reference": "https://nuclei.projectdiscovery.io",
-            "icon": "https://nuclei.projectdiscovery.io/static/favicon.png",
+            "icon": "https://avatars.githubusercontent.com/u/50994705?s=200&v=4",
             "defect_dojo_scan_type": "Nuclei Scan"
         }
     },
@@ -375,7 +375,7 @@
             "version_argument": "version",
             "output_format": "txt",
             "reference": "https://github.com/OJ/gobuster",
-            "icon": null,
+            "icon": "https://www.kali.org/tools/gobuster/images/gobuster-logo.svg",
             "defect_dojo_scan_type": null
         }
     }

@@ -1,20 +1,11 @@
-from rest_framework.serializers import ModelSerializer
-
 from framework.fields import IntegerChoicesField
 from framework.serializers import LikeSerializer
 from input_types.serializers import InputTypeSerializer
+from rest_framework.serializers import ModelSerializer
 from tools.enums import Intensity as IntensityEnum
 from tools.enums import Stage
 from tools.fields import StageField
-from tools.models import Argument, Configuration, Input, Intensity, Output, Tool
-
-
-class InputSerializer(ModelSerializer):
-    type = InputTypeSerializer(many=False, read_only=True)
-
-    class Meta:
-        model = Input
-        fields = ("id", "type", "filter", "order")
+from tools.models import Configuration, Intensity, Output, Tool
 
 
 class OutputSerializer(ModelSerializer):
@@ -36,34 +27,18 @@ class IntensitySerializer(ModelSerializer):
         fields = ("id", "argument", "value")
 
 
-class ArgumentSerializer(ModelSerializer):
-    inputs = InputSerializer(many=True, read_only=True)
-
-    class Meta:
-        model = Argument
-        fields = (
-            "id",
-            "name",
-            "argument",
-            "required",
-            "multiple",
-            "inputs",
-        )
-
-
 class SimpleConfigurationSerializer(ModelSerializer):
     stage = StageField(model=Stage)
     outputs = OutputSerializer(many=True, read_only=True)
 
     class Meta:
         model = Configuration
-        fields = ("id", "name", "tool", "arguments", "stage", "default", "outputs")
+        fields = ("id", "name", "stage", "default", "outputs")
 
 
 class ToolSerializer(LikeSerializer):
     intensities = IntensitySerializer(many=True, read_only=True)
     configurations = SimpleConfigurationSerializer(many=True, read_only=True)
-    arguments = ArgumentSerializer(many=True, read_only=True)
 
     class Meta:
         model = Tool
@@ -80,7 +55,6 @@ class ToolSerializer(LikeSerializer):
             "likes",
             "intensities",
             "configurations",
-            "arguments",
         )
 
 
@@ -99,3 +73,7 @@ class SimpleToolSerializer(ModelSerializer):
 
 class ConfigurationSerializer(SimpleConfigurationSerializer):
     tool = SimpleToolSerializer(many=False, read_only=True)
+
+    class Meta:
+        model = Configuration
+        fields = SimpleConfigurationSerializer.Meta.fields + ("tool",)
