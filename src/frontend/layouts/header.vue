@@ -68,12 +68,12 @@
     const tab = computed(() => { return route.path === '/' ? 'home' : route.path.split('/')[1].toLowerCase()})
     const user = userStore()
     const router = useRouter()
-    const { getTokens, saveTokens, removeTokens } = useTokens()
-    const { data, items, get, list, create, update, remove } = useApi('/api/security/logout/', true, false)
+    const tokens = useTokens()
+    const api = useApi('/api/security/logout/', true, false)
     function logout() {
-        create({ refresh: getTokens().refresh})
+        api.create({ refresh: tokens.get().refresh})
         user.logout()
-        removeTokens()
+        tokens.remove()
         router.push({ name: 'login' })
     }
 </script>

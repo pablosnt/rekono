@@ -1,7 +1,7 @@
 <template>
     <NuxtLayout name="public-form">
         <v-card-text class="text-center">You will receive via email a link to reset your password</v-card-text>
-        <v-form @submit.prevent="resetPassword(otp ? { otp: otp._value, password: password } : { email: email })">
+        <v-form @submit.prevent="loading = true; resetPassword(otp ? { otp: otp, password: password } : { email: email })">
             <v-text-field v-if="!otp"
                 v-model="email"
                 density="compact"
@@ -42,7 +42,8 @@
             />
 
             <v-card-actions class="justify-center">
-                <v-btn class="mb-8"
+                <v-btn v-if="!loading"
+                    class="mb-8"
                     color="red"
                     size="large"
                     variant="tonal"
@@ -50,6 +51,7 @@
                     type="submit"
                     block
                 />
+                <v-progress-circular v-if="loading" color="error" indeterminate/>
             </v-card-actions>
         </v-form>
     </NuxtLayout>
@@ -61,18 +63,27 @@
     const email = ref(null)
     const password = ref(null)
     const passwordConfirmation = ref(null)
+    const loading = ref(false)
     const alert = useAlert()
     const route = useRoute()
     const router = useRouter()
     const otp = ref(route.query.otp ? route.query.otp : null)
-    const { get, list, create, update, remove } = useApi('/api/users/reset-password/', false, false)
+    const api = useApi('/api/users/reset-password/', false, false)
     function resetPassword(body: object) {
+        let request = null
         if (body.otp) {
-            update(body)
-                .then(() => { router.push({ name: 'login' })})
+            request = api.update(body)
+                .then(() => {
+                    loading.value = false
+                    router.push({ name: 'login'
+                })})
         } else {
-            create(body)
-                .then(() => { alert('Done! You will receive via email a temporal link to change your password', 'success') })
+            request = api.create(body)
+                .then(() => {
+                    loading.value = false
+                    alert('Done! You will receive via email a temporal link to change your password', 'success')
+                })
         }
+        request.catch(() => { loading.value = false })
     }
 </script>

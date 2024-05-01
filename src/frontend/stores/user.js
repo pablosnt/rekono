@@ -13,8 +13,8 @@ export const userStore = defineStore('user', {
       this.role = null
     },
     check() {
-      const { getTokens, saveTokens, removeTokens } = useTokens()
-      const token = getTokens().access
+      const tokens = useTokens()
+      const token = tokens.get().access
       if (token !== null && this.user === null) {
         this.login(token)
       }

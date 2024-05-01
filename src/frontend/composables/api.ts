@@ -3,7 +3,7 @@ export function useApi(endpoint: string, authentication: boolean = true, refresh
     const router = useRouter()
     const refreshing = refreshStore()
     const alert = useAlert()
-    const { getTokens, saveTokens, removeTokens } = useTokens()
+    const tokens = useTokens()
     
     const defaultHeaders = {
         'Content-Type': 'application/json',
@@ -12,8 +12,7 @@ export function useApi(endpoint: string, authentication: boolean = true, refresh
     // TODO: Separate pagination, it must be provided by the parent item
     let { page, limit, total, limits, max_limit } = usePagination()
 
-    let data = ref({})
-    let items = ref([])
+    let items = []
 
     function url(endpoint: string): string {
         const currentEndpoint = config.backendRootPath ? config.backendRootPath + endpoint : endpoint
@@ -27,7 +26,7 @@ export function useApi(endpoint: string, authentication: boolean = true, refresh
 
     function headers(authentication: boolean): object {
         let currentHeaders = defaultHeaders
-        const token = getTokens().access
+        const token = tokens.get().access
         if (authentication && token) {
             currentHeaders.Authorization = `Bearer ${token}`
         }
@@ -79,23 +78,21 @@ export function useApi(endpoint: string, authentication: boolean = true, refresh
     function refresh(): Promise<any> {
         if (!refreshing.refreshing) {
             refreshing.change()
-            return request('/api/security/refresh/', { method: 'POST', headers: headers(true), body: { refresh: getTokens().refresh }})
+            return request('/api/security/refresh/', { method: 'POST', headers: headers(true), body: { refresh: tokens.get().refresh }})
                 .then((response) => {
-                    removeTokens()
-                    saveTokens(response)
+                    tokens.remove()
+                    tokens.save(response)
                     refreshing.change()
                     return Promise.resolve()
                 })
                 .catch((error) => {
-                    removeTokens()
+                    tokens.remove()
                     refreshing.change()
                     return Promise.reject()
                 })
         }
         else {
-            console.log('WAITING')
             while (refreshing.refreshing) {}
-            console.log('REPEAT')
             return Promise.resolve()
         }
     }
@@ -103,7 +100,6 @@ export function useApi(endpoint: string, authentication: boolean = true, refresh
     function get(id?: number): Promise<any> {
         return request(id ? `${endpoint}${id}/` : endpoint, { method: 'GET', headers: headers(authentication) })
             .then((response) => {
-                data = response
                 return Promise.resolve(response)
             })
     }
@@ -117,12 +113,15 @@ export function useApi(endpoint: string, authentication: boolean = true, refresh
         return request(endpoint, { method: 'GET', headers: headers(authentication), params: Object.assign({}, params, { page: currentPage, limit: currentLimit }) })
             .then((response) => {
                 total = response.count
-                items = items.concat(response.results)
-                if ((currentPage * currentLimit) < total && all) {
-                    return list(params, all, currentPage + 1)
+                if (all) {
+                    items = items.concat(response.results)
+                    if ((currentPage * currentLimit) < total) {
+                        return list(params, all, currentPage + 1)
+                    }
                 } else {
-                    return Promise.resolve(items)
+                    items = response.results
                 }
+                return Promise.resolve(items)
             })
     }
 
@@ -145,13 +144,8 @@ export function useApi(endpoint: string, authentication: boolean = true, refresh
         return request(id ? `${endpoint}${id}/` : endpoint, { method: 'PUT', headers: headers(authentication), body: body })
             .then((response) => {
                 if (response) {
-                    if (refreshData) {
-                        if (data) {
-                            data = response
-                        }
-                        if (items) {
-                            return list(refreshAll)
-                        }
+                    if (refreshData && items) {
+                        return list(refreshAll)
                     }
                     if (entity) {
                         alert(`${entity} has been successfully updated`, 'success')
@@ -176,5 +170,5 @@ export function useApi(endpoint: string, authentication: boolean = true, refresh
             })
     }
 
-    return { data, items, get, list, create, update, remove }
+    return { get, list, create, update, remove }
 }

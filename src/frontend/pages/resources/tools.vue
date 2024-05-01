@@ -1,6 +1,7 @@
 <template>
     <MenuResources>
         <v-container fluid>
+            <!-- TODO: Search and filter options -->
             <v-row dense>
                 <v-col v-for="tool in tools" :key="tool.id" cols="4">
                     <v-card :title="tool.name"
@@ -36,7 +37,7 @@
                             <v-divider class="mt-4 mb-4"/>
                             <div class="d-flex flex-row">
                                 <div v-for="intensity in tool.intensities">
-                                    <v-chip size="small" :color="intensities[intensity.value]">{{ intensity.value }}</v-chip>
+                                    <v-chip size="small" :color="colors.intensities[intensity.value]">{{ intensity.value }}</v-chip>
                                     <span class="me-1"/>
                                 </div>
                             </div>
@@ -76,18 +77,18 @@
                         </v-card-actions>
                     </v-card>
                 </v-col>
-            </v-row>            
+            </v-row>  
+            <!-- TODO: Pagination           -->
         </v-container>
     </MenuResources>
 </template>
 
 <script setup lang="ts">
     definePageMeta({layout: false})
-    let tools = ref([])
-    let show = ref(null)
-    const { stages, intensities } = useColors()
-    console.log(intensities)
-    console.log(intensities['Normal'])
-    const { get, list, create, update, remove } = useApi('/api/tools/', true, true, false, 'Tool')
-    await list({ ordering: 'id' }, true).then((response) => { tools = ref(response) })
+    const tools = ref([])
+    const show = ref(null)
+    const colors = ref(useColors())
+    const api = useApi('/api/tools/', true, true, false, 'Tool')
+    // TODO: filter parameters
+    await api.list({ ordering: 'id' }, true).then((response) => { tools.value = response })
 </script>
