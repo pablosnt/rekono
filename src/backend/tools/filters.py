@@ -1,13 +1,13 @@
 from django_filters.filters import CharFilter, ChoiceFilter
 from django_filters.rest_framework import FilterSet
-
 from framework.filters import LikeFilter
+from tools.enums import Intensity, Stage
 from tools.models import Configuration, Tool
 
 
 class ToolFilter(LikeFilter):
-    stage = ChoiceFilter(field_name="configurations__stage")
-    intensity = ChoiceFilter(field_name="intensities__value")
+    stage = ChoiceFilter(field_name="configurations__stage", choices=Stage.choices)
+    intensity = ChoiceFilter(field_name="intensities__value", choices=Intensity.choices)
     input = CharFilter(field_name="arguments__inputs__type__name")
     output = CharFilter(field_name="configurations__outputs__type__name")
 

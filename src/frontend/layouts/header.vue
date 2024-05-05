@@ -11,13 +11,9 @@
             <v-tabs v-model="tab" selected-class="text-red">
                 <v-tab value="home" to="/">Home</v-tab>
                 <v-tab value="projects" to="/projects">Projects</v-tab>
-                <v-tab value="reports" to="/reports">Reports</v-tab>
                 <v-tab value="notes" to="/notes">Notes</v-tab>
                 <v-tab value="resources" to="/resources">Resources</v-tab>
-                <v-tab v-if="user.role === 'Admin'"
-                    value="administration"
-                    to="/administration"
-                >Administration</v-tab>
+                <v-tab v-if="user.role === 'Admin'" value="administration" to="/administration">Administration</v-tab>
             </v-tabs>
 
             <v-spacer/>

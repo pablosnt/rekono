@@ -9,9 +9,10 @@ export function useApi(endpoint: string, authentication: boolean = true, refresh
         'Content-Type': 'application/json',
         Accept: 'application/json'
     }
-    // TODO: Separate pagination, it must be provided by the parent item
-    let { page, limit, total, limits, max_limit } = usePagination()
 
+    const default_size = 25
+    const max_size = 1000
+    let total = 0
     let items = []
 
     function url(endpoint: string): string {
@@ -104,24 +105,23 @@ export function useApi(endpoint: string, authentication: boolean = true, refresh
             })
     }
 
-    function list(params = {}, all = false, currentPage = 1): Promise<any> {
-        const currentLimit = all ? max_limit : limit
-        currentPage = all ? currentPage : page
-        if (currentPage === 1 && all) {
+    function list(params = {}, all = false, page = 1): Promise<any> {
+        const size = all ? max_size : default_size
+        if (page === 1 && all) {
             items = []
         }
-        return request(endpoint, { method: 'GET', headers: headers(authentication), params: Object.assign({}, params, { page: currentPage, limit: currentLimit }) })
+        return request(endpoint, { method: 'GET', headers: headers(authentication), params: Object.assign({}, params, { page: page, size: size }) })
             .then((response) => {
                 total = response.count
                 if (all) {
                     items = items.concat(response.results)
-                    if ((currentPage * currentLimit) < total) {
-                        return list(params, all, currentPage + 1)
+                    if ((page * size) < total) {
+                        return list(params, all, page + 1)
                     }
                 } else {
                     items = response.results
                 }
-                return Promise.resolve(items)
+                return Promise.resolve({ items: items, total: total })
             })
     }
 
@@ -170,5 +170,5 @@ export function useApi(endpoint: string, authentication: boolean = true, refresh
             })
     }
 
-    return { get, list, create, update, remove }
+    return { get, list, create, update, remove, default_size }
 }
