@@ -43,6 +43,7 @@ export function useEnums() {
             color: 'red',
         }
     }
+    const wordlists = ['Subdomain', 'Endpoint']
     
-    return { stages, intensities }
+    return { stages, intensities, wordlists }
 }

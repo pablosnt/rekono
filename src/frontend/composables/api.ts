@@ -10,7 +10,7 @@ export function useApi(endpoint: string, authentication: boolean = true, refresh
         Accept: 'application/json'
     }
 
-    const default_size = 25
+    const default_size = 24
     const max_size = 1000
     let total = 0
     let items = []
@@ -110,7 +110,7 @@ export function useApi(endpoint: string, authentication: boolean = true, refresh
         if (page === 1 && all) {
             items = []
         }
-        return request(endpoint, { method: 'GET', headers: headers(authentication), params: Object.assign({}, params, { page: page, size: size }) })
+        return request(endpoint, { method: 'GET', headers: headers(authentication), params: Object.assign({}, params, { page: page, limit: size }) })
             .then((response) => {
                 total = response.count
                 if (all) {

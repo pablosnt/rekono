@@ -90,6 +90,7 @@
             type: 'combobox',
             label: 'Stage',
             icon: 'mdi-stairs',
+            cols: 2,
             collection: Object.entries(enums.stages).map(([k, v]) => { v.name = k; return v }),
             fieldValue: 'id',
             fieldTitle: 'name',
@@ -122,6 +123,17 @@
             trueValue: true,
             falseValue: null,
             value: null
+        },
+        {
+            type: 'combobox',
+            label: 'Sort',
+            icon: 'mdi-sort',
+            cols: 2,
+            collection: ['id', 'name', 'likes_count'],
+            fieldValue: 'id',
+            fieldTitle: 'name',
+            key: 'ordering',
+            value: 'id'
         }
     ])
 </script>

@@ -33,7 +33,7 @@
                                 variant="outlined"
                                 v-model="f.value"
                                 :label="f.label"
-                                :items="f.collection"
+                                :items="f.key !== 'ordering' ? f.collection : getSortItems(f.collection)"
                                 :item-title="f.fieldTitle"
                                 :color="f.value && f.value.color ? f.value.color : null"
                                 :prepend-inner-icon="f.icon"
@@ -56,6 +56,15 @@
                                 :true-value="f.trueValue"
                                 :false-value="f.falseValue"
                                 @update:modelValue="addParameter(f.key, f.value)"
+                            />
+                            <!-- TODO: Remove -->
+                            <v-range-slider v-if="f.type === 'range'"
+                                v-model="f.value"
+                                :min="f.min"
+                                :max="f.max"
+                                :step="f.step"
+                                thumb-label="always"
+                                @update:modelValue="addParameter(`${f.key}__gte`, f.value[0]); addParameter(`${f.key}__lte`, f.value[1])"
                             />
                         </v-col>
                     </template>
@@ -119,4 +128,14 @@
             })
     }
     loadData(true)
+    function getSortItems(collection: Array<string>) {
+        return collection.map((item) => {
+            let name = item === 'id' ? 'ID': `${item.charAt(0).toUpperCase()}${item.slice(1)}`
+            name = name.includes('_') ? name.split('_')[0] : name
+            return [
+                { id: item, name: name },
+                { id: `-${item}`, name: `${name} desc` }
+            ]
+        }).flat(1)
+    }
 </script>

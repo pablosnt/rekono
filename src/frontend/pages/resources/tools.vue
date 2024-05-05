@@ -142,6 +142,16 @@
             trueValue: true,
             falseValue: null,
             value: null
+        },
+        {
+            type: 'combobox',
+            label: 'Sort',
+            icon: 'mdi-sort',
+            collection: ['id', 'name', 'command'],
+            fieldValue: 'id',
+            fieldTitle: 'name',
+            key: 'ordering',
+            value: 'id'
         }
     ])
 </script>
