@@ -2,23 +2,28 @@ export function useEnums() {
     const stages = {
         OSINT: {
             id: 1,
-            color: 'green'
+            color: 'green',
+            icon: 'mdi-search-web'
         },
         Enumeration: {
             id: 2,
-            color: 'purple'
+            color: 'purple',
+            icon: 'mdi-server-network'
         },
         Vulnerabilities: {
             id: 3,
-            color: 'orange'
+            color: 'orange',
+            icon: 'mdi-bug'
         },
         Services: {
             id: 4,
-            color: 'blue'
+            color: 'blue',
+            icon: 'mdi-layers-triple'
         },
         Exploitation: {
             id: 5,
-            color: 'red'
+            color: 'red',
+            icon: 'mdi-bomb'
         },
     }
     const intensities = {

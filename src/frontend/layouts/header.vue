@@ -30,6 +30,7 @@
                                 <v-icon color="red" icon="mdi-account"/>
                             </template>
                         </v-list-item>
+                        <!-- todo: Update link to the new GitHub pages -->
                         <v-list-item href="https://github.com/pablosnt/rekono/wiki"
                             target="_blank"
                             title="Documentation"

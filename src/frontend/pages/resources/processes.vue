@@ -9,54 +9,14 @@
                 <v-container fluid>
                     <v-row dense>
                         <v-col v-for="process in processes" :key="process.id" cols="4">
-                            <v-card :title="process.name"
-                                elevation="4"
-                                class="mx-auto"
-                                density="compact"
-                                hover
-                            >
-                                <v-card-text>
-                                    <p>{{ process.description }}</p>
-                                    <div v-if="process.tags.length > 0" class="d-flex flex-row justify-center ga-2">
-                                        <v-divider class="mt-4 mb-4"/>
-                                        <v-chip v-for="tag in process.tags" size="small">
-                                            {{ tag }}
-                                        </v-chip>
-                                    </div>
-                                </v-card-text>
-
-                                <template v-slot:append>
-                                    <v-chip v-if="process.steps" color="red">
-                                        <v-icon icon="mdi-rocket" start/>
-                                        {{ process.steps.length }} Steps
-                                    </v-chip>
-                                    <span class="me-3"/>
-                                    <v-chip v-if="process.owner" color="primary" :variant="process.owner.id === user.id ? 'flat' : 'tonal'">
-                                        <v-icon icon="mdi-at" start/>
-                                        {{ process.owner.username }}
-                                    </v-chip>
-                                    <v-chip v-if="!process.owner">Default</v-chip>
+                            <v-dialog width="auto">
+                                <template v-slot:activator="{ props: activatorProps }">
+                                    <ShowProcess :api="api" :process="process" :details="false" v-bind="activatorProps"/>
                                 </template>
-
-                                <!-- TODO: Open dialog on click to show the step's details -->
-                                <v-card-actions>
-                                    <!-- TODO: trigger actions -->
-                                    <v-btn hover icon size="large">
-                                        <v-icon icon="mdi-play" color="green"/>
-                                        <v-tooltip activator="parent" text="Run"/>
-                                    </v-btn>
-                                    <v-spacer/>
-                                    <v-btn icon
-                                        color="medium-emphasis"
-                                        hover
-                                    >
-                                        <v-badge floating :content="process.likes < 1000 ? process.likes : Math.floor(process.likes/1000).toString() + 'k'">
-                                            <v-icon :icon="process.liked ? 'mdi-heart' : 'mdi-heart-outline'" color="red"/>
-                                        </v-badge>
-                                        <v-tooltip activator="parent" :text="process.liked ? 'Dislike' : 'Like'"/>
-                                    </v-btn>
-                                </v-card-actions>
-                            </v-card>
+                                <template v-slot:default="{ isActive }">
+                                    <ShowProcess :api="api" :process="process" :details="true"/>
+                                </template>
+                            </v-dialog>
                         </v-col>
                     </v-row>
                 </v-container>

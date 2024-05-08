@@ -14,13 +14,12 @@
                                 density="compact"
                                 hover
                             >
-                                <!-- TODO: Open dialog on click to show the step's details -->
                                 <!-- TODO: trigger actions -->
                                 <template v-slot:append>
                                     <span class="me-3"/>
                                     <v-chip v-if="wordlist.size" color="red">
                                         <v-icon icon="mdi-counter" start/>
-                                        {{ wordlist.size }} Words
+                                        {{ wordlist.size < 1000 ? wordlist.size : Math.floor(wordlist.size/1000).toString() + 'k' }}  Words
                                     </v-chip>
                                     <span class="me-3"/>
                                     <v-chip>
@@ -29,13 +28,14 @@
                                         {{ wordlist.type }}
                                     </v-chip>
                                     <span class="me-3"/>
-                                    <v-chip v-if="wordlist.owner" color="primary" :variant="wordlist.owner.id === user.id ? 'flat' : 'tonal'">
+                                    <v-chip v-if="wordlist.owner" color="primary" :variant="wordlist.owner.id === user.user ? 'flat' : 'tonal'">
                                         <v-icon icon="mdi-at" start/>
                                         {{ wordlist.owner.username }}
                                     </v-chip>
                                     <v-chip v-if="!wordlist.owner">Default</v-chip>
                                     <span class="me-3"/>
-                                    <v-btn icon
+                                    <v-btn v-if="user.role !== 'Reader'"
+                                        icon
                                         color="medium-emphasis"
                                         variant="text"
                                         hover

@@ -57,7 +57,7 @@
                                 :false-value="f.falseValue"
                                 @update:modelValue="addParameter(f.key, f.value)"
                             />
-                            <!-- TODO: Remove -->
+                            <!-- todo: Remove -->
                             <v-range-slider v-if="f.type === 'range'"
                                 v-model="f.value"
                                 :min="f.min"
@@ -104,12 +104,15 @@
     const loadingData = ref(false)
     const expandFilters = ref(false)
     function collapseFilters() {
-        parameters.value = props.ordering ? { ordering: props.ordering } : {}
-        loadData(true)
-        Object.entries(props.filtering).map(([k, v]) => { v.value = null })
+        if (Object.keys(parameters.value).length !== 1 || parameters.value.ordering !== props.ordering) {
+            parameters.value = props.ordering ? { ordering: props.ordering } : {}
+            loadData(true)
+            Object.entries(props.filtering).map(([k, v]) => { v.value = null })
+        }
     }
     function addParameter(key: string, value: string) {
         if (value !== null && value !== undefined) { parameters.value[key] = value }
+        else if (key === 'ordering' && props.ordering) { parameters.value.ordering = props.ordering }
         else { delete parameters.value[key] }
         loadData()
     }

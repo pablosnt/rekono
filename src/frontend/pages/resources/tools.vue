@@ -61,16 +61,17 @@
                             
                                 <v-card-actions>
                                     <!-- TODO: trigger actions -->
-                                    <v-btn hover icon size="large">
+                                    <v-btn v-if="user.role !== 'Reader'" hover icon size="large">
                                         <v-icon icon="mdi-play" color="green"/>
                                         <v-tooltip activator="parent" text="Run"/>
                                     </v-btn>
-                                    <v-btn hover icon size="large">
+                                    <v-btn v-if="user.role !== 'Reader'" hover icon size="large">
                                         <v-icon icon="mdi-robot" color="blue-grey"/>
                                         <v-tooltip activator="parent" text="Add to process"/>
                                     </v-btn>
                                     <v-spacer/>
-                                    <v-btn icon
+                                    <v-btn v-if="user.role !== 'Reader'"
+                                        icon
                                         color="medium-emphasis"
                                         hover
                                     >
@@ -100,6 +101,7 @@
     defineEmits(['loadData'])
     const tools = ref([])
     const show = ref(null)
+    const user = userStore()
     const enums = ref(useEnums())
     const api = ref(useApi('/api/tools/', true, true, false, 'Tool'))
     const filtering = ref([
