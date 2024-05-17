@@ -5,13 +5,13 @@
         <v-card-text v-if="app" class="text-center">Type your OTP from your authentication app</v-card-text>
         <v-card-text v-if="!app" class="text-center">Type the OTP sent to your email</v-card-text>
         
-        <v-form @submit.prevent="loading = true; login(mfa)">
+        <v-form v-model="valid" @submit.prevent="login()">
             <v-otp-input v-if="app"
                 v-model="mfa"
                 variant="solo"
                 autofocus
                 validate-on="blur"
-                :rules="[o => !!o || 'OTP is required']"
+                :rules="[o => !!o || 'OTP is required', o => validate.mfa.test(o) || 'Invalid OTP']"
             />
             
             <v-text-field v-if="!app"
@@ -27,7 +27,7 @@
 
             <v-card-actions class="justify-center">
                 <v-btn v-if="!loading"
-                    class="mb-8"
+                    autofocus
                     color="red"
                     size="large"
                     variant="tonal"
@@ -48,23 +48,28 @@
 
 <script setup lang="ts">
     definePageMeta({layout: false})
+    const validate = ref(useValidation())
     const app = ref(true)
     const mfa = ref(null)
     const loading = ref(false)
+    const valid = ref(true)
     const router = useRouter()
     const tokens = useTokens()
     const token = ref(tokens.get().mfa)
-    const api = useApi('/api/security/mfa/', false, false)
-    const emailApi = ref(useApi('/api/security/mfa/email/', false, false))
-    function login(value: string) {
-        api.create({ token: token.value, mfa: value })
-            .then((response) => {
-                const isLogin = tokens.save(response)
-                loading.value = false
-                if (isLogin) {
-                    router.push({ name: 'index' })
-                }
-            })
-            .catch(() => { loading.value = false })
+    const api = useApi('/api/security/mfa/', false)
+    const emailApi = ref(useApi('/api/security/mfa/email/', false))
+    function login() {
+        if (valid.value) {
+            loading.value = true
+            api.create({ token: token.value, mfa: mfa.value })
+                .then((response) => {
+                    const isLogin = tokens.save(response)
+                    loading.value = false
+                    if (isLogin) {
+                        router.push({ name: 'index' })
+                    }
+                })
+                .catch(() => { loading.value = false })
+        }
     }
 </script>

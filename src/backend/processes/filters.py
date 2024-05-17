@@ -17,7 +17,7 @@ class ProcessFilter(LikeFilter):
     stage = ChoiceFilter(
         field_name="steps__configuration__stage", choices=Stage.choices
     )
-    tag = CharFilter(field_name="tags__name", lookup_expr="in")
+    tag = CharFilter(field_name="tags__name")
 
     class Meta:
         model = Process

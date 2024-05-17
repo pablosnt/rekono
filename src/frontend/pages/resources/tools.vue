@@ -1,12 +1,16 @@
 <template>
     <MenuResources>
-        <Dataset :api="api"
+        <Dataset ref="dataset"
+            :api="api"
             :filtering="filtering"
             ordering="id"
             @load-data="(data) => tools = data"
         >
             <template v-slot:data>
-                <v-container fluid>
+                <v-container v-if="tools !== null" fluid>
+                    <v-row v-if="tools.length === 0" justify="center" dense>
+                        <v-empty-state icon="mdi-rocket" title="There are no tools"/>
+                    </v-row>
                     <v-row dense>
                         <v-col v-for="tool in tools" :key="tool.id" cols="4">
                             <v-card :title="tool.name"
@@ -16,7 +20,6 @@
                                 elevation="4"
                                 class="mx-auto"
                                 density="compact"
-                                hover
                             >
                                 <v-card-text>
                                     <template v-for="configuration in tool.configurations">
@@ -65,21 +68,12 @@
                                         <v-icon icon="mdi-play" color="green"/>
                                         <v-tooltip activator="parent" text="Run"/>
                                     </v-btn>
-                                    <v-btn v-if="user.role !== 'Reader'" hover icon size="large">
-                                        <v-icon icon="mdi-robot" color="blue-grey"/>
-                                        <v-tooltip activator="parent" text="Add to process"/>
-                                    </v-btn>
                                     <v-spacer/>
-                                    <v-btn v-if="user.role !== 'Reader'"
-                                        icon
-                                        color="medium-emphasis"
-                                        hover
-                                    >
-                                        <v-badge floating :content="tool.likes < 1000 ? tool.likes : Math.floor(tool.likes/1000).toString() + 'k'">
-                                            <v-icon :icon="tool.liked ? 'mdi-heart' : 'mdi-heart-outline'" color="red"/>
-                                        </v-badge>
-                                        <v-tooltip activator="parent" :text="tool.liked ? 'Dislike' : 'Like'"/>
-                                    </v-btn>
+                                    <ButtonLike v-if="user.role !== 'Reader'"
+                                        :api="api"
+                                        :item="tool"
+                                        @reload="(value) => dataset.loadData(value)"
+                                    />
                                     <v-btn icon="mdi-open-in-new"
                                         color="medium-emphasis"
                                         target="_blank"
@@ -99,14 +93,15 @@
 <script setup lang="ts">
     definePageMeta({layout: false})
     defineEmits(['loadData'])
-    const tools = ref([])
+    const tools = ref(null)
     const show = ref(null)
+    const dataset = ref(null)
     const user = userStore()
     const enums = ref(useEnums())
-    const api = ref(useApi('/api/tools/', true, true, false, 'Tool'))
+    const api = ref(useApi('/api/tools/', true, 'Tool'))
     const filtering = ref([
         {
-            type: 'combobox',
+            type: 'autocomplete',
             label: 'Stage',
             icon: 'mdi-stairs',
             collection: Object.entries(enums.value.stages).map(([k, v]) => { v.name = k; return v }),
@@ -116,7 +111,7 @@
             value: null
         },
         {
-            type: 'combobox',
+            type: 'autocomplete',
             label: 'Intensity',
             icon: 'mdi-volume-high',
             collection: Object.entries(enums.value.intensities).map(([k, v]) => { v.name = k; return v }),
@@ -146,7 +141,7 @@
             value: null
         },
         {
-            type: 'combobox',
+            type: 'autocomplete',
             label: 'Sort',
             icon: 'mdi-sort',
             collection: ['id', 'name', 'command'],

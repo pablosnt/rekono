@@ -1,4 +1,5 @@
-from django_filters.filters import CharFilter, ChoiceFilter
+from django.db.models import QuerySet
+from django_filters.filters import CharFilter, ChoiceFilter, NumberFilter
 from django_filters.rest_framework import FilterSet
 from framework.filters import LikeFilter
 from tools.enums import Intensity, Stage
@@ -24,8 +25,9 @@ class ToolFilter(LikeFilter):
 
 
 class ConfigurationFilter(FilterSet):
-    input = CharFilter(field_name="tool__arguments__inputs__type__name")
     output = CharFilter(field_name="outputs__type__name")
+    process = NumberFilter(field_name="steps__process__id")
+    no_process = NumberFilter(field_name="steps__process__id", exclude=True)
 
     class Meta:
         model = Configuration

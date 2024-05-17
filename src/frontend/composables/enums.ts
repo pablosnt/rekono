@@ -10,11 +10,12 @@ export function useEnums() {
             color: 'purple',
             icon: 'mdi-server-network'
         },
-        Vulnerabilities: {
-            id: 3,
-            color: 'orange',
-            icon: 'mdi-bug'
-        },
+        // There are no configurations in this stage yet
+        // Vulnerabilities: {
+        //     id: 3,
+        //     color: 'orange',
+        //     icon: 'mdi-bug'
+        // },
         Services: {
             id: 4,
             color: 'blue',

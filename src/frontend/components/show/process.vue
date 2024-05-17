@@ -1,7 +1,6 @@
 <template>
     <v-card :title="process.name"
         elevation="4"
-        class="mx-auto"
         density="compact"
         hover
     >
@@ -16,48 +15,29 @@
                 {{ process.owner.username }}
             </v-chip>
             <v-chip v-if="!process.owner">Default</v-chip>
+            <v-btn v-if="details" icon="mdi-close"
+                variant="text"
+                @click="$emit('closeDialog')"
+            />
         </template>
 
         <v-card-text class="overflow-auto">
-            <p>{{ process.description }}</p>
-            <div v-if="details && process.tags.length > 0">
-                <v-divider class="mt-4 mb-4"/>
-                <div class="d-flex flex-row justify-center">
+            <div v-if="!details">
+                <p>{{ process.description }}</p>
+                <div v-if="process.tags.length > 0">
+                    <v-divider class="mt-4 mb-4"/>
                     <v-chip-group selected-class="v-chip">
                         <v-chip v-for="tag in process.tags" size="small">
                             {{ tag }}
                         </v-chip>
                     </v-chip-group>
-                    </div>
+                </div>
             </div>
-            <div v-if="details && process.steps.length > 0">
-                <v-stepper v-model="stage" editable alt-labels hide-actions flat>
-                    <v-stepper-header>
-                        <template v-for="s in stages" :key="s">
-                            <v-divider v-if="s !== stages[0]"/>
-                            <v-stepper-item :title="s" :color="enums.stages[s].color" :edit-icon="enums.stages[s].icon"/>
-                        </template>
-                    </v-stepper-header>
-                    <v-stepper-window>
-                        <template v-for="step in process.steps" :key="step.id">
-                            <v-banner v-if="step.configuration.stage === stages[stage]"
-                                :avatar="step.configuration.tool.icon"
-                                :text="step.configuration.tool.name + '  -  ' + step.configuration.name"
-                                :stacked="false"
-                            >
-                                <template v-slot:actions>
-                                    <v-btn icon="mdi-trash-can-outline" color="red" hover/>
-                                    <v-btn icon="mdi-open-in-new"
-                                        color="medium-emphasis"
-                                        target="_blank"
-                                        :href="step.configuration.tool.reference ? step.configuration.tool.reference : null"
-                                        hover
-                                    />
-                                </template>
-                            </v-banner>
-                        </template>
-                    </v-stepper-window>
-                </v-stepper>
+            <div v-if="details">
+                <FormSteps :process="process"
+                    :tools="tools"
+                    @reload="() => $emit('reload', false)"
+                />
             </div>
         </v-card-text>
 
@@ -67,20 +47,8 @@
                 <v-icon icon="mdi-play" color="green"/>
                 <v-tooltip activator="parent" text="Run"/>
             </v-btn>
-            <v-btn v-if="(process.owner !== null && process.owner.id === user.user) || user.role === 'Admin'" hover icon size="large">
-                <v-icon icon="mdi-rocket" color="blue-grey"/>
-                <v-tooltip activator="parent" text="Add new step"/>
-            </v-btn>
             <v-spacer/>
-            <v-btn icon
-                color="medium-emphasis"
-                hover
-            >
-                <v-badge floating :content="process.likes < 1000 ? process.likes : Math.floor(process.likes/1000).toString() + 'k'">
-                    <v-icon :icon="process.liked ? 'mdi-heart' : 'mdi-heart-outline'" color="red"/>
-                </v-badge>
-                <v-tooltip activator="parent" :text="process.liked ? 'Dislike' : 'Like'"/>
-            </v-btn>
+            <ButtonLike :api="api" :item="process" @reload="(value) => $emit('reload', value)"/>
             <v-speed-dial v-if="(process.owner !== null && process.owner.id === user.user) || user.role === 'Admin'" transition="scale-transition" location="bottom end" @click.native.stop>
                 <template v-slot:activator="{ props: activatorProps }">
                     <v-btn v-bind="activatorProps"
@@ -88,23 +56,46 @@
                         color="grey"
                         icon="mdi-cog"
                     />
-                    <v-tooltip activator="parent" text="Settings"/>
                 </template>
-                <v-btn key="1" icon="mdi-pencil" color="black"/>
-                <v-btn key="2" icon="mdi-trash-can-outline" color="red"/>
+                <v-dialog width="auto">
+                    <template v-slot:activator="{ props: activatorProps }">
+                        <v-btn key="1" icon="mdi-pencil" color="black" v-bind="activatorProps"/>
+                    </template>
+                    <template v-slot:default="{ isActive }">
+                        <DialogProcess :api="api"
+                            :edit="process"
+                            :tools="tools"
+                            @completed="$emit('reload', false)"
+                            @close-dialog="isActive.value = false"
+                        />
+                    </template>
+                </v-dialog>
+                <v-dialog width="500" class="overflow-auto">
+                    <template v-slot:activator="{ props: activatorProps }">
+                        <v-btn key="2" icon="mdi-trash-can-outline" color="red" v-bind="activatorProps"/>
+                    </template>
+                    <template v-slot:default="{ isActive }">
+                        <DialogDelete
+                            :api="api"
+                            :id="process.id"
+                            :text="`Process '${process.name}' will be removed`"
+                            @completed="$emit('reload', false)"
+                            @close-dialog="isActive.value = false"
+                        />
+                    </template>
+                </v-dialog>
             </v-speed-dial>
         </v-card-actions>
     </v-card>
 </template>
 
 <script setup lang="ts">
-    const props = defineProps({
+    defineProps({
         api: Object,
         process: Object,
+        tools: Array,
         details: Boolean
     })
+    defineEmits(['reload'])
     const user = userStore()
-    const stage = ref(null)
-    const enums = ref(useEnums())
-    const stages = Object.keys(enums.value.stages).filter((stage) => props.process.steps.filter((step) => step.configuration.stage === stage).length > 0)
 </script>

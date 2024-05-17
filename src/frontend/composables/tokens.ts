@@ -6,30 +6,32 @@ export function useTokens() {
 
     function get(): object {
         return {
-            access: sessionStorage.getItem(accessToken),
-            refresh: sessionStorage.getItem(refreshToken),
+            access: localStorage.getItem(accessToken),
+            refresh: localStorage.getItem(refreshToken),
             mfa: sessionStorage.getItem(mfaToken)
         }
     }
 
     function save(data: object): boolean {
-        if (data.access) {
-            remove()
-            sessionStorage.setItem(accessToken, data.access)
-            sessionStorage.setItem(refreshToken, data.refresh)
-            user.login(data.access)
-            return true
-        } else if (data.mfa) {
-            remove()
-            sessionStorage.setItem(mfaToken, data.mfa)
-            return false
+        if (data) {
+            if (data.access) {
+                remove()
+                localStorage.setItem(accessToken, data.access)
+                localStorage.setItem(refreshToken, data.refresh)
+                user.login(data.access)
+                return true
+            } else if (data.mfa) {
+                remove()
+                sessionStorage.setItem(mfaToken, data.mfa)
+                return false
+            }
         }
         throw new Error('User not authenticated')
     }
 
     function remove() {
-        sessionStorage.removeItem(accessToken)
-        sessionStorage.removeItem(refreshToken)
+        localStorage.removeItem(accessToken)
+        localStorage.removeItem(refreshToken)
         sessionStorage.removeItem(mfaToken)
     }
 

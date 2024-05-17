@@ -1,4 +1,4 @@
-export function useApi(endpoint: string, authentication: boolean = true, refreshData: boolean = true, refreshAll: boolean = false, entity?: string, extraHeaders?: object) {
+export function useApi(endpoint: string, authentication: boolean = true, entity?: string) {
     const config = useRuntimeConfig()
     const router = useRouter()
     const refreshing = refreshStore()
@@ -6,17 +6,16 @@ export function useApi(endpoint: string, authentication: boolean = true, refresh
     const tokens = useTokens()
     
     const defaultHeaders = {
-        'Content-Type': 'application/json',
         Accept: 'application/json'
     }
 
     const default_size = 24
     const max_size = 1000
     let total = 0
-    let items = []
 
-    function url(endpoint: string): string {
-        const currentEndpoint = config.backendRootPath ? config.backendRootPath + endpoint : endpoint
+    function url(endpoint: string, extraPath?: string): string {
+        let currentEndpoint = config.backendRootPath ? config.backendRootPath + endpoint : endpoint
+        if (extraPath) { currentEndpoint = `${currentEndpoint}/${extraPath}` }
         if (config.backendUrl) {
             var url = new URL(config.backendUrl)
             url.pathname = currentEndpoint
@@ -25,36 +24,43 @@ export function useApi(endpoint: string, authentication: boolean = true, refresh
         return currentEndpoint
     }
 
-    function headers(authentication: boolean): object {
+    function headers(authentication: boolean, extraHeaders?: object): object {
         let currentHeaders = defaultHeaders
         const token = tokens.get().access
-        if (authentication && token) {
+        if (authentication) {
+            if (!token) { router.push({ name: 'login' })}
             currentHeaders.Authorization = `Bearer ${token}`
         }
         return Object.assign({}, currentHeaders, extraHeaders)
     }
 
-    function request(endpoint: string, options = {}): Promise<any> {
-        return $fetch(url(endpoint), options)
+    function forwardToLogin(): Promise<any> {
+        tokens.remove()
+        if (refreshing.refreshing) { refreshing.change() }
+        return router.push({ name: 'login' })
+    }
+
+    function request(endpoint: string, options = {}, extraPath?: string, extraHeaders?: object): Promise<any> {
+        return $fetch(url(endpoint, extraPath), options)
             .catch((error) => {
                 let message = 'Unexpected error'
                 switch (error.statusCode) {
                     case 400:
-                        const value = Object.values(error.data)[0][0]
+                        const firstValue = Object.values(error.data)[0]
+                        const value = Array.isArray(firstValue) ? firstValue[0] : firstValue
                         const field = Object.keys(error.data)[0]
                         const body = `${value.charAt(0).toUpperCase()}${value.slice(1)}`
                         message = field !== 'non_field_errors' ? `${field}: ${body}` : body
                         break
                     case 401:
-                        if (endpoint === '/api/security/refresh/') {
-                            message = null
+                        if (endpoint.includes('/api/security/refresh/')) {
+                            return forwardToLogin()
                         } else if (authentication) {
                             return refresh()
                                 .then(() => {
-                                    options.headers = headers(authentication)
-                                    return request(endpoint, options)
+                                    options.headers = headers(authentication, extraHeaders)
+                                    return request(endpoint, options, extraPath)
                                 })
-                                .catch(() => { return router.push({ name: 'login' }) })
                         } else {
                             message = 'Invalid credentials'
                         }
@@ -76,21 +82,24 @@ export function useApi(endpoint: string, authentication: boolean = true, refresh
             })
     }
 
+    // TODO: problem during refreshing
     function refresh(): Promise<any> {
         if (!refreshing.refreshing) {
             refreshing.change()
-            return request('/api/security/refresh/', { method: 'POST', headers: headers(true), body: { refresh: tokens.get().refresh }})
+            const refresh = tokens.get().refresh
+            if (!refresh) { return forwardToLogin() }
+            return request('/api/security/refresh/', { method: 'POST', headers: headers(true), body: { refresh: refresh }})
                 .then((response) => {
                     tokens.remove()
-                    tokens.save(response)
+                    try {
+                        tokens.save(response)
+                    } catch (error) {
+                        forwardToLogin()
+                    }
                     refreshing.change()
                     return Promise.resolve()
                 })
-                .catch((error) => {
-                    tokens.remove()
-                    refreshing.change()
-                    return Promise.reject()
-                })
+                .catch(() => { forwardToLogin() })
         }
         else {
             while (refreshing.refreshing) {}
@@ -98,19 +107,16 @@ export function useApi(endpoint: string, authentication: boolean = true, refresh
         }
     }
 
-    function get(id?: number): Promise<any> {
-        return request(id ? `${endpoint}${id}/` : endpoint, { method: 'GET', headers: headers(authentication) })
+    function get(id?: number, extraPath?: string, extraHeaders?: object): Promise<any> {
+        return request(id ? `${endpoint}${id}/` : endpoint, { method: 'GET', headers: headers(authentication, extraHeaders) }, extraPath)
             .then((response) => {
                 return Promise.resolve(response)
             })
     }
 
-    function list(params = {}, all = false, page = 1): Promise<any> {
+    function list(params = {}, all = false, page = 1, items = [], extraPath?: string, extraHeaders?: object): Promise<any> {
         const size = all ? max_size : default_size
-        if (page === 1 && all) {
-            items = []
-        }
-        return request(endpoint, { method: 'GET', headers: headers(authentication), params: Object.assign({}, params, { page: page, limit: size }) })
+        return request(endpoint, { method: 'GET', headers: headers(authentication, extraHeaders), params: Object.assign({}, params, { page: page, limit: size }) }, extraPath)
             .then((response) => {
                 total = response.count
                 if (all) {
@@ -125,14 +131,11 @@ export function useApi(endpoint: string, authentication: boolean = true, refresh
             })
     }
 
-    function create(body: object) {
-        return request(endpoint, { method: 'POST', headers: headers(authentication), body: body })
+    function create(body: object, id?: number, extraPath?: string, extraHeaders?: object) {
+        return request(id ? `${endpoint}${id}/` : endpoint, { method: 'POST', headers: headers(authentication, extraHeaders), body: body }, extraPath)
             .then((response) => {
                 if (response) {
-                    if (items && refreshData) {
-                        return list(refreshAll)
-                    }
-                    if (entity) {
+                    if (entity && !extraPath) {
                         alert(`New ${entity.toLowerCase()} has been successfully created`, 'success')
                     }
                 }
@@ -140,14 +143,11 @@ export function useApi(endpoint: string, authentication: boolean = true, refresh
             })
     }
 
-    function update(body: object, id?: number) {
-        return request(id ? `${endpoint}${id}/` : endpoint, { method: 'PUT', headers: headers(authentication), body: body })
+    function update(body: object, id?: number, extraPath?: string, extraHeaders?: object) {
+        return request(id ? `${endpoint}${id}/` : endpoint, { method: 'PUT', headers: headers(authentication, extraHeaders), body: body }, extraPath)
             .then((response) => {
                 if (response) {
-                    if (refreshData && items) {
-                        return list(refreshAll)
-                    }
-                    if (entity) {
+                    if (entity && !extraPath) {
                         alert(`${entity} has been successfully updated`, 'success')
                     }
                 }
@@ -155,20 +155,15 @@ export function useApi(endpoint: string, authentication: boolean = true, refresh
             })
     }
 
-    function remove(id?: number) {
-        return request(id ? `${endpoint}${id}/` : endpoint, { method: 'DELETE', headers: headers(authentication) })
-            .then((response) => {
-                if (response) {
-                    if (refreshData && items) {
-                        return list(refreshAll)
-                    }
-                    if (entity) {
-                        alert(`${entity} has been deleted`, 'warning')
-                    }
+    function remove(id?: number, extraPath?: string, extraHeaders?: object) {
+        return request(id ? `${endpoint}${id}/` : endpoint, { method: 'DELETE', headers: headers(authentication, extraHeaders) }, extraPath)
+            .then(() => {
+                if (entity && !extraPath) {
+                    alert(`${entity} has been deleted`, 'warning')
                 }
-                return Promise.resolve(response)
+                return Promise.resolve()
             })
     }
 
-    return { get, list, create, update, remove, default_size }
+    return { get, list, create, update, remove, default_size, entity }
 }

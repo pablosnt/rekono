@@ -1,9 +1,8 @@
 from django.db import models
-from taggit.managers import TaggableManager
-
 from framework.models import BaseLike, BaseModel
 from rekono.settings import AUTH_USER_MODEL
 from security.validators.input_validator import Regex, Validator
+from taggit.managers import TaggableManager
 from tools.models import Configuration
 
 # Create your models here.
@@ -35,7 +34,11 @@ class Process(BaseLike):
 class Step(BaseModel):
     process = models.ForeignKey(Process, related_name="steps", on_delete=models.CASCADE)
     configuration = models.ForeignKey(
-        Configuration, on_delete=models.CASCADE, blank=True, null=True
+        Configuration,
+        related_name="steps",
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
     )
 
     class Meta:

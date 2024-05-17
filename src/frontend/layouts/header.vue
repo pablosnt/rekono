@@ -66,9 +66,10 @@
     const user = userStore()
     const router = useRouter()
     const tokens = useTokens()
-    const api = useApi('/api/security/logout/', true, false)
+    const api = useApi('/api/security/logout/', true)
     function logout() {
-        api.create({ refresh: tokens.get().refresh})
+        const refresh = tokens.get().refresh
+        if (refresh) { api.create({ refresh: refresh }) }
         user.logout()
         tokens.remove()
         router.push({ name: 'login' })

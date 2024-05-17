@@ -1,20 +1,23 @@
 <template>
     <MenuResources>
-        <Dataset :api="api"
+        <Dataset ref="dataset" 
+            :api="api"
             :filtering="filtering"
+            :add="DialogWordlist"
             @load-data="(data) => wordlists = data"
         >
             <template v-slot:data>
-                <v-container fluid>
+                <v-container v-if="wordlists !== null" fluid>
+                    <v-row v-if="wordlists.length === 0" justify="center" dense>
+                        <v-empty-state icon="mdi-file-word-box" title="There are no wordlists"/>
+                    </v-row>
                     <v-row dense>
                         <v-col v-for="wordlist in wordlists" :key="wordlist.id" cols="6">
                             <v-card :title="wordlist.name"
                                 elevation="4"
                                 class="mx-auto"
                                 density="compact"
-                                hover
                             >
-                                <!-- TODO: trigger actions -->
                                 <template v-slot:append>
                                     <span class="me-3"/>
                                     <v-chip v-if="wordlist.size" color="red">
@@ -34,18 +37,51 @@
                                     </v-chip>
                                     <v-chip v-if="!wordlist.owner">Default</v-chip>
                                     <span class="me-3"/>
-                                    <v-btn v-if="user.role !== 'Reader'"
-                                        icon
-                                        color="medium-emphasis"
-                                        variant="text"
-                                        hover
-                                    >
-                                        <v-badge floating :content="wordlist.likes < 1000 ? wordlist.likes : Math.floor(wordlist.likes/1000).toString() + 'k'">
-                                            <v-icon :icon="wordlist.liked ? 'mdi-heart' : 'mdi-heart-outline'" color="red"/>
-                                        </v-badge>
-                                        <v-tooltip activator="parent" :text="wordlist.liked ? 'Dislike' : 'Like'"/>
-                                    </v-btn>
                                 </template>
+
+                                <v-card-actions v-if="user.role !== 'Reader'">
+                                    <v-spacer/>
+                                    <ButtonLike :api="api"
+                                        :item="wordlist"
+                                        @reload="(value) => dataset.loadData(value)"
+                                    />
+                                    <v-speed-dial v-if="(wordlist.owner !== null && wordlist.owner.id === user.user) || user.role === 'Admin'" transition="scale-transition" location="bottom end">
+                                        <template v-slot:activator="{ props: activatorProps }">
+                                            <v-btn v-bind="activatorProps"
+                                                size="large"
+                                                color="grey"
+                                                icon="mdi-cog"
+                                            />
+                                        </template>
+                                        <v-dialog width="auto">
+                                            <template v-slot:activator="{ props: activatorProps }">
+                                                <v-btn key="1" icon="mdi-pencil" color="black" v-bind="activatorProps"/>
+                                            </template>
+                                            <template v-slot:default="{ isActive }">
+                                                <DialogWordlist
+                                                    :api="api"
+                                                    :edit="wordlist"
+                                                    @completed="dataset.loadData(false)"
+                                                    @close-dialog="isActive.value = false"
+                                                />
+                                            </template>
+                                        </v-dialog>
+                                        <v-dialog width="500" class="overflow-auto">
+                                            <template v-slot:activator="{ props: activatorProps }">
+                                                <v-btn key="2" icon="mdi-trash-can-outline" color="red" v-bind="activatorProps"/>
+                                            </template>
+                                            <template v-slot:default="{ isActive }">
+                                                <DialogDelete
+                                                    :api="api"
+                                                    :id="wordlist.id"
+                                                    :text="`Wordlist '${wordlist.name}' will be removed`"
+                                                    @completed="dataset.loadData(false)"
+                                                    @close-dialog="isActive.value = false"
+                                                />
+                                            </template>
+                                        </v-dialog>
+                                    </v-speed-dial>
+                                </v-card-actions>
                             </v-card>
                         </v-col>
                     </v-row>
@@ -57,15 +93,17 @@
 
 
 <script setup lang="ts">
+    const DialogWordlist = resolveComponent('DialogWordlist')
     definePageMeta({layout: false})
     defineEmits(['loadData'])
     const user = userStore()
     const enums = useEnums()
-    const wordlists = ref([])
-    const api = ref(useApi('/api/wordlists/', true, true, false, 'Wordlist'))
+    const dataset = ref(null)
+    const wordlists = ref(null)
+    const api = ref(useApi('/api/wordlists/', true, 'Wordlist'))
     const filtering = ref([
         {
-            type: 'combobox',
+            type: 'autocomplete',
             label: 'Type',
             icon: 'mdi-routes',
             collection: enums.wordlists,
@@ -93,7 +131,7 @@
             value: null
         },
         {
-            type: 'combobox',
+            type: 'autocomplete',
             label: 'Sort',
             icon: 'mdi-sort',
             collection: ['id', 'name', 'type', 'size', 'likes_count'],

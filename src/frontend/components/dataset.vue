@@ -1,6 +1,6 @@
 <template>
     <v-container fluid>
-        <v-row dense>
+        <v-row justify="center" dense>
             <v-text-field
                 v-model="search"
                 :loading="loadingSearch"
@@ -10,6 +10,7 @@
                 hide-details
                 single-line
                 autofocus
+                clearable
                 @update:modelValue="loadData"
             />
             <v-btn v-if="filtering?.length > 0"
@@ -18,16 +19,32 @@
                 size="large"
                 @click="expandFilters = !expandFilters; !expandFilters ? collapseFilters() : null"
             />
-            <!-- TODO: Add button -->
+            <v-dialog v-if="add !== null" :width="addFullscreen ? '100%' : 'auto'" :fullscreen="addFullscreen">
+                <template v-slot:activator="{ props: activatorProps }">
+                    <v-btn icon="mdi-plus-thick"
+                        variant="text"
+                        size="large"
+                        color="green"
+                        v-bind="activatorProps"
+                    />
+                </template>
+                <template v-slot:default="{ isActive }">
+                    <component :is="add"
+                        :api="api"
+                        @completed="loadData(true)"
+                        @close-dialog="isActive.value = false"
+                    />
+                </template>
+            </v-dialog>
         </v-row>
         <v-expand-transition>
             <v-container v-if="expandFilters" fluid class="mb-0">
                 <v-row justify="center" dense>
                     <template v-for="f in filtering">
                         <v-col class="d-flex justify-center align-center" :cols="f.cols ? f.cols : 3">
-                            <v-combobox v-if="f.type === 'combobox'"
+                            <v-autocomplete v-if="f.type === 'autocomplete'"
+                                auto-select-first
                                 clearable
-                                chips
                                 hide-details
                                 density="comfortable"
                                 variant="outlined"
@@ -35,12 +52,14 @@
                                 :label="f.label"
                                 :items="f.key !== 'ordering' ? f.collection : getSortItems(f.collection)"
                                 :item-title="f.fieldTitle"
+                                return-object
                                 :color="f.value && f.value.color ? f.value.color : null"
                                 :prepend-inner-icon="f.icon"
                                 @update:modelValue="addParameter(f.key, f.value && f.fieldValue ? f.value[f.fieldValue] : f.value)"  
                             />
                             <v-text-field v-if="f.type === 'text'"
                                 hide-details
+                                clearable
                                 density="comfortable"
                                 variant="outlined"
                                 v-model="f.value"
@@ -93,7 +112,17 @@
     const props = defineProps({
         api: Object,
         filtering: Array<object>,
-        ordering: String
+        ordering: String,
+        add: {
+            type: Object,
+            required: false,
+            default: null
+        },
+        addFullscreen: {
+            type: Boolean,
+            required: false,
+            default: false
+        }
     })
     const emit = defineEmits(['loadData'])
     const page = ref(1)
@@ -120,6 +149,8 @@
         if (search.value) {
             loadingSearch.value = true
             parameters.value.search = search.value
+        } else if (parameters.value.search) {
+            delete parameters.value.search
         }
         if (loading) { loadingData.value = true }
         props.api.list(parameters.value, false, page.value)
@@ -141,4 +172,5 @@
             ]
         }).flat(1)
     }
+    defineExpose({ loadData })
 </script>

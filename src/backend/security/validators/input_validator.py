@@ -13,7 +13,7 @@ logger = logging.getLogger()
 
 class Regex(Enum):
     IP_RANGE = r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}-\d{1,3}"
-    NAME = r"[\wÀ-ÿ\s\.\-\[\]()@]{0,120}"
+    NAME = r"[\wÀ-ÿ\s\.:\-\[\]()@]{0,120}"
     TEXT = r"[^;<>/]*"
     TARGET = r"[\w\d\.:\-/]{1,100}"
     TARGET_REGEX = r"[\w\d\.,:\-/\.\*\?\+\(\)\\]{1,300}"

@@ -1,14 +1,14 @@
 <template>
     <NuxtLayout name="public-form">
         <v-card-text class="text-center">You will receive via email a link to reset your password</v-card-text>
-        <v-form @submit.prevent="loading = true; resetPassword(otp ? { otp: otp, password: password } : { email: email })">
+        <v-form v-model="valid" @submit.prevent="resetPassword()">
             <v-text-field v-if="!otp"
                 v-model="email"
                 density="compact"
                 label="Email"
                 prepend-inner-icon="mdi-email"
                 variant="outlined"
-                :rules="[e => !!e || 'Email is required', e => /^[\w.-]+@[\w-]+\.[\w.-]+$/.test(e) || 'Invalid Email address']"
+                :rules="[e => !!e || 'Email is required', e => validate.email.test(e) || 'Invalid Email address']"
                 validate-on="blur"
             />
 
@@ -21,7 +21,7 @@
                 prepend-inner-icon="mdi-lock"
                 variant="outlined"
                 @click:append-inner="visible = !visible"
-                :rules="[p => !!p || 'Password is required']"
+                :rules="[p => !!p || 'Password is required', p => validate.password(p) || 'Password must contain one uppercase, lowercase, digit and symbol']"
                 validate-on="blur"
             />
 
@@ -43,7 +43,7 @@
 
             <v-card-actions class="justify-center">
                 <v-btn v-if="!loading"
-                    class="mb-8"
+                    autofocus
                     color="red"
                     size="large"
                     variant="tonal"
@@ -53,37 +53,50 @@
                 />
                 <v-progress-circular v-if="loading" color="error" indeterminate/>
             </v-card-actions>
+            <v-btn v-if="!loading"
+                class="d-flex text-align-right text-medium-emphasis"
+                prepend-icon="mdi-arrow-left-bold"
+                variant="text"
+                size="small"
+                text="Login"
+                to="/login"
+            />
         </v-form>
     </NuxtLayout>
 </template>
 
 <script setup lang="ts">
+    const validate = ref(useValidation())
     const visible = ref(false)
     const visibleConfirmation = ref(false)
     const email = ref(null)
     const password = ref(null)
     const passwordConfirmation = ref(null)
     const loading = ref(false)
+    const valid = ref(true)
     const alert = useAlert()
     const route = useRoute()
     const router = useRouter()
     const otp = ref(route.query.otp ? route.query.otp : null)
-    const api = useApi('/api/users/reset-password/', false, false)
-    function resetPassword(body: object) {
-        let request = null
-        if (body.otp) {
-            request = api.update(body)
-                .then(() => {
-                    loading.value = false
-                    router.push({ name: 'login'
-                })})
-        } else {
-            request = api.create(body)
-                .then(() => {
-                    loading.value = false
-                    alert('Done! You will receive via email a temporal link to change your password', 'success')
-                })
+    const api = useApi('/api/users/reset-password/', false)
+    function resetPassword() {
+        if (valid.value) {
+            loading.value = true
+            let request = null
+            if (otp.value) {
+                request = api.update({ otp: otp.value, password: password.value })
+                    .then(() => {
+                        loading.value = false
+                        router.push({ name: 'login'
+                    })})
+            } else {
+                request = api.create({ email: email.value })
+                    .then(() => {
+                        loading.value = false
+                        alert('Done! You will receive via email a temporal link to change your password', 'success')
+                    })
+            }
+            request.catch(() => { loading.value = false })
         }
-        request.catch(() => { loading.value = false })
     }
 </script>
