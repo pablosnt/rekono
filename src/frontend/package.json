@@ -12,7 +12,10 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
-    "stylelint": "stylelint **/*.{vue,css}"
+    "lint": "npm lint:eslint && npm lint:prettier",
+    "lint:eslint": "eslint .",
+    "lint:prettier": "prettier . --check",
+    "lintfix": "eslint . --fix && prettier --write --list-different ."
   },
   "dependencies": {
     "@mdi/font": "^7.4.47",
@@ -26,8 +29,12 @@
     "vue3-toastify": "^0.2.1"
   },
   "devDependencies": {
-    "@nuxtjs/stylelint-module": "^5.2.0",
-    "stylelint-config-standard": "^36.0.0",
+    "@nuxt/eslint": "^0.3.13",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.1.3",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5",
     "vite-plugin-vuetify": "^2.0.3",
     "vuetify": "^3.6.6"
   }

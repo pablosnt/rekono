@@ -42,6 +42,7 @@ export default defineNuxtConfig({
       })
     },
     '@pinia/nuxt',
-    '@nuxt/image'
+    '@nuxt/image',
+    '@nuxt/eslint'
   ]
 })
