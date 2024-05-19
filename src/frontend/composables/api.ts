@@ -3,11 +3,11 @@ export function useApi(
   authentication: boolean = true,
   entity?: string,
 ) {
-  const config = useRuntimeConfig();
-  const router = useRouter();
+  const user = userStore();
   const refreshing = refreshStore();
-  const alert = useAlert();
   const tokens = useTokens();
+  const config = useRuntimeConfig();
+  const alert = useAlert();
 
   const defaultHeaders = {
     Accept: "application/json",
@@ -37,19 +37,11 @@ export function useApi(
     const token = tokens.get().access;
     if (authentication) {
       if (!token) {
-        router.push({ name: "login" });
+        forwardToLogin();
       }
       currentHeaders.Authorization = `Bearer ${token}`;
     }
     return Object.assign({}, currentHeaders, extraHeaders);
-  }
-
-  function forwardToLogin(): Promise {
-    tokens.remove();
-    if (refreshing.refreshing) {
-      refreshing.change();
-    }
-    return router.push({ name: "login" });
   }
 
   function request(
@@ -71,12 +63,20 @@ export function useApi(
         }
         case 401:
           if (endpoint.includes("/api/security/refresh/")) {
-            return forwardToLogin();
+            return Promise.reject(error);
           } else if (authentication) {
-            return refresh().then(() => {
-              options.headers = headers(authentication, extraHeaders);
-              return request(endpoint, options, extraPath);
-            });
+            if (refreshing.refreshing) {
+              setTimeout(
+                () => (options.headers = headers(authentication, extraHeaders)),
+                1500,
+              );
+              return request(endpoint, options, extraPath, extraHeaders);
+            } else {
+              return refresh().then(() => {
+                options.headers = headers(authentication, extraHeaders);
+                return request(endpoint, options, extraPath, extraHeaders);
+              });
+            }
           } else {
             message = "Invalid credentials";
           }
@@ -98,14 +98,21 @@ export function useApi(
     });
   }
 
-  // TODO: problem during refreshing
-  function refresh(): Promise {
-    if (!refreshing.refreshing) {
+  function forwardToLogin(): Promise {
+    tokens.remove();
+    user.logout();
+    if (refreshing.refreshing) {
       refreshing.change();
-      const refresh = tokens.get().refresh;
-      if (!refresh) {
-        return forwardToLogin();
-      }
+    }
+    return navigateTo("/login");
+  }
+
+  function refresh(): Promise {
+    refreshing.change();
+    const refresh = tokens.get().refresh;
+    if (!refresh) {
+      forwardToLogin();
+    } else {
       return request("/api/security/refresh/", {
         method: "POST",
         headers: headers(true),
@@ -113,23 +120,14 @@ export function useApi(
       })
         .then((response) => {
           tokens.remove();
-          try {
-            tokens.save(response);
-            refreshing.change();
-          } catch (error) {
-            refreshing.change();
-            return forwardToLogin();
-          }
+          tokens.save(response);
+          refreshing.change();
           return Promise.resolve();
         })
         .catch(() => {
           forwardToLogin();
+          return Promise.reject();
         });
-    } else {
-      while (refreshing.refreshing) {
-        // pass
-      }
-      return Promise.resolve();
     }
   }
 
@@ -142,6 +140,7 @@ export function useApi(
       id ? `${endpoint}${id}/` : endpoint,
       { method: "GET", headers: headers(authentication, extraHeaders) },
       extraPath,
+      extraHeaders,
     ).then((response) => {
       return Promise.resolve(response);
     });
@@ -164,6 +163,7 @@ export function useApi(
         params: Object.assign({}, params, { page: page, limit: size }),
       },
       extraPath,
+      extraHeaders,
     ).then((response) => {
       total = response.count;
       if (all) {
@@ -192,6 +192,7 @@ export function useApi(
         body: body,
       },
       extraPath,
+      extraHeaders,
     ).then((response) => {
       if (response) {
         if (entity && !extraPath) {
@@ -219,6 +220,7 @@ export function useApi(
         body: body,
       },
       extraPath,
+      extraHeaders,
     ).then((response) => {
       if (response) {
         if (entity && !extraPath) {
@@ -234,6 +236,7 @@ export function useApi(
       id ? `${endpoint}${id}/` : endpoint,
       { method: "DELETE", headers: headers(authentication, extraHeaders) },
       extraPath,
+      extraHeaders,
     ).then(() => {
       if (entity && !extraPath) {
         alert(`${entity} has been deleted`, "warning");
