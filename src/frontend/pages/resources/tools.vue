@@ -26,7 +26,10 @@
                 density="compact"
               >
                 <v-card-text>
-                  <template v-for="configuration in tool.configurations" :key="configuration.id">
+                  <template
+                    v-for="configuration in tool.configurations"
+                    :key="configuration.id"
+                  >
                     <div class="d-flex flex-row">
                       <v-btn
                         v-if="configuration.default"

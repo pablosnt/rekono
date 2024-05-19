@@ -1,4 +1,4 @@
-certifi==2023.11.17
+certifi==2024.2.2
 cryptography==41.0.7
 defusedxml==0.7.1
 Django==5.0.3

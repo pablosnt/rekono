@@ -132,6 +132,6 @@ defineProps({
   tools: Array,
   details: Boolean,
 });
-defineEmits(["reload"]);
+defineEmits(["reload", "closeDialog"]);
 const user = userStore();
 </script>

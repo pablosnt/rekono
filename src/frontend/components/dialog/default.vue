@@ -36,4 +36,5 @@ defineProps({
     default: "800",
   },
 });
+defineEmits(["closeDialog"]);
 </script>

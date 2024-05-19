@@ -51,7 +51,6 @@
           edit-icon="mdi-reload mdi-18px"
           :color="step === 5 ? 'red' : undefined"
         />
-        <!-- TODO: Nuxt formatter & linter -->
       </v-stepper-header>
 
       <v-stepper-window>
@@ -448,7 +447,7 @@ const props = defineProps({
   api: {
     type: Object,
     required: false,
-    default: useApi("/api/tasks/", true, "Task")
+    default: useApi("/api/tasks/", true, "Task"),
   },
   project: {
     type: Object,

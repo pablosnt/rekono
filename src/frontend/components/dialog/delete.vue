@@ -40,4 +40,5 @@ defineProps({
   id: Number,
   text: String,
 });
+defineEmits(["closeDialog", "completed"]);
 </script>
