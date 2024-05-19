@@ -27,6 +27,6 @@ defineProps({
   api: Object,
   edit: Object,
 });
-const emit = defineEmits(["closeDialog", "completed"]);
+defineEmits(["closeDialog", "completed"]);
 const loading = ref(false);
 </script>

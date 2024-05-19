@@ -37,7 +37,7 @@ export default defineNuxtConfig({
   modules: [
     (_options, nuxt) => {
       nuxt.hooks.hook("vite:extendConfig", (config) => {
-        // @ts-expect-error
+        // @ts-expect-error https://vuetifyjs.com/en/getting-started/installation/#using-nuxt-3
         config.plugins.push(vuetify({ autoImport: true }));
       });
     },

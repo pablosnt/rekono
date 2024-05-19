@@ -49,13 +49,20 @@ jobs:
 
   frontend:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - script: eslint
+          - script: prettier
+    name: ${{ matrix.tool }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
       
-      - name: Install ESLint
+      - name: Install NPM dependencies
         working-directory: src/frontend
         run: npm install .
       
@@ -66,7 +73,7 @@ jobs:
             frontend:
               - 'src/frontend/**'
       
-      - name: StyleLint check
+      - name: Check
         working-directory: src/frontend/
         if: ${{ steps.changes.outputs.frontend == 'true' || github.event_name != 'pull_request' }} 
-        run: npm run stylelint
+        run: npm run ${{ matrix.script }}

@@ -17,7 +17,7 @@ export function useValidation() {
 
   return {
     email: /^[\w.-]+@[\w-]+\.[\w.-]+$/,
-    name: /^[\wÀ-ÿ\s\.:\-\[\]()@]{0,120}$/,
+    name: /^[\wÀ-ÿ\s.:\-[\]()@]{0,120}$/,
     text: /^[^;<>/]*$/,
     mfa: /^[\d]{6}$/,
     password,

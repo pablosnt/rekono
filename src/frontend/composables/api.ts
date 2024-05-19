@@ -44,8 +44,7 @@ export function useApi(
     return Object.assign({}, currentHeaders, extraHeaders);
   }
 
-  function forwardToLogin(): Promise<any> {
-    console.log("FORWARDING");
+  function forwardToLogin(): Promise {
     tokens.remove();
     if (refreshing.refreshing) {
       refreshing.change();
@@ -58,23 +57,23 @@ export function useApi(
     options = {},
     extraPath?: string,
     extraHeaders?: object,
-  ): Promise<any> {
+  ): Promise {
     return $fetch(url(endpoint, extraPath), options).catch((error) => {
       let message = "Unexpected error";
       switch (error.statusCode) {
-        case 400:
+        case 400: {
           const firstValue = Object.values(error.data)[0];
           const value = Array.isArray(firstValue) ? firstValue[0] : firstValue;
           const field = Object.keys(error.data)[0];
           const body = `${value.charAt(0).toUpperCase()}${value.slice(1)}`;
           message = field !== "non_field_errors" ? `${field}: ${body}` : body;
           break;
+        }
         case 401:
           if (endpoint.includes("/api/security/refresh/")) {
             return forwardToLogin();
           } else if (authentication) {
             return refresh().then(() => {
-              console.log("HELLO WORLD");
               options.headers = headers(authentication, extraHeaders);
               return request(endpoint, options, extraPath);
             });
@@ -100,7 +99,7 @@ export function useApi(
   }
 
   // TODO: problem during refreshing
-  function refresh(): Promise<any> {
+  function refresh(): Promise {
     if (!refreshing.refreshing) {
       refreshing.change();
       const refresh = tokens.get().refresh;
@@ -118,7 +117,6 @@ export function useApi(
             tokens.save(response);
             refreshing.change();
           } catch (error) {
-            console.log(error);
             refreshing.change();
             return forwardToLogin();
           }
@@ -128,7 +126,9 @@ export function useApi(
           forwardToLogin();
         });
     } else {
-      while (refreshing.refreshing) {}
+      while (refreshing.refreshing) {
+        // pass
+      }
       return Promise.resolve();
     }
   }
@@ -137,7 +137,7 @@ export function useApi(
     id?: number,
     extraPath?: string,
     extraHeaders?: object,
-  ): Promise<any> {
+  ): Promise {
     return request(
       id ? `${endpoint}${id}/` : endpoint,
       { method: "GET", headers: headers(authentication, extraHeaders) },
@@ -154,7 +154,7 @@ export function useApi(
     items = [],
     extraPath?: string,
     extraHeaders?: object,
-  ): Promise<any> {
+  ): Promise {
     const size = all ? max_size : default_size;
     return request(
       endpoint,

@@ -52,7 +52,7 @@
     <v-expand-transition>
       <v-container v-if="expandFilters" fluid class="mb-0">
         <v-row justify="center" dense>
-          <template v-for="f in filtering">
+          <template v-for="f in filtering" :key="f.key">
             <v-col
               class="d-flex justify-center align-center"
               :cols="f.cols ? f.cols : 3"
@@ -165,7 +165,7 @@ function collapseFilters() {
   ) {
     parameters.value = props.ordering ? { ordering: props.ordering } : {};
     loadData(true);
-    Object.entries(props.filtering).map(([k, v]) => {
+    Object.entries(props.filtering).map(([_, v]) => {
       v.value = null;
     });
   }
@@ -176,7 +176,9 @@ function addParameter(key: string, value: string) {
   } else if (key === "ordering" && props.ordering) {
     parameters.value.ordering = props.ordering;
   } else {
+    /* eslint-disable @typescript-eslint/no-dynamic-delete */
     delete parameters.value[key];
+    /* eslint-enable @typescript-eslint/no-dynamic-delete */
   }
   loadData();
 }

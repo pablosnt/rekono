@@ -1,4 +1,4 @@
-export default defineNuxtRouteMiddleware((to, from) => {
+export default defineNuxtRouteMiddleware((to, _) => {
   const user = userStore();
   const tokens = useTokens();
   const publicRoutes = ["login", "reset-password", "mfa"];

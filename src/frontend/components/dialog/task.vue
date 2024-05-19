@@ -55,7 +55,7 @@ defineProps({
     default: null,
   },
 });
-const emit = defineEmits(["closeDialog", "completed"]);
+defineEmits(["closeDialog", "completed"]);
 const loading = ref(false);
 const api = useApi("/api/tasks/", true, "Task");
 </script>

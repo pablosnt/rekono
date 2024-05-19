@@ -445,7 +445,11 @@
 import { VTimePicker } from "vuetify/labs/VTimePicker";
 import { VNumberInput } from "vuetify/labs/VNumberInput";
 const props = defineProps({
-  api: Object,
+  api: {
+    type: Object,
+    required: false,
+    default: useApi("/api/tasks/", true, "Task")
+  },
   project: {
     type: Object,
     required: false,
@@ -467,7 +471,6 @@ const props = defineProps({
     default: null,
   },
 });
-const api = useApi("/api/tasks/", true, "Task");
 const enums = useEnums();
 const router = useRouter();
 const valid = ref(true);

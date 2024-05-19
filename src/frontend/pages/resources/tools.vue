@@ -26,7 +26,7 @@
                 density="compact"
               >
                 <v-card-text>
-                  <template v-for="configuration in tool.configurations">
+                  <template v-for="configuration in tool.configurations" :key="configuration.id">
                     <div class="d-flex flex-row">
                       <v-btn
                         v-if="configuration.default"
@@ -69,6 +69,7 @@
                   <div class="d-flex flex-row justify-center ga-2">
                     <v-chip
                       v-for="intensity in tool.intensities"
+                      :key="intensity.value"
                       size="small"
                       :color="enums.intensities[intensity.value].color"
                     >

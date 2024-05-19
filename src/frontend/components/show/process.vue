@@ -29,7 +29,7 @@
         <div v-if="process.tags.length > 0">
           <v-divider class="mt-4 mb-4" />
           <v-chip-group selected-class="v-chip">
-            <v-chip v-for="tag in process.tags" size="small">
+            <v-chip v-for="tag in process.tags" :key="tag" size="small">
               {{ tag }}
             </v-chip>
           </v-chip-group>
@@ -72,7 +72,7 @@
         "
         transition="scale-transition"
         location="bottom end"
-        @click.native.stop
+        @click.stop
       >
         <template #activator="{ props: activatorProps }">
           <v-btn
