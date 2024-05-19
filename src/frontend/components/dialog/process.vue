@@ -1,39 +1,49 @@
 <template>
-    <DialogDefault :title="edit ? 'Edit Process' : (step === 1 ? process.name : 'New process')"
-        :loading="loading"
-        @close-dialog="closeDialog(step === 1)"
-    >
-        <template v-slot>
-            <FormProcess v-if="step === 0" :api="api"
-                :edit="edit ? edit : process"
-                @loading="(value) => loading = value"
-                @completed="(data) => { edit ? closeDialog(true) : createdProcess(data) }"
-            />
-            <FormSteps v-if="step === 1"
-                :process="process"
-                @reload="api.get(process.id).then((data) => process = data)"
-            />
-        </template>
-    </DialogDefault>
+  <DialogDefault
+    :title="edit ? 'Edit Process' : step === 1 ? process.name : 'New process'"
+    :loading="loading"
+    @close-dialog="closeDialog(step === 1)"
+  >
+    <template #default>
+      <FormProcess
+        v-if="step === 0"
+        :api="api"
+        :edit="edit ? edit : process"
+        @loading="(value) => (loading = value)"
+        @completed="
+          (data) => {
+            edit ? closeDialog(true) : createdProcess(data);
+          }
+        "
+      />
+      <FormSteps
+        v-if="step === 1"
+        :process="process"
+        @reload="api.get(process.id).then((data) => (process = data))"
+      />
+    </template>
+  </DialogDefault>
 </template>
 
 <script setup lang="ts">
-    defineProps({
-        api: Object,
-        edit: Object
-    })
-    const emit = defineEmits(['closeDialog', 'completed'])
-    const loading = ref(false)
-    const process = ref(null)
-    const step = ref(0)
-    function createdProcess(data: object) {
-        process.value = data
-        loading.value = false
-        step.value = 1
-    }
-    function closeDialog(completed: boolean) {
-        if (completed) { emit('completed') }
-        loading.value = false
-        emit('closeDialog')
-    }
+defineProps({
+  api: Object,
+  edit: Object,
+});
+const emit = defineEmits(["closeDialog", "completed"]);
+const loading = ref(false);
+const process = ref(null);
+const step = ref(0);
+function createdProcess(data: object) {
+  process.value = data;
+  loading.value = false;
+  step.value = 1;
+}
+function closeDialog(completed: boolean) {
+  if (completed) {
+    emit("completed");
+  }
+  loading.value = false;
+  emit("closeDialog");
+}
 </script>

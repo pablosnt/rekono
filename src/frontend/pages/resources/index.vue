@@ -1,3 +1,3 @@
 <script setup lang="ts">
-    definePageMeta({ redirect: '/resources/tools' })
+definePageMeta({ redirect: "/resources/tools" });
 </script>

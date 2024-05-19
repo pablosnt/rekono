@@ -1,173 +1,246 @@
-export function useApi(endpoint: string, authentication: boolean = true, entity?: string) {
-    const config = useRuntimeConfig()
-    const router = useRouter()
-    const refreshing = refreshStore()
-    const alert = useAlert()
-    const tokens = useTokens()
-    
-    const defaultHeaders = {
-        Accept: 'application/json'
+export function useApi(
+  endpoint: string,
+  authentication: boolean = true,
+  entity?: string,
+) {
+  const config = useRuntimeConfig();
+  const router = useRouter();
+  const refreshing = refreshStore();
+  const alert = useAlert();
+  const tokens = useTokens();
+
+  const defaultHeaders = {
+    Accept: "application/json",
+  };
+
+  const default_size = 24;
+  const max_size = 1000;
+  let total = 0;
+
+  function url(endpoint: string, extraPath?: string): string {
+    let currentEndpoint = config.backendRootPath
+      ? config.backendRootPath + endpoint
+      : endpoint;
+    if (extraPath) {
+      currentEndpoint = `${currentEndpoint}/${extraPath}`;
     }
+    if (config.backendUrl) {
+      const url = new URL(config.backendUrl);
+      url.pathname = currentEndpoint;
+      return url.href;
+    }
+    return currentEndpoint;
+  }
 
-    const default_size = 24
-    const max_size = 1000
-    let total = 0
+  function headers(authentication: boolean, extraHeaders?: object): object {
+    const currentHeaders = defaultHeaders;
+    const token = tokens.get().access;
+    if (authentication) {
+      if (!token) {
+        router.push({ name: "login" });
+      }
+      currentHeaders.Authorization = `Bearer ${token}`;
+    }
+    return Object.assign({}, currentHeaders, extraHeaders);
+  }
 
-    function url(endpoint: string, extraPath?: string): string {
-        let currentEndpoint = config.backendRootPath ? config.backendRootPath + endpoint : endpoint
-        if (extraPath) { currentEndpoint = `${currentEndpoint}/${extraPath}` }
-        if (config.backendUrl) {
-            var url = new URL(config.backendUrl)
-            url.pathname = currentEndpoint
-            return url.href
+  function forwardToLogin(): Promise<any> {
+    console.log("FORWARDING");
+    tokens.remove();
+    if (refreshing.refreshing) {
+      refreshing.change();
+    }
+    return router.push({ name: "login" });
+  }
+
+  function request(
+    endpoint: string,
+    options = {},
+    extraPath?: string,
+    extraHeaders?: object,
+  ): Promise<any> {
+    return $fetch(url(endpoint, extraPath), options).catch((error) => {
+      let message = "Unexpected error";
+      switch (error.statusCode) {
+        case 400:
+          const firstValue = Object.values(error.data)[0];
+          const value = Array.isArray(firstValue) ? firstValue[0] : firstValue;
+          const field = Object.keys(error.data)[0];
+          const body = `${value.charAt(0).toUpperCase()}${value.slice(1)}`;
+          message = field !== "non_field_errors" ? `${field}: ${body}` : body;
+          break;
+        case 401:
+          if (endpoint.includes("/api/security/refresh/")) {
+            return forwardToLogin();
+          } else if (authentication) {
+            return refresh().then(() => {
+              console.log("HELLO WORLD");
+              options.headers = headers(authentication, extraHeaders);
+              return request(endpoint, options, extraPath);
+            });
+          } else {
+            message = "Invalid credentials";
+          }
+          break;
+        case 403:
+          message = "You are not authorized to perform this operation";
+          break;
+        case 404:
+          message = "Resource not found";
+          break;
+        case 429:
+          message = "Too many requests";
+          break;
+      }
+      if (message) {
+        alert(message, "error");
+      }
+      return Promise.reject(error);
+    });
+  }
+
+  // TODO: problem during refreshing
+  function refresh(): Promise<any> {
+    if (!refreshing.refreshing) {
+      refreshing.change();
+      const refresh = tokens.get().refresh;
+      if (!refresh) {
+        return forwardToLogin();
+      }
+      return request("/api/security/refresh/", {
+        method: "POST",
+        headers: headers(true),
+        body: { refresh: refresh },
+      })
+        .then((response) => {
+          tokens.remove();
+          try {
+            tokens.save(response);
+            refreshing.change();
+          } catch (error) {
+            console.log(error);
+            refreshing.change();
+            return forwardToLogin();
+          }
+          return Promise.resolve();
+        })
+        .catch(() => {
+          forwardToLogin();
+        });
+    } else {
+      while (refreshing.refreshing) {}
+      return Promise.resolve();
+    }
+  }
+
+  function get(
+    id?: number,
+    extraPath?: string,
+    extraHeaders?: object,
+  ): Promise<any> {
+    return request(
+      id ? `${endpoint}${id}/` : endpoint,
+      { method: "GET", headers: headers(authentication, extraHeaders) },
+      extraPath,
+    ).then((response) => {
+      return Promise.resolve(response);
+    });
+  }
+
+  function list(
+    params = {},
+    all = false,
+    page = 1,
+    items = [],
+    extraPath?: string,
+    extraHeaders?: object,
+  ): Promise<any> {
+    const size = all ? max_size : default_size;
+    return request(
+      endpoint,
+      {
+        method: "GET",
+        headers: headers(authentication, extraHeaders),
+        params: Object.assign({}, params, { page: page, limit: size }),
+      },
+      extraPath,
+    ).then((response) => {
+      total = response.count;
+      if (all) {
+        items = items.concat(response.results);
+        if (page * size < total) {
+          return list(params, all, page + 1);
         }
-        return currentEndpoint
-    }
+      } else {
+        items = response.results;
+      }
+      return Promise.resolve({ items: items, total: total });
+    });
+  }
 
-    function headers(authentication: boolean, extraHeaders?: object): object {
-        let currentHeaders = defaultHeaders
-        const token = tokens.get().access
-        if (authentication) {
-            if (!token) { router.push({ name: 'login' })}
-            currentHeaders.Authorization = `Bearer ${token}`
+  function create(
+    body: object,
+    id?: number,
+    extraPath?: string,
+    extraHeaders?: object,
+  ) {
+    return request(
+      id ? `${endpoint}${id}/` : endpoint,
+      {
+        method: "POST",
+        headers: headers(authentication, extraHeaders),
+        body: body,
+      },
+      extraPath,
+    ).then((response) => {
+      if (response) {
+        if (entity && !extraPath) {
+          alert(
+            `New ${entity.toLowerCase()} has been successfully created`,
+            "success",
+          );
         }
-        return Object.assign({}, currentHeaders, extraHeaders)
-    }
+      }
+      return Promise.resolve(response);
+    });
+  }
 
-    function forwardToLogin(): Promise<any> {
-        console.log('FORWARDING')
-        tokens.remove()
-        if (refreshing.refreshing) { refreshing.change() }
-        return router.push({ name: 'login' })
-    }
-
-    function request(endpoint: string, options = {}, extraPath?: string, extraHeaders?: object): Promise<any> {
-        return $fetch(url(endpoint, extraPath), options)
-            .catch((error) => {
-                let message = 'Unexpected error'
-                switch (error.statusCode) {
-                    case 400:
-                        const firstValue = Object.values(error.data)[0]
-                        const value = Array.isArray(firstValue) ? firstValue[0] : firstValue
-                        const field = Object.keys(error.data)[0]
-                        const body = `${value.charAt(0).toUpperCase()}${value.slice(1)}`
-                        message = field !== 'non_field_errors' ? `${field}: ${body}` : body
-                        break
-                    case 401:
-                        if (endpoint.includes('/api/security/refresh/')) {
-                            return forwardToLogin()
-                        } else if (authentication) {
-                            return refresh()
-                                .then(() => {
-                                    console.log('HELLO WORLD')
-                                    options.headers = headers(authentication, extraHeaders)
-                                    return request(endpoint, options, extraPath)
-                                })
-                        } else {
-                            message = 'Invalid credentials'
-                        }
-                        break
-                    case 403:
-                        message = 'You are not authorized to perform this operation'
-                        break
-                    case 404:
-                        message = 'Resource not found'
-                        break
-                    case 429:
-                        message = 'Too many requests'
-                        break
-                }
-                if (message) {
-                    alert(message, 'error')
-                }
-                return Promise.reject(error)
-            })
-    }
-
-    // TODO: problem during refreshing
-    function refresh(): Promise<any> {
-        if (!refreshing.refreshing) {
-            refreshing.change()
-            const refresh = tokens.get().refresh
-            if (!refresh) { return forwardToLogin() }
-            return request('/api/security/refresh/', { method: 'POST', headers: headers(true), body: { refresh: refresh }})
-                .then((response) => {
-                    tokens.remove()
-                    try {
-                        tokens.save(response)
-                        refreshing.change()
-                    } catch (error) {
-                        console.log(error)
-                        refreshing.change()
-                        return forwardToLogin()
-                    }
-                    return Promise.resolve()
-                })
-                .catch(() => { forwardToLogin() })
+  function update(
+    body: object,
+    id?: number,
+    extraPath?: string,
+    extraHeaders?: object,
+  ) {
+    return request(
+      id ? `${endpoint}${id}/` : endpoint,
+      {
+        method: "PUT",
+        headers: headers(authentication, extraHeaders),
+        body: body,
+      },
+      extraPath,
+    ).then((response) => {
+      if (response) {
+        if (entity && !extraPath) {
+          alert(`${entity} has been successfully updated`, "success");
         }
-        else {
-            while (refreshing.refreshing) {}
-            return Promise.resolve()
-        }
-    }
+      }
+      return Promise.resolve(response);
+    });
+  }
 
-    function get(id?: number, extraPath?: string, extraHeaders?: object): Promise<any> {
-        return request(id ? `${endpoint}${id}/` : endpoint, { method: 'GET', headers: headers(authentication, extraHeaders) }, extraPath)
-            .then((response) => {
-                return Promise.resolve(response)
-            })
-    }
+  function remove(id?: number, extraPath?: string, extraHeaders?: object) {
+    return request(
+      id ? `${endpoint}${id}/` : endpoint,
+      { method: "DELETE", headers: headers(authentication, extraHeaders) },
+      extraPath,
+    ).then(() => {
+      if (entity && !extraPath) {
+        alert(`${entity} has been deleted`, "warning");
+      }
+      return Promise.resolve();
+    });
+  }
 
-    function list(params = {}, all = false, page = 1, items = [], extraPath?: string, extraHeaders?: object): Promise<any> {
-        const size = all ? max_size : default_size
-        return request(endpoint, { method: 'GET', headers: headers(authentication, extraHeaders), params: Object.assign({}, params, { page: page, limit: size }) }, extraPath)
-            .then((response) => {
-                total = response.count
-                if (all) {
-                    items = items.concat(response.results)
-                    if ((page * size) < total) {
-                        return list(params, all, page + 1)
-                    }
-                } else {
-                    items = response.results
-                }
-                return Promise.resolve({ items: items, total: total })
-            })
-    }
-
-    function create(body: object, id?: number, extraPath?: string, extraHeaders?: object) {
-        return request(id ? `${endpoint}${id}/` : endpoint, { method: 'POST', headers: headers(authentication, extraHeaders), body: body }, extraPath)
-            .then((response) => {
-                if (response) {
-                    if (entity && !extraPath) {
-                        alert(`New ${entity.toLowerCase()} has been successfully created`, 'success')
-                    }
-                }
-                return Promise.resolve(response)
-            })
-    }
-
-    function update(body: object, id?: number, extraPath?: string, extraHeaders?: object) {
-        return request(id ? `${endpoint}${id}/` : endpoint, { method: 'PUT', headers: headers(authentication, extraHeaders), body: body }, extraPath)
-            .then((response) => {
-                if (response) {
-                    if (entity && !extraPath) {
-                        alert(`${entity} has been successfully updated`, 'success')
-                    }
-                }
-                return Promise.resolve(response)
-            })
-    }
-
-    function remove(id?: number, extraPath?: string, extraHeaders?: object) {
-        return request(id ? `${endpoint}${id}/` : endpoint, { method: 'DELETE', headers: headers(authentication, extraHeaders) }, extraPath)
-            .then(() => {
-                if (entity && !extraPath) {
-                    alert(`${entity} has been deleted`, 'warning')
-                }
-                return Promise.resolve()
-            })
-    }
-
-    return { get, list, create, update, remove, default_size, entity }
+  return { get, list, create, update, remove, default_size, entity };
 }

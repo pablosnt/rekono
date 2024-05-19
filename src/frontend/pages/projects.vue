@@ -1,7 +1,7 @@
 <template>
-<NuxtLayout name="header"></NuxtLayout>
+  <NuxtLayout name="header" />
 </template>
- 
+
 <script setup lang="ts">
-    definePageMeta({layout: false})
+definePageMeta({ layout: false });
 </script>
