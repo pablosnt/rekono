@@ -1,11 +1,9 @@
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from framework.models import BaseModel
 from processes.models import Process
 from rekono.settings import AUTH_USER_MODEL
-from security.validators.input_validator import (
-    FutureDatetimeValidator,
-    TimeAmountValidator,
-)
+from security.validators.input_validator import FutureDatetimeValidator
 from targets.models import Target
 from tasks.enums import TimeUnit
 from tools.enums import Intensity
@@ -41,7 +39,7 @@ class Task(BaseModel):
     repeat_in = models.IntegerField(
         blank=True,
         null=True,
-        validators=[TimeAmountValidator(code="repeat_in")],
+        validators=[MinValueValidator(1), MaxValueValidator(60)],
     )
     # Time unit to apply to the 'repeat in' value
     repeat_time_unit = models.TextField(

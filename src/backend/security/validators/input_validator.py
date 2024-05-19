@@ -64,12 +64,6 @@ class FutureDatetimeValidator(RegexValidator):
             raise ValidationError("Datetime must be future", code=self.code)
 
 
-class TimeAmountValidator(RegexValidator):
-    def __call__(self, value: int) -> None:
-        if value > 1000 or value <= 0:
-            raise ValidationError("Time value is too high", code=self.code)
-
-
 class PasswordValidator:
     """Rekono password complexity validator."""
 

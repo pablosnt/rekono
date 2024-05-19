@@ -63,11 +63,17 @@
                                 </template>
                             
                                 <v-card-actions>
-                                    <!-- TODO: trigger actions -->
-                                    <v-btn v-if="user.role !== 'Reader'" hover icon size="large">
-                                        <v-icon icon="mdi-play" color="green"/>
-                                        <v-tooltip activator="parent" text="Run"/>
-                                    </v-btn>
+                                    <v-dialog width="auto">
+                                        <template v-slot:activator="{ props: activatorProps }">
+                                            <v-btn hover icon size="x-large" v-bind="activatorProps">
+                                                <v-icon icon="mdi-play-circle" color="green"/>
+                                                <v-tooltip activator="parent" text="Run"/>
+                                            </v-btn>
+                                        </template>
+                                        <template v-slot:default="{ isActive }">
+                                            <DialogTask :tool="tool" @close-dialog="isActive.value = false"/>
+                                        </template>
+                                    </v-dialog>
                                     <v-spacer/>
                                     <ButtonLike v-if="user.role !== 'Reader'"
                                         :api="api"

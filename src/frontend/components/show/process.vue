@@ -42,11 +42,17 @@
         </v-card-text>
 
         <v-card-actions v-if="user.role !== 'Reader'">
-            <!-- TODO: trigger actions -->
-            <v-btn hover icon size="large">
-                <v-icon icon="mdi-play" color="green"/>
-                <v-tooltip activator="parent" text="Run"/>
-            </v-btn>
+            <v-dialog width="auto">
+                <template v-slot:activator="{ props: activatorProps }">
+                    <v-btn hover icon size="x-large" v-bind="activatorProps">
+                        <v-icon icon="mdi-play-circle" color="green"/>
+                        <v-tooltip activator="parent" text="Run"/>
+                    </v-btn>
+                </template>
+                <template v-slot:default="{ isActive }">
+                    <DialogTask :process="process" @close-dialog="isActive.value = false"/>
+                </template>
+            </v-dialog>
             <v-spacer/>
             <ButtonLike :api="api" :item="process" @reload="(value) => $emit('reload', value)"/>
             <v-speed-dial v-if="(process.owner !== null && process.owner.id === user.user) || user.role === 'Admin'" transition="scale-transition" location="bottom end" @click.native.stop>

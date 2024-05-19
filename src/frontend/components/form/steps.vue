@@ -130,7 +130,7 @@
     function getSteps() {
         let params = defaultParams()
         params.process = props.process.id
-        if (tool.value) { params.tool = tool.value.id; console.log(tool.value.id) }
+        if (tool.value) { params.tool = tool.value.id }
         api.list(params, true).then((response) => steps.value = response.items)
     }
     function removeStep(id: number) {

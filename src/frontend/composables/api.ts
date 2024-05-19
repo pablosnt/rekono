@@ -35,6 +35,7 @@ export function useApi(endpoint: string, authentication: boolean = true, entity?
     }
 
     function forwardToLogin(): Promise<any> {
+        console.log('FORWARDING')
         tokens.remove()
         if (refreshing.refreshing) { refreshing.change() }
         return router.push({ name: 'login' })
@@ -58,6 +59,7 @@ export function useApi(endpoint: string, authentication: boolean = true, entity?
                         } else if (authentication) {
                             return refresh()
                                 .then(() => {
+                                    console.log('HELLO WORLD')
                                     options.headers = headers(authentication, extraHeaders)
                                     return request(endpoint, options, extraPath)
                                 })
@@ -93,10 +95,12 @@ export function useApi(endpoint: string, authentication: boolean = true, entity?
                     tokens.remove()
                     try {
                         tokens.save(response)
+                        refreshing.change()
                     } catch (error) {
-                        forwardToLogin()
+                        console.log(error)
+                        refreshing.change()
+                        return forwardToLogin()
                     }
-                    refreshing.change()
                     return Promise.resolve()
                 })
                 .catch(() => { forwardToLogin() })

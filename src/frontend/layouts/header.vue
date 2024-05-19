@@ -30,6 +30,7 @@
                                 <v-icon color="red" icon="mdi-account"/>
                             </template>
                         </v-list-item>
+                        <!-- todo: add dialog for clients and show guidelines to use the CLI? -->
                         <!-- todo: Update link to the new GitHub pages -->
                         <v-list-item href="https://github.com/pablosnt/rekono/wiki"
                             target="_blank"

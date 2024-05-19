@@ -1,18 +1,19 @@
 <template>
-    <div id="public-page">
-        <v-card id="public-form"
-            class="mx-auto pa-3"
-            elevation="8"
-            max-width="448"
-            rounded="lg"
-            style="margin-top: 120px;"
-        >
-            <v-img class="mx-auto ma-4"
-                src="/static/logo-black.png"
-            />
-            <slot />
-        </v-card>
-    </div>
+    <v-container id="public-page" class="fill-height" fluid>
+        <v-row justify="center">
+            <v-col cols="4">
+                <v-card id="public-form"
+                    class="mx-auto pa-3"
+                    elevation="8"
+                    rounded="lg"
+                >
+                    <v-img class="mx-auto ma-4" src="/static/logo-black.png"/>
+                    <slot />
+                </v-card>
+            </v-col>
+            
+        </v-row>
+    </v-container>
 </template>
 
 <style>

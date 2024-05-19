@@ -29,6 +29,6 @@
     "@nuxtjs/stylelint-module": "^5.2.0",
     "stylelint-config-standard": "^36.0.0",
     "vite-plugin-vuetify": "^2.0.3",
-    "vuetify": "^3.6.3"
+    "vuetify": "^3.6.6"
   }
 }

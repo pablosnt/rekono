@@ -50,6 +50,7 @@ export function useEnums() {
         }
     }
     const wordlists = ['Subdomain', 'Endpoint']
+    const timeUnits = ['Weeks', 'Days', 'Hours', 'Minutes']
     
-    return { stages, intensities, wordlists }
+    return { stages, intensities, wordlists, timeUnits }
 }
