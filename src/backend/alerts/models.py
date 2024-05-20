@@ -134,7 +134,7 @@ class MonitorSettings(BaseModel):
     rq_job_id = models.TextField(max_length=50, blank=True, null=True)
     last_monitor = models.DateTimeField(blank=True, null=True)
     hour_span = models.IntegerField(
-        default=7, validators=[MinValueValidator(24), MaxValueValidator(168)]
+        default=24, validators=[MinValueValidator(24), MaxValueValidator(168)]
     )
 
     def __str__(self) -> str:
