@@ -3,9 +3,6 @@ export function useApi(
   authentication: boolean = true,
   entity?: string,
 ) {
-  const user = userStore();
-  const refreshing = refreshStore();
-  const tokens = useTokens();
   const config = useRuntimeConfig();
   const alert = useAlert();
 
@@ -32,12 +29,19 @@ export function useApi(
     return currentEndpoint;
   }
 
-  function headers(authentication: boolean, extraHeaders?: object): object {
+  function headers(
+    authentication: boolean,
+    extraHeaders?: object,
+    refreshing?: object,
+    tokens?: object,
+  ): object {
+    tokens = tokens ? tokens : useTokens();
+    refreshing = refreshing ? refreshing : refreshStore();
     const currentHeaders = defaultHeaders;
     const token = tokens.get().access;
     if (authentication) {
       if (!token) {
-        forwardToLogin();
+        forwardToLogin(refreshing, tokens);
       }
       currentHeaders.Authorization = `Bearer ${token}`;
     }
@@ -65,15 +69,28 @@ export function useApi(
           if (endpoint.includes("/api/security/refresh/")) {
             return Promise.reject(error);
           } else if (authentication) {
+            const tokens = useTokens();
+            const refreshing = refreshStore();
             if (refreshing.refreshing) {
               setTimeout(
-                () => (options.headers = headers(authentication, extraHeaders)),
+                () =>
+                  (options.headers = headers(
+                    authentication,
+                    extraHeaders,
+                    refreshing,
+                    tokens,
+                  )),
                 1500,
               );
               return request(endpoint, options, extraPath, extraHeaders);
             } else {
-              return refresh().then(() => {
-                options.headers = headers(authentication, extraHeaders);
+              return refresh(refreshing, tokens).then(() => {
+                options.headers = headers(
+                  authentication,
+                  extraHeaders,
+                  refreshing,
+                  tokens,
+                );
                 return request(endpoint, options, extraPath, extraHeaders);
               });
             }
@@ -98,7 +115,8 @@ export function useApi(
     });
   }
 
-  function forwardToLogin(): Promise {
+  function forwardToLogin(refreshing: object, tokens: object): Promise {
+    const user = userStore();
     tokens.remove();
     user.logout();
     if (refreshing.refreshing) {
@@ -107,15 +125,15 @@ export function useApi(
     return navigateTo("/login");
   }
 
-  function refresh(): Promise {
+  function refresh(refreshing: object, tokens: object): Promise {
     refreshing.change();
     const refresh = tokens.get().refresh;
     if (!refresh) {
-      forwardToLogin();
+      forwardToLogin(refreshing, tokens);
     } else {
       return request("/api/security/refresh/", {
         method: "POST",
-        headers: headers(true),
+        headers: headers(true, {}, refreshing, tokens),
         body: { refresh: refresh },
       })
         .then((response) => {
@@ -125,7 +143,7 @@ export function useApi(
           return Promise.resolve();
         })
         .catch(() => {
-          forwardToLogin();
+          forwardToLogin(refreshing, tokens);
           return Promise.reject();
         });
     }
