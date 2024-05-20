@@ -87,24 +87,11 @@
                     {{ tool.version }}
                   </v-chip>
                   <span class="me-3" />
-                  <v-btn hover icon variant="text">
-                    <v-icon
-                      :icon="
-                        tool.is_installed
-                          ? 'mdi-check-circle'
-                          : 'mdi-close-circle'
-                      "
-                      :color="tool.is_installed ? 'green' : 'red'"
-                    />
-                    <v-tooltip
-                      activator="parent"
-                      :text="
-                        tool.is_installed
-                          ? 'Installed'
-                          : 'Tool may have been installed after its last execution attempt'
-                      "
-                    />
-                  </v-btn>
+                  <ButtonGreenCheck
+                    :condition="tool.is_installed"
+                    true-text="Installed"
+                    false-text="Tool may have been installed after its last execution attempt"
+                  />
                 </template>
 
                 <v-card-actions>

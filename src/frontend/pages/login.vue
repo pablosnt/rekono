@@ -8,7 +8,7 @@
         prepend-inner-icon="mdi-account"
         variant="outlined"
         :rules="[(u) => !!u || 'Username is required']"
-        validate-on="blur"
+        validate-on="input"
       />
 
       <v-text-field
@@ -20,7 +20,7 @@
         prepend-inner-icon="mdi-lock"
         variant="outlined"
         :rules="[(p) => !!p || 'Password is required']"
-        validate-on="blur"
+        validate-on="input"
         @click:append-inner="visible = !visible"
       />
       <v-card-actions class="justify-center">

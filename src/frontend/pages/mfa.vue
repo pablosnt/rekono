@@ -15,7 +15,7 @@
         v-model="mfa"
         variant="solo"
         autofocus
-        validate-on="blur"
+        validate-on="input"
         :rules="[
           (o) => !!o || 'OTP is required',
           (o) => validate.mfa.test(o) || 'Invalid OTP',
@@ -27,10 +27,10 @@
         v-model="mfa"
         density="compact"
         label="OTP"
-        prepend-inner-icon="mdi-account-key"
+        prepend-inner-icon="mdi-onepassword"
         variant="outlined"
         autofocus
-        validate-on="blur"
+        validate-on="input"
         :rules="[
           (o) => !!o || 'OTP is required',
           (o) => o.length === 128 || 'Invalid OTP',

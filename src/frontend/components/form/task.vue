@@ -69,7 +69,7 @@
                   item-title="name"
                   return-object
                   :rules="[(p) => !!p || 'Project is required']"
-                  validate-on="blur"
+                  validate-on="input"
                   @update:model-value="selectProject()"
                 />
               </v-col>
@@ -90,7 +90,7 @@
                   :disabled="selectedProject === null"
                   multiple
                   :rules="[(t) => t.length > 0 || 'Target is required']"
-                  validate-on="blur"
+                  validate-on="input"
                   @click:clear="allTargets = false"
                 >
                   <template #prepend>
@@ -129,7 +129,7 @@
                       selectedConfiguration !== null ||
                       'Project is required',
                   ]"
-                  validate-on="blur"
+                  validate-on="input"
                   @update:model-value="selectProcess()"
                 />
               </v-col>
@@ -151,7 +151,7 @@
                       selectedProcess !== null ||
                       'Tool is required',
                   ]"
-                  validate-on="blur"
+                  validate-on="input"
                   @update:model-value="selectTool()"
                 >
                   <template
@@ -194,7 +194,7 @@
                       selectedProcess !== null ||
                       'Configuration is required',
                   ]"
-                  validate-on="blur"
+                  validate-on="input"
                 />
               </v-col>
             </v-row>
@@ -220,7 +220,7 @@
                   "
                   return-object
                   :rules="[(i) => !!i || 'Intensity is required']"
-                  validate-on="blur"
+                  validate-on="input"
                 />
               </v-col>
             </v-row>
@@ -267,7 +267,7 @@
                       w.length > 0 ||
                       'Wordlist is required',
                   ]"
-                  validate-on="blur"
+                  validate-on="input"
                   @click:clear="allWordlists = false"
                 >
                   <template #prepend>
@@ -378,23 +378,11 @@
                   control-variant="split"
                   label="Time"
                   inset
+                  clearable
                   variant="outlined"
                   :max="60"
                   :min="1"
-                >
-                  <template #append>
-                    <v-btn
-                      variant="text"
-                      icon
-                      hover
-                      :disabled="monitor === null"
-                      @click="monitor = null"
-                    >
-                      <v-icon icon="mdi-close" />
-                      <v-tooltip activator="parent" text="Clear" />
-                    </v-btn>
-                  </template>
-                </VNumberInput>
+                />
               </v-col>
               <v-col cols="4">
                 <v-autocomplete

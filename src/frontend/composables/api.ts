@@ -72,17 +72,25 @@ export function useApi(
             const tokens = useTokens();
             const refreshing = refreshStore();
             if (refreshing.refreshing) {
-              setTimeout(
-                () =>
-                  (options.headers = headers(
-                    authentication,
-                    extraHeaders,
-                    refreshing,
-                    tokens,
-                  )),
-                1500,
-              );
-              return request(endpoint, options, extraPath, extraHeaders);
+              function wait() {
+                return new Promise((resolve, reject) => {
+                  setTimeout(() => {
+                    if (refreshing.refreshing) {
+                      return wait();
+                    }
+                    options.headers = headers(
+                      authentication,
+                      extraHeaders,
+                      refreshing,
+                      tokens,
+                    );
+                    request(endpoint, options, extraPath, extraHeaders)
+                      .then((response) => resolve(response))
+                      .catch((error) => reject(error));
+                  }, 500);
+                });
+              }
+              return wait();
             } else {
               return refresh(refreshing, tokens).then(() => {
                 options.headers = headers(

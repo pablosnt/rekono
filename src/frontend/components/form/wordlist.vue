@@ -9,7 +9,7 @@
         (n) => !!n || 'Name is required',
         (n) => validate.name.test(n) || 'Invalid name value',
       ]"
-      validate-on="blur"
+      validate-on="input"
       density="comfortable"
     />
 
@@ -25,7 +25,7 @@
       :items="enums.wordlists"
       prepend-inner-icon="mdi-routes"
       :rules="[(t) => !!t || 'Type is required']"
-      validate-on="blur"
+      validate-on="input"
     />
 
     <v-file-input
@@ -47,7 +47,7 @@
           f[0].size <= maxSize * 1000000 ||
           `File size must be less than ${maxSize} MB`,
       ]"
-      validate-on="blur"
+      validate-on="input"
     />
 
     <v-btn

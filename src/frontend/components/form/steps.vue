@@ -18,6 +18,7 @@
         <v-stepper-item
           :title="s"
           :color="enums.stages[s].color"
+          :icon="enums.stages[s].icon"
           :edit-icon="enums.stages[s].icon"
         />
       </template>

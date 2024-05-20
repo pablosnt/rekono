@@ -9,7 +9,7 @@
         (n) => !!n || 'Name is required',
         (n) => validate.name.test(n) || 'Invalid name value',
       ]"
-      validate-on="blur"
+      validate-on="input"
     />
 
     <v-textarea
@@ -21,7 +21,7 @@
         (d) => !!d || 'Description is required',
         (d) => validate.text.test(d) || 'Invalid description value',
       ]"
-      validate-on="blur"
+      validate-on="input"
       auto-grow
       max-rows="10"
       rows="3"
@@ -34,7 +34,7 @@
       prepend-inner-icon="mdi-tag"
       variant="outlined"
       :rules="[(t) => validate.name.test(t.trim()) || 'Invalid tag']"
-      validate-on="blur"
+      validate-on="input"
     >
       <template #append-inner>
         <v-btn

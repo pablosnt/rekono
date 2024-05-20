@@ -15,7 +15,7 @@
           (e) => !!e || 'Email is required',
           (e) => validate.email.test(e) || 'Invalid Email address',
         ]"
-        validate-on="blur"
+        validate-on="input"
       />
 
       <v-text-field
@@ -33,7 +33,7 @@
             validate.password(p) ||
             'Password must contain one uppercase, lowercase, digit and symbol',
         ]"
-        validate-on="blur"
+        validate-on="input"
         @click:append-inner="visible = !visible"
       />
 
@@ -50,7 +50,7 @@
           (p) => !!p || 'Password confirmation is required',
           (p) => p === password || 'Paswords do not match',
         ]"
-        validate-on="blur"
+        validate-on="input"
         @click:append-inner="visibleConfirmation = !visibleConfirmation"
       />
 

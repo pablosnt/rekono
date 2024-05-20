@@ -12,7 +12,10 @@
       <template #data>
         <v-container v-if="processes !== null" fluid>
           <v-row v-if="processes.length === 0" justify="center" dense>
-            <v-empty-state icon="mdi-robot" title="There are no processes" />
+            <v-empty-state
+              icon="mdi-robot-angry"
+              title="There are no processes"
+            />
           </v-row>
           <v-row dense>
             <v-col v-for="process in processes" :key="process.id" cols="4">
