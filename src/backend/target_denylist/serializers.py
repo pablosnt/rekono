@@ -1,10 +1,9 @@
 from rest_framework.serializers import ModelSerializer
+from target_denylist.models import TargetDenylist
 
-from target_blacklist.models import TargetBlacklist
 
-
-class TargetBlacklistSerializer(ModelSerializer):
+class TargetDenylistSerializer(ModelSerializer):
     class Meta:
-        model = TargetBlacklist
+        model = TargetDenylist
         fields = ("id", "target", "default")
         read_only_fields = ("default",)

@@ -40,7 +40,7 @@ ROLES = {
         "change": [],
         "delete": [Role.ADMIN, Role.AUDITOR],
     },
-    "targetblacklist": {
+    "targetdenylist": {
         "view": [Role.ADMIN],
         "add": [Role.ADMIN],
         "change": [Role.ADMIN],

@@ -1,6 +1,6 @@
 [
     {
-        "model": "target_blacklist.targetblacklist",
+        "model": "target_denylist.targetdenylist",
         "pk": 1,
         "fields": {
             "target": "127.0.0.1",
@@ -8,7 +8,7 @@
         }
     },
     {
-        "model": "target_blacklist.targetblacklist",
+        "model": "target_denylist.targetdenylist",
         "pk": 2,
         "fields": {
             "target": "::1",
@@ -16,7 +16,7 @@
         }
     },
     {
-        "model": "target_blacklist.targetblacklist",
+        "model": "target_denylist.targetdenylist",
         "pk": 3,
         "fields": {
             "target": "localhost",
@@ -24,7 +24,7 @@
         }
     },
     {
-        "model": "target_blacklist.targetblacklist",
+        "model": "target_denylist.targetdenylist",
         "pk": 4,
         "fields": {
             "target": "frontend",
@@ -32,7 +32,7 @@
         }
     },
     {
-        "model": "target_blacklist.targetblacklist",
+        "model": "target_denylist.targetdenylist",
         "pk": 5,
         "fields": {
             "target": "backend",
@@ -40,7 +40,7 @@
         }
     },
     {
-        "model": "target_blacklist.targetblacklist",
+        "model": "target_denylist.targetdenylist",
         "pk": 6,
         "fields": {
             "target": "postgres",
@@ -48,7 +48,7 @@
         }
     },
     {
-        "model": "target_blacklist.targetblacklist",
+        "model": "target_denylist.targetdenylist",
         "pk": 7,
         "fields": {
             "target": "redis",
@@ -56,7 +56,7 @@
         }
     },
     {
-        "model": "target_blacklist.targetblacklist",
+        "model": "target_denylist.targetdenylist",
         "pk": 8,
         "fields": {
             "target": "initialize",
@@ -64,7 +64,7 @@
         }
     },
     {
-        "model": "target_blacklist.targetblacklist",
+        "model": "target_denylist.targetdenylist",
         "pk": 9,
         "fields": {
             "target": "tasks-worker",
@@ -72,7 +72,7 @@
         }
     },
     {
-        "model": "target_blacklist.targetblacklist",
+        "model": "target_denylist.targetdenylist",
         "pk": 10,
         "fields": {
             "target": "executions-worker",
@@ -80,7 +80,7 @@
         }
     },
     {
-        "model": "target_blacklist.targetblacklist",
+        "model": "target_denylist.targetdenylist",
         "pk": 11,
         "fields": {
             "target": "findings-worker",
@@ -88,7 +88,7 @@
         }
     },
     {
-        "model": "target_blacklist.targetblacklist",
+        "model": "target_denylist.targetdenylist",
         "pk": 12,
         "fields": {
             "target": "telegram-bot",
@@ -96,7 +96,7 @@
         }
     },
     {
-        "model": "target_blacklist.targetblacklist",
+        "model": "target_denylist.targetdenylist",
         "pk": 13,
         "fields": {
             "target": "nginx",

@@ -48,14 +48,7 @@
                 <v-avatar :image="tool.icon" />
               </template>
               <template v-if="tool !== null && tool.reference !== null" #append>
-                <v-btn
-                  icon="mdi-open-in-new"
-                  color="medium-emphasis"
-                  variant="text"
-                  target="_blank"
-                  :href="tool.reference"
-                  hover
-                />
+                <ButtonLink :link="tool.reference" />
               </template>
             </v-autocomplete>
           </v-col>
@@ -103,17 +96,9 @@
                   :model-value="true"
                   @click="removeStep(step.id)"
                 />
-                <v-btn
+                <ButtonLink
                   v-if="configurations.length === 0"
-                  icon="mdi-open-in-new"
-                  color="medium-emphasis"
-                  target="_blank"
-                  :href="
-                    step.configuration.tool.reference
-                      ? step.configuration.tool.reference
-                      : null
-                  "
-                  hover
+                  :link="step.configuration.tool.reference"
                 />
               </template>
             </v-banner>

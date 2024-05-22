@@ -10,8 +10,8 @@
           prepend-icon="mdi-onepassword"
           variant="outlined"
           :rules="[
-            (t) => !!t || 'Telegram token is required',
-            (t) => validate.secret.test(t.trim()) || 'Invalid Telegram token',
+            (t) =>
+              !t || validate.secret.test(t.trim()) || 'Invalid Telegram token',
           ]"
           validate-on="input"
           clearable
@@ -25,7 +25,7 @@
         type="submit"
         class="mt-5"
         :disabled="
-          telegram?.token === null ||
+          telegram.token !== null &&
           telegram.token === '*'.repeat(telegram.token.length)
         "
         block

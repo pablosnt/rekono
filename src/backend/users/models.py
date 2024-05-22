@@ -179,9 +179,11 @@ class RekonoUserManager(UserManager):
         user = self._update_otp(
             user,
             hash(plain_otp),
-            self.get_otp_expiration_time(time)
-            if time is not None
-            else self.get_otp_expiration_time(),
+            (
+                self.get_otp_expiration_time(time)
+                if time is not None
+                else self.get_otp_expiration_time()
+            ),
         )
         return plain_otp
 

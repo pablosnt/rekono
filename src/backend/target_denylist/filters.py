@@ -1,9 +1,8 @@
 from django_filters.rest_framework import FilterSet
+from target_denylist.models import TargetDenylist
 
-from target_blacklist.models import TargetBlacklist
 
-
-class TargetBlacklistFilter(FilterSet):
+class TargetDenylistFilter(FilterSet):
     class Meta:
-        model = TargetBlacklist
+        model = TargetDenylist
         fields = {"target": ["exact", "icontains"], "default": ["exact"]}

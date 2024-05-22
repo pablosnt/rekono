@@ -1,19 +1,18 @@
 from django.db.models import QuerySet
-from rest_framework.permissions import IsAuthenticated
-
 from framework.views import BaseViewSet
+from rest_framework.permissions import IsAuthenticated
 from security.authorization.permissions import RekonoModelPermission
-from target_blacklist.filters import TargetBlacklistFilter
-from target_blacklist.models import TargetBlacklist
-from target_blacklist.serializers import TargetBlacklistSerializer
+from target_denylist.filters import TargetDenylistFilter
+from target_denylist.models import TargetDenylist
+from target_denylist.serializers import TargetDenylistSerializer
 
 # Create your views here.
 
 
-class TargetBlacklistViewSet(BaseViewSet):
-    queryset = TargetBlacklist.objects.all()
-    filterset_class = TargetBlacklistFilter
-    serializer_class = TargetBlacklistSerializer
+class TargetDenylistViewSet(BaseViewSet):
+    queryset = TargetDenylist.objects.all()
+    filterset_class = TargetDenylistFilter
+    serializer_class = TargetDenylistSerializer
     permission_classes = [IsAuthenticated, RekonoModelPermission]
     search_fields = ["target"]
     ordering_fields = ["id", "target"]

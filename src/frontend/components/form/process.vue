@@ -33,7 +33,7 @@
       :label="tags.length === 0 ? 'Tags' : null"
       prepend-inner-icon="mdi-tag"
       variant="outlined"
-      :rules="[(t) => validate.name.test(t.trim()) || 'Invalid tag']"
+      :rules="[(t) => !t || validate.name.test(t.trim()) || 'Invalid tag']"
       validate-on="input"
     >
       <template #append-inner>

@@ -135,11 +135,11 @@ function submit() {
     if (smtp.value.password !== "*".repeat(smtp.value.password.length)) {
       data.password = smtp.value.password;
     }
-    console.log(data);
     emit("loading", true);
     props.api.update(data, 1).then((data) => {
       emit("completed", data);
       emit("loading", false);
+      disabled.value = true;
     });
   }
 }

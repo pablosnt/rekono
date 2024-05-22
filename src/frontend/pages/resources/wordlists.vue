@@ -68,61 +68,31 @@
                     :item="wordlist"
                     @reload="(value) => dataset.loadData(value)"
                   />
-                  <v-speed-dial
+                  <ButtonEditDelete
                     v-if="
                       (wordlist.owner !== null &&
                         wordlist.owner.id === user.user) ||
                       user.role === 'Admin'
                     "
-                    transition="scale-transition"
-                    location="bottom end"
                   >
-                    <template #activator="{ props: activatorProps }">
-                      <v-btn
-                        v-bind="activatorProps"
-                        size="large"
-                        color="grey"
-                        icon="mdi-cog"
+                    <template #edit-dialog="{ isActive }">
+                      <DialogWordlist
+                        :api="api"
+                        :edit="wordlist"
+                        @completed="dataset.loadData(false)"
+                        @close-dialog="isActive.value = false"
                       />
                     </template>
-                    <v-dialog width="auto">
-                      <template #activator="{ props: activatorProps }">
-                        <v-btn
-                          key="1"
-                          icon="mdi-pencil"
-                          color="black"
-                          v-bind="activatorProps"
-                        />
-                      </template>
-                      <template #default="{ isActive }">
-                        <DialogWordlist
-                          :api="api"
-                          :edit="wordlist"
-                          @completed="dataset.loadData(false)"
-                          @close-dialog="isActive.value = false"
-                        />
-                      </template>
-                    </v-dialog>
-                    <v-dialog width="500" class="overflow-auto">
-                      <template #activator="{ props: activatorProps }">
-                        <v-btn
-                          key="2"
-                          icon="mdi-trash-can-outline"
-                          color="red"
-                          v-bind="activatorProps"
-                        />
-                      </template>
-                      <template #default="{ isActive }">
-                        <DialogDelete
-                          :id="wordlist.id"
-                          :api="api"
-                          :text="`Wordlist '${wordlist.name}' will be removed`"
-                          @completed="dataset.loadData(false)"
-                          @close-dialog="isActive.value = false"
-                        />
-                      </template>
-                    </v-dialog>
-                  </v-speed-dial>
+                    <template #delete-dialog="{ isActive }">
+                      <DialogDelete
+                        :id="wordlist.id"
+                        :api="api"
+                        :text="`Wordlist '${wordlist.name}' will be removed`"
+                        @completed="dataset.loadData(false)"
+                        @close-dialog="isActive.value = false"
+                      />
+                    </template>
+                  </ButtonEditDelete>
                 </v-card-actions>
               </v-card>
             </v-col>

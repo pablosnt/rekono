@@ -116,13 +116,7 @@
                     :item="tool"
                     @reload="(value) => dataset.loadData(value)"
                   />
-                  <v-btn
-                    icon="mdi-open-in-new"
-                    color="medium-emphasis"
-                    target="_blank"
-                    :href="tool.reference ? tool.reference : null"
-                    hover
-                  />
+                  <ButtonLink :link="tool.reference" />
                 </v-card-actions>
               </v-card>
             </v-col>

@@ -166,14 +166,7 @@
                     "
                     #append
                   >
-                    <v-btn
-                      icon="mdi-open-in-new"
-                      color="medium-emphasis"
-                      variant="text"
-                      target="_blank"
-                      :href="selectedTool.reference"
-                      hover
-                    />
+                    <ButtonLink :link="selectedTool.reference" />
                   </template>
                 </v-autocomplete>
                 <v-autocomplete
@@ -293,6 +286,7 @@
                 <v-alert
                   color="info"
                   icon="$info"
+                  variant="tonal"
                   text="You can schedule the execution at the best moment for you and your targets"
                 />
               </v-col>
@@ -367,6 +361,7 @@
                 <v-alert
                   color="info"
                   icon="$info"
+                  variant="tonal"
                   text="Configure how often you want to monitor your targets by executing this task periodically"
                 />
               </v-col>

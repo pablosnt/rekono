@@ -5,7 +5,7 @@ from typing import Any
 
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
-from target_blacklist.models import TargetBlacklist
+from target_denylist.models import TargetDenylist
 
 
 class TargetValidator(RegexValidator):
@@ -26,14 +26,14 @@ class TargetValidator(RegexValidator):
             raise ValidationError(
                 "Target is required", code=self.code, params={"value": value}
             )
-        blacklist = TargetBlacklist.objects.all().values_list("target", flat=True)
-        if value in blacklist:
+        denylist = TargetDenylist.objects.all().values_list("target", flat=True)
+        if value in denylist:
             raise ValidationError(
                 "Target is disallowed by policy",
                 code=self.code,
                 params={"value": value},
             )
-        for denied_value in blacklist:
+        for denied_value in denylist:
             try:
                 match = re.fullmatch(denied_value, value)
             except Exception:

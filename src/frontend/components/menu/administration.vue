@@ -12,11 +12,6 @@
         to: '/administration/integrations',
       },
       {
-        title: 'Monitoring',
-        icon: 'mdi-radar',
-        to: '/administration/monitoring',
-      },
-      {
         title: 'HTTP Headers',
         icon: 'mdi-web',
         to: '/administration/http-headers',
