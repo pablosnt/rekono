@@ -27,7 +27,7 @@
         v-model="mfa"
         density="compact"
         label="OTP"
-        prepend-inner-icon="mdi-onepassword"
+        prepend-inner-icon="mdi-key"
         variant="outlined"
         autofocus
         validate-on="input"

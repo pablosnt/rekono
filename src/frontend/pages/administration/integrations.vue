@@ -30,9 +30,10 @@
                     />
                   </template>
                   <template #default="{ isActive }">
-                    <DialogDefault
-                      :title="integration.name"
-                      width="800"
+                    <DialogCveCrowd
+                      v-if="integration.id === 4"
+                      :integration-api="api"
+                      :integration="integration"
                       @close-dialog="isActive.value = false"
                     />
                   </template>

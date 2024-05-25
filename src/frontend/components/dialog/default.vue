@@ -6,8 +6,10 @@
     :width="width"
     :loading="loading ? 'red' : false"
     :title="title"
+    :prepend-avatar="avatar"
   >
     <template #append>
+      <slot name="extra-append" />
       <v-btn icon="mdi-close" variant="text" @click="$emit('closeDialog')" />
     </template>
     <v-card-text class="overflow-auto">
@@ -34,6 +36,11 @@ defineProps({
     type: String,
     required: false,
     default: "800",
+  },
+  avatar: {
+    type: String,
+    required: false,
+    default: undefined,
   },
 });
 defineEmits(["closeDialog"]);

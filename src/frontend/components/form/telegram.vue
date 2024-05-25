@@ -7,7 +7,7 @@
           type="password"
           density="compact"
           label="Telegram token"
-          prepend-icon="mdi-onepassword"
+          prepend-icon="mdi-key"
           variant="outlined"
           :rules="[
             (t) =>

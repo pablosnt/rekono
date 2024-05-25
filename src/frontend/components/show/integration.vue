@@ -12,7 +12,7 @@
         color="success"
         class="mt-5"
         @click="
-          integrationsApi
+          api
             .update({ enabled: !integration.enabled }, integration.id)
             .then((data) => {
               integration = data;

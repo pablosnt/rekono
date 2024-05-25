@@ -36,6 +36,7 @@ class CVECrowd(BaseIntegration):
         ):
             try:
                 self.trending_cves = self._request(
+                    self.session.get,
                     self.url,
                     headers={"Authorization": f"Bearer {self.settings.secret}"},
                     params={"days": self.settings.trending_span_days},
