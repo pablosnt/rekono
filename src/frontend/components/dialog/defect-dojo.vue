@@ -106,6 +106,14 @@
               />
             </v-col>
           </v-row>
+          <v-row class="mt-5" justify="center" dense>
+            <v-alert
+              color="info"
+              icon="$info"
+              variant="tonal"
+              text="Tag value will be assigned to all entities created by Rekono in Defect-Dojo"
+            />
+          </v-row>
         </v-container>
         <v-btn
           color="blue"
