@@ -10,6 +10,11 @@
             label="Header"
             hide-details
             clearable
+            validate-on="input"
+            :rules="[
+              (k) => !!k || 'Header key is required',
+              (k) => validate.name.test(k.trim()) || 'Header key is invalid',
+            ]"
             @update:model-value="disabled = false"
           />
         </v-col>
@@ -20,17 +25,16 @@
             label="Value"
             hide-details
             clearable
+            validate-on="input"
+            :rules="[
+              (v) => !!v || 'Header value is required',
+              (v) => validate.text.test(v.trim()) || 'Header value is invalid',
+            ]"
             @update:model-value="disabled = false"
           >
             <template #prepend>:</template>
             <template v-if="header !== null" #append>
-              <v-btn
-                :disabled="disabled"
-                variant="text"
-                icon="mdi-tray-arrow-down"
-                color="green"
-                @click="submit()"
-              />
+              <ButtonSave :disabled="disabled" @click="submit()" />
               <v-dialog width="500" class="overflow-auto">
                 <template #activator="{ props: activatorProps }">
                   <v-btn hover variant="text" icon v-bind="activatorProps">
@@ -81,6 +85,7 @@ const props = defineProps({
   },
 });
 const emit = defineEmits(["completed", "loading"]);
+const validate = useValidation();
 
 const valid = ref(true);
 const disabled = ref(props.header !== null);
@@ -99,6 +104,7 @@ function submit() {
     emit("loading", true);
     request
       .then(() => {
+        disabled.value = true;
         emit("loading", false);
         emit("completed");
       })

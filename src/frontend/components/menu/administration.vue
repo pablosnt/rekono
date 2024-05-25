@@ -2,6 +2,11 @@
   <Menu
     :options="[
       {
+        title: 'Settings',
+        icon: 'mdi-cog',
+        to: '/administration/settings',
+      },
+      {
         title: 'Notifications',
         icon: 'mdi-bell-ring',
         to: '/administration/notifications',
@@ -19,17 +24,12 @@
       {
         title: 'Targets Denylist',
         icon: 'mdi-wall',
-        to: '/administration/targets-denylist',
+        to: '/administration/target-denylist',
       },
       {
         title: 'Users',
         icon: 'mdi-account-group',
         to: '/administration/users',
-      },
-      {
-        title: 'Settings',
-        icon: 'mdi-cog',
-        to: '/administration/settings',
       },
     ]"
   >

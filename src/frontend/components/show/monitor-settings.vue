@@ -21,11 +21,8 @@
           @update:model-value="save = true"
         >
           <template #append>
-            <v-btn
+            <ButtonSave
               :disabled="!save"
-              variant="text"
-              icon="mdi-tray-arrow-down"
-              color="green"
               @click="
                 api
                   .update({ hour_span: monitor.hour_span }, 1)
