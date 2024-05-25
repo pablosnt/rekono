@@ -115,24 +115,29 @@ const password = ref(props.data ? props.data.password : null);
 
 function submit() {
   if (valid.value) {
-    const data = {
-      host: host.value,
-      port: port.value,
-      tls: tls.value,
-      username: username.value,
-    };
-    if (
-      !password.value ||
-      password.value !== "*".repeat(password.value.length)
-    ) {
-      data.password = password.value;
-    }
     emit("loading", true);
-    props.api.update(data, 1).then((response) => {
-      emit("completed", response);
-      emit("loading", false);
-      disabled.value = true;
-    });
+    props.api
+      .update(
+        {
+          host: host.value.trim(),
+          port: port.value,
+          tls: tls.value,
+          username: username.value.trim(),
+          password:
+            !password.value ||
+            password.value !== "*".repeat(password.value.length)
+              ? password.value !== null
+                ? password.value.trim()
+                : null
+              : undefined,
+        },
+        1,
+      )
+      .then((response) => {
+        emit("completed", response);
+        emit("loading", false);
+        disabled.value = true;
+      });
   }
 }
 </script>

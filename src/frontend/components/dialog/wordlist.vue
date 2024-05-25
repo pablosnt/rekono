@@ -100,11 +100,11 @@ function submit() {
     let body = null;
     if (props.edit) {
       request = props.api.update;
-      body = { name: name.value, type: type.value };
+      body = { name: name.value.trim(), type: type.value };
     } else {
       request = props.api.create;
       body = new FormData();
-      body.append("name", name.value);
+      body.append("name", name.value.trim());
       body.append("type", type.value);
       body.append("file", file.value);
     }

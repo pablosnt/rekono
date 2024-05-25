@@ -164,16 +164,18 @@ function submit() {
     api
       .update(
         {
-          server: server.value,
+          server: server.value.trim(),
           api_token:
             !apiToken.value ||
             apiToken.value !== "*".repeat(apiToken.value.length)
-              ? apiToken.value
+              ? apiToken.value !== null
+                ? apiToken.value.trim()
+                : null
               : undefined,
           tls_validation: tls.value,
-          tag: tag.value,
-          test_type: testType.value,
-          test: test.value,
+          tag: tag.value.trim(),
+          test_type: testType.value.trim(),
+          test: test.value.trim(),
         },
         1,
       )

@@ -93,7 +93,11 @@ function submit() {
     emit("loading", true);
     const request = props.edit ? props.api.update : props.api.create;
     request(
-      { name: name.value, description: description.value, tags: tags.value },
+      {
+        name: name.value.trim(),
+        description: description.value.trim(),
+        tags: tags.value,
+      },
       props.edit?.id,
     )
       .then((response) => {

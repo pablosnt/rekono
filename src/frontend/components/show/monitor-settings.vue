@@ -9,7 +9,7 @@
       />
     </v-row>
     <v-row class="mt-8" justify="space-around">
-      <v-col cols="4">
+      <v-col cols="5">
         <VNumberInput
           v-model="monitor.hour_span"
           control-variant="split"
@@ -35,7 +35,13 @@
           </template>
         </VNumberInput>
       </v-col>
-      <v-col cols="6">
+    </v-row>
+    <v-row
+      v-if="new Date(monitor.last_monitor).getFullYear() !== 1970"
+      justify="center"
+      dense
+    >
+      <v-col cols="9">
         <v-banner
           icon="mdi-timelapse"
           :text="`Last monitor was on ${new Date(monitor.last_monitor).toString()}`"

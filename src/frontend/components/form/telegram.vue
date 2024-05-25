@@ -45,10 +45,12 @@ const token = ref(props.data ? props.data.token : null);
 function submit() {
   if (valid.value) {
     emit("loading", true);
-    props.api.update({ token: token.value }, 1).then((response) => {
-      emit("completed", response);
-      emit("loading", false);
-    });
+    props.api
+      .update({ token: token.value ? token.value.trim() : null }, 1)
+      .then((response) => {
+        emit("completed", response);
+        emit("loading", false);
+      });
   }
 }
 </script>
