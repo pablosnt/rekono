@@ -149,12 +149,25 @@ const props = defineProps({
     required: false,
     default: false,
   },
+  defaultParameters: {
+    type: Object,
+    required: false,
+    default: null,
+  },
 });
 const emit = defineEmits(["loadData"]);
 const page = ref(1);
 const total = ref(0);
 const search = ref(null);
-const parameters = ref(props.ordering ? { ordering: props.ordering } : {});
+const parameters = ref(
+  props.defaultParameters && props.ordering
+    ? Object.assign({}, props.defaultParameters, { ordering: props.ordering })
+    : props.defaultParameters
+      ? props.defaultParameters
+      : props.ordering
+        ? { ordering: props.ordering }
+        : {},
+);
 const loadingSearch = ref(false);
 const loadingData = ref(false);
 const expandFilters = ref(false);
