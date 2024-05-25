@@ -22,6 +22,7 @@ export function useValidation() {
     mfa: /^[\d]{6}$/,
     secret: /^[\w\s./\-=+,:<>¿?¡!#&$()@%[\]{}*]{1,500}$/,
     target: /^[\w\d.:\-/]{1,100}$/,
+    targetRegex: /^[\w\d.,:\-/*?+()\\]{1,300}$/,
     password,
   };
 }

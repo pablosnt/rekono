@@ -7,69 +7,67 @@
       $emit('closeDialog');
     "
   >
-    <template #default>
-      <v-form v-model="valid" @submit.prevent="submit()">
-        <v-text-field
-          v-model="name"
-          class="mt-2"
-          label="Name"
-          variant="outlined"
-          :rules="[
-            (n) => !!n || 'Name is required',
-            (n) => validate.name.test(n) || 'Invalid name value',
-          ]"
-          validate-on="input"
-          density="comfortable"
-        />
+    <v-form v-model="valid" @submit.prevent="submit()">
+      <v-text-field
+        v-model="name"
+        class="mt-2"
+        label="Name"
+        variant="outlined"
+        :rules="[
+          (n) => !!n || 'Name is required',
+          (n) => validate.name.test(n) || 'Invalid name value',
+        ]"
+        validate-on="input"
+        density="comfortable"
+      />
 
-        <v-autocomplete
-          v-model="type"
-          auto-select-first
-          class="mt-2"
-          clearable
-          hide-details
-          density="comfortable"
-          variant="outlined"
-          label="Type"
-          :items="enums.wordlists"
-          prepend-inner-icon="mdi-routes"
-          :rules="[(t) => !!t || 'Type is required']"
-          validate-on="input"
-        />
+      <v-autocomplete
+        v-model="type"
+        auto-select-first
+        class="mt-2"
+        clearable
+        hide-details
+        density="comfortable"
+        variant="outlined"
+        label="Type"
+        :items="enums.wordlists"
+        prepend-inner-icon="mdi-routes"
+        :rules="[(t) => !!t || 'Type is required']"
+        validate-on="input"
+      />
 
-        <v-file-input
-          v-if="!edit"
-          v-model="file"
-          class="mt-7"
-          clearable
-          density="comfortable"
-          variant="outlined"
-          show-size
-          label="File"
-          prepend-inner-icon="$file"
-          :prepend-icon="null"
-          accept="text/plain"
-          :rules="[
-            (f) => !!f || 'File is required',
-            (f) =>
-              !f.length ||
-              f[0].size <= maxSize * 1000000 ||
-              `File size must be less than ${maxSize} MB`,
-          ]"
-          validate-on="input"
-        />
+      <v-file-input
+        v-if="!edit"
+        v-model="file"
+        class="mt-7"
+        clearable
+        density="comfortable"
+        variant="outlined"
+        show-size
+        label="File"
+        prepend-inner-icon="$file"
+        :prepend-icon="null"
+        accept="text/plain"
+        :rules="[
+          (f) => !!f || 'File is required',
+          (f) =>
+            !f.length ||
+            f[0].size <= maxSize * 1000000 ||
+            `File size must be less than ${maxSize} MB`,
+        ]"
+        validate-on="input"
+      />
 
-        <v-btn
-          color="red"
-          size="large"
-          variant="tonal"
-          :text="!edit ? 'Create' : 'Update'"
-          type="submit"
-          class="mt-5"
-          block
-        />
-      </v-form>
-    </template>
+      <v-btn
+        color="red"
+        size="large"
+        variant="tonal"
+        :text="!edit ? 'Create' : 'Update'"
+        type="submit"
+        class="mt-5"
+        block
+      />
+    </v-form>
   </DialogDefault>
 </template>
 

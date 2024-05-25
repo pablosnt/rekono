@@ -1,3 +1,3 @@
 <script setup lang="ts">
-definePageMeta({ redirect: "/administration/notifications" });
+definePageMeta({ redirect: "/administration/settings" });
 </script>

@@ -8,7 +8,6 @@
             class="text-medium-emphasis"
             variant="outlined"
             label="Header"
-            hide-details
             clearable
             validate-on="input"
             :rules="[
@@ -23,7 +22,6 @@
             v-model="value"
             variant="outlined"
             label="Value"
-            hide-details
             clearable
             validate-on="input"
             :rules="[
@@ -35,26 +33,12 @@
             <template #prepend>:</template>
             <template v-if="header !== null" #append>
               <ButtonSave :disabled="disabled" @click="submit()" />
-              <v-dialog width="500" class="overflow-auto">
-                <template #activator="{ props: activatorProps }">
-                  <v-btn hover variant="text" icon v-bind="activatorProps">
-                    <v-icon icon="mdi-close" color="red" />
-                    <v-tooltip activator="parent" text="Delete" />
-                  </v-btn>
-                </template>
-                <template #default="{ isActive }">
-                  <DialogDelete
-                    :id="header.id"
-                    :api="api"
-                    :text="`HTTP header '${header.key}' will be removed`"
-                    @completed="
-                      $emit('completed');
-                      isActive.value = false;
-                    "
-                    @close-dialog="isActive.value = false"
-                  />
-                </template>
-              </v-dialog>
+              <ButtonDelete
+                :id="header.id"
+                :api="api"
+                :text="`HTTP header '${header.key}' will be removed`"
+                @completed="$emit('completed')"
+              />
             </template>
           </v-text-field>
         </v-col>
@@ -64,7 +48,7 @@
         color="red"
         size="large"
         variant="tonal"
-        text="Save"
+        text="Create"
         type="submit"
         class="mt-5"
         block

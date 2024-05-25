@@ -8,441 +8,436 @@
       $emit('closeDialog');
     "
   >
-    <template #default>
-      <v-form v-model="valid" @submit.prevent="submit()">
-        <v-stepper ref="stepper" v-model="step" editable flat>
-          <v-stepper-header>
-            <v-stepper-item
-              title="Target"
-              :value="0"
-              icon="mdi-target mdi-18px"
-              edit-icon="mdi-target mdi-18px"
-              :color="step === 0 ? 'red' : undefined"
-            />
-            <v-stepper-item
-              v-if="process === null"
-              title="Payload"
-              :value="1"
-              :subtitle="tool === null ? 'Process or Tool' : null"
-              icon="mdi-spider mdi-18px"
-              edit-icon="mdi-spider mdi-18px"
-              :color="step === 1 ? 'red' : undefined"
-            />
-            <v-stepper-item
-              title="Intensity"
-              :value="2"
-              icon="mdi-volume-high mdi-18px"
-              edit-icon="mdi-volume-high mdi-18px"
-              :color="step === 2 ? 'red' : undefined"
-            />
-            <v-stepper-item
-              title="Wordlists"
-              :disabled="
-                (selectedProcess === null ||
-                  !selectedProcess.wordlists.supported) &&
-                (selectedTool === null || !selectedTool.wordlists.supported)
-              "
-              :value="3"
-              icon="mdi-file-word-box mdi-18px"
-              edit-icon="mdi-file-word-box mdi-18px"
-              :color="step === 3 ? 'red' : undefined"
-            />
-            <v-stepper-item
-              title="Schedule"
-              :value="4"
-              icon="mdi-timer mdi-18px"
-              edit-icon="mdi-timer mdi-18px"
-              :color="step === 4 ? 'red' : undefined"
-            />
-            <v-stepper-item
-              title="Monitor"
-              :value="5"
-              icon="mdi-reload mdi-18px"
-              edit-icon="mdi-reload mdi-18px"
-              :color="step === 5 ? 'red' : undefined"
-            />
-          </v-stepper-header>
-
-          <v-stepper-window>
-            <v-stepper-window-item transition="fab-transition">
-              <v-container fluid>
-                <v-row justify="center" dense>
-                  <v-col cols="10">
-                    <v-autocomplete
-                      v-model="selectedProject"
-                      clearable
-                      auto-select-first
-                      density="comfortable"
-                      variant="outlined"
-                      label="Project"
-                      :items="projects"
-                      item-title="name"
-                      return-object
-                      :rules="[(p) => !!p || 'Project is required']"
-                      validate-on="input"
-                      @update:model-value="selectProject()"
-                    />
-                  </v-col>
-                </v-row>
-                <v-row class="mt-3" justify="center" dense>
-                  <v-col cols="10">
-                    <v-autocomplete
-                      v-model="selectedTargets"
-                      clearable
-                      chips
-                      auto-select-first
-                      density="comfortable"
-                      variant="outlined"
-                      label="Targets"
-                      :items="targets"
-                      item-title="target"
-                      return-object
-                      :disabled="selectedProject === null"
-                      multiple
-                      :rules="[(t) => t.length > 0 || 'Target is required']"
-                      validate-on="input"
-                      @click:clear="allTargets = false"
-                    >
-                      <template #prepend>
-                        <v-checkbox
-                          v-model="allTargets"
-                          label="All"
-                          hide-details
-                          @update:model-value="
-                            (value) => (selectedTargets = value ? targets : [])
-                          "
-                        />
-                      </template>
-                    </v-autocomplete>
-                  </v-col>
-                </v-row>
-              </v-container>
-            </v-stepper-window-item>
-
-            <v-stepper-window-item transition="fab-transition">
-              <v-container class="fill-height" fluid>
-                <v-row
-                  :justify="tool === null ? 'space-between' : 'center'"
-                  dense
-                >
-                  <v-col v-if="tool === null" align-self="center" cols="4">
-                    <v-autocomplete
-                      v-model="selectedProcess"
-                      clearable
-                      auto-select-first
-                      density="comfortable"
-                      variant="outlined"
-                      label="Process"
-                      :items="processes"
-                      item-title="name"
-                      return-object
-                      :rules="[
-                        (p) =>
-                          p !== null ||
-                          selectedConfiguration !== null ||
-                          'Project is required',
-                      ]"
-                      validate-on="input"
-                      @update:model-value="selectProcess()"
-                    />
-                  </v-col>
-                  <v-col align-self="center" :cols="tool !== null ? '10' : '6'">
-                    <v-autocomplete
-                      v-model="selectedTool"
-                      clearable
-                      auto-select-first
-                      density="comfortable"
-                      variant="outlined"
-                      label="Tool"
-                      :items="tools"
-                      item-title="name"
-                      return-object
-                      :disabled="tool !== null"
-                      :rules="[
-                        (t) =>
-                          t !== null ||
-                          selectedProcess !== null ||
-                          'Tool is required',
-                      ]"
-                      validate-on="input"
-                      @update:model-value="selectTool()"
-                    >
-                      <template
-                        v-if="
-                          selectedTool !== null && selectedTool.icon !== null
-                        "
-                        #prepend
-                      >
-                        <v-avatar :image="selectedTool.icon" />
-                      </template>
-                      <template
-                        v-if="
-                          selectedTool !== null &&
-                          selectedTool.reference !== null
-                        "
-                        #append
-                      >
-                        <ButtonLink :link="selectedTool.reference" />
-                      </template>
-                    </v-autocomplete>
-                    <v-autocomplete
-                      v-model="selectedConfiguration"
-                      class="mt-5"
-                      clearable
-                      auto-select-first
-                      density="comfortable"
-                      variant="outlined"
-                      label="Configuration"
-                      :items="selectedTool ? selectedTool.configurations : []"
-                      :disabled="selectedTool === null"
-                      item-title="name"
-                      return-object
-                      :rules="[
-                        (c) =>
-                          c !== null ||
-                          selectedProcess !== null ||
-                          'Configuration is required',
-                      ]"
-                      validate-on="input"
-                    />
-                  </v-col>
-                </v-row>
-              </v-container>
-            </v-stepper-window-item>
-
-            <v-stepper-window-item transition="fab-transition">
-              <v-container fluid>
-                <v-row justify="center" dense>
-                  <v-col cols="10">
-                    <v-autocomplete
-                      v-model="intensity"
-                      auto-select-first
-                      density="comfortable"
-                      variant="outlined"
-                      label="Intensity"
-                      :items="intensities"
-                      item-title="name"
-                      :color="intensity ? intensity.color : undefined"
-                      :disabled="
-                        (selectedProcess === null && selectedTool === null) ||
-                        (intensities.length === 1 && intensity)
-                      "
-                      return-object
-                      :rules="[(i) => !!i || 'Intensity is required']"
-                      validate-on="input"
-                    />
-                  </v-col>
-                </v-row>
-              </v-container>
-            </v-stepper-window-item>
-
-            <v-stepper-window-item transition="fab-transition">
-              <v-container fluid>
-                <v-row justify="space-between" dense>
-                  <v-col cols="3">
-                    <v-autocomplete
-                      v-model="wordlistFilter"
-                      clearable
-                      auto-select-first
-                      density="comfortable"
-                      variant="outlined"
-                      label="Filter by type"
-                      :items="enums.wordlists"
-                      prepend-inner-icon="mdi-routes"
-                      :disabled="
-                        selectedProcess === null && selectedTool === null
-                      "
-                      @update:model-value="getWordlists()"
-                    />
-                  </v-col>
-                  <v-col cols="8">
-                    <v-autocomplete
-                      v-model="selectedWordlists"
-                      clearable
-                      auto-select-first
-                      density="comfortable"
-                      variant="outlined"
-                      label="Wordlists"
-                      :items="wordlists"
-                      item-title="name"
-                      return-object
-                      multiple
-                      chips
-                      :disabled="
-                        selectedProcess === null && selectedTool === null
-                      "
-                      :rules="[
-                        (w) =>
-                          ((selectedProcess === null ||
-                            !selectedProcess.wordlists.required) &&
-                            (selectedTool === null ||
-                              !selectedTool.wordlists.required)) ||
-                          w.length > 0 ||
-                          'Wordlist is required',
-                      ]"
-                      validate-on="input"
-                      @click:clear="allWordlists = false"
-                    >
-                      <template #prepend>
-                        <v-checkbox
-                          v-model="allWordlists"
-                          label="All"
-                          hide-details
-                          @update:model-value="
-                            (value) =>
-                              (selectedWordlists = value ? wordlists : [])
-                          "
-                        />
-                      </template>
-                    </v-autocomplete>
-                  </v-col>
-                </v-row>
-              </v-container>
-            </v-stepper-window-item>
-
-            <v-stepper-window-item transition="fab-transition">
-              <v-container fluid>
-                <v-row justify="center" class="mb-5" dense>
-                  <v-col cols="10">
-                    <v-alert
-                      color="info"
-                      icon="$info"
-                      variant="tonal"
-                      text="You can schedule the execution at the best moment for you and your targets"
-                    />
-                  </v-col>
-                </v-row>
-                <v-row justify="space-around" dense>
-                  <v-col cols="6">
-                    <v-text-field
-                      v-model="scheduledDate"
-                      :active="dateMenu"
-                      label="Date"
-                      prepend-inner-icon="mdi-calendar"
-                      variant="underlined"
-                      readonly
-                    >
-                      <v-menu
-                        v-model="dateMenu"
-                        :close-on-content-click="false"
-                        activator="parent"
-                        transition="scale-transition"
-                      >
-                        <v-date-picker
-                          v-if="dateMenu"
-                          v-model="scheduledDate"
-                          show-adjacent-months
-                          :min="getMinDate()"
-                        >
-                          <template #actions>
-                            <v-btn text="Clear" @click="scheduledDate = null" />
-                          </template>
-                        </v-date-picker>
-                      </v-menu>
-                    </v-text-field>
-                  </v-col>
-                  <v-col cols="3">
-                    <v-text-field
-                      v-model="scheduledTime"
-                      :active="timeMenu"
-                      label="Time"
-                      prepend-inner-icon="mdi-clock-outline"
-                      variant="underlined"
-                      readonly
-                    >
-                      <v-menu
-                        v-model="timeMenu"
-                        :close-on-content-click="false"
-                        activator="parent"
-                        transition="scale-transition"
-                      >
-                        <VTimePicker
-                          v-if="timeMenu"
-                          v-model="scheduledTime"
-                          full-width
-                          format="24hr"
-                          :min="getMinTime()"
-                          scrollable
-                        >
-                          <template #actions>
-                            <v-btn text="Clear" @click="scheduledTime = null" />
-                          </template>
-                        </VTimePicker>
-                      </v-menu>
-                    </v-text-field>
-                  </v-col>
-                </v-row>
-              </v-container>
-            </v-stepper-window-item>
-
-            <v-stepper-window-item transition="fab-transition">
-              <v-container fluid>
-                <v-row justify="center" class="mb-5" dense>
-                  <v-col cols="11">
-                    <v-alert
-                      color="info"
-                      icon="$info"
-                      variant="tonal"
-                      text="Configure how often you want to monitor your targets by executing this task periodically"
-                    />
-                  </v-col>
-                </v-row>
-                <v-row justify="space-around" dense>
-                  <v-col cols="3">
-                    <VNumberInput
-                      v-model="monitor"
-                      control-variant="split"
-                      label="Time"
-                      inset
-                      clearable
-                      variant="outlined"
-                      :max="60"
-                      :min="1"
-                    />
-                  </v-col>
-                  <v-col cols="4">
-                    <v-autocomplete
-                      v-model="timeUnit"
-                      clearable
-                      auto-select-first
-                      density="comfortable"
-                      variant="outlined"
-                      label="Time unit"
-                      :items="enums.timeUnits"
-                    />
-                  </v-col>
-                </v-row>
-              </v-container>
-            </v-stepper-window-item>
-          </v-stepper-window>
-
-          <v-stepper-actions
-            @click:next="stepper.next()"
-            @click:prev="stepper.prev()"
+    <v-form v-model="valid" @submit.prevent="submit()">
+      <v-stepper ref="stepper" v-model="step" editable flat>
+        <v-stepper-header>
+          <v-stepper-item
+            title="Target"
+            :value="0"
+            icon="mdi-target mdi-18px"
+            edit-icon="mdi-target mdi-18px"
+            :color="step === 0 ? 'red' : undefined"
           />
-        </v-stepper>
+          <v-stepper-item
+            v-if="process === null"
+            title="Payload"
+            :value="1"
+            :subtitle="tool === null ? 'Process or Tool' : null"
+            icon="mdi-spider mdi-18px"
+            edit-icon="mdi-spider mdi-18px"
+            :color="step === 1 ? 'red' : undefined"
+          />
+          <v-stepper-item
+            title="Intensity"
+            :value="2"
+            icon="mdi-volume-high mdi-18px"
+            edit-icon="mdi-volume-high mdi-18px"
+            :color="step === 2 ? 'red' : undefined"
+          />
+          <v-stepper-item
+            title="Wordlists"
+            :disabled="
+              (selectedProcess === null ||
+                !selectedProcess.wordlists.supported) &&
+              (selectedTool === null || !selectedTool.wordlists.supported)
+            "
+            :value="3"
+            icon="mdi-file-word-box mdi-18px"
+            edit-icon="mdi-file-word-box mdi-18px"
+            :color="step === 3 ? 'red' : undefined"
+          />
+          <v-stepper-item
+            title="Schedule"
+            :value="4"
+            icon="mdi-timer mdi-18px"
+            edit-icon="mdi-timer mdi-18px"
+            :color="step === 4 ? 'red' : undefined"
+          />
+          <v-stepper-item
+            title="Monitor"
+            :value="5"
+            icon="mdi-reload mdi-18px"
+            edit-icon="mdi-reload mdi-18px"
+            :color="step === 5 ? 'red' : undefined"
+          />
+        </v-stepper-header>
 
-        <v-btn
-          v-if="!loading"
-          color="red"
-          size="large"
-          variant="tonal"
-          text="Execute"
-          type="submit"
-          prepend-icon="mdi-play"
-          block
-          :disabled="!isValid()"
+        <v-stepper-window>
+          <v-stepper-window-item transition="fab-transition">
+            <v-container fluid>
+              <v-row justify="center" dense>
+                <v-col cols="10">
+                  <v-autocomplete
+                    v-model="selectedProject"
+                    clearable
+                    auto-select-first
+                    density="comfortable"
+                    variant="outlined"
+                    label="Project"
+                    :items="projects"
+                    item-title="name"
+                    return-object
+                    :rules="[(p) => !!p || 'Project is required']"
+                    validate-on="input"
+                    @update:model-value="selectProject()"
+                  />
+                </v-col>
+              </v-row>
+              <v-row class="mt-3" justify="center" dense>
+                <v-col cols="10">
+                  <v-autocomplete
+                    v-model="selectedTargets"
+                    clearable
+                    chips
+                    auto-select-first
+                    density="comfortable"
+                    variant="outlined"
+                    label="Targets"
+                    :items="targets"
+                    item-title="target"
+                    return-object
+                    :disabled="selectedProject === null"
+                    multiple
+                    :rules="[(t) => t.length > 0 || 'Target is required']"
+                    validate-on="input"
+                    @click:clear="allTargets = false"
+                  >
+                    <template #prepend>
+                      <v-checkbox
+                        v-model="allTargets"
+                        label="All"
+                        hide-details
+                        @update:model-value="
+                          (value) => (selectedTargets = value ? targets : [])
+                        "
+                      />
+                    </template>
+                  </v-autocomplete>
+                </v-col>
+              </v-row>
+            </v-container>
+          </v-stepper-window-item>
+
+          <v-stepper-window-item transition="fab-transition">
+            <v-container class="fill-height" fluid>
+              <v-row
+                :justify="tool === null ? 'space-between' : 'center'"
+                dense
+              >
+                <v-col v-if="tool === null" align-self="center" cols="4">
+                  <v-autocomplete
+                    v-model="selectedProcess"
+                    clearable
+                    auto-select-first
+                    density="comfortable"
+                    variant="outlined"
+                    label="Process"
+                    :items="processes"
+                    item-title="name"
+                    return-object
+                    :rules="[
+                      (p) =>
+                        p !== null ||
+                        selectedConfiguration !== null ||
+                        'Project is required',
+                    ]"
+                    validate-on="input"
+                    @update:model-value="selectProcess()"
+                  />
+                </v-col>
+                <v-col align-self="center" :cols="tool !== null ? '10' : '6'">
+                  <v-autocomplete
+                    v-model="selectedTool"
+                    clearable
+                    auto-select-first
+                    density="comfortable"
+                    variant="outlined"
+                    label="Tool"
+                    :items="tools"
+                    item-title="name"
+                    return-object
+                    :disabled="tool !== null"
+                    :rules="[
+                      (t) =>
+                        t !== null ||
+                        selectedProcess !== null ||
+                        'Tool is required',
+                    ]"
+                    validate-on="input"
+                    @update:model-value="selectTool()"
+                  >
+                    <template
+                      v-if="selectedTool !== null && selectedTool.icon !== null"
+                      #prepend
+                    >
+                      <v-avatar :image="selectedTool.icon" />
+                    </template>
+                    <template
+                      v-if="
+                        selectedTool !== null && selectedTool.reference !== null
+                      "
+                      #append
+                    >
+                      <ButtonLink :link="selectedTool.reference" />
+                    </template>
+                  </v-autocomplete>
+                  <v-autocomplete
+                    v-model="selectedConfiguration"
+                    class="mt-5"
+                    clearable
+                    auto-select-first
+                    density="comfortable"
+                    variant="outlined"
+                    label="Configuration"
+                    :items="selectedTool ? selectedTool.configurations : []"
+                    :disabled="selectedTool === null"
+                    item-title="name"
+                    return-object
+                    :rules="[
+                      (c) =>
+                        c !== null ||
+                        selectedProcess !== null ||
+                        'Configuration is required',
+                    ]"
+                    validate-on="input"
+                  />
+                </v-col>
+              </v-row>
+            </v-container>
+          </v-stepper-window-item>
+
+          <v-stepper-window-item transition="fab-transition">
+            <v-container fluid>
+              <v-row justify="center" dense>
+                <v-col cols="10">
+                  <v-autocomplete
+                    v-model="intensity"
+                    auto-select-first
+                    density="comfortable"
+                    variant="outlined"
+                    label="Intensity"
+                    :items="intensities"
+                    item-title="name"
+                    :color="intensity ? intensity.color : undefined"
+                    :disabled="
+                      (selectedProcess === null && selectedTool === null) ||
+                      (intensities.length === 1 && intensity)
+                    "
+                    return-object
+                    :rules="[(i) => !!i || 'Intensity is required']"
+                    validate-on="input"
+                  />
+                </v-col>
+              </v-row>
+            </v-container>
+          </v-stepper-window-item>
+
+          <v-stepper-window-item transition="fab-transition">
+            <v-container fluid>
+              <v-row justify="space-between" dense>
+                <v-col cols="3">
+                  <v-autocomplete
+                    v-model="wordlistFilter"
+                    clearable
+                    auto-select-first
+                    density="comfortable"
+                    variant="outlined"
+                    label="Filter by type"
+                    :items="enums.wordlists"
+                    prepend-inner-icon="mdi-routes"
+                    :disabled="
+                      selectedProcess === null && selectedTool === null
+                    "
+                    @update:model-value="getWordlists()"
+                  />
+                </v-col>
+                <v-col cols="8">
+                  <v-autocomplete
+                    v-model="selectedWordlists"
+                    clearable
+                    auto-select-first
+                    density="comfortable"
+                    variant="outlined"
+                    label="Wordlists"
+                    :items="wordlists"
+                    item-title="name"
+                    return-object
+                    multiple
+                    chips
+                    :disabled="
+                      selectedProcess === null && selectedTool === null
+                    "
+                    :rules="[
+                      (w) =>
+                        ((selectedProcess === null ||
+                          !selectedProcess.wordlists.required) &&
+                          (selectedTool === null ||
+                            !selectedTool.wordlists.required)) ||
+                        w.length > 0 ||
+                        'Wordlist is required',
+                    ]"
+                    validate-on="input"
+                    @click:clear="allWordlists = false"
+                  >
+                    <template #prepend>
+                      <v-checkbox
+                        v-model="allWordlists"
+                        label="All"
+                        hide-details
+                        @update:model-value="
+                          (value) =>
+                            (selectedWordlists = value ? wordlists : [])
+                        "
+                      />
+                    </template>
+                  </v-autocomplete>
+                </v-col>
+              </v-row>
+            </v-container>
+          </v-stepper-window-item>
+
+          <v-stepper-window-item transition="fab-transition">
+            <v-container fluid>
+              <v-row justify="center" class="mb-5" dense>
+                <v-col cols="10">
+                  <v-alert
+                    color="info"
+                    icon="$info"
+                    variant="tonal"
+                    text="You can schedule the execution at the best moment for you and your targets"
+                  />
+                </v-col>
+              </v-row>
+              <v-row justify="space-around" dense>
+                <v-col cols="6">
+                  <v-text-field
+                    v-model="scheduledDate"
+                    :active="dateMenu"
+                    label="Date"
+                    prepend-inner-icon="mdi-calendar"
+                    variant="underlined"
+                    readonly
+                  >
+                    <v-menu
+                      v-model="dateMenu"
+                      :close-on-content-click="false"
+                      activator="parent"
+                      transition="scale-transition"
+                    >
+                      <v-date-picker
+                        v-if="dateMenu"
+                        v-model="scheduledDate"
+                        show-adjacent-months
+                        :min="getMinDate()"
+                      >
+                        <template #actions>
+                          <v-btn text="Clear" @click="scheduledDate = null" />
+                        </template>
+                      </v-date-picker>
+                    </v-menu>
+                  </v-text-field>
+                </v-col>
+                <v-col cols="3">
+                  <v-text-field
+                    v-model="scheduledTime"
+                    :active="timeMenu"
+                    label="Time"
+                    prepend-inner-icon="mdi-clock-outline"
+                    variant="underlined"
+                    readonly
+                  >
+                    <v-menu
+                      v-model="timeMenu"
+                      :close-on-content-click="false"
+                      activator="parent"
+                      transition="scale-transition"
+                    >
+                      <VTimePicker
+                        v-if="timeMenu"
+                        v-model="scheduledTime"
+                        full-width
+                        format="24hr"
+                        :min="getMinTime()"
+                        scrollable
+                      >
+                        <template #actions>
+                          <v-btn text="Clear" @click="scheduledTime = null" />
+                        </template>
+                      </VTimePicker>
+                    </v-menu>
+                  </v-text-field>
+                </v-col>
+              </v-row>
+            </v-container>
+          </v-stepper-window-item>
+
+          <v-stepper-window-item transition="fab-transition">
+            <v-container fluid>
+              <v-row justify="center" class="mb-5" dense>
+                <v-col cols="11">
+                  <v-alert
+                    color="info"
+                    icon="$info"
+                    variant="tonal"
+                    text="Configure how often you want to monitor your targets by executing this task periodically"
+                  />
+                </v-col>
+              </v-row>
+              <v-row justify="space-around" dense>
+                <v-col cols="3">
+                  <VNumberInput
+                    v-model="monitor"
+                    control-variant="split"
+                    label="Time"
+                    inset
+                    clearable
+                    variant="outlined"
+                    :max="60"
+                    :min="1"
+                  />
+                </v-col>
+                <v-col cols="4">
+                  <v-autocomplete
+                    v-model="timeUnit"
+                    clearable
+                    auto-select-first
+                    density="comfortable"
+                    variant="outlined"
+                    label="Time unit"
+                    :items="enums.timeUnits"
+                  />
+                </v-col>
+              </v-row>
+            </v-container>
+          </v-stepper-window-item>
+        </v-stepper-window>
+
+        <v-stepper-actions
+          @click:next="stepper.next()"
+          @click:prev="stepper.prev()"
         />
-        <v-progress-linear
-          v-if="loading"
-          v-model="progressPercentage"
-          height="20"
-          color="red"
-        >
-          <strong>{{ progressPercentage }}%</strong>
-        </v-progress-linear>
-      </v-form>
-    </template>
+      </v-stepper>
+
+      <v-btn
+        v-if="!loading"
+        color="red"
+        size="large"
+        variant="tonal"
+        text="Execute"
+        type="submit"
+        prepend-icon="mdi-play"
+        block
+        :disabled="!isValid()"
+      />
+      <v-progress-linear
+        v-if="loading"
+        v-model="progressPercentage"
+        height="20"
+        color="red"
+      >
+        <strong>{{ progressPercentage }}%</strong>
+      </v-progress-linear>
+    </v-form>
   </DialogDefault>
 </template>
 

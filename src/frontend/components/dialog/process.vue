@@ -4,24 +4,22 @@
     :loading="loading"
     @close-dialog="closeDialog(step === 1)"
   >
-    <template #default>
-      <FormProcess
-        v-if="step === 0"
-        :api="api"
-        :edit="edit ? edit : process"
-        @loading="(value) => (loading = value)"
-        @completed="
-          (data) => {
-            edit ? closeDialog(true) : createdProcess(data);
-          }
-        "
-      />
-      <FormSteps
-        v-if="step === 1"
-        :process="process"
-        @reload="api.get(process.id).then((response) => (process = response))"
-      />
-    </template>
+    <FormProcess
+      v-if="step === 0"
+      :api="api"
+      :edit="edit ? edit : process"
+      @loading="(value) => (loading = value)"
+      @completed="
+        (data) => {
+          edit ? closeDialog(true) : createdProcess(data);
+        }
+      "
+    />
+    <FormSteps
+      v-if="step === 1"
+      :process="process"
+      @reload="api.get(process.id).then((response) => (process = response))"
+    />
   </DialogDefault>
 </template>
 

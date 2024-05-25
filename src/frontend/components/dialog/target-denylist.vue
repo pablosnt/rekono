@@ -1,13 +1,13 @@
 <template>
   <DialogDefault
-    title="New HTTP Header"
+    title="New Target Pattern To Deny"
     :loading="loading"
     @close-dialog="
       loading = false;
       $emit('closeDialog');
     "
   >
-    <FormHttpHeader
+    <FormTargetDenylist
       :api="api"
       @loading="(value) => (loading = value)"
       @completed="

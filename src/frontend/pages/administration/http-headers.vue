@@ -58,7 +58,7 @@
 
 <script setup lang="ts">
 definePageMeta({ layout: false });
-defineEmits(["closeDialog", "completed"]);
+defineEmits(["closeDialog"]);
 const DialogHttpHeader = resolveComponent("DialogHttpHeader");
 const api = ref(useApi("/api/http-headers/", true, "HTTP header"));
 const dataset = ref(null);
