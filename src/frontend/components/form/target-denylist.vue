@@ -17,7 +17,7 @@
           ]"
           @update:model-value="disabled = false"
         >
-          <template v-if="pattern && !pattern.default" #append>
+          <template v-if="pattern" #append>
             <ButtonSave
               v-if="!pattern.default"
               :disabled="disabled"

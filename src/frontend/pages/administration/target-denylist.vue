@@ -6,7 +6,7 @@
           color="info"
           icon="$info"
           variant="tonal"
-          text="Targets can be denied by regexes, specific values or whole networks"
+          text="Targets can be denied by regexes, specific values or whole networks. Default patterns can't be edited or removed as they are protecting the own Rekono infrastructure"
           closable
         />
       </v-row>
