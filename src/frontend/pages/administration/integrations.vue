@@ -30,6 +30,12 @@
                     />
                   </template>
                   <template #default="{ isActive }">
+                    <DialogDefectDojo
+                      v-if="integration.id === 1"
+                      :integration-api="api"
+                      :integration="integration"
+                      @close-dialog="isActive.value = false"
+                    />
                     <DialogCveCrowd
                       v-if="integration.id === 4"
                       :integration-api="api"
