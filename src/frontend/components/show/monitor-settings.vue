@@ -29,7 +29,7 @@
               @click="
                 api
                   .update({ hour_span: monitor.hour_span }, 1)
-                  .then((data) => (monitor = data))
+                  .then((response) => (monitor = response))
               "
             />
           </template>
@@ -50,5 +50,5 @@ import { VNumberInput } from "vuetify/labs/VNumberInput";
 const save = ref(false);
 const api = useApi("/api/monitor/", true, "Monitoring");
 const monitor = ref({});
-api.get(1).then((data) => (monitor.value = data));
+api.get(1).then((response) => (monitor.value = response));
 </script>

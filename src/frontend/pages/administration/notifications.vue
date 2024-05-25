@@ -5,7 +5,7 @@
         <v-col align-self="center" cols="5">
           <ShowNotification
             :api="smtpApi"
-            :data="smtp"
+            :notification="smtp"
             title="e-Mail"
             card-color="grey-lighten-3"
             icon="mdi-email"
@@ -16,7 +16,7 @@
         <v-col align-self="center" cols="5">
           <ShowNotification
             :api="telegramApi"
-            :data="telegram"
+            :notification="telegram"
             title="Telegram"
             :subtitle="telegram?.bot ? `@${telegram?.bot}` : undefined"
             card-color="light-blue-lighten-5"
@@ -69,7 +69,7 @@ const smtp = ref({
   username: null,
   password: null,
 });
-smtpApi.get(1).then((data) => (smtp.value = data));
+smtpApi.get(1).then((response) => (smtp.value = response));
 
 const FormTelegram = resolveComponent("FormTelegram");
 const telegramApi = useApi(
@@ -78,5 +78,5 @@ const telegramApi = useApi(
   "Telegram settings",
 );
 const telegram = ref({ bot: null, token: null });
-telegramApi.get(1).then((data) => (telegram.value = data));
+telegramApi.get(1).then((response) => (telegram.value = response));
 </script>

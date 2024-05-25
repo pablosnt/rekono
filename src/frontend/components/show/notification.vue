@@ -39,9 +39,9 @@
 </template>
 
 <script setup lang="ts">
-defineProps({
+const props = defineProps({
   api: Object,
-  data: Object,
+  notification: Object,
   title: String,
   subtitle: {
     type: String,
@@ -63,5 +63,6 @@ defineProps({
   },
   form: Object,
 });
+const data = ref(props.notification ? props.notification : null);
 const loading = ref(false);
 </script>

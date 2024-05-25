@@ -19,7 +19,7 @@
       <FormSteps
         v-if="step === 1"
         :process="process"
-        @reload="api.get(process.id).then((data) => (process = data))"
+        @reload="api.get(process.id).then((response) => (process = response))"
       />
     </template>
   </DialogDefault>

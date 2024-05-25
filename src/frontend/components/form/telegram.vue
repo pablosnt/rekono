@@ -45,6 +45,7 @@ emit("loading", true);
 const validate = ref(useValidation());
 const valid = ref(true);
 
+// TODO: Move this to a variable per field model
 const telegram = ref({ token: null });
 watch(
   () => props.data,
@@ -57,8 +58,8 @@ watch(
 function submit() {
   if (valid.value) {
     emit("loading", true);
-    props.api.update({ token: telegram.value.token }, 1).then((data) => {
-      emit("completed", data);
+    props.api.update({ token: telegram.value.token }, 1).then((response) => {
+      emit("completed", response);
       emit("loading", false);
     });
   }

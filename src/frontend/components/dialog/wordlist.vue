@@ -87,7 +87,7 @@ const loading = ref(false);
 const maxSize = ref(512 * 1000000);
 useApi("/api/settings/", true, "Settings")
   .get(1)
-  .then((data) => (maxSize.value = data.max_uploaded_file_mb));
+  .then((response) => (maxSize.value = response.max_uploaded_file_mb));
 
 const name = ref(props.edit ? props.edit.name : null);
 const type = ref(props.edit ? props.edit.type : null);
@@ -109,8 +109,8 @@ function submit() {
       body.append("file", file.value);
     }
     request(body, props.edit?.id)
-      .then((data) => {
-        emit("completed", data);
+      .then((response) => {
+        emit("completed", response);
         loading.value = false;
         emit("closeDialog");
       })

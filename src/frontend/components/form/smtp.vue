@@ -109,6 +109,7 @@ const validate = ref(useValidation());
 const valid = ref(true);
 const disabled = ref(true);
 
+// TODO: Move this to a variable per field model
 const smtp = ref({
   host: null,
   port: null,
@@ -136,8 +137,8 @@ function submit() {
       data.password = smtp.value.password;
     }
     emit("loading", true);
-    props.api.update(data, 1).then((data) => {
-      emit("completed", data);
+    props.api.update(data, 1).then((response) => {
+      emit("completed", response);
       emit("loading", false);
       disabled.value = true;
     });

@@ -96,8 +96,8 @@ function submit() {
       { name: name.value, description: description.value, tags: tags.value },
       props.edit?.id,
     )
-      .then((data) => {
-        emit("completed", data);
+      .then((response) => {
+        emit("completed", response);
       })
       .catch(() => {
         emit("loading", false);

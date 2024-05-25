@@ -1,12 +1,25 @@
 <template>
-  <v-card
-    elevation="4"
+  <DialogDefault
     :title="data.name"
-    :text="data.description"
-    :prepend-avatar="data.icon"
-    :hover="data.id === 1 || data.id === 4"
+    :avatar="data.icon"
+    :loading="!color ? loading : false"
+    @close-dialog="$emit('closeDialog')"
   >
-    <template #append>
+    <template #extra-append>
+      <ButtonGreenCheck
+        v-if="!loading"
+        :condition="isAvailable"
+        true-text="Available"
+        false-text="Not Available"
+      />
+      <v-progress-circular
+        v-if="loading"
+        class="ma-3"
+        :color="color"
+        :size="24"
+        indeterminate
+      />
+      <span class="me-3" />
       <v-switch
         :model-value="data.enabled"
         color="success"
@@ -20,16 +33,24 @@
           })
         "
       />
+      <span class="me-3" />
       <ButtonLink :link="data.reference" />
     </template>
-  </v-card>
+    <template #default>
+      <slot />
+    </template>
+  </DialogDefault>
 </template>
 
 <script setup lang="ts">
 const props = defineProps({
   api: Object,
   integration: Object,
+  isAvailable: Boolean,
+  color: String,
+  loading: Boolean,
 });
 const data = ref(props.integration ? props.integration : {});
 const alert = ref(useAlert());
+defineEmits(["closeDialog"]);
 </script>

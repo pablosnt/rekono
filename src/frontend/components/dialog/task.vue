@@ -518,7 +518,7 @@ const timeUnit = ref("Days");
 if (!selectedProject.value) {
   useApi("/api/projects/", true, "Project")
     .list({}, true)
-    .then((data) => (projects.value = data.items));
+    .then((response) => (projects.value = response.items));
 }
 if (selectedTargets.value.length === 0 && selectedProject.value) {
   selectProject();
@@ -530,10 +530,10 @@ if (
 ) {
   useApi("/api/processes/", true, "Process")
     .list({}, true)
-    .then((data) => (processes.value = data.items));
+    .then((response) => (processes.value = response.items));
   useApi("/api/tools/", true, "Tool")
     .list({}, true)
-    .then((data) => (tools.value = data.items));
+    .then((response) => (tools.value = response.items));
 } else if (selectedTool.value) {
   selectTool();
 } else if (selectedProcess.value) {
@@ -545,7 +545,7 @@ function selectProject() {
   selectedTargets.value = [];
   useApi("/api/targets/", true, "Target")
     .list({ project: selectedProject.value.id }, true)
-    .then((data) => (targets.value = data.items));
+    .then((response) => (targets.value = response.items));
 }
 function selectTool() {
   if (selectedTool.value) {
@@ -553,7 +553,7 @@ function selectTool() {
     selectedConfiguration.value = null;
     useApi("/api/configurations/", true, "Configuration")
       .list({ tool: selectedTool.value.id, default: true })
-      .then((data) => (selectedConfiguration.value = data.items[0]));
+      .then((response) => (selectedConfiguration.value = response.items[0]));
     intensity.value = null;
     intensities.value = selectedTool.value.intensities.map((item) => {
       const details = Object.assign(
@@ -604,7 +604,7 @@ function defaultIntensities() {
 function getWordlists() {
   useApi("/api/wordlists/", true, "Wordlist")
     .list(wordlistFilter.value ? { type: wordlistFilter.value } : {}, true)
-    .then((data) => (wordlists.value = data.items));
+    .then((response) => (wordlists.value = response.items));
 }
 function getMinDate() {
   const date = new Date();
@@ -668,7 +668,7 @@ function submit() {
       body.target_id = selectedTargets.value[i].id;
       api
         .create(body)
-        .then((data) => {
+        .then((response) => {
           progress.value++;
           if (errors + progress.value === selectedTargets.value.length) {
             loading.value = false;
@@ -679,7 +679,7 @@ function submit() {
               });
             } else {
               router.push({
-                path: `/projects/${selectedProject.value.id}/tasks/${data.id}`,
+                path: `/projects/${selectedProject.value.id}/tasks/${response.id}`,
               });
             }
           }
