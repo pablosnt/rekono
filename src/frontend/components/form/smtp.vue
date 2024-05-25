@@ -4,7 +4,7 @@
       <v-row justify="space-around" dense>
         <v-col cols="6">
           <v-text-field
-            v-model="smtp.host"
+            v-model="host"
             prepend-icon="mdi-server"
             label="SMTP Host"
             variant="outlined"
@@ -16,12 +16,12 @@
             ]"
             validate-on="input"
             clearable
-            @update:model-value="disabled = smtp.host === null"
+            @update:model-value="disabled = host === null"
           />
         </v-col>
         <v-col cols="4">
           <VNumberInput
-            v-model="smtp.port"
+            v-model="port"
             hide-details
             hide-spin-buttons
             single-line
@@ -33,12 +33,12 @@
             :min="1"
             :rules="[(p) => !!p || 'Port is required']"
             validate-on="input"
-            @update:model-value="disabled = smtp.port === null"
+            @update:model-value="disabled = port === null"
           />
         </v-col>
         <v-col cols="2">
           <v-checkbox
-            v-model="smtp.tls"
+            v-model="tls"
             label="TLS"
             hide-details
             @update:model-value="disabled = false"
@@ -48,7 +48,7 @@
       <v-row class="mt-6" dense>
         <v-col cols="10">
           <v-text-field
-            v-model="smtp.username"
+            v-model="username"
             density="compact"
             label="Username"
             prepend-icon="mdi-account"
@@ -66,7 +66,7 @@
       <v-row dense>
         <v-col cols="10">
           <v-text-field
-            v-model="smtp.password"
+            v-model="password"
             type="password"
             density="compact"
             label="Password"
@@ -104,37 +104,28 @@ const props = defineProps({
   data: Object,
 });
 const emit = defineEmits(["completed", "loading"]);
-emit("loading", true);
 const validate = ref(useValidation());
 const valid = ref(true);
 const disabled = ref(true);
-
-// TODO: Move this to a variable per field model
-const smtp = ref({
-  host: null,
-  port: null,
-  tls: false,
-  username: null,
-  password: null,
-});
-watch(
-  () => props.data,
-  () => {
-    emit("loading", false);
-    smtp.value = props.data;
-  },
-);
+const host = ref(props.data ? props.data.host : null);
+const port = ref(props.data ? props.data.port : null);
+const tls = ref(props.data ? props.data.tls : false);
+const username = ref(props.data ? props.data.username : null);
+const password = ref(props.data ? props.data.password : null);
 
 function submit() {
   if (valid.value) {
     const data = {
-      host: smtp.value.host,
-      port: smtp.value.port,
-      tls: smtp.value.tls,
-      username: smtp.value.username,
+      host: host.value,
+      port: port.value,
+      tls: tls.value,
+      username: username.value,
     };
-    if (smtp.value.password !== "*".repeat(smtp.value.password.length)) {
-      data.password = smtp.value.password;
+    if (
+      !password.value ||
+      password.value !== "*".repeat(password.value.length)
+    ) {
+      data.password = password.value;
     }
     emit("loading", true);
     props.api.update(data, 1).then((response) => {

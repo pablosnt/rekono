@@ -3,7 +3,7 @@
     <v-container fluid>
       <v-row justify="center" dense>
         <v-text-field
-          v-model="telegram.token"
+          v-model="token"
           type="password"
           density="compact"
           label="Telegram token"
@@ -24,10 +24,7 @@
         text="Save"
         type="submit"
         class="mt-5"
-        :disabled="
-          telegram.token !== null &&
-          telegram.token === '*'.repeat(telegram.token.length)
-        "
+        :disabled="token !== null && token === '*'.repeat(token.length)"
         block
         autofocus
       />
@@ -41,24 +38,14 @@ const props = defineProps({
   data: Object,
 });
 const emit = defineEmits(["completed", "loading"]);
-emit("loading", true);
 const validate = ref(useValidation());
 const valid = ref(true);
-
-// TODO: Move this to a variable per field model
-const telegram = ref({ token: null });
-watch(
-  () => props.data,
-  () => {
-    emit("loading", false);
-    telegram.value = props.data;
-  },
-);
+const token = ref(props.data ? props.data.token : null);
 
 function submit() {
   if (valid.value) {
     emit("loading", true);
-    props.api.update({ token: telegram.value.token }, 1).then((response) => {
+    props.api.update({ token: token.value }, 1).then((response) => {
       emit("completed", response);
       emit("loading", false);
     });
