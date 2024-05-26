@@ -17,8 +17,8 @@
                 class="mx-auto"
                 density="compact"
                 :title="
-                  user.name && user.last_name
-                    ? `${user.last_name}, ${user.name}`
+                  user.first_name && user.last_name
+                    ? `${user.first_name} ${user.last_name}`
                     : user.email
                 "
                 :subtitle="user.username ? `@${user.username}` : undefined"
@@ -56,25 +56,16 @@
                           </v-avatar>
                           <h3 class="mt-2">
                             {{
-                              user.name
-                                ? `${user.last_name}, ${user.name}`
+                              user.first_name
+                                ? `${user.first_name} ${user.last_name}`
                                 : user.email
                             }}
                           </h3>
+                          <p v-if="user.username" class="text-primary mt-2">
+                            {{ `@${user.username}` }}
+                          </p>
                           <v-btn
-                            v-if="user.username"
-                            class="pa-0 text-none"
-                            color="primary"
-                            variant="plain"
-                            :text="`@${user.username}`"
-                            :href="
-                              user.name ? undefined : `mailto:${user.email}`
-                            "
-                            @click.stop
-                          />
-                          <br />
-                          <v-btn
-                            v-if="user.name"
+                            v-if="user.first_name"
                             class="pa-0 text-none"
                             color="primary"
                             variant="text"

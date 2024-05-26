@@ -127,7 +127,7 @@ function submit() {
             !password.value ||
             password.value !== "*".repeat(password.value.length)
               ? password.value !== null
-                ? password.value.trim()
+                ? password.value
                 : null
               : undefined,
         },

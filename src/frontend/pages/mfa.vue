@@ -15,7 +15,7 @@
         v-model="mfa"
         variant="solo"
         autofocus
-        validate-on="input"
+        validate-on="blur"
         :rules="[
           (o) => !!o || 'OTP is required',
           (o) => validate.mfa.test(o) || 'Invalid OTP',

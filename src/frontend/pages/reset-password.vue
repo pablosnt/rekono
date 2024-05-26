@@ -33,7 +33,7 @@
             validate.password(p) ||
             'Password must contain one uppercase, lowercase, digit and symbol',
         ]"
-        validate-on="input"
+        validate-on="blur"
         @click:append-inner="visible = !visible"
       />
 

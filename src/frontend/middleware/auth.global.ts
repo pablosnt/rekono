@@ -1,7 +1,7 @@
 export default defineNuxtRouteMiddleware((to, _) => {
   const user = userStore();
   const tokens = useTokens();
-  const publicRoutes = ["login", "reset-password", "mfa"];
+  const publicRoutes = ["login", "signup", "reset-password", "mfa"];
   user.check();
   if (
     (to.name === "mfa" && !tokens.get().mfa) ||
