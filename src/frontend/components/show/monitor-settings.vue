@@ -41,7 +41,7 @@
       <v-col cols="9">
         <v-banner
           icon="mdi-timelapse"
-          :text="`Last monitor was on ${new Date(monitor.last_monitor).toString()}`"
+          :text="`Last monitor was on ${new Date(monitor.last_monitor).toUTCString()}`"
         />
       </v-col>
     </v-row>

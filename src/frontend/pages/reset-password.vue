@@ -15,7 +15,7 @@
           (e) => !!e || 'Email is required',
           (e) => validate.email.test(e) || 'Invalid Email address',
         ]"
-        validate-on="input"
+        validate-on="blur"
       />
 
       <v-text-field

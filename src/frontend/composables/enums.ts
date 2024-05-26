@@ -51,6 +51,20 @@ export function useEnums() {
   };
   const wordlists = ["Subdomain", "Endpoint"];
   const timeUnits = ["Weeks", "Days", "Hours", "Minutes"];
+  const roles = {
+    Admin: {
+      icon: "mdi-account-tie",
+      color: "blue",
+    },
+    Auditor: {
+      icon: "mdi-account-cowboy-hat",
+      color: "red",
+    },
+    Reader: {
+      icon: "mdi-account-eye",
+      color: "green",
+    },
+  };
 
-  return { stages, intensities, wordlists, timeUnits };
+  return { stages, intensities, wordlists, timeUnits, roles };
 }
