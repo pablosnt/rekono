@@ -44,7 +44,7 @@
       </div>
     </v-card-text>
 
-    <v-card-actions v-if="user.role !== 'Reader'">
+    <v-card-actions>
       <v-dialog width="auto">
         <template #activator="{ props: activatorProps }">
           <v-btn hover icon size="x-large" v-bind="activatorProps">

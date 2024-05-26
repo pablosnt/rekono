@@ -111,7 +111,6 @@ const visible = ref(false);
 
 function submit() {
   if (valid.value) {
-    // TODO: Check passwords are not being trimmed
     loading.value = true;
     api
       .create({

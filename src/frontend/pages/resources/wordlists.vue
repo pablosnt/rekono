@@ -61,7 +61,7 @@
                   <span class="me-3" />
                 </template>
 
-                <v-card-actions v-if="user.role !== 'Reader'">
+                <v-card-actions>
                   <v-spacer />
                   <ButtonLike
                     :api="api"

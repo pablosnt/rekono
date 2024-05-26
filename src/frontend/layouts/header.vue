@@ -13,7 +13,9 @@
         <v-tab value="home" to="/">Home</v-tab>
         <v-tab value="projects" to="/projects">Projects</v-tab>
         <v-tab value="notes" to="/notes">Notes</v-tab>
-        <v-tab value="resources" to="/resources">Resources</v-tab>
+        <v-tab v-if="user.role !== 'Reader'" value="resources" to="/resources"
+          >Resources</v-tab
+        >
         <v-tab
           v-if="user.role === 'Admin'"
           value="administration"

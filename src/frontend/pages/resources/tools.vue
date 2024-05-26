@@ -111,7 +111,6 @@
                   </v-dialog>
                   <v-spacer />
                   <ButtonLike
-                    v-if="user.role !== 'Reader'"
                     :api="api"
                     :item="tool"
                     @reload="(value) => dataset.loadData(value)"
@@ -133,7 +132,6 @@ defineEmits(["loadData"]);
 const tools = ref(null);
 const show = ref(null);
 const dataset = ref(null);
-const user = userStore();
 const enums = ref(useEnums());
 const api = ref(useApi("/api/tools/", true, "Tool"));
 const filtering = ref([
