@@ -27,6 +27,10 @@ class RQStatsView(APIView):
             200: inline_serializer(
                 name="RQStats",
                 fields={
+                    "tasks": inline_serializer(
+                        name="TasksStats",
+                        fields={k: serializers.IntegerField() for k in exposed_fields},
+                    ),
                     "executions": inline_serializer(
                         name="ExecutionsStats",
                         fields={k: serializers.IntegerField() for k in exposed_fields},
@@ -35,8 +39,8 @@ class RQStatsView(APIView):
                         name="FindingsStats",
                         fields={k: serializers.IntegerField() for k in exposed_fields},
                     ),
-                    "tasks": inline_serializer(
-                        name="TasksStats",
+                    "monitor": inline_serializer(
+                        name="MonitorStats",
                         fields={k: serializers.IntegerField() for k in exposed_fields},
                     ),
                 },
@@ -44,7 +48,7 @@ class RQStatsView(APIView):
         },
     )
     def get(self, request: Request) -> Response:
-        stats = {}
+        stats = {"tasks": {}, "executions": {}, "findings": {}, "monitor": {}}
         for queue in get_statistics().get("queues", []):
             stats[queue["name"]] = {
                 k: v for k, v in queue.items() if k in exposed_fields

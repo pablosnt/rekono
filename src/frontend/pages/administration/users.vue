@@ -81,7 +81,10 @@
                             :text="user.email"
                             :href="`mailto:${user.email}`"
                           />
-                          <p class="text-medium-emphasis mt-2">
+                          <p
+                            v-if="user.username"
+                            class="text-medium-emphasis mt-2"
+                          >
                             Joined on
                             {{ new Date(user.date_joined).toUTCString() }}
                           </p>

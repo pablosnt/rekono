@@ -15,6 +15,7 @@
           ]"
           validate-on="input"
           clearable
+          @update:model-value="disabled = false"
         />
       </v-row>
       <v-btn
@@ -24,7 +25,9 @@
         text="Save"
         type="submit"
         class="mt-5"
-        :disabled="token !== null && token === '*'.repeat(token.length)"
+        :disabled="
+          disabled || (token !== null && token === '*'.repeat(token.length))
+        "
         block
         autofocus
       />
@@ -40,6 +43,7 @@ const props = defineProps({
 const emit = defineEmits(["completed", "loading"]);
 const validate = ref(useValidation());
 const valid = ref(true);
+const disabled = ref(true);
 const token = ref(props.data ? props.data.token : null);
 
 function submit() {

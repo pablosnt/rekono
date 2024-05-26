@@ -2,7 +2,7 @@
   <MenuAdministration>
     <v-form v-model="valid" @submit.prevent="submit()">
       <v-container fluid>
-        <v-row justify="space-around" dense>
+        <v-row justify="center" dense>
           <v-col cols="5">
             <v-card variant="text" class="mt-5" width="100%">
               <v-card-title class="text-h5">
@@ -16,7 +16,7 @@
                     <v-switch
                       v-model="settings.auto_fix_findings"
                       color="red"
-                      label="Mark findings as fixed automatically when they are not longer detected by the same tool and configuration"
+                      label="Mark findings as fixed automatically when they are no longer detected by the same tool and configuration"
                       @update:model-value="disabled = false"
                     />
                   </v-col>
@@ -24,7 +24,7 @@
               </v-container>
             </v-card>
           </v-col>
-          <v-col cols="5">
+          <v-col cols="4">
             <v-card variant="text" class="mt-5" width="100%">
               <v-card-title class="text-h5">
                 <v-icon color="red" icon="mdi-lock" />
@@ -52,8 +52,8 @@
             </v-card>
           </v-col>
         </v-row>
-        <v-row justify="space-around" dense>
-          <v-col cols="10">
+        <v-row justify="center" dense>
+          <v-col cols="9">
             <v-card variant="text" class="mt-5" width="100%">
               <v-card-title class="text-h5">
                 <v-icon color="red" icon="mdi-plus-network" />
@@ -111,17 +111,19 @@
             </v-card>
           </v-col>
         </v-row>
-        <v-btn
+        <v-fab
           color="red"
-          size="large"
-          variant="tonal"
-          text="Save"
-          type="submit"
-          class="mt-5"
-          block
-          autofocus
+          icon
+          class="position-fixed"
+          location="bottom"
+          size="64"
           :disabled="disabled"
-        />
+          app
+          @click="submit()"
+        >
+          <v-icon icon="mdi-tray-arrow-down" />
+          <v-tooltip activator="parent" text="Save" />
+        </v-fab>
       </v-container>
     </v-form>
   </MenuAdministration>

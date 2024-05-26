@@ -7,6 +7,11 @@
         to: '/administration/settings',
       },
       {
+        title: 'Queues',
+        icon: 'mdi-message-processing',
+        to: '/administration/queues',
+      },
+      {
         title: 'Notifications',
         icon: 'mdi-bell-ring',
         to: '/administration/notifications',
