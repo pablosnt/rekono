@@ -11,7 +11,7 @@
         :model-value="data.enabled"
         color="success"
         class="mt-5"
-        @click="
+        @click.prevent.stop="
           api.update({ enabled: !data.enabled }, data.id).then((response) => {
             data = response;
             data.enabled

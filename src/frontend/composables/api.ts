@@ -19,7 +19,7 @@ export function useApi(
       ? config.backendRootPath + endpoint
       : endpoint;
     if (extraPath) {
-      currentEndpoint = `${currentEndpoint}/${extraPath}`;
+      currentEndpoint = `${currentEndpoint}${extraPath}`;
     }
     if (config.backendUrl) {
       const url = new URL(config.backendUrl);

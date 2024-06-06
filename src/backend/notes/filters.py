@@ -1,5 +1,4 @@
 from django_filters.filters import BooleanFilter, CharFilter
-
 from framework.filters import (
     LikeFilter,
     MultipleFieldFilterSet,
@@ -12,10 +11,9 @@ from projects.models import Project
 class NoteFilter(LikeFilter, MultipleFieldFilterSet):
     project = MultipleModelChoiceFilter(
         queryset=Project.objects.all(),
-        field_name="id",
         fields=["project", "target__project"],
     )
-    tag = CharFilter(field_name="tags__name", lookup_expr="in")
+    tag = CharFilter(field_name="tags__name")
     is_fork = BooleanFilter(
         field_name="forked_from", lookup_expr="isnull", exclude=True
     )

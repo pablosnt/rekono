@@ -11,7 +11,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
-from rest_framework.status import HTTP_201_CREATED
+from rest_framework.status import HTTP_201_CREATED, HTTP_404_NOT_FOUND
 from security.authorization.permissions import (
     OwnerPermission,
     ProjectMemberPermission,
@@ -42,6 +42,7 @@ class NoteViewSet(LikeViewSet):
         "owner",
         "created_at",
         "updated_at",
+        "likes_count",
     ]
     http_method_names = ["get", "post", "put", "delete"]
 
@@ -81,14 +82,16 @@ class NoteViewSet(LikeViewSet):
     )
     def fork(self, request: Request, pk: str) -> Response:
         note = self.get_object()
-        fork = Note.objects.create(
-            project=note.project,
-            target=note.target,
-            title=note.title,
-            body=note.body,
-            owner=self.request.user,
-            public=False,
-            forked_from=note,
-        )
-        fork.tags.set(note.tags.all())
-        return Response(NoteSerializer(fork).data, status=HTTP_201_CREATED)
+        if note.public and note.owner.id != self.request.user.id:
+            fork = Note.objects.create(
+                project=note.project,
+                target=note.target,
+                title=note.title,
+                body=note.body,
+                owner=self.request.user,
+                public=False,
+                forked_from=note,
+            )
+            fork.tags.set(note.tags.all())
+            return Response(NoteSerializer(fork).data, status=HTTP_201_CREATED)
+        return Response(status=HTTP_404_NOT_FOUND)

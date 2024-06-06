@@ -11,7 +11,8 @@
       <v-conatiner fluid>
         <v-text-field
           v-model="email"
-          density="compact"
+          class="mt-3"
+          density="comfortable"
           label="Email"
           prepend-inner-icon="mdi-email"
           variant="outlined"
