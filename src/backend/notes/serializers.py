@@ -3,32 +3,27 @@ from typing import Any, Dict
 from framework.fields import TagField
 from framework.serializers import LikeSerializer
 from notes.models import Note
-from projects.models import Project
-from projects.serializers import ProjectSerializer
-from rest_framework.serializers import PrimaryKeyRelatedField, SerializerMethodField
+from rest_framework.serializers import SerializerMethodField
 from taggit.serializers import TaggitSerializer
-from targets.models import Target
-from targets.serializers import SimpleTargetSerializer
 from users.serializers import SimpleUserSerializer
+
+links = [
+    "project",
+    "target",
+    "task",
+    "execution",
+    "osint",
+    "host",
+    "port",
+    "path",
+    "credential",
+    "technology",
+    "vulnerability",
+    "exploit",
+]
 
 
 class NoteSerializer(TaggitSerializer, LikeSerializer):
-    project = ProjectSerializer(many=False, read_only=True, required=False)
-    project_id = PrimaryKeyRelatedField(
-        many=False,
-        write_only=True,
-        required=False,
-        source="project",
-        queryset=Project.objects.all(),
-    )
-    target = SimpleTargetSerializer(many=False, read_only=True, required=False)
-    target_id = PrimaryKeyRelatedField(
-        many=False,
-        write_only=True,
-        required=False,
-        source="target",
-        queryset=Target.objects.all(),
-    )
     owner = SimpleUserSerializer(many=False, read_only=True)
     tags = TagField()
     forked = SerializerMethodField(read_only=True)
@@ -36,23 +31,22 @@ class NoteSerializer(TaggitSerializer, LikeSerializer):
     class Meta:
         model = Note
         fields = (
-            "id",
-            "project",
-            "project_id",
-            "target",
-            "target_id",
-            "title",
-            "body",
-            "tags",
-            "owner",
-            "public",
-            "forked",
-            "forked_from",
-            "forks",
-            "created_at",
-            "updated_at",
-            "liked",
-            "likes",
+            ("id",)
+            + tuple(links)
+            + (
+                "title",
+                "body",
+                "tags",
+                "owner",
+                "public",
+                "forked",
+                "forked_from",
+                "forks",
+                "created_at",
+                "updated_at",
+                "liked",
+                "likes",
+            )
         )
         read_only_fields = (
             "owner",
@@ -70,8 +64,11 @@ class NoteSerializer(TaggitSerializer, LikeSerializer):
 
     def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
         attrs = super().validate(attrs)
-        if attrs.get("target"):
-            attrs["project"] = None
+        link = [l for l in reversed(links) if attrs.get(l)]
+        if len(link) > 0:
+            for value in [l for l in links if l != link[0]]:
+                attrs[value] = None
+            attrs["project"] = attrs.get(link[0]).get_project()
         return attrs
 
     def update(self, instance: Note, validated_data: Dict[str, Any]) -> Note:

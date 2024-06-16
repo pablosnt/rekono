@@ -1,21 +1,76 @@
 from typing import Any
 
 from django.db import models
-from taggit.managers import TaggableManager
-
+from executions.models import Execution
+from findings.models import (
+    OSINT,
+    Credential,
+    Exploit,
+    Host,
+    Path,
+    Port,
+    Technology,
+    Vulnerability,
+)
 from framework.models import BaseLike
 from projects.models import Project
 from rekono.settings import AUTH_USER_MODEL
 from security.validators.input_validator import Regex, Validator
+from taggit.managers import TaggableManager
 from targets.models import Target
+from tasks.models import Task
 
 
 class Note(BaseLike):
-    project = models.ForeignKey(
-        Project, related_name="notes", on_delete=models.CASCADE, null=True, blank=True
-    )
+    project = models.ForeignKey(Project, related_name="notes", on_delete=models.CASCADE)
     target = models.ForeignKey(
         Target, related_name="notes", on_delete=models.CASCADE, null=True, blank=True
+    )
+    task = models.ForeignKey(
+        Task, related_name="notes", on_delete=models.CASCADE, null=True, blank=True
+    )
+    execution = models.ForeignKey(
+        Execution, related_name="notes", on_delete=models.CASCADE, null=True, blank=True
+    )
+    osint = models.ForeignKey(
+        OSINT, related_name="notes", on_delete=models.CASCADE, null=True, blank=True
+    )
+    host = models.ForeignKey(
+        Host, related_name="notes", on_delete=models.CASCADE, null=True, blank=True
+    )
+    port = models.ForeignKey(
+        Port, related_name="notes", on_delete=models.CASCADE, null=True, blank=True
+    )
+    path = models.ForeignKey(
+        Path, related_name="notes", on_delete=models.CASCADE, null=True, blank=True
+    )
+    credential = models.ForeignKey(
+        Credential,
+        related_name="notes",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
+    technology = models.ForeignKey(
+        Technology,
+        related_name="notes",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
+    vulnerability = models.ForeignKey(
+        Vulnerability,
+        related_name="notes",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
+    exploit = models.ForeignKey(
+        Exploit,
+        related_name="notes",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
     )
     title = models.TextField(
         max_length=200, validators=[Validator(Regex.NAME.value, code="title")]
@@ -44,5 +99,6 @@ class Note(BaseLike):
                 break
         return f"{value}{self.title}"
 
-    def get_project(self) -> Any:
-        return self.target.project if self.target else self.project
+    @classmethod
+    def get_project_field(cls) -> str:
+        return "project"

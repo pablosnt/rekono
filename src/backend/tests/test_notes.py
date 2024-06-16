@@ -7,6 +7,16 @@ from tests.framework import ApiTest
 private_note = {
     "project": 1,
     "target": None,
+    "task": None,
+    "execution": None,
+    "osint": None,
+    "host": None,
+    "port": None,
+    "path": None,
+    "credential": None,
+    "technology": None,
+    "vulnerability": None,
+    "exploit": None,
     "title": "Title",
     "body": "Important things to remember",
     "tags": ["test"],
@@ -15,7 +25,6 @@ private_note = {
 public_note = {
     **private_note,
     "public": True,
-    "project": None,
     "target": 1,
 }
 invalid_note = {**private_note, "body": "Invalid;content"}

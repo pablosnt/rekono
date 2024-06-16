@@ -5,7 +5,7 @@ from drf_spectacular.utils import extend_schema
 from framework.views import LikeViewSet
 from notes.filters import NoteFilter
 from notes.models import Note
-from notes.serializers import NoteSerializer
+from notes.serializers import NoteSerializer, links
 from projects.models import Project
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
@@ -33,25 +33,27 @@ class NoteViewSet(LikeViewSet):
         OwnerPermission,
     ]
     search_fields = ["title", "body"]
-    ordering_fields = [
-        "id",
-        "project",
-        "target",
-        "title",
-        "tags",
-        "owner",
-        "created_at",
-        "updated_at",
-        "likes_count",
-    ]
+    ordering_fields = (
+        [
+            "id",
+        ]
+        + links
+        + [
+            "title",
+            "tags",
+            "owner",
+            "created_at",
+            "updated_at",
+            "likes_count",
+        ]
+    )
     http_method_names = ["get", "post", "put", "delete"]
 
     def _get_project_from_data(
         self, project_field: str, data: Dict[str, Any]
     ) -> Optional[Project]:
-        return data.get("project") or (
-            cast(Target, data.get("target")).project if data.get("target") else None
-        )
+        link = [l for l in reversed(links) if data.get(l)]
+        return data.get(link[0]).get_project() if len(link) > 0 else None
 
     def get_queryset(self) -> QuerySet:
         return (
@@ -93,5 +95,8 @@ class NoteViewSet(LikeViewSet):
                 forked_from=note,
             )
             fork.tags.set(note.tags.all())
-            return Response(NoteSerializer(fork).data, status=HTTP_201_CREATED)
+            return Response(
+                NoteSerializer(fork, context={"request": request}).data,
+                status=HTTP_201_CREATED,
+            )
         return Response(status=HTTP_404_NOT_FOUND)
