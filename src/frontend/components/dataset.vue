@@ -103,19 +103,6 @@
                 :false-value="f.falseValue"
                 @update:model-value="addParameter(f.key, f.value)"
               />
-              <!-- todo: Remove -->
-              <v-range-slider
-                v-if="f.type === 'range'"
-                v-model="f.value"
-                :min="f.min"
-                :max="f.max"
-                :step="f.step"
-                thumb-label="always"
-                @update:model-value="
-                  addParameter(`${f.key}__gte`, f.value[0]);
-                  addParameter(`${f.key}__lte`, f.value[1]);
-                "
-              />
             </v-col>
           </template>
         </v-row>

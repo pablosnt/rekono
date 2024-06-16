@@ -5,6 +5,8 @@
         ref="dataset"
         :api="api"
         :filtering="filtering"
+        :add="DialogNote"
+        :add-fullscreen="true"
         ordering="-updated_at"
         @load-data="(data) => (notes = data)"
       >
@@ -204,6 +206,7 @@
 
 <script setup lang="ts">
 definePageMeta({ layout: false });
+const DialogNote = resolveComponent("DialogNote");
 const dataset = ref(null);
 const user = userStore();
 const notes = ref([]);
@@ -269,7 +272,6 @@ const filtering = ref([
     value: "-updated_at",
   },
 ]);
-// TODO: Filter targets in the UI when project is selected
 const targets = ref([]);
 useApi("/api/targets/", true, "Target")
   .list({}, true)
@@ -285,25 +287,6 @@ useApi("/api/targets/", true, "Target")
         fieldValue: "id",
         fieldTitle: "target",
         key: "target",
-        value: null,
-      },
-    ].concat(filtering.value);
-  });
-const projects = ref([]);
-useApi("/api/projects/", true, "Project")
-  .list({}, true)
-  .then((response) => {
-    projects.value = response.items;
-    filtering.value = [
-      {
-        type: "autocomplete",
-        cols: 2,
-        label: "Project",
-        icon: "mdi-folder-open",
-        collection: projects.value,
-        fieldValue: "id",
-        fieldTitle: "name",
-        key: "project",
         value: null,
       },
     ].concat(filtering.value);
