@@ -1,5 +1,5 @@
 <template>
-  <NuxtLayout name="public-form">
+  <NuxtLayout name="public-form" :loading="loading">
     <v-card-title class="text-center">Welcome to Rekono!</v-card-title>
     <v-form v-model="valid" @submit.prevent="submit()">
       <v-text-field
@@ -75,15 +75,14 @@
 
       <v-card-actions class="justify-center">
         <v-btn
-          v-if="!loading"
           color="red"
           size="large"
           variant="tonal"
           text="Create Account"
           type="submit"
+          :disabled="loading"
           block
         />
-        <v-progress-circular v-if="loading" color="error" indeterminate />
       </v-card-actions>
     </v-form>
   </NuxtLayout>

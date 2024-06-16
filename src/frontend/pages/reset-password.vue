@@ -1,5 +1,5 @@
 <template>
-  <NuxtLayout name="public-form">
+  <NuxtLayout name="public-form" :loading="loading">
     <v-card-text class="text-center"
       >You will receive via email a link to reset your password</v-card-text
     >
@@ -56,19 +56,17 @@
 
       <v-card-actions class="justify-center">
         <v-btn
-          v-if="!loading"
           autofocus
           color="red"
           size="large"
           variant="tonal"
           text="Reset Password"
           type="submit"
+          :disabled="loading"
           block
         />
-        <v-progress-circular v-if="loading" color="error" indeterminate />
       </v-card-actions>
       <v-btn
-        v-if="!loading"
         class="d-flex text-align-right text-medium-emphasis"
         prepend-icon="mdi-arrow-left-bold"
         variant="text"

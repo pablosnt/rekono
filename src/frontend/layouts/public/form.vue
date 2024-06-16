@@ -7,6 +7,7 @@
           class="mx-auto pa-3"
           elevation="8"
           rounded="lg"
+          :loading="loading ? 'red' : false"
         >
           <v-img class="mx-auto ma-4" src="/static/logo-black.png" />
           <slot />
@@ -15,6 +16,16 @@
     </v-row>
   </v-container>
 </template>
+
+<script setup lang="ts">
+defineProps({
+  loading: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+});
+</script>
 
 <style>
 #public-page {

@@ -1,5 +1,5 @@
 <template>
-  <NuxtLayout name="public-form">
+  <NuxtLayout name="public-form" :loading="loading">
     <v-form v-model="valid" @submit.prevent="login()">
       <v-text-field
         v-model="username"
@@ -25,18 +25,16 @@
       />
       <v-card-actions class="justify-center">
         <v-btn
-          v-if="!loading"
           color="red"
           size="large"
           variant="tonal"
           text="Login"
           type="submit"
+          :disabled="loading"
           block
         />
-        <v-progress-circular v-if="loading" color="error" indeterminate />
       </v-card-actions>
       <v-btn
-        v-if="!loading"
         class="d-flex text-align-right text-medium-emphasis"
         variant="text"
         size="small"

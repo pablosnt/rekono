@@ -60,7 +60,8 @@
                 <v-icon color="red" icon="mdi-xml" />
               </template>
             </v-list-item>
-            <v-list-item title="Logout" @click.prevent="logout">
+            <!-- TODO: Forward to login doesn't work -->
+            <v-list-item title="Logout" to="/login" @click="logout()">
               <template #prepend>
                 <v-icon color="red" icon="mdi-logout-variant" />
               </template>
@@ -75,17 +76,18 @@
 
 <script setup lang="ts">
 const enums = ref(useEnums());
-const user = ref(userStore());
-const router = useRouter();
+const user = userStore();
 const tokens = useTokens();
+const router = useRouter();
 const api = useApi("/api/security/logout/", true);
 function logout() {
+  console.log("HELLO");
+  console.log(window.location);
   const refresh = tokens.get().refresh;
   if (refresh) {
     api.create({ refresh: refresh });
   }
-  user.value.logout();
+  user.logout();
   tokens.remove();
-  router.push({ name: "login" });
 }
 </script>

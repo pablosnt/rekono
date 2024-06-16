@@ -1,5 +1,5 @@
 <template>
-  <NuxtLayout name="public-form">
+  <NuxtLayout name="public-form" :loading="loading">
     <v-card-title class="text-center">Multi Factor Authentication</v-card-title>
 
     <v-card-text v-if="app" class="text-center"
@@ -39,16 +39,15 @@
 
       <v-card-actions class="justify-center">
         <v-btn
-          v-if="!loading"
           autofocus
           color="red"
           size="large"
           variant="tonal"
           text="Login"
           type="submit"
+          :disabled="loading"
           block
         />
-        <v-progress-circular v-if="loading" color="error" indeterminate />
       </v-card-actions>
 
       <div class="text-center">
