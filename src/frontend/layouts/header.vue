@@ -1,41 +1,46 @@
 <template>
   <v-layout>
     <v-app-bar color="black" density="compact">
-      <v-app-bar-title>
-        <NuxtImg
-          class="mt-2"
-          src="/static/logo-white.png"
-          alt="Rekono"
-          width="130"
-        />
-      </v-app-bar-title>
-      <v-tabs v-model="tab" selected-class="text-red">
-        <v-tab value="home" to="/">Home</v-tab>
-        <v-tab value="projects" to="/projects">Projects</v-tab>
-        <v-tab value="notes" to="/notes">Notes</v-tab>
-        <v-tab v-if="user.role !== 'Reader'" value="resources" to="/resources"
-          >Resources</v-tab
-        >
-        <v-tab
-          v-if="user.role === 'Admin'"
-          value="administration"
-          to="/administration"
-          >Administration</v-tab
-        >
-      </v-tabs>
+      <nuxt-link to="/">
+        <v-app-bar-title>
+          <NuxtImg
+            class="mt-2"
+            src="/static/logo-white.png"
+            alt="Rekono"
+            width="130"
+          />
+        </v-app-bar-title>
+      </nuxt-link>
 
       <v-spacer />
 
       <v-btn>
-        <v-icon icon="mdi-dots-vertical" size="x-large" />
+        <v-icon icon="mdi-menu" size="x-large" />
         <v-menu activator="parent" open-on-hover location="bottom">
           <v-list density="compact" nav>
             <v-list-item to="/profile" title="Profile">
               <template #prepend>
-                <v-icon color="red" icon="mdi-account" />
+                <v-icon color="red" :icon="enums.roles[user.role].icon" />
               </template>
             </v-list-item>
-            <!-- todo: add dialog for clients and show guidelines to use the CLI? -->
+            <v-list-item
+              v-if="user.role !== 'Reader'"
+              to="/resources"
+              title="Resources"
+            >
+              <template #prepend>
+                <v-icon color="red" icon="mdi-toolbox" />
+              </template>
+            </v-list-item>
+            <v-list-item
+              v-if="user.role === 'Admin'"
+              to="/administration"
+              title="Administration"
+            >
+              <template #prepend>
+                <v-icon color="red" icon="mdi-cog" />
+              </template>
+            </v-list-item>
             <!-- todo: Update link to the new GitHub pages -->
             <v-list-item
               href="https://github.com/pablosnt/rekono/wiki"
@@ -69,11 +74,8 @@
 </template>
 
 <script setup lang="ts">
-const route = useRoute();
-const tab = computed(() => {
-  return route.path === "/" ? "home" : route.path.split("/")[1].toLowerCase();
-});
-const user = userStore();
+const enums = ref(useEnums());
+const user = ref(userStore());
 const router = useRouter();
 const tokens = useTokens();
 const api = useApi("/api/security/logout/", true);
@@ -82,7 +84,7 @@ function logout() {
   if (refresh) {
     api.create({ refresh: refresh });
   }
-  user.logout();
+  user.value.logout();
   tokens.remove();
   router.push({ name: "login" });
 }
