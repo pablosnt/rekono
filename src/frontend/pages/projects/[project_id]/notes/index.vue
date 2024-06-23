@@ -1,5 +1,5 @@
 <template>
-  <NuxtLayout name="header">
+  <MenuProject>
     <v-main>
       <Dataset
         ref="dataset"
@@ -197,7 +197,7 @@
         </template>
       </Dataset>
     </v-main>
-  </NuxtLayout>
+  </MenuProject>
 </template>
 
 <script setup lang="ts">

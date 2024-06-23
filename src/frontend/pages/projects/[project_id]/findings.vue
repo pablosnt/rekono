@@ -1,3 +1,7 @@
 <template>
-  <h1>PROJECT ID</h1>
+  <MenuProject />
 </template>
+
+<script setup lang="ts">
+definePageMeta({ layout: false });
+</script>

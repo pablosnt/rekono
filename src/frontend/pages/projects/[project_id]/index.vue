@@ -1,5 +1,5 @@
 <template>
-  <NuxtLayout name="header" />
+  <MenuProject />
 </template>
 
 <script setup lang="ts">
