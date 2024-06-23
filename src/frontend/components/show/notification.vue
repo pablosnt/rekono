@@ -1,11 +1,5 @@
 <template>
-  <v-card
-    :title="title"
-    :subtitle="subtitle"
-    class="mx-auto"
-    elevation="4"
-    :color="cardColor"
-  >
+  <v-card :title="title" :subtitle="subtitle" class="mx-auto" elevation="4">
     <template #prepend>
       <v-icon size="x-large" :icon="icon" :color="iconColor" />
     </template>
@@ -48,7 +42,6 @@ const props = defineProps({
     required: false,
     default: undefined,
   },
-  cardColor: String,
   icon: String,
   iconColor: {
     type: String,

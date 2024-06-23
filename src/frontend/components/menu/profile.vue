@@ -12,9 +12,9 @@
         to: '/profile/security',
       },
       {
-        title: 'Telegram Bot',
+        title: 'Rekono Bot',
         icon: 'mdi-robot',
-        to: '/profile/telegram-bot',
+        to: '/profile/bot',
       },
       {
         title: 'HTTP Headers',
