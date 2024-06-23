@@ -20,21 +20,19 @@
       @load-data="(data) => (denylist = data)"
     >
       <template #data>
-        <v-container fluid>
-          <v-row dense>
-            <v-col v-for="pattern in denylist" :key="pattern.id" cols="4">
-              <v-card elevation="4" class="mx-auto" density="compact">
-                <v-card-text>
-                  <FormTargetDenylist
-                    :api="api"
-                    :pattern="pattern"
-                    @completed="dataset.loadData(false)"
-                  />
-                </v-card-text>
-              </v-card>
-            </v-col>
-          </v-row>
-        </v-container>
+        <v-row dense>
+          <v-col v-for="pattern in denylist" :key="pattern.id" cols="4">
+            <v-card elevation="4" class="mx-auto" density="compact">
+              <v-card-text>
+                <FormTargetDenylist
+                  :api="api"
+                  :pattern="pattern"
+                  @completed="dataset.loadData(false)"
+                />
+              </v-card-text>
+            </v-card>
+          </v-col>
+        </v-row>
       </template>
     </Dataset>
   </MenuAdministration>

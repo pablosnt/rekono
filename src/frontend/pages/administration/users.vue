@@ -9,42 +9,42 @@
       @load-data="(data) => (users = data)"
     >
       <template #data>
-        <v-container fluid>
-          <v-row dense>
-            <v-col v-for="user in users" :key="user.id" cols="4">
-              <v-card
-                elevation="4"
-                class="mx-auto"
-                density="compact"
-                :title="
-                  user.first_name && user.last_name
-                    ? `${user.first_name} ${user.last_name}`
-                    : user.email
-                "
-                :subtitle="user.username ? `@${user.username}` : undefined"
-              >
-                <template #prepend>
-                  <v-menu min-width="200px" rounded>
-                    <template #activator="{ props }">
-                      <v-btn icon v-bind="props">
-                        <v-avatar variant="outlined">
-                          <v-icon
-                            :icon="
-                              user.is_active
-                                ? enums.roles[user.role].icon
-                                : 'mdi-cancel'
-                            "
-                            :color="
-                              user.is_active
-                                ? enums.roles[user.role].color
-                                : 'grey'
-                            "
-                            size="x-large"
-                          />
-                        </v-avatar>
-                      </v-btn>
-                    </template>
-                    <v-card>
+        <v-row dense>
+          <v-col v-for="user in users" :key="user.id" cols="4">
+            <v-card
+              elevation="4"
+              class="mx-auto"
+              density="compact"
+              :title="
+                user.first_name && user.last_name
+                  ? `${user.first_name} ${user.last_name}`
+                  : user.email
+              "
+              :subtitle="user.username ? `@${user.username}` : undefined"
+            >
+              <template #prepend>
+                <v-menu min-width="200px" rounded>
+                  <template #activator="{ props }">
+                    <v-btn icon v-bind="props">
+                      <v-avatar variant="outlined">
+                        <v-icon
+                          :icon="
+                            user.is_active
+                              ? enums.roles[user.role].icon
+                              : 'mdi-cancel'
+                          "
+                          :color="
+                            user.is_active
+                              ? enums.roles[user.role].color
+                              : 'grey'
+                          "
+                          size="x-large"
+                        />
+                      </v-avatar>
+                    </v-btn>
+                  </template>
+                  <v-card>
+                    <template #text>
                       <v-card-text>
                         <div class="mx-auto text-center">
                           <v-avatar variant="outlined">
@@ -115,13 +115,13 @@
                           </div>
                         </div>
                       </v-card-text>
-                    </v-card>
-                  </v-menu>
-                </template>
-              </v-card>
-            </v-col>
-          </v-row>
-        </v-container>
+                    </template>
+                  </v-card>
+                </v-menu>
+              </template>
+            </v-card>
+          </v-col>
+        </v-row>
       </template>
     </Dataset>
   </MenuAdministration>

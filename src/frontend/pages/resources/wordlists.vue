@@ -5,99 +5,88 @@
       :api="api"
       :filtering="filtering"
       :add="DialogWordlist"
+      icon="mdi-file-word-box"
+      empty="There are no wordlists"
       @load-data="(data) => (wordlists = data)"
     >
       <template #data>
-        <v-container v-if="wordlists !== null" fluid>
-          <v-row v-if="wordlists.length === 0" justify="center" dense>
-            <v-empty-state
-              icon="mdi-file-word-box"
-              title="There are no wordlists"
-            />
-          </v-row>
-          <v-row dense>
-            <v-col v-for="wordlist in wordlists" :key="wordlist.id" cols="6">
-              <v-card
-                :title="wordlist.name"
-                elevation="4"
-                class="mx-auto"
-                density="compact"
-              >
-                <template #append>
-                  <span class="me-3" />
-                  <v-chip v-if="wordlist.size" color="red">
-                    <v-icon icon="mdi-counter" start />
-                    {{
-                      wordlist.size < 1000
-                        ? wordlist.size
-                        : Math.floor(wordlist.size / 1000).toString() + "k"
-                    }}
-                    Words
-                  </v-chip>
-                  <span class="me-3" />
-                  <v-chip>
-                    <v-icon
-                      v-if="wordlist.type === 'Subdomain'"
-                      icon="mdi-routes"
-                      start
-                    />
-                    <p v-if="wordlist.type === 'Endpoint'">
-                      <strong>/</strong><span class="me-1" />
-                    </p>
-                    {{ wordlist.type }}
-                  </v-chip>
-                  <span class="me-3" />
-                  <v-chip
-                    v-if="wordlist.owner"
-                    color="primary"
-                    :variant="
-                      wordlist.owner.id === user.user ? 'flat' : 'tonal'
-                    "
-                  >
-                    <v-icon icon="mdi-at" start />
-                    {{ wordlist.owner.username }}
-                  </v-chip>
-                  <v-chip v-if="!wordlist.owner">Default</v-chip>
-                  <span class="me-3" />
-                </template>
-
-                <v-card-actions>
-                  <v-spacer />
-                  <ButtonLike
-                    :api="api"
-                    :item="wordlist"
-                    @reload="(value) => dataset.loadData(value)"
+        <v-row dense>
+          <v-col v-for="wordlist in wordlists" :key="wordlist.id" cols="6">
+            <v-card
+              :title="wordlist.name"
+              elevation="4"
+              class="mx-auto"
+              density="compact"
+            >
+              <template #append>
+                <span class="me-3" />
+                <v-chip v-if="wordlist.size" color="red">
+                  <v-icon icon="mdi-counter" start />
+                  {{
+                    wordlist.size < 1000
+                      ? wordlist.size
+                      : Math.floor(wordlist.size / 1000).toString() + "k"
+                  }}
+                  Words
+                </v-chip>
+                <span class="me-3" />
+                <v-chip>
+                  <v-icon
+                    v-if="wordlist.type === 'Subdomain'"
+                    icon="mdi-routes"
+                    start
                   />
-                  <ButtonEditDelete
-                    v-if="
-                      (wordlist.owner !== null &&
-                        wordlist.owner.id === user.user) ||
-                      user.role === 'Admin'
-                    "
-                  >
-                    <template #edit-dialog="{ isActive }">
-                      <DialogWordlist
-                        :api="api"
-                        :edit="wordlist"
-                        @completed="dataset.loadData(false)"
-                        @close-dialog="isActive.value = false"
-                      />
-                    </template>
-                    <template #delete-dialog="{ isActive }">
-                      <DialogDelete
-                        :id="wordlist.id"
-                        :api="api"
-                        :text="`Wordlist '${wordlist.name}' will be removed`"
-                        @completed="dataset.loadData(false)"
-                        @close-dialog="isActive.value = false"
-                      />
-                    </template>
-                  </ButtonEditDelete>
-                </v-card-actions>
-              </v-card>
-            </v-col>
-          </v-row>
-        </v-container>
+                  <p v-if="wordlist.type === 'Endpoint'">
+                    <strong>/</strong><span class="me-1" />
+                  </p>
+                  {{ wordlist.type }}
+                </v-chip>
+                <span class="me-3" />
+                <v-chip
+                  v-if="wordlist.owner"
+                  color="primary"
+                  :variant="wordlist.owner.id === user.user ? 'flat' : 'tonal'"
+                >
+                  <v-icon icon="mdi-at" start />
+                  {{ wordlist.owner.username }}
+                </v-chip>
+                <v-chip v-if="!wordlist.owner">Default</v-chip>
+                <span class="me-3" />
+                <ButtonLike
+                  :api="api"
+                  :item="wordlist"
+                  @reload="(value) => dataset.loadData(value)"
+                />
+                <span class="me-3" />
+                <ButtonEditDelete
+                  v-if="
+                    (wordlist.owner !== null &&
+                      wordlist.owner.id === user.user) ||
+                    user.role === 'Admin'
+                  "
+                >
+                  <template #edit-dialog="{ isActive }">
+                    <DialogWordlist
+                      :api="api"
+                      :edit="wordlist"
+                      @completed="dataset.loadData(false)"
+                      @close-dialog="isActive.value = false"
+                    />
+                  </template>
+                  <template #delete-dialog="{ isActive }">
+                    <DialogDelete
+                      :id="wordlist.id"
+                      :api="api"
+                      :text="`Wordlist '${wordlist.name}' will be removed`"
+                      @completed="dataset.loadData(false)"
+                      @close-dialog="isActive.value = false"
+                    />
+                  </template>
+                </ButtonEditDelete>
+              </template>
+            </v-card>
+          </v-col>
+        </v-row>
       </template>
     </Dataset>
   </MenuResources>

@@ -1,7 +1,14 @@
 <template>
-  <v-speed-dial transition="scale-transition" location="bottom end" @click.stop>
+  <v-speed-dial transition="scale-transition" location="bottom end">
     <template #activator="{ props: activatorProps }">
-      <v-btn v-bind="activatorProps" size="large" color="grey" icon="mdi-cog" />
+      <v-btn
+        v-bind="activatorProps"
+        variant="text"
+        size="large"
+        color="grey"
+        icon="mdi-cog"
+        @click.prevent.stop
+      />
     </template>
     <v-dialog width="auto">
       <template #activator="{ props: activatorProps }">

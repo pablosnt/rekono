@@ -7,43 +7,37 @@
       ordering="id"
       :add="DialogProcess"
       :add-fullscreen="true"
+      icon="mdi-robot-angry"
+      empty="There are no processes"
       @load-data="(data) => (processes = data)"
     >
       <template #data>
-        <v-container v-if="processes !== null" fluid>
-          <v-row v-if="processes.length === 0" justify="center" dense>
-            <v-empty-state
-              icon="mdi-robot-angry"
-              title="There are no processes"
-            />
-          </v-row>
-          <v-row dense>
-            <v-col v-for="process in processes" :key="process.id" cols="4">
-              <v-dialog width="100%" fullscreen>
-                <template #activator="{ props: activatorProps }">
-                  <ShowProcess
-                    :api="api"
-                    :process="process"
-                    :tools="tools"
-                    :details="false"
-                    v-bind="activatorProps"
-                    @reload="(value) => dataset.loadData(value)"
-                  />
-                </template>
-                <template #default="{ isActive }">
-                  <ShowProcess
-                    :api="api"
-                    :process="process"
-                    :tools="tools"
-                    :details="true"
-                    @reload="(value) => dataset.loadData(value)"
-                    @close-dialog="isActive.value = false"
-                  />
-                </template>
-              </v-dialog>
-            </v-col>
-          </v-row>
-        </v-container>
+        <v-row dense>
+          <v-col v-for="process in processes" :key="process.id" cols="4">
+            <v-dialog width="100%" fullscreen>
+              <template #activator="{ props: activatorProps }">
+                <ShowProcess
+                  :api="api"
+                  :process="process"
+                  :tools="tools"
+                  :details="false"
+                  v-bind="activatorProps"
+                  @reload="(value) => dataset.loadData(value)"
+                />
+              </template>
+              <template #default="{ isActive }">
+                <ShowProcess
+                  :api="api"
+                  :process="process"
+                  :tools="tools"
+                  :details="true"
+                  @reload="(value) => dataset.loadData(value)"
+                  @close-dialog="isActive.value = false"
+                />
+              </template>
+            </v-dialog>
+          </v-col>
+        </v-row>
       </template>
     </Dataset>
   </MenuResources>

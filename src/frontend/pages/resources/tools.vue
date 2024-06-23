@@ -5,26 +5,38 @@
       :api="api"
       :filtering="filtering"
       ordering="id"
+      icon="mdi-rocket"
+      empty="There are no tools"
       @load-data="(data) => (tools = data)"
     >
       <template #data>
-        <v-container v-if="tools !== null" fluid>
-          <v-row v-if="tools.length === 0" justify="center" dense>
-            <v-empty-state icon="mdi-rocket" title="There are no tools" />
-          </v-row>
-          <v-row dense>
-            <v-col v-for="tool in tools" :key="tool.id" cols="4">
-              <v-card
-                :title="tool.name"
-                :subtitle="
-                  '$ ' + tool.command + (tool.script ? ' ' + tool.script : '')
-                "
-                :prepend-avatar="tool.icon"
-                rel="noopener"
-                elevation="4"
-                class="mx-auto"
-                density="compact"
-              >
+        <v-row dense>
+          <v-col v-for="tool in tools" :key="tool.id" cols="4">
+            <v-card
+              :title="tool.name"
+              :subtitle="
+                '$ ' + tool.command + (tool.script ? ' ' + tool.script : '')
+              "
+              :prepend-avatar="tool.icon"
+              rel="noopener"
+              elevation="4"
+              class="mx-auto"
+              density="compact"
+            >
+              <template #append>
+                <v-chip v-if="tool.version">
+                  <v-icon icon="mdi-tag" start />
+                  {{ tool.version }}
+                </v-chip>
+                <span class="me-3" />
+                <ButtonGreenCheck
+                  :condition="tool.is_installed"
+                  true-text="Installed"
+                  false-text="Tool may have been installed after its last execution attempt"
+                />
+              </template>
+
+              <template #text>
                 <v-card-text>
                   <template
                     v-for="configuration in tool.configurations"
@@ -80,47 +92,33 @@
                     </v-chip>
                   </div>
                 </v-card-text>
-
-                <template #append>
-                  <v-chip v-if="tool.version">
-                    <v-icon icon="mdi-tag" start />
-                    {{ tool.version }}
-                  </v-chip>
-                  <span class="me-3" />
-                  <ButtonGreenCheck
-                    :condition="tool.is_installed"
-                    true-text="Installed"
-                    false-text="Tool may have been installed after its last execution attempt"
-                  />
-                </template>
-
-                <v-card-actions>
-                  <v-dialog width="auto">
-                    <template #activator="{ props: activatorProps }">
-                      <v-btn hover icon size="x-large" v-bind="activatorProps">
-                        <v-icon icon="mdi-play-circle" color="green" />
-                        <v-tooltip activator="parent" text="Run" />
-                      </v-btn>
-                    </template>
-                    <template #default="{ isActive }">
-                      <DialogTask
-                        :tool="tool"
-                        @close-dialog="isActive.value = false"
-                      />
-                    </template>
-                  </v-dialog>
-                  <v-spacer />
-                  <ButtonLike
-                    :api="api"
-                    :item="tool"
-                    @reload="(value) => dataset.loadData(value)"
-                  />
-                  <ButtonLink :link="tool.reference" />
-                </v-card-actions>
-              </v-card>
-            </v-col>
-          </v-row>
-        </v-container>
+              </template>
+              <v-card-actions>
+                <v-dialog width="auto">
+                  <template #activator="{ props: activatorProps }">
+                    <v-btn hover icon size="x-large" v-bind="activatorProps">
+                      <v-icon icon="mdi-play-circle" color="green" />
+                      <v-tooltip activator="parent" text="Run" />
+                    </v-btn>
+                  </template>
+                  <template #default="{ isActive }">
+                    <DialogTask
+                      :tool="tool"
+                      @close-dialog="isActive.value = false"
+                    />
+                  </template>
+                </v-dialog>
+                <v-spacer />
+                <ButtonLike
+                  :api="api"
+                  :item="tool"
+                  @reload="(value) => dataset.loadData(value)"
+                />
+                <ButtonLink :link="tool.reference" />
+              </v-card-actions>
+            </v-card>
+          </v-col>
+        </v-row>
       </template>
     </Dataset>
   </MenuResources>

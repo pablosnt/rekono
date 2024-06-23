@@ -40,6 +40,7 @@
         size="small"
         text="Reset password"
         to="/reset-password"
+        :disabled="loading"
       />
     </v-form>
   </NuxtLayout>

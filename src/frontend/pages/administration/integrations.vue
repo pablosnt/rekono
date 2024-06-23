@@ -51,14 +51,18 @@
       </v-row>
       <v-row>
         <v-card variant="text" class="mt-5">
-          <v-card-title class="text-h5">
-            <v-icon color="red" icon="mdi-radar" />
-            <span class="me-1" />
-            Monitoring
-          </v-card-title>
-          <v-card-text>
-            <ShowMonitorSettings />
-          </v-card-text>
+          <template #title>
+            <v-card-title class="text-h5">
+              <v-icon color="red" icon="mdi-radar" />
+              <span class="me-1" />
+              Monitoring
+            </v-card-title>
+          </template>
+          <template #text>
+            <v-card-text>
+              <ShowMonitorSettings />
+            </v-card-text>
+          </template>
         </v-card>
       </v-row>
     </v-container>

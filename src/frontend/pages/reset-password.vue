@@ -73,6 +73,7 @@
         size="small"
         text="Login"
         to="/login"
+        :disabled="loading"
       />
     </v-form>
   </NuxtLayout>

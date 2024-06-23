@@ -27,30 +27,24 @@
       :default-parameters="{ target__isnull: true, user__isnull: true }"
       ordering="id"
       :add="DialogHttpHeader"
+      icon="mdi-web"
+      empty="There are no default HTTP headers"
       @load-data="(data) => (headers = data)"
     >
       <template #data>
-        <v-container fluid>
-          <v-row v-if="headers.length === 0" justify="center" dense>
-            <v-empty-state
-              icon="mdi-web"
-              title="There are no default HTTP headers"
-            />
-          </v-row>
-          <v-row dense>
-            <v-col v-for="header in headers" :key="header.id" cols="6">
-              <v-card elevation="4" class="mx-auto" density="compact">
-                <v-card-text>
-                  <FormHttpHeader
-                    :api="api"
-                    :header="header"
-                    @completed="dataset.loadData(false)"
-                  />
-                </v-card-text>
-              </v-card>
-            </v-col>
-          </v-row>
-        </v-container>
+        <v-row dense>
+          <v-col v-for="header in headers" :key="header.id" cols="6">
+            <v-card elevation="4" class="mx-auto" density="compact">
+              <v-card-text>
+                <FormHttpHeader
+                  :api="api"
+                  :header="header"
+                  @completed="dataset.loadData(false)"
+                />
+              </v-card-text>
+            </v-card>
+          </v-col>
+        </v-row>
       </template>
     </Dataset>
   </MenuAdministration>

@@ -109,10 +109,26 @@
       </v-container>
     </v-expand-transition>
   </v-container>
-  <v-container v-if="loadingData" fluid>
-    <v-progress-linear height="5" color="red" indeterminate rounded />
+  <v-container fluid>
+    <v-progress-linear
+      v-if="loadingData"
+      height="5"
+      color="red"
+      indeterminate
+      rounded
+    />
+    <v-row
+      v-if="
+        data !== null && icon !== null && empty !== null && data.length === 0
+      "
+      justify="center"
+      dense
+    >
+      <v-empty-state :icon="icon" :title="empty" />
+    </v-row>
+    <slot v-if="data !== null" name="data" />
   </v-container>
-  <slot name="data" />
+
   <v-pagination
     v-model="page"
     :length="Math.ceil(total / api.default_size)"
@@ -141,10 +157,21 @@ const props = defineProps({
     required: false,
     default: null,
   },
+  icon: {
+    type: String,
+    required: false,
+    default: null,
+  },
+  empty: {
+    type: String,
+    required: false,
+    default: null,
+  },
 });
 const emit = defineEmits(["loadData"]);
 const page = ref(1);
 const total = ref(0);
+const data = ref(null);
 const search = ref(null);
 const parameters = ref(
   props.defaultParameters && props.ordering
@@ -195,6 +222,7 @@ function loadData(loading: boolean = false) {
   props.api.list(parameters.value, false, page.value).then((response) => {
     emit("loadData", response.items);
     total.value = response.total;
+    data.value = response.items;
     loadingSearch.value = false;
     loadingData.value = false;
   });

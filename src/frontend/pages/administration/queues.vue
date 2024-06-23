@@ -8,12 +8,7 @@
           class="mt-5"
           cols="5"
         >
-          <v-card
-            color="red-lighten-5"
-            elevation="4"
-            class="mx-auto"
-            density="comfortable"
-          >
+          <v-card elevation="4" class="mx-auto" density="comfortable">
             <template #title>
               <v-card-title class="text-capitalize">{{ queue }}</v-card-title>
             </template>

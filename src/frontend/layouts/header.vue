@@ -81,8 +81,6 @@ const tokens = useTokens();
 const router = useRouter();
 const api = useApi("/api/security/logout/", true);
 function logout() {
-  console.log("HELLO");
-  console.log(window.location);
   const refresh = tokens.get().refresh;
   if (refresh) {
     api.create({ refresh: refresh });

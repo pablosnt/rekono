@@ -22,75 +22,76 @@
         @click="$emit('closeDialog')"
       />
     </template>
-
-    <v-card-text class="overflow-auto">
-      <div v-if="!details">
-        <p>{{ process.description }}</p>
-        <div v-if="process.tags.length > 0">
-          <v-divider class="mt-4 mb-4" />
-          <v-chip-group selected-class="v-chip">
-            <v-chip v-for="tag in process.tags" :key="tag" size="small">
-              {{ tag }}
-            </v-chip>
-          </v-chip-group>
+    <template #text>
+      <v-card-text class="overflow-auto">
+        <div v-if="!details">
+          <p>{{ process.description }}</p>
+          <div v-if="process.tags.length > 0">
+            <v-divider class="mt-3 mb-3" />
+            <v-chip-group selected-class="v-chip">
+              <v-chip v-for="tag in process.tags" :key="tag" size="small">
+                {{ tag }}
+              </v-chip>
+            </v-chip-group>
+          </div>
         </div>
-      </div>
-      <div v-if="details">
-        <FormSteps
-          :process="process"
-          :tools="tools"
-          @reload="() => $emit('reload', false)"
-        />
-      </div>
-    </v-card-text>
-
-    <v-card-actions>
-      <v-dialog width="auto">
-        <template #activator="{ props: activatorProps }">
-          <v-btn hover icon size="x-large" v-bind="activatorProps">
-            <v-icon icon="mdi-play-circle" color="green" />
-            <v-tooltip activator="parent" text="Run" />
-          </v-btn>
-        </template>
-        <template #default="{ isActive }">
-          <DialogTask
+        <div v-if="details">
+          <FormSteps
             :process="process"
-            @close-dialog="isActive.value = false"
-          />
-        </template>
-      </v-dialog>
-      <v-spacer />
-      <ButtonLike
-        :api="api"
-        :item="process"
-        @reload="(value) => $emit('reload', value)"
-      />
-      <ButtonEditDelete
-        v-if="
-          (process.owner !== null && process.owner.id === user.user) ||
-          user.role === 'Admin'
-        "
-      >
-        <template #edit-dialog="{ isActive }">
-          <DialogProcess
-            :api="api"
-            :edit="process"
             :tools="tools"
-            @completed="$emit('reload', false)"
-            @close-dialog="isActive.value = false"
+            @reload="() => $emit('reload', false)"
           />
-        </template>
-        <template #delete-dialog="{ isActive }">
-          <DialogDelete
-            :id="process.id"
-            :api="api"
-            :text="`Process '${process.name}' will be removed`"
-            @completed="$emit('reload', false)"
-            @close-dialog="isActive.value = false"
-          />
-        </template>
-      </ButtonEditDelete>
-    </v-card-actions>
+        </div>
+      </v-card-text>
+
+      <v-card-actions>
+        <v-dialog width="auto">
+          <template #activator="{ props: activatorProps }">
+            <v-btn hover icon size="x-large" v-bind="activatorProps">
+              <v-icon icon="mdi-play-circle" color="green" />
+              <v-tooltip activator="parent" text="Run" />
+            </v-btn>
+          </template>
+          <template #default="{ isActive }">
+            <DialogTask
+              :process="process"
+              @close-dialog="isActive.value = false"
+            />
+          </template>
+        </v-dialog>
+        <v-spacer />
+        <ButtonLike
+          :api="api"
+          :item="process"
+          @reload="(value) => $emit('reload', value)"
+        />
+        <ButtonEditDelete
+          v-if="
+            (process.owner !== null && process.owner.id === user.user) ||
+            user.role === 'Admin'
+          "
+        >
+          <template #edit-dialog="{ isActive }">
+            <DialogProcess
+              :api="api"
+              :edit="process"
+              :tools="tools"
+              @completed="$emit('reload', false)"
+              @close-dialog="isActive.value = false"
+            />
+          </template>
+          <template #delete-dialog="{ isActive }">
+            <DialogDelete
+              :id="process.id"
+              :api="api"
+              :text="`Process '${process.name}' will be removed`"
+              @completed="$emit('reload', false)"
+              @close-dialog="isActive.value = false"
+            />
+          </template>
+        </ButtonEditDelete>
+      </v-card-actions>
+    </template>
   </v-card>
 </template>
 

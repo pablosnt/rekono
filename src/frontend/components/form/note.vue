@@ -65,7 +65,7 @@
           </v-text-field>
         </v-col>
         <v-col cols="2">
-          <!-- TODO: Replace by button & icon. Floating button? -->
+          <!-- todo: Replace by button & icon. Floating button? -->
           <v-switch
             v-model="preview"
             color="red"
@@ -88,7 +88,7 @@
         />
         <div v-if="preview" v-html="mdBody" />
       </v-row>
-      <!-- TODO: Create / Save floating button -->
+      <!-- todo: Create / Save floating button -->
     </v-container>
   </v-form>
 </template>
@@ -97,7 +97,7 @@
 import MarkdownIt from "markdown-it";
 
 const validate = useValidation();
-// TODO: Review & apply all plugins
+// todo: Review & apply all plugins
 const markdown = ref(
   MarkdownIt({
     html: false,
@@ -122,5 +122,5 @@ const preview = ref(false);
 const projects = ref([]);
 const targets = ref([]);
 
-// TODO: always allow manual creation/edition. Automatically create the note some minutes after first body edition/createFunctionExpression. If automatic save is already enabled, update the note also on the dialog close
+// todo: always allow manual creation/edition. Automatically create the note some minutes after first body edition/createFunctionExpression. If automatic save is already enabled, update the note also on the dialog close
 </script>

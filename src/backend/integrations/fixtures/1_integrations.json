@@ -8,7 +8,7 @@
             "description": "Vulnerability management platform where Rekono will import findings when synchronization is enabled at project level",
             "enabled": true,
             "reference": "https://www.defectdojo.com/",
-            "icon": "https://defectdojo.com/touch-icon.png"
+            "icon": "https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/master/docs/static/favicons/apple-touch-icon.png"
         }
     },
     {

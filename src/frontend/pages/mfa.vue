@@ -52,6 +52,7 @@
 
       <div class="text-center">
         <v-btn
+          :disabled="loading"
           @click.prevent="
             app = !app;
             mfa = null;
