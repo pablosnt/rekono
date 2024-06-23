@@ -1,14 +1,22 @@
 export default defineNuxtRouteMiddleware((to, _) => {
+  const publicRoutes = ["login", "signup", "reset-password", "mfa"];
   const user = userStore();
   const tokens = useTokens();
-  const publicRoutes = ["login", "signup", "reset-password", "mfa"];
-  user.check();
-  if (
-    (to.name === "mfa" && !tokens.get().mfa) ||
-    (!publicRoutes.includes(to.name) && !user.user)
-  ) {
-    return navigateTo("/login");
-  } else if (publicRoutes.includes(to.name) && user.user) {
-    return navigateTo("/");
+  if (to.query !== undefined && to.query.logout === "true") {
+    const refresh = tokens.get().refresh;
+    if (refresh) {
+      useApi("/api/security/logout/", true).create({ refresh: refresh });
+    }
+    tokens.remove();
+  } else {
+    user.check();
+    if (
+      (to.name === "mfa" && !tokens.get().mfa) ||
+      (!publicRoutes.includes(to.name) && !user.user)
+    ) {
+      return navigateTo("/login");
+    } else if (publicRoutes.includes(to.name) && user.user) {
+      return navigateTo("/");
+    }
   }
 });

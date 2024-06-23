@@ -1,7 +1,7 @@
 <template>
   <v-layout>
     <v-app-bar color="black" density="compact">
-      <nuxt-link to="/">
+      <nuxt-link to="/" class="ml-4">
         <v-app-bar-title>
           <NuxtImg
             class="mt-2"
@@ -60,8 +60,7 @@
                 <v-icon color="red" icon="mdi-xml" />
               </template>
             </v-list-item>
-            <!-- TODO: Forward to login doesn't work -->
-            <v-list-item title="Logout" to="/login" @click="logout()">
+            <v-list-item title="Logout" to="/login?logout=true">
               <template #prepend>
                 <v-icon color="red" icon="mdi-logout-variant" />
               </template>
@@ -77,15 +76,4 @@
 <script setup lang="ts">
 const enums = ref(useEnums());
 const user = userStore();
-const tokens = useTokens();
-const router = useRouter();
-const api = useApi("/api/security/logout/", true);
-function logout() {
-  const refresh = tokens.get().refresh;
-  if (refresh) {
-    api.create({ refresh: refresh });
-  }
-  user.logout();
-  tokens.remove();
-}
 </script>
