@@ -1,7 +1,7 @@
 <template>
   <v-form v-model="valid" @submit.prevent="submit()">
     <v-container fluid>
-      <v-row justify="center" dense>
+      <v-row justify-sm="center" dense>
         <v-col cols="4">
           <v-text-field
             v-model="key"
@@ -67,6 +67,11 @@ const props = defineProps({
     required: false,
     default: null,
   },
+  parameters: {
+    type: Object,
+    required: false,
+    default: null,
+  },
 });
 const emit = defineEmits(["completed", "loading"]);
 const validate = useValidation();
@@ -79,7 +84,16 @@ const value = ref(props.header ? props.header.value : null);
 function submit() {
   if (valid.value) {
     let request = null;
-    const body = { key: key.value.trim(), value: value.value.trim() };
+    let body = { key: key.value.trim(), value: value.value.trim() };
+    if (props.parameters) {
+      body = Object.assign(
+        {},
+        Object.keys(props.parameters)
+          .filter((key) => !key.includes("__"))
+          .reduce((res, key) => ((res[key] = props.parameters[key]), res), {}),
+        body,
+      );
+    }
     if (props.header) {
       request = props.api.update(body, props.header.id);
     } else {

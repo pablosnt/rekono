@@ -43,6 +43,7 @@
           <component
             :is="add"
             :api="api"
+            :parameters="defaultParameters"
             @completed="loadData(true)"
             @close-dialog="isActive.value = false"
           />

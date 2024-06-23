@@ -9,6 +9,7 @@
   >
     <FormHttpHeader
       :api="api"
+      :parameters="parameters"
       @loading="(value) => (loading = value)"
       @completed="
         () => {
@@ -25,6 +26,11 @@
 defineProps({
   api: Object,
   edit: Object,
+  parameters: {
+    type: Object,
+    required: false,
+    default: null,
+  },
 });
 defineEmits(["closeDialog", "completed"]);
 const loading = ref(false);
