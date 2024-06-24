@@ -5,7 +5,6 @@ from pathlib import Path
 from typing import Any, Optional
 
 from django.db import models
-
 from framework.models import BaseLike, BaseModel
 from input_types.models import InputType
 from rekono.settings import CONFIG
@@ -60,7 +59,7 @@ class Tool(BaseLike):
         self.save(update_fields=update_fields)
 
     def _parse_version(self) -> Optional[str]:
-        version_regex = r"(?!m)[a-z]?[\d]+\.[\d]+\.[\d]*-?[a-z]*"
+        version_regex = r"(?!m)[a-z]?[\d]+\.[\d]+\.?[\d]*-?[a-z]*"
         if self.version_argument:
             process = subprocess.run(  # nosec
                 [i for i in [self.command, self.script, self.version_argument] if i],

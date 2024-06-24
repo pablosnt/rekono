@@ -1,8 +1,7 @@
 from typing import Any, Dict
 
-from rest_framework.serializers import FileField, ModelSerializer
-
 from framework.serializers import LikeSerializer
+from rest_framework.serializers import FileField, ModelSerializer
 from security.file_handler import FileHandler
 from users.serializers import SimpleUserSerializer
 from wordlists.models import Wordlist

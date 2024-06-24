@@ -69,7 +69,7 @@ INSTALLED_APPS = [
     "reporting",
     "security",
     "settings",
-    "target_blacklist",
+    "target_denylist",
     "target_ports",
     "targets",
     "tasks",

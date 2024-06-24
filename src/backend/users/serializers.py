@@ -1,9 +1,9 @@
 import logging
+import threading
 from typing import Any, Dict
 
 from django.contrib.auth.password_validation import validate_password
 from framework.serializers import MfaSerializer
-from http_headers.serializers import SimpleHttpHeaderSerializer
 from platforms.mail.notifications import SMTP
 from platforms.telegram_app.notifications.notifications import Telegram
 from rest_framework import status
@@ -107,8 +107,6 @@ class UpdateRoleSerializer(Serializer):
 class ProfileSerializer(UserSerializer):
     """Serializer to manage user profile via API."""
 
-    http_headers = SimpleHttpHeaderSerializer(many=True, read_only=True)
-
     class Meta:
         model = User
         fields = (
@@ -125,7 +123,6 @@ class ProfileSerializer(UserSerializer):
             "notification_scope",
             "email_notifications",
             "telegram_notifications",
-            "http_headers",
         )
         read_only_fields = (
             "username",
@@ -135,7 +132,6 @@ class ProfileSerializer(UserSerializer):
             "mfa",
             "role",
             "telegram_chat",
-            "http_headers",
         )
 
 
@@ -279,23 +275,20 @@ class RequestPasswordResetSerializer(Serializer):
 
     email = EmailField(max_length=150, required=True)
 
-    def save(self, **kwargs: Any) -> User:
-        """Save changes in instance.
-
-        Returns:
-            User: Instance after apply changes
-        """
-        user = User.objects.filter(
-            email=self.validated_data.get("email"), is_active=True
-        ).first()
-        if user:
+    def _save_in_thread(self, email: str) -> None:
+        user = User.objects.filter(email=email, is_active=True).first()
+        if email and user:
             otp = User.objects.setup_otp(user)
             SMTP().reset_password(user, otp)
             logger.info(
                 f"[User] User {user.id} requested a password reset",
                 extra={"user": user.id},
             )
-            return user
+
+    def save(self, **kwargs: Any) -> None:
+        threading.Thread(
+            target=self._save_in_thread, args=(self.validated_data.get("email"),)
+        ).start()
         return None
 
 

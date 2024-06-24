@@ -1,13 +1,14 @@
 import asyncio
 import logging
+import threading
+import time
 from typing import Any, Optional
 
-from telegram.constants import ParseMode
-from telegram.error import Forbidden, InvalidToken
-from telegram.ext import Application
-from telegram.helpers import escape_markdown
-
 from platforms.telegram_app.models import TelegramChat, TelegramSettings
+from telegram.constants import ParseMode
+from telegram.error import Forbidden, InvalidToken, NetworkError
+from telegram.ext import Application, CallbackContext
+from telegram.helpers import escape_markdown
 
 logger = logging.getLogger()
 
@@ -50,14 +51,17 @@ class BaseTelegram:
         self, chat: TelegramChat, message: str, reply_markup: Any = None
     ) -> None:
         if self.app and self.app.bot:
-            asyncio.run(
-                self.app.bot.send_message(
-                    chat.chat_id,
-                    text=message,
-                    reply_markup=reply_markup,
-                    parse_mode=ParseMode.MARKDOWN_V2,
+            try:
+                asyncio.run(
+                    self.app.bot.send_message(
+                        chat.chat_id,
+                        message,
+                        parse_mode=ParseMode.MARKDOWN_V2,
+                        reply_markup=reply_markup,
+                    )
                 )
-            )
+            except NetworkError:
+                pass
 
     def _escape(self, value: str) -> str:
         return escape_markdown(value, version=2)

@@ -144,6 +144,7 @@ dist_electron/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+.nuxt/
 # Editor directories and files
 *.suo
 *.ntvs*
@@ -160,5 +161,5 @@ rekono-kbx
 *.kaboxer.yaml
 
 # Temporal ignore
-src/backend-1.x/
+src/frontend-1.x/
 migrations/

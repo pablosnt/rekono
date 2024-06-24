@@ -18,8 +18,8 @@ logger = logging.getLogger()
 class TelegramSettingsSerializer(ModelSerializer):
     token = ProtectedSecretField(
         Validator(Regex.SECRET.value, code="password").__call__,
-        write_only=True,
-        required=True,
+        required=False,
+        allow_null=True,
         source="secret",
     )
     bot = SerializerMethodField(read_only=True)
