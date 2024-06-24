@@ -70,7 +70,7 @@
                   </v-card-text>
 
                   <v-card-actions @click.stop>
-                    <v-dialog width="auto">
+                    <v-dialog v-if="project.targets.length > 0" width="auto">
                       <template #activator="{ props: activatorProps }">
                         <v-btn
                           hover
@@ -105,7 +105,7 @@
                       "
                     >
                       <template #edit-dialog="{ isActive }">
-                        <!-- TODO: Dialog to edit project -->
+                        <!-- todo: Dialog to edit project -->
                       </template>
                       <template #delete-dialog="{ isActive }">
                         <DialogDelete
@@ -128,7 +128,7 @@
   </NuxtLayout>
 </template>
 
-<!-- TODO: Add, defect-dojo sync (create dialog to enable, disable, and click links to the products / engagements) -->
+<!-- todo: Add, defect-dojo sync (create dialog to enable, disable, and click links to the products / engagements) -->
 
 <script setup lang="ts">
 const dataset = ref(null);

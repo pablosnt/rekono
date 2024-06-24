@@ -1,6 +1,5 @@
 from typing import Any, Dict
 
-from http_headers.serializers import SimpleHttpHeaderSerializer
 from platforms.defect_dojo.serializers import DefectDojoTargetSyncSerializer
 from rest_framework.serializers import ModelSerializer
 from targets.models import Target
@@ -18,7 +17,6 @@ class TargetSerializer(ModelSerializer):
     """Serializer to manage targets via API."""
 
     defect_dojo_sync = DefectDojoTargetSyncSerializer(many=False, read_only=True)
-    http_headers = SimpleHttpHeaderSerializer(many=True, read_only=True)
 
     class Meta:
         model = Target

@@ -56,6 +56,6 @@ const props = defineProps({
   },
   form: Object,
 });
-const data = ref(props.notification ? props.notification : null);
+const data = ref(props.notification);
 const loading = ref(false);
 </script>

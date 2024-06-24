@@ -14,7 +14,8 @@ pyjwt==2.8.0
 pyotp==2.9.0
 python-magic==0.4.27
 python-libnmap==0.7.3
-python-telegram-bot==20.7
+python-telegram-bot==21.3
+python-telegram-bot[job-queue]
 pyyaml==6.0.1
 requests==2.31.0
 rq==1.15.1

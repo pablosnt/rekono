@@ -4,6 +4,7 @@
       <v-row justify="space-around" dense>
         <v-col align-self="center" cols="5">
           <ShowNotification
+            v-if="smtp !== null"
             :api="smtpApi"
             :notification="smtp"
             title="e-Mail"
@@ -14,6 +15,7 @@
         </v-col>
         <v-col align-self="center" cols="5">
           <ShowNotification
+            v-if="telegram != null"
             :api="telegramApi"
             :notification="telegram"
             title="Telegram"
@@ -60,13 +62,7 @@
 definePageMeta({ layout: false });
 const FormSmtp = resolveComponent("FormSmtp");
 const smtpApi = useApi("/api/smtp/", true, "SMTP settings");
-const smtp = ref({
-  host: null,
-  port: null,
-  tls: false,
-  username: null,
-  password: null,
-});
+const smtp = ref(null);
 smtpApi.get(1).then((response) => (smtp.value = response));
 
 const FormTelegram = resolveComponent("FormTelegram");
@@ -75,6 +71,6 @@ const telegramApi = useApi(
   true,
   "Telegram settings",
 );
-const telegram = ref({ bot: null, token: null });
+const telegram = ref(null);
 telegramApi.get(1).then((response) => (telegram.value = response));
 </script>

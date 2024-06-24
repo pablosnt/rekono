@@ -68,6 +68,12 @@ export function useApi(
         case 401:
           if (endpoint.includes("/api/security/refresh/")) {
             return Promise.reject(error);
+          } else if (
+            endpoint.includes("/api/telegram/link/") &&
+            error.data.detail &&
+            error.data.detail === "Incorrect authentication credentials."
+          ) {
+            message = "Invalid token";
           } else if (authentication) {
             const tokens = useTokens();
             const refreshing = refreshStore();

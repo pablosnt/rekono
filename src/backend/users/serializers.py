@@ -4,7 +4,6 @@ from typing import Any, Dict
 
 from django.contrib.auth.password_validation import validate_password
 from framework.serializers import MfaSerializer
-from http_headers.serializers import SimpleHttpHeaderSerializer
 from platforms.mail.notifications import SMTP
 from platforms.telegram_app.notifications.notifications import Telegram
 from rest_framework import status
@@ -107,8 +106,6 @@ class UpdateRoleSerializer(Serializer):
 
 class ProfileSerializer(UserSerializer):
     """Serializer to manage user profile via API."""
-
-    http_headers = SimpleHttpHeaderSerializer(many=True, read_only=True)
 
     class Meta:
         model = User

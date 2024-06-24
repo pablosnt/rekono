@@ -2,22 +2,28 @@ import logging
 from typing import Any, List
 
 from asgiref.sync import sync_to_async
-from telegram import Update
-from telegram.ext import CallbackContext, CommandHandler, ConversationHandler
-
 from platforms.telegram_app.bot.enums import Context, Section
 from platforms.telegram_app.bot.framework import BaseTelegramBot
 from platforms.telegram_app.models import TelegramChat
 from rekono.settings import DESCRIPTION
 from security.cryptography.hashing import hash
+from telegram import Update
+from telegram.ext import CallbackContext, CommandHandler, ConversationHandler
 from users.models import User
 
 logger = logging.getLogger()
 
 
 class BaseCommand(CommandHandler, BaseTelegramBot):
+
     def __init__(self, **kwargs: Any) -> None:
-        super().__init__(command=self.get_name(), callback=self._execute_command)
+        super().__init__(command=self.get_name(), callback=self.execute_command)
+
+    async def execute_command(self, update: Update, context: CallbackContext) -> None:
+        try:
+            await self._execute_command(update, context)
+        except:
+            pass
 
 
 class Help(BaseCommand):
