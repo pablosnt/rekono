@@ -65,6 +65,20 @@ export function useEnums() {
       color: "green",
     },
   };
+  const notificationScopes = [
+    "Disabled",
+    "Only my executions",
+    "All executions",
+  ];
+  const notificationPlatforms = ["e-Mail", "Telegram"];
 
-  return { stages, intensities, wordlists, timeUnits, roles };
+  return {
+    stages,
+    intensities,
+    wordlists,
+    timeUnits,
+    roles,
+    notificationScopes,
+    notificationPlatforms,
+  };
 }

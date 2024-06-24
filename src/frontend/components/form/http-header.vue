@@ -1,7 +1,7 @@
 <template>
   <v-form v-model="valid" @submit.prevent="submit()">
     <v-container fluid>
-      <v-row justify-sm="center" dense>
+      <v-row class="mt-5 ml-2" justify-sm="center" dense>
         <v-col cols="4">
           <v-text-field
             v-model="key"

@@ -123,7 +123,6 @@ class ProfileSerializer(UserSerializer):
             "notification_scope",
             "email_notifications",
             "telegram_notifications",
-            "http_headers",
         )
         read_only_fields = (
             "username",
@@ -133,7 +132,6 @@ class ProfileSerializer(UserSerializer):
             "mfa",
             "role",
             "telegram_chat",
-            "http_headers",
         )
 
 
