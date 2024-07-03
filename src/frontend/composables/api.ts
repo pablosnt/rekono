@@ -14,13 +14,10 @@ export function useApi(
   const max_size = 1000;
   let total = 0;
 
-  function url(endpoint: string, extraPath?: string): string {
-    let currentEndpoint = config.backendRootPath
+  function url(endpoint: string): string {
+    const currentEndpoint = config.backendRootPath
       ? config.backendRootPath + endpoint
       : endpoint;
-    if (extraPath) {
-      currentEndpoint = `${currentEndpoint}${extraPath}`;
-    }
     if (config.backendUrl) {
       const url = new URL(config.backendUrl);
       url.pathname = currentEndpoint;
@@ -54,7 +51,8 @@ export function useApi(
     extraPath?: string,
     extraHeaders?: object,
   ): Promise {
-    return $fetch(url(endpoint, extraPath), options).catch((error) => {
+    endpoint = extraPath ? `${endpoint}${extraPath}` : endpoint;
+    return $fetch(url(endpoint), options).catch((error) => {
       let message = "Unexpected error";
       switch (error.statusCode) {
         case 400: {
@@ -66,14 +64,17 @@ export function useApi(
           break;
         }
         case 401:
-          if (endpoint.includes("/api/security/refresh/")) {
-            return Promise.reject(error);
-          } else if (
-            endpoint.includes("/api/telegram/link/") &&
-            error.data.detail &&
-            error.data.detail === "Incorrect authentication credentials."
+          console.log(endpoint);
+          if (
+            endpoint.includes("/api/security/refresh/") ||
+            (error.data.detail &&
+              error.data.detail === "Incorrect authentication credentials." &&
+              (endpoint.includes("/api/profile/mfa/enable/") ||
+                endpoint.includes("/api/profile/mfa/disable/") ||
+                endpoint.includes("/api/telegram/link/")))
           ) {
-            message = "Invalid token";
+            console.log("HELLO WORLD");
+            return Promise.reject(error);
           } else if (authentication) {
             const tokens = useTokens();
             const refreshing = refreshStore();
@@ -90,7 +91,7 @@ export function useApi(
                       refreshing,
                       tokens,
                     );
-                    request(endpoint, options, extraPath, extraHeaders)
+                    request(endpoint, options, undefined, extraHeaders)
                       .then((response) => resolve(response))
                       .catch((error) => reject(error));
                   }, 500);
@@ -105,7 +106,7 @@ export function useApi(
                   refreshing,
                   tokens,
                 );
-                return request(endpoint, options, extraPath, extraHeaders);
+                return request(endpoint, options, undefined, extraHeaders);
               });
             }
           } else {

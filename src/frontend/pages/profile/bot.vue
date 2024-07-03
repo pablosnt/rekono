@@ -229,7 +229,12 @@ function link() {
         alert("Rekono Bot has been linked to your account", "success");
         loading.value = false;
       })
-      .catch(() => (loading.value = false));
+      .catch((error) => {
+        loading.value = false;
+        if (error.statusCode === 401) {
+          alert("Invalid Rekono Bot token", "error");
+        }
+      });
   }
 }
 

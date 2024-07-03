@@ -2,7 +2,7 @@
   <Menu
     :options="[
       {
-        title: 'Personal Information',
+        title: 'Information',
         icon: 'mdi-account',
         to: '/profile',
       },

@@ -77,7 +77,7 @@
                             class="text-medium-emphasis mt-2"
                           >
                             Joined on
-                            {{ new Date(user.date_joined).toUTCString() }}
+                            {{ new Date(user.date_joined).toDateString() }}
                           </p>
                           <div v-if="user.id !== current.user">
                             <v-divider class="my-3" />

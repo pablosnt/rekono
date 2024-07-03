@@ -20,7 +20,7 @@
             </template>
             <template #append>
               <p class="text-medium-emphasis">
-                Joined on {{ new Date(user.date_joined).toUTCString() }}
+                Joined on {{ new Date(user.date_joined).toDateString() }}
               </p>
             </template>
             <template #text>
