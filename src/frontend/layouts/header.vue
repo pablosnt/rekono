@@ -25,8 +25,8 @@
             </v-list-item>
             <v-list-item
               v-if="user.role !== 'Reader'"
-              to="/resources"
-              title="Resources"
+              to="/toolkit"
+              title="Toolkit"
             >
               <template #prepend>
                 <v-icon color="red" icon="mdi-toolbox" />

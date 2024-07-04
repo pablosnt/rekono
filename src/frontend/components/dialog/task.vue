@@ -309,9 +309,14 @@
                 </v-col>
               </v-row>
               <v-row justify="space-around" dense>
-                <v-col cols="6">
+                <v-col cols="5">
                   <v-text-field
                     v-model="scheduledDate"
+                    :model-value="
+                      scheduledDate !== undefined && scheduledDate !== null
+                        ? scheduledDate.toDateString()
+                        : null
+                    "
                     :active="dateMenu"
                     label="Date"
                     prepend-inner-icon="mdi-calendar"
@@ -337,7 +342,7 @@
                     </v-menu>
                   </v-text-field>
                 </v-col>
-                <v-col cols="3">
+                <v-col cols="5">
                   <v-text-field
                     v-model="scheduledTime"
                     :active="timeMenu"
@@ -418,17 +423,14 @@
         />
       </v-stepper>
 
-      <v-btn
+      <ButtonSubmit
         v-if="!loading"
-        color="red"
-        size="large"
-        variant="tonal"
         text="Execute"
-        type="submit"
-        prepend-icon="mdi-play"
-        block
+        :autofocus="false"
         :disabled="!isValid()"
+        prepend-icon="mdi-play"
       />
+
       <v-progress-linear
         v-if="loading"
         v-model="progressPercentage"

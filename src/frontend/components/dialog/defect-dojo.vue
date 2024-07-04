@@ -114,16 +114,11 @@
           />
         </v-row>
       </v-container>
-      <v-btn
+      <ButtonSubmit
         color="blue"
-        size="large"
-        variant="tonal"
         text="Save"
-        type="submit"
-        class="mt-5"
         :disabled="disabled"
-        block
-        autofocus
+        class="mt-5"
       />
     </v-form>
   </DialogIntegration>

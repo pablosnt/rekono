@@ -58,14 +58,10 @@
         validate-on="input"
       />
 
-      <v-btn
-        color="red"
-        size="large"
-        variant="tonal"
+      <ButtonSubmit
+        :autofocus="false"
         :text="!edit ? 'Create' : 'Update'"
-        type="submit"
         class="mt-5"
-        block
       />
     </v-form>
   </DialogDefault>

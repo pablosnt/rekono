@@ -1,16 +1,16 @@
 <template>
   <Menu
     :options="[
-      { title: 'Tools', icon: 'mdi-rocket', to: '/resources/tools' },
+      { title: 'Tools', icon: 'mdi-rocket', to: '/toolkit/tools' },
       {
         title: 'Processes',
         icon: 'mdi-robot-angry',
-        to: '/resources/processes',
+        to: '/toolkit/processes',
       },
       {
         title: 'Wordlists',
         icon: 'mdi-file-word-box',
-        to: '/resources/wordlists',
+        to: '/toolkit/wordlists',
       },
     ]"
   >

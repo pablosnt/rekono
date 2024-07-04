@@ -108,17 +108,7 @@
                   </v-row>
                   <v-row class="mt-5" justify="center" dense>
                     <v-col cols="8">
-                      <v-btn
-                        color="red"
-                        size="large"
-                        variant="tonal"
-                        text="Save"
-                        type="submit"
-                        class="mt-5"
-                        :disabled="disabled"
-                        block
-                        autofocus
-                      />
+                      <ButtonSubmit text="Save" :disabled="disabled" />
                     </v-col>
                   </v-row>
                 </v-container>

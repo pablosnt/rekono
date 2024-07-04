@@ -34,16 +34,10 @@
           </template>
         </v-text-field>
       </v-row>
-      <v-btn
+      <ButtonSubmit
         v-if="!pattern"
-        color="red"
-        size="large"
-        variant="tonal"
         text="Create"
-        type="submit"
         class="mt-5"
-        block
-        autofocus
         :disabled="disabled"
       />
     </v-container>

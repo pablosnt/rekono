@@ -64,14 +64,10 @@
       </v-chip-group>
     </v-text-field>
 
-    <v-btn
-      color="red"
-      size="large"
-      variant="tonal"
+    <ButtonSubmit
       :text="!edit ? 'Create' : 'Update'"
-      type="submit"
       class="mt-4"
-      block
+      :autofocus="false"
     />
   </v-form>
 </template>

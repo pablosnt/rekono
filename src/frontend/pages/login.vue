@@ -24,15 +24,7 @@
         @click:append-inner="visible = !visible"
       />
       <v-card-actions class="justify-center">
-        <v-btn
-          color="red"
-          size="large"
-          variant="tonal"
-          text="Login"
-          type="submit"
-          :disabled="loading"
-          block
-        />
+        <ButtonSubmit text="Login" :disabled="loading" />
       </v-card-actions>
       <v-btn
         class="d-flex text-align-right text-medium-emphasis"

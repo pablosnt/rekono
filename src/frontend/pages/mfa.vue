@@ -18,16 +18,7 @@
     >
       <template #buttons>
         <v-card-actions class="justify-center">
-          <v-btn
-            autofocus
-            color="red"
-            size="large"
-            variant="tonal"
-            text="Login"
-            type="submit"
-            :disabled="loading"
-            block
-          />
+          <ButtonSubmit text="Login" :disabled="loading" />
         </v-card-actions>
       </template>
     </FormMfa>

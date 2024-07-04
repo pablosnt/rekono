@@ -172,16 +172,10 @@
                   </v-row>
                   <v-row dense>
                     <v-col>
-                      <v-btn
-                        color="blue"
-                        size="large"
-                        variant="tonal"
+                      <ButtonSubmit
                         text="Link Rekono Bot"
-                        type="submit"
                         class="mt-5"
                         :disabled="disabled"
-                        block
-                        autofocus
                       />
                     </v-col>
                   </v-row>

@@ -36,15 +36,7 @@
           hide-details
         />
 
-        <v-btn
-          color="red"
-          size="large"
-          variant="tonal"
-          text="Invite"
-          type="submit"
-          class="mt-5"
-          block
-        />
+        <ButtonSubmit text="Invite" :autofocus="false" class="mt-5" />
       </v-conatiner>
     </v-form>
   </DialogDefault>
@@ -61,7 +53,7 @@ const loading = ref(false);
 const api = useApi("/api/users/", true, "User");
 
 function submit() {
-  if (validate.value) {
+  if (valid.value) {
     loading.value = true;
     api
       .create({ email: email.value.trim(), role: role.value })

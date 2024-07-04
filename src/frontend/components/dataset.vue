@@ -1,6 +1,6 @@
 <template>
   <v-container fluid>
-    <v-row justify="center" dense>
+    <v-row v-if="header" justify="center" dense>
       <v-text-field
         v-model="search"
         :loading="loadingSearch"
@@ -127,7 +127,7 @@
     >
       <v-empty-state :icon="icon" :title="empty" />
     </v-row>
-    <slot v-if="data !== null" name="data" />
+    <slot v-if="data !== null && data.length > 0" name="data" />
   </v-container>
 
   <v-pagination
@@ -143,6 +143,11 @@ const props = defineProps({
   api: Object,
   filtering: Array<object>,
   ordering: String,
+  header: {
+    type: Boolean,
+    required: false,
+    default: true,
+  },
   add: {
     type: Object,
     required: false,

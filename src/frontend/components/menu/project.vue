@@ -42,5 +42,4 @@
 <script setup lang="ts">
 const route = useRoute();
 const project = ref(route.params.project_id);
-console.log(project.value);
 </script>

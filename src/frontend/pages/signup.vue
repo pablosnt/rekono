@@ -74,15 +74,7 @@
       />
 
       <v-card-actions class="justify-center">
-        <v-btn
-          color="red"
-          size="large"
-          variant="tonal"
-          text="Create Account"
-          type="submit"
-          :disabled="loading"
-          block
-        />
+        <ButtonSubmit text="Create Account" :disabled="loading" />
       </v-card-actions>
     </v-form>
   </NuxtLayout>

@@ -82,17 +82,7 @@
           />
         </v-col>
       </v-row>
-      <v-btn
-        color="red"
-        size="large"
-        variant="tonal"
-        text="Save"
-        type="submit"
-        class="mt-5"
-        block
-        autofocus
-        :disabled="disabled"
-      />
+      <ButtonSubmit text="Save" class="mt-5" :disabled="disabled" />
     </v-container>
   </v-form>
 </template>

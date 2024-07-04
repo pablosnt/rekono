@@ -64,16 +64,15 @@ export function useApi(
           break;
         }
         case 401:
-          console.log(endpoint);
           if (
             endpoint.includes("/api/security/refresh/") ||
             (error.data.detail &&
               error.data.detail === "Incorrect authentication credentials." &&
               (endpoint.includes("/api/profile/mfa/enable/") ||
                 endpoint.includes("/api/profile/mfa/disable/") ||
-                endpoint.includes("/api/telegram/link/")))
+                endpoint.includes("/api/telegram/link/") ||
+                endpoint.includes("/api/profile/update-password/")))
           ) {
-            console.log("HELLO WORLD");
             return Promise.reject(error);
           } else if (authentication) {
             const tokens = useTokens();

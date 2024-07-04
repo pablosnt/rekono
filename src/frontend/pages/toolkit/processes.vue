@@ -1,5 +1,5 @@
 <template>
-  <MenuResources>
+  <MenuToolkit>
     <Dataset
       ref="dataset"
       :api="api"
@@ -40,7 +40,7 @@
         </v-row>
       </template>
     </Dataset>
-  </MenuResources>
+  </MenuToolkit>
 </template>
 
 <script setup lang="ts">
