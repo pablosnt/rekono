@@ -139,9 +139,9 @@
                       (p) =>
                         p !== null ||
                         selectedConfiguration !== null ||
-                        'Project is required',
+                        'Process or tool is required',
                     ]"
-                    validate-on="input"
+                    validate-on="blur"
                     @update:model-value="selectProcess()"
                   />
                 </v-col>
@@ -161,9 +161,9 @@
                       (t) =>
                         t !== null ||
                         selectedProcess !== null ||
-                        'Tool is required',
+                        'Tool or process is required',
                     ]"
-                    validate-on="input"
+                    validate-on="blur"
                     @update:model-value="selectTool()"
                   >
                     <template

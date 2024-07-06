@@ -27,42 +27,11 @@
       rows="3"
     />
 
-    <v-text-field
-      v-model="newTag"
+    <InputTag
       class="mt-2"
-      :label="tags.length === 0 ? 'Tags' : null"
-      prepend-inner-icon="mdi-tag"
-      variant="outlined"
-      :rules="[(t) => !t || validate.name.test(t.trim()) || 'Invalid tag']"
-      validate-on="input"
-    >
-      <template #append-inner>
-        <v-btn
-          icon="mdi-plus-thick"
-          color="green"
-          variant="text"
-          :disabled="
-            !newTag ||
-            !newTag.trim() ||
-            !validate.name.test(newTag.trim()) ||
-            tags.includes(newTag.trim())
-          "
-          @click="
-            tags.push(newTag.trim());
-            newTag = null;
-          "
-        />
-      </template>
-      <v-chip-group class="justify-center" multiple>
-        <v-chip
-          v-for="tag in tags"
-          :key="tag"
-          :text="tag"
-          closable
-          @click:close="tags.splice(tags.indexOf(tag), 1)"
-        />
-      </v-chip-group>
-    </v-text-field>
+      :value="tags"
+      @new-value="(value) => (tags = value)"
+    />
 
     <ButtonSubmit
       :text="!edit ? 'Create' : 'Update'"
@@ -83,7 +52,6 @@ const valid = ref(true);
 const name = ref(props.edit ? props.edit.name : null);
 const description = ref(props.edit ? props.edit.description : null);
 const tags = ref(props.edit ? props.edit.tags : []);
-const newTag = ref(null);
 function submit() {
   if (valid.value) {
     emit("loading", true);
@@ -98,6 +66,7 @@ function submit() {
     )
       .then((response) => {
         emit("completed", response);
+        emit("loading", false);
       })
       .catch(() => {
         emit("loading", false);

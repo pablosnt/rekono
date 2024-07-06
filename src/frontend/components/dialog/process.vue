@@ -4,7 +4,7 @@
     :loading="loading"
     @close-dialog="closeDialog(step === 1)"
   >
-    <FormProcess
+    <FormProcessProject
       v-if="step === 0"
       :api="api"
       :edit="edit ? edit : process"

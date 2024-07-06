@@ -71,7 +71,7 @@ defineProps({
     default: false,
   },
 });
-const emit = defineEmits(["loadData"]);
+const emit = defineEmits(["newOtp"]);
 const validate = ref(useValidation());
 const app = ref(true);
 const mfa = ref(null);

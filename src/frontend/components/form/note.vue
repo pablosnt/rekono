@@ -24,45 +24,11 @@
       </v-row>
       <v-row justify="space-around">
         <v-col cols="8">
-          <v-text-field
-            v-model="newTag"
+          <InputTag
             class="mt-2"
-            :label="tags.length === 0 ? 'Tags' : null"
-            prepend-inner-icon="mdi-tag"
-            variant="outlined"
-            :rules="[
-              (t) => !t || validate.name.test(t.trim()) || 'Invalid tag',
-            ]"
-            validate-on="input"
-            density="compact"
-          >
-            <template #append-inner>
-              <v-btn
-                icon="mdi-plus-thick"
-                color="green"
-                variant="text"
-                :disabled="
-                  !newTag ||
-                  !newTag.trim() ||
-                  !validate.name.test(newTag.trim()) ||
-                  tags.includes(newTag.trim())
-                "
-                @click="
-                  tags.push(newTag.trim());
-                  newTag = null;
-                "
-              />
-            </template>
-            <v-chip-group class="justify-center" multiple>
-              <v-chip
-                v-for="tag in tags"
-                :key="tag"
-                :text="tag"
-                closable
-                @click:close="tags.splice(tags.indexOf(tag), 1)"
-              />
-            </v-chip-group>
-          </v-text-field>
+            :value="tags"
+            @new-value="(value) => (tags = value)"
+          />
         </v-col>
         <v-col cols="2">
           <!-- todo: Replace by button & icon. Floating button? -->
@@ -114,7 +80,6 @@ const shared = ref(false);
 const project = ref(null);
 const target = ref(null);
 const tags = ref([]);
-const newTag = ref(null);
 const body = ref(null);
 const mdBody = ref(null);
 const preview = ref(false);

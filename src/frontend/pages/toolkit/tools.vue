@@ -126,7 +126,6 @@
 
 <script setup lang="ts">
 definePageMeta({ layout: false });
-defineEmits(["loadData"]);
 const tools = ref(null);
 const show = ref(null);
 const dataset = ref(null);

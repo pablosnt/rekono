@@ -41,6 +41,7 @@
                 <v-icon color="red" icon="mdi-cog" />
               </template>
             </v-list-item>
+            <!-- todo: about us section? -->
             <!-- todo: Update link to the new GitHub pages -->
             <v-list-item
               href="https://github.com/pablosnt/rekono/wiki"

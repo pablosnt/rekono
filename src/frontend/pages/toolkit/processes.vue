@@ -45,7 +45,6 @@
 
 <script setup lang="ts">
 definePageMeta({ layout: false });
-defineEmits(["loadData"]);
 const user = userStore();
 const enums = useEnums();
 const DialogProcess = resolveComponent("DialogProcess");

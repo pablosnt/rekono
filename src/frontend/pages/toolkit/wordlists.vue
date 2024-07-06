@@ -95,7 +95,6 @@
 <script setup lang="ts">
 const DialogWordlist = resolveComponent("DialogWordlist");
 definePageMeta({ layout: false });
-defineEmits(["loadData"]);
 const user = userStore();
 const enums = useEnums();
 const dataset = ref(null);

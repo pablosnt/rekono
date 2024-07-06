@@ -4,6 +4,7 @@
       <Dataset
         ref="dataset"
         :api="api"
+        :add="DialogProjectCreation"
         :filtering="filtering"
         icon="mdi-folder-open"
         :empty="
@@ -91,6 +92,7 @@
                       </template>
                     </v-dialog>
                     <v-spacer />
+                    <!-- todo: replace link by the Defect-Dojo product or engagement from the sync -->
                     <v-btn
                       variant="text"
                       target="_blank"
@@ -105,14 +107,19 @@
                       "
                     >
                       <template #edit-dialog="{ isActive }">
-                        <!-- todo: Dialog to edit project -->
+                        <DialogProjectEdition
+                          :api="api"
+                          :edit="project"
+                          @completed="dataset.loadData(false); isActive.value = false"
+                          @close-dialog="isActive.value = false"
+                        />
                       </template>
                       <template #delete-dialog="{ isActive }">
                         <DialogDelete
                           :id="project.id"
                           :api="api"
                           :text="`Project '${project.name}' will be removed`"
-                          @completed="$emit('reload', false)"
+                          @completed="dataset.loadData(false); isActive.value = false"
                           @close-dialog="isActive.value = false"
                         />
                       </template>
@@ -128,15 +135,43 @@
   </NuxtLayout>
 </template>
 
-<!-- todo: Add, defect-dojo sync (create dialog to enable, disable, and click links to the products / engagements) -->
-
 <script setup lang="ts">
 const dataset = ref(null);
 const projects = ref(null);
-const router = useRouter();
 const user = userStore();
 const api = ref(useApi("/api/projects/", true, "Project"));
-const filtering = ref([]);
+const filtering = ref([
+{
+    type: "text",
+    label: "Tag",
+    icon: "mdi-tag",
+    cols: 2,
+    key: "tag",
+    value: null,
+  },
+  {
+    type: "switch",
+    label: "Mine",
+    color: "blue",
+    cols: 1,
+    key: "owner",
+    trueValue: user.user,
+    falseValue: null,
+    value: null,
+  },
+  {
+    type: "autocomplete",
+    label: "Sort",
+    icon: "mdi-sort",
+    cols: 2,
+    collection: ["id", "name"],
+    fieldValue: "id",
+    fieldTitle: "name",
+    key: "ordering",
+    value: "id",
+  },
+]);
+const DialogProjectCreation = resolveComponent("DialogProjectCreation");
 
 const integration = ref(null);
 const integrationsApi = useApi("/api/integrations/", true);
