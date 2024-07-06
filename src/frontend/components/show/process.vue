@@ -1,9 +1,8 @@
 <template>
-  <v-card :title="process.name" elevation="4" density="compact" hover>
+  <v-card :title="process.name" elevation="3" density="compact" hover>
     <template #append>
       <v-chip v-if="process.steps" color="red">
-        <v-icon icon="mdi-rocket" start />
-        {{ process.steps.length }} Steps
+        <v-icon icon="mdi-rocket" start />3 {{ process.steps.length }} Steps
       </v-chip>
       <span class="me-3" />
       <v-chip
@@ -45,20 +44,7 @@
       </v-card-text>
 
       <v-card-actions>
-        <v-dialog width="auto">
-          <template #activator="{ props: activatorProps }">
-            <v-btn hover icon size="x-large" v-bind="activatorProps">
-              <v-icon icon="mdi-play-circle" color="green" />
-              <v-tooltip activator="parent" text="Run" />
-            </v-btn>
-          </template>
-          <template #default="{ isActive }">
-            <DialogTask
-              :process="process"
-              @close-dialog="isActive.value = false"
-            />
-          </template>
-        </v-dialog>
+        <ButtonRun :process="process" />
         <v-spacer />
         <ButtonLike
           :api="api"

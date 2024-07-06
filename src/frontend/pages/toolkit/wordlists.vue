@@ -14,7 +14,7 @@
           <v-col v-for="wordlist in wordlists" :key="wordlist.id" cols="6">
             <v-card
               :title="wordlist.name"
-              elevation="4"
+              elevation="2"
               class="mx-auto"
               density="compact"
             >

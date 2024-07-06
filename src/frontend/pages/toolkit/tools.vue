@@ -19,7 +19,7 @@
               "
               :prepend-avatar="tool.icon"
               rel="noopener"
-              elevation="4"
+              elevation="3"
               class="mx-auto"
               density="compact"
             >
@@ -94,20 +94,7 @@
                 </v-card-text>
               </template>
               <v-card-actions>
-                <v-dialog width="auto">
-                  <template #activator="{ props: activatorProps }">
-                    <v-btn hover icon size="x-large" v-bind="activatorProps">
-                      <v-icon icon="mdi-play-circle" color="green" />
-                      <v-tooltip activator="parent" text="Run" />
-                    </v-btn>
-                  </template>
-                  <template #default="{ isActive }">
-                    <DialogTask
-                      :tool="tool"
-                      @close-dialog="isActive.value = false"
-                    />
-                  </template>
-                </v-dialog>
+                <ButtonRun :tool="tool" />
                 <v-spacer />
                 <ButtonLike
                   :api="api"

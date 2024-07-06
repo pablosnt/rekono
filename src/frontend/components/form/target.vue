@@ -14,7 +14,16 @@
 
 <script setup lang="ts">
 const props = defineProps({
-  project: Object,
+  project: {
+    type: Object,
+    required: false,
+    default: null,
+  },
+  projectId: {
+    type: Number,
+    required: false,
+    default: null,
+  },
   api: {
     type: Object,
     required: false,

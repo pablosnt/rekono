@@ -71,6 +71,13 @@ export function useEnums() {
     "All executions",
   ];
   const notificationPlatforms = ["e-Mail", "Telegram"];
+  const targets = {
+    "Private IP": { icon: "mdi-ip" },
+    "Public IP": { icon: "mdi-ip" },
+    Network: { icon: "mdi-network" },
+    "IP Range": { icon: "mdi-ip-network" },
+    Domain: { icon: "mdi-dns" },
+  };
 
   return {
     stages,
@@ -80,5 +87,6 @@ export function useEnums() {
     roles,
     notificationScopes,
     notificationPlatforms,
+    targets,
   };
 }

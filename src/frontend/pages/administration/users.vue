@@ -12,7 +12,7 @@
         <v-row dense>
           <v-col v-for="user in users" :key="user.id" cols="4">
             <v-card
-              elevation="4"
+              elevation="3"
               class="mx-auto"
               density="compact"
               :title="

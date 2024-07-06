@@ -481,7 +481,7 @@ const router = useRouter();
 const loading = ref(false);
 const valid = ref(true);
 const stepper = ref(null);
-const step = ref(0);
+const step = ref(props.target ? 1 : 0);
 const allTargets = ref(false);
 const allWordlists = ref(false);
 const timeMenu = ref(false);
@@ -494,7 +494,9 @@ const progressPercentage = computed(() => {
 });
 
 const projects = ref([]);
-const selectedProject = ref(props.project ? props.project : null);
+const selectedProject = ref(
+  props.project ? props.project : props.target ? props.target.project : null,
+);
 const targets = ref([]);
 const selectedTargets = ref(props.target ? [props.target] : []);
 const processes = ref([]);

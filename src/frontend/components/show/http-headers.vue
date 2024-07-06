@@ -33,7 +33,7 @@
     <template #data>
       <v-row dense>
         <v-col v-for="header in headers" :key="header.id" cols="6">
-          <v-card elevation="4" class="mx-auto" density="compact">
+          <v-card elevation="3" class="mx-auto" density="compact">
             <FormHttpHeader
               :api="api"
               :header="header"

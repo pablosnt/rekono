@@ -18,7 +18,7 @@
               <v-card
                 :title="note.title"
                 :subtitle="new Date(note.updated_at).toUTCString()"
-                elevation="4"
+                elevation="3"
                 class="mx-auto"
                 density="compact"
                 :prepend-icon="
@@ -209,24 +209,6 @@ const notes = ref([]);
 const api = useApi("/api/notes/", true, "Note");
 const filtering = ref([
   {
-    type: "text",
-    label: "Tag",
-    cols: 2,
-    icon: "mdi-tag",
-    key: "tag",
-    value: null,
-  },
-  {
-    type: "switch",
-    label: "Mine",
-    color: "blue",
-    cols: 1,
-    key: "owner",
-    trueValue: user.user,
-    falseValue: null,
-    value: null,
-  },
-  {
     type: "switch",
     label: "Likes",
     color: "red",
@@ -268,6 +250,26 @@ const filtering = ref([
     value: "-updated_at",
   },
 ]);
+if (user.role === "Admin") {
+  filtering.value.unshift({
+    type: "switch",
+    label: "Mine",
+    color: "blue",
+    cols: 1,
+    key: "owner",
+    trueValue: user.user,
+    falseValue: null,
+    value: null,
+  });
+}
+filtering.value.unshift({
+  type: "text",
+  label: "Tag",
+  cols: 2,
+  icon: "mdi-tag",
+  key: "tag",
+  value: null,
+});
 const targets = ref([]);
 useApi("/api/targets/", true, "Target")
   .list({}, true)

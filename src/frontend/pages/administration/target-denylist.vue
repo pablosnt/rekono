@@ -22,7 +22,7 @@
       <template #data>
         <v-row dense>
           <v-col v-for="pattern in denylist" :key="pattern.id" cols="4">
-            <v-card elevation="4" class="mx-auto" density="compact">
+            <v-card elevation="3" class="mx-auto" density="compact">
               <FormTargetDenylist
                 :api="api"
                 :pattern="pattern"

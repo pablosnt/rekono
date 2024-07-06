@@ -1,7 +1,7 @@
 <template>
   <v-card
     class="mx-auto"
-    elevation="4"
+    elevation="3"
     :color="color"
     :width="width"
     :loading="loading ? 'red' : false"

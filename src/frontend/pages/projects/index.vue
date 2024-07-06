@@ -19,7 +19,7 @@
             <v-col v-for="project in projects" :key="project.id" cols="4">
               <v-card
                 :title="project.name"
-                elevation="4"
+                elevation="3"
                 class="mx-auto"
                 density="compact"
                 hover
@@ -71,26 +71,10 @@
                   </v-card-text>
 
                   <v-card-actions @click.stop>
-                    <v-dialog v-if="project.targets.length > 0" width="auto">
-                      <template #activator="{ props: activatorProps }">
-                        <v-btn
-                          hover
-                          icon
-                          size="x-large"
-                          v-bind="activatorProps"
-                          @click.prevent.stop
-                        >
-                          <v-icon icon="mdi-play-circle" color="green" />
-                          <v-tooltip activator="parent" text="Run" />
-                        </v-btn>
-                      </template>
-                      <template #default="{ isActive }">
-                        <DialogTask
-                          :project="project"
-                          @close-dialog="isActive.value = false"
-                        />
-                      </template>
-                    </v-dialog>
+                    <ButtonRun
+                      v-if="project.targets.length > 0"
+                      :project="project"
+                    />
                     <v-spacer />
                     <!-- todo: replace link by the Defect-Dojo product or engagement from the sync -->
                     <v-btn
@@ -151,11 +135,12 @@ const filtering = ref([
     type: "text",
     label: "Tag",
     icon: "mdi-tag",
-    cols: 2,
     key: "tag",
     value: null,
   },
-  {
+]);
+if (user.role === "Admin") {
+  filtering.value.push({
     type: "switch",
     label: "Mine",
     color: "blue",
@@ -164,19 +149,20 @@ const filtering = ref([
     trueValue: user.user,
     falseValue: null,
     value: null,
-  },
-  {
-    type: "autocomplete",
-    label: "Sort",
-    icon: "mdi-sort",
-    cols: 2,
-    collection: ["id", "name"],
-    fieldValue: "id",
-    fieldTitle: "name",
-    key: "ordering",
-    value: "id",
-  },
-]);
+  });
+}
+filtering.value.push({
+  type: "autocomplete",
+  label: "Sort",
+  icon: "mdi-sort",
+  cols: 2,
+  collection: ["id", "name"],
+  fieldValue: "id",
+  fieldTitle: "name",
+  key: "ordering",
+  value: "id",
+});
+
 const DialogProjectCreation = resolveComponent("DialogProjectCreation");
 
 const integration = ref(null);

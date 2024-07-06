@@ -1,6 +1,6 @@
 <template>
   <v-card
-    elevation="4"
+    elevation="3"
     :title="data.name"
     :text="data.description"
     :prepend-avatar="data.icon"

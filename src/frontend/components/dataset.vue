@@ -75,7 +75,9 @@
                 :item-title="f.fieldTitle"
                 return-object
                 :color="f.value && f.value.color ? f.value.color : null"
-                :prepend-inner-icon="f.icon"
+                :prepend-inner-icon="
+                  f.value && f.value.icon ? f.value.icon : f.icon
+                "
                 @update:model-value="
                   addParameter(
                     f.key,
