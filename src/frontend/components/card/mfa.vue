@@ -64,7 +64,6 @@
 </template>
 
 <script setup lang="ts">
-const alert = useAlert();
 const emit = defineEmits(["reload"]);
 const props = defineProps({ user: Object });
 const api = useApi("/api/profile/mfa/", true);

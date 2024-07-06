@@ -4,7 +4,9 @@
     :loading="loading"
     @close-dialog="
       loading = false;
-      project !== null ? navigateTo(`/projects/${project.id}`) : $emit('closeDialog');;
+      project !== null
+        ? navigateTo(`/projects/${project.id}`)
+        : $emit('closeDialog');
     "
   >
     <v-stepper v-model="step" hide-actions>
@@ -21,7 +23,7 @@
               project = response;
               step = 1;
             }
-              "
+          "
           @loading="(value) => (loading = value)"
         />
         <FormTarget
@@ -37,7 +39,7 @@
 
 <script setup lang="ts">
 defineProps({ api: Object });
-const emit = defineEmits(["closeDialog", "completed"]);
+defineEmits(["closeDialog", "completed"]);
 const loading = ref(false);
 const step = ref(0);
 const project = ref(null);

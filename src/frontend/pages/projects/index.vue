@@ -110,7 +110,10 @@
                         <DialogProjectEdition
                           :api="api"
                           :edit="project"
-                          @completed="dataset.loadData(false); isActive.value = false"
+                          @completed="
+                            dataset.loadData(false);
+                            isActive.value = false;
+                          "
                           @close-dialog="isActive.value = false"
                         />
                       </template>
@@ -119,7 +122,10 @@
                           :id="project.id"
                           :api="api"
                           :text="`Project '${project.name}' will be removed`"
-                          @completed="dataset.loadData(false); isActive.value = false"
+                          @completed="
+                            dataset.loadData(false);
+                            isActive.value = false;
+                          "
                           @close-dialog="isActive.value = false"
                         />
                       </template>
@@ -141,7 +147,7 @@ const projects = ref(null);
 const user = userStore();
 const api = ref(useApi("/api/projects/", true, "Project"));
 const filtering = ref([
-{
+  {
     type: "text",
     label: "Tag",
     icon: "mdi-tag",

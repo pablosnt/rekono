@@ -52,6 +52,7 @@
           counter
           @update:model-value="mdBody = markdown.render(body)"
         />
+        <!-- eslint-disable-next-line vue/no-v-html  -->
         <div v-if="preview" v-html="mdBody" />
       </v-row>
       <!-- todo: Create / Save floating button -->
@@ -62,7 +63,7 @@
 <script setup lang="ts">
 import MarkdownIt from "markdown-it";
 
-const validate = useValidation();
+// const validate = useValidation();
 // todo: Review & apply all plugins
 const markdown = ref(
   MarkdownIt({
@@ -77,15 +78,15 @@ const markdown = ref(
 const title = ref(null);
 const shared = ref(false);
 
-const project = ref(null);
-const target = ref(null);
+// const project = ref(null);
+// const target = ref(null);
 const tags = ref([]);
 const body = ref(null);
 const mdBody = ref(null);
 const preview = ref(false);
 
-const projects = ref([]);
-const targets = ref([]);
+// const projects = ref([]);
+// const targets = ref([]);
 
 // todo: always allow manual creation/edition. Automatically create the note some minutes after first body edition/createFunctionExpression. If automatic save is already enabled, update the note also on the dialog close
 </script>

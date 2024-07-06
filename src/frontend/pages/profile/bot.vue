@@ -31,8 +31,11 @@
             >
               <ButtonLink :link="`https://t.me/${telegram.bot}`" />
             </template>
-            <template v-if="user && telegram && !telegram?.is_available" #text>
-              <v-container fluid>
+            <template #text>
+              <v-container
+                v-if="user && telegram && !telegram?.is_available"
+                fluid
+              >
                 <v-row dense>
                   <v-col>
                     <v-alert
@@ -66,17 +69,15 @@
                   </v-col>
                 </v-row>
               </v-container>
-            </template>
-            <template
-              v-if="
-                user &&
-                telegram &&
-                telegram?.is_available &&
-                user?.telegram_chat !== null
-              "
-              #text
-            >
-              <v-container fluid>
+              <v-container
+                v-if="
+                  user &&
+                  telegram &&
+                  telegram?.is_available &&
+                  user?.telegram_chat !== null
+                "
+                fluid
+              >
                 <v-row dense>
                   <v-col>
                     <v-btn
@@ -107,17 +108,15 @@
                   </v-col>
                 </v-row>
               </v-container>
-            </template>
-            <template
-              v-if="
-                user &&
-                telegram &&
-                telegram?.is_available &&
-                user?.telegram_chat === null
-              "
-              #text
-            >
-              <v-container fluid>
+              <v-container
+                v-if="
+                  user &&
+                  telegram &&
+                  telegram?.is_available &&
+                  user?.telegram_chat === null
+                "
+                fluid
+              >
                 <v-row dense>
                   <v-col>
                     <v-alert color="info" icon="$info" variant="tonal">

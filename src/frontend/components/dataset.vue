@@ -209,9 +209,8 @@ function addParameter(key: string, value: string) {
   } else if (key === "ordering" && props.ordering) {
     parameters.value.ordering = props.ordering;
   } else {
-    /* eslint-disable @typescript-eslint/no-dynamic-delete */
+    /* eslint-disable-next-line @typescript-eslint/no-dynamic-delete */
     delete parameters.value[key];
-    /* eslint-enable @typescript-eslint/no-dynamic-delete */
   }
   loadData();
 }
