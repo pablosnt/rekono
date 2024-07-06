@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Any
 
 from django.core.exceptions import ValidationError
 from findings.enums import TriageStatus
@@ -22,8 +22,8 @@ class CreateReportSerializer(ModelSerializer):
     finding_types = MultipleChoiceField(
         choices=FindingName.choices, required=False, write_only=True
     )
-    validated_filter: Dict[str, Any] = {}
-    validated_finding_types: List[FindingName] = []
+    validated_filter: dict[str, Any] = {}
+    validated_finding_types: list[FindingName] = []
 
     class Meta:
         model = Report
@@ -39,7 +39,7 @@ class CreateReportSerializer(ModelSerializer):
         )
         read_only_fields = ("user",)
 
-    def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         attrs = super().validate(attrs)
         self.validated_filter = {"is_fixed": False}
         self.validated_triage_filter = {}

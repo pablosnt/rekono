@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 
 from django.db import models
 from framework.enums import InputKeyword
@@ -60,7 +60,7 @@ class HttpHeader(BaseInput):
             ),
         ]
 
-    def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
+    def parse(self, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
         return {
             InputKeyword.HEADERS.name.lower(): {
                 **accumulated.get(InputKeyword.HEADERS.name.lower(), {}),

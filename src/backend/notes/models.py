@@ -1,5 +1,3 @@
-from typing import Any
-
 from django.db import models
 from executions.models import Execution
 from findings.models import (

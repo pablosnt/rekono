@@ -23,6 +23,7 @@ class SecurityTest(ApiTest):
             endpoint=ApiTest.login,
         )
     ]
+    admin1: User
 
     def test_refresh_and_logout(self) -> None:
         # Login as admin1

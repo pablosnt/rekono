@@ -1,7 +1,7 @@
 import logging
 import os
 import threading
-from typing import Any, Dict, List
+from typing import Any
 
 import certifi
 from alerts.enums import AlertMode
@@ -56,7 +56,7 @@ class SMTP(BaseNotification):
             return False
 
     def _send_messages(
-        self, users: List[Any], subject: str, template_path: str, data: Dict[str, Any]
+        self, users: list[Any], subject: str, template_path: str, data: dict[str, Any]
     ) -> None:
         if not self.is_available():
             return
@@ -76,10 +76,10 @@ class SMTP(BaseNotification):
 
     def _notify(
         self,
-        users: List[Any],
+        users: list[Any],
         subject: str,
         template: str,
-        data: Dict[str, Any],
+        data: dict[str, Any],
         background: bool = True,
     ) -> None:
         if background:
@@ -90,9 +90,9 @@ class SMTP(BaseNotification):
             self._send_messages(users, subject, template, data)
 
     def _notify_execution(
-        self, users: List[Any], execution: Execution, findings: List[Finding]
+        self, users: list[Any], execution: Execution, findings: list[Finding]
     ) -> None:
-        findings_by_class: Dict[Any, List[Finding]] = {}
+        findings_by_class: dict[Any, list[Finding]] = {}
         for finding in findings:
             if findings.__class__.__name__.lower() not in findings_by_class:
                 findings_by_class[findings.__class__.__name__.lower()] = []
@@ -108,7 +108,7 @@ class SMTP(BaseNotification):
             background=False,
         )
 
-    def _notify_alert(self, users: List[Any], alert: Alert, finding: Finding) -> None:
+    def _notify_alert(self, users: list[Any], alert: Alert, finding: Finding) -> None:
         subjects = {
             AlertMode.NEW: f"New {finding.__class__.__name__.lower()} detected",
             AlertMode.FILTER.value: f"New {finding.__class__.__name__.lower()} matches alert criteria",

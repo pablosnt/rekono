@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 
 from alerts.enums import AlertMode
 from alerts.models import Alert, MonitorSettings
@@ -34,7 +34,7 @@ class AlertSerializer(ModelSerializer):
             pk=self.context.get("request").user.id
         ).exists()
 
-    def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         attrs = super().validate(attrs)
         if attrs.get("mode") == AlertMode.FILTER and not attrs.get("value"):
             raise ValidationError(
@@ -44,7 +44,7 @@ class AlertSerializer(ModelSerializer):
         return attrs
 
     @transaction.atomic()
-    def create(self, validated_data: Dict[str, Any]) -> Alert:
+    def create(self, validated_data: dict[str, Any]) -> Alert:
         alert = super().create(validated_data)
         if alert.suscribe_all_members:
             alert.suscribers.set(alert.project.members.all())

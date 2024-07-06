@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 
 from django.db.models import Q
 from framework.fields import TagField
@@ -76,7 +76,7 @@ class ProcessSerializer(TaggitSerializer, LikeSerializer):
             "wordlists",
         )
 
-    def get_wordlists(self, instance: Any) -> Dict[str, bool]:
+    def get_wordlists(self, instance: Any) -> dict[str, bool]:
         params = {"configuration__tool__arguments__inputs__type__name": "Wordlist"}
         return {
             "required": instance.steps.filter(

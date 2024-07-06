@@ -1,5 +1,4 @@
 import logging
-from typing import List
 
 from django_rq import job
 from executions.models import Execution
@@ -30,7 +29,7 @@ logger = logging.getLogger()
 class FindingsQueue(BaseQueue):
     name = "findings"
 
-    def enqueue(self, execution: Execution, findings: List[Finding]) -> Job:
+    def enqueue(self, execution: Execution, findings: list[Finding]) -> Job:
         job = super().enqueue(execution=execution, findings=findings)
         logger.info(
             f"[Findings] {len(findings)} findings from execution {execution.id} have been enqueued"
@@ -39,7 +38,7 @@ class FindingsQueue(BaseQueue):
 
     @staticmethod
     @job("findings")
-    def consume(execution: Execution, findings: List[Finding]) -> None:
+    def consume(execution: Execution, findings: list[Finding]) -> None:
         settings = Settings.objects.first()
         if findings:
             notifications = [SMTP(), Telegram()]

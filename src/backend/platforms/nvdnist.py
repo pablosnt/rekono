@@ -1,5 +1,3 @@
-from typing import List
-
 from executions.models import Execution
 from findings.enums import Severity
 from findings.framework.models import Finding
@@ -20,7 +18,7 @@ class NvdNist(BaseIntegration):
             Severity.INFO: (0, 2),
         }
 
-    def _process_findings(self, execution: Execution, findings: List[Finding]) -> None:
+    def _process_findings(self, execution: Execution, findings: list[Finding]) -> None:
         for finding in findings:
             if isinstance(finding, Vulnerability) and finding.cve:
                 try:

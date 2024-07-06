@@ -1,7 +1,7 @@
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Type
+from typing import Any, Optional, Type
 
 from authentications.models import Authentication
 from django.db import transaction
@@ -20,15 +20,15 @@ class RekonoTestCase:
 
 @dataclass
 class ApiTestCase(RekonoTestCase):
-    executors: List[str]
+    executors: list[str]
     method: str
     status_code: int
-    data: Optional[Dict[str, Any]] = None
-    expected: Optional[Dict[str, Any]] = None
+    data: Optional[dict[str, Any]] = None
+    expected: Optional[dict[str, Any]] = None
     endpoint: str = "{endpoint}"
     format: str = "json"
 
-    def _login(self, username: str, password: str) -> Tuple[str, str]:
+    def _login(self, username: str, password: str) -> tuple[str, str]:
         content = json.loads(
             (
                 APIClient()
@@ -43,7 +43,7 @@ class ApiTestCase(RekonoTestCase):
         return content.get("access"), content.get("refresh")
 
     def _check_response_content(
-        self, expected: Dict[str, Any], response: Dict[str, Any]
+        self, expected: dict[str, Any], response: dict[str, Any]
     ) -> None:
         for key, value in expected.items():
             if isinstance(value, dict):
@@ -83,13 +83,13 @@ class ApiTestCase(RekonoTestCase):
 @dataclass
 class ToolTestCase(RekonoTestCase):
     report: str
-    expected: Optional[List[Dict[str, Any]]] = None
+    expected: Optional[list[dict[str, Any]]] = None
 
     def _get_parser(
         self,
         execution: Execution,
         authentication: Authentication,
-        executor_arguments: List[str],
+        executor_arguments: list[str],
         reports: Path,
     ) -> BaseParser:
         report = reports / self.report
@@ -98,9 +98,11 @@ class ToolTestCase(RekonoTestCase):
         executor.arguments = executor_arguments
         parser = execution.configuration.tool.get_parser_class()(
             executor,
-            report.read_text()
-            if not execution.configuration.tool.output_format
-            else None,
+            (
+                report.read_text()
+                if not execution.configuration.tool.output_format
+                else None
+            ),
         )
         if execution.configuration.tool.output_format:
             parser.report = report

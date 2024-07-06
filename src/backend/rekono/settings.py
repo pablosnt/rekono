@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from datetime import timedelta
-from typing import Any, Dict
+from typing import Any
 
 from rekono.config import RekonoConfig
 
@@ -161,7 +161,7 @@ SIMPLE_JWT = {
     "ISSUER": "Rekono",
 }
 
-LOGGING: Dict[str, Any] = {
+LOGGING: dict[str, Any] = {
     "version": 1,
     # Disable default Django logging system to avoid noise
     "disable_existing_loggers": False,
@@ -205,7 +205,7 @@ LOGGING: Dict[str, Any] = {
 ################################################################################
 
 # nosemgrep: python.django.security.audit.django-rest-framework.missing-throttle-config.missing-throttle-config
-REST_FRAMEWORK: Dict[str, Any] = {
+REST_FRAMEWORK: dict[str, Any] = {
     "DEFAULT_METADATA_CLASS": None,
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_FILTER_BACKENDS": [

@@ -1,4 +1,4 @@
-from typing import Any, List, Optional
+from typing import Any, Optional
 
 from reporting.enums import FindingName, ReportFormat, ReportStatus
 from reporting.models import Report
@@ -12,7 +12,7 @@ class ReportingTest(ApiTest):
     endpoint = "/api/reports/"
     format = None
     only_true_positives = False
-    finding_types: Optional[List[str]] = [
+    finding_types: Optional[list[str]] = [
         FindingName.OSINT.value,
         FindingName.HOST.value,
         FindingName.PORT.value,

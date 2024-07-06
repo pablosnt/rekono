@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Callable, List
+from typing import Any, Callable
 from urllib.parse import urlparse
 
 import requests
@@ -51,10 +51,10 @@ class BaseIntegration(BasePlatform):
     def is_enabled(self) -> bool:
         return self.integration.enabled if self.integration else False
 
-    def _process_findings(self, execution: Execution, findings: List[Finding]) -> None:
+    def _process_findings(self, execution: Execution, findings: list[Finding]) -> None:
         pass
 
-    def process_findings(self, execution: Execution, findings: List[Finding]) -> None:
+    def process_findings(self, execution: Execution, findings: list[Finding]) -> None:
         if not self.is_enabled():
             return
         self._process_findings(execution, findings)
@@ -66,20 +66,20 @@ class BaseNotification(BasePlatform):
     def is_enabled(self, user: Any) -> bool:
         return getattr(user, self.enable_field)
 
-    def _notify(self, users: List[Any], *args: Any, **kwargs: Any) -> None:
+    def _notify(self, users: list[Any], *args: Any, **kwargs: Any) -> None:
         pass
 
-    def _notify_if_available(self, users: List[Any], *args: Any, **kwargs: Any) -> None:
+    def _notify_if_available(self, users: list[Any], *args: Any, **kwargs: Any) -> None:
         if self.is_available():
             self._notify(users, *args, **kwargs)
 
-    def _notify_if_enabled(self, users: List[Any], *args: Any, **kwargs: Any) -> None:
+    def _notify_if_enabled(self, users: list[Any], *args: Any, **kwargs: Any) -> None:
         if self.is_available():
             for user in users:
                 if self.is_enabled(user):
                     self._notify([user], *args, **kwargs)
 
-    def _get_users_to_notify_execution(self, execution: Execution) -> List[Any]:
+    def _get_users_to_notify_execution(self, execution: Execution) -> list[Any]:
         users = set()
         if (
             execution.task.executor.notification_scope != Notification.DISABLED
@@ -96,18 +96,18 @@ class BaseNotification(BasePlatform):
         )
         return list(users)
 
-    def _get_users_to_notify_alert(self, alert: Alert) -> List[Any]:
+    def _get_users_to_notify_alert(self, alert: Alert) -> list[Any]:
         return alert.suscribers.filter(**{self.enable_field: True}).all()
 
     def _notify_execution(
-        self, users: List[Any], execution: Execution, findings: List[Finding]
+        self, users: list[Any], execution: Execution, findings: list[Finding]
     ) -> None:
         pass
 
-    def _notify_alert(self, users: List[Any], alert: Alert, finding: Finding) -> None:
+    def _notify_alert(self, users: list[Any], alert: Alert, finding: Finding) -> None:
         pass
 
-    def process_findings(self, execution: Execution, findings: List[Finding]) -> None:
+    def process_findings(self, execution: Execution, findings: list[Finding]) -> None:
         if not self.is_available():
             return
         users = self._get_users_to_notify_execution(execution)

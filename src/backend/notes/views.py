@@ -1,7 +1,8 @@
-from typing import Any, Dict, Optional, cast
+from typing import Any, Optional, cast
 
 from django.db.models import Q, QuerySet
 from drf_spectacular.utils import extend_schema
+from framework.models import BaseModel
 from framework.views import LikeViewSet
 from notes.filters import NoteFilter
 from notes.models import Note
@@ -17,9 +18,6 @@ from security.authorization.permissions import (
     ProjectMemberPermission,
     RekonoModelPermission,
 )
-from targets.models import Target
-
-# Create your views here.
 
 
 class NoteViewSet(LikeViewSet):
@@ -50,10 +48,14 @@ class NoteViewSet(LikeViewSet):
     http_method_names = ["get", "post", "put", "delete"]
 
     def _get_project_from_data(
-        self, project_field: str, data: Dict[str, Any]
+        self, project_field: str, data: dict[str, Any]
     ) -> Optional[Project]:
-        link = [l for l in reversed(links) if data.get(l)]
-        return data.get(link[0]).get_project() if len(link) > 0 else None
+        data_links = [link for link in reversed(links) if data.get(link)]
+        return (
+            cast(BaseModel, data.get(data_links[0])).get_project()
+            if len(data_links) > 0
+            else None
+        )
 
     def get_queryset(self) -> QuerySet:
         return (

@@ -4,7 +4,7 @@ import re
 import subprocess  # nosec
 import uuid
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from authentications.models import Authentication
 from django.forms.models import model_to_dict
@@ -40,42 +40,44 @@ class BaseExecutor:
             CONFIG.reports
             / f'{str(uuid.uuid4())}.{execution.configuration.tool.output_format or "txt"}'
         )
-        self.arguments: List[str] = []
-        self.findings_used_in_execution: Dict[Any, BaseInput] = {}
+        self.arguments: list[str] = []
+        self.findings_used_in_execution: dict[Any, BaseInput] = {}
         self.authentication: Optional[Authentication] = None
 
     def _get_arguments(
         self,
-        findings: List[Finding],
-        target_ports: List[TargetPort],
-        input_vulnerabilities: List[InputVulnerability],
-        input_technologies: List[InputTechnology],
-        wordlists: List[Wordlist],
-    ) -> List[str]:
+        findings: list[Finding],
+        target_ports: list[TargetPort],
+        input_vulnerabilities: list[InputVulnerability],
+        input_technologies: list[InputTechnology],
+        wordlists: list[Wordlist],
+    ) -> list[str]:
         parameters = {
             "script": (
-                Path(
-                    getattr(
-                        CONFIG,
-                        self.execution.configuration.tool.script_directory_property.lower(),
+                (
+                    Path(
+                        getattr(
+                            CONFIG,
+                            self.execution.configuration.tool.script_directory_property.lower(),
+                        )
                     )
+                    / self.execution.configuration.tool.script
                 )
-                / self.execution.configuration.tool.script
-            )
-            if self.execution.configuration.tool.script_directory_property
-            and self.execution.configuration.tool.script
-            else "",
+                if self.execution.configuration.tool.script_directory_property
+                and self.execution.configuration.tool.script
+                else ""
+            ),
             "command": self.execution.configuration.tool.command,
             "intensity": self.intensity.argument,
-            "output": self.report
-            if self.execution.configuration.tool.output_format
-            else "",
+            "output": (
+                self.report if self.execution.configuration.tool.output_format else ""
+            ),
         }
         for argument in self.execution.configuration.tool.arguments.all():
             for argument_input in argument.inputs.all().order_by("order"):
                 input_model = argument_input.type.get_model_class()
                 input_fallback = argument_input.type.get_fallback_model_class()
-                parsed_data: Dict[str, Any] = {}
+                parsed_data: dict[str, Any] = {}
                 for base_input in (
                     findings
                     + list(wordlists)
@@ -110,9 +112,9 @@ class BaseExecutor:
                         argument_input, self.execution.task.target
                     ):
                         parsed_data = base_input.parse(parsed_data)
-                        self.findings_used_in_execution[
-                            base_input.__class__
-                        ] = base_input
+                        self.findings_used_in_execution[base_input.__class__] = (
+                            base_input
+                        )
                         if isinstance(base_input, Authentication):
                             self.authentication = base_input
                         if not argument.multiple:
@@ -152,11 +154,11 @@ class BaseExecutor:
 
     def check_arguments(
         self,
-        findings: List[Finding],
-        target_ports: List[TargetPort],
-        input_vulnerabilities: List[InputVulnerability],
-        input_technologies: List[InputTechnology],
-        wordlists: List[Wordlist],
+        findings: list[Finding],
+        target_ports: list[TargetPort],
+        input_vulnerabilities: list[InputVulnerability],
+        input_technologies: list[InputTechnology],
+        wordlists: list[Wordlist],
     ) -> bool:
         try:
             self._get_arguments(
@@ -170,7 +172,7 @@ class BaseExecutor:
         except RuntimeError:
             return False
 
-    def _get_environment(self) -> Dict[str, Any]:
+    def _get_environment(self) -> dict[str, Any]:
         environment = os.environ.copy()
         if self.execution.configuration.tool.command not in self.arguments:
             self.arguments.insert(0, self.execution.configuration.tool.command)
@@ -192,17 +194,20 @@ class BaseExecutor:
     def _before_running(self) -> None:
         pass
 
-    def _run(self, environment: Dict[str, Any] = os.environ.copy()) -> str:
+    def _run(self, environment: dict[str, Any] = os.environ.copy()) -> str:
         logger.info(f"[Tool] Running: {' '.join(self.arguments)}")
         process = subprocess.run(  # nosec
             self.arguments,
             capture_output=True,
             env=environment,
-            cwd=getattr(
-                CONFIG, self.execution.configuration.tool.run_directory_property.lower()
-            )
-            if self.execution.configuration.tool.run_directory_property
-            else None,
+            cwd=(
+                getattr(
+                    CONFIG,
+                    self.execution.configuration.tool.run_directory_property.lower(),
+                )
+                if self.execution.configuration.tool.run_directory_property
+                else None
+            ),
         )
         if (
             not self.execution.configuration.tool.ignore_exit_code
@@ -257,11 +262,11 @@ class BaseExecutor:
 
     def execute(
         self,
-        findings: List[Finding],
-        target_ports: List[TargetPort],
-        input_vulnerabilities: List[InputVulnerability],
-        input_technologies: List[InputTechnology],
-        wordlists: List[Wordlist],
+        findings: list[Finding],
+        target_ports: list[TargetPort],
+        input_vulnerabilities: list[InputVulnerability],
+        input_technologies: list[InputTechnology],
+        wordlists: list[Wordlist],
     ) -> None:
         self._on_start()
         self.execution.configuration.tool.update_status()

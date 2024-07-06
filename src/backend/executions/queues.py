@@ -1,5 +1,4 @@
 import logging
-from typing import Dict, List, Tuple
 
 import rq
 from django.utils import timezone
@@ -26,12 +25,12 @@ class ExecutionsQueue(BaseQueue):
     def enqueue(
         self,
         execution: Execution,
-        findings: List[Finding],
-        target_ports: List[TargetPort],
-        input_vulnerabilities: List[InputVulnerability],
-        input_technologies: List[InputTechnology],
-        wordlists: List[Wordlist],
-        dependencies: List[Job] = [],
+        findings: list[Finding],
+        target_ports: list[TargetPort],
+        input_vulnerabilities: list[InputVulnerability],
+        input_technologies: list[InputTechnology],
+        wordlists: list[Wordlist],
+        dependencies: list[Job] = [],
         at_front: bool = False,
     ) -> Job:
         job = self._get_queue().enqueue(
@@ -64,12 +63,12 @@ class ExecutionsQueue(BaseQueue):
     @job("executions")
     def consume(
         execution: Execution,
-        findings: List[Finding],
-        target_ports: List[TargetPort],
-        input_vulnerabilities: List[InputVulnerability],
-        input_technologies: List[InputTechnology],
-        wordlists: List[Wordlist],
-    ) -> Tuple[Execution, List[Finding]]:
+        findings: list[Finding],
+        target_ports: list[TargetPort],
+        input_vulnerabilities: list[InputVulnerability],
+        input_technologies: list[InputTechnology],
+        wordlists: list[Wordlist],
+    ) -> tuple[Execution, list[Finding]]:
         executor: BaseExecutor = execution.configuration.tool.get_executor_class()(
             execution
         )
@@ -102,12 +101,12 @@ class ExecutionsQueue(BaseQueue):
     @staticmethod
     def _get_findings_from_dependencies(
         executor: BaseExecutor,
-        target_ports: List[TargetPort],
-        input_vulnerabilities: List[InputVulnerability],
-        input_technologies: List[InputTechnology],
-        wordlists: List[Wordlist],
+        target_ports: list[TargetPort],
+        input_vulnerabilities: list[InputVulnerability],
+        input_technologies: list[InputTechnology],
+        wordlists: list[Wordlist],
         current_job: Job,
-    ) -> Dict[int, List[BaseInput]]:
+    ) -> dict[int, list[BaseInput]]:
         findings = []
         queue = ExecutionsQueue._get_queue()
         for dependency_id in current_job._dependency_ids:

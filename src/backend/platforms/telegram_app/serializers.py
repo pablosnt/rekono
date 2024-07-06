@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict
+from typing import Any
 
 from django.utils import timezone
 from framework.fields import ProtectedSecretField
@@ -49,7 +49,7 @@ class TelegramChatSerializer(ModelSerializer):
         read_only_fields = ("user",)
         extra_kwargs = {"otp": {"write_only": True}}
 
-    def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         attrs = super().validate(attrs)
         try:
             attrs["telegram_chat"] = TelegramChat.objects.get(
@@ -61,7 +61,7 @@ class TelegramChatSerializer(ModelSerializer):
             raise AuthenticationFailed(code=status.HTTP_401_UNAUTHORIZED)
         return attrs
 
-    def create(self, validated_data: Dict[str, Any]) -> TelegramChat:
+    def create(self, validated_data: dict[str, Any]) -> TelegramChat:
         validated_data["telegram_chat"].otp = None
         validated_data["telegram_chat"].otp_expiration = None
         validated_data["telegram_chat"].user = validated_data["user"]

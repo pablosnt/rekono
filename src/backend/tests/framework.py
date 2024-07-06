@@ -2,7 +2,7 @@ import hashlib
 import json
 import shutil
 from pathlib import Path as PathFile
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from authentications.enums import AuthenticationType
 from authentications.models import Authentication
@@ -52,7 +52,7 @@ from wordlists.models import Wordlist
 
 class RekonoTest(TestCase):
     data_dir = PathFile(__file__).resolve().parent / "data"
-    cases: List[RekonoTestCase] = []
+    cases: list[RekonoTestCase] = []
 
     def _create_user(self, username: str, role: Role) -> User:
         new_user = User.objects.create(
@@ -68,7 +68,7 @@ class RekonoTest(TestCase):
         return new_user
 
     def setUp(self) -> None:
-        self.users: Dict[Role, List[User]] = {
+        self.users: dict[Role, list[User]] = {
             Role.ADMIN: [],
             Role.AUDITOR: [],
             Role.READER: [],
@@ -221,13 +221,17 @@ class RekonoTest(TestCase):
         )
 
     def _create_finding(
-        self, model: Any, data: Dict[str, Any], execution: Execution = None
+        self, model: Any, data: dict[str, Any], execution: Execution = None
     ) -> Finding:
         new_finding = model.objects.create(
             **{
-                k: getattr(self, k)
-                if isinstance(v, int) and hasattr(self, k) and getattr(self, k).id == v
-                else v
+                k: (
+                    getattr(self, k)
+                    if isinstance(v, int)
+                    and hasattr(self, k)
+                    and getattr(self, k).id == v
+                    else v
+                )
                 for k, v in data.items()
             }
         )
@@ -298,7 +302,7 @@ class RekonoTest(TestCase):
             setattr(self, finding_model.__name__.lower(), new_finding)
             self.findings.append(new_finding)
 
-    def _metadata(self) -> Dict[str, Any]:
+    def _metadata(self) -> dict[str, Any]:
         return {}
 
     def test_cases(self) -> None:
@@ -327,10 +331,10 @@ class ApiTest(RekonoTest):
         )
         return APIClient(HTTP_AUTHORIZATION=f"Token {token}") if token else client
 
-    def _get_content(self, raw: Any) -> Dict[str, Any]:
+    def _get_content(self, raw: Any) -> dict[str, Any]:
         return json.loads((raw or "{}".encode()).decode())
 
-    def _metadata(self) -> Dict[str, Any]:
+    def _metadata(self) -> dict[str, Any]:
         return {"endpoint": self.endpoint}
 
     def test_str(self) -> None:
@@ -350,7 +354,7 @@ class ToolTest(RekonoTest):
     tool_name = ""
     execution = None
     authentication = None
-    executor_arguments: List[str] = []
+    executor_arguments: list[str] = []
 
     def setUp(self) -> None:
         if self.tool_name:
@@ -367,7 +371,7 @@ class ToolTest(RekonoTest):
                 task=self.task, configuration=self.configuration
             )
 
-    def _metadata(self) -> Dict[str, Any]:
+    def _metadata(self) -> dict[str, Any]:
         return {
             "execution": self.execution,
             "authentication": self.authentication,

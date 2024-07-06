@@ -4,7 +4,7 @@ import importlib
 import json
 import threading
 import uuid
-from typing import Any, Dict, List, Optional, Tuple, Type, cast
+from typing import Any, Optional, cast
 from xml.etree import ElementTree as ET  # nosec
 
 from django.db.models import Q, QuerySet
@@ -63,7 +63,7 @@ class ReportingViewSet(BaseViewSet):
     owner_field = "user"
 
     def _get_project_from_data(
-        self, project_field: str, data: Dict[str, Any]
+        self, project_field: str, data: dict[str, Any]
     ) -> Optional[Project]:
         return (
             cast(Task, data.get("task")).target.project
@@ -166,7 +166,7 @@ class ReportingViewSet(BaseViewSet):
 
     def _get_findings_to_report(
         self, serializer: ReportSerializer
-    ) -> Dict[Type[Finding], List[Finding]]:
+    ) -> dict[type[Finding], list[Finding]]:
         findings = {}
         models = importlib.import_module("findings.models")
         for finding_type in serializer.validated_finding_types:
@@ -187,7 +187,7 @@ class ReportingViewSet(BaseViewSet):
 
     def _get_findings_to_pdf_report(
         self, serializer: ReportSerializer
-    ) -> Tuple[Dict[int, Any], Dict[int, List[int]], List[int]]:
+    ) -> tuple[dict[int, Any], dict[int, list[int]], list[int]]:
         label_index = [s.value for s in reversed(Severity)]
         stats = [0] * len(Severity)
         stats_by_target = {}
@@ -304,13 +304,13 @@ class ReportingViewSet(BaseViewSet):
         self,
         filename: str,
         report: Report,
-        findings: Dict[Type[Finding], List[Finding]],
+        findings: dict[type[Finding], list[Finding]],
     ) -> bool:
         with (CONFIG.generated_reports / filename).open("w") as filepath:
             json.dump(findings, filepath, ensure_ascii=True, indent=4)
         return True
 
-    def _dict_to_xml(self, element: ET.Element, data: Dict[str, Any]) -> ET.Element:
+    def _dict_to_xml(self, element: ET.Element, data: dict[str, Any]) -> ET.Element:
         for key, value in data.items():
             child = ET.Element(key)
             if isinstance(value, dict):
@@ -324,7 +324,7 @@ class ReportingViewSet(BaseViewSet):
         self,
         filename: str,
         report: Report,
-        findings: Dict[Type[Finding], List[Finding]],
+        findings: dict[type[Finding], list[Finding]],
     ) -> bool:
         root = ET.Element("findings")
         for finding_type, finding_list in findings.items():
@@ -350,9 +350,9 @@ class ReportingViewSet(BaseViewSet):
         self,
         filename: str,
         report: Report,
-        findings_by_target: Dict[int, Any],
-        stats_by_target: Dict[int, List[int]],
-        stats: List[int],
+        findings_by_target: dict[int, Any],
+        stats_by_target: dict[int, list[int]],
+        stats: list[int],
     ) -> bool:
         template = get_template(CONFIG.pdf_report_template).render(
             {
@@ -362,9 +362,11 @@ class ReportingViewSet(BaseViewSet):
                     if report.target
                     else report.task.target.project
                 ),
-                "targets": (report.project.targets.all() if not CONFIG.testing else [])
-                if report.project
-                else [report.target or report.task.target],
+                "targets": (
+                    (report.project.targets.all() if not CONFIG.testing else [])
+                    if report.project
+                    else [report.target or report.task.target]
+                ),
                 "findings": findings_by_target,
                 "stats_by_target": stats_by_target,
                 "stats": stats,

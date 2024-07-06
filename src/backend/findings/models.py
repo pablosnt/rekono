@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 
 from django.db import models
 from django.utils import timezone
@@ -28,7 +28,7 @@ class OSINT(TriageFinding):
 
     unique_fields = ["data", "data_type"]
 
-    def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
+    def parse(self, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
         return (
             {
                 InputKeyword.TARGET.name.lower(): self.data,
@@ -39,7 +39,7 @@ class OSINT(TriageFinding):
             else {}
         )
 
-    def defect_dojo(self) -> Dict[str, Any]:
+    def defect_dojo(self) -> dict[str, Any]:
         return {
             "title": f"{self.data_type} found using OSINT techniques",
             "description": self.data,
@@ -64,14 +64,14 @@ class Host(Finding):
     unique_fields = ["address"]
     filters = [Finding.Filter(TargetType, "address", lambda a: Target.get_type(a))]
 
-    def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
+    def parse(self, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
         return {
             InputKeyword.TARGET.name.lower(): self.address,
             InputKeyword.HOST.name.lower(): self.address,
             InputKeyword.URL.name.lower(): self._get_url(self.address),
         }
 
-    def defect_dojo(self) -> Dict[str, Any]:
+    def defect_dojo(self) -> dict[str, Any]:
         return {
             "title": "Host discovered",
             "description": " - ".join(
@@ -106,7 +106,7 @@ class Port(Finding):
         Finding.Filter(str, "service", contains=True, processor=lambda s: s.lower()),
     ]
 
-    def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
+    def parse(self, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
         ports = (
             [self.port]
             if not accumulated
@@ -129,13 +129,15 @@ class Port(Finding):
             )
         return output
 
-    def defect_dojo(self) -> Dict[str, Any]:
+    def defect_dojo(self) -> dict[str, Any]:
         description = f"Port: {self.port}\nStatus: {self.status}\nProtocol: {self.protocol}\nService: {self.service}"
         return {
             "title": "Port discovered",
-            "description": f"Host: {self.host.address}\n{description}"
-            if self.host
-            else description,
+            "description": (
+                f"Host: {self.host.address}\n{description}"
+                if self.host
+                else description
+            ),
             "severity": Severity.INFO,
             "date": (
                 self.executions.order_by("-end").first().end or timezone.now()
@@ -183,7 +185,7 @@ class Path(Finding):
                 )
         return filter
 
-    def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
+    def parse(self, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
         path = self._clean_path(self.path)
         output = (
             {
@@ -200,17 +202,19 @@ class Path(Finding):
             InputKeyword.ENDPOINT.name.lower(): path,
         }
 
-    def defect_dojo_endpoint(self, target: Target) -> Dict[str, Any]:
+    def defect_dojo_endpoint(self, target: Target) -> dict[str, Any]:
         return {
             "protocol": self.port.service if self.port else None,
-            "host": self.port.host.address
-            if self.port and self.port.host
-            else target.target,
+            "host": (
+                self.port.host.address
+                if self.port and self.port.host
+                else target.target
+            ),
             "port": self.port.port if self.port else None,
             "path": self.path,
         }
 
-    def defect_dojo(self) -> Dict[str, Any]:
+    def defect_dojo(self) -> dict[str, Any]:
         description = f"Path: {self.path}\nType: {self.type}"
         for key, value in [("Status", self.status), ("Info", self.extra_info)]:
             if value:
@@ -257,14 +261,14 @@ class Technology(Finding):
         Finding.Filter(str, "name", contains=True, processor=lambda n: n.lower())
     ]
 
-    def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
+    def parse(self, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
         """Get useful information from this instance to be used in tool execution as argument.
 
         Args:
-            accumulated (Dict[str, Any], optional): Information from other instances of the same type. Defaults to {}.
+            accumulated (dict[str, Any], optional): Information from other instances of the same type. Defaults to {}.
 
         Returns:
-            Dict[str, Any]: Useful information for tool executions, including accumulated if setted
+            dict[str, Any]: Useful information for tool executions, including accumulated if setted
         """
         output = {InputKeyword.TECHNOLOGY.name.lower(): self.name}
         if self.version:
@@ -273,13 +277,15 @@ class Technology(Finding):
             output.update(self.port.parse(accumulated))
         return output
 
-    def defect_dojo(self) -> Dict[str, Any]:
+    def defect_dojo(self) -> dict[str, Any]:
         description = f"Technology: {self.name}\nVersion: {self.version}"
         return {
             "title": f"Technology {self.name} detected",
-            "description": f"{description}\nDetails: {self.description}"
-            if self.description
-            else description,
+            "description": (
+                f"{description}\nDetails: {self.description}"
+                if self.description
+                else description
+            ),
             "severity": Severity.LOW,
             "cwe": 200,  # CWE-200: Exposure of Sensitive Information to Unauthorized Actor
             "references": self.reference,
@@ -310,7 +316,7 @@ class Credential(TriageFinding):
 
     unique_fields = ["technology", "email", "username", "secret"]
 
-    def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
+    def parse(self, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
         output = self.technology.parse(accumulated) if self.technology else {}
         for key, field in [
             (InputKeyword.EMAIL.name.lower(), self.email),
@@ -321,7 +327,7 @@ class Credential(TriageFinding):
                 output[key] = field
         return output
 
-    def defect_dojo(self) -> Dict[str, Any]:
+    def defect_dojo(self) -> dict[str, Any]:
         return {
             "title": "Credentials exposure",
             "description": " - ".join(
@@ -371,7 +377,7 @@ class Vulnerability(TriageFinding):
         Finding.Filter(str, "cwe", contains=True, processor=lambda c: c.lower()),
     ]
 
-    def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
+    def parse(self, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
         output = {InputKeyword.CVE.name.lower(): self.cve}
         if self.technology:
             output.update(self.technology.parse(accumulated))
@@ -379,7 +385,7 @@ class Vulnerability(TriageFinding):
             output.update(self.port.parse(accumulated))
         return output
 
-    def defect_dojo(self) -> Dict[str, Any]:
+    def defect_dojo(self) -> dict[str, Any]:
         return {
             "title": self.name,
             "description": self.description,
@@ -417,7 +423,7 @@ class Exploit(TriageFinding):
 
     unique_fields = ["vulnerability", "technology", "edb_id", "reference"]
 
-    def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
+    def parse(self, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
         output = {InputKeyword.EXPLOIT.name.lower(): self.title}
         if self.vulnerability:
             output.update(self.vulnerability.parse(accumulated))
@@ -425,13 +431,13 @@ class Exploit(TriageFinding):
             output.update(self.technology.parse(accumulated))
         return output
 
-    def defect_dojo(self) -> Dict[str, Any]:
+    def defect_dojo(self) -> dict[str, Any]:
         return {
             "title": f"Exploit {self.edb_id} found" if self.edb_id else "Exploit found",
             "description": self.title,
-            "severity": self.vulnerability.severity
-            if self.vulnerability
-            else Severity.MEDIUM,
+            "severity": (
+                self.vulnerability.severity if self.vulnerability else Severity.MEDIUM
+            ),
             "references": self.reference,
             "date": (
                 self.executions.order_by("-end").first().end or timezone.now()

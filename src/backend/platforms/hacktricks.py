@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Optional
 
 import defusedxml.ElementTree as parser
 from executions.models import Execution
@@ -84,7 +84,7 @@ class HackTricks(BaseIntegration):
         }
         self.all_links = self._get_all_hacktricks_links()
 
-    def _get_all_hacktricks_links(self) -> List[str]:
+    def _get_all_hacktricks_links(self) -> list[str]:
         sitemap = self._request(
             self.session.get, self.hacktricks_sitemap_url, json=False
         )
@@ -96,7 +96,7 @@ class HackTricks(BaseIntegration):
                 return mapped_value
         return None
 
-    def _process_findings(self, execution: Execution, findings: List[Finding]) -> None:
+    def _process_findings(self, execution: Execution, findings: list[Finding]) -> None:
         for finding in findings:
             hacktricks_link = None
             if isinstance(finding, Host) and finding.os_type in self.host_type_mapping:

@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 
 from framework.fields import IntegerChoicesField
 from framework.serializers import LikeSerializer
@@ -61,7 +61,7 @@ class ToolSerializer(LikeSerializer):
             "wordlists",
         )
 
-    def get_wordlists(self, instance: Any) -> Dict[str, bool]:
+    def get_wordlists(self, instance: Any) -> dict[str, bool]:
         queryset = instance.arguments.filter(inputs__type__name="Wordlist")
         return {
             "required": queryset.filter(required=True).exists()

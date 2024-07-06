@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 
 from django.utils import timezone
 from findings.models import OSINT, Host
@@ -31,7 +31,7 @@ class TriageFindingSerializer(ModelSerializer):
         )
         read_only_fields = FindingSerializer.Meta.fields + ("triage_date", "triage_by")
 
-    def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         attrs = super().validate(attrs)
         attrs["triage_date"] = timezone.now()
         attrs["triage_by"] = self.context.get("request").user

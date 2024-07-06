@@ -1,3 +1,5 @@
+from typing import Any
+
 from django_rq.utils import get_statistics
 from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import serializers
@@ -48,7 +50,12 @@ class RQStatsView(APIView):
         },
     )
     def get(self, request: Request) -> Response:
-        stats = {"tasks": {}, "executions": {}, "findings": {}, "monitor": {}}
+        stats: dict[str, dict[str, Any]] = {
+            "tasks": {},
+            "executions": {},
+            "findings": {},
+            "monitor": {},
+        }
         for queue in get_statistics().get("queues", []):
             stats[queue["name"]] = {
                 k: v for k, v in queue.items() if k in exposed_fields

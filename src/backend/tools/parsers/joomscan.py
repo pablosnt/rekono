@@ -1,4 +1,3 @@
-from typing import Set
 from urllib.parse import urlparse
 
 from findings.enums import PathType, Severity
@@ -11,10 +10,10 @@ class Joomscan(BaseParser):
         technology = None
         vulnerability_name = None
         endpoints = set(["/"])
-        backups: Set[str] = set()
-        configurations: Set[str] = set()
-        path_disclosure: Set[str] = set()
-        directory_listing: Set[str] = set()
+        backups: set[str] = set()
+        configurations: set[str] = set()
+        path_disclosure: set[str] = set()
+        directory_listing: set[str] = set()
         host = urlparse(
             self.executor.arguments[self.executor.arguments.index("-u") + 1]
         ).hostname
@@ -89,7 +88,7 @@ class Joomscan(BaseParser):
             ("Configuration files found", configurations, Severity.MEDIUM, "CWE-497"),
             # CWE-497: Exposure of Sensitive System Information to an Unauthorized Control Sphere
             ("Full path disclosure", path_disclosure, Severity.LOW, "CWE-497"),
-            # CWE-548: Exposure of Information Through Directory Listing
+            # CWE-548: Exposure of Information Through Directory listing
             ("Directory listing", directory_listing, Severity.LOW, "CWE-548"),
         ]:
             if paths:

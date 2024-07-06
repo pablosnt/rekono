@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Optional
 
 from django.db import models
 from django.utils import timezone
@@ -14,9 +14,9 @@ class FindingManager(models.Manager):
     def _get_related_findings(
         self,
         finding: Any,
-        filter: Optional[Dict[str, Any]] = None,
+        filter: Optional[dict[str, Any]] = None,
         input_type: Optional[InputType] = None,
-    ) -> List[Any]:
+    ) -> list[Any]:
         related_findings = []
         current_input_type = (
             input_type
@@ -76,8 +76,8 @@ class FindingManager(models.Manager):
         )
 
     def fix(
-        self, findings: Union[Any, models.QuerySet], fixed_by: Optional[Any]
-    ) -> Union[Any, models.QuerySet]:
+        self, findings: Any | models.QuerySet, fixed_by: Optional[Any]
+    ) -> Any | models.QuerySet:
         if not findings:
             return findings
         args = {
@@ -132,7 +132,7 @@ class Finding(BaseInput):
     defect_dojo_id = models.IntegerField(blank=True, null=True)
     hacktricks_link = models.TextField(max_length=300, blank=True, null=True)
     objects = FindingManager()
-    unique_fields: List[str] = []
+    unique_fields: list[str] = []
 
     class Meta:
         abstract = True
@@ -144,7 +144,7 @@ class Finding(BaseInput):
     def get_project_field(cls) -> str:
         return "executions__task__target__project"
 
-    def defect_dojo(self) -> Dict[str, Any]:
+    def defect_dojo(self) -> dict[str, Any]:
         return {}  # pragma: no cover
 
 

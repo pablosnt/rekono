@@ -1,6 +1,6 @@
 import logging
 import threading
-from typing import Any, Dict
+from typing import Any
 
 from django.contrib.auth.password_validation import validate_password
 from framework.serializers import MfaSerializer
@@ -72,11 +72,11 @@ class InviteUserSerializer(ModelSerializer):
         model = User
         fields = ("email", "role")
 
-    def create(self, validated_data: Dict[str, Any]) -> User:
+    def create(self, validated_data: dict[str, Any]) -> User:
         """Create instance from validated data.
 
         Args:
-            validated_data (Dict[str, Any]): Validated data
+            validated_data (dict[str, Any]): Validated data
 
         Returns:
             User: Created instance
@@ -91,12 +91,12 @@ class UpdateRoleSerializer(Serializer):
 
     role = ChoiceField(choices=Role.choices, required=True, write_only=True)
 
-    def update(self, instance: User, validated_data: Dict[str, Any]) -> User:
+    def update(self, instance: User, validated_data: dict[str, Any]) -> User:
         """Update instance from validated data.
 
         Args:
             instance (User): Instance to update
-            validated_data (Dict[str, Any]): Validated data
+            validated_data (dict[str, Any]): Validated data
 
         Returns:
             User: Updated instance
@@ -140,7 +140,7 @@ class PasswordSerializer(UserSerializer):
         model = User
         fields = ("password",)
 
-    def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         attrs = super().validate(attrs)
         validate_password(attrs.get("password"))
         return attrs
@@ -151,7 +151,7 @@ class OTPSerializer(UserSerializer):
         model = User
         fields = ("otp",)
 
-    def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         attrs = super().validate(attrs)
         user = User.objects.verify_otp(attrs.get("otp"))
         if not user:
@@ -173,29 +173,29 @@ class CreateUserSerializer(OTPSerializer, PasswordSerializer):
             "otp",
         )
 
-    def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         """Validate the provided data before use it.
 
         Args:
-            attrs (Dict[str, Any]): Provided data
+            attrs (dict[str, Any]): Provided data
 
         Raises:
             ValidationError: Raised if provided data is invalid
              AuthenticationFailed: Raised if OTP is invalid
 
         Returns:
-            Dict[str, Any]: Data after validation process
+            dict[str, Any]: Data after validation process
         """
         attrs = super().validate(attrs)
         if attrs["user"].is_active is not None:
             raise AuthenticationFailed(code=status.HTTP_401_UNAUTHORIZED)
         return attrs
 
-    def create(self, validated_data: Dict[str, Any]) -> User:
+    def create(self, validated_data: dict[str, Any]) -> User:
         """Create instance from validated data.
 
         Args:
-            validated_data (Dict[str, Any]): Validated data
+            validated_data (dict[str, Any]): Validated data
 
         Returns:
             User: Created instance
@@ -221,29 +221,29 @@ class UpdatePasswordSerializer(PasswordSerializer):
             "old_password",
         )
 
-    def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         """Validate the provided data before use it.
 
         Args:
-            attrs (Dict[str, Any]): Provided data
+            attrs (dict[str, Any]): Provided data
 
         Raises:
             ValidationError: Raised if provided data is invalid
             AuthenticationFailed: Raised if old password is invalid
 
         Returns:
-            Dict[str, Any]: Data after validation process
+            dict[str, Any]: Data after validation process
         """
         if not self.instance.check_password(attrs.get("old_password")):
             raise AuthenticationFailed(code=status.HTTP_401_UNAUTHORIZED)
         return super().validate(attrs)
 
-    def update(self, instance: User, validated_data: Dict[str, Any]) -> User:
+    def update(self, instance: User, validated_data: dict[str, Any]) -> User:
         """Update instance from validated data.
 
         Args:
             instance (User): Instance to update
-            validated_data (Dict[str, Any]): Validated data
+            validated_data (dict[str, Any]): Validated data
 
         Returns:
             User: Updated instance

@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 from django.core.exceptions import PermissionDenied
 from django.db.models import Count, QuerySet
@@ -30,7 +30,7 @@ class BaseViewSet(ModelViewSet):
                 return cls.Meta.model
 
     def _get_project_from_data(
-        self, project_field: str, data: Dict[str, Any]
+        self, project_field: str, data: dict[str, Any]
     ) -> Optional[Project]:
         fields = project_field.split("__")
         if not fields:

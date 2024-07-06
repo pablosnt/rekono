@@ -1,15 +1,14 @@
 import copy
 import logging
-from typing import Any, Dict, List
+from typing import Any
 
 import django_rq
-from rq.job import Job
-from rq.queue import Queue
-
 from findings.framework.models import Finding
 from framework.models import BaseInput
 from input_types.models import InputType
 from parameters.models import InputTechnology, InputVulnerability
+from rq.job import Job
+from rq.queue import Queue
 from target_ports.models import TargetPort
 from tools.models import Input, Tool
 from wordlists.models import Wordlist
@@ -44,8 +43,8 @@ class BaseQueue:
 
     @staticmethod
     def _get_findings_by_type(
-        findings: List[Finding],
-    ) -> Dict[InputType, List[Finding]]:
+        findings: list[Finding],
+    ) -> dict[InputType, list[Finding]]:
         findings_by_type = {}
         for finding in findings:
             input_type = finding.get_input_type()
@@ -63,13 +62,13 @@ class BaseQueue:
     @staticmethod
     def _calculate_executions(
         tool: Tool,
-        findings: List[Finding],
-        target_ports: List[TargetPort],
-        input_vulnerabilities: List[InputVulnerability],
-        input_technologies: List[InputTechnology],
-        wordlists: List[Wordlist],
-    ) -> List[Dict[int, List[BaseInput]]]:
-        executions: List[Dict[int, List[BaseInput]]] = [{0: []}]
+        findings: list[Finding],
+        target_ports: list[TargetPort],
+        input_vulnerabilities: list[InputVulnerability],
+        input_technologies: list[InputTechnology],
+        wordlists: list[Wordlist],
+    ) -> list[dict[int, list[BaseInput]]]:
+        executions: list[dict[int, list[BaseInput]]] = [{0: []}]
         input_types_used = set()
         findings_by_type = BaseQueue._get_findings_by_type(findings)
         for index, input_type, source in [

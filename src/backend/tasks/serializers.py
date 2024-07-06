@@ -1,4 +1,4 @@
-from typing import Any, Dict, cast
+from typing import Any, cast
 
 from django.core.exceptions import ValidationError
 from processes.models import Process
@@ -74,7 +74,7 @@ class TaskSerializer(ModelSerializer):
             "executions",
         )
 
-    def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         if not attrs.get("intensity"):
             attrs["intensity"] = IntensityEnum.NORMAL
         if attrs.get("configuration"):
@@ -101,11 +101,11 @@ class TaskSerializer(ModelSerializer):
             attrs["repeat_time_unit"] = None
         return super().validate(attrs)
 
-    def create(self, validated_data: Dict[str, Any]) -> Task:
+    def create(self, validated_data: dict[str, Any]) -> Task:
         """Create instance from validated data.
 
         Args:
-            validated_data (Dict[str, Any]): Validated data
+            validated_data (dict[str, Any]): Validated data
 
         Returns:
             Task: Created instance

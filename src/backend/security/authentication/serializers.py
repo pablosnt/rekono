@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict
+from typing import Any
 
 from django.core.exceptions import ValidationError
 from framework.serializers import MfaSerializer
@@ -24,7 +24,7 @@ logger = logging.getLogger()
 class JwtAuthentication:
     user: User = None
 
-    def _login(self) -> Dict[str, str]:
+    def _login(self) -> dict[str, str]:
         User.objects.invalidate_all_tokens(self.user)
         token = self.__class__.get_token(self.user)
         SMTP().login_notification(self.user)
@@ -47,7 +47,7 @@ class JwtAuthentication:
 
 
 class LoginSerializer(JwtAuthentication, TokenObtainSerializer):
-    def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         super().validate(attrs)
         return (
             {"mfa": str(self.__class__.get_mfa_required_token(self.user))}
@@ -59,7 +59,7 @@ class LoginSerializer(JwtAuthentication, TokenObtainSerializer):
 class BaseMfaRequiredSerializer(Serializer):
     token = CharField()
 
-    def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         attrs = super().validate(attrs)
         if attrs.get("token"):
             try:
@@ -75,7 +75,7 @@ class BaseMfaRequiredSerializer(Serializer):
 class SendMfaEmailSerializer(BaseMfaRequiredSerializer):
     token = CharField(required=False)
 
-    def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         is_authenticated = IsAuthenticated().has_permission(
             self.context.get("request"), None
         )
@@ -94,7 +94,7 @@ class SendMfaEmailSerializer(BaseMfaRequiredSerializer):
 
 
 class MfaLoginSerializer(MfaSerializer, BaseMfaRequiredSerializer, JwtAuthentication):
-    def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         super().validate(attrs)
         if self.user.otp:
             User.objects.remove_otp(self.user)

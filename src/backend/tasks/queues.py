@@ -1,6 +1,6 @@
 import logging
 from datetime import timedelta
-from typing import Any, Dict, List
+from typing import Any
 
 from django.db.models import Max
 from django.utils import timezone
@@ -83,7 +83,7 @@ class TasksQueue(BaseQueue):
 
     @staticmethod
     def _consume_process_task(task: Task) -> None:
-        plan: List[Dict[str, Any]] = []
+        plan: list[dict[str, Any]] = []
         steps = (
             Step.objects.annotate(
                 max_input=Max("configuration__tool__arguments__inputs__type__id"),

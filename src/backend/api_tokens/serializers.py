@@ -1,8 +1,7 @@
 from typing import Any
 
-from rest_framework.serializers import ModelSerializer
-
 from api_tokens.models import ApiToken
+from rest_framework.serializers import ModelSerializer
 from security.cryptography.hashing import hash
 
 

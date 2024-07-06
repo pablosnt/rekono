@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime, timedelta
-from typing import Any, Dict, Optional, cast
+from typing import Any, Optional, cast
 
 import pyotp
 from django.contrib.auth.models import AbstractUser, Group, UserManager
@@ -39,7 +39,7 @@ class RekonoUserManager(UserManager):
         return otp
 
     def get_otp_expiration_time(
-        self, time: Dict[str, int] = {"hours": CONFIG.otp_expiration_hours}
+        self, time: dict[str, int] = {"hours": CONFIG.otp_expiration_hours}
     ) -> datetime:
         return timezone.now() + timedelta(**time)
 
@@ -47,7 +47,7 @@ class RekonoUserManager(UserManager):
         """Initialize user, assigning it a role and creating its API token.
 
         Args:
-            user (Any): User to initialize
+            user (any): User to initialize
             role (Role): Role to assign
         """
         group = Group.objects.get(name=role.value)  # Get user group related to the role
@@ -130,7 +130,7 @@ class RekonoUserManager(UserManager):
         """Enable disabled user, assigning it a new role.
 
         Args:
-            user (Any): User to enable
+            user (any): User to enable
 
         Returns:
             Any: Enabled user
@@ -148,7 +148,7 @@ class RekonoUserManager(UserManager):
         """Disable user.
 
         Args:
-            user (Any): User to disable
+            user (any): User to disable
 
         Returns:
             Any: Disabled user
@@ -174,7 +174,7 @@ class RekonoUserManager(UserManager):
         user.save(update_fields=["otp", "otp_expiration"])
         return user
 
-    def setup_otp(self, user: Any, time: Optional[Dict[str, int]] = None) -> str:
+    def setup_otp(self, user: Any, time: Optional[dict[str, int]] = None) -> str:
         plain_otp = self.generate_otp()
         user = self._update_otp(
             user,

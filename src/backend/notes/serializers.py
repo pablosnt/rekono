@@ -1,8 +1,10 @@
-from typing import Any, Dict
+from typing import Any, cast
 
 from framework.fields import TagField
+from framework.models import BaseModel
 from framework.serializers import LikeSerializer
 from notes.models import Note
+from rest_framework.fields import ValidationError
 from rest_framework.serializers import SerializerMethodField
 from taggit.serializers import TaggitSerializer
 from users.serializers import SimpleUserSerializer
@@ -62,18 +64,22 @@ class NoteSerializer(TaggitSerializer, LikeSerializer):
     def get_forked(self, instance: Any) -> bool:
         return instance.forks.filter(owner=self.context.get("request").user).exists()
 
-    def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         attrs = super().validate(attrs)
-        link = [l for l in reversed(links) if attrs.get(l)]
-        if len(link) > 0:
-            for value in [l for l in links if l != link[0]]:
+        data_links = [link for link in reversed(links) if attrs.get(link)]
+        if len(data_links) > 0:
+            for value in [link for link in links if link != data_links[0]]:
                 attrs[value] = None
-            attrs["project"] = attrs.get(link[0]).get_project()
+            attrs["project"] = cast(BaseModel, attrs.get(data_links[0])).get_project()
+        if not attrs.get("project"):
+            raise ValidationError(
+                "A relationship with a project entity is needed", code="project"
+            )
         return attrs
 
-    def update(self, instance: Note, validated_data: Dict[str, Any]) -> Note:
-        unlink_forks = instance.public and validated_data.get("public", False) == False
-        if instance.forked_from and validated_data.get("public", False) == True:
+    def update(self, instance: Note, validated_data: dict[str, Any]) -> Note:
+        unlink_forks = instance.public and not validated_data.get("public", False)
+        if instance.forked_from and validated_data.get("public", False):
             validated_data["public"] = True
         new_instance = super().update(instance, validated_data)
         if unlink_forks:

@@ -2,11 +2,10 @@ import ipaddress
 import logging
 import re
 import socket
-from typing import Any, Dict
+from typing import Any
 
 from django.core.exceptions import ValidationError
 from django.db import models
-
 from framework.enums import InputKeyword
 from framework.models import BaseInput
 from projects.models import Project
@@ -78,14 +77,14 @@ class Target(BaseInput):
             params={"value": target},
         )
 
-    def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
+    def parse(self, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
         """Get useful information from this instance to be used in tool execution as argument.
 
         Args:
-            accumulated (Dict[str, Any], optional): Information from other instances of the same type. Defaults to {}.
+            accumulated (dict[str, Any], optional): Information from other instances of the same type. Defaults to {}.
 
         Returns:
-            Dict[str, Any]: Useful information for tool executions, including accumulated if setted
+            dict[str, Any]: Useful information for tool executions, including accumulated if setted
         """
         return {
             InputKeyword.TARGET.name.lower(): self.target,

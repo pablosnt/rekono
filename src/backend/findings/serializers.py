@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 
 from findings.enums import TriageStatus
 from findings.framework.serializers import FindingSerializer, TriageFindingSerializer
@@ -133,7 +133,7 @@ class VulnerabilitySerializer(TriageFindingSerializer):
         )
 
     def update(
-        self, instance: Vulnerability, validated_data: Dict[str, Any]
+        self, instance: Vulnerability, validated_data: dict[str, Any]
     ) -> Vulnerability:
         instance = super().update(instance, validated_data)
         if instance.triage_status == TriageStatus.FALSE_POSITIVE:

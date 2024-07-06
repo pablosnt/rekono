@@ -1,4 +1,4 @@
-from typing import Any, List
+from typing import Any
 
 from django.db.models import Q, QuerySet
 from django_filters.rest_framework import FilterSet, filters
@@ -36,7 +36,7 @@ class MultipleFieldFilterSet(FilterSet):
 
 
 class MultipleFieldFilter(filters.Filter):
-    def __init__(self, fields: List[str], **kwargs: Any) -> None:
+    def __init__(self, fields: list[str], **kwargs: Any) -> None:
         kwargs["method"] = "multiple_field_filter"
         super().__init__(**kwargs)
         self.fields = fields

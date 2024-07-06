@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 
 from django.core.exceptions import PermissionDenied
 from http_headers.models import HttpHeader
@@ -11,7 +11,7 @@ class HttpHeaderSerializer(ModelSerializer):
         model = HttpHeader
         fields = ("id", "target", "user", "key", "value")
 
-    def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         attrs = super().validate(attrs)
         if attrs.get("target"):
             attrs["user"] = None
@@ -33,7 +33,7 @@ class SimpleHttpHeaderSerializer(ModelSerializer):
         fields = ("id", "key", "value")
 
     def update(
-        self, instance: HttpHeader, validated_data: Dict[str, Any]
+        self, instance: HttpHeader, validated_data: dict[str, Any]
     ) -> HttpHeader:
         if (
             instance.user is not None

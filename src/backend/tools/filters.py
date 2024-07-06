@@ -1,4 +1,3 @@
-from django.db.models import QuerySet
 from django_filters.filters import CharFilter, ChoiceFilter, NumberFilter
 from django_filters.rest_framework import FilterSet
 from framework.filters import LikeFilter
