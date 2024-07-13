@@ -6,7 +6,8 @@
       label="Targets"
       icon="mdi-target"
       :validate="validate.target"
-      @new-value="(value) => (targets = value)"
+      @new-value="(value) => (target = value)"
+      @new-values="(value) => (targets = value)"
     />
     <ButtonSubmit text="Create" :disabled="loading" />
   </v-form>
@@ -14,16 +15,7 @@
 
 <script setup lang="ts">
 const props = defineProps({
-  project: {
-    type: Object,
-    required: false,
-    default: null,
-  },
-  projectId: {
-    type: Number,
-    required: false,
-    default: null,
-  },
+  projectId: Number,
   api: {
     type: Object,
     required: false,
@@ -34,22 +26,27 @@ const emit = defineEmits(["completed", "loading"]);
 const validate = useValidation();
 const valid = ref(true);
 const loading = ref(false);
+const target = ref(null);
 const targets = ref([]);
 
 function submit() {
-  if (targets.value.length > 0 && valid.value) {
+  const targetsToCreate =
+    target.value === null
+      ? targets.value
+      : targets.value.concat([target.value]);
+  if (targetsToCreate.length > 0 && valid.value) {
     emit("loading", true);
     loading.value = true;
-    const body = { project: props.project.id };
+    const body = { project: props.projectId };
     let success = 0;
     let errors = 0;
-    for (let i = 0; i < targets.value.length; i++) {
-      body.target = targets.value[i];
+    for (let i = 0; i < targetsToCreate.length; i++) {
+      body.target = targetsToCreate[i];
       props.api
         .create(body)
         .then(() => {
           success++;
-          if (success + errors === targets.value.length) {
+          if (success + errors === targetsToCreate.length) {
             emit("completed");
             emit("loading", false);
             loading.value = false;
@@ -57,7 +54,7 @@ function submit() {
         })
         .catch(() => {
           errors++;
-          if (success + errors === targets.value.length) {
+          if (success + errors === targetsToCreate.length) {
             if (success > 0) {
               emit("completed");
             }

@@ -6,6 +6,11 @@
     variant="outlined"
     :rules="[(t) => !t || regex.test(t.trim()) || 'Invalid value']"
     validate-on="input"
+    @update:model-value="
+      newTag !== null && regex.test(newTag.trim())
+        ? $emit('newValue', newTag.trim())
+        : $emit('newValue', null)
+    "
   >
     <template #append-inner>
       <v-btn
@@ -20,8 +25,9 @@
         "
         @click="
           tags.push(newTag.trim());
+          $emit('newValues', tags);
           newTag = null;
-          $emit('newValue', tags);
+          $emit('newValue', newTag);
         "
       />
     </template>
@@ -33,7 +39,7 @@
         closable
         @click:close="
           tags.splice(tags.indexOf(tag), 1);
-          $emit('newValue', tags);
+          $emit('newValues', tags);
         "
       />
     </v-chip-group>
@@ -63,7 +69,7 @@ const props = defineProps({
     default: null,
   },
 });
-defineEmits(["newValue"]);
+defineEmits(["newValues"]);
 const regex = props.validate === null ? useValidation().name : props.validate;
 const newTag = ref(null);
 const tags = ref(props.value != null ? props.value : []);

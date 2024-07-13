@@ -83,9 +83,9 @@ function submit() {
     }
     props.api
       .update(body)
-      .then(() => {
+      .then((response) => {
         emit("loading", false);
-        emit("completed");
+        emit("completed", response);
       })
       .catch((error) => {
         emit("loading", false);

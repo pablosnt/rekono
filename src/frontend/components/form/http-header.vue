@@ -95,10 +95,10 @@ function submit() {
     }
     emit("loading", true);
     request
-      .then(() => {
+      .then((response) => {
         disabled.value = true;
         emit("loading", false);
-        emit("completed");
+        emit("completed", response);
       })
       .catch(() => emit("loading", false));
   }

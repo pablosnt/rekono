@@ -28,7 +28,7 @@
         />
         <FormTarget
           v-if="step === 1"
-          :project="project"
+          :project-id="project.id"
           @completed="navigateTo(`/projects/${project.id}`)"
           @loading="(value) => (loading = value)"
         />

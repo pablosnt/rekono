@@ -75,7 +75,7 @@ export function useEnums() {
     "Private IP": { icon: "mdi-ip" },
     "Public IP": { icon: "mdi-ip" },
     Network: { icon: "mdi-network" },
-    "IP Range": { icon: "mdi-ip-network" },
+    "IP range": { icon: "mdi-ip-network" },
     Domain: { icon: "mdi-dns" },
   };
 

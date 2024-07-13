@@ -494,9 +494,7 @@ const progressPercentage = computed(() => {
 });
 
 const projects = ref([]);
-const selectedProject = ref(
-  props.project ? props.project : props.target ? props.target.project : null,
-);
+const selectedProject = ref(props.project ? props.project : null);
 const targets = ref([]);
 const selectedTargets = ref(props.target ? [props.target] : []);
 const processes = ref([]);

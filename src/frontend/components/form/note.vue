@@ -27,7 +27,7 @@
           <InputTag
             class="mt-2"
             :value="tags"
-            @new-value="(value) => (tags = value)"
+            @new-values="(value) => (tags = value)"
           />
         </v-col>
         <v-col cols="2">
