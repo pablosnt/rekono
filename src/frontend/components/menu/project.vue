@@ -40,6 +40,7 @@
 </template>
 
 <script setup lang="ts">
+// todo: Limit the links available for each user role
 const route = useRoute();
 const project = ref(route.params.project_id);
 </script>

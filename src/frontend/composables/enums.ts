@@ -78,6 +78,32 @@ export function useEnums() {
     "IP range": { icon: "mdi-ip-network" },
     Domain: { icon: "mdi-dns" },
   };
+  const findings = {
+    osint: {
+      icon: "mdi-search-web",
+    },
+    host: {
+      icon: "mdi-server",
+    },
+    port: {
+      icon: "mdi-plus-network",
+    },
+    path: {
+      icon: "mdi-routes",
+    },
+    credential: {
+      icon: "mdi-key-chain",
+    },
+    technology: {
+      icon: "mdi-layers-triple",
+    },
+    vulnerability: {
+      icon: "mdi-bug",
+    },
+    exploit: {
+      icon: "mdi-bomb",
+    },
+  };
 
   return {
     stages,
@@ -88,5 +114,6 @@ export function useEnums() {
     notificationScopes,
     notificationPlatforms,
     targets,
+    findings,
   };
 }

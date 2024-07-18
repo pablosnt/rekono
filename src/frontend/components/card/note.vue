@@ -2,7 +2,9 @@
   <v-card
     class="mx-auto"
     elevation="3"
-    :subtitle="note ? new Date(note.updated_at).toUTCString() : undefined"
+    :subtitle="
+      currentNote ? new Date(currentNote.updated_at).toUTCString() : undefined
+    "
   >
     <template #title>
       <v-text-field
@@ -12,15 +14,37 @@
         variant="text"
         density="comfortable"
         focused
+        validate-on="input"
+        :rules="[(t) => !t || validate.name.test(t) || 'Invalid title value']"
+        @update:model-value="disabled = false"
       />
     </template>
     <template #append>
-      <!-- TODO: autosave button -->
-      <!-- TODO: Add links to the resources (targets, tasks, findings) -->
-      <v-btn v-model="preview" icon variant="text" @click="preview = !preview">
-        <v-icon :icon="preview ? 'mdi-pencil' : 'mdi-eye'" />
-        <v-tooltip activator="parent" :text="preview ? 'Edit' : 'Preview'" />
-      </v-btn>
+      <ButtonNoteLink
+        :target="target"
+        :task="task"
+        :execution="execution"
+        :osint="osint"
+        :host="host"
+        :port="port"
+        :path="path"
+        :credential="credential"
+        :technology="technology"
+        :vulnerability="vulnerability"
+        :exploit="exploit"
+        :note="note"
+      />
+      <ButtonNoteForkedFrom v-if="note" :note="note" />
+      <ButtonNoteForks v-if="currentNote" :note="currentNote" />
+      <ButtonLike
+        v-if="currentNote"
+        :api="api"
+        :item="currentNote"
+        @reload="
+          (value) =>
+            api.get(currentNote.id).then((response) => (currentNote = response))
+        "
+      />
       <v-btn v-model="shared" icon variant="text" @click="shared = !shared">
         <v-icon
           :icon="shared ? 'mdi-lock-open-variant' : 'mdi-lock'"
@@ -31,36 +55,117 @@
           :text="shared ? 'Public Note' : 'Private Note'"
         />
       </v-btn>
+      <!-- TODO: Read Only mode for Read users -->
+      <v-btn v-model="preview" icon variant="text" @click="preview = !preview">
+        <v-icon :icon="preview ? 'mdi-pencil' : 'mdi-eye'" />
+        <v-tooltip activator="parent" :text="preview ? 'Edit' : 'Preview'" />
+      </v-btn>
+      <v-btn
+        v-model="autoSave"
+        icon
+        variant="text"
+        @click="autoSave = !autoSave"
+      >
+        <v-icon icon="mdi-floppy" :color="autoSave ? 'green' : 'red'" />
+        <v-tooltip
+          activator="parent"
+          :text="
+            autoSave
+              ? 'Auto-Save: On. Note will be saved each minute'
+              : 'Auto-Save: Off'
+          "
+        />
+      </v-btn>
+      <v-speed-dial
+        v-if="currentNote"
+        transition="scale-transition"
+        location="bottom end"
+        @click.stop
+      >
+        <template #activator="{ props: activatorProps }">
+          <v-btn
+            v-bind="activatorProps"
+            size="large"
+            variant="text"
+            icon="mdi-dots-vertical-circle"
+          />
+        </template>
+        <v-dialog width="500" class="overflow-auto">
+          <template #activator="{ props: activatorProps }">
+            <v-btn
+              key="2"
+              icon="mdi-trash-can-outline"
+              color="red"
+              v-bind="activatorProps"
+            />
+          </template>
+          <template #default="{ isActive }">
+            <DialogDelete
+              :id="currentNote.id"
+              :api="api"
+              :text="`Note '${currentNote.title}' will be removed`"
+              @completed="$emit('closeDialog')"
+              @close-dialog="isActive.value = false"
+            />
+          </template>
+        </v-dialog>
+      </v-speed-dial>
+
+      <span class="me-2" />
 
       <v-btn
-        v-if="isCreation"
+        v-if="!note"
         icon="mdi-close"
         variant="text"
-        @click="$emit('closeDialog')"
+        @click="
+          autoSave ? submit(true) : null;
+          $emit('closeDialog');
+        "
       />
     </template>
     <template #text>
       <InputTag
         class="mt-2"
         :value="tags"
-        @new-values="(value) => (tags = value)"
+        @new-values="
+          (value) => {
+            disabled = false;
+            tags = value;
+          }
+        "
       />
       <v-textarea
         v-if="!preview"
         v-model="body"
         variant="solo"
         placeholder="Markdown content"
-        rows="35"
+        rows="40"
         width="100%"
         heigh="100%"
         counter
-        @update:model-value="markdownBody = body ? markdown.render(body) : null"
+        @update:model-value="
+          disabled = false;
+          markdownBody = body ? markdown.render(body) : null;
+        "
       />
       <v-container v-if="preview" fluid>
         <!-- eslint-disable-next-line vue/no-v-html  -->
         <div v-if="markdownBody" v-html="markdownBody" />
       </v-container>
     </template>
+    <v-fab
+      color="red"
+      icon
+      class="position-fixed"
+      location="bottom"
+      size="64"
+      :disabled="disabled"
+      app
+      @click="submit(true)"
+    >
+      <v-icon icon="mdi-floppy" />
+      <v-tooltip activator="parent" text="Save" />
+    </v-fab>
   </v-card>
 </template>
 
@@ -68,7 +173,11 @@
 import MarkdownIt from "markdown-it";
 import hljs from "highlight.js";
 const props = defineProps({
-  api: Object,
+  api: {
+    type: Object,
+    required: false,
+    default: useApi("/api/notes/", true, "Note"),
+  },
   parameters: {
     type: Object,
     required: false,
@@ -139,13 +248,8 @@ const props = defineProps({
     required: false,
     default: null,
   },
-  isCreation: {
-    type: Boolean,
-    required: false,
-    default: true,
-  },
 });
-defineEmits(["completed", "closeDialog"]);
+const emit = defineEmits(["completed", "closeDialog"]);
 const validate = useValidation();
 // TODO: Review & apply all plugins
 const markdown = ref(
@@ -165,11 +269,8 @@ const markdown = ref(
   }),
 );
 
-const projectId = ref(
-  props.parameters ? props.parameters.project : props.project,
-);
 const title = ref(null);
-const shared = ref(null);
+const shared = ref(false);
 const tags = ref([]);
 const body = ref(null);
 
@@ -180,8 +281,76 @@ if (props.note) {
   body.value = props.note.body;
 }
 
-const preview = ref(!props.isCreation && props.note && body.value);
+const disabled = ref(true);
+const autoSave = ref(true);
+const autoSaveSeconds = 60;
+const currentNote = ref(props.note);
+const preview = ref(props.note && body.value);
 const markdownBody = ref(preview.value ? markdown.value.render(body) : null);
+autoSubmit();
+
+function autoSubmit() {
+  setTimeout(() => {
+    if (autoSave.value) {
+      submit(false);
+    }
+    autoSubmit();
+  }, autoSaveSeconds * 1000);
+}
+
+function success(completed, response) {
+  currentNote.value = response;
+  disabled.value = true;
+  if (completed) {
+    emit("completed");
+    emit("closeDialog");
+  }
+}
+
+function submit(completed) {
+  if ((!title.value || validate.name.test(title.value)) && !disabled.value) {
+    let data = {
+      project: props.parameters ? props.parameters.project : props.project,
+      title: title.value ? title.value : "Untitled",
+      body: body.value,
+      tags: tags.value,
+      public: shared.value,
+    };
+    if (currentNote.value) {
+      data = Object.assign({}, data, {
+        target: currentNote.value.target,
+        task: currentNote.value.task,
+        execution: currentNote.value.execution,
+        osint: currentNote.value.osint,
+        host: currentNote.value.host,
+        port: currentNote.value.port,
+        path: currentNote.value.path,
+        credential: currentNote.value.credential,
+        technology: currentNote.value.technology,
+        vulnerability: currentNote.value.vulnerability,
+        exploit: currentNote.value.exploit,
+      });
+      props.api
+        .update(data, currentNote.value.id)
+        .then((response) => success(completed, response));
+    } else {
+      data = Object.assign({}, data, {
+        target: props.target ? props.target.id : null,
+        task: props.task ? props.task.id : null,
+        execution: props.execution ? props.execution.id : null,
+        osint: props.osint ? props.osint.id : null,
+        host: props.host ? props.host.id : null,
+        port: props.port ? props.port.id : null,
+        path: props.path ? props.path.id : null,
+        credential: props.credential ? props.credential.id : null,
+        technology: props.technology ? props.technology.id : null,
+        vulnerability: props.vulnerability ? props.vulnerability.id : null,
+        exploit: props.exploit ? props.exploit.id : null,
+      });
+      props.api.create(data).then((response) => success(completed, response));
+    }
+  }
+}
 </script>
 
 <style lang="css">

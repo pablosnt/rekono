@@ -24,6 +24,8 @@
               :prepend-icon="note.public ? 'mdi-lock-open-variant' : 'mdi-lock'"
             >
               <template #append>
+                <ButtonNoteLink :note="note" />
+                <span class="me-2" />
                 <v-chip
                   v-if="note.owner.id !== user.user"
                   color="primary"
@@ -33,71 +35,17 @@
                   {{ note.owner.username }}
                 </v-chip>
                 <span class="me-2" />
-                <v-chip
-                  v-if="note.project"
-                  prepend-icon="mdi-folder-open"
-                  append-icon="mdi-open-in-new"
-                  color="red"
-                  variant="tonal"
-                  link
-                  :href="`/projects/${note.project.id}`"
-                  >{{ note.project.name }}</v-chip
-                >
-                <v-chip
-                  v-if="note.target"
-                  prepend-icon="mdi-target"
-                  append-icon="mdi-open-in-new"
-                  color="red"
-                  variant="tonal"
-                  link
-                  :href="`/projects/${note.target.project}/targets`"
-                  >{{ note.target.target }}</v-chip
-                >
-                <span class="me-2" />
               </template>
               <template #text>
                 <v-card-text>
-                  <v-chip-group
-                    v-if="note.tags.length > 0"
-                    selected-class="v-chip"
-                  >
-                    <v-chip v-for="tag in note.tags" :key="tag" size="small">
-                      {{ tag }}
-                    </v-chip>
-                  </v-chip-group>
+                  <ShowTags :item="note" />
                 </v-card-text>
               </template>
 
               <v-card-actions>
                 <v-spacer />
-                <v-chip
-                  v-if="note.public"
-                  prepend-icon="mdi-arrow-decision"
-                  color="red"
-                  :variant="!note.forked ? 'tonal' : 'flat'"
-                  :disabled="note.forked || note.owner.id === user.user"
-                  @click="
-                    useApi('/api/notes/', true)
-                      .create({}, note.id, 'fork/')
-                      .then((response) => router.push(`/notes/${response.id}`))
-                  "
-                  >{{
-                    note.forks.length < 1000
-                      ? note.forks.length
-                      : Math.floor(note.forks.length / 1000).toString() + "k"
-                  }}
-                  Forks</v-chip
-                >
-                <v-chip
-                  v-if="note.forked_from"
-                  prepend-icon="mdi-arrow-decision"
-                  append-icon="mdi-open-in-new"
-                  color="red"
-                  variant="flat"
-                  link
-                  :href="`/notes/${note.forked_from}`"
-                  >Forked</v-chip
-                >
+                <ButtonNoteForks :note="note" />
+                <ButtonNoteForkedFrom :note="note" />
                 <span class="me-2" />
                 <ButtonLike
                   :api="api"

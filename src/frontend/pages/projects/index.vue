@@ -56,18 +56,7 @@
                 <template #text>
                   <v-card-text>
                     <p>{{ project.description }}</p>
-                    <div v-if="project.tags.length > 0">
-                      <v-divider class="mt-3 mb-3" />
-                      <v-chip-group selected-class="v-chip">
-                        <v-chip
-                          v-for="tag in project.tags"
-                          :key="tag"
-                          size="small"
-                        >
-                          {{ tag }}
-                        </v-chip>
-                      </v-chip-group>
-                    </div>
+                    <ShowTags :item="project" :divider="true" />
                   </v-card-text>
 
                   <v-card-actions @click.stop>

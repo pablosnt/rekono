@@ -25,14 +25,7 @@
       <v-card-text class="overflow-auto">
         <div v-if="!details">
           <p>{{ process.description }}</p>
-          <div v-if="process.tags.length > 0">
-            <v-divider class="mt-3 mb-3" />
-            <v-chip-group selected-class="v-chip">
-              <v-chip v-for="tag in process.tags" :key="tag" size="small">
-                {{ tag }}
-              </v-chip>
-            </v-chip-group>
-          </div>
+          <ShowTags :item="process" :divider="true" />
         </div>
         <div v-if="details">
           <FormSteps

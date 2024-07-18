@@ -1,7 +1,7 @@
 <template>
   <v-text-field
     v-model="newTag"
-    :label="label"
+    :label="tags.length === 0 ? label : undefined"
     :prepend-inner-icon="icon"
     variant="outlined"
     :rules="[(t) => !t || regex.test(t.trim()) || 'Invalid value']"

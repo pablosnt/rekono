@@ -129,7 +129,7 @@
           app
           @click="submit()"
         >
-          <v-icon icon="mdi-tray-arrow-down" />
+          <v-icon icon="mdi-floppy" />
           <v-tooltip activator="parent" text="Save" />
         </v-fab>
       </v-container>

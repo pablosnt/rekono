@@ -73,7 +73,10 @@ class Note(BaseLike):
     title = models.TextField(
         max_length=200, validators=[Validator(Regex.NAME.value, code="title")]
     )
-    body = models.TextField(validators=[Validator(Regex.TEXT.value, code="body")])
+    body = models.TextField(
+        validators=[Validator(Regex.MD.value, code="body")], blank=True, null=True
+    )
+    # TODO: It fails when the tag already exists in other entity
     tags = TaggableManager()
     owner = models.ForeignKey(
         AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True

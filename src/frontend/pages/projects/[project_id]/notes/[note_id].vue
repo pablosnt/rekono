@@ -1,5 +1,7 @@
 <template>
-  <MenuProject />
+  <MenuProject>
+    <CardNote />
+  </MenuProject>
 </template>
 
 <script setup lang="ts">
