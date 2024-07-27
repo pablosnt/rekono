@@ -7,9 +7,8 @@
 <script setup lang="ts">
 definePageMeta({ layout: false });
 const route = useRoute();
-const note = ref();
-useApi("/api/notes/", true)
+const note = ref(null);
+useApi("/api/notes/", true, "Note")
   .get(route.params.note_id)
   .then((response) => (note.value = response));
-// TODO: Receive the note from notes page, while the data is loaded from the API
 </script>

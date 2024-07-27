@@ -4,7 +4,7 @@
     hover
     color="medium-emphasis"
     variant="text"
-    @click.stop="submit()"
+    @click.prevent.stop="submit()"
   >
     <v-badge
       floating

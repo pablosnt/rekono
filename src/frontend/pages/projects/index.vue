@@ -44,14 +44,7 @@
                     {{ project.targets.length }} Targets
                   </v-chip>
                   <span class="me-3" />
-                  <v-chip
-                    v-if="project.owner"
-                    color="primary"
-                    :variant="project.owner.id === user.user ? 'flat' : 'tonal'"
-                  >
-                    <v-icon icon="mdi-at" start />
-                    {{ project.owner.username }}
-                  </v-chip>
+                  <MiscOwner :entity="project" />
                 </template>
                 <template #text>
                   <v-card-text>

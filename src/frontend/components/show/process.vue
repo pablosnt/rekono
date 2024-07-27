@@ -5,15 +5,7 @@
         <v-icon icon="mdi-rocket" start /> {{ process.steps.length }} Steps
       </v-chip>
       <span class="me-3" />
-      <v-chip
-        v-if="process.owner"
-        color="primary"
-        :variant="process.owner.id === user.user ? 'flat' : 'tonal'"
-      >
-        <v-icon icon="mdi-at" start />
-        {{ process.owner.username }}
-      </v-chip>
-      <v-chip v-if="!process.owner">Default</v-chip>
+      <MiscOwner :entity="process" />
       <v-btn
         v-if="details"
         icon="mdi-close"
@@ -75,8 +67,6 @@
 </template>
 
 <script setup lang="ts">
-import { MiscTags } from "#build/components";
-
 defineProps({
   api: Object,
   process: Object,

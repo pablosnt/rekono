@@ -42,15 +42,7 @@
                   {{ wordlist.type }}
                 </v-chip>
                 <span class="me-3" />
-                <v-chip
-                  v-if="wordlist.owner"
-                  color="primary"
-                  :variant="wordlist.owner.id === user.user ? 'flat' : 'tonal'"
-                >
-                  <v-icon icon="mdi-at" start />
-                  {{ wordlist.owner.username }}
-                </v-chip>
-                <v-chip v-if="!wordlist.owner">Default</v-chip>
+                <MiscOwner :entity="wordlist" />
                 <span class="me-3" />
                 <ButtonLike
                   :api="api"

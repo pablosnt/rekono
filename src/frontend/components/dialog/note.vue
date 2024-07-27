@@ -5,8 +5,8 @@
     :subtitle="
       currentNote ? new Date(currentNote.updated_at).toUTCString() : undefined
     "
+    :loading="loading ? 'red' : false"
   >
-    <!-- TODO: Setup loading while the save is triggered -->
     <template #title>
       <v-text-field
         v-model="title"
@@ -21,108 +21,132 @@
       />
     </template>
     <template #append>
-      <ButtonNoteLink
-        :target="target"
-        :task="task"
-        :execution="execution"
-        :osint="osint"
-        :host="host"
-        :port="port"
-        :path="path"
-        :credential="credential"
-        :technology="technology"
-        :vulnerability="vulnerability"
-        :exploit="exploit"
-        :note="note"
-      />
-      <ButtonNoteForkedFrom v-if="note" :note="note" />
-      <ButtonNoteForks v-if="currentNote" :note="currentNote" />
-      <ButtonLike
-        v-if="currentNote"
-        :api="api"
-        :item="currentNote"
-        @reload="
-          (value) =>
-            api.get(currentNote.id).then((response) => (currentNote = response))
-        "
-      />
-      <v-btn v-model="shared" icon variant="text" @click="shared = !shared">
-        <v-icon
-          :icon="shared ? 'mdi-lock-open-variant' : 'mdi-lock'"
-          :color="shared ? 'red' : 'green'"
-        />
-        <v-tooltip
-          activator="parent"
-          :text="shared ? 'Public Note' : 'Private Note'"
-        />
-      </v-btn>
-      <!-- todo: Read Only mode for Read users -->
-      <v-btn v-model="preview" icon variant="text" @click="preview = !preview">
-        <v-icon :icon="preview ? 'mdi-pencil' : 'mdi-eye'" />
-        <v-tooltip activator="parent" :text="preview ? 'Edit' : 'Preview'" />
-      </v-btn>
-      <v-btn
-        v-model="autoSave"
-        icon
-        variant="text"
-        @click="autoSave = !autoSave"
-      >
-        <v-icon icon="mdi-floppy" :color="autoSave ? 'green' : 'red'" />
-        <v-tooltip
-          activator="parent"
-          :text="
-            autoSave
-              ? 'Auto-Save: On. Note will be saved each minute'
-              : 'Auto-Save: Off'
-          "
-        />
-      </v-btn>
-      <v-speed-dial
-        v-if="currentNote"
-        transition="scale-transition"
-        location="bottom end"
-        @click.stop
-      >
-        <template #activator="{ props: activatorProps }">
-          <v-btn
-            v-bind="activatorProps"
-            size="large"
-            variant="text"
-            icon="mdi-dots-vertical-circle"
+      <v-container>
+        <v-spacer />
+        <v-row v-if="currentNote" dense>
+          <ButtonNoteLink
+            :target="target"
+            :task="task"
+            :execution="execution"
+            :osint="osint"
+            :host="host"
+            :port="port"
+            :path="path"
+            :credential="credential"
+            :technology="technology"
+            :vulnerability="vulnerability"
+            :exploit="exploit"
+            :note="note"
           />
-        </template>
-        <v-dialog width="500" class="overflow-auto">
-          <template #activator="{ props: activatorProps }">
-            <v-btn
-              key="2"
-              icon="mdi-trash-can-outline"
-              color="red"
-              v-bind="activatorProps"
+          <span class="me-2" />
+          <MiscNoteForkedFrom v-if="note" :note="note" />
+          <span class="me-2" />
+          <MiscNoteForks :note="currentNote" />
+          <span class="me-2" />
+          <ButtonLike
+            :api="api"
+            :item="currentNote"
+            @reload="
+              (value) =>
+                api
+                  .get(currentNote.id)
+                  .then((response) => (currentNote = response))
+            "
+          />
+          <span class="me-4" />
+          <MiscOwner :entity="currentNote" />
+          <span class="me-2" />
+          <ButtonDelete
+            v-if="currentNote"
+            :id="currentNote.id"
+            :api="api"
+            :text="`Note '${currentNote.title}' will be removed`"
+            @completed="
+              note
+                ? navigateTo(`/projects/${note.project}/notes`)
+                : $emit('completed')
+            "
+          />
+          <span class="me-2" />
+          <v-btn
+            v-if="!note"
+            icon="mdi-close"
+            variant="text"
+            @click="
+              autoSave ? submit(true) : null;
+              $emit('closeDialog');
+            "
+          />
+        </v-row>
+        <v-row dense>
+          <v-spacer />
+          <ButtonNoteLink
+            v-if="!currentNote"
+            :target="target"
+            :task="task"
+            :execution="execution"
+            :osint="osint"
+            :host="host"
+            :port="port"
+            :path="path"
+            :credential="credential"
+            :technology="technology"
+            :vulnerability="vulnerability"
+            :exploit="exploit"
+            :note="note"
+          />
+          <span class="me-2" />
+          <v-btn v-model="shared" icon variant="text" @click="shared = !shared">
+            <v-icon
+              :icon="shared ? 'mdi-lock-open-variant' : 'mdi-lock'"
+              :color="shared ? 'red' : 'green'"
             />
-          </template>
-          <template #default="{ isActive }">
-            <DialogDelete
-              :id="currentNote.id"
-              :api="api"
-              :text="`Note '${currentNote.title}' will be removed`"
-              @completed="navigateTo(`/projects/${currentNote.project}/notes`)"
-              @close-dialog="isActive.value = false"
+            <v-tooltip
+              activator="parent"
+              :text="shared ? 'Public Note' : 'Private Note'"
             />
-          </template>
-        </v-dialog>
-      </v-speed-dial>
+          </v-btn>
+          <v-btn
+            v-model="preview"
+            icon
+            variant="text"
+            @click="preview = !preview"
+          >
+            <v-icon :icon="preview ? 'mdi-pencil' : 'mdi-eye'" />
+            <v-tooltip
+              activator="parent"
+              :text="preview ? 'Edit' : 'Preview'"
+            />
+          </v-btn>
+          <v-btn
+            v-model="autoSave"
+            icon
+            variant="text"
+            @click="autoSave = !autoSave"
+          >
+            <v-icon icon="mdi-floppy" :color="autoSave ? 'green' : 'red'" />
+            <v-tooltip
+              activator="parent"
+              :text="
+                autoSave
+                  ? 'Auto-Save: On. Note will be saved each minute'
+                  : 'Auto-Save: Off'
+              "
+            />
+          </v-btn>
 
-      <span class="me-2" />
-
-      <v-btn
-        v-if="!note"
-        icon="mdi-close"
-        variant="text"
-        @click="
-          autoSave ? submit(true) : null;
-          $emit('closeDialog');
-        "
-      />
+          <span class="me-2" />
+          <v-btn
+            v-if="!note && !currentNote"
+            icon="mdi-close"
+            variant="text"
+            @click="
+              autoSave ? submit(true) : null;
+              $emit('closeDialog');
+            "
+          />
+        </v-row>
+      </v-container>
     </template>
     <template #text>
       <InputTag
@@ -256,6 +280,7 @@ const props = defineProps({
 });
 const emit = defineEmits(["completed", "closeDialog"]);
 const validate = useValidation();
+
 const markdown = ref(
   MarkdownIt({
     breaks: true,
@@ -292,12 +317,15 @@ if (props.note) {
   body.value = props.note.body;
 }
 
+const loading = ref(false);
 const disabled = ref(true);
 const autoSave = ref(true);
 const autoSaveSeconds = 60;
+const preview = ref(body.value);
 const currentNote = ref(props.note);
-const preview = ref(props.note && body.value);
-const markdownBody = ref(preview.value ? markdown.value.render(body) : null);
+const markdownBody = ref(
+  preview.value ? markdown.value.render(body.value) : null,
+);
 autoSubmit();
 
 function autoSubmit() {
@@ -312,9 +340,14 @@ function autoSubmit() {
 function success(completed, response) {
   currentNote.value = response;
   disabled.value = true;
+  loading.value = false;
   if (completed) {
-    emit("completed");
-    emit("closeDialog");
+    if (props.note) {
+      return navigateTo(`/projects/${response.project}/notes`);
+    } else {
+      emit("completed");
+      emit("closeDialog");
+    }
   }
 }
 
@@ -341,9 +374,11 @@ function submit(completed) {
         vulnerability: currentNote.value.vulnerability,
         exploit: currentNote.value.exploit,
       });
+      loading.value = true;
       props.api
         .update(data, currentNote.value.id)
-        .then((response) => success(completed, response));
+        .then((response) => success(completed, response))
+        .catch(() => (loading.value = false));
     } else {
       data = Object.assign({}, data, {
         project: props.parameters ? props.parameters.project : props.project,
@@ -359,7 +394,11 @@ function submit(completed) {
         vulnerability: props.vulnerability ? props.vulnerability.id : null,
         exploit: props.exploit ? props.exploit.id : null,
       });
-      props.api.create(data).then((response) => success(completed, response));
+      loading.value = true;
+      props.api
+        .create(data)
+        .then((response) => success(completed, response))
+        .catch(() => (loading.value = false));
     }
   }
 }

@@ -18,13 +18,13 @@
               >
                 <ShowIntegration
                   v-if="integration.id !== 1 && integration.id !== 4"
-                  :api="api"
+                  :api="iApi"
                   :integration="integration"
                 />
                 <v-dialog v-if="integration.id === 1 || integration.id === 4">
                   <template #activator="{ props: activatorProps }">
                     <ShowIntegration
-                      :api="api"
+                      :api="iApi"
                       :integration="integration"
                       v-bind="activatorProps"
                     />
@@ -32,13 +32,13 @@
                   <template #default="{ isActive }">
                     <DialogDefectDojo
                       v-if="integration.id === 1"
-                      :integration-api="api"
+                      :integration-api="iApi"
                       :integration="integration"
                       @close-dialog="isActive.value = false"
                     />
                     <DialogCveCrowd
                       v-if="integration.id === 4"
-                      :integration-api="api"
+                      :integration-api="iApi"
                       :integration="integration"
                       @close-dialog="isActive.value = false"
                     />
@@ -60,8 +60,53 @@
           </template>
           <template #text>
             <v-card-text>
-              <!-- TODO: Move code to here -->
-              <ShowMonitorSettings />
+              <v-container fluid>
+                <v-row>
+                  <v-alert
+                    color="info"
+                    icon="$info"
+                    variant="tonal"
+                    text="Some platforms like CVE Crowd, need to be used periodically to keep your findings up to date. Here you can configure the desired time lapse for the monitoring tasks"
+                  />
+                </v-row>
+                <v-row class="mt-8" justify="space-around">
+                  <v-col cols="5">
+                    <VNumberInput
+                      v-model="monitor.hour_span"
+                      control-variant="split"
+                      label="Hours"
+                      inset
+                      variant="outlined"
+                      :max="168"
+                      :min="24"
+                      @update:model-value="save = true"
+                    >
+                      <template #append>
+                        <ButtonSave
+                          :disabled="!save"
+                          @click="
+                            mApi
+                              .update({ hour_span: monitor.hour_span }, 1)
+                              .then((response) => (monitor = response))
+                          "
+                        />
+                      </template>
+                    </VNumberInput>
+                  </v-col>
+                </v-row>
+                <v-row
+                  v-if="new Date(monitor.last_monitor).getFullYear() !== 1970"
+                  justify="center"
+                  dense
+                >
+                  <v-col cols="9">
+                    <v-banner
+                      icon="mdi-timelapse"
+                      :text="`Last monitor was on ${new Date(monitor.last_monitor).toUTCString()}`"
+                    />
+                  </v-col>
+                </v-row>
+              </v-container>
             </v-card-text>
           </template>
         </v-card>
@@ -71,10 +116,16 @@
 </template>
 
 <script setup lang="ts">
+import { VNumberInput } from "vuetify/labs/VNumberInput";
 definePageMeta({ layout: false });
-const api = useApi("/api/integrations/", true);
+const iApi = useApi("/api/integrations/", true);
 const integrations = ref([]);
-api
+iApi
   .list({ ordering: "id" }, true)
   .then((response) => (integrations.value = response.items));
+
+const mApi = useApi("/api/monitor/", true, "Monitoring");
+const save = ref(false);
+const monitor = ref({});
+mApi.get(1).then((response) => (monitor.value = response));
 </script>

@@ -22,19 +22,12 @@
               class="mx-auto"
               density="compact"
               :prepend-icon="note.public ? 'mdi-lock-open-variant' : 'mdi-lock'"
+              :to="`/projects/${note.project}/notes/${note.id}`"
             >
-              <!-- TODO: :to="`/projects/${note.project}/notes/${note.id}`" -->
               <template #append>
                 <ButtonNoteLink :note="note" />
                 <span class="me-2" />
-                <v-chip
-                  v-if="note.owner.id !== user.user"
-                  color="primary"
-                  variant="tonal"
-                >
-                  <v-icon icon="mdi-at" start />
-                  {{ note.owner.username }}
-                </v-chip>
+                <MiscOwner :entity="note" />
                 <span class="me-2" />
               </template>
               <template #text>
@@ -45,8 +38,8 @@
               </template>
 
               <v-card-actions>
-                <ButtonNoteForks :note="note" />
-                <ButtonNoteForkedFrom :note="note" />
+                <MiscNoteForks :note="note" />
+                <MiscNoteForkedFrom :note="note" />
                 <v-spacer />
                 <ButtonLike
                   :api="api"
@@ -56,7 +49,6 @@
                 <v-speed-dial
                   transition="scale-transition"
                   location="bottom end"
-                  @click.stop
                 >
                   <template #activator="{ props: activatorProps }">
                     <v-btn
@@ -64,6 +56,7 @@
                       size="large"
                       color="grey"
                       icon="mdi-cog"
+                      @click.prevent.stop
                     />
                   </template>
                   <v-dialog v-if="!note.forked_from" width="auto">
