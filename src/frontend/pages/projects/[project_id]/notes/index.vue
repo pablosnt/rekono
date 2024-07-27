@@ -31,10 +31,10 @@
                 <span class="me-2" />
               </template>
               <template #text>
-                <v-card-text>
-                  <MiscTags :item="note" />
-                  <!-- TODO: Show parsed text truncated -->
-                </v-card-text>
+                 <v-container fluid>
+                  <div v-if="note.body" style="height: 250px; overflow: hidden;" v-html="markdown.render(note.body)"/>
+                 </v-container>
+                <MiscTags :item="note" :divider="note.body !== null" />
               </template>
 
               <v-card-actions>
@@ -139,6 +139,7 @@
 definePageMeta({ layout: false });
 const DialogNote = resolveComponent("DialogNote");
 const route = useRoute();
+const markdown = useMarkdown()
 const projectId = ref(route.params.project_id);
 const dataset = ref(null);
 const user = userStore();

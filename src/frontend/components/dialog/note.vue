@@ -61,6 +61,7 @@
             :id="currentNote.id"
             :api="api"
             :text="`Note '${currentNote.title}' will be removed`"
+            icon="mdi-trash-can"
             @completed="
               note
                 ? navigateTo(`/projects/${note.project}/notes`)
@@ -195,12 +196,6 @@
 </template>
 
 <script setup lang="ts">
-import MarkdownIt from "markdown-it";
-import { full as emoji } from "markdown-it-emoji";
-import marker from "markdown-it-mark";
-import hljs from "highlight.js";
-import "highlight.js/styles/qtcreator-dark.css";
-
 const props = defineProps({
   api: {
     type: Object,
@@ -280,30 +275,7 @@ const props = defineProps({
 });
 const emit = defineEmits(["completed", "closeDialog"]);
 const validate = useValidation();
-
-const markdown = ref(
-  MarkdownIt({
-    breaks: true,
-    linkify: true,
-    typographer: true,
-    highlight: function (str, lang) {
-      let result = "";
-      try {
-        if (lang && hljs.getLanguage(lang)) {
-          result = hljs.highlight(str, { language: lang }).value;
-        } else {
-          result = hljs.highlightAuto(str).value;
-        }
-      } catch (__) {}
-      if (result.length > 0) {
-        result = '<pre><code class="hljs">' + result + "</code></pre>";
-      }
-      return result;
-    },
-  })
-    .use(emoji)
-    .use(marker),
-);
+const markdown = useMarkdown()
 
 const title = ref(null);
 const shared = ref(false);
@@ -324,7 +296,7 @@ const autoSaveSeconds = 60;
 const preview = ref(body.value);
 const currentNote = ref(props.note);
 const markdownBody = ref(
-  preview.value ? markdown.value.render(body.value) : null,
+  preview.value ? markdown.render(body.value) : null,
 );
 autoSubmit();
 

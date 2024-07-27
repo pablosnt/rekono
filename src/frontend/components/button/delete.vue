@@ -2,7 +2,7 @@
   <v-dialog width="500" class="overflow-auto">
     <template #activator="{ props: activatorProps }">
       <v-btn hover variant="text" icon v-bind="activatorProps">
-        <v-icon icon="mdi-close" color="red" />
+        <v-icon :icon="icon" color="red" />
         <v-tooltip activator="parent" text="Delete" />
       </v-btn>
     </template>
@@ -26,6 +26,11 @@ defineProps({
   api: Object,
   id: Number,
   text: String,
+  icon: {
+    type: String,
+    required: false,
+    default: 'mdi-close'
+  }
 });
 defineEmits(["completed"]);
 </script>
