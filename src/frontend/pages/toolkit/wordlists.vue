@@ -43,7 +43,10 @@
                 </v-chip>
                 <span class="me-3" />
                 <MiscOwner :entity="wordlist" />
-                <span class="me-3" />
+              </template>
+
+              <v-card-actions>
+                <v-spacer />
                 <ButtonLike
                   :api="api"
                   :item="wordlist"
@@ -75,7 +78,7 @@
                     />
                   </template>
                 </ButtonEditDelete>
-              </template>
+              </v-card-actions>
             </v-card>
           </v-col>
         </v-row>

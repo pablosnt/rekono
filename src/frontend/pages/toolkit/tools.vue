@@ -93,6 +93,7 @@
                   </div>
                 </v-card-text>
               </template>
+
               <v-card-actions>
                 <ButtonRun :tool="tool" />
                 <v-spacer />

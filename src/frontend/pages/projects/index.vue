@@ -51,53 +51,52 @@
                     <p>{{ project.description }}</p>
                     <MiscTags :item="project" :divider="true" />
                   </v-card-text>
-
-                  <v-card-actions @click.stop>
-                    <ButtonRun
-                      v-if="project.targets.length > 0"
-                      :project="project"
-                    />
-                    <v-spacer />
-                    <!-- todo: replace link by the Defect-Dojo product or engagement from the sync -->
-                    <v-btn
-                      variant="text"
-                      target="_blank"
-                      :href="integration.reference"
-                      @click.stop
-                    >
-                      <v-avatar size="small" :image="integration.icon" />
-                    </v-btn>
-                    <ButtonEditDelete
-                      v-if="
-                        project.owner.id === user.user || user.role === 'Admin'
-                      "
-                    >
-                      <template #edit-dialog="{ isActive }">
-                        <DialogProjectEdition
-                          :api="api"
-                          :edit="project"
-                          @completed="
-                            dataset.loadData(false);
-                            isActive.value = false;
-                          "
-                          @close-dialog="isActive.value = false"
-                        />
-                      </template>
-                      <template #delete-dialog="{ isActive }">
-                        <DialogDelete
-                          :id="project.id"
-                          :api="api"
-                          :text="`Project '${project.name}' will be removed`"
-                          @completed="
-                            dataset.loadData(false);
-                            isActive.value = false;
-                          "
-                          @close-dialog="isActive.value = false"
-                        />
-                      </template>
-                    </ButtonEditDelete>
-                  </v-card-actions>
                 </template>
+                <v-card-actions @click.stop>
+                  <ButtonRun
+                    v-if="project.targets.length > 0"
+                    :project="project"
+                  />
+                  <v-spacer />
+                  <!-- todo: replace link by the Defect-Dojo product or engagement from the sync -->
+                  <v-btn
+                    variant="text"
+                    target="_blank"
+                    :href="integration.reference"
+                    @click.stop
+                  >
+                    <v-avatar size="small" :image="integration.icon" />
+                  </v-btn>
+                  <ButtonEditDelete
+                    v-if="
+                      project.owner.id === user.user || user.role === 'Admin'
+                    "
+                  >
+                    <template #edit-dialog="{ isActive }">
+                      <DialogProjectEdition
+                        :api="api"
+                        :edit="project"
+                        @completed="
+                          dataset.loadData(false);
+                          isActive.value = false;
+                        "
+                        @close-dialog="isActive.value = false"
+                      />
+                    </template>
+                    <template #delete-dialog="{ isActive }">
+                      <DialogDelete
+                        :id="project.id"
+                        :api="api"
+                        :text="`Project '${project.name}' will be removed`"
+                        @completed="
+                          dataset.loadData(false);
+                          isActive.value = false;
+                        "
+                        @close-dialog="isActive.value = false"
+                      />
+                    </template>
+                  </ButtonEditDelete>
+                </v-card-actions>
               </v-card>
             </v-col>
           </v-row>

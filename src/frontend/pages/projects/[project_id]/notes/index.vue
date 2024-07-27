@@ -144,6 +144,7 @@ const dataset = ref(null);
 const user = userStore();
 const notes = ref([]);
 const api = useApi("/api/notes/", true, "Note");
+// TODO: Review
 const filtering = ref([
   {
     type: "switch",

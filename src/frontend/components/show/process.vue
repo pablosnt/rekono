@@ -27,42 +27,41 @@
           />
         </div>
       </v-card-text>
-
-      <v-card-actions>
-        <ButtonRun :process="process" />
-        <v-spacer />
-        <ButtonLike
-          :api="api"
-          :item="process"
-          @reload="(value) => $emit('reload', value)"
-        />
-        <ButtonEditDelete
-          v-if="
-            (process.owner !== null && process.owner.id === user.user) ||
-            user.role === 'Admin'
-          "
-        >
-          <template #edit-dialog="{ isActive }">
-            <DialogProcess
-              :api="api"
-              :edit="process"
-              :tools="tools"
-              @completed="$emit('reload', false)"
-              @close-dialog="isActive.value = false"
-            />
-          </template>
-          <template #delete-dialog="{ isActive }">
-            <DialogDelete
-              :id="process.id"
-              :api="api"
-              :text="`Process '${process.name}' will be removed`"
-              @completed="$emit('reload', false)"
-              @close-dialog="isActive.value = false"
-            />
-          </template>
-        </ButtonEditDelete>
-      </v-card-actions>
     </template>
+    <v-card-actions>
+      <ButtonRun :process="process" />
+      <v-spacer />
+      <ButtonLike
+        :api="api"
+        :item="process"
+        @reload="(value) => $emit('reload', value)"
+      />
+      <ButtonEditDelete
+        v-if="
+          (process.owner !== null && process.owner.id === user.user) ||
+          user.role === 'Admin'
+        "
+      >
+        <template #edit-dialog="{ isActive }">
+          <DialogProcess
+            :api="api"
+            :edit="process"
+            :tools="tools"
+            @completed="$emit('reload', false)"
+            @close-dialog="isActive.value = false"
+          />
+        </template>
+        <template #delete-dialog="{ isActive }">
+          <DialogDelete
+            :id="process.id"
+            :api="api"
+            :text="`Process '${process.name}' will be removed`"
+            @completed="$emit('reload', false)"
+            @close-dialog="isActive.value = false"
+          />
+        </template>
+      </ButtonEditDelete>
+    </v-card-actions>
   </v-card>
 </template>
 
