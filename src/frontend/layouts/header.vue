@@ -42,7 +42,7 @@
               </template>
             </v-list-item>
             <!-- todo: about us section? -->
-             <!-- todo: Move the folowwing links to the footer ? -->
+            <!-- todo: Move the folowwing links to the footer ? -->
             <!-- todo: Update link to the new GitHub pages -->
             <v-list-item
               href="https://github.com/pablosnt/rekono/wiki"

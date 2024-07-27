@@ -75,7 +75,7 @@
 </template>
 
 <script setup lang="ts">
-import { MiscTags } from '#build/components';
+import { MiscTags } from "#build/components";
 
 defineProps({
   api: Object,

@@ -22,9 +22,8 @@
               class="mx-auto"
               density="compact"
               :prepend-icon="note.public ? 'mdi-lock-open-variant' : 'mdi-lock'"
-              
             >
-            <!-- TODO: :to="`/projects/${note.project}/notes/${note.id}`" -->
+              <!-- TODO: :to="`/projects/${note.project}/notes/${note.id}`" -->
               <template #append>
                 <ButtonNoteLink :note="note" />
                 <span class="me-2" />

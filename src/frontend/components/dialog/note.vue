@@ -151,7 +151,7 @@
       />
       <v-container v-if="preview" fluid>
         <!-- eslint-disable-next-line vue/no-v-html  -->
-        <div class="note-body-md" v-if="markdownBody" v-html="markdownBody" />
+        <div v-if="markdownBody" class="note-body-md" v-html="markdownBody" />
       </v-container>
     </template>
     <v-fab
