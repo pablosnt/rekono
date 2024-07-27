@@ -60,6 +60,7 @@
           </template>
           <template #text>
             <v-card-text>
+              <!-- TODO: Move code to here -->
               <ShowMonitorSettings />
             </v-card-text>
           </template>

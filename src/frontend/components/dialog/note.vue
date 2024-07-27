@@ -6,6 +6,7 @@
       currentNote ? new Date(currentNote.updated_at).toUTCString() : undefined
     "
   >
+    <!-- TODO: Setup loading while the save is triggered -->
     <template #title>
       <v-text-field
         v-model="title"
@@ -55,7 +56,7 @@
           :text="shared ? 'Public Note' : 'Private Note'"
         />
       </v-btn>
-      <!-- TODO: Read Only mode for Read users -->
+      <!-- todo: Read Only mode for Read users -->
       <v-btn v-model="preview" icon variant="text" @click="preview = !preview">
         <v-icon :icon="preview ? 'mdi-pencil' : 'mdi-eye'" />
         <v-tooltip activator="parent" :text="preview ? 'Edit' : 'Preview'" />
@@ -104,7 +105,7 @@
               :id="currentNote.id"
               :api="api"
               :text="`Note '${currentNote.title}' will be removed`"
-              @completed="$emit('closeDialog')"
+              @completed="navigateTo(`/projects/${currentNote.project}/notes`)"
               @close-dialog="isActive.value = false"
             />
           </template>
@@ -261,17 +262,16 @@ const markdown = ref(
     linkify: true,
     typographer: true,
     highlight: function (str, lang) {
-      let result = ""
+      let result = "";
       try {
         if (lang && hljs.getLanguage(lang)) {
-          result = hljs.highlight(str, { language: lang }).value
-        }
-        else {
+          result = hljs.highlight(str, { language: lang }).value;
+        } else {
           result = hljs.highlightAuto(str).value;
         }
       } catch (__) {}
       if (result.length > 0) {
-        result = '<pre><code class="hljs">' + result  + '</code></pre>';
+        result = '<pre><code class="hljs">' + result + "</code></pre>";
       }
       return result;
     },
@@ -300,7 +300,6 @@ const preview = ref(props.note && body.value);
 const markdownBody = ref(preview.value ? markdown.value.render(body) : null);
 autoSubmit();
 
-
 function autoSubmit() {
   setTimeout(() => {
     if (autoSave.value) {
@@ -322,7 +321,6 @@ function success(completed, response) {
 function submit(completed) {
   if ((!title.value || validate.name.test(title.value)) && !disabled.value) {
     let data = {
-      project: props.parameters ? props.parameters.project : props.project,
       title: title.value ? title.value : "Untitled",
       body: body.value,
       tags: tags.value,
@@ -330,6 +328,7 @@ function submit(completed) {
     };
     if (currentNote.value) {
       data = Object.assign({}, data, {
+        project: currentNote.value.project,
         target: currentNote.value.target,
         task: currentNote.value.task,
         execution: currentNote.value.execution,
@@ -347,6 +346,7 @@ function submit(completed) {
         .then((response) => success(completed, response));
     } else {
       data = Object.assign({}, data, {
+        project: props.parameters ? props.parameters.project : props.project,
         target: props.target ? props.target.id : null,
         task: props.task ? props.task.id : null,
         execution: props.execution ? props.execution.id : null,
@@ -370,10 +370,12 @@ function submit(completed) {
   font-size: 2.75em;
   line-height: 2;
 }
-.note-body-md table, .note-body-md th, .note-body-md td {
+.note-body-md table,
+.note-body-md th,
+.note-body-md td {
   border: 1px solid black;
   border-collapse: collapse;
-  padding: 5px
+  padding: 5px;
 }
 .note-body-md th {
   background-color: rgb(200, 69, 69);
@@ -384,11 +386,14 @@ function submit(completed) {
   font-size: 17.5px;
   border-left: 5px solid #eee;
 }
-.note-body-md code {
+.note-body-md p code,
+.note-body-md li code,
+.note-body-md blockquote code,
+.note-body-md td code {
   padding: 2px 4px;
-font-size: 90%;
-color: #c7254e;
-background-color: #f9f2f4;
-border-radius: 4px;
+  font-size: 90%;
+  color: #c7254e;
+  background-color: #f9f2f4;
+  border-radius: 4px;
 }
 </style>

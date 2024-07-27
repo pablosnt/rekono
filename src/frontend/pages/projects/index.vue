@@ -56,7 +56,7 @@
                 <template #text>
                   <v-card-text>
                     <p>{{ project.description }}</p>
-                    <ShowTags :item="project" :divider="true" />
+                    <MiscTags :item="project" :divider="true" />
                   </v-card-text>
 
                   <v-card-actions @click.stop>

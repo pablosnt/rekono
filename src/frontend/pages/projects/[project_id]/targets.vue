@@ -29,8 +29,8 @@
             >
               <template #append>
                 <!-- todo: Defect-Dojo sync -->
-                <!-- todo: Link to notes -->
-                <!-- todo: Create report dialog -->
+                <!-- todo: Link to notes and creation dialog -->
+                <!-- todo: Link to reports and creation dialog -->
                 <!-- todo: Link to tasks -->
                 <!-- todo: Link to findings -->
                 <ButtonRun :project="project" :target="target" />

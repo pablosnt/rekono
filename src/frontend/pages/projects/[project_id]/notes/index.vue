@@ -4,7 +4,7 @@
       ref="dataset"
       :api="api"
       :filtering="filtering"
-      :add="CardNote"
+      :add="DialogNote"
       :add-fullscreen="true"
       :default-parameters="{ project: projectId }"
       ordering="-updated_at"
@@ -22,7 +22,9 @@
               class="mx-auto"
               density="compact"
               :prepend-icon="note.public ? 'mdi-lock-open-variant' : 'mdi-lock'"
+              
             >
+            <!-- TODO: :to="`/projects/${note.project}/notes/${note.id}`" -->
               <template #append>
                 <ButtonNoteLink :note="note" />
                 <span class="me-2" />
@@ -38,15 +40,15 @@
               </template>
               <template #text>
                 <v-card-text>
-                  <ShowTags :item="note" />
+                  <MiscTags :item="note" />
+                  <!-- TODO: Show parsed text truncated -->
                 </v-card-text>
               </template>
 
               <v-card-actions>
-                <v-spacer />
                 <ButtonNoteForks :note="note" />
                 <ButtonNoteForkedFrom :note="note" />
-                <span class="me-2" />
+                <v-spacer />
                 <ButtonLike
                   :api="api"
                   :item="note"
@@ -143,7 +145,7 @@
 
 <script setup lang="ts">
 definePageMeta({ layout: false });
-const CardNote = resolveComponent("CardNote");
+const DialogNote = resolveComponent("DialogNote");
 const route = useRoute();
 const projectId = ref(route.params.project_id);
 const dataset = ref(null);

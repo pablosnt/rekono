@@ -25,7 +25,7 @@
       <v-card-text class="overflow-auto">
         <div v-if="!details">
           <p>{{ process.description }}</p>
-          <ShowTags :item="process" :divider="true" />
+          <MiscTags :item="process" :divider="true" />
         </div>
         <div v-if="details">
           <FormSteps
@@ -75,6 +75,8 @@
 </template>
 
 <script setup lang="ts">
+import { MiscTags } from '#build/components';
+
 defineProps({
   api: Object,
   process: Object,

@@ -40,7 +40,7 @@
           />
         </template>
         <template #default="{ isActive }">
-          <!-- TODO: Check when add must be displayed depending on the user roles -->
+          <!-- todo: Check when add must be displayed depending on the user roles -->
           <component
             :is="add"
             :api="api"
