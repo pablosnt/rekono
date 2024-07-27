@@ -66,11 +66,12 @@ class Tool(BaseLike):
                 capture_output=True,
             )
             if process.returncode == 0:
-                output = (process.stdout or process.stderr).decode("utf-8").lower()
+                output = (process.stdout or process.stderr).decode("utf-8")
                 version = re.search(
                     version_regex,
                     # zaproxy returns the Java version at the first line
                     re.sub("java version [^\s]*", "", output),
+                    flags=re.IGNORECASE
                 )
                 if version:
                     return version.group()

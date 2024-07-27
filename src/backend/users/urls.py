@@ -6,7 +6,7 @@ from users.views import MfaViewSet, ProfileViewSet, UserViewSet
 
 router = SimpleRouter()
 router.register("users", UserViewSet)
-router.register("profile/mfa", MfaViewSet)
+router.register("profile/mfa", MfaViewSet, basename="mfa")
 
 urlpatterns = [
     path(
