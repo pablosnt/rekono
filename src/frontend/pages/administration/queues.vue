@@ -21,10 +21,13 @@
                 </v-chip>
                 <span class="me-2" />
               </div>
-              <v-chip>
-                <v-icon icon="mdi-sitemap" start />
-                {{ queues[queue].workers }} workers
-              </v-chip>
+              <MiscCounter
+                :number="queues[queue].workers"
+                entity="workers"
+                icon="mdi-sitemap"
+                :color="undefined"
+                :show-zero="true"
+              />
             </template>
             <template #text>
               <v-container fluid>

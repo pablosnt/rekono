@@ -29,8 +29,8 @@ defineProps({
   icon: {
     type: String,
     required: false,
-    default: 'mdi-close'
-  }
+    default: "mdi-close",
+  },
 });
 defineEmits(["completed"]);
 </script>

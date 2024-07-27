@@ -1,9 +1,11 @@
 <template>
   <v-card :title="process.name" elevation="3" density="compact" hover>
     <template #append>
-      <v-chip v-if="process.steps" color="red">
-        <v-icon icon="mdi-rocket" start /> {{ process.steps.length }} Steps
-      </v-chip>
+      <MiscCounter
+        :collection="process.steps"
+        entity="Steps"
+        icon="mdi-rocket"
+      />
       <span class="me-3" />
       <MiscOwner :entity="process" />
       <v-btn

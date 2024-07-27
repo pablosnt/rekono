@@ -28,19 +28,35 @@
               :prepend-icon="enums.targets[target.type].icon"
             >
               <template #append>
-                <!-- todo: Defect-Dojo sync -->
-                <!-- todo: Link to notes and creation dialog -->
-                <!-- todo: Link to reports and creation dialog -->
-                <!-- todo: Link to tasks -->
-                <!-- todo: Link to findings -->
+                <MiscCounter
+                  :collection="target.tasks"
+                  entity="Tasks"
+                  icon="mdi-play-network"
+                  :link="`/projects/${target.project}/tasks`"
+                />
+                <span class="me-2" />
+                <MiscCounter
+                  :collection="target.notes"
+                  entity="Notes"
+                  icon="mdi-notebook"
+                  :link="`/projects/${target.project}/notes`"
+                  color="blue"
+                />
+                <!-- todo: Link (Defect-Dojo) -->
+              </template>
+              <v-card-actions>
                 <ButtonRun :project="project" :target="target" />
+                <v-spacer />
+                <!-- TODO: Create note -->
+                <!-- todo: Create report -->
                 <ButtonDelete
                   :id="target.id"
                   :api="api"
                   :text="`Target '${target.target}' will be removed`"
+                  icon="mdi-trash-can"
                   @completed="dataset.loadData(false)"
                 />
-              </template>
+              </v-card-actions>
             </v-card>
           </v-col>
         </v-row>

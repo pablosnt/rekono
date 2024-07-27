@@ -20,15 +20,11 @@
             >
               <template #append>
                 <span class="me-3" />
-                <v-chip v-if="wordlist.size" color="red">
-                  <v-icon icon="mdi-counter" start />
-                  {{
-                    wordlist.size < 1000
-                      ? wordlist.size
-                      : Math.floor(wordlist.size / 1000).toString() + "k"
-                  }}
-                  Words
-                </v-chip>
+                <MiscCounter
+                  :number="wordlist.size"
+                  entity="Words"
+                  icon="mdi-counter"
+                />
                 <span class="me-3" />
                 <v-chip>
                   <v-icon

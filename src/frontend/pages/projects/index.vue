@@ -34,15 +34,12 @@
                   <span class="me-2" />
                 </template>
                 <template #append>
-                  <v-chip
-                    v-if="project.targets"
-                    color="red"
-                    :to="`/projects/${project.id}/targets`"
-                    @click.stop
-                  >
-                    <v-icon icon="mdi-target" start />
-                    {{ project.targets.length }} Targets
-                  </v-chip>
+                  <MiscCounter
+                    :collection="project.targets"
+                    entity="Targets"
+                    icon="mdi-target"
+                    :link="`/projects/${project.id}/targets`"
+                  />
                   <span class="me-3" />
                   <MiscOwner :entity="project" />
                 </template>

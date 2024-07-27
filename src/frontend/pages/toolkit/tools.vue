@@ -24,8 +24,7 @@
               density="compact"
             >
               <template #append>
-                <v-chip v-if="tool.version">
-                  <v-icon icon="mdi-tag" start />
+                <v-chip v-if="tool.version" prepend-icon="mdi-tag">
                   {{ tool.version }}
                 </v-chip>
                 <span class="me-3" />

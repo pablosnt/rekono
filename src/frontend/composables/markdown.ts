@@ -5,8 +5,7 @@ import hljs from "highlight.js";
 import "highlight.js/styles/qtcreator-dark.css";
 
 export function useMarkdown() {
-
-    return MarkdownIt({
+  return MarkdownIt({
     breaks: true,
     linkify: true,
     typographer: true,
@@ -24,5 +23,7 @@ export function useMarkdown() {
       }
       return result;
     },
-  }).use(emoji).use(marker)
+  })
+    .use(emoji)
+    .use(marker);
 }

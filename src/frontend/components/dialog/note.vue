@@ -275,7 +275,7 @@ const props = defineProps({
 });
 const emit = defineEmits(["completed", "closeDialog"]);
 const validate = useValidation();
-const markdown = useMarkdown()
+const markdown = useMarkdown();
 
 const title = ref(null);
 const shared = ref(false);
@@ -295,9 +295,7 @@ const autoSave = ref(true);
 const autoSaveSeconds = 60;
 const preview = ref(body.value);
 const currentNote = ref(props.note);
-const markdownBody = ref(
-  preview.value ? markdown.render(body.value) : null,
-);
+const markdownBody = ref(preview.value ? markdown.render(body.value) : null);
 autoSubmit();
 
 function autoSubmit() {

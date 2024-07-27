@@ -6,7 +6,7 @@
     color="red"
     variant="flat"
     link
-    :href="`/projects/${note.project}/notes/${note.forked_from}`"
+    :to="`/projects/${note.project}/notes/${note.forked_from}`"
     >Forked</v-chip
   >
 </template>
