@@ -2,7 +2,7 @@
   <v-card :title="process.name" elevation="3" density="compact" hover>
     <template #append>
       <v-chip v-if="process.steps" color="red">
-        <v-icon icon="mdi-rocket" start />3 {{ process.steps.length }} Steps
+        <v-icon icon="mdi-rocket" start /> {{ process.steps.length }} Steps
       </v-chip>
       <span class="me-3" />
       <v-chip

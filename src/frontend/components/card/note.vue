@@ -150,7 +150,7 @@
       />
       <v-container v-if="preview" fluid>
         <!-- eslint-disable-next-line vue/no-v-html  -->
-        <div v-if="markdownBody" v-html="markdownBody" />
+        <div class="note-body-md" v-if="markdownBody" v-html="markdownBody" />
       </v-container>
     </template>
     <v-fab
@@ -171,7 +171,11 @@
 
 <script setup lang="ts">
 import MarkdownIt from "markdown-it";
+import { full as emoji } from "markdown-it-emoji";
+import marker from "markdown-it-mark";
 import hljs from "highlight.js";
+import "highlight.js/styles/qtcreator-dark.css";
+
 const props = defineProps({
   api: {
     type: Object,
@@ -251,22 +255,29 @@ const props = defineProps({
 });
 const emit = defineEmits(["completed", "closeDialog"]);
 const validate = useValidation();
-// TODO: Review & apply all plugins
 const markdown = ref(
   MarkdownIt({
     breaks: true,
     linkify: true,
     typographer: true,
     highlight: function (str, lang) {
-      if (lang && hljs.getLanguage(lang)) {
-        try {
-          return hljs.highlight(str, { language: lang, ignoreIllegals: true })
-            .value;
-        } catch (__) {}
+      let result = ""
+      try {
+        if (lang && hljs.getLanguage(lang)) {
+          result = hljs.highlight(str, { language: lang }).value
+        }
+        else {
+          result = hljs.highlightAuto(str).value;
+        }
+      } catch (__) {}
+      if (result.length > 0) {
+        result = '<pre><code class="hljs">' + result  + '</code></pre>';
       }
-      return "";
+      return result;
     },
-  }),
+  })
+    .use(emoji)
+    .use(marker),
 );
 
 const title = ref(null);
@@ -288,6 +299,7 @@ const currentNote = ref(props.note);
 const preview = ref(props.note && body.value);
 const markdownBody = ref(preview.value ? markdown.value.render(body) : null);
 autoSubmit();
+
 
 function autoSubmit() {
   setTimeout(() => {
@@ -355,7 +367,28 @@ function submit(completed) {
 
 <style lang="css">
 .note-title .v-input__control .v-field .v-field__field .v-field__input {
-  font-size: 3em;
-  line-height: 1;
+  font-size: 2.75em;
+  line-height: 2;
+}
+.note-body-md table, .note-body-md th, .note-body-md td {
+  border: 1px solid black;
+  border-collapse: collapse;
+  padding: 5px
+}
+.note-body-md th {
+  background-color: rgb(200, 69, 69);
+}
+.note-body-md blockquote {
+  padding: 10px 20px;
+  margin: 0 0 20px;
+  font-size: 17.5px;
+  border-left: 5px solid #eee;
+}
+.note-body-md code {
+  padding: 2px 4px;
+font-size: 90%;
+color: #c7254e;
+background-color: #f9f2f4;
+border-radius: 4px;
 }
 </style>
