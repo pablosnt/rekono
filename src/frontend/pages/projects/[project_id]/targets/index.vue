@@ -40,14 +40,14 @@
                   entity="Notes"
                   icon="mdi-notebook"
                   :link="`/projects/${target.project}/notes`"
-                  color="blue"
+                  color="indigo-darken-1"
                 />
                 <!-- todo: Link (Defect-Dojo) -->
               </template>
               <v-card-actions>
                 <ButtonRun :project="project" :target="target" />
                 <v-spacer />
-                <!-- TODO: Create note -->
+                <ButtonNote :project="project.id" :target="target" />
                 <!-- todo: Create report -->
                 <ButtonDelete
                   :id="target.id"

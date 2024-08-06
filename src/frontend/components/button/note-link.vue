@@ -1,5 +1,5 @@
 <template>
-  <v-chip v-if="entity" color="red" :to="link" @click.stop>
+  <v-chip v-if="entity" color="red" :to="link" target="_blank" @click.stop>
     <v-icon :icon="icon" start />
     {{ value }}
   </v-chip>
@@ -74,7 +74,6 @@ const icon = ref(null);
 const entity = ref(null);
 const value = ref(null);
 const link = ref(null);
-const fields = ["target"];
 
 for (let i = 0; i < Object.keys(props).length; i++) {
   const key = Object.keys(props)[i];
@@ -86,17 +85,7 @@ for (let i = 0; i < Object.keys(props).length; i++) {
   }
 }
 
-function getEntity(name) {
-  if (props.note && props.note[name] !== null) {
-    useApi(
-      `/api/${name.charAt(name.length - 1) === "y" ? name.substring(0, name.length - 1) + "ies" : name + "s"}`,
-      true,
-    )
-      .get(props.note[name])
-      .then((response) => (entity.value = response));
-  } else if (props[name]) {
-    entity.value = props[name];
-  }
+function processEntity(name) {
   // todo: add search value to the links
   if (entity.value) {
     if (name === "target") {
@@ -135,6 +124,23 @@ function getEntity(name) {
         }
       }
     }
+  }
+}
+
+function getEntity(name) {
+  if (props.note && props.note[name] !== null) {
+    useApi(
+      `/api/${name.charAt(name.length - 1) === "y" ? name.substring(0, name.length - 1) + "ies" : name + "s"}/`,
+      true,
+    )
+      .get(props.note[name])
+      .then((response) => {
+        entity.value = response;
+        processEntity(name);
+      });
+  } else if (props[name]) {
+    entity.value = props[name];
+    processEntity(name);
   }
 }
 </script>

@@ -1,13 +1,20 @@
 <template>
   <v-chip
-    v-if="entity.owner"
-    color="primary"
-    :variant="entity.owner.id === user.user ? 'flat' : 'tonal'"
+    :color="entity.owner ? 'primary' : undefined"
+    :variant="
+      !entity.owner
+        ? undefined
+        : entity.owner.id === user.user
+          ? 'flat'
+          : 'tonal'
+    "
   >
-    <v-icon icon="mdi-at" start />
-    {{ entity.owner.username }}
+    <p v-if="entity.owner">
+      <v-icon icon="mdi-at" start />
+      {{ entity.owner.username }}
+    </p>
+    <p v-if="!entity.owner">Default</p>
   </v-chip>
-  <v-chip v-if="!entity.owner">Default</v-chip>
 </template>
 
 <script setup lang="ts">

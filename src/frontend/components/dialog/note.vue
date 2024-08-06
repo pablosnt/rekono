@@ -24,25 +24,11 @@
       <v-container>
         <v-spacer />
         <v-row v-if="currentNote" dense>
-          <ButtonNoteLink
-            :target="target"
-            :task="task"
-            :execution="execution"
-            :osint="osint"
-            :host="host"
-            :port="port"
-            :path="path"
-            :credential="credential"
-            :technology="technology"
-            :vulnerability="vulnerability"
-            :exploit="exploit"
-            :note="note"
-          />
-          <span class="me-2" />
+          <ButtonNoteLink class="ma-2" :note="currentNote" />
+          <span v-if="note.forked_from !== null" class="me-2" />
           <MiscNoteForkedFrom v-if="note" :note="note" />
-          <span class="me-2" />
+          <span v-if="note.forks.length > 0" class="me-2" />
           <MiscNoteForks :note="currentNote" />
-          <span class="me-2" />
           <ButtonLike
             :api="api"
             :item="currentNote"
@@ -54,7 +40,7 @@
             "
           />
           <span class="me-4" />
-          <MiscOwner :entity="currentNote" />
+          <MiscOwner class="ma-2" :entity="currentNote" />
           <span class="me-2" />
           <ButtonDelete
             v-if="currentNote"
@@ -70,12 +56,13 @@
           />
           <span class="me-2" />
           <v-btn
-            v-if="!note"
             icon="mdi-close"
             variant="text"
             @click="
               autoSave ? submit(true) : null;
-              $emit('closeDialog');
+              note !== null
+                ? navigateTo(`/projects/${note.project}/notes`)
+                : $emit('closeDialog');
             "
           />
         </v-row>
@@ -83,6 +70,7 @@
           <v-spacer />
           <ButtonNoteLink
             v-if="!currentNote"
+            class="ma-2"
             :target="target"
             :task="task"
             :execution="execution"

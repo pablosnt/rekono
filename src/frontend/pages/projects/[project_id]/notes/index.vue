@@ -149,7 +149,7 @@ const dataset = ref(null);
 const user = userStore();
 const notes = ref([]);
 const api = useApi("/api/notes/", true, "Note");
-// TODO: Review
+// todo: Review filters. There are filters that might change when other filter changes. For instance, if target is selected, only findings from that target could be selected.
 const filtering = ref([
   {
     type: "switch",
