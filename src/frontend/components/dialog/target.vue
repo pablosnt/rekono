@@ -14,7 +14,6 @@
       @completed="
         () => {
           $emit('completed');
-          $emit('closeDialog');
         }
       "
       @loading="(value) => (loading = value)"

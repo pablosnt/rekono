@@ -10,9 +10,8 @@
       @loading="(value) => (loading = value)"
       @completed="
         () => {
-          emit('completed');
           loading = false;
-          emit('closeDialog');
+          emit('completed');
         }
       "
     />

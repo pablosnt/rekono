@@ -431,14 +431,11 @@
         prepend-icon="mdi-play"
       />
 
-      <v-progress-linear
+      <ShowPercentage
         v-if="loading"
-        v-model="progressPercentage"
-        height="20"
-        color="red"
-      >
-        <strong>{{ progressPercentage }}%</strong>
-      </v-progress-linear>
+        :total="selectedTargets.length"
+        :progress="progress"
+      />
     </v-form>
   </DialogDefault>
 </template>
@@ -487,11 +484,6 @@ const allWordlists = ref(false);
 const timeMenu = ref(false);
 const dateMenu = ref(false);
 const progress = ref(0);
-const progressPercentage = computed(() => {
-  return selectedTargets.value.length === 0
-    ? 0
-    : Math.ceil(progress.value / selectedTargets.value.length) * 100;
-});
 
 const projects = ref([]);
 const selectedProject = ref(props.project ? props.project : null);

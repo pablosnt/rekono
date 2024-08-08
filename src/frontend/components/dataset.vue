@@ -45,7 +45,7 @@
             :is="add"
             :api="api"
             :parameters="defaultParameters"
-            @completed="loadData(true)"
+            @completed="loadData(true); isActive.value = false"
             @close-dialog="isActive.value = false"
           />
         </template>

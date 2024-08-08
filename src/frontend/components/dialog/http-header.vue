@@ -14,7 +14,6 @@
       @completed="
         () => {
           loading = false;
-          $emit('closeDialog');
           $emit('completed');
         }
       "
