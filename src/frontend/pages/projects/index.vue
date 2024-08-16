@@ -7,7 +7,8 @@
         :add="DialogProjectCreation"
         :filtering="filtering"
         icon="mdi-folder-open"
-        :empty="
+        empty-head="No Projects"
+        :empty-text="
           user.role === 'Admin'
             ? 'Create your first project to start hacking'
             : 'There are no projects yet. Ask your administrator for one'

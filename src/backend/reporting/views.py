@@ -103,14 +103,15 @@ class ReportingViewSet(BaseViewSet):
             data=request.data, context={"request": request}
         )
         serializer.is_valid(raise_exception=True)
-        findings = (
-            self._get_findings_to_pdf_report(serializer)
-            if serializer.validated_data["format"] == ReportFormat.PDF
-            else self._get_findings_to_report(serializer)
-        )
-        if (isinstance(findings, list) and not findings) or (
-            isinstance(findings, tuple) and not findings[0]
-        ):
+        if serializer.validated_data["format"] == ReportFormat.PDF:
+            findings = self._get_findings_to_pdf_report(serializer)
+            count = len(
+                sum(sum([list(i.values()) for i in findings[0].values()], []), [])
+            )
+        else:
+            findings = self._get_findings_to_report(serializer)
+            count = len(sum(findings.values(), []))
+        if count == 0:
             return Response(
                 {"findings": "No findings found with this criteria"},
                 status=status.HTTP_404_NOT_FOUND,
@@ -174,7 +175,7 @@ class ReportingViewSet(BaseViewSet):
             query_filter = (
                 {**serializer.validated_filter, **serializer.validated_triage_filter}
                 if hasattr(model, "triage_status")
-                else {**serializer.validated_filter}
+                else serializer.validated_filter
             )
             query = model.objects.filter(**query_filter).all()
             if model == Vulnerability:

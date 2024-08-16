@@ -6,7 +6,8 @@
       :filtering="filtering"
       ordering="id"
       icon="mdi-rocket"
-      empty="There are no tools"
+      empty-head="No Tools"
+      empty-text="There are no tools"
       @load-data="(data) => (tools = data)"
     >
       <template #data>

@@ -9,7 +9,8 @@
       :default-parameters="{ project: projectId }"
       ordering="-updated_at"
       icon="mdi-notebook"
-      empty="There are no notes"
+      empty-head="No Notes"
+      empty-text="There are no notes. Create your first one"
       @load-data="(data) => (notes = data)"
     >
       <template #data>

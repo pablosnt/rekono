@@ -2,6 +2,7 @@ from typing import Any
 
 from django.core.exceptions import ValidationError
 from findings.enums import TriageStatus
+from projects.serializers import ProjectSerializer
 from reporting.enums import FindingName, ReportFormat
 from reporting.models import Report
 from rest_framework.serializers import (
@@ -9,9 +10,15 @@ from rest_framework.serializers import (
     ModelSerializer,
     MultipleChoiceField,
 )
+from targets.serializers import SimpleTargetSerializer
+from tasks.serializers import TaskSerializer
 
 
 class ReportSerializer(ModelSerializer):
+    project = ProjectSerializer(read_only=True, many=False)
+    target = SimpleTargetSerializer(read_only=True, many=False)
+    task = TaskSerializer(read_only=True, many=False)
+
     class Meta:
         model = Report
         fields = ("id", "project", "target", "task", "status", "format", "user", "date")

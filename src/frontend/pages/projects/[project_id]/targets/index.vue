@@ -8,7 +8,8 @@
       ordering="id"
       :add="DialogTarget"
       icon="mdi-target"
-      :empty="
+      empty-head="No Targets"
+      :empty-text="
         user.role === 'Reader'
           ? 'There are no targets'
           : 'Create your first target to start hacking'

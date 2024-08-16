@@ -27,7 +27,8 @@
     ordering="id"
     :add="DialogHttpHeader"
     icon="mdi-web"
-    empty="There are no custom HTTP headers"
+    empty-head="No HTTP Headers"
+    empty-text="There are no custom HTTP headers"
     @load-data="(data) => (headers = data)"
   >
     <template #data>

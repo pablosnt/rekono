@@ -27,7 +27,8 @@
         ordering="-expiration"
         :header="false"
         icon="mdi-api"
-        empty="There are no API tokens"
+        empty-head="No API Tokens"
+        empty-text="There are no API tokens"
         @load-data="(data) => (tokens = data)"
       >
         <template #data>

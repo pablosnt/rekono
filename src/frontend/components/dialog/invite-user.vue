@@ -60,7 +60,6 @@ function submit() {
       .then((response) => {
         loading.value = false;
         emit("completed", response);
-        emit("closeDialog");
       })
       .catch(() => (loading.value = false));
   }

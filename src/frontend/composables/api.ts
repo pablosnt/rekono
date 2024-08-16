@@ -1,3 +1,5 @@
+import { parse } from "vue/compiler-sfc";
+
 export function useApi(
   endpoint: string,
   authentication: boolean = true,
@@ -45,6 +47,16 @@ export function useApi(
     return Object.assign({}, currentHeaders, extraHeaders);
   }
 
+  function parseErrorMessage(error, include_field = true) {
+    const firstValue = Object.values(error.data)[0];
+    const value = Array.isArray(firstValue) ? firstValue[0] : firstValue;
+    const field = Object.keys(error.data)[0];
+    const body = `${value.charAt(0).toUpperCase()}${value.slice(1)}`;
+    return field !== "non_field_errors" && include_field
+      ? `${field}: ${body}`
+      : body;
+  }
+
   function request(
     endpoint: string,
     options = {},
@@ -56,11 +68,7 @@ export function useApi(
       let message = "Unexpected error";
       switch (error.statusCode) {
         case 400: {
-          const firstValue = Object.values(error.data)[0];
-          const value = Array.isArray(firstValue) ? firstValue[0] : firstValue;
-          const field = Object.keys(error.data)[0];
-          const body = `${value.charAt(0).toUpperCase()}${value.slice(1)}`;
-          message = field !== "non_field_errors" ? `${field}: ${body}` : body;
+          message = parseErrorMessage(error);
           break;
         }
         case 401:
@@ -116,7 +124,10 @@ export function useApi(
           message = "You are not authorized to perform this operation";
           break;
         case 404:
-          message = "Resource not found";
+          message =
+            endpoint.includes("/api/reports/") && options.method === "POST"
+              ? parseErrorMessage(error, false)
+              : "Resource not found";
           break;
         case 429:
           message = "Too many requests";
@@ -167,10 +178,18 @@ export function useApi(
     id?: number,
     extraPath?: string,
     extraHeaders?: object,
+    download?: boolean = false,
   ): Promise {
+    const options = {
+      method: "GET",
+      headers: headers(authentication, extraHeaders),
+    };
+    if (download) {
+      options.responseType = "blob";
+    }
     return request(
       id ? `${endpoint}${id}/` : endpoint,
-      { method: "GET", headers: headers(authentication, extraHeaders) },
+      options,
       extraPath,
       extraHeaders,
     ).then((response) => {

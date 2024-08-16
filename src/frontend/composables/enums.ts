@@ -104,6 +104,17 @@ export function useEnums() {
       icon: "mdi-bomb",
     },
   };
+  const reports = {
+    json: {
+      icon: "mdi-code-json",
+    },
+    xml: {
+      icon: "mdi-xml",
+    },
+    pdf: {
+      icon: "mdi-file-document",
+    },
+  };
 
   return {
     stages,
@@ -115,5 +126,6 @@ export function useEnums() {
     notificationPlatforms,
     targets,
     findings,
+    reports,
   };
 }

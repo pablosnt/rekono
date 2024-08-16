@@ -6,7 +6,8 @@
       :filtering="filtering"
       :add="DialogWordlist"
       icon="mdi-file-word-box"
-      empty="There are no wordlists"
+      empty-head="No Wordlists"
+      empty-text="There are no wordlists. Create your first one"
       @load-data="(data) => (wordlists = data)"
     >
       <template #data>

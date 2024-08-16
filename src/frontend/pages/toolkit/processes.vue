@@ -8,7 +8,8 @@
       :add="DialogProcess"
       :add-fullscreen="true"
       icon="mdi-robot-angry"
-      empty="There are no processes"
+      empty-head="No Processes"
+      empty-text="There are no processes. Create your first one"
       @load-data="(data) => (processes = data)"
     >
       <template #data>

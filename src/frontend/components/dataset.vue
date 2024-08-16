@@ -45,7 +45,10 @@
             :is="add"
             :api="api"
             :parameters="defaultParameters"
-            @completed="loadData(true); isActive.value = false"
+            @completed="
+              loadData(true);
+              isActive.value = false;
+            "
             @close-dialog="isActive.value = false"
           />
         </template>
@@ -123,12 +126,26 @@
     />
     <v-row
       v-if="
-        data !== null && icon !== null && empty !== null && data.length === 0
+        data !== null &&
+        icon !== null &&
+        (emptyHead !== undefined ||
+          emptyTitle !== undefined ||
+          emptyText !== undefined) &&
+        data.length === 0
       "
       justify="center"
       dense
     >
-      <v-empty-state :icon="icon" :title="empty" />
+      <v-empty-state
+        :icon="icon"
+        :headline="emptyHead"
+        :title="emptyTitle"
+        :text="emptyText"
+      >
+        <template #media>
+          <v-icon class="mb-3" color="red-darken-4" />
+        </template>
+      </v-empty-state>
     </v-row>
     <slot v-if="data !== null && data.length > 0" name="data" />
   </v-container>
@@ -171,10 +188,20 @@ const props = defineProps({
     required: false,
     default: null,
   },
-  empty: {
+  emptyHead: {
     type: String,
     required: false,
-    default: null,
+    default: undefined,
+  },
+  emptyTitle: {
+    type: String,
+    required: false,
+    default: undefined,
+  },
+  emptyText: {
+    type: String,
+    required: false,
+    default: undefined,
   },
 });
 const emit = defineEmits(["loadData"]);
