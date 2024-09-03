@@ -11,6 +11,7 @@
       <v-conatiner fluid>
         <v-row v-if="target === null && task === null" justify="center" dense>
           <v-col cols="11">
+            <!-- TODO: Allow association to Task from here -->
             <v-autocomplete
               v-model="selectedTarget"
               class="text-upper"
@@ -30,7 +31,7 @@
           <v-col cols="5">
             <v-autocomplete
               v-model="format"
-              class="text-uppercase"
+              
               auto-select-first
               density="comfortable"
               variant="outlined"
@@ -45,6 +46,9 @@
                   :title="item.raw.toUpperCase()"
                   :prepend-icon="enums.reports[item.raw].icon"
                 />
+              </template>
+              <template #selection="{ item, index }">
+                  <p>{{ item.raw.toUpperCase() }}</p>
               </template>
             </v-autocomplete>
           </v-col>
@@ -76,6 +80,7 @@
               clearable
               closable-chips
             >
+              <!-- todo: Look for other cases where this is useful -->
               <template #chip="{ props, item }">
                 <v-chip
                   v-bind="props"

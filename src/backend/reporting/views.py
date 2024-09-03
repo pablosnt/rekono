@@ -49,6 +49,7 @@ class ReportingViewSet(BaseViewSet):
     serializer_class = ReportSerializer
     filterset_class = ReportFilter
     permission_classes = [IsAuthenticated, RekonoModelPermission, OwnerPermission]
+    search_fields = ["format", "status"]
     ordering_fields = [
         "id",
         "project",

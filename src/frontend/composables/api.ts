@@ -62,9 +62,12 @@ export function useApi(
     options = {},
     extraPath?: string,
     extraHeaders?: object,
+    raw?: boolean = false,
   ): Promise {
     endpoint = extraPath ? `${endpoint}${extraPath}` : endpoint;
-    return $fetch(url(endpoint), options).catch((error) => {
+    return (
+      raw ? $fetch.raw(url(endpoint), options) : $fetch(url(endpoint), options)
+    ).catch((error) => {
       let message = "Unexpected error";
       switch (error.statusCode) {
         case 400: {
@@ -174,19 +177,42 @@ export function useApi(
     }
   }
 
+  async function download(
+    id?: number,
+    extraPath?: string,
+    extraHeaders?: object,
+  ) {
+    const options = {
+      method: "GET",
+      headers: headers(authentication, extraHeaders),
+      responseType: "blob",
+    };
+    return request(
+      id ? `${endpoint}${id}/` : endpoint,
+      options,
+      extraPath,
+      extraHeaders,
+      true,
+    ).then((response) => {
+      const a = document.createElement("a");
+      a.href = window.URL.createObjectURL(response._data);
+      a.download = response.headers
+        .get("content-disposition")
+        .replace('attachment; filename="', "")
+        .replace('"', "");
+      a.click();
+    });
+  }
+
   function get(
     id?: number,
     extraPath?: string,
     extraHeaders?: object,
-    download?: boolean = false,
   ): Promise {
     const options = {
       method: "GET",
       headers: headers(authentication, extraHeaders),
     };
-    if (download) {
-      options.responseType = "blob";
-    }
     return request(
       id ? `${endpoint}${id}/` : endpoint,
       options,
@@ -296,5 +322,5 @@ export function useApi(
     });
   }
 
-  return { get, list, create, update, remove, default_size, entity };
+  return { download, get, list, create, update, remove, default_size, entity };
 }

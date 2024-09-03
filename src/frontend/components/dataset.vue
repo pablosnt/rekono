@@ -82,13 +82,21 @@
                 :prepend-inner-icon="
                   f.value && f.value.icon ? f.value.icon : f.icon
                 "
+                :disabled="f.disabled ? f.disabled : false"
                 @update:model-value="
                   addParameter(
                     f.key,
                     f.value && f.fieldValue ? f.value[f.fieldValue] : f.value,
                   )
                 "
-              />
+              >
+                <template v-if="f.key === 'task'" #item="{ props, item }">
+                  <v-list-item v-bind="props" :title="getTaskTitle(item)" />
+                </template>
+                <template v-if="f.key === 'task'" #selection="{ item, index }">
+                  <p>{{ getTaskTitle(item.raw) }}</p>
+                </template>
+              </v-autocomplete>
               <v-text-field
                 v-if="f.type === 'text'"
                 v-model="f.value"
@@ -98,6 +106,7 @@
                 variant="outlined"
                 :label="f.label"
                 :prepend-inner-icon="f.icon"
+                :disabled="f.disabled ? f.disabled : false"
                 @update:model-value="addParameter(f.key, f.value)"
               />
               <v-switch
@@ -108,6 +117,7 @@
                 :color="f.color"
                 :true-value="f.trueValue"
                 :false-value="f.falseValue"
+                :disabled="f.disabled ? f.disabled : false"
                 @update:model-value="addParameter(f.key, f.value)"
               />
             </v-col>
@@ -204,7 +214,7 @@ const props = defineProps({
     default: undefined,
   },
 });
-const emit = defineEmits(["loadData"]);
+const emit = defineEmits(["loadData", "newFilter"]);
 const page = ref(1);
 const total = ref(0);
 const data = ref(null);
@@ -235,12 +245,17 @@ function collapseFilters() {
 }
 function addParameter(key: string, value: string) {
   if (value !== null && value !== undefined) {
+    console.log(key);
+    console.log(value);
     parameters.value[key] = value;
+    emit("newFilter", key, value);
   } else if (key === "ordering" && props.ordering) {
     parameters.value.ordering = props.ordering;
+    emit("newFilter", key, props.ordering);
   } else {
     /* eslint-disable-next-line @typescript-eslint/no-dynamic-delete */
     delete parameters.value[key];
+    emit("newFilter", key, null);
   }
   loadData();
 }
@@ -277,6 +292,14 @@ function getSortItems(collection: Array<string>) {
       ];
     })
     .flat(1);
+}
+function getTaskTitle(task) {
+  const executable = task.process
+    ? task.process.name
+    : `${task.configuration.tool.name} - ${task.configuration.name}`;
+  return task.start !== null
+    ? `${executable} - ${new Date(new Date(task.start).toISOString().split("T")[0]).toISOString().split("T")[0]}`
+    : executable;
 }
 defineExpose({ loadData });
 </script>

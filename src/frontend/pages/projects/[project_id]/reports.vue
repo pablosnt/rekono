@@ -11,6 +11,7 @@
       empty-head="No Reports"
       empty-text="There are no reports yet. Create your first one"
       @load-data="(data) => (reports = data)"
+      @new-filter="(key, value) => (key === 'target' ? getTasks(value) : null)"
     >
       <template #data>
         <v-row dense>
@@ -28,13 +29,7 @@
                 <v-btn hover variant="text" icon>
                   <v-icon
                     :icon="enums.reports[report.format.toLowerCase()].icon"
-                    :color="
-                      report.status === 'Ready'
-                        ? 'green'
-                        : report.status === 'Error'
-                          ? 'red'
-                          : 'yellow'
-                    "
+                    :color="enums.reportStatuses[report.status].color"
                   />
                   <v-tooltip activator="parent" :text="report.status" />
                 </v-btn>
@@ -42,7 +37,7 @@
               <template #append>
                 <div v-if="report.target || report.task">
                   <v-chip
-                    v-if="report.target"
+                    v-if="report.target && !report.task"
                     prepend-icon="mdi-target"
                     color="red"
                     link
@@ -57,7 +52,7 @@
                     :text="
                       report.task.process
                         ? report.task.process.name
-                        : report.task.configuration.name
+                        : `${report.task.configuration.tool.name} - ${report.task.configuration.name}`
                     "
                     :to="`/projects/${route.params.project_id}/targets/${report.task.id}`"
                   />
@@ -74,8 +69,8 @@
                 </div>
               </template>
               <v-card-actions v-if="report.target || report.task">
-                <v-spacer />
                 <ButtonReportDownload :api="api" :report="report" />
+                <v-spacer />
                 <ButtonDelete
                   :id="report.id"
                   :api="api"
@@ -96,10 +91,95 @@
 definePageMeta({ layout: false });
 const DialogReport = resolveComponent("DialogReport");
 const route = useRoute();
-const enums = useEnums();
+const enums = ref(useEnums());
 const dataset = ref(null);
 const reports = ref([]);
 const api = useApi("/api/reports/", true, "Report");
-const filtering = ref([]);
-// TODO
+const filtering = ref([
+  {
+    type: "autocomplete",
+    cols: 3,
+    label: "Target",
+    icon: "mdi-target",
+    collection: [],
+    fieldValue: "id",
+    fieldTitle: "target",
+    key: "target",
+    value: null,
+  },
+  {
+    type: "autocomplete",
+    cols: 3,
+    label: "Scan",
+    icon: "mdi-play-network",
+    collection: [],
+    fieldValue: "id",
+    fieldTitle: undefined,
+    key: "task",
+    value: null,
+    disabled: true,
+  },
+  // TODO: Format filter is not working for XML and PDF. It's returning 404
+  {
+    type: "autocomplete",
+    label: "Format",
+    icon: "mdi-file-document",
+    cols: 2,
+    collection: Object.entries(enums.value.reports).map(([k, v]) => {
+      v.id = k.toLowerCase();
+      v.name = k.toUpperCase();
+      return v;
+    }),
+    fieldValue: "id",
+    fieldTitle: "name",
+    key: "format",
+    value: null,
+  },
+  {
+    type: "autocomplete",
+    label: "Status",
+    icon: "mdi-check-decagram",
+    cols: 2,
+    collection: Object.entries(enums.value.reportStatuses).map(([k, v]) => {
+      v.name = k;
+      return v;
+    }),
+    fieldValue: "name",
+    fieldTitle: "name",
+    key: "status",
+    value: null,
+  },
+  {
+    type: "autocomplete",
+    label: "Sort",
+    icon: "mdi-sort",
+    cols: 2,
+    collection: ["id", "target", "task", "status", "format", "date"],
+    fieldValue: "id",
+    fieldTitle: "name",
+    key: "ordering",
+    value: "id",
+  },
+]);
+
+useApi("/api/targets/", true)
+  .list({}, true)
+  .then((response) => {
+    filtering.value[0].collection = response.items;
+  });
+
+function getTasks(target) {
+  if (target !== null) {
+    useApi("/api/tasks/", true)
+      .list({ target: target }, true)
+      .then((response) => {
+        filtering.value[1].collection = response.items;
+        filtering.value[1].disabled = false;
+      });
+  } else {
+    filtering.value[1].collection = [];
+    filtering.value[1].value = null;
+    filtering.value[1].disabled = true;
+  }
+}
 </script>

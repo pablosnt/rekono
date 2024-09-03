@@ -79,41 +79,24 @@ export function useEnums() {
     Domain: { icon: "mdi-dns" },
   };
   const findings = {
-    osint: {
-      icon: "mdi-search-web",
-    },
-    host: {
-      icon: "mdi-server",
-    },
-    port: {
-      icon: "mdi-plus-network",
-    },
-    path: {
-      icon: "mdi-routes",
-    },
-    credential: {
-      icon: "mdi-key-chain",
-    },
-    technology: {
-      icon: "mdi-layers-triple",
-    },
-    vulnerability: {
-      icon: "mdi-bug",
-    },
-    exploit: {
-      icon: "mdi-bomb",
-    },
+    osint: { icon: "mdi-search-web" },
+    host: { icon: "mdi-server" },
+    port: { icon: "mdi-plus-network" },
+    path: { icon: "mdi-routes" },
+    credential: { icon: "mdi-key-chain" },
+    technology: { icon: "mdi-layers-triple" },
+    vulnerability: { icon: "mdi-bug" },
+    exploit: { icon: "mdi-bomb" },
   };
   const reports = {
-    json: {
-      icon: "mdi-code-json",
-    },
-    xml: {
-      icon: "mdi-xml",
-    },
-    pdf: {
-      icon: "mdi-file-document",
-    },
+    json: { icon: "mdi-code-json" },
+    xml: { icon: "mdi-xml" },
+    pdf: { icon: "mdi-file-document" },
+  };
+  const reportStatuses = {
+    Ready: { color: "green" },
+    Pending: { color: "orange" },
+    Error: { color: "red" },
   };
 
   return {
@@ -127,5 +110,6 @@ export function useEnums() {
     targets,
     findings,
     reports,
+    reportStatuses,
   };
 }

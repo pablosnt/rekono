@@ -4,13 +4,13 @@
     hover
     variant="text"
     icon
-    @click="api.get(report.id, 'download/', {}, true)"
+    @click="api.download(report.id, 'download/', {})"
   >
     <v-icon icon="mdi-download" color="primary" />
     <v-tooltip activator="parent" text="Download" />
   </v-btn>
 </template>
-<!-- TODO: Download files automatically -->
+
 <script setup lang="ts">
 defineProps({ api: Object, report: Object });
 </script>
