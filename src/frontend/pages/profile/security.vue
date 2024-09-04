@@ -3,13 +3,13 @@
     <v-container v-if="user" fluid>
       <v-row justify="center" dense>
         <v-col cols="7">
-          <ShowMfa :user="user" @reload="getProfile()" />
+          <MfaShow :user="user" @reload="getProfile()" />
         </v-col>
         <v-col cols="7">
-          <ShowPassword />
+          <PasswordChange />
         </v-col>
         <v-col cols="7">
-          <ShowTokens />
+          <ApiTokenShow />
         </v-col>
       </v-row>
     </v-container>

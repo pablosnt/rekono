@@ -90,10 +90,13 @@
                   )
                 "
               >
-                <template v-if="f.key === 'task'" #item="{ props, item }">
-                  <v-list-item v-bind="props" :title="getTaskTitle(item)" />
+                <template
+                  v-if="f.key === 'task'"
+                  #item="{ props: taskProps, item }"
+                >
+                  <v-list-item v-bind="taskProps" :title="getTaskTitle(item)" />
                 </template>
-                <template v-if="f.key === 'task'" #selection="{ item, index }">
+                <template v-if="f.key === 'task'" #selection="{ item }">
                   <p>{{ getTaskTitle(item.raw) }}</p>
                 </template>
               </v-autocomplete>
@@ -245,8 +248,6 @@ function collapseFilters() {
 }
 function addParameter(key: string, value: string) {
   if (value !== null && value !== undefined) {
-    console.log(key);
-    console.log(value);
     parameters.value[key] = value;
     emit("newFilter", key, value);
   } else if (key === "ordering" && props.ordering) {

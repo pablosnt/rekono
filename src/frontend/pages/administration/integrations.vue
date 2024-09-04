@@ -16,27 +16,27 @@
                 class="d-flex justify-center align-center"
                 cols="5"
               >
-                <ShowIntegration
+                <IntegrationShow
                   v-if="integration.id !== 1 && integration.id !== 4"
                   :api="iApi"
                   :integration="integration"
                 />
                 <v-dialog v-if="integration.id === 1 || integration.id === 4">
                   <template #activator="{ props: activatorProps }">
-                    <ShowIntegration
+                    <IntegrationShow
                       :api="iApi"
                       :integration="integration"
                       v-bind="activatorProps"
                     />
                   </template>
                   <template #default="{ isActive }">
-                    <DialogDefectDojo
+                    <IntegrationDefectDojoDialog
                       v-if="integration.id === 1"
                       :integration-api="iApi"
                       :integration="integration"
                       @close-dialog="isActive.value = false"
                     />
-                    <DialogCveCrowd
+                    <IntegrationCveCrowdDialog
                       v-if="integration.id === 4"
                       :integration-api="iApi"
                       :integration="integration"
@@ -82,7 +82,7 @@
                       @update:model-value="save = true"
                     >
                       <template #append>
-                        <ButtonSave
+                        <UtilsButtonSave
                           :disabled="!save"
                           @click="
                             mApi

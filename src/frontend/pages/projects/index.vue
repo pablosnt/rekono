@@ -4,7 +4,7 @@
       <Dataset
         ref="dataset"
         :api="api"
-        :add="DialogProjectCreation"
+        :add="ProjectCreationDialog"
         :filtering="filtering"
         icon="mdi-folder-open"
         empty-head="No Projects"
@@ -35,23 +35,23 @@
                   <span class="me-2" />
                 </template>
                 <template #append>
-                  <MiscCounter
+                  <UtilsChipCounter
                     :collection="project.targets"
                     entity="Targets"
                     icon="mdi-target"
                     :link="`/projects/${project.id}/targets`"
                   />
                   <span class="me-3" />
-                  <MiscOwner :entity="project" />
+                  <UtilsChipOwner :entity="project" />
                 </template>
                 <template #text>
                   <v-card-text>
                     <p>{{ project.description }}</p>
-                    <MiscTags :item="project" :divider="true" />
+                    <TagShow :item="project" :divider="true" />
                   </v-card-text>
                 </template>
                 <v-card-actions @click.stop>
-                  <ButtonRun
+                  <TaskButton
                     v-if="project.targets.length > 0"
                     :project="project"
                   />
@@ -65,13 +65,13 @@
                   >
                     <v-avatar size="small" :image="integration.icon" />
                   </v-btn>
-                  <ButtonEditDelete
+                  <UtilsButtonEditDelete
                     v-if="
                       project.owner.id === user.user || user.role === 'Admin'
                     "
                   >
                     <template #edit-dialog="{ isActive }">
-                      <DialogProjectEdition
+                      <ProjectEditionDialog
                         :api="api"
                         :edit="project"
                         @completed="
@@ -82,7 +82,7 @@
                       />
                     </template>
                     <template #delete-dialog="{ isActive }">
-                      <DialogDelete
+                      <UtilsDeleteDialog
                         :id="project.id"
                         :api="api"
                         :text="`Project '${project.name}' will be removed`"
@@ -93,7 +93,7 @@
                         @close-dialog="isActive.value = false"
                       />
                     </template>
-                  </ButtonEditDelete>
+                  </UtilsButtonEditDelete>
                 </v-card-actions>
               </v-card>
             </v-col>
@@ -142,7 +142,7 @@ filtering.value.push({
   value: "id",
 });
 
-const DialogProjectCreation = resolveComponent("DialogProjectCreation");
+const ProjectCreationDialog = resolveComponent("ProjectCreationDialog");
 
 const integration = ref(null);
 const integrationsApi = useApi("/api/integrations/", true);

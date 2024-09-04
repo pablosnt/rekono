@@ -4,7 +4,7 @@
       ref="dataset"
       :api="api"
       :filtering="filtering"
-      :add="DialogWordlist"
+      :add="WordlistDialog"
       icon="mdi-file-word-box"
       empty-head="No Wordlists"
       empty-text="There are no wordlists. Create your first one"
@@ -21,7 +21,7 @@
             >
               <template #append>
                 <span class="me-3" />
-                <MiscCounter
+                <UtilsChipCounter
                   :number="wordlist.size"
                   entity="Words"
                   icon="mdi-counter"
@@ -39,18 +39,18 @@
                   {{ wordlist.type }}
                 </v-chip>
                 <span class="me-3" />
-                <MiscOwner :entity="wordlist" />
+                <UtilsChipOwner :entity="wordlist" />
               </template>
 
               <v-card-actions>
                 <v-spacer />
-                <ButtonLike
+                <UtilsButtonLike
                   :api="api"
                   :item="wordlist"
                   @reload="(value) => dataset.loadData(value)"
                 />
                 <span class="me-3" />
-                <ButtonEditDelete
+                <UtilsButtonEditDelete
                   v-if="
                     (wordlist.owner !== null &&
                       wordlist.owner.id === user.user) ||
@@ -58,7 +58,7 @@
                   "
                 >
                   <template #edit-dialog="{ isActive }">
-                    <DialogWordlist
+                    <WordlistDialog
                       :api="api"
                       :edit="wordlist"
                       @completed="dataset.loadData(false)"
@@ -66,7 +66,7 @@
                     />
                   </template>
                   <template #delete-dialog="{ isActive }">
-                    <DialogDelete
+                    <UtilsDeleteDialog
                       :id="wordlist.id"
                       :api="api"
                       :text="`Wordlist '${wordlist.name}' will be removed`"
@@ -74,7 +74,7 @@
                       @close-dialog="isActive.value = false"
                     />
                   </template>
-                </ButtonEditDelete>
+                </UtilsButtonEditDelete>
               </v-card-actions>
             </v-card>
           </v-col>
@@ -85,7 +85,7 @@
 </template>
 
 <script setup lang="ts">
-const DialogWordlist = resolveComponent("DialogWordlist");
+const WordlistDialog = resolveComponent("WordlistDialog");
 definePageMeta({ layout: false });
 const user = userStore();
 const enums = useEnums();

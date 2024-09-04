@@ -6,7 +6,7 @@
       :filtering="filtering"
       :default-parameters="{ project: projectId }"
       ordering="id"
-      :add="DialogTarget"
+      :add="TargetDialog"
       icon="mdi-target"
       empty-head="No Targets"
       :empty-text="
@@ -29,14 +29,14 @@
               :prepend-icon="enums.targets[target.type].icon"
             >
               <template #append>
-                <MiscCounter
+                <UtilsChipCounter
                   :collection="target.tasks"
                   entity="Tasks"
                   icon="mdi-play-network"
                   :link="`/projects/${target.project}/tasks`"
                 />
                 <span class="me-2" />
-                <MiscCounter
+                <UtilsChipCounter
                   :collection="target.notes"
                   entity="Notes"
                   icon="mdi-notebook"
@@ -46,11 +46,11 @@
                 <!-- todo: Link (Defect-Dojo) -->
               </template>
               <v-card-actions>
-                <ButtonRun :project="project" :target="target" />
+                <TaskButton :project="project" :target="target" />
                 <v-spacer />
-                <ButtonNote :project="project.id" :target="target" />
-                <!-- todo: Create report -->
-                <ButtonDelete
+                <NoteButton :project="project.id" :target="target" />
+                <!-- TODO: Create report -->
+                <UtilsButtonDelete
                   :id="target.id"
                   :api="api"
                   :text="`Target '${target.target}' will be removed`"
@@ -76,7 +76,7 @@ const project = ref(null);
 useApi("/api/projects/", true)
   .get(parseInt(projectId.value))
   .then((response) => (project.value = response));
-const DialogTarget = resolveComponent("DialogTarget");
+const TargetDialog = resolveComponent("TargetDialog");
 const dataset = ref(null);
 const api = useApi("/api/targets/", true, "Target");
 const targets = ref([]);

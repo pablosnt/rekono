@@ -16,14 +16,14 @@
       :api="api"
       :filtering="[]"
       ordering="id"
-      :add="DialogTargetDenylist"
+      :add="TargetDenylistDialog"
       @load-data="(data) => (denylist = data)"
     >
       <template #data>
         <v-row dense>
           <v-col v-for="pattern in denylist" :key="pattern.id" cols="4">
             <v-card elevation="3" class="mx-auto" density="compact">
-              <FormTargetDenylist
+              <TargetDenylistForm
                 :api="api"
                 :pattern="pattern"
                 @completed="dataset.loadData(false)"
@@ -39,7 +39,7 @@
 <script setup lang="ts">
 definePageMeta({ layout: false });
 defineEmits(["closeDialog"]);
-const DialogTargetDenylist = resolveComponent("DialogTargetDenylist");
+const TargetDenylistDialog = resolveComponent("TargetDenylistDialog");
 const api = ref(useApi("/api/target-denylist/", true, "Target pattern"));
 const dataset = ref(null);
 const denylist = ref([]);

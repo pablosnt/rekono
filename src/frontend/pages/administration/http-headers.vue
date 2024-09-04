@@ -1,6 +1,6 @@
 <template>
   <MenuAdministration>
-    <ShowHttpHeaders />
+    <HttpHeaderShow />
   </MenuAdministration>
 </template>
 

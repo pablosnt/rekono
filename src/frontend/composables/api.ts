@@ -1,5 +1,3 @@
-import { parse } from "vue/compiler-sfc";
-
 export function useApi(
   endpoint: string,
   authentication: boolean = true,

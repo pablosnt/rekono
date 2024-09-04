@@ -21,7 +21,7 @@
                 </v-chip>
                 <span class="me-2" />
               </div>
-              <MiscCounter
+              <UtilsChipCounter
                 :number="queues[queue].workers"
                 entity="workers"
                 icon="mdi-sitemap"

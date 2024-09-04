@@ -29,7 +29,7 @@
                   {{ tool.version }}
                 </v-chip>
                 <span class="me-3" />
-                <ButtonGreenCheck
+                <UtilsButtonGreenCheck
                   :condition="tool.is_installed"
                   true-text="Installed"
                   false-text="Tool may have been installed after its last execution attempt"
@@ -95,14 +95,14 @@
               </template>
 
               <v-card-actions>
-                <ButtonRun :tool="tool" />
+                <TaskButton :tool="tool" tooltip="Run" />
                 <v-spacer />
-                <ButtonLike
+                <UtilsButtonLike
                   :api="api"
                   :item="tool"
                   @reload="(value) => dataset.loadData(value)"
                 />
-                <ButtonLink :link="tool.reference" />
+                <UtilsButtonLink :link="tool.reference" />
               </v-card-actions>
             </v-card>
           </v-col>

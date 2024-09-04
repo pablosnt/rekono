@@ -1,10 +1,11 @@
+<!-- eslint-disable vue/no-v-html -->
 <template>
   <MenuProject>
     <Dataset
       ref="dataset"
       :api="api"
       :filtering="filtering"
-      :add="DialogNote"
+      :add="NoteDialog"
       :add-fullscreen="true"
       :default-parameters="{ project: projectId }"
       ordering="-updated_at"
@@ -15,6 +16,7 @@
     >
       <template #data>
         <v-row dense>
+          <!-- todo: Setup the same col size for all of them -->
           <v-col v-for="note in notes" :key="note.id" cols="6">
             <v-card
               :title="note.title"
@@ -26,9 +28,9 @@
               :to="`/projects/${note.project}/notes/${note.id}`"
             >
               <template #append>
-                <ButtonNoteLink :note="note" />
+                <NoteLink :note="note" />
                 <span class="me-2" />
-                <MiscOwner :entity="note" />
+                <UtilsChipOwner :entity="note" />
                 <span class="me-2" />
               </template>
               <template #text>
@@ -39,14 +41,14 @@
                     v-html="markdown.render(note.body)"
                   />
                 </v-container>
-                <MiscTags :item="note" :divider="note.body !== null" />
+                <TagShow :item="note" :divider="note.body !== null" />
               </template>
 
               <v-card-actions>
-                <MiscNoteForks :note="note" />
-                <MiscNoteForkedFrom :note="note" />
+                <NoteForksChip :note="note" />
+                <NoteForkedFromLink :note="note" />
                 <v-spacer />
-                <ButtonLike
+                <UtilsButtonLike
                   :api="api"
                   :item="note"
                   @reload="(value) => dataset.loadData(value)"
@@ -74,7 +76,7 @@
                       />
                     </template>
                     <template #default="{ isActive }">
-                      <DialogDefault
+                      <Dialog
                         title="Sharing"
                         :text="
                           note.public
@@ -108,7 +110,7 @@
                             >
                           </v-card-actions>
                         </template>
-                      </DialogDefault>
+                      </Dialog>
                     </template>
                   </v-dialog>
                   <v-dialog width="500" class="overflow-auto">
@@ -121,7 +123,7 @@
                       />
                     </template>
                     <template #default="{ isActive }">
-                      <DialogDelete
+                      <UtilsDeleteDialog
                         :id="note.id"
                         :api="api"
                         :text="`Note '${note.title}' will be removed`"
@@ -142,7 +144,7 @@
 
 <script setup lang="ts">
 definePageMeta({ layout: false });
-const DialogNote = resolveComponent("DialogNote");
+const NoteDialog = resolveComponent("NoteDialog");
 const route = useRoute();
 const markdown = useMarkdown();
 const projectId = ref(route.params.project_id);

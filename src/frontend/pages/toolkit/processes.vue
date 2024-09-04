@@ -5,7 +5,7 @@
       :api="api"
       :filtering="filtering"
       ordering="id"
-      :add="DialogProcess"
+      :add="ProcessDialog"
       :add-fullscreen="true"
       icon="mdi-robot-angry"
       empty-head="No Processes"
@@ -17,7 +17,7 @@
           <v-col v-for="process in processes" :key="process.id" cols="4">
             <v-dialog width="100%" fullscreen>
               <template #activator="{ props: activatorProps }">
-                <ShowProcess
+                <ProcessShow
                   :api="api"
                   :process="process"
                   :tools="tools"
@@ -27,7 +27,7 @@
                 />
               </template>
               <template #default="{ isActive }">
-                <ShowProcess
+                <ProcessShow
                   :api="api"
                   :process="process"
                   :tools="tools"
@@ -48,7 +48,7 @@
 definePageMeta({ layout: false });
 const user = userStore();
 const enums = useEnums();
-const DialogProcess = resolveComponent("DialogProcess");
+const ProcessDialog = resolveComponent("ProcessDialog");
 const dataset = ref(null);
 const processes = ref(null);
 const api = ref(useApi("/api/processes/", true, "Process"));

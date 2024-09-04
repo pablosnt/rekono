@@ -9,7 +9,7 @@
       >Type the OTP sent to your email</v-card-text
     >
 
-    <FormMfa
+    <MfaForm
       ref="mfaForm"
       :auto-trigger="true"
       :allow-email="true"
@@ -18,10 +18,10 @@
     >
       <template #buttons>
         <v-card-actions class="justify-center">
-          <ButtonSubmit text="Login" :disabled="loading" />
+          <UtilsButtonSubmit text="Login" :disabled="loading" />
         </v-card-actions>
       </template>
-    </FormMfa>
+    </MfaForm>
   </NuxtLayout>
 </template>
 

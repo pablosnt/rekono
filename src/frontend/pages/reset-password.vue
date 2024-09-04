@@ -16,9 +16,9 @@
         ]"
         validate-on="blur"
       />
-      <ButtonSubmit text="Reset Password" :disabled="loading" />
+      <UtilsButtonSubmit text="Reset Password" :disabled="loading" />
     </v-form>
-    <FormPassword
+    <PasswordForm
       v-if="otp"
       :api="api"
       submit-text="Reset Password"

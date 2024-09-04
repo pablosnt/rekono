@@ -29,7 +29,7 @@
               "
               #append
             >
-              <ButtonLink :link="`https://t.me/${telegram.bot}`" />
+              <UtilsButtonLink :link="`https://t.me/${telegram.bot}`" />
             </template>
             <template #text>
               <v-container
@@ -171,7 +171,7 @@
                   </v-row>
                   <v-row dense>
                     <v-col>
-                      <ButtonSubmit
+                      <UtilsButtonSubmit
                         text="Link Rekono Bot"
                         class="mt-5"
                         :disabled="disabled"

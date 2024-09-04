@@ -1,6 +1,6 @@
 <template>
   <MenuProject>
-    <DialogNote v-if="note" :note="note" />
+    <NoteDialog v-if="note" :note="note" />
   </MenuProject>
 </template>
 

@@ -6,7 +6,7 @@
       :filtering="filtering"
       :default-parameters="{ project: route.params.project_id }"
       ordering="id"
-      :add="DialogReport"
+      :add="ReportDialog"
       icon="mdi-file-document-multiple"
       empty-head="No Reports"
       empty-text="There are no reports yet. Create your first one"
@@ -58,8 +58,8 @@
                   />
                 </div>
                 <div v-if="!report.target && !report.task">
-                  <ButtonReportDownload :api="api" :report="report" />
-                  <ButtonDelete
+                  <ReportDownloadButton :api="api" :report="report" />
+                  <UtilsButtonDelete
                     :id="report.id"
                     :api="api"
                     :text="`Report '${report.id}' will be removed`"
@@ -69,9 +69,9 @@
                 </div>
               </template>
               <v-card-actions v-if="report.target || report.task">
-                <ButtonReportDownload :api="api" :report="report" />
+                <ReportDownloadButton :api="api" :report="report" />
                 <v-spacer />
-                <ButtonDelete
+                <UtilsButtonDelete
                   :id="report.id"
                   :api="api"
                   :text="`Report '${report.id}' will be removed`"
@@ -89,7 +89,7 @@
 
 <script setup lang="ts">
 definePageMeta({ layout: false });
-const DialogReport = resolveComponent("DialogReport");
+const ReportDialog = resolveComponent("ReportDialog");
 const route = useRoute();
 const enums = ref(useEnums());
 const dataset = ref(null);
