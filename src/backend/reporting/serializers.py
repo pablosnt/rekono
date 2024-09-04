@@ -12,12 +12,14 @@ from rest_framework.serializers import (
 )
 from targets.serializers import SimpleTargetSerializer
 from tasks.serializers import TaskSerializer
+from users.serializers import SimpleUserSerializer
 
 
 class ReportSerializer(ModelSerializer):
     project = ProjectSerializer(read_only=True, many=False)
     target = SimpleTargetSerializer(read_only=True, many=False)
     task = TaskSerializer(read_only=True, many=False)
+    user = SimpleUserSerializer(read_only=True, many=False)
 
     class Meta:
         model = Report

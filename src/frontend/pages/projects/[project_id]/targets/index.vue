@@ -49,7 +49,7 @@
                 <TaskButton :project="project" :target="target" />
                 <v-spacer />
                 <NoteButton :project="project.id" :target="target" />
-                <!-- TODO: Create report -->
+                <ReportButton :project="project.id" :target="target" />
                 <UtilsButtonDelete
                   :id="target.id"
                   :api="api"
@@ -89,9 +89,9 @@ const filtering = ref([
       v.name = k;
       return v;
     }),
-    fieldValue: "id",
+    fieldValue: "name",
     fieldTitle: "name",
-    key: "stage",
+    key: "type",
     value: null,
   },
   {

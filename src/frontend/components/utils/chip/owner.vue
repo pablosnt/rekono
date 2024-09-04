@@ -1,23 +1,26 @@
 <template>
   <v-chip
-    :color="entity.owner ? 'primary' : undefined"
+    :color="entity[field] ? 'primary' : undefined"
     :variant="
-      !entity.owner
+      !entity[field]
         ? undefined
-        : entity.owner.id === user.user
+        : entity[field].id === user.user
           ? 'flat'
           : 'tonal'
     "
   >
-    <p v-if="entity.owner">
+    <p v-if="entity[field]">
       <v-icon icon="mdi-at" start />
-      {{ entity.owner.username }}
+      {{ entity[field].username }}
     </p>
-    <p v-if="!entity.owner">Default</p>
+    <p v-if="!entity[field]">Default</p>
   </v-chip>
 </template>
 
 <script setup lang="ts">
-defineProps({ entity: Object });
+defineProps({
+  entity: Object,
+  field: { type: String, required: false, default: "owner" },
+});
 const user = userStore();
 </script>

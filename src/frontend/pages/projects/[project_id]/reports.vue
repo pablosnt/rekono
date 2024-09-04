@@ -35,28 +35,28 @@
                 </v-btn>
               </template>
               <template #append>
-                <div v-if="report.target || report.task">
-                  <v-chip
-                    v-if="report.target && !report.task"
-                    prepend-icon="mdi-target"
-                    color="red"
-                    link
-                    :text="report.target.target"
-                    :to="`/projects/${route.params.project_id}/targets/${report.target.id}`"
-                  />
-                  <v-chip
-                    v-if="report.task"
-                    prepend-icon="mdi-play-network"
-                    color="red"
-                    link
-                    :text="
-                      report.task.process
-                        ? report.task.process.name
-                        : `${report.task.configuration.tool.name} - ${report.task.configuration.name}`
-                    "
-                    :to="`/projects/${route.params.project_id}/targets/${report.task.id}`"
-                  />
-                </div>
+                <v-chip
+                  v-if="report.target && !report.task"
+                  prepend-icon="mdi-target"
+                  color="red"
+                  link
+                  :text="report.target.target"
+                  :to="`/projects/${route.params.project_id}/targets/${report.target.id}`"
+                />
+                <v-chip
+                  v-if="report.task"
+                  prepend-icon="mdi-play-network"
+                  color="red"
+                  link
+                  :text="
+                    report.task.process
+                      ? report.task.process.name
+                      : `${report.task.configuration.tool.name} - ${report.task.configuration.name}`
+                  "
+                  :to="`/projects/${route.params.project_id}/targets/${report.task.id}`"
+                />
+                <span v-if="report.target || report.task" class="me-2" />
+                <UtilsChipOwner :entity="report" field="user" />
                 <div v-if="!report.target && !report.task">
                   <ReportDownloadButton :api="api" :report="report" />
                   <UtilsButtonDelete
@@ -91,6 +91,7 @@
 definePageMeta({ layout: false });
 const ReportDialog = resolveComponent("ReportDialog");
 const route = useRoute();
+const user = userStore();
 const enums = ref(useEnums());
 const dataset = ref(null);
 const reports = ref([]);
@@ -98,9 +99,9 @@ const api = useApi("/api/reports/", true, "Report");
 const filtering = ref([
   {
     type: "autocomplete",
-    cols: 3,
     label: "Target",
     icon: "mdi-target",
+    cols: 2,
     collection: [],
     fieldValue: "id",
     fieldTitle: "target",
@@ -109,7 +110,6 @@ const filtering = ref([
   },
   {
     type: "autocomplete",
-    cols: 3,
     label: "Scan",
     icon: "mdi-play-network",
     collection: [],
@@ -119,7 +119,7 @@ const filtering = ref([
     value: null,
     disabled: true,
   },
-  // TODO: Format filter is not working for XML and PDF. It's returning 404
+  // todo: Format filter is not working for XML and PDF. It's returning 404
   {
     type: "autocomplete",
     label: "Format",
@@ -147,6 +147,16 @@ const filtering = ref([
     fieldValue: "name",
     fieldTitle: "name",
     key: "status",
+    value: null,
+  },
+  {
+    type: "switch",
+    label: "Mine",
+    color: "blue",
+    cols: 1,
+    key: "user",
+    trueValue: user.user,
+    falseValue: null,
     value: null,
   },
   {

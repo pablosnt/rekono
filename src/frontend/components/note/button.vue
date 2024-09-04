@@ -9,7 +9,7 @@
         variant="text"
         @click.prevent.stop
       >
-        <v-icon icon="mdi-note-plus" color="indigo-darken-1" />
+        <v-icon icon="mdi-notebook-plus" color="indigo-darken-1" />
         <v-tooltip activator="parent" text="Take a note" />
       </v-btn>
     </template>

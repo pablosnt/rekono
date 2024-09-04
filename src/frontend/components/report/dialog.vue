@@ -11,10 +11,8 @@
       <v-conatiner fluid>
         <v-row v-if="target === null && task === null" justify="center" dense>
           <v-col cols="11">
-            <!-- TODO: Allow association to Task from here -->
             <v-autocomplete
               v-model="selectedTarget"
-              class="text-upper"
               auto-select-first
               density="comfortable"
               variant="outlined"
@@ -24,7 +22,34 @@
               return-object
               validate-on="input"
               prepend-icon="mdi-target"
+              @update:model-value="searchTasks()"
             />
+          </v-col>
+        </v-row>
+        <v-row v-if="task === null" justify="center" dense>
+          <v-col cols="11">
+            <v-autocomplete
+              v-model="selectedTask"
+              :disabled="!selectedTarget"
+              auto-select-first
+              density="comfortable"
+              variant="outlined"
+              label="Task"
+              :items="tasks"
+              return-object
+              validate-on="input"
+              prepend-icon="mdi-play-network"
+            >
+              <template #item="{ props: taskProps, item }">
+                <v-list-item
+                  v-bind="taskProps"
+                  :title="utils.getTaskTitle(item)"
+                />
+              </template>
+              <template #selection="{ item }">
+                <p>{{ utils.getTaskTitle(item.raw) }}</p>
+              </template>
+            </v-autocomplete>
           </v-col>
         </v-row>
         <v-row justify="space-around" dense>
@@ -130,6 +155,7 @@ const props = defineProps({
 });
 const emit = defineEmits(["closeDialog", "completed"]);
 
+const utils = ref(useUtils());
 const enums = useEnums();
 const api = useApi("/api/reports/", true, "Report");
 const loading = ref(false);
@@ -141,14 +167,26 @@ if (selectedTarget.value === null && props.task === null) {
   searchTargets();
 }
 
+const tasks = ref([]);
+const selectedTask = ref(props.task !== null ? props.task : null);
+if (selectedTask.value === null && selectedTarget.value !== null) {
+  searchTasks();
+}
+
 const onlyTruePositives = ref(true);
 const findingTypes = ref(Object.keys(enums.findings));
 const format = ref("pdf");
 
 function searchTargets() {
-  useApi("/api/targets/", true, "Target")
+  useApi("/api/targets/", true)
     .list({ project: props.parameters.project }, true)
     .then((response) => (targets.value = response.items));
+}
+
+function searchTasks() {
+  useApi("/api/tasks/", true)
+    .list({ target: selectedTarget.value.id }, true)
+    .then((response) => (tasks.value = response.items));
 }
 
 function submit() {

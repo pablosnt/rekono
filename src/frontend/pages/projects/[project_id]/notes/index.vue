@@ -13,6 +13,7 @@
       empty-head="No Notes"
       empty-text="There are no notes. Create your first one"
       @load-data="(data) => (notes = data)"
+      @new-filter="(key, value) => (key === 'target' ? getTasks(value) : null)"
     >
       <template #data>
         <v-row dense>
@@ -152,8 +153,38 @@ const dataset = ref(null);
 const user = userStore();
 const notes = ref([]);
 const api = useApi("/api/notes/", true, "Note");
-// TODO: Review filters. There are filters that might change when other filter changes. For instance, if target is selected, only tasks and findings from that target could be selected.
 const filtering = ref([
+  {
+    type: "autocomplete",
+    cols: 2,
+    label: "Target",
+    icon: "mdi-target",
+    collection: [],
+    fieldValue: "id",
+    fieldTitle: "target",
+    key: "related_target",
+    value: null,
+  },
+  {
+    type: "autocomplete",
+    cols: 2,
+    label: "Scan",
+    icon: "mdi-play-network",
+    collection: [],
+    fieldValue: "id",
+    fieldTitle: undefined,
+    key: "related_task",
+    value: null,
+    disabled: true,
+  },
+  {
+    type: "text",
+    label: "Tag",
+    cols: 2,
+    icon: "mdi-tag",
+    key: "tag",
+    value: null,
+  },
   {
     type: "switch",
     label: "Likes",
@@ -174,30 +205,9 @@ const filtering = ref([
     falseValue: null,
     value: null,
   },
-  {
-    type: "autocomplete",
-    label: "Sort",
-    icon: "mdi-sort",
-    cols: 2,
-    collection: [
-      "id",
-      "project",
-      "target",
-      "title",
-      "tags",
-      "owner",
-      "created_at",
-      "updated_at",
-      "likes_count",
-    ],
-    fieldValue: "id",
-    fieldTitle: "name",
-    key: "ordering",
-    value: "-updated_at",
-  },
 ]);
 if (user.role === "Admin") {
-  filtering.value.unshift({
+  filtering.value.push({
     type: "switch",
     label: "Mine",
     color: "blue",
@@ -208,33 +218,48 @@ if (user.role === "Admin") {
     value: null,
   });
 }
-filtering.value.unshift({
-  type: "text",
-  label: "Tag",
+filtering.value.push({
+  type: "autocomplete",
+  label: "Sort",
+  icon: "mdi-sort",
   cols: 2,
-  icon: "mdi-tag",
-  key: "tag",
-  value: null,
+  collection: [
+    "id",
+    "project",
+    "target",
+    "title",
+    "tags",
+    "owner",
+    "created_at",
+    "updated_at",
+    "likes_count",
+  ],
+  fieldValue: "id",
+  fieldTitle: "name",
+  key: "ordering",
+  value: "-updated_at",
 });
-const targets = ref([]);
-useApi("/api/targets/", true, "Target")
+
+useApi("/api/targets/", true)
   .list({}, true)
   .then((response) => {
-    targets.value = response.items;
-    filtering.value = [
-      {
-        type: "autocomplete",
-        cols: 2,
-        label: "Target",
-        icon: "mdi-target",
-        collection: targets.value,
-        fieldValue: "id",
-        fieldTitle: "target",
-        key: "target",
-        value: null,
-      },
-    ].concat(filtering.value);
+    filtering.value[0].collection = response.items;
   });
+
+function getTasks(target) {
+  if (target !== null) {
+    useApi("/api/tasks/", true)
+      .list({ target: target }, true)
+      .then((response) => {
+        filtering.value[1].collection = response.items;
+        filtering.value[1].disabled = false;
+      });
+  } else {
+    filtering.value[1].collection = [];
+    filtering.value[1].value = null;
+    filtering.value[1].disabled = true;
+  }
+}
 
 function share(note) {
   const body = {

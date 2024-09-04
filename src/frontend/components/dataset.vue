@@ -91,13 +91,16 @@
                 "
               >
                 <template
-                  v-if="f.key === 'task'"
+                  v-if="f.key.includes('task')"
                   #item="{ props: taskProps, item }"
                 >
-                  <v-list-item v-bind="taskProps" :title="getTaskTitle(item)" />
+                  <v-list-item
+                    v-bind="taskProps"
+                    :title="utils.getTaskTitle(item)"
+                  />
                 </template>
-                <template v-if="f.key === 'task'" #selection="{ item }">
-                  <p>{{ getTaskTitle(item.raw) }}</p>
+                <template v-if="f.key.includes('task')" #selection="{ item }">
+                  <p>{{ utils.getTaskTitle(item.raw) }}</p>
                 </template>
               </v-autocomplete>
               <v-text-field
@@ -218,6 +221,7 @@ const props = defineProps({
   },
 });
 const emit = defineEmits(["loadData", "newFilter"]);
+const utils = ref(useUtils());
 const page = ref(1);
 const total = ref(0);
 const data = ref(null);
@@ -293,14 +297,6 @@ function getSortItems(collection: Array<string>) {
       ];
     })
     .flat(1);
-}
-function getTaskTitle(task) {
-  const executable = task.process
-    ? task.process.name
-    : `${task.configuration.tool.name} - ${task.configuration.name}`;
-  return task.start !== null
-    ? `${executable} - ${new Date(new Date(task.start).toISOString().split("T")[0]).toISOString().split("T")[0]}`
-    : executable;
 }
 defineExpose({ loadData });
 </script>
