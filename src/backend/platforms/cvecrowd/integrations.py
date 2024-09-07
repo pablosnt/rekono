@@ -27,8 +27,8 @@ class CVECrowd(BaseIntegration):
             return len(self.trending_cves) > 0
         return False
 
-    # TODO: Do this for all the integrations to allow mocking in unit tests
-    def request(method, url, json=True, **kwargs):
+    # Needed to mock the method for unit testing
+    def _request(method, url, json=True, **kwargs):
         return super()._request(method, url, json, **kwargs)
 
     def _get_trending_cves(self) -> None:
@@ -38,7 +38,7 @@ class CVECrowd(BaseIntegration):
             and len(self.trending_cves) == 0
         ):
             try:
-                self.trending_cves = self.request(
+                self.trending_cves = self._request(
                     self.session.get,
                     self.url,
                     headers={"Authorization": f"Bearer {self.settings.secret}"},
