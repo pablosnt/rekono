@@ -3,7 +3,7 @@ repos:
       hooks:
           - id: mypy
             name: mypy
-            entry: mypy
+            entry: sh -c 'cd src/; mypy --namespace-packages --package backend --install-types --non-interactive --ignore-missing-imports --exclude migrations/ --exclude env/'
             language: python
             types: [python]
             require_serial: true

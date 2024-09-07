@@ -1,6 +1,6 @@
 from typing import Any, Optional
 
-from reporting.enums import FindingName, ReportFormat, ReportStatus
+from reporting.enums import FindingName, ReportFormat
 from reporting.models import Report
 from targets.enums import TargetType
 from targets.models import Target
