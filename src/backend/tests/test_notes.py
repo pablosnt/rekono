@@ -27,7 +27,7 @@ public_note = {
     "public": True,
     "target": 1,
 }
-invalid_note = {**private_note, "body": "Invalid;content"}
+invalid_note = {**private_note, "title": "Invalid;content"}
 
 
 class NoteTest(ApiTest):

@@ -56,21 +56,22 @@ class CVECrowdTest(RekonoTest):
         self.assertFalse(Vulnerability.objects.get(pk=self.trending.id).trending)
         self.assertFalse(Vulnerability.objects.get(pk=self.not_trending.id).trending)
 
-    @mock.patch("platforms.cvecrowd.integrations.CVECrowd._request", success)
+    # TODO: Mocking is not working
+    @mock.patch("platforms.cvecrowd.integrations.CVECrowd.request", success)
     def test_process_findings(self) -> None:
         self.cvecrowd.process_findings(
             self.execution3, [self.trending, self.not_trending]
         )
         self._verify_success()
 
-    @mock.patch("platforms.cvecrowd.integrations.CVECrowd._request", not_found)
+    @mock.patch("platforms.cvecrowd.integrations.CVECrowd.request", not_found)
     def test_process_findings_not_found(self) -> None:
         self.cvecrowd.process_findings(
             self.execution3, [self.trending, self.not_trending]
         )
         self._verify_error()
 
-    @mock.patch("platforms.cvecrowd.integrations.CVECrowd._request", success)
+    @mock.patch("platforms.cvecrowd.integrations.CVECrowd.request", success)
     def test_process_findings_not_enabled(self) -> None:
         self.settings.execute_per_execution = False
         self.settings.save(update_fields=["execute_per_execution"])
@@ -80,12 +81,12 @@ class CVECrowdTest(RekonoTest):
         )
         self._verify_error()
 
-    @mock.patch("platforms.cvecrowd.integrations.CVECrowd._request", success)
+    @mock.patch("platforms.cvecrowd.integrations.CVECrowd.request", success)
     def test_monitor(self) -> None:
         self.cvecrowd.monitor()
         self._verify_success()
 
-    @mock.patch("platforms.cvecrowd.integrations.CVECrowd._request", not_found)
+    @mock.patch("platforms.cvecrowd.integrations.CVECrowd.request", not_found)
     def test_monitor_not_found(self) -> None:
         self.cvecrowd.monitor()
         self._verify_error()

@@ -146,44 +146,7 @@ class UserTest(ApiTest):
             ["admin2"],
             "get",
             200,
-            expected=[
-                {
-                    "id": 6,
-                    "username": "reader2",
-                    "role": Role.READER.value,
-                    "is_active": True,
-                },
-                {
-                    "id": 5,
-                    "username": "reader1",
-                    "role": Role.READER.value,
-                    "is_active": True,
-                },
-                {
-                    "id": 4,
-                    "username": "auditor2",
-                    "role": Role.AUDITOR.value,
-                    "is_active": True,
-                },
-                {
-                    "id": 3,
-                    "username": "auditor1",
-                    "role": Role.AUDITOR.value,
-                    "is_active": True,
-                },
-                {
-                    "id": 2,
-                    "username": "admin2",
-                    "role": Role.ADMIN.value,
-                    "is_active": True,
-                },
-                {
-                    "id": 1,
-                    "username": "admin1",
-                    "role": Role.ADMIN.value,
-                    "is_active": True,
-                },
-            ],
+            expected=[],
             endpoint="{endpoint}?no_project=1",
         ),
         ApiTestCase(

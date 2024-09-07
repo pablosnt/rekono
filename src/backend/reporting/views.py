@@ -110,9 +110,7 @@ class ReportingViewSet(BaseViewSet):
         ) = {}
         if serializer.validated_data["format"] == ReportFormat.PDF:
             findings = self._get_findings_to_pdf_report(serializer)
-            count = len(
-                sum(sum([list(i.values()) for i in findings[0].values()], []), [])
-            )
+            count = sum([len(q) for i in findings[0].values() for q in i.values()])
         else:
             findings = self._get_findings_to_report(serializer)
             count = len(sum(findings.values(), []))

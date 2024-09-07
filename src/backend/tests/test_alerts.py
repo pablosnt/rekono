@@ -9,6 +9,7 @@ new_alert = {
     "project": 1,
     "item": AlertItem.HOST.value,
     "mode": AlertMode.NEW.value,
+    "value": None,
     "subscribe_all_members": True,
 }
 filter_alert = {
@@ -23,6 +24,7 @@ monitor_alert = {
     "project": 1,
     "item": AlertItem.CVE.value,
     "mode": AlertMode.MONITOR.value,
+    "value": None,
     "subscribe_all_members": False,
 }
 
