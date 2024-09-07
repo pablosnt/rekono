@@ -111,7 +111,7 @@ class SMTP(BaseNotification):
     def _notify_alert(self, users: list[Any], alert: Alert, finding: Finding) -> None:
         subjects = {
             AlertMode.NEW: f"New {finding.__class__.__name__.lower()} detected",
-            AlertMode.FILTER.value: f"New {finding.__class__.__name__.lower()} matches alert criteria",
+            AlertMode.FILTER.value: f"New {finding.__class__.__name__.lower()} matches alert criterion",
             AlertMode.MONITOR.value: "New trending CVE",
         }
         self._notify(

@@ -60,15 +60,17 @@
               density="comfortable"
               variant="outlined"
               label="Format"
-              :items="Object.keys(enums.reports)"
+              :items="Object.keys(enums.reportFormats)"
               validate-on="input"
-              :prepend-icon="format ? enums.reports[format].icon : undefined"
+              :prepend-icon="
+                format ? enums.reportFormats[format].icon : undefined
+              "
             >
               <template #item="{ props: formatProps, item }">
                 <v-list-item
                   v-bind="formatProps"
                   :title="item.raw.toUpperCase()"
-                  :prepend-icon="enums.reports[item.raw].icon"
+                  :prepend-icon="enums.reportFormats[item.raw].icon"
                 />
               </template>
               <template #selection="{ item }">
@@ -108,10 +110,7 @@
               <template #chip="{ props: findingProps, item }">
                 <v-chip
                   v-bind="findingProps"
-                  :class="
-                    item.raw === 'osint' ? 'text-uppercase' : 'text-capitalize'
-                  "
-                  :prepend-icon="enums.findings[item.raw.toLowerCase()].icon"
+                  :prepend-icon="enums.findings[item.raw].icon"
                   :text="item.raw"
                 />
               </template>
@@ -123,7 +122,7 @@
                       ? item.raw.toUpperCase()
                       : `${item.raw.charAt(0).toUpperCase()}${item.raw.slice(1)}`
                   "
-                  :prepend-icon="enums.findings[item.raw.toLowerCase()].icon"
+                  :prepend-icon="enums.findings[item.raw].icon"
                 />
               </template>
             </v-autocomplete>
@@ -198,11 +197,7 @@ function submit() {
       task: props.task ? props.task.id : null,
       format: format.value,
       only_true_positives: onlyTruePositives.value,
-      finding_types: findingTypes.value.map(function (item) {
-        return item === "osint"
-          ? item.toUpperCase()
-          : `${item.charAt(0).toUpperCase()}${item.slice(1)}`;
-      }),
+      finding_types: findingTypes.value,
     })
     .then((response) => {
       loading.value = false;

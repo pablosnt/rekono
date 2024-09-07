@@ -35,11 +35,11 @@ class Alert(BaseModel):
         null=True,
     )
     enabled = models.BooleanField(default=True)
-    suscribe_all_members = models.BooleanField(default=False)
+    subscribe_all_members = models.BooleanField(default=False)
     owner = models.ForeignKey(
         AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True
     )
-    suscribers = models.ManyToManyField(
+    subscribers = models.ManyToManyField(
         AUTH_USER_MODEL, related_name="alerts", blank=True
     )
 

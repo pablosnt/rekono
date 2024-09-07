@@ -4,7 +4,7 @@
     :title="data.name"
     :text="data.description"
     :prepend-avatar="data.icon"
-    :hover="data.id === 1 || data.id === 4"
+    :hover="hover"
   >
     <template #append>
       <v-switch
@@ -29,6 +29,7 @@
 const props = defineProps({
   api: Object,
   integration: Object,
+  hover: { type: Boolean, required: false, default: false },
 });
 const data = ref(props.integration ? props.integration : {});
 const alert = ref(useAlert());

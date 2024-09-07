@@ -97,7 +97,7 @@ class BaseNotification(BasePlatform):
         return list(users)
 
     def _get_users_to_notify_alert(self, alert: Alert) -> list[Any]:
-        return alert.suscribers.filter(**{self.enable_field: True}).all()
+        return alert.subscribers.filter(**{self.enable_field: True}).all()
 
     def _notify_execution(
         self, users: list[Any], execution: Execution, findings: list[Finding]
@@ -117,5 +117,5 @@ class BaseNotification(BasePlatform):
         if not self.is_available():
             return
         self._notify_alert(
-            alert.suscribers.filter(**{self.enable_field: True}).all(), alert, finding
+            alert.subscribers.filter(**{self.enable_field: True}).all(), alert, finding
         )

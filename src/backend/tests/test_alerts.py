@@ -9,21 +9,21 @@ new_alert = {
     "project": 1,
     "item": AlertItem.HOST.value,
     "mode": AlertMode.NEW.value,
-    "suscribe_all_members": True,
+    "subscribe_all_members": True,
 }
 filter_alert = {
     "project": 1,
     "item": AlertItem.SERVICE.value,
     "mode": AlertMode.FILTER.value,
     "value": "ssh",
-    "suscribe_all_members": False,
+    "subscribe_all_members": False,
 }
 invalid_filter_alert = {**filter_alert, "value": None}
 monitor_alert = {
     "project": 1,
     "item": AlertItem.CVE.value,
     "mode": AlertMode.MONITOR.value,
-    "suscribe_all_members": False,
+    "subscribe_all_members": False,
 }
 
 
@@ -46,8 +46,8 @@ class AlertTest(ApiTest):
             {
                 "id": 1,
                 **new_alert,
-                "suscribe_all_members": None,
-                "suscribed": True,
+                "subscribe_all_members": None,
+                "subscribed": True,
                 "enabled": True,
                 "owner": {"id": 1, "username": "admin1"},
             },
@@ -60,8 +60,8 @@ class AlertTest(ApiTest):
                 {
                     "id": 1,
                     **new_alert,
-                    "suscribe_all_members": None,
-                    "suscribed": True,
+                    "subscribe_all_members": None,
+                    "subscribed": True,
                     "enabled": True,
                     "owner": {"id": 1, "username": "admin1"},
                 }
@@ -79,8 +79,8 @@ class AlertTest(ApiTest):
             expected={
                 "id": 1,
                 **new_alert,
-                "suscribe_all_members": None,
-                "suscribed": True,
+                "subscribe_all_members": None,
+                "subscribed": True,
                 "enabled": False,
                 "owner": {"id": 1, "username": "admin1"},
             },
@@ -94,8 +94,8 @@ class AlertTest(ApiTest):
             expected={
                 "id": 1,
                 **new_alert,
-                "suscribe_all_members": None,
-                "suscribed": True,
+                "subscribe_all_members": None,
+                "subscribed": True,
                 "enabled": True,
                 "owner": {"id": 1, "username": "admin1"},
             },
@@ -109,8 +109,8 @@ class AlertTest(ApiTest):
                 {
                     "id": 1,
                     **new_alert,
-                    "suscribe_all_members": None,
-                    "suscribed": True,
+                    "subscribe_all_members": None,
+                    "subscribed": True,
                     "enabled": True,
                     "owner": {"id": 1, "username": "admin1"},
                 }
@@ -129,8 +129,8 @@ class AlertTest(ApiTest):
             {
                 "id": 2,
                 **filter_alert,
-                "suscribe_all_members": None,
-                "suscribed": True,
+                "subscribe_all_members": None,
+                "subscribed": True,
                 "enabled": True,
                 "owner": {"id": 3, "username": "auditor1"},
             },
@@ -143,8 +143,8 @@ class AlertTest(ApiTest):
                 {
                     "id": 2,
                     **filter_alert,
-                    "suscribe_all_members": None,
-                    "suscribed": False,
+                    "subscribe_all_members": None,
+                    "subscribed": False,
                     "enabled": True,
                     "owner": {"id": 3, "username": "auditor1"},
                 },
@@ -158,18 +158,18 @@ class AlertTest(ApiTest):
                 {
                     "id": 2,
                     **filter_alert,
-                    "suscribe_all_members": None,
-                    "suscribed": True,
+                    "subscribe_all_members": None,
+                    "subscribed": True,
                     "enabled": True,
                     "owner": {"id": 3, "username": "auditor1"},
                 },
             ],
         ),
         ApiTestCase(
-            ["admin1", "reader1"], "post", 204, endpoint="{endpoint}2/suscription/"
+            ["admin1", "reader1"], "post", 204, endpoint="{endpoint}2/subscription/"
         ),
         ApiTestCase(
-            ["admin1", "reader1"], "post", 400, endpoint="{endpoint}2/suscription/"
+            ["admin1", "reader1"], "post", 400, endpoint="{endpoint}2/subscription/"
         ),
         ApiTestCase(
             ["admin1", "auditor1", "reader1"],
@@ -179,8 +179,8 @@ class AlertTest(ApiTest):
                 {
                     "id": 2,
                     **filter_alert,
-                    "suscribe_all_members": None,
-                    "suscribed": True,
+                    "subscribe_all_members": None,
+                    "subscribed": True,
                     "enabled": True,
                     "owner": {"id": 3, "username": "auditor1"},
                 },
@@ -190,13 +190,13 @@ class AlertTest(ApiTest):
             ["admin1", "auditor1", "reader1"],
             "delete",
             204,
-            endpoint="{endpoint}2/suscription/",
+            endpoint="{endpoint}2/subscription/",
         ),
         ApiTestCase(
             ["admin1", "auditor1", "reader1"],
             "delete",
             400,
-            endpoint="{endpoint}2/suscription/",
+            endpoint="{endpoint}2/subscription/",
         ),
         ApiTestCase(
             ["admin1", "auditor1", "reader1"],
@@ -206,8 +206,8 @@ class AlertTest(ApiTest):
                 {
                     "id": 2,
                     **filter_alert,
-                    "suscribe_all_members": None,
-                    "suscribed": False,
+                    "subscribe_all_members": None,
+                    "subscribed": False,
                     "enabled": True,
                     "owner": {"id": 3, "username": "auditor1"},
                 },
@@ -224,9 +224,9 @@ class AlertTest(ApiTest):
             {
                 "id": 2,
                 **filter_alert,
-                "suscribe_all_members": None,
+                "subscribe_all_members": None,
                 "value": "http",
-                "suscribed": False,
+                "subscribed": False,
                 "enabled": True,
                 "owner": {"id": 3, "username": "auditor1"},
             },
@@ -240,9 +240,9 @@ class AlertTest(ApiTest):
             {
                 "id": 2,
                 **filter_alert,
-                "suscribe_all_members": None,
+                "subscribe_all_members": None,
                 "value": "https",
-                "suscribed": False,
+                "subscribed": False,
                 "enabled": True,
                 "owner": {"id": 3, "username": "auditor1"},
             },
@@ -258,8 +258,8 @@ class AlertTest(ApiTest):
             {
                 "id": 3,
                 **monitor_alert,
-                "suscribe_all_members": None,
-                "suscribed": True,
+                "subscribe_all_members": None,
+                "subscribed": True,
                 "enabled": True,
                 "owner": {"id": 5, "username": "reader1"},
             },
@@ -272,8 +272,8 @@ class AlertTest(ApiTest):
                 {
                     "id": 3,
                     **monitor_alert,
-                    "suscribe_all_members": None,
-                    "suscribed": False,
+                    "subscribe_all_members": None,
+                    "subscribed": False,
                     "enabled": True,
                     "owner": {"id": 5, "username": "reader1"},
                 },
@@ -287,8 +287,8 @@ class AlertTest(ApiTest):
                 {
                     "id": 3,
                     **monitor_alert,
-                    "suscribe_all_members": None,
-                    "suscribed": True,
+                    "subscribe_all_members": None,
+                    "subscribed": True,
                     "enabled": True,
                     "owner": {"id": 5, "username": "reader1"},
                 },

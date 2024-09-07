@@ -104,6 +104,10 @@ class ReportingViewSet(BaseViewSet):
             data=request.data, context={"request": request}
         )
         serializer.is_valid(raise_exception=True)
+        findings: (
+            tuple[dict[int, Any], dict[int, list[int]], list[int]]
+            | dict[type[Finding], list[Finding]]
+        ) = {}
         if serializer.validated_data["format"] == ReportFormat.PDF:
             findings = self._get_findings_to_pdf_report(serializer)
             count = len(
@@ -114,7 +118,7 @@ class ReportingViewSet(BaseViewSet):
             count = len(sum(findings.values(), []))
         if count == 0:
             return Response(
-                {"findings": "No findings found with this criteria"},
+                {"findings": "No findings found with this criterion"},
                 status=status.HTTP_404_NOT_FOUND,
             )
         self.perform_create(serializer)

@@ -71,7 +71,7 @@ class Tool(BaseLike):
                     version_regex,
                     # zaproxy returns the Java version at the first line
                     re.sub("java version [^\s]*", "", output),
-                    flags=re.IGNORECASE
+                    flags=re.IGNORECASE,
                 )
                 if version:
                     return version.group()

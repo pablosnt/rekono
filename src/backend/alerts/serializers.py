@@ -9,7 +9,7 @@ from users.serializers import SimpleUserSerializer
 
 
 class AlertSerializer(ModelSerializer):
-    suscribed = SerializerMethodField(read_only=True)
+    subscribed = SerializerMethodField(read_only=True)
     owner = SimpleUserSerializer(many=False, read_only=True)
 
     class Meta:
@@ -22,15 +22,15 @@ class AlertSerializer(ModelSerializer):
             "value",
             "enabled",
             "owner",
-            "suscribed",
-            "suscribers",
-            "suscribe_all_members",
+            "subscribed",
+            "subscribers",
+            "subscribe_all_members",
         )
-        read_only_fields = ("id", "suscribed", "enabled", "owner", "suscribers")
-        extra_kwargs = {"suscribe_all_members": {"write_only": True}}
+        read_only_fields = ("id", "subscribed", "enabled", "owner", "subscribers")
+        extra_kwargs = {"subscribe_all_members": {"write_only": True}}
 
-    def get_suscribed(self, instance: Any) -> bool:
-        return instance.suscribers.filter(
+    def get_subscribed(self, instance: Any) -> bool:
+        return instance.subscribers.filter(
             pk=self.context.get("request").user.id
         ).exists()
 
@@ -46,10 +46,10 @@ class AlertSerializer(ModelSerializer):
     @transaction.atomic()
     def create(self, validated_data: dict[str, Any]) -> Alert:
         alert = super().create(validated_data)
-        if alert.suscribe_all_members:
-            alert.suscribers.set(alert.project.members.all())
+        if alert.subscribe_all_members:
+            alert.subscribers.set(alert.project.members.all())
         else:
-            alert.suscribers.add(alert.owner)
+            alert.subscribers.add(alert.owner)
         return alert
 
 
@@ -64,8 +64,8 @@ class EditAlertSerializer(AlertSerializer):
             "value",
             "enabled",
             "owner",
-            "suscribed",
-            "suscribers",
+            "subscribed",
+            "subscribers",
         )
         read_only_fields = (
             "id",
@@ -74,8 +74,8 @@ class EditAlertSerializer(AlertSerializer):
             "mode",
             "enabled",
             "owner",
-            "suscribed",
-            "suscribers",
+            "subscribed",
+            "subscribers",
         )
 
 

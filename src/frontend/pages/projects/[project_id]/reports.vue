@@ -28,7 +28,9 @@
               <template #prepend>
                 <v-btn hover variant="text" icon>
                   <v-icon
-                    :icon="enums.reports[report.format.toLowerCase()].icon"
+                    :icon="
+                      enums.reportFormats[report.format.toLowerCase()].icon
+                    "
                     :color="enums.reportStatuses[report.status].color"
                   />
                   <v-tooltip activator="parent" :text="report.status" />
@@ -125,7 +127,7 @@ const filtering = ref([
     label: "Format",
     icon: "mdi-file-document",
     cols: 2,
-    collection: Object.entries(enums.value.reports).map(([k, v]) => {
+    collection: Object.entries(enums.value.reportFormats).map(([k, v]) => {
       v.id = k.toLowerCase();
       v.name = k.toUpperCase();
       return v;

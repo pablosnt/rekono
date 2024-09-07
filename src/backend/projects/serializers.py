@@ -68,9 +68,9 @@ class ProjectSerializer(TaggitSerializer, ModelSerializer):
             item=AlertItem.CVE,
             mode=AlertMode.MONITOR,
             enabled=True,
-            owner=validated_data.get("owner"),
+            owner=None,
         )
-        alert.suscribers.add(validated_data.get("owner"))
+        alert.subscribers.add(validated_data.get("owner"))
         return project
 
 
@@ -92,7 +92,7 @@ class ProjectMemberSerializer(Serializer):
         user = get_object_or_404(User, pk=validated_data.get("user"), is_active=True)
         instance.members.add(user)
         for alert in Alert.objects.filter(
-            project=instance, suscribe_all_members=True, enabled=True
+            project=instance, subscribe_all_members=True, enabled=True
         ).all():
-            alert.suscribers.add(user)
+            alert.subscribers.add(user)
         return instance

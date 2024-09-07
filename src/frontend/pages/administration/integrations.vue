@@ -26,6 +26,7 @@
                     <IntegrationShow
                       :api="iApi"
                       :integration="integration"
+                      :hover="true"
                       v-bind="activatorProps"
                     />
                   </template>

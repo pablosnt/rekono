@@ -104,7 +104,12 @@ function processEntity(name) {
           : entity.value.process.name;
       }
     } else {
-      icon.value = enums.findings[name].icon;
+      icon.value =
+        enums.findings[
+          name === "osint"
+            ? name.toUpperCase()
+            : `${name.charAt(0).toUpperCase()}${name.slice(1)}`
+        ].icon;
       link.value = `/projects/${route.params.project_id}/findings`;
       const fields = [
         "name",

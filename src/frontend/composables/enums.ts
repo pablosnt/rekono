@@ -79,16 +79,16 @@ export function useEnums() {
     Domain: { icon: "mdi-dns" },
   };
   const findings = {
-    osint: { icon: "mdi-search-web" },
-    host: { icon: "mdi-server" },
-    port: { icon: "mdi-plus-network" },
-    path: { icon: "mdi-routes" },
-    credential: { icon: "mdi-key-chain" },
-    technology: { icon: "mdi-layers-triple" },
-    vulnerability: { icon: "mdi-bug" },
-    exploit: { icon: "mdi-bomb" },
+    OSINT: { icon: "mdi-search-web" },
+    Host: { icon: "mdi-server" },
+    Port: { icon: "mdi-plus-network" },
+    Path: { icon: "mdi-routes" },
+    Credential: { icon: "mdi-key-chain" },
+    Technology: { icon: "mdi-layers-triple" },
+    Vulnerability: { icon: "mdi-bug" },
+    Exploit: { icon: "mdi-bomb" },
   };
-  const reports = {
+  const reportFormats = {
     json: { icon: "mdi-code-json" },
     xml: { icon: "mdi-xml" },
     pdf: { icon: "mdi-file-document" },
@@ -97,6 +97,33 @@ export function useEnums() {
     Ready: { color: "green" },
     Pending: { color: "orange" },
     Error: { color: "red" },
+  };
+  const alertItems = {
+    OSINT: { filter: null, monitor: null, icon: findings.OSINT.icon },
+    Host: { filter: "address", monitor: null, icon: findings.Host.icon },
+    "Open Port": { filter: null, monitor: null, icon: findings.Port.icon },
+    Service: { filter: "name", monitor: null, icon: findings.Port.icon },
+    Technology: {
+      filter: "name",
+      monitor: null,
+      icon: findings.Technology.icon,
+    },
+    Credential: { filter: null, monitor: null, icon: findings.Credential.icon },
+    Vulnerability: {
+      filter: null,
+      monitor: null,
+      icon: findings.Vulnerability.icon,
+    },
+    CVE: {
+      filter: "cve",
+      monitor: "trending",
+      icon: findings.Vulnerability.icon,
+    },
+  };
+  const alertModes = {
+    New: { icon: "mdi-new-box" },
+    Filter: { icon: "mdi-filter" },
+    Monitor: { icon: "mdi-radar" },
   };
 
   return {
@@ -109,7 +136,9 @@ export function useEnums() {
     notificationPlatforms,
     targets,
     findings,
-    reports,
+    reportFormats,
     reportStatuses,
+    alertItems,
+    alertModes,
   };
 }
