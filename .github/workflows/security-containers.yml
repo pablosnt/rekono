@@ -19,7 +19,7 @@ jobs:
           fetch-depth: 0
       
       - name: Build Docker images
-        run: docker-compose build
+        run: docker compose build
       
       - name: Scan Nginx image with Trivy
         continue-on-error: true
