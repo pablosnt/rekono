@@ -26,7 +26,7 @@
                 entity="workers"
                 icon="mdi-sitemap"
                 :color="undefined"
-                :show-zero="true"
+                show-zero
               />
             </template>
             <template #text>

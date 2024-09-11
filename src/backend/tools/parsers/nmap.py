@@ -30,7 +30,10 @@ class Nmap(BaseParser):
                 except KeyError:
                     pass
             host = self.create_finding(
-                Host, address=nmap_host.address, os=selected_os.name, os_type=os_type
+                Host,
+                address=nmap_host.address,
+                os=selected_os.name if selected_os else None,
+                os_type=os_type,
             )
             for service in nmap_host.services:
                 port = self.create_finding(

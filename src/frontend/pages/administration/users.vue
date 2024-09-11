@@ -1,6 +1,6 @@
 <template>
   <MenuAdministration>
-    <UserShow :change-role="true" :enable-disable="true" />
+    <UserShow change-role enable-disable />
   </MenuAdministration>
 </template>
 <!-- todo: require SMTP to be configured before any invitation. Otherwise there could be a user invited, without email, who can't be removed, who can't receive any other email -->

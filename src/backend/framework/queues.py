@@ -22,14 +22,20 @@ class BaseQueue:
     def _get_queue(self) -> Queue:
         return django_rq.get_queue(self.name)
 
+    def _fetch_job(self, job_id: str) -> Job | None:
+        try:
+            return self._get_queue().fetch_job(job_id)
+        except Exception:
+            return None
+
     def cancel_job(self, job_id: str) -> None:
-        job = self._get_queue().fetch_job(job_id)
+        job = self._fetch_job(job_id)
         if job:
             logger.info(f"[{self.name}] Job {job_id} has been cancelled")
             job.cancel()
 
     def delete_job(self, job_id: str) -> None:
-        job = self._get_queue().fetch_job(job_id)
+        job = self._fetch_job(job_id)
         if job:
             logger.info(f"[{self.name}] Job {job_id} has been deleted")
             job.delete()

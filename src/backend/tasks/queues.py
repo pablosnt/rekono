@@ -13,6 +13,7 @@ from input_types.models import InputType
 from processes.models import Step
 from rq.job import Job
 from tasks.models import Task
+from tools.enums import Intensity as IntensityValue
 from tools.models import Intensity
 
 logger = logging.getLogger()
@@ -129,7 +130,7 @@ class TasksQueue(BaseQueue):
                     configuration=step.configuration,
                     group=1,
                     status=Status.SKIPPED,
-                    skipped_reason=f"Tool {step.configuration.tool.name} can't be executed with intensity {task.intensity.name.capitalize()}",
+                    skipped_reason=f"Tool {step.configuration.tool.name} can't be executed with intensity {IntensityValue(task.intensity).name.capitalize()}",
                 )
         for execution_job in plan:
             executions = TasksQueue._calculate_executions(

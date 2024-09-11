@@ -21,6 +21,10 @@
         :tool="tool"
         :configuration="configuration"
         @close-dialog="isActive.value = false"
+        @reload="
+          isActive.value = false;
+          $emit('reload');
+        "
       />
     </template>
   </v-dialog>
@@ -59,4 +63,5 @@ defineProps({
     default: "Scan",
   },
 });
+defineEmits(["reload"]);
 </script>

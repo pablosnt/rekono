@@ -54,7 +54,7 @@ class FindingsQueue(BaseQueue):
                     finding.__class__.objects.remove_fix(finding)
                 for alert in (
                     execution.task.target.project.alerts.filter(enabled=True)
-                    .sort("-item")
+                    .order_by("-item")
                     .all()
                 ):
                     if alert.must_be_triggered(execution, finding):

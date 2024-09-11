@@ -88,7 +88,7 @@ class HackTricks(BaseIntegration):
         sitemap = self._request(
             self.session.get, self.hacktricks_sitemap_url, json=False
         )
-        return [url[0].text for url in parser.fromstring(sitemap.text).getroot()]
+        return [url[0].text for url in parser.fromstring(sitemap.text)]
 
     def _get_mapped_value_for_service(self, service: str) -> Optional[str]:
         for mapped_value, services in self.services_mapping.items():

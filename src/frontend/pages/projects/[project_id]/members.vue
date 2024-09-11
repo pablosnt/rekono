@@ -1,6 +1,6 @@
 <template>
   <MenuProject>
-    <UserShow :project="route.params.project_id" :handle-member="true" />
+    <UserShow :project="route.params.project_id" handle-member />
   </MenuProject>
 </template>
 

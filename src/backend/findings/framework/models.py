@@ -76,7 +76,7 @@ class FindingManager(models.Manager):
         )
 
     def fix(
-        self, findings: Any | models.QuerySet, fixed_by: Optional[Any]
+        self, findings: Any | models.QuerySet, fixed_by: Optional[Any] = None
     ) -> Any | models.QuerySet:
         if not findings:
             return findings
@@ -97,7 +97,7 @@ class FindingManager(models.Manager):
                 self._update_finding_fix_data(related_finding, **args)
         return updated_finding
 
-    def remove_fix(self, finding: Any, fixed_by: Optional[Any]) -> Any:
+    def remove_fix(self, finding: Any, fixed_by: Optional[Any] = None) -> Any:
         original_fixed_by = finding.fixed_by
         updated_finding = self._update_finding_fix_data(finding, False)
         if fixed_by:

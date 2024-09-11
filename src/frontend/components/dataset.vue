@@ -25,34 +25,36 @@
           !expandFilters ? collapseFilters() : null;
         "
       />
-      <v-dialog
-        v-if="add !== null"
-        :width="addFullscreen ? '100%' : 'auto'"
-        :fullscreen="addFullscreen"
-      >
-        <template #activator="{ props: activatorProps }">
-          <v-btn
-            icon="mdi-plus-thick"
-            variant="text"
-            size="large"
-            color="green"
-            v-bind="activatorProps"
-          />
-        </template>
-        <template #default="{ isActive }">
-          <!-- todo: Check when add must be displayed depending on the user roles -->
-          <component
-            :is="add"
-            :api="api"
-            :parameters="defaultParameters"
-            @completed="
-              loadData(true);
-              isActive.value = false;
-            "
-            @close-dialog="isActive.value = false"
-          />
-        </template>
-      </v-dialog>
+      <slot name="add">
+        <v-dialog
+          v-if="add !== null"
+          :width="addFullscreen ? '100%' : 'auto'"
+          :fullscreen="addFullscreen"
+        >
+          <template #activator="{ props: activatorProps }">
+            <v-btn
+              icon="mdi-plus-thick"
+              variant="text"
+              size="large"
+              color="green"
+              v-bind="activatorProps"
+            />
+          </template>
+          <template #default="{ isActive }">
+            <!-- todo: Check when add must be displayed depending on the user roles -->
+            <component
+              :is="add"
+              :api="api"
+              :parameters="defaultParameters"
+              @completed="
+                loadData(true);
+                isActive.value = false;
+              "
+              @close-dialog="isActive.value = false"
+            />
+          </template>
+        </v-dialog>
+      </slot>
     </v-row>
     <v-expand-transition>
       <v-container v-if="expandFilters" fluid class="mb-0">
@@ -80,7 +82,9 @@
                 return-object
                 :color="f.value && f.value.color ? f.value.color : null"
                 :prepend-inner-icon="
-                  f.value && f.value.icon ? f.value.icon : f.icon
+                  f.value && f.value.icon && !f.enforceIcon
+                    ? f.value.icon
+                    : f.icon
                 "
                 :disabled="f.disabled ? f.disabled : false"
                 @update:model-value="
@@ -290,7 +294,12 @@ function getSortItems(collection: Array<string>) {
         item === "id"
           ? "ID"
           : `${item.charAt(0).toUpperCase()}${item.slice(1)}`;
-      name = name.includes("_") ? name.split("_")[0] : name;
+      if (name.includes("__")) {
+        name = name.split("__")[1];
+        name = `${name.charAt(0).toUpperCase()}${name.slice(1)}`;
+      } else if (name.includes("_")) {
+        name = name.split("_")[0];
+      }
       return [
         { id: item, name: name },
         { id: `-${item}`, name: `${name} desc` },

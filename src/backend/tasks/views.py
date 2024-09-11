@@ -40,7 +40,6 @@ class TaskViewSet(BaseViewSet):
     search_fields = [
         "target__target",
         "process__name",
-        "process__steps__configuration__tool__name",
         "configuration__name",
         "configuration__tool__name",
     ]

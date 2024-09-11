@@ -41,7 +41,7 @@
                   <MfaForm
                     ref="enableMfaForm"
                     :loading="enableMfaLoading"
-                    :auto-trigger="true"
+                    auto-trigger
                     @new-otp="(mfa) => enableMfa(mfa)"
                   />
                 </v-col>
@@ -49,8 +49,8 @@
                   <MfaForm
                     ref="disableMfaForm"
                     :loading="loading"
-                    :allow-email="true"
-                    :auto-trigger="true"
+                    allow-email
+                    auto-trigger
                     @new-otp="(mfa) => disableMfa(mfa)"
                   />
                 </v-col>

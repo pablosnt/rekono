@@ -9,7 +9,7 @@
       ordering="id"
       icon="mdi-alert"
       empty-head="No Alerts"
-      empty-text="There are alerts yet. Create your first one"
+      empty-text="There are no alerts yet. Create your first one"
       @load-data="(data) => (alerts = data)"
     >
       <template #data>
@@ -26,7 +26,7 @@
                 <AlertShow
                   :api="api"
                   :alert="alert"
-                  :hover="true"
+                  hover
                   v-bind="activatorProps"
                   @reload="dataset.loadData(false)"
                 />

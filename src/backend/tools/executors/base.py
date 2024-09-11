@@ -112,9 +112,9 @@ class BaseExecutor:
                         argument_input, self.execution.task.target
                     ):
                         parsed_data = base_input.parse(parsed_data)
-                        self.findings_used_in_execution[
-                            base_input.__class__
-                        ] = base_input
+                        self.findings_used_in_execution[base_input.__class__] = (
+                            base_input
+                        )
                         if isinstance(base_input, Authentication):
                             self.authentication = base_input
                         if not argument.multiple:
@@ -220,8 +220,9 @@ class BaseExecutor:
         pass
 
     def _on_start(self) -> None:
+        self.execution.status = Status.RUNNING
         self.execution.start = timezone.now()
-        self.execution.save(update_fields=["start"])
+        self.execution.save(update_fields=["start", "status"])
         if not self.execution.task.start:
             self.execution.task.start = timezone.now()
             self.execution.task.save(update_fields=["start"])

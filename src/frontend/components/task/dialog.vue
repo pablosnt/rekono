@@ -1,4 +1,5 @@
 <template>
+  <!-- todo: make items in target and wordlist selector closables -->
   <Dialog
     title="Execution"
     :loading="loading"
@@ -101,6 +102,9 @@
                     :rules="[(t) => t.length > 0 || 'Target is required']"
                     validate-on="input"
                     @click:clear="allTargets = false"
+                    @update:model-value="
+                      allTargets = targets.length === selectedTargets.length
+                    "
                   >
                     <template #prepend>
                       <v-checkbox
@@ -278,6 +282,10 @@
                     ]"
                     validate-on="input"
                     @click:clear="allWordlists = false"
+                    @update:model-value="
+                      allWordlists =
+                        wordlists.length === selectedWordlists.length
+                    "
                   >
                     <template #prepend>
                       <v-checkbox
@@ -470,9 +478,10 @@ const props = defineProps({
     default: null,
   },
 });
-defineEmits(["closeDialog"]);
+const emit = defineEmits(["reload", "closeDialog"]);
 const api = useApi("/api/tasks/", true, "Task");
 const enums = useEnums();
+const route = useRoute();
 const router = useRouter();
 
 const loading = ref(false);
@@ -508,8 +517,7 @@ if (!selectedProject.value) {
   useApi("/api/projects/", true, "Project")
     .list({}, true)
     .then((response) => (projects.value = response.items));
-}
-if (selectedTargets.value.length === 0 && selectedProject.value) {
+} else if (selectedTargets.value.length === 0) {
   selectProject();
 }
 if (
@@ -629,6 +637,9 @@ function isValid() {
       selectedWordlists.value.length > 0)
   );
 }
+function isScansPage() {
+  return /^\/projects\/[\d]+\/scans$/.test(route.path);
+}
 function submit() {
   if (isValid()) {
     const body = { intensity: intensity.value.name };
@@ -662,13 +673,20 @@ function submit() {
           if (errors + progress.value === selectedTargets.value.length) {
             loading.value = false;
 
-            if (selectedTargets.value.length > 1) {
-              router.push({
-                path: `/projects/${selectedProject.value.id}/tasks`,
-              });
+            if (
+              selectedTargets.value.length > 1 ||
+              (scheduledDate.value && scheduledTime.value)
+            ) {
+              if (isScansPage()) {
+                emit("reload");
+              } else {
+                router.push({
+                  path: `/projects/${selectedProject.value.id}/scans`,
+                });
+              }
             } else {
               router.push({
-                path: `/projects/${selectedProject.value.id}/tasks/${response.id}`,
+                path: `/projects/${selectedProject.value.id}/scans/${response.id}`,
               });
             }
           }

@@ -41,13 +41,10 @@
               prepend-icon="mdi-play-network"
             >
               <template #item="{ props: taskProps, item }">
-                <v-list-item
-                  v-bind="taskProps"
-                  :title="utils.getTaskTitle(item)"
-                />
+                <v-list-item v-bind="taskProps" :title="item.title" />
               </template>
               <template #selection="{ item }">
-                <p>{{ utils.getTaskTitle(item.raw) }}</p>
+                <p>{{ item.title }}</p>
               </template>
             </v-autocomplete>
           </v-col>
@@ -154,7 +151,7 @@ const props = defineProps({
 });
 const emit = defineEmits(["closeDialog", "completed"]);
 
-const utils = ref(useUtils());
+const utils = useUtils();
 const enums = useEnums();
 const api = useApi("/api/reports/", true, "Report");
 const loading = ref(false);
@@ -185,7 +182,12 @@ function searchTargets() {
 function searchTasks() {
   useApi("/api/tasks/", true)
     .list({ target: selectedTarget.value.id }, true)
-    .then((response) => (tasks.value = response.items));
+    .then((response) => {
+      tasks.value = response.items;
+      for (let i = 0; i < tasks.value.length; i++) {
+        utils.getTaskTitle(tasks.value[i]);
+      }
+    });
 }
 
 function submit() {

@@ -47,7 +47,7 @@
                 <template #text>
                   <v-card-text>
                     <p>{{ project.description }}</p>
-                    <TagShow :item="project" :divider="true" />
+                    <TagShow :item="project" divider />
                   </v-card-text>
                 </template>
                 <v-card-actions @click.stop>

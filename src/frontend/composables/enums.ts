@@ -125,6 +125,14 @@ export function useEnums() {
     Filter: { icon: "mdi-filter" },
     Monitor: { icon: "mdi-radar" },
   };
+  const statuses = {
+    Requested: { color: "grey", icon: "mdi-pause-circle" },
+    Skipped: { color: "grey", icon: "mdi-skip-next-circle" },
+    Running: { color: "yellow", icon: "mdi-play-circle" },
+    Cancelled: { color: "red", icon: "mdi-close-circle" },
+    Error: { color: "red", icon: "mdi-alert-circle" },
+    Completed: { color: "green", icon: "mdi-check-circle" },
+  };
 
   return {
     stages,
@@ -140,5 +148,6 @@ export function useEnums() {
     reportStatuses,
     alertItems,
     alertModes,
+    statuses,
   };
 }

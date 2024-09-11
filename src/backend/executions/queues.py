@@ -108,7 +108,7 @@ class ExecutionsQueue(BaseQueue):
         current_job: Job,
     ) -> dict[int, list[BaseInput]]:
         findings = []
-        queue = ExecutionsQueue._get_queue()
+        queue = ExecutionsQueue()._get_queue()
         for dependency_id in current_job._dependency_ids:
             dependency = queue.fetch_job(dependency_id)
             if dependency and dependency.result:

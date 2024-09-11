@@ -33,15 +33,26 @@
                   :collection="target.tasks"
                   entity="Tasks"
                   icon="mdi-play-network"
-                  :link="`/projects/${target.project}/tasks`"
+                  :link="`/projects/${target.project}/scans`"
+                  new-tab
                 />
-                <span class="me-2" />
                 <UtilsChipCounter
+                  class="ml-2"
+                  :collection="target.reports"
+                  entity="Reports"
+                  icon="mdi-file-document-multiple"
+                  :link="`/projects/${target.project}/reports`"
+                  color="blue-grey-darken-1"
+                  new-tab
+                />
+                <UtilsChipCounter
+                  class="ml-2"
                   :collection="target.notes"
                   entity="Notes"
                   icon="mdi-notebook"
                   :link="`/projects/${target.project}/notes`"
                   color="indigo-darken-1"
+                  new-tab
                 />
                 <!-- todo: Link (Defect-Dojo) -->
               </template>

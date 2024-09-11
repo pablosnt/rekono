@@ -19,7 +19,7 @@
       <v-card-text class="overflow-auto">
         <div v-if="!details">
           <p>{{ process.description }}</p>
-          <TagShow :item="process" :divider="true" />
+          <TagShow :item="process" divider />
         </div>
         <div v-if="details">
           <ProcessStepsForm

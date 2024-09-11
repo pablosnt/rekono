@@ -6,7 +6,7 @@
       :api="api"
       :filtering="filtering"
       :add="NoteDialog"
-      :add-fullscreen="true"
+      add-fullscreen
       :default-parameters="{ project: projectId }"
       ordering="-updated_at"
       icon="mdi-notebook"

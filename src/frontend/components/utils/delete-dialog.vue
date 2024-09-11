@@ -1,6 +1,6 @@
 <template>
   <Dialog
-    title="Delete Confirmation"
+    :title="`${action} Confirmation`"
     :loading="false"
     color="red"
     width="400"
@@ -16,7 +16,7 @@
           prepend-icon="mdi-close"
           color="blue-grey"
           @click="$emit('closeDialog')"
-          >Cancel</v-btn
+          >{{ action !== "Cancel" ? "Cancel" : "Abort" }}</v-btn
         >
         <v-spacer />
         <v-btn
@@ -27,7 +27,7 @@
               $emit('completed');
             })
           "
-          >Delete</v-btn
+          >{{ action }}</v-btn
         >
       </v-card-actions>
     </template>
@@ -39,6 +39,11 @@ defineProps({
   api: Object,
   id: Number,
   text: String,
+  action: {
+    type: String,
+    required: false,
+    default: "Delete",
+  },
 });
 defineEmits(["closeDialog", "completed"]);
 </script>

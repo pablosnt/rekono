@@ -31,6 +31,7 @@ class TargetSerializer(ModelSerializer):
             "tasks",
             "defect_dojo_sync",
             "notes",
+            "reports",
         )
         read_only_fields = (
             "type",
@@ -40,6 +41,7 @@ class TargetSerializer(ModelSerializer):
             "tasks",
             "defect_dojo_sync",
             "notes",
+            "reports",
         )
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:

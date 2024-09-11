@@ -95,10 +95,10 @@ function processEntity(name) {
     } else if (name === "execution" || name === "task") {
       icon.value = "mdi-play";
       if (name === "execution") {
-        link.value = `/projects/${route.params.project_id}/tasks/${entity.value.task}`;
+        link.value = `/projects/${route.params.project_id}/scans/${entity.value.task}`;
         value.value = entity.value.configuration.name;
       } else {
-        link.value = `/projects/${route.params.project_id}/tasks/${entity.value.id}`;
+        link.value = `/projects/${route.params.project_id}/scans/${entity.value.id}`;
         value.value = entity.value.configuration
           ? entity.value.configuration.name
           : entity.value.process.name;

@@ -11,8 +11,8 @@
 
     <MfaForm
       ref="mfaForm"
-      :auto-trigger="true"
-      :allow-email="true"
+      auto-trigger
+      allow-email
       :loading="loading"
       @new-otp="(mfa) => login(mfa)"
     >

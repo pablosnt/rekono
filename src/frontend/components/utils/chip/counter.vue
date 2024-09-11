@@ -5,7 +5,8 @@
     :color="color"
     link
     :to="link"
-    @click.prevent.stop
+    :target="newTab ? '_blank' : undefined"
+    @click.stop
   >
     {{ value < 1000 ? value : Math.floor(value / 1000).toString() + "k" }}
     {{ entity }}
@@ -37,6 +38,11 @@ const props = defineProps({
     default: undefined,
   },
   showZero: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  newTab: {
     type: Boolean,
     required: false,
     default: false,

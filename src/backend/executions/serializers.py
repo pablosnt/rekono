@@ -1,6 +1,5 @@
-from rest_framework.serializers import ModelSerializer, SerializerMethodField
-
 from executions.models import Execution
+from rest_framework.serializers import ModelSerializer, SerializerMethodField
 from tools.serializers import ConfigurationSerializer
 
 
@@ -26,3 +25,9 @@ class ExecutionSerializer(ModelSerializer):
 
     def get_has_report(self, instance: Execution) -> bool:
         return instance.output_file is not None
+
+
+class SimpleExecutionSerializer(ModelSerializer):
+    class Meta:
+        model = Execution
+        fields = ("id", "group", "configuration", "status", "start", "end")

@@ -13,9 +13,15 @@
       @load-data="(data) => (reports = data)"
       @new-filter="(key, value) => (key === 'target' ? getTasks(value) : null)"
     >
+      <!--
+           TODO: Fix date
+           TODO: Sometimes, multiple reports are created with the same ID, and then you can't remove or download them
+           TODO: PDF reports are not generated. Dialog gets stucked
+           TODO: Allow filtering by completed tasks in autocomplete?   
+        -->
       <template #data>
         <v-row dense>
-          <v-col v-for="report in reports" :key="report.id" cols="6">
+          <v-col v-for="report in reports" :key="report.id" cols="4">
             <v-card
               :title="report.format.toUpperCase()"
               :subtitle="
@@ -39,6 +45,7 @@
               <template #append>
                 <v-chip
                   v-if="report.target && !report.task"
+                  class="mr-2"
                   prepend-icon="mdi-target"
                   color="red"
                   link
@@ -47,6 +54,7 @@
                 />
                 <v-chip
                   v-if="report.task"
+                  class="mr-2"
                   prepend-icon="mdi-play-network"
                   color="red"
                   link
@@ -57,20 +65,9 @@
                   "
                   :to="`/projects/${route.params.project_id}/targets/${report.task.id}`"
                 />
-                <span v-if="report.target || report.task" class="me-2" />
                 <UtilsChipOwner :entity="report" field="user" />
-                <div v-if="!report.target && !report.task">
-                  <ReportDownloadButton :api="api" :report="report" />
-                  <UtilsButtonDelete
-                    :id="report.id"
-                    :api="api"
-                    :text="`Report '${report.id}' will be removed`"
-                    icon="mdi-trash-can"
-                    @completed="dataset.loadData(false)"
-                  />
-                </div>
               </template>
-              <v-card-actions v-if="report.target || report.task">
+              <v-card-actions>
                 <ReportDownloadButton :api="api" :report="report" />
                 <v-spacer />
                 <UtilsButtonDelete

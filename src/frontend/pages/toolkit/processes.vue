@@ -6,7 +6,7 @@
       :filtering="filtering"
       ordering="id"
       :add="ProcessDialog"
-      :add-fullscreen="true"
+      add-fullscreen
       icon="mdi-robot-angry"
       empty-head="No Processes"
       empty-text="There are no processes. Create your first one"
@@ -31,7 +31,7 @@
                   :api="api"
                   :process="process"
                   :tools="tools"
-                  :details="true"
+                  details
                   @reload="(value) => dataset.loadData(value)"
                   @close-dialog="isActive.value = false"
                 />
