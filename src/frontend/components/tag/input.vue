@@ -1,16 +1,11 @@
 <template>
   <v-text-field
     v-model="newTag"
-    :label="tags.length === 0 ? label : undefined"
+    :label="tags.length === 0 || keepLabelAfterInput ? label : undefined"
     :prepend-inner-icon="icon"
     variant="outlined"
     :rules="[(t) => !t || regex.test(t.trim()) || 'Invalid value']"
     validate-on="input"
-    @update:model-value="
-      newTag !== null && regex.test(newTag.trim())
-        ? $emit('newValue', newTag.trim())
-        : $emit('newValue', null)
-    "
   >
     <template #append-inner>
       <v-btn
@@ -26,8 +21,8 @@
         @click="
           tags.push(newTag.trim());
           $emit('newValues', tags);
-          newTag = null;
           $emit('newValue', newTag);
+          newTag = null;
         "
       />
     </template>
@@ -40,6 +35,7 @@
         @click:close="
           tags.splice(tags.indexOf(tag), 1);
           $emit('newValues', tags);
+          $emit('removeValue', tag);
         "
       />
     </v-chip-group>
@@ -68,9 +64,24 @@ const props = defineProps({
     required: false,
     default: null,
   },
+  keepLabelAfterInput: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
 });
-defineEmits(["newValue", "newValues"]);
+defineEmits(["newValue", "newValues", "removeValue"]);
 const regex = props.validate === null ? useValidation().name : props.validate;
 const newTag = ref(null);
 const tags = ref(props.value != null ? props.value : []);
+
+function addTag(tag) {
+  tags.value.push(tag.trim());
+}
+
+function removeTag(tag) {
+  tags.value.splice(tags.value.indexOf(tag.trim()), 1);
+}
+
+defineExpose({ addTag, removeTag });
 </script>

@@ -27,6 +27,7 @@
               class="mx-auto"
               density="compact"
               :prepend-icon="enums.targets[target.type].icon"
+              :to="`/projects/${target.project}/targets/${target.id}/scope`"
             >
               <template #append>
                 <UtilsChipCounter

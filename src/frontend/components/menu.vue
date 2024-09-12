@@ -8,6 +8,7 @@
           :title="o.title"
           :prepend-icon="o.icon"
           :to="o.to"
+          :active="o.to === route.path || route.path.startsWith(o.to)"
         />
       </v-list>
     </v-navigation-drawer>
@@ -19,4 +20,5 @@
 
 <script setup lang="ts">
 defineProps({ options: Array<object> });
+const route = useRoute();
 </script>

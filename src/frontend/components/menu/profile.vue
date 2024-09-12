@@ -4,7 +4,7 @@
       {
         title: 'Information',
         icon: 'mdi-account',
-        to: '/profile',
+        to: '/profile/information',
       },
       {
         title: 'Security',

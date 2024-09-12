@@ -36,7 +36,6 @@ class WordlistTest(ApiTest):
                 "id": 1,
                 "name": first_wordlist_name,
                 "type": WordlistType.ENDPOINT,
-                "size": None,
                 "owner": None,
                 "liked": False,
                 "likes": 0,

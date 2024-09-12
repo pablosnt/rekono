@@ -1,37 +1,45 @@
 <template>
   <Menu
     :options="[
-      { title: 'Dashboard', icon: 'mdi-chart-box', to: `/projects/${project}` },
+      {
+        title: 'Dashboard',
+        icon: 'mdi-chart-box',
+        to: `/projects/${route.params.project_id}/dashboard`,
+      },
       {
         title: 'Targets',
         icon: 'mdi-target',
-        to: `/projects/${project}/targets`,
+        to: `/projects/${route.params.project_id}/targets`,
       },
       {
         title: 'Scans',
         icon: 'mdi-play-network',
-        to: `/projects/${project}/scans`,
+        to: `/projects/${route.params.project_id}/scans`,
       },
       {
         title: 'Findings',
         icon: 'mdi-ladybug',
-        to: `/projects/${project}/findings`,
+        to: `/projects/${route.params.project_id}/findings`,
       },
       {
         title: 'Reports',
         icon: 'mdi-file-document-multiple',
-        to: `/projects/${project}/reports`,
+        to: `/projects/${route.params.project_id}/reports`,
       },
-      { title: 'Alerts', icon: 'mdi-alert', to: `/projects/${project}/alerts` },
+      {
+        title: 'Alerts',
+        icon: 'mdi-alert',
+        to: `/projects/${route.params.project_id}/alerts`,
+      },
       {
         title: 'Notes',
         icon: 'mdi-notebook',
-        to: `/projects/${project}/notes`,
+        to: `/projects/${route.params.project_id}/notes`,
       },
       {
         title: 'Members',
         icon: 'mdi-account-group',
-        to: `/projects/${project}/members`,
+        to: `/projects/${route.params.project_id}/members`,
       },
     ]"
   >
@@ -42,5 +50,4 @@
 <script setup lang="ts">
 // todo: Limit the links available for each user role
 const route = useRoute();
-const project = ref(route.params.project_id);
 </script>

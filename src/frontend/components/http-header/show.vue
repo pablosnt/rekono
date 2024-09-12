@@ -1,20 +1,11 @@
 <template>
   <v-container fluid>
-    <v-row justify="center" dense>
-      <v-alert
-        color="info"
-        icon="$info"
-        variant="tonal"
-        :text="`Custom HTTP headers will be sent by HTTP scanning tools that support this customization. ${!target && !user ? 'Note that these headers can be overwritten by each user or target' : !target ? 'Note that these headers can be overwritten by each target' : ''}`"
-        closable
-      />
-    </v-row>
     <v-row class="mt-3" justify="center" dense>
       <v-alert
         color="warning"
         icon="$warning"
         variant="tonal"
-        text="Don't add sensitive information, like credentials, as part of a HTTP header because its value will be always shown on plain text. Use target authentication instead"
+        :text="`Don't add sensitive information, like credentials, as part of a HTTP header because its value will be always shown on plain text. Use ${target ? 'scope' : 'target'} authentication instead`"
         closable
       />
     </v-row>
@@ -28,7 +19,7 @@
     :add="HttpHeaderDialog"
     icon="mdi-web"
     empty-head="No HTTP Headers"
-    empty-text="There are no custom HTTP headers"
+    :empty-text="`Custom HTTP headers will be sent by HTTP scanning tools that support this customization. ${!target && !user ? 'Note that these headers can be overwritten by each user or target' : !target ? 'Note that these headers can be overwritten by each target' : ''}`"
     @load-data="(data) => (headers = data)"
   >
     <template #data>

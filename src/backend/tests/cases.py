@@ -48,9 +48,12 @@ class ApiTestCase(RekonoTestCase):
         for key, value in expected.items():
             if isinstance(value, dict):
                 self._check_response_content(value, response.get(key, {}))
+            elif isinstance(value, list):
+                self.tc.assertEqual(len(value), len(response.get(key, [])))
+                if len(value) > 0 and isinstance(value[0], dict):
+                    for index, item in enumerate(value):
+                        self._check_response_content(item, response.get(key, [])[index])
             else:
-                if isinstance(value, list):
-                    self.tc.assertEqual(len(value), len(response.get(key, [])))
                 self.tc.assertEqual(value, response.get(key))
 
     def test_case(self, *args: Any, **kwargs: Any) -> None:
