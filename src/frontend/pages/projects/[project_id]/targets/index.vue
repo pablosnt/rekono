@@ -4,7 +4,7 @@
       ref="dataset"
       :api="api"
       :filtering="filtering"
-      :default-parameters="{ project: projectId }"
+      :default-parameters="{ project: route.params.project_id }"
       ordering="id"
       :add="TargetDialog"
       icon="mdi-target"
@@ -58,10 +58,10 @@
                 <!-- todo: Link (Defect-Dojo) -->
               </template>
               <v-card-actions>
-                <TaskButton :project="project" :target="target" />
+                <TaskButton v-if="project" :project="project" :target="target" />
                 <v-spacer />
-                <NoteButton :project="project.id" :target="target" />
-                <ReportButton :project="project.id" :target="target" />
+                <NoteButton :project="route.params.project_id" :target="target" />
+                <ReportButton :project="route.params.project_id" :target="target" />
                 <UtilsButtonDelete
                   :id="target.id"
                   :api="api"
@@ -83,10 +83,9 @@ definePageMeta({ layout: false });
 const user = userStore();
 const enums = useEnums();
 const route = useRoute();
-const projectId = ref(route.params.project_id);
 const project = ref(null);
 useApi("/api/projects/", true)
-  .get(parseInt(projectId.value))
+  .get(parseInt(route.params.project_id))
   .then((response) => (project.value = response));
 const TargetDialog = resolveComponent("TargetDialog");
 const dataset = ref(null);

@@ -4,7 +4,7 @@
       v-for="o in options"
       :key="o"
       :text="o.title"
-      :icon="o.icon"
+      :prepend-icon="o.icon"
       :to="o.to"
       color="red-darken-2"
     />

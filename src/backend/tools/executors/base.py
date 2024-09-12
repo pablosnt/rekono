@@ -112,9 +112,9 @@ class BaseExecutor:
                         argument_input, self.execution.task.target
                     ):
                         parsed_data = base_input.parse(parsed_data)
-                        self.findings_used_in_execution[base_input.__class__] = (
-                            base_input
-                        )
+                        self.findings_used_in_execution[
+                            base_input.__class__
+                        ] = base_input
                         if isinstance(base_input, Authentication):
                             self.authentication = base_input
                         if not argument.multiple:
