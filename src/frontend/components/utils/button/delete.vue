@@ -3,7 +3,7 @@
     <template #activator="{ props: activatorProps }">
       <v-btn
         hover
-        variant="text"
+        :variant="variant"
         icon
         v-bind="activatorProps"
         @click.prevent.stop
@@ -42,6 +42,11 @@ defineProps({
     type: String,
     required: false,
     default: "mdi-close",
+  },
+  variant: {
+    type: String,
+    required: false,
+    default: "text",
   },
 });
 defineEmits(["completed"]);

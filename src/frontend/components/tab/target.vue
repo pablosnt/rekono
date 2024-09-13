@@ -2,6 +2,11 @@
   <Tab
     :options="[
       {
+        title: 'Dashboard',
+        icon: 'mdi-chart-box',
+        to: `/projects/${route.params.project_id}/targets/${route.params.target_id}/dashboard`,
+      },
+      {
         title: 'Scope',
         icon: 'mdi-antenna',
         to: `/projects/${route.params.project_id}/targets/${route.params.target_id}/scope`,

@@ -3,7 +3,7 @@
     <TabTarget>
       <v-container fluid>
         <v-row justify="center" dense>
-          <v-col cols="10">
+          <v-col cols="8">
             <v-alert
               class="text-center"
               color="info"
@@ -14,12 +14,12 @@
           </v-col>
         </v-row>
         <v-row justify="center" dense>
-          <v-col cols="10">
+          <v-col cols="8">
             <ParametersTechnology />
           </v-col>
         </v-row>
         <v-row justify="center" dense>
-          <v-col cols="10">
+          <v-col cols="8">
             <ParametersVulnerability />
           </v-col>
         </v-row>

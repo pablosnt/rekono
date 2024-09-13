@@ -27,7 +27,7 @@
               class="mx-auto"
               density="compact"
               :prepend-icon="enums.targets[target.type].icon"
-              :to="`/projects/${target.project}/targets/${target.id}/scope`"
+              :to="`/projects/${target.project}/targets/${target.id}/dashboard`"
             >
               <template #append>
                 <UtilsChipCounter
@@ -58,10 +58,20 @@
                 <!-- todo: Link (Defect-Dojo) -->
               </template>
               <v-card-actions>
-                <TaskButton v-if="project" :project="project" :target="target" />
+                <TaskButton
+                  v-if="project"
+                  :project="project"
+                  :target="target"
+                />
                 <v-spacer />
-                <NoteButton :project="route.params.project_id" :target="target" />
-                <ReportButton :project="route.params.project_id" :target="target" />
+                <NoteButton
+                  :project="route.params.project_id"
+                  :target="target"
+                />
+                <ReportButton
+                  :project="route.params.project_id"
+                  :target="target"
+                />
                 <UtilsButtonDelete
                   :id="target.id"
                   :api="api"

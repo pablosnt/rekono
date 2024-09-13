@@ -1,4 +1,6 @@
 export function useUtils() {
+  const enums = useEnums();
+
   function getTaskTitle(task) {
     const executable = task.process
       ? task.process.name
@@ -68,5 +70,26 @@ export function useUtils() {
     return task.duration;
   }
 
-  return { getTaskTitle, getTaskStatus, getTaskDuration };
+  function getIconByPort(port) {
+    if (port) {
+      return [22, 23].includes(port)
+        ? "mdi-ssh"
+        : [53, 80, 443, 8080].includes(port)
+          ? "mdi-web"
+          : [109, 110, 995, 25, 587, 143, 993, 465].includes(port)
+            ? "mdi-email"
+            : [445, 137, 139].includes(port)
+              ? "mdi-nas"
+              : [20, 21, 69, 115, 989, 990].includes(port)
+                ? "mdi-folder-network"
+                : [3306, 5432, 2483, 2484].includes(port)
+                  ? "mdi-database"
+                  : [123].includes(port)
+                    ? "mdi-timer-cog"
+                    : enums.findings.Port.icon;
+    }
+    return enums.findings.Port.icon;
+  }
+
+  return { getTaskTitle, getTaskStatus, getTaskDuration, getIconByPort };
 }

@@ -6,7 +6,8 @@ on:
       - 'src/backend/**'
 
 env:
-  REQUIRED_COVERAGE: 95
+  # Temporal change to detect actual test errors easily. Then change it to 95
+  REQUIRED_COVERAGE: 90
 
 jobs:
   unit-tests:

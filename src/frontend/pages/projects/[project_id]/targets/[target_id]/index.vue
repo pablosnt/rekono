@@ -3,6 +3,6 @@ definePageMeta({ layout: false });
 const route = useRoute();
 const router = useRouter();
 router.push(
-  `/projects/${route.params.project_id}/targets/${route.params.target_id}/scope`,
+  `/projects/${route.params.project_id}/targets/${route.params.target_id}/dashboard`,
 );
 </script>

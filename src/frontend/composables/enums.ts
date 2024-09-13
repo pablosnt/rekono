@@ -133,6 +133,16 @@ export function useEnums() {
     Error: { color: "red", icon: "mdi-alert-circle" },
     Completed: { color: "green", icon: "mdi-check-circle" },
   };
+  const authentications = [
+    "None",
+    "Basic",
+    "Bearer",
+    "Cookie",
+    "Digest",
+    "JWT",
+    "NTLM",
+    "Token",
+  ];
 
   return {
     stages,
@@ -149,5 +159,6 @@ export function useEnums() {
     alertItems,
     alertModes,
     statuses,
+    authentications,
   };
 }

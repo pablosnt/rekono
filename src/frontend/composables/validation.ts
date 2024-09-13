@@ -25,5 +25,6 @@ export function useValidation() {
     targetRegex: /^[\w\d.,:\-/*?+()\\]{1,300}$/,
     password,
     cve: /^CVE-\d{4}-\d{1,7}$/,
+    path: /^[\w.\-_/\\]{0,500}$/,
   };
 }
