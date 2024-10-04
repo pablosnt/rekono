@@ -13,7 +13,7 @@ class Theharvester(BaseParser):
         "trello_urls": OSINTDataType.URL,
         "interesting_urls": OSINTDataType.URL,
         "emails": OSINTDataType.EMAIL,
-        "linkedin_links": OSINTDataType.LINK,
+        "linkedin_links": OSINTDataType.URL,
         "asns": OSINTDataType.ASN,
         "twitter_people": OSINTDataType.USER,
         "linkedin_people": OSINTDataType.USER,

@@ -56,10 +56,10 @@ class BaseViewSet(ModelViewSet):
         if members_field:
             if self.request.user.id:
                 project_filter = {members_field: self.request.user}
-                return super().get_queryset().filter(**project_filter)
+                return super().get_queryset().filter(**project_filter).distinct()
             else:  # pragma: no cover
                 return None
-        return super().get_queryset()
+        return super().get_queryset().distinct()
 
     def perform_create(self, serializer: Serializer) -> None:
         model = self._get_model()

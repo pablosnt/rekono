@@ -70,7 +70,7 @@
               :label="
                 mode === 'Filter' && item
                   ? `Filter by '${item === 'CVE' ? item : enums.alertItems[item].filter}'`
-                  : 'Filter'
+                  : 'Filter value'
               "
               :prepend-inner-icon="enums.alertModes.Filter.icon"
               variant="outlined"

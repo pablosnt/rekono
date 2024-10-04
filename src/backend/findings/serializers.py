@@ -17,17 +17,11 @@ from findings.models import (
 class OSINTSerializer(TriageFindingSerializer):
     class Meta:
         model = OSINT
-        fields = TriageFindingSerializer.Meta.fields + (
-            "data",
-            "data_type",
-            "source",
-            "reference",
-        )
+        fields = TriageFindingSerializer.Meta.fields + ("data", "data_type", "source")
         read_only_fields = TriageFindingSerializer.Meta.read_only_fields + (
             "data",
             "data_type",
             "source",
-            "reference",
         )
 
 

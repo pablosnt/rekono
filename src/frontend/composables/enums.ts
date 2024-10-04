@@ -1,3 +1,5 @@
+import type Link from "~/components/note/link.vue";
+
 export function useEnums() {
   const stages = {
     OSINT: {
@@ -143,6 +145,22 @@ export function useEnums() {
     "NTLM",
     "Token",
   ];
+  const osintTypes = {
+    IP: { icon: "mdi-ip" },
+    Domain: { icon: "mdi-routes" },
+    VHOST: { icon: "mdi-routes" },
+    URL: { icon: "mdi-link" },
+    Email: { icon: "mdi-email" },
+    ASN: { icon: "mdi-network" },
+    Username: { icon: "mdi-shield-account" },
+    Password: { icon: "mdi-shield-key" },
+  };
+  const triage = {
+    Untriaged: { icon: "mdi-help-circle", color: "grey" },
+    "False Positive": { icon: "mdi-close-circle", color: "red" },
+    "True Positive": { icon: "mdi-check-circle", color: "green" },
+    "Won't Fix": { icon: "mdi-cancel", color: "orange" },
+  };
 
   return {
     stages,
@@ -160,5 +178,7 @@ export function useEnums() {
     alertModes,
     statuses,
     authentications,
+    triage,
+    osintTypes,
   };
 }

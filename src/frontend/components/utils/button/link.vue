@@ -1,5 +1,6 @@
 <template>
   <v-btn
+    v-if="link"
     variant="text"
     icon="mdi-open-in-new"
     color="medium-emphasis"

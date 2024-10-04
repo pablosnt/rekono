@@ -3,9 +3,12 @@ from typing import Any
 from django.utils import timezone
 from findings.models import OSINT, Host
 from rest_framework.serializers import ModelSerializer
+from users.serializers import SimpleUserSerializer
 
 
 class FindingSerializer(ModelSerializer):
+    fixed_by = SimpleUserSerializer(many=False, read_only=True)
+
     class Meta:
         model = Host  # It's needed to define a non-abstract model as default. It will be overwritten
         fields = (
@@ -21,6 +24,9 @@ class FindingSerializer(ModelSerializer):
 
 
 class TriageFindingSerializer(ModelSerializer):
+    fixed_by = SimpleUserSerializer(many=False, read_only=True)
+    triage_by = SimpleUserSerializer(many=False, read_only=True)
+
     class Meta:
         model = OSINT  # It's needed to define a non-abstract model as default. It will be overwritten
         fields = FindingSerializer.Meta.fields + (

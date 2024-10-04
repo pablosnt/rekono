@@ -1,6 +1,6 @@
 <template>
   <MenuProject>
-    <TabTarget />
+    <TargetTab />
   </MenuProject>
 </template>
 <!-- todo -->

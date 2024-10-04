@@ -6,6 +6,7 @@
     :width="width"
     :loading="loading ? 'red' : false"
     :title="title"
+    :subtitle="subtitle"
     :prepend-avatar="avatar"
   >
     <template #append>
@@ -22,6 +23,11 @@
 <script setup lang="ts">
 defineProps({
   title: String,
+  avatar: {
+    type: String,
+    required: false,
+    default: undefined,
+  },
   loading: {
     type: Boolean,
     required: false,

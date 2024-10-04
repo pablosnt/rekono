@@ -14,10 +14,10 @@
       @new-filter="(key, value) => (key === 'target' ? getTasks(value) : null)"
     >
       <!--
-           TODO: Fix date
-           TODO: Sometimes, multiple reports are created with the same ID, and then you can't remove or download them
-           TODO: PDF reports are not generated. Dialog gets stucked
-           TODO: Allow filtering by completed tasks in autocomplete?   
+           todo: Fix date
+           todo: Sometimes, multiple reports are created with the same ID, and then you can't remove or download them
+           todo: PDF reports are not generated. Dialog gets stucked
+           todo: Allow filtering by completed tasks in autocomplete?   
         -->
       <template #data>
         <v-row dense>

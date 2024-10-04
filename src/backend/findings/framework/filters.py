@@ -1,4 +1,4 @@
-from django_filters.filters import ModelChoiceFilter
+from django_filters.filters import ModelMultipleChoiceFilter
 from findings.models import OSINT
 from framework.filters import MultipleFieldFilterSet
 from projects.models import Project
@@ -9,20 +9,21 @@ from users.models import User
 
 
 class FindingFilter(MultipleFieldFilterSet):
-    tool = ModelChoiceFilter(
+    tool = ModelMultipleChoiceFilter(
         queryset=Tool.objects.all(), field_name="executions__configuration__tool"
     )
-    task = ModelChoiceFilter(queryset=Task.objects.all(), field_name="executions__task")
-    target = ModelChoiceFilter(
+    task = ModelMultipleChoiceFilter(
+        queryset=Task.objects.all(), field_name="executions__task"
+    )
+    target = ModelMultipleChoiceFilter(
         queryset=Target.objects.all(), field_name="executions__task__target"
     )
-    project = ModelChoiceFilter(
+    project = ModelMultipleChoiceFilter(
         queryset=Project.objects.all(), field_name="executions__task__target__project"
     )
-    executor = ModelChoiceFilter(
+    executor = ModelMultipleChoiceFilter(
         queryset=User.objects.all(), field_name="executions__task__executor"
     )
-    fixed_by = ModelChoiceFilter(queryset=User.objects.all(), field_name="fixed_by")
 
     class Meta:
         model = OSINT  # It's needed to define a non-abstract model as default. It will be overwritten
@@ -31,11 +32,11 @@ class FindingFilter(MultipleFieldFilterSet):
             "is_fixed": ["exact"],
             "auto_fixed": ["exact"],
             "fixed_date": ["gte", "lte", "exact"],
+            "fixed_by": ["exact"],
         }
 
 
 class TriageFindingFilter(FindingFilter):
-    triage_by = ModelChoiceFilter(queryset=User.objects.all(), field_name="triage_by")
 
     class Meta:
         model = OSINT
@@ -44,4 +45,5 @@ class TriageFindingFilter(FindingFilter):
             "triage_status": ["exact"],
             "triage_comment": ["exact", "icontains"],
             "triage_date": ["gte", "lte", "exact"],
+            "triage_by": ["exact"],
         }

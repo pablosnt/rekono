@@ -24,7 +24,6 @@ class OSINT(TriageFinding):
     data = models.TextField(max_length=250)
     data_type = models.TextField(max_length=10, choices=OSINTDataType.choices)
     source = models.TextField(max_length=50, blank=True, null=True)
-    reference = models.TextField(max_length=250, blank=True, null=True)
 
     unique_fields = ["data", "data_type"]
 

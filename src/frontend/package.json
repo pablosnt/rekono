@@ -1,7 +1,7 @@
 {
   "name": "frontend",
   "version": "2.0.0",
-  "description": "Pentesting automation platform that combines hacking tools to complete assessments",
+  "description": "Pentesting automation platform that combines hacking tools to complete security assessments",
   "author": "Pablo Santiago López <rekono.project@gmail.com>",
   "homepage": "https://github.com/pablosnt/rekono",
   "private": true,

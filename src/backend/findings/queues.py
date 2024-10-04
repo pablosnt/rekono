@@ -1,6 +1,7 @@
 import logging
 
 from django_rq import job
+from executions.enums import Status
 from executions.models import Execution
 from findings.models import (
     OSINT,
@@ -62,6 +63,11 @@ class FindingsQueue(BaseQueue):
                             platform.process_alert(alert, finding)
                         break
         if settings.auto_fix_findings:
+            completed_executions = Execution.objects.filter(
+                configuration=execution.configuration,
+                task__target=execution.task.target,
+                status=Status.COMPLETED,
+            ).exclude(id=execution.id)
             for finding_type in [
                 OSINT,
                 Host,
@@ -72,11 +78,9 @@ class FindingsQueue(BaseQueue):
                 Vulnerability,
                 Exploit,
             ]:
+
                 finding_type.objects.fix(
                     finding_type.objects.filter(
-                        executions__configuration=execution.configuration,
-                        executions__task__target=execution.task.target,
-                    )
-                    .exclude(executions=execution)
-                    .all()
+                        executions__in=completed_executions
+                    ).all()
                 )

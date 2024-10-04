@@ -124,8 +124,8 @@
               <v-card-actions>
                 <v-btn
                   v-if="task.status && task.progress === 100"
-                  icon="mdi-repeat"
-                  color="green"
+                  icon
+                  variant="text"
                   @click.prevent.stop="
                     api
                       .create({}, task.id, 'repeat/')
@@ -135,7 +135,10 @@
                         ),
                       )
                   "
-                />
+                >
+                  <v-icon icon="mdi-repeat" color="green" />
+                  <v-tooltip activator="parent" text="Re-run" />
+                </v-btn>
                 <UtilsButtonDelete
                   v-if="
                     task.status &&

@@ -255,7 +255,7 @@ function collapseFilters() {
   }
 }
 function addParameter(key: string, value: string) {
-  // TODO: Keep parameters as URL parameter to allow links with filters from other pages or provided by users. Needed to link findings between them
+  // todo: Keep parameters as URL parameter to allow links with filters from other pages or provided by users. Needed to link findings between them
   if (value !== null && value !== undefined) {
     parameters.value[key] = value;
     emit("newFilter", key, value);
