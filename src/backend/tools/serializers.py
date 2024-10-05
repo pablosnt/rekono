@@ -31,11 +31,10 @@ class IntensitySerializer(ModelSerializer):
 
 class SimpleConfigurationSerializer(ModelSerializer):
     stage = StageField(model=Stage)
-    outputs = OutputSerializer(many=True, read_only=True)
 
     class Meta:
         model = Configuration
-        fields = ("id", "name", "stage", "default", "outputs")
+        fields = ("id", "name", "stage", "default")
 
 
 class ToolSerializer(LikeSerializer):

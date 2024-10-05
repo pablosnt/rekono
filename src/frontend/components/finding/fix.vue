@@ -6,7 +6,7 @@
     <v-chip
       color="green"
       :disabled="finding.auto_fixed"
-      :variant="finding.is_fixed ? 'flat' : 'tonal'"
+      :variant="finding.is_fixed ? 'tonal' : 'flat'"
       :closable="finding.is_fixed && !finding.auto_fixed"
       @click="
         finding.is_fixed

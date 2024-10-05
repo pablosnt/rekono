@@ -28,6 +28,8 @@ class ExecutionSerializer(ModelSerializer):
 
 
 class SimpleExecutionSerializer(ModelSerializer):
+    configuration = ConfigurationSerializer(many=False, read_only=True)
+
     class Meta:
         model = Execution
         fields = ("id", "group", "configuration", "status", "start", "end")

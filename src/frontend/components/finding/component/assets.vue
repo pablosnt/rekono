@@ -1,8 +1,3 @@
-<template>
-  <MenuProject>
-    <FindingTab />
-  </MenuProject>
-</template>
 <!-- 
     TODO:
     Hosts
@@ -13,7 +8,3 @@
       -- Exploits (Dialog) 
   -->
 <!-- TODO: Check all findings have the relationships needed on creation-->
-
-<script setup lang="ts">
-definePageMeta({ layout: false });
-</script>

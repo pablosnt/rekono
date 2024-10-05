@@ -1,12 +1,14 @@
 from typing import Any
 
 from django.utils import timezone
+from executions.serializers import SimpleExecutionSerializer
 from findings.models import OSINT, Host
 from rest_framework.serializers import ModelSerializer
 from users.serializers import SimpleUserSerializer
 
 
 class FindingSerializer(ModelSerializer):
+    executions = SimpleExecutionSerializer(many=True, read_only=True)
     fixed_by = SimpleUserSerializer(many=False, read_only=True)
 
     class Meta:
@@ -21,10 +23,18 @@ class FindingSerializer(ModelSerializer):
             "defect_dojo_id",
             "hacktricks_link",
         )
+        read_only_fields = (
+            "id",
+            "executions",
+            "auto_fixed",
+            "fixed_date",
+            "fixed_by",
+            "defect_dojo_id",
+            "hacktricks_link",
+        )
 
 
-class TriageFindingSerializer(ModelSerializer):
-    fixed_by = SimpleUserSerializer(many=False, read_only=True)
+class TriageFindingSerializer(FindingSerializer):
     triage_by = SimpleUserSerializer(many=False, read_only=True)
 
     class Meta:
@@ -35,7 +45,10 @@ class TriageFindingSerializer(ModelSerializer):
             "triage_date",
             "triage_by",
         )
-        read_only_fields = FindingSerializer.Meta.fields + ("triage_date", "triage_by")
+        read_only_fields = FindingSerializer.Meta.read_only_fields + (
+            "triage_date",
+            "triage_by",
+        )
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         attrs = super().validate(attrs)
