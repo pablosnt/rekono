@@ -1,6 +1,6 @@
 from datetime import timedelta
 from pathlib import Path as PathFile
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Optional
 
 import requests
 from django.utils import timezone
@@ -69,7 +69,7 @@ class DefectDojo(BaseIntegration):
         except Exception:
             return False
 
-    def create_product_type(self, name: str, description: str) -> Dict[str, Any]:
+    def create_product_type(self, name: str, description: str) -> dict[str, Any]:
         return self._request(
             self.session.post,
             "/product_types/",
@@ -77,8 +77,8 @@ class DefectDojo(BaseIntegration):
         )
 
     def create_product(
-        self, product_type: int, name: str, description: str, tags: List[str]
-    ) -> Dict[str, Any]:
+        self, product_type: int, name: str, description: str, tags: list[str]
+    ) -> dict[str, Any]:
         return self._request(
             self.session.post,
             "/products/",
@@ -91,8 +91,8 @@ class DefectDojo(BaseIntegration):
         )
 
     def create_engagement(
-        self, product: int, name: str, description: str, tags: List[str]
-    ) -> Dict[str, Any]:
+        self, product: int, name: str, description: str, tags: list[str]
+    ) -> dict[str, Any]:
         start = timezone.now()
         end = start + timedelta(days=7)
         return self._request(
@@ -110,7 +110,7 @@ class DefectDojo(BaseIntegration):
             },
         )
 
-    def _create_test_type(self, name: str, tags: List[str]) -> Dict[str, Any]:
+    def _create_test_type(self, name: str, tags: list[str]) -> dict[str, Any]:
         return self._request(
             self.session.post,
             "/test_types/",
@@ -119,7 +119,7 @@ class DefectDojo(BaseIntegration):
 
     def _create_test(
         self, test_type: int, engagement: int, title: str, description: str
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         return self._request(
             self.session.post,
             "/tests/",
@@ -135,7 +135,7 @@ class DefectDojo(BaseIntegration):
 
     def _create_endpoint(
         self, product: int, endpoint: Path, target: Target
-    ) -> Optional[Dict[str, Any]]:
+    ) -> Optional[dict[str, Any]]:
         try:
             return self._request(
                 self.session.post,
@@ -145,7 +145,7 @@ class DefectDojo(BaseIntegration):
         except HTTPError:
             return None
 
-    def _create_finding(self, test: int, finding: Finding) -> Dict[str, Any]:
+    def _create_finding(self, test: int, finding: Finding) -> dict[str, Any]:
         data = finding.defect_dojo()
         return self._request(
             self.session.post,
@@ -159,8 +159,8 @@ class DefectDojo(BaseIntegration):
         )
 
     def _import_scan(
-        self, engagement: int, execution: Execution, tags: List[str]
-    ) -> Dict[str, Any]:
+        self, engagement: int, execution: Execution, tags: list[str]
+    ) -> dict[str, Any]:
         with open(execution.output_file, "r") as report:
             return self._request(
                 self.session.post,
@@ -173,7 +173,7 @@ class DefectDojo(BaseIntegration):
                 files={"file": report},
             )
 
-    def _process_findings(self, execution: Execution, findings: List[Finding]) -> None:
+    def _process_findings(self, execution: Execution, findings: list[Finding]) -> None:
         target_sync = DefectDojoTargetSync.objects.filter(target=execution.task.target)
         if target_sync.exists():
             sync = target_sync.first()

@@ -1,0 +1,312 @@
+<template>
+  <v-container fluid>
+    <v-row v-if="header" justify="center" dense>
+      <v-text-field
+        v-model="search"
+        :loading="loadingSearch"
+        prepend-inner-icon="mdi-magnify"
+        label="Search"
+        variant="outlined"
+        hide-details
+        single-line
+        autofocus
+        clearable
+        @update:model-value="loadData"
+      />
+      <v-btn
+        v-if="filtering?.length > 0"
+        :icon="
+          expandFilters ? 'mdi-flip-v mdi-filter-variant' : 'mdi-filter-variant'
+        "
+        variant="text"
+        size="large"
+        @click="
+          expandFilters = !expandFilters;
+          !expandFilters ? collapseFilters() : null;
+        "
+      />
+      <slot name="add">
+        <v-dialog
+          v-if="add !== null"
+          :width="addFullscreen ? '100%' : 'auto'"
+          :fullscreen="addFullscreen"
+        >
+          <template #activator="{ props: activatorProps }">
+            <v-btn
+              icon="mdi-plus-thick"
+              variant="text"
+              size="large"
+              color="green"
+              v-bind="activatorProps"
+            />
+          </template>
+          <template #default="{ isActive }">
+            <!-- todo: Check when add must be displayed depending on the user roles -->
+            <component
+              :is="add"
+              :api="api"
+              :parameters="defaultParameters"
+              @completed="
+                loadData(true);
+                isActive.value = false;
+              "
+              @close-dialog="isActive.value = false"
+            />
+          </template>
+        </v-dialog>
+      </slot>
+    </v-row>
+    <v-expand-transition>
+      <v-container v-if="expandFilters" fluid class="mb-0">
+        <v-row justify="center" dense>
+          <template v-for="f in filtering" :key="f.key">
+            <v-col
+              class="d-flex justify-center align-center"
+              :cols="f.cols ? f.cols : 3"
+            >
+              <v-autocomplete
+                v-if="f.type === 'autocomplete'"
+                v-model="f.value"
+                auto-select-first
+                clearable
+                hide-details
+                density="comfortable"
+                variant="outlined"
+                :label="f.label"
+                :items="
+                  f.key !== 'ordering'
+                    ? f.collection
+                    : getSortItems(f.collection)
+                "
+                :item-title="f.fieldTitle"
+                return-object
+                :color="f.value && f.value.color ? f.value.color : null"
+                :prepend-inner-icon="
+                  f.value && f.value.icon && !f.enforceIcon
+                    ? f.value.icon
+                    : f.icon
+                "
+                :disabled="f.disabled ? f.disabled : false"
+                @update:model-value="
+                  addParameter(
+                    f.key,
+                    f.value && f.fieldValue ? f.value[f.fieldValue] : f.value,
+                  )
+                "
+              >
+                <template
+                  v-if="f.key.includes('task')"
+                  #item="{ props: taskProps, item }"
+                >
+                  <v-list-item
+                    v-bind="taskProps"
+                    :title="utils.getTaskTitle(item)"
+                  />
+                </template>
+                <template v-if="f.key.includes('task')" #selection="{ item }">
+                  <p>{{ utils.getTaskTitle(item.raw) }}</p>
+                </template>
+              </v-autocomplete>
+              <v-text-field
+                v-if="f.type === 'text'"
+                v-model="f.value"
+                hide-details
+                clearable
+                density="comfortable"
+                variant="outlined"
+                :label="f.label"
+                :prepend-inner-icon="f.icon"
+                :disabled="f.disabled ? f.disabled : false"
+                @update:model-value="addParameter(f.key, f.value)"
+              />
+              <v-switch
+                v-if="f.type === 'switch'"
+                v-model="f.value"
+                hide-details
+                :label="f.label"
+                :color="f.color"
+                :true-value="f.trueValue"
+                :false-value="f.falseValue"
+                :disabled="f.disabled ? f.disabled : false"
+                @update:model-value="addParameter(f.key, f.value)"
+              />
+            </v-col>
+          </template>
+        </v-row>
+      </v-container>
+    </v-expand-transition>
+  </v-container>
+  <v-container fluid>
+    <v-progress-linear
+      v-if="loadingData"
+      height="5"
+      color="red"
+      indeterminate
+      rounded
+    />
+    <v-row
+      v-if="
+        data !== null &&
+        icon !== null &&
+        (emptyHead !== undefined ||
+          emptyTitle !== undefined ||
+          emptyText !== undefined) &&
+        data.length === 0
+      "
+      justify="center"
+      dense
+    >
+      <v-empty-state
+        :icon="icon"
+        :headline="emptyHead"
+        :title="emptyTitle"
+        :text="emptyText"
+      >
+        <template #media>
+          <v-icon class="mb-3" color="red-darken-4" />
+        </template>
+      </v-empty-state>
+    </v-row>
+    <slot v-if="data !== null && data.length > 0" name="data" />
+  </v-container>
+
+  <v-pagination
+    v-model="page"
+    :length="Math.ceil(total / api.default_size)"
+    rounded="circle"
+    @update:model-value="loadData"
+  />
+</template>
+
+<script setup lang="ts">
+const props = defineProps({
+  api: Object,
+  filtering: Array<object>,
+  ordering: String,
+  header: {
+    type: Boolean,
+    required: false,
+    default: true,
+  },
+  add: {
+    type: Object,
+    required: false,
+    default: null,
+  },
+  addFullscreen: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  defaultParameters: {
+    type: Object,
+    required: false,
+    default: null,
+  },
+  icon: {
+    type: String,
+    required: false,
+    default: null,
+  },
+  emptyHead: {
+    type: String,
+    required: false,
+    default: undefined,
+  },
+  emptyTitle: {
+    type: String,
+    required: false,
+    default: undefined,
+  },
+  emptyText: {
+    type: String,
+    required: false,
+    default: undefined,
+  },
+});
+const emit = defineEmits(["loadData", "newFilter"]);
+const utils = ref(useUtils());
+const page = ref(1);
+const total = ref(0);
+const data = ref(null);
+const search = ref(null);
+const parameters = ref(
+  props.defaultParameters && props.ordering
+    ? Object.assign({}, props.defaultParameters, { ordering: props.ordering })
+    : props.defaultParameters
+      ? props.defaultParameters
+      : props.ordering
+        ? { ordering: props.ordering }
+        : {},
+);
+const loadingSearch = ref(false);
+const loadingData = ref(false);
+const expandFilters = ref(false);
+function collapseFilters() {
+  if (
+    Object.keys(parameters.value).length !== 1 ||
+    parameters.value.ordering !== props.ordering
+  ) {
+    parameters.value = props.ordering ? { ordering: props.ordering } : {};
+    loadData(true);
+    Object.entries(props.filtering).map(([_, v]) => {
+      v.value = null;
+    });
+  }
+}
+function addParameter(key: string, value: string) {
+  // todo: Keep parameters as URL parameter to allow links with filters from other pages or provided by users. Needed to link findings between them
+  if (value !== null && value !== undefined) {
+    parameters.value[key] = value;
+    emit("newFilter", key, value);
+  } else if (key === "ordering" && props.ordering) {
+    parameters.value.ordering = props.ordering;
+    emit("newFilter", key, props.ordering);
+  } else {
+    /* eslint-disable-next-line @typescript-eslint/no-dynamic-delete */
+    delete parameters.value[key];
+    emit("newFilter", key, null);
+  }
+  loadData();
+}
+function loadData(loading: boolean = false) {
+  if (search.value) {
+    loadingSearch.value = true;
+    parameters.value.search = search.value;
+  } else if (parameters.value.search) {
+    delete parameters.value.search;
+  }
+  if (loading) {
+    loadingData.value = true;
+  }
+  props.api.list(parameters.value, false, page.value).then((response) => {
+    emit("loadData", response.items);
+    total.value = response.total;
+    data.value = response.items;
+    loadingSearch.value = false;
+    loadingData.value = false;
+  });
+}
+loadData(true);
+function getSortItems(collection: Array<string>) {
+  return collection
+    .map((item) => {
+      let name =
+        item === "id"
+          ? "ID"
+          : `${item.charAt(0).toUpperCase()}${item.slice(1)}`;
+      if (name.includes("__")) {
+        name = name.split("__")[1];
+        name = `${name.charAt(0).toUpperCase()}${name.slice(1)}`;
+      } else if (name.includes("_")) {
+        name = name.split("_")[0];
+      }
+      return [
+        { id: item, name: name },
+        { id: `-${item}`, name: `${name} desc` },
+      ];
+    })
+    .flat(1);
+}
+defineExpose({ loadData });
+</script>

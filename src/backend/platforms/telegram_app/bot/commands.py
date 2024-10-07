@@ -1,15 +1,14 @@
 import logging
-from typing import Any, List
+from typing import Any
 
 from asgiref.sync import sync_to_async
-from telegram import Update
-from telegram.ext import CallbackContext, CommandHandler, ConversationHandler
-
 from platforms.telegram_app.bot.enums import Context, Section
 from platforms.telegram_app.bot.framework import BaseTelegramBot
 from platforms.telegram_app.models import TelegramChat
 from rekono.settings import DESCRIPTION
 from security.cryptography.hashing import hash
+from telegram import Update
+from telegram.ext import CallbackContext, CommandHandler, ConversationHandler
 from users.models import User
 
 logger = logging.getLogger()
@@ -17,7 +16,13 @@ logger = logging.getLogger()
 
 class BaseCommand(CommandHandler, BaseTelegramBot):
     def __init__(self, **kwargs: Any) -> None:
-        super().__init__(command=self.get_name(), callback=self._execute_command)
+        super().__init__(command=self.get_name(), callback=self.execute_command)
+
+    async def execute_command(self, update: Update, context: CallbackContext) -> None:
+        try:
+            await self._execute_command(update, context)
+        except Exception:  # nosec
+            pass
 
 
 class Help(BaseCommand):
@@ -25,12 +30,12 @@ class Help(BaseCommand):
     section = Section.BASIC
     allow_readers = True
 
-    def __init__(self, commands: List[BaseTelegramBot]) -> None:
+    def __init__(self, commands: list[BaseTelegramBot]) -> None:
         self.bot_commands = commands + [self]
         self.bot_commands.sort(key=lambda c: c.section.value)
         super().__init__()
 
-    def _build_help_message(self, commands: List[BaseTelegramBot]) -> str:
+    def _build_help_message(self, commands: list[BaseTelegramBot]) -> str:
         message = f"{self._escape(DESCRIPTION)}\n"
         current_section = None
         for command in commands:

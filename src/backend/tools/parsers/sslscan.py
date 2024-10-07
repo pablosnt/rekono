@@ -1,4 +1,4 @@
-from typing import Any, List
+from typing import Any
 
 from findings.enums import Severity
 from findings.framework.models import Finding
@@ -7,7 +7,7 @@ from tools.parsers.base import BaseParser
 
 
 class Sslscan(BaseParser):
-    technologies: List[Technology] = []
+    technologies: list[Technology] = []
 
     def create_finding(self, finding_type: Finding, **fields: Any) -> Finding:
         if (
@@ -47,9 +47,11 @@ class Sslscan(BaseParser):
                             technology=technology,
                             name=f"Insecure {technology.name} version supported",
                             description=f"{technology.name} {technology.version} is supported",
-                            severity=Severity.MEDIUM
-                            if technology.name == "TLS"
-                            else Severity.HIGH,
+                            severity=(
+                                Severity.MEDIUM
+                                if technology.name == "TLS"
+                                else Severity.HIGH
+                            ),
                             # CWE-326: Inadequate Encryption Strength
                             cwe="CWE-326",
                         )

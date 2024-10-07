@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 
 from findings.enums import TriageStatus
 from findings.framework.serializers import FindingSerializer, TriageFindingSerializer
@@ -17,17 +17,11 @@ from findings.models import (
 class OSINTSerializer(TriageFindingSerializer):
     class Meta:
         model = OSINT
-        fields = TriageFindingSerializer.Meta.fields + (
-            "data",
-            "data_type",
-            "source",
-            "reference",
-        )
+        fields = TriageFindingSerializer.Meta.fields + ("data", "data_type", "source")
         read_only_fields = TriageFindingSerializer.Meta.read_only_fields + (
             "data",
             "data_type",
             "source",
-            "reference",
         )
 
 
@@ -133,7 +127,7 @@ class VulnerabilitySerializer(TriageFindingSerializer):
         )
 
     def update(
-        self, instance: Vulnerability, validated_data: Dict[str, Any]
+        self, instance: Vulnerability, validated_data: dict[str, Any]
     ) -> Vulnerability:
         instance = super().update(instance, validated_data)
         if instance.triage_status == TriageStatus.FALSE_POSITIVE:

@@ -1,5 +1,3 @@
-from typing import Dict, List
-
 from findings.enums import Severity
 from findings.models import Technology, Vulnerability
 from tools.parsers.base import BaseParser
@@ -14,7 +12,7 @@ class Sshaudit(BaseParser):
     }
 
     def _parse_standard_output(self) -> None:
-        algorithms: Dict[str, List[str]] = {
+        algorithms: dict[str, list[str]] = {
             k: [] for k in self.cryptography_types.keys()
         }
         technology = None

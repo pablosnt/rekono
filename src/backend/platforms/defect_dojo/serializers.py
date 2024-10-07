@@ -1,4 +1,4 @@
-from typing import Any, Dict, cast
+from typing import Any, cast
 
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
@@ -56,7 +56,7 @@ class BaseDefectDojoSerializer(Serializer):
             self.client = DefectDojo()
         return self.client
 
-    def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         if not self._get_client().is_available():
             raise ValidationError(
                 "Defect-Dojo integration hasn't been configured properly",
@@ -111,7 +111,7 @@ class DefectDojoProductTypeSerializer(BaseDefectDojoSerializer):
         write_only=True,
     )
 
-    def create(self, validated_data: Dict[str, Any]) -> Dict[str, Any]:
+    def create(self, validated_data: dict[str, Any]) -> dict[str, Any]:
         return self._get_client().create_product_type(
             validated_data["name"], validated_data["description"]
         )
@@ -145,7 +145,7 @@ class DefectDojoProductSerializer(BaseDefectDojoSerializer):
         write_only=True,
     )
 
-    def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         attrs = super().validate(attrs)
         attrs["project"] = get_object_or_404(
             Project,
@@ -154,7 +154,7 @@ class DefectDojoProductSerializer(BaseDefectDojoSerializer):
         )
         return attrs
 
-    def create(self, validated_data: Dict[str, Any]) -> Dict[str, Any]:
+    def create(self, validated_data: dict[str, Any]) -> dict[str, Any]:
         return self._get_client().create_product(
             validated_data["product_type"],
             validated_data["name"],
@@ -186,7 +186,7 @@ class DefectDojoEngagementSerializer(BaseDefectDojoSerializer):
         write_only=True,
     )
 
-    def create(self, validated_data: Dict[str, Any]) -> Dict[str, Any]:
+    def create(self, validated_data: dict[str, Any]) -> dict[str, Any]:
         return self._get_client().create_engagement(
             validated_data["product"],
             validated_data["name"],
