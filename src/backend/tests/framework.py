@@ -245,7 +245,6 @@ class RekonoTest(TestCase):
                 "data": "admin",
                 "data_type": OSINTDataType.USER,
                 "source": "Google",
-                "reference": "https://any.com",
             },
             Host: {
                 "address": "10.10.10.10",

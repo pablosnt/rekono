@@ -1,29 +1,29 @@
 <template>
   <v-tabs
-        v-model="tab"
-        align-tabs="center"
-        fixed-tabs
-        @update:model-value="tabChange()"
-      >
-        <v-tab
-          value="osint"
-          text="OSINT"
-          :prepend-icon="enums.findings.OSINT.icon"
-          color="red-darken-2"
-        />
-        <v-tab
-          value="assets"
-          text="Assets"
-          :prepend-icon="enums.findings.Host.icon"
-          color="red-darken-2"
-        />
-        <v-tab
-          value="vulnerabilities"
-          text="Vulnerabilities"
-          :prepend-icon="enums.findings.Vulnerability.icon"
-          color="red-darken-2"
-        />
-      </v-tabs>
+    v-model="tab"
+    align-tabs="center"
+    fixed-tabs
+    @update:model-value="tabChange()"
+  >
+    <v-tab
+      value="osint"
+      text="OSINT"
+      :prepend-icon="enums.findings.OSINT.icon"
+      color="red-darken-2"
+    />
+    <v-tab
+      value="assets"
+      text="Assets"
+      :prepend-icon="enums.findings.Host.icon"
+      color="red-darken-2"
+    />
+    <v-tab
+      value="vulnerabilities"
+      text="Vulnerabilities"
+      :prepend-icon="enums.findings.Vulnerability.icon"
+      color="red-darken-2"
+    />
+  </v-tabs>
   <Dataset
     v-if="api"
     ref="dataset"
@@ -36,7 +36,7 @@
     :emtpy-text="tabs[tab].emptyText"
     @load-data="(data) => (findings = data)"
   >
-    <template #data>      
+    <template #data>
       <v-tabs-window v-model="tab">
         <v-tabs-window-item value="osint">
           <FindingComponentOsint
@@ -89,40 +89,52 @@ const props = defineProps({
 const route = useRoute();
 const router = useRouter();
 const enums = useEnums();
+const dataset = ref(null);
+const findings = ref([]);
 
 // TODO: Filtering
 const tabs = ref({
-  "osint": {
+  osint: {
     endpoint: "/api/osint/",
     icon: enums.findings.OSINT.icon,
     emptyHead: "No OSINT findings",
-    emptyText: "Run some OSINT tool to identify some OSINT information about your targets",
-    filtering: []
+    emptyText:
+      "Run some OSINT tool to identify some OSINT information about your targets",
+    filtering: [],
   },
-  "assets": {
+  assets: {
     endpoint: "/api/osint/",
     icon: enums.findings.Host.icon,
     emptyHead: "No assets found",
-    emptyText: "Run some enumeration tool to identify some assets exposed by your targets",
-    filtering: []
+    emptyText:
+      "Run some enumeration tool to identify some assets exposed by your targets",
+    filtering: [],
   },
-  "vulnerabilities": {
+  vulnerabilities: {
     endpoint: "/api/osint/",
     icon: enums.findings.Vulnerability.icon,
     emptyHead: "No vulnerabilities found",
     emptyText: "Run some vulnerability scan to identify some in your assets",
-    filtering: []
-  }
-})
-
-const tab = ref(route.query.tab && ['osint', 'assets', 'vulnerabilities'].includes(route.query.tab.toString().toLowerCase()) ? route.query.tab.toString().toLowerCase() : 'osint');
-const dataset = ref(null);
-const findings = ref([]);
+    filtering: [],
+  },
+});
 // TODO
 const globalFiltering = [];
 
-const api = computed(() => { return useApi(tabs.value[tab.value].endpoint, true) });
-const filtering = computed(() => { return globalFiltering.concat(tabs.value[tab.value].filtering)});
+const tab = ref(
+  route.query.tab &&
+    ["osint", "assets", "vulnerabilities"].includes(
+      route.query.tab.toString().toLowerCase(),
+    )
+    ? route.query.tab.toString().toLowerCase()
+    : "osint",
+);
+const api = computed(() => {
+  return useApi(tabs.value[tab.value].endpoint, true);
+});
+const filtering = computed(() => {
+  return globalFiltering.concat(tabs.value[tab.value].filtering);
+});
 
 const defaultParameters = ref(
   props.execution
@@ -144,9 +156,9 @@ useApi("/api/defect-dojo/settings/", true)
 
 function tabChange() {
   if (props.matchPath) {
-    router.replace({ query: { tab: tab.value }})
+    router.replace({ query: { tab: tab.value } });
   }
-  findings.value = []
+  findings.value = [];
   dataset.value.loadData(true);
 }
 </script>

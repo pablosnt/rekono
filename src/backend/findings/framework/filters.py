@@ -37,7 +37,6 @@ class FindingFilter(MultipleFieldFilterSet):
 
 
 class TriageFindingFilter(FindingFilter):
-
     class Meta:
         model = OSINT
         fields = {

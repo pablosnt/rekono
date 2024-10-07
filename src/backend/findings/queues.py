@@ -78,7 +78,6 @@ class FindingsQueue(BaseQueue):
                 Vulnerability,
                 Exploit,
             ]:
-
                 finding_type.objects.fix(
                     finding_type.objects.filter(
                         executions__in=completed_executions

@@ -1,4 +1,10 @@
-<template></template>
+<template>
+  <v-container fluid>
+    <v-row dense>
+      <v-col v-for="finding in findings" :key="finding.id" cols="6" />
+    </v-row>
+  </v-container>
+</template>
 
 <!-- TODO:
     Vulnerability (per Port or Technology) (new page)
@@ -7,7 +13,7 @@
     Check all findings have the relationships needed on creation
     -->
 
-    <script setup lang="ts">
+<script setup lang="ts">
 defineProps({
   api: Object,
   findings: Array,
@@ -16,5 +22,5 @@ defineProps({
   hacktricks: Object,
 });
 defineEmits(["reload"]);
-const enums = useEnums();
+// const enums = useEnums();
 </script>

@@ -1,5 +1,3 @@
-import type Link from "~/components/note/link.vue";
-
 export function useEnums() {
   const stages = {
     OSINT: {
