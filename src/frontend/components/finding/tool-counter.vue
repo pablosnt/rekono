@@ -36,9 +36,8 @@ const props = defineProps({ finding: Object });
 const tools = ref([]);
 const counters = ref({});
 
-console.log(props.finding.executions);
+
 for (let i = 0; i < props.finding.executions.length; i++) {
-  console.log(props.finding.executions[i].configuration.tool.name);
   if (counters.value[props.finding.executions[i].configuration.tool.name]) {
     counters.value[props.finding.executions[i].configuration.tool.name].count++;
   } else {
@@ -52,6 +51,4 @@ for (let i = 0; i < props.finding.executions.length; i++) {
 
 tools.value = Object.keys(counters.value);
 
-console.log(tools.value);
-console.log(counters.value);
 </script>

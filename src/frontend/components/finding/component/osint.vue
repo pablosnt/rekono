@@ -1,5 +1,4 @@
 <template>
-  <!-- TODO: Create utils component to include common components like container, row, etc -->
   <v-container fluid>
     <v-row dense>
       <v-col v-for="finding in findings" :key="finding.id" cols="6">

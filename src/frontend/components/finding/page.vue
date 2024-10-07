@@ -1,44 +1,44 @@
 <template>
-  <Dataset
-    v-if="api"
-    ref="dataset"
-    :api="api"
-    ordering="-id"
-    :icon="icon"
-    :filtering="filtering"
-    :default-parameters="defaultParameters"
-    :empty-head="emptyHead"
-    :emtpy-text="emptyText"
-    @load-data="(data) => (findings = data)"
-  >
-    <template #data>
-      <v-tabs
+  <v-tabs
         v-model="tab"
         align-tabs="center"
         fixed-tabs
         @update:model-value="tabChange()"
       >
         <v-tab
-          :value="1"
+          value="osint"
           text="OSINT"
           :prepend-icon="enums.findings.OSINT.icon"
           color="red-darken-2"
         />
         <v-tab
-          :value="2"
+          value="assets"
           text="Assets"
           :prepend-icon="enums.findings.Host.icon"
           color="red-darken-2"
         />
         <v-tab
-          :value="3"
+          value="vulnerabilities"
           text="Vulnerabilities"
           :prepend-icon="enums.findings.Vulnerability.icon"
           color="red-darken-2"
         />
       </v-tabs>
+  <Dataset
+    v-if="api"
+    ref="dataset"
+    :api="api"
+    ordering="-id"
+    :icon="tabs[tab].icon"
+    :filtering="filtering"
+    :default-parameters="defaultParameters"
+    :empty-head="tabs[tab].emptyHead"
+    :emtpy-text="tabs[tab].emptyText"
+    @load-data="(data) => (findings = data)"
+  >
+    <template #data>      
       <v-tabs-window v-model="tab">
-        <v-tabs-window-item :value="1">
+        <v-tabs-window-item value="osint">
           <FindingComponentOsint
             :api="api"
             :findings="findings"
@@ -48,8 +48,8 @@
             @reload="dataset.loadData(false)"
           />
         </v-tabs-window-item>
-        <v-tabs-window-item :value="2">
-          <FindingComponentOsint
+        <v-tabs-window-item value="assets">
+          <FindingComponentAssets
             :api="api"
             :findings="findings"
             :defectdojo="defectdojo"
@@ -58,8 +58,8 @@
             @reload="dataset.loadData(false)"
           />
         </v-tabs-window-item>
-        <v-tabs-window-item :value="3">
-          <FindingComponentOsint
+        <v-tabs-window-item value="vulnerabilities">
+          <FindingComponentVulnerabilities
             :api="api"
             :findings="findings"
             :defectdojo="defectdojo"
@@ -80,12 +80,6 @@ const props = defineProps({
     required: false,
     default: null,
   },
-  defaultTab: {
-    type: Number,
-    required: false,
-    default: 1,
-  },
-  // TODO: keep path updated with current tab
   matchPath: {
     type: Boolean,
     required: false,
@@ -93,24 +87,43 @@ const props = defineProps({
   },
 });
 const route = useRoute();
+const router = useRouter();
 const enums = useEnums();
-const tab = ref(props.defaultTab);
 
+// TODO: Filtering
+const tabs = ref({
+  "osint": {
+    endpoint: "/api/osint/",
+    icon: enums.findings.OSINT.icon,
+    emptyHead: "No OSINT findings",
+    emptyText: "Run some OSINT tool to identify some OSINT information about your targets",
+    filtering: []
+  },
+  "assets": {
+    endpoint: "/api/osint/",
+    icon: enums.findings.Host.icon,
+    emptyHead: "No assets found",
+    emptyText: "Run some enumeration tool to identify some assets exposed by your targets",
+    filtering: []
+  },
+  "vulnerabilities": {
+    endpoint: "/api/osint/",
+    icon: enums.findings.Vulnerability.icon,
+    emptyHead: "No vulnerabilities found",
+    emptyText: "Run some vulnerability scan to identify some in your assets",
+    filtering: []
+  }
+})
+
+const tab = ref(route.query.tab && ['osint', 'assets', 'vulnerabilities'].includes(route.query.tab.toString().toLowerCase()) ? route.query.tab.toString().toLowerCase() : 'osint');
 const dataset = ref(null);
 const findings = ref([]);
-
-const osintApi = useApi("/api/osint/", true);
-const hostsApi = useApi("/api/hosts/", true);
-const vulnsApi = useApi("/api/vulnerabilities/", true);
-const api = ref(null);
-
-const icon = ref(null);
-const emptyHead = ref(null);
-const emptyText = ref(null);
-
-// TODO: Keep global filters between tabs
+// TODO
 const globalFiltering = [];
-const filtering = ref([]);
+
+const api = computed(() => { return useApi(tabs.value[tab.value].endpoint, true) });
+const filtering = computed(() => { return globalFiltering.concat(tabs.value[tab.value].filtering)});
+
 const defaultParameters = ref(
   props.execution
     ? { executions: [props.execution] }
@@ -129,30 +142,11 @@ useApi("/api/defect-dojo/settings/", true)
   .get(1)
   .then((response) => (defectdojoSettings.value = response));
 
-tabChange();
-
 function tabChange() {
-  if (tab.value === 1) {
-    api.value = osintApi;
-    icon.value = enums.findings.OSINT.icon;
-    emptyHead.value = "No OSINT findings";
-    emptyText.value =
-      "Run some OSINT tool to identify some OSINT information about your targets";
-  } else if (tab.value === 2) {
-    api.value = hostsApi;
-    icon.value = enums.findings.Host.icon;
-    emptyHead.value = "No assets found";
-    emptyText.value =
-      "Run some enumeration tool to identify some assets exposed by your targets";
-  } else if (tab.value === 3) {
-    api.value = vulnsApi;
-    icon.value = enums.findings.Vulnerability.icon;
-    emptyHead.value = "No vulnerabilities found";
-    emptyText.value =
-      "Run some vulnerability scan to identify some in your assets";
+  if (props.matchPath) {
+    router.replace({ query: { tab: tab.value }})
   }
-  if (dataset.value) {
-    dataset.value.loadData(true);
-  }
+  findings.value = []
+  dataset.value.loadData(true);
 }
 </script>
