@@ -86,7 +86,7 @@ for (let i = 0; i < Object.keys(props).length; i++) {
 }
 
 function processEntity(name) {
-  // todo: add search value to the links
+  // todo: add search value to the links and review other ocurrences of the same problem
   if (entity.value) {
     if (name === "target") {
       icon.value = "mdi-target";

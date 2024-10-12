@@ -13,9 +13,7 @@
   <Dataset
     ref="dataset"
     :api="api"
-    :filtering="[]"
     :default-parameters="parameters"
-    ordering="id"
     :add="HttpHeaderDialog"
     icon="mdi-web"
     empty-head="No HTTP Headers"
@@ -53,7 +51,7 @@ const props = defineProps({
 });
 const parameters = ref(
   Object.assign(
-    {},
+    { ordering: "id" },
     props.target ? { target: props.target } : { target__isnull: true },
     props.user ? { user: props.user } : { user__isnull: true },
   ),

@@ -7,7 +7,7 @@
             <Dataset
               ref="dataset"
               :api="api"
-              ordering="port"
+              :default-parameters="{ ordering: 'port' }"
               :add="TargetPortDialog"
               icon="mdi-antenna"
               empty-head="No Scopes"
@@ -40,7 +40,7 @@
                           <td class="text-center">
                             <v-icon
                               class="mr-3"
-                              :icon="utils.getIconByPort(port.port)"
+                              :icon="portUtils.getIcon(port.port)"
                             />{{ port.port }}
                           </td>
                           <td class="text-center">{{ port.path }}</td>
@@ -125,7 +125,7 @@
 <script setup lang="ts">
 definePageMeta({ layout: false });
 const TargetPortDialog = resolveComponent("TargetPortDialog");
-const utils = useUtils();
+const portUtils = usePorts();
 const dataset = ref(null);
 const ports = ref([]);
 const api = useApi("/api/target-ports/", true, "Target port");

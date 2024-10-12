@@ -5,7 +5,6 @@
     :filtering="filtering"
     :add="handleMember ? ProjectMemberDialog : UserInvitationDialog"
     :default-parameters="project ? { project: project } : null"
-    ordering="id"
     @load-data="(data) => (users = data)"
   >
     <template #data>
@@ -178,42 +177,43 @@ const props = defineProps({
 });
 const current = userStore();
 const enums = ref(useEnums());
+const filters = useFilters();
 const roles = ref(Object.keys(enums.value.roles));
 const api = useApi("/api/users/", true);
 const removeMemberApi = props.project
   ? useApi(`/api/projects/${props.project}/members/`, true, "Project member")
   : null;
 const users = ref([]);
-const filtering = ref([
-  {
-    type: "autocomplete",
-    label: "Role",
-    icon: "mdi-diamond",
-    collection: roles.value,
-    key: "role",
-    value: null,
-  },
-  {
-    type: "switch",
-    label: "Active",
-    color: "green",
-    cols: 2,
-    key: "is_active",
-    trueValue: true,
-    falseValue: null,
-    value: null,
-  },
-  {
-    type: "autocomplete",
-    label: "Sort",
-    icon: "mdi-sort",
-    collection: ["id", "username", "email", "name", "date_joined"],
-    fieldValue: "id",
-    fieldTitle: "name",
-    key: "ordering",
-    value: "id",
-  },
-]);
+const filtering = ref(
+  filters.build([
+    {
+      type: "autocomplete",
+      label: "Role",
+      icon: "mdi-diamond",
+      collection: roles.value,
+      key: "role",
+    },
+    {
+      type: "switch",
+      label: "Active",
+      color: "green",
+      cols: 2,
+      key: "is_active",
+      trueValue: true,
+      falseValue: null,
+    },
+    {
+      type: "autocomplete",
+      label: "Sort",
+      icon: "mdi-sort",
+      collection: ["id", "username", "email", "name", "date_joined"],
+      fieldValue: "id",
+      fieldTitle: "name",
+      key: "ordering",
+      defaultValue: "id",
+    },
+  ]),
+);
 const dataset = ref(null);
 const alert = useAlert();
 

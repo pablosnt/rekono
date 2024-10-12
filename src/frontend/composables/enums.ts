@@ -128,7 +128,7 @@ export function useEnums() {
   const statuses = {
     Requested: { color: "grey", icon: "mdi-pause-circle" },
     Skipped: { color: "grey", icon: "mdi-skip-next-circle" },
-    Running: { color: "yellow", icon: "mdi-play-circle" },
+    Running: { color: "amber", icon: "mdi-play-circle" },
     Cancelled: { color: "red", icon: "mdi-close-circle" },
     Error: { color: "red", icon: "mdi-alert-circle" },
     Completed: { color: "green", icon: "mdi-check-circle" },
@@ -153,11 +153,28 @@ export function useEnums() {
     Username: { icon: "mdi-shield-account" },
     Password: { icon: "mdi-shield-key" },
   };
+  const osType = {
+    Linux: { icon: "mdi-linux", color: "orange" },
+    Windows: { icon: "mdi-microsoft", color: "blue" },
+    MacOS: { icon: "mdi-apple", color: "grey" },
+    iOS: { icon: "mdi-apple-ios", color: "grey" },
+    Android: { icon: "mdi-android", color: "green" },
+    Solaris: { icon: "mdi-white-balance-sunny", color: "orange" },
+    FreeBSD: { icon: "mdi-freebsd", color: "red" },
+    Other: { icon: "mdi-server", color: "black" },
+  };
   const triage = {
     Untriaged: { icon: "mdi-help-circle", color: "grey" },
     "False Positive": { icon: "mdi-close-circle", color: "red" },
     "True Positive": { icon: "mdi-check-circle", color: "green" },
     "Won't Fix": { icon: "mdi-cancel", color: "orange" },
+  };
+  const severity = {
+    Critical: { color: "red" },
+    High: { color: "orange" },
+    Medium: { color: "amber" },
+    Low: { color: "blue" },
+    Info: { color: "grey" },
   };
 
   return {
@@ -178,5 +195,7 @@ export function useEnums() {
     authentications,
     triage,
     osintTypes,
+    osType,
+    severity,
   };
 }

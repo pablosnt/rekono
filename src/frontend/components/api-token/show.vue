@@ -24,7 +24,7 @@
       <Dataset
         ref="dataset"
         :api="api"
-        ordering="-expiration"
+        :default-parameters="{ id: '-expiration' }"
         :header="false"
         icon="mdi-api"
         empty-head="No API Tokens"

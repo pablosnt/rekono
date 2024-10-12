@@ -31,10 +31,9 @@
       <Dataset
         ref="dataset"
         :api="api"
-        ordering="id"
         :header="false"
         :icon="enums.findings.Technology.icon"
-        :default-parameters="{ target: route.params.target_id }"
+        :default-parameters="{ target: route.params.target_id, ordering: 'id' }"
         empty-head="No Technologies"
         empty-text="There are no known technologies to be used as parameter"
         @load-data="(data) => (technologies = data)"

@@ -14,8 +14,7 @@
     <Dataset
       ref="dataset"
       :api="api"
-      :filtering="[]"
-      ordering="id"
+      :default-parameters="{ ordering: 'id' }"
       :add="TargetDenylistDialog"
       @load-data="(data) => (denylist = data)"
     >

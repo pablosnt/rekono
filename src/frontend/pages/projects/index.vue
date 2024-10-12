@@ -108,42 +108,41 @@
 const dataset = ref(null);
 const projects = ref(null);
 const user = userStore();
+const filters = useFilters();
 const api = ref(useApi("/api/projects/", true, "Project"));
-const filtering = ref([
-  {
-    type: "text",
-    label: "Tag",
-    icon: "mdi-tag",
-    key: "tag",
-    value: null,
-  },
-]);
-if (user.role === "Admin") {
-  filtering.value.push({
-    type: "switch",
-    label: "Mine",
-    color: "blue",
-    cols: 1,
-    key: "owner",
-    trueValue: user.user,
-    falseValue: null,
-    value: null,
-  });
-}
-filtering.value.push({
-  type: "autocomplete",
-  label: "Sort",
-  icon: "mdi-sort",
-  cols: 2,
-  collection: ["id", "name"],
-  fieldValue: "id",
-  fieldTitle: "name",
-  key: "ordering",
-  value: "id",
-});
+const filtering = ref(
+  filters.build([
+    {
+      type: "text",
+      label: "Tag",
+      icon: "mdi-tag",
+      key: "tag",
+    },
+    {
+      type: "switch",
+      label: "Mine",
+      color: "blue",
+      cols: 1,
+      key: "owner",
+      trueValue: user.user,
+      falseValue: null,
+      onlyAdmin: true,
+    },
+    {
+      type: "autocomplete",
+      label: "Sort",
+      icon: "mdi-sort",
+      cols: 2,
+      collection: ["id", "name"],
+      fieldValue: "id",
+      fieldTitle: "name",
+      key: "ordering",
+      defaultValue: "id",
+    },
+  ]),
+);
 
 const ProjectCreationDialog = resolveComponent("ProjectCreationDialog");
-
 const integration = ref(null);
 const integrationsApi = useApi("/api/integrations/", true);
 integrationsApi.get(1).then((response) => (integration.value = response));

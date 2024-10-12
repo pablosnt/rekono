@@ -41,7 +41,7 @@ class TriageFindingFilter(FindingFilter):
         model = OSINT
         fields = {
             **FindingFilter.Meta.fields.copy(),
-            "triage_status": ["exact"],
+            "triage_status": ["exact", "in"],
             "triage_comment": ["exact", "icontains"],
             "triage_date": ["gte", "lte", "exact"],
             "triage_by": ["exact"],

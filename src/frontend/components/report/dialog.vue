@@ -151,7 +151,7 @@ const props = defineProps({
 });
 const emit = defineEmits(["closeDialog", "completed"]);
 
-const utils = useUtils();
+const taskUtils = useTasks();
 const enums = useEnums();
 const api = useApi("/api/reports/", true, "Report");
 const loading = ref(false);
@@ -185,7 +185,7 @@ function searchTasks() {
     .then((response) => {
       tasks.value = response.items;
       for (let i = 0; i < tasks.value.length; i++) {
-        utils.getTaskTitle(tasks.value[i]);
+        taskUtils.getTitle(tasks.value[i]);
       }
     });
 }

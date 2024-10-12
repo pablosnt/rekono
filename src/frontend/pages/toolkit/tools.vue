@@ -4,7 +4,6 @@
       ref="dataset"
       :api="api"
       :filtering="filtering"
-      ordering="id"
       icon="mdi-rocket"
       empty-head="No Tools"
       empty-text="There are no tools"
@@ -118,63 +117,56 @@ const tools = ref(null);
 const show = ref(null);
 const dataset = ref(null);
 const enums = ref(useEnums());
+const filters = useFilters();
 const api = ref(useApi("/api/tools/", true, "Tool"));
-const filtering = ref([
-  {
-    type: "autocomplete",
-    label: "Stage",
-    icon: "mdi-stairs",
-    collection: Object.entries(enums.value.stages).map(([k, v]) => {
-      v.name = k;
-      return v;
-    }),
-    fieldValue: "id",
-    fieldTitle: "name",
-    key: "stage",
-    value: null,
-  },
-  {
-    type: "autocomplete",
-    label: "Intensity",
-    icon: "mdi-volume-high",
-    collection: Object.entries(enums.value.intensities).map(([k, v]) => {
-      v.name = k;
-      return v;
-    }),
-    fieldValue: "id",
-    fieldTitle: "name",
-    key: "intensity",
-    value: null,
-  },
-  {
-    type: "switch",
-    label: "Installed",
-    color: "green",
-    cols: 2,
-    key: "is_installed",
-    trueValue: true,
-    falseValue: null,
-    value: null,
-  },
-  {
-    type: "switch",
-    label: "Likes",
-    color: "red",
-    cols: 1,
-    key: "like",
-    trueValue: true,
-    falseValue: null,
-    value: null,
-  },
-  {
-    type: "autocomplete",
-    label: "Sort",
-    icon: "mdi-sort",
-    collection: ["id", "name", "command"],
-    fieldValue: "id",
-    fieldTitle: "name",
-    key: "ordering",
-    value: "id",
-  },
-]);
+const filtering = ref(
+  filters.build([
+    {
+      type: "autocomplete",
+      label: "Stage",
+      icon: "mdi-stairs",
+      collection: filters.collectionFromEnum(enums.value.stages),
+      fieldValue: "id",
+      fieldTitle: "name",
+      key: "stage",
+    },
+    {
+      type: "autocomplete",
+      label: "Intensity",
+      icon: "mdi-volume-high",
+      collection: filters.collectionFromEnum(enums.value.intensities),
+      fieldValue: "id",
+      fieldTitle: "name",
+      key: "intensity",
+    },
+    {
+      type: "switch",
+      label: "Installed",
+      color: "green",
+      cols: 2,
+      key: "is_installed",
+      trueValue: true,
+      falseValue: null,
+    },
+    {
+      type: "switch",
+      label: "Likes",
+      color: "red",
+      cols: 1,
+      key: "like",
+      trueValue: true,
+      falseValue: null,
+    },
+    {
+      type: "autocomplete",
+      label: "Sort",
+      icon: "mdi-sort",
+      collection: ["id", "name", "command"],
+      fieldValue: "id",
+      fieldTitle: "name",
+      key: "ordering",
+      defaultValue: "id",
+    },
+  ]),
+);
 </script>

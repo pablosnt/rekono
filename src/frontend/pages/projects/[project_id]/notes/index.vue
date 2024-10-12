@@ -8,16 +8,14 @@
       :add="NoteDialog"
       add-fullscreen
       :default-parameters="{ project: projectId }"
-      ordering="-updated_at"
       icon="mdi-notebook"
       empty-head="No Notes"
       empty-text="There are no notes. Create your first one"
       @load-data="(data) => (notes = data)"
-      @new-filter="(key, value) => (key === 'target' ? getTasks(value) : null)"
     >
       <template #data>
         <v-row dense>
-          <!-- todo: Setup the same col size for all of them -->
+          <!-- todo: Setup the same card height for all of them -->
           <v-col v-for="note in notes" :key="note.id" cols="6">
             <v-card
               :title="note.title"
@@ -148,118 +146,109 @@ definePageMeta({ layout: false });
 const NoteDialog = resolveComponent("NoteDialog");
 const route = useRoute();
 const markdown = useMarkdown();
+const filters = useFilters();
 const projectId = ref(route.params.project_id);
 const dataset = ref(null);
 const user = userStore();
 const notes = ref([]);
 const api = useApi("/api/notes/", true, "Note");
-const filtering = ref([
-  {
-    type: "autocomplete",
-    cols: 2,
-    label: "Target",
-    icon: "mdi-target",
-    collection: [],
-    fieldValue: "id",
-    fieldTitle: "target",
-    key: "related_target",
-    value: null,
-  },
-  {
-    type: "autocomplete",
-    cols: 2,
-    label: "Scan",
-    icon: "mdi-play-network",
-    collection: [],
-    fieldValue: "id",
-    fieldTitle: undefined,
-    key: "related_task",
-    value: null,
-    disabled: true,
-  },
-  {
-    type: "text",
-    label: "Tag",
-    cols: 2,
-    icon: "mdi-tag",
-    key: "tag",
-    value: null,
-  },
-  {
-    type: "switch",
-    label: "Likes",
-    color: "red",
-    cols: 1,
-    key: "like",
-    trueValue: true,
-    falseValue: null,
-    value: null,
-  },
-  {
-    type: "switch",
-    label: "Forks",
-    color: "blue",
-    cols: 1,
-    key: "is_fork",
-    trueValue: true,
-    falseValue: null,
-    value: null,
-  },
-]);
-if (user.role === "Admin") {
-  filtering.value.push({
-    type: "switch",
-    label: "Mine",
-    color: "blue",
-    cols: 1,
-    key: "owner",
-    trueValue: user.user,
-    falseValue: null,
-    value: null,
-  });
-}
-filtering.value.push({
-  type: "autocomplete",
-  label: "Sort",
-  icon: "mdi-sort",
-  cols: 2,
-  collection: [
-    "id",
-    "project",
-    "target",
-    "title",
-    "tags",
-    "owner",
-    "created_at",
-    "updated_at",
-    "likes_count",
-  ],
-  fieldValue: "id",
-  fieldTitle: "name",
-  key: "ordering",
-  value: "-updated_at",
-});
+const filtering = ref(
+  filters.build([
+    {
+      type: "autocomplete",
+      cols: 2,
+      label: "Target",
+      icon: "mdi-target",
+      request: useApi("/api/targets/", true).list({}, true),
+      fieldValue: "id",
+      fieldTitle: "target",
+      key: "related_target",
+      callback: (value, definitions) => {
+        const tasks = filters.getDefinitionFromKey("related_task", definitions);
+        if (value) {
+          useApi("/api/tasks/", true)
+            .list({ target: value }, true)
+            .then((response) => {
+              tasks.collection = response.items;
+              tasks.disabled = false;
+            });
+        } else {
+          tasks.collection = [];
+          tasks.value = null;
+          tasks.disabled = true;
+        }
+      },
+    },
+    {
+      type: "autocomplete",
+      cols: 2,
+      label: "Scan",
+      icon: "mdi-play-network",
+      collection: [],
+      fieldValue: "id",
+      fieldTitle: undefined,
+      key: "related_task",
 
-useApi("/api/targets/", true)
-  .list({}, true)
-  .then((response) => {
-    filtering.value[0].collection = response.items;
-  });
-
-function getTasks(target) {
-  if (target !== null) {
-    useApi("/api/tasks/", true)
-      .list({ target: target }, true)
-      .then((response) => {
-        filtering.value[1].collection = response.items;
-        filtering.value[1].disabled = false;
-      });
-  } else {
-    filtering.value[1].collection = [];
-    filtering.value[1].value = null;
-    filtering.value[1].disabled = true;
-  }
-}
+      disabled: true,
+    },
+    {
+      type: "text",
+      label: "Tag",
+      cols: 2,
+      icon: "mdi-tag",
+      key: "tag",
+    },
+    {
+      type: "switch",
+      label: "Likes",
+      color: "red",
+      cols: 1,
+      key: "like",
+      trueValue: true,
+      falseValue: null,
+    },
+    {
+      type: "switch",
+      label: "Forks",
+      color: "blue",
+      cols: 1,
+      key: "is_fork",
+      trueValue: true,
+      falseValue: null,
+    },
+    {
+      type: "switch",
+      label: "Mine",
+      color: "blue",
+      cols: 1,
+      key: "owner",
+      trueValue: user.user,
+      falseValue: null,
+      onlyAdmin: true,
+    },
+    {
+      type: "autocomplete",
+      label: "Sort",
+      icon: "mdi-sort",
+      cols: 2,
+      collection: [
+        "id",
+        "project",
+        "target",
+        "title",
+        "tags",
+        "owner",
+        "created_at",
+        "updated_at",
+        "likes_count",
+      ],
+      fieldValue: "id",
+      fieldTitle: "name",
+      key: "ordering",
+      defaultValue: "-updated_at",
+    },
+  ]),
+);
 
 function share(note) {
   const body = {

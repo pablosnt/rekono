@@ -6,17 +6,12 @@
   </v-container>
 </template>
 
-<!-- 
-    TODO:
-    Hosts
-      -- Ports & Services (same table as Hosts)
-      Paths (per Port) (Dialog)
-      Technologies (per Port) (expand section) 
-      -- Credentials  (Dialog)
-      -- Exploits (Dialog) 
+<!-- TODO:
+    Vulnerability
+      -- Exploits (Dialog)
 
     Check all findings have the relationships needed on creation
-  -->
+    -->
 
 <script setup lang="ts">
 defineProps({

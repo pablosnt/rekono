@@ -2,7 +2,7 @@
   <v-container fluid>
     <v-row dense>
       <v-col v-for="finding in findings" :key="finding.id" cols="6">
-        <FindingComponent
+        <FindingShowComponent
           :api="api"
           :finding="finding"
           title="data"
@@ -37,7 +37,7 @@
               <v-tooltip activator="parent" text="Create target" />
             </v-btn>
           </template>
-        </FindingComponent>
+        </FindingShowComponent>
       </v-col>
     </v-row>
   </v-container>

@@ -5,13 +5,11 @@
       :api="api"
       :filtering="filtering"
       :default-parameters="{ project: route.params.project_id }"
-      ordering="id"
       :add="ReportDialog"
       icon="mdi-file-document-multiple"
       empty-head="No Reports"
       empty-text="There are no reports yet. Create your first one"
       @load-data="(data) => (reports = data)"
-      @new-filter="(key, value) => (key === 'target' ? getTasks(value) : null)"
     >
       <!--
            todo: Fix date
@@ -92,103 +90,92 @@ const ReportDialog = resolveComponent("ReportDialog");
 const route = useRoute();
 const user = userStore();
 const enums = ref(useEnums());
+const filters = useFilters();
 const dataset = ref(null);
 const reports = ref([]);
 const api = useApi("/api/reports/", true, "Report");
-const filtering = ref([
-  {
-    type: "autocomplete",
-    label: "Target",
-    icon: "mdi-target",
-    cols: 2,
-    collection: [],
-    fieldValue: "id",
-    fieldTitle: "target",
-    key: "target",
-    value: null,
-  },
-  {
-    type: "autocomplete",
-    label: "Scan",
-    icon: "mdi-play-network",
-    collection: [],
-    fieldValue: "id",
-    fieldTitle: undefined,
-    key: "task",
-    value: null,
-    disabled: true,
-  },
-  // todo: Format filter is not working for XML and PDF. It's returning 404
-  {
-    type: "autocomplete",
-    label: "Format",
-    icon: "mdi-file-document",
-    cols: 2,
-    collection: Object.entries(enums.value.reportFormats).map(([k, v]) => {
-      v.id = k.toLowerCase();
-      v.name = k.toUpperCase();
-      return v;
-    }),
-    fieldValue: "id",
-    fieldTitle: "name",
-    key: "format",
-    value: null,
-  },
-  {
-    type: "autocomplete",
-    label: "Status",
-    icon: "mdi-check-decagram",
-    cols: 2,
-    collection: Object.entries(enums.value.reportStatuses).map(([k, v]) => {
-      v.name = k;
-      return v;
-    }),
-    fieldValue: "name",
-    fieldTitle: "name",
-    key: "status",
-    value: null,
-  },
-  {
-    type: "switch",
-    label: "Mine",
-    color: "blue",
-    cols: 1,
-    key: "user",
-    trueValue: user.user,
-    falseValue: null,
-    value: null,
-  },
-  {
-    type: "autocomplete",
-    label: "Sort",
-    icon: "mdi-sort",
-    cols: 2,
-    collection: ["id", "target", "task", "status", "format", "date"],
-    fieldValue: "id",
-    fieldTitle: "name",
-    key: "ordering",
-    value: "id",
-  },
-]);
+const filtering = ref(
+  filters.build([
+    {
+      type: "autocomplete",
+      label: "Target",
+      icon: "mdi-target",
+      cols: 2,
+      request: useApi("/api/targets/", true).list({}, true),
+      fieldValue: "id",
+      fieldTitle: "target",
+      key: "target",
+      callback: (value, definitions) => {
+        const tasks = filters.getDefinitionFromKey("related_task", definitions);
+        if (value) {
+          useApi("/api/tasks/", true)
+            .list({ target: value }, true)
+            .then((response) => {
+              tasks.collection = response.items;
+              tasks.disabled = false;
+            });
+        } else {
+          tasks.collection = [];
+          tasks.value = null;
+          tasks.disabled = true;
+        }
+      },
+    },
+    {
+      type: "autocomplete",
+      label: "Scan",
+      icon: "mdi-play-network",
+      collection: [],
+      fieldValue: "id",
+      key: "task",
 
-useApi("/api/targets/", true)
-  .list({}, true)
-  .then((response) => {
-    filtering.value[0].collection = response.items;
-  });
-
-function getTasks(target) {
-  if (target !== null) {
-    useApi("/api/tasks/", true)
-      .list({ target: target }, true)
-      .then((response) => {
-        filtering.value[1].collection = response.items;
-        filtering.value[1].disabled = false;
-      });
-  } else {
-    filtering.value[1].collection = [];
-    filtering.value[1].value = null;
-    filtering.value[1].disabled = true;
-  }
-}
+      disabled: true,
+    },
+    // todo: Format filter is not working for XML and PDF. It's returning 404
+    {
+      type: "autocomplete",
+      label: "Format",
+      icon: "mdi-file-document",
+      cols: 2,
+      collection: Object.entries(enums.value.reportFormats).map(([k, v]) => {
+        v.id = k.toLowerCase();
+        v.name = k.toUpperCase();
+        return v;
+      }),
+      fieldValue: "id",
+      fieldTitle: "name",
+      key: "format",
+    },
+    {
+      type: "autocomplete",
+      label: "Status",
+      icon: "mdi-check-decagram",
+      cols: 2,
+      collection: filters.collectionFromEnum(enums.value.reportStatuses),
+      fieldValue: "name",
+      fieldTitle: "name",
+      key: "status",
+    },
+    {
+      type: "switch",
+      label: "Mine",
+      color: "blue",
+      cols: 1,
+      key: "user",
+      trueValue: user.user,
+      falseValue: null,
+    },
+    {
+      type: "autocomplete",
+      label: "Sort",
+      icon: "mdi-sort",
+      cols: 2,
+      collection: ["id", "target", "task", "status", "format", "date"],
+      fieldValue: "id",
+      fieldTitle: "name",
+      key: "ordering",
+      defaultValue: "id",
+    },
+  ]),
+);
 </script>

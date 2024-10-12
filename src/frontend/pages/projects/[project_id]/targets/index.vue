@@ -5,7 +5,6 @@
       :api="api"
       :filtering="filtering"
       :default-parameters="{ project: route.params.project_id }"
-      ordering="id"
       :add="TargetDialog"
       icon="mdi-target"
       empty-head="No Targets"
@@ -93,6 +92,7 @@ definePageMeta({ layout: false });
 const user = userStore();
 const enums = useEnums();
 const route = useRoute();
+const filters = useFilters();
 const project = ref(null);
 useApi("/api/projects/", true)
   .get(parseInt(route.params.project_id))
@@ -101,30 +101,28 @@ const TargetDialog = resolveComponent("TargetDialog");
 const dataset = ref(null);
 const api = useApi("/api/targets/", true, "Target");
 const targets = ref([]);
-const filtering = ref([
-  {
-    type: "autocomplete",
-    label: "Type",
-    icon: "mdi-target",
-    collection: Object.entries(enums.targets).map(([k, v]) => {
-      v.name = k;
-      return v;
-    }),
-    fieldValue: "name",
-    fieldTitle: "name",
-    key: "type",
-    value: null,
-  },
-  {
-    type: "autocomplete",
-    label: "Sort",
-    icon: "mdi-sort",
-    cols: 2,
-    collection: ["id", "target", "type"],
-    fieldValue: "id",
-    fieldTitle: "name",
-    key: "ordering",
-    value: "id",
-  },
-]);
+const filtering = ref(
+  filters.build([
+    {
+      type: "autocomplete",
+      label: "Type",
+      icon: "mdi-target",
+      collection: filters.collectionFromEnum(enums.targets),
+      fieldValue: "name",
+      fieldTitle: "name",
+      key: "type",
+    },
+    {
+      type: "autocomplete",
+      label: "Sort",
+      icon: "mdi-sort",
+      cols: 2,
+      collection: ["id", "target", "type"],
+      fieldValue: "id",
+      fieldTitle: "name",
+      key: "ordering",
+      defaultValue: "id",
+    },
+  ]),
+);
 </script>

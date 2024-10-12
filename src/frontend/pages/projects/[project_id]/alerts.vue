@@ -6,7 +6,6 @@
       :add="AlertDialog"
       :filtering="filtering"
       :default-parameters="{ project: route.params.project_id }"
-      ordering="id"
       icon="mdi-alert"
       empty-head="No Alerts"
       empty-text="There are no alerts yet. Create your first one"
@@ -57,74 +56,66 @@ const dataset = ref(null);
 const user = userStore();
 const route = useRoute();
 const enums = ref(useEnums());
+const filters = useFilters();
 const api = useApi("/api/alerts/", true, "Alert");
 const alerts = ref([]);
-const filtering = ref([
-  {
-    type: "autocomplete",
-    label: "Mode",
-    collection: Object.entries(enums.value.alertModes).map(([k, v]) => {
-      v.name = k;
-      return v;
-    }),
-    cols: 2,
-    fieldValue: "name",
-    fieldTitle: "name",
-    key: "mode",
-    value: null,
-  },
-  {
-    type: "autocomplete",
-    label: "Item",
-    collection: Object.entries(enums.value.alertItems).map(([k, v]) => {
-      v.name = k;
-      return v;
-    }),
-    fieldValue: "name",
-    fieldTitle: "name",
-    key: "item",
-    value: null,
-  },
-  {
-    type: "switch",
-    label: "Enabled",
-    color: "green",
-    cols: 1,
-    key: "enabled",
-    trueValue: true,
-    falseValue: null,
-    value: null,
-  },
-  {
-    type: "switch",
-    label: "Subscribed",
-    color: "red",
-    cols: 2,
-    key: "subscribers",
-    trueValue: user.user,
-    falseValue: null,
-    value: null,
-  },
-  {
-    type: "switch",
-    label: "Mine",
-    color: "blue",
-    cols: 1,
-    key: "owner",
-    trueValue: user.user,
-    falseValue: null,
-    value: null,
-  },
-  {
-    type: "autocomplete",
-    label: "Sort",
-    icon: "mdi-sort",
-    cols: 2,
-    collection: ["id", "item", "mode"],
-    fieldValue: "id",
-    fieldTitle: "name",
-    key: "ordering",
-    value: "id",
-  },
-]);
+const filtering = ref(
+  filters.build([
+    {
+      type: "autocomplete",
+      label: "Mode",
+      collection: filters.collectionFromEnum(enums.value.alertModes),
+      cols: 2,
+      fieldValue: "name",
+      fieldTitle: "name",
+      key: "mode",
+    },
+    {
+      type: "autocomplete",
+      label: "Item",
+      collection: filters.collectionFromEnum(enums.value.alertItems),
+      fieldValue: "name",
+      fieldTitle: "name",
+      key: "item",
+    },
+    {
+      type: "switch",
+      label: "Enabled",
+      color: "green",
+      cols: 1,
+      key: "enabled",
+      trueValue: true,
+      falseValue: null,
+    },
+    {
+      type: "switch",
+      label: "Subscribed",
+      color: "red",
+      cols: 2,
+      key: "subscribers",
+      trueValue: user.user,
+      falseValue: null,
+    },
+    {
+      type: "switch",
+      label: "Mine",
+      color: "blue",
+      cols: 1,
+      key: "owner",
+      trueValue: user.user,
+      falseValue: null,
+    },
+    {
+      type: "autocomplete",
+      label: "Sort",
+      icon: "mdi-sort",
+      cols: 2,
+      collection: ["id", "item", "mode"],
+      fieldValue: "id",
+      fieldTitle: "name",
+      key: "ordering",
+      defaultValue: "id",
+    },
+  ]),
+);
 </script>

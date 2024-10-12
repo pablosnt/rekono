@@ -12,7 +12,7 @@
             variant="outlined"
             :max="65535"
             :min="1"
-            :prepend-icon="utils.getIconByPort(port)"
+            :prepend-icon="utils.getIcon(port)"
             @update:model-value="disabled = false"
           />
         </v-col>
@@ -50,7 +50,7 @@ const props = defineProps({
 const emit = defineEmits(["completed", "loading"]);
 const validate = useValidation();
 const route = useRoute();
-const utils = useUtils();
+const utils = usePorts();
 const valid = ref(true);
 const disabled = ref(true);
 const port = ref(null);

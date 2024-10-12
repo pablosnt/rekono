@@ -22,7 +22,8 @@
         size="large"
         @click="
           expandFilters = !expandFilters;
-          !expandFilters ? collapseFilters() : null;
+          !expandFilters ? resetParameters() : null;
+          $emit('expandFilters', expandFilters);
         "
       />
       <slot name="add">
@@ -68,43 +69,51 @@
                 v-if="f.type === 'autocomplete'"
                 v-model="f.value"
                 auto-select-first
-                clearable
                 hide-details
+                clearable
+                :chips="f.multiple ? f.multiple : undefined"
                 density="comfortable"
                 variant="outlined"
                 :label="f.label"
-                :items="
-                  f.key !== 'ordering'
-                    ? f.collection
-                    : getSortItems(f.collection)
-                "
+                :items="f.collection"
                 :item-title="f.fieldTitle"
                 return-object
-                :color="f.value && f.value.color ? f.value.color : null"
+                :color="
+                  f.multiple
+                    ? f.value.length > 0 && f.value[0].color
+                      ? f.value[0].color
+                      : null
+                    : f.value && f.value.color
+                      ? f.value.color
+                      : null
+                "
                 :prepend-inner-icon="
-                  f.value && f.value.icon && !f.enforceIcon
-                    ? f.value.icon
-                    : f.icon
+                  f.enforceIcon
+                    ? f.icon
+                    : f.multiple
+                      ? f.value.length > 0 && f.value[0].icon
+                        ? f.value[0].icon
+                        : f.icon
+                      : f.value && f.value.icon
+                        ? f.value.icon
+                        : f.icon
                 "
                 :disabled="f.disabled ? f.disabled : false"
-                @update:model-value="
-                  addParameter(
-                    f.key,
-                    f.value && f.fieldValue ? f.value[f.fieldValue] : f.value,
-                  )
-                "
+                :multiple="f.multiple ? f.multiple : false"
+                @update:model-value="addParameter(f.key, filters.getValue(f))"
               >
+                <!-- todo: Override list items to show custom icons per option -->
                 <template
                   v-if="f.key.includes('task')"
                   #item="{ props: taskProps, item }"
                 >
                   <v-list-item
                     v-bind="taskProps"
-                    :title="utils.getTaskTitle(item)"
+                    :title="tasks.getTitle(item.raw)"
                   />
                 </template>
                 <template v-if="f.key.includes('task')" #selection="{ item }">
-                  <p>{{ utils.getTaskTitle(item.raw) }}</p>
+                  <p>{{ tasks.getTitle(item.raw) }}</p>
                 </template>
               </v-autocomplete>
               <v-text-field
@@ -181,8 +190,16 @@
 <script setup lang="ts">
 const props = defineProps({
   api: Object,
-  filtering: Array<object>,
-  ordering: String,
+  filtering: {
+    type: Array<object>,
+    required: false,
+    default: [],
+  },
+  expandFilters: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
   header: {
     type: Boolean,
     required: false,
@@ -224,57 +241,78 @@ const props = defineProps({
     default: undefined,
   },
 });
-const emit = defineEmits(["loadData", "newFilter"]);
-const utils = ref(useUtils());
+const emit = defineEmits(["loadData", "expandFilters"]);
+const tasks = useTasks();
+const filters = useFilters();
 const page = ref(1);
 const total = ref(0);
 const data = ref(null);
 const search = ref(null);
-const parameters = ref(
-  props.defaultParameters && props.ordering
-    ? Object.assign({}, props.defaultParameters, { ordering: props.ordering })
-    : props.defaultParameters
-      ? props.defaultParameters
-      : props.ordering
-        ? { ordering: props.ordering }
-        : {},
-);
+const parameters = ref(loadParameters());
 const loadingSearch = ref(false);
 const loadingData = ref(false);
-const expandFilters = ref(false);
-function collapseFilters() {
-  if (
-    Object.keys(parameters.value).length !== 1 ||
-    parameters.value.ordering !== props.ordering
-  ) {
-    parameters.value = props.ordering ? { ordering: props.ordering } : {};
-    loadData(true);
-    Object.entries(props.filtering).map(([_, v]) => {
-      v.value = null;
+const expandFilters = ref(props.expandFilters);
+let changedFilters = false;
+loadData(true);
+
+function loadParameters() {
+  const parameters =
+    props.defaultParameters === null
+      ? {}
+      : Object.assign({}, props.defaultParameters);
+  if (props.filtering) {
+    for (let i = 0; i < props.filtering.length; i++) {
+      const value = filters.getValue(props.filtering[i]);
+      if (value !== null && value !== undefined) {
+        parameters[props.filtering[i].key] = value;
+      }
+    }
+  }
+  // TODO: Load parameters from URL query parameters
+  return parameters;
+}
+
+function resetParameters() {
+  if (changedFilters) {
+    props.filtering.map((item) => {
+      filters.setDefault(item);
+      if (item.callback) {
+        item.callback(item.value, props.filtering);
+      }
     });
+    // TODO: Without those from URL query params
+    parameters.value = loadParameters();
+    changedFilters = false;
+    loadData(true);
   }
 }
+
 function addParameter(key: string, value: string) {
-  // todo: Keep parameters as URL parameter to allow links with filters from other pages or provided by users. Needed to link findings between them
-  if (value !== null && value !== undefined) {
-    parameters.value[key] = value;
-    emit("newFilter", key, value);
-  } else if (key === "ordering" && props.ordering) {
-    parameters.value.ordering = props.ordering;
-    emit("newFilter", key, props.ordering);
+  changedFilters = true;
+  const definition = filters.getDefinitionFromKey(key, props.filtering);
+  if (definition.callback) {
+    definition.callback(value, props.filtering);
+    loadParameters();
   } else {
-    /* eslint-disable-next-line @typescript-eslint/no-dynamic-delete */
-    delete parameters.value[key];
-    emit("newFilter", key, null);
+    // TODO: Keep parameters as URL parameter to allow links with filters from other pages or provided by users. Needed to link findings between them
+    if (value !== null) {
+      parameters.value[key] = value;
+    } else {
+      /* eslint-disable-next-line @typescript-eslint/no-dynamic-delete */
+      delete parameters.value[key];
+    }
   }
   loadData();
 }
+
 function loadData(loading: boolean = false) {
-  if (search.value) {
-    loadingSearch.value = true;
-    parameters.value.search = search.value;
-  } else if (parameters.value.search) {
-    delete parameters.value.search;
+  if (parameters.value) {
+    if (search.value) {
+      loadingSearch.value = true;
+      parameters.value.search = search.value;
+    } else if (parameters.value.search) {
+      delete parameters.value.search;
+    }
   }
   if (loading) {
     loadingData.value = true;
@@ -287,26 +325,8 @@ function loadData(loading: boolean = false) {
     loadingData.value = false;
   });
 }
-loadData(true);
-function getSortItems(collection: Array<string>) {
-  return collection
-    .map((item) => {
-      let name =
-        item === "id"
-          ? "ID"
-          : `${item.charAt(0).toUpperCase()}${item.slice(1)}`;
-      if (name.includes("__")) {
-        name = name.split("__")[1];
-        name = `${name.charAt(0).toUpperCase()}${name.slice(1)}`;
-      } else if (name.includes("_")) {
-        name = name.split("_")[0];
-      }
-      return [
-        { id: item, name: name },
-        { id: `-${item}`, name: `${name} desc` },
-      ];
-    })
-    .flat(1);
-}
+
+// todo: Define parameters typing properly in all functions
+
 defineExpose({ loadData });
 </script>
