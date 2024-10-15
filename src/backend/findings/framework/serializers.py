@@ -22,6 +22,7 @@ class FindingSerializer(ModelSerializer):
             "fixed_by",
             "defect_dojo_id",
             "hacktricks_link",
+            "notes",
         )
         read_only_fields = (
             "id",
@@ -31,6 +32,7 @@ class FindingSerializer(ModelSerializer):
             "fixed_by",
             "defect_dojo_id",
             "hacktricks_link",
+            "notes",
         )
 
 

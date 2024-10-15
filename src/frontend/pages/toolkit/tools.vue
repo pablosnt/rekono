@@ -119,8 +119,9 @@ const dataset = ref(null);
 const enums = ref(useEnums());
 const filters = useFilters();
 const api = ref(useApi("/api/tools/", true, "Tool"));
-const filtering = ref(
-  filters.build([
+const filtering = ref([]);
+filters
+  .build([
     {
       type: "autocomplete",
       label: "Stage",
@@ -167,6 +168,6 @@ const filtering = ref(
       key: "ordering",
       defaultValue: "id",
     },
-  ]),
-);
+  ])
+  .then((results) => (filtering.value = results));
 </script>

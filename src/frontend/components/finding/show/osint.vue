@@ -16,6 +16,7 @@
           :defectdojo="defectdojo"
           :defectdojo-settings="defectdojoSettings"
           :hacktricks="hacktricks"
+          finding-type="osint"
           triage
           @reload="$emit('reload')"
         >

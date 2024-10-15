@@ -152,8 +152,9 @@ const dataset = ref(null);
 const user = userStore();
 const notes = ref([]);
 const api = useApi("/api/notes/", true, "Note");
-const filtering = ref(
-  filters.build([
+const filtering = ref([]);
+filters
+  .build([
     {
       type: "autocomplete",
       cols: 2,
@@ -247,8 +248,8 @@ const filtering = ref(
       key: "ordering",
       defaultValue: "-updated_at",
     },
-  ]),
-);
+  ])
+  .then((results) => (filtering.value = results));
 
 function share(note) {
   const body = {

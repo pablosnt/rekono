@@ -101,8 +101,9 @@ const TargetDialog = resolveComponent("TargetDialog");
 const dataset = ref(null);
 const api = useApi("/api/targets/", true, "Target");
 const targets = ref([]);
-const filtering = ref(
-  filters.build([
+const filtering = ref([]);
+filters
+  .build([
     {
       type: "autocomplete",
       label: "Type",
@@ -123,6 +124,6 @@ const filtering = ref(
       key: "ordering",
       defaultValue: "id",
     },
-  ]),
-);
+  ])
+  .then((results) => (filtering.value = results));
 </script>

@@ -25,6 +25,7 @@
     />
   </v-tabs>
   <Dataset
+    v-if="filtering.length > 0"
     ref="dataset"
     :key="forceUpdate"
     :api="tabs[tab].api"
@@ -146,138 +147,6 @@ const triageFiltering = [
     isAuditor: true,
   },
 ];
-const globalFiltering = filters.build([
-  {
-    type: "autocomplete",
-    cols: 2,
-    label: "Target",
-    icon: "mdi-target",
-    request: useApi("/api/targets/", true).list(
-      { project: route.params.project_id, ordering: "target" },
-      true,
-    ),
-    fieldValue: "id",
-    fieldTitle: "target",
-    key: "target",
-    skip: props.execution !== null || route.params.task_id,
-    callback: (value, definitions) => {
-      const task = filters.getDefinitionFromKey("task", definitions);
-      const host = filters.getDefinitionFromKey("host", definitions);
-      if (value) {
-        task.disabled = false;
-        useApi("/api/tasks/", true)
-          .list(
-            {
-              project: route.params.project_id,
-              target: value,
-              ordering: "-id",
-            },
-            true,
-          )
-          .then((response) => {
-            task.collection = response.items;
-          });
-        if (host) {
-          useApi("/api/hosts/", true)
-            .list(
-              {
-                project: route.params.project_id,
-                target: value,
-                ordering: "address",
-              },
-              true,
-            )
-            .then((response) => (host.collection = response.items));
-        }
-      } else {
-        task.disabled = true;
-        task.value = null;
-        task.collection = [];
-        if (host) {
-          host.request.then((response) => (host.collection = response.items));
-        }
-      }
-    },
-  },
-  {
-    type: "autocomplete",
-    cols: 3,
-    label: "Scan",
-    icon: "mdi-play-network",
-    collection: [],
-    fieldValue: "id",
-    key: "task",
-    skip: props.execution !== null || route.params.task_id,
-    disabled: true,
-  },
-  {
-    type: "autocomplete",
-    cols: 2,
-    label: "Tool",
-    icon: "mdi-rocket",
-    enforceIcon: true,
-    request: useApi("/api/tools/", true).list({ ordering: "name" }, true),
-    fieldValue: "id",
-    fieldTitle: "name",
-    key: "tool",
-    skip: props.execution !== null,
-  },
-  {
-    type: "switch",
-    label: "Fixed",
-    color: "green",
-    cols: 1,
-    key: "is_fixed",
-    trueValue: true,
-    falseValue: false,
-    defaultValue: false,
-    callback: (value, definitions) => {
-      const auto = filters.getDefinitionFromKey("auto_fixed", definitions);
-      const mine = filters.getDefinitionFromKey("fixed_by", definitions);
-      auto.disabled = value === false;
-      mine.disabled = value === false;
-      if (!value) {
-        auto.value = null;
-        mine.value = null;
-      }
-    },
-  },
-  {
-    type: "switch",
-    label: "Auto Fixed",
-    color: "green",
-    cols: 1,
-    key: "auto_fixed",
-    trueValue: true,
-    falseValue: null,
-    disabled: true,
-    callback: (value, definitions) => {
-      const mine = filters.getDefinitionFromKey("fixed_by", definitions);
-      mine.disabled = value !== null;
-      if (mine.disabled) {
-        mine.value = null;
-      }
-    },
-  },
-  {
-    type: "switch",
-    label: "My Fixes",
-    color: "blue",
-    cols: 1,
-    key: "fixed_by",
-    trueValue: user.user,
-    falseValue: null,
-    isAuditor: true,
-    disabled: true,
-    callback: (value, definitions) => {
-      const mine = filters.getDefinitionFromKey("auto_fixed", definitions);
-      mine.disabled = value !== null;
-      if (mine.disabled) {
-        mine.value = null;
-      }
-    },
-  },
-]);
 const tabs = ref({
   osint: {
     api: useApi("/api/osint/", true),
@@ -456,39 +325,186 @@ const tabs = ref({
     ],
   },
 });
-const filtering = ref(buildFiltering());
+const filtering = ref([]);
+let globalFiltering = [];
+filters
+  .build([
+    {
+      type: "autocomplete",
+      cols: 2,
+      label: "Target",
+      icon: "mdi-target",
+      request: useApi("/api/targets/", true).list(
+        { project: route.params.project_id, ordering: "target" },
+        true,
+      ),
+      fieldValue: "id",
+      fieldTitle: "target",
+      key: "target",
+      skip: props.execution !== null || route.params.task_id,
+      callback: (value, definitions) => {
+        const task = filters.getDefinitionFromKey("task", definitions);
+        const host = filters.getDefinitionFromKey("host", definitions);
+        if (value) {
+          task.disabled = false;
+          useApi("/api/tasks/", true)
+            .list(
+              {
+                project: route.params.project_id,
+                target: value,
+                ordering: "-id",
+              },
+              true,
+            )
+            .then((response) => {
+              task.collection = response.items;
+            });
+          if (host) {
+            useApi("/api/hosts/", true)
+              .list(
+                {
+                  project: route.params.project_id,
+                  target: value,
+                  ordering: "address",
+                },
+                true,
+              )
+              .then((response) => (host.collection = response.items));
+          }
+        } else {
+          task.disabled = true;
+          task.value = null;
+          task.collection = [];
+          if (host) {
+            host.request.then((response) => (host.collection = response.items));
+          }
+        }
+      },
+    },
+    {
+      type: "autocomplete",
+      cols: 3,
+      label: "Scan",
+      icon: "mdi-play-network",
+      collection: [],
+      fieldValue: "id",
+      key: "task",
+      skip: props.execution !== null || route.params.task_id,
+      disabled: true,
+    },
+    {
+      type: "autocomplete",
+      cols: 2,
+      label: "Tool",
+      icon: "mdi-rocket",
+      enforceIcon: true,
+      request: useApi("/api/tools/", true).list({ ordering: "name" }, true),
+      fieldValue: "id",
+      fieldTitle: "name",
+      key: "tool",
+      skip: props.execution !== null,
+    },
+    {
+      type: "switch",
+      label: "Fixed",
+      color: "green",
+      cols: 1,
+      key: "is_fixed",
+      trueValue: true,
+      falseValue: false,
+      defaultValue: false,
+      callback: (value, definitions) => {
+        const auto = filters.getDefinitionFromKey("auto_fixed", definitions);
+        const mine = filters.getDefinitionFromKey("fixed_by", definitions);
+        auto.disabled = value === false;
+        mine.disabled = value === false;
+        if (!value) {
+          auto.value = null;
+          mine.value = null;
+        }
+      },
+    },
+    {
+      type: "switch",
+      label: "Auto Fixed",
+      color: "green",
+      cols: 1,
+      key: "auto_fixed",
+      trueValue: true,
+      falseValue: null,
+      disabled: true,
+      callback: (value, definitions) => {
+        const mine = filters.getDefinitionFromKey("fixed_by", definitions);
+        mine.disabled = value !== null;
+        if (mine.disabled) {
+          mine.value = null;
+        }
+      },
+    },
+    {
+      type: "switch",
+      label: "My Fixes",
+      color: "blue",
+      cols: 1,
+      key: "fixed_by",
+      trueValue: user.user,
+      falseValue: null,
+      isAuditor: true,
+      disabled: true,
+      callback: (value, definitions) => {
+        const mine = filters.getDefinitionFromKey("auto_fixed", definitions);
+        mine.disabled = value !== null;
+        if (mine.disabled) {
+          mine.value = null;
+        }
+      },
+    },
+  ])
+  .then((globalFilters) => {
+    globalFiltering = globalFilters;
+    buildFiltering();
+  });
 
 function buildFiltering() {
-  return filters
-    .build(tabs.value[tab.value].filtering)
-    .concat(globalFiltering)
-    .concat(tabs.value[tab.value].triage ? filters.build(triageFiltering) : [])
-    .concat(
-      filters.build([
-        {
-          type: "autocomplete",
-          label: "Sort",
-          icon: "mdi-sort",
-          cols: 2,
-          collection: tabs.value[tab.value].ordering,
-          fieldValue: "id",
-          fieldTitle: "name",
-          key: "ordering",
-          defaultValue: "-id",
-        },
-      ]),
-    );
+  filters.build(tabs.value[tab.value].filtering).then((tabFilters) => {
+    filters
+      .build(tabs.value[tab.value].triage ? triageFiltering : [])
+      .then((triageFilters) => {
+        filters
+          .build([
+            {
+              type: "autocomplete",
+              label: "Sort",
+              icon: "mdi-sort",
+              cols: 2,
+              collection: tabs.value[tab.value].ordering,
+              fieldValue: "id",
+              fieldTitle: "name",
+              key: "ordering",
+              defaultValue: "-id",
+            },
+          ])
+          .then((orderFilters) => {
+            filtering.value = tabFilters
+              .concat(globalFiltering)
+              .concat(triageFilters)
+              .concat(orderFilters);
+          });
+      });
+  });
 }
 
 function tabChange() {
-  filtering.value = buildFiltering();
+  buildFiltering();
   forceUpdate.value++;
   if (dataset.value) {
     findings.value = [];
     dataset.value.loadData(true);
   }
   if (props.matchPath) {
-    router.replace({ query: { tab: tab.value } });
+    router.replace({
+      query: Object.assign({}, route.query, { tab: tab.value }),
+    });
   }
 }
 </script>

@@ -94,8 +94,9 @@ const filters = useFilters();
 const dataset = ref(null);
 const reports = ref([]);
 const api = useApi("/api/reports/", true, "Report");
-const filtering = ref(
-  filters.build([
+const filtering = ref([]);
+filters
+  .build([
     {
       type: "autocomplete",
       label: "Target",
@@ -176,6 +177,6 @@ const filtering = ref(
       key: "ordering",
       defaultValue: "id",
     },
-  ]),
-);
+  ])
+  .then((results) => (filtering.value = results));
 </script>

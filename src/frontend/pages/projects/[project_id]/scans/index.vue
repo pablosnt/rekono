@@ -170,8 +170,9 @@ const dataset = ref(null);
 const api = useApi("/api/tasks/", true, "Scan");
 const tasks = ref([]);
 
-const filtering = ref(
-  filters.build([
+const filtering = ref([]);
+filters
+  .build([
     {
       type: "autocomplete",
       label: "Target",
@@ -305,8 +306,8 @@ const filtering = ref(
       key: "ordering",
       defaultValue: "-id",
     },
-  ]),
-);
+  ])
+  .then((results) => (filtering.value = results));
 
 function loadData(data) {
   tasks.value = data;

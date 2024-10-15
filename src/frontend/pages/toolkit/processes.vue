@@ -53,8 +53,9 @@ const dataset = ref(null);
 const processes = ref(null);
 const api = ref(useApi("/api/processes/", true, "Process"));
 const tools = ref([]);
-const filtering = ref(
-  filters.build([
+const filtering = ref([]);
+filters
+  .build([
     {
       type: "autocomplete",
       label: "Stage",
@@ -101,8 +102,8 @@ const filtering = ref(
       key: "ordering",
       defaultValue: "id",
     },
-  ]),
-);
+  ])
+  .then((results) => (filtering.value = results));
 useApi("/api/tools/", true, "Tool")
   .list({}, true)
   .then((response) => {

@@ -10,6 +10,16 @@
       </v-btn>
     </template>
     <template #append>
+      <!-- todo: Move this to just a icon and the counter, without tex? -->
+      <UtilsChipCounter
+        class="ml-2"
+        :collection="finding.notes"
+        entity="Notes"
+        icon="mdi-notebook"
+        :link="`/projects/${route.params.project_id}/notes`"
+        color="indigo-darken-1"
+        new-tab
+      />
       <FindingLinks
         :finding="finding"
         :defectdojo="defectdojo"
@@ -31,13 +41,14 @@
         :finding="finding"
         @change="$emit('reload')"
       />
+      <NoteButton v-bind="noteProperties" />
       <slot name="actions" />
     </v-card-actions>
   </v-card>
 </template>
 
 <script setup lang="ts">
-defineProps({
+const props = defineProps({
   api: Object,
   finding: Object,
   title: String,
@@ -64,6 +75,12 @@ defineProps({
   defectdojo: Object,
   defectdojoSettings: Object,
   hacktricks: Object,
+  findingType: String,
 });
 defineEmits(["reload"]);
+const route = useRoute();
+const noteProperties = ref({
+  [props.findingType]: props.finding,
+  project: route.params.project_id,
+});
 </script>

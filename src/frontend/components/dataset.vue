@@ -11,7 +11,7 @@
         single-line
         autofocus
         clearable
-        @update:model-value="loadData"
+        @update:model-value="addParameter('search', search)"
       />
       <v-btn
         v-if="filtering?.length > 0"
@@ -79,16 +79,18 @@
                 :item-title="f.fieldTitle"
                 return-object
                 :color="
-                  f.multiple
-                    ? f.value.length > 0 && f.value[0].color
-                      ? f.value[0].color
-                      : null
-                    : f.value && f.value.color
-                      ? f.value.color
-                      : null
+                  f.value !== null && f.value !== undefined
+                    ? f.multiple
+                      ? f.value.length > 0 && f.value[0].color
+                        ? f.value[0].color
+                        : null
+                      : f.value && f.value.color
+                        ? f.value.color
+                        : null
+                    : null
                 "
                 :prepend-inner-icon="
-                  f.enforceIcon
+                  f.enforceIcon || f.value === null || f.value === undefined
                     ? f.icon
                     : f.multiple
                       ? f.value.length > 0 && f.value[0].icon
@@ -244,14 +246,16 @@ const props = defineProps({
 const emit = defineEmits(["loadData", "expandFilters"]);
 const tasks = useTasks();
 const filters = useFilters();
+const route = useRoute();
+const router = useRouter();
 const page = ref(1);
 const total = ref(0);
 const data = ref(null);
 const search = ref(null);
+const expandFilters = ref(props.expandFilters);
 const parameters = ref(loadParameters());
 const loadingSearch = ref(false);
 const loadingData = ref(false);
-const expandFilters = ref(props.expandFilters);
 let changedFilters = false;
 loadData(true);
 
@@ -265,10 +269,14 @@ function loadParameters() {
       const value = filters.getValue(props.filtering[i]);
       if (value !== null && value !== undefined) {
         parameters[props.filtering[i].key] = value;
+        if (props.filtering[i].callback) {
+          props.filtering[i].callback(value, props.filtering);
+        }
       }
     }
+    expandFilters.value =
+      Object.keys(route.query).filter((k) => k !== "tab").length > 0;
   }
-  // TODO: Load parameters from URL query parameters
   return parameters;
 }
 
@@ -280,7 +288,7 @@ function resetParameters() {
         item.callback(item.value, props.filtering);
       }
     });
-    // TODO: Without those from URL query params
+    router.replace({ query: {} });
     parameters.value = loadParameters();
     changedFilters = false;
     loadData(true);
@@ -289,30 +297,29 @@ function resetParameters() {
 
 function addParameter(key: string, value: string) {
   changedFilters = true;
-  const definition = filters.getDefinitionFromKey(key, props.filtering);
-  if (definition.callback) {
-    definition.callback(value, props.filtering);
-    loadParameters();
+  const queryParams = Object.assign({}, route.query);
+  if (value !== null && value !== undefined) {
+    parameters.value[key] = value;
+    queryParams[key] = value;
   } else {
-    // TODO: Keep parameters as URL parameter to allow links with filters from other pages or provided by users. Needed to link findings between them
-    if (value !== null) {
-      parameters.value[key] = value;
-    } else {
-      /* eslint-disable-next-line @typescript-eslint/no-dynamic-delete */
-      delete parameters.value[key];
-    }
+    /* eslint-disable-next-line @typescript-eslint/no-dynamic-delete */
+    delete parameters.value[key];
+    /* eslint-disable-next-line @typescript-eslint/no-dynamic-delete */
+    delete queryParams[key];
+    value = null;
+  }
+  router.replace({ query: queryParams });
+  const definition = filters.getDefinitionFromKey(key, props.filtering);
+  if (definition && definition.callback) {
+    definition.callback(value, props.filtering);
+    parameters.value = Object.assign({}, loadParameters(), parameters.value);
   }
   loadData();
 }
 
 function loadData(loading: boolean = false) {
-  if (parameters.value) {
-    if (search.value) {
-      loadingSearch.value = true;
-      parameters.value.search = search.value;
-    } else if (parameters.value.search) {
-      delete parameters.value.search;
-    }
+  if (search.value) {
+    loadingSearch.value = true;
   }
   if (loading) {
     loadingData.value = true;
@@ -326,7 +333,7 @@ function loadData(loading: boolean = false) {
   });
 }
 
-// todo: Define parameters typing properly in all functions
+// todo: Define parameters typing properly in all JS functions
 
 defineExpose({ loadData });
 </script>

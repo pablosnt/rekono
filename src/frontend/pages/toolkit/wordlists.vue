@@ -93,8 +93,9 @@ const filters = useFilters();
 const dataset = ref(null);
 const wordlists = ref(null);
 const api = ref(useApi("/api/wordlists/", true, "Wordlist"));
-const filtering = ref(
-  filters.build([
+const filtering = ref([]);
+filters
+  .build([
     {
       type: "autocomplete",
       label: "Type",
@@ -130,6 +131,6 @@ const filtering = ref(
       key: "ordering",
       defaultValue: "id",
     },
-  ]),
-);
+  ])
+  .then((results) => (filtering.value = results));
 </script>

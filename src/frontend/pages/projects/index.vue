@@ -110,8 +110,9 @@ const projects = ref(null);
 const user = userStore();
 const filters = useFilters();
 const api = ref(useApi("/api/projects/", true, "Project"));
-const filtering = ref(
-  filters.build([
+const filtering = ref([]);
+filters
+  .build([
     {
       type: "text",
       label: "Tag",
@@ -139,8 +140,8 @@ const filtering = ref(
       key: "ordering",
       defaultValue: "id",
     },
-  ]),
-);
+  ])
+  .then((results) => (filtering.value = results));
 
 const ProjectCreationDialog = resolveComponent("ProjectCreationDialog");
 const integration = ref(null);

@@ -59,8 +59,9 @@ const enums = ref(useEnums());
 const filters = useFilters();
 const api = useApi("/api/alerts/", true, "Alert");
 const alerts = ref([]);
-const filtering = ref(
-  filters.build([
+const filtering = ref([]);
+filters
+  .build([
     {
       type: "autocomplete",
       label: "Mode",
@@ -116,6 +117,6 @@ const filtering = ref(
       key: "ordering",
       defaultValue: "id",
     },
-  ]),
-);
+  ])
+  .then((results) => (filtering.value = results));
 </script>

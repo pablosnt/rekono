@@ -125,6 +125,7 @@ function processEntity(name) {
       for (let i = 0; i < fields.length; i++) {
         if (fields[i] in entity.value && entity[fields[i]]) {
           value.value = entity[fields[i]];
+          console.log(value.value);
           break;
         }
       }

@@ -184,8 +184,9 @@ const removeMemberApi = props.project
   ? useApi(`/api/projects/${props.project}/members/`, true, "Project member")
   : null;
 const users = ref([]);
-const filtering = ref(
-  filters.build([
+const filtering = ref([]);
+filters
+  .build([
     {
       type: "autocomplete",
       label: "Role",
@@ -212,8 +213,8 @@ const filtering = ref(
       key: "ordering",
       defaultValue: "id",
     },
-  ]),
-);
+  ])
+  .then((results) => (filtering.value = results));
 const dataset = ref(null);
 const alert = useAlert();
 
