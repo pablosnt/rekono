@@ -1,6 +1,9 @@
 <template>
   <v-btn
-    v-if="!['False Positive', 'Won\'t Fixed'].includes(finding.triage_status)"
+    v-if="
+      finding.triage_status === undefined ||
+      !['False Positive', 'Won\'t Fixed'].includes(finding.triage_status)
+    "
     class="text-none"
   >
     <v-chip

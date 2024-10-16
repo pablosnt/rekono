@@ -5,7 +5,7 @@
   >
     <template #prepend>
       <v-btn v-if="icon" hover icon variant="text" @click.prevent.stop>
-        <v-icon :icon="icon" color="red" />
+        <v-icon :icon="icon" :color="iconColor" />
         <v-tooltip v-if="iconTooltip" activator="parent" :text="iconTooltip" />
       </v-btn>
     </template>
@@ -61,6 +61,11 @@ const props = defineProps({
     type: String,
     required: false,
     default: undefined,
+  },
+  iconColor: {
+    type: String,
+    required: false,
+    default: "red",
   },
   iconTooltip: {
     type: String,

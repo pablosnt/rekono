@@ -17,6 +17,11 @@
         to: `/projects/${route.params.project_id}/scans`,
       },
       {
+        title: 'Assets',
+        icon: 'mdi-server',
+        to: `/projects/${route.params.project_id}/assets`,
+      },
+      {
         title: 'Findings',
         icon: 'mdi-ladybug',
         to: `/projects/${route.params.project_id}/findings`,
