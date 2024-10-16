@@ -1,5 +1,4 @@
 import copy
-from typing import List
 
 from executions.enums import Status
 from executions.models import Execution
@@ -24,7 +23,7 @@ class BaseQueueTest(QueueTest):
         super().setUp()
         self._setup_fake_tool()
 
-    def _setup_multiple_findings(self, create_ports_and_paths: bool) -> List[Finding]:
+    def _setup_multiple_findings(self, create_ports_and_paths: bool) -> list[Finding]:
         findings = []
         for host_index in range(1, self.number_of_hosts + 1):
             new_host = self._create_finding(

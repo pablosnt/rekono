@@ -1,4 +1,4 @@
-from typing import List, Optional, Self
+from typing import Optional, Self
 
 from django.apps import apps
 from django.db import models
@@ -49,13 +49,13 @@ class InputType(BaseModel):
         """
         return self._get_class_from_reference(self.fallback_model)
 
-    def get_related_input_types(self) -> List[Self]:
+    def get_related_input_types(self) -> list[Self]:
         """Get relations between the different input types.
 
         Returns:
-            Dict[InputType, List[InputType]]: Dict with a list of related input types for each input type
+            dict[InputType, list[InputType]]: dict with a list of related input types for each input type
         """
-        relations: List[InputType] = []
+        relations: list[InputType] = []
         if not self.relationships:
             return relations
         model = self.get_model_class()

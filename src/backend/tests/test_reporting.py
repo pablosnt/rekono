@@ -1,6 +1,6 @@
-from typing import Any, List, Optional
+from typing import Any, Optional
 
-from reporting.enums import FindingName, ReportFormat, ReportStatus
+from reporting.enums import FindingName, ReportFormat
 from reporting.models import Report
 from targets.enums import TargetType
 from targets.models import Target
@@ -12,7 +12,7 @@ class ReportingTest(ApiTest):
     endpoint = "/api/reports/"
     format = None
     only_true_positives = False
-    finding_types: Optional[List[str]] = [
+    finding_types: Optional[list[str]] = [
         FindingName.OSINT.value,
         FindingName.HOST.value,
         FindingName.PORT.value,
@@ -69,12 +69,11 @@ class ReportingTest(ApiTest):
                     {**report, "project": 1},
                     expected={
                         "id": 1,
-                        "project": 1,
+                        "project": {"id": 1, "name": "test"},
                         "task": None,
                         "target": None,
                         "format": self.format.value,
-                        "status": ReportStatus.PENDING.value,
-                        "user": 1,
+                        "user": {"id": 1, "username": "admin1"},
                     },
                 ),
                 ApiTestCase(
@@ -85,11 +84,10 @@ class ReportingTest(ApiTest):
                     expected={
                         "id": 2,
                         "project": None,
-                        "task": 1,
+                        "task": {"id": 1, "target": {"id": 1}},
                         "target": None,
                         "format": self.format.value,
-                        "status": ReportStatus.PENDING.value,
-                        "user": 3,
+                        "user": {"id": 3, "username": "auditor1"},
                     },
                 ),
                 ApiTestCase(
@@ -101,10 +99,9 @@ class ReportingTest(ApiTest):
                         "id": 3,
                         "project": None,
                         "task": None,
-                        "target": 1,
+                        "target": {"id": 1},
                         "format": self.format.value,
-                        "status": ReportStatus.PENDING.value,
-                        "user": 5,
+                        "user": {"id": 5, "username": "reader1"},
                     },
                 ),
                 ApiTestCase(
@@ -132,11 +129,11 @@ class ReportingTest(ApiTest):
                     200,
                     expected={
                         "id": 1,
-                        "project": 1,
+                        "project": {"id": 1, "name": "test"},
                         "task": None,
                         "target": None,
                         "format": self.format.value,
-                        "user": 1,
+                        "user": {"id": 1, "username": "admin1"},
                     },
                     endpoint="{endpoint}1/",
                 ),
@@ -147,10 +144,10 @@ class ReportingTest(ApiTest):
                     expected={
                         "id": 2,
                         "project": None,
-                        "task": 1,
+                        "task": {"id": 1, "target": {"id": 1}},
                         "target": None,
                         "format": self.format.value,
-                        "user": 3,
+                        "user": {"id": 3, "username": "auditor1"},
                     },
                     endpoint="{endpoint}2/",
                 ),
@@ -162,9 +159,9 @@ class ReportingTest(ApiTest):
                         "id": 3,
                         "project": None,
                         "task": None,
-                        "target": 1,
+                        "target": {"id": 1},
                         "format": self.format.value,
-                        "user": 5,
+                        "user": {"id": 5, "username": "reader1"},
                     },
                     endpoint="{endpoint}3/",
                 ),
@@ -177,25 +174,25 @@ class ReportingTest(ApiTest):
                             "id": 3,
                             "project": None,
                             "task": None,
-                            "target": 1,
+                            "target": {"id": 1},
                             "format": self.format.value,
-                            "user": 5,
+                            "user": {"id": 5, "username": "reader1"},
                         },
                         {
                             "id": 2,
                             "project": None,
-                            "task": 1,
+                            "task": {"id": 1, "target": {"id": 1}},
                             "target": None,
                             "format": self.format.value,
-                            "user": 3,
+                            "user": {"id": 3, "username": "auditor1"},
                         },
                         {
                             "id": 1,
-                            "project": 1,
+                            "project": {"id": 1, "name": "test"},
                             "task": None,
                             "target": None,
                             "format": self.format.value,
-                            "user": 1,
+                            "user": {"id": 1, "username": "admin1"},
                         },
                     ],
                 ),

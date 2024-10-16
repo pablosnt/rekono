@@ -1,14 +1,4 @@
-from typing import Any, Callable, List
-
-from telegram import Update
-from telegram.ext import (
-    CallbackContext,
-    CallbackQueryHandler,
-    CommandHandler,
-    ConversationHandler,
-    MessageHandler,
-    filters,
-)
+from typing import Any, Callable
 
 from platforms.telegram_app.bot.commands import Cancel
 from platforms.telegram_app.bot.enums import Context, Section
@@ -29,10 +19,19 @@ from platforms.telegram_app.bot.mixins.tools import (
     ToolMixin,
 )
 from platforms.telegram_app.bot.mixins.wordlists import WordlistMixin
+from telegram import Update
+from telegram.ext import (
+    CallbackContext,
+    CallbackQueryHandler,
+    CommandHandler,
+    ConversationHandler,
+    MessageHandler,
+    filters,
+)
 
 
 class BaseConversation(ConversationHandler, BaseTelegramBot):
-    _states_methods: List[Callable] = []
+    _states_methods: list[Callable] = []
     first_state = 0
 
     def __init__(self, **kwargs: Any) -> None:
@@ -40,9 +39,11 @@ class BaseConversation(ConversationHandler, BaseTelegramBot):
             entry_points=[CommandHandler(self.get_name(), self._save_command_name)],
             states={
                 index: [
-                    MessageHandler(filters.TEXT, state_method)
-                    if state_method.__name__.startswith("_create_")
-                    else CallbackQueryHandler(state_method)
+                    (
+                        MessageHandler(filters.TEXT, state_method)
+                        if state_method.__name__.startswith("_create_")
+                        else CallbackQueryHandler(state_method)
+                    )
                 ]
                 for index, state_method in enumerate(self._states_methods)
             },

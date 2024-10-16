@@ -14,6 +14,7 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
 from django.contrib import admin
 from django.shortcuts import redirect
 from django.urls import include, path
@@ -45,7 +46,7 @@ urlpatterns = [
     path("api/", include("reporting.urls")),
     path("api/", include("security.authentication.urls")),
     path("api/", include("settings.urls")),
-    path("api/", include("target_blacklist.urls")),
+    path("api/", include("target_denylist.urls")),
     path("api/", include("target_ports.urls")),
     path("api/", include("targets.urls")),
     path("api/", include("tasks.urls")),

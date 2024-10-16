@@ -35,11 +35,11 @@ class Alert(BaseModel):
         null=True,
     )
     enabled = models.BooleanField(default=True)
-    suscribe_all_members = models.BooleanField(default=False)
+    subscribe_all_members = models.BooleanField(default=False)
     owner = models.ForeignKey(
         AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True
     )
-    suscribers = models.ManyToManyField(
+    subscribers = models.ManyToManyField(
         AUTH_USER_MODEL, related_name="alerts", blank=True
     )
 
@@ -134,7 +134,7 @@ class MonitorSettings(BaseModel):
     rq_job_id = models.TextField(max_length=50, blank=True, null=True)
     last_monitor = models.DateTimeField(blank=True, null=True)
     hour_span = models.IntegerField(
-        default=7, validators=[MinValueValidator(24), MaxValueValidator(168)]
+        default=24, validators=[MinValueValidator(24), MaxValueValidator(168)]
     )
 
     def __str__(self) -> str:
