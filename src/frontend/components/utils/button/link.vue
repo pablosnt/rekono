@@ -2,14 +2,18 @@
   <v-btn
     v-if="link"
     variant="text"
-    icon="mdi-open-in-new"
+    :icon="icon"
     color="medium-emphasis"
-    target="_blank"
+    :target="target"
     :href="link"
     hover
   />
 </template>
 
 <script setup lang="ts">
-defineProps({ link: String });
+defineProps({
+  link: String,
+  icon: { type: String, required: false, default: "mdi-open-in-new" },
+  target: { type: Boolean, required: false, default: "_blank" },
+});
 </script>

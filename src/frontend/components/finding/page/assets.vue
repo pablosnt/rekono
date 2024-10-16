@@ -7,12 +7,18 @@
     :default-parameters="defaultParameters"
     empty-head="No assets found"
     empty-text="Run some enumeration tool to identify some assets exposed by your targets"
-    @load-data="(data) => (findings = data)"
+    @load-data="
+      (data) => {
+        findings = data;
+        forceReload++;
+      }
+    "
   >
     <template #data>
       <v-row dense>
         <v-col v-for="finding in findings" :key="finding.id" cols="6">
           <FindingShowHost
+            :key="forceReload > 1 ? forceReload : 1"
             :api="api"
             :finding="finding"
             :defectdojo="defectdojo"
@@ -54,6 +60,7 @@ const enums = useEnums();
 const filters = useFilters();
 const api = useApi("/api/hosts/", true);
 const dataset = ref(null);
+const forceReload = ref(0);
 const findings = ref([]);
 const filtering = ref([]);
 filters
@@ -85,6 +92,7 @@ filters
         },
       ])
       .then((orderFilters) => {
+        // todo: is_fixed filter's default value is not established correctly
         filtering.value = hostFilters
           .concat(props.globalFiltering)
           .concat(orderFilters);

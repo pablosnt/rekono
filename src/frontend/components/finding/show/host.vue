@@ -12,22 +12,19 @@
     finding-type="host"
     @reload="$emit('reload')"
   >
-    <!-- TODO: table with ports and services -->
+    <template #text>
+      <FindingShowPorts
+        :ports="finding.port"
+        :defectdojo="defectdojo"
+        :defectdojo-settings="defectdojoSettings"
+        :hacktricks="hacktricks"
+        @reload="$emit('reload')"
+      />
+    </template>
   </finding-show-component>
 </template>
 
 <!-- 
-    TODO:
-    Hosts
-      -- Ports & Services (same table as Hosts) -> Limit of N ports per host, otherwise, load more button is needed
-        -- New page with tabs
-          -- Paths
-          -- Technologies (there won't be many per port) (two sections: left side with list of techs, right side with details in tabs)
-            -- Credentials (there won't be manhy per tech)
-            -- Exploits (dialog)
-            -- Vulnerabilities (link to vulnerabilities page, if any)
-          -- Vulnerabilities (link to vulnerabilities page, if any)
-
     TODO: Check all findings have the relationships needed on creation
   -->
 

@@ -25,17 +25,6 @@ class OSINTSerializer(TriageFindingSerializer):
         )
 
 
-class HostSerializer(FindingSerializer):
-    class Meta:
-        model = Host
-        fields = FindingSerializer.Meta.fields + (
-            "address",
-            "os",
-            "os_type",
-            "port",
-        )
-
-
 class PortSerializer(FindingSerializer):
     class Meta:
         model = Port
@@ -48,6 +37,19 @@ class PortSerializer(FindingSerializer):
             "path",
             "technology",
             "vulnerability",
+        )
+
+
+class HostSerializer(FindingSerializer):
+    port = PortSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Host
+        fields = FindingSerializer.Meta.fields + (
+            "address",
+            "os",
+            "os_type",
+            "port",
         )
 
 

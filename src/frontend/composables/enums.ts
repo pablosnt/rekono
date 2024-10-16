@@ -154,10 +154,10 @@ export function useEnums() {
     Password: { icon: "mdi-shield-key" },
   };
   const osType = {
-    Linux: { icon: "mdi-linux", color: "orange" },
-    Windows: { icon: "mdi-microsoft", color: "blue" },
-    MacOS: { icon: "mdi-apple", color: "grey" },
-    iOS: { icon: "mdi-apple-ios", color: "grey" },
+    Linux: { icon: "mdi-linux", color: "orange-darken-4" },
+    Windows: { icon: "mdi-microsoft", color: "indigo" },
+    MacOS: { icon: "mdi-apple", color: "grey-darken-1" },
+    iOS: { icon: "mdi-apple-ios", color: "grey-darken-1" },
     Android: { icon: "mdi-android", color: "green" },
     Solaris: { icon: "mdi-white-balance-sunny", color: "orange" },
     FreeBSD: { icon: "mdi-freebsd", color: "red" },

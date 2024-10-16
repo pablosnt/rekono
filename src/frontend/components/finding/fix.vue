@@ -5,6 +5,7 @@
       !['False Positive', 'Won\'t Fixed'].includes(finding.triage_status)
     "
     class="text-none"
+    variant="text"
   >
     <v-chip
       color="green"
