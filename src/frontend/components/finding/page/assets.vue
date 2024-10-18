@@ -40,17 +40,7 @@ const props = defineProps({
   defectdojo: Object,
   defectdojoSettings: Object,
   hacktricks: Object,
-  task: {
-    type: Object,
-    required: false,
-    default: null,
-  },
-  execution: {
-    type: Object,
-    required: false,
-    default: null,
-  },
-  matchPath: {
+  matchQuery: {
     type: Boolean,
     required: false,
     default: false,
@@ -92,7 +82,7 @@ filters
         },
       ])
       .then((orderFilters) => {
-        // todo: is_fixed filter's default value is not established correctly
+        // TODO: is_fixed filter's default value is not established correctly
         filtering.value = hostFilters
           .concat(props.globalFiltering)
           .concat(orderFilters);

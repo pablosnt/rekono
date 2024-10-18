@@ -163,6 +163,12 @@ export function useEnums() {
     FreeBSD: { icon: "mdi-freebsd", color: "red" },
     Other: { icon: "mdi-server", color: "black" },
   };
+  const portStatus = {
+    Open: { color: "green" },
+    "Open - Filtered": { color: "orange-darken-4" },
+    Filtered: { color: "orange-darken-4" },
+    Closed: { color: "red" },
+  };
   const triage = {
     Untriaged: { icon: "mdi-help-circle", color: "grey" },
     "False Positive": { icon: "mdi-close-circle", color: "red" },
@@ -196,6 +202,7 @@ export function useEnums() {
     triage,
     osintTypes,
     osType,
+    portStatus,
     severity,
   };
 }

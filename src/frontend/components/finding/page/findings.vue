@@ -1,115 +1,29 @@
 <template>
-  <v-tabs
-    v-model="tab"
-    align-tabs="center"
-    fixed-tabs
-    @update:model-value="tabChange()"
-  >
-    <v-tab
-      value="osint"
-      text="OSINT"
-      :prepend-icon="enums.findings.OSINT.icon"
-      color="red-darken-2"
-    />
-    <v-tab
-      value="vulnerabilities"
-      text="Vulnerabilities"
-      :prepend-icon="enums.findings.Vulnerability.icon"
-      color="red-darken-2"
-    />
-  </v-tabs>
-  <Dataset
-    v-if="filtering.length > 0"
-    ref="dataset"
-    :key="forceUpdate"
-    :api="tabs[tab].api"
-    :icon="tabs[tab].icon"
-    :filtering="filtering"
-    :expand-filters="expandFilters"
-    :default-parameters="defaultParameters"
-    :empty-head="tabs[tab].emptyHead"
-    :empty-text="tabs[tab].emptyText"
-    @load-data="(data) => (findings = data)"
-    @expand-filters="(value) => (expandFilters = value)"
-  >
-    <template #data>
-      <v-tabs-window v-model="tab">
-        <v-container fluid>
-          <v-row dense>
-            <v-col v-for="finding in findings" :key="finding.id" cols="6">
-              <v-tabs-window-item value="osint">
-                <FindingShowOsint
-                  :api="tabs[tab].api"
-                  :finding="finding"
-                  :defectdojo="defectdojo"
-                  :defectdojo-settings="defectdojoSettings"
-                  :hacktricks="hacktricks"
-                  @reload="dataset.loadData(false)"
-                />
-              </v-tabs-window-item>
-              <v-tabs-window-item value="vulnerabilities">
-                <FindingShowVulnerability
-                  :api="tabs[tab].api"
-                  :finding="finding"
-                  :defectdojo="defectdojo"
-                  :defectdojo-settings="defectdojoSettings"
-                  :hacktricks="hacktricks"
-                  @reload="dataset.loadData(false)"
-                />
-              </v-tabs-window-item>
-            </v-col>
-          </v-row>
-        </v-container>
-      </v-tabs-window>
-    </template>
-  </Dataset>
+  <DatasetSharedTabs :tabs="tabs" :default-parameters="defaultParameters" :default-properties="{ defectdojo: defectdojo, defectdojoSettings: defectdojoSettings, hacktricks: hacktricks }" :global-filtering="globalFiltering.concat(triageFiltering)" entity="finding" :match-query="matchQuery"/>
 </template>
 
 <script setup lang="ts">
-const props = defineProps({
+defineProps({
   defaultParameters: Object,
   globalFiltering: Array,
   triageFiltering: Array,
   defectdojo: Object,
   defectdojoSettings: Object,
   hacktricks: Object,
-  task: {
-    type: Object,
-    required: false,
-    default: null,
-  },
-  execution: {
-    type: Object,
-    required: false,
-    default: null,
-  },
-  matchPath: {
+  matchQuery: {
     type: Boolean,
     required: false,
     default: false,
   },
 });
 const route = useRoute();
-const router = useRouter();
 const enums = useEnums();
 const filters = useFilters();
 
-const forceUpdate = ref(1);
-const expandFilters = ref(false);
-const dataset = ref(null);
-const findings = ref([]);
-
-const tab = ref(
-  route.query.tab &&
-    ["osint", "vulnerabilities"].includes(
-      route.query.tab.toString().toLowerCase(),
-    )
-    ? route.query.tab.toString().toLowerCase()
-    : "osint",
-);
-
 const tabs = ref({
   osint: {
+    text: "OSINT",
+    component: resolveComponent("FindingShowOsint"),
     api: useApi("/api/osint/", true),
     icon: enums.findings.OSINT.icon,
     emptyHead: "No OSINT findings",
@@ -127,10 +41,11 @@ const tabs = ref({
         key: "data_type",
       },
     ],
-    triage: true,
     ordering: ["id", "data", "data_type", "source"],
   },
   vulnerabilities: {
+    text: "Vulnerabilities",
+    component: resolveComponent("FindingShowVulnerability"),
     api: useApi("/api/vulnerabilities/", true),
     icon: enums.findings.Vulnerability.icon,
     emptyHead: "No vulnerabilities found",
@@ -252,7 +167,6 @@ const tabs = ref({
         falseValue: null,
       },
     ],
-    triage: true,
     ordering: [
       "id",
       "technology",
@@ -265,45 +179,4 @@ const tabs = ref({
     ],
   },
 });
-const filtering = ref([]);
-buildFiltering();
-
-function buildFiltering() {
-  filters.build(tabs.value[tab.value].filtering).then((tabFilters) => {
-    filters
-      .build([
-        {
-          type: "autocomplete",
-          label: "Sort",
-          icon: "mdi-sort",
-          cols: 2,
-          collection: tabs.value[tab.value].ordering,
-          fieldValue: "id",
-          fieldTitle: "name",
-          key: "ordering",
-          defaultValue: "-id",
-        },
-      ])
-      .then((orderFilters) => {
-        filtering.value = tabFilters
-          .concat(props.globalFiltering)
-          .concat(props.triageFiltering)
-          .concat(orderFilters);
-      });
-  });
-}
-
-function tabChange() {
-  buildFiltering();
-  forceUpdate.value++;
-  if (dataset.value) {
-    findings.value = [];
-    dataset.value.loadData(true);
-  }
-  if (props.matchPath) {
-    router.replace({
-      query: Object.assign({}, route.query, { tab: tab.value }),
-    });
-  }
-}
 </script>

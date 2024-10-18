@@ -2,15 +2,13 @@
   <component
     v-if="globalFiltering.length > 0 && (!triage || triageFiltering.length > 0)"
     :is="page"
-    :task="task"
-    :execution="execution"
     :default-parameters="defaultParameters"
     :global-filtering="globalFiltering"
     :triage-filtering="triageFiltering"
     :defectdojo="defectdojo"
     :defectdojo-settings="defectdojoSettings"
     :hacktricks="hacktricks"
-    :match-path="matchPath"
+    :match-query="matchQuery"
   />
 </template>
 
@@ -27,10 +25,10 @@ const props = defineProps({
     required: false,
     default: null,
   },
-  matchPath: {
+  matchQuery: {
     type: Boolean,
     required: false,
-    default: undefined,
+    default: false,
   },
   triage: {
     type: Boolean,

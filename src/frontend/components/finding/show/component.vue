@@ -10,7 +10,7 @@
       </v-btn>
     </template>
     <template #append>
-      <!-- todo: Move this to just a icon and the counter, without tex? -->
+      <!-- TODO: Move this to just a icon and the counter, without tex? -->
       <UtilsChipCounter
         class="ml-2"
         :collection="finding.notes"

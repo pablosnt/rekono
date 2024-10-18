@@ -22,8 +22,8 @@
               <td>{{ port.protocol }}</td>
               <td>{{ port.status }}</td>
               <td class="text-left">
-                <!-- todo: Change look & feel. Instead of fix use something meaning "remove from scope" -->
-                <!-- todo: When fix changes, page is reloaded and showMore is reseted -->
+                <!-- TODO: Change look & feel. Instead of fix use something meaning "remove from scope" -->
+                <!-- TODO: When fix changes, page is reloaded and show is reseted -->
                 <FindingFix
                   :api="api"
                   :finding="port"
@@ -36,20 +36,26 @@
                   :defectdojo-settings="defectdojoSettings"
                   :hacktricks="hacktricks"
                 />
-                <UtilsButtonLink
-                  :link="`/projects/${route.params.project_id}/assets/${port.id}`"
+                <FindingVulnerabilityCounter
+                  v-if="port.vulnerability.length > 0"
+                  :port="port"
+                />
+                <v-btn
+                  variant="text"
                   icon="mdi-arrow-right-circle"
-                  target="_self"
+                  color="medium-emphasis"
+                  :to="`/projects/${route.params.project_id}/assets/${port.id}`"
+                  hover
                 />
               </td>
             </tr>
           </tbody>
         </v-table>
         <v-btn
-          v-if="showMore !== undefined"
-          :text="showMore ? 'SHOW LESS' : 'SHOW MORE'"
+          v-if="show !== undefined"
+          :text="show ? 'SHOW LESS' : 'SHOW MORE'"
           variant="plain"
-          @click="showMore = !showMore"
+          @click="show = !show"
         />
       </v-col>
     </v-row>

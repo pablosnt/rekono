@@ -1,0 +1,111 @@
+<template>
+  <v-card
+    v-if="port !== null && host !== null"
+    class="pa-6"
+    :title="`${port.protocol} ${port.port} ${port.service ? port.service : ''}`"
+    :subtitle="host.address"
+    :prepend-icon="portsUtils.getIcon(port.port)"
+    variant="text"
+  >
+    <template #append>
+      <v-chip class="mr-5" :color="enums.portStatus[port.status].color">{{
+        port.status
+      }}</v-chip>
+      <FindingToolCounter class="mr-3" :finding="port" />
+      <FindingFix :api="api" :finding="port" @change="getPort()" />
+      <NoteButton :port="port" :project="route.params.project_id" />
+      <!-- TODO: Move this to just a icon and the counter, without tex? -->
+      <UtilsChipCounter
+        class="ml-2"
+        :collection="port.notes"
+        entity="Notes"
+        icon="mdi-notebook"
+        :link="`/projects/${route.params.project_id}/notes`"
+        color="indigo-darken-1"
+        new-tab
+      />
+      <FindingLinks
+        :finding="port"
+        :defectdojo="defectdojo"
+        :defectdojo-settings="defectdojoSettings"
+        :hacktricks="hacktricks"
+      />
+      <!-- TODO: unify counter components -->
+      <!-- TODO: port filter in query is not working -->
+      <FindingVulnerabilityCounter :port="port" />
+    </template>
+    <template #text>
+      <DatasetSharedTabs :tabs="tabs" :default-parameters="defaultParameters" :default-properties="{ defectdojo: defectdojo, defectdojoSettings: defectdojoSettings, hacktricks: hacktricks }" :global-filtering="globalFiltering" entity="finding" :match-query="matchQuery"/>
+    </template>
+  </v-card>
+</template>
+
+<script setup lang="ts">
+defineProps({
+  defaultParameters: Object,
+  globalFiltering: Array,
+  triageFiltering: Array,
+  defectdojo: Object,
+  defectdojoSettings: Object,
+  hacktricks: Object,
+  matchQuery: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+});
+const route = useRoute();
+const enums = useEnums();
+const filters = useFilters();
+const portsUtils = usePorts();
+
+const api = useApi("/api/ports/", true);
+const host = ref(null);
+const port = ref(null);
+getPort();
+
+const tabs = ref({
+  paths: {
+    text: 'Paths',
+    component: resolveComponent('FindingShowPath'),
+    api: useApi("/api/paths/", true),
+    icon: enums.findings.Path.icon,
+    emptyHead: "No paths found",
+    emptyText: "Run some service discovery tool to detect your first one",
+    filtering: [
+      {
+        cols: 2,
+        type: "autocomplete",
+        label: "Type",
+        icon: "mdi-tag",
+        collection: filters.collectionFromEnum(enums.osintTypes),
+        fieldValue: "name",
+        fieldTitle: "name",
+        key: "type",
+      },
+    ],
+    ordering: ["id", "path", "status", "type"],
+  },
+  technologies: {
+    text: 'Technologies',
+    component: resolveComponent('FindingShowTechnology'),
+    api: useApi("/api/technologies/", true),
+    icon: enums.findings.Technology.icon,
+    emptyHead: "No technologies found",
+    emptyText: "Run some service discovery tool to detect your first one",
+    filtering: [],
+    ordering: ["id", "name", "version"],
+  },
+});
+
+function getPort() {
+  api.get(route.params.port_id).then((response) => {
+    port.value = response;
+    if (host.value === null) {
+      useApi("/api/hosts/", true)
+        .get(port.value.host)
+        .then((hostResponse) => (host.value = hostResponse));
+    }
+  });
+}
+</script>
