@@ -1,5 +1,6 @@
 <template>
   <Dataset
+    v-if="filtering.length > 0"
     ref="dataset"
     :api="api"
     :icon="enums.findings.Host.icon"
@@ -82,7 +83,6 @@ filters
         },
       ])
       .then((orderFilters) => {
-        // TODO: is_fixed filter's default value is not established correctly
         filtering.value = hostFilters
           .concat(props.globalFiltering)
           .concat(orderFilters);
