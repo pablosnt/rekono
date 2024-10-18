@@ -40,7 +40,7 @@
             "
           />
           <span class="me-4" />
-          <UtilsChipOwner class="ma-2" :entity="currentNote" />
+          <UtilsOwner class="ma-2" :entity="currentNote" />
           <span class="me-2" />
           <UtilsButtonDelete
             v-if="currentNote"

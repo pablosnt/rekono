@@ -29,26 +29,27 @@
               :to="`/projects/${target.project}/targets/${target.id}/dashboard`"
             >
               <template #append>
-                <UtilsChipCounter
+                <UtilsCounter
                   :collection="target.tasks"
-                  entity="Tasks"
+                  tooltip="Tasks"
                   icon="mdi-play-network"
                   :link="`/projects/${target.project}/scans`"
+                  color="red"
                   new-tab
                 />
-                <UtilsChipCounter
+                <UtilsCounter
                   class="ml-2"
                   :collection="target.reports"
-                  entity="Reports"
+                  tooltip="Reports"
                   icon="mdi-file-document-multiple"
                   :link="`/projects/${target.project}/reports`"
                   color="blue-grey-darken-1"
                   new-tab
                 />
-                <UtilsChipCounter
+                <UtilsCounter
                   class="ml-2"
                   :collection="target.notes"
-                  entity="Notes"
+                  tooltip="Notes"
                   icon="mdi-notebook"
                   :link="`/projects/${target.project}/notes`"
                   color="indigo-darken-1"

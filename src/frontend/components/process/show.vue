@@ -1,13 +1,13 @@
 <template>
   <v-card :title="process.name" elevation="3" density="compact" hover>
     <template #append>
-      <UtilsChipCounter
+      <UtilsCounter
         :collection="process.steps"
         entity="Steps"
         icon="mdi-rocket"
       />
       <span class="me-3" />
-      <UtilsChipOwner :entity="process" />
+      <UtilsOwner :entity="process" />
       <v-btn
         v-if="details"
         icon="mdi-close"

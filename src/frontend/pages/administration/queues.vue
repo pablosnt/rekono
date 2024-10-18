@@ -21,11 +21,10 @@
                 </v-chip>
                 <span class="me-2" />
               </div>
-              <UtilsChipCounter
+              <UtilsCounter
                 :number="queues[queue].workers"
                 entity="workers"
                 icon="mdi-sitemap"
-                :color="undefined"
                 show-zero
               />
             </template>

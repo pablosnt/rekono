@@ -126,5 +126,6 @@ export function useFilters() {
     getValue,
     setDefault,
     build,
+    setValueFromQuery
   };
 }

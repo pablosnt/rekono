@@ -35,14 +35,13 @@
                   <span class="me-2" />
                 </template>
                 <template #append>
-                  <UtilsChipCounter
+                  <UtilsCounter
                     :collection="project.targets"
-                    entity="Targets"
+                    tooltip="Targets"
                     icon="mdi-target"
                     :link="`/projects/${project.id}/targets`"
                   />
-                  <span class="me-3" />
-                  <UtilsChipOwner :entity="project" />
+                  <UtilsOwner :entity="project" />
                 </template>
                 <template #text>
                   <v-card-text>

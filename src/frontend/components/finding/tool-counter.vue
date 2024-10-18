@@ -1,33 +1,17 @@
 <template>
   <div v-if="tools" class="d-flex flex-row justify-center ga-2">
-    <v-btn
+    <utils-counter
       v-for="tool in tools"
       :key="tool"
-      icon
-      hover
-      color="medium-emphasis"
-      variant="text"
-      :href="counters[tool].reference"
-      target="_blank"
-    >
-      <v-badge
-        floating
-        :content="
-          counters[tool].count < 1000
-            ? counters[tool].count
-            : Math.floor(counters[tool].count / 1000).toString() + 'k'
-        "
-      >
-        <v-avatar v-if="counters[tool].icon" :image="counters[tool].icon" />
-        <v-avatar
-          v-if="!counters[tool].icon"
-          icon="mdi-rocket"
-          color="red"
-          variant="tonal"
-        />
-      </v-badge>
-      <v-tooltip activator="parent" :text="`${tool} detections`" />
-    </v-btn>
+      :number="counters[tool].count"
+      :image="counters[tool].icon ? counters[tool].icon : undefined"
+      :icon="!counters[tool].icon ? 'mdi-rocket' : undefined"
+      :color="!counters[tool].icon ? 'red' : undefined"
+      :variant="!counters[tool].icon ? 'tonal' : undefined"
+      :tooltip="`${tool} detections`"
+      new-tab
+    />
+    <!-- TODO: Link to latest task where the issue was found by each tool -->
   </div>
 </template>
 

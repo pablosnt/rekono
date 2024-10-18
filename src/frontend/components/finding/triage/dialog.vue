@@ -14,7 +14,7 @@
     "
   >
     <template #extra-append>
-      <UtilsChipOwner :entity="finding" field="triage_by" />
+      <UtilsOwner :entity="finding" field="triage_by" />
     </template>
     <v-form v-model="valid" class="mt-3" @submit.prevent="submit()">
       <v-conatiner fluid>

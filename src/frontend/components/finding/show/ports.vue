@@ -36,9 +36,12 @@
                   :defectdojo-settings="defectdojoSettings"
                   :hacktricks="hacktricks"
                 />
-                <FindingVulnerabilityCounter
-                  v-if="port.vulnerability.length > 0"
-                  :port="port"
+                <UtilsCounter
+                  icon="mdi-ladybug"
+                  :collection="port.vulnerability"
+                  :link="`/projects/${route.params.project_id}/findings?tab=vulnerabilities&host=${port.host}&port=${port.id}`"
+                  tooltip="Vulnerabilities"
+                  variant="text"
                 />
                 <v-btn
                   variant="text"

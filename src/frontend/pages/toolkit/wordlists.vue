@@ -21,7 +21,7 @@
             >
               <template #append>
                 <span class="me-3" />
-                <UtilsChipCounter
+                <UtilsCounter
                   :number="wordlist.size"
                   entity="Words"
                   icon="mdi-counter"
@@ -39,7 +39,7 @@
                   {{ wordlist.type }}
                 </v-chip>
                 <span class="me-3" />
-                <UtilsChipOwner :entity="wordlist" />
+                <UtilsOwner :entity="wordlist" />
               </template>
 
               <v-card-actions>

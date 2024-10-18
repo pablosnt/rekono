@@ -60,12 +60,12 @@ const props = defineProps({
   globalFiltering: { type: Array, required: false, default: null },
   conditionalFiltering: { type: Array, required: false, default: null },
   conditionalField: { type: String, required: false, default: null },
-  
+
   entity: String,
-  matchQuery: { type: Boolean, required: false, default: false }
+  matchQuery: { type: Boolean, required: false, default: false },
 });
 const route = useRoute();
-const router = useRouter()
+const router = useRouter();
 const filters = useFilters();
 
 const forceUpdate = ref(0);
@@ -76,7 +76,7 @@ const tabKeys = ref(Object.keys(props.tabs));
 const tabQuery = route.query.tab?.toString().toLowerCase();
 const tab = ref(tabKeys.value.includes(tabQuery) ? tabQuery : tabKeys.value[0]);
 const filtering = ref([]);
-buildFiltering()
+buildFiltering();
 
 function properties(item) {
   return Object.assign(
@@ -86,7 +86,7 @@ function properties(item) {
       [props.entity]: item,
     },
     props.defaultProperties !== null ? props.defaultProperties : {},
-  )
+  );
 }
 
 function buildFiltering() {
@@ -134,16 +134,16 @@ function buildFiltering() {
 }
 
 function tabChange() {
-    buildFiltering()
-    forceUpdate.value++
-    if (dataset.value) {
-        collection.value = []
-        dataset.value.loadData(true)
-    }
-    if (props.matchQuery) {
-        router.replace({
+  buildFiltering();
+  forceUpdate.value++;
+  if (dataset.value) {
+    collection.value = [];
+    dataset.value.loadData(true);
+  }
+  if (props.matchQuery) {
+    router.replace({
       query: Object.assign({}, route.query, { tab: tab.value }),
     });
-    }
+  }
 }
 </script>

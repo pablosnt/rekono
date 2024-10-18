@@ -1,5 +1,16 @@
 <template>
-  <DatasetSharedTabs :tabs="tabs" :default-parameters="defaultParameters" :default-properties="{ defectdojo: defectdojo, defectdojoSettings: defectdojoSettings, hacktricks: hacktricks }" :global-filtering="globalFiltering.concat(triageFiltering)" entity="finding" :match-query="matchQuery"/>
+  <DatasetSharedTabs
+    :tabs="tabs"
+    :default-parameters="defaultParameters"
+    :default-properties="{
+      defectdojo: defectdojo,
+      defectdojoSettings: defectdojoSettings,
+      hacktricks: hacktricks,
+    }"
+    :global-filtering="globalFiltering.concat(triageFiltering)"
+    entity="finding"
+    :match-query="matchQuery"
+  />
 </template>
 
 <script setup lang="ts">
@@ -78,6 +89,7 @@ const tabs = ref({
               )
               .then((response) => {
                 definition.collection = response.items;
+                filters.setValueFromQuery(definition)
               });
           } else {
             definition.disabled = true;
@@ -114,6 +126,7 @@ const tabs = ref({
               )
               .then((response) => {
                 definition.collection = response.items;
+                filters.setValueFromQuery(definition)
               });
           } else {
             definition.disabled = true;

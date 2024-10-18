@@ -81,34 +81,34 @@
                 <div>
                   <v-divider class="mt-4 mb-4" />
                   <div class="d-flex flex-row justify-center ga-2">
-                    <v-chip :color="enums.intensities[task.intensity].color">
+                    <v-chip  class="mt-4" :color="enums.intensities[task.intensity].color">
                       {{ task.intensity }}
                     </v-chip>
-                    <UtilsChipCounter
+                    <UtilsCounter
                       :collection="task.wordlists"
-                      entity="Wordlists Used"
+                      tooltip="Wordlists used"
                       icon="mdi-file-word-box"
                       link="/toolkit/wordlists"
                       color="blue-grey"
                       new-tab
                     />
-                    <UtilsChipCounter
+                    <UtilsCounter
                       :collection="task.notes"
-                      entity="Notes"
+                      tooltip="Notes"
                       icon="mdi-notebook"
                       :link="`/projects/${route.params.project_id}/notes`"
                       color="indigo-darken-1"
                       new-tab
                     />
-                    <UtilsChipCounter
+                    <UtilsCounter
                       :collection="task.reports"
-                      entity="Reports"
+                      tooltip="Reports"
                       icon="mdi-file-document-multiple"
                       :link="`/projects/${route.params.project_id}/reports`"
                       color="blue-grey-darken-1"
                       new-tab
                     />
-                    <UtilsChipOwner :entity="task" field="executor" />
+                    <UtilsOwner class="mt-4" :entity="task" field="executor" />
                   </div>
                 </div>
               </template>
@@ -233,6 +233,7 @@ filters
             .then((response) => {
               configuration.collection = response.items;
               configuration.disabled = false;
+              filters.setValueFromQuery(tasks)
             });
         } else {
           process.disabled = false;

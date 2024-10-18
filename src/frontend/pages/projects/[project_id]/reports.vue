@@ -63,7 +63,7 @@
                   "
                   :to="`/projects/${route.params.project_id}/targets/${report.task.id}`"
                 />
-                <UtilsChipOwner :entity="report" field="user" />
+                <UtilsOwner :entity="report" field="user" />
               </template>
               <v-card-actions>
                 <ReportDownloadButton :api="api" :report="report" />
@@ -107,13 +107,14 @@ filters
       fieldTitle: "target",
       key: "target",
       callback: (value, definitions) => {
-        const tasks = filters.getDefinitionFromKey("related_task", definitions);
+        const tasks = filters.getDefinitionFromKey("task", definitions);
         if (value) {
           useApi("/api/tasks/", true)
             .list({ target: value }, true)
             .then((response) => {
               tasks.collection = response.items;
               tasks.disabled = false;
+              filters.setValueFromQuery(tasks)
             });
         } else {
           tasks.collection = [];

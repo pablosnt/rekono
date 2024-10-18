@@ -14,11 +14,10 @@
       <FindingToolCounter class="mr-3" :finding="port" />
       <FindingFix :api="api" :finding="port" @change="getPort()" />
       <NoteButton :port="port" :project="route.params.project_id" />
-      <!-- TODO: Move this to just a icon and the counter, without tex? -->
-      <UtilsChipCounter
+      <UtilsCounter
         class="ml-2"
         :collection="port.notes"
-        entity="Notes"
+        tooltip="Notes"
         icon="mdi-notebook"
         :link="`/projects/${route.params.project_id}/notes`"
         color="indigo-darken-1"
@@ -30,12 +29,28 @@
         :defectdojo-settings="defectdojoSettings"
         :hacktricks="hacktricks"
       />
-      <!-- TODO: unify counter components -->
-      <!-- TODO: port filter in query is not working -->
-      <FindingVulnerabilityCounter :port="port" />
+      <UtilsCounter
+        icon="mdi-ladybug"
+        size="x-large"
+        :collection="port.vulnerability"
+        :link="`/projects/${route.params.project_id}/findings?tab=vulnerabilities&host=${port.host}&port=${port.id}`"
+        tooltip="Vulnerabilities"
+        show-zero
+      />
     </template>
     <template #text>
-      <DatasetSharedTabs :tabs="tabs" :default-parameters="defaultParameters" :default-properties="{ defectdojo: defectdojo, defectdojoSettings: defectdojoSettings, hacktricks: hacktricks }" :global-filtering="globalFiltering" entity="finding" :match-query="matchQuery"/>
+      <DatasetSharedTabs
+        :tabs="tabs"
+        :default-parameters="defaultParameters"
+        :default-properties="{
+          defectdojo: defectdojo,
+          defectdojoSettings: defectdojoSettings,
+          hacktricks: hacktricks,
+        }"
+        :global-filtering="globalFiltering"
+        entity="finding"
+        :match-query="matchQuery"
+      />
     </template>
   </v-card>
 </template>
@@ -66,8 +81,8 @@ getPort();
 
 const tabs = ref({
   paths: {
-    text: 'Paths',
-    component: resolveComponent('FindingShowPath'),
+    text: "Paths",
+    component: resolveComponent("FindingShowPath"),
     api: useApi("/api/paths/", true),
     icon: enums.findings.Path.icon,
     emptyHead: "No paths found",
@@ -87,8 +102,8 @@ const tabs = ref({
     ordering: ["id", "path", "status", "type"],
   },
   technologies: {
-    text: 'Technologies',
-    component: resolveComponent('FindingShowTechnology'),
+    text: "Technologies",
+    component: resolveComponent("FindingShowTechnology"),
     api: useApi("/api/technologies/", true),
     icon: enums.findings.Technology.icon,
     emptyHead: "No technologies found",

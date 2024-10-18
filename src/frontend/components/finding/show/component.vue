@@ -10,11 +10,10 @@
       </v-btn>
     </template>
     <template #append>
-      <!-- TODO: Move this to just a icon and the counter, without tex? -->
-      <UtilsChipCounter
+      <UtilsCounter
         class="ml-2"
         :collection="finding.notes"
-        entity="Notes"
+        tooltip="Notes"
         icon="mdi-notebook"
         :link="`/projects/${route.params.project_id}/notes`"
         color="indigo-darken-1"
@@ -30,6 +29,7 @@
     <template #text>
       <slot name="text" />
       <v-divider class="my-3 mb-5" />
+      <!-- TODO: Exposure time -->
       <FindingToolCounter :finding="finding" />
     </template>
     <v-card-actions>

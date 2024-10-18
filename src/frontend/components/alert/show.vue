@@ -47,7 +47,7 @@
               })
         "
       />
-      <UtilsChipOwner :entity="item" />
+      <UtilsOwner :entity="item" />
     </template>
     <v-card-actions>
       <AlertSubscribe :api="api" :item="alert" @reload="$emit('reload')" />

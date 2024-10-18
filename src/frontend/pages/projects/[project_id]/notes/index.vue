@@ -29,7 +29,7 @@
               <template #append>
                 <NoteLink :note="note" />
                 <span class="me-2" />
-                <UtilsChipOwner :entity="note" />
+                <UtilsOwner :entity="note" />
                 <span class="me-2" />
               </template>
               <template #text>
@@ -172,6 +172,7 @@ filters
             .then((response) => {
               tasks.collection = response.items;
               tasks.disabled = false;
+              filters.setValueFromQuery(tasks)
             });
         } else {
           tasks.collection = [];

@@ -93,6 +93,7 @@ filters
             )
             .then((response) => {
               task.collection = response.items;
+              filters.setValueFromQuery(task)
             });
           if (host) {
             useApi("/api/hosts/", true)
@@ -104,14 +105,14 @@ filters
                 },
                 true,
               )
-              .then((response) => (host.collection = response.items));
+              .then((response) => { host.collection = response.items; filters.setValueFromQuery(host) });
           }
         } else {
           task.disabled = true;
           task.value = null;
           task.collection = [];
           if (host) {
-            host.request.then((response) => (host.collection = response.items));
+            host.request.then((response) => { host.collection = response.items; filters.setValueFromQuery(host) });
           }
         }
       },
