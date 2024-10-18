@@ -1,4 +1,4 @@
-from typing import Any, List
+from typing import Any
 
 from django.core import management
 from django.core.management.commands import loaddata
@@ -29,5 +29,5 @@ class BaseApp:
                 )
             )
 
-    def _get_models(self) -> List[Any]:
+    def _get_models(self) -> list[Any]:
         return []  # pragma: no cover

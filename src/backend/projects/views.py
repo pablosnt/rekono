@@ -71,8 +71,8 @@ class ProjectViewSet(BaseViewSet):
         if int(member_id) != project.owner.id:
             # Member found and it isn't the project owner
             project.members.remove(member)  # Remove project member
-            for alert in project.alerts.filter(suscribers=member).all():
-                alert.suscribers.remove(member)
+            for alert in project.alerts.filter(subscribers=member).all():
+                alert.subscribers.remove(member)
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(
             {"user": ["The project owner can't be removed"]},

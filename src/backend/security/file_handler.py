@@ -2,11 +2,10 @@ import hashlib
 import logging
 import uuid
 from pathlib import Path
-from typing import Any, List, Tuple
+from typing import Any
 
 import magic
 from django.core.exceptions import ValidationError
-
 from rekono.settings import CONFIG
 from settings.models import Settings
 
@@ -16,8 +15,8 @@ logger = logging.getLogger()
 class FileHandler:
     def __init__(
         self,
-        extensions: List[str] = ["txt", "text", ""],
-        mime_types: List[str] = ["text/plain"],
+        extensions: list[str] = ["txt", "text", ""],
+        mime_types: list[str] = ["text/plain"],
     ) -> None:
         self.allowed_extensions = extensions
         self.allowed_mime_types = mime_types
@@ -65,7 +64,7 @@ class FileHandler:
             checksum = hashlib.sha512(file.read()).hexdigest()
             return checksum == expected_checksum
 
-    def store_file(self, in_memory_file: Any) -> Tuple[str, str, int]:
+    def store_file(self, in_memory_file: Any) -> tuple[str, str, int]:
         path = CONFIG.wordlists / f"{str(uuid.uuid4())}.txt"
         checksum = hashlib.sha512()
         with path.open("wb+") as stored_file:

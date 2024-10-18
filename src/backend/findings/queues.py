@@ -1,7 +1,7 @@
 import logging
-from typing import List
 
 from django_rq import job
+from executions.enums import Status
 from executions.models import Execution
 from findings.models import (
     OSINT,
@@ -30,7 +30,7 @@ logger = logging.getLogger()
 class FindingsQueue(BaseQueue):
     name = "findings"
 
-    def enqueue(self, execution: Execution, findings: List[Finding]) -> Job:
+    def enqueue(self, execution: Execution, findings: list[Finding]) -> Job:
         job = super().enqueue(execution=execution, findings=findings)
         logger.info(
             f"[Findings] {len(findings)} findings from execution {execution.id} have been enqueued"
@@ -39,7 +39,7 @@ class FindingsQueue(BaseQueue):
 
     @staticmethod
     @job("findings")
-    def consume(execution: Execution, findings: List[Finding]) -> None:
+    def consume(execution: Execution, findings: list[Finding]) -> None:
         settings = Settings.objects.first()
         if findings:
             notifications = [SMTP(), Telegram()]
@@ -55,7 +55,7 @@ class FindingsQueue(BaseQueue):
                     finding.__class__.objects.remove_fix(finding)
                 for alert in (
                     execution.task.target.project.alerts.filter(enabled=True)
-                    .sort("-item")
+                    .order_by("-item")
                     .all()
                 ):
                     if alert.must_be_triggered(execution, finding):
@@ -63,6 +63,11 @@ class FindingsQueue(BaseQueue):
                             platform.process_alert(alert, finding)
                         break
         if settings.auto_fix_findings:
+            completed_executions = Execution.objects.filter(
+                configuration=execution.configuration,
+                task__target=execution.task.target,
+                status=Status.COMPLETED,
+            ).exclude(id=execution.id)
             for finding_type in [
                 OSINT,
                 Host,
@@ -75,9 +80,6 @@ class FindingsQueue(BaseQueue):
             ]:
                 finding_type.objects.fix(
                     finding_type.objects.filter(
-                        executions__configuration=execution.configuration,
-                        executions__task__target=execution.task.target,
-                    )
-                    .exclude(executions=execution)
-                    .all()
+                        executions__in=completed_executions
+                    ).all()
                 )

@@ -1,6 +1,6 @@
 import logging
 from datetime import timedelta
-from typing import Any, Dict, List
+from typing import Any
 
 from django.db.models import Max
 from django.utils import timezone
@@ -13,6 +13,7 @@ from input_types.models import InputType
 from processes.models import Step
 from rq.job import Job
 from tasks.models import Task
+from tools.enums import Intensity as IntensityValue
 from tools.models import Intensity
 
 logger = logging.getLogger()
@@ -83,7 +84,7 @@ class TasksQueue(BaseQueue):
 
     @staticmethod
     def _consume_process_task(task: Task) -> None:
-        plan: List[Dict[str, Any]] = []
+        plan: list[dict[str, Any]] = []
         steps = (
             Step.objects.annotate(
                 max_input=Max("configuration__tool__arguments__inputs__type__id"),
@@ -129,7 +130,7 @@ class TasksQueue(BaseQueue):
                     configuration=step.configuration,
                     group=1,
                     status=Status.SKIPPED,
-                    skipped_reason=f"Tool {step.configuration.tool.name} can't be executed with intensity {task.intensity.name.capitalize()}",
+                    skipped_reason=f"Tool {step.configuration.tool.name} can't be executed with intensity {IntensityValue(task.intensity).name.capitalize()}",
                 )
         for execution_job in plan:
             executions = TasksQueue._calculate_executions(
@@ -165,9 +166,18 @@ class TasksQueue(BaseQueue):
         job: Any, connection: Any, result: Task, *args: Any, **kwargs: Any
     ) -> None:
         if result and result.repeat_in and result.repeat_time_unit:
-            result.enqueued_at = result.enqueued_at + timedelta(
-                **{result.repeat_time_unit.lower(): result.repeat_in}
+            new_task = Task.objects.create(
+                target=result.target,
+                process=result.process,
+                configuration=result.configuration,
+                intensity=result.intensity,
+                executor=result.user,
+                scheduled_at=result.enqueued_at
+                + timedelta(**{result.repeat_time_unit.lower(): result.repeat_in}),
+                repeat_in=result.repeat_in,
+                repeat_time_unit=result.repeat_time_unit,
             )
+            new_task.wordlists.set(result.wordlists.all())
             instance = TasksQueue()
             job = instance._get_queue().enqueue_at(
                 result.enqueued_at,
@@ -176,5 +186,5 @@ class TasksQueue(BaseQueue):
                 on_success=instance._scheduled_callback,
             )
             logger.info(f"[Task] Scheduled task {result.id} has been enqueued again")
-            result.rq_job_id = job.id
-            result.save(update_fields=["enqueued_at", "rq_job_id"])
+            new_task.rq_job_id = job.id
+            new_task.save(update_fields=["rq_job_id"])

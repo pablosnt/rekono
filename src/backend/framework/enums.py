@@ -2,7 +2,7 @@ from enum import Enum
 
 
 class InputKeyword(Enum):
-    """List of keywords that can be included in tool argument patterns to include BaseInput data."""
+    """list of keywords that can be included in tool argument patterns to include BaseInput data."""
 
     TARGET = 1
     HOST = 2

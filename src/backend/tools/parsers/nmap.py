@@ -1,10 +1,9 @@
 import re
-from typing import Any, List
-
-from libnmap.parser import NmapParser
+from typing import Any
 
 from findings.enums import HostOS, PathType, PortStatus, Protocol, Severity
 from findings.models import Credential, Host, Path, Port, Technology, Vulnerability
+from libnmap.parser import NmapParser
 from security.validators.input_validator import Regex
 from tools.parsers.base import BaseParser
 
@@ -31,7 +30,10 @@ class Nmap(BaseParser):
                 except KeyError:
                     pass
             host = self.create_finding(
-                Host, address=nmap_host.address, os=selected_os.name, os_type=os_type
+                Host,
+                address=nmap_host.address,
+                os=selected_os.name if selected_os else None,
+                os_type=os_type,
             )
             for service in nmap_host.services:
                 port = self.create_finding(
@@ -60,7 +62,7 @@ class Nmap(BaseParser):
                 self._parse_nse_scripts(nmap_host.scripts_results, technologies)
 
     def _parse_nse_scripts(
-        self, results: Any, technologies: List[Technology] | Technology
+        self, results: Any, technologies: list[Technology] | Technology
     ) -> None:
         technology = (
             technologies if isinstance(technologies, Technology) else technologies[0]
@@ -152,7 +154,13 @@ class Nmap(BaseParser):
                         name="SAMBA Remote Code Execution from Writable Share",
                         cve="CVE-2017-7494",
                     )
-                case "smb2-vuln-uptime" | "smb-vuln-ms06-025" | "smb-vuln-ms07-029" | "smb-vuln-ms10-061" | "smb-vuln-ms17-010":
+                case (
+                    "smb2-vuln-uptime"
+                    | "smb-vuln-ms06-025"
+                    | "smb-vuln-ms07-029"
+                    | "smb-vuln-ms10-061"
+                    | "smb-vuln-ms17-010"
+                ):
                     self._parse_nse_vulners(script, smb_technology)
                 case "smb-enum-users":
                     for line in script.get("output").split("\n"):
@@ -187,9 +195,11 @@ class Nmap(BaseParser):
                                     technology=smb_technology,
                                     name="Anonymous SMB",
                                     description=f"Anonymous access is allowed to the SMB share {path}",
-                                    severity=Severity.CRITICAL
-                                    if "WRITE" in anonymous
-                                    else Severity.HIGH,
+                                    severity=(
+                                        Severity.CRITICAL
+                                        if "WRITE" in anonymous
+                                        else Severity.HIGH
+                                    ),
                                     # CWE-287: Improper Authentication
                                     cwe="CWE-287",
                                 )

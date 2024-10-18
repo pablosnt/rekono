@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 from unittest import mock
 
 from findings.enums import Severity
@@ -28,18 +28,18 @@ success = {
 }
 
 
-def _success(impact_value: Dict[str, Any]) -> Dict[str, Any]:
+def _success(impact_value: dict[str, Any]) -> dict[str, Any]:
     success["vulnerabilities"][0]["cve"]["metrics"] = impact_value
     return success
 
 
-def success_cvss_3(*args: Any, **kwargs: Any) -> Dict[str, Any]:
+def success_cvss_3(*args: Any, **kwargs: Any) -> dict[str, Any]:
     return _success(
         {"cvssMetricV31": [{"type": "Primary", "cvssData": {"baseScore": 9}}]}
     )
 
 
-def success_cvss_2(*args: Any, **kwargs: Any) -> Dict[str, Any]:
+def success_cvss_2(*args: Any, **kwargs: Any) -> dict[str, Any]:
     return _success(
         {"cvssMetricV2": [{"type": "Primary", "cvssData": {"baseScore": 8}}]}
     )
