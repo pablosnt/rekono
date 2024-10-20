@@ -1,4 +1,6 @@
 export function useTasks() {
+  const dates = useDates();
+
   function getTitle(task) {
     const executable =
       task.configuration !== null
@@ -49,25 +51,5 @@ export function useTasks() {
     return task.status;
   }
 
-  function getDuration(task) {
-    const start = new Date(task.start);
-    const end = new Date(task.end);
-    const seconds = Math.floor((end.getTime() - start.getTime()) / 1000);
-    const fields = [
-      { value: Math.floor(seconds / (3600 * 24)), name: "d" },
-      { value: Math.floor((seconds % (3600 * 24)) / 3600), name: "h" },
-      { value: Math.floor((seconds % 3600) / 60), name: "m" },
-      { value: Math.floor(seconds % 60), name: "s" },
-    ];
-    task.duration = "";
-    for (let i = 0; i < fields.length; i++) {
-      if (fields[i].value > 0) {
-        task.duration = task.duration + `${fields[i].value} ${fields[i].name} `;
-      }
-    }
-    task.duration = task.duration.trim();
-    return task.duration;
-  }
-
-  return { getTitle, getStatus, getDuration };
+  return { getTitle, getStatus };
 }

@@ -21,11 +21,22 @@
 
 <script setup lang="ts">
 const props = defineProps({ finding: Object });
+const emit = defineEmits(["exposure"]);
 const route = useRoute();
+const dates = useDates();
+const api = useApi("/api/executions/", true);
 const tools = ref([]);
 const counters = ref({});
+let first = null;
+let last = null;
 
 for (let i = 0; i < props.finding.executions.length; i++) {
+  if (first === null || props.finding.executions[i].id < first) {
+    first = props.finding.executions[i].id;
+  }
+  if (last === null || props.finding.executions[i].id > last) {
+    last = props.finding.executions[i].id;
+  }
   if (counters.value[props.finding.executions[i].configuration.tool.name]) {
     counters.value[props.finding.executions[i].configuration.tool.name].count++;
     if (
@@ -46,9 +57,31 @@ for (let i = 0; i < props.finding.executions.length; i++) {
   }
 }
 
+if (first !== last && first !== null && last !== null) {
+  api.get(first).then((firstExecution) => {
+    if (props.finding.is_fixed) {
+      api.get(last).then((lastExecution) => {
+        emit(
+          "exposure",
+          dates.getDuration(
+            new Date(firstExecution.start),
+            new Date(lastExecution.start),
+            true,
+          ),
+        );
+      });
+    } else {
+      emit(
+        "exposure",
+        dates.getDuration(new Date(firstExecution.start), new Date(), true),
+      );
+    }
+  });
+}
+
 tools.value = Object.keys(counters.value);
 for (let i = 0; i < tools.value.length; i++) {
-  useApi("/api/executions/", true)
+  api
     .get(counters.value[tools.value[i]].lastExecution)
     .then(
       (response) => (counters.value[tools.value[i]].lastTask = response.task),

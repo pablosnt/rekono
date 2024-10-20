@@ -29,8 +29,10 @@
     <template #text>
       <slot name="text" />
       <v-divider class="my-3 mb-5" />
-      <!-- TODO: Exposure time -->
-      <FindingToolCounter :finding="finding" />
+      <FindingToolCounter
+        :finding="finding"
+        @exposure="(value) => (exposure = value)"
+      />
     </template>
     <v-card-actions>
       <FindingFix
@@ -40,6 +42,15 @@
         @change="$emit('reload')"
       />
       <v-spacer />
+      <v-btn variant="text">
+        <v-chip
+          v-if="exposure"
+          :text="exposure"
+          prepend-icon="mdi-clock-alert"
+          color="red"
+        />
+        <v-tooltip activator="parent" text="Exposure time" />
+      </v-btn>
       <FindingTriageButton
         v-if="triage"
         :api="api"
@@ -93,4 +104,5 @@ const noteProperties = ref({
   [props.findingType]: props.finding,
   project: route.params.project_id,
 });
+const exposure = ref(null);
 </script>

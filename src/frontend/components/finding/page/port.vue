@@ -11,7 +11,20 @@
       <v-chip class="mr-5" :color="enums.portStatus[port.status].color">{{
         port.status
       }}</v-chip>
-      <FindingToolCounter class="mr-3" :finding="port" />
+      <v-btn variant="text">
+        <v-chip
+          v-if="exposure"
+          :text="exposure"
+          prepend-icon="mdi-clock-alert"
+          color="red"
+        />
+        <v-tooltip activator="parent" text="Exposure time" />
+      </v-btn>
+      <FindingToolCounter
+        class="mr-3"
+        :finding="port"
+        @exposure="(value) => (exposure = value)"
+      />
       <FindingFix :api="api" :finding="port" asset-syntax @change="getPort()" />
       <NoteButton :port="port" :project="route.params.project_id" />
       <UtilsCounter
@@ -74,6 +87,7 @@ const enums = useEnums();
 const filters = useFilters();
 const portsUtils = usePorts();
 
+const exposure = ref(null);
 const api = useApi("/api/ports/", true);
 const host = ref(null);
 const port = ref(null);

@@ -70,7 +70,7 @@
                   <span class="text-medium-emphasis">Time:</span>
                   {{ new Date(task.start).toUTCString() }}
                 </p>
-                <p v-if="task.start && task.end">
+                <p v-if="task.start && task.end && task.duration">
                   <span class="text-medium-emphasis">Duration:</span>
                   {{ task.duration }}
                 </p>
@@ -165,6 +165,7 @@ const utils = useTasks();
 const user = userStore();
 const enums = ref(useEnums());
 const filters = useFilters();
+const dates = useDates();
 const project = ref(null);
 useApi("/api/projects/", true)
   .get(route.params.project_id)
@@ -319,7 +320,12 @@ function loadData(data) {
   for (let i = 0; i < tasks.value.length; i++) {
     utils.getTitle(tasks.value[i]);
     utils.getStatus(tasks.value[i]);
-    utils.getDuration(tasks.value[i]);
+    if (tasks.value[i].start && tasks.value[i].end) {
+      tasks.value[i].duration = dates.getDuration(
+        new Date(tasks.value[i].start),
+        new Date(tasks.value[i].end),
+      );
+    }
     if (tasks.value[i].status === "Running") {
       autoreload = true;
     }
