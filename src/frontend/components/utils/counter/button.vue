@@ -1,6 +1,5 @@
 <template>
   <v-btn
-    v-if="entity === null && (value > 0 || showZero)"
     class="mr-4 text-none"
     :icon="icon !== undefined || image !== undefined"
     variant="text"
@@ -27,31 +26,12 @@
     </v-badge>
     <v-tooltip v-if="tooltip !== null" activator="parent" :text="tooltip" />
   </v-btn>
-  <v-chip
-    v-if="entity !== null && (value > 0 || showZero)"
-    class="mr-4"
-    :prepend-icon="icon"
-    :color="color"
-    :link="link !== null"
-    :target="newTab ? '_blank' : '_self'"
-    @click.stop
-  >
-    {{ display }} {{ entity }}
-  </v-chip>
 </template>
 
 <script setup lang="ts">
-const props = defineProps({
-  number: {
-    type: Number,
-    required: false,
-    default: 0,
-  },
-  collection: {
-    type: Array,
-    required: false,
-    default: null,
-  },
+defineProps({
+  value: Number,
+  display: String,
   icon: {
     type: String,
     required: false,
@@ -82,30 +62,20 @@ const props = defineProps({
     required: false,
     default: null,
   },
-  showZero: {
-    type: Boolean,
-    required: false,
-    default: false,
-  },
   newTab: {
     type: Boolean,
     required: false,
     default: false,
-  },
-  entity: {
-    type: String,
-    required: false,
-    default: null,
   },
   tooltip: {
     type: String,
     required: false,
     default: null,
   },
+  entity: {
+    type: String,
+    required: false,
+    default: null,
+  },
 });
-const value = ref(props.collection ? props.collection.length : props.number);
-const display =
-  value.value < 1000
-    ? value.value
-    : Math.floor(value.value / 1000).toString() + "k";
 </script>

@@ -119,7 +119,7 @@ const tabs = ref({
               .list(
                 {
                   project: route.params.project_id,
-                  port: name,
+                  port: value,
                   ordering: "port",
                 },
                 true,

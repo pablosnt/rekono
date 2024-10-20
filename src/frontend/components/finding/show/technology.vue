@@ -12,6 +12,10 @@
     @reload="$emit('reload')"
   >
     <template #append-after>
+      <FindingExploitDialog
+        v-if="finding.exploit.length > 0"
+        :technology="finding"
+      />
       <UtilsCounter
         icon="mdi-ladybug"
         size="x-large"
@@ -33,8 +37,6 @@
     </template>
   </finding-show-component>
 </template>
-
-<!-- TODO: exploits  -->
 
 <script setup lang="ts">
 defineProps({

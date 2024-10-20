@@ -25,6 +25,16 @@ const props = defineProps({
     required: false,
     default: null,
   },
+  technology: {
+    type: Object,
+    required: false,
+    default: null,
+  },
+  vulnerability: {
+    type: Object,
+    required: false,
+    default: null,
+  },
   matchQuery: {
     type: Boolean,
     required: false,
@@ -42,13 +52,21 @@ const route = useRoute();
 const filters = useFilters();
 
 const defaultParameters = ref(
-  props.execution
-    ? { executions: [props.execution.id] }
-    : props.task
-      ? { task: props.task.id }
-      : route.params.task_id
-        ? { task: route.params.task_id }
-        : { project: route.params.project_id },
+  Object.assign(
+    {},
+    props.technology
+      ? { technology: props.technology.id }
+      : props.vulnerability
+        ? { vulnerability: props.vulnerability.id }
+        : {},
+    props.execution
+      ? { executions: [props.execution.id] }
+      : props.task
+        ? { task: props.task.id }
+        : route.params.task_id
+          ? { task: route.params.task_id }
+          : { project: route.params.project_id },
+  ),
 );
 
 const hacktricks = ref(null);

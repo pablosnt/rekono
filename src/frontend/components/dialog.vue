@@ -8,7 +8,11 @@
     :title="title"
     :subtitle="subtitle"
     :prepend-avatar="avatar"
+    :prepend-icon="!iconColor ? icon : undefined"
   >
+    <template #prepend>
+      <v-icon v-if="icon" :icon="icon" :color="iconColor" />
+    </template>
     <template #append>
       <slot name="extra-append" />
       <v-btn icon="mdi-close" variant="text" @click="$emit('closeDialog')" />
@@ -43,7 +47,12 @@ defineProps({
     required: false,
     default: "800",
   },
-  avatar: {
+  icon: {
+    type: String,
+    required: false,
+    default: undefined,
+  },
+  iconColor: {
     type: String,
     required: false,
     default: undefined,
