@@ -20,22 +20,12 @@
               <td>{{ port.port }}</td>
               <td>{{ port.service }}</td>
               <td>{{ port.protocol }}</td>
-              <td>{{ port.status }}</td>
+              <td>
+                <v-chip :color="enums.portStatus[port.status].color">{{
+                  port.status
+                }}</v-chip>
+              </td>
               <td class="text-left">
-                <!-- TODO: When fix changes, page is reloaded and show is reseted -->
-                <FindingFix
-                  :api="api"
-                  :finding="port"
-                  asset-syntax
-                  @change="$emit('reload')"
-                />
-                <NoteButton :project="route.params.project_id" :port="port" />
-                <FindingLinks
-                  :finding="port"
-                  :defectdojo="defectdojo"
-                  :defectdojo-settings="defectdojoSettings"
-                  :hacktricks="hacktricks"
-                />
                 <UtilsCounter
                   icon="mdi-ladybug"
                   :collection="port.vulnerability"
@@ -75,7 +65,7 @@ const props = defineProps({
 defineEmits(["reload"]);
 const route = useRoute();
 const portsUtils = usePorts();
-const api = useApi("/api/ports/", true);
+const enums = useEnums();
 const maxPorts = 3;
 const raw = props.ports
   .filter((p) => !p.auto_fixed)
