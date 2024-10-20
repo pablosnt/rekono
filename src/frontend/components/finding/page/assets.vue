@@ -84,7 +84,18 @@ filters
       ])
       .then((orderFilters) => {
         filtering.value = hostFilters
-          .concat(props.globalFiltering)
+          .concat(
+            props.globalFiltering.map((f) => {
+              if (f.label && f.label.includes("Fixe")) {
+                f.label =
+                  f.label === "Fixed"
+                    ? "Out of Scope"
+                    : f.label.replace("Fixe", "Outscope");
+                f.cols = 2;
+              }
+              return f;
+            }),
+          )
           .concat(orderFilters);
       });
   });

@@ -33,7 +33,12 @@
       <FindingToolCounter :finding="finding" />
     </template>
     <v-card-actions>
-      <FindingFix :api="api" :finding="finding" @change="$emit('reload')" />
+      <FindingFix
+        :api="api"
+        :finding="finding"
+        :asset-syntax="!triage"
+        @change="$emit('reload')"
+      />
       <v-spacer />
       <FindingTriageButton
         v-if="triage"

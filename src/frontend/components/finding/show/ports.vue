@@ -22,11 +22,11 @@
               <td>{{ port.protocol }}</td>
               <td>{{ port.status }}</td>
               <td class="text-left">
-                <!-- TODO: Change look & feel. Instead of fix use something meaning "remove from scope" -->
                 <!-- TODO: When fix changes, page is reloaded and show is reseted -->
                 <FindingFix
                   :api="api"
                   :finding="port"
+                  asset-syntax
                   @change="$emit('reload')"
                 />
                 <NoteButton :project="route.params.project_id" :port="port" />

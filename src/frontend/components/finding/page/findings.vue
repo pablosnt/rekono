@@ -89,7 +89,7 @@ const tabs = ref({
               )
               .then((response) => {
                 definition.collection = response.items;
-                filters.setValueFromQuery(definition)
+                filters.setValueFromQuery(definition);
               });
           } else {
             definition.disabled = true;
@@ -126,7 +126,7 @@ const tabs = ref({
               )
               .then((response) => {
                 definition.collection = response.items;
-                filters.setValueFromQuery(definition)
+                filters.setValueFromQuery(definition);
               });
           } else {
             definition.disabled = true;

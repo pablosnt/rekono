@@ -81,7 +81,10 @@
                 <div>
                   <v-divider class="mt-4 mb-4" />
                   <div class="d-flex flex-row justify-center ga-2">
-                    <v-chip  class="mt-4" :color="enums.intensities[task.intensity].color">
+                    <v-chip
+                      class="mt-4"
+                      :color="enums.intensities[task.intensity].color"
+                    >
                       {{ task.intensity }}
                     </v-chip>
                     <UtilsCounter
@@ -233,7 +236,7 @@ filters
             .then((response) => {
               configuration.collection = response.items;
               configuration.disabled = false;
-              filters.setValueFromQuery(tasks)
+              filters.setValueFromQuery(tasks);
             });
         } else {
           process.disabled = false;

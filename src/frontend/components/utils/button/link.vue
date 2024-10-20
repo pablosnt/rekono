@@ -14,6 +14,6 @@
 defineProps({
   link: String,
   icon: { type: String, required: false, default: "mdi-open-in-new" },
-  target: { type: Boolean, required: false, default: "_blank" },
+  target: { type: String, required: false, default: "_blank" },
 });
 </script>

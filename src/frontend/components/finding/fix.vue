@@ -27,13 +27,15 @@
         />
       </template>
       <p v-if="finding.is_fixed && finding.fixed_by">
-        Fixed by @{{ finding.fixed_by.username }}
+        {{ assetSyntax ? "Outscoped" : "Fixed" }} by @{{
+          finding.fixed_by.username
+        }}
       </p>
       <template v-if="finding.is_fixed && finding.auto_fixed">
         <v-icon icon="mdi-robot" start />
-        <p>Auto-Fixed</p>
+        <p>{{ assetSyntax ? "Auto-Outscoped" : "Auto-Fixed" }}</p>
       </template>
-      <p v-if="!finding.is_fixed">FIX</p>
+      <p v-if="!finding.is_fixed">{{ assetSyntax ? "OUTSCOPE" : "FIX" }}</p>
     </v-chip>
     <v-tooltip
       v-if="finding.is_fixed && finding.fixed_date"
@@ -44,6 +46,10 @@
 </template>
 
 <script setup lang="ts">
-defineProps({ api: Object, finding: Object });
+defineProps({
+  api: Object,
+  finding: Object,
+  assetSyntax: { type: Boolean, required: false, default: false },
+});
 defineEmits(["change"]);
 </script>

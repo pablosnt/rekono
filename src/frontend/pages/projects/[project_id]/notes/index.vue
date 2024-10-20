@@ -172,7 +172,7 @@ filters
             .then((response) => {
               tasks.collection = response.items;
               tasks.disabled = false;
-              filters.setValueFromQuery(tasks)
+              filters.setValueFromQuery(tasks);
             });
         } else {
           tasks.collection = [];

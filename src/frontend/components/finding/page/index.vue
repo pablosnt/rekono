@@ -1,7 +1,7 @@
 <template>
   <component
-    v-if="globalFiltering.length > 0 && (!triage || triageFiltering.length > 0)"
     :is="page"
+    v-if="globalFiltering.length > 0 && (!triage || triageFiltering.length > 0)"
     :default-parameters="defaultParameters"
     :global-filtering="globalFiltering"
     :triage-filtering="triageFiltering"
@@ -61,7 +61,7 @@ useApi("/api/defect-dojo/settings/", true)
   .get(1)
   .then((response) => (defectdojoSettings.value = response));
 
-let globalFiltering = ref([]);
+const globalFiltering = ref([]);
 filters
   .build([
     {
@@ -93,7 +93,7 @@ filters
             )
             .then((response) => {
               task.collection = response.items;
-              filters.setValueFromQuery(task)
+              filters.setValueFromQuery(task);
             });
           if (host) {
             useApi("/api/hosts/", true)
@@ -105,14 +105,20 @@ filters
                 },
                 true,
               )
-              .then((response) => { host.collection = response.items; filters.setValueFromQuery(host) });
+              .then((response) => {
+                host.collection = response.items;
+                filters.setValueFromQuery(host);
+              });
           }
         } else {
           task.disabled = true;
           task.value = null;
           task.collection = [];
           if (host) {
-            host.request.then((response) => { host.collection = response.items; filters.setValueFromQuery(host) });
+            host.request.then((response) => {
+              host.collection = response.items;
+              filters.setValueFromQuery(host);
+            });
           }
         }
       },

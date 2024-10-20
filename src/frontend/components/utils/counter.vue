@@ -9,7 +9,7 @@
     :target="newTab ? '_blank' : '_self'"
     stacked
   >
-    <v-badge  :content="display">
+    <v-badge :content="display">
       <v-avatar
         v-if="size === undefined"
         :icon="icon"
@@ -17,9 +17,13 @@
         :color="color"
         :variant="variant"
       />
-      <v-icon v-if="size !== undefined" :icon="icon" :size="size" :color="color"
-        
-        :variant="variant"/>
+      <v-icon
+        v-if="size !== undefined"
+        :icon="icon"
+        :size="size"
+        :color="color"
+        :variant="variant"
+      />
     </v-badge>
     <v-tooltip v-if="tooltip !== null" activator="parent" :text="tooltip" />
   </v-btn>

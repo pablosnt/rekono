@@ -12,7 +12,7 @@
         port.status
       }}</v-chip>
       <FindingToolCounter class="mr-3" :finding="port" />
-      <FindingFix :api="api" :finding="port" @change="getPort()" />
+      <FindingFix :api="api" :finding="port" asset-syntax @change="getPort()" />
       <NoteButton :port="port" :project="route.params.project_id" />
       <UtilsCounter
         class="ml-2"
