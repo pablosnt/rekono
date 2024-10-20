@@ -1,6 +1,7 @@
-from typing import Any, Dict, cast
+from typing import Any, cast
 
 from django.core.exceptions import ValidationError
+from executions.serializers import SimpleExecutionSerializer
 from processes.models import Process
 from processes.serializers import SimpleProcessSerializer
 from rest_framework.serializers import ModelSerializer, PrimaryKeyRelatedField
@@ -42,6 +43,7 @@ class TaskSerializer(ModelSerializer):
     configuration = ConfigurationSerializer(many=False, read_only=True)
     intensity = IntegerChoicesField(model=IntensityEnum, required=False)
     executor = SimpleUserSerializer(many=False, read_only=True)
+    executions = SimpleExecutionSerializer(many=True, read_only=True)
 
     class Meta:
         model = Task
@@ -64,6 +66,8 @@ class TaskSerializer(ModelSerializer):
             "end",
             "wordlists",
             "executions",
+            "notes",
+            "reports",
         )
         read_only_fields = (
             "executor",
@@ -72,9 +76,11 @@ class TaskSerializer(ModelSerializer):
             "start",
             "end",
             "executions",
+            "notes",
+            "reports",
         )
 
-    def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         if not attrs.get("intensity"):
             attrs["intensity"] = IntensityEnum.NORMAL
         if attrs.get("configuration"):
@@ -101,11 +107,11 @@ class TaskSerializer(ModelSerializer):
             attrs["repeat_time_unit"] = None
         return super().validate(attrs)
 
-    def create(self, validated_data: Dict[str, Any]) -> Task:
+    def create(self, validated_data: dict[str, Any]) -> Task:
         """Create instance from validated data.
 
         Args:
-            validated_data (Dict[str, Any]): Validated data
+            validated_data (dict[str, Any]): Validated data
 
         Returns:
             Task: Created instance

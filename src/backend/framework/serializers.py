@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 
 from rest_framework import status
 from rest_framework.exceptions import AuthenticationFailed
@@ -21,7 +21,7 @@ class LikeSerializer(ModelSerializer):
         """Check if an instance is liked by the current user or not.
 
         Args:
-            instance (Any): Instance to check
+            instance (any): Instance to check
 
         Returns:
             bool: Indicate if the current user likes this instance or not
@@ -36,7 +36,7 @@ class LikeSerializer(ModelSerializer):
         """Count number of likes for an instance.
 
         Args:
-            instance (Any): Instance to check
+            instance (any): Instance to check
 
         Returns:
             int: Number of likes for this instance
@@ -48,13 +48,15 @@ class MfaSerializer(Serializer):
     mfa = CharField(max_length=200, required=True, write_only=True)
     validator = User.objects.verify_mfa_or_otp
 
-    def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         attrs = super().validate(attrs)
         if not self.validator(
             attrs.get("mfa"),
-            self.user
-            if hasattr(self, "user") and getattr(self, "user")
-            else self.context.get("request").user,
+            (
+                self.user
+                if hasattr(self, "user") and getattr(self, "user")
+                else self.context.get("request").user
+            ),
         ):
             raise AuthenticationFailed(code=status.HTTP_401_UNAUTHORIZED)
         return attrs

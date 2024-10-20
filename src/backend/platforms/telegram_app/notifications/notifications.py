@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Any
 
 from alerts.models import Alert
 from django.forms.models import model_to_dict
@@ -23,15 +23,15 @@ class Telegram(BaseNotification, BaseTelegram):
         self.initialize()
         return bool(self.settings.secret and self.app and self.app.bot)
 
-    def _notify(self, users: List[Any], message: str) -> None:
+    def _notify(self, users: list[Any], message: str) -> None:
         for user in users:
             if hasattr(user, "telegram_chat"):
                 self._send_message(user.telegram_chat, message)
 
     def _notify_execution(
-        self, users: List[User], execution: Execution, findings: List[Finding]
+        self, users: list[User], execution: Execution, findings: list[Finding]
     ) -> None:
-        texts_by_type: Dict[Any, List[str]] = {}
+        texts_by_type: dict[Any, list[str]] = {}
         for finding in findings:
             if finding.__class__ not in texts_by_type:
                 texts_by_type[finding.__class__] = []
@@ -69,7 +69,7 @@ class Telegram(BaseNotification, BaseTelegram):
         )
         self._notify(users, message)
 
-    def _notify_alert(self, users: List[User], alert: Alert, finding: Finding) -> None:
+    def _notify_alert(self, users: list[User], alert: Alert, finding: Finding) -> None:
         self._notify(
             users,
             HEADER.format(

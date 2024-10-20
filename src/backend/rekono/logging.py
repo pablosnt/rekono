@@ -9,7 +9,7 @@ class LoggingFilter(logging.Filter):
         """Filter logging records.
 
         Args:
-            record (Any): Log record
+            record (any): Log record
 
         Returns:
             bool: Indicate if log record is included or not

@@ -62,29 +62,29 @@ class AlertViewSet(BaseViewSet):
             ProjectMemberPermission,
         ],
     )
-    def suscription(self, request: Request, pk: str) -> Response:
+    def subscription(self, request: Request, pk: str) -> Response:
         alert = self.get_object()
         for method, expected_exists, error, operation in [
             (
                 "POST",
                 False,
-                "You are already suscribed to this alert",
-                alert.suscribers.add,
+                "You are already subscribed to this alert",
+                alert.subscribers.add,
             ),
             (
                 "DELETE",
                 True,
-                "You are already not suscribed to this alert",
-                alert.suscribers.remove,
+                "You are already not subscribed to this alert",
+                alert.subscribers.remove,
             ),
         ]:
             if request.method == method:
                 if (
-                    alert.suscribers.filter(id=request.user.id).exists()
+                    alert.subscribers.filter(id=request.user.id).exists()
                     is not expected_exists
                 ):
                     return Response(
-                        {"suscribe": error}, status=status.HTTP_400_BAD_REQUEST
+                        {"subscribe": error}, status=status.HTTP_400_BAD_REQUEST
                     )
                 operation(request.user)
                 break

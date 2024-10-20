@@ -9,7 +9,7 @@ from users.models import User
 
 
 class SecurityTest(ApiTest):
-    refresh = "/api/security/refresh-token/"
+    refresh = "/api/security/refresh/"
     logout = "/api/security/logout/"
     api_tokens = "/api/api-tokens/"
     mfa_login = "/api/security/mfa/"
@@ -23,6 +23,7 @@ class SecurityTest(ApiTest):
             endpoint=ApiTest.login,
         )
     ]
+    admin1: User
 
     def test_refresh_and_logout(self) -> None:
         # Login as admin1

@@ -1,4 +1,4 @@
-from typing import Dict, List, cast
+from typing import cast
 from unittest import mock
 
 from tests.cases import ApiTestCase, RekonoTestCase
@@ -14,7 +14,7 @@ from tests.platforms.defect_dojo.mock import (
 
 class DefectDojoEntitiesTest(ApiTest):
     endpoint = "/api/defect-dojo/"
-    cases: List[RekonoTestCase] = []
+    cases: list[RekonoTestCase] = []
 
     def setUp(self) -> None:
         super().setUp()
@@ -65,7 +65,7 @@ class DefectDojoEntitiesTest(ApiTest):
                     ),
                     ApiTestCase([], "post", 404, valid_data, endpoint),
                 ]
-                if "project_id" in cast(Dict[str, str], valid_data)
+                if "project_id" in cast(dict[str, str], valid_data)
                 else [
                     ApiTestCase(
                         ["admin1", "admin2", "auditor1", "auditor2"],

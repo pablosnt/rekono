@@ -1,5 +1,5 @@
 import json
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 import defusedxml.ElementTree as parser
 from django.db.models.fields.related_descriptors import ReverseManyToOneDescriptor
@@ -20,7 +20,7 @@ class BaseParser:
             and executor.report.stat().st_size > 0
             else None
         )
-        self.findings: List[Finding] = []
+        self.findings: list[Finding] = []
 
     def create_finding(self, finding_type: Finding, **fields: Any) -> Finding:
         for (
@@ -65,14 +65,14 @@ class BaseParser:
     def _parse_standard_output(self) -> None:
         pass
 
-    def _load_report_as_json(self) -> Dict[str, Any]:
+    def _load_report_as_json(self) -> dict[str, Any]:
         with open(self.report, "r", encoding="utf-8") as report:
             return json.load(report)
 
     def _load_report_as_xml(self) -> Any:
         return parser.parse(self.report).getroot()
 
-    def _load_report_by_lines(self) -> List[str]:
+    def _load_report_by_lines(self) -> list[str]:
         with open(self.report, "r", encoding="utf-8") as report:
             return report.readlines()
 

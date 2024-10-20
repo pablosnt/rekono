@@ -73,7 +73,6 @@ class TechnologyFilter(FindingFilter):
             "name": ["exact", "icontains"],
             "version": ["exact", "icontains"],
             "description": ["exact", "icontains"],
-            "related_to": ["exact"],
         }
 
 

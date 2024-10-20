@@ -1,17 +1,16 @@
 import logging
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable, Optional
 
 from asgiref.sync import sync_to_async
 from django.db import IntegrityError
 from django.db.models import QuerySet
-from rest_framework.serializers import Serializer
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
-from telegram.ext import CallbackContext, ConversationHandler
-
 from platforms.telegram_app.bot.commands import Cancel
 from platforms.telegram_app.bot.enums import Context
 from platforms.telegram_app.bot.framework import BaseTelegramBot
 from platforms.telegram_app.models import TelegramChat
+from rest_framework.serializers import Serializer
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram.ext import CallbackContext, ConversationHandler
 
 logger = logging.getLogger()
 
@@ -68,7 +67,7 @@ class BaseMixin(BaseTelegramBot):
     @sync_to_async
     def _save_serializer_async(
         self, serializer: Serializer
-    ) -> Tuple[Any, Dict[str, Any]]:
+    ) -> tuple[Any, dict[str, Any]]:
         try:
             return (
                 (serializer.save(), None)
@@ -114,7 +113,7 @@ class BaseMixin(BaseTelegramBot):
     async def _ask_values(
         self,
         update: Update,
-        values: List[str],
+        values: list[str],
         options_per_row: int,
         message: str,
         next_state: int,
@@ -182,7 +181,7 @@ class BaseMixin(BaseTelegramBot):
         return ConversationHandler.END
 
     def _build_error_message_from_serializer_errors(
-        self, serializer_errors: Dict[str, Any]
+        self, serializer_errors: dict[str, Any]
     ) -> str:
         return "*ERRORS*\n" + "\n".join(
             [
@@ -204,11 +203,11 @@ class BaseMixin(BaseTelegramBot):
         update: Update,
         context: CallbackContext,
         serializer_class: Serializer,
-        data: Dict[str, Any],
+        data: dict[str, Any],
         previous_state: int,
         next_state: int,
         chat: TelegramChat = None,
-    ) -> Tuple[int, Optional[Any]]:
+    ) -> tuple[int, Optional[Any]]:
         chat = chat or await self._get_active_telegram_chat(update)
         if not chat or not update.effective_message:
             return ConversationHandler.END, None

@@ -105,9 +105,11 @@ class UserViewSet(BaseViewSet):
     )
     def reset_password(self, request: Request, *args, **kwargs) -> Response:
         serializer = self._is_valid(
-            RequestPasswordResetSerializer
-            if request.method.lower() == "post"
-            else ResetPasswordSerializer,
+            (
+                RequestPasswordResetSerializer
+                if request.method.lower() == "post"
+                else ResetPasswordSerializer
+            ),
             request,
         )
         serializer.save()

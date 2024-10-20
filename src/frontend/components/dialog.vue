@@ -1,0 +1,62 @@
+<template>
+  <v-card
+    class="mx-auto"
+    elevation="3"
+    :color="color"
+    :width="width"
+    :loading="loading ? 'red' : false"
+    :title="title"
+    :subtitle="subtitle"
+    :prepend-avatar="avatar"
+    :prepend-icon="!iconColor ? icon : undefined"
+  >
+    <template #prepend>
+      <v-icon v-if="icon" :icon="icon" :color="iconColor" />
+    </template>
+    <template #append>
+      <slot name="extra-append" />
+      <v-btn icon="mdi-close" variant="text" @click="$emit('closeDialog')" />
+    </template>
+    <v-card-text class="overflow-auto">
+      <slot />
+    </v-card-text>
+    <slot name="card" />
+  </v-card>
+</template>
+
+<script setup lang="ts">
+defineProps({
+  title: String,
+  avatar: {
+    type: String,
+    required: false,
+    default: undefined,
+  },
+  loading: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  color: {
+    type: String,
+    required: false,
+    default: "default",
+  },
+  width: {
+    type: String,
+    required: false,
+    default: "800",
+  },
+  icon: {
+    type: String,
+    required: false,
+    default: undefined,
+  },
+  iconColor: {
+    type: String,
+    required: false,
+    default: undefined,
+  },
+});
+defineEmits(["closeDialog"]);
+</script>
