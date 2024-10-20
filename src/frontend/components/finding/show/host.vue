@@ -18,7 +18,6 @@
         :defectdojo="defectdojo"
         :defectdojo-settings="defectdojoSettings"
         :hacktricks="hacktricks"
-        @reload="$emit('reload')"
       />
     </template>
   </finding-show-component>

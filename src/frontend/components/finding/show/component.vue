@@ -10,6 +10,7 @@
       </v-btn>
     </template>
     <template #append>
+      <slot name="append-before" />
       <UtilsCounter
         class="ml-2"
         :collection="finding.notes"
@@ -25,6 +26,7 @@
         :defectdojo-settings="defectdojoSettings"
         :hacktricks="hacktricks"
       />
+      <slot name="append-after" />
     </template>
     <template #text>
       <slot name="text" />

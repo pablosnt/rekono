@@ -11,13 +11,30 @@
     finding-type="technology"
     @reload="$emit('reload')"
   >
+    <template #append-after>
+      <UtilsCounter
+        icon="mdi-ladybug"
+        size="x-large"
+        :collection="finding.vulnerability"
+        :link="`/projects/${route.params.project_id}/findings?tab=vulnerabilities&host=${host}&port=${finding.port}&technology=${finding.id}`"
+        tooltip="Vulnerabilities"
+        show-zero
+      />
+    </template>
     <template #text>
       {{ finding.description }}
+      <FindingShowCredentials
+        :credentials="finding.credential"
+        :defectdojo="defectdojo"
+        :defectdojo-settings="defectdojoSettings"
+        :hacktricks="hacktricks"
+        @reload="$emit('reload')"
+      />
     </template>
   </finding-show-component>
 </template>
 
-<!-- TODO: credentials, vulnerabilities, exploits  -->
+<!-- TODO: exploits  -->
 
 <script setup lang="ts">
 defineProps({
@@ -26,7 +43,9 @@ defineProps({
   defectdojo: Object,
   defectdojoSettings: Object,
   hacktricks: Object,
+  host: Number
 });
 defineEmits(["reload"]);
 const enums = useEnums();
+const route = useRoute()
 </script>

@@ -62,16 +62,15 @@ const props = defineProps({
   defectdojoSettings: Object,
   hacktricks: Object,
 });
-defineEmits(["reload"]);
 const route = useRoute();
 const portsUtils = usePorts();
 const enums = useEnums();
-const maxPorts = 3;
+const max = 3;
 const raw = props.ports
   .filter((p) => !p.auto_fixed)
   .sort((a, b) => a.port - b.port);
-const show = ref(maxPorts < raw.length ? false : undefined);
+const show = ref(max < raw.length ? false : undefined);
 const portsShow = computed(() => {
-  return show.value ? raw : raw.slice(0, maxPorts);
+  return show.value ? raw : raw.slice(0, max);
 });
 </script>
