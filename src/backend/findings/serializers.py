@@ -65,22 +65,6 @@ class PathSerializer(FindingSerializer):
         )
 
 
-class TechnologySerializer(FindingSerializer):
-    class Meta:
-        model = Technology
-        fields = FindingSerializer.Meta.fields + (
-            "port",
-            "name",
-            "version",
-            "description",
-            "reference",
-            "related_to",
-            "related_technologies",
-            "vulnerability",
-            "exploit",
-        )
-
-
 class CredentialSerializer(TriageFindingSerializer):
     class Meta:
         model = Credential
@@ -97,6 +81,23 @@ class CredentialSerializer(TriageFindingSerializer):
             "username",
             "secret",
             "context",
+        )
+
+
+class TechnologySerializer(FindingSerializer):
+    credential = CredentialSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Technology
+        fields = FindingSerializer.Meta.fields + (
+            "port",
+            "name",
+            "version",
+            "description",
+            "reference",
+            "credential",
+            "vulnerability",
+            "exploit",
         )
 
 

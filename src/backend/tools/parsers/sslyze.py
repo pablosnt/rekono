@@ -90,10 +90,7 @@ class Sslyze(BaseParser):
                     )
                     if cipher_suites:
                         technology = self.create_finding(
-                            Technology,
-                            name=protocol.upper(),
-                            version=version,
-                            related_to=self.generic_tech,
+                            Technology, name=protocol.upper(), version=version
                         )
                         severity = Severity.HIGH
                         if protocol.lower() == "tls":

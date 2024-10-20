@@ -22,9 +22,11 @@ class Cmseek(BaseParser):
             name=data.get("cms_name").strip(),
             version=version.strip() if version is not None else None,
             description="CMS",
-            reference=data.get("cms_url", "").strip()
-            if data.get("cms_url")
-            else data.get("cms_url"),
+            reference=(
+                data.get("cms_url", "").strip()
+                if data.get("cms_url")
+                else data.get("cms_url")
+            ),
         )
         for key, value in data.items():
             if key in [
@@ -101,9 +103,11 @@ class Cmseek(BaseParser):
                         Vulnerability,
                         technology=cms,
                         name=vulnerability.get("name", "").strip(),
-                        cve=vulnerability.get("cve").strip()
-                        if vulnerability.get("cve") is not None
-                        else None,
+                        cve=(
+                            vulnerability.get("cve").strip()
+                            if vulnerability.get("cve") is not None
+                            else None
+                        ),
                     )
             elif "Version" in value and "," in value:
                 for component in value.split(","):
@@ -119,6 +123,5 @@ class Cmseek(BaseParser):
                             Technology,
                             name=technology.strip(),
                             version=version.strip() if version is not None else None,
-                            related_to=cms,
                             description=f"{cms.name} {name}",
                         )
