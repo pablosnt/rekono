@@ -10,7 +10,7 @@
       :key="t"
       :value="t"
       :text="tabs[t].text"
-      :icon="tabs[t].icon"
+      :prepend-icon="tabs[t].icon"
       color="red-darken-2"
     />
   </v-tabs>
