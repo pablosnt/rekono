@@ -9,28 +9,49 @@
       :color="!counters[tool].icon ? 'red' : undefined"
       :variant="!counters[tool].icon ? 'tonal' : undefined"
       :tooltip="`${tool} detections`"
+      :link="
+        counters[tool].lastTask
+          ? `/projects/${route.params.project_id}/scans/${counters[tool].lastTask}`
+          : undefined
+      "
       new-tab
     />
-    <!-- TODO: Link to latest task where the issue was found by each tool -->
   </div>
 </template>
 
 <script setup lang="ts">
 const props = defineProps({ finding: Object });
+const route = useRoute();
 const tools = ref([]);
 const counters = ref({});
 
 for (let i = 0; i < props.finding.executions.length; i++) {
   if (counters.value[props.finding.executions[i].configuration.tool.name]) {
     counters.value[props.finding.executions[i].configuration.tool.name].count++;
+    if (
+      counters.value[props.finding.executions[i].configuration.tool.name].id <
+      props.finding.executions[i].id
+    ) {
+      counters.value[props.finding.executions[i].configuration.tool.name].id =
+        props.finding.executions[i].id;
+    }
   } else {
     counters.value[props.finding.executions[i].configuration.tool.name] = {
       count: 1,
       icon: props.finding.executions[i].configuration.tool.icon,
       reference: props.finding.executions[i].configuration.tool.reference,
+      lastExecution: props.finding.executions[i].id,
+      lastTask: null,
     };
   }
 }
 
 tools.value = Object.keys(counters.value);
+for (let i = 0; i < tools.value.length; i++) {
+  useApi("/api/executions/", true)
+    .get(counters.value[tools.value[i]].lastExecution)
+    .then(
+      (response) => (counters.value[tools.value[i]].lastTask = response.task),
+    );
+}
 </script>
