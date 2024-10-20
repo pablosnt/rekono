@@ -187,6 +187,7 @@
     rounded="circle"
     @update:model-value="loadData"
   />
+  <!-- todo: keep page in query params -->
 </template>
 
 <script setup lang="ts">

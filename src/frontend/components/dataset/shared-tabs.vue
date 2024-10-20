@@ -37,13 +37,11 @@
               :key="item.id"
               :cols="tabs[tab].cols ? tabs[tab].cols : '6'"
             >
-              <v-tabs-window-item v-for="t in tabKeys" :key="t" :value="t">
-                <component
-                  :is="tabs[tab].component"
-                  v-bind="properties(item)"
-                  @reload="dataset.loadData(false)"
-                />
-              </v-tabs-window-item>
+              <component
+                :is="tabs[tab].component"
+                v-bind="properties(item)"
+                @reload="dataset.loadData(false)"
+              />
             </v-col>
           </v-row>
         </v-container>
