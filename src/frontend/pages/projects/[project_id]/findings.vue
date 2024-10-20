@@ -1,6 +1,6 @@
 <template>
   <MenuProject>
-    <FindingPage :page="FindingPageFindings" match-query triage />
+    <FindingPage :page="FindingPageFindings" match-query />
   </MenuProject>
 </template>
 

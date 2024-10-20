@@ -43,9 +43,9 @@ defineProps({
   defectdojo: Object,
   defectdojoSettings: Object,
   hacktricks: Object,
-  host: Number
+  host: Number,
 });
 defineEmits(["reload"]);
 const enums = useEnums();
-const route = useRoute()
+const route = useRoute();
 </script>

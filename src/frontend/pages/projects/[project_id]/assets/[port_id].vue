@@ -1,6 +1,6 @@
 <template>
   <MenuProject>
-    <FindingPage :page="FindingPagePort" match-query />
+    <FindingPage :page="FindingPagePort" match-query asset />
   </MenuProject>
 </template>
 

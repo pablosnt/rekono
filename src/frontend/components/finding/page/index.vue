@@ -1,7 +1,7 @@
 <template>
   <component
     :is="page"
-    v-if="globalFiltering.length > 0 && (!triage || triageFiltering.length > 0)"
+    v-if="globalFiltering.length > 0 && (asset || triageFiltering.length > 0)"
     :default-parameters="defaultParameters"
     :global-filtering="globalFiltering"
     :triage-filtering="triageFiltering"
@@ -30,7 +30,7 @@ const props = defineProps({
     required: false,
     default: false,
   },
-  triage: {
+  asset: {
     type: Boolean,
     required: false,
     default: false,
@@ -148,9 +148,9 @@ filters
     },
     {
       type: "switch",
-      label: "Fixed",
+      label: props.asset ? "Out of Scope" : "Fixed",
       color: "green",
-      cols: 1,
+      cols: props.asset ? 2 : 1,
       key: "is_fixed",
       trueValue: true,
       falseValue: false,
@@ -168,9 +168,9 @@ filters
     },
     {
       type: "switch",
-      label: "Auto Fixed",
+      label: props.asset ? "Auto Outscoped" : "Auto Fixed",
       color: "green",
-      cols: 1,
+      cols: props.asset ? 2 : 1,
       key: "auto_fixed",
       trueValue: true,
       falseValue: null,
@@ -185,9 +185,9 @@ filters
     },
     {
       type: "switch",
-      label: "My Fixes",
+      label: props.asset ? "My Outscopes" : "My Fixes",
       color: "blue",
-      cols: 1,
+      cols: props.asset ? 2 : 1,
       key: "fixed_by",
       trueValue: user.user,
       falseValue: null,
@@ -207,7 +207,7 @@ filters
   });
 
 const triageFiltering = ref([]);
-if (props.triage) {
+if (!props.asset) {
   filters
     .build([
       {

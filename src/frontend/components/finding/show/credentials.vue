@@ -16,9 +16,8 @@
             <tr v-for="credential in credentialsShow" :key="credential.id">
               <td>
                 <v-btn v-if="credential.context !== null" variant="text" icon>
-                  <v-icon color="info"
-                  icon="$info"/>
-                  <v-tooltip activator="parent" :text="credential.context"/>
+                  <v-icon color="info" icon="$info" />
+                  <v-tooltip activator="parent" :text="credential.context" />
                 </v-btn>
               </td>
               <td>{{ credential.email }}</td>
@@ -30,7 +29,10 @@
                   :finding="credential"
                   @change="$emit('reload')"
                 />
-                <NoteButton :project="route.params.project_id" :credential="credential" />
+                <NoteButton
+                  :project="route.params.project_id"
+                  :credential="credential"
+                />
                 <FindingLinks
                   :finding="credential"
                   :defectdojo="defectdojo"
@@ -59,12 +61,11 @@ const props = defineProps({
   defectdojoSettings: Object,
   hacktricks: Object,
 });
-defineEmits(['reload'])
+defineEmits(["reload"]);
 const route = useRoute();
-const api = useApi("/api/credentials/", true)
+const api = useApi("/api/credentials/", true);
 const max = 3;
-const raw = props.credentials
-  .filter((p) => !p.auto_fixed)
+const raw = props.credentials.filter((p) => !p.auto_fixed);
 const show = ref(max < raw.length ? false : undefined);
 const credentialsShow = computed(() => {
   return show.value ? raw : raw.slice(0, max);

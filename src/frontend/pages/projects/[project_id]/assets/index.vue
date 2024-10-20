@@ -1,6 +1,6 @@
 <template>
   <MenuProject>
-    <FindingPage :page="FindingPageAssets" />
+    <FindingPage :page="FindingPageAssets" asset />
   </MenuProject>
 </template>
 

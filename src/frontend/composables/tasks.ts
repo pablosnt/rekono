@@ -1,6 +1,4 @@
 export function useTasks() {
-  const dates = useDates();
-
   function getTitle(task) {
     const executable =
       task.configuration !== null

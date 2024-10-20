@@ -54,12 +54,14 @@
     <template #text>
       <DatasetSharedTabs
         :tabs="tabs"
-        :default-parameters="Object.assign({}, defaultParameters, { port: port.id })"
+        :default-parameters="
+          Object.assign({}, defaultParameters, { port: port.id })
+        "
         :default-properties="{
           defectdojo: defectdojo,
           defectdojoSettings: defectdojoSettings,
           hacktricks: hacktricks,
-          host: port.host
+          host: port.host,
         }"
         :global-filtering="globalFiltering"
         entity="finding"
@@ -87,7 +89,7 @@ const route = useRoute();
 const enums = useEnums();
 const filters = useFilters();
 const portsUtils = usePorts();
-// TODO: Apply asset syntax to filters
+
 const exposure = ref(null);
 const api = useApi("/api/ports/", true);
 const host = ref(null);
