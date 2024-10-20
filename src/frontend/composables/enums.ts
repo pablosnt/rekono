@@ -176,11 +176,11 @@ export function useEnums() {
     "Won't Fix": { icon: "mdi-cancel", color: "orange" },
   };
   const severity = {
-    Critical: { color: "red" },
-    High: { color: "orange" },
-    Medium: { color: "amber" },
-    Low: { color: "blue" },
-    Info: { color: "grey" },
+    Critical: { color: "red", icon: "mdi-alert-circle" },
+    High: { color: "orange", icon: "mdi-arrow-up-circle" },
+    Medium: { color: "amber", icon: "mdi-minus-circle" },
+    Low: { color: "blue", icon: "mdi-arrow-down-circle" },
+    Info: { color: "grey", icon: "$info" },
   };
 
   return {

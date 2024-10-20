@@ -57,9 +57,9 @@ for (let i = 0; i < props.finding.executions.length; i++) {
   }
 }
 
-if (first !== last && first !== null && last !== null) {
+if (first !== null && last !== null) {
   api.get(first).then((firstExecution) => {
-    if (props.finding.is_fixed) {
+    if (props.finding.is_fixed && first !== last) {
       api.get(last).then((lastExecution) => {
         emit(
           "exposure",
@@ -70,7 +70,7 @@ if (first !== last && first !== null && last !== null) {
           ),
         );
       });
-    } else {
+    } else if (!props.finding.is_fixed) {
       emit(
         "exposure",
         dates.getDuration(new Date(firstExecution.start), new Date(), true),
