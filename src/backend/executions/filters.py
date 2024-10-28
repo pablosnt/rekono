@@ -30,7 +30,6 @@ class ExecutionFilter(FilterSet):
         model = Execution
         fields = {
             "task": ["exact"],
-            "group": ["exact"],
             "configuration": ["exact"],
             "status": ["exact"],
             "enqueued_at": ["gte", "lte", "exact"],

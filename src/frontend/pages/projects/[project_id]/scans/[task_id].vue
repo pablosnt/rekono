@@ -131,7 +131,7 @@
           rounded
         />
         <v-empty-state
-          v-if="executions.length === 0"
+          v-if="stages.length === 0"
           icon="mdi-play-network"
           headline="No Executions"
           text="This task doesn't have any execution yet"
@@ -140,124 +140,156 @@
             <v-icon class="mb-3" color="red-darken-4" />
           </template>
         </v-empty-state>
-        <div
-          v-if="executions.length > 0"
-          class="d-flex justify-space-around overflow-x-auto"
-        >
-          <v-timeline
-            v-for="g in task.max_group"
-            :key="g"
-            density="dense"
-            side="end"
-            :truncate-line="
-              g === 1 ? 'start' : g === task.max_group ? 'end' : undefined
-            "
+        <div v-if="stages.length > 0" class="d-flex overflow-auto">
+          <template
+            v-for="(stage, index) in Object.keys(enums.stages).filter(
+              (s) => executions[s] !== undefined && executions[s].length > 0,
+            )"
+            :key="stage"
           >
-            <v-timeline-item
-              v-for="execution in executions.filter((e) => e.group === g)"
-              :key="execution.id"
-              dot-color="white"
-              hide-opposite
-              min-width="550"
-            >
-              <template #icon>
-                <v-progress-circular
-                  v-if="execution.status && execution.status === 'Running'"
-                  color="amber"
-                  width="5"
-                  indeterminate
+            <v-container fluid>
+              <v-row>
+                <!-- TODO: Chip not shown correctly, when number of stages is less than 3 -->
+                <v-chip
+                  class="mb-3"
+                  :text="stage"
+                  :prepend-icon="enums.stages[stage].icon"
+                  :color="enums.stages[stage].color"
                 />
-                <v-btn
-                  v-if="execution.status && execution.status !== 'Running'"
-                  icon
-                  variant="text"
-                  :color="enums.statuses[execution.status].color"
+                <v-timeline
+                  density="dense"
+                  side="end"
+                  :truncate-line="
+                    index === 0
+                      ? 'start'
+                      : index === stages.length - 1
+                        ? 'end'
+                        : undefined
+                  "
                 >
-                  <v-icon
-                    :icon="enums.statuses[execution.status].icon"
-                    size="x-large"
-                  />
-                  <v-tooltip activator="parent" :text="execution.status" />
-                </v-btn>
-              </template>
-              <v-dialog
-                v-if="['Completed', 'Error'].includes(execution.status)"
-                width="auto"
-              >
-              <!-- TODO: Replace dialog by https://vuetifyjs.com/en/components/navigation-drawers/#temporary -->
-                <template #activator="{ props: activatorProps }">
-                  <ExecutionShow
-                    :api="api"
-                    :execution="execution"
-                    v-bind="activatorProps"
-                  />
-                </template>
-                <template #default="{ isActive }">
-                  <Dialog
-                    :title="execution.configuration.name"
-                    :subtitle="execution.configuration.tool.name"
-                    :avatar="execution.configuration.tool.icon"
-                    @close-dialog="isActive.value = false"
+                  <v-timeline-item
+                    v-for="execution in executions[stage]"
+                    :key="execution.id"
+                    dot-color="white"
+                    hide-opposite
+                    min-width="550"
                   >
-                    <template #extra-append>
-                      <!-- todo: This is used also in showExecution. Should we create a common component -->
+                    <template #icon>
+                      <v-progress-circular
+                        v-if="
+                          execution.status && execution.status === 'Running'
+                        "
+                        color="amber"
+                        width="5"
+                        indeterminate
+                      />
                       <v-btn
                         v-if="
-                          execution.status === 'Completed' &&
-                          execution.has_report
+                          execution.status && execution.status !== 'Running'
                         "
-                        hover
-                        variant="text"
                         icon
-                        @click="api.download(execution.id, 'report/', {})"
+                        variant="text"
+                        :color="enums.statuses[execution.status].color"
                       >
-                        <v-icon icon="mdi-download" color="primary" />
+                        <v-icon
+                          :icon="enums.statuses[execution.status].icon"
+                          size="x-large"
+                        />
                         <v-tooltip
                           activator="parent"
-                          text="Download original report"
+                          :text="execution.status"
                         />
                       </v-btn>
-                      <!-- todo: Set up this as counters. Include osint  -->
-                      <UtilsButtonLink
-                        icon="mdi-server"
-                        size="x-large"
-                        :link="`/projects/${route.params.project_id}/assets?target=${task.target.id}&task=${task.id}&execution=${execution.id}`"
-                        tooltip="Assets"
-                        color="indigo"
-                      />
-                      <UtilsButtonLink
-                        icon="mdi-ladybug"
-                        size="x-large"
-                        :link="`/projects/${route.params.project_id}/findings?target=${task.target.id}&task=${task.id}&execution=${execution.id}`"
-                        tooltip="Findings"
-                        color="red"
-                      />
-                      <!-- todo: execution filter doesn´t exist yet -->
                     </template>
-                    <v-textarea
-                      variant="outlined"
-                      bg-color="grey-darken-4"
-                      rows="25"
-                      :value="
-                        execution.output_error
-                          ? execution.output_error
-                          : execution.output_plain
+
+                    <ExecutionShow
+                      v-if="['Completed', 'Error'].includes(execution.status)"
+                      :api="api"
+                      :execution="execution"
+                      @click="
+                        expand = !expand;
+                        expandExecution =
+                          !expand ||
+                          (expandExecution && expandExecution === execution.id)
+                            ? null
+                            : execution;
                       "
-                      readonly
                     />
-                  </Dialog>
-                </template>
-              </v-dialog>
-              <ExecutionShow
-                v-if="!['Completed', 'Error'].includes(execution.status)"
-                :api="api"
-                :execution="execution"
-              />
-            </v-timeline-item>
-          </v-timeline>
+
+                    <ExecutionShow
+                      v-if="!['Completed', 'Error'].includes(execution.status)"
+                      :api="api"
+                      :execution="execution"
+                    />
+                  </v-timeline-item>
+                </v-timeline>
+              </v-row>
+            </v-container>
+          </template>
         </div>
       </template>
     </v-card>
+    <v-navigation-drawer
+      v-model="expand"
+      width="800"
+      location="right"
+      class="position-fixed"
+      temporary
+      @update:model-value="!expand ? (expandExecution = null) : null"
+    >
+      <Dialog
+        v-if="expandExecution"
+        :title="expandExecution.configuration.name"
+        :subtitle="expandExecution.configuration.tool.name"
+        :avatar="expandExecution.configuration.tool.icon"
+        elevation="0"
+        @close-dialog="
+          expand = false;
+          expandExecution = null;
+        "
+      >
+        <template #extra-append>
+          <ExecutionReportButton :api="api" :execution="expandExecution" />
+          <UtilsCounter
+            :collection="expandExecution.osint"
+            :icon="enums.findings.OSINT.icon"
+            size="x-large"
+            :link="`/projects/${route.params.project_id}/findings?tab=osint&target=${task.target.id}&task=${task.id}&execution=${expandExecution.id}`"
+            tooltip="OSINT"
+            new-tab
+          />
+          <UtilsCounter
+            :collection="expandExecution.host"
+            :icon="enums.findings.Host.icon"
+            size="x-large"
+            :link="`/projects/${route.params.project_id}/assets?target=${task.target.id}&task=${task.id}&execution=${expandExecution.id}`"
+            tooltip="Assets"
+            color="indigo"
+            new-tab
+          />
+          <UtilsCounter
+            :collection="expandExecution.vulnerability"
+            :icon="enums.findings.Vulnerability.icon"
+            size="x-large"
+            :link="`/projects/${route.params.project_id}/findings?tab=vulnerabilities&target=${task.target.id}&task=${task.id}&execution=${expandExecution.id}`"
+            tooltip="Findings"
+            new-tab
+          />
+          <!-- todo: execution filter doesn´t exist yet -->
+        </template>
+        <v-textarea
+          variant="outlined"
+          bg-color="grey-darken-4"
+          rows="35"
+          :value="
+            expandExecution.output_error
+              ? expandExecution.output_error
+              : expandExecution.output_plain
+          "
+          readonly
+        />
+      </Dialog>
+    </v-navigation-drawer>
   </MenuProject>
 </template>
 
@@ -269,7 +301,10 @@ const apiTasks = useApi("/api/tasks/", true);
 const api = useApi("/api/executions/", true, "Execution");
 const loading = ref(false);
 const task = ref(null);
-const executions = ref([]);
+const executions = ref({});
+const stages = ref([]);
+const expand = ref(false);
+const expandExecution = ref(null);
 loadExecutions(true);
 loadTask();
 
@@ -287,33 +322,44 @@ function loadTask() {
   });
 }
 
-function loadExecutions(showLoading: boolean, page: number = 1) {
+// page: number = 1,
+function loadExecutions(showLoading: boolean, stage?: string | null = null) {
   if (showLoading) {
     loading.value = true;
   }
-  api
-    .list(
-      {
-        task: route.params.task_id,
-        project: route.params.project_id,
-        ordering: "group,start,status,configuration__tool",
-      },
-      false,
-      page,
-    )
-    .then((response) => {
-      if (page === 1) {
-        executions.value = response.items;
-      } else if (response.items.length > 0) {
-        executions.value = executions.value.concat(response.items);
-      }
-      if (response.items.length === 24) {
-        loadExecutions(true, page + 1);
-      } else {
+  for (const s of stage !== null ? [stage] : Object.keys(enums.stages)) {
+    api
+      .list(
+        {
+          task: route.params.task_id,
+          project: route.params.project_id,
+          stage: enums.stages[s].id,
+          ordering: "start,status,configuration__tool",
+        },
+        true,
+        // false,
+        // page,
+      )
+      .then((response) => {
+        // if (page === 1) {
+        if (response.items.length > 0) {
+          executions.value[s] = response.items;
+
+          stages.value.push(s);
+        }
+        // } else if (response.items.length > 0) {
+        //   executions.value[s] = executions.value[s].concat(response.items);
+        // }
+        // if (response.items.length === 24) {
+        //   loadExecutions(true, page + 1, s);
+        // } else {
         loading.value = false;
-      }
-    })
-    .catch(() => (loading.value = false));
+        // }
+      })
+      .catch(() => (loading.value = false));
+  }
 }
-// TODO: Show one timeline per stage. Remove group. Only reload those stages with Running or Requested executions. Don't paginate to keep it simpler for now. Then, if needed, use automatic next page retrival on user scroll
+// TODO: Loading per stage?
+// TODO: Only reload those stages with Running or Requested executions
+// TODO: Use automatic next page retrival on user scroll
 </script>

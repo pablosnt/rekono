@@ -37,7 +37,6 @@ class ExecutionViewSet(BaseViewSet):
     ordering_fields = [
         "id",
         "task",
-        "group",
         "configuration",
         "configuration__tool",
         "creation",

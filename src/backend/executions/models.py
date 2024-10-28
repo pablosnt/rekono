@@ -13,7 +13,6 @@ class Execution(BaseModel):
     task = models.ForeignKey(
         Task, related_name="executions", on_delete=models.CASCADE, blank=True, null=True
     )
-    group = models.IntegerField(default=1)
     # Job Id in the executions queue
     rq_job_id = models.TextField(max_length=50, blank=True, null=True)
     configuration = models.ForeignKey(

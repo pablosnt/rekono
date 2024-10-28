@@ -12,7 +12,6 @@ class ExecutionSerializer(ModelSerializer):
         fields = (
             "id",
             "task",
-            "group",
             "configuration",
             "output_plain",
             "output_error",
@@ -21,6 +20,14 @@ class ExecutionSerializer(ModelSerializer):
             "status",
             "start",
             "end",
+            "osint",
+            "host",
+            "port",
+            "path",
+            "technology",
+            "credential",
+            "vulnerability",
+            "exploit",
         )
 
     def get_has_report(self, instance: Execution) -> bool:
@@ -32,4 +39,4 @@ class SimpleExecutionSerializer(ModelSerializer):
 
     class Meta:
         model = Execution
-        fields = ("id", "group", "configuration", "status", "start", "end")
+        fields = ("id", "configuration", "status", "start", "end")

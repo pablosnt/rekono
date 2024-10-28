@@ -1,13 +1,14 @@
 <template>
   <v-card
     class="mx-auto"
-    elevation="3"
+    :elevation="elevation"
     :color="color"
     :width="width"
     :loading="loading ? 'red' : false"
     :title="title"
     :subtitle="subtitle"
     :prepend-icon="!iconColor ? icon : undefined"
+    :variant="variant"
   >
     <template #prepend>
       <v-avatar v-if="avatar" :image="avatar" />
@@ -61,6 +62,11 @@ defineProps({
     type: String,
     required: false,
     default: undefined,
+  },
+  elevation: {
+    type: String,
+    required: false,
+    default: "3",
   },
 });
 defineEmits(["closeDialog"]);

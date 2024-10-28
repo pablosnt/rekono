@@ -71,7 +71,7 @@ class TasksQueue(BaseQueue):
         executions_queue = ExecutionsQueue()
         for parameters in executions or [{}]:
             execution = Execution.objects.create(
-                task=task, configuration=task.configuration, group=1
+                task=task, configuration=task.configuration
             )
             executions_queue.enqueue(
                 execution,
@@ -107,7 +107,6 @@ class TasksQueue(BaseQueue):
                 ).distinct(),
                 "dependencies": [],
                 "jobs": [],
-                "group": 1,
             }
             if Intensity.objects.filter(
                 tool=step.configuration.tool, value__lte=task.intensity
@@ -115,9 +114,6 @@ class TasksQueue(BaseQueue):
                 for execution_job in plan:
                     for output in execution_job.get("outputs", []):
                         if output in item.get("inputs", []):
-                            item["group"] = max(
-                                [item["group"], execution_job["group"] + 1]
-                            )
                             if execution_job["step"].id not in [
                                 d["step"].id for d in item["dependencies"]
                             ]:
@@ -128,7 +124,6 @@ class TasksQueue(BaseQueue):
                 Execution.objects.create(
                     task=task,
                     configuration=step.configuration,
-                    group=1,
                     status=Status.SKIPPED,
                     skipped_reason=f"Tool {step.configuration.tool.name} can't be executed with intensity {IntensityValue(task.intensity).name.capitalize()}",
                 )
@@ -143,9 +138,7 @@ class TasksQueue(BaseQueue):
             )
             for parameters in executions or [{}]:
                 execution = Execution.objects.create(
-                    task=task,
-                    configuration=execution_job["step"].configuration,
-                    group=execution_job["group"],
+                    task=task, configuration=execution_job["step"].configuration
                 )
                 execution_job["jobs"].append(
                     executions_queue.enqueue(

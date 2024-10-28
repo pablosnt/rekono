@@ -2,7 +2,6 @@ import math
 from typing import Any, cast
 
 from django.core.exceptions import ValidationError
-from django.db.models import Max
 from executions.enums import Status
 from processes.models import Process
 from processes.serializers import SimpleProcessSerializer
@@ -51,7 +50,6 @@ class TaskSerializer(ModelSerializer):
     executor = SimpleUserSerializer(many=False, read_only=True)
     status = SerializerMethodField(read_only=True)
     progress = SerializerMethodField(read_only=True)
-    max_group = SerializerMethodField(read_only=True)
 
     class Meta:
         model = Task
@@ -78,7 +76,6 @@ class TaskSerializer(ModelSerializer):
             "reports",
             "status",
             "progress",
-            "max_group",
         )
         read_only_fields = (
             "executor",
@@ -91,7 +88,6 @@ class TaskSerializer(ModelSerializer):
             "reports",
             "status",
             "progress",
-            "max_group",
         )
 
     def get_status(self, instance: Any) -> Status:
@@ -129,9 +125,6 @@ class TaskSerializer(ModelSerializer):
             if total > 0
             else 0
         )
-
-    def get_max_group(self, instance: Any) -> int | None:
-        return instance.executions.aggregate(Max("group")).get("group__max")
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         if not attrs.get("intensity"):

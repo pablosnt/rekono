@@ -1,4 +1,5 @@
 <template>
+  <!-- TODO: Hardcode in task_id page -->
   <v-card
     :title="execution.configuration.name"
     :subtitle="execution.configuration.tool.name"
@@ -15,14 +16,6 @@
         v-if="!execution.configuration.tool.icon"
         icon="mdi-rocket"
         color="red"
-      />
-    </template>
-    <template #append>
-      <v-chip
-        class="mb-3"
-        :text="execution.configuration.stage"
-        :prepend-icon="enums.stages[execution.configuration.stage].icon"
-        :color="enums.stages[execution.configuration.stage].color"
       />
     </template>
     <template #text>
@@ -43,22 +36,12 @@
       </p>
     </template>
     <v-card-actions>
-      <v-btn
-        v-if="execution.status === 'Completed' && execution.has_report"
-        hover
-        variant="text"
-        icon
-        @click="api.download(execution.id, 'report/', {})"
-      >
-        <v-icon icon="mdi-download" color="primary" />
-        <v-tooltip activator="parent" text="Download original report" />
-      </v-btn>
+      <ExecutionReportButton :api="api" :execution="execution" />
     </v-card-actions>
   </v-card>
 </template>
 
 <script setup lang="ts">
 defineProps({ api: Object, execution: Object });
-const enums = useEnums();
 const dates = useDates();
 </script>

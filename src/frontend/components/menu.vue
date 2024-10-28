@@ -1,6 +1,6 @@
 <template>
   <NuxtLayout name="header">
-    <v-navigation-drawer expand-on-hover rail>
+    <v-navigation-drawer expand-on-hover rail class="position-fixed">
       <v-list color="transparent" active-class="text-red">
         <v-list-item
           v-for="o in options"

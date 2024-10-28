@@ -152,7 +152,6 @@ class ExecutionsQueue(BaseQueue):
             new_execution = Execution.objects.create(
                 task=executor.execution.task,
                 configuration=executor.execution.configuration,
-                group=executor.execution.group,
             )
             job = self.enqueue(
                 new_execution,
