@@ -31,10 +31,21 @@
               :prepend-avatar="
                 task.configuration ? task.configuration.tool.icon : undefined
               "
-              :prepend-icon="task.process ? 'mdi-robot-angry' : undefined"
               hover
-              :to="`/project/${route.params.project_id}/scans/${task.id}`"
+              :to="`/projects/${route.params.project_id}/scans/${task.id}`"
             >
+              <template #prepend>
+                <v-icon
+                  v-if="task.process"
+                  icon="mdi-robot-angry"
+                  color="red"
+                />
+                <v-icon
+                  v-if="task.configuration && !task.configuration.tool.icon"
+                  icon="mdi-rocket"
+                  color="red"
+                />
+              </template>
               <template #append>
                 <v-progress-circular
                   v-if="task.status && task.status === 'Running'"
@@ -66,6 +77,10 @@
               </template>
               <template #text>
                 <!-- todo: show dates in user time zone -> `.toLocaleString(undefined, { hour12: false })`` -->
+                <p v-if="!task.start && task.scheduled_at">
+                  <span class="text-medium-emphasis">Scheduled:</span>
+                  {{ new Date(task.scheduled_at).toUTCString() }}
+                </p>
                 <p v-if="task.start">
                   <span class="text-medium-emphasis">Time:</span>
                   {{ new Date(task.start).toUTCString() }}
@@ -75,7 +90,7 @@
                   {{ task.duration }}
                 </p>
                 <p v-if="task.repeat_in && task.repeat_time_unit">
-                  <span class="text-medium-emphasis">Monitor Span:</span>
+                  <span class="text-medium-emphasis">Monitor span:</span>
                   {{ task.repeat_in }} {{ task.repeat_time_unit.toLowerCase() }}
                 </p>
                 <div>
@@ -161,11 +176,11 @@
 <script setup lang="ts">
 definePageMeta({ layout: false });
 const route = useRoute();
+const dates = useDates();
 const utils = useTasks();
 const user = userStore();
 const enums = ref(useEnums());
 const filters = useFilters();
-const dates = useDates();
 const project = ref(null);
 useApi("/api/projects/", true)
   .get(route.params.project_id)
@@ -316,21 +331,16 @@ filters
 
 function loadData(data) {
   tasks.value = data;
-  let autoreload = false;
   for (let i = 0; i < tasks.value.length; i++) {
     utils.getTitle(tasks.value[i]);
-    utils.getStatus(tasks.value[i]);
     if (tasks.value[i].start && tasks.value[i].end) {
       tasks.value[i].duration = dates.getDuration(
-        new Date(tasks.value[i].start),
-        new Date(tasks.value[i].end),
+        tasks.value[i].start,
+        tasks.value[i].end,
       );
     }
-    if (tasks.value[i].status === "Running") {
-      autoreload = true;
-    }
   }
-  if (autoreload) {
+  if (tasks.value.filter((t) => t.status === "Running").length > 0) {
     setTimeout(() => {
       dataset.value.loadData(false);
     }, 10 * 1000);

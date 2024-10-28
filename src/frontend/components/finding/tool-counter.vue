@@ -63,18 +63,11 @@ if (first !== null && last !== null) {
       api.get(last).then((lastExecution) => {
         emit(
           "exposure",
-          dates.getDuration(
-            new Date(firstExecution.start),
-            new Date(lastExecution.start),
-            true,
-          ),
+          dates.getDuration(firstExecution.start, lastExecution.start, true),
         );
       });
     } else if (!props.finding.is_fixed) {
-      emit(
-        "exposure",
-        dates.getDuration(new Date(firstExecution.start), new Date(), true),
-      );
+      emit("exposure", dates.getDuration(firstExecution.start, null, true));
     }
   });
 }

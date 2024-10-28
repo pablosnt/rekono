@@ -1,5 +1,7 @@
 export function useDates() {
-  function getDuration(start, end, round: boolean = false) {
+  function getDuration(startISO, endISO = null, round: boolean = false) {
+    const start = new Date(startISO);
+    const end = endISO ? new Date(endISO) : new Date();
     const seconds = Math.floor((end.getTime() - start.getTime()) / 1000);
     const fields = [
       { value: Math.floor(seconds / (3600 * 24 * 365)), name: "y" },

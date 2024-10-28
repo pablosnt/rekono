@@ -1,10 +1,16 @@
+import math
 from typing import Any, cast
 
 from django.core.exceptions import ValidationError
-from executions.serializers import SimpleExecutionSerializer
+from django.db.models import Max
+from executions.enums import Status
 from processes.models import Process
 from processes.serializers import SimpleProcessSerializer
-from rest_framework.serializers import ModelSerializer, PrimaryKeyRelatedField
+from rest_framework.serializers import (
+    ModelSerializer,
+    PrimaryKeyRelatedField,
+    SerializerMethodField,
+)
 from targets.models import Target
 from targets.serializers import SimpleTargetSerializer
 from tasks.models import Task
@@ -43,7 +49,9 @@ class TaskSerializer(ModelSerializer):
     configuration = ConfigurationSerializer(many=False, read_only=True)
     intensity = IntegerChoicesField(model=IntensityEnum, required=False)
     executor = SimpleUserSerializer(many=False, read_only=True)
-    executions = SimpleExecutionSerializer(many=True, read_only=True)
+    status = SerializerMethodField(read_only=True)
+    progress = SerializerMethodField(read_only=True)
+    max_group = SerializerMethodField(read_only=True)
 
     class Meta:
         model = Task
@@ -68,6 +76,9 @@ class TaskSerializer(ModelSerializer):
             "executions",
             "notes",
             "reports",
+            "status",
+            "progress",
+            "max_group",
         )
         read_only_fields = (
             "executor",
@@ -78,7 +89,49 @@ class TaskSerializer(ModelSerializer):
             "executions",
             "notes",
             "reports",
+            "status",
+            "progress",
+            "max_group",
         )
+
+    def get_status(self, instance: Any) -> Status:
+        for status in [Status.RUNNING, Status.CANCELLED, Status.ERROR]:
+            if instance.executions.filter(status=status).count() > 0:
+                return status
+        if (
+            instance.executions.exclude(
+                status__in=[Status.COMPLETED, Status.SKIPPED]
+            ).count()
+            == 0
+        ):
+            return Status.COMPLETED
+        if instance.executions.filter(status=Status.SKIPPED).count() > 0:
+            return Status.SKIPPED
+        return Status.REQUESTED
+
+    def get_progress(self, instance: Any) -> int | None:
+        total = instance.executions.count()
+        return (
+            math.ceil(
+                (
+                    instance.executions.filter(
+                        status__in=[
+                            Status.ERROR,
+                            Status.COMPLETED,
+                            Status.SKIPPED,
+                            Status.CANCELLED,
+                        ]
+                    ).count()
+                    / total
+                )
+                * 100
+            )
+            if total > 0
+            else 0
+        )
+
+    def get_max_group(self, instance: Any) -> int | None:
+        return instance.executions.aggregate(Max("group")).get("group__max")
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         if not attrs.get("intensity"):

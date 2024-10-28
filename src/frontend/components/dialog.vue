@@ -7,10 +7,10 @@
     :loading="loading ? 'red' : false"
     :title="title"
     :subtitle="subtitle"
-    :prepend-avatar="avatar"
     :prepend-icon="!iconColor ? icon : undefined"
   >
     <template #prepend>
+      <v-avatar v-if="avatar" :image="avatar" />
       <v-icon v-if="icon" :icon="icon" :color="iconColor" />
     </template>
     <template #append>
@@ -27,6 +27,11 @@
 <script setup lang="ts">
 defineProps({
   title: String,
+  subtitle: {
+    type: String,
+    required: false,
+    default: undefined,
+  },
   avatar: {
     type: String,
     required: false,

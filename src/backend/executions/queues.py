@@ -74,6 +74,19 @@ class ExecutionsQueue(BaseQueue):
         )
         current_job = rq.get_current_job()
         if not findings and current_job and current_job._dependency_ids:
+            logger.info(
+                "BEFORE "
+                + str(
+                    ExecutionsQueue._get_findings_from_dependencies(
+                        executor,
+                        target_ports,
+                        input_vulnerabilities,
+                        input_technologies,
+                        wordlists,
+                        current_job,
+                    )
+                )
+            )
             (
                 findings,
                 target_ports,
@@ -108,7 +121,8 @@ class ExecutionsQueue(BaseQueue):
         current_job: Job,
     ) -> dict[int, list[BaseInput]]:
         findings = []
-        queue = ExecutionsQueue()._get_queue()
+        self = ExecutionsQueue()
+        queue = self._get_queue()
         for dependency_id in current_job._dependency_ids:
             dependency = queue.fetch_job(dependency_id)
             if dependency and dependency.result:
@@ -134,12 +148,13 @@ class ExecutionsQueue(BaseQueue):
         )
         new_jobs = []
         for execution in executions[1:]:
+            logger.info("NEW EXECUTION " + str(execution))
             new_execution = Execution.objects.create(
                 task=executor.execution.task,
                 configuration=executor.execution.configuration,
                 group=executor.execution.group,
             )
-            job = queue.enqueue(
+            job = self.enqueue(
                 new_execution,
                 execution.get(0, []),
                 execution.get(1, []),
@@ -151,16 +166,16 @@ class ExecutionsQueue(BaseQueue):
             )
             new_jobs.append(job.id)
         if new_jobs:
-            instance = ExecutionsQueue()
+            logger.info("NEW JOB " + str(new_jobs))
             registry = DeferredJobRegistry(queue=queue)
             for pending_job_id in registry.get_job_ids():
                 pending_job = queue.fetch_job(pending_job_id)
                 if pending_job and current_job.id in pending_job._dependency_ids:
                     dependencies = pending_job._dependency_ids
                     meta = pending_job.get_meta()
-                    instance.cancel_job(pending_job_id)
-                    instance.delete_job(pending_job_id)
-                    instance.enqueue(
+                    self.cancel_job(pending_job_id)
+                    self.delete_job(pending_job_id)
+                    self.enqueue(
                         meta["execution"],
                         [],
                         meta["target_ports"],
@@ -169,4 +184,5 @@ class ExecutionsQueue(BaseQueue):
                         meta["wordlists"],
                         dependencies=dependencies + new_jobs,
                     )
+        logger.info("TOTAL EXECUTIONS " + str(executions))
         return executions[0] if executions else {}

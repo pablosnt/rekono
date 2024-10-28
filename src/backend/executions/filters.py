@@ -29,7 +29,7 @@ class ExecutionFilter(FilterSet):
     class Meta:
         model = Execution
         fields = {
-            "task": ["exact", "isnull"],
+            "task": ["exact"],
             "group": ["exact"],
             "configuration": ["exact"],
             "status": ["exact"],
