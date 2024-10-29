@@ -39,4 +39,4 @@ class SimpleExecutionSerializer(ModelSerializer):
 
     class Meta:
         model = Execution
-        fields = ("id", "configuration", "status", "start", "end")
+        fields = ("id", "task", "configuration", "status", "start", "end")

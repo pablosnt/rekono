@@ -28,56 +28,41 @@ const api = useApi("/api/executions/", true);
 const tools = ref([]);
 const counters = ref({});
 let first = null;
-let last = null;
 
 for (let i = 0; i < props.finding.executions.length; i++) {
   if (first === null || props.finding.executions[i].id < first) {
     first = props.finding.executions[i].id;
   }
-  if (last === null || props.finding.executions[i].id > last) {
-    last = props.finding.executions[i].id;
-  }
   if (counters.value[props.finding.executions[i].configuration.tool.name]) {
     counters.value[props.finding.executions[i].configuration.tool.name].count++;
     if (
-      counters.value[props.finding.executions[i].configuration.tool.name].id <
-      props.finding.executions[i].id
+      counters.value[props.finding.executions[i].configuration.tool.name]
+        .lastTask < props.finding.executions[i].task
     ) {
-      counters.value[props.finding.executions[i].configuration.tool.name].id =
-        props.finding.executions[i].id;
+      counters.value[
+        props.finding.executions[i].configuration.tool.name
+      ].lastTask = props.finding.executions[i].task;
     }
   } else {
     counters.value[props.finding.executions[i].configuration.tool.name] = {
       count: 1,
       icon: props.finding.executions[i].configuration.tool.icon,
       reference: props.finding.executions[i].configuration.tool.reference,
-      lastExecution: props.finding.executions[i].id,
-      lastTask: null,
+      lastTask: props.finding.executions[i].task,
     };
   }
 }
 
-if (first !== null && last !== null) {
+if (first !== null) {
   api.get(first).then((firstExecution) => {
-    if (props.finding.is_fixed && first !== last) {
-      api.get(last).then((lastExecution) => {
-        emit(
-          "exposure",
-          dates.getDuration(firstExecution.start, lastExecution.start, true),
-        );
-      });
-    } else if (!props.finding.is_fixed) {
-      emit("exposure", dates.getDuration(firstExecution.start, null, true));
-    }
-  });
-}
-
-tools.value = Object.keys(counters.value);
-for (let i = 0; i < tools.value.length; i++) {
-  api
-    .get(counters.value[tools.value[i]].lastExecution)
-    .then(
-      (response) => (counters.value[tools.value[i]].lastTask = response.task),
+    emit(
+      "exposure",
+      dates.getDuration(
+        firstExecution.start,
+        props.finding.is_fixed ? props.finding.fixed_date : null,
+        true,
+      ),
     );
+  });
 }
 </script>

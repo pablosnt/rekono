@@ -149,13 +149,14 @@
           >
             <v-container fluid>
               <v-row>
-                <!-- TODO: Chip not shown correctly, when number of stages is less than 3 -->
                 <v-chip
                   class="mb-3"
                   :text="stage"
                   :prepend-icon="enums.stages[stage].icon"
                   :color="enums.stages[stage].color"
                 />
+              </v-row>
+              <v-row>
                 <v-timeline
                   density="dense"
                   side="end"
@@ -202,10 +203,14 @@
                       </v-btn>
                     </template>
 
-                    <ExecutionShow
-                      v-if="['Completed', 'Error'].includes(execution.status)"
-                      :api="api"
-                      :execution="execution"
+                    <v-card
+                      :title="execution.configuration.name"
+                      :subtitle="execution.configuration.tool.name"
+                      variant="outlined"
+                      :hover="['Completed', 'Error'].includes(execution.status)"
+                      :disabled="
+                        !['Completed', 'Error'].includes(execution.status)
+                      "
                       @click="
                         expand = !expand;
                         expandExecution =
@@ -214,14 +219,91 @@
                             ? null
                             : execution;
                       "
-                    />
+                    >
+                      <template #prepend>
+                        <!-- todo: why not using prepend-avatar as Dialog does? Do the same everywhere -->
+                        <v-avatar
+                          v-if="execution.configuration.tool.icon"
+                          :image="execution.configuration.tool.icon"
+                        />
+                        <v-icon
+                          v-if="!execution.configuration.tool.icon"
+                          icon="mdi-rocket"
+                          color="red"
+                        />
+                      </template>
+                      <template #text>
+                        <p v-if="execution.start">
+                          <span class="text-medium-emphasis">Time:</span>
+                          {{ new Date(execution.start).toUTCString() }}
+                        </p>
+                        <p v-if="execution.start && execution.end">
+                          <span class="text-medium-emphasis">Duration:</span>
+                          {{
+                            dates.getDuration(execution.start, execution.end)
+                          }}
+                        </p>
 
-                    <ExecutionShow
-                      v-if="!['Completed', 'Error'].includes(execution.status)"
-                      :api="api"
-                      :execution="execution"
-                    />
+                        <p
+                          v-if="
+                            execution.status === 'Skipped' &&
+                            execution.skipped_reason
+                          "
+                          class="text-center font-weight-light"
+                        >
+                          {{ execution.skipped_reason }}
+                        </p>
+                      </template>
+                      <v-card-actions>
+                        <ExecutionDownload :api="api" :execution="execution" />
+                        <v-spacer />
+                        <UtilsCounter
+                          :collection="execution.osint"
+                          :icon="enums.findings.OSINT.icon"
+                          size="x-large"
+                          :link="`/projects/${route.params.project_id}/findings?tab=osint&target=${task.target.id}&task=${task.id}&execution=${execution.id}`"
+                          tooltip="OSINT"
+                          new-tab
+                        />
+                        <UtilsCounter
+                          :collection="execution.host"
+                          :icon="enums.findings.Host.icon"
+                          size="x-large"
+                          :link="`/projects/${route.params.project_id}/assets?target=${task.target.id}&task=${task.id}&execution=${execution.id}`"
+                          tooltip="Assets"
+                          color="indigo"
+                          new-tab
+                        />
+                        <UtilsCounter
+                          :collection="execution.vulnerability"
+                          :icon="enums.findings.Vulnerability.icon"
+                          size="x-large"
+                          :link="`/projects/${route.params.project_id}/findings?tab=vulnerabilities&target=${task.target.id}&task=${task.id}&execution=${execution.id}`"
+                          tooltip="Findings"
+                          new-tab
+                        />
+                      </v-card-actions>
+                    </v-card>
                   </v-timeline-item>
+                  <div
+                    v-intersect="
+                      (isIntersecting, entries, observer) =>
+                        isIntersecting &&
+                        executions.value[stage].length % 24 === 0
+                          ? loadExecutions(
+                              true,
+                              stage,
+                              executions.value[stage].length / 24 + 1,
+                            )
+                          : null
+                    "
+                  />
+                  <v-progress-circular
+                    v-if="loadingStages[stage]"
+                    color="red"
+                    width="5"
+                    indeterminate
+                  />
                 </v-timeline>
               </v-row>
             </v-container>
@@ -249,7 +331,7 @@
         "
       >
         <template #extra-append>
-          <ExecutionReportButton :api="api" :execution="expandExecution" />
+          <ExecutionDownload :api="api" :execution="expandExecution" />
           <UtilsCounter
             :collection="expandExecution.osint"
             :icon="enums.findings.OSINT.icon"
@@ -280,7 +362,7 @@
         <v-textarea
           variant="outlined"
           bg-color="grey-darken-4"
-          rows="35"
+          rows="30"
           :value="
             expandExecution.output_error
               ? expandExecution.output_error
@@ -297,14 +379,21 @@
 definePageMeta({ layout: false });
 const route = useRoute();
 const enums = useEnums();
+const dates = useDates();
 const apiTasks = useApi("/api/tasks/", true);
 const api = useApi("/api/executions/", true, "Execution");
-const loading = ref(false);
 const task = ref(null);
 const executions = ref({});
 const stages = ref([]);
 const expand = ref(false);
 const expandExecution = ref(null);
+const loadingStages = ref({});
+const loading = computed(() => {
+  return (
+    Object.entries(loadingStages.value).filter(([_, v]) => v === true).length >
+    0
+  );
+});
 loadExecutions(true);
 loadTask();
 
@@ -313,8 +402,16 @@ function loadTask() {
     task.value = response;
     if (["Running", "Requested"].includes(task.value.status)) {
       setTimeout(() => {
-        if (!loading.value) {
-          loadExecutions(false);
+        for (const stage of Object.keys(enums.stages)) {
+          if (
+            !loadingStages.value[stage] &&
+            executions.value[stage] &&
+            executions.value[stage].filter((e) =>
+              ["Running", "Requested"].includes(e.status),
+            )
+          ) {
+            loadExecutions(false, stage);
+          }
         }
         loadTask();
       }, 10 * 1000);
@@ -322,12 +419,16 @@ function loadTask() {
   });
 }
 
-// page: number = 1,
-function loadExecutions(showLoading: boolean, stage?: string | null = null) {
-  if (showLoading) {
-    loading.value = true;
-  }
+function loadExecutions(
+  showLoading: boolean,
+  stage?: string | null = null,
+  page: number = 1,
+) {
+  // todo: Use this syntax in all for loops
   for (const s of stage !== null ? [stage] : Object.keys(enums.stages)) {
+    if (showLoading) {
+      loadingStages.value[s] = true;
+    }
     api
       .list(
         {
@@ -336,30 +437,21 @@ function loadExecutions(showLoading: boolean, stage?: string | null = null) {
           stage: enums.stages[s].id,
           ordering: "start,status,configuration__tool",
         },
-        true,
-        // false,
-        // page,
+        false,
+        page,
       )
       .then((response) => {
-        // if (page === 1) {
         if (response.items.length > 0) {
-          executions.value[s] = response.items;
-
-          stages.value.push(s);
+          if (page === 1) {
+            executions.value[s] = response.items;
+            stages.value.push(s);
+          } else {
+            executions.value[s] = executions.value[s].concat(response.items);
+          }
         }
-        // } else if (response.items.length > 0) {
-        //   executions.value[s] = executions.value[s].concat(response.items);
-        // }
-        // if (response.items.length === 24) {
-        //   loadExecutions(true, page + 1, s);
-        // } else {
-        loading.value = false;
-        // }
+        loadingStages.value[s] = false;
       })
-      .catch(() => (loading.value = false));
+      .catch(() => (loadingStages.value[s] = false));
   }
 }
-// TODO: Loading per stage?
-// TODO: Only reload those stages with Running or Requested executions
-// TODO: Use automatic next page retrival on user scroll
 </script>
