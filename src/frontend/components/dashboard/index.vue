@@ -1,11 +1,14 @@
 <template>
-  <v-card rounded="0" flat>
+  <v-card v-if="ready" rounded="0" flat>
     <v-window v-model="tab" show-arrows="hover" continuous>
-      <v-window-item
+      <!-- <v-window-item
         ><DashboardActivity :project="project" :target="target"
-      /></v-window-item>
-      <v-window-item
+      /></v-window-item> -->
+      <!-- <v-window-item
         ><DashboardAssets :project="project" :target="target"
+      /></v-window-item> -->
+      <v-window-item
+        ><DashboardVulnerabilities :project="project" :target="target"
       /></v-window-item>
     </v-window>
     <!-- <v-card-actions class="justify-center">
@@ -30,16 +33,25 @@
 <script setup lang="ts">
 const route = useRoute();
 const tab = ref(0);
+const ready = ref(false);
 const project = ref(null);
 const target = ref(null);
 
 if (route.params.target_id) {
   useApi("/api/targets/", true)
     .get(route.params.target_id)
-    .then((response) => (target.value = response));
+    .then((response) => {
+      target.value = response;
+      ready.value = true;
+    });
 } else if (route.params.project_id) {
-  useApi("/api/project/", true)
+  useApi("/api/projects/", true)
     .get(route.params.project_id)
-    .then((response) => (project.value = response));
+    .then((response) => {
+      project.value = response;
+      ready.value = true;
+    });
+} else {
+  ready.value = true;
 }
 </script>

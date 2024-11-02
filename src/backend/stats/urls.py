@@ -1,7 +1,7 @@
 from django.urls import path
 from stats.views import (
     ActivityStatsView,
-    AssetsStatsView,
+    HostsStatsView,
     RQStatsView,
     TriagingStatsView,
     VulnerabilityStatsView,
@@ -10,7 +10,7 @@ from stats.views import (
 urlpatterns = [
     path("stats/rq/", RQStatsView.as_view(), name="rq-stats"),
     path("stats/activity/", ActivityStatsView.as_view(), name="activity-stats"),
-    path("stats/assets/", AssetsStatsView.as_view(), name="assets-stats"),
+    path("stats/assets/", HostsStatsView.as_view(), name="assets-stats"),
     path(
         "stats/vulnerabilities/",
         VulnerabilityStatsView.as_view(),

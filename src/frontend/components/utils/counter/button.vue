@@ -3,7 +3,7 @@
     class="mr-4 text-none"
     :icon="icon !== undefined || image !== undefined"
     variant="text"
-    :to="link"
+    :href="link"
     :hover="link !== null"
     :target="newTab ? '_blank' : '_self'"
     stacked

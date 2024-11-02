@@ -1,4 +1,5 @@
 <template>
+  <!-- todo: Review from where is this used, and consider hardcode the button. Review also all the occurrences of links via href to Rekono endpoints -->
   <v-btn
     v-if="link"
     variant="text"
@@ -10,7 +11,7 @@
     hover
   >
     <v-icon :icon="icon" />
-    <v-tooltip v-if="tooltip" :text="tooltip" />
+    <v-tooltip v-if="tooltip !== undefined" activator="parent" :text="tooltip" />
   </v-btn>
 </template>
 

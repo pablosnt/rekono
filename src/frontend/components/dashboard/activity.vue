@@ -254,8 +254,8 @@ api
   .then((response) => {
     stats.value = response;
     if (
-      !props.project &&
-      !props.target &&
+      props.project === null &&
+      props.target === null &&
       (!response.top_projects || response.top_projects.length === 0)
     ) {
       navigateTo("/projects");

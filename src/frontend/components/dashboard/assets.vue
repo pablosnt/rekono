@@ -17,7 +17,7 @@
                   const search = stats.os_distribution.filter(
                     (item) => item.os_type === os_type,
                   );
-                  return search.length > 0 ? search[0].total : 0;
+                  return search.length > 0 ? search[0].count : 0;
                 }),
               },
             ]"
@@ -60,7 +60,7 @@
                 data: stats.services_distribution.map((item) => {
                   return {
                     x: `${item.protocol} ${item.port} ${item.service}`,
-                    y: item.total,
+                    y: item.count,
                   };
                 }),
               },
@@ -97,7 +97,7 @@
                 data: stats.technologies_distribution.map((item) => {
                   return {
                     x: item.name,
-                    y: item.total,
+                    y: item.count,
                   };
                 }),
               },
@@ -130,35 +130,35 @@
               {
                 name: 'Critical',
                 group: 'current',
-                data: stats.top_vulnerabilities.map(
+                data: stats.top_vulnerable.map(
                   (item) => item.vulnerabilities_critical,
                 ),
               },
               {
                 name: 'High',
                 group: 'current',
-                data: stats.top_vulnerabilities.map(
+                data: stats.top_vulnerable.map(
                   (item) => item.vulnerabilities_high,
                 ),
               },
               {
                 name: 'Medium',
                 group: 'current',
-                data: stats.top_vulnerabilities.map(
+                data: stats.top_vulnerable.map(
                   (item) => item.vulnerabilities_medium,
                 ),
               },
               {
                 name: 'Low',
                 group: 'current',
-                data: stats.top_vulnerabilities.map(
+                data: stats.top_vulnerable.map(
                   (item) => item.vulnerabilities_low,
                 ),
               },
               {
                 name: 'Fixed',
                 group: 'fixed',
-                data: stats.top_vulnerabilities.map(
+                data: stats.top_vulnerable.map(
                   (item) => item.fixed_vulnerabilities,
                 ),
               },
@@ -173,7 +173,7 @@
               dataLabels: {
                 formatter: (value) => {
                   return value > 1000
-                    ? Math.floor(nvalue / 1000).toString() + 'k'
+                    ? Math.floor(value / 1000).toString() + 'k'
                     : value;
                 },
               },
@@ -200,13 +200,11 @@
                 '#4CAF50',
               ],
               xaxis: {
-                categories: stats.top_vulnerabilities.map(
-                  (item) => item.address,
-                ),
+                categories: stats.top_vulnerable.map((item) => item.address),
                 labels: {
                   formatter: (value) => {
                     return value > 1000
-                      ? Math.floor(nvalue / 1000).toString() + 'k'
+                      ? Math.floor(value / 1000).toString() + 'k'
                       : value;
                   },
                 },
