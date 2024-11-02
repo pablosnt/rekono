@@ -96,7 +96,7 @@
 
 <script setup lang="ts">
 definePageMeta({ layout: false });
-const api = useApi("/api/rq-stats/", true);
+const api = useApi("/api/stats/rq/", true);
 const queues = ref({});
 api.get().then((response) => (queues.value = response));
 </script>

@@ -51,6 +51,7 @@
     <slot />
   </Menu>
 </template>
+<!-- todo: Entry for integrations (Defect-Dojo) configuration -->
 
 <script setup lang="ts">
 // todo: Limit the links available for each user role

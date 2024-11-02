@@ -25,7 +25,6 @@ const emit = defineEmits(["exposure"]);
 const route = useRoute();
 const dates = useDates();
 const api = useApi("/api/executions/", true);
-const tools = ref([]);
 const counters = ref({});
 let first = null;
 
@@ -65,4 +64,6 @@ if (first !== null) {
     );
   });
 }
+
+const tools = ref(Object.keys(counters.value));
 </script>

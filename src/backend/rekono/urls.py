@@ -23,7 +23,6 @@ from drf_spectacular.views import (
     SpectacularRedocView,
     SpectacularSwaggerView,
 )
-from rekono.views import RQStatsView
 from rest_framework.urlpatterns import format_suffix_patterns
 
 urlpatterns = [
@@ -46,6 +45,7 @@ urlpatterns = [
     path("api/", include("reporting.urls")),
     path("api/", include("security.authentication.urls")),
     path("api/", include("settings.urls")),
+    path("api/", include("stats.urls")),
     path("api/", include("target_denylist.urls")),
     path("api/", include("target_ports.urls")),
     path("api/", include("targets.urls")),
@@ -53,7 +53,6 @@ urlpatterns = [
     path("api/", include("tools.urls")),
     path("api/", include("users.urls")),
     path("api/", include("wordlists.urls")),
-    path("api/rq-stats/", RQStatsView.as_view(), name="redis-stats"),
     # OpenAPI specification
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     # Swagger-UI

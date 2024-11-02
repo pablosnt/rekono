@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from typing import Any, Optional
 
 from django.core.exceptions import PermissionDenied
@@ -11,6 +12,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.serializers import Serializer
+from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from security.authorization.permissions import IsAuditor
 
@@ -118,3 +120,42 @@ class LikeViewSet(BaseViewSet):
         else:
             self.get_object().liked_by.remove(request.user)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class StatsView(APIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = Serializer
+    top = 5
+
+    def _filter(
+        self,
+        request: Request,
+        queryset: QuerySet,
+        data: dict[str, Any],
+        time_field: str | None = None,
+    ) -> QuerySet:
+        project_field = queryset.model.get_project_field()
+        filters = {
+            (
+                f"{project_field}__members__id" if project_field else "members__id"
+            ): request.user.id
+        }
+        if data.get("target"):
+            filters[project_field.split("__project")[0]] = data.get("target")
+        elif data.get("project"):
+            filters[project_field] = data.get("project")
+        if data.get("months") and time_field:
+            filters[f"{time_field}__gte"] = datetime.now() - timedelta(
+                days=data.get("months", 0) * 30
+            )
+        return queryset.filter(**filters)
+
+    def _stats(self, request: Request, data: dict[str, Any]) -> dict[str, Any]:
+        return {}
+
+    def get(self, request: Request) -> Response:
+        serializer = self.serializer_class(data=request.query_params)
+        serializer.is_valid(raise_exception=True)
+        return Response(
+            self._stats(request, serializer.validated_data), status=status.HTTP_200_OK
+        )

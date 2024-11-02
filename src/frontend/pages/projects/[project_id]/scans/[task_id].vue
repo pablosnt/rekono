@@ -6,12 +6,19 @@
       :title="task.process ? task.process.name : task.configuration.name"
       :subtitle="task.configuration ? task.configuration.tool.name : 'Process'"
       :prepend-avatar="
-        task.configuration ? task.configuration.tool.icon : undefined
+        task.configuration && task.configuration.tool.icon
+          ? task.configuration.tool.icon
+          : undefined
       "
       variant="text"
     >
       <template #prepend>
         <v-icon v-if="task.process" icon="mdi-robot-angry" color="red" />
+        <v-icon
+          v-if="ttask.configuration && !task.configuration.tool.icon"
+          icon="mdi-rocket"
+          color="red"
+        />
       </template>
       <template #append>
         <v-btn

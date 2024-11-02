@@ -21,6 +21,7 @@
     "@mdi/font": "^7.4.47",
     "@nuxt/image": "^1.6.0",
     "@pinia/nuxt": "^0.5.1",
+    "apexcharts": "^4.0.0",
     "highlight.js": "^11.10.0",
     "jwt-decode": "^4.0.0",
     "markdown-it-emoji": "^3.0.0",
@@ -30,6 +31,7 @@
     "qr-code-styling": "^1.6.0-rc.1",
     "vue": "^3.4.21",
     "vue-router": "^4.3.0",
+    "vue3-apexcharts": "^1.7.0",
     "vue3-toastify": "^0.2.1"
   },
   "devDependencies": {

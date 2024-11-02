@@ -75,7 +75,6 @@
 </template>
 
 <script setup lang="ts">
-definePageMeta({ layout: false });
 const enums = useEnums();
 const route = useRoute();
 const api = useApi("/api/parameters/technologies/", true, "Technology");

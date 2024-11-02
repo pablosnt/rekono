@@ -176,11 +176,19 @@ export function useEnums() {
     "Won't Fix": { icon: "mdi-cancel", color: "orange" },
   };
   const severity = {
-    Critical: { color: "red", icon: "mdi-alert-circle" },
-    High: { color: "orange", icon: "mdi-arrow-up-circle" },
-    Medium: { color: "amber", icon: "mdi-minus-circle" },
-    Low: { color: "blue", icon: "mdi-arrow-down-circle" },
-    Info: { color: "grey", icon: "$info" },
+    Critical: { color: "red", icon: "mdi-alert-circle", dashboard: "#F44336" },
+    High: {
+      color: "orange",
+      icon: "mdi-arrow-up-circle",
+      dashboard: "#FF9800",
+    },
+    Medium: { color: "amber", icon: "mdi-minus-circle", dashboard: "#FFC107" },
+    Low: {
+      color: "indigo",
+      icon: "mdi-arrow-down-circle",
+      dashboard: "#3F51B5",
+    },
+    Info: { color: "grey", icon: "$info", dashboard: "#9E9E9E" },
   };
 
   return {

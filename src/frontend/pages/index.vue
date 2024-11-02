@@ -1,4 +1,10 @@
-<!-- todo -->
+<template>
+  <NuxtLayout name="header">
+    <v-main>
+      <Dashboard />
+    </v-main>
+  </NuxtLayout>
+</template>
 <script setup lang="ts">
-definePageMeta({ redirect: "/projects" });
+definePageMeta({ layout: false });
 </script>
