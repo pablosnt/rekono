@@ -12,20 +12,23 @@
             <template #text>
               <v-table density="comfortable">
                 <tbody>
-                  <tr v-for="project in stats.top_projects" :key="project.id">
+                  <tr
+                    v-for="top_project in stats.top_projects"
+                    :key="top_project.id"
+                  >
                     <td class="text-center text-capitalize">
-                      {{ project.name }}
+                      {{ top_project.name }}
                     </td>
-                    <td><TagShow :item="project" /></td>
+                    <td><TagShow :item="top_project" /></td>
                     <td class="text-center">
                       <UtilsCounter
-                        :collection="project.targets"
+                        :collection="top_project.targets"
                         tooltip="Targets"
                         icon="mdi-target"
-                        :link="`/projects/${project.id}/targets`"
+                        :link="`/projects/${top_project.id}/targets`"
                       />
                       <UtilsButtonLink
-                        :link="`/projects/${project.id}/`"
+                        :link="`/projects/${top_project.id}/`"
                         target="_self"
                         icon="mdi-arrow-right-circle"
                       />

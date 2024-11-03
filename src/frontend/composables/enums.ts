@@ -170,10 +170,18 @@ export function useEnums() {
     Closed: { color: "red" },
   };
   const triage = {
-    Untriaged: { icon: "mdi-help-circle", color: "grey" },
-    "False Positive": { icon: "mdi-close-circle", color: "red" },
-    "True Positive": { icon: "mdi-check-circle", color: "green" },
-    "Won't Fix": { icon: "mdi-cancel", color: "orange" },
+    Untriaged: { icon: "mdi-help-circle", color: "grey", dashboard: "#9E9E9E" },
+    "False Positive": {
+      icon: "mdi-close-circle",
+      color: "red",
+      dashboard: "#F44336",
+    },
+    "True Positive": {
+      icon: "mdi-check-circle",
+      color: "green",
+      dashboard: "#4CAF50",
+    },
+    "Won't Fix": { icon: "mdi-cancel", color: "orange", dashboard: "#FF9800" },
   };
   const severity = {
     Critical: { color: "red", icon: "mdi-alert-circle", dashboard: "#F44336" },

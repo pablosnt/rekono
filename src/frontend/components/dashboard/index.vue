@@ -5,10 +5,16 @@
         ><DashboardActivity :project="project" :target="target"
       /></v-window-item> -->
       <!-- <v-window-item
-        ><DashboardAssets :project="project" :target="target"
+        ><DashboardAssets :project="project" :target="target" :height="height"
+      /></v-window-item> -->
+      <!-- <v-window-item
+        ><DashboardVulnerabilities :project="project" :target="target" :height="height"
       /></v-window-item> -->
       <v-window-item
-        ><DashboardVulnerabilities :project="project" :target="target"
+        ><DashboardTriaging
+          :project="project"
+          :target="target"
+          :height="height"
       /></v-window-item>
     </v-window>
     <!-- <v-card-actions class="justify-center">
@@ -32,8 +38,9 @@
 
 <script setup lang="ts">
 const route = useRoute();
-const tab = ref(0);
+const tab = ref(0); // TODO: Keep tab in query params
 const ready = ref(false);
+const height = ref("450");
 const project = ref(null);
 const target = ref(null);
 

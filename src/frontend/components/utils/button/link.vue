@@ -11,7 +11,11 @@
     hover
   >
     <v-icon :icon="icon" />
-    <v-tooltip v-if="tooltip !== undefined" activator="parent" :text="tooltip" />
+    <v-tooltip
+      v-if="tooltip !== undefined"
+      activator="parent"
+      :text="tooltip"
+    />
   </v-btn>
 </template>
 

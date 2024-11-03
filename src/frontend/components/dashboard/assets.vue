@@ -48,7 +48,7 @@
               labels: os_types,
               colors: ['#F44336'],
             }"
-            height="450"
+            :height="height"
           />
         </v-col>
         <v-col cols="6">
@@ -83,7 +83,7 @@
               },
               plotOptions: { treemap: { distributed: true } },
             }"
-            height="450"
+            :height="height"
           />
         </v-col>
       </v-row>
@@ -120,7 +120,7 @@
               },
               plotOptions: { treemap: { distributed: true } },
             }"
-            height="450"
+            :height="height"
           />
         </v-col>
         <v-col cols="6">
@@ -210,7 +210,7 @@
                 },
               },
             }"
-            height="450"
+            :height="height"
           />
           <!-- TODO: Composable to divide by 1000 -->
         </v-col>
@@ -231,6 +231,7 @@ const props = defineProps({
     required: false,
     default: null,
   },
+  height: String,
 });
 const enums = useEnums();
 const api = useApi("/api/stats/assets/", true);

@@ -526,18 +526,22 @@ class TriageStatusCountSerializer(Serializer):
 
 
 class TriagingStatsSerializer(ScopeSerializer):
-    fp_rate = FloatField(read_only=True)
-    distribution = TriageStatusCountSerializer(read_only=True, many=True)
+    fp_rate = SerializerMethodField(read_only=True)
+    distribution = SerializerMethodField(read_only=True)
 
-    def _stats(self) -> dict[str, Any]:
+    def get_fp_rate(self, instance: Any) -> float:
         all = 0
         fps = 0
-        distribution: dict[str, int] = {}
         for model in [OSINT, Credential, Vulnerability, Exploit]:
             all += self._filter(model.objects.all()).count()
             fps += self._filter(
                 model.objects.filter(triage_status=TriageStatus.FALSE_POSITIVE)
             ).count()
+        return round((fps / all) * 100, 2) if all > 0 else 0.0
+
+    def get_distribution(self, instance: Any) -> TriageStatusCountSerializer(many=True):
+        distribution: dict[str, int] = {}
+        for model in [OSINT, Credential, Vulnerability, Exploit]:
             distribution.update(
                 {
                     i["triage_status"]: distribution.get(i["triage_status"], 0)
@@ -550,12 +554,6 @@ class TriagingStatsSerializer(ScopeSerializer):
                     )
                 }
             )
-        return {
-            "fp_rate": round((fps / all) * 100, 2),
-            "distribution": TriageStatusCountSerializer(
-                [{"status": k, "count": v} for k, v in distribution.items()], many=True
-            ).data,
-        }
-
-    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
-        return {**super().validate(attrs), **self._stats()}
+        return TriageStatusCountSerializer(
+            [{"status": k, "count": v} for k, v in distribution.items()], many=True
+        ).data
