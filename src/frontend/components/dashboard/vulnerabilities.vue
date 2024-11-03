@@ -21,7 +21,7 @@
             <apexchart
               type="radialBar"
               :series="
-                stats.fix_progress_per_severity.map((item) => item.progress)
+                stats.fix_progress_per_severity.map((item) => item.progress.toFixed(2))
               "
               :options="{
                 title: { text: 'Fixing progress' },

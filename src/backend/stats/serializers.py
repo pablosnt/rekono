@@ -1,7 +1,9 @@
 from datetime import datetime, timedelta
 from typing import Any
 
-from django.db.models import Count, F, Max, Q, QuerySet
+from django.db.models import Count, ExpressionWrapper, F
+from django.db.models import FloatField as Float
+from django.db.models import Max, Q, QuerySet
 from findings.enums import Severity, TriageStatus
 from findings.models import (
     OSINT,
@@ -404,36 +406,28 @@ class VulnerabilityStatsSerializer(ScopeSerializer):
             else 0.0
         )
 
-    # TODO: Maybe this kind of things are doable via Django models without manual loops?
     def get_fix_progress_per_severity(
         self, instance: Any
     ) -> SeverityProgressSerializer(many=True):
-        progresses = []
-        for severity in reversed(Severity):
-            all = self._filter(
+        return SeverityProgressSerializer(
+            self._filter(
                 Vulnerability.objects.exclude(triage_status=TriageStatus.FALSE_POSITIVE)
                 .exclude(triage_status=TriageStatus.WONT_FIX)
-                .filter(severity=severity)
-            ).count()
-            if all > 0:
-                progresses.append(
-                    {
-                        "severity": severity.value,
-                        "progress": round(
-                            (
-                                self._filter(
-                                    self._fixed_vulnerabilities.exclude(
-                                        triage_status=TriageStatus.WONT_FIX
-                                    ).filter(severity=severity)
-                                ).count()
-                                / all
-                            )
-                            * 100,
-                            2,
-                        ),
-                    }
+                .values("severity")
+                .annotate(count=Count("id", distinct=True))
+                .annotate(
+                    count_fixed=Count("id", distinct=True, filter=Q(is_fixed=True))
                 )
-        return SeverityProgressSerializer(progresses, many=True).data
+                .annotate(
+                    progress=ExpressionWrapper(
+                        (F("count_fixed") * 1.0 / F("count")) * 100,
+                        output_field=Float(),
+                    )
+                )
+                .order_by("-severity")
+            ),
+            many=True,
+        ).data
 
     def _get_trending_cve(self, fixed: bool) -> CveCountSerializer(many=True):
         return CveCountSerializer(
