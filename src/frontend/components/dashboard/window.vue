@@ -1,5 +1,8 @@
 <template>
-  <v-card :title="title" variant="text" :prepend-icon="icon">
+  <v-card :title="title" variant="text">
+    <template #prepend>
+      <v-icon v-if="icon" :icon="icon" :color="iconColor"/>
+    </template>
     <template #append>
       <slot name="extra-append" />
       <v-btn variant="text" icon color="medium-emphasis" to="/projects" hover>
@@ -9,7 +12,16 @@
       <TaskButton :project="project" :target="target" />
     </template>
     <template #text>
-      <slot />
+      <v-container v-if="loading" fluid>
+        <v-row justify="center" dense>
+          <v-progress-circular
+      color="red-lighten-1"
+      indeterminate
+      :size="100"
+      :width="10"
+    /></v-row>
+        </v-container>
+      <slot v-if="!loading" />
     </template>
   </v-card>
 </template>
@@ -22,6 +34,11 @@ defineProps({
     required: false,
     default: undefined,
   },
+  iconColor: {
+    type: String,
+    required: false,
+    default: undefined
+  },
   project: {
     type: Object,
     required: false,
@@ -32,5 +49,10 @@ defineProps({
     required: false,
     default: null,
   },
+  loading: {
+    type: Boolean,
+    required: false,
+    default: null
+  }
 });
 </script>

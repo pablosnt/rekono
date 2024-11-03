@@ -1,17 +1,19 @@
 <template>
-  <!-- TODO: Links within charts? -->
+  <!-- TODO: Links within CVE and CWE charts? -->
   <DashboardWindow
     title="Vulnerabilities"
     :icon="enums.findings.Vulnerability.icon"
+    icon-color="red"
     :project="project"
     :target="target"
+    :loading="loading"
   >
     <template #extra-append>
       <v-switch
         v-model="fixed"
         class="mr-3 mt-5"
         color="green"
-        label="Only Fixed"
+        label="Fix stats"
       />
     </template>
     <template #default>
@@ -276,6 +278,7 @@ const enums = useEnums();
 const api = useApi("/api/stats/vulnerabilities/", true);
 const stats = ref(null);
 const fixed = ref(false);
+const loading = ref(true)
 
 api
   .get(
@@ -286,5 +289,6 @@ api
   )
   .then((response) => {
     stats.value = response;
+    loading.value = false
   });
 </script>

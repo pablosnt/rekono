@@ -2,8 +2,10 @@
   <DashboardWindow
     title="Triaging"
     icon="mdi-check-all"
+    icon-color="green"
     :project="project"
     :target="target"
+    :loading="loading"
   >
     <v-container v-if="stats" fluid>
       <v-row justify="space-around">
@@ -102,6 +104,7 @@ const props = defineProps({
 const enums = useEnums();
 const api = useApi("/api/stats/triaging/", true);
 const stats = ref(null);
+const loading = ref(true)
 
 api
   .get(
@@ -112,5 +115,6 @@ api
   )
   .then((response) => {
     stats.value = response;
+    loading.value = false
   });
 </script>

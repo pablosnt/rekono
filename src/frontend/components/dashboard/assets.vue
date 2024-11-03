@@ -2,8 +2,10 @@
   <DashboardWindow
     title="Assets"
     :icon="enums.findings.Host.icon"
+    icon-color="indigo"
     :project="project"
     :target="target"
+    :loading="loading"
   >
     <v-container v-if="stats" fluid>
       <v-row justify="space-around">
@@ -237,6 +239,7 @@ const enums = useEnums();
 const api = useApi("/api/stats/assets/", true);
 const stats = ref(null);
 const os_types = Object.keys(enums.osType);
+const loading = ref(true)
 
 api
   .get(
@@ -247,5 +250,6 @@ api
   )
   .then((response) => {
     stats.value = response;
+    loading.value = false
   });
 </script>

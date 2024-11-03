@@ -1,29 +1,29 @@
 <template>
   <v-card v-if="ready" rounded="0" flat>
-    <v-window v-model="tab" show-arrows="hover" continuous @update:model-value="router.replace({ query: { dashboard: tab }})">
+    <v-window v-model="tab" show-arrows="hover" continuous @update:model-value="forceReload++; router.replace({ query: { dashboard: tab }})">
       <v-window-item
-        ><DashboardActivity :project="project" :target="target"
+        ><DashboardActivity :key="forceReload + tab" :project="project" :target="target"
       /></v-window-item>
       <v-window-item
-        ><DashboardAssets :project="project" :target="target" :height="height"
+        ><DashboardAssets :key="forceReload + tab" :project="project" :target="target" :height="height"
       /></v-window-item>
       <v-window-item
-        ><DashboardVulnerabilities :project="project" :target="target" :height="height"
+        ><DashboardVulnerabilities :key="forceReload + tab" :project="project" :target="target" :height="height"
       /></v-window-item>
       <v-window-item
-        ><DashboardTriaging
+        ><DashboardTriaging :key="forceReload + tab"
           :project="project"
           :target="target"
           :height="height"
       /></v-window-item>
     </v-window>
-    <!-- <v-card-actions class="justify-center">
-      <v-item-group v-model="tab" class="text-center" mandatory  @update:model-value="router.replace({ query: { dashboard: tab }})>
+    <v-card-actions class="justify-center">
+      <v-item-group v-model="tab" class="text-center" mandatory  @update:model-value="forceReload++; router.replace({ query: { dashboard: tab }})">
         <v-item
-          v-for="n in 2"
+          v-for="n in 4"
           :key="`btn-${n}`"
           v-slot="{ isSelected, toggle }"
-          :value="n"
+          :value="n - 1"
         >
           <v-btn
             :variant="isSelected ? 'outlined' : 'text'"
@@ -32,7 +32,7 @@
           ></v-btn>
         </v-item>
       </v-item-group>
-    </v-card-actions> -->
+    </v-card-actions>
   </v-card>
 </template>
 
@@ -44,6 +44,7 @@ const ready = ref(false);
 const height = ref("450");
 const project = ref(null);
 const target = ref(null);
+const forceReload = ref(0)
 
 if (route.params.target_id) {
   useApi("/api/targets/", true)

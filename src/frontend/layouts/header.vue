@@ -1,4 +1,5 @@
 <template>
+  <!-- todo: Links to Home and Project when needed? -->
   <v-layout>
     <v-app-bar color="black" density="compact">
       <nuxt-link to="/" class="ml-4">

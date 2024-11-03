@@ -69,7 +69,4 @@ class TriagingStatsView(StatsView):
 
 
 # TODO: Evolution
-#   Scans per date (Last year? 1/3/6 Months?)
-#   Discoverd assets (host, port/service) per time (Last year? 1/3/6 Months?)
-#   Findings per time and type & Vulnerabilities per time and severity ?  (Last year? 1/3/6 Months?)
-#   Fixed findings per time & Fixed vulnerabilities per time and severity ?  (Last year? 1/3/6 Months?)
+#   Per day: findings, fixed findings, hosts, services

@@ -97,7 +97,6 @@ class ScopeTimelineSerializer(ScopeSerializer, TimelineSerializer):
     pass
 
 
-# TODO: Improve performance or UX during loading
 class ActivityStatsSerializer(ScopeSerializer):
     latest_tasks = SerializerMethodField(read_only=True)
     latest_hosts = SerializerMethodField(read_only=True)

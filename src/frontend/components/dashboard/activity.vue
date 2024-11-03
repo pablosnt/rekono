@@ -4,6 +4,7 @@
     icon="mdi-history"
     :project="project"
     :target="target"
+    :loading="loading"
   >
     <v-container v-if="stats" fluid>
       <v-row justify="space-around">
@@ -246,6 +247,7 @@ const props = defineProps({
 const enums = useEnums();
 const api = useApi("/api/stats/activity/", true);
 const stats = ref(null);
+const loading = ref(true)
 
 api
   .get(
@@ -256,6 +258,7 @@ api
   )
   .then((response) => {
     stats.value = response;
+    loading.value = false
     if (
       props.project === null &&
       props.target === null &&
@@ -263,5 +266,6 @@ api
     ) {
       navigateTo("/projects");
     }
+    loading.value = false
   });
 </script>
