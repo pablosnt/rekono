@@ -20,7 +20,7 @@
                     <td class="text-center text-capitalize">
                       {{ top_project.name }}
                     </td>
-                    <td><TagShow :item="top_project" /></td>
+                    <td><TagShow :item="top_project" :truncate="3" /></td>
                     <td class="text-center">
                       <UtilsCounter
                         :collection="top_project.targets"
@@ -253,7 +253,7 @@ api
   .get(
     null,
     props.project || props.target
-      ? `?${props.target ? props.target.id : props.project.id}`
+      ? `?${props.target ? `target=${props.target.id}` : `project=${props.project.id}`}`
       : null,
   )
   .then((response) => {

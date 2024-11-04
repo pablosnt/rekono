@@ -286,7 +286,7 @@ api
   .get(
     null,
     props.project || props.target
-      ? `?${props.target ? props.target.id : props.project.id}`
+      ? `?${props.target ? `target=${props.target.id}` : `project=${props.project.id}`}`
       : null,
   )
   .then((response) => {
