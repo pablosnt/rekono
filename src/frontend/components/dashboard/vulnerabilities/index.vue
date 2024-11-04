@@ -167,7 +167,7 @@
                 colors: fixed
                   ? ['#4CAF50']
                   : stats.top_cve.map(
-                      (item) => enums.severity[item.max_severity].dashboard,
+                      (item) => enums.severity[item.severity_value].dashboard,
                     ),
                 xaxis: {
                   labels: {
@@ -202,8 +202,10 @@
                     >
                       <v-badge :content="item.count">
                         <v-chip
-                          :prepend-icon="enums.severity[item.max_severity].icon"
-                          :color="enums.severity[item.max_severity].color"
+                          :prepend-icon="
+                            enums.severity[item.severity_value].icon
+                          "
+                          :color="enums.severity[item.severity_value].color"
                           :href="item.link"
                           target="_blank"
                         >

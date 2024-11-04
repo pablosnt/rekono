@@ -1,11 +1,6 @@
-from typing import Any
-
-from django.db.models import Count
 from django_rq.utils import get_statistics
-from drf_spectacular.utils import extend_schema, inline_serializer
-from findings.enums import TriageStatus
-from findings.models import OSINT, Credential, Exploit, Vulnerability
-from rest_framework import serializers, status
+from drf_spectacular.utils import extend_schema
+from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -14,11 +9,12 @@ from rest_framework.views import APIView
 from security.authorization.permissions import IsAdmin
 from stats.serializers import (
     ActivityStatsSerializer,
+    HostEvolutionSerializer,
     HostsStatsSerializer,
     RQStatsSerializer,
-    ScopeSerializer,
     StatsSerializer,
     TriagingStatsSerializer,
+    VulnerabilityEvolutionSerializer,
     VulnerabilityStatsSerializer,
 )
 
@@ -43,7 +39,7 @@ class StatsView(APIView):
     def get_serializer_class(self) -> type[StatsSerializer]:
         return self.serializer_class
 
-    @extend_schema(parameters=[ScopeSerializer])
+    @extend_schema(parameters=[StatsSerializer])
     def get(self, request: Request) -> Response:
         serializer = self.serializer_class(
             data=request.query_params, context={"request": request}
@@ -56,17 +52,21 @@ class ActivityStatsView(StatsView):
     serializer_class = ActivityStatsSerializer
 
 
-class HostsStatsView(StatsView):
+class HostStatsView(StatsView):
     serializer_class = HostsStatsSerializer
+
+
+class HostEvolutionView(StatsView):
+    serializer_class = HostEvolutionSerializer
 
 
 class VulnerabilityStatsView(StatsView):
     serializer_class = VulnerabilityStatsSerializer
 
 
+class VulnerabilityEvolutionView(StatsView):
+    serializer_class = VulnerabilityEvolutionSerializer
+
+
 class TriagingStatsView(StatsView):
     serializer_class = TriagingStatsSerializer
-
-
-# TODO: Evolution
-#   Per day: findings, fixed findings, hosts, services

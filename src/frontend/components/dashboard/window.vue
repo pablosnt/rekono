@@ -1,5 +1,5 @@
 <template>
-  <v-card :title="title" variant="text">
+  <v-card :title="title" :subtitle="subtitle" variant="text">
     <template #prepend>
       <v-icon v-if="icon" :icon="icon" :color="iconColor" />
     </template>
@@ -40,6 +40,11 @@
 <script setup lang="ts">
 defineProps({
   title: String,
+  subtitle: {
+    type: String,
+    required: false,
+    default: undefined,
+  },
   icon: {
     type: String,
     required: false,
@@ -66,4 +71,5 @@ defineProps({
     default: null,
   },
 });
+// TODO: Move all API calls to here, as we did with dataset component
 </script>

@@ -128,43 +128,31 @@
         <v-col cols="6">
           <apexchart
             type="bar"
-            :series="[
-              {
-                name: 'Critical',
-                group: 'current',
-                data: stats.top_vulnerable.map(
-                  (item) => item.vulnerabilities_critical,
-                ),
-              },
-              {
-                name: 'High',
-                group: 'current',
-                data: stats.top_vulnerable.map(
-                  (item) => item.vulnerabilities_high,
-                ),
-              },
-              {
-                name: 'Medium',
-                group: 'current',
-                data: stats.top_vulnerable.map(
-                  (item) => item.vulnerabilities_medium,
-                ),
-              },
-              {
-                name: 'Low',
-                group: 'current',
-                data: stats.top_vulnerable.map(
-                  (item) => item.vulnerabilities_low,
-                ),
-              },
-              {
-                name: 'Fixed',
-                group: 'fixed',
-                data: stats.top_vulnerable.map(
-                  (item) => item.fixed_vulnerabilities,
-                ),
-              },
-            ]"
+            :series="
+              Object.keys(enums.severity)
+                .filter((severity) => severity !== 'Info')
+                .map((severity) => {
+                  return {
+                    name: severity,
+                    group: 'current',
+                    data: stats.top_vulnerable.map((item) => {
+                      const search = item.vulnerabilities_per_severity.filter(
+                        (counter) => counter.severity === severity,
+                      );
+                      return search.length > 0 ? search[0].count : 0;
+                    }),
+                  };
+                })
+                .concat([
+                  {
+                    name: 'Fixed',
+                    group: 'fixed',
+                    data: stats.top_vulnerable.map(
+                      (item) => item.fixed_vulnerabilities,
+                    ),
+                  },
+                ])
+            "
             :options="{
               title: { text: 'Assets with more vulnerabilities' },
               chart: { stacked: true },

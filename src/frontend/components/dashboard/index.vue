@@ -1,37 +1,52 @@
 <template>
   <v-card v-if="ready" rounded="0" flat>
     <v-window
-      v-model="tab"
+      v-model="page"
       show-arrows="hover"
       continuous
       @update:model-value="
         forceReload++;
-        router.replace({ query: { dashboard: tab } });
+        router.replace({ query: { page: page } });
       "
     >
+      <!-- TODO: Implement this with a loop -->
       <v-window-item
         ><DashboardActivity
-          :key="forceReload + tab"
+          :key="forceReload + page"
           :project="project"
           :target="target"
       /></v-window-item>
       <v-window-item
         ><DashboardAssets
-          :key="forceReload + tab"
+          :key="forceReload + page"
+          :project="project"
+          :target="target"
+          :height="height"
+      /></v-window-item>
+      <v-window-item
+        ><DashboardAssetsEvolution
+          :key="forceReload + page"
           :project="project"
           :target="target"
           :height="height"
       /></v-window-item>
       <v-window-item
         ><DashboardVulnerabilities
-          :key="forceReload + tab"
+          :key="forceReload + page"
+          :project="project"
+          :target="target"
+          :height="height"
+      /></v-window-item>
+      <v-window-item
+        ><DashboardVulnerabilitiesEvolution
+          :key="forceReload + page"
           :project="project"
           :target="target"
           :height="height"
       /></v-window-item>
       <v-window-item
         ><DashboardTriaging
-          :key="forceReload + tab"
+          :key="forceReload + page"
           :project="project"
           :target="target"
           :height="height"
@@ -39,16 +54,16 @@
     </v-window>
     <v-card-actions class="justify-center">
       <v-item-group
-        v-model="tab"
+        v-model="page"
         class="text-center"
         mandatory
         @update:model-value="
           forceReload++;
-          router.replace({ query: { dashboard: tab } });
+          router.replace({ query: { page: page } });
         "
       >
         <v-item
-          v-for="n in 4"
+          v-for="n in 6"
           :key="`btn-${n}`"
           v-slot="{ isSelected, toggle }"
           :value="n - 1"
@@ -67,10 +82,10 @@
 <script setup lang="ts">
 const route = useRoute();
 const router = useRouter();
-const tab = ref(
-  route.query.dashboard !== undefined &&
-    [0, 1, 2, 3, 4].includes(parseInt(route.query.dashboard))
-    ? parseInt(route.query.dashboard)
+const page = ref(
+  route.query.page !== undefined &&
+    [0, 1, 2, 3, 4, 5].includes(parseInt(route.query.page))
+    ? parseInt(route.query.page)
     : 0,
 );
 const ready = ref(false);
