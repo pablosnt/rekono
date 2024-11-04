@@ -1,7 +1,7 @@
 <template>
   <v-card :title="title" variant="text">
     <template #prepend>
-      <v-icon v-if="icon" :icon="icon" :color="iconColor"/>
+      <v-icon v-if="icon" :icon="icon" :color="iconColor" />
     </template>
     <template #append>
       <slot name="extra-append" />
@@ -15,12 +15,12 @@
       <v-container v-if="loading" fluid>
         <v-row justify="center" dense>
           <v-progress-circular
-      color="red-lighten-1"
-      indeterminate
-      :size="100"
-      :width="10"
-    /></v-row>
-        </v-container>
+            color="red-lighten-1"
+            indeterminate
+            :size="100"
+            :width="10"
+        /></v-row>
+      </v-container>
       <slot v-if="!loading" />
     </template>
   </v-card>
@@ -37,7 +37,7 @@ defineProps({
   iconColor: {
     type: String,
     required: false,
-    default: undefined
+    default: undefined,
   },
   project: {
     type: Object,
@@ -52,7 +52,7 @@ defineProps({
   loading: {
     type: Boolean,
     required: false,
-    default: null
-  }
+    default: null,
+  },
 });
 </script>

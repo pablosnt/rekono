@@ -247,7 +247,7 @@ const props = defineProps({
 const enums = useEnums();
 const api = useApi("/api/stats/activity/", true);
 const stats = ref(null);
-const loading = ref(true)
+const loading = ref(true);
 
 api
   .get(
@@ -258,7 +258,7 @@ api
   )
   .then((response) => {
     stats.value = response;
-    loading.value = false
+    loading.value = false;
     if (
       props.project === null &&
       props.target === null &&
@@ -266,6 +266,6 @@ api
     ) {
       navigateTo("/projects");
     }
-    loading.value = false
+    loading.value = false;
   });
 </script>

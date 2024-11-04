@@ -104,7 +104,7 @@ const props = defineProps({
 const enums = useEnums();
 const api = useApi("/api/stats/triaging/", true);
 const stats = ref(null);
-const loading = ref(true)
+const loading = ref(true);
 
 api
   .get(
@@ -115,6 +115,6 @@ api
   )
   .then((response) => {
     stats.value = response;
-    loading.value = false
+    loading.value = false;
   });
 </script>

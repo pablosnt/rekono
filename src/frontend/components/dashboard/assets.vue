@@ -214,7 +214,7 @@
             }"
             :height="height"
           />
-          <!-- TODO: Composable to divide by 1000 -->
+          <!-- todo: Composable to divide by 1000 -->
         </v-col>
       </v-row>
     </v-container>
@@ -239,7 +239,7 @@ const enums = useEnums();
 const api = useApi("/api/stats/assets/", true);
 const stats = ref(null);
 const os_types = Object.keys(enums.osType);
-const loading = ref(true)
+const loading = ref(true);
 
 api
   .get(
@@ -250,6 +250,6 @@ api
   )
   .then((response) => {
     stats.value = response;
-    loading.value = false
+    loading.value = false;
   });
 </script>

@@ -23,7 +23,9 @@
             <apexchart
               type="radialBar"
               :series="
-                stats.fix_progress_per_severity.map((item) => item.progress.toFixed(2))
+                stats.fix_progress_per_severity.map((item) =>
+                  item.progress.toFixed(2),
+                )
               "
               :options="{
                 title: { text: 'Fixing progress' },
@@ -278,7 +280,7 @@ const enums = useEnums();
 const api = useApi("/api/stats/vulnerabilities/", true);
 const stats = ref(null);
 const fixed = ref(false);
-const loading = ref(true)
+const loading = ref(true);
 
 api
   .get(
@@ -289,6 +291,6 @@ api
   )
   .then((response) => {
     stats.value = response;
-    loading.value = false
+    loading.value = false;
   });
 </script>
