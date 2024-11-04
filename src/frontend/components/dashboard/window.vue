@@ -5,11 +5,22 @@
     </template>
     <template #append>
       <slot name="extra-append" />
-      <v-btn variant="text" icon color="medium-emphasis" to="/projects" hover>
+      <v-btn
+        v-if="target !== null || (project === null && target === null)"
+        variant="text"
+        icon
+        color="medium-emphasis"
+        to="/projects"
+        hover
+      >
         <v-icon icon="mdi-folder-open" />
         <v-tooltip activator="parent" text="All projects" />
       </v-btn>
-      <TaskButton :project="project" :target="target" />
+      <TaskButton
+        v-if="target !== null || (project === null && target === null)"
+        :project="project"
+        :target="target"
+      />
     </template>
     <template #text>
       <v-container v-if="loading" fluid>

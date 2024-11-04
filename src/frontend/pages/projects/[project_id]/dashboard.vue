@@ -3,6 +3,18 @@
     <v-card :title="project.name">
       <template #append>
         <TagShow :item="project" />
+        <v-btn
+          class="ml-5"
+          variant="text"
+          icon
+          color="medium-emphasis"
+          to="/projects"
+          hover
+        >
+          <v-icon icon="mdi-folder-open" />
+          <v-tooltip activator="parent" text="All projects" />
+        </v-btn>
+        <TaskButton :project="project" />
         <UtilsButtonEditDelete
           v-if="
             project.owner &&

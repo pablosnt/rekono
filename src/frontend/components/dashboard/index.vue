@@ -86,14 +86,16 @@ if (route.params.target_id) {
       target.value = response;
       ready.value = true;
     });
-} else if (route.params.project_id) {
+}
+if (route.params.project_id) {
   useApi("/api/projects/", true)
     .get(route.params.project_id)
     .then((response) => {
       project.value = response;
       ready.value = true;
     });
-} else {
+}
+if (!route.params.target_id && !route.params.project_id) {
   ready.value = true;
 }
 </script>
