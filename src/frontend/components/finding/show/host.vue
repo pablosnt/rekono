@@ -23,8 +23,6 @@
   </finding-show-component>
 </template>
 
-<!-- TODO: Check all findings have the relationships needed on creation -->
-
 <script setup lang="ts">
 defineProps({
   api: Object,

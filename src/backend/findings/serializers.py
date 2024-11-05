@@ -1,6 +1,6 @@
 from typing import Any
 
-from findings.enums import TriageStatus
+from findings.enums import Severity, TriageStatus
 from findings.framework.serializers import FindingSerializer, TriageFindingSerializer
 from findings.models import (
     OSINT,
@@ -12,6 +12,7 @@ from findings.models import (
     Technology,
     Vulnerability,
 )
+from framework.fields import IntegerChoicesField
 
 
 class OSINTSerializer(TriageFindingSerializer):
@@ -102,6 +103,8 @@ class TechnologySerializer(FindingSerializer):
 
 
 class VulnerabilitySerializer(TriageFindingSerializer):
+    severity = IntegerChoicesField(model=Severity, required=False)
+
     class Meta:
         model = Vulnerability
         fields = TriageFindingSerializer.Meta.fields + (

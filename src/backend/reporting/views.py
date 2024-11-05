@@ -182,7 +182,7 @@ class ReportingViewSet(BaseViewSet):
             )
             query = model.objects.filter(**query_filter).all()
             if model == Vulnerability:
-                query = query.order_by("severity")
+                query = query.order_by("-severity")
             findings[model.__name__.lower()] = [
                 {k: v for k, v in model_to_dict(f).items() if k != "executions"}
                 for f in query
@@ -192,7 +192,6 @@ class ReportingViewSet(BaseViewSet):
     def _get_findings_to_pdf_report(
         self, serializer: ReportSerializer
     ) -> tuple[dict[int, Any], dict[int, list[int]], list[int]]:
-        label_index = [s.value for s in reversed(Severity)]
         stats = [0] * len(Severity)
         stats_by_target = {}
         findings_by_target = {}
@@ -247,7 +246,7 @@ class ReportingViewSet(BaseViewSet):
                             }
                         )
                         .filter(Q(technology__port__host=host) | Q(port__host=host))
-                        .order_by("severity")
+                        .order_by("-severity")
                         .all(),
                         FindingName.EXPLOIT.value: Exploit.objects.filter(
                             **{
@@ -276,18 +275,19 @@ class ReportingViewSet(BaseViewSet):
             else:
                 for host in findings_by_target[target.id][FindingName.HOST.value]:
                     for vulnerability in host[FindingName.VULNERABILITY.value]:
-                        index = label_index.index(vulnerability.severity)
-                        stats[index] += 1
-                        stats_by_target[target.id][index] += 1
+                        stats[vulnerability.severity.value - 1] += 1
+                        stats_by_target[target.id][
+                            vulnerability.severity.value - 1
+                        ] += 1
                     for credential in host[FindingName.CREDENTIAL.value]:
-                        index = label_index.index(
-                            Severity.HIGH.value
-                            if credential.secret
-                            else Severity.LOW.value
-                        )
-                        stats[index] += 1
-                        stats_by_target[target.id][index] += 1
-        return findings_by_target, stats_by_target, stats
+                        severity = Severity.HIGH if credential.secret else Severity.LOW
+                        stats[severity.value - 1] += 1
+                        stats_by_target[target.id][severity.value - 1] += 1
+        return (
+            findings_by_target,
+            {k: reversed(v) for k, v in stats_by_target.items()},
+            reversed(stats),
+        )
 
     def _create_report_file(self, report: Report, *findings: Any) -> None:
         filename = f"{str(uuid.uuid4())}.{report.format.lower()}"

@@ -15,7 +15,7 @@
       <template #prepend>
         <v-icon v-if="task.process" icon="mdi-robot-angry" color="red" />
         <v-icon
-          v-if="ttask.configuration && !task.configuration.tool.icon"
+          v-if="task.configuration && !task.configuration.tool.icon"
           icon="mdi-rocket"
           color="red"
         />
@@ -296,11 +296,11 @@
                     v-intersect="
                       (isIntersecting, entries, observer) =>
                         isIntersecting &&
-                        executions.value[stage].length % 24 === 0
+                        executions[stage].length % 24 === 0
                           ? loadExecutions(
                               true,
                               stage,
-                              executions.value[stage].length / 24 + 1,
+                              executions[stage].length / 24 + 1,
                             )
                           : null
                     "

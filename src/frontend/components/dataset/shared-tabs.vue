@@ -65,7 +65,6 @@ const props = defineProps({
 const route = useRoute();
 const router = useRouter();
 const filters = useFilters();
-
 const forceUpdate = ref(0);
 const expandFilters = ref(false);
 const dataset = ref(null);
@@ -117,7 +116,7 @@ function buildFiltering() {
                   fieldValue: "id",
                   fieldTitle: "name",
                   key: "ordering",
-                  defaultValue: "-id",
+                  defaultValue: props.tabs[tab.value].defaultOrdering ? props.tabs[tab.value].defaultOrdering : '-id',
                 },
               ])
               .then((orderFilters) => {

@@ -16,6 +16,7 @@ from findings.models import (
     Vulnerability,
 )
 from findings.serializers import HostSerializer, VulnerabilitySerializer
+from framework.fields import IntegerChoicesField
 from framework.models import BaseModel
 from projects.models import Project
 from projects.serializers import ProjectSerializer
@@ -66,7 +67,7 @@ class DateCount(Serializer):
 
 class CveCount(Serializer):
     cve = CharField()
-    severity_value = CharField()
+    severity_value = IntegerChoicesField(model=Severity, required=False)
     link = CharField()
     count = IntegerField()
 
@@ -77,12 +78,12 @@ class CweCount(Serializer):
 
 
 class SeverityProgress(Serializer):
-    severity = CharField()
+    severity = IntegerChoicesField(model=Severity, required=False)
     progress = FloatField()
 
 
 class SeverityCount(Serializer):
-    severity = CharField()
+    severity = IntegerChoicesField(model=Severity, required=False)
     count = IntegerField()
 
 
@@ -213,7 +214,7 @@ class HostsStatsSerializer(StatsSerializer):
                     k: v
                     for item in [
                         {
-                            f"port_vulnerability_{severity.value.lower()}": Count(
+                            f"port_vulnerability_{severity.name.lower()}": Count(
                                 "port__vulnerability",
                                 distinct=True,
                                 filter=~Q(
@@ -222,7 +223,7 @@ class HostsStatsSerializer(StatsSerializer):
                                 & Q(port__vulnerability__is_fixed=False)
                                 & Q(port__vulnerability__severity=severity),
                             ),
-                            f"technology_vulnerability_{severity.value.lower()}": Count(
+                            f"technology_vulnerability_{severity.name.lower()}": Count(
                                 "port__technology__vulnerability",
                                 distinct=True,
                                 filter=~Q(
@@ -242,10 +243,10 @@ class HostsStatsSerializer(StatsSerializer):
                     k: v
                     for item in [
                         {
-                            f"vulnerabilities_{severity.value.lower()}": F(
-                                f"port_vulnerability_{severity.value.lower()}"
+                            f"vulnerabilities_{severity.name.lower()}": F(
+                                f"port_vulnerability_{severity.name.lower()}"
                             )
-                            + F(f"technology_vulnerability_{severity.value.lower()}")
+                            + F(f"technology_vulnerability_{severity.name.lower()}")
                         }
                         for severity in Severity
                     ]
@@ -255,7 +256,7 @@ class HostsStatsSerializer(StatsSerializer):
             .annotate(
                 vulnerabilities=sum(
                     [
-                        F(f"vulnerabilities_{severity.value.lower()}")
+                        F(f"vulnerabilities_{severity.name.lower()}")
                         for severity in Severity
                     ]
                 ),
@@ -267,7 +268,7 @@ class HostsStatsSerializer(StatsSerializer):
                 "address",
                 "fixed_vulnerabilities",
                 "vulnerabilities",
-                *[f"vulnerabilities_{severity.value.lower()}" for severity in Severity],
+                *[f"vulnerabilities_{severity.name.lower()}" for severity in Severity],
             )
             .order_by("-vulnerabilities", "-fixed_vulnerabilities")[: self.top]
         )
@@ -283,13 +284,13 @@ class HostsStatsSerializer(StatsSerializer):
                     },
                     "vulnerabilities_per_severity": [
                         {
-                            "severity": severity.value,
+                            "severity": severity.name,
                             "count": item.get(
-                                f"vulnerabilities_{severity.value.lower()}"
+                                f"vulnerabilities_{severity.name.lower()}"
                             ),
                         }
                         for severity in Severity
-                        if item.get(f"vulnerabilities_{severity.value.lower()}")
+                        if item.get(f"vulnerabilities_{severity.name.lower()}")
                     ],
                 }
                 for item in queryset
@@ -483,7 +484,7 @@ class VulnerabilityStatsSerializer(StatsSerializer):
             self._get_vulnerabilities(fixed)
             .values("severity")
             .annotate(count=Count("severity"))
-            .order_by("-count"),
+            .order_by("-severity"),
         )
 
     def get_severity_distribution(self, instance: Any) -> SeverityCount(many=True):

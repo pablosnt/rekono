@@ -184,19 +184,21 @@ export function useEnums() {
     "Won't Fix": { icon: "mdi-cancel", color: "orange", dashboard: "#FF9800" },
   };
   const severity = {
-    Critical: { color: "red", icon: "mdi-alert-circle", dashboard: "#F44336" },
+    Critical: { id: 5, color: "red", icon: "mdi-alert-circle", dashboard: "#F44336" },
     High: {
+      id: 5,
       color: "orange",
       icon: "mdi-arrow-up-circle",
       dashboard: "#FF9800",
     },
-    Medium: { color: "amber", icon: "mdi-minus-circle", dashboard: "#FFC107" },
+    Medium: { id: 5, color: "amber", icon: "mdi-minus-circle", dashboard: "#FFC107" },
     Low: {
+      id: 2,
       color: "indigo",
       icon: "mdi-arrow-down-circle",
       dashboard: "#3F51B5",
     },
-    Info: { color: "grey", icon: "$info", dashboard: "#9E9E9E" },
+    Info: { id: 1,color: "grey", icon: "$info", dashboard: "#9E9E9E" },
   };
 
   return {

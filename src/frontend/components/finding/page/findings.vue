@@ -152,7 +152,7 @@ const tabs = ref({
         label: "Severity",
         icon: "mdi-fire",
         collection: filters.collectionFromEnum(enums.severity),
-        fieldValue: "name",
+        fieldValue: "id",
         fieldTitle: "name",
         key: "severity",
       },
@@ -190,7 +190,7 @@ const tabs = ref({
       "cwe",
       "osvdb",
     ],
+    defaultOrdering: '-severity'
   },
 });
-// TODO: Sort vulnerabilities by severity by default
 </script>

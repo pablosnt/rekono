@@ -1,5 +1,4 @@
 <template>
-  <!-- TODO: findings like this might be marked as fixed because they are not detected by the same configuration with different wordlist -->
   <finding-show-component
     :api="api"
     :finding="finding"

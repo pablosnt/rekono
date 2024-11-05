@@ -355,7 +355,7 @@ class Vulnerability(TriageFinding):
     )
     name = models.TextField(max_length=50)
     description = models.TextField(blank=True, null=True)
-    severity = models.TextField(choices=Severity.choices, default=Severity.MEDIUM)
+    severity = models.IntegerField(choices=Severity.choices, default=Severity.MEDIUM)
     cve = models.TextField(max_length=20, blank=True, null=True)
     cwe = models.TextField(max_length=20, blank=True, null=True)
     osvdb = models.TextField(max_length=20, blank=True, null=True)

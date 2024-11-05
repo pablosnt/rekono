@@ -198,7 +198,7 @@
                                 {% if h.Vulnerability %}
                                     <h4>Vulnerabilities</h4>
                                     {% for v in h.Vulnerability %}
-                                        {% if v.severity == "Critical" or v.severity == "High" %}
+                                        {% if v.severity.name == "CRITICAL" or v.severity.name == "HIGH" %}
                                             <table border="1" cellspacing="1" cellpadding="5">
                                                 <tbody>
                                                     <tr>
@@ -237,7 +237,7 @@
                                                     </tr>
                                                     <tr>
                                                         <th bgcolor="#dc3545" class="white" width="20%">Severity</th>
-                                                        <td width="60%" class="{{ v.severity|lower }}">{{ v.severity }}</td>
+                                                        <td width="60%" class="{{ v.severity.name|lower }}">{{ v.severity.name|capitalize }}</td>
                                                     </tr>
                                                     <tr>
                                                         <th bgcolor="#dc3545" class="white" width="20%">CVE</th>
@@ -358,7 +358,7 @@
 
                                 {% if h.Vulnerability %}
                                     {% for v in h.Vulnerability %}
-                                        {% if v.severity == "Medium" or v.severity == "Low" %}
+                                        {% if v.severity.name == "MEDIUM" or v.severity.name == "LOW" %}
                                             <table border="1" cellspacing="1" cellpadding="5">
                                                 <tbody>
                                                     <tr>
@@ -397,7 +397,7 @@
                                                     </tr>
                                                     <tr>
                                                         <th bgcolor="#dc3545" class="white" width="20%">Severity</th>
-                                                        <td width="60%" class="{{ v.severity|lower }}">{{ v.severity }}</td>
+                                                        <td width="60%" class="{{ v.severity.name|lower }}">{{ v.severity.name|capitalize }}</td>
                                                     </tr>
                                                     <tr>
                                                         <th bgcolor="#dc3545" class="white" width="20%">CVE</th>
@@ -514,7 +514,7 @@
 
                                 {% if h.Vulnerability %}
                                     {% for v in h.Vulnerability %}
-                                        {% if v.severity == "Info" %}
+                                        {% if v.severity.name == "INFO" %}
                                             <table border="1" cellspacing="1" cellpadding="5">
                                                 <tbody>
                                                     <tr>
@@ -553,7 +553,7 @@
                                                     </tr>
                                                     <tr>
                                                         <th bgcolor="#dc3545" class="white" width="20%">Severity</th>
-                                                        <td width="60%" class="{{ v.severity|lower }}">{{ v.severity }}</td>
+                                                        <td width="60%" class="{{ v.severity.name|lower }}">{{ v.severity.name|capitalize }}</td>
                                                     </tr>
                                                     <tr>
                                                         <th bgcolor="#dc3545" class="white" width="20%">CVE</th>
