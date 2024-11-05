@@ -190,7 +190,7 @@ const tabs = ref({
       "cwe",
       "osvdb",
     ],
-    defaultOrdering: '-severity'
+    defaultOrdering: "-severity",
   },
 });
 </script>

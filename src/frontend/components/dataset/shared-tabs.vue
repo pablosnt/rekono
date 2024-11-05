@@ -116,7 +116,9 @@ function buildFiltering() {
                   fieldValue: "id",
                   fieldTitle: "name",
                   key: "ordering",
-                  defaultValue: props.tabs[tab.value].defaultOrdering ? props.tabs[tab.value].defaultOrdering : '-id',
+                  defaultValue: props.tabs[tab.value].defaultOrdering
+                    ? props.tabs[tab.value].defaultOrdering
+                    : "-id",
                 },
               ])
               .then((orderFilters) => {

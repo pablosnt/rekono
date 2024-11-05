@@ -4,7 +4,6 @@ from typing import Any
 from django.db.models import Count, QuerySet
 from django.db.models.functions import TruncDate
 from executions.models import Execution
-from findings.models import Credential
 from framework.models import BaseModel
 from projects.models import Project
 from rest_framework.serializers import PrimaryKeyRelatedField, Serializer

@@ -295,8 +295,7 @@
                   <div
                     v-intersect="
                       (isIntersecting, entries, observer) =>
-                        isIntersecting &&
-                        executions[stage].length % 24 === 0
+                        isIntersecting && executions[stage].length % 24 === 0
                           ? loadExecutions(
                               true,
                               stage,
