@@ -528,8 +528,6 @@ class VulnerabilityEvolutionSerializer(StatsSerializer):
 class TriagingStatsSerializer(StatsSerializer):
     fp_rate = SerializerMethodField(read_only=True)
     distribution = SerializerMethodField(read_only=True)
-    # TODO: Explain the differences between both charts in the UI
-    # TODO: Review this stats. Very high numbers. 9 Untriaged but 10 in the database
 
     def get_fp_rate(self, instance: Any) -> float:
         all = 0

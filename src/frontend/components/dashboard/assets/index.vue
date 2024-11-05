@@ -1,11 +1,12 @@
 <template>
   <DashboardWindow
+    :api="api"
     title="Assets"
     :icon="enums.findings.Host.icon"
     icon-color="indigo"
     :project="project"
     :target="target"
-    :loading="loading"
+    @stats="(data) => (stats = data)"
   >
     <v-container v-if="stats" fluid>
       <v-row justify="space-around">
@@ -210,7 +211,7 @@
 </template>
 
 <script setup lang="ts">
-const props = defineProps({
+defineProps({
   project: {
     type: Object,
     required: false,
@@ -227,17 +228,4 @@ const enums = useEnums();
 const api = useApi("/api/stats/assets/", true);
 const stats = ref(null);
 const os_types = Object.keys(enums.osType);
-const loading = ref(true);
-
-api
-  .get(
-    null,
-    props.project || props.target
-      ? `?${props.target ? `target=${props.target.id}` : `project=${props.project.id}`}`
-      : null,
-  )
-  .then((response) => {
-    stats.value = response;
-    loading.value = false;
-  });
 </script>

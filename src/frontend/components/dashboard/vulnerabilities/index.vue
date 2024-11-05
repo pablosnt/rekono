@@ -1,12 +1,13 @@
 <template>
   <!-- TODO: Links within CVE and CWE charts? -->
   <DashboardWindow
+    :api="api"
     title="Vulnerabilities"
     :icon="enums.findings.Vulnerability.icon"
     icon-color="red"
     :project="project"
     :target="target"
-    :loading="loading"
+    @stats="(data) => (stats = data)"
   >
     <template #extra-append>
       <v-switch
@@ -265,7 +266,7 @@
 </template>
 
 <script setup lang="ts">
-const props = defineProps({
+defineProps({
   project: {
     type: Object,
     required: false,
@@ -282,17 +283,4 @@ const enums = useEnums();
 const api = useApi("/api/stats/vulnerabilities/", true);
 const stats = ref(null);
 const fixed = ref(false);
-const loading = ref(true);
-
-api
-  .get(
-    null,
-    props.project || props.target
-      ? `?${props.target ? `target=${props.target.id}` : `project=${props.project.id}`}`
-      : null,
-  )
-  .then((response) => {
-    stats.value = response;
-    loading.value = false;
-  });
 </script>

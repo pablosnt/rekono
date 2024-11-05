@@ -1,43 +1,38 @@
 <template>
   <DashboardWindow
+    :api="api"
     title="Assets"
     subtitle="Evolution"
     :icon="enums.findings.Host.icon"
     icon-color="indigo"
     :project="project"
     :target="target"
-    :loading="loading"
+    @stats="
+      (data) => {
+        stats = data;
+        dates = [
+          ...new Set(
+            data.hosts
+              .map((item) => item.date)
+              .concat(data.ports.map((item) => item.date)),
+          ),
+        ];
+      }
+    "
   >
     <v-container v-if="stats" fluid>
       <v-row justify="center">
         <v-col>
-          <!-- TODO: General implementation of data series calculation from evolution response -->
           <apexchart
             type="area"
             :series="[
               {
                 name: 'Hosts',
-                data: dates.map((date) => {
-                  const search = stats.hosts.filter(
-                    (item) => item.date === date,
-                  );
-                  return {
-                    y: search.length > 0 ? search[0].count : 0,
-                    x: new Date(date).getTime(),
-                  };
-                }),
+                data: serie(stats.hosts),
               },
               {
                 name: 'Ports',
-                data: dates.map((date) => {
-                  const search = stats.ports.filter(
-                    (item) => item.date === date,
-                  );
-                  return {
-                    y: search.length > 0 ? search[0].count : 0,
-                    x: new Date(date).getTime(),
-                  };
-                }),
+                data: serie(stats.ports),
               },
             ]"
             :options="{
@@ -83,7 +78,7 @@
 </template>
 
 <script setup lang="ts">
-const props = defineProps({
+defineProps({
   project: {
     type: Object,
     required: false,
@@ -99,25 +94,15 @@ const props = defineProps({
 const enums = useEnums();
 const api = useApi("/api/stats/assets/evolution/", true);
 const stats = ref(null);
-const loading = ref(true);
 const dates = ref([]);
 
-api
-  .get(
-    null,
-    props.project || props.target
-      ? `?${props.target ? `target=${props.target.id}` : `project=${props.project.id}`}`
-      : null,
-  )
-  .then((response) => {
-    stats.value = response;
-    dates.value = [
-      ...new Set(
-        response.hosts
-          .map((item) => item.date)
-          .concat(response.ports.map((item) => item.date)),
-      ),
-    ];
-    loading.value = false;
+function serie(data) {
+  return dates.value.map((date) => {
+    const search = data.filter((item) => item.date === date);
+    return {
+      y: search.length > 0 ? search[0].count : 0,
+      x: new Date(date).getTime(),
+    };
   });
+}
 </script>

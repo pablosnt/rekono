@@ -1,6 +1,6 @@
 <template>
   <MenuProject>
-    <v-card :title="project.name">
+    <v-card :title="project.name" variant="text">
       <template #append>
         <TagShow :item="project" />
         <v-btn

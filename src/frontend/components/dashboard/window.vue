@@ -38,7 +38,8 @@
 </template>
 
 <script setup lang="ts">
-defineProps({
+const props = defineProps({
+  api: Object,
   title: String,
   subtitle: {
     type: String,
@@ -55,6 +56,7 @@ defineProps({
     required: false,
     default: undefined,
   },
+
   project: {
     type: Object,
     required: false,
@@ -65,11 +67,19 @@ defineProps({
     required: false,
     default: null,
   },
-  loading: {
-    type: Boolean,
-    required: false,
-    default: null,
-  },
 });
-// TODO: Move all API calls to here, as we did with dataset component
+const emit = defineEmits(["stats"]);
+const loading = ref(true);
+
+props.api
+  .get(
+    null,
+    props.project || props.target
+      ? `?${props.target ? `target=${props.target.id}` : `project=${props.project.id}`}`
+      : null,
+  )
+  .then((response) => {
+    emit("stats", response);
+    loading.value = false;
+  });
 </script>

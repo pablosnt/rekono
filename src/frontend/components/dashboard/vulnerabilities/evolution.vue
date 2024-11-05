@@ -1,12 +1,18 @@
 <template>
   <DashboardWindow
+    :api="api"
     title="Vulnerabilities"
     subtitle="Evolution"
     :icon="enums.findings.Vulnerability.icon"
     icon-color="red"
     :project="project"
     :target="target"
-    :loading="loading"
+    @stats="
+      (data) => {
+        stats = data;
+        dates = [...new Set(data.evolution.map((item) => item.date))];
+      }
+    "
   >
     <template #default>
       <v-container v-if="stats" fluid>
@@ -78,7 +84,7 @@
 </template>
 
 <script setup lang="ts">
-const props = defineProps({
+defineProps({
   project: {
     type: Object,
     required: false,
@@ -94,19 +100,5 @@ const props = defineProps({
 const enums = useEnums();
 const api = useApi("/api/stats/vulnerabilities/evolution/", true);
 const stats = ref(null);
-const loading = ref(true);
 const dates = ref([]);
-
-api
-  .get(
-    null,
-    props.project || props.target
-      ? `?${props.target ? `target=${props.target.id}` : `project=${props.project.id}`}`
-      : null,
-  )
-  .then((response) => {
-    stats.value = response;
-    dates.value = [...new Set(response.evolution.map((item) => item.date))];
-    loading.value = false;
-  });
 </script>

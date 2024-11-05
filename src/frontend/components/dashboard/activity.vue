@@ -1,10 +1,20 @@
 <template>
   <DashboardWindow
+    :api="api"
     title="Recent activity"
     icon="mdi-history"
     :project="project"
     :target="target"
-    :loading="loading"
+    @stats="
+      (data) => {
+        stats = data;
+        project === null &&
+        target === null &&
+        (!data.top_projects || data.top_projects.length === 0)
+          ? navigateTo('/projects')
+          : null;
+      }
+    "
   >
     <v-container v-if="stats" fluid>
       <v-row justify="space-around">
@@ -232,7 +242,7 @@
 </template>
 
 <script setup lang="ts">
-const props = defineProps({
+defineProps({
   project: {
     type: Object,
     required: false,
@@ -243,29 +253,9 @@ const props = defineProps({
     required: false,
     default: null,
   },
+  height: String,
 });
 const enums = useEnums();
 const api = useApi("/api/stats/activity/", true);
 const stats = ref(null);
-const loading = ref(true);
-
-api
-  .get(
-    null,
-    props.project || props.target
-      ? `?${props.target ? `target=${props.target.id}` : `project=${props.project.id}`}`
-      : null,
-  )
-  .then((response) => {
-    stats.value = response;
-    loading.value = false;
-    if (
-      props.project === null &&
-      props.target === null &&
-      (!response.top_projects || response.top_projects.length === 0)
-    ) {
-      navigateTo("/projects");
-    }
-    loading.value = false;
-  });
 </script>
