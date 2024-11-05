@@ -155,7 +155,7 @@
                 ])
             "
             :options="{
-              title: { text: 'Assets with more vulnerabilities' },
+              title: { text: 'Top Vulnerable Assets' },
               chart: { stacked: true },
               tooltip: {
                 shared: true,

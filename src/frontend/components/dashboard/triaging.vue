@@ -16,7 +16,10 @@
             :series="[stats.fp_rate]"
             :options="{
               title: {
-                text: 'False positives rate',
+                text: 'False Positives Rate',
+              },
+              subtitle: {
+                text: 'Rate from all findings, including fixed ones',
               },
               colors: ['#4CAF50'],
               plotOptions: {
@@ -57,9 +60,9 @@
             :series="stats.distribution.map((item) => item.count)"
             :options="{
               title: {
-                text: 'Findings per triage status',
+                text: 'Findings per Triage Status',
               },
-
+              subtitle: { text: 'Triaging from not fixed findings' },
               labels: stats.distribution.map((item) => item.status),
               colors: stats.distribution.map(
                 (item) => enums.triage[item.status].dashboard,

@@ -20,60 +20,71 @@
       }
     "
   >
-    <v-container v-if="stats" fluid>
-      <v-row justify="center">
-        <v-col>
-          <apexchart
-            type="area"
-            :series="[
-              {
-                name: 'Hosts',
-                data: serie(stats.hosts),
-              },
-              {
-                name: 'Ports',
-                data: serie(stats.ports),
-              },
-            ]"
-            :options="{
-              title: { test: 'Assets along the last year' },
-              chart: {
-                stacked: true,
-              },
-              animations: {
-                enabled: true,
-                speed: 800,
-                animateGradually: {
+    <template #extra-append>
+      <v-btn variant="text" icon>
+        <v-icon color="info" icon="$info" />
+        <v-tooltip
+          activator="parent"
+          text="Assets disappeared and detected again are shown as exposed from the first detection"
+        />
+      </v-btn>
+    </template>
+    <template #default>
+      <v-container v-if="stats" fluid>
+        <v-row justify="center">
+          <v-col>
+            <apexchart
+              type="area"
+              :series="[
+                {
+                  name: 'Hosts',
+                  data: serie(stats.hosts),
+                },
+                {
+                  name: 'Ports',
+                  data: serie(stats.ports),
+                },
+              ]"
+              :options="{
+                title: { test: 'Assets along the last year' },
+                chart: {
+                  stacked: true,
+                },
+                animations: {
                   enabled: true,
-                  delay: 150,
+                  speed: 800,
+                  animateGradually: {
+                    enabled: true,
+                    delay: 150,
+                  },
+                  dynamicAnimation: {
+                    enabled: true,
+                    speed: 350,
+                  },
                 },
-                dynamicAnimation: {
-                  enabled: true,
-                  speed: 350,
+                xaxis: {
+                  type: 'datetime',
                 },
-              },
-              xaxis: {
-                type: 'datetime',
-              },
-              dataLabels: {
-                enabled: false,
-              },
-              stroke: {
-                curve: 'straight',
-              },
-              fill: {
-                type: 'gradient',
-                gradient: {
-                  opacityFrom: 0.6,
-                  opacityTo: 0.8,
+                dataLabels: {
+                  enabled: false,
                 },
-              },
-            }"
-            height="800"
-          />
-        </v-col>
-      </v-row>
-    </v-container>
+                stroke: {
+                  curve: 'straight',
+                },
+                fill: {
+                  type: 'gradient',
+                  gradient: {
+                    opacityFrom: 0.6,
+                    opacityTo: 0.8,
+                  },
+                },
+              }"
+              height="800"
+            />
+          </v-col>
+        </v-row>
+      </v-container>
+    </template>
   </DashboardWindow>
 </template>
 

@@ -1,6 +1,5 @@
 <template>
   <v-card v-if="ready" rounded="0" flat>
-    <!-- TODO: Review accuracy of titles, colors, add missing information or the explanations needed to each chart -->
     <v-window
       v-model="page"
       show-arrows="hover"

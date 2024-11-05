@@ -1,5 +1,4 @@
 <template>
-  <!-- TODO: Links within CVE and CWE charts? -->
   <DashboardWindow
     :api="api"
     title="Vulnerabilities"
@@ -29,7 +28,10 @@
                 )
               "
               :options="{
-                title: { text: 'Fixing progress' },
+                title: { text: 'Fixing Progress' },
+                subtitle: {
+                  text: 'Percentage of fixed vulnerabilities per severity',
+                },
                 labels: stats.fix_progress_per_severity.map(
                   (item) => item.severity,
                 ),
@@ -90,8 +92,8 @@
               :options="{
                 title: {
                   text: fixed
-                    ? 'Fixed vulnerabilities per severity'
-                    : 'Vulnerabilities per severity',
+                    ? 'Fixed Vulnerabilities per Severity'
+                    : 'Vulnerabilities per Severity',
                 },
 
                 labels: (fixed
@@ -141,7 +143,7 @@
               ]"
               :options="{
                 title: {
-                  text: fixed ? 'Most common fixed CVEs' : 'Most common CVEs',
+                  text: fixed ? 'Most Common Fixed CVEs' : 'Most Common CVEs',
                 },
                 dataLabels: {
                   formatter: (value) => {
@@ -179,12 +181,24 @@
                     },
                   },
                 },
+                chart: {
+                  events: {
+                    dataPointSelection: function (event, chartContext, opts) {
+                      navigateTo(
+                        (fixed ? stats.top_fixed_cve : stats.top_cve)[
+                          opts.dataPointIndex
+                        ].link,
+                        { external: true, open: { target: '_blank' } },
+                      );
+                    },
+                  },
+                },
               }"
               :height="height"
             />
           </v-col>
           <v-col cols="4">
-            <v-card :title="fixed ? 'Trending fixed CVEs' : 'Trending CVEs'">
+            <v-card :title="fixed ? 'Trending Fixed CVEs' : 'Trending CVEs'">
               <template #prepend>
                 <v-icon
                   :icon="fixed ? 'mdi-fire-off' : 'mdi-fire'"
@@ -255,9 +269,26 @@
                   },
                 },
                 plotOptions: { treemap: { distributed: true } },
+                chart: {
+                  events: {
+                    dataPointSelection: function (event, chartContext, opts) {
+                      navigateTo(
+                        `https://cwe.mitre.org/data/definitions/${
+                          (fixed
+                            ? stats.fixed_cwe_distribution
+                            : stats.cwe_distribution)[opts.dataPointIndex].cwe
+                            .toLowerCase()
+                            .split('-')[1]
+                        }.html`,
+                        { external: true, open: { target: '_blank' } },
+                      );
+                    },
+                  },
+                },
               }"
               :height="height"
             />
+            <!-- todo: composable to get CWE reference -->
           </v-col>
         </v-row>
       </v-container>

@@ -23,7 +23,7 @@
   </finding-show-component>
 </template>
 
-<!-- todo: Check all findings have the relationships needed on creation -->
+<!-- TODO: Check all findings have the relationships needed on creation -->
 
 <script setup lang="ts">
 defineProps({

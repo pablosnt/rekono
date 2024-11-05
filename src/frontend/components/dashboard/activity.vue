@@ -125,6 +125,15 @@
                         {{ task.target.target }}
                       </v-chip>
                     </td>
+                    <td v-if="project || target" class="text-center">
+                      <p v-if="!task.start && task.scheduled_at">
+                        Scheduled at
+                        {{ new Date(task.scheduled_at).toUTCString() }}
+                      </p>
+                      <p v-if="task.start">
+                        {{ new Date(task.start).toUTCString() }}
+                      </p>
+                    </td>
                     <td class="text-right">
                       <UtilsButtonLink
                         :link="`/projects/${task.target.project}/scans/${task.id}`"

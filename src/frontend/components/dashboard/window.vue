@@ -6,7 +6,7 @@
     <template #append>
       <slot name="extra-append" />
       <v-btn
-        v-if="target !== null || (project === null && target === null)"
+        v-if="project === null && target === null"
         variant="text"
         icon
         color="medium-emphasis"

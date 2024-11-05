@@ -14,6 +14,15 @@
       }
     "
   >
+    <template #extra-append>
+      <v-btn variant="text" icon>
+        <v-icon color="info" icon="$info" />
+        <v-tooltip
+          activator="parent"
+          text="Vulnerabilities fixed and detected again are shown as exposed from the first detection"
+        />
+      </v-btn>
+    </template>
     <template #default>
       <v-container v-if="stats" fluid>
         <v-row justify="center">

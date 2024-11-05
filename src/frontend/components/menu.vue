@@ -11,6 +11,7 @@
           :active="o.to === route.path || route.path.startsWith(o.to)"
         />
       </v-list>
+      <!-- todo: Link to home and all projects in the bottom -->
     </v-navigation-drawer>
     <v-main>
       <slot />

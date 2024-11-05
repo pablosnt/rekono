@@ -192,5 +192,5 @@ const tabs = ref({
     ],
   },
 });
-// todo: Sort vulnerabilities by severity by default
+// TODO: Sort vulnerabilities by severity by default
 </script>
