@@ -56,6 +56,13 @@ class RekonoUserManager(UserManager):
         logger.info(f"[User] Role {role} has been assigned to user {user.id}")
         return user
 
+    def send_invitation(self, user: Any) -> None:
+        plain_otp = self.generate_otp()
+        user.otp = hash(plain_otp)
+        user.otp_expiration = (self.get_otp_expiration_time(),)
+        user.save(update_fields=["otp"])
+        SMTP().invite_user(user, plain_otp)
+
     def invite_user(self, email: str, role: Role) -> Any:
         """Create a new user.
 
@@ -67,15 +74,9 @@ class RekonoUserManager(UserManager):
             Any: Created user
         """
         # Create new user including an OTP. The user will be inactive while invitation is not accepted
-        plain_otp = self.generate_otp()
-        user = User.objects.create(
-            email=email,
-            otp=hash(plain_otp),
-            otp_expiration=self.get_otp_expiration_time(),
-            is_active=None,
-        )
+        user = User.objects.create(email=email, is_active=None)
         self.assign_role(user, role)
-        SMTP().invite_user(user, plain_otp)
+        self.send_invitation(user)
         logger.info(f"[User] User {user.id} has been invited with role {role}")
         return user
 

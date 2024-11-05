@@ -3,6 +3,7 @@ import threading
 from typing import Any
 
 from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
 from framework.serializers import MfaSerializer
 from platforms.mail.notifications import SMTP
 from platforms.telegram_app.notifications.notifications import Telegram
@@ -71,6 +72,14 @@ class InviteUserSerializer(ModelSerializer):
     class Meta:
         model = User
         fields = ("email", "role")
+
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
+        attrs = super().validate(attrs)
+        if not SMTP().is_available():
+            raise ValidationError(
+                "SMTP client is not available to send the invitation", code="smtp"
+            )
+        return attrs
 
     def create(self, validated_data: dict[str, Any]) -> User:
         """Create instance from validated data.

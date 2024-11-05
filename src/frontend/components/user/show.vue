@@ -3,11 +3,35 @@
     ref="dataset"
     :api="api"
     :filtering="filtering"
-    :add="handleMember ? ProjectMemberDialog : UserInvitationDialog"
+    :add="handleMember ? ProjectMemberDialog : (smtp && smtp.is_available ? UserInvitationDialog : undefined )"
     :default-parameters="project ? { project: project } : null"
     @load-data="(data) => (users = data)"
   >
     <template #data>
+      <v-container v-if="smtp && !smtp.is_available" class="mb-3" fluid>
+      <v-row >
+        <v-alert
+                      
+                      color="warning"
+                      icon="$warning"
+                      variant="tonal"
+                      closable
+                    >
+                      <template #text>
+                        <p>
+                          SMTP server is not configured yet, so new users can't be invited to Rekono. You can do it in the
+                          <v-btn
+                            class="pa-0 text-none font-weight-bold"
+                            density="compact"
+                            text="Notifications page"
+                            variant="plain"
+                            to="/administration/notifications"
+                          />
+                        </p>
+                      </template>
+                    </v-alert>
+      </v-row>
+    </v-container>
       <v-row dense>
         <v-col v-for="user in users" :key="user.id" cols="4">
           <v-card
@@ -110,6 +134,14 @@
                             variant="tonal"
                             block
                             @click.stop="enableOrDisable(user)"
+                          />
+                          <v-btn
+                            v-if="enableDisable && !user.username && smtp && smtp.is_available"
+                            color="green"
+                            text="Resend Invitation"
+                            variant="tonal"
+                            block
+                            @click.stop="api.create({}, user.id, 'resend/').then(() => alert('Invitation has been sent again', 'success'))"
                           />
                           <v-dialog
                             v-if="handleMember"
@@ -220,6 +252,8 @@ const alert = useAlert();
 
 const UserInvitationDialog = resolveComponent("UserInvitationDialog");
 const ProjectMemberDialog = resolveComponent("ProjectMemberDialog");
+const smtp = ref(null)
+useApi("/api/smtp/", true).get(1).then((response) => smtp.value = response)
 
 function enableOrDisable(user) {
   let request = null;
