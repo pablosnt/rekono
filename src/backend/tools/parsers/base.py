@@ -66,15 +66,19 @@ class BaseParser:
         pass
 
     def _load_report_as_json(self) -> dict[str, Any]:
-        with open(self.report, "r", encoding="utf-8") as report:
-            return json.load(report)
+        if self.report:
+            with self.report.open("r", encoding="utf-8") as report:
+                return json.load(report)
+        return {}
 
     def _load_report_as_xml(self) -> Any:
         return parser.parse(self.report).getroot()
 
     def _load_report_by_lines(self) -> list[str]:
-        with open(self.report, "r", encoding="utf-8") as report:
-            return report.readlines()
+        if self.report:
+            with self.report.open("r", encoding="utf-8") as report:
+                return report.readlines()
+        return []
 
     def _protect_value(self, value: Optional[str]) -> Optional[str]:
         if not value:

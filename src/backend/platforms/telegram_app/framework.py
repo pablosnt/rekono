@@ -26,7 +26,7 @@ class BaseTelegram:
                 self._handle_invalid_token()
         return self.app
 
-    def get_bot_name(self) -> str:
+    def get_bot_name(self) -> str | None:
         return self.app.bot.username if self.app and self.app.bot else None
 
     def _get_app(self) -> Optional[Application]:

@@ -1,6 +1,7 @@
 import logging
 import os
 import threading
+from turtle import back
 from typing import Any
 
 import certifi
@@ -42,7 +43,8 @@ class SMTP(BaseNotification):
 
     def is_available(self) -> bool:
         if (
-            not self.settings
+            not self.backend
+            or not self.settings
             or not self.settings.host
             or not self.settings.port
             or CONFIG.testing
@@ -58,7 +60,7 @@ class SMTP(BaseNotification):
     def _send_messages(
         self, users: list[Any], subject: str, template_path: str, data: dict[str, Any]
     ) -> None:
-        if not self.is_available():
+        if not self.backend or not self.is_available():
             return
         try:
             message = EmailMultiAlternatives(

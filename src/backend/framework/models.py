@@ -57,7 +57,7 @@ class BaseEncrypted(BaseModel):
     _encrypted_field = "_secret"
 
     @property
-    def secret(self) -> str:
+    def secret(self) -> str | None:
         return (
             (
                 self._encryptor.decrypt(getattr(self, self._encrypted_field))

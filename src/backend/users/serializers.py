@@ -53,7 +53,7 @@ class UserSerializer(ModelSerializer):
             str: Role name assigned to the user
         """
         role = instance.groups.first()
-        return role.name if role else None
+        return role.name if role else Role.READER.value
 
 
 class SimpleUserSerializer(UserSerializer):

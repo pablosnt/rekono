@@ -67,10 +67,10 @@ class BaseMixin(BaseTelegramBot):
     @sync_to_async
     def _save_serializer_async(
         self, serializer: Serializer
-    ) -> tuple[Any, dict[str, Any]]:
+    ) -> tuple[Any | None, dict[str, Any]]:
         try:
             return (
-                (serializer.save(), None)
+                (serializer.save(), {})
                 if serializer.is_valid()
                 else (None, serializer.errors)
             )
