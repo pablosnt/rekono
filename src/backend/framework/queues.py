@@ -74,7 +74,7 @@ class BaseQueue:
         input_technologies: list[InputTechnology],
         wordlists: list[Wordlist],
     ) -> list[dict[int, list[BaseInput]]]:
-        executions: list[dict[int, list[BaseInput]]] = [{i: []} for i in range(5)]
+        executions: list[dict[int, list[BaseInput]]] = [{0: []}]
         input_types_used = set()
         findings_by_type = BaseQueue._get_findings_by_type(findings)
         for index, input_type, source in [

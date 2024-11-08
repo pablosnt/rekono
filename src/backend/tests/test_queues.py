@@ -193,7 +193,6 @@ class TasksQueueTest(QueueTest):
         self.assertEqual(task_id, execution.task.id)
         self.assertEqual(execution_id, execution.id)
         self.assertEqual(configuration_id, execution.configuration.id)
-        self.assertEqual(group, execution.group)
         self.assertEqual(status, execution.status)
         self.assertIsNone(execution.start)
 

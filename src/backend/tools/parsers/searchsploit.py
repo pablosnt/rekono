@@ -11,7 +11,7 @@ class Searchsploit(BaseParser):
                 Exploit,
                 title=exploit.get("Title"),
                 edb_id=int(edb_id) if edb_id else None,
-                reference=f"https://www.exploit-db.com/exploits/{edb_id}"
-                if edb_id
-                else None,
+                reference=(
+                    f"https://www.exploit-db.com/exploits/{edb_id}" if edb_id else None
+                ),
             )

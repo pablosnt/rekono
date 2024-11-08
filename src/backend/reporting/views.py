@@ -275,18 +275,16 @@ class ReportingViewSet(BaseViewSet):
             else:
                 for host in findings_by_target[target.id][FindingName.HOST.value]:
                     for vulnerability in host[FindingName.VULNERABILITY.value]:
-                        stats[vulnerability.severity.value - 1] += 1
-                        stats_by_target[target.id][
-                            vulnerability.severity.value - 1
-                        ] += 1
+                        stats[vulnerability.severity - 1] += 1
+                        stats_by_target[target.id][vulnerability.severity - 1] += 1
                     for credential in host[FindingName.CREDENTIAL.value]:
                         severity = Severity.HIGH if credential.secret else Severity.LOW
-                        stats[severity.value - 1] += 1
-                        stats_by_target[target.id][severity.value - 1] += 1
+                        stats[severity - 1] += 1
+                        stats_by_target[target.id][severity - 1] += 1
         return (
             findings_by_target,
-            {k: reversed(v) for k, v in stats_by_target.items()},
-            reversed(stats),
+            {k: list(reversed(v)) for k, v in stats_by_target.items()},
+            list(reversed(stats)),
         )
 
     def _create_report_file(self, report: Report, *findings: Any) -> None:

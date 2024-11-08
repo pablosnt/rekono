@@ -60,9 +60,9 @@ class TargetMixin(BaseMixin):
             TargetSerializer,
             {
                 "project": project.id if project else None,
-                "target": update.effective_message.text
-                if update.effective_message
-                else None,
+                "target": (
+                    update.effective_message.text if update.effective_message else None
+                ),
             },
             self._get_previous_state(self._create_target),
             self._get_next_state(self._create_target),

@@ -1,4 +1,3 @@
-from django.db import models
 from findings.enums import (
     HostOS,
     OSINTDataType,
@@ -36,7 +35,7 @@ findings_data = {
         {
             "title": "Host discovered",
             "description": f"10.10.10.10 - {HostOS.LINUX.value}",
-            "severity": Severity.INFO.value,
+            "severity": Severity.INFO,
         },
         "10.10.10.10",
         "/api/hosts/",
@@ -138,9 +137,7 @@ class FindingTest(ApiTest):
                                 "id": 1,
                                 "is_fixed": False,
                                 **{
-                                    k: v
-                                    if not isinstance(v, models.TextChoices)
-                                    else v.value
+                                    k: str(v) if isinstance(v, Severity) else v
                                     for k, v in self.raw_findings[
                                         finding.__class__
                                     ].items()
@@ -182,9 +179,7 @@ class FindingTest(ApiTest):
                                 "id": 1,
                                 "is_fixed": True,
                                 **{
-                                    k: v
-                                    if not isinstance(v, models.TextChoices)
-                                    else v.value
+                                    k: str(v) if isinstance(v, Severity) else v
                                     for k, v in self.raw_findings[
                                         finding.__class__
                                     ].items()
@@ -226,9 +221,7 @@ class FindingTest(ApiTest):
                                 "id": 1,
                                 "is_fixed": False,
                                 **{
-                                    k: v
-                                    if not isinstance(v, models.TextChoices)
-                                    else v.value
+                                    k: str(v) if isinstance(v, Severity) else v
                                     for k, v in self.raw_findings[
                                         finding.__class__
                                     ].items()
@@ -303,13 +296,13 @@ class TriageFindingTest(ApiTest):
                         expected=[
                             {
                                 "id": 1,
-                                "triage_status": TriageStatus.FALSE_POSITIVE.value
-                                if isinstance(finding, Exploit)
-                                else TriageStatus.UNTRIAGED.value,
+                                "triage_status": (
+                                    TriageStatus.FALSE_POSITIVE.value
+                                    if isinstance(finding, Exploit)
+                                    else TriageStatus.UNTRIAGED.value
+                                ),
                                 **{
-                                    k: v
-                                    if not isinstance(v, models.TextChoices)
-                                    else v.value
+                                    k: str(v) if isinstance(v, Severity) else v
                                     for k, v in self.raw_findings[
                                         finding.__class__
                                     ].items()
@@ -325,13 +318,13 @@ class TriageFindingTest(ApiTest):
                         expected=[
                             {
                                 "id": 1,
-                                "triage_status": TriageStatus.FALSE_POSITIVE.value
-                                if isinstance(finding, Exploit)
-                                else TriageStatus.UNTRIAGED.value,
+                                "triage_status": (
+                                    TriageStatus.FALSE_POSITIVE.value
+                                    if isinstance(finding, Exploit)
+                                    else TriageStatus.UNTRIAGED.value
+                                ),
                                 **{
-                                    k: v
-                                    if not isinstance(v, models.TextChoices)
-                                    else v.value
+                                    k: str(v) if isinstance(v, Severity) else v
                                     for k, v in self.raw_findings[
                                         finding.__class__
                                     ].items()
@@ -370,9 +363,7 @@ class TriageFindingTest(ApiTest):
                             "id": 1,
                             **self.false_positive,
                             **{
-                                k: v
-                                if not isinstance(v, models.TextChoices)
-                                else v.value
+                                k: str(v) if isinstance(v, Severity) else v
                                 for k, v in self.raw_findings[finding.__class__].items()
                             },
                         },
@@ -394,9 +385,7 @@ class TriageFindingTest(ApiTest):
                             "id": 1,
                             **self.true_positive,
                             **{
-                                k: v
-                                if not isinstance(v, models.TextChoices)
-                                else v.value
+                                k: str(v) if isinstance(v, Severity) else v
                                 for k, v in self.raw_findings[finding.__class__].items()
                             },
                         },
