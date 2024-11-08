@@ -65,8 +65,8 @@
               variant="outlined"
               hide-details
               :rules="[
-                (t) => !!t || 'Tag is required',
-                (t) => validate.name.test(t.trim()) || 'Invalid tag value',
+                (t) =>
+                  !t || validate.name.test(t.trim()) || 'Invalid tag value',
               ]"
               validate-on="input"
               clearable

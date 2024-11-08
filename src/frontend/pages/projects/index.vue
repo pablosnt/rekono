@@ -16,6 +16,7 @@
         @load-data="(data) => (projects = data)"
       >
         <template #data>
+          <!-- todo: review if all Dataset#data starts is within a row and col. If so, move it to Dataset default template -->
           <v-row dense>
             <v-col v-for="project in projects" :key="project.id" cols="4">
               <v-card
@@ -41,6 +42,7 @@
                     icon="mdi-target"
                     :link="`/projects/${project.id}/targets`"
                   />
+                  <ProjectDefectDojo :project="project" only-link />
                   <UtilsOwner :entity="project" />
                 </template>
                 <template #text>
@@ -55,15 +57,7 @@
                     :project="project"
                   />
                   <v-spacer />
-                  <!-- todo: replace link by the Defect-Dojo product or engagement from the sync -->
-                  <v-btn
-                    variant="text"
-                    target="_blank"
-                    :href="integration.reference"
-                    @click.stop
-                  >
-                    <v-avatar size="small" :image="integration.icon" />
-                  </v-btn>
+
                   <UtilsButtonEditDelete
                     v-if="
                       project.owner.id === user.user || user.role === 'Admin'
@@ -143,7 +137,4 @@ filters
   .then((results) => (filtering.value = results));
 
 const ProjectCreationDialog = resolveComponent("ProjectCreationDialog");
-const integration = ref(null);
-const integrationsApi = useApi("/api/integrations/", true);
-integrationsApi.get(1).then((response) => (integration.value = response));
 </script>

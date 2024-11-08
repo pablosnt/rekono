@@ -2,7 +2,7 @@
   <MenuProject>
     <v-card :title="project.name" variant="text">
       <template #append>
-        <TagShow :item="project" />
+        <ProjectDefectDojo :project="project" @reload="loadData()" />
         <TaskButton :project="project" />
         <UtilsButtonEditDelete
           v-if="
@@ -36,6 +36,7 @@
         </UtilsButtonEditDelete>
       </template>
       <template #text>
+        <TagShow :item="project" />
         {{ project.description }}
         <v-divider class="mt-5" />
         <Dashboard />

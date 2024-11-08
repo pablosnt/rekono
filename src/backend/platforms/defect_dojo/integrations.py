@@ -193,7 +193,7 @@ class DefectDojo(BaseIntegration):
                         product_id,
                         execution.task.target.target,
                         f"Rekono assessment for {execution.task.target.target}",
-                        [self.settings.tag],
+                        [self.settings.tag] if self.settings.tag else [],
                     )
                     new_sync = DefectDojoTargetSync.objects.create(
                         defect_dojo_sync=sync,
@@ -227,7 +227,8 @@ class DefectDojo(BaseIntegration):
                     if not test_id:
                         if not self.settings.test_type_id:
                             new_test_type = self._create_test_type(
-                                self.settings.test_type, [self.settings.tag]
+                                self.settings.test_type,
+                                [self.settings.tag] if self.settings.tag else [],
                             )
                             self.settings.test_type_id = new_test_type.get("id")
                             self.settings.save(update_fields=["test_type_id"])

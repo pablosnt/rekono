@@ -1,6 +1,5 @@
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-
 from framework.models import BaseEncrypted, BaseModel
 from projects.models import Project
 from security.validators.input_validator import Regex, Validator
@@ -25,7 +24,10 @@ class DefectDojoSettings(BaseEncrypted):
     )
     tls_validation = models.BooleanField(default=True)
     tag = models.TextField(
-        max_length=200, validators=[Validator(Regex.NAME.value, code="tag")]
+        max_length=200,
+        validators=[Validator(Regex.NAME.value, code="tag")],
+        blank=True,
+        null=True,
     )
     # Stores Test Type ID to avoid duplicated creation
     test_type_id = models.IntegerField(
@@ -57,6 +59,8 @@ class DefectDojoSync(BaseModel):
     )
     product_id = models.IntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(999999999)],
+        blank=True,
+        null=True,
     )
     engagement_id = models.IntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(999999999)],
