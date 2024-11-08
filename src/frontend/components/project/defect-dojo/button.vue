@@ -13,13 +13,9 @@
     :color="color ? 'blue-accent-3' : undefined"
     @click.stop
   >
-  <!-- todo: review color after and update icon -->
-    <v-avatar
-      v-if="!icon"
-      size="small"
-      :image="integration.icon"
-    />
-    <v-icon v-if="icon" :icon="icon"/>
+    <!-- todo: review color after and update icon -->
+    <v-avatar v-if="!icon" size="small" :image="integration.icon" />
+    <v-icon v-if="icon" :icon="icon" />
   </v-btn>
 </template>
 
@@ -28,7 +24,7 @@ defineProps({
   project: Object,
   settings: Object,
   integration: Object,
-  variant: { type: String, required: false, default: 'text' },
+  variant: { type: String, required: false, default: "text" },
   icon: { type: String, required: false, default: undefined },
   color: { type: Boolean, required: false, default: false },
   link: { type: Boolean, required: false, default: false },

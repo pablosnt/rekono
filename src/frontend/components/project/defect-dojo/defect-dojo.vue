@@ -49,29 +49,28 @@
       link
     />
     <v-dialog width="500" class="overflow-auto">
-    <template #activator="{ props: activatorProps }">
-      <v-btn
-        color="red"
-        icon="mdi-link-off"
-        v-bind="activatorProps"
-        @click.prevent.stop
-      />
-    </template>
-    <template #default="{ isActive }">
-      <UtilsDeleteDialog
-      :id="project.defect_dojo_sync.id"
-      :api="api"
-      text="Defect-Dojo synchronization will be disabled"
-        action="Disable"
-        @completed="
-        isActive.value = false;
-          $emit('reload');
-          
-        "
-        @close-dialog="isActive.value = false"
-      />
-    </template>
-  </v-dialog>
+      <template #activator="{ props: activatorProps }">
+        <v-btn
+          color="red"
+          icon="mdi-link-off"
+          v-bind="activatorProps"
+          @click.prevent.stop
+        />
+      </template>
+      <template #default="{ isActive }">
+        <UtilsDeleteDialog
+          :id="project.defect_dojo_sync.id"
+          :api="api"
+          text="Defect-Dojo synchronization will be disabled"
+          action="Disable"
+          @completed="
+            isActive.value = false;
+            $emit('reload');
+          "
+          @close-dialog="isActive.value = false"
+        />
+      </template>
+    </v-dialog>
   </v-speed-dial>
 
   <v-dialog

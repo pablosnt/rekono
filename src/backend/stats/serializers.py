@@ -1,3 +1,4 @@
+# mypy: disable-error-code="valid-type"
 from datetime import date
 from typing import Any
 
