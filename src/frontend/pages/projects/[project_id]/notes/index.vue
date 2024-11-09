@@ -11,131 +11,123 @@
       icon="mdi-notebook"
       empty-head="No Notes"
       empty-text="There are no notes. Create your first one"
-      @load-data="(data) => (notes = data)"
     >
-      <template #data>
-        <v-row dense>
-          <!-- TODO: Setup the same card height for all of them -->
-          <v-col v-for="note in notes" :key="note.id" cols="6">
-            <v-card
-              :title="note.title"
-              :subtitle="new Date(note.updated_at).toUTCString()"
-              elevation="3"
-              class="mx-auto"
-              density="compact"
-              :prepend-icon="note.public ? 'mdi-lock-open-variant' : 'mdi-lock'"
-              :to="`/projects/${note.project}/notes/${note.id}`"
-            >
-              <template #append>
-                <NoteLink :note="note" />
-                <span class="me-2" />
-                <UtilsOwner :entity="note" />
-                <span class="me-2" />
-              </template>
-              <template #text>
-                <v-container fluid>
-                  <div
-                    v-if="note.body"
-                    style="height: 250px; overflow: hidden"
-                    v-html="markdown.render(note.body)"
-                  />
-                </v-container>
-                <TagShow :item="note" :divider="note.body !== null" />
-              </template>
+      <template #item="{ item }">
+        <!-- TODO: Setup the same card height for all of them -->
+        <v-card
+          :title="item.title"
+          :subtitle="new Date(item.updated_at).toUTCString()"
+          elevation="3"
+          class="mx-auto"
+          density="compact"
+          :prepend-icon="item.public ? 'mdi-lock-open-variant' : 'mdi-lock'"
+          :to="`/projects/${item.project}/notes/${item.id}`"
+        >
+          <template #append>
+            <NoteLink :note="item" />
+            <span class="me-2" />
+            <UtilsOwner :entity="item" />
+            <span class="me-2" />
+          </template>
+          <template #text>
+            <v-container fluid>
+              <div
+                v-if="item.body"
+                style="height: 250px; overflow: hidden"
+                v-html="markdown.render(item.body)"
+              />
+            </v-container>
+            <TagShow :item="item" :divider="item.body !== null" />
+          </template>
 
-              <v-card-actions>
-                <NoteForksChip :note="note" />
-                <NoteForkedFromLink :note="note" />
-                <v-spacer />
-                <UtilsButtonLike
-                  :api="api"
-                  :item="note"
-                  @reload="(value) => dataset.loadData(value)"
+          <v-card-actions>
+            <NoteForksChip :note="item" />
+            <NoteForkedFromLink :note="item" />
+            <v-spacer />
+            <UtilsButtonLike
+              :api="api"
+              :item="item"
+              @reload="(value) => dataset.loadData(value)"
+            />
+            <v-speed-dial transition="scale-transition" location="bottom end">
+              <template #activator="{ props: activatorProps }">
+                <v-btn
+                  v-bind="activatorProps"
+                  size="large"
+                  color="grey"
+                  icon="mdi-cog"
+                  @click.prevent.stop
                 />
-                <v-speed-dial
-                  transition="scale-transition"
-                  location="bottom end"
-                >
-                  <template #activator="{ props: activatorProps }">
-                    <v-btn
-                      v-bind="activatorProps"
-                      size="large"
-                      color="grey"
-                      icon="mdi-cog"
-                      @click.prevent.stop
-                    />
-                  </template>
-                  <v-dialog v-if="!note.forked_from" width="auto">
-                    <template #activator="{ props: activatorProps }">
-                      <v-btn
-                        key="1"
-                        :icon="note.public ? 'mdi-share-off' : 'mdi-share'"
-                        color="black"
-                        v-bind="activatorProps"
-                      />
+              </template>
+              <v-dialog v-if="!item.forked_from" width="auto">
+                <template #activator="{ props: activatorProps }">
+                  <v-btn
+                    key="1"
+                    :icon="item.public ? 'mdi-share-off' : 'mdi-share'"
+                    color="black"
+                    v-bind="activatorProps"
+                  />
+                </template>
+                <template #default="{ isActive }">
+                  <Dialog
+                    title="Sharing"
+                    :text="
+                      item.public
+                        ? 'This note won\'t be public anymore and current forks will be unlinked from it'
+                        : 'This note will be public so anyone can read and fork it'
+                    "
+                    :loading="false"
+                    color="secondary"
+                    width="400"
+                    @close-dialog="isActive.value = false"
+                  >
+                    <template #card>
+                      <v-card-actions>
+                        <v-btn
+                          prepend-icon="mdi-close"
+                          color="blue-grey"
+                          @click="isActive.value = false"
+                          >Cancel</v-btn
+                        >
+                        <v-spacer />
+                        <v-btn
+                          :prepend-icon="
+                            item.public ? 'mdi-share-off' : 'mdi-share'
+                          "
+                          color="grey-lighten-5"
+                          @click="
+                            share(item);
+                            isActive.value = false;
+                          "
+                          >{{ item.public ? "Privatize" : "Share" }}</v-btn
+                        >
+                      </v-card-actions>
                     </template>
-                    <template #default="{ isActive }">
-                      <Dialog
-                        title="Sharing"
-                        :text="
-                          note.public
-                            ? 'This note won\'t be public anymore and current forks will be unlinked from it'
-                            : 'This note will be public so anyone can read and fork it'
-                        "
-                        :loading="false"
-                        color="secondary"
-                        width="400"
-                        @close-dialog="isActive.value = false"
-                      >
-                        <template #card>
-                          <v-card-actions>
-                            <v-btn
-                              prepend-icon="mdi-close"
-                              color="blue-grey"
-                              @click="isActive.value = false"
-                              >Cancel</v-btn
-                            >
-                            <v-spacer />
-                            <v-btn
-                              :prepend-icon="
-                                note.public ? 'mdi-share-off' : 'mdi-share'
-                              "
-                              color="grey-lighten-5"
-                              @click="
-                                share(note);
-                                isActive.value = false;
-                              "
-                              >{{ note.public ? "Privatize" : "Share" }}</v-btn
-                            >
-                          </v-card-actions>
-                        </template>
-                      </Dialog>
-                    </template>
-                  </v-dialog>
-                  <v-dialog width="500" class="overflow-auto">
-                    <template #activator="{ props: activatorProps }">
-                      <v-btn
-                        key="2"
-                        icon="mdi-trash-can-outline"
-                        color="red"
-                        v-bind="activatorProps"
-                      />
-                    </template>
-                    <template #default="{ isActive }">
-                      <UtilsDeleteDialog
-                        :id="note.id"
-                        :api="api"
-                        :text="`Note '${note.title}' will be removed`"
-                        @completed="dataset.loadData(false)"
-                        @close-dialog="isActive.value = false"
-                      />
-                    </template>
-                  </v-dialog>
-                </v-speed-dial>
-              </v-card-actions>
-            </v-card>
-          </v-col>
-        </v-row>
+                  </Dialog>
+                </template>
+              </v-dialog>
+              <v-dialog width="500" class="overflow-auto">
+                <template #activator="{ props: activatorProps }">
+                  <v-btn
+                    key="2"
+                    icon="mdi-trash-can-outline"
+                    color="red"
+                    v-bind="activatorProps"
+                  />
+                </template>
+                <template #default="{ isActive }">
+                  <UtilsDeleteDialog
+                    :id="item.id"
+                    :api="api"
+                    :text="`Note '${item.title}' will be removed`"
+                    @completed="dataset.loadData(false)"
+                    @close-dialog="isActive.value = false"
+                  />
+                </template>
+              </v-dialog>
+            </v-speed-dial>
+          </v-card-actions>
+        </v-card>
       </template>
     </Dataset>
   </MenuProject>
@@ -150,7 +142,6 @@ const filters = useFilters();
 const projectId = ref(route.params.project_id);
 const dataset = ref(null);
 const user = userStore();
-const notes = ref([]);
 const api = useApi("/api/notes/", true, "Note");
 const filtering = ref([]);
 filters

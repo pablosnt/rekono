@@ -10,25 +10,20 @@
     empty-text="Run some enumeration tool to identify some assets exposed by your targets"
     @load-data="
       (data) => {
-        findings = data;
         forceReload++;
       }
     "
   >
-    <template #data>
-      <v-row dense>
-        <v-col v-for="finding in findings" :key="finding.id" cols="6">
-          <FindingShowHost
-            :key="forceReload > 1 ? forceReload : 1"
-            :api="api"
-            :finding="finding"
-            :defectdojo="defectdojo"
-            :defectdojo-settings="defectdojoSettings"
-            :hacktricks="hacktricks"
-            @reload="dataset.loadData(false)"
-          />
-        </v-col>
-      </v-row>
+    <template #item="{ item }">
+      <FindingShowHost
+        :key="forceReload > 1 ? forceReload : 1"
+        :api="api"
+        :finding="item"
+        :defectdojo="defectdojo"
+        :defectdojo-settings="defectdojoSettings"
+        :hacktricks="hacktricks"
+        @reload="dataset.loadData(false)"
+      />
     </template>
   </Dataset>
 </template>
@@ -52,7 +47,6 @@ const filters = useFilters();
 const api = useApi("/api/hosts/", true);
 const dataset = ref(null);
 const forceReload = ref(0);
-const findings = ref([]);
 const filtering = ref([]);
 filters
   .build([

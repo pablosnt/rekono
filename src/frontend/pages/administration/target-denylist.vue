@@ -16,20 +16,16 @@
       :api="api"
       :default-parameters="{ ordering: 'id' }"
       :add="TargetDenylistDialog"
-      @load-data="(data) => (denylist = data)"
+      cols="4"
     >
-      <template #data>
-        <v-row dense>
-          <v-col v-for="pattern in denylist" :key="pattern.id" cols="4">
-            <v-card elevation="3" class="mx-auto" density="compact">
-              <TargetDenylistForm
-                :api="api"
-                :pattern="pattern"
-                @completed="dataset.loadData(false)"
-              />
-            </v-card>
-          </v-col>
-        </v-row>
+      <template #item="{ item }">
+        <v-card elevation="3" class="mx-auto" density="compact">
+          <TargetDenylistForm
+            :api="api"
+            :pattern="item"
+            @completed="dataset.loadData(false)"
+          />
+        </v-card>
       </template>
     </Dataset>
   </MenuAdministration>
@@ -41,5 +37,4 @@ defineEmits(["closeDialog"]);
 const TargetDenylistDialog = resolveComponent("TargetDenylistDialog");
 const api = ref(useApi("/api/target-denylist/", true, "Target pattern"));
 const dataset = ref(null);
-const denylist = ref([]);
 </script>

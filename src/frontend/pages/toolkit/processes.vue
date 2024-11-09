@@ -9,35 +9,31 @@
       icon="mdi-robot-angry"
       empty-head="No Processes"
       empty-text="There are no processes. Create your first one"
-      @load-data="(data) => (processes = data)"
+      cols="4"
     >
-      <template #data>
-        <v-row dense>
-          <v-col v-for="process in processes" :key="process.id" cols="4">
-            <v-dialog width="100%" fullscreen>
-              <template #activator="{ props: activatorProps }">
-                <ProcessShow
-                  :api="api"
-                  :process="process"
-                  :tools="tools"
-                  :details="false"
-                  v-bind="activatorProps"
-                  @reload="(value) => dataset.loadData(value)"
-                />
-              </template>
-              <template #default="{ isActive }">
-                <ProcessShow
-                  :api="api"
-                  :process="process"
-                  :tools="tools"
-                  details
-                  @reload="(value) => dataset.loadData(value)"
-                  @close-dialog="isActive.value = false"
-                />
-              </template>
-            </v-dialog>
-          </v-col>
-        </v-row>
+      <template #item="{ item }">
+        <v-dialog width="100%" fullscreen>
+          <template #activator="{ props: activatorProps }">
+            <ProcessShow
+              :api="api"
+              :process="item"
+              :tools="tools"
+              :details="false"
+              v-bind="activatorProps"
+              @reload="(value) => dataset.loadData(value)"
+            />
+          </template>
+          <template #default="{ isActive }">
+            <ProcessShow
+              :api="api"
+              :process="item"
+              :tools="tools"
+              details
+              @reload="(value) => dataset.loadData(value)"
+              @close-dialog="isActive.value = false"
+            />
+          </template>
+        </v-dialog>
       </template>
     </Dataset>
   </MenuToolkit>
@@ -50,7 +46,6 @@ const enums = useEnums();
 const filters = useFilters();
 const ProcessDialog = resolveComponent("ProcessDialog");
 const dataset = ref(null);
-const processes = ref(null);
 const api = ref(useApi("/api/processes/", true, "Process"));
 const tools = ref([]);
 const filtering = ref([]);

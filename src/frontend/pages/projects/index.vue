@@ -13,84 +13,74 @@
             ? 'Create your first project to start hacking'
             : 'There are no projects yet. Ask your administrator for one'
         "
-        @load-data="(data) => (projects = data)"
+        cols="4"
       >
-        <template #data>
-          <!-- CODE: review if all Dataset#data starts is within a row and col. If so, move it to Dataset default template -->
-          <v-row dense>
-            <v-col v-for="project in projects" :key="project.id" cols="4">
-              <v-card
-                :title="project.name"
-                elevation="3"
-                class="mx-auto"
-                density="compact"
-                hover
-                :to="`/projects/${project.id}`"
-              >
-                <template #prepend>
-                  <v-avatar color="red-accent-4">
-                    <span class="text-h5 text">{{
-                      project.name.charAt(0).toUpperCase()
-                    }}</span>
-                  </v-avatar>
-                  <span class="me-2" />
-                </template>
-                <template #append>
-                  <UtilsCounter
-                    :collection="project.targets"
-                    tooltip="Targets"
-                    icon="mdi-target"
-                    :link="`/projects/${project.id}/targets`"
-                  />
-                  <ProjectDefectDojo :project="project" only-link />
-                  <UtilsOwner :entity="project" />
-                </template>
-                <template #text>
-                  <v-card-text>
-                    <p>{{ project.description }}</p>
-                    <TagShow :item="project" divider />
-                  </v-card-text>
-                </template>
-                <v-card-actions @click.stop>
-                  <TaskButton
-                    v-if="project.targets.length > 0"
-                    :project="project"
-                  />
-                  <v-spacer />
+        <template #item="{ item }">
+          <v-card
+            :title="item.name"
+            elevation="3"
+            class="mx-auto"
+            density="compact"
+            hover
+            :to="`/projects/${item.id}`"
+          >
+            <template #prepend>
+              <v-avatar color="red-accent-4">
+                <span class="text-h5 text">{{
+                  item.name.charAt(0).toUpperCase()
+                }}</span>
+              </v-avatar>
+              <span class="me-2" />
+            </template>
+            <template #append>
+              <UtilsCounter
+                :collection="item.targets"
+                tooltip="Targets"
+                icon="mdi-target"
+                :link="`/projects/${item.id}/targets`"
+              />
+              <ProjectDefectDojo :project="item" only-link />
+              <UtilsOwner :entity="item" />
+            </template>
+            <template #text>
+              <v-card-text>
+                <p>{{ item.description }}</p>
+                <TagShow :item="item" divider />
+              </v-card-text>
+            </template>
+            <v-card-actions @click.stop>
+              <TaskButton v-if="item.targets.length > 0" :project="item" />
+              <v-spacer />
 
-                  <UtilsButtonEditDelete
-                    v-if="
-                      project.owner.id === user.user || user.role === 'Admin'
+              <UtilsButtonEditDelete
+                v-if="item.owner.id === user.user || user.role === 'Admin'"
+              >
+                <template #edit-dialog="{ isActive }">
+                  <ProjectEditionDialog
+                    :api="api"
+                    :edit="item"
+                    @completed="
+                      dataset.loadData(false);
+                      isActive.value = false;
                     "
-                  >
-                    <template #edit-dialog="{ isActive }">
-                      <ProjectEditionDialog
-                        :api="api"
-                        :edit="project"
-                        @completed="
-                          dataset.loadData(false);
-                          isActive.value = false;
-                        "
-                        @close-dialog="isActive.value = false"
-                      />
-                    </template>
-                    <template #delete-dialog="{ isActive }">
-                      <UtilsDeleteDialog
-                        :id="project.id"
-                        :api="api"
-                        :text="`Project '${project.name}' will be removed`"
-                        @completed="
-                          dataset.loadData(false);
-                          isActive.value = false;
-                        "
-                        @close-dialog="isActive.value = false"
-                      />
-                    </template>
-                  </UtilsButtonEditDelete>
-                </v-card-actions>
-              </v-card>
-            </v-col>
-          </v-row>
+                    @close-dialog="isActive.value = false"
+                  />
+                </template>
+                <template #delete-dialog="{ isActive }">
+                  <UtilsDeleteDialog
+                    :id="item.id"
+                    :api="api"
+                    :text="`Project '${item.name}' will be removed`"
+                    @completed="
+                      dataset.loadData(false);
+                      isActive.value = false;
+                    "
+                    @close-dialog="isActive.value = false"
+                  />
+                </template>
+              </UtilsButtonEditDelete>
+            </v-card-actions>
+          </v-card>
         </template>
       </Dataset>
     </v-main>
@@ -99,7 +89,6 @@
 
 <script setup lang="ts">
 const dataset = ref(null);
-const projects = ref(null);
 const user = userStore();
 const filters = useFilters();
 const api = ref(useApi("/api/projects/", true, "Project"));

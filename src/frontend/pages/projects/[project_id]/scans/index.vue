@@ -18,156 +18,146 @@
           @reload="dataset.loadData(false)"
         />
       </template>
-      <template #data>
-        <v-row justify="center" dense>
-          <v-col v-for="task in tasks" :key="task.id" cols="6">
-            <v-card
-              :title="
-                task.process ? task.process.name : task.configuration.name
-              "
-              :subtitle="
-                task.configuration ? task.configuration.tool.name : 'Process'
-              "
-              :prepend-avatar="
-                task.configuration ? task.configuration.tool.icon : undefined
-              "
-              hover
-              :to="`/projects/${route.params.project_id}/scans/${task.id}`"
+      <template #item="{ item }">
+        <v-card
+          :title="item.process ? item.process.name : item.configuration.name"
+          :subtitle="
+            item.configuration ? item.configuration.tool.name : 'Process'
+          "
+          :prepend-avatar="
+            item.configuration ? item.configuration.tool.icon : undefined
+          "
+          hover
+          :to="`/projects/${route.params.project_id}/scans/${item.id}`"
+        >
+          <template #prepend>
+            <v-icon v-if="item.process" icon="mdi-robot-angry" color="red" />
+            <v-icon
+              v-if="item.configuration && !item.configuration.tool.icon"
+              icon="mdi-rocket"
+              color="red"
+            />
+          </template>
+          <template #append>
+            <v-progress-circular
+              v-if="item.status && item.status === 'Running'"
+              :model-value="item.progress"
+              size="50"
+              width="5"
+              class="mr-3"
+              color="amber"
             >
-              <template #prepend>
-                <v-icon
-                  v-if="task.process"
-                  icon="mdi-robot-angry"
-                  color="red"
-                />
-                <v-icon
-                  v-if="task.configuration && !task.configuration.tool.icon"
-                  icon="mdi-rocket"
-                  color="red"
-                />
-              </template>
-              <template #append>
-                <v-progress-circular
-                  v-if="task.status && task.status === 'Running'"
-                  :model-value="task.progress"
-                  size="50"
-                  width="5"
-                  class="mr-3"
-                  color="amber"
-                >
-                  <template #default>{{ task.progress }}%</template>
-                </v-progress-circular>
+              <template #default>{{ item.progress }}%</template>
+            </v-progress-circular>
+            <v-chip
+              v-if="item.status && item.status !== 'Running'"
+              class="mr-3"
+              :color="enums.statuses[item.status].color"
+            >
+              <v-icon :icon="enums.statuses[item.status].icon" start />
+              {{ item.status }}
+            </v-chip>
+            <v-chip
+              color="red"
+              :to="`/projects/${route.params.project_id}/targets/${item.target.id}`"
+              target="_blank"
+              @click.stop
+            >
+              <v-icon icon="mdi-target" start />
+              {{ item.target.target }}
+            </v-chip>
+          </template>
+          <template #text>
+            <!-- TODO: show dates in user time zone -> `.toLocaleString(undefined, { hour12: false })`` -->
+            <p v-if="!item.start && item.scheduled_at">
+              <span class="text-medium-emphasis">Scheduled:</span>
+              {{ new Date(item.scheduled_at).toUTCString() }}
+            </p>
+            <p v-if="item.start">
+              <span class="text-medium-emphasis">Time:</span>
+              {{ new Date(item.start).toUTCString() }}
+            </p>
+            <p v-if="item.start && item.end && item.duration">
+              <span class="text-medium-emphasis">Duration:</span>
+              {{ item.duration }}
+            </p>
+            <p v-if="item.repeat_in && item.repeat_time_unit">
+              <span class="text-medium-emphasis">Monitor span:</span>
+              {{ item.repeat_in }} {{ item.repeat_time_unit.toLowerCase() }}
+            </p>
+            <div>
+              <v-divider class="mt-4 mb-4" />
+              <div class="d-flex flex-row justify-center ga-2">
                 <v-chip
-                  v-if="task.status && task.status !== 'Running'"
-                  class="mr-3"
-                  :color="enums.statuses[task.status].color"
+                  class="mt-4"
+                  :color="enums.intensities[item.intensity].color"
                 >
-                  <v-icon :icon="enums.statuses[task.status].icon" start />
-                  {{ task.status }}
+                  {{ item.intensity }}
                 </v-chip>
-                <v-chip
-                  color="red"
-                  :to="`/projects/${route.params.project_id}/targets/${task.target.id}`"
-                  target="_blank"
-                  @click.stop
-                >
-                  <v-icon icon="mdi-target" start />
-                  {{ task.target.target }}
-                </v-chip>
-              </template>
-              <template #text>
-                <!-- TODO: show dates in user time zone -> `.toLocaleString(undefined, { hour12: false })`` -->
-                <p v-if="!task.start && task.scheduled_at">
-                  <span class="text-medium-emphasis">Scheduled:</span>
-                  {{ new Date(task.scheduled_at).toUTCString() }}
-                </p>
-                <p v-if="task.start">
-                  <span class="text-medium-emphasis">Time:</span>
-                  {{ new Date(task.start).toUTCString() }}
-                </p>
-                <p v-if="task.start && task.end && task.duration">
-                  <span class="text-medium-emphasis">Duration:</span>
-                  {{ task.duration }}
-                </p>
-                <p v-if="task.repeat_in && task.repeat_time_unit">
-                  <span class="text-medium-emphasis">Monitor span:</span>
-                  {{ task.repeat_in }} {{ task.repeat_time_unit.toLowerCase() }}
-                </p>
-                <div>
-                  <v-divider class="mt-4 mb-4" />
-                  <div class="d-flex flex-row justify-center ga-2">
-                    <v-chip
-                      class="mt-4"
-                      :color="enums.intensities[task.intensity].color"
-                    >
-                      {{ task.intensity }}
-                    </v-chip>
-                    <UtilsCounter
-                      :collection="task.wordlists"
-                      tooltip="Wordlists used"
-                      icon="mdi-file-word-box"
-                      link="/toolkit/wordlists"
-                      color="blue-grey"
-                      new-tab
-                    />
-                    <UtilsCounter
-                      :collection="task.notes"
-                      tooltip="Notes"
-                      icon="mdi-notebook"
-                      :link="`/projects/${route.params.project_id}/notes`"
-                      color="indigo-darken-1"
-                      new-tab
-                    />
-                    <UtilsCounter
-                      :collection="task.reports"
-                      tooltip="Reports"
-                      icon="mdi-file-document-multiple"
-                      :link="`/projects/${route.params.project_id}/reports`"
-                      color="blue-grey-darken-1"
-                      new-tab
-                    />
-                    <UtilsOwner class="mt-4" :entity="task" field="executor" />
-                  </div>
-                </div>
-              </template>
-              <v-card-actions>
-                <v-btn
-                  v-if="task.status && task.progress === 100"
-                  icon
-                  variant="text"
-                  @click.prevent.stop="
-                    api
-                      .create({}, task.id, 'repeat/')
-                      .then((response) =>
-                        navigateTo(
-                          `/projects/${route.params.project_id}/scans/${response.id}`,
-                        ),
-                      )
-                  "
-                >
-                  <v-icon icon="mdi-repeat" color="green" />
-                  <v-tooltip activator="parent" text="Re-run" />
-                </v-btn>
-                <UtilsButtonDelete
-                  v-if="
-                    task.status &&
-                    task.progress < 100 &&
-                    task.status !== 'Cancelled'
-                  "
-                  :id="task.id"
-                  :api="api"
-                  :text="`Task '${task.title}' will be cancelled`"
-                  action="Cancel"
-                  @click.prevent.stop
-                  @completed="dataset.loadData(false)"
+                <UtilsCounter
+                  :collection="item.wordlists"
+                  tooltip="Wordlists used"
+                  icon="mdi-file-word-box"
+                  link="/toolkit/wordlists"
+                  color="blue-grey"
+                  new-tab
                 />
-                <v-spacer />
-                <NoteButton :project="route.params.project_id" :task="task" />
-                <ReportButton :project="route.params.project_id" :task="task" />
-              </v-card-actions>
-            </v-card>
-          </v-col>
-        </v-row>
+                <UtilsCounter
+                  :collection="item.notes"
+                  tooltip="Notes"
+                  icon="mdi-notebook"
+                  :link="`/projects/${route.params.project_id}/notes`"
+                  color="indigo-darken-1"
+                  new-tab
+                />
+                <UtilsCounter
+                  :collection="item.reports"
+                  tooltip="Reports"
+                  icon="mdi-file-document-multiple"
+                  :link="`/projects/${route.params.project_id}/reports`"
+                  color="blue-grey-darken-1"
+                  new-tab
+                />
+                <UtilsOwner class="mt-4" :entity="item" field="executor" />
+              </div>
+            </div>
+          </template>
+          <v-card-actions>
+            <v-btn
+              v-if="item.status && item.progress === 100"
+              icon
+              variant="text"
+              @click.prevent.stop="
+                api
+                  .create({}, item.id, 'repeat/')
+                  .then((response) =>
+                    navigateTo(
+                      `/projects/${route.params.project_id}/scans/${response.id}`,
+                    ),
+                  )
+              "
+            >
+              <v-icon icon="mdi-repeat" color="green" />
+              <v-tooltip activator="parent" text="Re-run" />
+            </v-btn>
+            <UtilsButtonDelete
+              v-if="
+                item.status &&
+                item.progress < 100 &&
+                item.status !== 'Cancelled'
+              "
+              :id="item.id"
+              :api="api"
+              :text="`Task '${item.title}' will be cancelled`"
+              action="Cancel"
+              @click.prevent.stop
+              @completed="dataset.loadData(false)"
+            />
+            <v-spacer />
+            <NoteButton :project="route.params.project_id" :task="item" />
+            <ReportButton :project="route.params.project_id" :task="item" />
+          </v-card-actions>
+        </v-card>
       </template>
     </Dataset>
   </MenuProject>
@@ -187,7 +177,6 @@ useApi("/api/projects/", true)
   .then((response) => (project.value = response));
 const dataset = ref(null);
 const api = useApi("/api/tasks/", true, "Scan");
-const tasks = ref([]);
 
 const filtering = ref([]);
 filters
@@ -252,7 +241,7 @@ filters
             .then((response) => {
               configuration.collection = response.items;
               configuration.disabled = false;
-              filters.setValueFromQuery(tasks);
+              filters.setValueFromQuery(configuration);
             });
         } else {
           process.disabled = false;
@@ -330,17 +319,13 @@ filters
   .then((results) => (filtering.value = results));
 
 function loadData(data) {
-  tasks.value = data;
-  for (let i = 0; i < tasks.value.length; i++) {
-    utils.getTitle(tasks.value[i]);
-    if (tasks.value[i].start && tasks.value[i].end) {
-      tasks.value[i].duration = dates.getDuration(
-        tasks.value[i].start,
-        tasks.value[i].end,
-      );
+  for (let i = 0; i < data.length; i++) {
+    utils.getTitle(data[i]);
+    if (data[i].start && data[i].end) {
+      data[i].duration = dates.getDuration(data[i].start, data[i].end);
     }
   }
-  if (tasks.value.filter((t) => t.status === "Running").length > 0) {
+  if (data.filter((t) => t.status === "Running").length > 0) {
     setTimeout(() => {
       dataset.value.loadData(false);
     }, 10 * 1000);

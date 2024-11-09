@@ -13,75 +13,60 @@
           ? 'There are no targets'
           : 'Create your first target to start hacking'
       "
-      @load-data="(data) => (targets = data)"
     >
-      <template #data>
-        <v-row dense>
-          <v-col v-for="target in targets" :key="target.id" cols="6">
-            <v-card
-              :title="target.target"
-              :subtitle="target.type"
-              elevation="2"
-              class="mx-auto"
-              density="compact"
-              :prepend-icon="enums.targets[target.type].icon"
-              :to="`/projects/${target.project}/targets/${target.id}/dashboard`"
-            >
-              <template #append>
-                <UtilsCounter
-                  :collection="target.tasks"
-                  tooltip="Tasks"
-                  icon="mdi-play-network"
-                  :link="`/projects/${target.project}/scans`"
-                  color="red"
-                  new-tab
-                />
-                <UtilsCounter
-                  class="ml-2"
-                  :collection="target.reports"
-                  tooltip="Reports"
-                  icon="mdi-file-document-multiple"
-                  :link="`/projects/${target.project}/reports`"
-                  color="blue-grey-darken-1"
-                  new-tab
-                />
-                <UtilsCounter
-                  class="ml-2"
-                  :collection="target.notes"
-                  tooltip="Notes"
-                  icon="mdi-notebook"
-                  :link="`/projects/${target.project}/notes`"
-                  color="indigo-darken-1"
-                  new-tab
-                />
-                <!-- CODE: Link (Defect-Dojo) -->
-              </template>
-              <v-card-actions>
-                <TaskButton
-                  v-if="project"
-                  :project="project"
-                  :target="target"
-                />
-                <v-spacer />
-                <NoteButton
-                  :project="route.params.project_id"
-                  :target="target"
-                />
-                <ReportButton
-                  :project="route.params.project_id"
-                  :target="target"
-                />
-                <UtilsButtonDelete
-                  :id="target.id"
-                  :api="api"
-                  :text="`Target '${target.target}' will be removed`"
-                  icon="mdi-trash-can"
-                  @completed="dataset.loadData(false)"
-                />
-              </v-card-actions>
-            </v-card>
-          </v-col>
-        </v-row>
+      <template #item="{ item }">
+        <v-card
+          :title="item.target"
+          :subtitle="item.type"
+          elevation="2"
+          class="mx-auto"
+          density="compact"
+          :prepend-icon="enums.targets[item.type].icon"
+          :to="`/projects/${item.project}/targets/${item.id}/dashboard`"
+        >
+          <template #append>
+            <UtilsCounter
+              :collection="item.tasks"
+              tooltip="Tasks"
+              icon="mdi-play-network"
+              :link="`/projects/${item.project}/scans`"
+              color="red"
+              new-tab
+            />
+            <UtilsCounter
+              class="ml-2"
+              :collection="item.reports"
+              tooltip="Reports"
+              icon="mdi-file-document-multiple"
+              :link="`/projects/${item.project}/reports`"
+              color="blue-grey-darken-1"
+              new-tab
+            />
+            <UtilsCounter
+              class="ml-2"
+              :collection="item.notes"
+              tooltip="Notes"
+              icon="mdi-notebook"
+              :link="`/projects/${item.project}/notes`"
+              color="indigo-darken-1"
+              new-tab
+            />
+            <!-- TODO: Link (Defect-Dojo) -->
+          </template>
+          <v-card-actions>
+            <TaskButton v-if="project" :project="project" :target="item" />
+            <v-spacer />
+            <NoteButton :project="route.params.project_id" :target="item" />
+            <ReportButton :project="route.params.project_id" :target="item" />
+            <UtilsButtonDelete
+              :id="item.id"
+              :api="api"
+              :text="`Target '${item.target}' will be removed`"
+              icon="mdi-trash-can"
+              @completed="dataset.loadData(false)"
+            />
+          </v-card-actions>
+        </v-card>
       </template>
     </Dataset>
   </MenuProject>
@@ -100,7 +85,6 @@ useApi("/api/projects/", true)
 const TargetDialog = resolveComponent("TargetDialog");
 const dataset = ref(null);
 const api = useApi("/api/targets/", true, "Target");
-const targets = ref([]);
 const filtering = ref([]);
 filters
   .build([

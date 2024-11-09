@@ -11,9 +11,9 @@
           : undefined
     "
     :default-parameters="project ? { project: project } : null"
-    @load-data="(data) => (users = data)"
+    cols="4"
   >
-    <template #data>
+    <template #prepend-data>
       <v-container v-if="smtp && !smtp.is_available" class="mb-3" fluid>
         <v-row>
           <v-alert color="warning" icon="$warning" variant="tonal" closable>
@@ -33,168 +33,163 @@
           </v-alert>
         </v-row>
       </v-container>
-      <v-row dense>
-        <v-col v-for="user in users" :key="user.id" cols="4">
-          <v-card
-            elevation="3"
-            class="mx-auto"
-            density="compact"
-            :title="
-              user.first_name && user.last_name
-                ? `${user.first_name} ${user.last_name}`
-                : user.email
-            "
-            :subtitle="user.username ? `@${user.username}` : undefined"
-          >
-            <template #prepend>
-              <v-menu min-width="200px" rounded>
-                <template #activator="{ props: avatarProps }">
-                  <v-btn icon v-bind="avatarProps">
+    </template>
+    <template #item="{ item }">
+      <v-card
+        elevation="3"
+        class="mx-auto"
+        density="compact"
+        :title="
+          item.first_name && item.last_name
+            ? `${item.first_name} ${item.last_name}`
+            : item.email
+        "
+        :subtitle="item.username ? `@${item.username}` : undefined"
+      >
+        <template #prepend>
+          <v-menu min-width="200px" rounded>
+            <template #activator="{ props: avatarProps }">
+              <v-btn icon v-bind="avatarProps">
+                <v-avatar variant="outlined">
+                  <v-icon
+                    :icon="
+                      item.is_active
+                        ? enums.roles[item.role].icon
+                        : 'mdi-cancel'
+                    "
+                    :color="
+                      item.is_active ? enums.roles[item.role].color : 'grey'
+                    "
+                    size="x-large"
+                  />
+                </v-avatar>
+              </v-btn>
+            </template>
+            <v-card>
+              <template #text>
+                <v-card-text>
+                  <div class="mx-auto text-center">
                     <v-avatar variant="outlined">
                       <v-icon
-                        :icon="
-                          user.is_active
-                            ? enums.roles[user.role].icon
-                            : 'mdi-cancel'
-                        "
-                        :color="
-                          user.is_active ? enums.roles[user.role].color : 'grey'
-                        "
+                        :icon="enums.roles[item.role].icon"
+                        :color="enums.roles[item.role].color"
                         size="x-large"
                       />
                     </v-avatar>
-                  </v-btn>
-                </template>
-                <v-card>
-                  <template #text>
-                    <v-card-text>
-                      <div class="mx-auto text-center">
-                        <v-avatar variant="outlined">
-                          <v-icon
-                            :icon="enums.roles[user.role].icon"
-                            :color="enums.roles[user.role].color"
-                            size="x-large"
-                          />
-                        </v-avatar>
-                        <h3 class="mt-2">
-                          {{
-                            user.first_name
-                              ? `${user.first_name} ${user.last_name}`
-                              : user.email
-                          }}
-                        </h3>
-                        <p v-if="user.username" class="text-primary mt-2">
-                          {{ `@${user.username}` }}
-                        </p>
-                        <v-btn
-                          v-if="user.first_name"
-                          class="pa-0 text-none"
-                          color="primary"
-                          variant="text"
-                          :text="user.email"
-                          :href="`mailto:${user.email}`"
+                    <h3 class="mt-2">
+                      {{
+                        item.first_name
+                          ? `${item.first_name} ${item.last_name}`
+                          : item.email
+                      }}
+                    </h3>
+                    <p v-if="item.username" class="text-primary mt-2">
+                      {{ `@${item.username}` }}
+                    </p>
+                    <v-btn
+                      v-if="item.first_name"
+                      class="pa-0 text-none"
+                      color="primary"
+                      variant="text"
+                      :text="item.email"
+                      :href="`mailto:${item.email}`"
+                    />
+                    <p v-if="item.username" class="text-medium-emphasis mt-2">
+                      Joined on
+                      {{ new Date(item.date_joined).toDateString() }}
+                    </p>
+                    <div v-if="item.id !== current.user">
+                      <v-divider class="my-3" />
+                      <div v-if="changeRole">
+                        <v-autocomplete
+                          v-model="item.role"
+                          auto-select-first
+                          density="comfortable"
+                          variant="underlined"
+                          :prepend-inner-icon="enums.roles[item.role].icon"
+                          :color="enums.roles[item.role].color"
+                          label="Role"
+                          :items="roles"
+                          :rules="[(r) => !!r || 'Role is required']"
+                          validate-on="input"
+                          hide-details
+                          @update:model-value="
+                            api
+                              .update({ role: item.role }, item.id)
+                              .then((response) => {
+                                item = response;
+                                dataset.loadData(false);
+                              })
+                          "
+                          @click.stop
                         />
-                        <p
-                          v-if="user.username"
-                          class="text-medium-emphasis mt-2"
-                        >
-                          Joined on
-                          {{ new Date(user.date_joined).toDateString() }}
-                        </p>
-                        <div v-if="user.id !== current.user">
-                          <v-divider class="my-3" />
-                          <div v-if="changeRole">
-                            <v-autocomplete
-                              v-model="user.role"
-                              auto-select-first
-                              density="comfortable"
-                              variant="underlined"
-                              :prepend-inner-icon="enums.roles[user.role].icon"
-                              :color="enums.roles[user.role].color"
-                              label="Role"
-                              :items="roles"
-                              :rules="[(r) => !!r || 'Role is required']"
-                              validate-on="input"
-                              hide-details
-                              @update:model-value="
-                                api
-                                  .update({ role: user.role }, user.id)
-                                  .then((response) => {
-                                    user = response;
-                                    dataset.loadData(false);
-                                  })
-                              "
-                              @click.stop
-                            />
-                            <v-divider class="my-3" />
-                          </div>
-                          <v-btn
-                            v-if="enableDisable && user.username"
-                            :color="user.is_active ? 'red' : 'green'"
-                            :text="user.is_active ? 'Disable' : 'Enable'"
-                            variant="tonal"
-                            block
-                            @click.stop="enableOrDisable(user)"
-                          />
-                          <v-btn
-                            v-if="
-                              enableDisable &&
-                              !user.username &&
-                              smtp &&
-                              smtp.is_available
-                            "
-                            color="green"
-                            text="Resend Invitation"
-                            variant="tonal"
-                            block
-                            @click.stop="
-                              api
-                                .create({}, user.id, 'resend/')
-                                .then(() =>
-                                  alert(
-                                    'Invitation has been sent again',
-                                    'success',
-                                  ),
-                                )
-                            "
-                          />
-                          <v-dialog
-                            v-if="handleMember"
-                            width="500"
-                            class="overflow-auto"
-                          >
-                            <template #activator="{ props: activatorProps }">
-                              <v-btn
-                                v-bind="activatorProps"
-                                color="red"
-                                text="Remove Member"
-                                variant="tonal"
-                                block
-                              />
-                            </template>
-                            <template #default="{ isActive }">
-                              <UtilsDeleteDialog
-                                :id="user.id"
-                                :api="removeMemberApi"
-                                :text="`Project member '${user.email}' will be removed`"
-                                @completed="
-                                  dataset.loadData(false);
-                                  isActive.value = false;
-                                "
-                                @close-dialog="isActive.value = false"
-                              />
-                            </template>
-                          </v-dialog>
-                        </div>
+                        <v-divider class="my-3" />
                       </div>
-                    </v-card-text>
-                  </template>
-                </v-card>
-              </v-menu>
-            </template>
-          </v-card>
-        </v-col>
-      </v-row>
+                      <v-btn
+                        v-if="enableDisable && item.username"
+                        :color="item.is_active ? 'red' : 'green'"
+                        :text="item.is_active ? 'Disable' : 'Enable'"
+                        variant="tonal"
+                        block
+                        @click.stop="enableOrDisable(item)"
+                      />
+                      <v-btn
+                        v-if="
+                          enableDisable &&
+                          !item.username &&
+                          smtp &&
+                          smtp.is_available
+                        "
+                        color="green"
+                        text="Resend Invitation"
+                        variant="tonal"
+                        block
+                        @click.stop="
+                          api
+                            .create({}, item.id, 'resend/')
+                            .then(() =>
+                              alert(
+                                'Invitation has been sent again',
+                                'success',
+                              ),
+                            )
+                        "
+                      />
+                      <v-dialog
+                        v-if="handleMember"
+                        width="500"
+                        class="overflow-auto"
+                      >
+                        <template #activator="{ props: activatorProps }">
+                          <v-btn
+                            v-bind="activatorProps"
+                            color="red"
+                            text="Remove Member"
+                            variant="tonal"
+                            block
+                          />
+                        </template>
+                        <template #default="{ isActive }">
+                          <UtilsDeleteDialog
+                            :id="item.id"
+                            :api="removeMemberApi"
+                            :text="`Project member '${item.email}' will be removed`"
+                            @completed="
+                              dataset.loadData(false);
+                              isActive.value = false;
+                            "
+                            @close-dialog="isActive.value = false"
+                          />
+                        </template>
+                      </v-dialog>
+                    </div>
+                  </div>
+                </v-card-text>
+              </template>
+            </v-card>
+          </v-menu>
+        </template>
+      </v-card>
     </template>
   </Dataset>
 </template>
@@ -230,7 +225,6 @@ const api = useApi("/api/users/", true);
 const removeMemberApi = props.project
   ? useApi(`/api/projects/${props.project}/members/`, true, "Project member")
   : null;
-const users = ref([]);
 const filtering = ref([]);
 filters
   .build([

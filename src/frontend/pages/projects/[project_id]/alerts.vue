@@ -9,41 +9,37 @@
       icon="mdi-alert"
       empty-head="No Alerts"
       empty-text="There are no alerts yet. Create your first one"
-      @load-data="(data) => (alerts = data)"
+      cols="4"
     >
-      <template #data>
-        <v-row dense>
-          <v-col v-for="alert in alerts" :key="alert.id" cols="4">
+      <template #item="{ item }">
+        <AlertShow
+          v-if="!item.value"
+          :api="api"
+          :alert="item"
+          @reload="dataset.loadData(false)"
+        />
+        <v-dialog v-if="item.value !== null">
+          <template #activator="{ props: activatorProps }">
             <AlertShow
-              v-if="!alert.value"
               :api="api"
-              :alert="alert"
+              :alert="item"
+              hover
+              v-bind="activatorProps"
               @reload="dataset.loadData(false)"
             />
-            <v-dialog v-if="alert.value !== null">
-              <template #activator="{ props: activatorProps }">
-                <AlertShow
-                  :api="api"
-                  :alert="alert"
-                  hover
-                  v-bind="activatorProps"
-                  @reload="dataset.loadData(false)"
-                />
-              </template>
-              <template #default="{ isActive }">
-                <AlertDialog
-                  :api="api"
-                  :edit="alert"
-                  @completed="
-                    dataset.loadData(false);
-                    isActive.value = false;
-                  "
-                  @close-dialog="isActive.value = false"
-                />
-              </template>
-            </v-dialog>
-          </v-col>
-        </v-row>
+          </template>
+          <template #default="{ isActive }">
+            <AlertDialog
+              :api="api"
+              :edit="item"
+              @completed="
+                dataset.loadData(false);
+                isActive.value = false;
+              "
+              @close-dialog="isActive.value = false"
+            />
+          </template>
+        </v-dialog>
       </template>
     </Dataset>
   </MenuProject>
@@ -58,7 +54,6 @@ const route = useRoute();
 const enums = ref(useEnums());
 const filters = useFilters();
 const api = useApi("/api/alerts/", true, "Alert");
-const alerts = ref([]);
 const filtering = ref([]);
 filters
   .build([

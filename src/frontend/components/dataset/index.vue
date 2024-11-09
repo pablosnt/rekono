@@ -178,7 +178,18 @@
         </template>
       </v-empty-state>
     </v-row>
-    <slot v-if="data !== null && data.length > 0" name="data" />
+    <slot v-if="data !== null && data.length > 0" name="data">
+      <slot name="prepend-data" />
+      <v-row dense>
+        <v-col
+          v-for="item in data"
+          :key="item.id ? item.id : item"
+          :cols="cols"
+        >
+          <slot name="item" :item="item" />
+        </v-col>
+      </v-row>
+    </slot>
   </v-container>
 
   <v-pagination
@@ -242,6 +253,11 @@ const props = defineProps({
     type: String,
     required: false,
     default: undefined,
+  },
+  cols: {
+    type: String,
+    required: false,
+    default: "6",
   },
 });
 const emit = defineEmits(["loadData", "expandFilters"]);
@@ -334,7 +350,7 @@ function loadData(loading: boolean = false) {
   });
 }
 
-// TODO: Define parameters typing properly in all JS functions
+// CODE: Define parameters typing properly in all JS functions
 
 defineExpose({ loadData });
 </script>

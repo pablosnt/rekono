@@ -8,77 +8,71 @@
       icon="mdi-file-word-box"
       empty-head="No Wordlists"
       empty-text="There are no wordlists. Create your first one"
-      @load-data="(data) => (wordlists = data)"
     >
-      <template #data>
-        <v-row dense>
-          <v-col v-for="wordlist in wordlists" :key="wordlist.id" cols="6">
-            <v-card
-              :title="wordlist.name"
-              elevation="2"
-              class="mx-auto"
-              density="compact"
-            >
-              <template #append>
-                <span class="me-3" />
-                <UtilsCounter
-                  :number="wordlist.size"
-                  entity="Words"
-                  icon="mdi-counter"
-                />
-                <span class="me-3" />
-                <v-chip>
-                  <v-icon
-                    v-if="wordlist.type === 'Subdomain'"
-                    icon="mdi-routes"
-                    start
-                  />
-                  <p v-if="wordlist.type === 'Endpoint'">
-                    <strong>/</strong><span class="me-1" />
-                  </p>
-                  {{ wordlist.type }}
-                </v-chip>
-                <span class="me-3" />
-                <UtilsOwner :entity="wordlist" />
-              </template>
+      <template #item="{ item }">
+        <v-card
+          :title="item.name"
+          elevation="2"
+          class="mx-auto"
+          density="compact"
+        >
+          <template #append>
+            <span class="me-3" />
+            <UtilsCounter
+              :number="item.size"
+              entity="Words"
+              icon="mdi-counter"
+            />
+            <span class="me-3" />
+            <v-chip>
+              <v-icon
+                v-if="item.type === 'Subdomain'"
+                icon="mdi-routes"
+                start
+              />
+              <p v-if="item.type === 'Endpoint'">
+                <strong>/</strong><span class="me-1" />
+              </p>
+              {{ item.type }}
+            </v-chip>
+            <span class="me-3" />
+            <UtilsOwner :entity="item" />
+          </template>
 
-              <v-card-actions>
-                <v-spacer />
-                <UtilsButtonLike
+          <v-card-actions>
+            <v-spacer />
+            <UtilsButtonLike
+              :api="api"
+              :item="item"
+              @reload="(value) => dataset.loadData(value)"
+            />
+            <span class="me-3" />
+            <UtilsButtonEditDelete
+              v-if="
+                (item.owner !== null && item.owner.id === user.user) ||
+                user.role === 'Admin'
+              "
+            >
+              <template #edit-dialog="{ isActive }">
+                <WordlistDialog
                   :api="api"
-                  :item="wordlist"
-                  @reload="(value) => dataset.loadData(value)"
+                  :edit="item"
+                  @completed="dataset.loadData(false)"
+                  @close-dialog="isActive.value = false"
                 />
-                <span class="me-3" />
-                <UtilsButtonEditDelete
-                  v-if="
-                    (wordlist.owner !== null &&
-                      wordlist.owner.id === user.user) ||
-                    user.role === 'Admin'
-                  "
-                >
-                  <template #edit-dialog="{ isActive }">
-                    <WordlistDialog
-                      :api="api"
-                      :edit="wordlist"
-                      @completed="dataset.loadData(false)"
-                      @close-dialog="isActive.value = false"
-                    />
-                  </template>
-                  <template #delete-dialog="{ isActive }">
-                    <UtilsDeleteDialog
-                      :id="wordlist.id"
-                      :api="api"
-                      :text="`Wordlist '${wordlist.name}' will be removed`"
-                      @completed="dataset.loadData(false)"
-                      @close-dialog="isActive.value = false"
-                    />
-                  </template>
-                </UtilsButtonEditDelete>
-              </v-card-actions>
-            </v-card>
-          </v-col>
-        </v-row>
+              </template>
+              <template #delete-dialog="{ isActive }">
+                <UtilsDeleteDialog
+                  :id="item.id"
+                  :api="api"
+                  :text="`Wordlist '${item.name}' will be removed`"
+                  @completed="dataset.loadData(false)"
+                  @close-dialog="isActive.value = false"
+                />
+              </template>
+            </UtilsButtonEditDelete>
+          </v-card-actions>
+        </v-card>
       </template>
     </Dataset>
   </MenuToolkit>
@@ -91,7 +85,6 @@ const user = userStore();
 const enums = useEnums();
 const filters = useFilters();
 const dataset = ref(null);
-const wordlists = ref(null);
 const api = ref(useApi("/api/wordlists/", true, "Wordlist"));
 const filtering = ref([]);
 filters

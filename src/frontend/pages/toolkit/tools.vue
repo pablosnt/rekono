@@ -7,105 +7,96 @@
       icon="mdi-rocket"
       empty-head="No Tools"
       empty-text="There are no tools"
-      @load-data="(data) => (tools = data)"
+      cols="4"
     >
-      <template #data>
-        <v-row dense>
-          <v-col v-for="tool in tools" :key="tool.id" cols="4">
-            <v-card
-              :title="tool.name"
-              :subtitle="
-                '$ ' + tool.command + (tool.script ? ' ' + tool.script : '')
-              "
-              :prepend-avatar="tool.icon"
-              rel="noopener"
-              elevation="3"
-              class="mx-auto"
-              density="compact"
-            >
-              <template #append>
-                <v-chip v-if="tool.version" prepend-icon="mdi-tag">
-                  {{ tool.version }}
-                </v-chip>
-                <span class="me-3" />
-                <UtilsButtonGreenCheck
-                  :condition="tool.is_installed"
-                  true-text="Installed"
-                  false-text="Tool may have been installed after its last execution attempt"
-                />
-              </template>
+      <template #item="{ item }">
+        <v-card
+          :title="item.name"
+          :subtitle="
+            '$ ' + item.command + (item.script ? ' ' + item.script : '')
+          "
+          :prepend-avatar="item.icon"
+          rel="noopener"
+          elevation="3"
+          class="mx-auto"
+          density="compact"
+        >
+          <template #append>
+            <v-chip v-if="item.version" prepend-icon="mdi-tag">
+              {{ item.version }}
+            </v-chip>
+            <span class="me-3" />
+            <UtilsButtonGreenCheck
+              :condition="item.is_installed"
+              true-text="Installed"
+              false-text="Tool may have been installed after its last execution attempt"
+            />
+          </template>
 
-              <template #text>
-                <v-card-text>
-                  <template
-                    v-for="configuration in tool.configurations"
-                    :key="configuration.id"
+          <template #text>
+            <v-card-text>
+              <template
+                v-for="configuration in item.configurations"
+                :key="configuration.id"
+              >
+                <div class="d-flex flex-row">
+                  <v-btn
+                    v-if="configuration.default"
+                    icon
+                    size="medium"
+                    variant="text"
+                    @click="show = show !== item.id ? item.id : null"
                   >
-                    <div class="d-flex flex-row">
-                      <v-btn
-                        v-if="configuration.default"
-                        icon
-                        size="medium"
-                        variant="text"
-                        @click="show = show !== tool.id ? tool.id : null"
-                      >
-                        <p>{{ configuration.name }}</p>
-                        <span class="me-2" />
-                        <v-icon
-                          v-if="tool.configurations.length > 1"
-                          :icon="
-                            show === tool.id
-                              ? 'mdi-chevron-up'
-                              : 'mdi-chevron-down'
-                          "
-                          color="black"
-                        />
-                        <v-tooltip
-                          activator="parent"
-                          :text="
-                            tool.configurations.length > 1
-                              ? 'Configurations'
-                              : 'Configuration'
-                          "
-                        />
-                      </v-btn>
-                    </div>
-                    <v-expand-transition>
-                      <div
-                        v-show="show == tool.id"
-                        v-if="!configuration.default"
-                      >
-                        <p>{{ configuration.name }}</p>
-                      </div>
-                    </v-expand-transition>
-                  </template>
-                  <v-divider class="mt-4 mb-4" />
-                  <div class="d-flex flex-row justify-center ga-2">
-                    <v-chip
-                      v-for="intensity in tool.intensities"
-                      :key="intensity.value"
-                      size="small"
-                      :color="enums.intensities[intensity.value].color"
-                    >
-                      {{ intensity.value }}
-                    </v-chip>
+                    <p>{{ configuration.name }}</p>
+                    <span class="me-2" />
+                    <v-icon
+                      v-if="item.configurations.length > 1"
+                      :icon="
+                        show === item.id ? 'mdi-chevron-up' : 'mdi-chevron-down'
+                      "
+                      color="black"
+                    />
+                    <v-tooltip
+                      activator="parent"
+                      :text="
+                        item.configurations.length > 1
+                          ? 'Configurations'
+                          : 'Configuration'
+                      "
+                    />
+                  </v-btn>
+                </div>
+                <v-expand-transition>
+                  <div v-show="show == item.id" v-if="!configuration.default">
+                    <p>{{ configuration.name }}</p>
                   </div>
-                </v-card-text>
+                </v-expand-transition>
               </template>
+              <v-divider class="mt-4 mb-4" />
+              <div class="d-flex flex-row justify-center ga-2">
+                <v-chip
+                  v-for="intensity in item.intensities"
+                  :key="intensity.value"
+                  size="small"
+                  :color="enums.intensities[intensity.value].color"
+                >
+                  {{ intensity.value }}
+                </v-chip>
+              </div>
+            </v-card-text>
+          </template>
 
-              <v-card-actions>
-                <TaskButton :tool="tool" tooltip="Run" />
-                <v-spacer />
-                <UtilsButtonLike
-                  :api="api"
-                  :item="tool"
-                  @reload="(value) => dataset.loadData(value)"
-                />
-                <UtilsButtonLink :link="tool.reference" />
-              </v-card-actions>
-            </v-card>
-          </v-col>
-        </v-row>
+          <v-card-actions>
+            <TaskButton :tool="item" tooltip="Run" />
+            <v-spacer />
+            <UtilsButtonLike
+              :api="api"
+              :item="item"
+              @reload="(value) => dataset.loadData(value)"
+            />
+            <UtilsButtonLink :link="item.reference" />
+          </v-card-actions>
+        </v-card>
       </template>
     </Dataset>
   </MenuToolkit>
@@ -113,7 +104,6 @@
 
 <script setup lang="ts">
 definePageMeta({ layout: false });
-const tools = ref(null);
 const show = ref(null);
 const dataset = ref(null);
 const enums = ref(useEnums());

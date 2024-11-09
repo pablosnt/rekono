@@ -9,7 +9,6 @@
       icon="mdi-file-document-multiple"
       empty-head="No Reports"
       empty-text="There are no reports yet. Create your first one"
-      @load-data="(data) => (reports = data)"
     >
       <!--
            TODO: Fix date
@@ -17,68 +16,60 @@
            TODO: PDF reports are not generated. Dialog gets stucked
            TODO: Allow filtering by completed tasks in autocomplete?   
         -->
-      <template #data>
-        <v-row dense>
-          <v-col v-for="report in reports" :key="report.id" cols="4">
-            <v-card
-              :title="report.format.toUpperCase()"
-              :subtitle="
-                report.date ? new Date(report.date).toUTCString() : undefined
+      <template #item="{ item }">
+        <v-card
+          :title="item.format.toUpperCase()"
+          :subtitle="item.date ? new Date(item.date).toUTCString() : undefined"
+          elevation="3"
+          class="mx-auto"
+          density="compact"
+        >
+          <template #prepend>
+            <v-btn hover variant="text" icon>
+              <v-icon
+                :icon="enums.reportFormats[item.format.toLowerCase()].icon"
+                :color="enums.reportStatuses[item.status].color"
+              />
+              <v-tooltip activator="parent" :text="item.status" />
+            </v-btn>
+          </template>
+          <template #append>
+            <v-chip
+              v-if="item.target && !item.task"
+              class="mr-2"
+              prepend-icon="mdi-target"
+              color="red"
+              link
+              :text="item.target.target"
+              :to="`/projects/${route.params.project_id}/targets/${item.target.id}`"
+            />
+            <v-chip
+              v-if="item.task"
+              class="mr-2"
+              prepend-icon="mdi-play-network"
+              color="red"
+              link
+              :text="
+                item.task.process
+                  ? item.task.process.name
+                  : `${item.task.configuration.tool.name} - ${item.task.configuration.name}`
               "
-              elevation="3"
-              class="mx-auto"
-              density="compact"
-            >
-              <template #prepend>
-                <v-btn hover variant="text" icon>
-                  <v-icon
-                    :icon="
-                      enums.reportFormats[report.format.toLowerCase()].icon
-                    "
-                    :color="enums.reportStatuses[report.status].color"
-                  />
-                  <v-tooltip activator="parent" :text="report.status" />
-                </v-btn>
-              </template>
-              <template #append>
-                <v-chip
-                  v-if="report.target && !report.task"
-                  class="mr-2"
-                  prepend-icon="mdi-target"
-                  color="red"
-                  link
-                  :text="report.target.target"
-                  :to="`/projects/${route.params.project_id}/targets/${report.target.id}`"
-                />
-                <v-chip
-                  v-if="report.task"
-                  class="mr-2"
-                  prepend-icon="mdi-play-network"
-                  color="red"
-                  link
-                  :text="
-                    report.task.process
-                      ? report.task.process.name
-                      : `${report.task.configuration.tool.name} - ${report.task.configuration.name}`
-                  "
-                  :to="`/projects/${route.params.project_id}/targets/${report.task.id}`"
-                />
-                <UtilsOwner :entity="report" field="user" />
-              </template>
-              <v-card-actions>
-                <ReportDownloadButton :api="api" :report="report" />
-                <v-spacer />
-                <UtilsButtonDelete
-                  :id="report.id"
-                  :api="api"
-                  :text="`Report '${report.id}' will be removed`"
-                  icon="mdi-trash-can"
-                  @completed="dataset.loadData(false)"
-                />
-              </v-card-actions>
-            </v-card>
-          </v-col>
-        </v-row>
+              :to="`/projects/${route.params.project_id}/targets/${item.task.id}`"
+            />
+            <UtilsOwner :entity="item" field="user" />
+          </template>
+          <v-card-actions>
+            <ReportDownloadButton :api="api" :report="item" />
+            <v-spacer />
+            <UtilsButtonDelete
+              :id="item.id"
+              :api="api"
+              :text="`Report '${item.id}' will be removed`"
+              icon="mdi-trash-can"
+              @completed="dataset.loadData(false)"
+            />
+          </v-card-actions>
+        </v-card>
       </template>
     </Dataset>
   </MenuProject>
@@ -92,7 +83,6 @@ const user = userStore();
 const enums = ref(useEnums());
 const filters = useFilters();
 const dataset = ref(null);
-const reports = ref([]);
 const api = useApi("/api/reports/", true, "Report");
 const filtering = ref([]);
 filters

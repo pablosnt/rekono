@@ -14,40 +14,30 @@
       color="red-darken-2"
     />
   </v-tabs>
-  <Dataset
-    v-if="filtering.length > 0"
-    ref="dataset"
-    :key="forceUpdate"
-    :api="tabs[tab].api"
-    :icon="tabs[tab].icon"
-    :filtering="filtering"
-    :expand-filters="expandFilters"
-    :default-parameters="defaultParameters"
-    :empty-head="tabs[tab].emptyHead"
-    :empty-text="tabs[tab].emptyText"
-    @load-data="(data) => (collection = data)"
-    @expand-filters="(value) => (expandFilters = value)"
-  >
-    <template #data>
-      <v-tabs-window v-model="tab">
-        <v-container fluid>
-          <v-row dense>
-            <v-col
-              v-for="item in collection"
-              :key="item.id"
-              :cols="tabs[tab].cols ? tabs[tab].cols : '6'"
-            >
-              <component
-                :is="tabs[tab].component"
-                v-bind="properties(item)"
-                @reload="dataset.loadData(false)"
-              />
-            </v-col>
-          </v-row>
-        </v-container>
-      </v-tabs-window>
-    </template>
-  </Dataset>
+  <v-tabs-window v-model="tab">
+    <Dataset
+      v-if="filtering.length > 0"
+      ref="dataset"
+      :key="forceUpdate"
+      :api="tabs[tab].api"
+      :icon="tabs[tab].icon"
+      :filtering="filtering"
+      :expand-filters="expandFilters"
+      :default-parameters="defaultParameters"
+      :empty-head="tabs[tab].emptyHead"
+      :empty-text="tabs[tab].emptyText"
+      :cols="tabs[tab].cols ? tabs[tab].cols : '6'"
+      @expand-filters="(value) => (expandFilters = value)"
+    >
+      <template #item="{ item }">
+        <component
+          :is="tabs[tab].component"
+          v-bind="properties(item)"
+          @reload="dataset.loadData(false)"
+        />
+      </template>
+    </Dataset>
+  </v-tabs-window>
 </template>
 
 <script setup lang="ts">
@@ -68,7 +58,6 @@ const filters = useFilters();
 const forceUpdate = ref(0);
 const expandFilters = ref(false);
 const dataset = ref(null);
-const collection = ref([]);
 const tabKeys = ref(Object.keys(props.tabs));
 const tabQuery = route.query.tab?.toString().toLowerCase();
 const tab = ref(tabKeys.value.includes(tabQuery) ? tabQuery : tabKeys.value[0]);
@@ -136,7 +125,6 @@ function tabChange() {
   buildFiltering();
   forceUpdate.value++;
   if (dataset.value) {
-    collection.value = [];
     dataset.value.loadData(true);
   }
   if (props.matchQuery) {
