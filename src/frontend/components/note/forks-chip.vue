@@ -10,12 +10,7 @@
         .create({}, note.id, 'fork/')
         .then((response) => router.push(`/notes/${response.id}`))
     "
-    >{{
-      note.forks.length < 1000
-        ? note.forks.length
-        : Math.floor(note.forks.length / 1000).toString() + "k"
-    }}
-    Forks</v-chip
+    >{{ utils.displayNumber(note.forks) }} Forks</v-chip
   >
 </template>
 
@@ -23,4 +18,5 @@
 defineProps({ note: Object });
 const user = userStore();
 const router = useRouter();
+const utils = useUtils();
 </script>

@@ -162,11 +162,7 @@
                 intersect: false,
               },
               dataLabels: {
-                formatter: (value) => {
-                  return value > 1000
-                    ? Math.floor(value / 1000).toString() + 'k'
-                    : value;
-                },
+                formatter: utils.displayNumber,
               },
               plotOptions: {
                 animations: {
@@ -193,17 +189,12 @@
               xaxis: {
                 categories: stats.top_vulnerable.map((item) => item.address),
                 labels: {
-                  formatter: (value) => {
-                    return value > 1000
-                      ? Math.floor(value / 1000).toString() + 'k'
-                      : value;
-                  },
+                  formatter: utils.displayNumber,
                 },
               },
             }"
             :height="height"
           />
-          <!-- TODO: Composable to divide by 1000 -->
         </v-col>
       </v-row>
     </v-container>
@@ -225,6 +216,7 @@ defineProps({
   height: String,
 });
 const enums = useEnums();
+const utils = useUtils();
 const api = useApi("/api/stats/assets/", true);
 const stats = ref(null);
 const os_types = Object.keys(enums.osType);

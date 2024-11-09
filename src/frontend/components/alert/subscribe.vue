@@ -6,14 +6,7 @@
     variant="text"
     @click.prevent.stop="submit()"
   >
-    <v-badge
-      floating
-      :content="
-        item.subscribers.length < 1000
-          ? item.subscribers.length
-          : Math.floor(item.subscribers.length / 1000).toString() + 'k'
-      "
-    >
+    <v-badge floating :content="utils.displayNumber(item.subscribers.length)">
       <v-icon
         :icon="item.subscribed ? 'mdi-bell-ring' : 'mdi-bell-outline'"
         color="red"
@@ -32,6 +25,7 @@ const props = defineProps({
   item: Object,
 });
 const emit = defineEmits(["reload"]);
+const utils = useUtils();
 function submit() {
   let request = null;
   if (props.item.subscribed) {

@@ -3,7 +3,7 @@
     :is="UtilsComponent"
     v-if="value > 0 || showZero"
     :value="value"
-    :display="display"
+    :display="utils.displayNumber(value)"
     :icon="icon"
     :image="image"
     :size="size"
@@ -80,13 +80,10 @@ const props = defineProps({
     default: null,
   },
 });
+const utils = useUtils();
 const UtilsComponent =
   props.entity !== null
     ? resolveComponent("UtilsCounterChip")
     : resolveComponent("UtilsCounterButton");
 const value = ref(props.collection ? props.collection.length : props.number);
-const display =
-  value.value < 1000
-    ? value.value
-    : Math.floor(value.value / 1000).toString() + "k";
 </script>

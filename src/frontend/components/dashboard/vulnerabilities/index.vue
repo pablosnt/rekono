@@ -146,11 +146,7 @@
                   text: fixed ? 'Most Common Fixed CVEs' : 'Most Common CVEs',
                 },
                 dataLabels: {
-                  formatter: (value) => {
-                    return value > 1000
-                      ? Math.floor(value / 1000).toString() + 'k'
-                      : value;
-                  },
+                  formatter: utils.displayNumber,
                 },
                 plotOptions: {
                   animations: {
@@ -174,11 +170,7 @@
                     ),
                 xaxis: {
                   labels: {
-                    formatter: (value) => {
-                      return value > 1000
-                        ? Math.floor(value / 1000).toString() + 'k'
-                        : value;
-                    },
+                    formatter: utils.displayNumber,
                   },
                 },
                 chart: {
@@ -311,6 +303,7 @@ defineProps({
   height: String,
 });
 const enums = useEnums();
+const utils = useUtils();
 const api = useApi("/api/stats/vulnerabilities/", true);
 const stats = ref(null);
 const fixed = ref(false);
