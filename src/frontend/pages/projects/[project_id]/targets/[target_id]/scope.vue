@@ -11,10 +11,9 @@
               :add="TargetPortDialog"
               icon="mdi-antenna"
               empty-head="No Scopes"
-              empty-text="Define the set of ports and paths in the target scope and how to perform the authentication"
+              empty-text="Define the set of ports and paths in scope and how to perform the authentication. Otherwise, the whole target will be scanned without authentication"
               @load-data="(data) => (ports = data)"
             >
-              <!-- TODO: Review empty-text and use them to provide help about the entities that the user can create -->
               <template #data>
                 <v-row justify="center" dense>
                   <v-col cols="10">

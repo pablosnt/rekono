@@ -1,6 +1,6 @@
 <template>
   <v-form v-model="valid" @submit.prevent="submit()">
-    <!-- TODO: create general form with name and description ? -->
+    <!-- CODE: create general form with name and description ? -->
     <v-text-field
       v-model="name"
       class="mt-2"

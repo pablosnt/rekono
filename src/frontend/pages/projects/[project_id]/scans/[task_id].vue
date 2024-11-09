@@ -228,7 +228,7 @@
                       "
                     >
                       <template #prepend>
-                        <!-- TODO: why not using prepend-avatar as Dialog does? Do the same everywhere -->
+                        <!-- CODE: why not using prepend-avatar as Dialog does? Do the same everywhere -->
                         <v-avatar
                           v-if="execution.configuration.tool.icon"
                           :image="execution.configuration.tool.icon"
@@ -430,7 +430,7 @@ function loadExecutions(
   stage?: string | null = null,
   page: number = 1,
 ) {
-  // TODO: Use this syntax in all for loops
+  // CODE: Use this syntax in all for loops
   for (const s of stage !== null ? [stage] : Object.keys(enums.stages)) {
     if (showLoading) {
       loadingStages.value[s] = true;
