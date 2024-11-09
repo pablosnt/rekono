@@ -1,7 +1,6 @@
 import logging
 import os
 import threading
-from turtle import back
 from typing import Any
 
 import certifi
