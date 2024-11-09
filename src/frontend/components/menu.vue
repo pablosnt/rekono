@@ -11,7 +11,14 @@
           :active="o.to === route.path || route.path.startsWith(o.to)"
         />
       </v-list>
-      <!-- TODO: Link to home and all projects in the bottom -->
+      <template #append>
+        <v-list-item
+          prepend-icon="mdi-folder-open"
+          title="Projects"
+          to="/projects"
+        />
+        <v-list-item prepend-icon="mdi-home" title="Home" to="/" />
+      </template>
     </v-navigation-drawer>
     <v-main>
       <slot />
