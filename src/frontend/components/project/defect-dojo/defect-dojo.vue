@@ -113,7 +113,6 @@ const props = defineProps({
   onlyLink: { type: Boolean, required: false, default: false },
 });
 defineEmits(["reload"]);
-console.log(props);
 const integration = ref({ enabled: false });
 const settings = ref({ is_available: false });
 const api = useApi("/api/defect-dojo/sync/", true, "Defect-Dojo sync");

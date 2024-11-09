@@ -300,7 +300,7 @@ function success(completed, response) {
   disabled.value = true;
   loading.value = false;
   if (completed) {
-    // todo: Review this and update pages depending on this one
+    // TODO: Review this and update pages depending on this one
     if (props.note) {
       return navigateTo(`/projects/${response.project}/notes`);
     } else {

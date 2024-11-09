@@ -2,7 +2,7 @@
   <v-container fluid>
     <v-row>
       <v-col class="text-center">
-        <!-- todo: Use fixed-header option in other occurrences? -->
+        <!-- TODO: Use fixed-header option in other occurrences? -->
         <v-table v-if="portsShow.length > 0" density="compact">
           <thead>
             <tr>

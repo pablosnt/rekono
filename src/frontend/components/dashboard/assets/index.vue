@@ -203,7 +203,7 @@
             }"
             :height="height"
           />
-          <!-- todo: Composable to divide by 1000 -->
+          <!-- TODO: Composable to divide by 1000 -->
         </v-col>
       </v-row>
     </v-container>

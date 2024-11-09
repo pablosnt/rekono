@@ -42,7 +42,7 @@
             />
           </template>
           <template #default="{ isActive }">
-            <!-- todo: Check when add must be displayed depending on the user roles -->
+            <!-- TODO: Check when add must be displayed depending on the user roles -->
             <component
               :is="add"
               :api="api"
@@ -104,7 +104,7 @@
                 :multiple="f.multiple ? f.multiple : false"
                 @update:model-value="addParameter(f.key, filters.getValue(f))"
               >
-                <!-- todo: Override list items to show custom icons per option -->
+                <!-- TODO: Override list items to show custom icons per option -->
                 <template
                   v-if="f.key.includes('task')"
                   #item="{ props: taskProps, item }"
@@ -187,7 +187,7 @@
     rounded="circle"
     @update:model-value="loadData"
   />
-  <!-- todo: keep page in query params -->
+  <!-- TODO: keep page in query params -->
 </template>
 
 <script setup lang="ts">
@@ -334,7 +334,7 @@ function loadData(loading: boolean = false) {
   });
 }
 
-// todo: Define parameters typing properly in all JS functions
+// TODO: Define parameters typing properly in all JS functions
 
 defineExpose({ loadData });
 </script>

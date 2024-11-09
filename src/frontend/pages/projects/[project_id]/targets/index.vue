@@ -18,7 +18,7 @@
       <template #data>
         <v-row dense>
           <v-col v-for="target in targets" :key="target.id" cols="6">
-            <!-- todo: On click dialog: stats like in the project dashboard (tasks, hosts, vulnerabilities, etc.) ? target ports + authentications, parameters (CVEs, technologies), http headers -->
+            <!-- TODO: On click dialog: stats like in the project dashboard (tasks, hosts, vulnerabilities, etc.) ? target ports + authentications, parameters (CVEs, technologies), http headers -->
             <v-card
               :title="target.target"
               :subtitle="target.type"
@@ -55,7 +55,7 @@
                   color="indigo-darken-1"
                   new-tab
                 />
-                <!-- todo: Link (Defect-Dojo) -->
+                <!-- TODO: Link (Defect-Dojo) -->
               </template>
               <v-card-actions>
                 <TaskButton

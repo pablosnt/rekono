@@ -15,7 +15,7 @@
     >
       <template #data>
         <v-row dense>
-          <!-- todo: Setup the same card height for all of them -->
+          <!-- TODO: Setup the same card height for all of them -->
           <v-col v-for="note in notes" :key="note.id" cols="6">
             <v-card
               :title="note.title"

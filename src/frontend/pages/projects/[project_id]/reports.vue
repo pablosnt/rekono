@@ -12,10 +12,10 @@
       @load-data="(data) => (reports = data)"
     >
       <!--
-           todo: Fix date
-           todo: Sometimes, multiple reports are created with the same ID, and then you can't remove or download them
-           todo: PDF reports are not generated. Dialog gets stucked
-           todo: Allow filtering by completed tasks in autocomplete?   
+           TODO: Fix date
+           TODO: Sometimes, multiple reports are created with the same ID, and then you can't remove or download them
+           TODO: PDF reports are not generated. Dialog gets stucked
+           TODO: Allow filtering by completed tasks in autocomplete?   
         -->
       <template #data>
         <v-row dense>
@@ -133,7 +133,7 @@ filters
 
       disabled: true,
     },
-    // todo: Format filter is not working for XML and PDF. It's returning 404
+    // TODO: Format filter is not working for XML and PDF. It's returning 404
     {
       type: "autocomplete",
       label: "Format",

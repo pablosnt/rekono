@@ -14,7 +14,7 @@
               empty-text="Define the set of ports and paths in the target scope and how to perform the authentication"
               @load-data="(data) => (ports = data)"
             >
-              <!-- todo: Review empty-text and use them to provide help about the entities that the user can create -->
+              <!-- TODO: Review empty-text and use them to provide help about the entities that the user can create -->
               <template #data>
                 <v-row justify="center" dense>
                   <v-col cols="10">

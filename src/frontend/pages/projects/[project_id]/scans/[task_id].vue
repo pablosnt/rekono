@@ -129,7 +129,7 @@
           {{ task.repeat_in }} {{ task.repeat_time_unit.toLowerCase() }}
         </p>
         <v-divider class="mt-4 mb-4" />
-        <!-- todo: progress bars ususally get blocked when API requests are being triggered -->
+        <!-- TODO: progress bars ususally get blocked when API requests are being triggered -->
         <v-progress-linear
           v-if="loading"
           height="5"
@@ -228,7 +228,7 @@
                       "
                     >
                       <template #prepend>
-                        <!-- todo: why not using prepend-avatar as Dialog does? Do the same everywhere -->
+                        <!-- TODO: why not using prepend-avatar as Dialog does? Do the same everywhere -->
                         <v-avatar
                           v-if="execution.configuration.tool.icon"
                           :image="execution.configuration.tool.icon"
@@ -363,7 +363,7 @@
             tooltip="Findings"
             new-tab
           />
-          <!-- todo: execution filter doesn´t exist yet -->
+          <!-- TODO: execution filter doesn´t exist yet -->
         </template>
         <v-textarea
           variant="outlined"
@@ -430,7 +430,7 @@ function loadExecutions(
   stage?: string | null = null,
   page: number = 1,
 ) {
-  // todo: Use this syntax in all for loops
+  // TODO: Use this syntax in all for loops
   for (const s of stage !== null ? [stage] : Object.keys(enums.stages)) {
     if (showLoading) {
       loadingStages.value[s] = true;

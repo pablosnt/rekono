@@ -14,7 +14,7 @@
       </v-btn>
     </template>
     <template #default="{ isActive }">
-      <!-- todo: Review how creation is handled after that -->
+      <!-- TODO: Review how creation is handled after that -->
       <ReportDialog
         :project="project"
         :target="target"

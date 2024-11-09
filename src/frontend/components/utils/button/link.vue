@@ -1,5 +1,5 @@
 <template>
-  <!-- todo: Review from where is this used, and consider hardcode the button. Review also all the occurrences of links via href to Rekono endpoints -->
+  <!-- TODO: Review from where is this used, and consider hardcode the button. Review also all the occurrences of links via href to Rekono endpoints -->
   <v-btn
     v-if="link"
     variant="text"

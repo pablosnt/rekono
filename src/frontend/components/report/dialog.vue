@@ -103,7 +103,7 @@
               clearable
               closable-chips
             >
-              <!-- todo: Look for other cases where this is useful -->
+              <!-- TODO: Look for other cases where this is useful -->
               <template #chip="{ props: findingProps, item }">
                 <v-chip
                   v-bind="findingProps"

@@ -13,7 +13,7 @@
     :color="color ? 'blue-accent-3' : undefined"
     @click.stop
   >
-    <!-- todo: review color after and update icon -->
+    <!-- TODO: review color after and update icon -->
     <v-avatar v-if="!icon" size="small" :image="integration.icon" />
     <v-icon v-if="icon" :icon="icon" />
   </v-btn>

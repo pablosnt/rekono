@@ -1,5 +1,5 @@
 <template>
-  <!-- todo: make items in target and wordlist selector closables -->
+  <!-- TODO: make items in target and wordlist selector closables -->
   <Dialog
     title="Execution"
     :loading="loading"

@@ -27,7 +27,7 @@
             />
           </v-col>
           <v-col>
-            <!-- todo: Review validation in all forms -->
+            <!-- TODO: Review validation in all forms -->
             <v-autocomplete
               v-model="item"
               auto-select-first

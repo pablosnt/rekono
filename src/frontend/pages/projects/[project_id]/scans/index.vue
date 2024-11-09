@@ -1,6 +1,6 @@
 <template>
   <MenuProject>
-    <!-- todo: Keep Search, Filter and Add button always on the top of the page, and scroll only the data -->
+    <!-- TODO: Keep Search, Filter and Add button always on the top of the page, and scroll only the data -->
     <Dataset
       ref="dataset"
       :api="api"
@@ -76,7 +76,7 @@
                 </v-chip>
               </template>
               <template #text>
-                <!-- todo: show dates in user time zone -> `.toLocaleString(undefined, { hour12: false })`` -->
+                <!-- TODO: show dates in user time zone -> `.toLocaleString(undefined, { hour12: false })`` -->
                 <p v-if="!task.start && task.scheduled_at">
                   <span class="text-medium-emphasis">Scheduled:</span>
                   {{ new Date(task.scheduled_at).toUTCString() }}

@@ -288,7 +288,7 @@
               }"
               :height="height"
             />
-            <!-- todo: composable to get CWE reference -->
+            <!-- TODO: composable to get CWE reference -->
           </v-col>
         </v-row>
       </v-container>

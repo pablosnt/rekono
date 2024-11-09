@@ -16,7 +16,7 @@
         @load-data="(data) => (projects = data)"
       >
         <template #data>
-          <!-- todo: review if all Dataset#data starts is within a row and col. If so, move it to Dataset default template -->
+          <!-- TODO: review if all Dataset#data starts is within a row and col. If so, move it to Dataset default template -->
           <v-row dense>
             <v-col v-for="project in projects" :key="project.id" cols="4">
               <v-card

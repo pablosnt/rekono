@@ -53,6 +53,6 @@
 </template>
 
 <script setup lang="ts">
-// todo: Limit the links available for each user role
+// TODO: Limit the links available for each user role
 const route = useRoute();
 </script>
