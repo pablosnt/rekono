@@ -221,7 +221,7 @@
                       </v-btn>
                       <v-chip
                         v-if="vulnerability.cwe"
-                        :href="`https://cwe.mitre.org/data/definitions/${vulnerability.cwe.toLowerCase().split('-')[1]}.html`"
+                        :href="vulnerabilities.cweReference(vulnerability.cwe)"
                         target="_blank"
                         :text="vulnerability.cwe.toUpperCase()"
                         @click.stop
@@ -265,6 +265,7 @@ defineProps({
   height: String,
 });
 const enums = useEnums();
+const vulnerabilities = useVulnerabilities();
 const api = useApi("/api/stats/activity/", true);
 const stats = ref(null);
 </script>

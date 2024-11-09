@@ -265,13 +265,11 @@
                   events: {
                     dataPointSelection: function (event, chartContext, opts) {
                       navigateTo(
-                        `https://cwe.mitre.org/data/definitions/${
+                        vulnerabilities.cweReference(
                           (fixed
                             ? stats.fixed_cwe_distribution
-                            : stats.cwe_distribution)[opts.dataPointIndex].cwe
-                            .toLowerCase()
-                            .split('-')[1]
-                        }.html`,
+                            : stats.cwe_distribution)[opts.dataPointIndex],
+                        ).cwe,
                         { external: true, open: { target: '_blank' } },
                       );
                     },
@@ -280,7 +278,6 @@
               }"
               :height="height"
             />
-            <!-- TODO: composable to get CWE reference -->
           </v-col>
         </v-row>
       </v-container>
@@ -303,6 +300,7 @@ defineProps({
   height: String,
 });
 const enums = useEnums();
+const vulnerabilities = useVulnerabilities();
 const utils = useUtils();
 const api = useApi("/api/stats/vulnerabilities/", true);
 const stats = ref(null);
