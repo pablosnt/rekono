@@ -350,7 +350,5 @@ function loadData(loading: boolean = false): void {
   });
 }
 
-// CODE: Define parameters typing properly in all JS functions
-
 defineExpose({ loadData });
 </script>
