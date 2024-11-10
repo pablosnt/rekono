@@ -319,7 +319,7 @@ filters
   .then((results) => (filtering.value = results));
 
 function loadData(data) {
-  for (const task of data.length) {
+  for (const task of data) {
     utils.getTitle(task);
     if (task.start && task.end) {
       task.duration = dates.getDuration(task.start, task.end);

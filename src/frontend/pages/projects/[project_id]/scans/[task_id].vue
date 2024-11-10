@@ -218,6 +218,11 @@
                       :disabled="
                         !['Completed', 'Error'].includes(execution.status)
                       "
+                      :prepend-avatar="
+                        execution.configuration.tool.icon
+                          ? execution.configuration.tool.icon
+                          : undefined
+                      "
                       @click="
                         expand = !expand;
                         expandExecution =
@@ -227,17 +232,11 @@
                             : execution;
                       "
                     >
-                      <template #prepend>
-                        <!-- CODE: why not using prepend-avatar as Dialog does? Do the same everywhere -->
-                        <v-avatar
-                          v-if="execution.configuration.tool.icon"
-                          :image="execution.configuration.tool.icon"
-                        />
-                        <v-icon
-                          v-if="!execution.configuration.tool.icon"
-                          icon="mdi-rocket"
-                          color="red"
-                        />
+                      <template
+                        v-if="!execution.configuration.tool.icon"
+                        #prepend
+                      >
+                        <v-icon icon="mdi-rocket" color="red" />
                       </template>
                       <template #text>
                         <p v-if="execution.start">

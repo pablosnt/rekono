@@ -664,7 +664,7 @@ function submit() {
     let errors = 0;
     loading.value = true;
     progress.value = 0;
-    for (const target of selectedTargets) {
+    for (const target of selectedTargets.value) {
       body.target_id = target.id;
       api
         .create(body)

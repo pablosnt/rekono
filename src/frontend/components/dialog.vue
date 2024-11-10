@@ -7,12 +7,12 @@
     :loading="loading ? 'red' : false"
     :title="title"
     :subtitle="subtitle"
+    :prepend-avatar="avatar ? avatar : undefined"
     :prepend-icon="!iconColor ? icon : undefined"
     :variant="variant"
   >
-    <template #prepend>
-      <v-avatar v-if="avatar" :image="avatar" />
-      <v-icon v-if="icon" :icon="icon" :color="iconColor" />
+    <template v-if="icon && iconColor" #prepend>
+      <v-icon :icon="icon" :color="iconColor" />
     </template>
     <template #append>
       <slot name="extra-append" />
