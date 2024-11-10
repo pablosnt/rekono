@@ -26,7 +26,7 @@ const props = defineProps({
 });
 const emit = defineEmits(["reload"]);
 const utils = useUtils();
-function submit() {
+function submit(): void {
   let request = null;
   if (props.item.subscribed) {
     request = props.api.remove(props.item.id, "subscription/");

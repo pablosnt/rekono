@@ -64,7 +64,7 @@ const tab = ref(tabKeys.value.includes(tabQuery) ? tabQuery : tabKeys.value[0]);
 const filtering = ref([]);
 buildFiltering();
 
-function properties(item) {
+function properties(item: object): object {
   return Object.assign(
     {},
     {
@@ -75,7 +75,7 @@ function properties(item) {
   );
 }
 
-function buildFiltering() {
+function buildFiltering(): void {
   filters.build(props.tabs[tab.value].filtering).then((tabFilters) => {
     filters
       .build(
@@ -121,7 +121,7 @@ function buildFiltering() {
   });
 }
 
-function tabChange() {
+function tabChange(): void {
   buildFiltering();
   forceUpdate.value++;
   if (dataset.value) {

@@ -130,7 +130,7 @@ const tabs = ref({
   },
 });
 
-function getPort() {
+function getPort(): void {
   api.get(route.params.port_id).then((response) => {
     port.value = response;
     if (host.value === null) {

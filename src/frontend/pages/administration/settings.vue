@@ -158,7 +158,7 @@ api.get(1).then((response) => {
   disabled.value = true;
 });
 
-function submit() {
+function submit(): void {
   if (valid.value) {
     api.update(settings.value, 1).then((response) => {
       settings.value = response;

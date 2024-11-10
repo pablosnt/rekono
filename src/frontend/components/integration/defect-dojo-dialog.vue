@@ -149,7 +149,7 @@ api.get(1).then((response) => {
   loading.value = false;
 });
 
-function loadData(data) {
+function loadData(data: object): void {
   isAvailable.value = data.is_available;
   server.value = data.server;
   apiToken.value = data.api_token;
@@ -159,7 +159,7 @@ function loadData(data) {
   test.value = data.test;
 }
 
-function submit() {
+function submit(): void {
   if (valid.value) {
     loading.value = true;
     api

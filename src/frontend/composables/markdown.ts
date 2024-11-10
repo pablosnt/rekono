@@ -9,7 +9,7 @@ export function useMarkdown() {
     breaks: true,
     linkify: true,
     typographer: true,
-    highlight: function (str, lang) {
+    highlight: function (str: string, lang: string): string {
       let result = "";
       try {
         if (lang && hljs.getLanguage(lang)) {

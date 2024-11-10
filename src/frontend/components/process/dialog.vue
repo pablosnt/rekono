@@ -32,12 +32,12 @@ const emit = defineEmits(["closeDialog", "completed"]);
 const loading = ref(false);
 const process = ref(null);
 const step = ref(0);
-function createdProcess(data: object) {
+function createdProcess(data: object): void {
   process.value = data;
   loading.value = false;
   step.value = 1;
 }
-function closeDialog(completed: boolean) {
+function closeDialog(completed: boolean): void {
   if (completed) {
     emit("completed");
   }

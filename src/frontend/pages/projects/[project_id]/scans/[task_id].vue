@@ -402,7 +402,7 @@ const loading = computed(() => {
 loadExecutions(true);
 loadTask();
 
-function loadTask() {
+function loadTask(): void {
   apiTasks.get(route.params.task_id).then((response) => {
     task.value = response;
     if (["Running", "Requested"].includes(task.value.status)) {
@@ -428,7 +428,7 @@ function loadExecutions(
   showLoading: boolean,
   stage?: string | null = null,
   page: number = 1,
-) {
+): void {
   for (const s of stage !== null ? [stage] : Object.keys(enums.stages)) {
     if (showLoading) {
       loadingStages.value[s] = true;

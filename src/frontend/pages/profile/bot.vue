@@ -206,13 +206,13 @@ const valid = ref(true);
 const disabled = ref(true);
 const loading = ref(false);
 
-function getProfile() {
+function getProfile(): void {
   useApi("/api/profile/", true)
     .get()
     .then((response) => (user.value = response));
 }
 
-function link() {
+function link(): void {
   if (valid.value) {
     loading.value = true;
     api
@@ -231,7 +231,7 @@ function link() {
   }
 }
 
-function unlink() {
+function unlink(): void {
   loading.value = true;
   api
     .remove(user.value.telegram_chat)

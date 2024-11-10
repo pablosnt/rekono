@@ -86,7 +86,7 @@ const disabled = ref(true);
 const status = ref(props.finding.triage_status);
 const comment = ref(props.finding.triage_comment);
 
-function submit() {
+function submit(): void {
   if (valid.value) {
     loading.value = true;
     props.api

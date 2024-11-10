@@ -1,6 +1,6 @@
 export function usePorts() {
   const enums = useEnums();
-  function getIcon(port) {
+  function getIcon(port: number): string {
     switch (port) {
       case 20:
       case 21:

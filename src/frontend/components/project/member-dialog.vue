@@ -45,7 +45,7 @@ props.api
   .list({ is_active: true, no_project: props.parameters.project }, true)
   .then((response) => (users.value = response.items));
 
-function submit() {
+function submit(): void {
   loading.value = true;
   let errors = 0;
   for (const newMember of newMembers.value) {

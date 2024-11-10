@@ -75,7 +75,7 @@ const disabled = ref(props.header !== null);
 const key = ref(props.header ? props.header.key : null);
 const value = ref(props.header ? props.header.value : null);
 
-function submit() {
+function submit(): void {
   if (valid.value) {
     let request = null;
     let body = { key: key.value.trim(), value: value.value.trim() };

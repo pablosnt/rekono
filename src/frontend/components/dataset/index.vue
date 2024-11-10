@@ -276,7 +276,7 @@ const loadingData = ref(false);
 let changedFilters = false;
 loadData(true);
 
-function loadParameters() {
+function loadParameters(): object {
   const parameters =
     props.defaultParameters === null
       ? {}
@@ -297,7 +297,7 @@ function loadParameters() {
   return parameters;
 }
 
-function resetParameters() {
+function resetParameters(): void {
   if (changedFilters) {
     props.filtering.map((item) => {
       filters.setDefault(item);
@@ -312,7 +312,7 @@ function resetParameters() {
   }
 }
 
-function addParameter(key: string, value: string) {
+function addParameter(key: string, value: string): void {
   changedFilters = true;
   const queryParams = Object.assign({}, route.query);
   if (value !== null && value !== undefined) {
@@ -334,7 +334,7 @@ function addParameter(key: string, value: string) {
   loadData();
 }
 
-function loadData(loading: boolean = false) {
+function loadData(loading: boolean = false): void {
   if (search.value) {
     loadingSearch.value = true;
   }

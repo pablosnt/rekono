@@ -72,7 +72,7 @@ const visible = ref(false);
 const password = ref(null);
 const passwordConfirmation = ref(null);
 
-function submit() {
+function submit(): void {
   if (valid.value && (props.otp || props.oldPassword)) {
     emit("loading", true);
     const body = { password: password.value };

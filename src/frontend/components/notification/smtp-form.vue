@@ -103,7 +103,7 @@ const tls = ref(props.data ? props.data.tls : false);
 const username = ref(props.data ? props.data.username : null);
 const password = ref(props.data ? props.data.password : null);
 
-function submit() {
+function submit(): void {
   if (valid.value) {
     emit("loading", true);
     props.api

@@ -58,7 +58,7 @@ const project = ref({
 });
 loadData();
 
-function loadData() {
+function loadData(): void {
   api
     .get(route.params.project_id)
     .then((response) => (project.value = response));

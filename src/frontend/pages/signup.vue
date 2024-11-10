@@ -100,7 +100,7 @@ const password = ref(null);
 const passwordConfirmation = ref(null);
 const visible = ref(false);
 
-function submit() {
+function submit(): void {
   if (valid.value) {
     loading.value = true;
     api

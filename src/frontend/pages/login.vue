@@ -48,7 +48,7 @@ const valid = ref(true);
 const router = useRouter();
 const tokens = useTokens();
 const api = useApi("/api/security/login/", false);
-function login() {
+function login(): void {
   if (valid.value) {
     loading.value = true;
     api

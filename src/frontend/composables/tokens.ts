@@ -29,7 +29,7 @@ export function useTokens() {
     throw new Error("User not authenticated");
   }
 
-  function remove() {
+  function remove(): void {
     localStorage.removeItem(accessToken);
     localStorage.removeItem(refreshToken);
     sessionStorage.removeItem(mfaToken);

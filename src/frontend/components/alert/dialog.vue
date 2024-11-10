@@ -112,7 +112,7 @@ if (props.edit) {
 }
 const subscribe = ref(false);
 
-function submit() {
+function submit(): void {
   if (valid.value) {
     loading.value = true;
     let request = null;

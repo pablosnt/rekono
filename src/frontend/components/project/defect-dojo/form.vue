@@ -59,7 +59,7 @@ const valid = ref(true);
 const name = ref(null);
 const description = ref(null);
 
-function submit() {
+function submit(): void {
   if (valid.value) {
     emit("loading", true);
     props.api

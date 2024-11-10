@@ -99,13 +99,13 @@ const valid = ref(true);
 const loading = ref(false);
 const dateMenu = ref(false);
 
-function getDefaultExpiration() {
+function getDefaultExpiration(): Date {
   const date = new Date();
   date.setFullYear(date.getFullYear() + 1);
   return date;
 }
 
-function submit() {
+function submit(): void {
   if (valid.value) {
     loading.value = true;
     expiration.value.setUTCHours(23);
@@ -126,7 +126,7 @@ function submit() {
   }
 }
 
-function copyKey() {
+function copyKey(): void {
   navigator.clipboard.writeText(key.value);
   alert("API token copied to the clipboard", "success");
 }

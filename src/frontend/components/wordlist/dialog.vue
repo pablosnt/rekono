@@ -87,7 +87,7 @@ const name = ref(props.edit ? props.edit.name : null);
 const type = ref(props.edit ? props.edit.type : null);
 const file = ref(null);
 
-function submit() {
+function submit(): void {
   if (valid.value) {
     loading.value = true;
     let request = null;

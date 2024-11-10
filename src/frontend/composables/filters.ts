@@ -2,19 +2,22 @@ export function useFilters() {
   const user = userStore();
   const route = useRoute();
 
-  function collectionFromEnum(data) {
+  function collectionFromEnum(data: object): Array<object> {
     return Object.entries(data).map(([k, v]) => {
       v.name = k;
       return v;
     });
   }
 
-  function getDefinitionFromKey(key, filtering) {
+  function getDefinitionFromKey(
+    key: string,
+    filtering: Array<object>,
+  ): object | null {
     const search = filtering.filter((item) => item.key === key);
     return search.length > 0 ? search[0] : null;
   }
 
-  function getValue(item) {
+  function getValue(item: object): string | number | boolean | null {
     if (item.multiple) {
       return item.value !== null &&
         item.value !== undefined &&
@@ -34,7 +37,10 @@ export function useFilters() {
     }
   }
 
-  function setValue(item, value) {
+  function setValue(
+    item: object,
+    value: string | number | boolean | null,
+  ): void {
     if (item.collection) {
       item.value = item.multiple
         ? item.collection.filter((f) =>
@@ -48,7 +54,7 @@ export function useFilters() {
     }
   }
 
-  function setDefault(item) {
+  function setDefault(item: object): void {
     if (item.defaultValue === null || item.defaultValue === undefined) {
       item.value = item.defaultValue = item.multiple ? [] : null;
     } else {
@@ -56,7 +62,7 @@ export function useFilters() {
     }
   }
 
-  function setValueFromQuery(item) {
+  function setValueFromQuery(item: object): void {
     const value = route.query[item.key]?.toString();
     if (value !== undefined && value !== null) {
       setValue(item, value);
@@ -70,7 +76,7 @@ export function useFilters() {
     }
   }
 
-  function build(filters) {
+  function build(filters: Array<object>): Promise {
     return Promise.all(
       filters
         .filter(

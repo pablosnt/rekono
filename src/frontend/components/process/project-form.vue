@@ -52,7 +52,7 @@ const valid = ref(true);
 const name = ref(props.edit ? props.edit.name : null);
 const description = ref(props.edit ? props.edit.description : null);
 const tags = ref(props.edit ? props.edit.tags : []);
-function submit() {
+function submit(): void {
   if (valid.value) {
     emit("loading", true);
     const request = props.edit ? props.api.update : props.api.create;

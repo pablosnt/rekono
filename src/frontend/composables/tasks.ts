@@ -1,5 +1,5 @@
 export function useTasks() {
-  function getTitle(task) {
+  function getTitle(task: object): string {
     const executable =
       task.configuration !== null
         ? `${task.configuration.tool.name} - ${task.configuration.name}`

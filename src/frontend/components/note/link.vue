@@ -84,7 +84,7 @@ for (const key of Object.keys(props)) {
   }
 }
 
-function processEntity(name) {
+function processEntity(name: string): void {
   // TODO: add search value to the links and review other ocurrences of the same problem
   if (entity.value) {
     if (name === "target") {
@@ -131,7 +131,7 @@ function processEntity(name) {
   }
 }
 
-function getEntity(name) {
+function getEntity(name: string): void {
   if (props.note && props.note[name] !== null) {
     useApi(
       `/api/${name.charAt(name.length - 1) === "y" ? name.substring(0, name.length - 1) + "ies" : name + "s"}/`,

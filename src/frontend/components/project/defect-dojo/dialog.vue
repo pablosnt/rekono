@@ -167,7 +167,7 @@ const eDisabled = ref(false);
 const loading = ref(false);
 const step = ref(1);
 
-function submit() {
+function submit(): void {
   if (productType.value && product.value) {
     loading.value = true;
     props.api

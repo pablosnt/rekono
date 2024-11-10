@@ -50,7 +50,7 @@ const router = useRouter();
 const otp = ref(route.query.otp ? route.query.otp : null);
 const api = useApi("/api/users/reset-password/", false);
 
-function sendResetToken() {
+function sendResetToken(): void {
   if (valid.value) {
     loading.value = true;
     api

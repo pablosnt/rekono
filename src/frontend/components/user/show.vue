@@ -266,7 +266,7 @@ useApi("/api/smtp/", true)
   .get(1)
   .then((response) => (smtp.value = response));
 
-function enableOrDisable(user) {
+function enableOrDisable(user: object): void {
   let request = null;
   let message = user.username ? user.username : user.email;
   if (user.is_active) {

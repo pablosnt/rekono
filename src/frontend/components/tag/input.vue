@@ -75,11 +75,11 @@ const regex = props.validate === null ? useValidation().name : props.validate;
 const newTag = ref(null);
 const tags = ref(props.value != null ? props.value : []);
 
-function addTag(tag) {
+function addTag(tag: string): void {
   tags.value.push(tag.trim());
 }
 
-function removeTag(tag) {
+function removeTag(tag: string): void {
   tags.value.splice(tags.value.indexOf(tag.trim()), 1);
 }
 

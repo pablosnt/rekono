@@ -80,13 +80,13 @@ const tokens = useTokens();
 const token = ref(tokens.get().mfa);
 const emailApi = ref(useApi("/api/security/mfa/email/", token.value === null));
 
-function newOtp() {
+function newOtp(): void {
   if (valid.value) {
     emit("newOtp", mfa.value);
   }
 }
 
-function clearOtp() {
+function clearOtp(): void {
   mfa.value = null;
 }
 

@@ -41,7 +41,7 @@ const valid = ref(true);
 const disabled = ref(true);
 const token = ref(props.data ? props.data.token : null);
 
-function submit() {
+function submit(): void {
   if (valid.value) {
     emit("loading", true);
     props.api

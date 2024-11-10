@@ -135,7 +135,7 @@ api.get().then((response) => {
   getPlatforms();
 });
 
-function getPlatforms() {
+function getPlatforms(): void {
   for (const platform of enums.notificationPlatforms) {
     if (
       user.value[`${platform.toLowerCase().replace("-", "")}_notifications`] ===
@@ -146,7 +146,7 @@ function getPlatforms() {
   }
 }
 
-function submit() {
+function submit(): void {
   if (valid.value) {
     api
       .update({

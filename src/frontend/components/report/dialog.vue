@@ -173,13 +173,13 @@ const onlyTruePositives = ref(true);
 const findingTypes = ref(Object.keys(enums.findings));
 const format = ref("pdf");
 
-function searchTargets() {
+function searchTargets(): void {
   useApi("/api/targets/", true)
     .list({ project: props.parameters.project }, true)
     .then((response) => (targets.value = response.items));
 }
 
-function searchTasks() {
+function searchTasks(): void {
   useApi("/api/tasks/", true)
     .list({ target: selectedTarget.value.id }, true)
     .then((response) => {
@@ -190,7 +190,7 @@ function searchTasks() {
     });
 }
 
-function submit() {
+function submit(): void {
   loading.value = true;
   api
     .create({

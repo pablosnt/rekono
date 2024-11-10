@@ -1,5 +1,9 @@
 export function useDates() {
-  function getDuration(startISO, endISO = null, round: boolean = false) {
+  function getDuration(
+    startISO: string,
+    endISO: string = "",
+    round: boolean = false,
+  ): string {
     const start = new Date(startISO);
     const end = endISO ? new Date(endISO) : new Date();
     const seconds = Math.floor((end.getTime() - start.getTime()) / 1000);

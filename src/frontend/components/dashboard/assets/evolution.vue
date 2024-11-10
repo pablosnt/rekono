@@ -107,7 +107,7 @@ const api = useApi("/api/stats/assets/evolution/", true);
 const stats = ref(null);
 const dates = ref([]);
 
-function serie(data) {
+function serie(data: Array<object>): Array<object> {
   return dates.value.map((date) => {
     const search = data.filter((item) => item.date === date);
     return {

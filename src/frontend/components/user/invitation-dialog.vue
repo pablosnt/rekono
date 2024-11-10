@@ -52,7 +52,7 @@ const valid = ref(true);
 const loading = ref(false);
 const api = useApi("/api/users/", true, "User");
 
-function submit() {
+function submit(): void {
   if (valid.value) {
     loading.value = true;
     api

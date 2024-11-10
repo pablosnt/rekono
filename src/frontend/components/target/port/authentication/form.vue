@@ -79,7 +79,7 @@ const name = ref(null);
 const secret = ref(null);
 const type = ref("None");
 
-function submit() {
+function submit(): void {
   if (valid.value) {
     emit("loading", true);
     props.api

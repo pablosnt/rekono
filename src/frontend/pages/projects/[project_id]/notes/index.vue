@@ -243,7 +243,7 @@ filters
   ])
   .then((results) => (filtering.value = results));
 
-function share(note) {
+function share(note: object): void {
   const body = {
     title: note.title,
     body: note.body,

@@ -56,7 +56,7 @@ const disabled = ref(true);
 const port = ref(null);
 const path = ref(null);
 
-function submit() {
+function submit(): void {
   if (valid.value) {
     emit("loading", true);
     props.api

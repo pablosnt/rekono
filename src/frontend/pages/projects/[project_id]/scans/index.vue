@@ -318,7 +318,7 @@ filters
   ])
   .then((results) => (filtering.value = results));
 
-function loadData(data) {
+function loadData(data: Array<object>): void {
   for (const task of data) {
     utils.getTitle(task);
     if (task.start && task.end) {

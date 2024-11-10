@@ -50,8 +50,8 @@
                       value: {
                         show: true,
                         fontSize: '14px',
-                        formatter: function (val) {
-                          return val + ' %';
+                        formatter: function (value: string) {
+                          return value + ' %';
                         },
                       },
                       total: {

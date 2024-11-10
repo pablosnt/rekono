@@ -45,7 +45,10 @@ export function useApi(
     return Object.assign({}, currentHeaders, extraHeaders);
   }
 
-  function parseErrorMessage(error, include_field = true) {
+  function parseErrorMessage(
+    error: object,
+    include_field: boolean = true,
+  ): string {
     const firstValue = Object.values(error.data)[0];
     const value = Array.isArray(firstValue) ? firstValue[0] : firstValue;
     const field = Object.keys(error.data)[0];
@@ -57,7 +60,7 @@ export function useApi(
 
   function request(
     endpoint: string,
-    options = {},
+    options: object = {},
     extraPath?: string,
     extraHeaders?: object,
     raw?: boolean = false,
@@ -87,7 +90,7 @@ export function useApi(
             const tokens = useTokens();
             const refreshing = refreshStore();
             if (refreshing.refreshing) {
-              function wait() {
+              function wait(): Promise {
                 return new Promise((resolve, reject) => {
                   setTimeout(() => {
                     if (refreshing.refreshing) {
@@ -179,7 +182,7 @@ export function useApi(
     id?: number,
     extraPath?: string,
     extraHeaders?: object,
-  ) {
+  ): Promise {
     const options = {
       method: "GET",
       headers: headers(authentication, extraHeaders),
@@ -222,10 +225,10 @@ export function useApi(
   }
 
   function list(
-    params = {},
-    all = false,
-    page = 1,
-    items = [],
+    params: object = {},
+    all: boolean = false,
+    page: number = 1,
+    items: Array = [],
     extraPath?: string,
     extraHeaders?: object,
   ): Promise {
@@ -258,7 +261,7 @@ export function useApi(
     id?: number,
     extraPath?: string,
     extraHeaders?: object,
-  ) {
+  ): Promise {
     return request(
       id ? `${endpoint}${id}/` : endpoint,
       {
@@ -286,7 +289,7 @@ export function useApi(
     id?: number,
     extraPath?: string,
     extraHeaders?: object,
-  ) {
+  ): Promise {
     return request(
       id ? `${endpoint}${id}/` : endpoint,
       {
@@ -306,7 +309,11 @@ export function useApi(
     });
   }
 
-  function remove(id?: number, extraPath?: string, extraHeaders?: object) {
+  function remove(
+    id?: number,
+    extraPath?: string,
+    extraHeaders?: object,
+  ): Promise {
     return request(
       id ? `${endpoint}${id}/` : endpoint,
       { method: "DELETE", headers: headers(authentication, extraHeaders) },

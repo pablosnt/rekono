@@ -47,7 +47,7 @@ const version = ref(null);
 const valid = ref(true);
 const loading = ref(false);
 
-function submit() {
+function submit(): void {
   if (valid.value) {
     loading.value = true;
     props.api

@@ -286,7 +286,7 @@ const currentNote = ref(props.note);
 const markdownBody = ref(preview.value ? markdown.render(body.value) : null);
 autoSubmit();
 
-function autoSubmit() {
+function autoSubmit(): void {
   setTimeout(() => {
     if (autoSave.value) {
       submit(false);
@@ -295,7 +295,7 @@ function autoSubmit() {
   }, autoSaveSeconds * 1000);
 }
 
-function success(completed, response) {
+function success(completed: boolean, response: object) {
   currentNote.value = response;
   disabled.value = true;
   loading.value = false;
@@ -310,7 +310,7 @@ function success(completed, response) {
   }
 }
 
-function submit(completed) {
+function submit(completed: boolean): void {
   if ((!title.value || validate.name.test(title.value)) && !disabled.value) {
     let data = {
       title: title.value ? title.value : "Untitled",

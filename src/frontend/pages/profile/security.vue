@@ -21,7 +21,7 @@ definePageMeta({ layout: false });
 const api = useApi("/api/profile", true);
 const user = ref(null);
 getProfile();
-function getProfile() {
+function getProfile(): void {
   api.get().then((response) => (user.value = response));
 }
 </script>

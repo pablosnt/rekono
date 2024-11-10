@@ -537,14 +537,14 @@ if (
   selectProcess();
 }
 
-function selectProject() {
+function selectProject(): void {
   allTargets.value = false;
   selectedTargets.value = [];
   useApi("/api/targets/", true, "Target")
     .list({ project: selectedProject.value.id }, true)
     .then((response) => (targets.value = response.items));
 }
-function selectTool() {
+function selectTool(): void {
   if (selectedTool.value) {
     selectedProcess.value = null;
     selectedConfiguration.value = null;
@@ -574,7 +574,7 @@ function selectTool() {
     }
   }
 }
-function selectProcess() {
+function selectProcess(): void {
   if (selectedProcess.value) {
     selectedTool.value = null;
     selectedConfiguration.value = null;
@@ -587,7 +587,7 @@ function selectProcess() {
     }
   }
 }
-function defaultIntensities() {
+function defaultIntensities(): void {
   intensities.value = Object.entries(enums.intensities).map(([k, v]) => {
     v.name = k;
     return v;
@@ -598,12 +598,12 @@ function defaultIntensities() {
     enums.intensities.Normal,
   );
 }
-function getWordlists() {
+function getWordlists(): void {
   useApi("/api/wordlists/", true, "Wordlist")
     .list(wordlistFilter.value ? { type: wordlistFilter.value } : {}, true)
     .then((response) => (wordlists.value = response.items));
 }
-function getMinDate() {
+function getMinDate(): string {
   const date = new Date();
   if (scheduledTime.value) {
     const parsed = scheduledTime.value.split(":");
@@ -616,7 +616,7 @@ function getMinDate() {
   }
   return date.toISOString().split("T")[0];
 }
-function getMinTime() {
+function getMinTime(): string {
   const date = new Date();
   if (
     scheduledDate.value &&
@@ -627,7 +627,7 @@ function getMinTime() {
   }
   return undefined;
 }
-function isValid() {
+function isValid(): boolean {
   return (
     selectedTargets.value.length > 0 &&
     (selectedProcess.value || selectedConfiguration.value) &&
@@ -637,10 +637,10 @@ function isValid() {
       selectedWordlists.value.length > 0)
   );
 }
-function isScansPage() {
+function isScansPage(): boolean {
   return /^\/projects\/[\d]+\/scans$/.test(route.path);
 }
-function submit() {
+function submit(): void {
   if (isValid()) {
     const body = { intensity: intensity.value.name };
     if (selectedProcess.value) {

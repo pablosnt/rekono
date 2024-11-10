@@ -60,7 +60,7 @@ const valid = ref(true);
 const disabled = ref(props.pattern !== null);
 const target = ref(props.pattern ? props.pattern.target : null);
 
-function submit() {
+function submit(): void {
   if (valid.value) {
     let request = null;
     const body = { target: target.value.trim() };

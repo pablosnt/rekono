@@ -74,7 +74,7 @@ const disableForm = ref(null);
 const loading = ref(false);
 const expand = ref(null);
 
-function mfaSection() {
+function mfaSection(): void {
   expand.value = expand.value === null ? "mfa" : null;
   if (mfa.value && props.user && !props.user.mfa) {
     api
@@ -83,7 +83,12 @@ function mfaSection() {
       .catch(() => (expand.value = null));
   }
 }
-function enableOrDisable(otp, name, alert, form) {
+function enableOrDisable(
+  otp: string,
+  name: string,
+  alert: string,
+  form: object,
+): void {
   loading.value = true;
   api
     .create({ mfa: otp }, undefined, `${name}/`)
@@ -101,10 +106,10 @@ function enableOrDisable(otp, name, alert, form) {
       }
     });
 }
-function enableMfa(otp) {
+function enableMfa(otp: string): void {
   enableOrDisable(otp, "enable", "success", enableForm.value);
 }
-function disableMfa(otp) {
+function disableMfa(otp: string): void {
   enableOrDisable(otp, "disable", "warning", disableForm.value);
 }
 </script>

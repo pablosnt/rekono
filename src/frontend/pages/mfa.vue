@@ -33,7 +33,7 @@ const router = useRouter();
 const tokens = useTokens();
 const token = ref(tokens.get().mfa);
 const api = useApi("/api/security/mfa/", false);
-function login(mfa) {
+function login(mfa: string): void {
   loading.value = true;
   api
     .create({ token: token.value, mfa: mfa })

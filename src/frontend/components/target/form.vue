@@ -29,7 +29,7 @@ const loading = ref(false);
 const target = ref(null);
 const targets = ref([]);
 
-function submit() {
+function submit(): void {
   const targetsToCreate =
     target.value === null
       ? targets.value

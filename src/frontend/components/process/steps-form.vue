@@ -152,7 +152,7 @@ const stage = ref(
       )
     : null,
 );
-function defaultParams() {
+function defaultParams(): object {
   return stage.value !== null
     ? { stage: enums.value.stages[stages.value[stage.value]].id }
     : {};
@@ -161,7 +161,7 @@ function defaultParams() {
 const toolApi = useApi("/api/tools/", true, "Tool");
 const tools = ref([]);
 const tool = ref(null);
-function getTools() {
+function getTools(): void {
   if (stage.value !== null) {
     toolApi
       .list(defaultParams())
@@ -172,7 +172,7 @@ function getTools() {
 const api = useApi("/api/steps/", true, "Step");
 const steps = ref([]);
 getSteps();
-function getSteps() {
+function getSteps(): void {
   const params = defaultParams();
   params.process = props.process.id;
   if (tool.value) {
@@ -180,7 +180,7 @@ function getSteps() {
   }
   api.list(params, true).then((response) => (steps.value = response.items));
 }
-function removeStep(id: number) {
+function removeStep(id: number): void {
   api.remove(id).then(() => {
     getSteps();
     getConfigurations();
@@ -190,7 +190,7 @@ function removeStep(id: number) {
 
 const configurationApi = useApi("/api/configurations/", true, "Configuration");
 const configurations = ref([]);
-function getConfigurations() {
+function getConfigurations(): void {
   if (tool.value) {
     const params = defaultParams();
     params.tool = tool.value.id;
