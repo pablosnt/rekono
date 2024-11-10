@@ -48,9 +48,9 @@ props.api
 function submit() {
   loading.value = true;
   let errors = 0;
-  for (let i = 0; i < newMembers.value.length; i++) {
+  for (const newMember of newMembers.value) {
     addApi
-      .create({ user: newMembers.value[i] })
+      .create({ user: newMember })
       .then(() => {
         progress.value++;
         if (errors + progress.value === newMembers.value.length) {

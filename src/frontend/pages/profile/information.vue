@@ -136,13 +136,12 @@ api.get().then((response) => {
 });
 
 function getPlatforms() {
-  for (let i = 0; i < enums.notificationPlatforms.length; i++) {
+  for (const platform of enums.notificationPlatforms) {
     if (
-      user.value[
-        `${enums.notificationPlatforms[i].toLowerCase().replace("-", "")}_notifications`
-      ] === true
+      user.value[`${platform.toLowerCase().replace("-", "")}_notifications`] ===
+      true
     ) {
-      platforms.value.push(enums.notificationPlatforms[i]);
+      platforms.value.push(platform);
     }
   }
 }

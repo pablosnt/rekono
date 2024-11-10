@@ -319,10 +319,10 @@ filters
   .then((results) => (filtering.value = results));
 
 function loadData(data) {
-  for (let i = 0; i < data.length; i++) {
-    utils.getTitle(data[i]);
-    if (data[i].start && data[i].end) {
-      data[i].duration = dates.getDuration(data[i].start, data[i].end);
+  for (const task of data.length) {
+    utils.getTitle(task);
+    if (task.start && task.end) {
+      task.duration = dates.getDuration(task.start, task.end);
     }
   }
   if (data.filter((t) => t.status === "Running").length > 0) {

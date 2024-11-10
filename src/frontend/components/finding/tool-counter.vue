@@ -28,26 +28,25 @@ const api = useApi("/api/executions/", true);
 const counters = ref({});
 let first = null;
 
-for (let i = 0; i < props.finding.executions.length; i++) {
-  if (first === null || props.finding.executions[i].id < first) {
-    first = props.finding.executions[i].id;
+for (const execution of props.finding.executions) {
+  if (first === null || execution.id < first) {
+    first = execution.id;
   }
-  if (counters.value[props.finding.executions[i].configuration.tool.name]) {
-    counters.value[props.finding.executions[i].configuration.tool.name].count++;
+  if (counters.value[execution.configuration.tool.name]) {
+    counters.value[execution.configuration.tool.name].count++;
     if (
-      counters.value[props.finding.executions[i].configuration.tool.name]
-        .lastTask < props.finding.executions[i].task
+      counters.value[execution.configuration.tool.name].lastTask <
+      execution.task
     ) {
-      counters.value[
-        props.finding.executions[i].configuration.tool.name
-      ].lastTask = props.finding.executions[i].task;
+      counters.value[execution.configuration.tool.name].lastTask =
+        execution.task;
     }
   } else {
-    counters.value[props.finding.executions[i].configuration.tool.name] = {
+    counters.value[execution.configuration.tool.name] = {
       count: 1,
-      icon: props.finding.executions[i].configuration.tool.icon,
-      reference: props.finding.executions[i].configuration.tool.reference,
-      lastTask: props.finding.executions[i].task,
+      icon: execution.configuration.tool.icon,
+      reference: execution.configuration.tool.reference,
+      lastTask: execution.task,
     };
   }
 }

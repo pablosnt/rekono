@@ -184,8 +184,8 @@ function searchTasks() {
     .list({ target: selectedTarget.value.id }, true)
     .then((response) => {
       tasks.value = response.items;
-      for (let i = 0; i < tasks.value.length; i++) {
-        taskUtils.getTitle(tasks.value[i]);
+      for (const task of tasks.value) {
+        taskUtils.getTitle(task);
       }
     });
 }

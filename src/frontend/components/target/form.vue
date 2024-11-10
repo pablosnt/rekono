@@ -40,8 +40,8 @@ function submit() {
     const body = { project: props.projectId };
     let success = 0;
     let errors = 0;
-    for (let i = 0; i < targetsToCreate.length; i++) {
-      body.target = targetsToCreate[i];
+    for (const target of targetsToCreate) {
+      body.target = target;
       props.api
         .create(body)
         .then(() => {

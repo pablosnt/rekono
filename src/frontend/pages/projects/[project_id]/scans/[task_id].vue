@@ -430,7 +430,6 @@ function loadExecutions(
   stage?: string | null = null,
   page: number = 1,
 ) {
-  // CODE: Use this syntax in all for loops
   for (const s of stage !== null ? [stage] : Object.keys(enums.stages)) {
     if (showLoading) {
       loadingStages.value[s] = true;

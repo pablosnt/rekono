@@ -75,8 +75,7 @@ const entity = ref(null);
 const value = ref(null);
 const link = ref(null);
 
-for (let i = 0; i < Object.keys(props).length; i++) {
-  const key = Object.keys(props)[i];
+for (const key of Object.keys(props)) {
   if (key !== "note") {
     getEntity(key);
     if (entity.value) {
@@ -122,9 +121,9 @@ function processEntity(name) {
         "username",
         "secret",
       ];
-      for (let i = 0; i < fields.length; i++) {
-        if (fields[i] in entity.value && entity[fields[i]]) {
-          value.value = entity[fields[i]];
+      for (const field of fields) {
+        if (field in entity.value && entity[field]) {
+          value.value = entity[field];
           break;
         }
       }

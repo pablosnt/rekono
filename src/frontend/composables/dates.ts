@@ -19,14 +19,14 @@ export function useDates() {
     ];
     let duration = "";
     let count = 0;
-    for (let i = 0; i < fields.length; i++) {
-      if (fields[i].value > 0) {
+    for (const field of fields) {
+      if (field.value > 0) {
         count++;
         if (count === 3 && round) {
           duration = duration + "+";
           break;
         } else {
-          duration = duration + `${fields[i].value} ${fields[i].name} `;
+          duration = duration + `${field.value} ${field.name} `;
         }
       }
     }

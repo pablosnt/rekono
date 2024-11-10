@@ -282,12 +282,12 @@ function loadParameters() {
       ? {}
       : Object.assign({}, props.defaultParameters);
   if (props.filtering) {
-    for (let i = 0; i < props.filtering.length; i++) {
-      const value = filters.getValue(props.filtering[i]);
+    for (const definition of props.filtering) {
+      const value = filters.getValue(definition);
       if (value !== null && value !== undefined) {
-        parameters[props.filtering[i].key] = value;
-        if (props.filtering[i].callback) {
-          props.filtering[i].callback(value, props.filtering);
+        parameters[definition.key] = value;
+        if (definition.callback) {
+          definition.callback(value, props.filtering);
         }
       }
     }

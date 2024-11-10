@@ -7,8 +7,8 @@ export function useValidation() {
       /^.*[0-9]+.*$/,
       /^.*[\W]+.*$/,
     ];
-    for (let i = 0; i < regexes.length; i++) {
-      if (!regexes[i].test(password)) {
+    for (const regex of regexes) {
+      if (!regex.test(password)) {
         return false;
       }
     }
