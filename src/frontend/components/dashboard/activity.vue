@@ -40,8 +40,8 @@
                       />
                       <UtilsButtonLink
                         :link="`/projects/${top_project.id}/`"
-                        target="_self"
                         icon="mdi-arrow-right-circle"
+                        same-tab
                       />
                     </td>
                   </tr>
@@ -137,8 +137,8 @@
                     <td class="text-right">
                       <UtilsButtonLink
                         :link="`/projects/${task.target.project}/scans/${task.id}`"
-                        target="_self"
                         icon="mdi-arrow-right-circle"
+                        same-tab
                       />
                     </td>
                   </tr>

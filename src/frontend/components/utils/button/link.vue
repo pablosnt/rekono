@@ -1,11 +1,10 @@
 <template>
-  <!-- CODE: Review from where is this used, and consider hardcode the button. Review also all the occurrences of links via href to Rekono endpoints -->
   <v-btn
     v-if="link"
     variant="text"
     icon
     :color="color"
-    :target="target"
+    :target="sameTab ? '_self' : '_blank'"
     :href="link"
     :size="size"
     hover
@@ -23,7 +22,7 @@
 defineProps({
   link: String,
   icon: { type: String, required: false, default: "mdi-open-in-new" },
-  target: { type: String, required: false, default: "_blank" },
+  sameTab: { type: Boolean, required: false, default: false },
   size: { type: String, required: false, default: undefined },
   color: { type: String, required: false, default: "medium-emphasis" },
   tooltip: { type: String, required: false, default: undefined },

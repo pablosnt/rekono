@@ -17,7 +17,7 @@
         :size="24"
         indeterminate
       />
-      <UtilsButtonLink v-if="link" :link="link" />
+      <UtilsButtonLink :link="link" />
     </template>
     <v-card-text>
       <v-slot name="prepend" />
