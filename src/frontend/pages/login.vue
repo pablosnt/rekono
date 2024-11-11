@@ -1,5 +1,5 @@
 <template>
-  <NuxtLayout name="public-form" :loading="loading">
+  <NuxtLayout name="public" :loading="loading">
     <v-form v-model="valid" @submit.prevent="login()">
       <v-text-field
         v-model="username"

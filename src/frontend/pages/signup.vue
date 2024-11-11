@@ -1,5 +1,5 @@
 <template>
-  <NuxtLayout name="public-form" :loading="loading">
+  <NuxtLayout name="public" :loading="loading">
     <v-card-title class="text-center">Welcome to Rekono!</v-card-title>
     <v-form v-model="valid" @submit.prevent="submit()">
       <v-text-field

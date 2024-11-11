@@ -70,7 +70,7 @@ export function useEnums() {
     "Only my executions",
     "All executions",
   ];
-  const notificationPlatforms = ["e-Mail", "Telegram"];
+  const notificationPlatforms = ["Email", "Telegram"];
   const targets = {
     "Private IP": { icon: "mdi-ip" },
     "Public IP": { icon: "mdi-ip" },

@@ -7,7 +7,7 @@
             v-if="smtp !== null"
             :api="smtpApi"
             :notification="smtp"
-            title="e-Mail"
+            title="Email"
             icon="mdi-email"
             loading-color="black"
             :form="NotificationSmtpForm"

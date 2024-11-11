@@ -6,7 +6,7 @@ export function useTasks() {
         : task.process.name;
     task.title =
       task.start !== null
-        ? `${executable} - ${new Date(new Date(task.start).toISOString().split("T")[0]).toISOString().split("T")[0]}`
+        ? `${executable} - ${new Date(task.start).toISOString().split("T")[0]}`
         : executable;
     return task.title;
   }

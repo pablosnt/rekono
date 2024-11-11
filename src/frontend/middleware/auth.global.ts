@@ -2,7 +2,7 @@ export default defineNuxtRouteMiddleware((to, _) => {
   const publicRoutes = ["login", "signup", "reset-password", "mfa"];
   const user = userStore();
   const tokens = useTokens();
-  if (to.query !== undefined && to.query.logout === "true") {
+  if (to.name === "login" && to.query.logout === "true") {
     const refresh = tokens.get().refresh;
     if (refresh) {
       useApi("/api/security/logout/", true).create({ refresh: refresh });

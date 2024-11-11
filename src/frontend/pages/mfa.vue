@@ -1,5 +1,5 @@
 <template>
-  <NuxtLayout name="public-form" :loading="loading">
+  <NuxtLayout name="public" :loading="loading">
     <v-card-title class="text-center">Multi Factor Authentication</v-card-title>
 
     <v-card-text v-if="app" class="text-center"

@@ -137,10 +137,7 @@ api.get().then((response) => {
 
 function getPlatforms(): void {
   for (const platform of enums.notificationPlatforms) {
-    if (
-      user.value[`${platform.toLowerCase().replace("-", "")}_notifications`] ===
-      true
-    ) {
+    if (user.value[`${platform.toLowerCase()}_notifications`] === true) {
       platforms.value.push(platform);
     }
   }
@@ -153,7 +150,7 @@ function submit(): void {
         first_name: user.value.first_name,
         last_name: user.value.last_name,
         notification_scope: user.value.notification_scope,
-        email_notifications: platforms.value.includes("e-Mail"),
+        email_notifications: platforms.value.includes("Email"),
         telegram_notifications: platforms.value.includes("Telegram"),
       })
       .then((response) => {

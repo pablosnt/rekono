@@ -1,5 +1,5 @@
 <template>
-  <NuxtLayout name="header">
+  <NuxtLayout name="main">
     <v-main>
       <Dashboard />
     </v-main>

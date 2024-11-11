@@ -1,5 +1,5 @@
 <template>
-  <NuxtLayout name="public-form" :loading="loading">
+  <NuxtLayout name="public" :loading="loading">
     <v-card-text class="text-center"
       >You will receive via email a link to reset your password</v-card-text
     >
