@@ -1,5 +1,5 @@
 <template>
-  <Dialog
+  <BaseDialog
     title="Edit Project"
     :loading="loading"
     @close-dialog="emit('closeDialog')"
@@ -15,7 +15,7 @@
         }
       "
     />
-  </Dialog>
+  </BaseDialog>
 </template>
 
 <script setup lang="ts">

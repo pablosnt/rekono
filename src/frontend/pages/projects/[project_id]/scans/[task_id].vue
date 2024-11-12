@@ -324,7 +324,7 @@
       temporary
       @update:model-value="!expand ? (expandExecution = null) : null"
     >
-      <Dialog
+      <BaseDialog
         v-if="expandExecution"
         :title="expandExecution.configuration.name"
         :subtitle="expandExecution.configuration.tool.name"
@@ -335,7 +335,7 @@
           expandExecution = null;
         "
       >
-        <template #extra-append>
+        <template #append>
           <ExecutionDownload :api="api" :execution="expandExecution" />
           <UtilsCounter
             :collection="expandExecution.osint"
@@ -375,7 +375,7 @@
           "
           readonly
         />
-      </Dialog>
+      </BaseDialog>
     </v-navigation-drawer>
   </MenuProject>
 </template>

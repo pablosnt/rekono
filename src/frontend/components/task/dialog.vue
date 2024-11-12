@@ -1,6 +1,6 @@
 <template>
   <!-- TODO: make items in target and wordlist selector closables -->
-  <Dialog
+  <BaseDialog
     title="Execution"
     :loading="loading"
     width="1000"
@@ -445,7 +445,7 @@
         :progress="progress"
       />
     </v-form>
-  </Dialog>
+  </BaseDialog>
 </template>
 
 <script setup lang="ts">

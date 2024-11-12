@@ -1,5 +1,5 @@
 <template>
-  <Dialog
+  <BaseDialog
     title="Create Report"
     :loading="loading"
     @close-dialog="
@@ -128,7 +128,7 @@
       </v-conatiner>
       <UtilsButtonSubmit text="Create" :autofocus="false" class="mt-5" />
     </v-form>
-  </Dialog>
+  </BaseDialog>
 </template>
 
 <script setup lang="ts">

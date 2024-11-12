@@ -1,5 +1,5 @@
 <template>
-  <Dialog title="New Project Member" :loading="loading">
+  <BaseDialog title="New Project Member" :loading="loading">
     <v-container>
       <v-form v-model="valid" @submit.prevent="submit()">
         <v-autocomplete
@@ -27,7 +27,7 @@
         :progress="progress"
       />
     </v-container>
-  </Dialog>
+  </BaseDialog>
 </template>
 
 <script setup lang="ts">

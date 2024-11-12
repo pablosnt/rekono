@@ -20,7 +20,7 @@
       }
     "
   >
-    <template #extra-append>
+    <template #append>
       <v-btn variant="text" icon>
         <v-icon color="info" icon="$info" />
         <v-tooltip

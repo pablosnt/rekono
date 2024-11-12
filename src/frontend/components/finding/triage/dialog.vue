@@ -1,5 +1,5 @@
 <template>
-  <Dialog
+  <BaseDialog
     title="Triage"
     :subtitle="
       finding.triage_date
@@ -13,7 +13,7 @@
       $emit('closeDialog');
     "
   >
-    <template #extra-append>
+    <template #append>
       <UtilsOwner :entity="finding" field="triage_by" />
     </template>
     <v-form v-model="valid" class="mt-3" @submit.prevent="submit()">
@@ -72,7 +72,7 @@
         </v-row>
       </v-conatiner>
     </v-form>
-  </Dialog>
+  </BaseDialog>
 </template>
 
 <script setup lang="ts">

@@ -8,7 +8,7 @@
     :target="target"
     @stats="(data) => (stats = data)"
   >
-    <template #extra-append>
+    <template #append>
       <v-switch
         v-model="fixed"
         class="mr-3 mt-5"

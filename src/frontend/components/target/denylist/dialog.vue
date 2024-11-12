@@ -1,5 +1,5 @@
 <template>
-  <Dialog
+  <BaseDialog
     title="New Target Pattern To Deny"
     :loading="loading"
     @close-dialog="
@@ -17,7 +17,7 @@
         }
       "
     />
-  </Dialog>
+  </BaseDialog>
 </template>
 
 <script setup lang="ts">

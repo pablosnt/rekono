@@ -217,7 +217,7 @@ export function useApi(
     page: number = 1,
     extraPath?: string,
     extraHeaders?: object,
-    items: Array<object> = [], // CODE: Review calls
+    items: Array<object> = [],
   ): Promise {
     const size = all ? max_size : default_size;
     return request(

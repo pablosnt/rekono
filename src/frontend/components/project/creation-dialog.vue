@@ -1,5 +1,5 @@
 <template>
-  <Dialog
+  <BaseDialog
     title="New Project"
     :loading="loading"
     @close-dialog="
@@ -34,7 +34,7 @@
         />
       </v-stepper-window>
     </v-stepper>
-  </Dialog>
+  </BaseDialog>
 </template>
 
 <script setup lang="ts">

@@ -1,5 +1,5 @@
 <template>
-  <Dialog
+  <BaseDialog
     title="Create Report"
     :loading="loading"
     @close-dialog="
@@ -88,7 +88,7 @@
         </v-row>
       </v-conatiner>
     </v-form>
-  </Dialog>
+  </BaseDialog>
 </template>
 
 <script setup lang="ts">

@@ -1,5 +1,5 @@
 <template>
-  <Dialog
+  <BaseDialog
     :title="edit ? 'Edit Wordlist' : 'New Wordlist'"
     :loading="loading"
     @close-dialog="
@@ -64,7 +64,7 @@
         class="mt-5"
       />
     </v-form>
-  </Dialog>
+  </BaseDialog>
 </template>
 
 <script setup lang="ts">

@@ -12,7 +12,7 @@
       cols="4"
     >
       <template #item="{ item }">
-        <AlertShow
+        <Alert
           v-if="!item.value"
           :api="api"
           :alert="item"
@@ -20,7 +20,7 @@
         />
         <v-dialog v-if="item.value !== null">
           <template #activator="{ props: activatorProps }">
-            <AlertShow
+            <Alert
               :api="api"
               :alert="item"
               hover

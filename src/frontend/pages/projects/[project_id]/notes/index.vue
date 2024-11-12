@@ -69,7 +69,7 @@
                   />
                 </template>
                 <template #default="{ isActive }">
-                  <Dialog
+                  <BaseDialog
                     title="Sharing"
                     :text="
                       item.public
@@ -103,7 +103,7 @@
                         >
                       </v-card-actions>
                     </template>
-                  </Dialog>
+                  </BaseDialog>
                 </template>
               </v-dialog>
               <v-dialog width="500" class="overflow-auto">

@@ -1,5 +1,5 @@
 <template>
-  <Menu
+  <BaseMenu
     :options="[
       {
         title: 'Settings',
@@ -39,5 +39,5 @@
     ]"
   >
     <slot />
-  </Menu>
+  </BaseMenu>
 </template>

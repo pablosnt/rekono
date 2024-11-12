@@ -1,5 +1,5 @@
 <template>
-  <Dialog
+  <BaseDialog
     title="Invite User"
     :loading="loading"
     @close-dialog="
@@ -39,7 +39,7 @@
         <UtilsButtonSubmit text="Invite" :autofocus="false" class="mt-5" />
       </v-conatiner>
     </v-form>
-  </Dialog>
+  </BaseDialog>
 </template>
 
 <script setup lang="ts">

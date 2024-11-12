@@ -15,7 +15,7 @@
       <v-icon :icon="icon" :color="iconColor" />
     </template>
     <template #append>
-      <slot name="extra-append" />
+      <slot name="append" />
       <v-btn icon="mdi-close" variant="text" @click="$emit('closeDialog')" />
     </template>
     <v-card-text class="overflow-auto">

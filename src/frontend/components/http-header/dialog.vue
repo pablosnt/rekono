@@ -1,5 +1,5 @@
 <template>
-  <Dialog
+  <BaseDialog
     title="New HTTP Header"
     :loading="loading"
     @close-dialog="
@@ -18,7 +18,7 @@
         }
       "
     />
-  </Dialog>
+  </BaseDialog>
 </template>
 
 <script setup lang="ts">

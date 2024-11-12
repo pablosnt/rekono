@@ -9,7 +9,7 @@
           <PasswordChange />
         </v-col>
         <v-col cols="7">
-          <ApiTokenShow />
+          <ApiToken />
         </v-col>
       </v-row>
     </v-container>

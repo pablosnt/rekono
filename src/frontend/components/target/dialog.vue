@@ -1,5 +1,5 @@
 <template>
-  <Dialog
+  <BaseDialog
     title="New Target"
     :loading="loading"
     @close-dialog="
@@ -18,7 +18,7 @@
       "
       @loading="(value) => (loading = value)"
     />
-  </Dialog>
+  </BaseDialog>
 </template>
 
 <script setup lang="ts">

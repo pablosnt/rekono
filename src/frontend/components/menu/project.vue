@@ -1,5 +1,5 @@
 <template>
-  <Menu
+  <BaseMenu
     :options="[
       {
         title: 'Dashboard',
@@ -49,7 +49,7 @@
     ]"
   >
     <slot />
-  </Menu>
+  </BaseMenu>
 </template>
 
 <script setup lang="ts">

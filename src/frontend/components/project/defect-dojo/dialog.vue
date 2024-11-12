@@ -1,5 +1,5 @@
 <template>
-  <Dialog
+  <BaseDialog
     title="Defect-Dojo Sync"
     width="1000"
     :avatar="integration.icon"
@@ -146,7 +146,7 @@
       color="blue"
       @click="submit()"
     />
-  </Dialog>
+  </BaseDialog>
 </template>
 
 <script setup lang="ts">

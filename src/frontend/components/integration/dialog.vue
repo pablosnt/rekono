@@ -1,11 +1,11 @@
 <template>
-  <Dialog
+  <BaseDialog
     :title="data.name"
     :avatar="data.icon"
     :loading="!color ? loading : false"
     @close-dialog="$emit('closeDialog')"
   >
-    <template #extra-append>
+    <template #append>
       <UtilsButtonGreenCheck
         v-if="!loading"
         :condition="isAvailable"
@@ -39,7 +39,7 @@
     <template #default>
       <slot />
     </template>
-  </Dialog>
+  </BaseDialog>
 </template>
 
 <script setup lang="ts">

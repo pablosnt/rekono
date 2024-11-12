@@ -1,5 +1,5 @@
 <template>
-  <Dialog
+  <BaseDialog
     title="New API Token"
     :loading="loading"
     @close-dialog="
@@ -82,7 +82,7 @@
         </v-row>
       </v-container>
     </v-form>
-  </Dialog>
+  </BaseDialog>
 </template>
 
 <script setup lang="ts">

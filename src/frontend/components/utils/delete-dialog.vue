@@ -1,5 +1,5 @@
 <template>
-  <Dialog
+  <BaseDialog
     :title="`${action} Confirmation`"
     :loading="false"
     color="red"
@@ -31,7 +31,7 @@
         >
       </v-card-actions>
     </template>
-  </Dialog>
+  </BaseDialog>
 </template>
 
 <script setup lang="ts">

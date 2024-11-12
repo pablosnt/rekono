@@ -1,5 +1,5 @@
 <template>
-  <Dialog
+  <BaseDialog
     title="New Technology"
     :loading="loading"
     @close-dialog="
@@ -34,7 +34,7 @@
         <UtilsButtonSubmit text="Create" />
       </v-conatiner>
     </v-form>
-  </Dialog>
+  </BaseDialog>
 </template>
 
 <script setup lang="ts">

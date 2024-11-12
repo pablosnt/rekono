@@ -1,5 +1,5 @@
 <template>
-  <Tab
+  <BaseTabs
     :options="[
       {
         title: 'Dashboard',
@@ -24,7 +24,7 @@
     ]"
   >
     <slot />
-  </Tab>
+  </BaseTabs>
 </template>
 
 <script setup lang="ts">

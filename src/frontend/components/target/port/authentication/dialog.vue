@@ -1,5 +1,5 @@
 <template>
-  <Dialog
+  <BaseDialog
     title="New Authentication"
     :loading="loading"
     @close-dialog="
@@ -12,7 +12,7 @@
       @completed="$emit('completed')"
       @loading="(value) => (loading = value)"
     />
-  </Dialog>
+  </BaseDialog>
 </template>
 
 <script setup lang="ts">

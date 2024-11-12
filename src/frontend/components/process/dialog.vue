@@ -1,5 +1,5 @@
 <template>
-  <Dialog
+  <BaseDialog
     :title="edit ? 'Edit Process' : step === 1 ? process.name : 'New process'"
     :loading="loading"
     @close-dialog="closeDialog(step === 1)"
@@ -20,7 +20,7 @@
       :process="process"
       @reload="api.get(process.id).then((response) => (process = response))"
     />
-  </Dialog>
+  </BaseDialog>
 </template>
 
 <script setup lang="ts">

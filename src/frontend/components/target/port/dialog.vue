@@ -1,5 +1,5 @@
 <template>
-  <Dialog
+  <BaseDialog
     title="New Scope"
     :loading="loading"
     @close-dialog="
@@ -41,7 +41,7 @@
         />
       </v-stepper-window>
     </v-stepper>
-  </Dialog>
+  </BaseDialog>
 </template>
 
 <script setup lang="ts">

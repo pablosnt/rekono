@@ -1,5 +1,5 @@
 <template>
-  <Menu
+  <BaseMenu
     :options="[
       { title: 'Tools', icon: 'mdi-rocket', to: '/toolkit/tools' },
       {
@@ -15,5 +15,5 @@
     ]"
   >
     <slot />
-  </Menu>
+  </BaseMenu>
 </template>

@@ -1,5 +1,5 @@
 <template>
-  <Menu
+  <BaseMenu
     :options="[
       {
         title: 'Information',
@@ -24,5 +24,5 @@
     ]"
   >
     <slot />
-  </Menu>
+  </BaseMenu>
 </template>
