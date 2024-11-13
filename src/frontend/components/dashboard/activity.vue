@@ -34,7 +34,7 @@
                       <BaseTagShow :tags="top_project.tags" :truncate="3" />
                     </td>
                     <td class="text-center">
-                      <UtilsCounter
+                      <UtilsCounterButton
                         :collection="top_project.targets"
                         tooltip="Targets"
                         icon="mdi-target"

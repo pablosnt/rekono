@@ -1,36 +1,30 @@
 <template>
   <v-chip
+  v-if="value > 0 || showZero"
     class="mr-4"
     :prepend-icon="icon"
     :color="color"
+    :to="link"
     :link="link !== null"
     :target="newTab ? '_blank' : '_self'"
     :variant="variant"
-    :disabled="disabled"
     @click.prevent.stop
   >
-    {{ display }} {{ entity }}
+    {{ utils.displayNumber(collection ? collection.length : number) }} {{ entity }}
   </v-chip>
 </template>
 
 <script setup lang="ts">
-defineProps({
-  value: Number,
-  display: String,
-  icon: {
-    type: String,
+const props = defineProps({
+  number: {
+    type: Number,
     required: false,
-    default: undefined,
+    default: 0,
   },
-  image: {
-    type: String,
+  collection: {
+    type: Array,
     required: false,
-    default: undefined,
-  },
-  size: {
-    type: String,
-    required: false,
-    default: undefined,
+    default: null,
   },
   variant: {
     type: String,
@@ -52,20 +46,13 @@ defineProps({
     required: false,
     default: false,
   },
-  tooltip: {
-    type: String,
-    required: false,
-    default: null,
-  },
-  entity: {
-    type: String,
-    required: false,
-    default: null,
-  },
-  disabled: {
+  entity: String,
+  showZero: {
     type: Boolean,
     required: false,
     default: false,
   },
 });
+const utils = useUtils();
+const value = ref(props.collection ? props.collection.length : props.number);
 </script>

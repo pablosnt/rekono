@@ -16,7 +16,7 @@
         v-if="finding.exploit.length > 0"
         :technology="finding"
       />
-      <UtilsCounter
+      <UtilsCounterButton
         icon="mdi-ladybug"
         size="x-large"
         :collection="finding.vulnerability"

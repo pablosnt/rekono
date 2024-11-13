@@ -1,5 +1,5 @@
 <template>
-  <UtilsCounter
+  <UtilsCounterChip
     v-if="note.public"
     :collection="note.forks"
     icon="mdi-arrow-decision"

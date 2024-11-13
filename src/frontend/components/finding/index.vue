@@ -11,7 +11,7 @@
     </template>
     <template #append>
       <slot name="append-before" />
-      <UtilsCounter
+      <UtilsCounterButton
         class="ml-2"
         :collection="finding.notes"
         tooltip="Notes"

@@ -27,7 +27,7 @@
       />
       <FindingFix :api="api" :finding="port" asset-syntax @change="getPort()" />
       <NoteButton :port="port" :project="route.params.project_id" />
-      <UtilsCounter
+      <UtilsCounterButton
         class="ml-2"
         :collection="port.notes"
         tooltip="Notes"
@@ -42,7 +42,7 @@
         :defectdojo-settings="defectdojoSettings"
         :hacktricks="hacktricks"
       />
-      <UtilsCounter
+      <UtilsCounterButton
         icon="mdi-ladybug"
         size="x-large"
         :collection="port.vulnerability"

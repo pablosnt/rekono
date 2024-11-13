@@ -26,7 +26,7 @@
                 }}</v-chip>
               </td>
               <td class="text-left">
-                <UtilsCounter
+                <UtilsCounterButton
                   icon="mdi-ladybug"
                   :collection="port.vulnerability"
                   :link="`/projects/${route.params.project_id}/findings?tab=vulnerabilities&host=${port.host}&port=${port.id}`"

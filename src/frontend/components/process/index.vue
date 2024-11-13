@@ -1,7 +1,7 @@
 <template>
   <v-card :title="process.name" elevation="3" density="compact" hover>
     <template #append>
-      <UtilsCounter
+      <UtilsCounterChip
         :collection="process.steps"
         entity="Steps"
         icon="mdi-rocket"

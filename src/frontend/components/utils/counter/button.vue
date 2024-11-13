@@ -1,15 +1,12 @@
 <template>
-  <v-btn
+  <BaseLink
+    v-if="value > 0 || showZero"
     class="mr-4 text-none"
     :icon="icon !== undefined || image !== undefined"
-    variant="text"
-    :href="link"
-    :hover="link !== null"
-    :target="newTab ? '_blank' : '_self'"
-    :disabled="disabled"
     stacked
   >
-    <v-badge :content="display">
+    <template #icon>
+      <v-badge :content="utils.displayNumber(value)">
       <v-avatar
         v-if="size === undefined"
         :icon="icon"
@@ -24,15 +21,23 @@
         :color="color"
         :variant="variant"
       />
-    </v-badge>
-    <v-tooltip v-if="tooltip !== null" activator="parent" :text="tooltip" />
-  </v-btn>
+      </v-badge>
+    </template>
+  </BaseLink>
 </template>
 
 <script setup lang="ts">
-defineProps({
-  value: Number,
-  display: String,
+const props = defineProps({
+  number: {
+    type: Number,
+    required: false,
+    default: 0,
+  },
+  collection: {
+    type: Array,
+    required: false,
+    default: null,
+  },
   icon: {
     type: String,
     required: false,
@@ -58,30 +63,13 @@ defineProps({
     required: false,
     default: "red",
   },
-  link: {
-    type: String,
-    required: false,
-    default: null,
-  },
-  newTab: {
-    type: Boolean,
-    required: false,
-    default: false,
-  },
-  tooltip: {
-    type: String,
-    required: false,
-    default: null,
-  },
-  entity: {
-    type: String,
-    required: false,
-    default: null,
-  },
-  disabled: {
+  // TODO
+  showZero: {
     type: Boolean,
     required: false,
     default: false,
   },
 });
+const utils = useUtils();
+const value = ref(props.collection ? props.collection.length : props.number)
 </script>

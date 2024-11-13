@@ -33,7 +33,7 @@
               <span class="me-2" />
             </template>
             <template #append>
-              <UtilsCounter
+              <UtilsCounterButton
                 :collection="item.targets"
                 tooltip="Targets"
                 icon="mdi-target"

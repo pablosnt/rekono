@@ -18,7 +18,7 @@
         >
           <template #append>
             <span class="me-3" />
-            <UtilsCounter
+            <UtilsCounterChip
               :number="item.size"
               entity="Words"
               icon="mdi-counter"

@@ -25,15 +25,14 @@
           :to="`/projects/${item.project}/targets/${item.id}/dashboard`"
         >
           <template #append>
-            <UtilsCounter
+            <UtilsCounterButton
               :collection="item.tasks"
               tooltip="Tasks"
               icon="mdi-play-network"
               :link="`/projects/${item.project}/scans`"
-              color="red"
               new-tab
             />
-            <UtilsCounter
+            <UtilsCounterButton
               class="ml-2"
               :collection="item.reports"
               tooltip="Reports"
@@ -42,7 +41,7 @@
               color="blue-grey-darken-1"
               new-tab
             />
-            <UtilsCounter
+            <UtilsCounterButton
               class="ml-2"
               :collection="item.notes"
               tooltip="Notes"

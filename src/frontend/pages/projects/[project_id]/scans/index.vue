@@ -94,7 +94,7 @@
                 >
                   {{ item.intensity }}
                 </v-chip>
-                <UtilsCounter
+                <UtilsCounterButton
                   :collection="item.wordlists"
                   tooltip="Wordlists used"
                   icon="mdi-file-word-box"
@@ -102,7 +102,7 @@
                   color="blue-grey"
                   new-tab
                 />
-                <UtilsCounter
+                <UtilsCounterButton
                   :collection="item.notes"
                   tooltip="Notes"
                   icon="mdi-notebook"
@@ -110,7 +110,7 @@
                   color="indigo-darken-1"
                   new-tab
                 />
-                <UtilsCounter
+                <UtilsCounterButton
                   :collection="item.reports"
                   tooltip="Reports"
                   icon="mdi-file-document-multiple"

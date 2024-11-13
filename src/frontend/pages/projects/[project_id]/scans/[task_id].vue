@@ -83,7 +83,7 @@
         <v-chip :color="enums.intensities[task.intensity].color">
           {{ task.intensity }}
         </v-chip>
-        <UtilsCounter
+        <UtilsCounterButton
           :collection="task.wordlists"
           tooltip="Wordlists used"
           icon="mdi-file-word-box"
@@ -91,7 +91,7 @@
           color="blue-grey"
           new-tab
         />
-        <UtilsCounter
+        <UtilsCounterButton
           :collection="task.notes"
           tooltip="Notes"
           icon="mdi-notebook"
@@ -99,7 +99,7 @@
           color="indigo-darken-1"
           new-tab
         />
-        <UtilsCounter
+        <UtilsCounterButton
           :collection="task.reports"
           tooltip="Reports"
           icon="mdi-file-document-multiple"
@@ -263,7 +263,7 @@
                       <v-card-actions>
                         <ExecutionDownload :api="api" :execution="execution" />
                         <v-spacer />
-                        <UtilsCounter
+                        <UtilsCounterButton
                           :collection="execution.osint"
                           :icon="enums.findings.OSINT.icon"
                           size="x-large"
@@ -271,7 +271,7 @@
                           tooltip="OSINT"
                           new-tab
                         />
-                        <UtilsCounter
+                        <UtilsCounterButton
                           :collection="execution.host"
                           :icon="enums.findings.Host.icon"
                           size="x-large"
@@ -280,7 +280,7 @@
                           color="indigo"
                           new-tab
                         />
-                        <UtilsCounter
+                        <UtilsCounterButton
                           :collection="execution.vulnerability"
                           :icon="enums.findings.Vulnerability.icon"
                           size="x-large"
@@ -337,7 +337,7 @@
       >
         <template #append>
           <ExecutionDownload :api="api" :execution="expandExecution" />
-          <UtilsCounter
+          <UtilsCounterButton
             :collection="expandExecution.osint"
             :icon="enums.findings.OSINT.icon"
             size="x-large"
@@ -345,7 +345,7 @@
             tooltip="OSINT"
             new-tab
           />
-          <UtilsCounter
+          <UtilsCounterButton
             :collection="expandExecution.host"
             :icon="enums.findings.Host.icon"
             size="x-large"
@@ -354,7 +354,7 @@
             color="indigo"
             new-tab
           />
-          <UtilsCounter
+          <UtilsCounterButton
             :collection="expandExecution.vulnerability"
             :icon="enums.findings.Vulnerability.icon"
             size="x-large"

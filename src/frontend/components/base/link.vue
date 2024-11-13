@@ -12,8 +12,10 @@
     :hover="link !== undefined"
     @click.prevent.stop
   >
+    <v-slot name="icon">
     <v-avatar v-if="avatar" :size="avatarSize" :image="avatar" />
     <v-icon v-if="icon && !avatar" :color="iconColor" :icon="icon" />
+    </v-slot>
     <v-tooltip
       v-if="tooltip !== undefined"
       activator="parent"
