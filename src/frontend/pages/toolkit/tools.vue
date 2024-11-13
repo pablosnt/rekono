@@ -26,7 +26,7 @@
               {{ item.version }}
             </v-chip>
             <span class="me-3" />
-            <UtilsButtonGreenCheck
+            <UtilsGreenCheck
               :condition="item.is_installed"
               true-text="Installed"
               false-text="Tool may have been installed after its last execution attempt"
@@ -89,7 +89,7 @@
           <v-card-actions>
             <TaskButton :tool="item" tooltip="Run" />
             <v-spacer />
-            <UtilsButtonLike
+            <UtilsLike
               :api="api"
               :item="item"
               @reload="(value) => dataset.loadData(value)"

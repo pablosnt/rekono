@@ -56,7 +56,7 @@
                     </td>
                     <td class="text-center">{{ technology.version }}</td>
                     <td>
-                      <UtilsButtonDelete
+                      <UtilsDeleteButton
                         :id="technology.id"
                         :api="api"
                         :text="`Technology '${technology.name}' will be removed`"

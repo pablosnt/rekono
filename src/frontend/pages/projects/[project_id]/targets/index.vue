@@ -58,7 +58,7 @@
             <v-spacer />
             <NoteButton :project="route.params.project_id" :target="item" />
             <ReportButton :project="route.params.project_id" :target="item" />
-            <UtilsButtonDelete
+            <UtilsDeleteButton
               :id="item.id"
               :api="api"
               :text="`Target '${item.target}' will be removed`"

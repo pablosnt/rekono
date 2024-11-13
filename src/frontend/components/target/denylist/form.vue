@@ -23,7 +23,7 @@
               :disabled="disabled"
               @click="submit"
             />
-            <UtilsButtonDelete
+            <UtilsDeleteButton
               v-if="!pattern.default"
               :id="pattern.id"
               :api="api"

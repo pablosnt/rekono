@@ -1,5 +1,5 @@
 <template>
-  <UtilsNameDescriptionForm
+  <BaseFormNameDescription
     :edit="edit"
     @submit="(name, description) => submit(name, description)"
   >
@@ -8,7 +8,7 @@
       :value="tags"
       @new-values="(value) => (tags = value)"
     />
-  </UtilsNameDescriptionForm>
+  </BaseFormNameDescription>
 </template>
 
 <script setup lang="ts">

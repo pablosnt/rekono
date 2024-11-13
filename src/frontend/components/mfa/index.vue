@@ -37,7 +37,7 @@
               </v-row>
               <v-row justify="center" dense>
                 <v-col v-if="!user.mfa && qrUrl">
-                  <UtilsShowQr class="text-center" :data="qrUrl" />
+                  <UtilsQr class="text-center" :data="qrUrl" />
                   <MfaForm
                     ref="enableMfaForm"
                     :loading="enableMfaLoading"

@@ -4,7 +4,7 @@
       <template #append>
         <ProjectDefectDojo :project="project" @reload="loadData()" />
         <TaskButton :project="project" />
-        <UtilsButtonEditDelete
+        <UtilsDeleteButtonEdit
           v-if="
             project.owner &&
             (project.owner.id === user.user || user.role === 'Admin')
@@ -33,7 +33,7 @@
               @close-dialog="isActive.value = false"
             />
           </template>
-        </UtilsButtonEditDelete>
+        </UtilsDeleteButtonEdit>
       </template>
       <template #text>
         <BaseTagShow :tags="project.tags" />

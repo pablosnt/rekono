@@ -1,5 +1,5 @@
 <template>
-  <UtilsNameDescriptionForm
+  <BaseFormNameDescription
     :disabled="disabled"
     @submit="(name, description) => submit(name, description)"
   />

@@ -52,7 +52,7 @@
               <TaskButton v-if="item.targets.length > 0" :project="item" />
               <v-spacer />
 
-              <UtilsButtonEditDelete
+              <UtilsDeleteButtonEdit
                 v-if="item.owner.id === user.user || user.role === 'Admin'"
               >
                 <template #edit-dialog="{ isActive }">
@@ -78,7 +78,7 @@
                     @close-dialog="isActive.value = false"
                   />
                 </template>
-              </UtilsButtonEditDelete>
+              </UtilsDeleteButtonEdit>
             </v-card-actions>
           </v-card>
         </template>

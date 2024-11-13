@@ -4,7 +4,7 @@
       <v-icon size="x-large" :icon="icon" :color="iconColor" />
     </template>
     <template #append>
-      <UtilsButtonGreenCheck
+      <UtilsGreenCheck
         v-if="!loading"
         :condition="data?.is_available"
         true-text="Available"

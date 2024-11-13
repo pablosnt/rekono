@@ -29,7 +29,7 @@
           <NoteForkedFrom v-if="note" :note="note" />
           <span v-if="note.forks.length > 0" class="me-2" />
           <NoteForks :note="currentNote" />
-          <UtilsButtonLike
+          <UtilsLike
             :api="api"
             :item="currentNote"
             @reload="
@@ -42,7 +42,7 @@
           <span class="me-4" />
           <UtilsOwner class="ma-2" :entity="currentNote" />
           <span class="me-2" />
-          <UtilsButtonDelete
+          <UtilsDeleteButton
             v-if="currentNote"
             :id="currentNote.id"
             :api="api"

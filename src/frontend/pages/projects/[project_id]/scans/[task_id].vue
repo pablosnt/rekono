@@ -38,7 +38,7 @@
           <v-icon icon="mdi-repeat" color="green" />
           <v-tooltip activator="parent" text="Re-run" />
         </v-btn>
-        <UtilsButtonDelete
+        <UtilsDeleteButton
           v-if="
             task.status && task.progress < 100 && task.status !== 'Cancelled'
           "

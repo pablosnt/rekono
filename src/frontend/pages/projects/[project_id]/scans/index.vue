@@ -140,7 +140,7 @@
               <v-icon icon="mdi-repeat" color="green" />
               <v-tooltip activator="parent" text="Re-run" />
             </v-btn>
-            <UtilsButtonDelete
+            <UtilsDeleteButton
               v-if="
                 item.status &&
                 item.progress < 100 &&

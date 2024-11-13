@@ -6,7 +6,7 @@
     @close-dialog="$emit('closeDialog')"
   >
     <template #append>
-      <UtilsButtonGreenCheck
+      <UtilsGreenCheck
         v-if="!loading"
         :condition="isAvailable"
         true-text="Available"

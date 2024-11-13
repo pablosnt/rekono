@@ -1,5 +1,5 @@
 <template>
-  <FindingShowComponent
+  <Finding
     v-if="finding"
     :api="api"
     :finding="finding"
@@ -34,7 +34,7 @@
         <v-tooltip activator="parent" text="Create target" />
       </v-btn>
     </template>
-  </FindingShowComponent>
+  </Finding>
 </template>
 
 <script setup lang="ts">

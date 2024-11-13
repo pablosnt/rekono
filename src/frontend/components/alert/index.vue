@@ -52,7 +52,7 @@
     <v-card-actions>
       <AlertSubscribe :api="api" :item="alert" @reload="$emit('reload')" />
       <v-spacer />
-      <UtilsButtonDelete
+      <UtilsDeleteButton
         :id="item.id"
         :api="api"
         :text="`Alert '${item.mode} ${item.item}' will be removed`"

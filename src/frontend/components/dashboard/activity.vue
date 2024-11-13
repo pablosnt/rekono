@@ -175,7 +175,7 @@
                       {{ host.address }}
                     </td>
                     <td class="text-center">
-                      <FindingToolCounter :finding="host" />
+                      <FindingTools :finding="host" />
                     </td>
                   </tr>
                 </tbody>
@@ -235,7 +235,7 @@
                     </td>
 
                     <td class="text-center">
-                      <FindingToolCounter :finding="vulnerability" />
+                      <FindingTools :finding="vulnerability" />
                     </td>
 
                     <td class="text-right">

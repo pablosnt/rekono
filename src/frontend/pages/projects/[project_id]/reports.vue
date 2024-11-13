@@ -61,7 +61,7 @@
           <v-card-actions>
             <ReportButtonDownload :api="api" :report="item" />
             <v-spacer />
-            <UtilsButtonDelete
+            <UtilsDeleteButton
               :id="item.id"
               :api="api"
               :text="`Report '${item.id}' will be removed`"

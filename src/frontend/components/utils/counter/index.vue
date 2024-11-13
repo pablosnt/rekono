@@ -1,4 +1,5 @@
 <template>
+  <!-- CODE: Remove and just use one or the other counter -->
   <component
     :is="UtilsComponent"
     v-if="value > 0 || showZero"

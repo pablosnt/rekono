@@ -1,10 +1,12 @@
 <template>
   <MenuProject>
-    <FindingPage :page="FindingPageFindings" match-query />
+    <FindingPage :page="FindingOsintVulnerabilityPage" match-query />
   </MenuProject>
 </template>
 
 <script setup lang="ts">
 definePageMeta({ layout: false });
-const FindingPageFindings = resolveComponent("FindingPageFindings");
+const FindingOsintVulnerabilityPage = resolveComponent(
+  "FindingOsintVulnerabilityPage",
+);
 </script>

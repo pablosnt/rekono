@@ -88,7 +88,7 @@
                                 />
                               </template>
                             </v-dialog>
-                            <UtilsButtonDelete
+                            <UtilsDeleteButton
                               v-if="port.authentication"
                               :id="port.authentication.id"
                               :api="authApi"
@@ -97,7 +97,7 @@
                               action="Delete Authentication"
                               @completed="dataset.loadData(false)"
                             />
-                            <UtilsButtonDelete
+                            <UtilsDeleteButton
                               :id="port.id"
                               :api="api"
                               :text="`Target port '${port.port}' will be removed`"

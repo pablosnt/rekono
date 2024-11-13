@@ -27,7 +27,7 @@
     </template>
     <template #text>
       {{ finding.description }}
-      <FindingShowCredentials
+      <FindingCredential
         :credentials="finding.credential"
         :defectdojo="defectdojo"
         :defectdojo-settings="defectdojoSettings"

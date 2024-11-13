@@ -13,7 +13,7 @@
     @reload="$emit('reload')"
   >
     <template #text>
-      <FindingShowPorts
+      <FindingPort
         :ports="finding.port"
         :defectdojo="defectdojo"
         :defectdojo-settings="defectdojoSettings"

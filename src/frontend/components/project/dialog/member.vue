@@ -21,7 +21,7 @@
           class="mt-5"
           :disabled="newMembers.length === 0"
       /></v-form>
-      <UtilsPercentageProgress
+      <UtilsPercentage
         v-if="loading"
         :total="newMembers.length"
         :progress="progress"

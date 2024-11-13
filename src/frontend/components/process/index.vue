@@ -33,12 +33,12 @@
     <v-card-actions>
       <TaskButton :process="process" tooltip="Run" />
       <v-spacer />
-      <UtilsButtonLike
+      <UtilsLike
         :api="api"
         :item="process"
         @reload="(value) => $emit('reload', value)"
       />
-      <UtilsButtonEditDelete
+      <UtilsDeleteButtonEdit
         v-if="
           (process.owner !== null && process.owner.id === user.user) ||
           user.role === 'Admin'
@@ -62,7 +62,7 @@
             @close-dialog="isActive.value = false"
           />
         </template>
-      </UtilsButtonEditDelete>
+      </UtilsDeleteButtonEdit>
     </v-card-actions>
   </v-card>
 </template>

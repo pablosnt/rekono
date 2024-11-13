@@ -41,13 +41,13 @@
 
           <v-card-actions>
             <v-spacer />
-            <UtilsButtonLike
+            <UtilsLike
               :api="api"
               :item="item"
               @reload="(value) => dataset.loadData(value)"
             />
             <span class="me-3" />
-            <UtilsButtonEditDelete
+            <UtilsDeleteButtonEdit
               v-if="
                 (item.owner !== null && item.owner.id === user.user) ||
                 user.role === 'Admin'
@@ -70,7 +70,7 @@
                   @close-dialog="isActive.value = false"
                 />
               </template>
-            </UtilsButtonEditDelete>
+            </UtilsDeleteButtonEdit>
           </v-card-actions>
         </v-card>
       </template>

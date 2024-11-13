@@ -20,7 +20,7 @@
         />
         <v-tooltip activator="parent" text="Exposure time" />
       </v-btn>
-      <FindingToolCounter
+      <FindingTools
         class="mr-3"
         :finding="port"
         @exposure="(value) => (exposure = value)"
@@ -99,7 +99,7 @@ getPort();
 const tabs = ref({
   paths: {
     text: "Paths",
-    component: resolveComponent("FindingShowPath"),
+    component: resolveComponent("FindingPath"),
     api: useApi("/api/paths/", true),
     icon: enums.findings.Path.icon,
     emptyHead: "No paths found",
@@ -120,7 +120,7 @@ const tabs = ref({
   },
   technologies: {
     text: "Technologies",
-    component: resolveComponent("FindingShowTechnology"),
+    component: resolveComponent("FindingTechnology"),
     api: useApi("/api/technologies/", true),
     icon: enums.findings.Technology.icon,
     emptyHead: "No technologies found",

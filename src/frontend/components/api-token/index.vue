@@ -47,7 +47,7 @@
                   {{ new Date(token.expiration).toDateString() }}
                 </td>
                 <td>
-                  <UtilsButtonDelete
+                  <UtilsDeleteButton
                     :id="token.id"
                     :api="api"
                     :text="`API token '${token.name}' will be removed`"

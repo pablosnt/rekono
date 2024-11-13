@@ -1,10 +1,10 @@
 <template>
   <MenuProject>
-    <FindingPage :page="FindingPageAssets" asset />
+    <FindingPage :page="FindingHostPage" asset />
   </MenuProject>
 </template>
 
 <script setup lang="ts">
 definePageMeta({ layout: false });
-const FindingPageAssets = resolveComponent("FindingPageAssets");
+const FindingHostPage = resolveComponent("FindingHostPage");
 </script>

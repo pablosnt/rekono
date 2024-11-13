@@ -439,7 +439,7 @@
         prepend-icon="mdi-play"
       />
 
-      <UtilsPercentageProgress
+      <UtilsPercentage
         v-if="loading"
         :total="selectedTargets.length"
         :progress="progress"

@@ -33,7 +33,7 @@
             <template #prepend>:</template>
             <template v-if="header !== null" #append>
               <UtilsButtonSave :disabled="disabled" @click="submit()" />
-              <UtilsButtonDelete
+              <UtilsDeleteButton
                 :id="header.id"
                 :api="api"
                 :text="`HTTP header '${header.key}' will be removed`"

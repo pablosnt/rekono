@@ -31,7 +31,7 @@
     <template #text>
       <slot name="text" />
       <v-divider class="my-3 mb-5" />
-      <FindingToolCounter
+      <FindingTools
         :finding="finding"
         @exposure="(value) => (exposure = value)"
       />

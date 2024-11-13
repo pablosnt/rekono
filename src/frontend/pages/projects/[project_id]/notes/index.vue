@@ -44,7 +44,7 @@
             <NoteForks :note="item" />
             <NoteForkedFrom :note="item" />
             <v-spacer />
-            <UtilsButtonLike
+            <UtilsLike
               :api="api"
               :item="item"
               @reload="(value) => dataset.loadData(value)"
