@@ -1,7 +1,7 @@
 <template>
   <MenuProject>
     <TargetTab>
-      <HttpHeaderShow :target="route.params.target_id" />
+      <HttpHeader :target="route.params.target_id" />
     </TargetTab>
   </MenuProject>
 </template>

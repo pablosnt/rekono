@@ -4,7 +4,7 @@
     :loading="loading"
     @close-dialog="closeDialog(step === 1)"
   >
-    <ProcessProjectForm
+    <ProcessFormProject
       v-if="step === 0"
       :api="api"
       :edit="edit ? edit : process"
@@ -15,7 +15,7 @@
         }
       "
     />
-    <ProcessStepsForm
+    <ProcessFormSteps
       v-if="step === 1"
       :process="process"
       @reload="api.get(process.id).then((response) => (process = response))"

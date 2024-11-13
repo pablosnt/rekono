@@ -3,18 +3,18 @@
     <v-container class="mt-5" fluid>
       <v-row justify="space-around" dense>
         <v-col align-self="center" cols="5">
-          <NotificationShow
+          <Notification
             v-if="smtp !== null"
             :api="smtpApi"
             :notification="smtp"
             title="Email"
             icon="mdi-email"
             loading-color="black"
-            :form="NotificationSmtpForm"
+            :form="NotificationFormSmtp"
           />
         </v-col>
         <v-col align-self="center" cols="5">
-          <NotificationShow
+          <Notification
             v-if="telegram != null"
             :api="telegramApi"
             :notification="telegram"
@@ -28,7 +28,7 @@
                 ? `https://t.me/${telegram.bot}`
                 : 'https://core.telegram.org/bots#how-do-i-create-a-bot'
             "
-            :form="NotificationTelegramForm"
+            :form="NotificationFormTelegram"
           >
             <template #prepend>
               <v-alert
@@ -51,7 +51,7 @@
                 </template>
               </v-alert>
             </template>
-          </NotificationShow>
+          </Notification>
         </v-col>
       </v-row>
     </v-container>
@@ -60,12 +60,12 @@
 
 <script setup lang="ts">
 definePageMeta({ layout: false });
-const NotificationSmtpForm = resolveComponent("NotificationSmtpForm");
+const NotificationFormSmtp = resolveComponent("NotificationFormSmtp");
 const smtpApi = useApi("/api/smtp/", true, "SMTP settings");
 const smtp = ref(null);
 smtpApi.get(1).then((response) => (smtp.value = response));
 
-const NotificationTelegramForm = resolveComponent("NotificationTelegramForm");
+const NotificationFormTelegram = resolveComponent("NotificationFormTelegram");
 const telegramApi = useApi(
   "/api/telegram/settings/",
   true,

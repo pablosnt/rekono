@@ -29,7 +29,7 @@
               "
               #append
             >
-              <UtilsButtonLink :link="`https://t.me/${telegram.bot}`" />
+              <BaseLink :link="`https://t.me/${telegram.bot}`" />
             </template>
             <template #text>
               <v-container

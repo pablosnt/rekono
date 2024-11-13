@@ -3,7 +3,7 @@
     <v-container v-if="user" fluid>
       <v-row justify="center" dense>
         <v-col cols="7">
-          <MfaShow :user="user" @reload="getProfile()" />
+          <Mfa :user="user" @reload="getProfile()" />
         </v-col>
         <v-col cols="7">
           <PasswordChange />

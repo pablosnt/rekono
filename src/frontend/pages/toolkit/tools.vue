@@ -94,7 +94,7 @@
               :item="item"
               @reload="(value) => dataset.loadData(value)"
             />
-            <UtilsButtonLink :link="item.reference" />
+            <BaseLink :link="item.reference" />
           </v-card-actions>
         </v-card>
       </template>

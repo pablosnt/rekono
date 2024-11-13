@@ -16,14 +16,14 @@
                 class="d-flex justify-center align-center"
                 cols="5"
               >
-                <IntegrationShow
+                <Integration
                   v-if="integration.id !== 1 && integration.id !== 4"
                   :api="iApi"
                   :integration="integration"
                 />
                 <v-dialog v-if="integration.id === 1 || integration.id === 4">
                   <template #activator="{ props: activatorProps }">
-                    <IntegrationShow
+                    <Integration
                       :api="iApi"
                       :integration="integration"
                       hover
@@ -31,13 +31,13 @@
                     />
                   </template>
                   <template #default="{ isActive }">
-                    <IntegrationDefectDojoDialog
+                    <IntegrationDialogDefectDojo
                       v-if="integration.id === 1"
                       :integration-api="iApi"
                       :integration="integration"
                       @close-dialog="isActive.value = false"
                     />
-                    <IntegrationCveCrowdDialog
+                    <IntegrationDialogCveCrowd
                       v-if="integration.id === 4"
                       :integration-api="iApi"
                       :integration="integration"

@@ -1,6 +1,6 @@
 <template>
   <MenuAdministration>
-    <UserShow change-role enable-disable />
+    <User change-role enable-disable />
   </MenuAdministration>
 </template>
 

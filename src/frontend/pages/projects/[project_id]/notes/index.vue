@@ -37,7 +37,7 @@
                 v-html="markdown.render(item.body)"
               />
             </v-container>
-            <TagShow :item="item" :divider="item.body !== null" />
+            <BaseTagShow :tags="item.tags" :divider="item.body !== null" />
           </template>
 
           <v-card-actions>

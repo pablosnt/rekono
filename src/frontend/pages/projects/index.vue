@@ -4,7 +4,7 @@
       <Dataset
         ref="dataset"
         :api="api"
-        :add="ProjectCreationDialog"
+        :add="ProjectDialogCreate"
         :filtering="filtering"
         icon="mdi-folder-open"
         empty-head="No Projects"
@@ -45,7 +45,7 @@
             <template #text>
               <v-card-text>
                 <p>{{ item.description }}</p>
-                <TagShow :item="item" divider />
+                <BaseTagShow :tags="item.tags" divider />
               </v-card-text>
             </template>
             <v-card-actions @click.stop>
@@ -56,7 +56,7 @@
                 v-if="item.owner.id === user.user || user.role === 'Admin'"
               >
                 <template #edit-dialog="{ isActive }">
-                  <ProjectEditionDialog
+                  <ProjectDialogEdit
                     :api="api"
                     :edit="item"
                     @completed="
@@ -125,5 +125,5 @@ filters
   ])
   .then((results) => (filtering.value = results));
 
-const ProjectCreationDialog = resolveComponent("ProjectCreationDialog");
+const ProjectDialogCreate = resolveComponent("ProjectDialogCreate");
 </script>

@@ -1,6 +1,6 @@
 <template>
   <MenuProfile>
-    <HttpHeaderShow :user="user.user" />
+    <HttpHeader :user="user.user" />
   </MenuProfile>
 </template>
 

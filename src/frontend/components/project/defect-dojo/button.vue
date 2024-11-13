@@ -1,5 +1,6 @@
 <template>
-  <v-btn
+  <!-- TODO: Test and remove -->
+  <!-- <v-btn
     :variant="variant"
     :target="link ? '_blank' : undefined"
     :href="
@@ -13,10 +14,25 @@
     :color="color ? 'blue-accent-3' : undefined"
     @click.stop
   >
-    <!-- TODO: review color after and update icon -->
+    
     <v-avatar v-if="!icon" size="small" :image="integration.icon" />
     <v-icon v-if="icon" :icon="icon" />
-  </v-btn>
+  </v-btn> -->
+  <!-- TODO: review color after and update icon -->
+  <BaseLink
+    :link="
+      !link
+        ? undefined
+        : project.defect_dojo_sync.engagement_id !== null
+          ? `${settings.server}/engagement/${project.defect_dojo_sync.engagement_id}`
+          : `${settings.server}/product/${project.defect_dojo_sync.product_id}`
+    "
+    :color="color ? 'blue-accent-3' : undefined"
+    :avatar="!icon ? integration.icon : undefined"
+    :icon="icon ? icon : undefined"
+    :variant="variant"
+    show-always
+  />
 </template>
 
 <script setup lang="ts">

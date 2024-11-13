@@ -11,7 +11,7 @@
           "
         >
           <template #edit-dialog="{ isActive }">
-            <ProjectEditionDialog
+            <ProjectDialogEdit
               :api="api"
               :edit="project"
               @completed="
@@ -36,7 +36,7 @@
         </UtilsButtonEditDelete>
       </template>
       <template #text>
-        <TagShow :item="project" />
+        <BaseTagShow :tags="project.tags" />
         {{ project.description }}
         <v-divider class="mt-5" />
         <Dashboard />

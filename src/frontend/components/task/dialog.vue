@@ -182,7 +182,7 @@
                       "
                       #append
                     >
-                      <UtilsButtonLink :link="selectedTool.reference" />
+                      <BaseLink :link="selectedTool.reference" />
                     </template>
                   </v-autocomplete>
                   <v-autocomplete

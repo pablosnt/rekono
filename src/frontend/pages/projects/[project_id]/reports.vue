@@ -59,7 +59,7 @@
             <UtilsOwner :entity="item" field="user" />
           </template>
           <v-card-actions>
-            <ReportDownloadButton :api="api" :report="item" />
+            <ReportButtonDownload :api="api" :report="item" />
             <v-spacer />
             <UtilsButtonDelete
               :id="item.id"

@@ -14,7 +14,7 @@
       <template #item="{ item }">
         <v-dialog width="100%" fullscreen>
           <template #activator="{ props: activatorProps }">
-            <ProcessShow
+            <Process
               :api="api"
               :process="item"
               :tools="tools"
@@ -24,7 +24,7 @@
             />
           </template>
           <template #default="{ isActive }">
-            <ProcessShow
+            <Process
               :api="api"
               :process="item"
               :tools="tools"
