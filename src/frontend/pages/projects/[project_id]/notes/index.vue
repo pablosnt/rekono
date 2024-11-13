@@ -24,7 +24,7 @@
           :to="`/projects/${item.project}/notes/${item.id}`"
         >
           <template #append>
-            <NoteLink :note="item" />
+            <NoteReferences :note="item" />
             <span class="me-2" />
             <UtilsOwner :entity="item" />
             <span class="me-2" />
@@ -41,8 +41,8 @@
           </template>
 
           <v-card-actions>
-            <NoteForksChip :note="item" />
-            <NoteForkedFromLink :note="item" />
+            <NoteForks :note="item" />
+            <NoteForkedFrom :note="item" />
             <v-spacer />
             <UtilsButtonLike
               :api="api"

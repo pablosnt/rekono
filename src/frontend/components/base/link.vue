@@ -1,4 +1,5 @@
 <template>
+  <!-- CODE: Review all the places where this can be used, and maybe, adapt it if needed -->
   <v-btn
     v-if="link || showAlways"
     :variant="variant"

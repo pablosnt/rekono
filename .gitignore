@@ -158,5 +158,4 @@ rekono-kbx
 *.kaboxer.yaml
 
 # Temporal ignore
-src/frontend-1.x/
 migrations/

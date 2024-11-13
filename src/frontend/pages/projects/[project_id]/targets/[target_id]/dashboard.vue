@@ -1,8 +1,8 @@
 <template>
   <MenuProject>
-    <TargetTab>
+    <TargetTabs>
       <Dashboard />
-    </TargetTab>
+    </TargetTabs>
   </MenuProject>
 </template>
 

@@ -1,6 +1,6 @@
 <template>
   <MenuProject>
-    <TargetTab>
+    <TargetTabs>
       <v-container fluid>
         <v-row justify="center" dense>
           <v-col cols="8">
@@ -24,7 +24,7 @@
           </v-col>
         </v-row>
       </v-container>
-    </TargetTab>
+    </TargetTabs>
   </MenuProject>
 </template>
 

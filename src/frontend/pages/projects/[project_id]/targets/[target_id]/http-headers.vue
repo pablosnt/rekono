@@ -1,8 +1,8 @@
 <template>
   <MenuProject>
-    <TargetTab>
+    <TargetTabs>
       <HttpHeader :target="route.params.target_id" />
-    </TargetTab>
+    </TargetTabs>
   </MenuProject>
 </template>
 <!-- TODO: review the width of this kind of pages, which is different compared with other pages on the same menu -->

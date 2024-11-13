@@ -1,5 +1,5 @@
 <template>
-  <!-- TODO: Test if BaseLink can be used here without defining all the properties manually -->
+  <!-- CODE: Test if BaseLink can be used here without defining all the properties manually -->
   <v-btn
     :disabled="report.status !== 'Ready'"
     hover

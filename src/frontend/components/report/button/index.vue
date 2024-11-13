@@ -1,7 +1,7 @@
 <template>
   <v-dialog width="auto">
     <template #activator="{ props: activatorProps }">
-      <!-- TODO: Test if BaseLink can be used here without defining all the properties manually -->
+      <!-- CODE: Test if BaseLink can be used here without defining all the properties manually -->
       <v-btn
         hover
         icon
