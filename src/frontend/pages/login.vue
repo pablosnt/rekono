@@ -24,7 +24,7 @@
         @click:append-inner="visible = !visible"
       />
       <v-card-actions class="justify-center">
-        <BaseButtonSubmit text="Login" :disabled="loading" />
+        <UtilsSubmit text="Login" :disabled="loading" />
       </v-card-actions>
       <v-btn
         class="d-flex text-align-right text-medium-emphasis"

@@ -36,7 +36,7 @@
           hide-details
         />
 
-        <BaseButtonSubmit text="Invite" :autofocus="false" class="mt-5" />
+        <UtilsSubmit text="Invite" :autofocus="false" class="mt-5" />
       </v-conatiner>
     </v-form>
   </BaseDialog>

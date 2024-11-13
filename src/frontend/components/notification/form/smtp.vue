@@ -82,7 +82,7 @@
           />
         </v-col>
       </v-row>
-      <BaseButtonSubmit text="Save" class="mt-5" :disabled="disabled" />
+      <UtilsSubmit text="Save" class="mt-5" :disabled="disabled" />
     </v-container>
   </v-form>
 </template>

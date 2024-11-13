@@ -140,7 +140,7 @@
         />
       </template>
     </v-stepper>
-    <BaseButtonSubmit
+    <UtilsSubmit
       v-if="step == 3"
       text="Enable Sync"
       color="blue"

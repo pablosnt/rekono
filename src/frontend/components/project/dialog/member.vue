@@ -16,7 +16,7 @@
           multiple
           :rules="[(m) => m.length > 0 || 'Member is required']"
           validate-on="input" />
-        <BaseButtonSubmit
+        <UtilsSubmit
           text="Add"
           class="mt-5"
           :disabled="newMembers.length === 0"

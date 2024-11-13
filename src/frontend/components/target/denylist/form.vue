@@ -38,7 +38,7 @@
           </template>
         </v-text-field>
       </v-row>
-      <BaseButtonSubmit
+      <UtilsSubmit
         v-if="!pattern"
         text="Create"
         class="mt-5"

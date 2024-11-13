@@ -35,7 +35,7 @@
     />
 
     <v-card-actions class="justify-center">
-      <BaseButtonSubmit :text="submitText" :disabled="loading" />
+      <UtilsSubmit :text="submitText" :disabled="loading" />
     </v-card-actions>
   </v-form>
 </template>

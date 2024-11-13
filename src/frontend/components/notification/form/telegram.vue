@@ -18,7 +18,7 @@
           @update:model-value="disabled = false"
         />
       </v-row>
-      <BaseButtonSubmit
+      <UtilsSubmit
         color="blue"
         text="Save"
         class="mt-5"

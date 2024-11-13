@@ -53,7 +53,7 @@
             </v-date-picker>
           </v-menu>
         </v-text-field>
-        <BaseButtonSubmit text="Create" />
+        <UtilsSubmit text="Create" />
       </v-conatiner>
       <v-container v-if="key" fluid>
         <v-row justify="center" dense>

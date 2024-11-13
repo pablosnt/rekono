@@ -9,7 +9,7 @@
       @new-value="(value) => (target = value)"
       @new-values="(value) => (targets = value)"
     />
-    <BaseButtonSubmit text="Create" :disabled="loading" />
+    <UtilsSubmit text="Create" :disabled="loading" />
   </v-form>
 </template>
 

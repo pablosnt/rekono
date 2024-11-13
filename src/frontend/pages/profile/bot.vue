@@ -171,7 +171,7 @@
                   </v-row>
                   <v-row dense>
                     <v-col>
-                      <BaseButtonSubmit
+                      <UtilsSubmit
                         text="Link Rekono Bot"
                         class="mt-5"
                         :disabled="disabled"

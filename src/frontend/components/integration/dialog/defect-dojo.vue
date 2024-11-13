@@ -114,12 +114,7 @@
           />
         </v-row>
       </v-container>
-      <BaseButtonSubmit
-        color="blue"
-        text="Save"
-        :disabled="disabled"
-        class="mt-5"
-      />
+      <UtilsSubmit color="blue" text="Save" :disabled="disabled" class="mt-5" />
     </v-form>
   </IntegrationDialog>
 </template>

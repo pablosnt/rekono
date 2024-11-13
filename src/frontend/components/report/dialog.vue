@@ -126,7 +126,7 @@
           </v-col>
         </v-row>
       </v-conatiner>
-      <BaseButtonSubmit text="Create" :autofocus="false" class="mt-5" />
+      <UtilsSubmit text="Create" :autofocus="false" class="mt-5" />
     </v-form>
   </BaseDialog>
 </template>

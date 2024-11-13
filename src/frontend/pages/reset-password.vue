@@ -16,7 +16,7 @@
         ]"
         validate-on="blur"
       />
-      <BaseButtonSubmit text="Reset Password" :disabled="loading" />
+      <UtilsSubmit text="Reset Password" :disabled="loading" />
     </v-form>
     <PasswordForm
       v-if="otp"

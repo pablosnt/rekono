@@ -44,7 +44,7 @@
           </v-text-field>
         </v-col>
       </v-row>
-      <BaseButtonSubmit
+      <UtilsSubmit
         v-if="!header"
         text="Create"
         class="mt-5"
