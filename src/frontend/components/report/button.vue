@@ -1,7 +1,7 @@
 <template>
   <v-dialog width="auto">
     <template #activator="{ props: activatorProps }">
-      <BaseLink
+      <BaseButton
         hover
         size="x-large"
         v-bind="activatorProps"

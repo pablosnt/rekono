@@ -1,6 +1,5 @@
 <template>
   <!-- CODE: Review all the places where this can be used, and maybe, adapt it if needed -->
-  <!-- CODE: Replace link name by button -->
   <!-- CODE: Avoid definining properties without default that can be automatically inherited in all occurrences -->
   <v-btn
     v-if="link || !hide"
@@ -13,8 +12,8 @@
     @click.prevent.stop
   >
     <v-slot name="icon">
-    <v-avatar v-if="avatar" :size="avatarSize" :image="avatar" />
-    <v-icon v-if="icon && !avatar" :color="iconColor" :icon="icon" />
+      <v-avatar v-if="avatar" :size="avatarSize" :image="avatar" />
+      <v-icon v-if="icon && !avatar" :color="iconColor" :icon="icon" />
     </v-slot>
     <v-tooltip
       v-if="tooltip !== undefined"

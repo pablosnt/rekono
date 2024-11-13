@@ -59,7 +59,7 @@
             <UtilsOwner :entity="item" field="user" />
           </template>
           <v-card-actions>
-            <BaseLink
+            <BaseButton
               variant="text"
               :disabled="item.status !== 'Ready'"
               hover

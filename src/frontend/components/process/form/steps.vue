@@ -48,7 +48,7 @@
                 <v-avatar :image="tool.icon" />
               </template>
               <template v-if="tool !== null && tool.reference !== null" #append>
-                <BaseLink :link="tool.reference" />
+                <BaseButton :link="tool.reference" />
               </template>
             </v-autocomplete>
           </v-col>
@@ -96,7 +96,7 @@
                   :model-value="true"
                   @click="removeStep(step.id)"
                 />
-                <BaseLink
+                <BaseButton
                   v-if="configurations.length === 0"
                   :link="step.configuration.tool.reference"
                 />

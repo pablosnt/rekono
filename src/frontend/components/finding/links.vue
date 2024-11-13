@@ -1,5 +1,5 @@
 <template>
-  <BaseLink
+  <BaseButton
     v-if="
       defectdojo &&
       defectdojo.enabled &&
@@ -10,13 +10,13 @@
     :avatar="defectdojo.icon"
     tooltip="Defect-Dojo finding"
   />
-  <BaseLink
+  <BaseButton
     v-if="hacktricks && hacktricks.enabled && finding.hacktricks_link"
     :link="finding.hacktricks_link"
     :avatar="hacktricks.icon"
     :tooltip="hacktricks.name"
   />
-  <BaseLink :link="finding.reference" />
+  <BaseButton :link="finding.reference" />
 </template>
 
 <script setup lang="ts">

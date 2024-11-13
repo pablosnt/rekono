@@ -20,7 +20,7 @@
           })
         "
       />
-      <BaseLink :link="data.reference" />
+      <BaseButton :link="data.reference" />
     </template>
   </v-card>
 </template>

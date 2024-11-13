@@ -34,7 +34,7 @@
         "
       />
       <span class="me-3" />
-      <BaseLink :link="data.reference" />
+      <BaseButton :link="data.reference" />
     </template>
     <template #default>
       <slot />

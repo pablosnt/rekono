@@ -17,7 +17,7 @@
         :size="24"
         indeterminate
       />
-      <BaseLink :link="link" />
+      <BaseButton :link="link" />
     </template>
     <v-card-text>
       <v-slot name="prepend" />

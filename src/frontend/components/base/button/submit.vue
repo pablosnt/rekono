@@ -1,5 +1,5 @@
 <template>
-  <BaseLink
+  <BaseButton
     :autofocus="autofocus"
     :color="color"
     size="large"

@@ -18,7 +18,7 @@
           @update:model-value="disabled = false"
         >
           <template v-if="pattern" #append>
-            <BaseLink
+            <BaseButton
               v-if="!pattern.default"
               :disabled="disabled"
               icon="mdi-tray-arrow-down"

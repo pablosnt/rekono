@@ -40,7 +40,7 @@
                         icon="mdi-target"
                         :link="`/projects/${top_project.id}/targets`"
                       />
-                      <BaseLink
+                      <BaseButton
                         :link="`/projects/${top_project.id}/`"
                         icon="mdi-arrow-right-circle"
                         same-tab
@@ -137,7 +137,7 @@
                       </p>
                     </td>
                     <td class="text-right">
-                      <BaseLink
+                      <BaseButton
                         :link="`/projects/${task.target.project}/scans/${task.id}`"
                         icon="mdi-arrow-right-circle"
                         same-tab
@@ -239,7 +239,7 @@
                     </td>
 
                     <td class="text-right">
-                      <BaseLink :link="vulnerability.reference" />
+                      <BaseButton :link="vulnerability.reference" />
                     </td>
                   </tr>
                 </tbody>

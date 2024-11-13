@@ -32,7 +32,7 @@
           >
             <template #prepend>:</template>
             <template v-if="header !== null" #append>
-              <BaseLink
+              <BaseButton
                 :disabled="disabled"
                 icon="mdi-tray-arrow-down"
                 icon-color="green"

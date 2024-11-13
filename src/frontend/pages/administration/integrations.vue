@@ -83,7 +83,7 @@
                       @update:model-value="save = true"
                     >
                       <template #append>
-                        <BaseLink
+                        <BaseButton
                           icon="mdi-tray-arrow-down"
                           icon-color="green"
                           tooltip="Save"

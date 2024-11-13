@@ -1,6 +1,6 @@
 <template>
   <v-chip
-  v-if="value > 0 || showZero"
+    v-if="value > 0 || showZero"
     class="mr-4"
     :prepend-icon="icon"
     :color="color"
@@ -10,7 +10,8 @@
     :variant="variant"
     @click.prevent.stop
   >
-    {{ utils.displayNumber(collection ? collection.length : number) }} {{ entity }}
+    {{ utils.displayNumber(collection ? collection.length : number) }}
+    {{ entity }}
   </v-chip>
 </template>
 

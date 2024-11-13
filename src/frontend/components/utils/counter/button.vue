@@ -1,5 +1,5 @@
 <template>
-  <BaseLink
+  <BaseButton
     v-if="value > 0 || showZero"
     class="mr-4 text-none"
     :icon="icon !== undefined || image !== undefined"
@@ -7,23 +7,23 @@
   >
     <template #icon>
       <v-badge :content="utils.displayNumber(value)">
-      <v-avatar
-        v-if="size === undefined"
-        :icon="icon"
-        :image="image"
-        :color="color"
-        :variant="variant"
-      />
-      <v-icon
-        v-if="size !== undefined"
-        :icon="icon"
-        :size="size"
-        :color="color"
-        :variant="variant"
-      />
+        <v-avatar
+          v-if="size === undefined"
+          :icon="icon"
+          :image="image"
+          :color="color"
+          :variant="variant"
+        />
+        <v-icon
+          v-if="size !== undefined"
+          :icon="icon"
+          :size="size"
+          :color="color"
+          :variant="variant"
+        />
       </v-badge>
     </template>
-  </BaseLink>
+  </BaseButton>
 </template>
 
 <script setup lang="ts">
@@ -71,5 +71,5 @@ const props = defineProps({
   },
 });
 const utils = useUtils();
-const value = ref(props.collection ? props.collection.length : props.number)
+const value = ref(props.collection ? props.collection.length : props.number);
 </script>

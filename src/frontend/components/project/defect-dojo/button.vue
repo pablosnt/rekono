@@ -1,6 +1,6 @@
 <template>
   <!-- TODO: review color after and update icon -->
-  <BaseLink
+  <BaseButton
     :link="
       !link
         ? undefined
