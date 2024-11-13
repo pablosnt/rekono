@@ -20,5 +20,5 @@ defineProps({
   color: { type: String, required: false, default: "red" },
   prependIcon: { type: String, required: false, default: undefined },
 });
-// CODE: Remove this component and use the v-btn directly
+// CODE: Remove this component and use the v-btn directly or BaseLink
 </script>

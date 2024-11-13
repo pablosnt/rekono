@@ -6,7 +6,8 @@
     :variant="!note.forked ? 'tonal' : 'flat'"
     :disabled="note.forked || note.owner.id === user.user"
     entity="Forks"
-    @click="
+    show-zero
+    @click.prevent.stop="
       useApi('/api/notes/', true)
         .create({}, note.id, 'fork/')
         .then((response) => router.push(`/notes/${response.id}`))

@@ -7,11 +7,10 @@
     :target="newTab ? '_blank' : '_self'"
     :variant="variant"
     :disabled="disabled"
-    @click.stop="$emit('click')"
+    @click.prevent.stop
   >
     {{ display }} {{ entity }}
   </v-chip>
-  <!-- CODE: Test if it's needed to retrigger the click event -->
 </template>
 
 <script setup lang="ts">
@@ -69,5 +68,4 @@ defineProps({
     default: false,
   },
 });
-defineEmits(["click"]);
 </script>

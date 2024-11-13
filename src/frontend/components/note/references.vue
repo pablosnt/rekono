@@ -134,7 +134,7 @@ function processEntity(name: string): void {
 function getEntity(name: string): void {
   if (props.note && props.note[name] !== null) {
     useApi(
-      `/api/${name.charAt(name.length - 1) === "y" ? name.substring(0, name.length - 1) + "ies" : name + "s"}/`,
+      `/api/${name.charAt(name.length - 1) === "y" ? name.substring(0, name.length - 1) + "ies" : name !== "osint" ? name + "s" : name}/`,
       true,
     )
       .get(props.note[name])

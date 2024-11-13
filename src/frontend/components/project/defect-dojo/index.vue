@@ -108,7 +108,7 @@
 </template>
 
 <script setup lang="ts">
-const props = defineProps({
+defineProps({
   project: Object,
   onlyLink: { type: Boolean, required: false, default: false },
 });
@@ -116,15 +116,11 @@ defineEmits(["reload"]);
 const integration = ref({ enabled: false });
 const settings = ref({ is_available: false });
 const api = useApi("/api/defect-dojo/sync/", true, "Defect-Dojo sync");
-
-if (!props.onlyLink) {
-  useApi("/api/integrations/", true)
-    .get(1)
-    .then((integrationResponse) => {
-      integration.value = integrationResponse;
-    });
-}
-
+useApi("/api/integrations/", true)
+  .get(1)
+  .then((integrationResponse) => {
+    integration.value = integrationResponse;
+  });
 useApi("/api/defect-dojo/settings/", true)
   .get(1)
   .then((settingsResponse) => {
