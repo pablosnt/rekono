@@ -84,7 +84,7 @@
           </v-col>
         </v-row>
         <v-row>
-          <UtilsButtonSubmit :text="!edit ? 'Create' : 'Update'" />
+          <BaseButtonSubmit :text="!edit ? 'Create' : 'Update'" />
         </v-row>
       </v-conatiner>
     </v-form>

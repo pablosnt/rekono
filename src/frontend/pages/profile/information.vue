@@ -108,7 +108,7 @@
                   </v-row>
                   <v-row class="mt-5" justify="center" dense>
                     <v-col cols="8">
-                      <UtilsButtonSubmit text="Save" :disabled="disabled" />
+                      <BaseButtonSubmit text="Save" :disabled="disabled" />
                     </v-col>
                   </v-row>
                 </v-container>

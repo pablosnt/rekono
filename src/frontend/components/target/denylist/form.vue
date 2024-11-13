@@ -18,9 +18,13 @@
           @update:model-value="disabled = false"
         >
           <template v-if="pattern" #append>
-            <UtilsButtonSave
+            <BaseLink
               v-if="!pattern.default"
               :disabled="disabled"
+              icon="mdi-tray-arrow-down"
+              icon-color="green"
+              tooltip="Save"
+              hover
               @click="submit"
             />
             <UtilsDeleteButton
@@ -34,7 +38,7 @@
           </template>
         </v-text-field>
       </v-row>
-      <UtilsButtonSubmit
+      <BaseButtonSubmit
         v-if="!pattern"
         text="Create"
         class="mt-5"

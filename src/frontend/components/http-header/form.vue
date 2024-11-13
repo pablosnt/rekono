@@ -32,18 +32,19 @@
           >
             <template #prepend>:</template>
             <template v-if="header !== null" #append>
-              <UtilsButtonSave :disabled="disabled" @click="submit()" />
-              <UtilsDeleteButton
-                :id="header.id"
-                :api="api"
-                :text="`HTTP header '${header.key}' will be removed`"
-                @completed="$emit('completed')"
+              <BaseLink
+                :disabled="disabled"
+                icon="mdi-tray-arrow-down"
+                icon-color="green"
+                tooltip="Save"
+                hover
+                @click="submit"
               />
             </template>
           </v-text-field>
         </v-col>
       </v-row>
-      <UtilsButtonSubmit
+      <BaseButtonSubmit
         v-if="!header"
         text="Create"
         class="mt-5"

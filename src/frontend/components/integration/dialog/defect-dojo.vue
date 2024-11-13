@@ -114,7 +114,7 @@
           />
         </v-row>
       </v-container>
-      <UtilsButtonSubmit
+      <BaseButtonSubmit
         color="blue"
         text="Save"
         :disabled="disabled"

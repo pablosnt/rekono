@@ -58,7 +58,7 @@
         validate-on="input"
       />
 
-      <UtilsButtonSubmit
+      <BaseButtonSubmit
         :autofocus="false"
         :text="!edit ? 'Create' : 'Update'"
         class="mt-5"

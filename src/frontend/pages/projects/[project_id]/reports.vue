@@ -59,7 +59,15 @@
             <UtilsOwner :entity="item" field="user" />
           </template>
           <v-card-actions>
-            <ReportButtonDownload :api="api" :report="item" />
+            <BaseLink
+              variant="text"
+              :disabled="item.status !== 'Ready'"
+              hover
+              icon="mdi-download"
+              icon-color="primary"
+              tooltip="Download"
+              @click="api.download(item.id, 'download/', {})"
+            />
             <v-spacer />
             <UtilsDeleteButton
               :id="item.id"

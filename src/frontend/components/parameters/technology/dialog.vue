@@ -31,7 +31,7 @@
           ]"
           validate-on="input"
         />
-        <UtilsButtonSubmit text="Create" />
+        <BaseButtonSubmit text="Create" />
       </v-conatiner>
     </v-form>
   </BaseDialog>

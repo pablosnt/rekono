@@ -83,7 +83,11 @@
                       @update:model-value="save = true"
                     >
                       <template #append>
-                        <UtilsButtonSave
+                        <BaseLink
+                          icon="mdi-tray-arrow-down"
+                          icon-color="green"
+                          tooltip="Save"
+                          hover
                           :disabled="!save"
                           @click="
                             mApi

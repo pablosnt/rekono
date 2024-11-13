@@ -1,6 +1,7 @@
 <template>
   <div ref="qrCode" />
 </template>
+<!-- CODE: Move all utils to base? -->
 
 <script setup lang="ts">
 import QRCodeStyling from "qr-code-styling";

@@ -33,7 +33,7 @@
           </v-text-field>
         </v-col>
       </v-row>
-      <UtilsButtonSubmit class="mt-4" :disabled="disabled" text="Create" />
+      <BaseButtonSubmit class="mt-4" :disabled="disabled" text="Create" />
     </v-container>
   </v-form>
 </template>

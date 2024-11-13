@@ -74,7 +74,7 @@
       />
 
       <v-card-actions class="justify-center">
-        <UtilsButtonSubmit text="Create Account" :disabled="loading" />
+        <BaseButtonSubmit text="Create Account" :disabled="loading" />
       </v-card-actions>
     </v-form>
   </NuxtLayout>

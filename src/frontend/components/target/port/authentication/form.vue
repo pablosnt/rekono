@@ -52,7 +52,7 @@
         </v-col>
       </v-row>
 
-      <UtilsButtonSubmit
+      <BaseButtonSubmit
         class="mt-4"
         :disabled="disabled || type === 'None'"
         text="Save"

@@ -18,7 +18,7 @@
     >
       <template #buttons>
         <v-card-actions class="justify-center">
-          <UtilsButtonSubmit text="Login" :disabled="loading" />
+          <BaseButtonSubmit text="Login" :disabled="loading" />
         </v-card-actions>
       </template>
     </MfaForm>

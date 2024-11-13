@@ -68,7 +68,7 @@
           </v-col>
         </v-row>
         <v-row>
-          <UtilsButtonSubmit :disabled="disabled" text="Triage" />
+          <BaseButtonSubmit :disabled="disabled" text="Triage" />
         </v-row>
       </v-conatiner>
     </v-form>

@@ -36,7 +36,7 @@
 
     <slot name="inputs" />
 
-    <UtilsButtonSubmit
+    <BaseButtonSubmit
       :text="!edit ? 'Create' : 'Update'"
       class="mt-4"
       :autofocus="false"

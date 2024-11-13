@@ -1,18 +1,14 @@
 <template>
   <v-dialog width="auto">
     <template #activator="{ props: activatorProps }">
-      <!-- CODE: Test if BaseLink can be used here without defining all the properties manually -->
-      <v-btn
+      <BaseLink
         hover
-        icon
         size="x-large"
         v-bind="activatorProps"
-        variant="text"
-        @click.prevent.stop
-      >
-        <v-icon icon="mdi-file-document-plus" color="blue-grey-darken-2" />
-        <v-tooltip activator="parent" text="Create a report" />
-      </v-btn>
+        icon="mdi-file-document-plus"
+        icon-color="blue-grey-darken-2"
+        tooltip="Create a report"
+      />
     </template>
     <template #default="{ isActive }">
       <!-- TODO: Review how creation is handled after that -->
