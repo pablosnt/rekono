@@ -41,9 +41,8 @@
                         :link="`/projects/${top_project.id}/targets`"
                       />
                       <BaseButton
-                        :link="`/projects/${top_project.id}/`"
+                        :route="`/projects/${top_project.id}/`"
                         icon="mdi-arrow-right-circle"
-                        same-tab
                       />
                     </td>
                   </tr>
@@ -138,9 +137,8 @@
                     </td>
                     <td class="text-right">
                       <BaseButton
-                        :link="`/projects/${task.target.project}/scans/${task.id}`"
+                        :route="`/projects/${task.target.project}/scans/${task.id}`"
                         icon="mdi-arrow-right-circle"
-                        same-tab
                       />
                     </td>
                   </tr>
@@ -163,13 +161,11 @@
                 <tbody>
                   <tr v-for="host in stats.latest_hosts" :key="host.id">
                     <td class="text-right">
-                      <v-btn icon variant="text">
-                        <v-icon
-                          :icon="enums.osType[host.os_type].icon"
-                          :color="enums.osType[host.os_type].color"
-                        />
-                        <v-tooltip activator="parent" :text="host.os_type" />
-                      </v-btn>
+                      <BaseButton
+                        :icon="enums.osType[host.os_type].icon"
+                        :icon-color="enums.osType[host.os_type].color"
+                        :tooltip="host.os_type"
+                      />
                     </td>
                     <td class="text-center text-capitalize">
                       {{ host.address }}
@@ -198,16 +194,13 @@
                     :key="vulnerability.id"
                   >
                     <td class="text-right">
-                      <v-btn icon variant="text">
-                        <v-icon
-                          :icon="enums.severity[vulnerability.severity].icon"
-                          :color="enums.severity[vulnerability.severity].color"
-                        />
-                        <v-tooltip
-                          activator="parent"
-                          :text="vulnerability.severity"
-                        />
-                      </v-btn>
+                      <BaseButton
+                        :icon="enums.severity[vulnerability.severity].icon"
+                        :icon-color="
+                          enums.severity[vulnerability.severity].color
+                        "
+                        :tooltip="vulnerability.severity"
+                      />
                     </td>
                     <td class="text-center text-capitalize">
                       {{
@@ -217,10 +210,13 @@
                       }}
                     </td>
                     <td class="text-center">
-                      <v-btn v-if="vulnerability.trending" icon variant="text">
-                        <v-icon icon="mdi-fire" color="orange" size="x-large" />
-                        <v-tooltip activator="parent" text="Trending CVE" />
-                      </v-btn>
+                      <BaseButton
+                        v-if="vulnerability.trending"
+                        icon="mdi-fire"
+                        icon-color="orange"
+                        icon-size="x-large"
+                        tooltip="Trending CVE"
+                      />
                       <v-chip
                         v-if="vulnerability.cwe"
                         :href="vulnerabilities.cweReference(vulnerability.cwe)"
@@ -239,7 +235,11 @@
                     </td>
 
                     <td class="text-right">
-                      <BaseButton :link="vulnerability.reference" />
+                      <BaseButton
+                        :link="vulnerability.reference"
+                        new-tab
+                        hide
+                      />
                     </td>
                   </tr>
                 </tbody>

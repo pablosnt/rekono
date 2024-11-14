@@ -1,17 +1,15 @@
 <template>
   <v-dialog width="100%" fullscreen>
     <template #activator="{ props: activatorProps }">
-      <v-btn
+      <BaseButton
         hover
-        icon
+        icon="mdi-notebook-plus"
+        icon-color="indigo-darken-1"
         size="x-large"
         v-bind="activatorProps"
-        variant="text"
+        tooltip="Take a note"
         @click.prevent.stop
-      >
-        <v-icon icon="mdi-notebook-plus" color="indigo-darken-1" />
-        <v-tooltip activator="parent" text="Take a note" />
-      </v-btn>
+      />
     </template>
     <template #default="{ isActive }">
       <NoteDialog

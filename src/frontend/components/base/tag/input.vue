@@ -8,10 +8,9 @@
     validate-on="input"
   >
     <template #append-inner>
-      <v-btn
+      <BaseButton
         icon="mdi-plus-thick"
         color="green"
-        variant="text"
         :disabled="
           !newTag ||
           !newTag.trim() ||

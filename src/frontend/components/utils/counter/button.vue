@@ -63,7 +63,6 @@ const props = defineProps({
     required: false,
     default: "red",
   },
-  // TODO
   showZero: {
     type: Boolean,
     required: false,

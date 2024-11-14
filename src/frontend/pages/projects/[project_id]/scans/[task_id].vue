@@ -21,10 +21,11 @@
         />
       </template>
       <template #append>
-        <v-btn
+        <BaseButton
           v-if="task.status && task.progress === 100"
-          icon
-          variant="text"
+          icon="mdi-repeat"
+          icon-color="green"
+          tooltip="Re-run"
           @click.prevent.stop="
             apiTasks
               .create({}, task.id, 'repeat/')
@@ -34,10 +35,7 @@
                 ),
               )
           "
-        >
-          <v-icon icon="mdi-repeat" color="green" />
-          <v-tooltip activator="parent" text="Re-run" />
-        </v-btn>
+        />
         <UtilsDeleteButton
           v-if="
             task.status && task.progress < 100 && task.status !== 'Cancelled'
@@ -191,23 +189,15 @@
                         width="5"
                         indeterminate
                       />
-                      <v-btn
+                      <BaseButton
                         v-if="
                           execution.status && execution.status !== 'Running'
                         "
-                        icon
-                        variant="text"
+                        :icon="enums.statuses[execution.status].icon"
+                        icon-size="x-large"
+                        :tooltip="execution.status"
                         :color="enums.statuses[execution.status].color"
-                      >
-                        <v-icon
-                          :icon="enums.statuses[execution.status].icon"
-                          size="x-large"
-                        />
-                        <v-tooltip
-                          activator="parent"
-                          :text="execution.status"
-                        />
-                      </v-btn>
+                      />
                     </template>
 
                     <v-card

@@ -5,17 +5,12 @@
     </template>
     <template #append>
       <slot name="extra-append" />
-      <v-btn
+      <BaseButton
         v-if="project === null && target === null"
-        variant="text"
-        icon
-        color="medium-emphasis"
-        to="/projects"
-        hover
-      >
-        <v-icon icon="mdi-folder-open" />
-        <v-tooltip activator="parent" text="All projects" />
-      </v-btn>
+        icon="mdi-folder-open"
+        route="/projects"
+        tooltip="All projects"
+      />
       <TaskButton
         v-if="target !== null || (project === null && target === null)"
         :project="project"

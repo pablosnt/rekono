@@ -182,7 +182,7 @@
                       "
                       #append
                     >
-                      <BaseButton :link="selectedTool.reference" />
+                      <BaseButton :link="selectedTool.reference" new-tab hide />
                     </template>
                   </v-autocomplete>
                   <v-autocomplete

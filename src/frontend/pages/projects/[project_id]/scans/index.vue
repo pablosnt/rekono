@@ -123,10 +123,11 @@
             </div>
           </template>
           <v-card-actions>
-            <v-btn
+            <BaseButton
               v-if="item.status && item.progress === 100"
-              icon
-              variant="text"
+              icon="mdi-repeat"
+              icon-color="green"
+              tooltip="Re-run"
               @click.prevent.stop="
                 api
                   .create({}, item.id, 'repeat/')
@@ -136,10 +137,7 @@
                     ),
                   )
               "
-            >
-              <v-icon icon="mdi-repeat" color="green" />
-              <v-tooltip activator="parent" text="Re-run" />
-            </v-btn>
+            />
             <UtilsDeleteButton
               v-if="
                 item.status &&

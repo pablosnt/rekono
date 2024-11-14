@@ -1,34 +1,43 @@
 <template>
-  <!-- CODE: Review all the places where this can be used, and maybe, adapt it if needed -->
-  <!-- CODE: Avoid definining properties without default that can be automatically inherited in all occurrences -->
   <v-btn
-    v-if="link || !hide"
+    v-if="route || link || !hide"
     :color="color"
     :target="!link ? undefined : newTab ? '_blank' : '_self'"
+    :to="route"
     :href="link"
     :variant="variant"
     :icon="icon || avatar"
-    :hover="link !== undefined"
+    :hover="link || route"
     @click.prevent.stop
   >
-    <v-slot name="icon">
-      <v-avatar v-if="avatar" :size="avatarSize" :image="avatar" />
-      <v-icon v-if="icon && !avatar" :color="iconColor" :icon="icon" />
+    <v-slot>
+      <v-slot name="prepend" />
+      <v-slot name="icon">
+        <v-avatar v-if="avatar" :size="avatarSize" :image="avatar" />
+        <v-icon
+          v-if="icon && !avatar"
+          :size="iconSize"
+          :color="iconColor"
+          :icon="icon"
+        />
+      </v-slot>
+      <v-tooltip
+        v-if="tooltip !== undefined"
+        activator="parent"
+        :text="tooltip"
+      />
     </v-slot>
-    <v-tooltip
-      v-if="tooltip !== undefined"
-      activator="parent"
-      :text="tooltip"
-    />
   </v-btn>
 </template>
 
 <script setup lang="ts">
 defineProps({
+  route: { type: String, required: false, default: undefined },
   link: { type: String, required: false, default: undefined },
   variant: { type: String, required: false, default: "text" },
   icon: { type: String, required: false, default: "mdi-open-in-new" },
   iconColor: { type: String, required: false, default: undefined },
+  iconSize: { type: String, required: false, default: undefined },
   avatar: { type: String, required: false, default: undefined },
   avatarSize: { type: String, required: false, default: "small" },
   color: { type: String, required: false, default: "medium-emphasis" },

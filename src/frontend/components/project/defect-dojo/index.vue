@@ -50,12 +50,7 @@
     />
     <v-dialog width="500" class="overflow-auto">
       <template #activator="{ props: activatorProps }">
-        <v-btn
-          color="red"
-          icon="mdi-link-off"
-          v-bind="activatorProps"
-          @click.prevent.stop
-        />
+        <BaseButton color="red" icon="mdi-link-off" v-bind="activatorProps" />
       </template>
       <template #default="{ isActive }">
         <UtilsDeleteDialog

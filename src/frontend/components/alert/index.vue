@@ -19,10 +19,12 @@
       </p>
     </template>
     <template #prepend>
-      <v-btn hover variant="text" icon>
-        <v-icon :icon="enums.alertModes[item.mode].icon" color="green" />
-        <v-tooltip activator="parent" :text="item.mode" />
-      </v-btn>
+      <BaseButton
+        hover
+        :icon="enums.alertModes[item.mode].icon"
+        icon-color="green"
+        :tooltip="item.mode"
+      />
     </template>
     <template #append>
       <v-switch

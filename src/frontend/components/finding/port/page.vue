@@ -11,15 +11,16 @@
       <v-chip class="mr-5" :color="enums.portStatus[port.status].color">{{
         port.status
       }}</v-chip>
-      <v-btn variant="text">
-        <v-chip
-          v-if="exposure"
-          :text="exposure"
-          prepend-icon="mdi-clock-alert"
-          color="red"
-        />
-        <v-tooltip activator="parent" text="Exposure time" />
-      </v-btn>
+      <BaseButton tooltip="Exposure time">
+        <template #icon>
+          <v-chip
+            v-if="exposure"
+            :text="exposure"
+            prepend-icon="mdi-clock-alert"
+            color="red"
+          />
+        </template>
+      </BaseButton>
       <FindingTools
         class="mr-3"
         :finding="port"

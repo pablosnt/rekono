@@ -1,22 +1,19 @@
 <template>
-  <v-btn
+  <BaseButton
     icon
     hover
-    color="medium-emphasis"
-    variant="text"
+    :text="item.subscribed ? 'Unsubscribe' : 'Subscribe'"
     @click.prevent.stop="submit()"
   >
-    <v-badge floating :content="utils.displayNumber(item.subscribers.length)">
-      <v-icon
-        :icon="item.subscribed ? 'mdi-bell-ring' : 'mdi-bell-outline'"
-        color="red"
-      />
-    </v-badge>
-    <v-tooltip
-      activator="parent"
-      :text="item.subscribed ? 'Unsubscribe' : 'Subscribe'"
-    />
-  </v-btn>
+    <template #icon>
+      <v-badge floating :content="utils.displayNumber(item.subscribers.length)">
+        <v-icon
+          :icon="item.subscribed ? 'mdi-bell-ring' : 'mdi-bell-outline'"
+          color="red"
+        />
+      </v-badge>
+    </template>
+  </BaseButton>
 </template>
 
 <script setup lang="ts">

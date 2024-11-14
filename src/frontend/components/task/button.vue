@@ -1,17 +1,15 @@
 <template>
   <v-dialog width="auto">
     <template #activator="{ props: activatorProps }">
-      <v-btn
+      <BaseButton
         hover
-        icon
+        icon="mdi-play-circle"
+        icon-color="green"
+        :tooltip="tooltip"
         size="x-large"
         v-bind="activatorProps"
-        variant="text"
         @click.prevent.stop
-      >
-        <v-icon icon="mdi-play-circle" color="green" />
-        <v-tooltip activator="parent" :text="tooltip" />
-      </v-btn>
+      />
     </template>
     <template #default="{ isActive }">
       <TaskDialog

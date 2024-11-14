@@ -85,44 +85,30 @@
             :note="note"
           />
           <span class="me-2" />
-          <v-btn v-model="shared" icon variant="text" @click="shared = !shared">
-            <v-icon
-              :icon="shared ? 'mdi-lock-open-variant' : 'mdi-lock'"
-              :color="shared ? 'red' : 'green'"
-            />
-            <v-tooltip
-              activator="parent"
-              :text="shared ? 'Public Note' : 'Private Note'"
-            />
-          </v-btn>
-          <v-btn
+          <BaseButton
+            v-model="shared"
+            :icon="shared ? 'mdi-lock-open-variant' : 'mdi-lock'"
+            :icon-color="shared ? 'red' : 'green'"
+            :tooltip="shared ? 'Public Note' : 'Private Note'"
+            @click="shared = !shared"
+          />
+          <BaseButton
             v-model="preview"
-            icon
-            variant="text"
+            :icon="preview ? 'mdi-pencil' : 'mdi-eye'"
+            :tooltip="preview ? 'Edit' : 'Preview'"
             @click="preview = !preview"
-          >
-            <v-icon :icon="preview ? 'mdi-pencil' : 'mdi-eye'" />
-            <v-tooltip
-              activator="parent"
-              :text="preview ? 'Edit' : 'Preview'"
-            />
-          </v-btn>
-          <v-btn
+          />
+          <BaseButton
             v-model="autoSave"
-            icon
-            variant="text"
+            icon="mdi-floppy"
+            :icon-color="autoSave ? 'green' : 'red'"
+            :tooltip="
+              autoSave
+                ? 'Auto-Save: On. Note will be saved each minute'
+                : 'Auto-Save: Off'
+            "
             @click="autoSave = !autoSave"
-          >
-            <v-icon icon="mdi-floppy" :color="autoSave ? 'green' : 'red'" />
-            <v-tooltip
-              activator="parent"
-              :text="
-                autoSave
-                  ? 'Auto-Save: On. Note will be saved each minute'
-                  : 'Auto-Save: Off'
-              "
-            />
-          </v-btn>
+          />
 
           <span class="me-2" />
           <v-btn

@@ -1,7 +1,7 @@
 <template>
   <v-card title="Change Password" prepend-icon="mdi-key-change" variant="text">
     <template #append>
-      <v-btn
+      <BaseButton
         :icon="expand === null ? 'mdi-menu-down' : 'mdi-menu-up'"
         variant="plain"
         size="x-large"

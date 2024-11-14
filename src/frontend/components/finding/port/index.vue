@@ -33,12 +33,10 @@
                   tooltip="Vulnerabilities"
                   variant="text"
                 />
-                <v-btn
-                  variant="text"
+                <BaseButton
                   icon="mdi-arrow-right-circle"
                   color="medium-emphasis"
-                  :to="`/projects/${route.params.project_id}/assets/${port.id}`"
-                  hover
+                  :route="`/projects/${route.params.project_id}/assets/${port.id}`"
                 />
               </td>
             </tr>

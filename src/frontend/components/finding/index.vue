@@ -4,10 +4,13 @@
     :subtitle="subtitle ? finding[subtitle] : undefined"
   >
     <template #prepend>
-      <v-btn v-if="icon" hover icon variant="text" @click.prevent.stop>
-        <v-icon :icon="icon" :color="iconColor" />
-        <v-tooltip v-if="iconTooltip" activator="parent" :text="iconTooltip" />
-      </v-btn>
+      <BaseButton
+        v-if="icon"
+        hover
+        :icon="icon"
+        :icon-color="iconColor"
+        :tooltip="iconTooltip"
+      />
     </template>
     <template #append>
       <slot name="append-before" />
@@ -44,15 +47,16 @@
         @change="$emit('reload')"
       />
       <v-spacer />
-      <v-btn variant="text">
-        <v-chip
-          v-if="exposure"
-          :text="exposure"
-          prepend-icon="mdi-clock-alert"
-          color="red"
-        />
-        <v-tooltip activator="parent" text="Exposure time" />
-      </v-btn>
+      <BaseButton tooltip="Exposure time">
+        <template #icon>
+          <v-chip
+            v-if="exposure"
+            :text="exposure"
+            prepend-icon="mdi-clock-alert"
+            color="red"
+          />
+        </template>
+      </BaseButton>
       <FindingTriageButton
         v-if="triage"
         :api="api"

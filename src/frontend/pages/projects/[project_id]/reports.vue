@@ -25,13 +25,12 @@
           density="compact"
         >
           <template #prepend>
-            <v-btn hover variant="text" icon>
-              <v-icon
-                :icon="enums.reportFormats[item.format.toLowerCase()].icon"
-                :color="enums.reportStatuses[item.status].color"
-              />
-              <v-tooltip activator="parent" :text="item.status" />
-            </v-btn>
+            <BaseButton
+              hover
+              :icon="enums.reportFormats[item.format.toLowerCase()].icon"
+              :icon-color="enums.reportStatuses[item.status].color"
+              :tooltip="item.status"
+            />
           </template>
           <template #append>
             <v-chip

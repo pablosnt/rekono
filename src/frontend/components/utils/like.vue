@@ -1,19 +1,19 @@
 <template>
-  <v-btn
+  <BaseButton
     icon
     hover
-    color="medium-emphasis"
-    variant="text"
+    :tooltip="item.liked ? 'Dislike' : 'Like'"
     @click.prevent.stop="submit()"
   >
-    <v-badge floating :content="utils.displayNumber(item.likes)">
-      <v-icon
-        :icon="item.liked ? 'mdi-heart' : 'mdi-heart-outline'"
-        color="red"
-      />
-    </v-badge>
-    <v-tooltip activator="parent" :text="item.liked ? 'Dislike' : 'Like'" />
-  </v-btn>
+    <template #icon>
+      <v-badge floating :content="utils.displayNumber(item.likes)">
+        <v-icon
+          :icon="item.liked ? 'mdi-heart' : 'mdi-heart-outline'"
+          color="red"
+        />
+      </v-badge>
+    </template>
+  </BaseButton>
 </template>
 
 <script setup lang="ts">

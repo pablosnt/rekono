@@ -1,11 +1,10 @@
 <template>
-  <v-btn hover icon variant="text">
-    <v-icon
-      :icon="condition ? 'mdi-check-circle' : 'mdi-close-circle'"
-      :color="condition ? 'green' : 'red'"
-    />
-    <v-tooltip activator="parent" :text="condition ? trueText : falseText" />
-  </v-btn>
+  <BaseButton
+    hover
+    :icon="condition ? 'mdi-check-circle' : 'mdi-close-circle'"
+    :icon-color="condition ? 'green' : 'red'"
+    :tooltip="condition ? trueText : falseText"
+  />
 </template>
 
 <script setup lang="ts">

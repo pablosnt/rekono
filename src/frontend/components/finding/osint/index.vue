@@ -17,11 +17,12 @@
     @reload="$emit('reload')"
   >
     <template #actions>
-      <v-btn
+      <BaseButton
         v-if="['IP', 'Domain'].includes(finding.data_type)"
         hover
-        icon
-        variant="text"
+        icon="mdi-target"
+        icon-color="red"
+        tooltip="Create target"
         @click="
           api
             .create({}, finding.id, 'target/')
@@ -29,10 +30,7 @@
               navigateTo(`/projects/${route.params.project_id}/targets`),
             )
         "
-      >
-        <v-icon icon="mdi-target" color="red" />
-        <v-tooltip activator="parent" text="Create target" />
-      </v-btn>
+      />
     </template>
   </Finding>
 </template>

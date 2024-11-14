@@ -7,9 +7,8 @@
     <template #append>
       <v-dialog width="auto">
         <template #activator="{ props: activatorProps }">
-          <v-btn
+          <BaseButton
             icon="mdi-plus-thick"
-            variant="text"
             size="large"
             color="green"
             v-bind="activatorProps"

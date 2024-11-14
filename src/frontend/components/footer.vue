@@ -13,26 +13,28 @@
         >
           <p class="text-overline">{{ section }}</p>
           <template v-for="item in footer[section]" :key="item.link">
-            <v-btn
+            <BaseButton
               v-if="item.icon"
               class="mx-3"
-              target="_blank"
               :href="item.link"
               icon
               variant="plain"
+              new-tab
             >
-              <v-icon
-                v-if="item.icon.substring(0, 4) === 'mdi-'"
-                size="large"
-                :icon="item.icon"
-              />
-              <Icon
-                v-if="item.icon.substring(0, 4) !== 'mdi-'"
-                :icon="item.icon"
-                height="28"
-                width="28"
-              />
-            </v-btn>
+              <template #icon>
+                <v-icon
+                  v-if="item.icon.substring(0, 4) === 'mdi-'"
+                  size="large"
+                  :icon="item.icon"
+                />
+                <Icon
+                  v-if="item.icon.substring(0, 4) !== 'mdi-'"
+                  :icon="item.icon"
+                  height="28"
+                  width="28"
+                />
+              </template>
+            </BaseButton>
           </template>
         </v-col>
       </v-row>

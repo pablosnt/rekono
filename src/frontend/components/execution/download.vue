@@ -1,14 +1,12 @@
 <template>
-  <v-btn
+  <BaseButton
     v-if="execution.status === 'Completed' && execution.has_report"
     hover
-    variant="text"
-    icon
+    icon="mdi-download"
+    icon-color="primary"
+    tooltip="Download original report"
     @click="api.download(execution.id, 'report/', {})"
-  >
-    <v-icon icon="mdi-download" color="primary" />
-    <v-tooltip activator="parent" text="Download original report" />
-  </v-btn>
+  />
 </template>
 
 <script setup lang="ts">

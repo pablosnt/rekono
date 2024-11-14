@@ -34,7 +34,7 @@
         "
       />
       <span class="me-3" />
-      <BaseButton :link="data.reference" />
+      <BaseButton :link="data.reference" new-tab hide />
     </template>
     <template #default>
       <slot />

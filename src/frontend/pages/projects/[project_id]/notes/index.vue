@@ -51,17 +51,16 @@
             />
             <v-speed-dial transition="scale-transition" location="bottom end">
               <template #activator="{ props: activatorProps }">
-                <v-btn
+                <BaseButton
                   v-bind="activatorProps"
                   size="large"
                   color="grey"
                   icon="mdi-cog"
-                  @click.prevent.stop
                 />
               </template>
               <v-dialog v-if="!item.forked_from" width="auto">
                 <template #activator="{ props: activatorProps }">
-                  <v-btn
+                  <BaseButton
                     key="1"
                     :icon="item.public ? 'mdi-share-off' : 'mdi-share'"
                     color="black"
@@ -108,7 +107,7 @@
               </v-dialog>
               <v-dialog width="500" class="overflow-auto">
                 <template #activator="{ props: activatorProps }">
-                  <v-btn
+                  <BaseButton
                     key="2"
                     icon="mdi-trash-can-outline"
                     color="red"

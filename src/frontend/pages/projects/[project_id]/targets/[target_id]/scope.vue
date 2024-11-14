@@ -68,9 +68,8 @@
                             <!-- mdi-key-plus -->
                             <v-dialog v-if="!port.authentication" width="auto">
                               <template #activator="{ props: activatorProps }">
-                                <v-btn
+                                <BaseButton
                                   icon="mdi-key-plus"
-                                  variant="text"
                                   size="large"
                                   color="green"
                                   v-bind="activatorProps"

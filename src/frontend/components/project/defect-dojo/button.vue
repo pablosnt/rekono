@@ -12,7 +12,7 @@
     :avatar="!icon ? integration.icon : undefined"
     :icon="icon ? icon : undefined"
     :variant="variant"
-    show-always
+    new-tab
   />
 </template>
 

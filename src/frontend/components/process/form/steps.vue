@@ -48,7 +48,7 @@
                 <v-avatar :image="tool.icon" />
               </template>
               <template v-if="tool !== null && tool.reference !== null" #append>
-                <BaseButton :link="tool.reference" />
+                <BaseButton :link="tool.reference" new-tab hide />
               </template>
             </v-autocomplete>
           </v-col>
@@ -83,7 +83,7 @@
               :stacked="false"
             >
               <template #actions>
-                <v-btn
+                <BaseButton
                   v-if="configurations.length === 0"
                   hover
                   icon="mdi-close"
@@ -99,6 +99,8 @@
                 <BaseButton
                   v-if="configurations.length === 0"
                   :link="step.configuration.tool.reference"
+                  new-tab
+                  hide
                 />
               </template>
             </v-banner>

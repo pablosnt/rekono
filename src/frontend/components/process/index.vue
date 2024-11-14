@@ -8,7 +8,7 @@
       />
       <span class="me-3" />
       <UtilsOwner :entity="process" />
-      <v-btn
+      <BaseButton
         v-if="details"
         icon="mdi-close"
         variant="text"

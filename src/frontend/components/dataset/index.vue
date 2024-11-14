@@ -13,12 +13,11 @@
         clearable
         @update:model-value="addParameter('search', search)"
       />
-      <v-btn
+      <BaseButton
         v-if="filtering?.length > 0"
         :icon="
           expandFilters ? 'mdi-flip-v mdi-filter-variant' : 'mdi-filter-variant'
         "
-        variant="text"
         size="large"
         @click="
           expandFilters = !expandFilters;
@@ -33,9 +32,8 @@
           :fullscreen="addFullscreen"
         >
           <template #activator="{ props: activatorProps }">
-            <v-btn
+            <BaseButton
               icon="mdi-plus-thick"
-              variant="text"
               size="large"
               color="green"
               v-bind="activatorProps"

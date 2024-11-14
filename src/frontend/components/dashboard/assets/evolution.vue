@@ -21,13 +21,11 @@
     "
   >
     <template #append>
-      <v-btn variant="text" icon>
-        <v-icon color="info" icon="$info" />
-        <v-tooltip
-          activator="parent"
-          text="Assets disappeared and detected again are shown as exposed from the first detection"
-        />
-      </v-btn>
+      <BaseButton
+        icon-color="info"
+        icon="$info"
+        tooltip="Assets disappeared and detected again are shown as exposed from the first detection"
+      />
     </template>
     <template #default>
       <v-container v-if="stats" fluid>

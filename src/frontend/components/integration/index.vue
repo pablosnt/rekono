@@ -20,7 +20,7 @@
           })
         "
       />
-      <BaseButton :link="data.reference" />
+      <BaseButton :link="data.reference" new-tab hide />
     </template>
   </v-card>
 </template>

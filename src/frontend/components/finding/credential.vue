@@ -15,10 +15,12 @@
           <tbody class="text-center">
             <tr v-for="credential in credentialsShow" :key="credential.id">
               <td>
-                <v-btn v-if="credential.context !== null" variant="text" icon>
-                  <v-icon color="info" icon="$info" />
-                  <v-tooltip activator="parent" :text="credential.context" />
-                </v-btn>
+                <BaseButton
+                  v-if="credential.context !== null"
+                  icon-color="info"
+                  icon="$info"
+                  :tooltip="credential.context"
+                />
               </td>
               <td>{{ credential.email }}</td>
               <td>{{ credential.username }}</td>

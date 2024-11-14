@@ -40,31 +40,29 @@
                 :key="configuration.id"
               >
                 <div class="d-flex flex-row">
-                  <v-btn
+                  <BaseButton
                     v-if="configuration.default"
-                    icon
+                    :icon="
+                      item.configurations.length < 2
+                        ? undefined
+                        : show === item.id
+                          ? 'mdi-chevron-up'
+                          : 'mdi-chevron-down'
+                    "
+                    icon-color="black"
                     size="medium"
-                    variant="text"
+                    :tooltip="
+                      item.configurations.length > 1
+                        ? 'Configurations'
+                        : 'Configuration'
+                    "
                     @click="show = show !== item.id ? item.id : null"
                   >
-                    <p>{{ configuration.name }}</p>
-                    <span class="me-2" />
-                    <v-icon
-                      v-if="item.configurations.length > 1"
-                      :icon="
-                        show === item.id ? 'mdi-chevron-up' : 'mdi-chevron-down'
-                      "
-                      color="black"
-                    />
-                    <v-tooltip
-                      activator="parent"
-                      :text="
-                        item.configurations.length > 1
-                          ? 'Configurations'
-                          : 'Configuration'
-                      "
-                    />
-                  </v-btn>
+                    <template #prepend>
+                      <p>{{ configuration.name }}</p>
+                      <span class="me-2" />
+                    </template>
+                  </BaseButton>
                 </div>
                 <v-expand-transition>
                   <div v-show="show == item.id" v-if="!configuration.default">
@@ -94,7 +92,7 @@
               :item="item"
               @reload="(value) => dataset.loadData(value)"
             />
-            <BaseButton :link="item.reference" />
+            <BaseButton :link="item.reference" new-tab hide />
           </v-card-actions>
         </v-card>
       </template>

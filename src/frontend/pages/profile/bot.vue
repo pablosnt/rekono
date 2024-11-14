@@ -29,7 +29,7 @@
               "
               #append
             >
-              <BaseButton :link="`https://t.me/${telegram.bot}`" />
+              <BaseButton :link="`https://t.me/${telegram.bot}`" new-tab />
             </template>
             <template #text>
               <v-container

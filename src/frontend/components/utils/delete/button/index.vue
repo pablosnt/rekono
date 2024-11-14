@@ -1,16 +1,14 @@
 <template>
   <v-dialog width="500" class="overflow-auto">
     <template #activator="{ props: activatorProps }">
-      <v-btn
+      <BaseButton
         hover
         :variant="variant"
-        icon
+        :icon="icon"
+        icon-color="red"
+        :tooltip="action"
         v-bind="activatorProps"
-        @click.prevent.stop
-      >
-        <v-icon :icon="icon" color="red" />
-        <v-tooltip activator="parent" :text="action" />
-      </v-btn>
+      />
     </template>
     <template #default="{ isActive }">
       <UtilsDeleteDialog
