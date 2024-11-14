@@ -6,13 +6,13 @@
     :to="route"
     :href="link"
     :variant="variant"
-    :icon="icon || avatar"
-    :hover="link || route"
+    :icon="icon !== undefined || avatar !== undefined"
+    :hover="link !== undefined || route !== undefined"
     @click.prevent.stop
   >
-    <v-slot>
-      <v-slot name="prepend" />
-      <v-slot name="icon">
+    <slot>
+      <slot name="prepend" />
+      <slot name="icon">
         <v-avatar v-if="avatar" :size="avatarSize" :image="avatar" />
         <v-icon
           v-if="icon && !avatar"
@@ -20,13 +20,13 @@
           :color="iconColor"
           :icon="icon"
         />
-      </v-slot>
+      </slot>
       <v-tooltip
         v-if="tooltip !== undefined"
         activator="parent"
         :text="tooltip"
       />
-    </v-slot>
+    </slot>
   </v-btn>
 </template>
 

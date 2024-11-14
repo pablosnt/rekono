@@ -1,5 +1,5 @@
 <template>
-  <BaseButton
+  <v-btn
     :autofocus="autofocus"
     :color="color"
     size="large"

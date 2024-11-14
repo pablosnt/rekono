@@ -16,8 +16,7 @@
             <BaseButton
               v-if="item.icon"
               class="mx-3"
-              :href="item.link"
-              icon
+              :link="item.link"
               variant="plain"
               new-tab
             >
