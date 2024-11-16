@@ -210,6 +210,28 @@ export function useEnums() {
     },
     Info: { id: 1, color: "grey", icon: "$info", dashboard: "#9E9E9E" },
   };
+  const queues = {
+    tasks: {
+      icon: "mdi-play-network",
+      color: "orange",
+      description: "Create tool executions from requested scans",
+    },
+    executions: {
+      icon: "mdi-play-circle",
+      color: "green",
+      description: "Executes hacking tools",
+    },
+    findings: {
+      icon: findings.Vulnerability.icon,
+      color: "red",
+      description: "Processes the findings detected by the tools",
+    },
+    monitor: {
+      icon: alertModes.Monitor.icon,
+      color: "blue-grey",
+      description: "Monitor all the findings periodically",
+    },
+  };
 
   return {
     stages,
@@ -232,5 +254,6 @@ export function useEnums() {
     osType,
     portStatus,
     severity,
+    queues,
   };
 }

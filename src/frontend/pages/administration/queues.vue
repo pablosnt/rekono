@@ -1,14 +1,25 @@
 <template>
   <MenuAdministration>
-    <v-container class="mt-5" fluid>
-      <v-row justify="space-around" dense>
+    <v-container fluid>
+      <v-row justify="space-around">
         <v-col
           v-for="queue in Object.keys(queues)"
           :key="queue"
-          class="mt-5"
+          class="ma-10"
           cols="5"
         >
-          <v-card elevation="3" class="mx-auto" density="comfortable">
+          <v-card
+            elevation="5"
+            class="mx-auto"
+            density="comfortable"
+            :subtitle="enums.queues[queue].description"
+          >
+            <template #prepend>
+              <v-icon
+                :color="enums.queues[queue].color"
+                :icon="enums.queues[queue].icon"
+              />
+            </template>
             <template #title>
               <v-card-title class="text-capitalize">{{ queue }}</v-card-title>
             </template>
@@ -43,8 +54,7 @@
                   <v-col cols="4">
                     <p>
                       <span class="text-medium-emphasis ml-2"
-                        ><v-icon icon="mdi-graph-outline" size="small" /> On
-                        Hold:</span
+                        ><v-icon icon="mdi-pause" size="small" /> On Hold:</span
                       >
                       {{ queues[queue].deferred_jobs }}
                     </p>
@@ -96,7 +106,9 @@
 
 <script setup lang="ts">
 definePageMeta({ layout: false });
-const api = useApi("/api/stats/rq/", true);
+const enums = useEnums();
 const queues = ref({});
-api.get().then((response) => (queues.value = response));
+useApi("/api/stats/rq/", true)
+  .get()
+  .then((response) => (queues.value = response));
 </script>

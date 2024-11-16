@@ -22,17 +22,13 @@
               <v-icon color="red" :icon="enums.roles[user.role].icon" />
             </template>
           </v-list-item>
-          <v-list-item
-            v-if="user.role !== 'Reader'"
-            to="/toolkit"
-            title="Toolkit"
-          >
+          <v-list-item v-if="autz.isAuditor()" to="/toolkit" title="Toolkit">
             <template #prepend>
               <v-icon color="red" icon="mdi-toolbox" />
             </template>
           </v-list-item>
           <v-list-item
-            v-if="user.role === 'Admin'"
+            v-if="autz.isAdmin()"
             to="/administration"
             title="Administration"
           >
@@ -53,5 +49,6 @@
 
 <script setup lang="ts">
 const enums = ref(useEnums());
+const autz = useAutz();
 const user = userStore();
 </script>

@@ -8,7 +8,7 @@
       },
       {
         title: 'Queues',
-        icon: 'mdi-message-processing',
+        icon: 'mdi-list-box',
         to: '/administration/queues',
       },
       {

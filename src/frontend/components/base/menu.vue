@@ -2,14 +2,17 @@
   <NuxtLayout name="main">
     <v-navigation-drawer expand-on-hover rail class="position-fixed">
       <v-list color="transparent" active-class="text-red">
-        <v-list-item
-          v-for="o in options"
-          :key="o"
-          :title="o.title"
-          :prepend-icon="o.icon"
-          :to="o.to"
-          :active="o.to === route.path || route.path.startsWith(o.to)"
-        />
+        <template v-for="o in options" :key="o">
+          <v-list-item
+            v-if="
+              (!o.admin || autz.isAdmin()) && (!o.auditor || autz.isAuditor())
+            "
+            :title="o.title"
+            :prepend-icon="o.icon"
+            :to="o.to"
+            :active="o.to === route.path || route.path.startsWith(o.to)"
+          />
+        </template>
       </v-list>
       <template #append>
         <v-list-item
@@ -29,4 +32,5 @@
 <script setup lang="ts">
 defineProps({ options: Array<object> });
 const route = useRoute();
+const autz = useAutz();
 </script>
