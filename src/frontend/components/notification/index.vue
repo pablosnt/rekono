@@ -1,7 +1,11 @@
 <template>
-  <v-card :title="title" :subtitle="subtitle" class="mx-auto" elevation="3">
+  <v-card :title="title" :subtitle="subtitle" class="mx-auto" elevation="2">
     <template #prepend>
-      <v-icon size="x-large" :icon="icon" :color="iconColor" />
+      <v-icon
+        size="x-large"
+        :icon="enums.notificationPlatforms[title].icon"
+        :color="enums.notificationPlatforms[title].color"
+      />
     </template>
     <template #append>
       <UtilsGreenCheck
@@ -13,19 +17,23 @@
       <v-progress-circular
         v-if="loading"
         class="ma-3"
-        :color="loadingColor"
+        :color="enums.notificationPlatforms[title].color"
         :size="24"
         indeterminate
       />
       <BaseButton :link="link" new-tab hide />
     </template>
     <v-card-text>
-      <v-slot name="prepend" />
       <component
         :is="form"
         :api="api"
         :data="data"
-        @completed="(value) => (data = value)"
+        @completed="
+          (value) => {
+            $emit('completed', value);
+            data = value;
+          }
+        "
         @loading="(value) => (loading = value)"
       />
     </v-card-text>
@@ -42,13 +50,6 @@ const props = defineProps({
     required: false,
     default: undefined,
   },
-  icon: String,
-  iconColor: {
-    type: String,
-    required: false,
-    default: undefined,
-  },
-  loadingColor: String,
   link: {
     type: String,
     required: false,
@@ -56,6 +57,8 @@ const props = defineProps({
   },
   form: Object,
 });
+defineEmits(["completed"]);
+const enums = useEnums();
 const data = ref(props.notification);
 const loading = ref(false);
 </script>

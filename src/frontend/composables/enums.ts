@@ -70,7 +70,16 @@ export function useEnums() {
     "Only my executions",
     "All executions",
   ];
-  const notificationPlatforms = ["Email", "Telegram"];
+  const notificationPlatforms = {
+    Email: {
+      icon: "mdi-email",
+      color: "blue-grey",
+    },
+    Telegram: {
+      icon: "mdi-send-circle mdi-rotate-315",
+      color: "light-blue-accent-3",
+    },
+  };
   const targets = {
     "Private IP": { icon: "mdi-ip" },
     "Public IP": { icon: "mdi-ip" },
@@ -213,8 +222,8 @@ export function useEnums() {
   const queues = {
     tasks: {
       icon: "mdi-play-network",
-      color: "orange",
-      description: "Create tool executions from requested scans",
+      color: "orange-darken-2",
+      description: "Creates tool executions from requested scans",
     },
     executions: {
       icon: "mdi-play-circle",
@@ -229,7 +238,7 @@ export function useEnums() {
     monitor: {
       icon: alertModes.Monitor.icon,
       color: "blue-grey",
-      description: "Monitor all the findings periodically",
+      description: "Monitors all the findings periodically",
     },
   };
 

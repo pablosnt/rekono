@@ -103,4 +103,5 @@ const footer = ref({
     },
   ],
 });
+// todo: Adapt red colors when the new logo is ready. Here and everywhere.
 </script>

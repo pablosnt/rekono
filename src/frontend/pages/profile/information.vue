@@ -92,7 +92,9 @@
                                 density="comfortable"
                                 variant="outlined"
                                 label="Platforms"
-                                :items="enums.notificationPlatforms"
+                                :items="
+                                  Object.keys(enums.notificationPlatforms)
+                                "
                                 :disabled="
                                   user.notification_scope === 'Disabled'
                                 "
@@ -136,7 +138,7 @@ api.get().then((response) => {
 });
 
 function getPlatforms(): void {
-  for (const platform of enums.notificationPlatforms) {
+  for (const platform of Object.keys(enums.notificationPlatforms)) {
     if (user.value[`${platform.toLowerCase()}_notifications`] === true) {
       platforms.value.push(platform);
     }

@@ -11,12 +11,12 @@
             hide-details
             single-line
             :rules="[
-              (h) => !!h || 'Host is required',
-              (h) => validate.target.test(h.trim()) || 'Invalid host value',
+              (h) =>
+                !h || validate.target.test(h.trim()) || 'Invalid host value',
             ]"
             validate-on="input"
             clearable
-            @update:model-value="disabled = host === null"
+            @update:model-value="disabled = false"
           />
         </v-col>
         <v-col cols="4">
@@ -31,9 +31,7 @@
             variant="outlined"
             :max="65535"
             :min="1"
-            :rules="[(p) => !!p || 'Port is required']"
-            validate-on="input"
-            @update:model-value="disabled = port === null"
+            @update:model-value="disabled = false"
           />
         </v-col>
         <v-col cols="2">

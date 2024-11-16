@@ -1,6 +1,32 @@
 <template>
   <v-form v-model="valid" @submit.prevent="submit()">
     <v-container fluid>
+      <v-row
+        v-if="!data || !data.is_available || !data.bot"
+        class="mb-5"
+        justify="center"
+        dense
+      >
+        <v-alert
+          color="info"
+          icon="$info"
+          variant="outline"
+          class="text-center"
+        >
+          <template #text>
+            Register your bot in
+            <v-btn
+              class="pa-0 text-none font-weight-bold"
+              density="compact"
+              text="@BotFather"
+              target="_blank"
+              href="https://t.me/botfather"
+              variant="plain"
+            />
+            and set up your Telegram token here
+          </template>
+        </v-alert>
+      </v-row>
       <v-row justify="center" dense>
         <v-text-field
           v-model="token"
