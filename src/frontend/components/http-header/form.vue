@@ -1,7 +1,7 @@
 <template>
   <v-form v-model="valid" @submit.prevent="submit()">
     <v-container fluid>
-      <v-row class="mt-5 ml-2" justify-sm="center" dense>
+      <v-row justify="center" dense>
         <v-col cols="4">
           <v-text-field
             v-model="key"
@@ -39,6 +39,14 @@
                 tooltip="Save"
                 hover
                 @click="submit"
+              />
+              <UtilsDeleteButton
+                v-if="header !== null"
+                :id="header.id"
+                :api="api"
+                icon="mdi-close"
+                :text="`HTTP header '${header.key}' will be removed`"
+                @completed="$emit('completed')"
               />
             </template>
           </v-text-field>

@@ -1,15 +1,4 @@
 <template>
-  <v-container fluid>
-    <v-row class="mt-3" justify="center" dense>
-      <v-alert
-        color="warning"
-        icon="$warning"
-        variant="tonal"
-        :text="`Don't add sensitive information, like credentials, as part of a HTTP header because its value will be always shown on plain text. Use ${target ? 'scope' : 'target'} authentication instead`"
-        closable
-      />
-    </v-row>
-  </v-container>
   <Dataset
     ref="dataset"
     :api="api"
@@ -17,11 +6,24 @@
     :add="HttpHeaderDialog"
     icon="mdi-web"
     empty-head="No HTTP Headers"
-    :empty-text="`Custom HTTP headers will be sent by HTTP scanning tools that support this customization. ${!target && !user ? 'Note that these headers can be overwritten by each user or target' : !target ? 'Note that these headers can be overwritten by each target' : ''}`"
+    empty-text="Create the HTTP headers that must be sent by HTTP hacking tools"
   >
+    <template #prepend-search>
+      <v-row class="mb-5" dense>
+        <v-alert
+          class="text-center"
+          color="warning"
+          icon="$warning"
+          variant="tonal"
+          :text="`Don't add sensitive information, like credentials, as part of a HTTP header because its value will be always shown on plain text. Use ${target ? 'scope' : 'target'} authentication instead`"
+          closable
+        />
+      </v-row>
+    </template>
     <template #item="{ item }">
-      <v-card elevation="3" class="mx-auto" density="compact">
+      <v-card elevation="1" class="ma-5">
         <HttpHeaderForm
+          class="ma-5"
           :api="api"
           :header="item"
           @completed="dataset.loadData(false)"

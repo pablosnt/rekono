@@ -17,12 +17,12 @@
       <slot name="append" />
       <BaseButton icon="mdi-close" @click="$emit('closeDialog')" />
     </template>
-    <v-card-text class="overflow-auto">
-      <slot />
-    </v-card-text>
-    <v-card-actions>
+    <template #text>
+      <v-card-text class="overflow-auto">
+        <slot />
+      </v-card-text>
       <slot name="actions" />
-    </v-card-actions>
+    </template>
   </v-card>
 </template>
 

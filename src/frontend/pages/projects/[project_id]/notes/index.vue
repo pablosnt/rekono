@@ -81,24 +81,26 @@
                     @close-dialog="isActive.value = false"
                   >
                     <template #actions>
-                      <v-btn
-                        prepend-icon="mdi-close"
-                        color="blue-grey"
-                        @click="isActive.value = false"
-                        >Cancel</v-btn
-                      >
-                      <v-spacer />
-                      <v-btn
-                        :prepend-icon="
-                          item.public ? 'mdi-share-off' : 'mdi-share'
-                        "
-                        color="grey-lighten-5"
-                        @click="
-                          share(item);
-                          isActive.value = false;
-                        "
-                        >{{ item.public ? "Privatize" : "Share" }}</v-btn
-                      >
+                      <v-card-actions>
+                        <v-btn
+                          prepend-icon="mdi-close"
+                          color="blue-grey"
+                          @click="isActive.value = false"
+                          >Cancel</v-btn
+                        >
+                        <v-spacer />
+                        <v-btn
+                          :prepend-icon="
+                            item.public ? 'mdi-share-off' : 'mdi-share'
+                          "
+                          color="grey-lighten-5"
+                          @click="
+                            share(item);
+                            isActive.value = false;
+                          "
+                          >{{ item.public ? "Privatize" : "Share" }}</v-btn
+                        >
+                      </v-card-actions>
                     </template>
                   </BaseDialog>
                 </template>
