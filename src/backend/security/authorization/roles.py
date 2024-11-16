@@ -239,7 +239,7 @@ ROLES = {
         "delete": [Role.ADMIN, Role.AUDITOR, Role.READER],
     },
     "httpheader": {
-        "view": [Role.ADMIN, Role.AUDITOR, Role.READER],
+        "view": [Role.ADMIN, Role.AUDITOR],
         "add": [Role.ADMIN, Role.AUDITOR],
         "change": [Role.ADMIN, Role.AUDITOR],
         "delete": [Role.ADMIN, Role.AUDITOR],

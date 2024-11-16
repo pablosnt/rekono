@@ -44,7 +44,6 @@
                 v-if="header !== null"
                 :id="header.id"
                 :api="api"
-                icon="mdi-close"
                 :text="`HTTP header '${header.key}' will be removed`"
                 @completed="$emit('completed')"
               />

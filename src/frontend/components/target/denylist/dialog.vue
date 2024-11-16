@@ -1,11 +1,8 @@
 <template>
   <BaseDialog
-    title="New Target Pattern To Deny"
+    title="New Denied Target"
     :loading="loading"
-    @close-dialog="
-      loading = false;
-      $emit('closeDialog');
-    "
+    @close-dialog="$emit('closeDialog')"
   >
     <TargetDenylistForm
       :api="api"

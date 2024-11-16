@@ -22,9 +22,9 @@
       </v-row>
     </template>
     <template #item="{ item }">
-      <v-card elevation="1" class="ma-5">
+      <v-card elevation="2" class="ma-5">
         <HttpHeaderForm
-          class="ma-5"
+          class="ml-4 mt-6"
           :api="api"
           :header="item"
           @completed="dataset.loadData(false)"

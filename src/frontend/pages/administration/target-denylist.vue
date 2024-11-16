@@ -1,16 +1,5 @@
 <template>
   <MenuAdministration>
-    <v-container fluid>
-      <v-row justify="center" dense>
-        <v-alert
-          color="info"
-          icon="$info"
-          variant="tonal"
-          text="Targets can be denied by regexes, specific values or whole networks. Default patterns can't be edited or removed as they are protecting the own Rekono infrastructure"
-          closable
-        />
-      </v-row>
-    </v-container>
     <Dataset
       ref="dataset"
       :api="api"
@@ -18,9 +7,22 @@
       :add="TargetDenylistDialog"
       cols="4"
     >
+      <template #prepend-search>
+        <v-row class="mb-5" dense>
+          <v-alert
+            class="text-center"
+            color="info"
+            icon="$info"
+            variant="tonal"
+            text="Targets can be denied by regex, specific values or network. Default patterns can't be edited or removed as they are protecting Rekono infrastructure"
+            closable
+          />
+        </v-row>
+      </template>
       <template #item="{ item }">
-        <v-card elevation="3" class="mx-auto" density="compact">
+        <v-card elevation="1" class="ma-5" density="compact">
           <TargetDenylistForm
+            class="ml-4 mr-4 mt-6"
             :api="api"
             :pattern="item"
             @completed="dataset.loadData(false)"
