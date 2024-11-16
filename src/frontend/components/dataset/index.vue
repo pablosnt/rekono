@@ -31,7 +31,11 @@
         />
         <slot name="add">
           <v-dialog
-            v-if="add !== null"
+            v-if="
+              add !== null &&
+              (!admin || autz.isAdmin()) &&
+              (!auditor || autz.isAuditor())
+            "
             :width="addFullscreen ? '100%' : 'auto'"
             :fullscreen="addFullscreen"
           >
@@ -44,7 +48,6 @@
               />
             </template>
             <template #default="{ isActive }">
-              <!-- TODO: Check when add must be displayed depending on the user roles -->
               <component
                 :is="add"
                 :api="api"
@@ -222,6 +225,16 @@ const props = defineProps({
     required: false,
     default: true,
   },
+  admin: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  auditor: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
   add: {
     type: Object,
     required: false,
@@ -268,6 +281,7 @@ const tasks = useTasks();
 const filters = useFilters();
 const route = useRoute();
 const router = useRouter();
+const autz = useAutz();
 const page = ref(1);
 const total = ref(0);
 const data = ref(null);

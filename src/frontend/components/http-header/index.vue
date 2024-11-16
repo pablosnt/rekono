@@ -7,6 +7,7 @@
     icon="mdi-web"
     empty-head="No HTTP Headers"
     empty-text="Create the HTTP headers that must be sent by HTTP hacking tools"
+    auditor
   >
     <template #prepend-search>
       <v-row class="mb-5" dense>
