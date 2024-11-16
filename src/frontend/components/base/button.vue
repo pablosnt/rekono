@@ -8,8 +8,8 @@
     :variant="variant"
     :icon="icon !== undefined || avatar !== undefined"
     :hover="link !== undefined || route !== undefined"
+    @click.stop
   >
-    <!-- REMOVED @click.prevent.stop. Some BaseButtons will fail-->
     <slot>
       <slot name="prepend" />
       <slot name="icon">

@@ -1,8 +1,7 @@
 <template>
   <v-card
-    elevation="3"
+    elevation="2"
     :title="data.name"
-    :text="data.description"
     :prepend-avatar="data.icon"
     :hover="hover"
   >
@@ -21,6 +20,9 @@
         "
       />
       <BaseButton :link="data.reference" new-tab hide />
+    </template>
+    <template #text>
+      <p class="text-center">{{ data.description }}</p>
     </template>
   </v-card>
 </template>

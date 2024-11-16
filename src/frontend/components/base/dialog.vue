@@ -9,7 +9,6 @@
     :subtitle="subtitle"
     :prepend-avatar="avatar ? avatar : undefined"
     :prepend-icon="!iconColor ? icon : undefined"
-    :variant="variant"
   >
     <template v-if="icon && iconColor" #prepend>
       <v-icon :icon="icon" :color="iconColor" />
@@ -21,7 +20,9 @@
     <v-card-text class="overflow-auto">
       <slot />
     </v-card-text>
-    <slot name="card" />
+    <v-card-actions>
+      <slot name="actions" />
+    </v-card-actions>
   </v-card>
 </template>
 

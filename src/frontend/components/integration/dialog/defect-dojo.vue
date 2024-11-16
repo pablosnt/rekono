@@ -3,7 +3,7 @@
     :api="integrationApi"
     :integration="integration"
     :is-available="isAvailable"
-    color="blue"
+    color="blue-darken-3"
     :loading="loading"
     @close-dialog="$emit('closeDialog')"
   >
@@ -61,7 +61,7 @@
             <v-text-field
               v-model="tag"
               prepend-icon="mdi-tag"
-              label="Tag"
+              label="Rekono Tag"
               variant="outlined"
               hide-details
               :rules="[
@@ -105,16 +105,13 @@
             />
           </v-col>
         </v-row>
-        <v-row class="mt-5" justify="center" dense>
-          <v-alert
-            color="info"
-            icon="$info"
-            variant="tonal"
-            text="Tag value will be assigned to all entities created by Rekono in Defect-Dojo"
-          />
-        </v-row>
       </v-container>
-      <UtilsSubmit color="blue" text="Save" :disabled="disabled" class="mt-5" />
+      <UtilsSubmit
+        color="blue-darken-3"
+        text="Save"
+        :disabled="disabled"
+        class="mt-5"
+      />
     </v-form>
   </IntegrationDialog>
 </template>

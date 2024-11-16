@@ -10,26 +10,24 @@
       <p>{{ text }}</p>
       <p><strong>Are you sure?</strong></p>
     </template>
-    <template #card>
-      <v-card-actions>
-        <v-btn
-          prepend-icon="mdi-close"
-          color="blue-grey"
-          @click="$emit('closeDialog')"
-          >{{ action !== "Cancel" ? "Cancel" : "Abort" }}</v-btn
-        >
-        <v-spacer />
-        <v-btn
-          prepend-icon="mdi-trash-can-outline"
-          color="grey-lighten-5"
-          @click="
-            api.remove(id).then(() => {
-              $emit('completed');
-            })
-          "
-          >{{ action }}</v-btn
-        >
-      </v-card-actions>
+    <template #actions>
+      <v-btn
+        prepend-icon="mdi-close"
+        color="blue-grey"
+        @click="$emit('closeDialog')"
+        >{{ action !== "Cancel" ? "Cancel" : "Abort" }}</v-btn
+      >
+      <v-spacer />
+      <v-btn
+        prepend-icon="mdi-trash-can-outline"
+        color="grey-lighten-5"
+        @click="
+          api.remove(id).then(() => {
+            $emit('completed');
+          })
+        "
+        >{{ action }}</v-btn
+      >
     </template>
   </BaseDialog>
 </template>
