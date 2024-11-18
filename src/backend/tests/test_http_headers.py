@@ -16,11 +16,9 @@ class HttpHeaderTest(ApiTest):
     expected_str = "10.10.10.10 - User-Agent"
     cases = [
         ApiTestCase(
-            ["admin1", "admin2", "auditor1", "auditor2", "reader1", "reader2"],
-            "get",
-            200,
-            expected=[],
+            ["admin1", "admin2", "auditor1", "auditor2"], "get", 200, expected=[]
         ),
+        ApiTestCase(["reader1", "reader2"], "get", 403),
         ApiTestCase(["admin2", "auditor2", "reader1", "reader2"], "post", 403, target),
         ApiTestCase(["auditor1"], "post", 400, {**target, **invalid_data}),
         ApiTestCase(["auditor1"], "post", 201, target, {"id": 1, **target}),
@@ -33,15 +31,15 @@ class HttpHeaderTest(ApiTest):
         ),
         ApiTestCase(["auditor2"], "post", 201, user, {"id": 3, **user}),
         ApiTestCase(["auditor2"], "post", 400, user),
-        ApiTestCase(["admin2", "reader2"], "get", 200, expected=[{"id": 2, **data}]),
+        ApiTestCase(["admin2"], "get", 200, expected=[{"id": 2, **data}]),
         ApiTestCase(
-            ["admin1", "auditor1", "reader1"],
+            ["auditor2"], "get", 200, expected=[{"id": 3, **user}, {"id": 2, **data}]
+        ),
+        ApiTestCase(
+            ["admin1", "auditor1"],
             "get",
             200,
             expected=[{"id": 2, **data}, {"id": 1, **target}],
-        ),
-        ApiTestCase(
-            ["auditor2"], "get", 200, expected=[{"id": 3, **user}, {"id": 2, **data}]
         ),
         ApiTestCase(
             ["auditor1", "auditor2", "reader1", "reader2"],
@@ -61,16 +59,14 @@ class HttpHeaderTest(ApiTest):
             ["admin1"], "put", 200, new_data, {"id": 2, **new_data}, "{endpoint}2/"
         ),
         ApiTestCase(
-            ["admin1", "admin2", "auditor1", "auditor2", "reader1", "reader2"],
+            ["admin1", "admin2", "auditor1", "auditor2"],
             "get",
             200,
             expected={"id": 2, **new_data},
             endpoint="{endpoint}2/",
         ),
         ApiTestCase(["auditor1"], "delete", 204, endpoint="{endpoint}1/"),
-        ApiTestCase(
-            ["admin1", "auditor1", "reader1"], "get", 404, endpoint="{endpoint}1/"
-        ),
+        ApiTestCase(["admin1", "auditor1"], "get", 404, endpoint="{endpoint}1/"),
     ]
 
     def setUp(self) -> None:
