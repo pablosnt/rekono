@@ -8,7 +8,7 @@
     "
   >
     <v-form v-model="valid" @submit.prevent="submit()">
-      <v-conatiner v-if="!key" fluid>
+      <v-container v-if="!key" fluid>
         <v-text-field
           v-model="name"
           class="mt-2"
@@ -54,7 +54,7 @@
           </v-menu>
         </v-text-field>
         <UtilsSubmit text="Create" />
-      </v-conatiner>
+      </v-container>
       <v-container v-if="key" fluid>
         <v-row justify="center" dense>
           <v-col cols="10">

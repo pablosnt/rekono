@@ -13,32 +13,38 @@
     :default-parameters="project ? { project: project } : null"
     cols="4"
   >
-    <template #prepend-data>
-      <v-container v-if="smtp && !smtp.is_available" class="mb-3" fluid>
-        <v-row>
-          <v-alert color="warning" icon="$warning" variant="tonal" closable>
-            <template #text>
-              <p>
-                SMTP server is not configured yet, so new users can't be invited
-                to Rekono. You can do it in the
-                <v-btn
-                  class="pa-0 text-none font-weight-bold"
-                  density="compact"
-                  text="Notifications page"
-                  variant="plain"
-                  to="/administration/notifications"
-                />
-              </p>
-            </template>
-          </v-alert>
-        </v-row>
-      </v-container>
+    <template #prepend-search>
+      <v-row
+        v-if="smtp && !smtp.is_available && !handleMember"
+        class="mb-5"
+        dense
+      >
+        <v-alert
+          class="text-center"
+          color="warning"
+          icon="$warning"
+          variant="tonal"
+        >
+          <template #text>
+            <p>
+              Configure a
+              <v-btn
+                class="pa-0 text-none font-weight-bold"
+                density="compact"
+                text="SMTP server"
+                variant="plain"
+                to="/administration/notifications"
+              />
+              to invite new users to Rekono
+            </p>
+          </template>
+        </v-alert>
+      </v-row>
     </template>
     <template #item="{ item }">
       <v-card
-        elevation="3"
-        class="mx-auto"
-        density="compact"
+        elevation="1"
+        class="ma-5"
         :title="
           item.first_name && item.last_name
             ? `${item.first_name} ${item.last_name}`
@@ -100,16 +106,13 @@
                     </p>
                     <div v-if="item.id !== current.user">
                       <v-divider class="my-3" />
-                      <div v-if="changeRole">
-                        <v-autocomplete
+                      <div v-if="changeRole" class="mb-4">
+                        <BaseAutocomplete
                           v-model="item.role"
-                          auto-select-first
                           density="comfortable"
                           variant="underlined"
-                          :prepend-inner-icon="enums.roles[item.role].icon"
-                          :color="enums.roles[item.role].color"
                           label="Role"
-                          :items="roles"
+                          :definition="enums.roles"
                           :rules="[(r) => !!r || 'Role is required']"
                           validate-on="input"
                           hide-details
@@ -123,7 +126,6 @@
                           "
                           @click.stop
                         />
-                        <v-divider class="my-3" />
                       </div>
                       <v-btn
                         v-if="enableDisable && item.username"
@@ -218,21 +220,27 @@ const props = defineProps({
   },
 });
 const current = userStore();
-const enums = ref(useEnums());
+const enums = useEnums();
 const filters = useFilters();
-const roles = ref(Object.keys(enums.value.roles));
+const alert = useAlert();
 const api = useApi("/api/users/", true);
 const removeMemberApi = props.project
   ? useApi(`/api/projects/${props.project}/members/`, true, "Project member")
   : null;
+const UserDialog = resolveComponent("UserDialog");
+const ProjectDialogMember = resolveComponent("ProjectDialogMember");
+
+const dataset = ref(null);
 const filtering = ref([]);
 filters
   .build([
     {
       type: "autocomplete",
       label: "Role",
-      icon: "mdi-diamond",
-      collection: roles.value,
+      icon: "mdi-card-account-details",
+      collection: filters.collectionFromEnum(enums.roles),
+      fieldValue: "name",
+      fieldTitle: "name",
       key: "role",
     },
     {
@@ -256,11 +264,7 @@ filters
     },
   ])
   .then((results) => (filtering.value = results));
-const dataset = ref(null);
-const alert = useAlert();
 
-const UserDialog = resolveComponent("UserDialog");
-const ProjectDialogMember = resolveComponent("ProjectDialogMember");
 const smtp = ref(null);
 useApi("/api/smtp/", true)
   .get(1)

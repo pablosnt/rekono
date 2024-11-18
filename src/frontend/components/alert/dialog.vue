@@ -8,7 +8,7 @@
     "
   >
     <v-form v-model="valid" class="mt-3" @submit.prevent="submit()">
-      <v-conatiner fluid>
+      <v-container fluid>
         <v-row v-if="edit === null" justify="space-around" dense>
           <v-col cols="4">
             <v-autocomplete
@@ -86,7 +86,7 @@
         <v-row>
           <UtilsSubmit :text="!edit ? 'Create' : 'Update'" />
         </v-row>
-      </v-conatiner>
+      </v-container>
     </v-form>
   </BaseDialog>
 </template>

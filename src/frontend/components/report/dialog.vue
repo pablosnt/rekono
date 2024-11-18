@@ -8,7 +8,7 @@
     "
   >
     <v-form v-model="valid" class="mt-3" @submit.prevent="submit()">
-      <v-conatiner fluid>
+      <v-container fluid>
         <v-row v-if="target === null && task === null" justify="center" dense>
           <v-col cols="11">
             <v-autocomplete
@@ -125,7 +125,7 @@
             </v-autocomplete>
           </v-col>
         </v-row>
-      </v-conatiner>
+      </v-container>
       <UtilsSubmit text="Create" :autofocus="false" class="mt-5" />
     </v-form>
   </BaseDialog>

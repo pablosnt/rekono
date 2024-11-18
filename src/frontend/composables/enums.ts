@@ -1,4 +1,5 @@
 export function useEnums() {
+  // todo: Review all colors and find the best tone for each one
   const stages = {
     OSINT: {
       id: 1,

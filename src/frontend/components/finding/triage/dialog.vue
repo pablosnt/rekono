@@ -17,7 +17,7 @@
       <UtilsOwner :entity="finding" field="triage_by" />
     </template>
     <v-form v-model="valid" class="mt-3" @submit.prevent="submit()">
-      <v-conatiner fluid>
+      <v-container fluid>
         <v-row justify="center" dense>
           <v-col cols="11">
             <v-autocomplete
@@ -70,7 +70,7 @@
         <v-row>
           <UtilsSubmit :disabled="disabled" text="Triage" />
         </v-row>
-      </v-conatiner>
+      </v-container>
     </v-form>
   </BaseDialog>
 </template>

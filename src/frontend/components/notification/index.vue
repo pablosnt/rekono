@@ -1,5 +1,5 @@
 <template>
-  <v-card :title="title" :subtitle="subtitle" class="mx-auto" elevation="2">
+  <v-card :title="title" :subtitle="subtitle" class="mx-auto" elevation="1">
     <template #prepend>
       <v-icon
         size="x-large"

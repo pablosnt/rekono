@@ -70,20 +70,31 @@
                 class="d-flex justify-center align-center"
                 :cols="f.cols ? f.cols : 3"
               >
-                <v-autocomplete
+                <BaseAutocomplete
                   v-if="f.type === 'autocomplete'"
                   v-model="f.value"
-                  auto-select-first
                   hide-details
                   clearable
                   :chips="f.multiple ? f.multiple : undefined"
                   density="comfortable"
                   variant="outlined"
                   :label="f.label"
-                  :items="f.collection"
+                  :collection="f.collection"
                   :item-title="f.fieldTitle"
+                  :title="
+                    f.key.includes('task')
+                      ? tasks.getTitle
+                      : (value) => (f.fieldTitle ? value[f.fieldTitle] : value)
+                  "
+                  :icon="f.icon"
+                  :enforce-icon="f.enfoceIcon"
                   return-object
-                  :color="
+                  :disabled="f.disabled ? f.disabled : false"
+                  :multiple="f.multiple ? f.multiple : false"
+                  @update:model-value="addParameter(f.key, filters.getValue(f))"
+                />
+                <!-- 
+                :color="
                     f.value !== null && f.value !== undefined
                       ? f.multiple
                         ? f.value.length > 0 && f.value[0].color
@@ -94,35 +105,8 @@
                           : null
                       : null
                   "
-                  :prepend-inner-icon="
-                    f.enforceIcon || f.value === null || f.value === undefined
-                      ? f.icon
-                      : f.multiple
-                        ? f.value.length > 0 && f.value[0].icon
-                          ? f.value[0].icon
-                          : f.icon
-                        : f.value && f.value.icon
-                          ? f.value.icon
-                          : f.icon
-                  "
-                  :disabled="f.disabled ? f.disabled : false"
-                  :multiple="f.multiple ? f.multiple : false"
-                  @update:model-value="addParameter(f.key, filters.getValue(f))"
-                >
-                  <!-- TODO: Override list items to show custom icons per option -->
-                  <template
-                    v-if="f.key.includes('task')"
-                    #item="{ props: taskProps, item }"
-                  >
-                    <v-list-item
-                      v-bind="taskProps"
-                      :title="tasks.getTitle(item.raw)"
-                    />
-                  </template>
-                  <template v-if="f.key.includes('task')" #selection="{ item }">
-                    <p>{{ tasks.getTitle(item.raw) }}</p>
-                  </template>
-                </v-autocomplete>
+                -->
+                <!-- TODO: Override list items to show custom icons per option -->
                 <v-text-field
                   v-if="f.type === 'text'"
                   v-model="f.value"

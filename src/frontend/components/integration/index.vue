@@ -1,6 +1,6 @@
 <template>
   <v-card
-    elevation="2"
+    elevation="1"
     :title="data.name"
     :prepend-avatar="data.icon"
     :hover="hover"

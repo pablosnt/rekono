@@ -8,7 +8,7 @@
     "
   >
     <v-form v-model="valid" @submit.prevent="submit()">
-      <v-conatiner fluid>
+      <v-container fluid>
         <v-text-field
           v-model="name"
           class="mt-2"
@@ -32,7 +32,7 @@
           validate-on="input"
         />
         <UtilsSubmit text="Create" />
-      </v-conatiner>
+      </v-container>
     </v-form>
   </BaseDialog>
 </template>
