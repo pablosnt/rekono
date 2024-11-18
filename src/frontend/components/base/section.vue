@@ -1,5 +1,5 @@
 <template>
-  <v-card variant="text" width="100%" :subtitle="subtitle">
+  <v-card variant="text" width="100%" :subtitle="subtitle" :loading="loading">
     <template #prepend>
       <slot name="prepend">
         <v-card-title v-if="icon" :class="titleClass">
@@ -43,6 +43,11 @@ defineProps({
     type: String,
     required: false,
     default: "red",
+  },
+  loading: {
+    type: String,
+    required: false,
+    default: undefined,
   },
 });
 </script>

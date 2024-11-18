@@ -15,6 +15,7 @@
         :id="id"
         :api="api"
         :text="text"
+        :icon="iconConfirmation"
         :action="action"
         @completed="
           $emit('completed');
@@ -40,6 +41,11 @@ defineProps({
     type: String,
     required: false,
     default: "mdi-close",
+  },
+  iconConfirmation: {
+    type: String,
+    required: false,
+    default: "mdi-trash-can-outline",
   },
   variant: {
     type: String,

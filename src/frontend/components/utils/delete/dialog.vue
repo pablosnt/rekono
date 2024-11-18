@@ -20,7 +20,7 @@
         >
         <v-spacer />
         <v-btn
-          prepend-icon="mdi-trash-can-outline"
+          :prepend-icon="icon"
           color="grey-lighten-5"
           @click="
             api.remove(id).then(() => {
@@ -39,6 +39,11 @@ defineProps({
   api: Object,
   id: Number,
   text: String,
+  icon: {
+    type: String,
+    required: false,
+    default: "mdi-trash-can-outline",
+  },
   action: {
     type: String,
     required: false,

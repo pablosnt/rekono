@@ -16,7 +16,7 @@
           <template #text>
             Register your bot in
             <v-btn
-              class="pa-0 text-none font-weight-bold"
+              class="pa-0 text-none mb-1 font-weight-bold"
               density="compact"
               text="@BotFather"
               target="_blank"
