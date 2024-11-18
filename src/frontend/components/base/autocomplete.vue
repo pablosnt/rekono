@@ -8,7 +8,7 @@
   >
     <template #prepend-inner>
       <v-icon
-        v-if="model && !enforceIcon && prependInner"
+        v-if="!chips && model && !enforceIcon && prependInner"
         v-bind="properties(model, true)"
       />
       <v-icon
@@ -30,7 +30,7 @@
       <p>{{ title(item.raw) }}</p>
     </template>
     <template v-if="chips" #chip="{ props: itemProps, item }">
-      <v-chip v-bind="itemProps" :text="title(item.raw)">
+      <v-chip v-bind="itemProps" :text="title(item.raw)" closable>
         <template #prepend>
           <v-icon
             v-if="properties(item.raw).icon"

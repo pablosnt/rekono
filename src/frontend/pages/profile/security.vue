@@ -2,13 +2,13 @@
   <MenuProfile>
     <v-container v-if="user" fluid>
       <v-row justify="center" dense>
-        <v-col cols="7">
+        <v-col cols="8">
           <Mfa :user="user" @reload="getProfile()" />
         </v-col>
-        <v-col cols="7">
+        <v-col cols="8">
           <PasswordChange />
         </v-col>
-        <v-col cols="7">
+        <v-col cols="8">
           <ApiToken />
         </v-col>
       </v-row>

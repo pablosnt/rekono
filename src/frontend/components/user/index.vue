@@ -237,7 +237,7 @@ filters
     {
       type: "autocomplete",
       label: "Role",
-      icon: "mdi-card-account-details",
+      icon: "mdi-card-account-details-star",
       collection: filters.collectionFromEnum(enums.roles),
       fieldValue: "name",
       fieldTitle: "name",

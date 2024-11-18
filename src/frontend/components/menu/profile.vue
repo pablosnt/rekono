@@ -20,6 +20,7 @@
         title: 'HTTP Headers',
         icon: 'mdi-web',
         to: '/profile/http-headers',
+        auditor: true,
       },
     ]"
   >

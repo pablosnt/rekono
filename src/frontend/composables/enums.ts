@@ -66,11 +66,20 @@ export function useEnums() {
       color: "green",
     },
   };
-  const notificationScopes = [
-    "Disabled",
-    "Only my executions",
-    "All executions",
-  ];
+  const notificationScopes = {
+    Disabled: {
+      icon: "mdi-cancel",
+      color: "red",
+    },
+    "Only my executions": {
+      icon: "mdi-check",
+      color: "green",
+    },
+    "All executions": {
+      icon: "mdi-check-all",
+      color: "green",
+    },
+  };
   const notificationPlatforms = {
     Email: {
       icon: "mdi-email",
