@@ -1,87 +1,81 @@
 <template>
   <BaseDialog
-    title="New API Token"
-    :loading="loading"
-    @close-dialog="
-      loading = false;
-      $emit('closeDialog');
+    :title="key && name ? name : 'New API Token'"
+    :subtitle="
+      key
+        ? 'This is the last time you can see your API key. Save it safely'
+        : undefined
     "
+    :loading="loading"
+    @close-dialog="$emit('closeDialog')"
   >
-    <v-form v-model="valid" @submit.prevent="submit()">
-      <v-container v-if="!key" fluid>
-        <v-text-field
-          v-model="name"
-          class="mt-2"
-          label="Name"
-          variant="outlined"
-          :rules="[
-            (n) => !!n || 'Name is required',
-            (n) => validate.name.test(n) || 'Invalid name value',
-          ]"
-          validate-on="input"
-        />
-
-        <v-text-field
-          v-model="expiration"
-          :model-value="expiration.toDateString()"
-          :active="dateMenu"
-          label="Date"
-          prepend-inner-icon="mdi-calendar"
-          variant="underlined"
-          readonly
-          :rules="[(e) => !!e || 'Expiration is required']"
-          validate-on="input"
-        >
-          <v-menu
-            v-model="dateMenu"
-            :close-on-content-click="false"
-            activator="parent"
-            transition="scale-transition"
-          >
-            <v-date-picker
-              v-if="dateMenu"
-              v-model="expiration"
-              show-adjacent-months
-              :min="minExpiration.toISOString().split('T')[0]"
-            >
-              <template #actions>
-                <v-btn
-                  text="Clear"
-                  @click="expiration = getDefaultExpiration()"
-                />
-              </template>
-            </v-date-picker>
-          </v-menu>
-        </v-text-field>
-        <UtilsSubmit text="Create" />
-      </v-container>
-      <v-container v-if="key" fluid>
-        <v-row justify="center" dense>
-          <v-col cols="10">
-            <v-alert
-              class="text-center"
-              color="info"
-              icon="$info"
-              variant="tonal"
-              text="This is the last time you can see your API key's value. Save it safely"
-            />
-          </v-col>
-        </v-row>
-        <v-row justify="center" dense>
-          <v-col cols="8">
+    <v-container fluid>
+      <v-row justify="center" dense>
+        <v-col cols="11">
+          <v-form v-if="!key" v-model="valid" @submit.prevent="submit()">
             <v-text-field
-              v-model="key"
-              bg-color="green"
-              variant="outline"
-              readonly
-              prepend-inner-icon="mdi-api"
-              append-inner-icon="mdi-bookmark-multiple-outline"
-              @click:append-inner="copyKey()"
+              v-model="name"
+              class="mb-3"
+              label="Name"
+              variant="outlined"
+              :rules="[
+                (n) => !!n || 'Name is required',
+                (n) => validate.name.test(n) || 'Invalid name value',
+              ]"
+              validate-on="input"
             />
-          </v-col>
-        </v-row>
-      </v-container>
-    </v-form>
+
+            <v-text-field
+              v-model="expiration"
+              :model-value="expiration.toDateString()"
+              :active="dateMenu"
+              label="Date"
+              prepend-inner-icon="mdi-calendar"
+              variant="outlined"
+              readonly
+              :rules="[(e) => !!e || 'Expiration is required']"
+              validate-on="input"
+            >
+              <v-menu
+                v-model="dateMenu"
+                :close-on-content-click="false"
+                activator="parent"
+                transition="scale-transition"
+              >
+                <v-date-picker
+                  v-if="dateMenu"
+                  v-model="expiration"
+                  show-adjacent-months
+                  :min="minExpiration.toISOString().split('T')[0]"
+                >
+                  <template #actions>
+                    <v-btn
+                      text="Clear"
+                      @click="expiration = getDefaultExpiration()"
+                    />
+                  </template>
+                </v-date-picker>
+              </v-menu>
+            </v-text-field>
+            <UtilsSubmit text="Create" />
+          </v-form>
+          <v-text-field
+            v-if="key"
+            v-model="key"
+            bg-color="green"
+            readonly
+            hide-details
+            rounded
+            prepend-inner-icon="mdi-api"
+            append-inner-icon="mdi-bookmark-multiple-outline"
+            @click:append-inner="
+              navigator.clipboard.writeText(key);
+              alert('API token copied to the clipboard', 'success');
+            "
+          />
+        </v-col>
+      </v-row>
+    </v-container>
   </BaseDialog>
 </template>
 
@@ -124,10 +118,5 @@ function submit(): void {
       })
       .catch(() => (loading.value = false));
   }
-}
-
-function copyKey(): void {
-  navigator.clipboard.writeText(key.value);
-  alert("API token copied to the clipboard", "success");
 }
 </script>

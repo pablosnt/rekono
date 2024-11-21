@@ -7,12 +7,7 @@
         justify="center"
         dense
       >
-        <v-alert
-          color="info"
-          icon="$info"
-          variant="outline"
-          class="text-center"
-        >
+        <v-alert color="info" icon="$info" variant="tonal" class="text-center">
           <template #text>
             Register your bot in
             <v-btn

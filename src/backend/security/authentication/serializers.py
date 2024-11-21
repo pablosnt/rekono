@@ -86,10 +86,12 @@ class SendMfaEmailSerializer(BaseMfaRequiredSerializer):
         return super().validate(attrs)
 
     def save(self, **kwargs: Any) -> User:
-        mfa = User.objects.setup_otp(
-            self.user, {"minutes": CONFIG.mfa_expiration_minutes}
+        SMTP().mfa(
+            self.user,
+            User.objects.setup_otp(
+                self.user, {"minutes": CONFIG.mfa_expiration_minutes}
+            ),
         )
-        SMTP().mfa(self.user, mfa)
         return self.user
 
 

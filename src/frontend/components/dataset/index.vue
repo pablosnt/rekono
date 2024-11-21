@@ -181,9 +181,9 @@
       </slot>
     </v-container>
     <v-pagination
-      v-if="data !== null && data.length > 0"
+      v-if="data !== null && data.length > 0 && pages > 1"
       v-model="page"
-      :length="Math.ceil(total / api.default_size)"
+      :length="pages"
       rounded="circle"
       @update:model-value="loadData"
     />
@@ -268,6 +268,7 @@ const router = useRouter();
 const autz = useAutz();
 const page = ref(1);
 const total = ref(0);
+const pages = computed(() => Math.ceil(total.value / props.api.default_size));
 const data = ref(null);
 const search = ref(null);
 const expandFilters = ref(props.expandFilters);

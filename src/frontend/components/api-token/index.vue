@@ -1,25 +1,46 @@
 <template>
-  <v-card title="API Tokens" prepend-icon="mdi-api" variant="text">
-    <template #append>
-      <v-dialog width="auto">
-        <template #activator="{ props: activatorProps }">
-          <BaseButton
-            icon="mdi-plus-thick"
-            size="large"
-            color="green"
-            v-bind="activatorProps"
-          />
-        </template>
-        <template #default="{ isActive }">
-          <ApiTokenDialog
-            :api="api"
-            @completed="dataset.loadData(false)"
-            @close-dialog="isActive.value = false"
-          />
-        </template>
-      </v-dialog>
-    </template>
-    <template #text>
+  <v-expansion-panel ref="panel" value="api-tokens">
+    <v-expansion-panel-title disable-icon-rotate>
+      <v-card-title class="text-h5">
+        <v-icon icon="mdi-api" color="red" />
+      </v-card-title>
+      <p class="text-h5">API Tokens</p>
+      <template #actions>
+        <BaseButton
+          class="mt-1"
+          icon="mdi-xml"
+          link="/api/schema/swagger-ui.html"
+          color="red"
+          new-tab
+          @click="$emit('expand', panel ? panel.value : null)"
+        />
+        <v-dialog width="auto">
+          <template #activator="{ props: activatorProps }">
+            <BaseButton
+              icon="mdi-plus-thick"
+              size="large"
+              color="green"
+              v-bind="activatorProps"
+              @click="$emit('expand', panel ? panel.value : null)"
+            />
+          </template>
+          <template #default="{ isActive }">
+            <ApiTokenDialog
+              :api="api"
+              @completed="
+                dataset.loadData(false);
+                $emit('expand', panel ? panel.value : null);
+              "
+              @close-dialog="
+                isActive.value = false;
+                $emit('expand', panel ? panel.value : null);
+              "
+            />
+          </template>
+        </v-dialog>
+      </template>
+    </v-expansion-panel-title>
+    <v-expansion-panel-text>
       <Dataset
         ref="dataset"
         :api="api"
@@ -27,7 +48,7 @@
         :header="false"
         icon="mdi-api"
         empty-head="No API Tokens"
-        empty-text="There are no API tokens"
+        empty-text="Create your first API token to make API requests"
         @load-data="(data) => (tokens = data)"
       >
         <template #data>
@@ -42,7 +63,9 @@
             <tbody>
               <tr v-for="token in tokens" :key="token.id">
                 <td class="text-center text-capitalize">{{ token.name }}</td>
-                <td class="text-center">
+                <td
+                  :class="`text-center ${new Date(token.expiration) <= new Date() ? 'text-red' : ''}`"
+                >
                   {{ new Date(token.expiration).toDateString() }}
                 </td>
                 <td>
@@ -58,12 +81,14 @@
           </v-table>
         </template>
       </Dataset>
-    </template>
-  </v-card>
+    </v-expansion-panel-text>
+  </v-expansion-panel>
 </template>
 
 <script setup lang="ts">
+defineEmits(["expand"]);
 const api = useApi("/api/api-tokens/", true, "API token");
 const tokens = ref([]);
 const dataset = ref(null);
+const panel = ref(null);
 </script>

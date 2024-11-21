@@ -14,9 +14,10 @@
       <slot name="append" />
     </template>
     <template #text>
-      <v-card-text>
+      <v-card-text v-if="!notWrappedText">
         <slot />
       </v-card-text>
+      <slot v-if="notWrappedText" />
     </template>
   </v-card>
 </template>
@@ -48,6 +49,11 @@ defineProps({
     type: String,
     required: false,
     default: undefined,
+  },
+  notWrappedText: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
 });
 </script>

@@ -2,6 +2,7 @@
   <v-form v-model="valid" @submit.prevent="submit()">
     <v-text-field
       v-model="password"
+      class="mb-3"
       :append-inner-icon="visible ? 'mdi-eye-off' : 'mdi-eye'"
       :type="visible ? 'text' : 'password'"
       density="compact"
@@ -20,6 +21,7 @@
 
     <v-text-field
       v-model="passwordConfirmation"
+      class="mb-2"
       :append-inner-icon="visible ? 'mdi-eye-off' : 'mdi-eye'"
       :type="visible ? 'text' : 'password'"
       density="compact"
@@ -30,7 +32,7 @@
         (p) => !!p || 'Password confirmation is required',
         (p) => p === password || 'Paswords do not match',
       ]"
-      validate-on="input"
+      validate-on="blur"
       @click:append-inner="visible = !visible"
     />
 
