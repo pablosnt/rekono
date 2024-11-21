@@ -14,6 +14,7 @@
       <v-icon
         v-if="(!model || enforceIcon || !prependInner) && icon"
         :icon="icon"
+        :color="iconColor"
       />
     </template>
     <template #item="{ props: itemProps, item }">
@@ -69,6 +70,11 @@ const props = defineProps({
     required: false,
     default: false,
   },
+  iconColor: {
+    type: String,
+    required: false,
+    default: undefined,
+  },
   chips: {
     type: Boolean,
     required: false,
@@ -80,16 +86,19 @@ const prependInner = ref(true);
 
 function properties(item: object, updatePrependInner: boolean = false): object {
   const metadata =
-    item.icon === undefined && !props.definition
-      ? undefined
-      : item.icon === undefined
+    item.icon !== undefined || item.color !== undefined
+      ? item
+      : props.definition
         ? props.definition[item]
-        : item;
+        : undefined;
   if (metadata !== undefined) {
     if (updatePrependInner) {
       prependInner.value = true;
     }
-    return { icon: metadata.icon, color: metadata.color };
+    return {
+      icon: metadata.icon ? metadata.icon : props.icon,
+      color: metadata.color,
+    };
   } else {
     if (updatePrependInner) {
       prependInner.value = false;

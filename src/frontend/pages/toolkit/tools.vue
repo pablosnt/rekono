@@ -16,83 +16,70 @@
             '$ ' + item.command + (item.script ? ' ' + item.script : '')
           "
           :prepend-avatar="item.icon"
-          rel="noopener"
-          elevation="3"
-          class="mx-auto"
-          density="compact"
+          elevation="2"
+          class="ma-3"
+          density="comfortable"
         >
           <template #append>
-            <v-chip v-if="item.version" prepend-icon="mdi-tag">
+            <v-chip v-if="item.version" class="mr-2" prepend-icon="mdi-tag">
               {{ item.version }}
             </v-chip>
-            <span class="me-3" />
             <UtilsGreenCheck
               :condition="item.is_installed"
               true-text="Installed"
               false-text="Tool may have been installed after its last execution attempt"
             />
+            <BaseButton :link="item.reference" new-tab hide />
           </template>
-
           <template #text>
-            <v-card-text>
-              <template
-                v-for="configuration in item.configurations"
-                :key="configuration.id"
+            <p v-if="item.configurations.length === 1" class="ma-6">
+              {{ item.configurations[0].name }}
+            </p>
+            <v-expansion-panels
+              v-if="item.configurations.length > 1"
+              v-model="show"
+              variant="accordion"
+            >
+              <v-expansion-panel elevation="0" :value="item.id">
+                <v-expansion-panel-title
+                  >{{ item.configurations.filter((c) => c.default)[0].name }}
+                  <v-tooltip activator="parent" text="Configurations" />
+                </v-expansion-panel-title>
+                <v-expansion-panel-text>
+                  <v-container v-show="show === item.id">
+                    <v-row
+                      v-for="configuration in item.configurations"
+                      :key="configuration.id"
+                    >
+                      <p v-if="!configuration.default" class="ma-1">
+                        {{ configuration.name }}
+                      </p>
+                    </v-row>
+                  </v-container>
+                </v-expansion-panel-text>
+              </v-expansion-panel>
+            </v-expansion-panels>
+            <v-divider class="mt-4 mb-4" />
+            <div class="d-flex flex-row justify-center ga-2">
+              <v-chip
+                v-for="intensity in item.intensities"
+                :key="intensity.value"
+                size="small"
+                :color="enums.intensities[intensity.value].color"
               >
-                <div class="d-flex flex-row">
-                  <BaseButton
-                    v-if="configuration.default"
-                    :icon="
-                      item.configurations.length < 2
-                        ? undefined
-                        : show === item.id
-                          ? 'mdi-chevron-up'
-                          : 'mdi-chevron-down'
-                    "
-                    icon-color="black"
-                    size="medium"
-                    :tooltip="
-                      item.configurations.length > 1
-                        ? 'Configurations'
-                        : 'Configuration'
-                    "
-                    @click="show = show !== item.id ? item.id : null"
-                  >
-                    <template #prepend>
-                      <p>{{ configuration.name }}</p>
-                      <span class="me-2" />
-                    </template>
-                  </BaseButton>
-                </div>
-                <v-expand-transition>
-                  <div v-show="show == item.id" v-if="!configuration.default">
-                    <p>{{ configuration.name }}</p>
-                  </div>
-                </v-expand-transition>
-              </template>
-              <v-divider class="mt-4 mb-4" />
-              <div class="d-flex flex-row justify-center ga-2">
-                <v-chip
-                  v-for="intensity in item.intensities"
-                  :key="intensity.value"
-                  size="small"
-                  :color="enums.intensities[intensity.value].color"
-                >
-                  {{ intensity.value }}
-                </v-chip>
-              </div>
-            </v-card-text>
+                {{ intensity.value }}
+              </v-chip>
+            </div>
           </template>
-
           <v-card-actions>
             <TaskButton :tool="item" tooltip="Run" />
             <v-spacer />
             <UtilsLike
+              class="mr-5"
               :api="api"
               :item="item"
               @reload="(value) => dataset.loadData(value)"
             />
-            <BaseButton :link="item.reference" new-tab hide />
           </v-card-actions>
         </v-card>
       </template>
@@ -122,7 +109,8 @@ filters
     {
       type: "autocomplete",
       label: "Intensity",
-      icon: "mdi-volume-high",
+      icon: "mdi-fire",
+      color: "orange",
       collection: filters.collectionFromEnum(enums.value.intensities),
       fieldValue: "id",
       fieldTitle: "name",

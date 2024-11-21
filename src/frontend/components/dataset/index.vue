@@ -63,7 +63,7 @@
         </slot>
       </v-row>
       <v-expand-transition>
-        <v-container v-if="expandFilters" fluid class="mb-0">
+        <v-container v-show="expandFilters" fluid class="mb-0">
           <v-row justify="center" dense>
             <template v-for="f in filtering" :key="f.key">
               <v-col
@@ -87,6 +87,7 @@
                       : (value) => (f.fieldTitle ? value[f.fieldTitle] : value)
                   "
                   :icon="f.icon"
+                  :icon-color="f.color"
                   :enforce-icon="f.enfoceIcon"
                   return-object
                   :disabled="f.disabled ? f.disabled : false"
