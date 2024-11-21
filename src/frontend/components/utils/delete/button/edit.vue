@@ -8,12 +8,12 @@
         icon="mdi-cog"
       />
     </template>
-    <v-dialog width="auto">
+    <v-dialog key="1" width="auto">
       <template #activator="{ props: activatorProps }">
         <BaseButton
-          key="1"
           icon="mdi-pencil"
           color="black"
+          variant="flat"
           v-bind="activatorProps"
         />
       </template>
@@ -21,12 +21,12 @@
         <slot name="edit-dialog" :is-active="isActive" />
       </template>
     </v-dialog>
-    <v-dialog width="500" class="overflow-auto">
+    <v-dialog key="2" width="500" class="overflow-auto">
       <template #activator="{ props: activatorProps }">
         <BaseButton
-          key="2"
           icon="mdi-trash-can-outline"
           color="red"
+          variant="flat"
           v-bind="activatorProps"
         />
       </template>

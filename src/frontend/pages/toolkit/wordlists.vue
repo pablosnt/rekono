@@ -8,56 +8,40 @@
       icon="mdi-file-word-box"
       empty-head="No Wordlists"
       empty-text="There are no wordlists. Create your first one"
+      cols="5"
     >
       <template #item="{ item }">
         <v-card
           :title="item.name"
+          :subtitle="`${utils.displayNumber(item.size)} words`"
           elevation="2"
-          class="mx-auto"
-          density="compact"
+          class="ma-3"
+          density="comfortable"
         >
-          <template #append>
-            <span class="me-3" />
-            <UtilsCounterChip
-              :number="item.size"
-              entity="Words"
-              icon="mdi-counter"
+          <template #prepend>
+            <BaseButton
+              :icon="enums.wordlists[item.type].icon"
+              :tooltip="item.type"
+              @click.prevent.stop
             />
-            <span class="me-3" />
-            <v-chip>
-              <v-icon
-                v-if="item.type === 'Subdomain'"
-                icon="mdi-routes"
-                start
-              />
-              <p v-if="item.type === 'Endpoint'">
-                <strong>/</strong><span class="me-1" />
-              </p>
-              {{ item.type }}
-            </v-chip>
-            <span class="me-3" />
-            <UtilsOwner :entity="item" />
           </template>
-
-          <v-card-actions>
-            <v-spacer />
+          <template #append>
             <UtilsLike
+              class="mr-4"
               :api="api"
               :item="item"
               @reload="(value) => dataset.loadData(value)"
             />
-            <span class="me-3" />
-            <UtilsDeleteButtonEdit
-              v-if="
-                (item.owner !== null && item.owner.id === user.user) ||
-                user.role === 'Admin'
-              "
-            >
+            <UtilsOwner :entity="item" />
+            <UtilsDeleteButtonEdit v-if="autz.isAdmin() || autz.isOwner(item)">
               <template #edit-dialog="{ isActive }">
                 <WordlistDialog
                   :api="api"
                   :edit="item"
-                  @completed="dataset.loadData(false)"
+                  @completed="
+                    dataset.loadData(false);
+                    isActive.value = false;
+                  "
                   @close-dialog="isActive.value = false"
                 />
               </template>
@@ -66,12 +50,15 @@
                   :id="item.id"
                   :api="api"
                   :text="`Wordlist '${item.name}' will be removed`"
-                  @completed="dataset.loadData(false)"
+                  @completed="
+                    dataset.loadData(false);
+                    isActive.value = false;
+                  "
                   @close-dialog="isActive.value = false"
                 />
               </template>
             </UtilsDeleteButtonEdit>
-          </v-card-actions>
+          </template>
         </v-card>
       </template>
     </Dataset>
@@ -84,6 +71,8 @@ definePageMeta({ layout: false });
 const user = userStore();
 const enums = useEnums();
 const filters = useFilters();
+const utils = useUtils();
+const autz = useAutz();
 const dataset = ref(null);
 const api = ref(useApi("/api/wordlists/", true, "Wordlist"));
 const filtering = ref([]);
@@ -92,8 +81,10 @@ filters
     {
       type: "autocomplete",
       label: "Type",
-      icon: "mdi-routes",
-      collection: enums.wordlists,
+      icon: "mdi-tag",
+      collection: filters.collectionFromEnum(enums.wordlists),
+      fieldValue: "name",
+      fieldTitle: "name",
       key: "type",
     },
     {

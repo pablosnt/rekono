@@ -138,6 +138,7 @@ filters
       type: "autocomplete",
       label: "Sort",
       icon: "mdi-sort",
+      cols: 2,
       collection: ["id", "name", "command"],
       fieldValue: "id",
       fieldTitle: "name",

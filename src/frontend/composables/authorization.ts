@@ -11,5 +11,9 @@ export function useAutz() {
     );
   }
 
-  return { isAdmin, isAuditor };
+  function isOwner(entity: object, field: string = "owner"): boolean {
+    return entity[field] && item[field].id === user.user;
+  }
+
+  return { isAdmin, isAuditor, isOwner };
 }

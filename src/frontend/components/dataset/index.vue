@@ -64,7 +64,7 @@
       </v-row>
       <v-expand-transition>
         <v-container v-show="expandFilters" fluid class="mb-0">
-          <v-row justify="center" dense>
+          <v-row justify="space-around" dense>
             <template v-for="f in filtering" :key="f.key">
               <v-col
                 class="d-flex justify-center align-center"

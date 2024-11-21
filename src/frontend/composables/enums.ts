@@ -50,7 +50,10 @@ export function useEnums() {
       color: "red",
     },
   };
-  const wordlists = ["Subdomain", "Endpoint"];
+  const wordlists = {
+    Subdomain: { icon: "mdi-dns" },
+    Endpoint: { icon: "mdi-routes" },
+  };
   const timeUnits = ["Weeks", "Days", "Hours", "Minutes"];
   const roles = {
     Admin: {
