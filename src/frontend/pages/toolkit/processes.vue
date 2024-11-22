@@ -48,7 +48,6 @@ const ProcessDialog = resolveComponent("ProcessDialog");
 const dataset = ref(null);
 const api = ref(useApi("/api/processes/", true, "Process"));
 const filtering = ref([]);
-// TODO: Move all filter building to Dataset
 filters
   .build([
     {
