@@ -1,5 +1,4 @@
 import logging
-from typing import List
 
 from alerts.enums import AlertItem, AlertMode
 from alerts.models import Alert
@@ -19,7 +18,7 @@ class CVECrowd(BaseIntegration):
     def __init__(self) -> None:
         self.settings = CVECrowdSettings.objects.first()
         self.url = "https://api.cvecrowd.com/api/v1/cves"
-        self.trending_cves: List[str] = []
+        self.trending_cves: list[str] = []
         super().__init__()
 
     def is_available(self) -> bool:
@@ -27,6 +26,10 @@ class CVECrowd(BaseIntegration):
             self._get_trending_cves()
             return len(self.trending_cves) > 0
         return False
+
+    # Needed to mock the method for unit testing
+    def _request(method, url, json=True, **kwargs):
+        return super()._request(method, url, json, **kwargs)
 
     def _get_trending_cves(self) -> None:
         if (
@@ -36,6 +39,7 @@ class CVECrowd(BaseIntegration):
         ):
             try:
                 self.trending_cves = self._request(
+                    self.session.get,
                     self.url,
                     headers={"Authorization": f"Bearer {self.settings.secret}"},
                     params={"days": self.settings.trending_span_days},
@@ -43,7 +47,7 @@ class CVECrowd(BaseIntegration):
             except Exception:  # nosec
                 pass
 
-    def _process_findings(self, execution: Execution, findings: List[Finding]) -> None:
+    def _process_findings(self, execution: Execution, findings: list[Finding]) -> None:
         if not self.settings.execute_per_execution:
             return
         self._get_trending_cves()
@@ -73,7 +77,7 @@ class CVECrowd(BaseIntegration):
         Vulnerability.objects.filter(trending=False, cve__in=self.trending_cves).update(
             trending=True
         )
-        notified_vulnerabilities: List[int] = []
+        notified_vulnerabilities: list[int] = []
         for alert in Alert.objects.filter(
             item=AlertItem.CVE, mode=AlertMode.MONITOR, enabled=True
         ).all():

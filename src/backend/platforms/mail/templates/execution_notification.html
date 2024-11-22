@@ -262,7 +262,7 @@
                                     <td></td>
                                 {% endif %}
                                 <td><strong>{{ v.name }}</strong></td>
-                                <td>{{ v.severity }}</td>
+                                <td>{{ v.severity.name|capitalize }}</td>
                                 <td><strong>{{ v.cve }}</strong></td>
                                 <td>{{ v.cwe }}</td>
                                 {% if v.reference %}

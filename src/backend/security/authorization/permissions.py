@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 
 from alerts.models import Alert
 from notes.models import Note
@@ -92,7 +92,7 @@ class OwnerPermission(BasePermission):
     """Check if current user can access an object based on HTTP method and creator user."""
 
     # By default: instance returns the same object, allow_admin is True and owner_field is owner
-    mapping: Dict[Any, Dict[str, Any]] = {
+    mapping: dict[Any, dict[str, Any]] = {
         Wordlist: {},
         Process: {},
         Step: {

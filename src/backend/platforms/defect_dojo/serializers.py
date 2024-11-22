@@ -1,4 +1,4 @@
-from typing import Any, Dict, cast
+from typing import Any, cast
 
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
@@ -49,24 +49,25 @@ class DefectDojoSettingsSerializer(ModelSerializer):
 
 
 class BaseDefectDojoSerializer(Serializer):
-    client = None
+    _client = None
 
-    def _get_client(self) -> DefectDojo:
-        if not self.client:
-            self.client = DefectDojo()
-        return self.client
+    @property
+    def client(self) -> DefectDojo:
+        if not self._client:
+            self._client = DefectDojo()
+        return self._client
 
-    def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
-        if not self._get_client().is_available():
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
+        if not self.client.is_available():
             raise ValidationError(
-                "Defect-Dojo integration hasn't been configured properly",
+                "Defect-Dojo integration is not configured",
                 code="defect-dojo",
             )
         attrs = super().validate(attrs)
         for entity in ["product_type", "product", "engagement"]:
             value = attrs.get(f"{entity}_id") or attrs.get(entity)
             if value:
-                if not self._get_client().exists(f"{entity}s", value):
+                if not self.client.exists(f"{entity}s", value):
                     raise ValidationError(f"Entity {value} doesn't exist", code=entity)
         return attrs
 
@@ -111,8 +112,8 @@ class DefectDojoProductTypeSerializer(BaseDefectDojoSerializer):
         write_only=True,
     )
 
-    def create(self, validated_data: Dict[str, Any]) -> Dict[str, Any]:
-        return self._get_client().create_product_type(
+    def create(self, validated_data: dict[str, Any]) -> dict[str, Any]:
+        return self.client.create_product_type(
             validated_data["name"], validated_data["description"]
         )
 
@@ -145,7 +146,7 @@ class DefectDojoProductSerializer(BaseDefectDojoSerializer):
         write_only=True,
     )
 
-    def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         attrs = super().validate(attrs)
         attrs["project"] = get_object_or_404(
             Project,
@@ -154,13 +155,19 @@ class DefectDojoProductSerializer(BaseDefectDojoSerializer):
         )
         return attrs
 
-    def create(self, validated_data: Dict[str, Any]) -> Dict[str, Any]:
-        return self._get_client().create_product(
+    def create(self, validated_data: dict[str, Any]) -> dict[str, Any]:
+        return self.client.create_product(
             validated_data["product_type"],
             validated_data["name"],
             validated_data["description"],
-            [self._get_client().settings.tag]
-            + list(validated_data["project"].tags.all().values_list("slug", flat=True)),
+            (
+                [self.client.settings.tag]
+                if self.client.settings.tag
+                else []
+                + list(
+                    validated_data["project"].tags.all().values_list("slug", flat=True)
+                )
+            ),
         )
 
 
@@ -186,10 +193,10 @@ class DefectDojoEngagementSerializer(BaseDefectDojoSerializer):
         write_only=True,
     )
 
-    def create(self, validated_data: Dict[str, Any]) -> Dict[str, Any]:
-        return self._get_client().create_engagement(
+    def create(self, validated_data: dict[str, Any]) -> dict[str, Any]:
+        return self.client.create_engagement(
             validated_data["product"],
             validated_data["name"],
             validated_data["description"],
-            [self._get_client().settings.tag],
+            [self.client.settings.tag] if self.client.settings.tag else [],
         )

@@ -1,8 +1,7 @@
-from typing import Any, Dict
+from typing import Any
 
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-
 from framework.enums import InputKeyword
 from framework.models import BaseInput
 from security.validators.input_validator import Regex, Validator
@@ -36,14 +35,14 @@ class TargetPort(BaseInput):
             )
         ]
 
-    def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
+    def parse(self, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
         """Get useful information from this instance to be used in tool execution as argument.
 
         Args:
-            accumulated (Dict[str, Any], optional): Information from other instances of the same type. Defaults to {}.
+            accumulated (dict[str, Any], optional): Information from other instances of the same type. Defaults to {}.
 
         Returns:
-            Dict[str, Any]: Useful information for tool executions, including accumulated if setted
+            dict[str, Any]: Useful information for tool executions, including accumulated if setted
         """
         output = self.authentication.parse(accumulated) if self.authentication else {}
         ports = (accumulated or {}).get(InputKeyword.PORTS.name.lower(), []) + [

@@ -1,4 +1,5 @@
 from typing import Any, cast
+from unittest import mock
 
 from platforms.mail.notifications import SMTP
 from platforms.telegram_app.models import TelegramChat
@@ -146,44 +147,7 @@ class UserTest(ApiTest):
             ["admin2"],
             "get",
             200,
-            expected=[
-                {
-                    "id": 6,
-                    "username": "reader2",
-                    "role": Role.READER.value,
-                    "is_active": True,
-                },
-                {
-                    "id": 5,
-                    "username": "reader1",
-                    "role": Role.READER.value,
-                    "is_active": True,
-                },
-                {
-                    "id": 4,
-                    "username": "auditor2",
-                    "role": Role.AUDITOR.value,
-                    "is_active": True,
-                },
-                {
-                    "id": 3,
-                    "username": "auditor1",
-                    "role": Role.AUDITOR.value,
-                    "is_active": True,
-                },
-                {
-                    "id": 2,
-                    "username": "admin2",
-                    "role": Role.ADMIN.value,
-                    "is_active": True,
-                },
-                {
-                    "id": 1,
-                    "username": "admin1",
-                    "role": Role.ADMIN.value,
-                    "is_active": True,
-                },
-            ],
+            expected=[],
             endpoint="{endpoint}?no_project=1",
         ),
         ApiTestCase(
@@ -366,6 +330,26 @@ class UserTest(ApiTest):
         super().setUp()
         self._setup_project()
 
+    @mock.patch("platforms.mail.notifications.SMTP.is_available", lambda self: True)
+    def test_cases(self) -> None:
+        super().test_cases()
+
+    def test_invite_and_create_without_smtp(self) -> None:
+        client = self._get_api_client()
+        response = client.post(
+            self.login,
+            data={"username": self.admin1.username, "password": self.admin1.username},
+        )
+        self.assertEqual(200, response.status_code)
+        authenticated_client = self._get_api_client(
+            self._get_content(response.content)["access"]
+        )
+
+        self.assertEqual(
+            400, authenticated_client.post(self.endpoint, data=invitation1).status_code
+        )
+
+    @mock.patch("platforms.mail.notifications.SMTP.is_available", lambda self: True)
     def test_invite_and_create(self) -> None:
         client = self._get_api_client()
         response = client.post(

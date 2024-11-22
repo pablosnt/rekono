@@ -1,9 +1,15 @@
-from typing import Any, Dict, cast
+import math
+from typing import Any, cast
 
 from django.core.exceptions import ValidationError
+from executions.enums import Status
 from processes.models import Process
 from processes.serializers import SimpleProcessSerializer
-from rest_framework.serializers import ModelSerializer, PrimaryKeyRelatedField
+from rest_framework.serializers import (
+    ModelSerializer,
+    PrimaryKeyRelatedField,
+    SerializerMethodField,
+)
 from targets.models import Target
 from targets.serializers import SimpleTargetSerializer
 from tasks.models import Task
@@ -42,6 +48,8 @@ class TaskSerializer(ModelSerializer):
     configuration = ConfigurationSerializer(many=False, read_only=True)
     intensity = IntegerChoicesField(model=IntensityEnum, required=False)
     executor = SimpleUserSerializer(many=False, read_only=True)
+    status = SerializerMethodField(read_only=True)
+    progress = SerializerMethodField(read_only=True)
 
     class Meta:
         model = Task
@@ -64,6 +72,10 @@ class TaskSerializer(ModelSerializer):
             "end",
             "wordlists",
             "executions",
+            "notes",
+            "reports",
+            "status",
+            "progress",
         )
         read_only_fields = (
             "executor",
@@ -72,9 +84,49 @@ class TaskSerializer(ModelSerializer):
             "start",
             "end",
             "executions",
+            "notes",
+            "reports",
+            "status",
+            "progress",
         )
 
-    def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
+    def get_status(self, instance: Any) -> Status:
+        for status in [Status.RUNNING, Status.CANCELLED, Status.ERROR]:
+            if instance.executions.filter(status=status).count() > 0:
+                return status
+        if (
+            instance.executions.exclude(
+                status__in=[Status.COMPLETED, Status.SKIPPED]
+            ).count()
+            == 0
+        ):
+            return Status.COMPLETED
+        if instance.executions.filter(status=Status.SKIPPED).count() > 0:
+            return Status.SKIPPED
+        return Status.REQUESTED
+
+    def get_progress(self, instance: Any) -> int | None:
+        total = instance.executions.count()
+        return (
+            math.ceil(
+                (
+                    instance.executions.filter(
+                        status__in=[
+                            Status.ERROR,
+                            Status.COMPLETED,
+                            Status.SKIPPED,
+                            Status.CANCELLED,
+                        ]
+                    ).count()
+                    / total
+                )
+                * 100
+            )
+            if total > 0
+            else 0
+        )
+
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         if not attrs.get("intensity"):
             attrs["intensity"] = IntensityEnum.NORMAL
         if attrs.get("configuration"):
@@ -101,11 +153,11 @@ class TaskSerializer(ModelSerializer):
             attrs["repeat_time_unit"] = None
         return super().validate(attrs)
 
-    def create(self, validated_data: Dict[str, Any]) -> Task:
+    def create(self, validated_data: dict[str, Any]) -> Task:
         """Create instance from validated data.
 
         Args:
-            validated_data (Dict[str, Any]): Validated data
+            validated_data (dict[str, Any]): Validated data
 
         Returns:
             Task: Created instance

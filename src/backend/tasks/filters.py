@@ -1,8 +1,8 @@
 from django_filters.filters import ChoiceFilter, ModelChoiceFilter
 from django_filters.rest_framework import FilterSet
-
 from projects.models import Project
 from tasks.models import Task
+from tools.enums import Stage
 from tools.models import Tool
 
 
@@ -13,7 +13,7 @@ class TaskFilter(FilterSet):
     tool = ModelChoiceFilter(
         queryset=Tool.objects.all(), field_name="configuration__tool"
     )
-    stage = ChoiceFilter(field_name="configuration__stage")
+    stage = ChoiceFilter(field_name="configuration__stage", choices=Stage.choices)
 
     class Meta:
         model = Task
