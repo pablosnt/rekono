@@ -14,6 +14,7 @@ class Process(BaseLike):
         unique=True,
         validators=[Validator(Regex.NAME.value, code="name")],
     )
+    # TODO: Review default process descriptions
     description = models.TextField(
         max_length=300, validators=[Validator(Regex.TEXT.value, code="description")]
     )

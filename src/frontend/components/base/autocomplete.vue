@@ -7,9 +7,25 @@
     :chips="chips"
   >
     <template #prepend-inner>
-      <v-icon
-        v-if="!chips && model && !enforceIcon && prependInner"
+      <v-avatar
+        v-if="
+          !chips && model && !enforceIcon && prependInner && !model.reference
+        "
         v-bind="properties(model, true)"
+        variant="text"
+      />
+      <BaseButton
+        v-if="
+          !chips &&
+          model &&
+          !enforceIcon &&
+          prependInner &&
+          (model.image || model.icon) &&
+          model.reference
+        "
+        :link="model.reference"
+        :avatar="properties(model, true).image"
+        new-tab
       />
       <v-icon
         v-if="(!model || enforceIcon || !prependInner) && icon"
@@ -20,9 +36,10 @@
     <template #item="{ props: itemProps, item }">
       <v-list-item v-bind="itemProps" :title="title(item.raw)">
         <template #prepend>
-          <v-icon
-            v-if="properties(item.raw).icon"
+          <v-avatar
+            v-if="properties(item.raw).icon || properties(item.raw).image"
             v-bind="properties(item.raw)"
+            variant="text"
           />
         </template>
       </v-list-item>
@@ -33,9 +50,10 @@
     <template v-if="chips" #chip="{ props: itemProps, item }">
       <v-chip v-bind="itemProps" :text="title(item.raw)" closable>
         <template #prepend>
-          <v-icon
-            v-if="properties(item.raw).icon"
+          <v-avatar
+            v-if="properties(item.raw).icon || properties(item.raw).image"
             v-bind="properties(item.raw)"
+            variant="text"
           />
         </template>
       </v-chip>
@@ -96,8 +114,16 @@ function properties(item: object, updatePrependInner: boolean = false): object {
       prependInner.value = true;
     }
     return {
-      icon: metadata.icon ? metadata.icon : props.icon,
-      color: metadata.color,
+      icon: !metadata.icon
+        ? props.icon
+        : metadata.icon.substring(0, 4) === "mdi-"
+          ? metadata.icon
+          : undefined,
+      image:
+        metadata.icon && metadata.icon.substring(0, 4) !== "mdi-"
+          ? metadata.icon
+          : undefined,
+      color: metadata.color ? metadata.color : props.iconColor,
     };
   } else {
     if (updatePrependInner) {

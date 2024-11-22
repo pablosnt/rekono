@@ -25,6 +25,7 @@
       variant="outlined"
       :rules="[
         (d) => !!d || 'Description is required',
+        (d) => d.length <= 300 || 'Max 300 characters',
         (d) => validate.text.test(d) || 'Invalid description value',
       ]"
       validate-on="input"
@@ -32,9 +33,10 @@
       max-rows="10"
       rows="3"
       :disabled="disabled"
+      counter
     />
 
-    <slot name="inputs" />
+    <slot />
 
     <UtilsSubmit
       :text="!edit ? 'Create' : 'Update'"

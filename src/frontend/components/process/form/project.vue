@@ -12,10 +12,7 @@
 </template>
 
 <script setup lang="ts">
-const props = defineProps({
-  api: Object,
-  edit: Object,
-});
+const props = defineProps({ api: Object, edit: Object });
 const emit = defineEmits(["completed", "loading"]);
 const tags = ref(props.edit ? props.edit.tags : []);
 

@@ -7,7 +7,7 @@
       :add="WordlistDialog"
       icon="mdi-file-word-box"
       empty-head="No Wordlists"
-      empty-text="There are no wordlists. Create your first one"
+      empty-text="Create one to use it as dictionary for enumeration scans"
       cols="5"
     >
       <template #item="{ item }">

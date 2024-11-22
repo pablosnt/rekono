@@ -6,6 +6,7 @@
         icon="mdi-play-circle"
         icon-color="green"
         :tooltip="tooltip"
+        :disabled="disabled"
         size="x-large"
         v-bind="activatorProps"
         @click.prevent.stop
@@ -59,6 +60,11 @@ defineProps({
     type: String,
     required: false,
     default: "Scan",
+  },
+  disabled: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
 });
 defineEmits(["reload"]);

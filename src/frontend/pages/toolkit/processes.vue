@@ -8,7 +8,7 @@
       add-fullscreen
       icon="mdi-robot-angry"
       empty-head="No Processes"
-      empty-text="There are no processes. Create your first one"
+      empty-text="Create one to design your custom execution plan by combining multiple hacking tools"
       cols="4"
     >
       <template #item="{ item }">
@@ -47,10 +47,21 @@ const filters = useFilters();
 const ProcessDialog = resolveComponent("ProcessDialog");
 const dataset = ref(null);
 const api = ref(useApi("/api/processes/", true, "Process"));
-const tools = ref([]);
 const filtering = ref([]);
+// TODO: Move all filter building to Dataset
 filters
   .build([
+    {
+      type: "autocomplete",
+      label: "Tool",
+      icon: "mdi-rocket",
+      cols: 2,
+      request: useApi("/api/tools/", true, "Tool").list({}, true),
+      fieldValue: "id",
+      fieldTitle: "name",
+      key: "tool",
+      enforceIcon: true,
+    },
     {
       type: "autocomplete",
       label: "Stage",
@@ -99,24 +110,4 @@ filters
     },
   ])
   .then((results) => (filtering.value = results));
-useApi("/api/tools/", true, "Tool")
-  .list({}, true)
-  .then((response) => {
-    tools.value = response.items;
-    filtering.value = filters
-      .process([
-        {
-          type: "autocomplete",
-          label: "Tool",
-          icon: "mdi-rocket",
-          cols: 2,
-          collection: tools.value,
-          fieldValue: "id",
-          fieldTitle: "name",
-          key: "tool",
-          enforceIcon: true,
-        },
-      ])
-      .concat(filtering.value);
-  });
 </script>

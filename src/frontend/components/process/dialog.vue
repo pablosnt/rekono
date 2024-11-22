@@ -2,7 +2,10 @@
   <BaseDialog
     :title="edit ? 'Edit Process' : step === 1 ? process.name : 'New process'"
     :loading="loading"
-    @close-dialog="closeDialog(step === 1)"
+    @close-dialog="
+      loading = false;
+      $emit(step === 1 ? 'completed' : 'closeDialog');
+    "
   >
     <ProcessFormProject
       v-if="step === 0"
@@ -11,37 +14,21 @@
       @loading="(value) => (loading = value)"
       @completed="
         (data) => {
-          edit ? closeDialog(true) : createdProcess(data);
+          loading = false;
+          edit
+            ? $emit('completed')
+            : ((process = data), (loading = false), (step = 1));
         }
       "
     />
-    <ProcessFormSteps
-      v-if="step === 1"
-      :process="process"
-      @reload="api.get(process.id).then((response) => (process = response))"
-    />
+    <ProcessFormSteps v-if="step === 1" :process="process" />
   </BaseDialog>
 </template>
 
 <script setup lang="ts">
-defineProps({
-  api: Object,
-  edit: Object,
-});
-const emit = defineEmits(["closeDialog", "completed"]);
+defineProps({ api: Object, edit: Object });
+defineEmits(["closeDialog", "completed"]);
 const loading = ref(false);
 const process = ref(null);
 const step = ref(0);
-function createdProcess(data: object): void {
-  process.value = data;
-  loading.value = false;
-  step.value = 1;
-}
-function closeDialog(completed: boolean): void {
-  if (completed) {
-    emit("completed");
-  }
-  loading.value = false;
-  emit("closeDialog");
-}
 </script>

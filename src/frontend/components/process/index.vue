@@ -1,13 +1,33 @@
 <template>
-  <v-card :title="process.name" elevation="3" density="compact" hover>
+  <v-card
+    :title="process.name"
+    :subtitle="`${utils.displayNumber(process.steps.length)} steps`"
+    elevation="2"
+    :class="details ? '' : 'ma-3'"
+    density="comfortable"
+    :hover="!details"
+  >
     <template #append>
-      <UtilsCounterChip
-        :collection="process.steps"
-        entity="Steps"
-        icon="mdi-rocket"
+      <TaskButton
+        v-if="details"
+        :process="process"
+        tooltip="Run"
+        :disabled="process.steps.length === 0"
       />
-      <span class="me-3" />
-      <UtilsOwner :entity="process" />
+      <UtilsLike
+        class="mr-6"
+        :api="api"
+        :item="process"
+        @reload="(value) => $emit('reload', value)"
+      />
+      <UtilsOwner class="mr-2" :entity="process" />
+      <ProcessEditDelete
+        v-if="details"
+        :api="api"
+        :process="process"
+        :tools="tools"
+        @reload="$emit('reload', false)"
+      />
       <BaseButton
         v-if="details"
         icon="mdi-close"
@@ -16,53 +36,27 @@
       />
     </template>
     <template #text>
-      <v-card-text class="overflow-auto">
-        <div v-if="!details">
-          <p>{{ process.description }}</p>
-          <BaseTagShow :tags="process.tags" divider />
-        </div>
-        <div v-if="details">
-          <ProcessFormSteps
-            :process="process"
-            :tools="tools"
-            @reload="() => $emit('reload', false)"
-          />
-        </div>
-      </v-card-text>
+      <template v-if="!details">
+        <p class="text-center">{{ process.description }}</p>
+        <BaseTagShow :tags="process.tags" divider />
+      </template>
+      <div v-if="details">
+        <ProcessFormSteps :process="process" />
+      </div>
     </template>
-    <v-card-actions>
-      <TaskButton :process="process" tooltip="Run" />
-      <v-spacer />
-      <UtilsLike
-        :api="api"
-        :item="process"
-        @reload="(value) => $emit('reload', value)"
+    <v-card-actions v-if="!details">
+      <TaskButton
+        :process="process"
+        tooltip="Run"
+        :disabled="process.steps.length === 0"
       />
-      <UtilsDeleteButtonEdit
-        v-if="
-          (process.owner !== null && process.owner.id === user.user) ||
-          user.role === 'Admin'
-        "
-      >
-        <template #edit-dialog="{ isActive }">
-          <ProcessDialog
-            :api="api"
-            :edit="process"
-            :tools="tools"
-            @completed="$emit('reload', false)"
-            @close-dialog="isActive.value = false"
-          />
-        </template>
-        <template #delete-dialog="{ isActive }">
-          <UtilsDeleteDialog
-            :id="process.id"
-            :api="api"
-            :text="`Process '${process.name}' will be removed`"
-            @completed="$emit('reload', false)"
-            @close-dialog="isActive.value = false"
-          />
-        </template>
-      </UtilsDeleteButtonEdit>
+      <v-spacer />
+      <ProcessEditDelete
+        :api="api"
+        :process="process"
+        :tools="tools"
+        @reload="$emit('reload', false)"
+      />
     </v-card-actions>
   </v-card>
 </template>
@@ -75,5 +69,5 @@ defineProps({
   details: Boolean,
 });
 defineEmits(["reload", "closeDialog"]);
-const user = userStore();
+const utils = useUtils();
 </script>

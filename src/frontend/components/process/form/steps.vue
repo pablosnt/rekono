@@ -7,9 +7,9 @@
     flat
     @update:model-value="
       tool = null;
+      configurations = [];
       getSteps();
       getTools();
-      getConfigurations();
     "
   >
     <v-stepper-header>
@@ -26,87 +26,70 @@
     <v-stepper-window>
       <v-container fluid>
         <v-row justify="center" dense>
-          <v-col cols="5">
-            <v-autocomplete
+          <v-col cols="3">
+            <BaseAutocomplete
               v-model="tool"
               clearable
-              auto-select-first
               hide-details
-              density="comfortable"
               variant="outlined"
               label="Tool"
-              :items="tools"
-              item-title="name"
+              icon="mdi-rocket"
+              icon-color="red"
+              :collection="tools"
+              :title="(tool) => tool.name"
               return-object
               @update:model-value="
                 getSteps();
-                getConfigurations();
+                tool !== null ? getConfigurations() : (configurations = []);
               "
-            >
-              {{ tool }}
-              <template v-if="tool !== null && tool.icon !== null" #prepend>
-                <v-avatar :image="tool.icon" />
-              </template>
-              <template v-if="tool !== null && tool.reference !== null" #append>
-                <BaseButton :link="tool.reference" new-tab hide />
-              </template>
-            </v-autocomplete>
+            />
           </v-col>
         </v-row>
       </v-container>
-
       <v-empty-state
-        v-if="configurations.length === 0 && process.steps.length === 0"
+        v-if="configurations.length === 0 && steps.length === 0"
         icon="mdi-rocket"
-        title="There are no steps in this process yet"
+        title="There are no steps. Choose the tool and configuration you want to run as part of this process"
       />
-
-      <v-row
-        :justify="
-          configurations.length > 0 && steps.length > 0
-            ? 'space-between'
-            : 'center'
-        "
-        dense
-      >
-        <v-col v-if="steps.length > 0" cols="5">
+      <v-row justify="space-around">
+        <v-col v-if="steps.length > 0" cols="4">
           <template v-for="step in steps" :key="step.id">
             <v-banner
-              :avatar="tool === null ? step.configuration.tool.icon : null"
               :text="
                 tool === null
                   ? step.configuration.tool.name +
-                    '  -  ' +
+                    ': ' +
                     step.configuration.name
                   : step.configuration.name
               "
               :stacked="false"
             >
-              <template #actions>
+              <template #prepend>
                 <BaseButton
                   v-if="configurations.length === 0"
-                  hover
-                  icon="mdi-close"
-                  color="red"
-                  @click="removeStep(step.id)"
+                  class="mt-5"
+                  :avatar="step.configuration.tool.icon"
+                  :icon="
+                    step.configuration.tool.icon === null
+                      ? 'mdi-rocket'
+                      : undefined
+                  "
+                  icon-color="red"
+                  :link="step.configuration.tool.reference"
+                  new-tab
                 />
+              </template>
+              <template #actions>
                 <v-switch
-                  v-if="configurations.length > 0"
                   color="red"
                   :model-value="true"
                   @click="removeStep(step.id)"
-                />
-                <BaseButton
-                  v-if="configurations.length === 0"
-                  :link="step.configuration.tool.reference"
-                  new-tab
-                  hide
                 />
               </template>
             </v-banner>
           </template>
         </v-col>
-        <v-col v-if="configurations.length > 0" cols="5">
+        <v-col v-if="configurations.length > 0" cols="4">
           <template
             v-for="configuration in configurations"
             :key="configuration.id"
@@ -126,7 +109,6 @@
                       .then(() => {
                         getSteps();
                         getConfigurations();
-                        emit('reload');
                       })
                   "
                 />
@@ -141,69 +123,62 @@
 
 <script setup lang="ts">
 const props = defineProps({ process: Object });
-const emit = defineEmits(["reload"]);
-const enums = ref(useEnums());
-const stages = ref(Object.keys(enums.value.stages));
+const enums = useEnums();
+const api = useApi("/api/steps/", true, "Step");
+const toolApi = useApi("/api/tools/", true, "Tool");
+const configurationApi = useApi("/api/configurations/", true, "Configuration");
+const steps = ref([]);
+const tools = ref([]);
+const tool = ref(null);
+const configurations = ref([]);
+const stages = ref(Object.keys(enums.stages));
 const currentStages = props.process.steps.map(
   (step) => step.configuration.stage,
 );
-const stage = ref(
-  props.process.steps.length > 0
-    ? stages.value.indexOf(
-        stages.value.filter((s) => currentStages.includes(s))[0],
-      )
-    : null,
-);
-function defaultParams(): object {
-  return stage.value !== null
-    ? { stage: enums.value.stages[stages.value[stage.value]].id }
-    : {};
+const stage = ref(null);
+if (props.process.steps.length > 0) {
+  stage.value = stages.value.indexOf(
+    stages.value.filter((s) => currentStages.includes(s))[0],
+  );
+  getSteps();
 }
+getTools();
 
-const toolApi = useApi("/api/tools/", true, "Tool");
-const tools = ref([]);
-const tool = ref(null);
 function getTools(): void {
   if (stage.value !== null) {
     toolApi
-      .list(defaultParams())
+      .list({ stage: enums.stages[stages.value[stage.value]].id })
       .then((response) => (tools.value = response.items));
   }
 }
 
-const api = useApi("/api/steps/", true, "Step");
-const steps = ref([]);
-getSteps();
 function getSteps(): void {
-  const params = defaultParams();
-  params.process = props.process.id;
+  const params = {
+    stage: enums.stages[stages.value[stage.value]].id,
+    process: props.process.id,
+  };
   if (tool.value) {
     params.tool = tool.value.id;
   }
   api.list(params, true).then((response) => (steps.value = response.items));
 }
+
 function removeStep(id: number): void {
   api.remove(id).then(() => {
     getSteps();
     getConfigurations();
-    emit("reload");
   });
 }
 
-const configurationApi = useApi("/api/configurations/", true, "Configuration");
-const configurations = ref([]);
 function getConfigurations(): void {
   if (tool.value) {
-    const params = defaultParams();
-    params.tool = tool.value.id;
-    params.no_process = props.process.id;
     configurationApi
-      .list(params)
+      .list({
+        stage: enums.stages[stages.value[stage.value]].id,
+        tool: tool.value.id,
+        no_process: props.process.id,
+      })
       .then((response) => (configurations.value = response.items));
-  } else {
-    configurations.value = [];
   }
 }
-
-getTools();
 </script>

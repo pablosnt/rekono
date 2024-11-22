@@ -12,7 +12,7 @@ export function useAutz() {
   }
 
   function isOwner(entity: object, field: string = "owner"): boolean {
-    return entity[field] && item[field].id === user.user;
+    return entity[field] && entity[field].id === user.user;
   }
 
   return { isAdmin, isAuditor, isOwner };
