@@ -1,5 +1,5 @@
 <template>
-  <v-dialog width="auto">
+  <v-dialog v-if="autz.isAuditor()" width="auto">
     <template #activator="{ props: activatorProps }">
       <BaseButton
         hover
@@ -68,4 +68,5 @@ defineProps({
   },
 });
 defineEmits(["reload"]);
+const autz = useAutz();
 </script>

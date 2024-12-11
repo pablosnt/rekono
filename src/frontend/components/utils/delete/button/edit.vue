@@ -6,6 +6,7 @@
         size="large"
         color="grey"
         icon="mdi-cog"
+        @click.prevent.stop
       />
     </template>
     <v-dialog key="1" width="auto">

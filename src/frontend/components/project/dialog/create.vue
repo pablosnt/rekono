@@ -9,7 +9,7 @@
         : $emit('closeDialog');
     "
   >
-    <v-stepper v-model="step" hide-actions>
+    <v-stepper v-model="step" hide-actions flat>
       <v-stepper-header>
         <v-stepper-item title="Project" icon="mdi-folder-open" color="red" />
         <v-stepper-item title="Targets" icon="mdi-target" color="red" />
@@ -31,7 +31,18 @@
           :project-id="project.id"
           @completed="navigateTo(`/projects/${project.id}`)"
           @loading="(value) => (loading = value)"
-        />
+          @target="(value) => (target = value ? true : false)"
+          @targets="(value) => (targets = value.length > 0)"
+        >
+          <template #submit>
+            <UtilsSubmit
+              v-if="!targets && !target"
+              text="Skip"
+              color="blue-grey"
+              @click="navigateTo(`/projects/${project.id}`)"
+            />
+          </template>
+        </TargetForm>
       </v-stepper-window>
     </v-stepper>
   </BaseDialog>
@@ -43,4 +54,6 @@ defineEmits(["closeDialog", "completed"]);
 const loading = ref(false);
 const step = ref(0);
 const project = ref(null);
+const target = ref(false);
+const targets = ref(false);
 </script>

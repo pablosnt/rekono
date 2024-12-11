@@ -1,15 +1,30 @@
 <template>
-  <v-form v-model="valid" @submit.prevent="submit()">
+  <v-form @submit.prevent="submit()">
     <BaseTagInput
       class="mt-5"
       :value="targets"
       label="Targets"
       icon="mdi-target"
       :validate="validate.target"
-      @new-value="(value) => (target = value)"
-      @new-values="(value) => (targets = value)"
+      @input-value="
+        (value) => {
+          target = value;
+          $emit('target', value);
+        }
+      "
+      @new-values="
+        (value) => {
+          targets = value;
+          $emit('targets', value);
+        }
+      "
     />
-    <UtilsSubmit text="Create" :disabled="loading" />
+    <slot name="submit">
+      <UtilsSubmit
+        text="Create"
+        :disabled="loading || (targets.length === 0 && target === null)"
+      />
+    </slot>
   </v-form>
 </template>
 
@@ -22,9 +37,8 @@ const props = defineProps({
     default: useApi("/api/targets/", true, "Target"),
   },
 });
-const emit = defineEmits(["completed", "loading"]);
+const emit = defineEmits(["completed", "loading", "target", "targets"]);
 const validate = useValidation();
-const valid = ref(true);
 const loading = ref(false);
 const target = ref(null);
 const targets = ref([]);
@@ -34,7 +48,7 @@ function submit(): void {
     target.value === null
       ? targets.value
       : targets.value.concat([target.value]);
-  if (targetsToCreate.length > 0 && valid.value) {
+  if (targetsToCreate.length > 0) {
     emit("loading", true);
     loading.value = true;
     const body = { project: props.projectId };

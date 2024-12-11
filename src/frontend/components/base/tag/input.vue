@@ -6,6 +6,13 @@
     variant="outlined"
     :rules="[(t) => !t || regex.test(t.trim()) || 'Invalid value']"
     validate-on="input"
+    @update:model-value="
+      (value) =>
+        $emit(
+          'inputValue',
+          value && regex.test(value.trim()) ? value.trim() : null,
+        )
+    "
   >
     <template #append-inner>
       <BaseButton
@@ -69,7 +76,7 @@ const props = defineProps({
     default: false,
   },
 });
-defineEmits(["newValue", "newValues", "removeValue"]);
+defineEmits(["newValue", "newValues", "inputValue", "removeValue"]);
 const regex = props.validate === null ? useValidation().name : props.validate;
 const newTag = ref(null);
 const tags = ref(props.value != null ? props.value : []);

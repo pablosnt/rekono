@@ -120,6 +120,7 @@
                   :disabled="f.disabled ? f.disabled : false"
                   @update:model-value="addParameter(f.key, f.value)"
                 />
+                <!-- TODO: Use a chip instead of a switch? -->
                 <v-switch
                   v-if="f.type === 'switch'"
                   v-model="f.value"

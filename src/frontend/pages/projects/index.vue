@@ -9,28 +9,32 @@
         icon="mdi-folder-open"
         empty-head="No Projects"
         :empty-text="
-          user.role === 'Admin'
+          autz.isAdmin()
             ? 'Create your first project to start hacking'
-            : 'There are no projects yet. Ask your administrator for one'
+            : 'There are no projects yet. Ask your administrator to get assigned to one'
         "
         cols="4"
+        admin
       >
         <template #item="{ item }">
           <v-card
             :title="item.name"
-            elevation="3"
-            class="mx-auto"
-            density="compact"
+            elevation="2"
+            class="ma-3"
+            density="comfortable"
             hover
-            :to="`/projects/${item.id}`"
+            :to="
+              item.targets.length > 0
+                ? `/projects/${item.id}`
+                : `/projects/${item.id}/targets`
+            "
           >
             <template #prepend>
-              <v-avatar color="red-accent-4">
+              <v-avatar class="mr-2" color="red-accent-4">
                 <span class="text-h5 text">{{
                   item.name.charAt(0).toUpperCase()
                 }}</span>
               </v-avatar>
-              <span class="me-2" />
             </template>
             <template #append>
               <UtilsCounterButton
@@ -40,7 +44,7 @@
                 :link="`/projects/${item.id}/targets`"
               />
               <ProjectDefectDojo :project="item" only-link />
-              <UtilsOwner :entity="item" />
+              <UtilsOwner class="ml-4" :entity="item" />
             </template>
             <template #text>
               <v-card-text>
@@ -49,11 +53,13 @@
               </v-card-text>
             </template>
             <v-card-actions @click.stop>
-              <TaskButton v-if="item.targets.length > 0" :project="item" />
+              <TaskButton
+                :project="item"
+                :disabled="item.targets.length === 0"
+              />
               <v-spacer />
-
               <UtilsDeleteButtonEdit
-                v-if="item.owner.id === user.user || user.role === 'Admin'"
+                v-if="autz.isOwner(item) || autz.isAdmin()"
               >
                 <template #edit-dialog="{ isActive }">
                   <ProjectDialogEdit
@@ -90,6 +96,7 @@
 <script setup lang="ts">
 const dataset = ref(null);
 const user = userStore();
+const autz = useAutz();
 const filters = useFilters();
 const api = ref(useApi("/api/projects/", true, "Project"));
 const filtering = ref([]);

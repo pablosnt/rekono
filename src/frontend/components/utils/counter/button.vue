@@ -1,7 +1,7 @@
 <template>
   <BaseButton
     v-if="value > 0 || showZero"
-    class="mr-4 text-none"
+    class="text-none"
     :icon="icon !== undefined || image !== undefined"
     stacked
   >
