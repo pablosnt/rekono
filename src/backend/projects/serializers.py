@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict
+from typing import Any
 
 from alerts.enums import AlertItem, AlertMode
 from alerts.models import Alert
@@ -51,11 +51,11 @@ class ProjectSerializer(TaggitSerializer, ModelSerializer):
         )
 
     @transaction.atomic()
-    def create(self, validated_data: Dict[str, Any]) -> Project:
+    def create(self, validated_data: dict[str, Any]) -> Project:
         """Create instance from validated data.
 
         Args:
-            validated_data (Dict[str, Any]): Validated data
+            validated_data (dict[str, Any]): Validated data
 
         Returns:
             Project: Created instance
@@ -68,9 +68,9 @@ class ProjectSerializer(TaggitSerializer, ModelSerializer):
             item=AlertItem.CVE,
             mode=AlertMode.MONITOR,
             enabled=True,
-            owner=validated_data.get("owner"),
+            owner=None,
         )
-        alert.suscribers.add(validated_data.get("owner"))
+        alert.subscribers.add(validated_data.get("owner"))
         return project
 
 
@@ -79,12 +79,12 @@ class ProjectMemberSerializer(Serializer):
 
     user = IntegerField(required=True)
 
-    def update(self, instance: Project, validated_data: Dict[str, Any]) -> Project:
+    def update(self, instance: Project, validated_data: dict[str, Any]) -> Project:
         """Update instance from validated data.
 
         Args:
             instance (Project): Instance to update
-            validated_data (Dict[str, Any]): Validated data
+            validated_data (dict[str, Any]): Validated data
 
         Returns:
             Project: Updated instance
@@ -92,7 +92,7 @@ class ProjectMemberSerializer(Serializer):
         user = get_object_or_404(User, pk=validated_data.get("user"), is_active=True)
         instance.members.add(user)
         for alert in Alert.objects.filter(
-            project=instance, suscribe_all_members=True, enabled=True
+            project=instance, subscribe_all_members=True, enabled=True
         ).all():
-            alert.suscribers.add(user)
+            alert.subscribers.add(user)
         return instance

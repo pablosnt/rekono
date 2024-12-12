@@ -4,6 +4,7 @@ from typing import Any
 from django.core.exceptions import PermissionDenied
 from drf_spectacular.utils import extend_schema
 from framework.views import BaseViewSet
+from platforms.mail.notifications import SMTP
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
@@ -85,11 +86,28 @@ class UserViewSet(BaseViewSet):
     @action(
         detail=False,
         methods=["POST"],
-        url_path="create",
+        url_path="signup",
         permission_classes=[IsNotAuthenticated],
     )
     def create_after_invitation(self, request: Request, *args, **kwargs) -> Response:
         return self._create(CreateUserSerializer, request)
+
+    @extend_schema(request=None, responses={204: None})
+    @action(detail=True, methods=["POST"])
+    def resend(self, request: Request, pk: str) -> Response:
+        user = self.get_object()
+        if user.is_active is not None or user.otp is None:
+            return Response(
+                {"user": "User account has been already created"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if not SMTP().is_available():
+            return Response(
+                {"smtp": "SMTP client is not available to send the invitation"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        User.objects.send_invitation(user)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @extend_schema(
         request=RequestPasswordResetSerializer, responses={200: None}, methods=["POST"]
@@ -105,9 +123,11 @@ class UserViewSet(BaseViewSet):
     )
     def reset_password(self, request: Request, *args, **kwargs) -> Response:
         serializer = self._is_valid(
-            RequestPasswordResetSerializer
-            if request.method.lower() == "post"
-            else ResetPasswordSerializer,
+            (
+                RequestPasswordResetSerializer
+                if request.method.lower() == "post"
+                else ResetPasswordSerializer
+            ),
             request,
         )
         serializer.save()

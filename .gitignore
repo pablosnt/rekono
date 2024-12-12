@@ -71,9 +71,6 @@ instance/
 # Sphinx documentation
 docs/_build/
 
-# PyBuilder
-target/
-
 # Jupyter Notebook
 .ipynb_checkpoints
 
@@ -144,6 +141,7 @@ dist_electron/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+.nuxt/
 # Editor directories and files
 *.suo
 *.ntvs*
@@ -160,5 +158,4 @@ rekono-kbx
 *.kaboxer.yaml
 
 # Temporal ignore
-src/backend-1.x/
 migrations/

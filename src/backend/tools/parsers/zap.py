@@ -44,13 +44,15 @@ class Zap(BaseParser):
                         Vulnerability,
                         name=name,
                         description=self._clean(description) if description else name,
-                        severity=self.severity_mapping[int(severity)]
-                        if severity
-                        else Severity.MEDIUM,
+                        severity=(
+                            self.severity_mapping[int(severity)]
+                            if severity
+                            else Severity.MEDIUM
+                        ),
                         cwe=f"CWE-{cwe}" if cwe else None,
-                        reference=self._clean_reference(reference)
-                        if reference
-                        else None,
+                        reference=(
+                            self._clean_reference(reference) if reference else None
+                        ),
                     )
 
     def _clean(self, value: str) -> str:

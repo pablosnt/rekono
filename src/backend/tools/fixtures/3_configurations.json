@@ -378,7 +378,7 @@
         "pk": 35,
         "fields": {
             "tool": 17,
-            "name": "List shares",
+            "name": "list shares",
             "arguments": "{host} {port} {authentication}",
             "stage": 4,
             "default": true
@@ -389,7 +389,7 @@
         "pk": 36,
         "fields": {
             "tool": 17,
-            "name": "List shares and directories recursively",
+            "name": "list shares and directories recursively",
             "arguments": "{host} {port} -R {authentication}",
             "stage": 4,
             "default": false

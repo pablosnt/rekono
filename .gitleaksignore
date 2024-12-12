@@ -165,6 +165,8 @@ b91d7845d1ee485b628add9afc7a11aeff1b5ebc:src/backend/tests/test_users.py:hashico
 b91d7845d1ee485b628add9afc7a11aeff1b5ebc:src/backend/tests/test_users.py:hashicorp-tf-password:26
 76aefefc1177ee4ce8846c45c02177cb7a76ba7a:src/backend/tests/data/reports/gitleaks/leaky-repo.json:private-key:98
 76aefefc1177ee4ce8846c45c02177cb7a76ba7a:src/backend/tests/data/reports/gitleaks/leaky-repo.json:generic-api-key:9
+76aefefc1177ee4ce8846c45c02177cb7a76ba7a:src/backend/tests/data/reports/gitleaks/leaky-repo.json:slack-access-token:26
+76aefefc1177ee4ce8846c45c02177cb7a76ba7a:src/backend/tests/data/reports/gitleaks/leaky-repo.json:slack-access-token:27
 76aefefc1177ee4ce8846c45c02177cb7a76ba7a:src/backend/tests/data/reports/gitleaks/leaky-repo.json:generic-api-key:44
 76aefefc1177ee4ce8846c45c02177cb7a76ba7a:src/backend/tests/data/reports/gitleaks/leaky-repo.json:generic-api-key:45
 76aefefc1177ee4ce8846c45c02177cb7a76ba7a:src/backend/tests/data/reports/gitleaks/leaky-repo.json:generic-api-key:63
@@ -174,5 +176,6 @@ b91d7845d1ee485b628add9afc7a11aeff1b5ebc:src/backend/tests/test_users.py:hashico
 76aefefc1177ee4ce8846c45c02177cb7a76ba7a:src/backend/tests/parsers/test_gitleaks.py:generic-api-key:14
 76aefefc1177ee4ce8846c45c02177cb7a76ba7a:src/backend/tests/parsers/test_gitleaks.py:generic-api-key:34
 76aefefc1177ee4ce8846c45c02177cb7a76ba7a:src/backend/tests/parsers/test_gitleaks.py:generic-api-key:39
+76aefefc1177ee4ce8846c45c02177cb7a76ba7a:src/backend/tests/parsers/test_gitleaks.py:slack-access-token:24
 7c6c7b005ae8815e053f17523d8dc87256af9d2a:config.yaml:generic-api-key:18
 80a20bf5f24f9d511a3480315e301c19da7eca3e:src/backend/findings/enums.py:hashicorp-tf-password:21

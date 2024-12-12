@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime, timedelta
-from typing import Any, Dict, Optional, cast
+from typing import Any, Optional, cast
 
 import pyotp
 from django.contrib.auth.models import AbstractUser, Group, UserManager
@@ -39,7 +39,7 @@ class RekonoUserManager(UserManager):
         return otp
 
     def get_otp_expiration_time(
-        self, time: Dict[str, int] = {"hours": CONFIG.otp_expiration_hours}
+        self, time: dict[str, int] = {"hours": CONFIG.otp_expiration_hours}
     ) -> datetime:
         return timezone.now() + timedelta(**time)
 
@@ -47,7 +47,7 @@ class RekonoUserManager(UserManager):
         """Initialize user, assigning it a role and creating its API token.
 
         Args:
-            user (Any): User to initialize
+            user (any): User to initialize
             role (Role): Role to assign
         """
         group = Group.objects.get(name=role.value)  # Get user group related to the role
@@ -55,6 +55,13 @@ class RekonoUserManager(UserManager):
         user.groups.set([group])  # Set user group
         logger.info(f"[User] Role {role} has been assigned to user {user.id}")
         return user
+
+    def send_invitation(self, user: Any) -> None:
+        plain_otp = self.generate_otp()
+        user.otp = hash(plain_otp)
+        user.otp_expiration = self.get_otp_expiration_time()
+        user.save(update_fields=["otp", "otp_expiration"])
+        SMTP().invite_user(user, plain_otp)
 
     def invite_user(self, email: str, role: Role) -> Any:
         """Create a new user.
@@ -67,15 +74,9 @@ class RekonoUserManager(UserManager):
             Any: Created user
         """
         # Create new user including an OTP. The user will be inactive while invitation is not accepted
-        plain_otp = self.generate_otp()
-        user = User.objects.create(
-            email=email,
-            otp=hash(plain_otp),
-            otp_expiration=self.get_otp_expiration_time(),
-            is_active=None,
-        )
+        user = User.objects.create(email=email, is_active=None)
         self.assign_role(user, role)
-        SMTP().invite_user(user, plain_otp)
+        self.send_invitation(user)
         logger.info(f"[User] User {user.id} has been invited with role {role}")
         return user
 
@@ -130,7 +131,7 @@ class RekonoUserManager(UserManager):
         """Enable disabled user, assigning it a new role.
 
         Args:
-            user (Any): User to enable
+            user (any): User to enable
 
         Returns:
             Any: Enabled user
@@ -148,7 +149,7 @@ class RekonoUserManager(UserManager):
         """Disable user.
 
         Args:
-            user (Any): User to disable
+            user (any): User to disable
 
         Returns:
             Any: Disabled user
@@ -174,14 +175,16 @@ class RekonoUserManager(UserManager):
         user.save(update_fields=["otp", "otp_expiration"])
         return user
 
-    def setup_otp(self, user: Any, time: Optional[Dict[str, int]] = None) -> str:
+    def setup_otp(self, user: Any, time: Optional[dict[str, int]] = None) -> str:
         plain_otp = self.generate_otp()
         user = self._update_otp(
             user,
             hash(plain_otp),
-            self.get_otp_expiration_time(time)
-            if time is not None
-            else self.get_otp_expiration_time(),
+            (
+                self.get_otp_expiration_time(time)
+                if time is not None
+                else self.get_otp_expiration_time()
+            ),
         )
         return plain_otp
 

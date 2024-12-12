@@ -17,7 +17,7 @@
 <address addr="AC:AC:AC:AC:AC:AC" addrtype="mac" vendor="Apple"/>
 <hostnames>
 </hostnames>
-<ports><port protocol="tcp" portid="21"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="ftp" product="vsftpd" version="2.3.4" ostype="Unix" method="probed" conf="10"><cpe>cpe:/a:vsftpd:vsftpd:2.3.4</cpe></service><script id="ftp-vsftpd-backdoor" output="&#xa;  VULNERABLE:&#xa;  vsFTPd version 2.3.4 backdoor&#xa;    State: VULNERABLE (Exploitable)&#xa;    IDs:  BID:48539  CVE:CVE-2011-2523&#xa;      vsFTPd version 2.3.4 backdoor, this was reported on 2011-07-04.&#xa;    Disclosure date: 2011-07-03&#xa;    Exploit results:&#xa;      Shell command: id&#xa;      Results: uid=0(root) gid=0(root) groups=0(root)&#xa;    References:&#xa;      https://github.com/rapid7/metasploit-framework/blob/master/modules/exploits/unix/ftp/vsftpd_234_backdoor.rb&#xa;      https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2011-2523&#xa;      http://scarybeastsecurity.blogspot.com/2011/07/alert-vsftpd-download-backdoored.html&#xa;      https://www.securityfocus.com/bid/48539&#xa;"><table key="CVE-2011-2523">
+<ports><port protocol="tcp" portid="21"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="ftp" product="vsftpd" version="2.3.4" ostype="Unix" method="probed" conf="10"><cpe>cpe:/a:vsftpd:vsftpd:2.3.4</cpe></service><script id="ftp-vsftpd-backdoor" output="&#xa;  VULNERABLE:&#xa;  vsFTPd version 2.3.4 backdoor&#xa;    State: VULNERABLE (Exploitable)&#xa;    IDs:  BID:48539  CVE:CVE-2011-2523&#xa;      vsFTPd version 2.3.4 backdoor, this was reported on 2011-07-04.&#xa;    Disclosure date: 2011-07-03&#xa;    Exploit results:&#xa;      Shell command: id&#xa;      Results: uid=0(*****) gid=0(*****) groups=0(*****)&#xa;    References:&#xa;      https://github.com/rapid7/metasploit-framework/blob/master/modules/exploits/unix/ftp/vsftpd_234_backdoor.rb&#xa;      https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2011-2523&#xa;      http://scarybeastsecurity.blogspot.com/2011/07/alert-vsftpd-download-backdoored.html&#xa;      https://www.securityfocus.com/bid/48539&#xa;"><table key="CVE-2011-2523">
 <elem key="title">vsFTPd version 2.3.4 backdoor</elem>
 <elem key="state">VULNERABLE (Exploitable)</elem>
 <table key="ids">
@@ -37,7 +37,7 @@
 <elem key="disclosure">2011-07-03</elem>
 <table key="exploit_results">
 <elem>Shell command: id</elem>
-<elem>Results: uid=0(root) gid=0(root) groups=0(root)</elem>
+<elem>Results: uid=0(*****) gid=0(*****) groups=0(*****)</elem>
 </table>
 <table key="refs">
 <elem>https://github.com/rapid7/metasploit-framework/blob/master/modules/exploits/unix/ftp/vsftpd_234_backdoor.rb</elem>
