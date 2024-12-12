@@ -370,14 +370,14 @@ class UserTest(ApiTest):
         self.assertEqual(
             403,
             authenticated_client.post(
-                f"{self.endpoint}create/", data={"otp": otp, **user1}
+                f"{self.endpoint}signup/", data={"otp": otp, **user1}
             ).status_code,
         )
 
         self.assertEqual(
             401,
             client.post(
-                f"{self.endpoint}create/", data={"otp": "invalid otp", **user1}
+                f"{self.endpoint}signup/", data={"otp": "invalid otp", **user1}
             ).status_code,
         )
 
@@ -392,7 +392,7 @@ class UserTest(ApiTest):
             self.assertEqual(
                 400,
                 client.post(
-                    f"{self.endpoint}create/", data={"otp": otp, **invalid_user}
+                    f"{self.endpoint}signup/", data={"otp": otp, **invalid_user}
                 ).status_code,
             )
 
@@ -401,13 +401,13 @@ class UserTest(ApiTest):
         self.assertEqual(
             401,
             client.post(
-                f"{self.endpoint}create/", data={"otp": otp, **user1}
+                f"{self.endpoint}signup/", data={"otp": otp, **user1}
             ).status_code,
         )
 
         new_user.is_active = None
         new_user.save(update_fields=["is_active"])
-        response = client.post(f"{self.endpoint}create/", data={"otp": otp, **user1})
+        response = client.post(f"{self.endpoint}signup/", data={"otp": otp, **user1})
         self.assertEqual(201, response.status_code)
         content = self._get_content(response.content)
         self.assertEqual(7, content["id"])
@@ -416,7 +416,7 @@ class UserTest(ApiTest):
         self.assertEqual(
             401,
             client.post(
-                f"{self.endpoint}create/",
+                f"{self.endpoint}signup/",
                 data={"otp": otp, **user1, "username": "unique new test"},
             ).status_code,
         )

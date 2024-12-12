@@ -3,7 +3,7 @@
     <v-form v-model="valid" @submit.prevent="login()">
       <v-text-field
         v-model="username"
-        density="compact"
+        density="comfortable"
         label="Username"
         prepend-inner-icon="mdi-account"
         variant="outlined"
@@ -15,7 +15,7 @@
         v-model="password"
         :append-inner-icon="visible ? 'mdi-eye-off' : 'mdi-eye'"
         :type="visible ? 'text' : 'password'"
-        density="compact"
+        density="comfortable"
         label="Password"
         prepend-inner-icon="mdi-lock"
         variant="outlined"
@@ -48,6 +48,7 @@ const valid = ref(true);
 const router = useRouter();
 const tokens = useTokens();
 const api = useApi("/api/security/login/", false);
+
 function login(): void {
   if (valid.value) {
     loading.value = true;

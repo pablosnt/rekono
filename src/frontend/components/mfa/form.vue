@@ -3,21 +3,22 @@
     <v-otp-input
       v-if="app"
       v-model="mfa"
-      variant="solo"
+      class="mb-3"
+      variant="outlined"
       autofocus
+      :loading="loading ? 'red' : false"
+      focus-all
       validate-on="blur"
       :rules="[
         (o) => !!o || 'Code is required',
         (o) => validate.mfa.test(o) || 'Invalid code',
       ]"
-      @update:model-value="
-        autoTrigger && mfa && mfa.length === 6 ? newOtp() : null
-      "
+      @update:model-value="mfa && mfa.length === 6 ? newOtp() : null"
     />
     <v-text-field
       v-if="!app"
       v-model="mfa"
-      class="mt-5"
+      class="ma-3"
       density="comfortable"
       label="Token"
       prepend-inner-icon="mdi-key"
@@ -28,11 +29,8 @@
         (o) => !!o || 'Token is required',
         (o) => o.length === 128 || 'Invalid token',
       ]"
-      @update:model-value="
-        autoTrigger && mfa && mfa.length === 128 ? newOtp() : null
-      "
+      @update:model-value="mfa && mfa.length === 128 ? newOtp() : null"
     />
-    <slot name="buttons" />
     <div
       v-if="allowEmail && ((smtp && smtp.is_available) || user.user == null)"
       class="text-center"
@@ -42,6 +40,7 @@
         :disabled="loading"
         @click.prevent="
           app = !app;
+          $emit('app', app);
           mfa = null;
           !app ? api.create(token !== null ? { token: token } : {}) : null;
         "
@@ -63,13 +62,8 @@ defineProps({
     required: false,
     default: false,
   },
-  autoTrigger: {
-    type: Boolean,
-    required: false,
-    default: false,
-  },
 });
-const emit = defineEmits(["newOtp"]);
+const emit = defineEmits(["newOtp", "app"]);
 const user = userStore();
 const validate = ref(useValidation());
 const app = ref(true);

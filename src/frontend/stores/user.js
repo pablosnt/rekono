@@ -17,6 +17,8 @@ export const userStore = defineStore("user", {
       const token = tokens.get().access;
       if (token !== null && this.user === null) {
         this.login(token);
+      } else if (token === null && this.user !== null) {
+        this.logout();
       }
     },
   },

@@ -1,12 +1,12 @@
 <template>
   <NuxtLayout name="public" :loading="loading">
     <v-card-text class="text-center"
-      >You will receive via email a link to reset your password</v-card-text
+      >You will receive a link via email to reset your password</v-card-text
     >
     <v-form v-if="!otp" v-model="valid" @submit.prevent="sendResetToken()">
       <v-text-field
         v-model="email"
-        density="compact"
+        density="comfortable"
         label="Email"
         prepend-inner-icon="mdi-email"
         variant="outlined"
@@ -20,12 +20,10 @@
     </v-form>
     <PasswordForm
       v-if="otp"
-      :api="api"
+      v-model="password"
       submit-text="Reset Password"
-      :otp="otp"
-      :loading="loading"
-      @loading="(value) => (loading = value)"
-      @completed="() => router.push({ name: 'login' })"
+      :disabled="loading"
+      @custom-submit="(valid) => resetPassword(valid)"
     />
     <v-btn
       class="d-flex text-align-right text-medium-emphasis"
@@ -47,6 +45,7 @@ const valid = ref(true);
 const alert = useAlert();
 const route = useRoute();
 const router = useRouter();
+const password = ref(null);
 const otp = ref(route.query.otp ? route.query.otp : null);
 const api = useApi("/api/users/reset-password/", false);
 
@@ -58,11 +57,27 @@ function sendResetToken(): void {
       .then(() => {
         loading.value = false;
         alert(
-          "Done! You will receive via email a temporal link to change your password",
+          "Password reset requested. Use the link sent to your email",
           "success",
         );
       })
       .catch(() => (loading.value = false));
+  }
+}
+
+function resetPassword(valid): void {
+  if (valid && otp.value) {
+    loading.value = true;
+    api
+      .update({ password: password.value, otp: otp.value })
+      .then(() => {
+        loading.value = false;
+        password.value = null;
+        router.push({ name: "login" });
+      })
+      .catch(() => {
+        loading.value = false;
+      });
   }
 }
 </script>

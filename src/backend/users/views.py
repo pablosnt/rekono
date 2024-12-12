@@ -86,7 +86,7 @@ class UserViewSet(BaseViewSet):
     @action(
         detail=False,
         methods=["POST"],
-        url_path="create",
+        url_path="signup",
         permission_classes=[IsNotAuthenticated],
     )
     def create_after_invitation(self, request: Request, *args, **kwargs) -> Response:

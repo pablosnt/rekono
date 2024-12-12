@@ -59,8 +59,8 @@ class RekonoUserManager(UserManager):
     def send_invitation(self, user: Any) -> None:
         plain_otp = self.generate_otp()
         user.otp = hash(plain_otp)
-        user.otp_expiration = (self.get_otp_expiration_time(),)
-        user.save(update_fields=["otp"])
+        user.otp_expiration = self.get_otp_expiration_time()
+        user.save(update_fields=["otp", "otp_expiration"])
         SMTP().invite_user(user, plain_otp)
 
     def invite_user(self, email: str, role: Role) -> Any:

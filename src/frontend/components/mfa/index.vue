@@ -41,7 +41,11 @@
                 />) and type a valid code to enable MFA in your account
               </p>
               <p v-if="user.mfa">
-                Type a valid code to disable MFA in your account
+                {{
+                  app
+                    ? "Type a valid code from your authenticator app to disable MFA in your account"
+                    : "Paste the token sent to your email to disable MFA in your account"
+                }}
               </p>
             </template>
           </v-alert>
@@ -56,9 +60,9 @@
             <MfaForm
               ref="mfaForm"
               :loading="loading"
-              auto-trigger
               :allow-email="user.mfa"
               @new-otp="(mfa) => enableOrDisable(mfa)"
+              @app="(value) => (app = value)"
             />
           </v-col>
         </v-row>
@@ -76,6 +80,7 @@ const mfa = ref(props.user.mfa);
 const mfaForm = ref(null);
 const qrUrl = ref(null);
 const loading = ref(false);
+const app = ref(true);
 
 function registerMfa(): void {
   if (mfa.value && props.user && !props.user.mfa) {
