@@ -4,8 +4,10 @@
       <BaseButton
         hover
         icon="mdi-notebook-plus"
-        icon-color="indigo-darken-1"
-        size="x-large"
+        :icon-color="iconColor"
+        :color="color"
+        :size="size"
+        :variant="variant"
         v-bind="activatorProps"
         tooltip="Take a note"
         @click.prevent.stop
@@ -92,6 +94,26 @@ defineProps({
     type: Object,
     required: false,
     default: null,
+  },
+  variant: {
+    type: String,
+    required: false,
+    default: "text",
+  },
+  iconColor: {
+    type: String,
+    required: false,
+    default: "indigo-darken-1",
+  },
+  color: {
+    type: String,
+    required: false,
+    default: undefined,
+  },
+  size: {
+    type: String,
+    required: false,
+    default: "x-large",
   },
 });
 </script>

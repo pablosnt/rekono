@@ -1,7 +1,8 @@
 <template>
   <v-text-field
     v-model="newTag"
-    :label="tags.length === 0 || keepLabelAfterInput ? label : undefined"
+    :label="label"
+    :persistent-placeholder="tags.length > 0"
     :prepend-inner-icon="icon"
     variant="outlined"
     :rules="[(t) => !t || regex.test(t.trim()) || 'Invalid value']"
@@ -69,11 +70,6 @@ const props = defineProps({
     type: RegExp,
     required: false,
     default: null,
-  },
-  keepLabelAfterInput: {
-    type: Boolean,
-    required: false,
-    default: false,
   },
 });
 defineEmits(["newValue", "newValues", "inputValue", "removeValue"]);

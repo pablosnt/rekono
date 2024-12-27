@@ -1,7 +1,6 @@
 <template>
   <v-form @submit.prevent="submit()">
     <BaseTagInput
-      class="mt-5"
       :value="targets"
       label="Targets"
       icon="mdi-target"
@@ -19,10 +18,17 @@
         }
       "
     />
+
     <slot name="submit">
+      <UtilsPercentage
+        v-if="loading && targetsToCreate.length > 1"
+        :total="targetsToCreate.length"
+        :progress="success + errors"
+      />
       <UtilsSubmit
+        v-if="!loading || targetsToCreate.length < 2"
         text="Create"
-        :disabled="loading || (targets.length === 0 && target === null)"
+        :disabled="targets.length === 0 && target === null"
       />
     </slot>
   </v-form>
@@ -42,34 +48,37 @@ const validate = useValidation();
 const loading = ref(false);
 const target = ref(null);
 const targets = ref([]);
+const targetsToCreate = ref([]);
+const success = ref(0);
+const errors = ref(0);
 
 function submit(): void {
-  const targetsToCreate =
+  targetsToCreate.value =
     target.value === null
       ? targets.value
       : targets.value.concat([target.value]);
-  if (targetsToCreate.length > 0) {
+  if (targetsToCreate.value.length > 0) {
     emit("loading", true);
     loading.value = true;
     const body = { project: props.projectId };
-    let success = 0;
-    let errors = 0;
-    for (const target of targetsToCreate) {
+    success.value = 0;
+    errors.value = 0;
+    for (const target of targetsToCreate.value) {
       body.target = target;
       props.api
         .create(body)
         .then(() => {
-          success++;
-          if (success + errors === targetsToCreate.length) {
+          success.value++;
+          if (success.value + errors.value === targetsToCreate.value.length) {
             emit("completed");
             emit("loading", false);
             loading.value = false;
           }
         })
         .catch(() => {
-          errors++;
-          if (success + errors === targetsToCreate.length) {
-            if (success > 0) {
+          errors.value++;
+          if (success.value + errors.value === targetsToCreate.value.length) {
+            if (success.value > 0) {
               emit("completed");
             }
             emit("loading", false);

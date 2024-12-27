@@ -28,6 +28,7 @@
         />
         <TargetForm
           v-if="step === 1"
+          class="mt-3"
           :project-id="project.id"
           @completed="navigateTo(`/projects/${project.id}`)"
           @loading="(value) => (loading = value)"

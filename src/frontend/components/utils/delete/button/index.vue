@@ -4,9 +4,11 @@
       <BaseButton
         hover
         :variant="variant"
+        :color="color"
         :icon="icon"
-        icon-color="red"
+        :icon-color="iconColor"
         :tooltip="action"
+        :size="size"
         v-bind="activatorProps"
       />
     </template>
@@ -51,6 +53,21 @@ defineProps({
     type: String,
     required: false,
     default: "text",
+  },
+  iconColor: {
+    type: String,
+    required: false,
+    default: "red",
+  },
+  color: {
+    type: String,
+    required: false,
+    default: undefined,
+  },
+  size: {
+    type: String,
+    required: false,
+    default: undefined,
   },
 });
 defineEmits(["completed"]);

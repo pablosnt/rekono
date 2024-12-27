@@ -25,7 +25,7 @@
             hover
             :to="
               item.targets.length > 0
-                ? `/projects/${item.id}`
+                ? `/projects/${item.id}/dashboard`
                 : `/projects/${item.id}/targets`
             "
           >

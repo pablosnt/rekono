@@ -3,10 +3,12 @@
     <template #activator="{ props: activatorProps }">
       <BaseButton
         hover
-        size="x-large"
+        :icon-color="iconColor"
+        :color="color"
+        :size="size"
+        :variant="variant"
         v-bind="activatorProps"
         icon="mdi-file-document-plus"
-        icon-color="blue-grey-darken-2"
         tooltip="Create a report"
       />
     </template>
@@ -38,6 +40,26 @@ defineProps({
     type: Object,
     required: false,
     default: null,
+  },
+  variant: {
+    type: String,
+    required: false,
+    default: "text",
+  },
+  iconColor: {
+    type: String,
+    required: false,
+    default: "blue-grey-darken-2",
+  },
+  color: {
+    type: String,
+    required: false,
+    default: undefined,
+  },
+  size: {
+    type: String,
+    required: false,
+    default: "x-large",
   },
 });
 </script>

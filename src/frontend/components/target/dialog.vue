@@ -11,11 +11,7 @@
       v-if="parameters"
       :api="api"
       :project-id="parameters.project"
-      @completed="
-        () => {
-          $emit('completed');
-        }
-      "
+      @completed="$emit('completed')"
       @loading="(value) => (loading = value)"
     />
   </BaseDialog>
