@@ -65,21 +65,9 @@
 
 <script setup lang="ts">
 defineProps({
-  icon: {
-    type: String,
-    required: false,
-    default: "mdi-lock",
-  },
-  submitText: {
-    type: String,
-    required: false,
-    default: null,
-  },
-  submitDisabled: {
-    type: Boolean,
-    required: false,
-    default: false,
-  },
+  icon: { type: String, required: false, default: "mdi-lock" },
+  submitText: { type: String, required: false, default: null },
+  submitDisabled: { type: Boolean, required: false, default: false },
 });
 defineEmits(["customSubmit"]);
 const model = defineModel();

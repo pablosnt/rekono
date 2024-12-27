@@ -17,42 +17,14 @@
 
 <script setup lang="ts">
 const props = defineProps({
-  number: {
-    type: Number,
-    required: false,
-    default: 0,
-  },
-  collection: {
-    type: Array,
-    required: false,
-    default: null,
-  },
-  variant: {
-    type: String,
-    required: false,
-    default: "tonal",
-  },
-  color: {
-    type: String,
-    required: false,
-    default: "red",
-  },
-  link: {
-    type: String,
-    required: false,
-    default: null,
-  },
-  newTab: {
-    type: Boolean,
-    required: false,
-    default: false,
-  },
+  number: { type: Number, required: false, default: 0 },
+  collection: { type: Array, required: false, default: null },
+  variant: { type: String, required: false, default: "tonal" },
+  color: { type: String, required: false, default: "red" },
+  link: { type: String, required: false, default: null },
+  newTab: { type: Boolean, required: false, default: false },
   entity: String,
-  showZero: {
-    type: Boolean,
-    required: false,
-    default: false,
-  },
+  showZero: { type: Boolean, required: false, default: false },
 });
 const utils = useUtils();
 const value = ref(props.collection ? props.collection.length : props.number);

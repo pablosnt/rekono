@@ -51,11 +51,7 @@
 <script setup lang="ts">
 const props = defineProps({
   api: Object,
-  pattern: {
-    type: Object,
-    required: false,
-    default: null,
-  },
+  pattern: { type: Object, required: false, default: null },
 });
 const emit = defineEmits(["completed", "loading"]);
 const validate = useValidation();

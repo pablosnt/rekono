@@ -196,71 +196,19 @@
 <script setup lang="ts">
 const props = defineProps({
   api: Object,
-  filtering: {
-    type: Array<object>,
-    required: false,
-    default: [],
-  },
-  expandFilters: {
-    type: Boolean,
-    required: false,
-    default: false,
-  },
-  header: {
-    type: Boolean,
-    required: false,
-    default: true,
-  },
-  admin: {
-    type: Boolean,
-    required: false,
-    default: false,
-  },
-  auditor: {
-    type: Boolean,
-    required: false,
-    default: false,
-  },
-  add: {
-    type: Object,
-    required: false,
-    default: null,
-  },
-  addFullscreen: {
-    type: Boolean,
-    required: false,
-    default: false,
-  },
-  defaultParameters: {
-    type: Object,
-    required: false,
-    default: null,
-  },
-  icon: {
-    type: String,
-    required: false,
-    default: null,
-  },
-  emptyHead: {
-    type: String,
-    required: false,
-    default: undefined,
-  },
-  emptyTitle: {
-    type: String,
-    required: false,
-    default: undefined,
-  },
-  emptyText: {
-    type: String,
-    required: false,
-    default: undefined,
-  },
-  cols: {
-    type: String,
-    required: false,
-    default: "6",
-  },
+  filtering: { type: Array<object>, required: false, default: [] },
+  expandFilters: { type: Boolean, required: false, default: false },
+  header: { type: Boolean, required: false, default: true },
+  admin: { type: Boolean, required: false, default: false },
+  auditor: { type: Boolean, required: false, default: false },
+  add: { type: Object, required: false, default: null },
+  addFullscreen: { type: Boolean, required: false, default: false },
+  defaultParameters: { type: Object, required: false, default: null },
+  icon: { type: String, required: false, default: null },
+  emptyHead: { type: String, required: false, default: undefined },
+  emptyTitle: { type: String, required: false, default: undefined },
+  emptyText: { type: String, required: false, default: undefined },
+  cols: { type: String, required: false, default: "6" },
 });
 const emit = defineEmits(["loadData", "expandFilters"]);
 const tasks = useTasks();

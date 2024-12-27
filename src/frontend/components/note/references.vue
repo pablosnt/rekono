@@ -7,66 +7,18 @@
 
 <script setup lang="ts">
 const props = defineProps({
-  target: {
-    type: Object,
-    required: false,
-    default: null,
-  },
-  task: {
-    type: Object,
-    required: false,
-    default: null,
-  },
-  execution: {
-    type: Object,
-    required: false,
-    default: null,
-  },
-  osint: {
-    type: Object,
-    required: false,
-    default: null,
-  },
-  host: {
-    type: Object,
-    required: false,
-    default: null,
-  },
-  port: {
-    type: Object,
-    required: false,
-    default: null,
-  },
-  path: {
-    type: Object,
-    required: false,
-    default: null,
-  },
-  credential: {
-    type: Object,
-    required: false,
-    default: null,
-  },
-  technology: {
-    type: Object,
-    required: false,
-    default: null,
-  },
-  vulnerability: {
-    type: Object,
-    required: false,
-    default: null,
-  },
-  exploit: {
-    type: Object,
-    required: false,
-    default: null,
-  },
-  note: {
-    type: Object,
-    required: false,
-    default: null,
-  },
+  target: { type: Object, required: false, default: null },
+  task: { type: Object, required: false, default: null },
+  execution: { type: Object, required: false, default: null },
+  osint: { type: Object, required: false, default: null },
+  host: { type: Object, required: false, default: null },
+  port: { type: Object, required: false, default: null },
+  path: { type: Object, required: false, default: null },
+  credential: { type: Object, required: false, default: null },
+  technology: { type: Object, required: false, default: null },
+  vulnerability: { type: Object, required: false, default: null },
+  exploit: { type: Object, required: false, default: null },
+  note: { type: Object, required: false, default: null },
 });
 const route = useRoute();
 const enums = useEnums();

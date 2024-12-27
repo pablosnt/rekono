@@ -1,6 +1,6 @@
 <template>
   <BaseDialog
-    title="New Target"
+    title="New Targets"
     :loading="loading"
     @close-dialog="
       loading = false;

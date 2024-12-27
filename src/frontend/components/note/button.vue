@@ -35,85 +35,21 @@
 
 <script setup lang="ts">
 defineProps({
-  project: {
-    type: Number,
-    required: false,
-    default: null,
-  },
-  target: {
-    type: Object,
-    required: false,
-    default: null,
-  },
-  task: {
-    type: Object,
-    required: false,
-    default: null,
-  },
-  execution: {
-    type: Object,
-    required: false,
-    default: null,
-  },
-  osint: {
-    type: Object,
-    required: false,
-    default: null,
-  },
-  host: {
-    type: Object,
-    required: false,
-    default: null,
-  },
-  port: {
-    type: Object,
-    required: false,
-    default: null,
-  },
-  path: {
-    type: Object,
-    required: false,
-    default: null,
-  },
-  credential: {
-    type: Object,
-    required: false,
-    default: null,
-  },
-  technology: {
-    type: Object,
-    required: false,
-    default: null,
-  },
-  vulnerability: {
-    type: Object,
-    required: false,
-    default: null,
-  },
-  exploit: {
-    type: Object,
-    required: false,
-    default: null,
-  },
-  variant: {
-    type: String,
-    required: false,
-    default: "text",
-  },
-  iconColor: {
-    type: String,
-    required: false,
-    default: "indigo-darken-1",
-  },
-  color: {
-    type: String,
-    required: false,
-    default: undefined,
-  },
-  size: {
-    type: String,
-    required: false,
-    default: "x-large",
-  },
+  project: { type: Number, required: false, default: null },
+  target: { type: Object, required: false, default: null },
+  task: { type: Object, required: false, default: null },
+  execution: { type: Object, required: false, default: null },
+  osint: { type: Object, required: false, default: null },
+  host: { type: Object, required: false, default: null },
+  port: { type: Object, required: false, default: null },
+  path: { type: Object, required: false, default: null },
+  credential: { type: Object, required: false, default: null },
+  technology: { type: Object, required: false, default: null },
+  vulnerability: { type: Object, required: false, default: null },
+  exploit: { type: Object, required: false, default: null },
+  variant: { type: String, required: false, default: "text" },
+  iconColor: { type: String, required: false, default: "indigo-darken-1" },
+  color: { type: String, required: false, default: undefined },
+  size: { type: String, required: false, default: "x-large" },
 });
 </script>

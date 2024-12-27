@@ -39,16 +39,8 @@ defineProps({
   api: Object,
   id: Number,
   text: String,
-  icon: {
-    type: String,
-    required: false,
-    default: "mdi-trash-can-outline",
-  },
-  action: {
-    type: String,
-    required: false,
-    default: "Delete",
-  },
+  icon: { type: String, required: false, default: "mdi-trash-can-outline" },
+  action: { type: String, required: false, default: "Delete" },
 });
 defineEmits(["closeDialog", "completed"]);
 </script>

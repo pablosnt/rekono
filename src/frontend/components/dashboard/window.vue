@@ -36,32 +36,11 @@
 const props = defineProps({
   api: Object,
   title: String,
-  subtitle: {
-    type: String,
-    required: false,
-    default: undefined,
-  },
-  icon: {
-    type: String,
-    required: false,
-    default: undefined,
-  },
-  iconColor: {
-    type: String,
-    required: false,
-    default: undefined,
-  },
-
-  project: {
-    type: Object,
-    required: false,
-    default: null,
-  },
-  target: {
-    type: Object,
-    required: false,
-    default: null,
-  },
+  subtitle: { type: String, required: false, default: undefined },
+  icon: { type: String, required: false, default: undefined },
+  iconColor: { type: String, required: false, default: undefined },
+  project: { type: Object, required: false, default: null },
+  target: { type: Object, required: false, default: null },
 });
 const emit = defineEmits(["stats"]);
 const loading = ref(true);

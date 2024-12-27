@@ -25,35 +25,11 @@
 <script setup lang="ts">
 defineProps({
   title: String,
-  titleClass: {
-    type: String,
-    required: false,
-    default: "text-h5",
-  },
-  subtitle: {
-    type: String,
-    required: false,
-    default: undefined,
-  },
-  icon: {
-    type: String,
-    required: false,
-    default: undefined,
-  },
-  color: {
-    type: String,
-    required: false,
-    default: "red",
-  },
-  loading: {
-    type: String,
-    required: false,
-    default: undefined,
-  },
-  notWrappedText: {
-    type: Boolean,
-    required: false,
-    default: false,
-  },
+  titleClass: { type: String, required: false, default: "text-h5" },
+  subtitle: { type: String, required: false, default: undefined },
+  icon: { type: String, required: false, default: undefined },
+  color: { type: String, required: false, default: "red" },
+  loading: { type: String, required: false, default: undefined },
+  notWrappedText: { type: Boolean, required: false, default: false },
 });
 </script>

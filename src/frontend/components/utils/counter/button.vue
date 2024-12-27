@@ -28,46 +28,14 @@
 
 <script setup lang="ts">
 const props = defineProps({
-  number: {
-    type: Number,
-    required: false,
-    default: 0,
-  },
-  collection: {
-    type: Array,
-    required: false,
-    default: null,
-  },
-  icon: {
-    type: String,
-    required: false,
-    default: undefined,
-  },
-  image: {
-    type: String,
-    required: false,
-    default: undefined,
-  },
-  size: {
-    type: String,
-    required: false,
-    default: undefined,
-  },
-  variant: {
-    type: String,
-    required: false,
-    default: "tonal",
-  },
-  color: {
-    type: String,
-    required: false,
-    default: "red",
-  },
-  showZero: {
-    type: Boolean,
-    required: false,
-    default: false,
-  },
+  number: { type: Number, required: false, default: 0 },
+  collection: { type: Array, required: false, default: null },
+  icon: { type: String, required: false, default: undefined },
+  image: { type: String, required: false, default: undefined },
+  size: { type: String, required: false, default: undefined },
+  variant: { type: String, required: false, default: "tonal" },
+  color: { type: String, required: false, default: "red" },
+  showZero: { type: Boolean, required: false, default: false },
 });
 const utils = useUtils();
 const value = ref(props.collection ? props.collection.length : props.number);

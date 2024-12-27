@@ -49,16 +49,8 @@
 
 <script setup lang="ts">
 const props = defineProps({
-  edit: {
-    type: Object,
-    required: false,
-    default: null,
-  },
-  disabled: {
-    type: Boolean,
-    required: false,
-    default: false,
-  },
+  edit: { type: Object, required: false, default: null },
+  disabled: { type: Boolean, required: false, default: false },
 });
 defineEmits(["submit"]);
 const validate = ref(useValidation());

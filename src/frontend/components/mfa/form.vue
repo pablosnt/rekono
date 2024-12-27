@@ -52,16 +52,8 @@
 
 <script setup lang="ts">
 defineProps({
-  allowEmail: {
-    type: Boolean,
-    required: false,
-    default: false,
-  },
-  loading: {
-    type: Boolean,
-    required: false,
-    default: false,
-  },
+  allowEmail: { type: Boolean, required: false, default: false },
+  loading: { type: Boolean, required: false, default: false },
 });
 const emit = defineEmits(["newOtp", "app"]);
 const user = userStore();

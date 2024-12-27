@@ -19,11 +19,7 @@
 
 <script setup lang="ts">
 defineProps({
-  loading: {
-    type: Boolean,
-    required: false,
-    default: false,
-  },
+  loading: { type: Boolean, required: false, default: false },
 });
 </script>
 

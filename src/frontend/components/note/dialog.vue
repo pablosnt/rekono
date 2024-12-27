@@ -176,76 +176,20 @@ const props = defineProps({
     required: false,
     default: useApi("/api/notes/", true, "Note"),
   },
-  parameters: {
-    type: Object,
-    required: false,
-    default: null,
-  },
-  project: {
-    type: Number,
-    required: false,
-    default: null,
-  },
-  target: {
-    type: Object,
-    required: false,
-    default: null,
-  },
-  task: {
-    type: Object,
-    required: false,
-    default: null,
-  },
-  execution: {
-    type: Object,
-    required: false,
-    default: null,
-  },
-  osint: {
-    type: Object,
-    required: false,
-    default: null,
-  },
-  host: {
-    type: Object,
-    required: false,
-    default: null,
-  },
-  port: {
-    type: Object,
-    required: false,
-    default: null,
-  },
-  path: {
-    type: Object,
-    required: false,
-    default: null,
-  },
-  credential: {
-    type: Object,
-    required: false,
-    default: null,
-  },
-  technology: {
-    type: Object,
-    required: false,
-    default: null,
-  },
-  vulnerability: {
-    type: Object,
-    required: false,
-    default: null,
-  },
-  exploit: {
-    type: Object,
-    required: false,
-    default: null,
-  },
-  note: {
-    type: Object,
-    required: false,
-    default: null,
-  },
+  parameters: { type: Object, required: false, default: null },
+  project: { type: Number, required: false, default: null },
+  target: { type: Object, required: false, default: null },
+  task: { type: Object, required: false, default: null },
+  execution: { type: Object, required: false, default: null },
+  osint: { type: Object, required: false, default: null },
+  host: { type: Object, required: false, default: null },
+  port: { type: Object, required: false, default: null },
+  path: { type: Object, required: false, default: null },
+  credential: { type: Object, required: false, default: null },
+  technology: { type: Object, required: false, default: null },
+  vulnerability: { type: Object, required: false, default: null },
+  exploit: { type: Object, required: false, default: null },
+  note: { type: Object, required: false, default: null },
 });
 const emit = defineEmits(["completed", "closeDialog"]);
 const validate = useValidation();

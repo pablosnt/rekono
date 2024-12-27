@@ -51,26 +51,10 @@
 
 <script setup lang="ts">
 const props = defineProps({
-  value: {
-    type: Array,
-    required: false,
-    default: null,
-  },
-  label: {
-    type: String,
-    required: false,
-    default: "Tags",
-  },
-  icon: {
-    type: String,
-    required: false,
-    default: "mdi-tag",
-  },
-  validate: {
-    type: RegExp,
-    required: false,
-    default: null,
-  },
+  value: { type: Array, required: false, default: null },
+  label: { type: String, required: false, default: "Tags" },
+  icon: { type: String, required: false, default: "mdi-tag" },
+  validate: { type: RegExp, required: false, default: null },
 });
 defineEmits(["newValue", "newValues", "inputValue", "removeValue"]);
 const regex = props.validate === null ? useValidation().name : props.validate;

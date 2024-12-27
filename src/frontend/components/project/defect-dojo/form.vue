@@ -8,16 +8,8 @@
 <script setup lang="ts">
 const props = defineProps({
   api: Object,
-  disabled: {
-    type: Boolean,
-    required: false,
-    default: false,
-  },
-  extraData: {
-    type: Object,
-    required: false,
-    default: null,
-  },
+  disabled: { type: Boolean, required: false, default: false },
+  extraData: { type: Object, required: false, default: null },
 });
 const emit = defineEmits(["completed", "loading"]);
 

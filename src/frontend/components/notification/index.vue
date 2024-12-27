@@ -45,16 +45,8 @@ const props = defineProps({
   api: Object,
   notification: Object,
   title: String,
-  subtitle: {
-    type: String,
-    required: false,
-    default: undefined,
-  },
-  link: {
-    type: String,
-    required: false,
-    default: undefined,
-  },
+  subtitle: { type: String, required: false, default: undefined },
+  link: { type: String, required: false, default: undefined },
   form: Object,
 });
 defineEmits(["completed"]);

@@ -452,31 +452,11 @@
 import { VTimePicker } from "vuetify/labs/VTimePicker";
 import { VNumberInput } from "vuetify/labs/VNumberInput";
 const props = defineProps({
-  project: {
-    type: Object,
-    required: false,
-    default: null,
-  },
-  target: {
-    type: Object,
-    required: false,
-    default: null,
-  },
-  process: {
-    type: Object,
-    required: false,
-    default: null,
-  },
-  tool: {
-    type: Object,
-    required: false,
-    default: null,
-  },
-  configuration: {
-    type: Object,
-    required: false,
-    default: null,
-  },
+  project: { type: Object, required: false, default: null },
+  target: { type: Object, required: false, default: null },
+  process: { type: Object, required: false, default: null },
+  tool: { type: Object, required: false, default: null },
+  configuration: { type: Object, required: false, default: null },
 });
 const emit = defineEmits(["reload", "closeDialog"]);
 const api = useApi("/api/tasks/", true, "Task");

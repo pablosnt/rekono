@@ -36,11 +36,7 @@ const props = defineProps({
   defectdojo: Object,
   defectdojoSettings: Object,
   hacktricks: Object,
-  matchQuery: {
-    type: Boolean,
-    required: false,
-    default: false,
-  },
+  matchQuery: { type: Boolean, required: false, default: false },
 });
 const enums = useEnums();
 const filters = useFilters();

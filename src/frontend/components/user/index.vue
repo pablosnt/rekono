@@ -198,26 +198,10 @@
 
 <script setup lang="ts">
 const props = defineProps({
-  project: {
-    type: Number,
-    required: false,
-    default: null,
-  },
-  changeRole: {
-    type: Boolean,
-    required: false,
-    default: false,
-  },
-  enableDisable: {
-    type: Boolean,
-    required: false,
-    default: false,
-  },
-  handleMember: {
-    type: Boolean,
-    required: false,
-    default: false,
-  },
+  project: { type: Number, required: false, default: null },
+  changeRole: { type: Boolean, required: false, default: false },
+  enableDisable: { type: Boolean, required: false, default: false },
+  handleMember: { type: Boolean, required: false, default: false },
 });
 const current = userStore();
 const enums = useEnums();

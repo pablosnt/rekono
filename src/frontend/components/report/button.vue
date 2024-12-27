@@ -26,40 +26,12 @@
 
 <script setup lang="ts">
 defineProps({
-  project: {
-    type: Number,
-    required: false,
-    default: null,
-  },
-  target: {
-    type: Object,
-    required: false,
-    default: null,
-  },
-  task: {
-    type: Object,
-    required: false,
-    default: null,
-  },
-  variant: {
-    type: String,
-    required: false,
-    default: "text",
-  },
-  iconColor: {
-    type: String,
-    required: false,
-    default: "blue-grey-darken-2",
-  },
-  color: {
-    type: String,
-    required: false,
-    default: undefined,
-  },
-  size: {
-    type: String,
-    required: false,
-    default: "x-large",
-  },
+  project: { type: Number, required: false, default: null },
+  target: { type: Object, required: false, default: null },
+  task: { type: Object, required: false, default: null },
+  variant: { type: String, required: false, default: "text" },
+  iconColor: { type: String, required: false, default: "blue-grey-darken-2" },
+  color: { type: String, required: false, default: undefined },
+  size: { type: String, required: false, default: "x-large" },
 });
 </script>

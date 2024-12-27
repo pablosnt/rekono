@@ -88,16 +88,8 @@
 
 <script setup lang="ts">
 defineProps({
-  project: {
-    type: Object,
-    required: false,
-    default: null,
-  },
-  target: {
-    type: Object,
-    required: false,
-    default: null,
-  },
+  project: { type: Object, required: false, default: null },
+  target: { type: Object, required: false, default: null },
   height: String,
 });
 const enums = useEnums();

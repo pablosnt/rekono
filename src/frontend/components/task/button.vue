@@ -31,41 +31,13 @@
 
 <script setup lang="ts">
 defineProps({
-  project: {
-    type: Object,
-    required: false,
-    default: null,
-  },
-  target: {
-    type: Object,
-    required: false,
-    default: null,
-  },
-  process: {
-    type: Object,
-    required: false,
-    default: null,
-  },
-  tool: {
-    type: Object,
-    required: false,
-    default: null,
-  },
-  configuration: {
-    type: Object,
-    required: false,
-    default: null,
-  },
-  tooltip: {
-    type: String,
-    required: false,
-    default: "Scan",
-  },
-  disabled: {
-    type: Boolean,
-    required: false,
-    default: false,
-  },
+  project: { type: Object, required: false, default: null },
+  target: { type: Object, required: false, default: null },
+  process: { type: Object, required: false, default: null },
+  tool: { type: Object, required: false, default: null },
+  configuration: { type: Object, required: false, default: null },
+  tooltip: { type: String, required: false, default: "Scan" },
+  disabled: { type: Boolean, required: false, default: false },
 });
 defineEmits(["reload"]);
 const autz = useAutz();

@@ -133,21 +133,9 @@
 
 <script setup lang="ts">
 const props = defineProps({
-  parameters: {
-    type: Object,
-    required: false,
-    default: null,
-  },
-  target: {
-    type: Object,
-    required: false,
-    default: null,
-  },
-  task: {
-    type: Object,
-    required: false,
-    default: null,
-  },
+  parameters: { type: Object, required: false, default: null },
+  target: { type: Object, required: false, default: null },
+  task: { type: Object, required: false, default: null },
 });
 const emit = defineEmits(["closeDialog", "completed"]);
 

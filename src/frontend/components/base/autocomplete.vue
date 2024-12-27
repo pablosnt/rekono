@@ -63,41 +63,13 @@
 
 <script setup lang="ts">
 const props = defineProps({
-  definition: {
-    type: Object,
-    required: false,
-    default: null,
-  },
-  collection: {
-    type: Array,
-    required: false,
-    default: null,
-  },
-  title: {
-    type: Function,
-    required: false,
-    default: (value) => value,
-  },
-  icon: {
-    type: String,
-    required: false,
-    default: undefined,
-  },
-  enforceIcon: {
-    type: Boolean,
-    required: false,
-    default: false,
-  },
-  iconColor: {
-    type: String,
-    required: false,
-    default: undefined,
-  },
-  chips: {
-    type: Boolean,
-    required: false,
-    default: false,
-  },
+  definition: { type: Object, required: false, default: null },
+  collection: { type: Array, required: false, default: null },
+  title: { type: Function, required: false, default: (value) => value },
+  icon: { type: String, required: false, default: undefined },
+  enforceIcon: { type: Boolean, required: false, default: false },
+  iconColor: { type: String, required: false, default: undefined },
+  chips: { type: Boolean, required: false, default: false },
 });
 const model = defineModel();
 const prependInner = ref(true);

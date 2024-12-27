@@ -25,11 +25,7 @@
 defineProps({
   api: Object,
   edit: Object,
-  parameters: {
-    type: Object,
-    required: false,
-    default: null,
-  },
+  parameters: { type: Object, required: false, default: null },
 });
 defineEmits(["closeDialog", "completed"]);
 const loading = ref(false);

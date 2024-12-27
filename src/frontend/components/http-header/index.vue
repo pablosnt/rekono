@@ -36,16 +36,8 @@
 
 <script setup lang="ts">
 const props = defineProps({
-  target: {
-    type: Number,
-    required: false,
-    default: null,
-  },
-  user: {
-    type: Number,
-    required: false,
-    default: null,
-  },
+  target: { type: Number, required: false, default: null },
+  user: { type: Number, required: false, default: null },
 });
 const parameters = ref(
   Object.assign(

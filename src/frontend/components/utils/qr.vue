@@ -14,26 +14,11 @@ const options = {
   type: "svg",
   data: props.data,
   image: "/favicon.png",
-  dotsOptions: {
-    color: "#cb001d",
-    type: "rounded",
-  },
-  backgroundOptions: {
-    color: "white",
-  },
-  cornersDotOptions: {
-    color: "black",
-    type: "square",
-  },
-  cornersSquareOptions: {
-    color: "black",
-    type: "extra-rounded",
-  },
-  imageOptions: {
-    hideBackgroundDots: true,
-    imageSize: 0.4,
-    margin: 0,
-  },
+  dotsOptions: { color: "#cb001d", type: "rounded" },
+  backgroundOptions: { color: "white" },
+  cornersDotOptions: { color: "black", type: "square" },
+  cornersSquareOptions: { color: "black", type: "extra-rounded" },
+  imageOptions: { hideBackgroundDots: true, imageSize: 0.4, margin: 0 },
 };
 const qr = new QRCodeStyling(options);
 

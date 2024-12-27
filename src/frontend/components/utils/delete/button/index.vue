@@ -34,41 +34,17 @@ defineProps({
   api: Object,
   id: Number,
   text: String,
-  action: {
-    type: String,
-    required: false,
-    default: "Delete",
-  },
-  icon: {
-    type: String,
-    required: false,
-    default: "mdi-close",
-  },
+  action: { type: String, required: false, default: "Delete" },
+  icon: { type: String, required: false, default: "mdi-close" },
   iconConfirmation: {
     type: String,
     required: false,
     default: "mdi-trash-can-outline",
   },
-  variant: {
-    type: String,
-    required: false,
-    default: "text",
-  },
-  iconColor: {
-    type: String,
-    required: false,
-    default: "red",
-  },
-  color: {
-    type: String,
-    required: false,
-    default: undefined,
-  },
-  size: {
-    type: String,
-    required: false,
-    default: undefined,
-  },
+  variant: { type: String, required: false, default: "text" },
+  iconColor: { type: String, required: false, default: "red" },
+  color: { type: String, required: false, default: undefined },
+  size: { type: String, required: false, default: undefined },
 });
 defineEmits(["completed"]);
 </script>

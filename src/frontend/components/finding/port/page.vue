@@ -80,11 +80,7 @@ defineProps({
   defectdojo: Object,
   defectdojoSettings: Object,
   hacktricks: Object,
-  matchQuery: {
-    type: Boolean,
-    required: false,
-    default: false,
-  },
+  matchQuery: { type: Boolean, required: false, default: false },
 });
 const route = useRoute();
 const enums = useEnums();

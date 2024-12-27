@@ -15,36 +15,12 @@
 <script setup lang="ts">
 const props = defineProps({
   page: Object,
-  task: {
-    type: Object,
-    required: false,
-    default: null,
-  },
-  execution: {
-    type: Object,
-    required: false,
-    default: null,
-  },
-  technology: {
-    type: Object,
-    required: false,
-    default: null,
-  },
-  vulnerability: {
-    type: Object,
-    required: false,
-    default: null,
-  },
-  matchQuery: {
-    type: Boolean,
-    required: false,
-    default: false,
-  },
-  asset: {
-    type: Boolean,
-    required: false,
-    default: false,
-  },
+  task: { type: Object, required: false, default: null },
+  execution: { type: Object, required: false, default: null },
+  technology: { type: Object, required: false, default: null },
+  vulnerability: { type: Object, required: false, default: null },
+  matchQuery: { type: Boolean, required: false, default: false },
+  asset: { type: Boolean, required: false, default: false },
 });
 const user = userStore();
 const enums = useEnums();

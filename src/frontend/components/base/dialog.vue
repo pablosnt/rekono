@@ -29,46 +29,14 @@
 <script setup lang="ts">
 defineProps({
   title: String,
-  subtitle: {
-    type: String,
-    required: false,
-    default: undefined,
-  },
-  avatar: {
-    type: String,
-    required: false,
-    default: undefined,
-  },
-  loading: {
-    type: Boolean,
-    required: false,
-    default: false,
-  },
-  color: {
-    type: String,
-    required: false,
-    default: "default",
-  },
-  width: {
-    type: String,
-    required: false,
-    default: "800",
-  },
-  icon: {
-    type: String,
-    required: false,
-    default: undefined,
-  },
-  iconColor: {
-    type: String,
-    required: false,
-    default: undefined,
-  },
-  elevation: {
-    type: String,
-    required: false,
-    default: "3",
-  },
+  subtitle: { type: String, required: false, default: undefined },
+  avatar: { type: String, required: false, default: undefined },
+  loading: { type: Boolean, required: false, default: false },
+  color: { type: String, required: false, default: "default" },
+  width: { type: String, required: false, default: "800" },
+  icon: { type: String, required: false, default: undefined },
+  iconColor: { type: String, required: false, default: undefined },
+  elevation: { type: String, required: false, default: "3" },
 });
 defineEmits(["closeDialog"]);
 </script>
