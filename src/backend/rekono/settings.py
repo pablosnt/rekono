@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     "platforms.cvecrowd",
     "platforms.defect_dojo",
     "platforms.mail",
+    "platforms.nvdnist",
     "platforms.telegram_app",
     "parameters",
     "projects",

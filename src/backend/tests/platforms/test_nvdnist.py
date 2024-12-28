@@ -3,7 +3,7 @@ from unittest import mock
 
 from findings.enums import Severity
 from findings.models import Vulnerability
-from platforms.nvdnist import NvdNist
+from platforms.nvdnist.integrations import NvdNist
 from tests.framework import RekonoTest
 
 success = {
@@ -88,3 +88,6 @@ class NvdNistTest(RekonoTest):
     @mock.patch("platforms.nvdnist.NvdNist._request", not_found)
     def test_integration_not_found(self) -> None:
         self._test(Severity.LOW, None, None, "test")
+
+
+# TODO: Test Settings
