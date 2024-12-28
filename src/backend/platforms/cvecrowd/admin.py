@@ -1,6 +1,6 @@
 from django.contrib import admin
-from platforms.cvecrowd.models import CVECrowdSettings
+from platforms.cvecrowd.models import CveCrowdSettings
 
 # Register your models here.
 
-admin.site.register(CVECrowdSettings)
+admin.site.register(CveCrowdSettings)

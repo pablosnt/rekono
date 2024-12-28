@@ -7,16 +7,16 @@ from findings.enums import TriageStatus
 from findings.framework.models import Finding
 from findings.models import Vulnerability
 from framework.platforms import BaseIntegration
-from platforms.cvecrowd.models import CVECrowdSettings
+from platforms.cvecrowd.models import CveCrowdSettings
 from platforms.mail.notifications import SMTP
 from platforms.telegram_app.notifications.notifications import Telegram
 
 logger = logging.getLogger()
 
 
-class CVECrowd(BaseIntegration):
+class CveCrowd(BaseIntegration):
     def __init__(self) -> None:
-        self.settings = CVECrowdSettings.objects.first()
+        self.settings = CveCrowdSettings.objects.first()
         self.url = "https://api.cvecrowd.com/api/v1/cves"
         self.trending_cves: list[str] = []
         super().__init__()

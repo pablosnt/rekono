@@ -12,7 +12,7 @@ from findings.enums import (
 )
 from findings.framework.models import Finding, TriageFinding
 from framework.enums import InputKeyword
-from platforms.defect_dojo.models import DefectDojoSettings
+from platforms.defectdojo.models import DefectDojoSettings
 from target_ports.models import TargetPort
 from targets.enums import TargetType
 from targets.models import Target
@@ -38,7 +38,7 @@ class OSINT(TriageFinding):
             else {}
         )
 
-    def defect_dojo(self) -> dict[str, Any]:
+    def defectdojo(self) -> dict[str, Any]:
         return {
             "title": f"{self.data_type} found using OSINT techniques",
             "description": self.data,
@@ -70,7 +70,7 @@ class Host(Finding):
             InputKeyword.URL.name.lower(): self._get_url(self.address),
         }
 
-    def defect_dojo(self) -> dict[str, Any]:
+    def defectdojo(self) -> dict[str, Any]:
         return {
             "title": "Host discovered",
             "description": " - ".join(
@@ -128,7 +128,7 @@ class Port(Finding):
             )
         return output
 
-    def defect_dojo(self) -> dict[str, Any]:
+    def defectdojo(self) -> dict[str, Any]:
         description = f"Port: {self.port}\nStatus: {self.status}\nProtocol: {self.protocol}\nService: {self.service}"
         return {
             "title": "Port discovered",
@@ -201,7 +201,7 @@ class Path(Finding):
             InputKeyword.ENDPOINT.name.lower(): path,
         }
 
-    def defect_dojo_endpoint(self, target: Target) -> dict[str, Any]:
+    def defectdojo_endpoint(self, target: Target) -> dict[str, Any]:
         return {
             "protocol": self.port.service if self.port else None,
             "host": (
@@ -213,7 +213,7 @@ class Path(Finding):
             "path": self.path,
         }
 
-    def defect_dojo(self) -> dict[str, Any]:
+    def defectdojo(self) -> dict[str, Any]:
         description = f"Path: {self.path}\nType: {self.type}"
         for key, value in [("Status", self.status), ("Info", self.extra_info)]:
             if value:
@@ -269,7 +269,7 @@ class Technology(Finding):
             output.update(self.port.parse(accumulated))
         return output
 
-    def defect_dojo(self) -> dict[str, Any]:
+    def defectdojo(self) -> dict[str, Any]:
         description = f"Technology: {self.name}\nVersion: {self.version}"
         return {
             "title": f"Technology {self.name} detected",
@@ -319,7 +319,7 @@ class Credential(TriageFinding):
                 output[key] = field
         return output
 
-    def defect_dojo(self) -> dict[str, Any]:
+    def defectdojo(self) -> dict[str, Any]:
         return {
             "title": "Credentials exposure",
             "description": " - ".join(
@@ -377,7 +377,7 @@ class Vulnerability(TriageFinding):
             output.update(self.port.parse(accumulated))
         return output
 
-    def defect_dojo(self) -> dict[str, Any]:
+    def defectdojo(self) -> dict[str, Any]:
         return {
             "title": self.name,
             "description": self.description,
@@ -423,7 +423,7 @@ class Exploit(TriageFinding):
             output.update(self.technology.parse(accumulated))
         return output
 
-    def defect_dojo(self) -> dict[str, Any]:
+    def defectdojo(self) -> dict[str, Any]:
         return {
             "title": f"Exploit {self.edb_id} found" if self.edb_id else "Exploit found",
             "description": self.title,

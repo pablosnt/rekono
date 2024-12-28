@@ -6,7 +6,7 @@ from alerts.models import Alert
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from framework.fields import TagField
-from platforms.defect_dojo.serializers import DefectDojoSyncSerializer
+from platforms.defectdojo.serializers import DefectDojoSyncSerializer
 from projects.models import Project
 from rest_framework.serializers import IntegerField, ModelSerializer, Serializer
 from taggit.serializers import TaggitSerializer
@@ -25,7 +25,7 @@ class ProjectSerializer(TaggitSerializer, ModelSerializer):
     # Owner details for read operations
     owner = SimpleUserSerializer(many=False, read_only=True)
     tags = TagField()  # Tags
-    defect_dojo_sync = DefectDojoSyncSerializer(many=False, read_only=True)
+    defectdojo_sync = DefectDojoSyncSerializer(many=False, read_only=True)
 
     class Meta:
         """Serializer metadata."""
@@ -39,14 +39,14 @@ class ProjectSerializer(TaggitSerializer, ModelSerializer):
             "targets",
             "members",
             "tags",
-            "defect_dojo_sync",
+            "defectdojo_sync",
             "notes",
         )
         read_only_fields = (
             "owner",
             "targets",
             "members",
-            "defect_dojo_sync",
+            "defectdojo_sync",
             "notes",
         )
 

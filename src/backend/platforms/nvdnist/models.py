@@ -1,13 +1,8 @@
-from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from framework.models import BaseEncrypted
 from security.validators.input_validator import Regex, Validator
 
 # Create your models here.
-
-
-# TODO: Don't split defect_dojo word
-# TODO: Don't use uppercase in CVECrowd
 
 
 class NvdNistSettings(BaseEncrypted):

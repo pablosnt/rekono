@@ -37,7 +37,7 @@ urlpatterns = [
     path("api/", include("notes.urls")),
     path("api/", include("parameters.urls")),
     path("api/", include("platforms.cvecrowd.urls")),
-    path("api/", include("platforms.defect_dojo.urls")),
+    path("api/", include("platforms.defectdojo.urls")),
     path("api/", include("platforms.mail.urls")),
     path("api/", include("platforms.nvdnist.urls")),
     path("api/", include("platforms.telegram_app.urls")),

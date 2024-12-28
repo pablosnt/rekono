@@ -6,7 +6,7 @@ from security.validators.input_validator import Regex, Validator
 # Create your models here.
 
 
-class CVECrowdSettings(BaseEncrypted):
+class CveCrowdSettings(BaseEncrypted):
     _api_token = models.TextField(
         max_length=50,
         validators=[Validator(Regex.SECRET.value, code="api_token")],

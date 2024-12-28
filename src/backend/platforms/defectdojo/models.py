@@ -52,7 +52,7 @@ class DefectDojoSettings(BaseEncrypted):
 
 class DefectDojoSync(BaseModel):
     project = models.OneToOneField(
-        Project, related_name="defect_dojo_sync", on_delete=models.CASCADE
+        Project, related_name="defectdojo_sync", on_delete=models.CASCADE
     )
     product_type_id = models.IntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(999999999)],
@@ -77,19 +77,19 @@ class DefectDojoSync(BaseModel):
 
 
 class DefectDojoTargetSync(BaseModel):
-    defect_dojo_sync = models.ForeignKey(
+    defectdojo_sync = models.ForeignKey(
         DefectDojoSync, related_name="target_syncs", on_delete=models.CASCADE
     )
     target = models.OneToOneField(
-        Target, related_name="defect_dojo_sync", on_delete=models.CASCADE
+        Target, related_name="defectdojo_sync", on_delete=models.CASCADE
     )
     engagement_id = models.IntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(999999999)]
     )
 
     def __str__(self) -> str:
-        return f"{self.defect_dojo_sync.__str__()} - {self.target.target} - {self.engagement_id}"
+        return f"{self.defectdojo_sync.__str__()} - {self.target.target} - {self.engagement_id}"
 
     @classmethod
     def get_project_field(cls) -> str:
-        return "defect_dojo_sync__project"  # pragma: no cover
+        return "defectdojo_sync__project"  # pragma: no cover

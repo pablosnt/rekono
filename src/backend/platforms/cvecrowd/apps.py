@@ -11,6 +11,6 @@ class CvecrowdConfig(BaseApp, AppConfig):
     skip_if_model_exists = True
 
     def _get_models(self) -> list[Any]:
-        from platforms.cvecrowd.models import CVECrowdSettings
+        from platforms.cvecrowd.models import CveCrowdSettings
 
-        return [CVECrowdSettings]
+        return [CveCrowdSettings]

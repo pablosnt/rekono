@@ -9,7 +9,7 @@ from findings.enums import PathType, Severity
 from findings.framework.models import Finding
 from findings.models import Path
 from framework.platforms import BaseIntegration
-from platforms.defect_dojo.models import (
+from platforms.defectdojo.models import (
     DefectDojoSettings,
     DefectDojoSync,
     DefectDojoTargetSync,
@@ -140,13 +140,13 @@ class DefectDojo(BaseIntegration):
             return self._request(
                 self.session.post,
                 "/endpoints/",
-                data={**endpoint.defect_dojo_endpoint(target), "product": product},
+                data={**endpoint.defectdojo_endpoint(target), "product": product},
             )
         except HTTPError:
             return None
 
     def _create_finding(self, test: int, finding: Finding) -> dict[str, Any]:
-        data = finding.defect_dojo()
+        data = finding.defectdojo()
         return self._request(
             self.session.post,
             "/findings/",
@@ -166,7 +166,7 @@ class DefectDojo(BaseIntegration):
                 self.session.post,
                 "/import-scan/",
                 data={
-                    "scan_type": execution.configuration.tool.defect_dojo_scan_type,
+                    "scan_type": execution.configuration.tool.defectdojo_scan_type,
                     "engagement": engagement,
                     "tags": tags,
                 },
@@ -178,7 +178,7 @@ class DefectDojo(BaseIntegration):
         if target_sync.exists():
             sync = target_sync.first()
             engagement_id = sync.engagement_id
-            product_id = sync.defect_dojo_sync.product_id
+            product_id = sync.defectdojo_sync.product_id
         else:
             project_sync = DefectDojoSync.objects.filter(
                 project=execution.task.target.project
@@ -196,7 +196,7 @@ class DefectDojo(BaseIntegration):
                         [self.settings.tag] if self.settings.tag else [],
                     )
                     new_sync = DefectDojoTargetSync.objects.create(
-                        defect_dojo_sync=sync,
+                        defectdojo_sync=sync,
                         target=execution.task.target,
                         engagement_id=new_engagement.get("id"),
                     )
@@ -204,25 +204,25 @@ class DefectDojo(BaseIntegration):
             else:
                 return
         if (
-            execution.configuration.tool.defect_dojo_scan_type
+            execution.configuration.tool.defectdojo_scan_type
             and execution.output_file is not None
             and PathFile(execution.output_file).is_file()
         ):
             new_import = self._import_scan(
                 engagement_id, execution, [self.settings.tag]
             )
-            execution.defect_dojo_test_id = new_import.get("test_id")
-            execution.save(update_fields=["defect_dojo_test_id"])
+            execution.defectdojo_test_id = new_import.get("test_id")
+            execution.save(update_fields=["defectdojo_test_id"])
         else:
             test_id = None
             for finding in findings:
                 if isinstance(finding, Path) and finding.type == PathType.ENDPOINT:
-                    if finding.defect_dojo_id is None:
+                    if finding.defectdojo_id is None:
                         new_endpoint = self._create_endpoint(
                             product_id, finding, execution.task.target
                         )
                         if new_endpoint is not None:
-                            finding.defect_dojo_id = new_endpoint.get("id")
+                            finding.defectdojo_id = new_endpoint.get("id")
                 else:
                     if not test_id:
                         if not self.settings.test_type_id:
@@ -241,5 +241,5 @@ class DefectDojo(BaseIntegration):
                         test_id = new_test.get("id")
                     if test_id:
                         new_finding = self._create_finding(test_id, finding)
-                        finding.defect_dojo_id = new_finding.get("id")
-                finding.save(update_fields=["defect_dojo_id"])
+                        finding.defectdojo_id = new_finding.get("id")
+                finding.save(update_fields=["defectdojo_id"])
