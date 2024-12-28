@@ -13,7 +13,7 @@ class BaseModel(models.Model):
     class Meta:
         abstract = True
 
-    def get_project(self) -> Any:
+    def get_project(self) -> Any | list[Any]:
         filter_field = self.__class__.get_project_field()
         if filter_field:
             project = self
@@ -23,6 +23,7 @@ class BaseModel(models.Model):
                 else:
                     return None
             return project
+        return None
 
     @classmethod
     def get_project_field(cls) -> str:

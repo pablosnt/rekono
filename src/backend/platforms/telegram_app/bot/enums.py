@@ -20,3 +20,5 @@ class Context(Enum):
     PROCESS = "process"
     INTENSITY = "intensity"
     WORDLIST = "wordlist"
+    INPUT_TECHNOLOGY = "input_technology"
+    INPUT_VULNERABILITY = "input_vulnerability"

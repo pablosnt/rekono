@@ -117,12 +117,11 @@ class BaseQueueTest(QueueTest):
             )
             vulnerabilities.append(
                 InputVulnerability.objects.create(
-                    target=self.target, cve=self.input_vulnerability.cve + f"{index}"
+                    cve=self.input_vulnerability.cve + f"{index}"
                 )
             )
             technologies.append(
                 InputTechnology.objects.create(
-                    target=self.target,
                     name=self.input_technology.name + f"{index}",
                     version=self.input_technology.version,
                 )
@@ -202,6 +201,8 @@ class TasksQueueTest(QueueTest):
             target=self.target, configuration=configuration, intensity=Intensity.INSANE
         )
         task.wordlists.add(self.wordlist)
+        task.input_technologies.add(self.input_technology)
+        task.input_vulnerabilities.add(self.input_vulnerability)
         self.queue._consume_tool_task(task)
         self.assertEqual(1, Execution.objects.count())
         self._validate_execution(

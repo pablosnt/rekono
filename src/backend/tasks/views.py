@@ -125,6 +125,8 @@ class TaskViewSet(BaseViewSet):
             executor=request.user,
         )
         new_task.wordlists.set(task.wordlists.all())  # Add wordlists from original task
+        new_task.input_technologies.set(task.input_technologies.all())
+        new_task.input_vulnerabilities.set(task.input_vulnerabilities.all())
         self.tasks_queue.enqueue(new_task)
         return Response(
             TaskSerializer(instance=new_task).data, status=status.HTTP_201_CREATED
