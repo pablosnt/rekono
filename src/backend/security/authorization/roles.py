@@ -262,4 +262,10 @@ ROLES = {
         "change": [Role.ADMIN],
         "delete": [],
     },
+    "nvdnistsettings": {
+        "view": [Role.ADMIN],
+        "add": [],
+        "change": [Role.ADMIN],
+        "delete": [],
+    },
 }

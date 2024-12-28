@@ -4,7 +4,9 @@ from unittest import mock
 from findings.enums import Severity
 from findings.models import Vulnerability
 from platforms.nvdnist.integrations import NvdNist
-from tests.framework import RekonoTest
+from platforms.nvdnist.models import NvdNistSettings
+from tests.cases import ApiTestCase
+from tests.framework import ApiTest, RekonoTest
 
 success = {
     "vulnerabilities": [
@@ -72,22 +74,65 @@ class NvdNistTest(RekonoTest):
         self.assertEqual(description, self.vulnerability.description)
         self.assertEqual(severity, self.vulnerability.severity)
 
-    @mock.patch("platforms.nvdnist.NvdNist._request", success_cvss_3)
+    @mock.patch("platforms.nvdnist.integrations.NvdNist._request", success_cvss_3)
     def test_integration_cvss_3(self) -> None:
         self._test(
             Severity.CRITICAL,
             self.nvdnist.reference.format(cve=self.vulnerability.cve),
         )
 
-    @mock.patch("platforms.nvdnist.NvdNist._request", success_cvss_2)
+    @mock.patch("platforms.nvdnist.integrations.NvdNist._request", success_cvss_2)
     def test_integration_cvss_2(self) -> None:
         self._test(
             Severity.HIGH, self.nvdnist.reference.format(cve=self.vulnerability.cve)
         )
 
-    @mock.patch("platforms.nvdnist.NvdNist._request", not_found)
+    @mock.patch("platforms.nvdnist.integrations.NvdNist._request", not_found)
     def test_integration_not_found(self) -> None:
         self._test(Severity.LOW, None, None, "test")
 
 
-# TODO: Test Settings
+new_settings = {"api_token": "nvd-nist-token"}
+invalid_settings = {"api_token": "token" * 50}
+
+
+class NvdNistSettingsTest(ApiTest):
+    endpoint = "/api/nvdnist/1/"
+    expected_str = "NVD NIST"
+    cases = [
+        ApiTestCase(["auditor1", "auditor2", "reader1", "reader2"], "get", 403),
+        ApiTestCase(
+            ["admin1", "admin2"],
+            "get",
+            200,
+            expected={"id": 1, "api_token": None},
+        ),
+        ApiTestCase(
+            ["auditor1", "auditor2", "reader1", "reader2"], "put", 403, new_settings
+        ),
+        # ApiTestCase(["admin1", "admin2"], "put", 400, invalid_settings),
+        ApiTestCase(
+            ["admin1", "admin2"],
+            "put",
+            200,
+            new_settings,
+            expected={
+                "id": 1,
+                "api_token": "*" * len(str(new_settings.get("api_token", ""))),
+                "is_available": False,
+            },
+        ),
+        ApiTestCase(
+            ["admin1", "admin2"],
+            "get",
+            200,
+            expected={
+                "id": 1,
+                "api_token": "*" * len(str(new_settings.get("api_token", ""))),
+                "is_available": False,
+            },
+        ),
+    ]
+
+    def _get_object(self) -> Any:
+        return NvdNistSettings.objects.first()
