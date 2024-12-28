@@ -40,8 +40,8 @@ class BaseQueue:
             logger.info(f"[{self.name}] Job {job_id} has been deleted")
             job.delete()
 
-    def enqueue(self, **kwargs: Any) -> Job:
-        return self._get_queue().enqueue(self.consume, **kwargs)
+    def enqueue(self, *args: Any, **kwargs: Any) -> Job:
+        return self._get_queue().enqueue(self.consume, *args, **kwargs)
 
     @staticmethod
     def consume(**kwargs: Any) -> Any:

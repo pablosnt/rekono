@@ -50,7 +50,7 @@ class Task(BaseModel):
     enqueued_at = models.DateTimeField(blank=True, null=True)
     start = models.DateTimeField(blank=True, null=True)
     end = models.DateTimeField(blank=True, null=True)
-    wordlists = models.ManyToManyField(Wordlist, related_name="wordlists", blank=True)
+    wordlists = models.ManyToManyField(Wordlist, related_name="tasks", blank=True)
 
     def __str__(self) -> str:
         """Instance representation in text format.

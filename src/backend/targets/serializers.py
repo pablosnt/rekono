@@ -26,8 +26,6 @@ class TargetSerializer(ModelSerializer):
             "target",
             "type",
             "target_ports",
-            "input_technologies",
-            "input_vulnerabilities",
             "tasks",
             "defect_dojo_sync",
             "notes",
@@ -36,8 +34,6 @@ class TargetSerializer(ModelSerializer):
         read_only_fields = (
             "type",
             "target_ports",
-            "input_technologies",
-            "input_vulnerabilities",
             "tasks",
             "defect_dojo_sync",
             "notes",

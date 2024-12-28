@@ -112,40 +112,6 @@ class NewPort(
         super().__init__(**kwargs)
 
 
-class NewTechnology(BaseConversationFromProject, TargetMixin, InputTechnologyMixin):
-    help = "Create new input technology"
-    section = Section.TARGETS
-
-    def __init__(self, **kwargs: Any) -> None:
-        self._states_methods = [
-            self._ask_for_project,
-            self._save_project,
-            self._ask_for_target,
-            self._save_target,
-            self._ask_for_new_technology,
-            self._create_input_technology,
-        ]
-        super().__init__(**kwargs)
-
-
-class NewVulnerability(
-    BaseConversationFromProject, TargetMixin, InputVulnerabilityMixin
-):
-    help = "Create new input vulnerability"
-    section = Section.TARGETS
-
-    def __init__(self, **kwargs: Any) -> None:
-        self._states_methods = [
-            self._ask_for_project,
-            self._save_project,
-            self._ask_for_target,
-            self._save_target,
-            self._ask_for_new_vulnerability,
-            self._create_input_vulnerability,
-        ]
-        super().__init__(**kwargs)
-
-
 class Tool(
     BaseConversationFromProject,
     TargetMixin,
@@ -153,6 +119,8 @@ class Tool(
     ConfigurationMixin,
     IntensityMixin,
     WordlistMixin,
+    InputTechnologyMixin,
+    InputVulnerabilityMixin,
     TaskMixin,
 ):
     help = "Execute a tool"
@@ -172,6 +140,12 @@ class Tool(
             self._save_intensity,
             self._ask_for_wordlist,
             self._save_wordlist,
+            self._ask_for_input_technology,
+            self._save_input_technology,
+            self._create_input_technology,
+            self._ask_for_input_vulnerability,
+            self._save_input_vulnerability,
+            self._create_input_vulnerability,
             self._ask_for_task_confirmation,
             self._new_task,
         ]

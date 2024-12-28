@@ -27,8 +27,8 @@ class InputTechnologyViewSet(BaseViewSet):
     ]
     # Fields used to search input technologies
     search_fields = ["name", "version"]
-    ordering_fields = ["id", "target", "name"]
-    http_method_names = ["get", "post", "delete"]
+    ordering_fields = ["id", "name"]
+    http_method_names = ["get", "post"]
 
 
 class InputVulnerabilityViewSet(BaseViewSet):
@@ -44,5 +44,5 @@ class InputVulnerabilityViewSet(BaseViewSet):
     ]
     # Fields used to search input vulnerabilities
     search_fields = ["cve"]
-    ordering_fields = ["id", "target", "cve"]
-    http_method_names = ["get", "post", "delete"]
+    ordering_fields = ["id", "cve"]
+    http_method_names = ["get", "post"]

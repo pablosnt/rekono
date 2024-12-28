@@ -132,8 +132,8 @@ class TasksQueue(BaseQueue):
                 execution_job["step"].configuration.tool,
                 [],
                 task.target.target_ports.all(),
-                task.target.input_vulnerabilities.all(),
-                task.target.input_technologies.all(),
+                task.input_vulnerabilities.all(),
+                task.input_technologies.all(),
                 task.wordlists.all(),
             )
             for parameters in executions or [{}]:

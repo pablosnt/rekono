@@ -4,7 +4,7 @@ from django.db import models
 from framework.enums import InputKeyword
 from framework.models import BaseInput
 from security.validators.input_validator import Regex, Validator
-from targets.models import Target
+from tasks.models import Task
 
 # Create your models here.
 
@@ -12,9 +12,7 @@ from targets.models import Target
 class InputTechnology(BaseInput):
     """Input technology model."""
 
-    target = models.ForeignKey(
-        Target, related_name="input_technologies", on_delete=models.CASCADE
-    )
+    tasks = models.ManyToManyField(Task, related_name="input_technologies", blank=True)
     name = models.TextField(
         max_length=100,
         validators=[Validator(Regex.NAME.value, code="name", deny_injections=True)],
@@ -31,61 +29,11 @@ class InputTechnology(BaseInput):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=["target", "name"], name="unique_input_technology"
+                fields=["name", "version"], name="unique_input_technology"
             )
         ]
 
-    def parse(self, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
-        """Get useful information from this instance to be used in tool execution as argument.
-
-        Args:
-            accumulated (dict[str, Any], optional): Information from other instances of the same type. Defaults to {}.
-
-        Returns:
-            dict[str, Any]: Useful information for tool executions, including accumulated if setted
-        """
-        output = self.target.parse(accumulated)
-        output[InputKeyword.TECHNOLOGY.name.lower()] = self.name
-        if self.version:
-            output[InputKeyword.VERSION.name.lower()] = self.version
-        return output
-
-    def __str__(self) -> str:
-        """Instance representation in text format.
-
-        Returns:
-            str: String value that identifies this instance
-        """
-        return f"{self.target.__str__()} - {self.name}{f' - {self.version}' if self.version else ''}"
-
-    @classmethod
-    def get_project_field(cls) -> str:
-        return "target__project"
-
-
-class InputVulnerability(BaseInput):
-    """Input vulnerability model."""
-
-    target = models.ForeignKey(
-        Target, related_name="input_vulnerabilities", on_delete=models.CASCADE
-    )
-    cve = models.TextField(
-        max_length=20,
-        validators=[Validator(Regex.CVE.value, code="cve", deny_injections=True)],
-    )
-
-    filters = [
-        BaseInput.Filter(type=str, field="cve", processor=lambda v: "cve"),
-        BaseInput.Filter(type=str, field="cve", processor=lambda v: v.lower()),
-    ]
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=["target", "cve"], name="unique_input_vulnerability"
-            )
-        ]
-
+    # TODO: Move to just a mapping?
     def parse(self, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
         """Get useful information from this instance to be used in tool execution as argument.
 
@@ -96,8 +44,8 @@ class InputVulnerability(BaseInput):
             dict[str, Any]: Useful information for tool executions, including accumulated if setted
         """
         return {
-            **self.target.parse(accumulated),
-            InputKeyword.CVE.name.lower(): self.cve,
+            InputKeyword.TECHNOLOGY.name.lower(): self.name,
+            InputKeyword.VERSION.name.lower(): self.version or "",
         }
 
     def __str__(self) -> str:
@@ -106,8 +54,50 @@ class InputVulnerability(BaseInput):
         Returns:
             str: String value that identifies this instance
         """
-        return f"{self.target.__str__()} - {self.cve}"
+        return f"{self.name} - {self.version}" if self.version else self.name
+
+    # TODO: Move to an attribute?
+    @classmethod
+    def get_project_field(cls) -> str:
+        return "tasks__target__project"
+
+
+class InputVulnerability(BaseInput):
+    """Input vulnerability model."""
+
+    tasks = models.ManyToManyField(
+        Task, related_name="input_vulnerabilities", blank=True
+    )
+    cve = models.TextField(
+        max_length=20,
+        validators=[Validator(Regex.CVE.value, code="cve", deny_injections=True)],
+        unique=True,
+    )
+
+    filters = [
+        BaseInput.Filter(type=str, field="cve", processor=lambda v: "cve"),
+        BaseInput.Filter(type=str, field="cve", processor=lambda v: v.lower()),
+    ]
+
+    def parse(self, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
+        """Get useful information from this instance to be used in tool execution as argument.
+
+        Args:
+            accumulated (dict[str, Any], optional): Information from other instances of the same type. Defaults to {}.
+
+        Returns:
+            dict[str, Any]: Useful information for tool executions, including accumulated if setted
+        """
+        return {InputKeyword.CVE.name.lower(): self.cve}
+
+    def __str__(self) -> str:
+        """Instance representation in text format.
+
+        Returns:
+            str: String value that identifies this instance
+        """
+        return self.cve
 
     @classmethod
     def get_project_field(cls) -> str:
-        return "target__project"
+        return "tasks__target__project"

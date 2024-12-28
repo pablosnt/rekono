@@ -10,6 +10,7 @@ from wordlists.models import Wordlist
 
 class WordlistMixin(BaseMixin):
     default_wordlist = "Default tools wordlists"
+    tools_with_required_wordlists = ["Gobuster"]
 
     @sync_to_async
     def _get_wordlists_keyboard_async(self) -> list[InlineKeyboardButton]:
@@ -43,7 +44,6 @@ class WordlistMixin(BaseMixin):
                 update, context, self._get_next_state(self._save_wordlist)
             )
         keyboard = await self._get_wordlists_keyboard_async()
-        tools_with_required_wordlists = ["Gobuster"]
         required_filter = {
             "argument__required": True,
             "type__name": InputTypeName.WORDLIST,
@@ -51,7 +51,7 @@ class WordlistMixin(BaseMixin):
         is_wordlist_required = (
             tool
             and (
-                tool.name in tools_with_required_wordlists
+                tool.name in self.tools_with_required_wordlists
                 or await self._queryset_exists_async(
                     Input.objects.filter(**{**required_filter, "argument__tool": tool})
                 )
@@ -61,7 +61,7 @@ class WordlistMixin(BaseMixin):
                 and (
                     await self._queryset_exists_async(
                         process.steps.filter(
-                            configuration__tool__name__in=tools_with_required_wordlists
+                            configuration__tool__name__in=self.tools_with_required_wordlists
                         )
                     )
                     or await self._queryset_exists_async(
