@@ -3,10 +3,6 @@ from typing import Any, cast
 
 from django.core.exceptions import ValidationError
 from executions.enums import Status
-from parameters.serializers import (
-    InputTechnologySerializer,
-    InputVulnerabilitySerializer,
-)
 from processes.models import Process
 from processes.serializers import SimpleProcessSerializer
 from rest_framework.serializers import (
