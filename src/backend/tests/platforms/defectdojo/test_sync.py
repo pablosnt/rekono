@@ -1,10 +1,10 @@
 from typing import Any
 from unittest import mock
 
-from platforms.defect_dojo.models import DefectDojoSync, DefectDojoTargetSync
+from platforms.defectdojo.models import DefectDojoSync, DefectDojoTargetSync
 from tests.cases import ApiTestCase
 from tests.framework import ApiTest
-from tests.platforms.defect_dojo.mock import return_true
+from tests.platforms.defectdojo.mock import return_true
 
 sync1 = {"project": 1, "product_type_id": 1, "product_id": 1, "engagement_id": 1}
 sync2 = {"project": 1, "product_type_id": 1, "product_id": 1, "engagement_id": None}
@@ -21,7 +21,7 @@ class DefectDojoSyncTest(ApiTest):
             ["admin1", "auditor1", "reader1"],
             "get",
             200,
-            expected={"id": 1, "defect_dojo_sync": {"id": 1, **sync1}},
+            expected={"id": 1, "defectdojo_sync": {"id": 1, **sync1}},
             endpoint="/api/projects/1/",
         ),
         ApiTestCase(["reader1", "reader2"], "delete", 403, endpoint="{endpoint}1/"),
@@ -36,7 +36,7 @@ class DefectDojoSyncTest(ApiTest):
             ["admin1", "auditor1", "reader1"],
             "get",
             200,
-            expected={"id": 1, "defect_dojo_sync": None},
+            expected={"id": 1, "defectdojo_sync": None},
             endpoint="/api/projects/1/",
         ),
         ApiTestCase(["admin1"], "post", 201, sync2, {"id": 2, **sync2}),
@@ -44,7 +44,7 @@ class DefectDojoSyncTest(ApiTest):
             ["admin1", "auditor1", "reader1"],
             "get",
             200,
-            expected={"id": 1, "defect_dojo_sync": {"id": 2, **sync2}},
+            expected={"id": 1, "defectdojo_sync": {"id": 2, **sync2}},
             endpoint="/api/projects/1/",
         ),
         ApiTestCase(["auditor1"], "delete", 204, endpoint="{endpoint}2/"),
@@ -52,15 +52,15 @@ class DefectDojoSyncTest(ApiTest):
             ["admin1", "auditor1", "reader1"],
             "get",
             200,
-            expected={"id": 1, "defect_dojo_sync": None},
+            expected={"id": 1, "defectdojo_sync": None},
             endpoint="/api/projects/1/",
         ),
     ]
 
     @mock.patch(
-        "platforms.defect_dojo.integrations.DefectDojo.is_available", return_true
+        "platforms.defectdojo.integrations.DefectDojo.is_available", return_true
     )
-    @mock.patch("platforms.defect_dojo.integrations.DefectDojo.exists", return_true)
+    @mock.patch("platforms.defectdojo.integrations.DefectDojo.exists", return_true)
     def test_cases(self) -> None:
         super().test_cases()
 
@@ -81,7 +81,7 @@ class DefectDojoTargetSyncTest(ApiTest):
 
     def _get_object(self) -> Any:
         return DefectDojoTargetSync.objects.create(
-            defect_dojo_sync=DefectDojoSync.objects.create(
+            defectdojo_sync=DefectDojoSync.objects.create(
                 **{**sync2, "project": self.project}
             ),
             target=self.target,

@@ -3,7 +3,7 @@ from unittest import mock
 
 from tests.cases import ApiTestCase, RekonoTestCase
 from tests.framework import ApiTest
-from tests.platforms.defect_dojo.mock import (
+from tests.platforms.defectdojo.mock import (
     create_engagement,
     create_product,
     create_product_type,
@@ -79,25 +79,25 @@ class DefectDojoEntitiesTest(ApiTest):
             )
 
     @mock.patch(
-        "platforms.defect_dojo.integrations.DefectDojo.is_available", return_true
+        "platforms.defectdojo.integrations.DefectDojo.is_available", return_true
     )
-    @mock.patch("platforms.defect_dojo.integrations.DefectDojo.exists", return_true)
+    @mock.patch("platforms.defectdojo.integrations.DefectDojo.exists", return_true)
     @mock.patch(
-        "platforms.defect_dojo.integrations.DefectDojo.create_product_type",
+        "platforms.defectdojo.integrations.DefectDojo.create_product_type",
         create_product_type,
     )
     @mock.patch(
-        "platforms.defect_dojo.integrations.DefectDojo.create_product", create_product
+        "platforms.defectdojo.integrations.DefectDojo.create_product", create_product
     )
     @mock.patch(
-        "platforms.defect_dojo.integrations.DefectDojo.create_engagement",
+        "platforms.defectdojo.integrations.DefectDojo.create_engagement",
         create_engagement,
     )
     def test_cases(self) -> None:
         super().test_cases()
 
     @mock.patch(
-        "platforms.defect_dojo.integrations.DefectDojo.is_available", return_false
+        "platforms.defectdojo.integrations.DefectDojo.is_available", return_false
     )
     def test_cases_not_available(self) -> None:
         for endpoint, valid, _ in self.entities_cases:

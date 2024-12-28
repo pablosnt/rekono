@@ -244,19 +244,19 @@ class FindingTest(ApiTest):
         for _, _, endpoint in findings_data.values():
             self.assertEqual(401, APIClient().get(endpoint).status_code)
 
-    def test_defect_dojo(self) -> None:
+    def test_defectdojo(self) -> None:
         for finding in self.findings:
-            parsed = finding.defect_dojo()
+            parsed = finding.defectdojo()
             for key, value in findings_data[finding.__class__][0].items():
                 self.assertEqual(value, parsed[key])
-        defect_dojo_endpoint = {
+        defectdojo_endpoint = {
             "protocol": "http",
             "host": "10.10.10.10",
             "port": 80,
             "path": "/index.php",
         }
-        parsed = self.path.defect_dojo_endpoint(self.target)
-        for key, value in defect_dojo_endpoint.items():
+        parsed = self.path.defectdojo_endpoint(self.target)
+        for key, value in defectdojo_endpoint.items():
             self.assertEqual(value, parsed[key])
 
 

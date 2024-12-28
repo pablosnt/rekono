@@ -1,11 +1,11 @@
 from typing import Any
 from unittest import mock
 
-from platforms.defect_dojo.integrations import DefectDojo
-from platforms.defect_dojo.models import DefectDojoTargetSync
+from platforms.defectdojo.integrations import DefectDojo
+from platforms.defectdojo.models import DefectDojoTargetSync
 from tests.cases import ApiTestCase
 from tests.framework import RekonoTest
-from tests.platforms.defect_dojo.mock import (
+from tests.platforms.defectdojo.mock import (
     create_engagement,
     create_test,
     create_test_type,
@@ -28,11 +28,11 @@ class DefectDojoIntegrationTest(RekonoTest):
         self._setup_tasks_and_executions()
 
     @mock.patch(
-        "platforms.defect_dojo.integrations.DefectDojo.is_available", return_true
+        "platforms.defectdojo.integrations.DefectDojo.is_available", return_true
     )
-    @mock.patch("platforms.defect_dojo.integrations.DefectDojo.exists", return_true)
+    @mock.patch("platforms.defectdojo.integrations.DefectDojo.exists", return_true)
     @mock.patch(
-        "platforms.defect_dojo.integrations.DefectDojo._import_scan", import_scan
+        "platforms.defectdojo.integrations.DefectDojo._import_scan", import_scan
     )
     def test_project_sync(self) -> None:
         ApiTestCase(
@@ -43,32 +43,32 @@ class DefectDojoIntegrationTest(RekonoTest):
             self.data_dir / "reports" / "nmap" / "enumeration-vulners.xml"
         )
         DefectDojo().process_findings(self.execution3, self.findings)
-        self.assertEqual(1, self.execution3.defect_dojo_test_id)
+        self.assertEqual(1, self.execution3.defectdojo_test_id)
         for finding in self.findings:
-            self.assertIsNone(finding.defect_dojo_id)
+            self.assertIsNone(finding.defectdojo_id)
 
     @mock.patch(
-        "platforms.defect_dojo.integrations.DefectDojo.is_available", return_true
+        "platforms.defectdojo.integrations.DefectDojo.is_available", return_true
     )
-    @mock.patch("platforms.defect_dojo.integrations.DefectDojo.exists", return_true)
+    @mock.patch("platforms.defectdojo.integrations.DefectDojo.exists", return_true)
     @mock.patch(
-        "platforms.defect_dojo.integrations.DefectDojo.create_engagement",
+        "platforms.defectdojo.integrations.DefectDojo.create_engagement",
         create_engagement,
     )
     @mock.patch(
-        "platforms.defect_dojo.integrations.DefectDojo._create_test_type",
+        "platforms.defectdojo.integrations.DefectDojo._create_test_type",
         create_test_type,
     )
     @mock.patch(
-        "platforms.defect_dojo.integrations.DefectDojo._create_test",
+        "platforms.defectdojo.integrations.DefectDojo._create_test",
         create_test,
     )
     @mock.patch(
-        "platforms.defect_dojo.integrations.DefectDojo._create_endpoint",
+        "platforms.defectdojo.integrations.DefectDojo._create_endpoint",
         return_id,
     )
     @mock.patch(
-        "platforms.defect_dojo.integrations.DefectDojo._create_finding", return_id
+        "platforms.defectdojo.integrations.DefectDojo._create_finding", return_id
     )
     def test_target_sync(self) -> None:
         sync["engagement_id"] = None
@@ -88,9 +88,9 @@ class DefectDojoIntegrationTest(RekonoTest):
                 target=self.execution1.task.target
             ).exists()
         )
-        self.assertIsNone(self.execution3.defect_dojo_test_id)
+        self.assertIsNone(self.execution3.defectdojo_test_id)
         for finding in self.findings:
-            self.assertEqual(1, finding.defect_dojo_id)
+            self.assertEqual(1, finding.defectdojo_id)
         integration.process_findings(self.execution1, self.findings)
         self.assertEqual(
             1,
@@ -98,6 +98,6 @@ class DefectDojoIntegrationTest(RekonoTest):
                 target=self.execution1.task.target
             ).count(),
         )
-        self.assertIsNone(self.execution3.defect_dojo_test_id)
+        self.assertIsNone(self.execution3.defectdojo_test_id)
         for finding in self.findings:
-            self.assertEqual(1, finding.defect_dojo_id)
+            self.assertEqual(1, finding.defectdojo_id)
