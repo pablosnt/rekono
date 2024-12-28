@@ -3,6 +3,7 @@ from typing import Any, cast
 
 from django.core.exceptions import ValidationError
 from executions.enums import Status
+from input_types.enums import InputTypeName
 from processes.models import Process
 from processes.serializers import SimpleProcessSerializer
 from rest_framework.serializers import (
@@ -16,7 +17,7 @@ from tasks.models import Task
 from tasks.queues import TasksQueue
 from tools.enums import Intensity as IntensityEnum
 from tools.fields import IntegerChoicesField
-from tools.models import Configuration, Intensity
+from tools.models import Configuration, Input, Intensity
 from tools.serializers import ConfigurationSerializer
 from users.serializers import SimpleUserSerializer
 
@@ -141,8 +142,20 @@ class TaskSerializer(ModelSerializer):
                     f'Invalid intensity {attrs["intensity"]} for tool {cast(Configuration, attrs.get("configuration")).tool.name}',
                     code="intensity",
                 )
+            for input_type, field in [
+                (InputTypeName.TECHNOLOGY, "input_technologies"),
+                (InputTypeName.VULNERABILITY, "input_vulnerabilities"),
+            ]:
+
+                if not Input.objects.filter(
+                    argument__tool=cast(Configuration, attrs.get("configuration")).tool,
+                    type__name=input_type,
+                ):
+                    attrs[field] = []
         elif attrs.get("process"):
             attrs["configuration"] = None
+            attrs["input_technologies"] = []
+            attrs["input_vulnerabilities"] = []
         else:
             raise ValidationError(
                 {

@@ -3,16 +3,15 @@ from typing import Any
 from django.db import models
 from framework.enums import InputKeyword
 from framework.models import BaseInput
+from parameters.framework.models import InputParameter
 from security.validators.input_validator import Regex, Validator
-from tasks.models import Task
 
 # Create your models here.
 
 
-class InputTechnology(BaseInput):
+class InputTechnology(InputParameter):
     """Input technology model."""
 
-    tasks = models.ManyToManyField(Task, related_name="input_technologies", blank=True)
     name = models.TextField(
         max_length=100,
         validators=[Validator(Regex.NAME.value, code="name", deny_injections=True)],
@@ -25,13 +24,6 @@ class InputTechnology(BaseInput):
     )
 
     filters = [BaseInput.Filter(type=str, field="name", contains=True)]
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=["name", "version"], name="unique_input_technology"
-            )
-        ]
 
     # TODO: Move to just a mapping?
     def parse(self, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
@@ -56,22 +48,13 @@ class InputTechnology(BaseInput):
         """
         return f"{self.name} - {self.version}" if self.version else self.name
 
-    # TODO: Move to an attribute?
-    @classmethod
-    def get_project_field(cls) -> str:
-        return "tasks__target__project"
 
-
-class InputVulnerability(BaseInput):
+class InputVulnerability(InputParameter):
     """Input vulnerability model."""
 
-    tasks = models.ManyToManyField(
-        Task, related_name="input_vulnerabilities", blank=True
-    )
     cve = models.TextField(
         max_length=20,
         validators=[Validator(Regex.CVE.value, code="cve", deny_injections=True)],
-        unique=True,
     )
 
     filters = [
@@ -97,7 +80,3 @@ class InputVulnerability(BaseInput):
             str: String value that identifies this instance
         """
         return self.cve
-
-    @classmethod
-    def get_project_field(cls) -> str:
-        return "tasks__target__project"

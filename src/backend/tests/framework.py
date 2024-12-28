@@ -171,10 +171,10 @@ class RekonoTest(TestCase):
             target_port=self.target_port,
         )
         self.input_vulnerability = InputVulnerability.objects.create(
-            target=self.target, cve="CVE-2023-2222"
+            cve="CVE-2023-2222"
         )
         self.input_technology = InputTechnology.objects.create(
-            target=self.target, name="Joomla", version="2.0.0"
+            name="Joomla", version="2.0.0"
         )
         path = self.data_dir / "wordlists" / "endpoints_wordlist.txt"
         self.wordlist = Wordlist.objects.create(
@@ -366,6 +366,9 @@ class ToolTest(RekonoTest):
                 configuration=self.configuration,
                 intensity=IntensityEnum.NORMAL,
             )
+            self.task.wordlists.set([self.wordlist])
+            self.task.input_technologies.set([self.input_technology])
+            self.task.input_vulnerabilities.set([self.input_vulnerability])
             self.execution = Execution.objects.create(
                 task=self.task, configuration=self.configuration
             )

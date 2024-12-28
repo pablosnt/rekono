@@ -4,6 +4,7 @@ from alerts.models import Alert
 from notes.models import Note
 from platforms.telegram_app.models import TelegramChat
 from processes.models import Process, Step
+from projects.models import Project
 from reporting.models import Report
 from rest_framework.permissions import BasePermission, DjangoModelPermissions
 from rest_framework.request import Request
@@ -85,7 +86,14 @@ class ProjectMemberPermission(BasePermission):
             bool: Indicate if user is authorized to make this request or not
         """
         project = obj.get_project()
-        return not project or request.user in project.members.all()
+        output = (
+            not project
+            or (isinstance(project, Project) and request.user in project.members.all())
+            or any([p for p in project if request.user in p.members.all()])
+        )
+        if not output:
+            pass
+        return output
 
 
 class OwnerPermission(BasePermission):

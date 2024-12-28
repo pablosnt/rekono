@@ -1,48 +1,29 @@
-from framework.views import BaseViewSet
 from parameters.filters import InputTechnologyFilter, InputVulnerabilityFilter
+from parameters.framework.views import InputParameterViewSet
 from parameters.models import InputTechnology, InputVulnerability
 from parameters.serializers import (
     InputTechnologySerializer,
     InputVulnerabilitySerializer,
 )
-from rest_framework.permissions import IsAuthenticated
-from security.authorization.permissions import (
-    ProjectMemberPermission,
-    RekonoModelPermission,
-)
 
 # Create your views here.
 
 
-class InputTechnologyViewSet(BaseViewSet):
-    """InputTechnology ViewSet that includes: get, retrieve, create, and delete features."""
+class InputTechnologyViewSet(InputParameterViewSet):
 
     queryset = InputTechnology.objects.all()
     serializer_class = InputTechnologySerializer
     filterset_class = InputTechnologyFilter
-    permission_classes = [
-        IsAuthenticated,
-        RekonoModelPermission,
-        ProjectMemberPermission,
-    ]
     # Fields used to search input technologies
     search_fields = ["name", "version"]
     ordering_fields = ["id", "name"]
-    http_method_names = ["get", "post"]
 
 
-class InputVulnerabilityViewSet(BaseViewSet):
-    """InputVulnerability ViewSet that includes: get, retrieve, create, and delete features."""
+class InputVulnerabilityViewSet(InputParameterViewSet):
 
     queryset = InputVulnerability.objects.all()
     serializer_class = InputVulnerabilitySerializer
     filterset_class = InputVulnerabilityFilter
-    permission_classes = [
-        IsAuthenticated,
-        RekonoModelPermission,
-        ProjectMemberPermission,
-    ]
     # Fields used to search input vulnerabilities
     search_fields = ["cve"]
     ordering_fields = ["id", "cve"]
-    http_method_names = ["get", "post"]

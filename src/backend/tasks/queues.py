@@ -64,8 +64,8 @@ class TasksQueue(BaseQueue):
             task.configuration.tool,
             [],
             task.target.target_ports.all(),
-            task.target.input_vulnerabilities.all(),
-            task.target.input_technologies.all(),
+            task.input_vulnerabilities.all(),
+            task.input_technologies.all(),
             task.wordlists.all(),
         )
         executions_queue = ExecutionsQueue()
@@ -171,6 +171,8 @@ class TasksQueue(BaseQueue):
                 repeat_time_unit=result.repeat_time_unit,
             )
             new_task.wordlists.set(result.wordlists.all())
+            new_task.input_technologies.set(result.input_technologies.all())
+            new_task.input_vulnerabilities.set(result.input_vulnerabilities.all())
             instance = TasksQueue()
             job = instance._get_queue().enqueue_at(
                 result.enqueued_at,

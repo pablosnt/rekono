@@ -6,6 +6,7 @@ from executions.models import Execution
 from findings.enums import TriageStatus
 from framework.models import BaseInput
 from input_types.models import InputType
+from projects.models import Project
 from rekono.settings import AUTH_USER_MODEL
 from security.validators.input_validator import Regex, Validator
 
@@ -137,7 +138,7 @@ class Finding(BaseInput):
     class Meta:
         abstract = True
 
-    def get_project(self) -> Any:
+    def get_project(self) -> Project:
         return self.executions.first().task.target.project
 
     @classmethod
