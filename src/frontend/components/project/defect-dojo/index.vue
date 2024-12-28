@@ -4,9 +4,9 @@
       onlyLink &&
       settings !== null &&
       settings.server !== null &&
-      project.defect_dojo_sync !== null &&
-      (project.defect_dojo_sync.product_id !== null ||
-        project.defect_dojo_sync.engagement_id !== null)
+      project.defectdojo_sync !== null &&
+      (project.defectdojo_sync.product_id !== null ||
+        project.defectdojo_sync.engagement_id !== null)
     "
     :project="project"
     :settings="settings"
@@ -22,7 +22,7 @@
       settings.is_available &&
       integration !== null &&
       integration.enabled &&
-      project.defect_dojo_sync !== null
+      project.defectdojo_sync !== null
     "
     transition="scale-transition"
     location="bottom end"
@@ -37,8 +37,8 @@
     </template>
     <ProjectDefectDojoButton
       v-if="
-        project.defect_dojo_sync.product_id !== null ||
-        project.defect_dojo_sync.engagement_id !== null
+        project.defectdojo_sync.product_id !== null ||
+        project.defectdojo_sync.engagement_id !== null
       "
       :project="project"
       :settings="settings"
@@ -54,7 +54,7 @@
       </template>
       <template #default="{ isActive }">
         <UtilsDeleteDialog
-          :id="project.defect_dojo_sync.id"
+          :id="project.defectdojo_sync.id"
           :api="api"
           text="Defect-Dojo synchronization will be disabled"
           action="Disable"
@@ -75,7 +75,7 @@
       settings.is_available &&
       integration !== null &&
       integration.enabled &&
-      project.defect_dojo_sync === null
+      project.defectdojo_sync === null
     "
     width="auto"
   >
