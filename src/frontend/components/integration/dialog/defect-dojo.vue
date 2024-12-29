@@ -39,6 +39,7 @@
           </v-col>
         </v-row>
         <v-row justify="center" dense>
+          <!-- TODO: Try to define a common component for this -->
           <v-col cols="11">
             <v-text-field
               v-model="apiToken"

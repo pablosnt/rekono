@@ -26,7 +26,7 @@
         <v-text-field
           v-model="token"
           type="password"
-          density="compact"
+          density="comfortable"
           label="Telegram token"
           prepend-icon="mdi-key"
           variant="outlined"

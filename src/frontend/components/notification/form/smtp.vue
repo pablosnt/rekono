@@ -47,7 +47,7 @@
         <v-col cols="10">
           <v-text-field
             v-model="username"
-            density="compact"
+            density="comfortable"
             label="Username"
             prepend-icon="mdi-account"
             variant="outlined"
@@ -66,7 +66,7 @@
           <v-text-field
             v-model="password"
             type="password"
-            density="compact"
+            density="comfortable"
             label="Password"
             prepend-icon="mdi-lock"
             variant="outlined"
