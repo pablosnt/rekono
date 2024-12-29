@@ -38,7 +38,15 @@
           <v-card-actions>
             <TaskButton v-if="project" :project="project" :target="item" />
             <v-spacer />
-            <v-speed-dial v-if="item.tasks.length > 0 || item.reports.length > 0 || item.notes.length > 0" transition="fade-transition" location="left center">
+            <v-speed-dial
+              v-if="
+                item.tasks.length > 0 ||
+                item.reports.length > 0 ||
+                item.notes.length > 0
+              "
+              transition="fade-transition"
+              location="left center"
+            >
               <template #activator="{ props: activatorProps }">
                 <BaseButton
                   v-bind="activatorProps"
