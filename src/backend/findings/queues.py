@@ -63,15 +63,9 @@ class FindingsQueue(BaseQueue):
                             platform.process_alert(alert, finding)
                         break
         if settings.auto_fix_findings:
-            # TODO: TEST!
-            completed_executions = Execution.objects.filter(
-                configuration=execution.configuration,
-                task__target=execution.task.target,
-                # task__wordlists__in=execution.task.wordlists.all(),
-                # task__input_technologies__in=execution.task.input_technologies.all(),
-                # task__input_vulnerabilities__in=execution.task.input_vulnerabilities.all(),
-                status=Status.COMPLETED,
-            ).exclude(id=execution.id)
+            previous_executions = Execution.objects.filter(
+                hash=execution.hash, status=Status.COMPLETED
+            )
             for finding_type in [
                 OSINT,
                 Host,
@@ -83,7 +77,7 @@ class FindingsQueue(BaseQueue):
                 Exploit,
             ]:
                 finding_type.objects.fix(
-                    finding_type.objects.filter(  # .exclude(executions__id=execution.id)
-                        executions__in=completed_executions
-                    ).all()
+                    finding_type.objects.exclude(executions__id=execution.id)
+                    .filter(executions__in=previous_executions)
+                    .all()
                 )
