@@ -3,18 +3,40 @@
     :api="integrationApi"
     :integration="integration"
     :is-available="isAvailable"
-    color="green-darken-3"
+    color="black-darken-3"
     :loading="loading"
     @close-dialog="$emit('closeDialog')"
   >
     <v-form v-model="valid" @submit.prevent="submit()">
-      <v-container fluid>
+      <v-container fluid
+        ><v-row v-if="!isAvailable" class="mb-5" justify="center" dense>
+          <v-alert
+            color="info"
+            icon="$info"
+            variant="tonal"
+            class="text-center"
+          >
+            <template #text>
+              <span class="font-weight-bold">This API key is not mandatory</span
+              >. However, configuring one will increase their API's rate limit,
+              so it can avoid some blocked requests.
+              <v-btn
+                class="pa-0 ml-0 text-none mb-1 font-weight-bold text-left"
+                density="compact"
+                text="Request yours here"
+                target="_blank"
+                href="https://nvd.nist.gov/developers/request-an-api-key"
+                variant="plain"
+              />
+            </template>
+          </v-alert>
+        </v-row>
         <v-row class="mb-3" justify="center">
           <v-col cols="11">
             <v-text-field
               v-model="apiToken"
               type="password"
-              label="CVE Crowd API key"
+              label="NVD NIST API key"
               prepend-inner-icon="mdi-key"
               variant="outlined"
               :rules="[
@@ -25,62 +47,32 @@
               clearable
               @update:model-value="disabled = false"
             />
-          </v-col>
-        </v-row>
-        <v-row justify="space-around" dense>
-          <v-col cols="4">
-            <VNumberInput
-              v-model="trendingSpanDays"
-              control-variant="split"
-              label="Trending Span Days"
-              inset
-              variant="outlined"
-              :max="7"
-              :min="1"
-              @update:model-value="disabled = false"
-            />
-          </v-col>
-          <v-col cols="5">
-            <v-switch
-              v-model="executePerExecution"
-              color="green"
-              :label="
-                executePerExecution
-                  ? 'After executions & Monitor'
-                  : 'Only Monitor'
-              "
-              @update:model-value="disabled = false"
+            <UtilsSubmit
+              color="black-darken-3"
+              text="Save"
+              :disabled="disabled"
+              class="mt-5"
             />
           </v-col>
         </v-row>
-        <UtilsSubmit
-          color="green-darken-3"
-          text="Save"
-          :disabled="disabled"
-          class="mt-5"
-        />
       </v-container>
     </v-form>
   </IntegrationDialog>
 </template>
 
 <script setup lang="ts">
-import { VNumberInput } from "vuetify/labs/VNumberInput";
 defineProps({
   integrationApi: Object,
   integration: Object,
 });
 const emit = defineEmits(["closeDialog"]);
-const api = useApi("/api/cvecrowd/", true, "CVE Crowd");
+const api = useApi("/api/nvdnist/", true, "CVE Crowd");
 const valid = ref(true);
 const validate = ref(useValidation());
 const disabled = ref(true);
 const loading = ref(true);
-
 const isAvailable = ref(false);
 const apiToken = ref(null);
-const trendingSpanDays = ref(7);
-const executePerExecution = ref(true);
 
 api.get(1).then((response) => {
   loadData(response);
@@ -90,8 +82,6 @@ api.get(1).then((response) => {
 function loadData(data: object): void {
   isAvailable.value = data.is_available;
   apiToken.value = data.api_token;
-  trendingSpanDays.value = data.trending_span_days;
-  executePerExecution.value = data.execute_per_execution;
 }
 
 function submit(): void {
@@ -100,8 +90,6 @@ function submit(): void {
     api
       .update(
         {
-          trending_span_days: trendingSpanDays.value,
-          execute_per_execution: executePerExecution.value,
           api_token:
             !apiToken.value ||
             apiToken.value !== "*".repeat(apiToken.value.length)

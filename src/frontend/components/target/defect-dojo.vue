@@ -3,8 +3,8 @@
   <BaseButton
     v-if="integration.enabled && settings.is_available"
     :link="
-      target.defect_dojo_sync && target.defect_dojo_sync.engagement_id
-        ? `${settings.server}/engagement/${target.defect_dojo_sync.engagement_id}`
+      target.defectdojo_sync && target.defectdojo_sync.engagement_id
+        ? `${settings.server}/engagement/${target.defectdojo_sync.engagement_id}`
         : undefined
     "
     color="blue-accent-3"

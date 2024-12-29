@@ -30,14 +30,18 @@ class BaseIntegration(BasePlatform):
         retries = Retry(
             total=10,
             backoff_factor=1,
-            # TODO: Remove 403 and improve backoff_factor for NVD NIST: https://nvd.nist.gov/developers/start-here
-            status_forcelist=[403, 429, 500, 502, 503, 504, 599],
+            status_forcelist=[429, 500, 502, 503, 504, 599],
         )
         session.mount(f"{urlparse(url).scheme}://", HTTPAdapter(max_retries=retries))
         return session
 
     def _request(
-        self, method: Callable, url: str, json: bool = True, **kwargs: Any
+        self,
+        method: Callable,
+        url: str,
+        json: bool = True,
+        trigger_exception: bool = True,
+        **kwargs: Any,
     ) -> Any:
         try:
             response = method(url, **kwargs)
@@ -46,7 +50,8 @@ class BaseIntegration(BasePlatform):
         logger.info(
             f"[{self.__class__.__name__}] {method.__name__.upper()} {urlparse(url).path} > HTTP {response.status_code}"
         )
-        response.raise_for_status()
+        if trigger_exception:
+            response.raise_for_status()
         return response.json() if json else response
 
     def is_enabled(self) -> bool:

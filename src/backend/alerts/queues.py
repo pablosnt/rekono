@@ -6,7 +6,7 @@ from alerts.models import MonitorSettings
 from django.utils import timezone
 from django_rq import job
 from framework.queues import BaseQueue
-from platforms.cvecrowd.integrations import CVECrowd
+from platforms.cvecrowd.integrations import CveCrowd
 from rq.job import Job
 
 logger = logging.getLogger()
@@ -31,7 +31,7 @@ class MonitorQueue(BaseQueue):
         settings = MonitorSettings.objects.first()
         settings.last_monitor = timezone.now()
         settings.save(update_fields=["last_monitor"])
-        for platform in [CVECrowd()]:
+        for platform in [CveCrowd()]:
             platform.monitor()
 
     @staticmethod

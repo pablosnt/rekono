@@ -1,6 +1,6 @@
 from typing import Any
 
-from platforms.defect_dojo.models import DefectDojoSettings
+from platforms.defectdojo.models import DefectDojoSettings
 from tests.cases import ApiTestCase
 from tests.framework import ApiTest
 

@@ -1,6 +1,6 @@
 from typing import Any
 
-from platforms.defect_dojo.serializers import DefectDojoTargetSyncSerializer
+from platforms.defectdojo.serializers import DefectDojoTargetSyncSerializer
 from rest_framework.serializers import ModelSerializer
 from targets.models import Target
 
@@ -16,7 +16,7 @@ class SimpleTargetSerializer(ModelSerializer):
 class TargetSerializer(ModelSerializer):
     """Serializer to manage targets via API."""
 
-    defect_dojo_sync = DefectDojoTargetSyncSerializer(many=False, read_only=True)
+    defectdojo_sync = DefectDojoTargetSyncSerializer(many=False, read_only=True)
 
     class Meta:
         model = Target
@@ -27,7 +27,7 @@ class TargetSerializer(ModelSerializer):
             "type",
             "target_ports",
             "tasks",
-            "defect_dojo_sync",
+            "defectdojo_sync",
             "notes",
             "reports",
         )
@@ -35,7 +35,7 @@ class TargetSerializer(ModelSerializer):
             "type",
             "target_ports",
             "tasks",
-            "defect_dojo_sync",
+            "defectdojo_sync",
             "notes",
             "reports",
         )

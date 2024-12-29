@@ -1,12 +1,11 @@
-from rest_framework.routers import SimpleRouter
-
-from platforms.defect_dojo.views import (
+from platforms.defectdojo.views import (
     DefectDojoEngagementViewSet,
     DefectDojoProductTypeViewSet,
     DefectDojoProductViewSet,
     DefectDojoSettingsViewSet,
     DefectDojoSyncViewSet,
 )
+from rest_framework.routers import SimpleRouter
 
 # Register your views here.
 

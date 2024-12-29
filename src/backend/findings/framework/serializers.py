@@ -20,7 +20,7 @@ class FindingSerializer(ModelSerializer):
             "auto_fixed",
             "fixed_date",
             "fixed_by",
-            "defect_dojo_id",
+            "defectdojo_id",
             "hacktricks_link",
             "notes",
         )
@@ -30,7 +30,7 @@ class FindingSerializer(ModelSerializer):
             "auto_fixed",
             "fixed_date",
             "fixed_by",
-            "defect_dojo_id",
+            "defectdojo_id",
             "hacktricks_link",
             "notes",
         )

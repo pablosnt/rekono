@@ -10,11 +10,15 @@
             class="ma-5"
           >
             <Integration
-              v-if="!customizableIntegrations.includes(integration.id)"
+              v-if="
+                !Object.keys(customForm).includes(integration.id.toString())
+              "
               :api="iApi"
               :integration="integration"
             />
-            <v-dialog v-if="customizableIntegrations.includes(integration.id)">
+            <v-dialog
+              v-if="Object.keys(customForm).includes(integration.id.toString())"
+            >
               <template #activator="{ props: activatorProps }">
                 <Integration
                   :api="iApi"
@@ -99,9 +103,9 @@ const mApi = useApi("/api/monitor/", true, "Monitoring");
 const save = ref(false);
 const monitor = ref({});
 mApi.get(1).then((response) => (monitor.value = response));
-const customizableIntegrations = ref([1, 4]);
 const customForm = ref({
   1: resolveComponent("IntegrationDialogDefectDojo"),
+  2: resolveComponent("IntegrationDialogNvdNist"),
   4: resolveComponent("IntegrationDialogCveCrowd"),
 });
 </script>

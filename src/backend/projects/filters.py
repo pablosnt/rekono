@@ -7,11 +7,11 @@ class ProjectFilter(FilterSet):
     """FilterSet to filter Project entities."""
 
     tag = CharFilter(field_name="tags__name")
-    defect_dojo_product_type = NumberFilter(
-        field_name="defect_dojo_sync__product_type_id"
+    defectdojo_product_type = NumberFilter(
+        field_name="defectdojo_sync__product_type_id"
     )
-    defect_dojo_product = NumberFilter(field_name="defect_dojo_sync__product_id")
-    defect_dojo_engagement = NumberFilter(field_name="defect_dojo_sync__engagement_id")
+    defectdojo_product = NumberFilter(field_name="defectdojo_sync__product_id")
+    defectdojo_engagement = NumberFilter(field_name="defectdojo_sync__engagement_id")
 
     class Meta:
         model = Project
@@ -19,5 +19,5 @@ class ProjectFilter(FilterSet):
             "name": ["exact", "icontains"],
             "owner": ["exact"],
             "members": ["exact"],
-            "defect_dojo_sync": ["exact"],
+            "defectdojo_sync": ["exact"],
         }

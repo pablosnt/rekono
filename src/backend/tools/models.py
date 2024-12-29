@@ -27,7 +27,7 @@ class Tool(BaseLike):
     output_format = models.TextField(max_length=5, blank=True, null=True)
     reference = models.TextField(max_length=250, blank=True, null=True)
     icon = models.TextField(max_length=250, blank=True, null=True)
-    defect_dojo_scan_type = models.TextField(max_length=100, blank=True, null=True)
+    defectdojo_scan_type = models.TextField(max_length=100, blank=True, null=True)
 
     def get_parser_class(self) -> Any:
         return self._get_related_class("tools.parsers", self.name)

@@ -130,7 +130,7 @@ class Finding(BaseInput):
         blank=True,
         null=True,
     )
-    defect_dojo_id = models.IntegerField(blank=True, null=True)
+    defectdojo_id = models.IntegerField(blank=True, null=True)
     hacktricks_link = models.TextField(max_length=300, blank=True, null=True)
     objects = FindingManager()
     unique_fields: list[str] = []
@@ -145,7 +145,7 @@ class Finding(BaseInput):
     def get_project_field(cls) -> str:
         return "executions__task__target__project"
 
-    def defect_dojo(self) -> dict[str, Any]:
+    def defectdojo(self) -> dict[str, Any]:
         return {}  # pragma: no cover
 
 

@@ -4,8 +4,8 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.shortcuts import get_object_or_404
 from framework.fields import ProtectedSecretField
-from platforms.defect_dojo.integrations import DefectDojo
-from platforms.defect_dojo.models import (
+from platforms.defectdojo.integrations import DefectDojo
+from platforms.defectdojo.models import (
     DefectDojoSettings,
     DefectDojoSync,
     DefectDojoTargetSync,
@@ -89,7 +89,7 @@ class DefectDojoTargetSyncSerializer(ModelSerializer):
         model = DefectDojoTargetSync
         fields = (
             "id",
-            "defect_dojo_sync",
+            "defectdojo_sync",
             "target",
             "engagement_id",
         )

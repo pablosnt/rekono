@@ -4,9 +4,9 @@
       defectdojo &&
       defectdojo.enabled &&
       defectdojoSettings.is_available &&
-      finding.defect_dojo_id
+      finding.defectdojo_id
     "
-    :link="`${defectdojoSettings.server}/finding/${finding.defect_dojo_id}`"
+    :link="`${defectdojoSettings.server}/finding/${finding.defectdojo_id}`"
     :avatar="defectdojo.icon"
     tooltip="Defect-Dojo finding"
     new-tab
