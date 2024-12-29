@@ -28,6 +28,7 @@ class Execution(BaseModel):
     enqueued_at = models.DateTimeField(blank=True, null=True)
     start = models.DateTimeField(blank=True, null=True)
     end = models.DateTimeField(blank=True, null=True)
+    hash = models.TextField(max_length=128, blank=True, null=True)
     defectdojo_test_id = models.IntegerField(blank=True, null=True)
 
     def __str__(self) -> str:

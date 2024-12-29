@@ -18,6 +18,7 @@ from framework.models import BaseInput
 from http_headers.models import HttpHeader
 from parameters.models import InputTechnology, InputVulnerability
 from rekono.settings import CONFIG
+from security.cryptography.hashing import hash
 from settings.models import Settings
 from target_ports.models import TargetPort
 from tools.models import Intensity
@@ -41,6 +42,7 @@ class BaseExecutor:
             / f'{str(uuid.uuid4())}.{execution.configuration.tool.output_format or "txt"}'
         )
         self.arguments: list[str] = []
+        self.environment: dict[str, Any] = {}
         self.findings_used_in_execution: dict[Any, BaseInput] = {}
         self.authentication: Optional[Authentication] = None
 
@@ -256,8 +258,18 @@ class BaseExecutor:
         if self.execution.configuration.tool.output_format and self.report.is_file():
             self.execution.output_file = self.report
         self.execution.output_plain = output
+        self.execution.hash = hash(
+            " ".join(
+                [f"{k}={v}" for k, v in self.environment.items()]
+                + [
+                    a
+                    for a in self.arguments
+                    if str(self.report).lower() not in a.lower()
+                ]
+            ).lower()
+        )
         self.execution.save(
-            update_fields=["status", "end", "output_file", "output_plain"]
+            update_fields=["status", "end", "output_file", "output_plain", "hash"]
         )
         self._on_task_end()
 
@@ -288,10 +300,10 @@ class BaseExecutor:
             logger.error(f"[Tool] {str(error)}")
             self._on_skip(str(error))
             return
-        environment = self._get_environment()
+        self.environment = self._get_environment()
         self._before_running()
         try:
-            output = "" if CONFIG.testing else self._run(environment)
+            output = "" if CONFIG.testing else self._run(self.environment)
         except (RuntimeError, Exception) as error:
             logger.error(
                 f"[Tool] {self.execution.configuration.tool.name} execution finish with errors"
