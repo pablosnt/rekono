@@ -63,7 +63,7 @@ class FindingsQueue(BaseQueue):
                             platform.process_alert(alert, finding)
                         break
         if settings.auto_fix_findings:
-            previous_executions = Execution.objects.filter(
+            same_executions = Execution.objects.filter(
                 hash=execution.hash, status=Status.COMPLETED
             )
             for finding_type in [
@@ -78,6 +78,6 @@ class FindingsQueue(BaseQueue):
             ]:
                 finding_type.objects.fix(
                     finding_type.objects.exclude(executions__id=execution.id)
-                    .filter(executions__in=previous_executions)
+                    .filter(executions__in=same_executions)
                     .all()
                 )
