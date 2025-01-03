@@ -12,7 +12,7 @@
         tooltip="All projects"
       />
       <TaskButton
-        v-if="target !== null || (project === null && target === null)"
+        v-if="project === null && target === null"
         :project="project"
         :target="target"
       />

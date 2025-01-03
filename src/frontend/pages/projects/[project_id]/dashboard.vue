@@ -15,7 +15,11 @@
         </template>
         <template #append>
           <TaskButton :project="project" />
-          <ProjectDefectDojo :project="project" avatar-size="25" @reload="loadData()" />
+          <ProjectDefectDojo
+            :project="project"
+            avatar-size="25"
+            @reload="loadData()"
+          />
           <UtilsDeleteButtonEdit v-if="autz.isAdmin()">
             <template #edit-dialog="{ isActive }">
               <ProjectDialogEdit
@@ -55,7 +59,7 @@
 <script setup lang="ts">
 definePageMeta({ layout: false });
 const route = useRoute();
-const autz = useAutz()
+const autz = useAutz();
 const api = useApi("/api/projects/", true);
 const project = ref({
   id: route.params.project_id,

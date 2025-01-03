@@ -38,95 +38,16 @@
           <v-card-actions>
             <TaskButton v-if="project" :project="project" :target="item" />
             <v-spacer />
-            <v-speed-dial
-              v-if="
-                item.tasks.length > 0 ||
-                item.reports.length > 0 ||
-                item.notes.length > 0
-              "
-              transition="fade-transition"
-              location="left center"
-            >
-              <template #activator="{ props: activatorProps }">
-                <BaseButton
-                  v-bind="activatorProps"
-                  size="x-large"
-                  color="blue-grey"
-                  icon="mdi-link"
-                  @click.prevent.stop
-                />
-              </template>
-              <UtilsCounterButton
-                key="1"
-                :collection="item.tasks"
-                tooltip="Tasks"
-                icon="mdi-play-network"
-                color="green"
-                :link="`/projects/${item.project}/scans?target=${item.id}`"
-                new-tab
-              />
-              <UtilsCounterButton
-                key="2"
-                :collection="item.reports"
-                tooltip="Reports"
-                icon="mdi-file-document"
-                :link="`/projects/${item.project}/reports`"
-                color="blue-grey-darken-1"
-                new-tab
-              />
-              <UtilsCounterButton
-                key="3"
-                :collection="item.notes"
-                tooltip="Notes"
-                icon="mdi-notebook"
-                :link="`/projects/${item.project}/notes`"
-                color="indigo-darken-1"
-                new-tab
-              />
-              <TargetDefectDojo
-                class="mt-3"
-                :target="item"
-                :integration="integration"
-                :settings="settings"
-              />
-            </v-speed-dial>
-            <v-speed-dial transition="fade-transition" location="bottom center">
-              <template #activator="{ props: activatorProps }">
-                <BaseButton
-                  v-bind="activatorProps"
-                  size="large"
-                  color="blue-grey"
-                  icon="mdi-cog"
-                  @click.prevent.stop
-                />
-              </template>
-              <NoteButton
-                :project="route.params.project_id"
-                :target="item"
-                variant="flat"
-                color="indigo-darken-1"
-                icon-color="white"
-                size="small"
-              />
-              <ReportButton
-                :project="route.params.project_id"
-                :target="item"
-                variant="flat"
-                color="blue-grey-darken-2"
-                icon-color="white"
-                size="small"
-              />
-              <UtilsDeleteButton
-                :id="item.id"
-                :api="api"
-                :text="`Target '${item.target}' will be removed`"
-                icon="mdi-trash-can"
-                variant="flat"
-                color="red"
-                icon-color="white"
-                @completed="dataset.loadData(false)"
-              />
-            </v-speed-dial>
+            <TargetButtonLinks
+              :target="item"
+              :integration="integration"
+              :settings="settings"
+            />
+            <TargetButtonActions
+              :target="item"
+              :api="api"
+              @completed="dataset.loadData(false)"
+            />
           </v-card-actions>
         </v-card>
       </template>

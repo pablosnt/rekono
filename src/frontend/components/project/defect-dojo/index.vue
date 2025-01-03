@@ -56,7 +56,12 @@
     />
     <v-dialog width="500" class="overflow-auto">
       <template #activator="{ props: activatorProps }">
-        <BaseButton variant="flat" color="red" icon="mdi-link-off" v-bind="activatorProps" />
+        <BaseButton
+          variant="flat"
+          color="red"
+          icon="mdi-link-off"
+          v-bind="activatorProps"
+        />
       </template>
       <template #default="{ isActive }">
         <UtilsDeleteDialog
@@ -115,10 +120,10 @@
 defineProps({
   project: Object,
   onlyLink: { type: Boolean, required: false, default: false },
-  avatarSize: {type: String, required: false, default: 'small'}
+  avatarSize: { type: String, required: false, default: "small" },
 });
 defineEmits(["reload"]);
-const autz = useAutz()
+const autz = useAutz();
 const integration = ref({ enabled: false });
 const settings = ref({ is_available: false });
 const api = useApi("/api/defect-dojo/sync/", true, "Defect-Dojo sync");
