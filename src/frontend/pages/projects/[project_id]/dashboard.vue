@@ -15,13 +15,8 @@
         </template>
         <template #append>
           <TaskButton :project="project" />
-          <ProjectDefectDojo :project="project" @reload="loadData()" />
-          <UtilsDeleteButtonEdit
-            v-if="
-              project.owner &&
-              (project.owner.id === user.user || user.role === 'Admin')
-            "
-          >
+          <ProjectDefectDojo :project="project" avatar-size="25" @reload="loadData()" />
+          <UtilsDeleteButtonEdit v-if="autz.isAdmin()">
             <template #edit-dialog="{ isActive }">
               <ProjectDialogEdit
                 :api="api"
@@ -59,8 +54,8 @@
 
 <script setup lang="ts">
 definePageMeta({ layout: false });
-const user = userStore();
 const route = useRoute();
+const autz = useAutz()
 const api = useApi("/api/projects/", true);
 const project = ref({
   id: route.params.project_id,

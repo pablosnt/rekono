@@ -1,7 +1,7 @@
 <template>
   <ProjectDefectDojoButton
     v-if="
-      onlyLink &&
+      (onlyLink || !autz.isAuditor()) &&
       settings !== null &&
       settings.server !== null &&
       project.defectdojo_sync !== null &&
@@ -11,12 +11,15 @@
     :project="project"
     :settings="settings"
     :integration="integration"
+    size="x-large"
+    :avatar-size="avatarSize"
     link
   />
 
   <v-speed-dial
     v-if="
       !onlyLink &&
+      autz.isAuditor() &&
       settings !== null &&
       settings.server !== null &&
       settings.is_available &&
@@ -25,7 +28,8 @@
       project.defectdojo_sync !== null
     "
     transition="scale-transition"
-    location="bottom end"
+    location="bottom center"
+    open-on-hover
   >
     <template #activator="{ props: activatorProps }">
       <ProjectDefectDojoButton
@@ -33,6 +37,8 @@
         :project="project"
         :settings="settings"
         :integration="integration"
+        size="x-large"
+        :avatar-size="avatarSize"
       />
     </template>
     <ProjectDefectDojoButton
@@ -50,7 +56,7 @@
     />
     <v-dialog width="500" class="overflow-auto">
       <template #activator="{ props: activatorProps }">
-        <BaseButton color="red" icon="mdi-link-off" v-bind="activatorProps" />
+        <BaseButton variant="flat" color="red" icon="mdi-link-off" v-bind="activatorProps" />
       </template>
       <template #default="{ isActive }">
         <UtilsDeleteDialog
@@ -71,6 +77,7 @@
   <v-dialog
     v-if="
       !onlyLink &&
+      autz.isAuditor() &&
       settings !== null &&
       settings.is_available &&
       integration !== null &&
@@ -85,6 +92,8 @@
         :project="project"
         :settings="settings"
         :integration="integration"
+        size="x-large"
+        :avatar-size="avatarSize"
       />
     </template>
     <template #default="{ isActive }">
@@ -106,8 +115,10 @@
 defineProps({
   project: Object,
   onlyLink: { type: Boolean, required: false, default: false },
+  avatarSize: {type: String, required: false, default: 'small'}
 });
 defineEmits(["reload"]);
+const autz = useAutz()
 const integration = ref({ enabled: false });
 const settings = ref({ is_available: false });
 const api = useApi("/api/defect-dojo/sync/", true, "Defect-Dojo sync");

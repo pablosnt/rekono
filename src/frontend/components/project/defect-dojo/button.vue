@@ -8,7 +8,7 @@
           ? `${settings.server}/engagement/${project.defectdojo_sync.engagement_id}`
           : `${settings.server}/product/${project.defectdojo_sync.product_id}`
     "
-    :color="color ? 'blue-accent-3' : undefined"
+    :color="color ? 'blue-accent-2' : undefined"
     :avatar="!icon ? integration.icon : undefined"
     :icon="icon ? icon : undefined"
     :variant="variant"
