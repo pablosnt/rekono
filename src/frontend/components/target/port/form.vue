@@ -58,6 +58,9 @@ const path = ref(null);
 
 function submit(): void {
   if (valid.value) {
+    if (path.value && !path.value.startsWith("/")) {
+      path.value = "/".concat(path.value);
+    }
     emit("loading", true);
     props.api
       .create({

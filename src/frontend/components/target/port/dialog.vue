@@ -8,7 +8,7 @@
       targetPort !== null ? $emit('completed') : null;
     "
   >
-    <v-stepper v-model="step" hide-actions>
+    <v-stepper v-model="step" hide-actions flat>
       <v-stepper-header>
         <v-stepper-item
           title="Target Port"

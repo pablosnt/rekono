@@ -28,7 +28,7 @@
               (n) => !n || validate.name.test(n) || 'Invalid name value',
             ]"
             validate-on="input"
-            prepend-icon="mdi-shield-account"
+            prepend-inner-icon="mdi-shield-account"
             :disabled="type === 'None'"
           />
         </v-col>
@@ -45,16 +45,15 @@
               (s) => validate.secret.test(s) || 'Invalid secret value',
             ]"
             validate-on="input"
-            prepend-icon="mdi-shield-key"
+            prepend-inner-icon="mdi-shield-key"
             :disabled="type === 'None'"
             @update:model-value="disabled = false"
           />
         </v-col>
       </v-row>
-
       <UtilsSubmit
         class="mt-4"
-        :disabled="disabled || type === 'None'"
+        :disabled="disabled && type !== 'None'"
         text="Save"
       />
     </v-container>
@@ -80,6 +79,9 @@ const secret = ref(null);
 const type = ref("None");
 
 function submit(): void {
+  if (type.value === "None") {
+    emit("completed");
+  }
   if (valid.value) {
     emit("loading", true);
     props.api
