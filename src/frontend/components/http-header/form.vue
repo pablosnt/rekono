@@ -14,6 +14,7 @@
               (k) => !!k || 'Header key is required',
               (k) => validate.name.test(k.trim()) || 'Header key is invalid',
             ]"
+            :readonly="autz.isAuditor()"
             @update:model-value="disabled = false"
           />
         </v-col>
@@ -28,11 +29,13 @@
               (v) => !!v || 'Header value is required',
               (v) => validate.text.test(v.trim()) || 'Header value is invalid',
             ]"
+            :readonly="autz.isAuditor()"
             @update:model-value="disabled = false"
           >
             <template #prepend>:</template>
             <template v-if="header !== null" #append>
               <BaseButton
+                v-if="autz.isAuditor()"
                 :disabled="disabled"
                 icon="mdi-tray-arrow-down"
                 icon-color="green"
@@ -41,7 +44,7 @@
                 @click="submit"
               />
               <UtilsDeleteButton
-                v-if="header !== null"
+                v-if="autz.isAuditor() && header !== null"
                 :id="header.id"
                 :api="api"
                 :text="`HTTP header '${header.key}' will be removed`"
@@ -69,7 +72,7 @@ const props = defineProps({
 });
 const emit = defineEmits(["completed", "loading"]);
 const validate = useValidation();
-
+const autz = useAutz();
 const valid = ref(true);
 const disabled = ref(props.header !== null);
 const key = ref(props.header ? props.header.key : null);

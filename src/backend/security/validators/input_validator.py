@@ -21,7 +21,7 @@ class Regex(Enum):
     PATH_WITH_QUERYPARAMS = r"[\w\.\-_/\\#?&%$]{0,500}"
     CVE = r"CVE-\d{4}-\d{1,7}"
     SECRET = r"[\w\s\./\-=\+,:<>¿?¡!#&$()@%\[\]\{\}\*]{1,500}"
-    INJECTION = r"[;\"&</>$]+"
+    INJECTION = r"[;\"'&<>$]+"
 
 
 class Validator(RegexValidator):

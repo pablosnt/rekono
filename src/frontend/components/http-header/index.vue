@@ -6,7 +6,7 @@
     :add="HttpHeaderDialog"
     icon="mdi-web"
     empty-head="No HTTP Headers"
-    empty-text="Create the HTTP headers that must be sent by HTTP hacking tools"
+    empty-text="Define the HTTP headers to be sent by HTTP hacking tools"
     auditor
   >
     <template #prepend-search>
