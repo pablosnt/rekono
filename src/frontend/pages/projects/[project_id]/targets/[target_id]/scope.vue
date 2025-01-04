@@ -9,6 +9,7 @@
         icon="mdi-antenna"
         empty-head="No Scope Defined"
         empty-text="Define the ports and paths to be scanned and how to authenticate. Otherwise, the whole target address will be scanned"
+        auditor
         @load-data="(data) => (ports = data)"
       >
         <template #data>
@@ -20,7 +21,7 @@
                 <th class="text-center font-weight-bold">Authentication</th>
                 <th class="text-center font-weight-bold">Auth Name</th>
                 <th class="text-center font-weight-bold">Auth Secret</th>
-                <th />
+                <th v-if="autz.isAuditor()" />
               </tr>
             </thead>
             <tbody>
@@ -40,7 +41,7 @@
                 <td class="text-center">
                   {{ port.authentication ? port.authentication.secret : "" }}
                 </td>
-                <td>
+                <td v-if="autz.isAuditor()">
                   <v-dialog v-if="!port.authentication" width="auto">
                     <template #activator="{ props: activatorProps }">
                       <BaseButton
@@ -95,6 +96,7 @@
 definePageMeta({ layout: false });
 const TargetPortDialog = resolveComponent("TargetPortDialog");
 const portUtils = usePorts();
+const autz = useAutz();
 const dataset = ref(null);
 const ports = ref([]);
 const api = useApi("/api/target-ports/", true, "Target port");
