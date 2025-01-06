@@ -1,5 +1,6 @@
 from typing import Any
 
+from framework.serializers import RelatedNotesSerializer
 from platforms.defectdojo.serializers import DefectDojoTargetSyncSerializer
 from rest_framework.serializers import ModelSerializer
 from targets.models import Target
@@ -13,7 +14,7 @@ class SimpleTargetSerializer(ModelSerializer):
         fields = ("id", "project", "target", "type")
 
 
-class TargetSerializer(ModelSerializer):
+class TargetSerializer(RelatedNotesSerializer):
     """Serializer to manage targets via API."""
 
     defectdojo_sync = DefectDojoTargetSyncSerializer(many=False, read_only=True)
@@ -36,8 +37,8 @@ class TargetSerializer(ModelSerializer):
             "target_ports",
             "tasks",
             "defectdojo_sync",
-            "notes",
             "reports",
+            "notes",
         )
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:

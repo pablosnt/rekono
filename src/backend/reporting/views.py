@@ -100,9 +100,7 @@ class ReportingViewSet(BaseViewSet):
 
     @extend_schema(request=CreateReportSerializer, responses=ReportSerializer)
     def create(self, request: Request, *args: Any, **kwargs: Any):
-        serializer = self.get_serializer_class()(
-            data=request.data, context={"request": request}
-        )
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         findings: (
             tuple[dict[int, Any], dict[int, list[int]], list[int]]

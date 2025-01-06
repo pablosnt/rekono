@@ -3,11 +3,11 @@ from typing import Any
 from django.utils import timezone
 from executions.serializers import SimpleExecutionSerializer
 from findings.models import OSINT, Host
-from rest_framework.serializers import ModelSerializer
+from framework.serializers import RelatedNotesSerializer
 from users.serializers import SimpleUserSerializer
 
 
-class FindingSerializer(ModelSerializer):
+class FindingSerializer(RelatedNotesSerializer):
     executions = SimpleExecutionSerializer(many=True, read_only=True)
     fixed_by = SimpleUserSerializer(many=False, read_only=True)
 

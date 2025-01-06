@@ -38,6 +38,5 @@ defineProps({
   color: { type: String, required: false, default: undefined },
   size: { type: String, required: false, default: "x-large" },
 });
-// TODO: Property to swap iconColor and color, but not defining them from consumer. sppedDialMode or something like that, passed and used by BaseButton. Variant must be flat too
 defineEmits(["completed"]);
 </script>

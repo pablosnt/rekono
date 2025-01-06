@@ -6,9 +6,10 @@ from alerts.models import Alert
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from framework.fields import TagField
+from framework.serializers import RelatedNotesSerializer
 from platforms.defectdojo.serializers import DefectDojoSyncSerializer
 from projects.models import Project
-from rest_framework.serializers import IntegerField, ModelSerializer, Serializer
+from rest_framework.serializers import IntegerField, Serializer
 from taggit.serializers import TaggitSerializer
 from targets.serializers import SimpleTargetSerializer
 from users.models import User
@@ -17,7 +18,7 @@ from users.serializers import SimpleUserSerializer
 logger = logging.getLogger()
 
 
-class ProjectSerializer(TaggitSerializer, ModelSerializer):
+class ProjectSerializer(TaggitSerializer, RelatedNotesSerializer):
     """Serializer to manage projects via API."""
 
     # Target details for read operations

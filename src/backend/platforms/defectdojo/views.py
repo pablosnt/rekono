@@ -43,9 +43,7 @@ class DefectDojoEntityViewSet(BaseViewSet):
     permission_classes = [IsAuthenticated, IsAuditor]
 
     def create(self, request: Request) -> Response:
-        serializer = self.get_serializer_class()(
-            data=request.data, context={"request": request}
-        )
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         try:
             response = serializer.create(serializer.validated_data)

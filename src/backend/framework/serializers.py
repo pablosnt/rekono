@@ -1,5 +1,6 @@
 from typing import Any
 
+from django.db.models import Q
 from rest_framework import status
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.serializers import (
@@ -60,3 +61,12 @@ class MfaSerializer(Serializer):
         ):
             raise AuthenticationFailed(code=status.HTTP_401_UNAUTHORIZED)
         return attrs
+
+
+class RelatedNotesSerializer(ModelSerializer):
+    notes = SerializerMethodField(read_only=True)
+
+    def get_notes(self, instance: Any) -> list[int]:
+        return instance.notes.filter(
+            Q(public=True) | Q(owner__id=self.context.get("request").user.id)
+        ).values_list("id", flat=True)

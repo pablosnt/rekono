@@ -13,7 +13,6 @@
         @click.prevent.stop
       />
     </template>
-    <!-- TODO: What happen with these notes authorization? Some of them might be private, but they will be linked anyway? -->
     <NoteButton
       v-if="autz.isAuditor()"
       key="1"

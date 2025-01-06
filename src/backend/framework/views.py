@@ -61,6 +61,15 @@ class BaseViewSet(ModelViewSet):
                 return None
         return super().get_queryset().distinct()
 
+    def get_serializer(self, *args, **kwargs):
+        return self.get_serializer_class()(
+            *args,
+            **{
+                **kwargs,
+                "context": {**kwargs.get("context", {}), "request": self.request},
+            },
+        )
+
     def perform_create(self, serializer: Serializer) -> None:
         model = self._get_model()
         if model:

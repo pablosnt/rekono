@@ -3,14 +3,11 @@ from typing import Any, cast
 
 from django.core.exceptions import ValidationError
 from executions.enums import Status
+from framework.serializers import RelatedNotesSerializer
 from input_types.enums import InputTypeName
 from processes.models import Process
 from processes.serializers import SimpleProcessSerializer
-from rest_framework.serializers import (
-    ModelSerializer,
-    PrimaryKeyRelatedField,
-    SerializerMethodField,
-)
+from rest_framework.serializers import PrimaryKeyRelatedField, SerializerMethodField
 from targets.models import Target
 from targets.serializers import SimpleTargetSerializer
 from tasks.models import Task
@@ -22,7 +19,7 @@ from tools.serializers import ConfigurationSerializer
 from users.serializers import SimpleUserSerializer
 
 
-class TaskSerializer(ModelSerializer):
+class TaskSerializer(RelatedNotesSerializer):
     target_id = PrimaryKeyRelatedField(
         many=False,
         write_only=True,

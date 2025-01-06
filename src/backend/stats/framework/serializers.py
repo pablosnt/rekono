@@ -48,7 +48,7 @@ class StatsSerializer(Serializer):
     def _serialize(
         self, serializer_class: Any, queryset: QuerySet, many: bool = True
     ) -> Any:
-        return serializer_class(queryset, many=many).data
+        return serializer_class(queryset, many=many, context=self.context).data
 
     def _get_serialized_evolution(
         self, serializer_class: Any, model: type[BaseModel] | None = None

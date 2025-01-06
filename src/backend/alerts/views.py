@@ -107,8 +107,7 @@ class AlertViewSet(BaseViewSet):
                 alert.enabled = new_value
                 alert.save(update_fields=["enabled"])
                 return Response(
-                    AlertSerializer(alert, context={"request": request}).data,
-                    status=status.HTTP_200_OK,
+                    self.get_serializer(alert).data, status=status.HTTP_200_OK
                 )
 
 

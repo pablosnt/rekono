@@ -97,8 +97,5 @@ class NoteViewSet(LikeViewSet):
                 forked_from=note,
             )
             fork.tags.set(note.tags.all())
-            return Response(
-                NoteSerializer(fork, context={"request": request}).data,
-                status=HTTP_201_CREATED,
-            )
+            return Response(self.get_serializer(fork).data, status=HTTP_201_CREATED)
         return Response(status=HTTP_404_NOT_FOUND)
