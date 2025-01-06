@@ -19,7 +19,11 @@
       <template #item="{ item }">
         <v-card
           :title="item.format.toUpperCase()"
-          :subtitle="item.date ? new Date(item.date).toUTCString() : undefined"
+          :subtitle="
+            item.date
+              ? new Date(item.date).toLocaleString(undefined, { hour12: false })
+              : undefined
+          "
           elevation="3"
           class="mx-auto"
           density="compact"
@@ -87,7 +91,7 @@ definePageMeta({ layout: false });
 const ReportDialog = resolveComponent("ReportDialog");
 const route = useRoute();
 const user = userStore();
-const enums = ref(useEnums());
+const enums = useEnums();
 const filters = useFilters();
 const dataset = ref(null);
 const api = useApi("/api/reports/", true, "Report");
@@ -136,7 +140,7 @@ filters
       label: "Format",
       icon: "mdi-file-document",
       cols: 2,
-      collection: Object.entries(enums.value.reportFormats).map(([k, v]) => {
+      collection: Object.entries(enums.reportFormats).map(([k, v]) => {
         v.id = k.toLowerCase();
         v.name = k.toUpperCase();
         return v;
@@ -150,7 +154,7 @@ filters
       label: "Status",
       icon: "mdi-check-decagram",
       cols: 2,
-      collection: filters.collectionFromEnum(enums.value.reportStatuses),
+      collection: filters.collectionFromEnum(enums.reportStatuses),
       fieldValue: "name",
       fieldTitle: "name",
       key: "status",

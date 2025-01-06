@@ -72,7 +72,7 @@ const props = defineProps({
   hover: { type: Boolean, required: false, default: false },
 });
 defineEmits(["reload"]);
-const enums = ref(useEnums());
+const enums = useEnums();
 const _alert = ref(useAlert());
 const item = ref(props.alert);
 </script>

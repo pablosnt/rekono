@@ -19,6 +19,10 @@
         :target="target"
         :task="task"
         @close-dialog="isActive.value = false"
+        @completed="
+          isActive.value = false;
+          $emit('completed');
+        "
       />
     </template>
   </v-dialog>
@@ -34,4 +38,6 @@ defineProps({
   color: { type: String, required: false, default: undefined },
   size: { type: String, required: false, default: "x-large" },
 });
+// TODO: Property to swap iconColor and color, but not defining them from consumer. sppedDialMode or something like that, passed and used by BaseButton. Variant must be flat too
+defineEmits(["completed"]);
 </script>

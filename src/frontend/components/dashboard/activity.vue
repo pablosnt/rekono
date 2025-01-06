@@ -129,10 +129,19 @@
                     <td v-if="project || target" class="text-center">
                       <p v-if="!task.start && task.scheduled_at">
                         Scheduled at
-                        {{ new Date(task.scheduled_at).toUTCString() }}
+                        {{
+                          new Date(task.scheduled_at).toLocaleString(
+                            undefined,
+                            { hour12: false },
+                          )
+                        }}
                       </p>
                       <p v-if="task.start">
-                        {{ new Date(task.start).toUTCString() }}
+                        {{
+                          new Date(task.start).toLocaleString(undefined, {
+                            hour12: false,
+                          })
+                        }}
                       </p>
                     </td>
                     <td class="text-right">

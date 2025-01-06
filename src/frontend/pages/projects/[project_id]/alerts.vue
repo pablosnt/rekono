@@ -51,7 +51,7 @@ const AlertDialog = resolveComponent("AlertDialog");
 const dataset = ref(null);
 const user = userStore();
 const route = useRoute();
-const enums = ref(useEnums());
+const enums = useEnums();
 const filters = useFilters();
 const api = useApi("/api/alerts/", true, "Alert");
 const filtering = ref([]);
@@ -60,7 +60,7 @@ filters
     {
       type: "autocomplete",
       label: "Mode",
-      collection: filters.collectionFromEnum(enums.value.alertModes),
+      collection: filters.collectionFromEnum(enums.alertModes),
       cols: 2,
       fieldValue: "name",
       fieldTitle: "name",
@@ -69,7 +69,7 @@ filters
     {
       type: "autocomplete",
       label: "Item",
-      collection: filters.collectionFromEnum(enums.value.alertItems),
+      collection: filters.collectionFromEnum(enums.alertItems),
       fieldValue: "name",
       fieldTitle: "name",
       key: "item",

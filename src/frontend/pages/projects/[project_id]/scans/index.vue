@@ -1,6 +1,5 @@
 <template>
   <MenuProject>
-    <!-- TODO: Keep Search, Filter and Add button always on the top of the page, and scroll only the data -->
     <Dataset
       ref="dataset"
       :api="api"
@@ -13,7 +12,7 @@
     >
       <template #add>
         <TaskButton
-          v-if="project"
+          v-if="project && autz.isAuditor()"
           :project="project"
           @reload="dataset.loadData(false)"
         />
@@ -24,13 +23,17 @@
           :subtitle="
             item.configuration ? item.configuration.tool.name : 'Process'
           "
-          :prepend-avatar="
-            item.configuration ? item.configuration.tool.icon : undefined
-          "
+          elevation="2"
+          class="ma-3"
+          density="comfortable"
           hover
           :to="`/projects/${route.params.project_id}/scans/${item.id}`"
         >
           <template #prepend>
+            <v-avatar
+              v-if="item.configuration && item.configuration.tool.icon"
+              :image="item.configuration.tool.icon"
+            />
             <v-icon v-if="item.process" icon="mdi-robot-angry" color="red" />
             <v-icon
               v-if="item.configuration && !item.configuration.tool.icon"
@@ -39,24 +42,6 @@
             />
           </template>
           <template #append>
-            <v-progress-circular
-              v-if="item.status && item.status === 'Running'"
-              :model-value="item.progress"
-              size="50"
-              width="5"
-              class="mr-3"
-              color="amber"
-            >
-              <template #default>{{ item.progress }}%</template>
-            </v-progress-circular>
-            <v-chip
-              v-if="item.status && item.status !== 'Running'"
-              class="mr-3"
-              :color="enums.statuses[item.status].color"
-            >
-              <v-icon :icon="enums.statuses[item.status].icon" start />
-              {{ item.status }}
-            </v-chip>
             <v-chip
               color="red"
               :to="`/projects/${route.params.project_id}/targets/${item.target.id}`"
@@ -68,93 +53,73 @@
             </v-chip>
           </template>
           <template #text>
-            <!-- TODO: show dates in user time zone -> `.toLocaleString(undefined, { hour12: false })`` -->
-            <p v-if="!item.start && item.scheduled_at">
-              <span class="text-medium-emphasis">Scheduled:</span>
-              {{ new Date(item.scheduled_at).toUTCString() }}
-            </p>
-            <p v-if="item.start">
-              <span class="text-medium-emphasis">Time:</span>
-              {{ new Date(item.start).toUTCString() }}
-            </p>
-            <p v-if="item.start && item.end && item.duration">
-              <span class="text-medium-emphasis">Duration:</span>
-              {{ item.duration }}
-            </p>
-            <p v-if="item.repeat_in && item.repeat_time_unit">
-              <span class="text-medium-emphasis">Monitor span:</span>
-              {{ item.repeat_in }} {{ item.repeat_time_unit.toLowerCase() }}
-            </p>
-            <div>
-              <v-divider class="mt-4 mb-4" />
-              <div class="d-flex flex-row justify-center ga-2">
+            <v-container fluid>
+              <v-row>
+                <span class="text-medium-emphasis mr-2">Intensity:</span>
                 <v-chip
-                  class="mt-4"
                   :color="enums.intensities[item.intensity].color"
+                  size="x-small"
                 >
                   {{ item.intensity }}
                 </v-chip>
-                <UtilsCounterButton
-                  :collection="item.wordlists"
-                  tooltip="Wordlists used"
-                  icon="mdi-file-word-box"
-                  link="/toolkit/wordlists"
-                  color="blue-grey"
-                  new-tab
-                />
-                <UtilsCounterButton
-                  :collection="item.notes"
-                  tooltip="Notes"
-                  icon="mdi-notebook"
-                  :link="`/projects/${route.params.project_id}/notes`"
-                  color="indigo-darken-1"
-                  new-tab
-                />
-                <UtilsCounterButton
-                  :collection="item.reports"
-                  tooltip="Reports"
-                  icon="mdi-file-document-multiple"
-                  :link="`/projects/${route.params.project_id}/reports`"
-                  color="blue-grey-darken-1"
-                  new-tab
-                />
-                <UtilsOwner class="mt-4" :entity="item" field="executor" />
-              </div>
-            </div>
+              </v-row>
+              <v-row v-if="!item.start && item.scheduled_at">
+                <span class="text-medium-emphasis mr-2">Scheduled:</span>
+                {{
+                  new Date(item.scheduled_at).toLocaleString(undefined, {
+                    hour12: false,
+                  })
+                }}
+              </v-row>
+              <v-row v-if="item.start">
+                <span class="text-medium-emphasis mr-2">Time:</span>
+                {{
+                  new Date(item.start).toLocaleString(undefined, {
+                    hour12: false,
+                  })
+                }}
+              </v-row>
+              <v-row v-if="item.start && item.end && item.duration">
+                <span class="text-medium-emphasis mr-2">Duration:</span>
+                {{ item.duration }}
+              </v-row>
+              <v-row v-if="item.repeat_in && item.repeat_time_unit">
+                <span class="text-medium-emphasis mr-2">Monitor span:</span>
+                {{ item.repeat_in }} {{ item.repeat_time_unit.toLowerCase() }}
+              </v-row>
+              <v-row>
+                <span class="text-medium-emphasis mr-2">Executor:</span>
+                <UtilsOwner :entity="item" field="executor" size="x-small" />
+              </v-row>
+            </v-container>
+            <v-card-actions>
+              <v-progress-circular
+                v-if="item.status && item.status === 'Running'"
+                :model-value="item.progress"
+                size="50"
+                width="5"
+                class="mr-3"
+                color="amber"
+              >
+                <template #default>{{ item.progress }}%</template>
+              </v-progress-circular>
+              <v-chip
+                v-if="item.status && item.status !== 'Running'"
+                class="mr-3"
+                :color="enums.statuses[item.status].color"
+              >
+                <v-icon :icon="enums.statuses[item.status].icon" start />
+                {{ item.status }}
+              </v-chip>
+              <v-spacer />
+              <TaskButtonLinks :task="item" />
+              <TaskButtonActions
+                :api="api"
+                :task="item"
+                @completed="dataset.loadData(false)"
+              />
+            </v-card-actions>
           </template>
-          <v-card-actions>
-            <BaseButton
-              v-if="item.status && item.progress === 100"
-              icon="mdi-repeat"
-              icon-color="green"
-              tooltip="Re-run"
-              @click.prevent.stop="
-                api
-                  .create({}, item.id, 'repeat/')
-                  .then((response) =>
-                    navigateTo(
-                      `/projects/${route.params.project_id}/scans/${response.id}`,
-                    ),
-                  )
-              "
-            />
-            <UtilsDeleteButton
-              v-if="
-                item.status &&
-                item.progress < 100 &&
-                item.status !== 'Cancelled'
-              "
-              :id="item.id"
-              :api="api"
-              :text="`Task '${item.title}' will be cancelled`"
-              action="Cancel"
-              @click.prevent.stop
-              @completed="dataset.loadData(false)"
-            />
-            <v-spacer />
-            <NoteButton :project="route.params.project_id" :task="item" />
-            <ReportButton :project="route.params.project_id" :task="item" />
-          </v-card-actions>
         </v-card>
       </template>
     </Dataset>
@@ -165,9 +130,9 @@
 definePageMeta({ layout: false });
 const route = useRoute();
 const dates = useDates();
-const utils = useTasks();
 const user = userStore();
-const enums = ref(useEnums());
+const autz = useAutz();
+const enums = useEnums();
 const filters = useFilters();
 const project = ref(null);
 useApi("/api/projects/", true)
@@ -264,7 +229,7 @@ filters
       type: "autocomplete",
       label: "Stage",
       icon: "mdi-stairs",
-      collection: Object.entries(enums.value.stages).map(([k, v]) => {
+      collection: Object.entries(enums.stages).map(([k, v]) => {
         v.name = k;
         return v;
       }),
@@ -276,7 +241,7 @@ filters
       type: "autocomplete",
       label: "Intensity",
       icon: "mdi-volume-high",
-      collection: Object.entries(enums.value.intensities).map(([k, v]) => {
+      collection: Object.entries(enums.intensities).map(([k, v]) => {
         v.name = k;
         return v;
       }),
@@ -318,7 +283,6 @@ filters
 
 function loadData(data: Array<object>): void {
   for (const task of data) {
-    utils.getTitle(task);
     if (task.start && task.end) {
       task.duration = dates.getDuration(task.start, task.end);
     }

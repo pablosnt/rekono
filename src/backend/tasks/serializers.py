@@ -93,22 +93,22 @@ class TaskSerializer(ModelSerializer):
             "progress",
         )
 
-    def get_status(self, instance: Any) -> Status:
+    def get_status(self, instance: Any) -> str:
         for status in [Status.RUNNING, Status.CANCELLED, Status.ERROR]:
             if instance.executions.filter(status=status).count() > 0:
                 return status
-        if (
+        if instance.executions.count() == 0:
+            return Status.REQUESTED
+        elif (
             instance.executions.exclude(
                 status__in=[Status.COMPLETED, Status.SKIPPED]
             ).count()
             == 0
         ):
             return Status.COMPLETED
-        if instance.executions.filter(status=Status.SKIPPED).count() > 0:
-            return Status.SKIPPED
         return Status.REQUESTED
 
-    def get_progress(self, instance: Any) -> int | None:
+    def get_progress(self, instance: Any) -> int:
         total = instance.executions.count()
         return (
             math.ceil(

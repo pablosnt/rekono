@@ -78,7 +78,7 @@
 <script setup lang="ts">
 const props = defineProps({ api: Object, finding: Object });
 const emit = defineEmits(["closeDialog", "completed"]);
-const enums = ref(useEnums());
+const enums = useEnums();
 const validate = useValidation();
 const loading = ref(false);
 const valid = ref(true);

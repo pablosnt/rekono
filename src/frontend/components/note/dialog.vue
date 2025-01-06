@@ -3,7 +3,11 @@
     class="mx-auto"
     elevation="3"
     :subtitle="
-      currentNote ? new Date(currentNote.updated_at).toUTCString() : undefined
+      currentNote
+        ? new Date(currentNote.updated_at).toLocaleString(undefined, {
+            hour12: false,
+          })
+        : undefined
     "
     :loading="loading ? 'red' : false"
   >

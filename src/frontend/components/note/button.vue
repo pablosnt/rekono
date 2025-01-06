@@ -28,6 +28,10 @@
         :vulnerability="vulnerability"
         :exploit="exploit"
         @close-dialog="isActive.value = false"
+        @completed="
+          isActive.value = false;
+          $emit('completed');
+        "
       />
     </template>
   </v-dialog>
@@ -52,4 +56,5 @@ defineProps({
   color: { type: String, required: false, default: undefined },
   size: { type: String, required: false, default: "x-large" },
 });
+defineEmits(["completed"]);
 </script>

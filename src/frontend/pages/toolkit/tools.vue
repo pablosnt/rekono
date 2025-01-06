@@ -91,7 +91,7 @@
 definePageMeta({ layout: false });
 const show = ref(null);
 const dataset = ref(null);
-const enums = ref(useEnums());
+const enums = useEnums();
 const filters = useFilters();
 const api = ref(useApi("/api/tools/", true, "Tool"));
 const filtering = ref([]);
@@ -101,7 +101,7 @@ filters
       type: "autocomplete",
       label: "Stage",
       icon: "mdi-stairs",
-      collection: filters.collectionFromEnum(enums.value.stages),
+      collection: filters.collectionFromEnum(enums.stages),
       fieldValue: "id",
       fieldTitle: "name",
       key: "stage",
@@ -111,7 +111,7 @@ filters
       label: "Intensity",
       icon: "mdi-fire",
       color: "orange",
-      collection: filters.collectionFromEnum(enums.value.intensities),
+      collection: filters.collectionFromEnum(enums.intensities),
       fieldValue: "id",
       fieldTitle: "name",
       key: "intensity",

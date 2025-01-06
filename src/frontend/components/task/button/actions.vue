@@ -13,11 +13,12 @@
         @click.prevent.stop
       />
     </template>
+    <!-- TODO: What happen with these notes authorization? Some of them might be private, but they will be linked anyway? -->
     <NoteButton
-      key="1"
       v-if="autz.isAuditor()"
+      key="1"
       :project="parseInt(route.params.project_id)"
-      :target="target"
+      :task="task"
       variant="flat"
       color="indigo-darken-1"
       icon-color="white"
@@ -27,30 +28,53 @@
     <ReportButton
       key="2"
       :project="parseInt(route.params.project_id)"
-      :target="target"
+      :target="task.target"
+      :task="task"
       variant="flat"
       color="blue-grey-darken-2"
       icon-color="white"
       size="small"
       @completed="$emit('completed')"
     />
-    <UtilsDeleteButton
+    <BaseButton
       key="3"
-      v-if="autz.isAuditor()"
-      :id="target.id"
+      v-if="autz.isAuditor() && task.progress === 100"
+      icon="mdi-repeat"
+      icon-color="white"
+      color="green"
+      size="small"
+      tooltip="Re-run"
+      variant="flat"
+      @click.prevent.stop="
+        api
+          .create({}, task.id, 'repeat/')
+          .then((response) =>
+            navigateTo(
+              `/projects/${route.params.project_id}/scans/${response.id}`,
+            ),
+          )
+      "
+    />
+    <UtilsDeleteButton
+      key="4"
+      v-if="
+        autz.isAuditor() && task.progress < 100 && task.status !== 'Cancelled'
+      "
+      :id="task.id"
       :api="api"
-      :text="`Target '${target.target}' will be removed`"
-      icon="mdi-trash-can"
+      :text="`Task '${task.title}' will be cancelled`"
+      action="Cancel"
+      @click.prevent.stop
+      @completed="$emit('completed')"
       variant="flat"
       color="red"
       icon-color="white"
-      @completed="$emit('completed')"
     />
   </v-speed-dial>
 </template>
 
 <script setup lang="ts">
-defineProps({ target: Object, api: Object });
+defineProps({ task: Object, api: Object });
 defineEmits(["completed"]);
 const route = useRoute();
 const autz = useAutz();

@@ -112,11 +112,17 @@
       <template #text>
         <p v-if="!task.start && task.scheduled_at">
           <span class="text-medium-emphasis">Scheduled:</span>
-          {{ new Date(task.scheduled_at).toUTCString() }}
+          {{
+            new Date(task.scheduled_at).toLocaleString(undefined, {
+              hour12: false,
+            })
+          }}
         </p>
         <p v-if="task.start">
           <span class="text-medium-emphasis">Time:</span>
-          {{ new Date(task.start).toUTCString() }}
+          {{
+            new Date(task.start).toLocaleString(undefined, { hour12: false })
+          }}
         </p>
         <p v-if="task.start && task.end && task.duration">
           <span class="text-medium-emphasis">Duration:</span>
@@ -231,7 +237,12 @@
                       <template #text>
                         <p v-if="execution.start">
                           <span class="text-medium-emphasis">Time:</span>
-                          {{ new Date(execution.start).toUTCString() }}
+                          {{
+                            new Date(execution.start).toLocaleString(
+                              undefined,
+                              { hour12: false },
+                            )
+                          }}
                         </p>
                         <p v-if="execution.start && execution.end">
                           <span class="text-medium-emphasis">Duration:</span>

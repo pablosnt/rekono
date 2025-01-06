@@ -99,7 +99,7 @@ const props = defineProps({
 });
 const emit = defineEmits(["closeDialog", "completed"]);
 const validate = useValidation();
-const enums = ref(useEnums());
+const enums = useEnums();
 const valid = ref(true);
 const loading = ref(false);
 const mode = ref(null);

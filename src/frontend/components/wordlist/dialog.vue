@@ -73,7 +73,7 @@ const props = defineProps({
   edit: { type: Object, required: false, default: null },
 });
 const emit = defineEmits(["closeDialog", "completed"]);
-const enums = ref(useEnums());
+const enums = useEnums();
 const validate = ref(useValidation());
 const valid = ref(true);
 const loading = ref(false);

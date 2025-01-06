@@ -1,5 +1,6 @@
 <template>
   <!-- TODO: make items in target and wordlist selector closables -->
+  <!-- TODO: Add input parameters form to task dialog -->
   <BaseDialog
     title="Execution"
     :loading="loading"

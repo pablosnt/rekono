@@ -2,6 +2,7 @@
   <div class="ma-5">
     <v-container fluid>
       <slot v-if="header" name="prepend-search" />
+      <!-- TODO: Keep Search, Filter and Add button always on the top of the page, and scroll only the data -->
       <v-row v-if="header" justify="center" dense>
         <v-text-field
           v-model="search"

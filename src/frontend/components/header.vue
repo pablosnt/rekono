@@ -48,7 +48,7 @@
 </template>
 
 <script setup lang="ts">
-const enums = ref(useEnums());
+const enums = useEnums();
 const autz = useAutz();
 const user = userStore();
 </script>

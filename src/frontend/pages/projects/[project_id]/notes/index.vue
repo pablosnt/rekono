@@ -16,7 +16,11 @@
         <!-- TODO: Setup the same card height for all of them -->
         <v-card
           :title="item.title"
-          :subtitle="new Date(item.updated_at).toUTCString()"
+          :subtitle="
+            new Date(item.updated_at).toLocaleString(undefined, {
+              hour12: false,
+            })
+          "
           elevation="3"
           class="mx-auto"
           density="compact"
