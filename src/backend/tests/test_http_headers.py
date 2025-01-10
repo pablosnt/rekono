@@ -16,9 +16,11 @@ class HttpHeaderTest(ApiTest):
     expected_str = "10.10.10.10 - User-Agent"
     cases = [
         ApiTestCase(
-            ["admin1", "admin2", "auditor1", "auditor2"], "get", 200, expected=[]
+            ["admin1", "admin2", "auditor1", "auditor2", "reader1", "reader2"],
+            "get",
+            200,
+            expected=[],
         ),
-        ApiTestCase(["reader1", "reader2"], "get", 403),
         ApiTestCase(["admin2", "auditor2", "reader1", "reader2"], "post", 403, target),
         ApiTestCase(["auditor1"], "post", 400, {**target, **invalid_data}),
         ApiTestCase(["auditor1"], "post", 201, target, {"id": 1, **target}),

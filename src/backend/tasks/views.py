@@ -69,34 +69,37 @@ class TaskViewSet(BaseViewSet):
             Response: HTTP response
         """
         task = self.get_object()
+        has_executions = task.executions.exists()
         running_executions = task.executions.filter(
             status__in=[Status.REQUESTED, Status.RUNNING]
         ).all()
-        if running_executions:
-            if task.rq_job_id:
-                self.tasks_queue.cancel_job(task.rq_job_id)
-                self.tasks_queue.delete_job(task.rq_job_id)
-                logger.info(f"[Task] Task {task.id} has been cancelled")
-            connection = django_rq.get_connection("executions")
-            for execution in running_executions:
-                if not CONFIG.testing:  # pragma: no cover
-                    if execution.status == Status.RUNNING:
-                        send_stop_job_command(connection, execution.rq_job_id)
-                    else:
-                        self.executions_queue.cancel_job(execution.rq_job_id)
-                logger.info(f"[Execution] Execution {execution.id} has been cancelled")
-                execution.status = Status.CANCELLED
-                execution.end = timezone.now()
-                execution.save(update_fields=["status", "end"])
-            task.end = timezone.now()
-            task.save(update_fields=["end"])
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        else:
+        if not running_executions and has_executions:
             logger.warning(f"[Task] Task {task.id} can't be cancelled")
             return Response(
                 {"task": f"Task {task.id} can't be cancelled"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+        if task.rq_job_id:
+            self.tasks_queue.cancel_job(task.rq_job_id)
+            self.tasks_queue.delete_job(task.rq_job_id)
+            logger.info(f"[Task] Task {task.id} has been cancelled")
+        connection = django_rq.get_connection("executions")
+        for execution in running_executions:
+            if not CONFIG.testing:  # pragma: no cover
+                if execution.status == Status.RUNNING:
+                    send_stop_job_command(connection, execution.rq_job_id)
+                else:
+                    self.executions_queue.cancel_job(execution.rq_job_id)
+            logger.info(f"[Execution] Execution {execution.id} has been cancelled")
+            execution.status = Status.CANCELLED
+            execution.end = timezone.now()
+            execution.save(update_fields=["status", "end"])
+        if has_executions:
+            task.end = timezone.now()
+            task.save(update_fields=["end"])
+        else:
+            task.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @extend_schema(request=None, responses={200: TaskSerializer})
     @action(detail=True, methods=["POST"])
