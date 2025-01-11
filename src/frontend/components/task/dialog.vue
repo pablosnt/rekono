@@ -1,8 +1,6 @@
 <template>
-  <!-- TODO: make items in target and wordlist selector closables -->
-  <!-- TODO: Add input parameters form to task dialog -->
   <BaseDialog
-    title="Execution"
+    title="Scan"
     :loading="loading"
     width="1000"
     @close-dialog="
@@ -14,6 +12,7 @@
       <v-stepper ref="stepper" v-model="step" editable flat>
         <v-stepper-header>
           <v-stepper-item
+            v-if="project === null || target === null"
             title="Target"
             :value="0"
             icon="mdi-target mdi-18px"
@@ -30,6 +29,7 @@
             :color="step === 1 ? 'red' : undefined"
           />
           <v-stepper-item
+            v-if="(selectedProcess || selectedTool) && intensities.length > 1"
             title="Intensity"
             :value="2"
             icon="mdi-volume-high mdi-18px"
@@ -37,46 +37,59 @@
             :color="step === 2 ? 'red' : undefined"
           />
           <v-stepper-item
-            title="Wordlists"
-            :disabled="
-              (selectedProcess === null ||
-                !selectedProcess.wordlists.supported) &&
-              (selectedTool === null || !selectedTool.wordlists.supported)
+            v-if="
+              (selectedProcess && selectedProcess.wordlists.supported) ||
+              (selectedTool && selectedTool.wordlists.supported)
             "
+            title="Wordlists"
             :value="3"
             icon="mdi-file-word-box mdi-18px"
             edit-icon="mdi-file-word-box mdi-18px"
             :color="step === 3 ? 'red' : undefined"
           />
           <v-stepper-item
-            title="Schedule"
+            v-if="selectedTool && selectedTool.require_input_technology"
+            title="Technologies"
             :value="4"
-            icon="mdi-timer mdi-18px"
-            edit-icon="mdi-timer mdi-18px"
+            :icon="`${enums.findings.Technology.icon} mdi-18px`"
+            :edit-icon="`${enums.findings.Technology.icon} mdi-18px`"
             :color="step === 4 ? 'red' : undefined"
           />
           <v-stepper-item
-            title="Monitor"
+            v-if="selectedTool && selectedTool.require_input_vulnerability"
+            title="Vulnerabilities"
             :value="5"
-            icon="mdi-reload mdi-18px"
-            edit-icon="mdi-reload mdi-18px"
+            :icon="`${enums.findings.Vulnerability.icon} mdi-18px`"
+            :edit-icon="`${enums.findings.Vulnerability.icon} mdi-18px`"
             :color="step === 5 ? 'red' : undefined"
           />
+          <v-stepper-item
+            title="Schedule"
+            :value="6"
+            icon="mdi-timer mdi-18px"
+            edit-icon="mdi-timer mdi-18px"
+            :color="step === 6 ? 'red' : undefined"
+          />
+          <v-stepper-item
+            title="Monitor"
+            :value="7"
+            icon="mdi-reload mdi-18px"
+            edit-icon="mdi-reload mdi-18px"
+            :color="step === 7 ? 'red' : undefined"
+          />
         </v-stepper-header>
-
         <v-stepper-window>
           <v-stepper-window-item transition="fab-transition">
             <v-container fluid>
-              <v-row justify="center" dense>
+              <v-row v-if="project === null" justify="center" dense>
                 <v-col cols="10">
-                  <v-autocomplete
+                  <BaseAutocomplete
                     v-model="selectedProject"
                     clearable
-                    auto-select-first
                     density="comfortable"
                     variant="outlined"
                     label="Project"
-                    :items="projects"
+                    :collection="projects"
                     item-title="name"
                     return-object
                     :rules="[(p) => !!p || 'Project is required']"
@@ -87,15 +100,14 @@
               </v-row>
               <v-row class="mt-3" justify="center" dense>
                 <v-col cols="10">
-                  <v-autocomplete
+                  <BaseAutocomplete
                     v-model="selectedTargets"
                     clearable
                     chips
-                    auto-select-first
                     density="comfortable"
                     variant="outlined"
                     label="Targets"
-                    :items="targets"
+                    :collection="targets"
                     item-title="target"
                     return-object
                     :disabled="selectedProject === null"
@@ -117,48 +129,47 @@
                         "
                       />
                     </template>
-                  </v-autocomplete>
+                  </BaseAutocomplete>
                 </v-col>
               </v-row>
             </v-container>
           </v-stepper-window-item>
-
           <v-stepper-window-item transition="fab-transition">
             <v-container class="fill-height" fluid>
               <v-row
                 :justify="tool === null ? 'space-between' : 'center'"
                 dense
               >
-                <v-col v-if="tool === null" align-self="center" cols="4">
-                  <v-autocomplete
+                <v-col v-if="tool === null" align-self="center" cols="6">
+                  <BaseAutocomplete
                     v-model="selectedProcess"
+                    icon="mdi-robot-angry"
                     clearable
-                    auto-select-first
                     density="comfortable"
                     variant="outlined"
                     label="Process"
-                    :items="processes"
+                    :collection="processes"
                     item-title="name"
                     return-object
                     :rules="[
                       (p) =>
                         p !== null ||
-                        selectedConfiguration !== null ||
+                        selectedTool !== null ||
                         'Process or tool is required',
                     ]"
                     validate-on="blur"
                     @update:model-value="selectProcess()"
                   />
                 </v-col>
-                <v-col align-self="center" :cols="tool !== null ? '10' : '6'">
-                  <v-autocomplete
+                <v-col align-self="center" :cols="tool !== null ? '11' : '6'">
+                  <BaseAutocomplete
                     v-model="selectedTool"
                     clearable
-                    auto-select-first
+                    icon="mdi-rocket"
                     density="comfortable"
                     variant="outlined"
                     label="Tool"
-                    :items="tools"
+                    :collection="tools"
                     item-title="name"
                     return-object
                     :disabled="tool !== null"
@@ -172,12 +183,6 @@
                     @update:model-value="selectTool()"
                   >
                     <template
-                      v-if="selectedTool !== null && selectedTool.icon !== null"
-                      #prepend
-                    >
-                      <v-avatar :image="selectedTool.icon" />
-                    </template>
-                    <template
                       v-if="
                         selectedTool !== null && selectedTool.reference !== null
                       "
@@ -185,17 +190,18 @@
                     >
                       <BaseButton :link="selectedTool.reference" new-tab hide />
                     </template>
-                  </v-autocomplete>
-                  <v-autocomplete
+                  </BaseAutocomplete>
+                  <BaseAutocomplete
+                    v-if="selectedTool !== null"
                     v-model="selectedConfiguration"
                     class="mt-5"
                     clearable
-                    auto-select-first
                     density="comfortable"
                     variant="outlined"
                     label="Configuration"
-                    :items="selectedTool ? selectedTool.configurations : []"
-                    :disabled="selectedTool === null"
+                    :collection="
+                      selectedTool ? selectedTool.configurations : []
+                    "
                     item-title="name"
                     return-object
                     :rules="[
@@ -210,24 +216,19 @@
               </v-row>
             </v-container>
           </v-stepper-window-item>
-
           <v-stepper-window-item transition="fab-transition">
             <v-container fluid>
               <v-row justify="center" dense>
                 <v-col cols="10">
-                  <v-autocomplete
+                  <BaseAutocomplete
                     v-model="intensity"
-                    auto-select-first
+                    icon="mdi-volume-high"
                     density="comfortable"
                     variant="outlined"
                     label="Intensity"
-                    :items="intensities"
+                    :collection="intensities"
                     item-title="name"
                     :color="intensity ? intensity.color : undefined"
-                    :disabled="
-                      (selectedProcess === null && selectedTool === null) ||
-                      (intensities.length === 1 && intensity)
-                    "
                     return-object
                     :rules="[(i) => !!i || 'Intensity is required']"
                     validate-on="input"
@@ -236,80 +237,80 @@
               </v-row>
             </v-container>
           </v-stepper-window-item>
-
           <v-stepper-window-item transition="fab-transition">
             <v-container fluid>
-              <v-row justify="space-between" dense>
-                <v-col cols="3">
-                  <v-autocomplete
+              <v-row justify="center" dense>
+                <v-col cols="6">
+                  <BaseAutocomplete
                     v-model="wordlistFilter"
                     clearable
-                    auto-select-first
+                    chips
+                    multiple
                     density="comfortable"
                     variant="outlined"
                     label="Filter by type"
-                    :items="enums.wordlists"
+                    :definition="enums.wordlists"
                     prepend-inner-icon="mdi-routes"
-                    :disabled="
-                      selectedProcess === null && selectedTool === null
+                    @update:model-value="
+                      selectedWordlists = [];
+                      allWordlists = false;
+                      getWordlists();
                     "
-                    @update:model-value="getWordlists()"
                   />
                 </v-col>
-                <v-col cols="8">
-                  <v-autocomplete
-                    v-model="selectedWordlists"
-                    clearable
-                    auto-select-first
-                    density="comfortable"
-                    variant="outlined"
-                    label="Wordlists"
-                    :items="wordlists"
-                    item-title="name"
-                    return-object
-                    multiple
-                    chips
-                    :disabled="
-                      selectedProcess === null && selectedTool === null
-                    "
-                    :rules="[
-                      (w) =>
-                        ((selectedProcess === null ||
-                          !selectedProcess.wordlists.required) &&
-                          (selectedTool === null ||
-                            !selectedTool.wordlists.required)) ||
-                        w.length > 0 ||
-                        'Wordlist is required',
-                    ]"
-                    validate-on="input"
-                    @click:clear="allWordlists = false"
-                    @update:model-value="
-                      allWordlists =
-                        wordlists.length === selectedWordlists.length
-                    "
-                  >
-                    <template #prepend>
-                      <v-checkbox
-                        v-model="allWordlists"
-                        label="All"
-                        hide-details
-                        @update:model-value="
-                          (value) =>
-                            (selectedWordlists = value ? wordlists : [])
-                        "
-                      />
-                    </template>
-                  </v-autocomplete>
-                </v-col>
+              </v-row>
+              <v-row>
+                <BaseAutocomplete
+                  v-model="selectedWordlists"
+                  clearable
+                  density="comfortable"
+                  variant="outlined"
+                  label="Wordlists"
+                  :collection="wordlists"
+                  item-title="name"
+                  return-object
+                  multiple
+                  chips
+                  :rules="[
+                    (w) =>
+                      ((selectedProcess === null ||
+                        !selectedProcess.wordlists.required) &&
+                        (selectedTool === null ||
+                          !selectedTool.wordlists.required)) ||
+                      w.length > 0 ||
+                      'Wordlist is required',
+                  ]"
+                  validate-on="input"
+                  @click:clear="allWordlists = false"
+                  @update:model-value="
+                    allWordlists = wordlists.length === selectedWordlists.length
+                  "
+                >
+                  <template #prepend>
+                    <v-checkbox
+                      v-model="allWordlists"
+                      label="All"
+                      hide-details
+                      @update:model-value="
+                        (value) => (selectedWordlists = value ? wordlists : [])
+                      "
+                    />
+                  </template>
+                </BaseAutocomplete>
               </v-row>
             </v-container>
           </v-stepper-window-item>
+
+          <!-- TODO: Add input parameters form to task dialog -->
+          <v-stepper-window-item transition="fab-transition" />
+          <v-stepper-window-item transition="fab-transition" />
 
           <v-stepper-window-item transition="fab-transition">
             <v-container fluid>
               <v-row justify="center" class="mb-5" dense>
                 <v-col cols="10">
                   <v-alert
+                    class="text-center"
                     color="info"
                     icon="$info"
                     variant="tonal"
@@ -329,12 +330,11 @@
                     :active="dateMenu"
                     label="Date"
                     prepend-inner-icon="mdi-calendar"
-                    variant="underlined"
+                    variant="outlined"
                     readonly
                   >
                     <v-menu
                       v-model="dateMenu"
-                      :close-on-content-click="false"
                       activator="parent"
                       transition="scale-transition"
                     >
@@ -357,12 +357,11 @@
                     :active="timeMenu"
                     label="Time"
                     prepend-inner-icon="mdi-clock-outline"
-                    variant="underlined"
+                    variant="outlined"
                     readonly
                   >
                     <v-menu
                       v-model="timeMenu"
-                      :close-on-content-click="false"
                       activator="parent"
                       transition="scale-transition"
                     >
@@ -384,21 +383,21 @@
               </v-row>
             </v-container>
           </v-stepper-window-item>
-
           <v-stepper-window-item transition="fab-transition">
             <v-container fluid>
               <v-row justify="center" class="mb-5" dense>
                 <v-col cols="11">
                   <v-alert
+                    class="text-center"
                     color="info"
                     icon="$info"
                     variant="tonal"
-                    text="Configure how often you want to monitor your targets by executing this task periodically"
+                    text="Configure how often you want to execute this scan to monitor your targets"
                   />
                 </v-col>
               </v-row>
               <v-row justify="space-around" dense>
-                <v-col cols="3">
+                <v-col cols="4">
                   <VNumberInput
                     v-model="monitor"
                     control-variant="split"
@@ -410,28 +409,23 @@
                     :min="1"
                   />
                 </v-col>
-                <v-col cols="4">
-                  <v-autocomplete
+                <v-col cols="5">
+                  <BaseAutocomplete
                     v-model="timeUnit"
-                    clearable
-                    auto-select-first
-                    density="comfortable"
                     variant="outlined"
                     label="Time unit"
-                    :items="enums.timeUnits"
+                    :collection="enums.timeUnits"
                   />
                 </v-col>
               </v-row>
             </v-container>
           </v-stepper-window-item>
         </v-stepper-window>
-
         <v-stepper-actions
           @click:next="stepper.next()"
           @click:prev="stepper.prev()"
         />
       </v-stepper>
-
       <UtilsSubmit
         v-if="!loading"
         text="Execute"
@@ -439,7 +433,6 @@
         :disabled="!isValid()"
         prepend-icon="mdi-play"
       />
-
       <UtilsPercentage
         v-if="loading"
         :total="selectedTargets.length"
@@ -487,7 +480,7 @@ const selectedConfiguration = ref(null);
 const intensities = ref([]);
 const intensity = ref(null);
 const wordlists = ref([]);
-const wordlistFilter = ref(null);
+const wordlistFilter = ref(Object.keys(enums.wordlists));
 const selectedWordlists = ref([]);
 const scheduledDate = ref(null);
 const scheduledTime = ref(null);
@@ -525,6 +518,7 @@ function selectProject(): void {
     .list({ project: selectedProject.value.id }, true)
     .then((response) => (targets.value = response.items));
 }
+
 function selectTool(): void {
   if (selectedTool.value) {
     selectedProcess.value = null;
@@ -555,11 +549,20 @@ function selectTool(): void {
     }
   }
 }
+
 function selectProcess(): void {
   if (selectedProcess.value) {
     selectedTool.value = null;
     selectedConfiguration.value = null;
-    defaultIntensities();
+    intensities.value = Object.entries(enums.intensities).map(([k, v]) => {
+      v.name = k;
+      return v;
+    });
+    intensity.value = Object.assign(
+      {},
+      { name: "Normal" },
+      enums.intensities.Normal,
+    );
     if (
       wordlists.value.length === 0 &&
       selectedProcess.value.wordlists.supported
@@ -568,22 +571,13 @@ function selectProcess(): void {
     }
   }
 }
-function defaultIntensities(): void {
-  intensities.value = Object.entries(enums.intensities).map(([k, v]) => {
-    v.name = k;
-    return v;
-  });
-  intensity.value = Object.assign(
-    {},
-    { name: "Normal" },
-    enums.intensities.Normal,
-  );
-}
+
 function getWordlists(): void {
   useApi("/api/wordlists/", true, "Wordlist")
     .list(wordlistFilter.value ? { type: wordlistFilter.value } : {}, true)
     .then((response) => (wordlists.value = response.items));
 }
+
 function getMinDate(): string {
   const date = new Date();
   if (scheduledTime.value) {
@@ -597,6 +591,7 @@ function getMinDate(): string {
   }
   return date.toISOString().split("T")[0];
 }
+
 function getMinTime(): string {
   const date = new Date();
   if (
@@ -608,6 +603,7 @@ function getMinTime(): string {
   }
   return undefined;
 }
+
 function isValid(): boolean {
   return (
     selectedTargets.value.length > 0 &&
@@ -618,9 +614,7 @@ function isValid(): boolean {
       selectedWordlists.value.length > 0)
   );
 }
-function isScansPage(): boolean {
-  return /^\/projects\/[\d]+\/scans$/.test(route.path);
-}
+
 function submit(): void {
   if (isValid()) {
     const body = { intensity: intensity.value.name };
@@ -653,12 +647,11 @@ function submit(): void {
           progress.value++;
           if (errors + progress.value === selectedTargets.value.length) {
             loading.value = false;
-
             if (
               selectedTargets.value.length > 1 ||
               (scheduledDate.value && scheduledTime.value)
             ) {
-              if (isScansPage()) {
+              if (/^\/projects\/[\d]+\/scans$/.test(route.path)) {
                 emit("reload");
               } else {
                 router.push({
@@ -676,6 +669,15 @@ function submit(): void {
           errors++;
           if (errors + progress.value === selectedTargets.value.length) {
             loading.value = false;
+            if (progress.value > 0) {
+              if (/^\/projects\/[\d]+\/scans$/.test(route.path)) {
+                emit("reload");
+              } else {
+                router.push({
+                  path: `/projects/${selectedProject.value.id}/scans`,
+                });
+              }
+            }
           }
         });
     }

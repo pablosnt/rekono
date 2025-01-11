@@ -55,41 +55,58 @@
           <template #text>
             <v-container fluid>
               <v-row>
-                <span class="text-medium-emphasis mr-2">Intensity:</span>
-                <v-chip
-                  :color="enums.intensities[item.intensity].color"
-                  size="x-small"
-                >
-                  {{ item.intensity }}
-                </v-chip>
-              </v-row>
-              <v-row v-if="!item.start && item.scheduled_at">
-                <span class="text-medium-emphasis mr-2">Scheduled:</span>
-                {{
-                  new Date(item.scheduled_at).toLocaleString(undefined, {
-                    hour12: false,
-                  })
-                }}
-              </v-row>
-              <v-row v-if="item.start">
-                <span class="text-medium-emphasis mr-2">Time:</span>
-                {{
-                  new Date(item.start).toLocaleString(undefined, {
-                    hour12: false,
-                  })
-                }}
-              </v-row>
-              <v-row v-if="item.start && item.end && item.duration">
-                <span class="text-medium-emphasis mr-2">Duration:</span>
-                {{ item.duration }}
-              </v-row>
-              <v-row v-if="item.repeat_in && item.repeat_time_unit">
-                <span class="text-medium-emphasis mr-2">Monitor span:</span>
-                {{ item.repeat_in }} {{ item.repeat_time_unit.toLowerCase() }}
-              </v-row>
-              <v-row>
-                <span class="text-medium-emphasis mr-2">Executor:</span>
-                <UtilsOwner :entity="item" field="executor" size="x-small" />
+                <v-col>
+                  <v-container>
+                    <v-row class="mb-1">
+                      <span class="text-medium-emphasis mr-2">Intensity:</span>
+                      <v-chip
+                        :color="enums.intensities[item.intensity].color"
+                        size="x-small"
+                      >
+                        {{ item.intensity }}
+                      </v-chip>
+                    </v-row>
+                    <v-row>
+                      <span class="text-medium-emphasis mr-2">Executor:</span>
+                      <UtilsOwner
+                        :entity="item"
+                        field="executor"
+                        size="x-small"
+                      />
+                    </v-row>
+                  </v-container>
+                </v-col>
+                <v-col>
+                  <v-container>
+                    <v-row v-if="!item.start && item.scheduled_at" class="mb-1">
+                      <span class="text-medium-emphasis mr-2">Scheduled:</span>
+                      {{
+                        new Date(item.scheduled_at).toLocaleString(undefined, {
+                          hour12: false,
+                        })
+                      }}
+                    </v-row>
+                    <v-row v-if="item.start" class="mb-1">
+                      <span class="text-medium-emphasis mr-2">Time:</span>
+                      {{
+                        new Date(item.start).toLocaleString(undefined, {
+                          hour12: false,
+                        })
+                      }}
+                    </v-row>
+                    <v-row v-if="item.start && item.end && item.duration">
+                      <span class="text-medium-emphasis mr-2">Duration:</span>
+                      {{ item.duration }}
+                    </v-row>
+                    <v-row v-if="item.repeat_in && item.repeat_time_unit">
+                      <span class="text-medium-emphasis mr-2"
+                        >Monitor span:</span
+                      >
+                      {{ item.repeat_in }}
+                      {{ item.repeat_time_unit.toLowerCase() }}
+                    </v-row>
+                  </v-container>
+                </v-col>
               </v-row>
             </v-container>
             <v-card-actions>

@@ -19,8 +19,8 @@
       />
     </template>
     <UtilsCounterButton
-      key="1"
       v-if="autz.isAuditor()"
+      key="1"
       :collection="task.wordlists"
       tooltip="Wordlists used"
       icon="mdi-file-word-box"

@@ -2,12 +2,13 @@ from typing import Any
 
 from framework.fields import IntegerChoicesField
 from framework.serializers import LikeSerializer
+from input_types.enums import InputTypeName
 from input_types.serializers import InputTypeSerializer
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
 from tools.enums import Intensity as IntensityEnum
 from tools.enums import Stage
 from tools.fields import StageField
-from tools.models import Configuration, Intensity, Output, Tool
+from tools.models import Argument, Configuration, Intensity, Output, Tool
 
 
 class OutputSerializer(ModelSerializer):
@@ -41,6 +42,8 @@ class ToolSerializer(LikeSerializer):
     intensities = IntensitySerializer(many=True, read_only=True)
     configurations = SimpleConfigurationSerializer(many=True, read_only=True)
     wordlists = SerializerMethodField(read_only=True)
+    require_input_technology = SerializerMethodField(read_only=True)
+    require_input_vulnerability = SerializerMethodField(read_only=True)
 
     class Meta:
         model = Tool
@@ -58,15 +61,29 @@ class ToolSerializer(LikeSerializer):
             "intensities",
             "configurations",
             "wordlists",
+            "require_input_technology",
+            "require_input_vulnerability",
         )
 
     def get_wordlists(self, instance: Any) -> dict[str, bool]:
-        queryset = instance.arguments.filter(inputs__type__name="Wordlist")
+        queryset = Argument.objects.filter(
+            tool=instance, inputs__type__name=InputTypeName.WORDLIST
+        )
         return {
             "required": queryset.filter(required=True).exists()
             or instance.name == "Gobuster",
             "supported": queryset.exists(),
         }
+
+    def get_require_input_technology(self, instance: Any) -> bool:
+        return Argument.objects.filter(
+            tool=instance, inputs__type__name=InputTypeName.TECHNOLOGY, required=True
+        ).exists()
+
+    def get_require_input_vulnerability(self, instance: Any) -> bool:
+        return Argument.objects.filter(
+            tool=instance, inputs__type__name=InputTypeName.VULNERABILITY, required=True
+        ).exists()
 
 
 class SimpleToolSerializer(ModelSerializer):

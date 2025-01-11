@@ -36,8 +36,8 @@
       @completed="$emit('completed')"
     />
     <BaseButton
-      key="3"
       v-if="autz.isAuditor() && task.progress === 100"
+      key="3"
       icon="mdi-repeat"
       icon-color="white"
       color="green"
@@ -55,19 +55,19 @@
       "
     />
     <UtilsDeleteButton
-      key="4"
       v-if="
         autz.isAuditor() && task.progress < 100 && task.status !== 'Cancelled'
       "
       :id="task.id"
+      key="4"
       :api="api"
       :text="`Task '${task.title}' will be cancelled`"
       action="Cancel"
-      @click.prevent.stop
-      @completed="$emit('completed')"
       variant="flat"
       color="red"
       icon-color="white"
+      @click.prevent.stop
+      @completed="$emit('completed')"
     />
   </v-speed-dial>
 </template>

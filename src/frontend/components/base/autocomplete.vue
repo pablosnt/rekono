@@ -1,10 +1,12 @@
 <template>
   <!-- TODO: Migrate all usages of v-autocomplete to this custom implementation -->
+  <!-- TODO: Search doesn't work well because of the getTitle() -->
   <v-autocomplete
     v-model="model"
     auto-select-first
     :items="collection !== null ? collection : Object.keys(definition)"
     :chips="chips"
+    :item-name="itemName"
   >
     <template #prepend-inner>
       <v-avatar
@@ -34,7 +36,7 @@
       />
     </template>
     <template #item="{ props: itemProps, item }">
-      <v-list-item v-bind="itemProps" :title="title(item.raw)">
+      <v-list-item v-bind="itemProps" :title="getTitle(item.raw)">
         <template #prepend>
           <v-avatar
             v-if="properties(item.raw).icon || properties(item.raw).image"
@@ -44,11 +46,17 @@
         </template>
       </v-list-item>
     </template>
+    <template #prepend>
+      <slot name="prepend" />
+    </template>
     <template #selection="{ item }">
-      <p>{{ title(item.raw) }}</p>
+      <p>{{ getTitle(item.raw) }}</p>
+    </template>
+    <template #append>
+      <slot name="append" />
     </template>
     <template v-if="chips" #chip="{ props: itemProps, item }">
-      <v-chip v-bind="itemProps" :text="title(item.raw)" closable>
+      <v-chip v-bind="itemProps" :text="getTitle(item.raw)" closable>
         <template #prepend>
           <v-avatar
             v-if="properties(item.raw).icon || properties(item.raw).image"
@@ -65,6 +73,7 @@
 const props = defineProps({
   definition: { type: Object, required: false, default: null },
   collection: { type: Array, required: false, default: null },
+  itemTitle: { type: String, required: false, default: undefined },
   title: { type: Function, required: false, default: (value) => value },
   icon: { type: String, required: false, default: undefined },
   enforceIcon: { type: Boolean, required: false, default: false },
@@ -73,6 +82,10 @@ const props = defineProps({
 });
 const model = defineModel();
 const prependInner = ref(true);
+
+function getTitle(value: string | object): string {
+  return props.itemTitle ? value[props.itemTitle] : props.title(value);
+}
 
 function properties(item: object, updatePrependInner: boolean = false): object {
   const metadata =

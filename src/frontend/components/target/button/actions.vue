@@ -14,8 +14,8 @@
       />
     </template>
     <NoteButton
-      key="1"
       v-if="autz.isAuditor()"
+      key="1"
       :project="parseInt(route.params.project_id)"
       :target="target"
       variant="flat"
@@ -35,9 +35,9 @@
       @completed="$emit('completed')"
     />
     <UtilsDeleteButton
-      key="3"
       v-if="autz.isAuditor()"
       :id="target.id"
+      key="3"
       :api="api"
       :text="`Target '${target.target}' will be removed`"
       icon="mdi-trash-can"
