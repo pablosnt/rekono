@@ -71,7 +71,8 @@ class OSINTViewSet(TriageFindingViewSet):
             serializer.is_valid(raise_exception=True)
             return Response(
                 TargetSerializer(
-                    instance=serializer.create(serializer.validated_data)
+                    instance=serializer.create(serializer.validated_data),
+                    context={"request": request},
                 ).data,
                 status=status.HTTP_201_CREATED,
             )

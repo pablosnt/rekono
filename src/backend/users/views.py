@@ -74,7 +74,9 @@ class UserViewSet(BaseViewSet):
     def _create(self, serializer: Serializer, request: Request) -> Response:
         serializer = self._is_valid(serializer, request)
         return Response(
-            UserSerializer(instance=serializer.create(serializer.validated_data)).data,
+            self.get_serializer(
+                instance=serializer.create(serializer.validated_data)
+            ).data,
             status=status.HTTP_201_CREATED,
         )
 
