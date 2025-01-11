@@ -100,7 +100,7 @@ class ReportingViewSet(BaseViewSet):
 
     @extend_schema(request=CreateReportSerializer, responses=ReportSerializer)
     def create(self, request: Request, *args: Any, **kwargs: Any):
-        serializer = self.get_serializer(data=request.data)
+        serializer = self.get_serializer(request.data)
         serializer.is_valid(raise_exception=True)
         findings: (
             tuple[dict[int, Any], dict[int, list[int]], list[int]]
@@ -128,7 +128,8 @@ class ReportingViewSet(BaseViewSet):
             ),
         ).start()
         return Response(
-            ReportSerializer(serializer.instance).data, status=status.HTTP_201_CREATED
+            self.get_serializer(instance=serializer.instance).data,
+            status=status.HTTP_201_CREATED,
         )
 
     def destroy(self, request: Request, *args: Any, **kwargs: Any) -> Response:

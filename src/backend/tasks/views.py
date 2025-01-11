@@ -132,5 +132,6 @@ class TaskViewSet(BaseViewSet):
         new_task.input_vulnerabilities.set(task.input_vulnerabilities.all())
         self.tasks_queue.enqueue(new_task)
         return Response(
-            TaskSerializer(instance=new_task).data, status=status.HTTP_201_CREATED
+            TaskSerializer(instance=new_task).data,
+            status=status.HTTP_201_CREATED,
         )

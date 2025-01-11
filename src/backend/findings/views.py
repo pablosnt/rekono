@@ -65,12 +65,15 @@ class OSINTViewSet(TriageFindingViewSet):
             OSINTDataType.DOMAIN,
         ]:
             serializer = TargetSerializer(
-                data={"project": osint.get_project().id, "target": osint.data}
+                data={"project": osint.get_project().id, "target": osint.data},
+                context={"request": request},
             )
             serializer.is_valid(raise_exception=True)
-            target = serializer.create(serializer.validated_data)
             return Response(
-                TargetSerializer(target).data, status=status.HTTP_201_CREATED
+                TargetSerializer(
+                    instance=serializer.create(serializer.validated_data)
+                ).data,
+                status=status.HTTP_201_CREATED,
             )
         return Response(
             {"data_type": "Target creation is not available for this OSINT data type"},

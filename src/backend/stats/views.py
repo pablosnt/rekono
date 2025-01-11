@@ -26,7 +26,8 @@ class RQStatsView(APIView):
     def get(self, request: Request) -> Response:
         return Response(
             RQStatsSerializer(
-                {queue["name"]: queue for queue in get_statistics().get("queues", [])}
+                {queue["name"]: queue for queue in get_statistics().get("queues", [])},
+                context={"request": request},
             ).data,
             status=HTTP_200_OK,
         )

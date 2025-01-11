@@ -74,7 +74,7 @@ class UserViewSet(BaseViewSet):
     def _create(self, serializer: Serializer, request: Request) -> Response:
         serializer = self._is_valid(serializer, request)
         return Response(
-            UserSerializer(serializer.create(serializer.validated_data)).data,
+            UserSerializer(instance=serializer.create(serializer.validated_data)).data,
             status=status.HTTP_201_CREATED,
         )
 
@@ -137,8 +137,12 @@ class UserViewSet(BaseViewSet):
     def update(self, request, *args, **kwargs):
         instance = self._get_object_if_not_current_user(request)
         serializer = self._is_valid(UpdateRoleSerializer, request)
-        instance = serializer.update(instance, serializer.validated_data)
-        return Response(UserSerializer(instance).data, status=status.HTTP_200_OK)
+        return Response(
+            self.get_serializer(
+                instance=serializer.update(instance, serializer.validated_data)
+            ).data,
+            status=status.HTTP_200_OK,
+        )
 
     def destroy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         instance = self._get_object_if_not_current_user(request)
@@ -162,7 +166,9 @@ class UserViewSet(BaseViewSet):
         """
         instance = self._get_object_if_not_current_user(request)
         User.objects.enable_user(instance)
-        return Response(UserSerializer(instance).data, status=status.HTTP_200_OK)
+        return Response(
+            self.get_serializer(instance=instance).data, status=status.HTTP_200_OK
+        )
 
 
 class BaseProfileViewSet(GenericViewSet):
@@ -173,7 +179,7 @@ class BaseProfileViewSet(GenericViewSet):
 
     def _get(self, request: Request) -> Response:
         return Response(
-            self.serializer_class(request.user, many=False).data,
+            self.get_serializer(instance=request.user).data,
             status=status.HTTP_200_OK,
         )
 
@@ -213,7 +219,8 @@ class MfaViewSet(BaseProfileViewSet):
             )
         return Response(
             RegisterMfaSerializer(
-                {"url": User.objects.register_mfa(request.user)}
+                {"url": User.objects.register_mfa(request.user)},
+                context={"request": request},
             ).data,
             status=status.HTTP_200_OK,
         )
