@@ -79,8 +79,8 @@
           />
         </v-stepper-header>
         <v-stepper-window>
-          <v-stepper-window-item transition="fab-transition">
-            <v-container fluid>
+          <v-container fluid>
+            <v-stepper-window-item transition="fab-transition">
               <v-row v-if="project === null" justify="center" dense>
                 <v-col cols="10">
                   <BaseAutocomplete
@@ -132,10 +132,8 @@
                   </BaseAutocomplete>
                 </v-col>
               </v-row>
-            </v-container>
-          </v-stepper-window-item>
-          <v-stepper-window-item transition="fab-transition">
-            <v-container class="fill-height" fluid>
+            </v-stepper-window-item>
+            <v-stepper-window-item transition="fab-transition">
               <v-row
                 :justify="tool === null ? 'space-between' : 'center'"
                 dense
@@ -214,10 +212,8 @@
                   />
                 </v-col>
               </v-row>
-            </v-container>
-          </v-stepper-window-item>
-          <v-stepper-window-item transition="fab-transition">
-            <v-container fluid>
+            </v-stepper-window-item>
+            <v-stepper-window-item transition="fab-transition">
               <v-row justify="center" dense>
                 <v-col cols="10">
                   <BaseAutocomplete
@@ -235,10 +231,8 @@
                   />
                 </v-col>
               </v-row>
-            </v-container>
-          </v-stepper-window-item>
-          <v-stepper-window-item transition="fab-transition">
-            <v-container fluid>
+            </v-stepper-window-item>
+            <v-stepper-window-item transition="fab-transition">
               <v-row justify="center" dense>
                 <v-col cols="6">
                   <BaseAutocomplete
@@ -298,15 +292,88 @@
                   </template>
                 </BaseAutocomplete>
               </v-row>
-            </v-container>
-          </v-stepper-window-item>
+            </v-stepper-window-item>
 
-          <!-- TODO: Add input parameters form to task dialog -->
-          <v-stepper-window-item transition="fab-transition" />
-          <v-stepper-window-item transition="fab-transition" />
+            <!-- TODO: Add input parameters form to task dialog -->
+            <v-stepper-window-item transition="fab-transition">
+              <v-form
+                v-model="validTechnology"
+                @submit.prevent="submitTechnology()"
+              >
+                <v-row justify="space-around" dense>
+                  <v-col cols="5">
+                    <v-text-field
+                      v-model="technologyName"
+                      class="mt-2"
+                      label="Technology"
+                      variant="outlined"
+                      :rules="[
+                        (n) => !!n || 'Name is required',
+                        (n) => validate.name.test(n) || 'Invalid name value',
+                      ]"
+                      validate-on="input"
+                    />
+                  </v-col>
+                  <v-col cols="5">
+                    <v-text-field
+                      v-model="technologyVersion"
+                      class="mt-2"
+                      label="Version"
+                      variant="outlined"
+                      :rules="[
+                        (v) =>
+                          !v ||
+                          validate.name.test(v) ||
+                          'Invalid version value',
+                      ]"
+                      validate-on="input"
+                    />
+                  </v-col>
+                  <v-col cols="1">
+                    <BaseButton
+                      class="mt-2"
+                      type="submit"
+                      icon="mdi-plus-circle"
+                      icon-color="green"
+                      size="x-large"
+                      autofocus
+                      tooltip="Add technology"
+                    />
+                  </v-col>
+                </v-row>
+              </v-form>
+              <v-row justify="center">
+                <v-chip-group v-model="selectedTechnologies" multiple>
+                  <v-chip
+                    v-for="technology in createdTechnologies"
+                    :key="technology.id"
+                    :value="technology.id"
+                    :text="
+                      technology.version
+                        ? `${technology.name} ${technology.version}`
+                        : technology.name
+                    "
+                    variant="outlined"
+                    filter
+                  />
+                  <v-chip
+                    v-for="technology in technologies"
+                    :key="technology.id"
+                    :value="technology.id"
+                    :text="
+                      technology.version
+                        ? `${technology.name} ${technology.version}`
+                        : technology.name
+                    "
+                    variant="outlined"
+                    filter
+                  />
+                </v-chip-group>
+              </v-row>
+            </v-stepper-window-item>
+            <v-stepper-window-item transition="fab-transition" />
 
-          <v-stepper-window-item transition="fab-transition">
-            <v-container fluid>
+            <v-stepper-window-item transition="fab-transition">
               <v-row justify="center" class="mb-5" dense>
                 <v-col cols="10">
                   <v-alert
@@ -381,10 +448,8 @@
                   </v-text-field>
                 </v-col>
               </v-row>
-            </v-container>
-          </v-stepper-window-item>
-          <v-stepper-window-item transition="fab-transition">
-            <v-container fluid>
+            </v-stepper-window-item>
+            <v-stepper-window-item transition="fab-transition">
               <v-row justify="center" class="mb-5" dense>
                 <v-col cols="11">
                   <v-alert
@@ -418,8 +483,8 @@
                   />
                 </v-col>
               </v-row>
-            </v-container>
-          </v-stepper-window-item>
+            </v-stepper-window-item>
+          </v-container>
         </v-stepper-window>
         <v-stepper-actions
           @click:next="stepper.next()"
@@ -457,6 +522,7 @@ const api = useApi("/api/tasks/", true, "Task");
 const enums = useEnums();
 const route = useRoute();
 const router = useRouter();
+const validate = useValidation();
 
 const loading = ref(false);
 const valid = ref(true);
@@ -467,6 +533,15 @@ const allWordlists = ref(false);
 const timeMenu = ref(false);
 const dateMenu = ref(false);
 const progress = ref(0);
+
+const technologyApi = useApi(
+  "/api/parameters/technologies/",
+  true,
+  "Technology",
+);
+const validTechnology = ref(true);
+const technologyName = ref(null);
+const technologyVersion = ref(null);
 
 const projects = ref([]);
 const selectedProject = ref(props.project ? props.project : null);
@@ -482,6 +557,11 @@ const intensity = ref(null);
 const wordlists = ref([]);
 const wordlistFilter = ref(Object.keys(enums.wordlists));
 const selectedWordlists = ref([]);
+const createdTechnologies = ref([]);
+const technologies = ref([]);
+const selectedTechnologies = ref([]);
+const vulnerabilities = ref([]);
+const selectedVulnerabilities = ref([]);
 const scheduledDate = ref(null);
 const scheduledTime = ref(null);
 const monitor = ref(null);
@@ -547,6 +627,12 @@ function selectTool(): void {
     ) {
       getWordlists();
     }
+    if (selectedTool.value.require_input_technology) {
+      getTechnologies();
+    }
+    if (selectedTool.value.require_input_vulnerability) {
+      getVulnerabilities();
+    }
   }
 }
 
@@ -576,6 +662,18 @@ function getWordlists(): void {
   useApi("/api/wordlists/", true, "Wordlist")
     .list(wordlistFilter.value ? { type: wordlistFilter.value } : {}, true)
     .then((response) => (wordlists.value = response.items));
+}
+
+function getTechnologies(): void {
+  technologyApi
+    .list({}, true)
+    .then((response) => (technologies.value = response.items));
+}
+
+function getVulnerabilities(): void {
+  useApi("/api/parameters/vulnerabilities/", true, "Vulnerability")
+    .list({}, true)
+    .then((response) => (vulnerabilities.value = response.items));
 }
 
 function getMinDate(): string {
@@ -615,6 +713,25 @@ function isValid(): boolean {
   );
 }
 
+function submitTechnology(): void {
+  if (validTechnology.value) {
+    technologyApi
+      .create({ name: technologyName.value, version: technologyVersion.value })
+      .then((response) => {
+        if (
+          technologies.value.filter((t) => t.id === response.id).length === 0
+        ) {
+          createdTechnologies.value.push(response);
+        }
+        if (!selectedTechnologies.value.includes(response.id)) {
+          selectedTechnologies.value.push(response.id);
+        }
+        technologyName.value = null;
+        technologyVersion.value = null;
+      });
+  }
+}
+
 function submit(): void {
   if (isValid()) {
     const body = { intensity: intensity.value.name };
@@ -635,6 +752,9 @@ function submit(): void {
     }
     if (selectedWordlists.value.length > 0) {
       body.wordlists = selectedWordlists.value.map((w) => w.id);
+    }
+    if (selectedTechnologies.value.length > 0) {
+      body.input_technologies = selectedTechnologies.value;
     }
     let errors = 0;
     loading.value = true;
