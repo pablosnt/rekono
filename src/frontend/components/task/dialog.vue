@@ -293,8 +293,6 @@
                 </BaseAutocomplete>
               </v-row>
             </v-stepper-window-item>
-
-            <!-- TODO: Add input parameters form to task dialog -->
             <v-stepper-window-item transition="fab-transition">
               <v-form
                 v-model="validTechnology"
@@ -345,18 +343,6 @@
               <v-row justify="center">
                 <v-chip-group v-model="selectedTechnologies" multiple>
                   <v-chip
-                    v-for="technology in createdTechnologies"
-                    :key="technology.id"
-                    :value="technology.id"
-                    :text="
-                      technology.version
-                        ? `${technology.name} ${technology.version}`
-                        : technology.name
-                    "
-                    variant="outlined"
-                    filter
-                  />
-                  <v-chip
                     v-for="technology in technologies"
                     :key="technology.id"
                     :value="technology.id"
@@ -371,8 +357,51 @@
                 </v-chip-group>
               </v-row>
             </v-stepper-window-item>
-            <v-stepper-window-item transition="fab-transition" />
-
+            <v-stepper-window-item transition="fab-transition">
+              <v-form
+                v-model="validVulnerability"
+                @submit.prevent="submitVulnerability()"
+              >
+                <v-row justify="space-around" dense>
+                  <v-col cols="8">
+                    <v-text-field
+                      v-model="vulnerabilityCve"
+                      class="mt-2"
+                      label="CVE"
+                      variant="outlined"
+                      :rules="[
+                        (v) => !!v || 'CVE is required',
+                        (v) => validate.cve.test(v) || 'Invalid CVE value',
+                      ]"
+                      validate-on="input"
+                    />
+                  </v-col>
+                  <v-col cols="2">
+                    <BaseButton
+                      class="mt-2"
+                      type="submit"
+                      icon="mdi-plus-circle"
+                      icon-color="green"
+                      size="x-large"
+                      autofocus
+                      tooltip="Add vulnerability"
+                    />
+                  </v-col>
+                </v-row>
+              </v-form>
+              <v-row justify="center">
+                <v-chip-group v-model="selectedVulnerabilities" multiple>
+                  <v-chip
+                    v-for="vulnerability in vulnerabilities"
+                    :key="vulnerability.id"
+                    :value="vulnerability.id"
+                    :text="vulnerability.cve"
+                    variant="outlined"
+                    filter
+                  />
+                </v-chip-group>
+              </v-row>
+            </v-stepper-window-item>
             <v-stepper-window-item transition="fab-transition">
               <v-row justify="center" class="mb-5" dense>
                 <v-col cols="10">
@@ -518,12 +547,10 @@ const props = defineProps({
   configuration: { type: Object, required: false, default: null },
 });
 const emit = defineEmits(["reload", "closeDialog"]);
-const api = useApi("/api/tasks/", true, "Task");
 const enums = useEnums();
 const route = useRoute();
 const router = useRouter();
 const validate = useValidation();
-
 const loading = ref(false);
 const valid = ref(true);
 const stepper = ref(null);
@@ -533,16 +560,17 @@ const allWordlists = ref(false);
 const timeMenu = ref(false);
 const dateMenu = ref(false);
 const progress = ref(0);
-
+const api = useApi("/api/tasks/", true, "Task");
 const technologyApi = useApi(
   "/api/parameters/technologies/",
   true,
   "Technology",
 );
-const validTechnology = ref(true);
-const technologyName = ref(null);
-const technologyVersion = ref(null);
-
+const vulnerabilityApi = useApi(
+  "/api/parameters/vulnerabilities/",
+  true,
+  "Vulnerability",
+);
 const projects = ref([]);
 const selectedProject = ref(props.project ? props.project : null);
 const targets = ref([]);
@@ -557,9 +585,13 @@ const intensity = ref(null);
 const wordlists = ref([]);
 const wordlistFilter = ref(Object.keys(enums.wordlists));
 const selectedWordlists = ref([]);
-const createdTechnologies = ref([]);
+const validTechnology = ref(true);
+const technologyName = ref(null);
+const technologyVersion = ref(null);
 const technologies = ref([]);
 const selectedTechnologies = ref([]);
+const validVulnerability = ref(true);
+const vulnerabilityCve = ref(null);
 const vulnerabilities = ref([]);
 const selectedVulnerabilities = ref([]);
 const scheduledDate = ref(null);
@@ -628,10 +660,14 @@ function selectTool(): void {
       getWordlists();
     }
     if (selectedTool.value.require_input_technology) {
-      getTechnologies();
+      technologyApi
+        .list({}, true)
+        .then((response) => (technologies.value = response.items));
     }
     if (selectedTool.value.require_input_vulnerability) {
-      getVulnerabilities();
+      vulnerabilityApi
+        .list({}, true)
+        .then((response) => (vulnerabilities.value = response.items));
     }
   }
 }
@@ -662,18 +698,6 @@ function getWordlists(): void {
   useApi("/api/wordlists/", true, "Wordlist")
     .list(wordlistFilter.value ? { type: wordlistFilter.value } : {}, true)
     .then((response) => (wordlists.value = response.items));
-}
-
-function getTechnologies(): void {
-  technologyApi
-    .list({}, true)
-    .then((response) => (technologies.value = response.items));
-}
-
-function getVulnerabilities(): void {
-  useApi("/api/parameters/vulnerabilities/", true, "Vulnerability")
-    .list({}, true)
-    .then((response) => (vulnerabilities.value = response.items));
 }
 
 function getMinDate(): string {
@@ -709,7 +733,13 @@ function isValid(): boolean {
     intensity.value &&
     (!(selectedProcess.value ? selectedProcess.value : selectedTool.value)
       .wordlists.required ||
-      selectedWordlists.value.length > 0)
+      selectedWordlists.value.length > 0) &&
+    (!selectedTool.value ||
+      !selectedTool.value.require_input_technology ||
+      selectedTechnologies.value.length > 0) &&
+    (!selectedTool.value ||
+      !selectedTool.value.require_input_vulnerability ||
+      selectedVulnerabilities.value.length > 0)
   );
 }
 
@@ -721,13 +751,31 @@ function submitTechnology(): void {
         if (
           technologies.value.filter((t) => t.id === response.id).length === 0
         ) {
-          createdTechnologies.value.push(response);
+          technologies.value.unshift(response);
         }
         if (!selectedTechnologies.value.includes(response.id)) {
           selectedTechnologies.value.push(response.id);
         }
         technologyName.value = null;
         technologyVersion.value = null;
+      });
+  }
+}
+
+function submitVulnerability(): void {
+  if (validVulnerability.value) {
+    vulnerabilityApi
+      .create({ cve: vulnerabilityCve.value })
+      .then((response) => {
+        if (
+          vulnerabilities.value.filter((t) => t.id === response.id).length === 0
+        ) {
+          vulnerabilities.value.unshift(response);
+        }
+        if (!selectedVulnerabilities.value.includes(response.id)) {
+          selectedVulnerabilities.value.push(response.id);
+        }
+        vulnerabilityCve.value = null;
       });
   }
 }
@@ -755,6 +803,9 @@ function submit(): void {
     }
     if (selectedTechnologies.value.length > 0) {
       body.input_technologies = selectedTechnologies.value;
+    }
+    if (selectedVulnerabilities.value.length > 0) {
+      body.input_vulnerabilities = selectedVulnerabilities.value;
     }
     let errors = 0;
     loading.value = true;
