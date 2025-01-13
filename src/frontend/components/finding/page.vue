@@ -128,6 +128,7 @@ filters
       skip: props.execution !== null || route.params.task_id,
       disabled: true,
     },
+    // TODO: Add execution filter to link findings from task_id page
     {
       type: "autocomplete",
       cols: 2,

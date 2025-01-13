@@ -30,104 +30,56 @@
           :to="`/projects/${route.params.project_id}/scans/${item.id}`"
         >
           <template #prepend>
-            <v-avatar
-              v-if="item.configuration && item.configuration.tool.icon"
-              :image="item.configuration.tool.icon"
-            />
-            <v-icon v-if="item.process" icon="mdi-robot-angry" color="red" />
-            <v-icon
-              v-if="item.configuration && !item.configuration.tool.icon"
-              icon="mdi-rocket"
-              color="red"
-            />
+            <TaskIcon :task="item" />
           </template>
           <template #append>
-            <v-chip
-              color="red"
-              :to="`/projects/${route.params.project_id}/targets/${item.target.id}`"
-              target="_blank"
-              @click.stop
-            >
-              <v-icon icon="mdi-target" start />
-              {{ item.target.target }}
-            </v-chip>
+            <TaskTarget :task="item" />
           </template>
           <template #text>
-            <v-container fluid>
-              <v-row>
-                <v-col>
-                  <v-container>
-                    <v-row class="mb-1">
-                      <span class="text-medium-emphasis mr-2">Intensity:</span>
-                      <v-chip
-                        :color="enums.intensities[item.intensity].color"
-                        size="x-small"
-                      >
-                        {{ item.intensity }}
-                      </v-chip>
-                    </v-row>
-                    <v-row>
-                      <span class="text-medium-emphasis mr-2">Executor:</span>
-                      <UtilsOwner
-                        :entity="item"
-                        field="executor"
-                        size="x-small"
-                      />
-                    </v-row>
-                  </v-container>
+            <v-container>
+              <v-row justify="space-between" dense>
+                <v-col v-if="!item.start && item.scheduled_at" cols="6">
+                  <span class="text-medium-emphasis mr-2">Scheduled:</span>
+                  {{
+                    new Date(item.scheduled_at).toLocaleString(undefined, {
+                      hour12: false,
+                    })
+                  }}
                 </v-col>
-                <v-col>
-                  <v-container>
-                    <v-row v-if="!item.start && item.scheduled_at" class="mb-1">
-                      <span class="text-medium-emphasis mr-2">Scheduled:</span>
-                      {{
-                        new Date(item.scheduled_at).toLocaleString(undefined, {
-                          hour12: false,
-                        })
-                      }}
-                    </v-row>
-                    <v-row v-if="item.start" class="mb-1">
-                      <span class="text-medium-emphasis mr-2">Time:</span>
-                      {{
-                        new Date(item.start).toLocaleString(undefined, {
-                          hour12: false,
-                        })
-                      }}
-                    </v-row>
-                    <v-row v-if="item.start && item.end && item.duration">
-                      <span class="text-medium-emphasis mr-2">Duration:</span>
-                      {{ item.duration }}
-                    </v-row>
-                    <v-row v-if="item.repeat_in && item.repeat_time_unit">
-                      <span class="text-medium-emphasis mr-2"
-                        >Monitor span:</span
-                      >
-                      {{ item.repeat_in }}
-                      {{ item.repeat_time_unit.toLowerCase() }}
-                    </v-row>
-                  </v-container>
+                <v-col v-if="item.start">
+                  <span class="text-medium-emphasis mr-2">Time:</span>
+                  {{
+                    new Date(item.start).toLocaleString(undefined, {
+                      hour12: false,
+                    })
+                  }}
+                </v-col>
+                <v-col v-if="item.start && item.end && item.duration" cols="6">
+                  <span class="text-medium-emphasis mr-2">Duration:</span>
+                  {{ item.duration }}
+                </v-col>
+                <v-col v-if="item.repeat_in && item.repeat_time_unit" cols="6">
+                  <span class="text-medium-emphasis">Monitor span:</span>
+                  {{ item.repeat_in }}
+                  {{ item.repeat_time_unit.toLowerCase() }}
+                </v-col>
+                <v-col cols="6">
+                  <span class="text-medium-emphasis mr-2">Intensity:</span>
+                  <v-chip
+                    :color="enums.intensities[item.intensity].color"
+                    size="x-small"
+                  >
+                    {{ item.intensity }}
+                  </v-chip>
+                </v-col>
+                <v-col cols="6">
+                  <span class="text-medium-emphasis mr-2">Executor:</span>
+                  <UtilsOwner :entity="item" field="executor" size="x-small" />
                 </v-col>
               </v-row>
             </v-container>
             <v-card-actions>
-              <v-progress-circular
-                v-if="item.status && item.status === 'Running'"
-                :model-value="item.progress"
-                size="50"
-                width="5"
-                class="mr-3"
-                color="amber"
-              >
-                <template #default>{{ item.progress }}%</template>
-              </v-progress-circular>
-              <v-chip
-                v-if="item.status && item.status !== 'Running'"
-                class="mr-3"
-                :color="enums.statuses[item.status].color"
-              >
-                <v-icon :icon="enums.statuses[item.status].icon" start />
-                {{ item.status }}
-              </v-chip>
+              <TaskStatus :task="item" />
               <v-spacer />
               <TaskButtonLinks :task="item" />
               <TaskButtonActions
@@ -299,11 +251,10 @@ filters
   .then((results) => (filtering.value = results));
 
 function loadData(data: Array<object>): void {
-  for (const task of data) {
-    if (task.start && task.end) {
-      task.duration = dates.getDuration(task.start, task.end);
-    }
-  }
+  data.forEach((task) => {
+    task.duration =
+      task.start && task.end ? dates.getDuration(task.start, task.end) : null;
+  });
   if (data.filter((t) => t.status === "Running").length > 0) {
     setTimeout(() => {
       dataset.value.loadData(false);
