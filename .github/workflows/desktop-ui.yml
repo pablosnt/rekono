@@ -71,7 +71,7 @@ jobs:
         run: ren *.${{ matrix.extension }} %DEB_FILENAME%.${{ matrix.extension }}
       
       - name: Upload Desktop UI as GitHub artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ env.DEB_FILENAME }}_${{ matrix.os }}
           path: rekono/frontend/dist_electron/${{ env.DEB_FILENAME }}.${{ matrix.extension }}

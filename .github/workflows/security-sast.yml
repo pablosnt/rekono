@@ -32,7 +32,7 @@ jobs:
       
       - name: Upload Semgrep report as GitHub artifact
         if: ${{ always() }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Semgrep
           path: semgrep_*.json
