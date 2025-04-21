@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Fixed
 
-- Upgrade `psycopg2` version to `2.9.10` ()
+- Upgrade `psycopg2` version to `2.9.10`
 
 
 ## [1.6.6] - 2024-04-25
