@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   postgres:
     restart: always
@@ -37,8 +35,8 @@ services:
   initializer:
     restart: 'no'
     image: rekono-kali:latest
-    command: sh -c "python manage.py migrate && python manage.py createsuperuser --no-input"
-    container_name: initialize
+    command: bash -c "source /code/env/bin/activate && python manage.py migrate && python manage.py createsuperuser --no-input"
+    container_name: initializer
     volumes:
       - rekono:/rekono
       - ./config.yaml:/rekono/config.yaml:ro
@@ -82,7 +80,7 @@ services:
       context: .
       dockerfile: docker/Dockerfile.kali
     image: rekono-kali:latest
-    command: python manage.py rqworker executions-queue
+    command: bash -c "source /code/env/bin/activate && python manage.py rqworker executions-queue"
     hostname: executions-worker
     volumes:
       - rekono:/rekono

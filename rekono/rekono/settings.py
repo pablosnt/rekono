@@ -54,7 +54,7 @@ from rekono.environment import (
 
 # Rekono description
 DESCRIPTION = 'Automation platform that combines different hacking tools to complete pentesting processes'
-VERSION = '1.6.6'                                                               # Rekono version
+VERSION = '1.6.7'                                                               # Rekono version
 TESTING = 'test' in sys.argv                                                    # Tests execution
 
 ################################################################################
@@ -438,7 +438,7 @@ FRONTEND_URL = os.getenv(RKN_FRONTEND_URL, CONFIG.FRONTEND_URL)
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'CET'
+TIME_ZONE = 'Europe/Madrid'
 
 USE_I18N = True
 
