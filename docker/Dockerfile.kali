@@ -4,10 +4,12 @@ FROM kalilinux/kali-last-release
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 ENV OBJC_DISABLE_INITIALIZE_FORK_SAFETY YES
+ENV PYTHONVERSION 3.9.10
 
 # Install requirements
-RUN apt update -y && apt upgrade -y && apt dist-upgrade -y && apt install python3-pip libpq-dev python3-dev libmagic1 libcap2-bin -y
-RUN ln -s /usr/bin/python3 /usr/bin/python
+RUN apt update -y && \
+    apt install python3-pip python3-venv python3-dev python3-virtualenv libpq-dev libmagic1 libcap2-bin libffi-dev wget -y && \
+    ln -s /usr/bin/python3 /usr/bin/python
 
 # Home
 RUN mkdir /rekono
@@ -18,30 +20,39 @@ RUN mkdir /code
 COPY rekono/ /code
 COPY requirements.txt /code
 
-# Install backend dependencies
-RUN pip install -r /code/requirements.txt
+# Python 3.9
+RUN mkdir -p /tmp && \
+    cd /tmp && \
+    wget https://www.python.org/ftp/python/$PYTHONVERSION/Python-$PYTHONVERSION.tgz && \
+    tar zxvf Python-$PYTHONVERSION.tgz && \
+    cd Python-$PYTHONVERSION && \
+    ./configure --prefix=/opt/python$PYTHONVERSION && \
+    make && \
+    make install
 
-# Tools
-RUN apt install nmap dirsearch theharvester nikto sslscan sslyze cmseek zaproxy exploitdb metasploit-framework emailharvester joomscan gitleaks smbmap nuclei gobuster -y
-RUN setcap cap_net_raw,cap_net_admin,cap_net_bind_service+eip $(which nmap)
-RUN git clone https://github.com/fullhunt/log4j-scan /opt/log4j-scan
-RUN git clone https://github.com/fullhunt/spring4shell-scan.git /opt/spring4shell-scan
-RUN git clone https://github.com/internetwache/GitTools.git /opt/GitTools
-RUN pip install -r /opt/log4j-scan/requirements.txt
-RUN pip install -r /opt/spring4shell-scan/requirements.txt
-RUN pip install emailfinder ssh-audit
-
-# Wordlists
-RUN apt install seclists dirb -y
+# Install tools and backend dependencies
+RUN virtualenv -p /opt/python$PYTHONVERSION/bin/python3 /code/env && \
+    . /code/env/bin/activate  && \
+    pip install -U setuptools  && \
+    pip install -r /code/requirements.txt  && \
+    apt install nmap dirsearch theharvester nikto sslscan sslyze cmseek zaproxy exploitdb metasploit-framework emailharvester joomscan gitleaks smbmap nuclei gobuster -y && \
+    setcap cap_net_raw,cap_net_admin,cap_net_bind_service+eip $(which nmap) && \
+    git clone https://github.com/fullhunt/log4j-scan /opt/log4j-scan && \
+    git clone https://github.com/fullhunt/spring4shell-scan.git /opt/spring4shell-scan && \
+    git clone https://github.com/internetwache/GitTools.git /opt/GitTools && \
+    apt install seclists dirb -y && \
+    pip install emailfinder ssh-audit validators  && \
+    pip install -r /opt/log4j-scan/requirements.txt  && \
+    pip install -r /opt/spring4shell-scan/requirements.txt
 
 # System user
-RUN adduser --disabled-password rekono
-RUN chown -R rekono:rekono /code
-RUN chown -R rekono:rekono /rekono
-RUN chown -R rekono:rekono /usr/share/cmseek
-RUN chown -R rekono:rekono /opt/
-RUN chown -R rekono:rekono /usr/share/seclists/
-RUN chown -R rekono:rekono /usr/share/dirb/wordlists/
+RUN adduser --disabled-password rekono && \
+    chown -R rekono:rekono /code && \
+    chown -R rekono:rekono /rekono && \
+    chown -R rekono:rekono /usr/share/cmseek && \
+    chown -R rekono:rekono /opt/ && \
+    chown -R rekono:rekono /usr/share/seclists/ && \
+    chown -R rekono:rekono /usr/share/dirb/wordlists/
 
 # Final system configuration
 USER rekono
