@@ -68,7 +68,7 @@ apt install rekono-kbx
 If you are using **Parrot OS**, you can download the Debian package from the Rekono release:
 
 ```bash
-wget https://github.com/pablosnt/rekono/releases/download/1.6.6/rekono-kbx_1.6.6_amd64.deb && dpkg -i rekono-kbx_1.6.6_amd64.deb || apt -f install -y
+wget https://github.com/pablosnt/rekono/releases/download/1.6.7/rekono-kbx_1.6.7_amd64.deb && dpkg -i rekono-kbx_1.6.7_amd64.deb || apt -f install -y
 ```
 
 > Default credentials are `rekono:rekono`. For security reasons, **password should be changed** the first time you access the account
