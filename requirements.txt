@@ -8,7 +8,7 @@ django-rq==2.4.1
 django-taggit==2.0.0
 drf-spectacular==0.25.1
 pycryptodome==3.19.1
-psycopg2==2.9.5
+psycopg2==2.9.10
 pyjwt==2.4.0
 python-magic==0.4.24
 python-libnmap==0.7.3
