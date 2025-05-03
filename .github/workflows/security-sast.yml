@@ -13,13 +13,10 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: gitleaks/gitleaks-action@4df650038e2eb9f7329218df929c2780866e61a3
+      - uses: gitleaks/gitleaks-action@9c66aa96d2700e2b6aa0f9f7021ae6e5cc7a4375
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITLEAKS_NOTIFY_USER_LIST: "@pablosnt"
-          GITLEAKS_ENABLE_COMMENTS: true
-          GITLEAKS_ENABLE_UPLOAD_ARTIFACT: true
-          GITLEAKS_ENABLE_SUMMARY: true
 
   sast:
     runs-on: ubuntu-latest
