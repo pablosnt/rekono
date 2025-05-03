@@ -30,7 +30,7 @@ jobs:
             path: src/backend
             report: semgrep-backend.json
             arguments: --config=auto --error --json
-          - name: Semgrep CI/CD
+          - name: Semgrep CICD
             tool: semgrep
             version: latest
             path: .github/workflows
