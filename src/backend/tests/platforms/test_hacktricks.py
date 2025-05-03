@@ -11,7 +11,7 @@ base_url = "https://book.hacktricks.wiki/en/"
 def links(*args: Any, **kwargs: Any) -> list[str]:
     return [
         f"{base_url}pentesting-web/web-vulnerabilities-methodology.html",
-        f"{base_url}network-services-pentesting//wordpress.html",
+        f"{base_url}network-services-pentesting/wordpress.html",
         f"{base_url}network-services-pentesting/pentesting-dns",
         f"{base_url}network-services-pentesting/pentesting-ssh",
     ]
