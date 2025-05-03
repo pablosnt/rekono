@@ -34,7 +34,7 @@ class HackTricksTest(RekonoTest):
         return {
             self.host: f"{base_url}linux-hardening/privilege-escalation/index.html",
             self.port: f"{base_url}pentesting-web/web-vulnerabilities-methodology.html",
-            self.technology: f"{base_url}network-services-pentesting/wordpress",
+            self.technology: f"{base_url}network-services-pentesting/wordpress.html",
             self.vulnerability: None,
             self.exploit: None,
         }
