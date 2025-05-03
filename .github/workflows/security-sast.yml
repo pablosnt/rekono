@@ -84,7 +84,7 @@ jobs:
         if: ${{ !cancelled() && (steps.changes.outputs.path == 'true' || github.event_name != 'pull_request') }}
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.tool }}
+          name: ${{ matrix.name }}
           path: ${{ matrix.report }}
           if-no-files-found: warn
       
