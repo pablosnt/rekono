@@ -9,17 +9,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - uses: gitleaks/gitleaks-action@4df650038e2eb9f7329218df929c2780866e61a3
+      - uses: gitleaks/gitleaks-action@9c66aa96d2700e2b6aa0f9f7021ae6e5cc7a4375
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITLEAKS_NOTIFY_USER_LIST: "@pablosnt"
-          GITLEAKS_ENABLE_COMMENTS: true
-          GITLEAKS_ENABLE_UPLOAD_ARTIFACT: true
-          GITLEAKS_ENABLE_SUMMARY: true
 
   sast:
     runs-on: ubuntu-latest
@@ -33,7 +30,7 @@ jobs:
             path: src/backend
             report: semgrep-backend.json
             arguments: --config=auto --error --json
-          - name: Semgrep CI/CD
+          - name: Semgrep CICD
             tool: semgrep
             version: latest
             path: .github/workflows
@@ -54,14 +51,14 @@ jobs:
     name: ${{ matrix.name }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Setup Python 3
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: 3.11
+          python-version: 3.13
       
       - uses: dorny/paths-filter@3c49e64ca26115121162fb767bc6af9e8d059f1a
         id: changes
@@ -85,9 +82,9 @@ jobs:
       
       - name: Upload report as GitHub artifact
         if: ${{ !cancelled() && (steps.changes.outputs.path == 'true' || github.event_name != 'pull_request') }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.tool }}
+          name: ${{ matrix.name }}
           path: ${{ matrix.report }}
           if-no-files-found: warn
       

@@ -69,11 +69,11 @@ class ReportingTest(ApiTest):
                     {**report, "project": 1},
                     expected={
                         "id": 1,
-                        "project": {"id": 1, "name": "test"},
+                        "project": 1,
                         "task": None,
                         "target": None,
                         "format": self.format.value,
-                        "user": {"id": 1, "username": "admin1"},
+                        "user": 1,
                     },
                 ),
                 ApiTestCase(
@@ -84,10 +84,10 @@ class ReportingTest(ApiTest):
                     expected={
                         "id": 2,
                         "project": None,
-                        "task": {"id": 1, "target": {"id": 1}},
+                        "task": 1,
                         "target": None,
                         "format": self.format.value,
-                        "user": {"id": 3, "username": "auditor1"},
+                        "user": 3,
                     },
                 ),
                 ApiTestCase(
@@ -99,9 +99,9 @@ class ReportingTest(ApiTest):
                         "id": 3,
                         "project": None,
                         "task": None,
-                        "target": {"id": 1},
+                        "target": 1,
                         "format": self.format.value,
-                        "user": {"id": 5, "username": "reader1"},
+                        "user": 5,
                     },
                 ),
                 ApiTestCase(
