@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -54,14 +54,14 @@ jobs:
     name: ${{ matrix.name }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Setup Python 3
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: 3.11
+          python-version: 3.13
       
       - uses: dorny/paths-filter@3c49e64ca26115121162fb767bc6af9e8d059f1a
         id: changes
@@ -85,7 +85,7 @@ jobs:
       
       - name: Upload report as GitHub artifact
         if: ${{ !cancelled() && (steps.changes.outputs.path == 'true' || github.event_name != 'pull_request') }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.tool }}
           path: ${{ matrix.report }}
