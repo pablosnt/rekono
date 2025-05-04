@@ -4,7 +4,7 @@ import importlib
 import json
 import threading
 import uuid
-from typing import Any, Dict, List, Optional, Tuple, Type, cast
+from typing import Any, Optional, cast
 from xml.etree import ElementTree as ET  # nosec
 
 from django.db.models import Q, QuerySet
@@ -49,6 +49,7 @@ class ReportingViewSet(BaseViewSet):
     serializer_class = ReportSerializer
     filterset_class = ReportFilter
     permission_classes = [IsAuthenticated, RekonoModelPermission, OwnerPermission]
+    search_fields = ["format", "status"]
     ordering_fields = [
         "id",
         "project",
@@ -63,7 +64,7 @@ class ReportingViewSet(BaseViewSet):
     owner_field = "user"
 
     def _get_project_from_data(
-        self, project_field: str, data: Dict[str, Any]
+        self, project_field: str, data: dict[str, Any]
     ) -> Optional[Project]:
         return (
             cast(Task, data.get("task")).target.project
@@ -99,20 +100,21 @@ class ReportingViewSet(BaseViewSet):
 
     @extend_schema(request=CreateReportSerializer, responses=ReportSerializer)
     def create(self, request: Request, *args: Any, **kwargs: Any):
-        serializer = self.get_serializer_class()(
-            data=request.data, context={"request": request}
-        )
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        findings = (
-            self._get_findings_to_pdf_report(serializer)
-            if serializer.validated_data["format"] == ReportFormat.PDF
-            else self._get_findings_to_report(serializer)
-        )
-        if (isinstance(findings, list) and not findings) or (
-            isinstance(findings, tuple) and not findings[0]
-        ):
+        findings: (
+            tuple[dict[int, Any], dict[int, list[int]], list[int]]
+            | dict[type[Finding], list[Finding]]
+        ) = {}
+        if serializer.validated_data["format"] == ReportFormat.PDF:
+            findings = self._get_findings_to_pdf_report(serializer)
+            count = sum([len(q) for i in findings[0].values() for q in i.values()])
+        else:
+            findings = self._get_findings_to_report(serializer)
+            count = len(sum(findings.values(), []))
+        if count == 0:
             return Response(
-                {"findings": "No findings found with this criteria"},
+                {"findings": "No findings found with this criterion"},
                 status=status.HTTP_404_NOT_FOUND,
             )
         self.perform_create(serializer)
@@ -126,7 +128,8 @@ class ReportingViewSet(BaseViewSet):
             ),
         ).start()
         return Response(
-            ReportSerializer(serializer.instance).data, status=status.HTTP_201_CREATED
+            self.get_serializer(instance=serializer.instance).data,
+            status=status.HTTP_201_CREATED,
         )
 
     def destroy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
@@ -166,7 +169,7 @@ class ReportingViewSet(BaseViewSet):
 
     def _get_findings_to_report(
         self, serializer: ReportSerializer
-    ) -> Dict[Type[Finding], List[Finding]]:
+    ) -> dict[type[Finding], list[Finding]]:
         findings = {}
         models = importlib.import_module("findings.models")
         for finding_type in serializer.validated_finding_types:
@@ -174,11 +177,11 @@ class ReportingViewSet(BaseViewSet):
             query_filter = (
                 {**serializer.validated_filter, **serializer.validated_triage_filter}
                 if hasattr(model, "triage_status")
-                else {**serializer.validated_filter}
+                else serializer.validated_filter
             )
             query = model.objects.filter(**query_filter).all()
             if model == Vulnerability:
-                query = query.order_by("severity")
+                query = query.order_by("-severity")
             findings[model.__name__.lower()] = [
                 {k: v for k, v in model_to_dict(f).items() if k != "executions"}
                 for f in query
@@ -187,8 +190,7 @@ class ReportingViewSet(BaseViewSet):
 
     def _get_findings_to_pdf_report(
         self, serializer: ReportSerializer
-    ) -> Tuple[Dict[int, Any], Dict[int, List[int]], List[int]]:
-        label_index = [s.value for s in reversed(Severity)]
+    ) -> tuple[dict[int, Any], dict[int, list[int]], list[int]]:
         stats = [0] * len(Severity)
         stats_by_target = {}
         findings_by_target = {}
@@ -243,7 +245,7 @@ class ReportingViewSet(BaseViewSet):
                             }
                         )
                         .filter(Q(technology__port__host=host) | Q(port__host=host))
-                        .order_by("severity")
+                        .order_by("-severity")
                         .all(),
                         FindingName.EXPLOIT.value: Exploit.objects.filter(
                             **{
@@ -272,18 +274,17 @@ class ReportingViewSet(BaseViewSet):
             else:
                 for host in findings_by_target[target.id][FindingName.HOST.value]:
                     for vulnerability in host[FindingName.VULNERABILITY.value]:
-                        index = label_index.index(vulnerability.severity)
-                        stats[index] += 1
-                        stats_by_target[target.id][index] += 1
+                        stats[vulnerability.severity - 1] += 1
+                        stats_by_target[target.id][vulnerability.severity - 1] += 1
                     for credential in host[FindingName.CREDENTIAL.value]:
-                        index = label_index.index(
-                            Severity.HIGH.value
-                            if credential.secret
-                            else Severity.LOW.value
-                        )
-                        stats[index] += 1
-                        stats_by_target[target.id][index] += 1
-        return findings_by_target, stats_by_target, stats
+                        severity = Severity.HIGH if credential.secret else Severity.LOW
+                        stats[severity - 1] += 1
+                        stats_by_target[target.id][severity - 1] += 1
+        return (
+            findings_by_target,
+            {k: list(reversed(v)) for k, v in stats_by_target.items()},
+            list(reversed(stats)),
+        )
 
     def _create_report_file(self, report: Report, *findings: Any) -> None:
         filename = f"{str(uuid.uuid4())}.{report.format.lower()}"
@@ -304,13 +305,13 @@ class ReportingViewSet(BaseViewSet):
         self,
         filename: str,
         report: Report,
-        findings: Dict[Type[Finding], List[Finding]],
+        findings: dict[type[Finding], list[Finding]],
     ) -> bool:
         with (CONFIG.generated_reports / filename).open("w") as filepath:
             json.dump(findings, filepath, ensure_ascii=True, indent=4)
         return True
 
-    def _dict_to_xml(self, element: ET.Element, data: Dict[str, Any]) -> ET.Element:
+    def _dict_to_xml(self, element: ET.Element, data: dict[str, Any]) -> ET.Element:
         for key, value in data.items():
             child = ET.Element(key)
             if isinstance(value, dict):
@@ -324,7 +325,7 @@ class ReportingViewSet(BaseViewSet):
         self,
         filename: str,
         report: Report,
-        findings: Dict[Type[Finding], List[Finding]],
+        findings: dict[type[Finding], list[Finding]],
     ) -> bool:
         root = ET.Element("findings")
         for finding_type, finding_list in findings.items():
@@ -350,9 +351,9 @@ class ReportingViewSet(BaseViewSet):
         self,
         filename: str,
         report: Report,
-        findings_by_target: Dict[int, Any],
-        stats_by_target: Dict[int, List[int]],
-        stats: List[int],
+        findings_by_target: dict[int, Any],
+        stats_by_target: dict[int, list[int]],
+        stats: list[int],
     ) -> bool:
         template = get_template(CONFIG.pdf_report_template).render(
             {
@@ -362,9 +363,11 @@ class ReportingViewSet(BaseViewSet):
                     if report.target
                     else report.task.target.project
                 ),
-                "targets": (report.project.targets.all() if not CONFIG.testing else [])
-                if report.project
-                else [report.target or report.task.target],
+                "targets": (
+                    (report.project.targets.all() if not CONFIG.testing else [])
+                    if report.project
+                    else [report.target or report.task.target]
+                ),
                 "findings": findings_by_target,
                 "stats_by_target": stats_by_target,
                 "stats": stats,

@@ -1,5 +1,4 @@
 import copy
-from typing import List
 
 from executions.enums import Status
 from executions.models import Execution
@@ -24,12 +23,12 @@ class BaseQueueTest(QueueTest):
         super().setUp()
         self._setup_fake_tool()
 
-    def _setup_multiple_findings(self, create_ports_and_paths: bool) -> List[Finding]:
+    def _setup_multiple_findings(self, create_ports_and_paths: bool) -> list[Finding]:
         findings = []
         for host_index in range(1, self.number_of_hosts + 1):
             new_host = self._create_finding(
                 Host,
-                {"address": f"10.10.10.{host_index}", "os_type": HostOS.LINUX},
+                {"ip": f"10.10.10.{host_index}", "os_type": HostOS.LINUX},
                 self.execution,
             )
             setattr(self, f"host{host_index}", new_host)
@@ -118,12 +117,11 @@ class BaseQueueTest(QueueTest):
             )
             vulnerabilities.append(
                 InputVulnerability.objects.create(
-                    target=self.target, cve=self.input_vulnerability.cve + f"{index}"
+                    cve=self.input_vulnerability.cve + f"{index}"
                 )
             )
             technologies.append(
                 InputTechnology.objects.create(
-                    target=self.target,
                     name=self.input_technology.name + f"{index}",
                     version=self.input_technology.version,
                 )
@@ -194,7 +192,6 @@ class TasksQueueTest(QueueTest):
         self.assertEqual(task_id, execution.task.id)
         self.assertEqual(execution_id, execution.id)
         self.assertEqual(configuration_id, execution.configuration.id)
-        self.assertEqual(group, execution.group)
         self.assertEqual(status, execution.status)
         self.assertIsNone(execution.start)
 
@@ -204,6 +201,8 @@ class TasksQueueTest(QueueTest):
             target=self.target, configuration=configuration, intensity=Intensity.INSANE
         )
         task.wordlists.add(self.wordlist)
+        task.input_technologies.add(self.input_technology)
+        task.input_vulnerabilities.add(self.input_vulnerability)
         self.queue._consume_tool_task(task)
         self.assertEqual(1, Execution.objects.count())
         self._validate_execution(

@@ -5,7 +5,6 @@ from pathlib import Path
 from typing import Any, Optional
 
 from django.db import models
-
 from framework.models import BaseLike, BaseModel
 from input_types.models import InputType
 from rekono.settings import CONFIG
@@ -28,7 +27,7 @@ class Tool(BaseLike):
     output_format = models.TextField(max_length=5, blank=True, null=True)
     reference = models.TextField(max_length=250, blank=True, null=True)
     icon = models.TextField(max_length=250, blank=True, null=True)
-    defect_dojo_scan_type = models.TextField(max_length=100, blank=True, null=True)
+    defectdojo_scan_type = models.TextField(max_length=100, blank=True, null=True)
 
     def get_parser_class(self) -> Any:
         return self._get_related_class("tools.parsers", self.name)
@@ -60,18 +59,19 @@ class Tool(BaseLike):
         self.save(update_fields=update_fields)
 
     def _parse_version(self) -> Optional[str]:
-        version_regex = r"(?!m)[a-z]?[\d]+\.[\d]+\.[\d]*-?[a-z]*"
+        version_regex = r"(?!m)[a-z]?[\d]+\.[\d]+\.?[\d]*-?[a-z]*"
         if self.version_argument:
             process = subprocess.run(  # nosec
                 [i for i in [self.command, self.script, self.version_argument] if i],
                 capture_output=True,
             )
             if process.returncode == 0:
-                output = (process.stdout or process.stderr).decode("utf-8").lower()
+                output = (process.stdout or process.stderr).decode("utf-8")
                 version = re.search(
                     version_regex,
                     # zaproxy returns the Java version at the first line
                     re.sub("java version [^\s]*", "", output),
+                    flags=re.IGNORECASE,
                 )
                 if version:
                     return version.group()

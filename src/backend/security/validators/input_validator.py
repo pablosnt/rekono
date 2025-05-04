@@ -13,15 +13,15 @@ logger = logging.getLogger()
 
 class Regex(Enum):
     IP_RANGE = r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}-\d{1,3}"
-    NAME = r"[\wÀ-ÿ\s\.\-\[\]()@]{0,120}"
-    TEXT = r"[^;<>/]*"
+    NAME = r"[\wÀ-ÿ\s\.:\-\[\]()@]{0,120}"
+    TEXT = r"[^;<>]*"
     TARGET = r"[\w\d\.:\-/]{1,100}"
-    TARGET_REGEX = r"[\w\d\.,:\-/\.\*\?\+\(\)\\]{1,300}"
+    TARGET_REGEX = r"[\w\d\.,:\-/\*\?\+\(\)\\]{1,300}"
     PATH = r"[\w\.\-_/\\]{0,500}"
     PATH_WITH_QUERYPARAMS = r"[\w\.\-_/\\#?&%$]{0,500}"
     CVE = r"CVE-\d{4}-\d{1,7}"
-    SECRET = r"[\w\./\-=\+,:<>¿?¡!#&$()@%\[\]\{\}\*]{1,500}"
-    INJECTION = r"[;\"&</>$]+"
+    SECRET = r"[\w\s\./\-=\+,:<>¿?¡!#&$()@%\[\]\{\}\*]{1,500}"
+    INJECTION = r"[;\"'&<>$]+"
 
 
 class Validator(RegexValidator):
@@ -62,12 +62,6 @@ class FutureDatetimeValidator(RegexValidator):
     def __call__(self, value: Any) -> None:
         if value <= timezone.now():
             raise ValidationError("Datetime must be future", code=self.code)
-
-
-class TimeAmountValidator(RegexValidator):
-    def __call__(self, value: int) -> None:
-        if value > 1000 or value <= 0:
-            raise ValidationError("Time value is too high", code=self.code)
 
 
 class PasswordValidator:

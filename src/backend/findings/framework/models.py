@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Optional
 
 from django.db import models
 from django.utils import timezone
@@ -6,6 +6,7 @@ from executions.models import Execution
 from findings.enums import TriageStatus
 from framework.models import BaseInput
 from input_types.models import InputType
+from projects.models import Project
 from rekono.settings import AUTH_USER_MODEL
 from security.validators.input_validator import Regex, Validator
 
@@ -14,9 +15,9 @@ class FindingManager(models.Manager):
     def _get_related_findings(
         self,
         finding: Any,
-        filter: Optional[Dict[str, Any]] = None,
+        filter: Optional[dict[str, Any]] = None,
         input_type: Optional[InputType] = None,
-    ) -> List[Any]:
+    ) -> list[Any]:
         related_findings = []
         current_input_type = (
             input_type
@@ -76,8 +77,8 @@ class FindingManager(models.Manager):
         )
 
     def fix(
-        self, findings: Union[Any, models.QuerySet], fixed_by: Optional[Any]
-    ) -> Union[Any, models.QuerySet]:
+        self, findings: Any | models.QuerySet, fixed_by: Optional[Any] = None
+    ) -> Any | models.QuerySet:
         if not findings:
             return findings
         args = {
@@ -97,7 +98,7 @@ class FindingManager(models.Manager):
                 self._update_finding_fix_data(related_finding, **args)
         return updated_finding
 
-    def remove_fix(self, finding: Any, fixed_by: Optional[Any]) -> Any:
+    def remove_fix(self, finding: Any, fixed_by: Optional[Any] = None) -> Any:
         original_fixed_by = finding.fixed_by
         updated_finding = self._update_finding_fix_data(finding, False)
         if fixed_by:
@@ -129,22 +130,22 @@ class Finding(BaseInput):
         blank=True,
         null=True,
     )
-    defect_dojo_id = models.IntegerField(blank=True, null=True)
+    defectdojo_id = models.IntegerField(blank=True, null=True)
     hacktricks_link = models.TextField(max_length=300, blank=True, null=True)
     objects = FindingManager()
-    unique_fields: List[str] = []
+    unique_fields: list[str] = []
 
     class Meta:
         abstract = True
 
-    def get_project(self) -> Any:
+    def get_project(self) -> Project:
         return self.executions.first().task.target.project
 
     @classmethod
     def get_project_field(cls) -> str:
         return "executions__task__target__project"
 
-    def defect_dojo(self) -> Dict[str, Any]:
+    def defectdojo(self) -> dict[str, Any]:
         return {}  # pragma: no cover
 
 

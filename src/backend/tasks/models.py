@@ -1,11 +1,10 @@
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from framework.models import BaseModel
+from parameters.models import InputTechnology, InputVulnerability
 from processes.models import Process
 from rekono.settings import AUTH_USER_MODEL
-from security.validators.input_validator import (
-    FutureDatetimeValidator,
-    TimeAmountValidator,
-)
+from security.validators.input_validator import FutureDatetimeValidator
 from targets.models import Target
 from tasks.enums import TimeUnit
 from tools.enums import Intensity
@@ -41,7 +40,7 @@ class Task(BaseModel):
     repeat_in = models.IntegerField(
         blank=True,
         null=True,
-        validators=[TimeAmountValidator(code="repeat_in")],
+        validators=[MinValueValidator(1), MaxValueValidator(60)],
     )
     # Time unit to apply to the 'repeat in' value
     repeat_time_unit = models.TextField(
@@ -52,7 +51,13 @@ class Task(BaseModel):
     enqueued_at = models.DateTimeField(blank=True, null=True)
     start = models.DateTimeField(blank=True, null=True)
     end = models.DateTimeField(blank=True, null=True)
-    wordlists = models.ManyToManyField(Wordlist, related_name="wordlists", blank=True)
+    wordlists = models.ManyToManyField(Wordlist, related_name="tasks", blank=True)
+    input_technologies = models.ManyToManyField(
+        InputTechnology, related_name="tasks", blank=True
+    )
+    input_vulnerabilities = models.ManyToManyField(
+        InputVulnerability, related_name="tasks", blank=True
+    )
 
     def __str__(self) -> str:
         """Instance representation in text format.

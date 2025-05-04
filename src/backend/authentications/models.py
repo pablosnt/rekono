@@ -1,5 +1,5 @@
 import base64
-from typing import Any, Dict
+from typing import Any
 
 from authentications.enums import AuthenticationType
 from django.db import models
@@ -44,26 +44,26 @@ class Authentication(BaseInput, BaseEncrypted):
             else self.secret
         )
 
-    def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
+    def parse(self, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
         """Get useful information from this instance to be used in tool execution as argument.
 
         Args:
-            accumulated (Dict[str, Any], optional): Information from other instances of the same type. Defaults to {}.
+            accumulated (dict[str, Any], optional): Information from other instances of the same type. Defaults to {}.
 
         Returns:
-            Dict[str, Any]: Useful information for tool executions, including accumulated if setted
+            dict[str, Any]: Useful information for tool executions, including accumulated if setted
         """
         return {
-            InputKeyword.COOKIE_NAME.name.lower(): self.name
-            if self.type == AuthenticationType.COOKIE
-            else None,
+            InputKeyword.COOKIE_NAME.name.lower(): (
+                self.name if self.type == AuthenticationType.COOKIE else None
+            ),
             InputKeyword.SECRET.name.lower(): self.secret,
             InputKeyword.CREDENTIAL_TYPE.name.lower(): self.type,
             InputKeyword.CREDENTIAL_TYPE_LOWER.name.lower(): self.type.lower(),
             InputKeyword.TOKEN.name.lower(): self.get_token(),
-            InputKeyword.USERNAME.name.lower(): self.name
-            if self.type == AuthenticationType.BASIC
-            else None,
+            InputKeyword.USERNAME.name.lower(): (
+                self.name if self.type == AuthenticationType.BASIC else None
+            ),
         }
 
     def __str__(self) -> str:

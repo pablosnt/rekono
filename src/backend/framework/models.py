@@ -1,5 +1,5 @@
 import importlib
-from typing import Any, Callable, Dict, List, Optional, cast
+from typing import Any, Callable, Optional, cast
 
 import requests
 import urllib3
@@ -13,7 +13,7 @@ class BaseModel(models.Model):
     class Meta:
         abstract = True
 
-    def get_project(self) -> Any:
+    def get_project(self) -> Any | list[Any]:
         filter_field = self.__class__.get_project_field()
         if filter_field:
             project = self
@@ -23,6 +23,7 @@ class BaseModel(models.Model):
                 else:
                     return None
             return project
+        return None
 
     @classmethod
     def get_project_field(cls) -> str:
@@ -57,7 +58,7 @@ class BaseEncrypted(BaseModel):
     _encrypted_field = "_secret"
 
     @property
-    def secret(self) -> str:
+    def secret(self) -> str | None:
         return (
             (
                 self._encryptor.decrypt(getattr(self, self._encrypted_field))
@@ -75,9 +76,11 @@ class BaseEncrypted(BaseModel):
             setattr(
                 self,
                 self._encrypted_field,
-                self._encryptor.encrypt(value)
-                if self._encryptor and value is not None
-                else value,
+                (
+                    self._encryptor.encrypt(value)
+                    if self._encryptor and value is not None
+                    else value
+                ),
             )
 
 
@@ -100,7 +103,7 @@ class BaseInput(BaseModel):
             self.contains = contains
             self.processor = processor
 
-    filters: List[Filter] = []
+    filters: list[Filter] = []
 
     def _clean_path(self, value: str) -> str:
         return f"/{value}" if len(value) > 1 and value[0] != "/" else value
@@ -110,7 +113,7 @@ class BaseInput(BaseModel):
         host: str,
         port: Optional[int] = None,
         endpoint: str = "",
-        protocols: List[str] = ["http", "https"],
+        protocols: list[str] = ["http", "https"],
     ) -> Optional[str]:
         """Get a HTTP or HTTPS URL from host, port and endpoint.
 
@@ -118,7 +121,7 @@ class BaseInput(BaseModel):
             host (str): Host to include in the URL
             port (int, optional): Port to include in the URL. Defaults to None.
             endpoint (str, optional): Endpoint to include in the URL. Defaults to ''.
-            protocols (List[str], optional): Protocol list to check. Defaults to ['http', 'https'].
+            protocols (list[str], optional): Protocol list to check. Defaults to ['http', 'https'].
 
         Returns:
             Optional[str]: [description]
@@ -157,7 +160,7 @@ class BaseInput(BaseModel):
         """Check if this instance is valid based on input filter.
 
         Args:
-            input (Any): Tool input whose filter will be applied
+            input (any): Tool input whose filter will be applied
 
         Returns:
             bool: Indicate if this instance match the input filter or not
@@ -208,16 +211,16 @@ class BaseInput(BaseModel):
                         return True
         return False
 
-    def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
+    def parse(self, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
         """Get useful information from this instance to be used in tool execution as argument.
 
         To be implemented by subclasses.
 
         Args:
-            accumulated (Dict[str, Any], optional): Information from other instances of the same type. Defaults to {}.
+            accumulated (dict[str, Any], optional): Information from other instances of the same type. Defaults to {}.
 
         Returns:
-            Dict[str, Any]: Useful information for tool executions, including accumulated if setted
+            dict[str, Any]: Useful information for tool executions, including accumulated if setted
         """
         return {}  # pragma: no cover
 

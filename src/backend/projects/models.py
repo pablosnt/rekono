@@ -1,13 +1,10 @@
-from typing import Any
+from typing import Self
 
 from django.db import models
-from taggit.managers import TaggableManager
-
 from framework.models import BaseModel
 from rekono.settings import AUTH_USER_MODEL
 from security.validators.input_validator import Regex, Validator
-
-# Create your models here.
+from taggit.managers import TaggableManager
 
 
 class Project(BaseModel):
@@ -39,7 +36,7 @@ class Project(BaseModel):
         """
         return self.name
 
-    def get_project(self) -> Any:
+    def get_project(self) -> Self:
         """Get the related project for the instance. This will be used for authorization purposes.
 
         Returns:

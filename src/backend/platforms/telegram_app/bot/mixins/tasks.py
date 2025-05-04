@@ -1,9 +1,8 @@
-from telegram import Update
-from telegram.ext import CallbackContext, ConversationHandler
-
 from platforms.telegram_app.bot.enums import Context
 from platforms.telegram_app.bot.mixins.framework import BaseMixin
 from tasks.serializers import TaskSerializer
+from telegram import Update
+from telegram.ext import CallbackContext, ConversationHandler
 
 
 class TaskMixin(BaseMixin):
@@ -51,6 +50,12 @@ Are you sure?
                 process = self._get_context_value(context, Context.PROCESS)
                 configuration = self._get_context_value(context, Context.CONFIGURATION)
                 wordlist = self._get_context_value(context, Context.WORDLIST)
+                input_technology = self._get_context_value(
+                    context, Context.INPUT_TECHNOLOGY
+                )
+                input_vulnerability = self._get_context_value(
+                    context, Context.INPUT_VULNERABILITY
+                )
                 data = {
                     "target_id": target.id if target else None,
                     "intensity": self._get_context_value(
@@ -58,6 +63,12 @@ Are you sure?
                     ).capitalize(),
                     "executor": chat.user,
                     "wordlists": [wordlist.id] if wordlist else [],
+                    "input_technologies": (
+                        [input_technology.id] if input_technology else []
+                    ),
+                    "input_vulnerabilities": (
+                        [input_vulnerability.id] if input_vulnerability else []
+                    ),
                 }
                 if process:
                     data["process_id"] = process.id

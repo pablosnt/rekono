@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Callable, List
+from typing import Any, Callable
 from urllib.parse import urlparse
 
 import requests
@@ -30,13 +30,18 @@ class BaseIntegration(BasePlatform):
         retries = Retry(
             total=10,
             backoff_factor=1,
-            status_forcelist=[403, 429, 500, 502, 503, 504, 599],
+            status_forcelist=[429, 500, 502, 503, 504, 599],
         )
         session.mount(f"{urlparse(url).scheme}://", HTTPAdapter(max_retries=retries))
         return session
 
     def _request(
-        self, method: Callable, url: str, json: bool = True, **kwargs: Any
+        self,
+        method: Callable,
+        url: str,
+        json: bool = True,
+        trigger_exception: bool = True,
+        **kwargs: Any,
     ) -> Any:
         try:
             response = method(url, **kwargs)
@@ -45,16 +50,17 @@ class BaseIntegration(BasePlatform):
         logger.info(
             f"[{self.__class__.__name__}] {method.__name__.upper()} {urlparse(url).path} > HTTP {response.status_code}"
         )
-        response.raise_for_status()
+        if trigger_exception:
+            response.raise_for_status()
         return response.json() if json else response
 
     def is_enabled(self) -> bool:
         return self.integration.enabled if self.integration else False
 
-    def _process_findings(self, execution: Execution, findings: List[Finding]) -> None:
+    def _process_findings(self, execution: Execution, findings: list[Finding]) -> None:
         pass
 
-    def process_findings(self, execution: Execution, findings: List[Finding]) -> None:
+    def process_findings(self, execution: Execution, findings: list[Finding]) -> None:
         if not self.is_enabled():
             return
         self._process_findings(execution, findings)
@@ -66,20 +72,20 @@ class BaseNotification(BasePlatform):
     def is_enabled(self, user: Any) -> bool:
         return getattr(user, self.enable_field)
 
-    def _notify(self, users: List[Any], *args: Any, **kwargs: Any) -> None:
+    def _notify(self, users: list[Any], *args: Any, **kwargs: Any) -> None:
         pass
 
-    def _notify_if_available(self, users: List[Any], *args: Any, **kwargs: Any) -> None:
+    def _notify_if_available(self, users: list[Any], *args: Any, **kwargs: Any) -> None:
         if self.is_available():
             self._notify(users, *args, **kwargs)
 
-    def _notify_if_enabled(self, users: List[Any], *args: Any, **kwargs: Any) -> None:
+    def _notify_if_enabled(self, users: list[Any], *args: Any, **kwargs: Any) -> None:
         if self.is_available():
             for user in users:
                 if self.is_enabled(user):
                     self._notify([user], *args, **kwargs)
 
-    def _get_users_to_notify_execution(self, execution: Execution) -> List[Any]:
+    def _get_users_to_notify_execution(self, execution: Execution) -> list[Any]:
         users = set()
         if (
             execution.task.executor.notification_scope != Notification.DISABLED
@@ -96,18 +102,18 @@ class BaseNotification(BasePlatform):
         )
         return list(users)
 
-    def _get_users_to_notify_alert(self, alert: Alert) -> List[Any]:
-        return alert.suscribers.filter(**{self.enable_field: True}).all()
+    def _get_users_to_notify_alert(self, alert: Alert) -> list[Any]:
+        return alert.subscribers.filter(**{self.enable_field: True}).all()
 
     def _notify_execution(
-        self, users: List[Any], execution: Execution, findings: List[Finding]
+        self, users: list[Any], execution: Execution, findings: list[Finding]
     ) -> None:
         pass
 
-    def _notify_alert(self, users: List[Any], alert: Alert, finding: Finding) -> None:
+    def _notify_alert(self, users: list[Any], alert: Alert, finding: Finding) -> None:
         pass
 
-    def process_findings(self, execution: Execution, findings: List[Finding]) -> None:
+    def process_findings(self, execution: Execution, findings: list[Finding]) -> None:
         if not self.is_available():
             return
         users = self._get_users_to_notify_execution(execution)
@@ -117,5 +123,5 @@ class BaseNotification(BasePlatform):
         if not self.is_available():
             return
         self._notify_alert(
-            alert.suscribers.filter(**{self.enable_field: True}).all(), alert, finding
+            alert.subscribers.filter(**{self.enable_field: True}).all(), alert, finding
         )

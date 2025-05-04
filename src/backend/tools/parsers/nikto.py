@@ -18,9 +18,11 @@ class Nikto(BaseParser):
                 self.create_finding(
                     Vulnerability,
                     name=description,
-                    description=f"[{method} {endpoint}] {description}"
-                    if endpoint
-                    else f"[{method}] {description}",
+                    description=(
+                        f"[{method} {endpoint}] {description}"
+                        if endpoint
+                        else f"[{method}] {description}"
+                    ),
                     severity=Severity.MEDIUM,
                     osvdb=f"OSVDB-{osvdb_id}" if osvdb_id and osvdb_id != "0" else None,
                 )

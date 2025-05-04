@@ -27,11 +27,11 @@ jobs:
       DEB_FILENAME: RekonoUI
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: 16
       
@@ -71,7 +71,7 @@ jobs:
         run: ren *.${{ matrix.extension }} ${{ env.DEB_FILENAME }}.${{ matrix.extension }}
       
       - name: Upload Desktop UI as GitHub artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ env.DEB_FILENAME }}_${{ matrix.os }}
           path: src/frontend/dist_electron/${{ env.DEB_FILENAME }}.${{ matrix.extension }}

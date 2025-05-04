@@ -1,8 +1,7 @@
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 from django.db import models
-
 from framework.enums import InputKeyword
 from framework.models import BaseInput, BaseLike
 from rekono.settings import AUTH_USER_MODEL
@@ -50,14 +49,14 @@ class Wordlist(BaseInput, BaseLike):
             return super().filter(input, target) and check
         return check
 
-    def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
+    def parse(self, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
         """Get useful information from this instance to be used in tool execution as argument.
 
         Args:
-            accumulated (Dict[str, Any], optional): Information from other instances of the same type. Defaults to {}.
+            accumulated (dict[str, Any], optional): Information from other instances of the same type. Defaults to {}.
 
         Returns:
-            Dict[str, Any]: Useful information for tool executions, including accumulated if setted
+            dict[str, Any]: Useful information for tool executions, including accumulated if setted
         """
         return {InputKeyword.WORDLIST.name.lower(): self.path}
 

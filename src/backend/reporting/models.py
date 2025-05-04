@@ -1,5 +1,3 @@
-from typing import Any
-
 from django.db import models
 from framework.models import BaseModel
 from projects.models import Project
@@ -29,7 +27,7 @@ class Report(BaseModel):
     )
     date = models.DateTimeField(auto_now_add=True)
 
-    def get_project(self) -> Any:
+    def get_project(self) -> Project:
         return (self.task or self.target or self.project).get_project()
 
     def __str__(self) -> str:

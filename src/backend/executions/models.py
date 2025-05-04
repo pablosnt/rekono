@@ -1,5 +1,4 @@
 from django.db import models
-
 from executions.enums import Status
 from framework.models import BaseModel
 from tasks.models import Task
@@ -14,7 +13,6 @@ class Execution(BaseModel):
     task = models.ForeignKey(
         Task, related_name="executions", on_delete=models.CASCADE, blank=True, null=True
     )
-    group = models.IntegerField(default=1)
     # Job Id in the executions queue
     rq_job_id = models.TextField(max_length=50, blank=True, null=True)
     configuration = models.ForeignKey(
@@ -30,7 +28,8 @@ class Execution(BaseModel):
     enqueued_at = models.DateTimeField(blank=True, null=True)
     start = models.DateTimeField(blank=True, null=True)
     end = models.DateTimeField(blank=True, null=True)
-    defect_dojo_test_id = models.IntegerField(blank=True, null=True)
+    hash = models.TextField(max_length=128, blank=True, null=True)
+    defectdojo_test_id = models.IntegerField(blank=True, null=True)
 
     def __str__(self) -> str:
         """Instance representation in text format.

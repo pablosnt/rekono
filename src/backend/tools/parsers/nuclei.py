@@ -1,5 +1,5 @@
 import json
-from typing import Dict, cast
+from typing import cast
 
 from findings.enums import Severity
 from findings.models import Credential, Technology, Vulnerability
@@ -41,9 +41,11 @@ class Nuclei(BaseParser):
                     Vulnerability,
                     name=name.strip(),
                     description=description.strip() if description else None,
-                    severity=cast(Dict[str, str], Severity)[severity.upper()]
-                    if severity
-                    else Severity.INFO,
+                    severity=(
+                        cast(dict[str, str], Severity)[severity.upper()]
+                        if severity
+                        else Severity.INFO
+                    ),
                     cve=cve.upper() if cve else None,
                     cwe=cwe[0].upper() if cwe else None,
                     reference=reference[0] if reference else None,

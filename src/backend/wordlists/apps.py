@@ -1,10 +1,9 @@
 import os
 from pathlib import Path
-from typing import Any, List
+from typing import Any
 
 from django.apps import AppConfig
 from django.db.models.signals import post_migrate
-
 from framework.apps import BaseApp
 
 
@@ -32,7 +31,7 @@ class WordlistsConfig(BaseApp, AppConfig):
                     wordlist.size = len(wordlist_file.readlines())
                     wordlist.save(update_fields=["size"])
 
-    def _get_models(self) -> List[Any]:
+    def _get_models(self) -> list[Any]:
         from wordlists.models import Wordlist
 
         return [Wordlist]
