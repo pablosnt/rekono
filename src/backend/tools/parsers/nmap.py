@@ -31,7 +31,7 @@ class Nmap(BaseParser):
                     pass
             host = self.create_finding(
                 Host,
-                address=nmap_host.address,
+                ip=nmap_host.address,
                 os=selected_os.name if selected_os else None,
                 os_type=os_type,
             )

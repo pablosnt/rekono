@@ -53,28 +53,34 @@ class OSINT(TriageFinding):
 
 
 class Host(Finding):
-    address = models.TextField(max_length=30)
+    ip = models.TextField(max_length=30)
+    domain = models.TextField(max_length=500, blank=True, null=True)
     # OS full specification
     os = models.TextField(max_length=250, blank=True, null=True)
     os_type = models.TextField(
         max_length=10, choices=HostOS.choices, default=HostOS.OTHER
     )
+    # Geolocation
+    country = models.TextField(max_length=100, blank=True, null=True)
+    city = models.TextField(max_length=100, blank=True, null=True)
+    latitude = models.FloatField(blank=True, null=True)
+    longitude = models.FloatField(blank=True, null=True)
 
-    unique_fields = ["address"]
-    filters = [Finding.Filter(TargetType, "address", lambda a: Target.get_type(a))]
+    unique_fields = ["ip"]
+    filters = [Finding.Filter(TargetType, "ip", lambda a: Target.get_type(a))]
 
     def parse(self, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
         return {
-            InputKeyword.TARGET.name.lower(): self.address,
-            InputKeyword.HOST.name.lower(): self.address,
-            InputKeyword.URL.name.lower(): self._get_url(self.address),
+            InputKeyword.TARGET.name.lower(): self.ip,
+            InputKeyword.HOST.name.lower(): self.ip,
+            InputKeyword.URL.name.lower(): self._get_url(self.ip),
         }
 
     def defectdojo(self) -> dict[str, Any]:
         return {
             "title": "Host discovered",
             "description": " - ".join(
-                [field for field in [self.address, self.os_type] if field]
+                [field for field in [self.ip, self.os_type] if field]
             ),
             "severity": Severity.INFO,
             "date": (
@@ -83,7 +89,7 @@ class Host(Finding):
         }
 
     def __str__(self) -> str:
-        return self.address
+        return self.ip
 
 
 class Port(Finding):
@@ -119,10 +125,10 @@ class Port(Finding):
         if self.host:
             output.update(
                 {
-                    InputKeyword.TARGET.name.lower(): f"{self.host.address}:{self.port}",
-                    InputKeyword.HOST.name.lower(): self.host.address,
+                    InputKeyword.TARGET.name.lower(): f"{self.host.ip}:{self.port}",
+                    InputKeyword.HOST.name.lower(): self.host.ip,
                     InputKeyword.URL.name.lower(): self._get_url(
-                        self.host.address, self.port
+                        self.host.ip, self.port
                     ),
                 }
             )
@@ -133,9 +139,7 @@ class Port(Finding):
         return {
             "title": "Port discovered",
             "description": (
-                f"Host: {self.host.address}\n{description}"
-                if self.host
-                else description
+                f"Host: {self.host.ip}\n{description}" if self.host else description
             ),
             "severity": Severity.INFO,
             "date": (
@@ -190,7 +194,7 @@ class Path(Finding):
             {
                 **self.port.parse(accumulated),
                 InputKeyword.URL.name.lower(): self._get_url(
-                    self.port.host.address, self.port.port, path
+                    self.port.host.ip, self.port.port, path
                 ),
             }
             if self.port
@@ -205,9 +209,7 @@ class Path(Finding):
         return {
             "protocol": self.port.service if self.port else None,
             "host": (
-                self.port.host.address
-                if self.port and self.port.host
-                else target.target
+                self.port.host.ip if self.port and self.port.host else target.target
             ),
             "port": self.port.port if self.port else None,
             "path": self.path,
@@ -221,7 +223,7 @@ class Path(Finding):
         if self.port:
             description = f"Port: {self.port.port}\n{description}"
             if self.port.host:
-                description = f"Host: {self.port.host.address}\n{description}"
+                description = f"Host: {self.port.host.ip}\n{description}"
         return {
             "title": "Path discovered",
             "description": description,

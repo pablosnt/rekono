@@ -147,7 +147,7 @@
 
                         {% if items.Host %}
                             {% for h in items.Host %}
-                                <h3>{{ h.Host.address }}</h3>
+                                <h3>{{ h.Host.ip}}</h3>
                                 <p class="relevant">[{{ h.Host.os_type }}] {{ h.Host.os|default_if_none:"Unknown OS" }}</p>
                                 {% if h.Port %}
                                     <h4>Ports & Technologies</h4>

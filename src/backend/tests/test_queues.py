@@ -28,7 +28,7 @@ class BaseQueueTest(QueueTest):
         for host_index in range(1, self.number_of_hosts + 1):
             new_host = self._create_finding(
                 Host,
-                {"address": f"10.10.10.{host_index}", "os_type": HostOS.LINUX},
+                {"ip": f"10.10.10.{host_index}", "os_type": HostOS.LINUX},
                 self.execution,
             )
             setattr(self, f"host{host_index}", new_host)

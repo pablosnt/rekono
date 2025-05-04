@@ -98,7 +98,7 @@
                     <tbody>
                         {% for h in host %}
                             <tr>
-                                <td><strong>{{ h.address }}</strong></td>
+                                <td><strong>{{ h.ip }}</strong></td>
                                 <td>{{ h.os }}</td>
                                 <td>{{ h.os_type }}</td>
                             </tr>
@@ -123,7 +123,7 @@
                         {% for p in port %}
                             <tr>
                                 {% if p.host %}
-                                    <td><strong>{{ p.host.address }}</strong></td>
+                                    <td><strong>{{ p.host.ip }}</strong></td>
                                 {% else %}
                                     <td></td>
                                 {% endif %}
@@ -152,7 +152,7 @@
                         {% for p in path %}
                             <tr>
                                 {% if p.port and p.port.host %}
-                                    <td><strong>{{ p.port.host.address }} - {{ p.port.port }}</strong></td>
+                                    <td><strong>{{ p.port.host.ip }} - {{ p.port.port }}</strong></td>
                                 {% elif p.port %}
                                     <td><strong>{{ p.port.port }}</strong></td>
                                 {% else %}
@@ -182,7 +182,7 @@
                         {% for t in technology %}
                             <tr>
                                 {% if t.port and t.port.host %}
-                                    <td><strong>{{ t.port.host.address }} - {{ t.port.port }}</strong></td>
+                                    <td><strong>{{ t.port.host.ip }} - {{ t.port.port }}</strong></td>
                                 {% elif t.port %}
                                     <td><strong>{{ t.port.port }}</strong></td>
                                 {% else %}
@@ -255,7 +255,7 @@
                                     <td></td>
                                 {% endif %}
                                 {% if v.port and v.port.host %}
-                                    <td><strong>{{ v.port.host.address }} - {{ v.port.port }}</strong></td>
+                                    <td><strong>{{ v.port.host.ip }} - {{ v.port.port }}</strong></td>
                                 {% elif v.port %}
                                     <td><strong>{{ v.port.port }}</strong></td>
                                 {% else %}

@@ -65,7 +65,7 @@ function processEntity(name: string): void {
       const fields = [
         "name",
         "title",
-        "address",
+        "ip",
         "port",
         "path",
         "data",

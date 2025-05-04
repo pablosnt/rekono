@@ -247,7 +247,7 @@ class RekonoTest(TestCase):
                 "source": "Google",
             },
             Host: {
-                "address": "10.10.10.10",
+                "ip": "10.10.10.10",
                 "os": "some type of Linux",
                 "os_type": HostOS.LINUX,
             },
