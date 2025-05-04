@@ -1,6 +1,5 @@
 from tests.framework import RekonoTest
 from platforms.hosts_metadata import HostsMetadata
-from findings.models import Host
 
 
 class HostsMetadataTest(RekonoTest):
@@ -9,7 +8,7 @@ class HostsMetadataTest(RekonoTest):
         self._setup_tasks_and_executions()
         self._setup_findings(self.execution1)
 
-    def _test_integration(self, expected: list[tuple[str, str]]) -> None:
+    def _test_integration(self, expected: list[tuple[str, str | None]]) -> None:
         client = HostsMetadata()
         client.process_findings(self.execution1, [self.host])
         for field, value in expected:
@@ -17,7 +16,6 @@ class HostsMetadataTest(RekonoTest):
 
     def test_public_ip(self) -> None:
         self.host.ip = "8.8.8.8"
-        # self.host.save(update_fields=["ip"])
         self._test_integration(
             [
                 ("domain", "dns.google"),
@@ -27,9 +25,4 @@ class HostsMetadataTest(RekonoTest):
         )
 
     def test_unresolvable_private_ip(self) -> None:
-        # self.host.ip = "10.10.10.10"
-        # self.host.domain = None
-        # self.host.country = None
-        # self.host.city = None
-        # self.host.save(update_fields=["ip", "domain", "country", "city"])
         self._test_integration([("domain", None), ("country", None), ("city", None)])
