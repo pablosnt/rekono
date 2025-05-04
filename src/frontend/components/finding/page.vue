@@ -95,7 +95,7 @@ filters
                 {
                   project: route.params.project_id,
                   target: value,
-                  ordering: "address",
+                  ordering: "ip",
                 },
                 true,
               )

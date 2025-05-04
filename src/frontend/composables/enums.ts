@@ -122,7 +122,7 @@ export function useEnums() {
   };
   const alertItems = {
     OSINT: { filter: null, monitor: null, icon: findings.OSINT.icon },
-    Host: { filter: "address", monitor: null, icon: findings.Host.icon },
+    Host: { filter: "ip", monitor: null, icon: findings.Host.icon },
     "Open Port": { filter: null, monitor: null, icon: findings.Port.icon },
     Service: { filter: "name", monitor: null, icon: findings.Port.icon },
     Technology: {

@@ -94,7 +94,8 @@ class DateSeverityCount(DateCount, SeverityCount):
 
 class HostVulnerabilities(Serializer):
     id = IntegerField()
-    address = CharField()
+    # TODO: use other host fields?
+    ip = CharField()
     vulnerabilities = IntegerField()
     vulnerabilities_per_severity = SeverityCount(many=True)
     fixed_vulnerabilities = IntegerField()
@@ -266,7 +267,7 @@ class HostsStatsSerializer(StatsSerializer):
             )
             .values(
                 "id",
-                "address",
+                "ip",
                 "fixed_vulnerabilities",
                 "vulnerabilities",
                 *[f"vulnerabilities_{severity.name.lower()}" for severity in Severity],

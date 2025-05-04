@@ -62,7 +62,7 @@ class Alert(BaseModel):
         AlertItem.HOST.value: {
             "model": Host,
             AlertMode.NEW.value: True,
-            AlertMode.FILTER.value: "address",
+            AlertMode.FILTER.value: "ip",
         },
         AlertItem.OPEN_PORT.value: {
             "model": Port,

@@ -21,6 +21,7 @@ from platforms.hacktricks import HackTricks
 from platforms.mail.notifications import SMTP
 from platforms.nvdnist.integrations import NvdNist
 from platforms.telegram_app.notifications.notifications import Telegram
+from platforms.hosts_metadata import HostsMetadata
 from rq.job import Job
 from settings.models import Settings
 
@@ -48,7 +49,12 @@ class FindingsQueue(BaseQueue):
                 HackTricks(),
                 CveCrowd(),
                 DefectDojo(),
+                HostsMetadata(),
             ] + notifications:
+                # TODO: Instead of sending the list of findings and iterate them for each integration,
+                # iterate them here and send only one finding to each integration
+                # TODO: Each integration can define a finding type or filter, so only will be triggered if
+                # the findings matches that condition
                 platform.process_findings(execution, findings)
             for finding in findings:
                 if settings.auto_fix_findings and finding.is_fixed:

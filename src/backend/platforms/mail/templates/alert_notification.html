@@ -37,7 +37,7 @@
                                 <div class="col-6">
                                     <div class="row">
                                         <p class="text-muted mr-2">Address</p>
-                                        <p><strong>{{ finding.address }}</strong></p>
+                                        <p><strong>{{ finding.ip }}</strong></p>
                                     </div>
                                     <div class="row">
                                         <p class="text-muted mr-2">OS</p>
@@ -55,7 +55,7 @@
                                     <div class="row">
                                         <p class="text-muted mr-2">Host</p>
                                         {% if finding.host %}
-                                            <p>{{ finding.host.address }}</p>
+                                            <p>{{ finding.host.ip }}</p>
                                         {% endif %}
                                     </div>
                                     <div class="row">
@@ -82,7 +82,7 @@
                                     <div class="row">
                                         <p class="text-muted mr-2">Host</p>
                                         {% if finding.port and finding.port.host %}
-                                            <p>{{ finding.port.host.address }}</p>
+                                            <p>{{ finding.port.host.ip }}</p>
                                         {% endif %}
                                     </div>
                                     <div class="row">
@@ -141,7 +141,7 @@
                                     <div class="row">
                                         <p class="text-muted mr-2">Host</p>
                                         {% if finding.port and finding.port.host %}
-                                            <p>{{ finding.port.host.address }}</p>
+                                            <p>{{ finding.port.host.ip }}</p>
                                         {% endif %}
                                     </div>
                                     <div class="row">

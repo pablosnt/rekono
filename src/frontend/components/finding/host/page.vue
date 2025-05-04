@@ -65,7 +65,7 @@ filters
           label: "Sort",
           icon: "mdi-sort",
           cols: 2,
-          collection: ["id", "host", "address", "os_type"],
+          collection: ["id", "host", "ip", "os_type"],
           fieldValue: "id",
           fieldTitle: "name",
           key: "ordering",

@@ -187,7 +187,7 @@
                 '#4CAF50',
               ],
               xaxis: {
-                categories: stats.top_vulnerable.map((item) => item.address),
+                categories: stats.top_vulnerable.map((item) => item.ip),
                 labels: {
                   formatter: utils.displayNumber,
                 },

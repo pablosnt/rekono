@@ -8,6 +8,7 @@ django-filter==24.3
 django-rq==3.0.0
 django-taggit==6.1.0
 drf-spectacular==0.27.2
+geocoder==1.38.1
 pycryptodome==3.21.0
 psycopg2-binary==2.9.10
 pyjwt==2.9.0

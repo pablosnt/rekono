@@ -3,7 +3,7 @@
     v-if="port !== null && host !== null"
     class="pa-6"
     :title="`${port.protocol} ${port.port} ${port.service ? port.service : ''}`"
-    :subtitle="host.address"
+    :subtitle="host.ip"
     :prepend-icon="portsUtils.getIcon(port.port)"
     variant="text"
   >

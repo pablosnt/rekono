@@ -47,9 +47,14 @@ class HostSerializer(FindingSerializer):
     class Meta:
         model = Host
         fields = FindingSerializer.Meta.fields + (
-            "address",
+            "ip",
+            "domain",
             "os",
             "os_type",
+            "country",
+            "city",
+            "latitude",
+            "longitude",
             "port",
         )
 

@@ -177,7 +177,7 @@
                       />
                     </td>
                     <td class="text-center text-capitalize">
-                      {{ host.address }}
+                      {{ host.ip }}
                     </td>
                     <td class="text-center">
                       <FindingTools :finding="host" />

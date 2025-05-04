@@ -2,7 +2,7 @@
   <finding-show-component
     :api="api"
     :finding="finding"
-    title="address"
+    title="ip"
     subtitle="os"
     :icon="enums.osType[finding.os_type].icon"
     :icon-color="enums.osType[finding.os_type].color"

@@ -29,9 +29,12 @@ class HostFilter(FindingFilter):
         model = Host
         fields = {
             **FindingFilter.Meta.fields.copy(),
-            "address": ["exact", "icontains"],
+            "ip": ["exact", "icontains"],
+            "domain": ["exact", "icontains"],
             "os": ["exact", "icontains"],
             "os_type": ["exact"],
+            "country": ["exact", "icontains"],
+            "city": ["exact", "icontains"],
         }
 
 

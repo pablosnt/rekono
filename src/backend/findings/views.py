@@ -86,8 +86,8 @@ class HostViewSet(FindingViewSet):
     queryset = Host.objects.all()
     serializer_class = HostSerializer
     filterset_class = HostFilter
-    search_fields = ["address", "os"]
-    ordering_fields = ["id", "address", "os_type"]
+    search_fields = ["ip", "domain", "os", "country", "city"]
+    ordering_fields = ["id", "ip", "domain", "os_type", "country"]
 
 
 class PortViewSet(FindingViewSet):
