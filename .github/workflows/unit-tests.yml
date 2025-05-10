@@ -27,9 +27,8 @@ jobs:
 
       - name: Install UV
         uses: astral-sh/setup-uv@v6
-      
-      - name: Install Python
-        run: uv python install
+        with:
+          activate-environment: true
       
       - name: Install dependencies
         working-directory: src/backend

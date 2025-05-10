@@ -66,10 +66,8 @@ jobs:
       - name: Install UV
         if: ${{ steps.changes.outputs.path == 'true' }}
         uses: astral-sh/setup-uv@v6
-      
-      - name: Install Python
-        if: ${{ steps.changes.outputs.path == 'true' }}
-        run: uv python install
+        with:
+          activate-environment: true
 
       - name: Installation
         if: ${{ matrix.version == 'latest' && (steps.changes.outputs.path == 'true' || github.event_name != 'pull_request') }}
