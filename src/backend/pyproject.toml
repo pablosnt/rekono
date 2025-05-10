@@ -33,9 +33,7 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    "coverage>=7.8.0",
-    "flake8>=7.2.0",
-    "pytype>=2024.10.11",
+    "coverage>=7.8.0"
 ]
 
 [tool.ruff]
