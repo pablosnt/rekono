@@ -45,7 +45,8 @@ jobs:
       
       - name: Flake8
         if: ${{ (steps.changes.outputs.backend == 'true' || github.event_name != 'pull_request') && !cancelled() }}
-        run: uvx flake8 --ignore=E203,E501,W503,W605 src/backend
+        working-directory: src/backend
+        run: uvx flake8 --ignore=E203,E501,W503,W605 .
 
   frontend:
     name: Frontend Style

@@ -1,0 +1,4 @@
+[flake8]
+exclude =
+    .venv
+    migrations
