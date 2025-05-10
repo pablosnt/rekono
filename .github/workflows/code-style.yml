@@ -35,7 +35,7 @@ jobs:
 
       - name: Ruff
         if: ${{ steps.changes.outputs.backend == 'true' || github.event_name != 'pull_request' }}
-        working_directory: src/backend
+        working-directory: src/backend
         run: uvx ruff format --check
       
       - name: PyType
