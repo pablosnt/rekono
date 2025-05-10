@@ -57,9 +57,7 @@ class DefectDojoSyncTest(ApiTest):
         ),
     ]
 
-    @mock.patch(
-        "platforms.defectdojo.integrations.DefectDojo.is_available", return_true
-    )
+    @mock.patch("platforms.defectdojo.integrations.DefectDojo.is_available", return_true)
     @mock.patch("platforms.defectdojo.integrations.DefectDojo.exists", return_true)
     def test_cases(self) -> None:
         super().test_cases()
@@ -81,9 +79,7 @@ class DefectDojoTargetSyncTest(ApiTest):
 
     def _get_object(self) -> Any:
         return DefectDojoTargetSync.objects.create(
-            defectdojo_sync=DefectDojoSync.objects.create(
-                **{**sync2, "project": self.project}
-            ),
+            defectdojo_sync=DefectDojoSync.objects.create(**{**sync2, "project": self.project}),
             target=self.target,
             engagement_id=1,
         )

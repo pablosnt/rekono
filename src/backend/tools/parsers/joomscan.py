@@ -14,18 +14,13 @@ class Joomscan(BaseParser):
         configurations: set[str] = set()
         path_disclosure: set[str] = set()
         directory_listing: set[str] = set()
-        host = urlparse(
-            self.executor.arguments[self.executor.arguments.index("-u") + 1]
-        ).hostname
+        host = urlparse(self.executor.arguments[self.executor.arguments.index("-u") + 1]).hostname
         lines = self.output.split("\n")
         for index, line in enumerate(lines):
             data = line.strip()
             if not data:
                 continue
-            if (
-                "[++] Joomla" in data
-                and lines[index - 1] == "[+] Detecting Joomla Version"
-            ):
+            if "[++] Joomla" in data and lines[index - 1] == "[+] Detecting Joomla Version":
                 version = data.replace("[++] Joomla ", "").strip()
                 technology = self.create_finding(
                     Technology,
@@ -35,9 +30,7 @@ class Joomscan(BaseParser):
                     reference="https://www.joomla.org/",
                 )
             elif "CVE : " in data:
-                vulnerability_name = (
-                    lines[index - 1].replace("[++]", "").replace("Joomla!", "").strip()
-                )
+                vulnerability_name = lines[index - 1].replace("[++]", "").replace("Joomla!", "").strip()
                 for cve in data.replace("CVE : ", "").strip().split(","):
                     self.create_finding(
                         Vulnerability,
@@ -51,11 +44,7 @@ class Joomscan(BaseParser):
                     Exploit,
                     technology=technology,
                     title=vulnerability_name,
-                    edb_id=int(
-                        link.split("https://www.exploit-db.com/exploits/", 1)[
-                            1
-                        ].replace("/", "")
-                    ),
+                    edb_id=int(link.split("https://www.exploit-db.com/exploits/", 1)[1].replace("/", "")),
                     reference=link,
                 )
             elif "Debug mode Enabled" in data:

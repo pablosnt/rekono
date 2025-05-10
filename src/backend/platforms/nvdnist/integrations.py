@@ -84,30 +84,18 @@ class NvdNist(BaseIntegration):
                             "cvssMetricV2",
                         ]:
                             metrics = cvss_metrics.get(field) or sum(
-                                [
-                                    list(items)
-                                    for key, items in cvss_metrics.items()
-                                    if key.lower().startswith(field)
-                                ],
+                                [list(items) for key, items in cvss_metrics.items() if key.lower().startswith(field)],
                                 [],
                             )
                             for cvss in metrics:
                                 if cvss.get("type", "").lower() == type:
-                                    base_score = cvss.get("cvssData", {}).get(
-                                        "baseScore"
-                                    )
+                                    base_score = cvss.get("cvssData", {}).get("baseScore")
                                     if base_score:
                                         severity = base_score
                                         break
                             if severity > 0:
                                 break
                 finding.cwe = f"CWE-{cwe}"
-                finding.severity = [
-                    k
-                    for k, v in self.cvss_mapping.items()
-                    if severity >= v[0] and severity < v[1]
-                ][0]
+                finding.severity = [k for k, v in self.cvss_mapping.items() if severity >= v[0] and severity < v[1]][0]
                 finding.reference = self.reference.format(cve=finding.cve)
-                finding.save(
-                    update_fields=["description", "severity", "cwe", "reference"]
-                )
+                finding.save(update_fields=["description", "severity", "cwe", "reference"])

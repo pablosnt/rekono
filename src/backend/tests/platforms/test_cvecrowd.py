@@ -58,16 +58,12 @@ class CveCrowdTest(RekonoTest):
 
     @mock.patch("platforms.cvecrowd.integrations.CveCrowd._request", success)
     def test_process_findings(self) -> None:
-        self.cvecrowd.process_findings(
-            self.execution3, [self.trending, self.not_trending]
-        )
+        self.cvecrowd.process_findings(self.execution3, [self.trending, self.not_trending])
         self._verify_success()
 
     @mock.patch("platforms.cvecrowd.integrations.CveCrowd._request", not_found)
     def test_process_findings_not_found(self) -> None:
-        self.cvecrowd.process_findings(
-            self.execution3, [self.trending, self.not_trending]
-        )
+        self.cvecrowd.process_findings(self.execution3, [self.trending, self.not_trending])
         self._verify_error()
 
     @mock.patch("platforms.cvecrowd.integrations.CveCrowd._request", success)
@@ -75,9 +71,7 @@ class CveCrowdTest(RekonoTest):
         self.settings.execute_per_execution = False
         self.settings.save(update_fields=["execute_per_execution"])
         self.cvecrowd = CveCrowd()
-        self.cvecrowd.process_findings(
-            self.execution3, [self.trending, self.not_trending]
-        )
+        self.cvecrowd.process_findings(self.execution3, [self.trending, self.not_trending])
         self._verify_error()
 
     @mock.patch("platforms.cvecrowd.integrations.CveCrowd._request", success)
@@ -115,9 +109,7 @@ class CveCrowdSettingsTest(ApiTest):
                 "execute_per_execution": True,
             },
         ),
-        ApiTestCase(
-            ["auditor1", "auditor2", "reader1", "reader2"], "put", 403, new_settings
-        ),
+        ApiTestCase(["auditor1", "auditor2", "reader1", "reader2"], "put", 403, new_settings),
         ApiTestCase(["admin1", "admin2"], "put", 400, invalid_settings),
         ApiTestCase(
             ["admin1", "admin2"],

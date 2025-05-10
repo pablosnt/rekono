@@ -25,9 +25,7 @@ class FileHandler:
         max_mb_size = Settings.objects.first().max_uploaded_file_mb
         size = in_memory_file.size / (1024 * 1024)  # Get file size in MB
         if size > max_mb_size:  # File size greater than size limit
-            logger.warning(
-                f"[Security] Attempt of upload too large file with {size} MB"
-            )
+            logger.warning(f"[Security] Attempt of upload too large file with {size} MB")
             raise ValidationError(
                 f"File size is greater than the max size allowed ({max_mb_size} MB)",
                 code="file",
@@ -37,22 +35,14 @@ class FileHandler:
     def _validate_extension(self, in_memory_file: Any) -> None:
         extension = Path(in_memory_file.name).suffix[1:].lower()  # Get file extension
         if extension not in self.allowed_extensions:
-            logger.warning(
-                f"[Security] Attempt of upload file with invalid extension: {extension}"
-            )
-            raise ValidationError(
-                "Invalid extension", code="file", params={"value": extension}
-            )
+            logger.warning(f"[Security] Attempt of upload file with invalid extension: {extension}")
+            raise ValidationError("Invalid extension", code="file", params={"value": extension})
 
     def _validate_mime_type(self, in_memory_file: Any) -> None:
         mime_type = magic.from_buffer(in_memory_file.read(1024), mime=True)
         if mime_type not in self.allowed_mime_types:
-            logger.warning(
-                f"[Security] Attempt of upload file with invalid MIME type: {mime_type}"
-            )
-            raise ValidationError(
-                "Invalid MIME type", code="file", params={"value": mime_type}
-            )
+            logger.warning(f"[Security] Attempt of upload file with invalid MIME type: {mime_type}")
+            raise ValidationError("Invalid MIME type", code="file", params={"value": mime_type})
 
     def validate_file(self, in_memory_file: Any) -> None:
         self._validate_size(in_memory_file)

@@ -69,9 +69,7 @@ class BaseConversationFromProject(BaseConversation, ProjectMixin):
         return (
             await super()._ask_for_project(update, context)
             if not self._get_context_value(context, Context.PROJECT)
-            else await self._go_to_next_state(
-                update, context, self._get_next_state(self._save_project)
-            )
+            else await self._go_to_next_state(update, context, self._get_next_state(self._save_project))
         )
 
 
@@ -89,9 +87,7 @@ class NewTarget(BaseConversationFromProject, TargetMixin):
         super().__init__(**kwargs)
 
 
-class NewPort(
-    BaseConversationFromProject, TargetMixin, TargetPortMixin, AuthenticationMixin
-):
+class NewPort(BaseConversationFromProject, TargetMixin, TargetPortMixin, AuthenticationMixin):
     help = "Create new target port"
     section = Section.TARGETS
 

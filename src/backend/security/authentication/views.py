@@ -29,9 +29,7 @@ class SendEmailMfaView(GenericAPIView):
 
     @extend_schema(request=SendMfaEmailSerializer, responses={204: None})
     def post(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        serializer = SendMfaEmailSerializer(
-            data=request.data, context={"request": request}
-        )
+        serializer = SendMfaEmailSerializer(data=request.data, context={"request": request})
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(status=status.HTTP_204_NO_CONTENT)

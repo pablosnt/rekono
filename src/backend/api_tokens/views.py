@@ -23,8 +23,4 @@ class ApiTokenViewSet(BaseViewSet):
         return super().get_queryset().filter(user=self.request.user).all()
 
     def get_serializer_class(self) -> Serializer:
-        return (
-            CreateApiTokenSerializer
-            if self.request.method == "POST"
-            else super().get_serializer_class()
-        )
+        return CreateApiTokenSerializer if self.request.method == "POST" else super().get_serializer_class()

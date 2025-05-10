@@ -14,9 +14,7 @@ class CveCrowdSettings(BaseEncrypted):
         blank=True,
         db_column="api_token",
     )
-    trending_span_days = models.IntegerField(
-        default=7, validators=[MinValueValidator(1), MaxValueValidator(7)]
-    )
+    trending_span_days = models.IntegerField(default=7, validators=[MinValueValidator(1), MaxValueValidator(7)])
     execute_per_execution = models.BooleanField(default=True)
 
     _encrypted_field = "_api_token"

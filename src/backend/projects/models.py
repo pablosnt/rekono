@@ -15,17 +15,11 @@ class Project(BaseModel):
         unique=True,
         validators=[Validator(Regex.NAME.value, code="name")],
     )
-    description = models.TextField(
-        max_length=300, validators=[Validator(Regex.TEXT.value, code="description")]
-    )
+    description = models.TextField(max_length=300, validators=[Validator(Regex.TEXT.value, code="description")])
     # User that created the project
-    owner = models.ForeignKey(
-        AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True
-    )
+    owner = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True)
     # Relation with all users that belong to the project
-    members = models.ManyToManyField(
-        AUTH_USER_MODEL, related_name="projects", blank=True
-    )
+    members = models.ManyToManyField(AUTH_USER_MODEL, related_name="projects", blank=True)
     tags = TaggableManager()  # Project tags
 
     def __str__(self) -> str:

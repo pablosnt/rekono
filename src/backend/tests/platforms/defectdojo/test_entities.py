@@ -78,17 +78,13 @@ class DefectDojoEntitiesTest(ApiTest):
                 ]
             )
 
-    @mock.patch(
-        "platforms.defectdojo.integrations.DefectDojo.is_available", return_true
-    )
+    @mock.patch("platforms.defectdojo.integrations.DefectDojo.is_available", return_true)
     @mock.patch("platforms.defectdojo.integrations.DefectDojo.exists", return_true)
     @mock.patch(
         "platforms.defectdojo.integrations.DefectDojo.create_product_type",
         create_product_type,
     )
-    @mock.patch(
-        "platforms.defectdojo.integrations.DefectDojo.create_product", create_product
-    )
+    @mock.patch("platforms.defectdojo.integrations.DefectDojo.create_product", create_product)
     @mock.patch(
         "platforms.defectdojo.integrations.DefectDojo.create_engagement",
         create_engagement,
@@ -96,14 +92,10 @@ class DefectDojoEntitiesTest(ApiTest):
     def test_cases(self) -> None:
         super().test_cases()
 
-    @mock.patch(
-        "platforms.defectdojo.integrations.DefectDojo.is_available", return_false
-    )
+    @mock.patch("platforms.defectdojo.integrations.DefectDojo.is_available", return_false)
     def test_cases_not_available(self) -> None:
         for endpoint, valid, _ in self.entities_cases:
-            ApiTestCase(
-                ["admin1", "auditor1"], "post", 400, valid, endpoint=endpoint
-            ).test_case(endpoint=endpoint)
+            ApiTestCase(["admin1", "auditor1"], "post", 400, valid, endpoint=endpoint).test_case(endpoint=endpoint)
 
     def test_anonymous_access(self) -> None:
         base = self.endpoint

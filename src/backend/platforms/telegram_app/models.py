@@ -45,9 +45,7 @@ class TelegramChat(BaseModel):
 
     def is_auditor(self) -> bool:
         return (
-            self.user.groups.filter(
-                Q(name=str(Role.AUDITOR)) | Q(name=str(Role.ADMIN))
-            ).exists()
+            self.user.groups.filter(Q(name=str(Role.AUDITOR)) | Q(name=str(Role.ADMIN))).exists()
             if self.user
             else False
         )

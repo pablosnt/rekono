@@ -17,9 +17,7 @@ router.register(
     DefectDojoProductTypeViewSet,
     basename="defect-dojo_product-type",
 )
-router.register(
-    "defect-dojo/products", DefectDojoProductViewSet, basename="defect-dojo_product"
-)
+router.register("defect-dojo/products", DefectDojoProductViewSet, basename="defect-dojo_product")
 router.register(
     "defect-dojo/engagements",
     DefectDojoEngagementViewSet,

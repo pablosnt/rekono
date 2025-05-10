@@ -62,9 +62,7 @@ class InputType(BaseModel):
         if model:
             for field in model._meta.get_fields():  # For each model field
                 # Check if field is a ForeignKey to a BaseInput model
-                if field.__class__ == models.ForeignKey and issubclass(
-                    field.related_model, BaseInput
-                ):
+                if field.__class__ == models.ForeignKey and issubclass(field.related_model, BaseInput):
                     # Search InputType by model
                     related_type = InputType.objects.filter(
                         model=f"{field.related_model._meta.app_label}.{field.related_model._meta.model_name}"

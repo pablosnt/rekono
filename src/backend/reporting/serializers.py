@@ -28,9 +28,7 @@ class ReportSerializer(ModelSerializer):
 
 class CreateReportSerializer(ModelSerializer):
     only_true_positives = BooleanField(required=False, write_only=True)
-    finding_types = MultipleChoiceField(
-        choices=FindingName.choices, required=False, write_only=True
-    )
+    finding_types = MultipleChoiceField(choices=FindingName.choices, required=False, write_only=True)
     validated_filter: dict[str, Any] = {}
     validated_finding_types: list[FindingName] = []
 
@@ -65,9 +63,7 @@ class CreateReportSerializer(ModelSerializer):
                     self.validated_filter[filter_field] = value
                 only_true_positives = attrs.pop("only_true_positives", False)
                 if only_true_positives:
-                    self.validated_triage_filter.update(
-                        {"triage_status": TriageStatus.TRUE_POSITIVE}
-                    )
+                    self.validated_triage_filter.update({"triage_status": TriageStatus.TRUE_POSITIVE})
                 else:
                     self.validated_triage_filter.update(
                         {
@@ -80,12 +76,8 @@ class CreateReportSerializer(ModelSerializer):
                     )
                 break
         if no_mandatory_field:
-            raise ValidationError(
-                "At lest one task, target or project must be provided", code="report"
-            )
+            raise ValidationError("At lest one task, target or project must be provided", code="report")
         self.validated_finding_types = (
-            attrs.pop("finding_types")
-            if "finding_types" in attrs and attrs.get("format") != ReportFormat.PDF
-            else None
+            attrs.pop("finding_types") if "finding_types" in attrs and attrs.get("format") != ReportFormat.PDF else None
         ) or list(FindingName)
         return attrs

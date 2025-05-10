@@ -11,20 +11,12 @@ from users.models import User
 
 class ExecutionFilter(FilterSet):
     target = ModelChoiceFilter(queryset=Target.objects.all(), field_name="task__target")
-    project = ModelChoiceFilter(
-        queryset=Project.objects.all(), field_name="task__target__project"
-    )
-    process = ModelChoiceFilter(
-        queryset=Process.objects.all(), field_name="task__process"
-    )
-    tool = ModelChoiceFilter(
-        queryset=Tool.objects.all(), field_name="configuration__tool"
-    )
+    project = ModelChoiceFilter(queryset=Project.objects.all(), field_name="task__target__project")
+    process = ModelChoiceFilter(queryset=Process.objects.all(), field_name="task__process")
+    tool = ModelChoiceFilter(queryset=Tool.objects.all(), field_name="configuration__tool")
     stage = ChoiceFilter(field_name="configuration__stage", choices=Stage.choices)
     intensity = ChoiceFilter(field_name="task__intensity", choices=Intensity.choices)
-    executor = ModelChoiceFilter(
-        queryset=User.objects.all(), field_name="task__executor"
-    )
+    executor = ModelChoiceFilter(queryset=User.objects.all(), field_name="task__executor")
 
     class Meta:
         model = Execution

@@ -9,12 +9,8 @@ from targets.models import Target
 class AuthenticationFilter(FilterSet):
     """FilterSet to filter and sort authentications entities."""
 
-    target = ModelChoiceFilter(
-        queryset=Target.objects.all(), field_name="target_port__target"
-    )
-    project = ModelChoiceFilter(
-        queryset=Project.objects.all(), field_name="target_port__target__project"
-    )
+    target = ModelChoiceFilter(queryset=Target.objects.all(), field_name="target_port__target")
+    project = ModelChoiceFilter(queryset=Project.objects.all(), field_name="target_port__target__project")
 
     class Meta:
         model = Authentication

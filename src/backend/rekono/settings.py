@@ -276,9 +276,7 @@ SPECTACULAR_SETTINGS = {
 
 if CONFIG.testing:
     # In memory database for testing
-    DATABASES = {
-        "default": {"ENGINE": "django.db.backends.sqlite3", "NAME": ":memory:"}
-    }
+    DATABASES = {"default": {"ENGINE": "django.db.backends.sqlite3", "NAME": ":memory:"}}
 else:
     # Production database
     DATABASES = {  # pragma: no cover

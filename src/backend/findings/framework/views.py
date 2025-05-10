@@ -46,9 +46,7 @@ class FindingViewSet(BaseViewSet):
             else:
                 finding.__class__.objects.remove_fix(finding, request.user)
         if bad_request:
-            return Response(
-                {"finding": bad_request}, status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({"finding": bad_request}, status=status.HTTP_400_BAD_REQUEST)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 

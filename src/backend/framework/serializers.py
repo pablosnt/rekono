@@ -53,11 +53,7 @@ class MfaSerializer(Serializer):
         attrs = super().validate(attrs)
         if not self.validator(
             attrs.get("mfa"),
-            (
-                self.user
-                if hasattr(self, "user") and getattr(self, "user")
-                else self.context.get("request").user
-            ),
+            (self.user if hasattr(self, "user") and getattr(self, "user") else self.context.get("request").user),
         ):
             raise AuthenticationFailed(code=status.HTTP_401_UNAUTHORIZED)
         return attrs
@@ -67,6 +63,6 @@ class RelatedNotesSerializer(ModelSerializer):
     notes = SerializerMethodField(read_only=True)
 
     def get_notes(self, instance: Any) -> list[int]:
-        return instance.notes.filter(
-            Q(public=True) | Q(owner__id=self.context.get("request").user.id)
-        ).values_list("id", flat=True)
+        return instance.notes.filter(Q(public=True) | Q(owner__id=self.context.get("request").user.id)).values_list(
+            "id", flat=True
+        )

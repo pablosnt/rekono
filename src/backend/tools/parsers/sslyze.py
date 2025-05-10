@@ -16,9 +16,7 @@ class Sslyze(BaseParser):
     def create_finding(self, finding_type: Finding, **fields: Any) -> Finding:
         if finding_type == Vulnerability and not fields.get("technology"):
             if not self.generic_tech:
-                self.generic_tech = super().create_finding(
-                    Technology, name="Generic TLS"
-                )
+                self.generic_tech = super().create_finding(Technology, name="Generic TLS")
             fields["technology"] = self.generic_tech
         return super().create_finding(finding_type, **fields)
 
@@ -30,15 +28,11 @@ class Sslyze(BaseParser):
                 continue
             for check, fields in [
                 (
-                    lambda: result["heartbleed"]["result"][
-                        "is_vulnerable_to_heartbleed"
-                    ],
+                    lambda: result["heartbleed"]["result"]["is_vulnerable_to_heartbleed"],
                     {"name": "Heartbleed", "cve": "CVE-2014-0160"},
                 ),
                 (
-                    lambda: result["openssl_ccs_injection"]["result"][
-                        "is_vulnerable_to_ccs_injection"
-                    ],
+                    lambda: result["openssl_ccs_injection"]["result"]["is_vulnerable_to_ccs_injection"],
                     {"name": "OpenSSL CSS Injection", "cve": "CVE-2014-0224"},
                 ),
                 (
@@ -57,12 +51,8 @@ class Sslyze(BaseParser):
                     },
                 ),
                 (
-                    lambda: not result["session_renegotiation"]["result"][
-                        "supports_secure_renegotiation"
-                    ]
-                    or result["session_renegotiation"]["result"][
-                        "is_vulnerable_to_client_renegotiation_dos"
-                    ],
+                    lambda: not result["session_renegotiation"]["result"]["supports_secure_renegotiation"]
+                    or result["session_renegotiation"]["result"]["is_vulnerable_to_client_renegotiation_dos"],
                     {
                         "name": "Insecure TLS renegotiation supported",
                         "description": "Insecure TLS renegotiation supported",
@@ -82,16 +72,14 @@ class Sslyze(BaseParser):
                 for version in versions:
                     cipher_suites = (
                         result.get(
-                            f'{protocol.lower()}_{version.replace(".", "_")}_cipher_suites',
+                            f"{protocol.lower()}_{version.replace('.', '_')}_cipher_suites",
                             {},
                         )
                         .get("result", {})
                         .get("accepted_cipher_suites", [])
                     )
                     if cipher_suites:
-                        technology = self.create_finding(
-                            Technology, name=protocol.upper(), version=version
-                        )
+                        technology = self.create_finding(Technology, name=protocol.upper(), version=version)
                         severity = Severity.HIGH
                         if protocol.lower() == "tls":
                             severity = Severity.MEDIUM
@@ -101,7 +89,7 @@ class Sslyze(BaseParser):
                                         Vulnerability,
                                         technology=technology,
                                         name="Insecure cipher suite supported",
-                                        description=f'TLS {technology.version} {cs["cipher_suite"]["name"]}',
+                                        description=f"TLS {technology.version} {cs['cipher_suite']['name']}",
                                         severity=Severity.LOW,
                                         # CWE-326: Inadequate Encryption Strength
                                         cwe="CWE-326",
@@ -116,9 +104,7 @@ class Sslyze(BaseParser):
                                 # CWE-326: Inadequate Encryption Strength
                                 cwe="CWE-326",
                             )
-            for deploy in (
-                result["certificate_info"]["result"]["certificate_deployments"] or []
-            ):
+            for deploy in result["certificate_info"]["result"]["certificate_deployments"] or []:
                 if not deploy["leaf_certificate_subject_matches_hostname"]:
                     self.create_finding(
                         Vulnerability,

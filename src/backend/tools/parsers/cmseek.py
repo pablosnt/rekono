@@ -10,9 +10,7 @@ class Cmseek(BaseParser):
         data = self._load_report_as_json()
         if not data.get("cms_name") or not data.get("cms_id"):
             return
-        version = data.get(f"{data.get('cms_id')}_version") or data.get(
-            f"{data.get('cms_name')}_version"
-        )
+        version = data.get(f"{data.get('cms_id')}_version") or data.get(f"{data.get('cms_name')}_version")
         base_url = data.get("url", "")
         parser = urlparse(base_url)
         if parser.path:
@@ -22,11 +20,7 @@ class Cmseek(BaseParser):
             name=data.get("cms_name").strip(),
             version=version.strip() if version is not None else None,
             description="CMS",
-            reference=(
-                data.get("cms_url", "").strip()
-                if data.get("cms_url")
-                else data.get("cms_url")
-            ),
+            reference=(data.get("cms_url", "").strip() if data.get("cms_url") else data.get("cms_url")),
         )
         for key, value in data.items():
             if key in [
@@ -43,11 +37,7 @@ class Cmseek(BaseParser):
                 for path in (
                     value
                     if isinstance(value, list)
-                    else (
-                        value.split(",")
-                        if isinstance(value, str) and "," in value
-                        else [value]
-                    )
+                    else (value.split(",") if isinstance(value, str) and "," in value else [value])
                 )
                 if base_url in path
             ]
@@ -103,11 +93,7 @@ class Cmseek(BaseParser):
                         Vulnerability,
                         technology=cms,
                         name=vulnerability.get("name", "").strip(),
-                        cve=(
-                            vulnerability.get("cve").strip()
-                            if vulnerability.get("cve") is not None
-                            else None
-                        ),
+                        cve=(vulnerability.get("cve").strip() if vulnerability.get("cve") is not None else None),
                     )
             elif "Version" in value and "," in value:
                 for component in value.split(","):
@@ -115,9 +101,7 @@ class Cmseek(BaseParser):
                     version = None
                     if "Version" in component:
                         technology, version = component.split("Version", 1)
-                    name = key.replace(f"{data.get('cms_name')}_", "").replace(
-                        f"{data.get('cms_id')}_", ""
-                    )
+                    name = key.replace(f"{data.get('cms_name')}_", "").replace(f"{data.get('cms_id')}_", "")
                     if technology:
                         self.create_finding(
                             Technology,

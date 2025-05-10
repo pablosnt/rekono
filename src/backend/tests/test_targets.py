@@ -79,9 +79,7 @@ class TargetTest(ApiTest):
             endpoint="{endpoint}2/",
         ),
         ApiTestCase(["admin2", "auditor2", "reader2"], "get", 200, expected=[]),
-        ApiTestCase(
-            ["admin2", "auditor2", "reader2"], "get", 404, endpoint="{endpoint}1/"
-        ),
+        ApiTestCase(["admin2", "auditor2", "reader2"], "get", 404, endpoint="{endpoint}1/"),
         ApiTestCase(["reader1", "reader2"], "delete", 403, endpoint="{endpoint}1/"),
         ApiTestCase(["admin2", "auditor2"], "delete", 404, endpoint="{endpoint}1/"),
         ApiTestCase(["auditor1"], "delete", 204, endpoint="{endpoint}1/"),

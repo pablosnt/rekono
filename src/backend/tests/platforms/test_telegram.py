@@ -63,9 +63,7 @@ class TelegramChatTest(ApiTest):
                 chat_id=chat_id,
             )
             self.assertFalse(chat.is_auditor())
-            ApiTestCase(
-                [user.username], "post", 401, {"otp": "invalid token"}
-            ).test_case(endpoint=self.endpoint)
+            ApiTestCase([user.username], "post", 401, {"otp": "invalid token"}).test_case(endpoint=self.endpoint)
             ApiTestCase(
                 [user.username],
                 "post",
@@ -92,24 +90,26 @@ class TelegramChatTest(ApiTest):
         for index, user in enumerate(users):
             for id in range(1, chat_id):
                 if id != index + 1:
-                    ApiTestCase(
-                        [user.username], "delete", 403, endpoint=f"{{endpoint}}{id}/"
-                    ).test_case(endpoint=self.endpoint)
+                    ApiTestCase([user.username], "delete", 403, endpoint=f"{{endpoint}}{id}/").test_case(
+                        endpoint=self.endpoint
+                    )
         for index, user in enumerate(users):
-            ApiTestCase(
-                [user.username], "delete", 204, endpoint=f"{{endpoint}}{index + 1}/"
-            ).test_case(endpoint=self.endpoint)
-            ApiTestCase(
-                [user.username],
-                "get",
-                200,
-                expected={
-                    "id": user.id,
-                    "username": user.username,
-                    "email": user.email,
-                    "telegram_chat": None,
-                },
-            ).test_case(endpoint=self.profile),
+            ApiTestCase([user.username], "delete", 204, endpoint=f"{{endpoint}}{index + 1}/").test_case(
+                endpoint=self.endpoint
+            )
+            (
+                ApiTestCase(
+                    [user.username],
+                    "get",
+                    200,
+                    expected={
+                        "id": user.id,
+                        "username": user.username,
+                        "email": user.email,
+                        "telegram_chat": None,
+                    },
+                ).test_case(endpoint=self.profile),
+            )
 
     def _get_object(self) -> Any:
         return TelegramChat.objects.create(user=self.admin1, chat_id=1)

@@ -66,12 +66,9 @@ class ToolSerializer(LikeSerializer):
         )
 
     def get_wordlists(self, instance: Any) -> dict[str, bool]:
-        queryset = Argument.objects.filter(
-            tool=instance, inputs__type__name=InputTypeName.WORDLIST
-        )
+        queryset = Argument.objects.filter(tool=instance, inputs__type__name=InputTypeName.WORDLIST)
         return {
-            "required": queryset.filter(required=True).exists()
-            or instance.name == "Gobuster",
+            "required": queryset.filter(required=True).exists() or instance.name == "Gobuster",
             "supported": queryset.exists(),
         }
 

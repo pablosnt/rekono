@@ -7,9 +7,7 @@ class Nikto(BaseParser):
     def _parse_report(self) -> None:
         endpoints = set(["/"])
         root = self._load_report_as_xml()
-        for item in (
-            root.findall("niktoscan")[-1].findall("scandetails")[0].findall("item")
-        ):
+        for item in root.findall("niktoscan")[-1].findall("scandetails")[0].findall("item"):
             method = item.attrib["method"]
             endpoint = item.findtext("uri")
             description = item.findtext("description")
@@ -18,11 +16,7 @@ class Nikto(BaseParser):
                 self.create_finding(
                     Vulnerability,
                     name=description,
-                    description=(
-                        f"[{method} {endpoint}] {description}"
-                        if endpoint
-                        else f"[{method}] {description}"
-                    ),
+                    description=(f"[{method} {endpoint}] {description}" if endpoint else f"[{method}] {description}"),
                     severity=Severity.MEDIUM,
                     osvdb=f"OSVDB-{osvdb_id}" if osvdb_id and osvdb_id != "0" else None,
                 )

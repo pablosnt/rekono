@@ -36,9 +36,7 @@ class DefectDojoSettingsTest(ApiTest):
     cases = [
         ApiTestCase(["auditor1", "auditor2", "reader1", "reader2"], "get", 403),
         ApiTestCase(["admin1", "admin2"], "get", 200, expected={"id": 1, **settings}),
-        ApiTestCase(
-            ["auditor1", "auditor2", "reader1", "reader2"], "put", 403, new_settings
-        ),
+        ApiTestCase(["auditor1", "auditor2", "reader1", "reader2"], "put", 403, new_settings),
         ApiTestCase(["admin1", "admin2"], "put", 400, invalid_settings),
         ApiTestCase(
             ["admin1", "admin2"],

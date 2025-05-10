@@ -7,7 +7,6 @@ import geocoder
 
 
 class HostsMetadata(BaseIntegration):
-
     def __init__(self):
         pass
 
@@ -34,6 +33,4 @@ class HostsMetadata(BaseIntegration):
                         finding.country = geocode.country
                         finding.city = geocode.city
                         finding.latitude, finding.longitude = geocode.latlng
-                finding.save(
-                    update_fields=["domain", "country", "city", "latitude", "longitude"]
-                )
+                finding.save(update_fields=["domain", "country", "city", "latitude", "longitude"])

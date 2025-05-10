@@ -54,9 +54,7 @@ class TaskTest(ApiTest):
                 },
             ],
         ),
-        ApiTestCase(
-            ["admin2", "auditor2", "reader2"], "get", 404, endpoint="{endpoint}1/"
-        ),
+        ApiTestCase(["admin2", "auditor2", "reader2"], "get", 404, endpoint="{endpoint}1/"),
         ApiTestCase(
             ["admin1", "auditor1", "reader1"],
             "get",
@@ -72,15 +70,9 @@ class TaskTest(ApiTest):
             },
             endpoint="{endpoint}1/",
         ),
-        ApiTestCase(
-            ["admin2", "auditor2"], "post", 404, endpoint="{endpoint}1/repeat/"
-        ),
-        ApiTestCase(
-            ["reader1", "reader2"], "post", 403, endpoint="{endpoint}1/repeat/"
-        ),
-        ApiTestCase(
-            ["admin1", "auditor1"], "post", 400, endpoint="{endpoint}1/repeat/"
-        ),
+        ApiTestCase(["admin2", "auditor2"], "post", 404, endpoint="{endpoint}1/repeat/"),
+        ApiTestCase(["reader1", "reader2"], "post", 403, endpoint="{endpoint}1/repeat/"),
+        ApiTestCase(["admin1", "auditor1"], "post", 400, endpoint="{endpoint}1/repeat/"),
         ApiTestCase(
             ["auditor1"],
             "post",

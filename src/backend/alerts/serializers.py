@@ -30,16 +30,12 @@ class AlertSerializer(ModelSerializer):
         extra_kwargs = {"subscribe_all_members": {"write_only": True}}
 
     def get_subscribed(self, instance: Any) -> bool:
-        return instance.subscribers.filter(
-            pk=self.context.get("request").user.id
-        ).exists()
+        return instance.subscribers.filter(pk=self.context.get("request").user.id).exists()
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         attrs = super().validate(attrs)
         if attrs.get("mode") == AlertMode.FILTER and not attrs.get("value"):
-            raise ValidationError(
-                "Value is required when the alert mode is 'filter'", code="value"
-            )
+            raise ValidationError("Value is required when the alert mode is 'filter'", code="value")
         attrs["enabled"] = True
         return attrs
 

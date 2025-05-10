@@ -96,12 +96,7 @@ class TaskSerializer(RelatedNotesSerializer):
                 return status
         if instance.executions.count() == 0:
             return Status.REQUESTED
-        elif (
-            instance.executions.exclude(
-                status__in=[Status.COMPLETED, Status.SKIPPED]
-            ).count()
-            == 0
-        ):
+        elif instance.executions.exclude(status__in=[Status.COMPLETED, Status.SKIPPED]).count() == 0:
             return Status.COMPLETED
         return Status.REQUESTED
 
@@ -136,14 +131,13 @@ class TaskSerializer(RelatedNotesSerializer):
                 value=attrs.get("intensity"),
             ).exists():
                 raise ValidationError(
-                    f'Invalid intensity {attrs["intensity"]} for tool {cast(Configuration, attrs.get("configuration")).tool.name}',
+                    f"Invalid intensity {attrs['intensity']} for tool {cast(Configuration, attrs.get('configuration')).tool.name}",
                     code="intensity",
                 )
             for input_type, field in [
                 (InputTypeName.TECHNOLOGY, "input_technologies"),
                 (InputTypeName.VULNERABILITY, "input_vulnerabilities"),
             ]:
-
                 if not Input.objects.filter(
                     argument__tool=cast(Configuration, attrs.get("configuration")).tool,
                     type__name=input_type,

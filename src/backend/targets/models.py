@@ -19,20 +19,14 @@ logger = logging.getLogger()
 
 
 class Target(BaseInput):
-    project = models.ForeignKey(
-        Project, related_name="targets", on_delete=models.CASCADE
-    )
-    target = models.TextField(
-        max_length=100, validators=[TargetValidator(Regex.TARGET.value)]
-    )
+    project = models.ForeignKey(Project, related_name="targets", on_delete=models.CASCADE)
+    target = models.TextField(max_length=100, validators=[TargetValidator(Regex.TARGET.value)])
     type = models.TextField(max_length=10, choices=TargetType.choices)
 
     filters = [BaseInput.Filter(type=TargetType, field="type")]
 
     class Meta:
-        constraints = [
-            models.UniqueConstraint(fields=["project", "target"], name="unique_target")
-        ]
+        constraints = [models.UniqueConstraint(fields=["project", "target"], name="unique_target")]
 
     @staticmethod
     def get_type(target: str) -> str:

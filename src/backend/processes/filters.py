@@ -8,15 +8,9 @@ from users.models import User
 
 
 class ProcessFilter(LikeFilter):
-    configuration = ModelChoiceFilter(
-        queryset=Configuration.objects.all(), field_name="steps__configuration"
-    )
-    tool = ModelChoiceFilter(
-        queryset=Tool.objects.all(), field_name="steps__configuration__tool"
-    )
-    stage = ChoiceFilter(
-        field_name="steps__configuration__stage", choices=Stage.choices
-    )
+    configuration = ModelChoiceFilter(queryset=Configuration.objects.all(), field_name="steps__configuration")
+    tool = ModelChoiceFilter(queryset=Tool.objects.all(), field_name="steps__configuration__tool")
+    stage = ChoiceFilter(field_name="steps__configuration__stage", choices=Stage.choices)
     tag = CharFilter(field_name="tags__name")
 
     class Meta:
@@ -30,9 +24,7 @@ class ProcessFilter(LikeFilter):
 
 class StepFilter(FilterSet):
     owner = ModelChoiceFilter(queryset=User.objects.all(), field_name="process__owner")
-    tool = ModelChoiceFilter(
-        queryset=Tool.objects.all(), field_name="configuration__tool"
-    )
+    tool = ModelChoiceFilter(queryset=Tool.objects.all(), field_name="configuration__tool")
     stage = ChoiceFilter(field_name="configuration__stage", choices=Stage.choices)
     tag = CharFilter(field_name="configuration__tool", lookup_expr="in")
 

@@ -23,9 +23,7 @@ class TargetValidator(RegexValidator):
     def __call__(self, value: str | None) -> None:
         super().__call__(value)
         if not value:
-            raise ValidationError(
-                "Target is required", code=self.code, params={"value": value}
-            )
+            raise ValidationError("Target is required", code=self.code, params={"value": value})
         denylist = TargetDenylist.objects.all().values_list("target", flat=True)
         if value in denylist:
             raise ValidationError(

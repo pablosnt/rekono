@@ -32,12 +32,7 @@ class BaseTelegram:
     def _get_app(self) -> Optional[Application]:
         if self.settings and self.settings.secret:
             try:
-                return (
-                    Application.builder()
-                    .token(self.settings.secret)
-                    .post_init(self._post_init)
-                    .build()
-                )
+                return Application.builder().token(self.settings.secret).post_init(self._post_init).build()
             except (InvalidToken, Forbidden):
                 self._handle_invalid_token()
         return None
@@ -45,9 +40,7 @@ class BaseTelegram:
     async def _post_init(self, application: Application) -> None:
         pass
 
-    def _send_message(
-        self, chat: TelegramChat, message: str, reply_markup: Any = None
-    ) -> None:
+    def _send_message(self, chat: TelegramChat, message: str, reply_markup: Any = None) -> None:
         if self.app and self.app.bot:
             try:
                 asyncio.run(

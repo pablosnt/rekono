@@ -15,12 +15,8 @@ class Process(BaseLike):
         validators=[Validator(Regex.NAME.value, code="name")],
     )
     # TODO: Review default process descriptions
-    description = models.TextField(
-        max_length=300, validators=[Validator(Regex.TEXT.value, code="description")]
-    )
-    owner = models.ForeignKey(
-        AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True
-    )
+    description = models.TextField(max_length=300, validators=[Validator(Regex.TEXT.value, code="description")])
+    owner = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True)
     tags = TaggableManager()
 
     def __str__(self) -> str:
@@ -43,11 +39,7 @@ class Step(BaseModel):
     )
 
     class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=["process", "configuration"], name="unique_step"
-            )
-        ]
+        constraints = [models.UniqueConstraint(fields=["process", "configuration"], name="unique_step")]
 
     def __str__(self) -> str:
         """Instance representation in text format.
