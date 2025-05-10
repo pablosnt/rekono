@@ -64,11 +64,11 @@ jobs:
           fetch-depth: 0
 
       - name: Install UV
-        if: ${{ steps.changes.outputs.backend == 'true' }}
+        if: ${{ steps.changes.outputs.path == 'true' }}
         uses: astral-sh/setup-uv@v6
       
       - name: Install Python
-        if: ${{ steps.changes.outputs.backend == 'true' }}
+        if: ${{ steps.changes.outputs.path == 'true' }}
         run: uv python install
 
       - name: Installation

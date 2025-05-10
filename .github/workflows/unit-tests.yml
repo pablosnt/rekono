@@ -26,15 +26,12 @@ jobs:
           sudo systemctl start redis-server
 
       - name: Install UV
-        if: ${{ steps.changes.outputs.backend == 'true' }}
         uses: astral-sh/setup-uv@v6
       
       - name: Install Python
-        if: ${{ steps.changes.outputs.backend == 'true' }}
         run: uv python install
       
       - name: Install dependencies
-        if: ${{ steps.changes.outputs.backend == 'true' }}
         run: uv sync --locked
 
       - name: Run unit tests
