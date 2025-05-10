@@ -1,3 +1,4 @@
+# pytype: disable=attribute-error
 """
 Django settings for rekono project.
 

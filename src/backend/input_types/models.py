@@ -27,12 +27,13 @@ class InputType(BaseModel):
         """
         return self.name
 
-    def _get_class_from_reference(self, reference: str) -> BaseInput:
+    def _get_class_from_reference(self, reference: str) -> BaseInput | None:
         if not reference:
             return None
         app_label, model_name = reference.split(".", 1)
         return apps.get_model(app_label=app_label, model_name=model_name)
 
+    # TODO: Replace Optional syntax by | None
     def get_model_class(self) -> Optional[BaseInput]:
         """Get related model from 'model' reference.
 

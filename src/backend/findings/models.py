@@ -156,7 +156,7 @@ class Path(Finding):
                 value += "/"
         return value
 
-    def filter(self, input: Any, target: Target = None) -> bool:
+    def filter(self, input: Any, target: Target | None = None) -> bool:
         filter = super().filter(input, target)
         if self.port:
             target_port = TargetPort.objects.filter(target=target, port=self.port.port).first()
