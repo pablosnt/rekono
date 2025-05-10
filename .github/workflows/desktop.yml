@@ -1,119 +1,119 @@
-name: Desktop
-on:
-  release:
-    types: [published]
+# name: Desktop
+# on:
+#   release:
+#     types: [published]
 
-jobs:
-  docker-image:
-    name: Docker Image
-    runs-on: ubuntu-latest
-    environment: docker-hub
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+# jobs:
+#   docker-image:
+#     name: Docker Image
+#     runs-on: ubuntu-latest
+#     environment: docker-hub
+#     steps:
+#       - name: Checkout
+#         uses: actions/checkout@v4
+#         with:
+#           fetch-depth: 0
       
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 16
+#       - uses: actions/setup-node@v4
+#         with:
+#           node-version: 16
       
-      - name: Install dependencies
-        working-directory: src/frontend
-        run: npm install .
+#       - name: Install dependencies
+#         working-directory: src/frontend
+#         run: npm install .
 
-      - name: Configure Rekono backend
-        working-directory: src/frontend
-        run: echo "VUE_APP_DESKTOP_BACKEND_URL=http://127.0.0.1:8000" > .env.production
+#       - name: Configure Rekono backend
+#         working-directory: src/frontend
+#         run: echo "VUE_APP_DESKTOP_BACKEND_URL=http://127.0.0.1:8000" > .env.production
       
-      - name: Generate Desktop UI
-        working-directory: src/frontend
-        run: npm run electron:build
+#       - name: Generate Desktop UI
+#         working-directory: src/frontend
+#         run: npm run electron:build
       
-      - name: Build Docker image
-        run: docker build --build-arg REKONO_VERSION=${{ github.event.release.name }} --file docker/debian/Dockerfile --tag ${{ secrets.DOCKER_USER }}/rekono:${{ github.event.release.name }} .
+#       - name: Build Docker image
+#         run: docker build --build-arg REKONO_VERSION=${{ github.event.release.name }} --file docker/debian/Dockerfile --tag ${{ secrets.DOCKER_USER }}/rekono:${{ github.event.release.name }} .
 
-      - name: Publish Docker image in Docker Hub
-        run: |
-          docker tag ${{ secrets.DOCKER_USER }}/rekono:${{ github.event.release.name }} ${{ secrets.DOCKER_USER }}/rekono:latest
-          docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }}
-          docker push ${{ secrets.DOCKER_USER }}/rekono:${{ github.event.release.name }}
-          docker push ${{ secrets.DOCKER_USER }}/rekono:latest
-          docker logout
+#       - name: Publish Docker image in Docker Hub
+#         run: |
+#           docker tag ${{ secrets.DOCKER_USER }}/rekono:${{ github.event.release.name }} ${{ secrets.DOCKER_USER }}/rekono:latest
+#           docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }}
+#           docker push ${{ secrets.DOCKER_USER }}/rekono:${{ github.event.release.name }}
+#           docker push ${{ secrets.DOCKER_USER }}/rekono:latest
+#           docker logout
 
-  debian-package:
-    name: Debian Package
-    runs-on: ubuntu-latest
-    environment: gitlab
-    needs: docker-image
-    steps:
-      - name: Checkout GitLab repository
-        run: git clone https://gitlab.com/pablosnt/rekono.git rekono-deb
+#   debian-package:
+#     name: Debian Package
+#     runs-on: ubuntu-latest
+#     environment: gitlab
+#     needs: docker-image
+#     steps:
+#       - name: Checkout GitLab repository
+#         run: git clone https://gitlab.com/pablosnt/rekono.git rekono-deb
 
-      - name: Update debian/changelog
-        working-directory: rekono-deb/debian
-        shell: python
-        run: |
-          import pytz
-          from datetime import datetime
-          with open('changelog', 'r') as changelog:
-            old_changes = changelog.read()
-          tz = pytz.timezone('Europe/Madrid')
-          d = tz.localize(datetime.now())
-          change_time = d.strftime('%a, %d %b %Y %H:%M:%S %z')
-          new_changes = f'rekono-kbx (${{ github.event.release.name }}) kali-dev; urgency=medium\n\n  * Update Rekono version to ${{ github.event.release.name }}.\n\n -- Pablo Santiago López <${{ secrets.GITLAB_EMAIL }}>  {change_time}\n\n'
-          with open('changelog', 'w') as changelog:
-            changelog.write(new_changes + old_changes)
+#       - name: Update debian/changelog
+#         working-directory: rekono-deb/debian
+#         shell: python
+#         run: |
+#           import pytz
+#           from datetime import datetime
+#           with open('changelog', 'r') as changelog:
+#             old_changes = changelog.read()
+#           tz = pytz.timezone('Europe/Madrid')
+#           d = tz.localize(datetime.now())
+#           change_time = d.strftime('%a, %d %b %Y %H:%M:%S %z')
+#           new_changes = f'rekono-kbx (${{ github.event.release.name }}) kali-dev; urgency=medium\n\n  * Update Rekono version to ${{ github.event.release.name }}.\n\n -- Pablo Santiago López <${{ secrets.GITLAB_EMAIL }}>  {change_time}\n\n'
+#           with open('changelog', 'w') as changelog:
+#             changelog.write(new_changes + old_changes)
       
-      - name: Commit changes to GitLab
-        working-directory: rekono-deb
-        run: |
-          git config user.name 'Pablo Santiago'
-          git config user.email '${{ secrets.GITLAB_EMAIL }}'
-          git checkout -b release/${{ github.event.release.name }}
-          git add .
-          git commit -m "Update Rekono version to ${{ github.event.release.name }}"
-          git config credential.helper '!f() { sleep 1; echo "username=${{ secrets.GITLAB_USER }}"; echo "password=${{ secrets.GITLAB_TOKEN }}"; }; f'
-          git push --set-upstream origin release/${{ github.event.release.name }}
+#       - name: Commit changes to GitLab
+#         working-directory: rekono-deb
+#         run: |
+#           git config user.name 'Pablo Santiago'
+#           git config user.email '${{ secrets.GITLAB_EMAIL }}'
+#           git checkout -b release/${{ github.event.release.name }}
+#           git add .
+#           git commit -m "Update Rekono version to ${{ github.event.release.name }}"
+#           git config credential.helper '!f() { sleep 1; echo "username=${{ secrets.GITLAB_USER }}"; echo "password=${{ secrets.GITLAB_TOKEN }}"; }; f'
+#           git push --set-upstream origin release/${{ github.event.release.name }}
       
-      - name: GitLab merge request
-        shell: python
-        env:
-          GITLAB_PROJECT_ID: 45783845
-        run: |
-          import requests
-          headers = {
-            'PRIVATE-TOKEN': '${{ secrets.GITLAB_TOKEN }}'
-          }
-          data = {
-            'title': 'Update Rekono version to ${{ github.event.release.name }}',
-            'source_branch': 'release/${{ github.event.release.name }}',
-            'target_branch': 'kali/master',
-          }
-          response = requests.post('https://gitlab.com/api/v4/projects/${{ env.GITLAB_PROJECT_ID }}/merge_requests', data=data, headers=headers)
-          if response.status_code != 201:
-            print(response.text)
-          response.raise_for_status()
+#       - name: GitLab merge request
+#         shell: python
+#         env:
+#           GITLAB_PROJECT_ID: 45783845
+#         run: |
+#           import requests
+#           headers = {
+#             'PRIVATE-TOKEN': '${{ secrets.GITLAB_TOKEN }}'
+#           }
+#           data = {
+#             'title': 'Update Rekono version to ${{ github.event.release.name }}',
+#             'source_branch': 'release/${{ github.event.release.name }}',
+#             'target_branch': 'kali/master',
+#           }
+#           response = requests.post('https://gitlab.com/api/v4/projects/${{ env.GITLAB_PROJECT_ID }}/merge_requests', data=data, headers=headers)
+#           if response.status_code != 201:
+#             print(response.text)
+#           response.raise_for_status()
 
-      - name: GitLab issue in Kali Linux repository
-        shell: python
-        env:
-          GITLAB_PROJECT_ID: 48406619
-        run: |
-          import requests
-          headers = {
-            'PRIVATE-TOKEN': '${{ secrets.GITLAB_TOKEN }}'
-          }
-          data = {
-            'title': 'New Rekono version ${{ github.event.release.name }}',
-            'description': '''Please, upgrade the `rekono-kbx` Kali Linux package to the latest version `${{ github.event.release.name }}`.
+#       - name: GitLab issue in Kali Linux repository
+#         shell: python
+#         env:
+#           GITLAB_PROJECT_ID: 48406619
+#         run: |
+#           import requests
+#           headers = {
+#             'PRIVATE-TOKEN': '${{ secrets.GITLAB_TOKEN }}'
+#           }
+#           data = {
+#             'title': 'New Rekono version ${{ github.event.release.name }}',
+#             'description': '''Please, upgrade the `rekono-kbx` Kali Linux package to the latest version `${{ github.event.release.name }}`.
 
-            New version details:
-            - [GitHub release](https://github.com/pablosnt/rekono/releases/tag/${{ github.event.release.name }})
-            - [Rekono changelog](https://github.com/pablosnt/rekono/blob/main/CHANGELOG.md)
+#             New version details:
+#             - [GitHub release](https://github.com/pablosnt/rekono/releases/tag/${{ github.event.release.name }})
+#             - [Rekono changelog](https://github.com/pablosnt/rekono/blob/main/CHANGELOG.md)
 
-            Thank you very much!
-            ''',
-          }
-          response = requests.post('https://gitlab.com/api/v4/projects/${{ env.GITLAB_PROJECT_ID }}/issues', data=data, headers=headers)
-          response.raise_for_status()
+#             Thank you very much!
+#             ''',
+#           }
+#           response = requests.post('https://gitlab.com/api/v4/projects/${{ env.GITLAB_PROJECT_ID }}/issues', data=data, headers=headers)
+#           response.raise_for_status()

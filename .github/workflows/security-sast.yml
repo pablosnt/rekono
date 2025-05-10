@@ -50,16 +50,6 @@ jobs:
             arguments: --exit-warning --json
     name: ${{ matrix.name }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Setup Python 3
-        uses: actions/setup-python@v5
-        with:
-          python-version: 3.13
-      
       - uses: dorny/paths-filter@3c49e64ca26115121162fb767bc6af9e8d059f1a
         id: changes
         name: Path filter
@@ -68,17 +58,30 @@ jobs:
             path:
               - '${{ matrix.path }}/**'
 
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install UV
+        if: ${{ steps.changes.outputs.backend == 'true' }}
+        uses: astral-sh/setup-uv@v6
+      
+      - name: Install Python
+        if: ${{ steps.changes.outputs.backend == 'true' }}
+        run: uv python install
+
       - name: Installation
         if: ${{ matrix.version == 'latest' && (steps.changes.outputs.path == 'true' || github.event_name != 'pull_request') }}
-        run: pip install ${{ matrix.tool }}
+        run: uv tool install ${{ matrix.tool }}
       
       - name: Installation
         if: ${{ matrix.version != 'latest' && (steps.changes.outputs.path == 'true' || github.event_name != 'pull_request') }}
-        run: pip install ${{ matrix.tool }}==${{ matrix.version }}
+        run: uv tool install ${{ matrix.tool }}==${{ matrix.version }}
       
       - name: Scan
         if: ${{ steps.changes.outputs.path == 'true' || github.event_name != 'pull_request' }}
-        run: ${{ matrix.tool }} ${{ matrix.arguments }} -o ${{ matrix.report }} ${{ matrix.path }}
+        run: uvx ${{ matrix.tool }} ${{ matrix.arguments }} -o ${{ matrix.report }} ${{ matrix.path }}
       
       - name: Upload report as GitHub artifact
         if: ${{ !cancelled() && (steps.changes.outputs.path == 'true' || github.event_name != 'pull_request') }}

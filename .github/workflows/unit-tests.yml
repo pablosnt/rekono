@@ -25,17 +25,22 @@ jobs:
           sudo apt install redis-server -y
           sudo systemctl start redis-server
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: 3.13
-
-      - name: Install Python dependencies
-        run: python3 -m pip install -r src/backend/requirements-dev.txt
+      - name: Install UV
+        if: ${{ steps.changes.outputs.backend == 'true' }}
+        uses: astral-sh/setup-uv@v6
+      
+      - name: Install Python
+        if: ${{ steps.changes.outputs.backend == 'true' }}
+        run: uv python install
+      
+      - name: Install dependencies
+        if: ${{ steps.changes.outputs.backend == 'true' }}
+        run: uv sync --locked
 
       - name: Run unit tests
         working-directory: src/backend
-        run: coverage run manage.py test
+        run: uv run coverage run manage.py test
       
       - name: Check coverage
         working-directory: src/backend
-        run: coverage report -m --skip-covered --omit="tests/*,platforms/telegram_app/bot/*,platforms/telegram_app/framework.py,platforms/**/notifications.py" --fail-under=$REQUIRED_COVERAGE
+        run: uv run coverage report -m --skip-covered --omit="tests/*,platforms/telegram_app/bot/*,platforms/telegram_app/framework.py,platforms/**/notifications.py" --fail-under=$REQUIRED_COVERAGE
