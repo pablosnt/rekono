@@ -17,7 +17,7 @@ export function useMarkdown() {
         } else {
           result = hljs.highlightAuto(str).value;
         }
-      /* eslint-disable-next-line no-empty, @typescript-eslint/no-unused-vars */
+        /* eslint-disable-next-line no-empty, @typescript-eslint/no-unused-vars */
       } catch (__) {}
       if (result.length > 0) {
         result = '<pre><code class="hljs">' + result + "</code></pre>";
