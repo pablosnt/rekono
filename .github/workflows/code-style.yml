@@ -18,34 +18,34 @@ jobs:
               - 'src/backend/**'
 
       - name: Checkout
-        if: ${{ steps.changes.outputs.backend == 'true' }}
+        if: ${{ steps.changes.outputs.backend == 'true' || github.event_name != 'pull_request' }}
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Install UV
-        if: ${{ steps.changes.outputs.backend == 'true' }}
+        if: ${{ steps.changes.outputs.backend == 'true' || github.event_name != 'pull_request' }}
         uses: astral-sh/setup-uv@v6
       
       - name: Install Python
-        if: ${{ steps.changes.outputs.backend == 'true' }}
+        if: ${{ steps.changes.outputs.backend == 'true' || github.event_name != 'pull_request' }}
         run: uv python install
       
       - name: Install dependencies
-        if: ${{ steps.changes.outputs.backend == 'true' }}
+        if: ${{ steps.changes.outputs.backend == 'true' || github.event_name != 'pull_request' }}
         run: uv sync --locked
 
       - name: Ruff
-        if: ${{ steps.changes.outputs.backend == 'true' }}
+        if: ${{ steps.changes.outputs.backend == 'true' || github.event_name != 'pull_request' }}
         working_directory: src/backend
         run: uvx ruff --check
       
       - name: PyType
-        if: ${{ steps.changes.outputs.backend == 'true' }} && (success() || failure())
+        if: (${{ steps.changes.outputs.backend == 'true' || github.event_name != 'pull_request' }}) && (success() || failure())
         run: uvx pytype src/backend
       
       - name: Flake8
-        if: ${{ steps.changes.outputs.backend == 'true' }} && (success() || failure())
+        if: (${{ steps.changes.outputs.backend == 'true' || github.event_name != 'pull_request' }}) && (success() || failure())
         run: uvx flake8 --ignore=E203,E501,W503,W605 src/backend
 
   frontend:
@@ -60,22 +60,22 @@ jobs:
               - 'src/frontend/**'
 
       - name: Checkout
-        if: ${{ steps.changes.outputs.frontend == 'true' }}
+        if: ${{ steps.changes.outputs.frontend == 'true' || github.event_name != 'pull_request' }}
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
       
       - name: Install NPM dependencies
-        if: ${{ steps.changes.outputs.frontend == 'true' }}
+        if: ${{ steps.changes.outputs.frontend == 'true' || github.event_name != 'pull_request' }}
         working-directory: src/frontend
         run: npm install .
       
       - name: ESLint
         working-directory: src/frontend/
-        if: ${{ steps.changes.outputs.frontend == 'true' }}
+        if: ${{ steps.changes.outputs.frontend == 'true' || github.event_name != 'pull_request' }}
         run: npm run eslint
       
       - name: Prettier
         working-directory: src/frontend/
-        if: ${{ steps.changes.outputs.frontend == 'true' }} && (success() || failure())
+        if: (${{ steps.changes.outputs.frontend == 'true' || github.event_name != 'pull_request' }}) && (success() || failure())
         run: npm run prettier
