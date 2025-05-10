@@ -65,7 +65,7 @@ class Host(Finding):
     longitude = models.FloatField(blank=True, null=True)
 
     unique_fields = ["ip"]
-    filters = [Finding.Filter(TargetType, "ip", lambda a: Target.get_type(a))]
+    filters = [Finding.Filter(TargetType, "ip", processor=lambda a: Target.get_type(a))]
 
     def parse(self, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
         return {
