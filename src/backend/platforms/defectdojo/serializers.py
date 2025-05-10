@@ -113,9 +113,7 @@ class DefectDojoProductTypeSerializer(BaseDefectDojoSerializer):
     )
 
     def create(self, validated_data: dict[str, Any]) -> dict[str, Any]:
-        return self.client.create_product_type(
-            validated_data["name"], validated_data["description"]
-        )
+        return self.client.create_product_type(validated_data["name"], validated_data["description"])
 
 
 class DefectDojoProductSerializer(BaseDefectDojoSerializer):
@@ -163,10 +161,7 @@ class DefectDojoProductSerializer(BaseDefectDojoSerializer):
             (
                 [self.client.settings.tag]
                 if self.client.settings.tag
-                else []
-                + list(
-                    validated_data["project"].tags.all().values_list("slug", flat=True)
-                )
+                else [] + list(validated_data["project"].tags.all().values_list("slug", flat=True))
             ),
         )
 

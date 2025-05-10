@@ -39,22 +39,12 @@ class Validator(RegexValidator):
 
     def __call__(self, value: str | None) -> None:
         if not value:
-            raise ValidationError(
-                "Value is required", code=self.code, params={"value": value}
-            )
+            raise ValidationError("Value is required", code=self.code, params={"value": value})
         regex_matches = re.fullmatch(self.regex, value)
-        invalid_input = (
-            not bool(regex_matches) if self.inverse_match else bool(regex_matches)
-        )
-        is_injection = (
-            bool(re.findall(Regex.INJECTION.value, value))
-            if self.deny_injections
-            else False
-        )
+        invalid_input = not bool(regex_matches) if self.inverse_match else bool(regex_matches)
+        is_injection = bool(re.findall(Regex.INJECTION.value, value)) if self.deny_injections else False
         if invalid_input or is_injection:
-            logger.warning(
-                f"[Security] Value '{value}' doesn't match the allowed regex"
-            )
+            logger.warning(f"[Security] Value '{value}' doesn't match the allowed regex")
             raise ValidationError(self.message, code=self.code, params={"value": value})
 
 

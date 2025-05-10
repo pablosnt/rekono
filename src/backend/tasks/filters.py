@@ -7,12 +7,8 @@ from tools.models import Tool
 
 
 class TaskFilter(FilterSet):
-    project = ModelChoiceFilter(
-        queryset=Project.objects.all(), field_name="target__project"
-    )
-    tool = ModelChoiceFilter(
-        queryset=Tool.objects.all(), field_name="configuration__tool"
-    )
+    project = ModelChoiceFilter(queryset=Project.objects.all(), field_name="target__project")
+    tool = ModelChoiceFilter(queryset=Tool.objects.all(), field_name="configuration__tool")
     stage = ChoiceFilter(field_name="configuration__stage", choices=Stage.choices)
 
     class Meta:

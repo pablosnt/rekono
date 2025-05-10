@@ -13,12 +13,8 @@ from targets.models import Target
 class TargetPort(BaseInput):
     """Target port model."""
 
-    target = models.ForeignKey(
-        Target, related_name="target_ports", on_delete=models.CASCADE
-    )
-    port = models.IntegerField(
-        validators=[MinValueValidator(0), MaxValueValidator(65535)]
-    )
+    target = models.ForeignKey(Target, related_name="target_ports", on_delete=models.CASCADE)
+    port = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(65535)])
     path = models.TextField(
         max_length=100,
         validators=[Validator(Regex.PATH.value, code="path")],
@@ -29,11 +25,7 @@ class TargetPort(BaseInput):
     filters = [BaseInput.Filter(type=int, field="port")]
 
     class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=["target", "port"], name="unique_target_port"
-            )
-        ]
+        constraints = [models.UniqueConstraint(fields=["target", "port"], name="unique_target_port")]
 
     def parse(self, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
         """Get useful information from this instance to be used in tool execution as argument.
@@ -45,9 +37,7 @@ class TargetPort(BaseInput):
             dict[str, Any]: Useful information for tool executions, including accumulated if setted
         """
         output = self.authentication.parse(accumulated) if self.authentication else {}
-        ports = (accumulated or {}).get(InputKeyword.PORTS.name.lower(), []) + [
-            self.port
-        ]
+        ports = (accumulated or {}).get(InputKeyword.PORTS.name.lower(), []) + [self.port]
         path = self._clean_path(self.path)
         return {
             **output,
@@ -57,9 +47,7 @@ class TargetPort(BaseInput):
             InputKeyword.PORTS.name.lower(): ports,
             InputKeyword.ENDPOINT.name.lower(): self._clean_path(path),
             InputKeyword.PORTS_COMMAS.name.lower(): ",".join([str(p) for p in ports]),
-            InputKeyword.URL.name.lower(): self._get_url(
-                self.target.target, self.port, path
-            ),
+            InputKeyword.URL.name.lower(): self._get_url(self.target.target, self.port, path),
         }
 
     def __str__(self) -> str:

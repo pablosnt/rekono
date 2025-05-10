@@ -10,16 +10,8 @@ class Sslscan(BaseParser):
     technologies: list[Technology] = []
 
     def create_finding(self, finding_type: Finding, **fields: Any) -> Finding:
-        if (
-            finding_type == Vulnerability
-            and not fields.get("technology")
-            and fields.get("sslversion")
-        ):
-            search = [
-                t
-                for t in self.technologies
-                if f"{t.name}v{t.version}" == fields.get("sslversion")
-            ]
+        if finding_type == Vulnerability and not fields.get("technology") and fields.get("sslversion"):
+            search = [t for t in self.technologies if f"{t.name}v{t.version}" == fields.get("sslversion")]
             fields["technology"] = search[0] if search else None
             fields.pop("sslversion")
         return super().create_finding(finding_type, **fields)
@@ -47,11 +39,7 @@ class Sslscan(BaseParser):
                             technology=technology,
                             name=f"Insecure {technology.name} version supported",
                             description=f"{technology.name} {technology.version} is supported",
-                            severity=(
-                                Severity.MEDIUM
-                                if technology.name == "TLS"
-                                else Severity.HIGH
-                            ),
+                            severity=(Severity.MEDIUM if technology.name == "TLS" else Severity.HIGH),
                             # CWE-326: Inadequate Encryption Strength
                             cwe="CWE-326",
                         )
@@ -70,8 +58,7 @@ class Sslscan(BaseParser):
                             },
                         ),
                         (
-                            lambda: item.tag == "heartbleed"
-                            and item.attrib["vulnerable"] == "1",
+                            lambda: item.tag == "heartbleed" and item.attrib["vulnerable"] == "1",
                             {
                                 "name": f"Heartbleed in {item.attrib.get('sslversion')}",
                                 "cve": "CVE-2014-0160",

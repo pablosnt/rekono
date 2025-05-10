@@ -28,15 +28,11 @@ class HttpHeaderTest(ApiTest):
         ApiTestCase(["auditor1", "auditor2", "reader1", "reader2"], "post", 403, data),
         ApiTestCase(["admin2"], "post", 201, data, {"id": 2, **data}),
         ApiTestCase(["admin1"], "post", 400, data),
-        ApiTestCase(
-            ["admin1", "admin2", "auditor1", "reader1", "reader2"], "post", 403, user
-        ),
+        ApiTestCase(["admin1", "admin2", "auditor1", "reader1", "reader2"], "post", 403, user),
         ApiTestCase(["auditor2"], "post", 201, user, {"id": 3, **user}),
         ApiTestCase(["auditor2"], "post", 400, user),
         ApiTestCase(["admin2"], "get", 200, expected=[{"id": 2, **data}]),
-        ApiTestCase(
-            ["auditor2"], "get", 200, expected=[{"id": 3, **user}, {"id": 2, **data}]
-        ),
+        ApiTestCase(["auditor2"], "get", 200, expected=[{"id": 3, **user}, {"id": 2, **data}]),
         ApiTestCase(
             ["admin1", "auditor1"],
             "get",
@@ -57,9 +53,7 @@ class HttpHeaderTest(ApiTest):
             new_data,
             endpoint="{endpoint}3/",
         ),
-        ApiTestCase(
-            ["admin1"], "put", 200, new_data, {"id": 2, **new_data}, "{endpoint}2/"
-        ),
+        ApiTestCase(["admin1"], "put", 200, new_data, {"id": 2, **new_data}, "{endpoint}2/"),
         ApiTestCase(
             ["admin1", "admin2", "auditor1", "auditor2"],
             "get",

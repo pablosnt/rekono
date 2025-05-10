@@ -38,9 +38,7 @@ class RekonoUserManager(UserManager):
             return self.generate_otp(model)
         return otp
 
-    def get_otp_expiration_time(
-        self, time: dict[str, int] = {"hours": CONFIG.otp_expiration_hours}
-    ) -> datetime:
+    def get_otp_expiration_time(self, time: dict[str, int] = {"hours": CONFIG.otp_expiration_hours}) -> datetime:
         return timezone.now() + timedelta(**time)
 
     def assign_role(self, user: Any, role: Role) -> None:
@@ -80,9 +78,7 @@ class RekonoUserManager(UserManager):
         logger.info(f"[User] User {user.id} has been invited with role {role}")
         return user
 
-    def create_user(
-        self, user: Any, username: str, first_name: str, last_name: str, password: str
-    ) -> Any:
+    def create_user(self, user: Any, username: str, first_name: str, last_name: str, password: str) -> Any:
         user.username = username
         user.first_name = first_name
         user.last_name = last_name
@@ -108,9 +104,7 @@ class RekonoUserManager(UserManager):
         )
         return user
 
-    def create_superuser(
-        self, username: str, email: str, password: str, **extra_fields: Any
-    ) -> Any:
+    def create_superuser(self, username: str, email: str, password: str, **extra_fields: Any) -> Any:
         """Create a new superuser (Admin role, platform administrator and staff).
 
         Args:
@@ -180,11 +174,7 @@ class RekonoUserManager(UserManager):
         user = self._update_otp(
             user,
             hash(plain_otp),
-            (
-                self.get_otp_expiration_time(time)
-                if time is not None
-                else self.get_otp_expiration_time()
-            ),
+            (self.get_otp_expiration_time(time) if time is not None else self.get_otp_expiration_time()),
         )
         return plain_otp
 
@@ -220,9 +210,7 @@ class RekonoUserManager(UserManager):
 
     def invalidate_all_tokens(self, user: Any) -> Any:
         for token in OutstandingToken.objects.filter(user=user).exclude(
-            id__in=BlacklistedToken.objects.filter(token__user=user).values_list(
-                "token_id", flat=True
-            )
+            id__in=BlacklistedToken.objects.filter(token__user=user).values_list("token_id", flat=True)
         ):
             BlacklistedToken.objects.create(token=token)
         return user
@@ -230,9 +218,7 @@ class RekonoUserManager(UserManager):
     def register_mfa(self, user: Any) -> str:
         user.secret = pyotp.random_base32()
         user.save(update_fields=["_mfa_key"])
-        return pyotp.totp.TOTP(user.secret).provisioning_uri(
-            user.email, issuer_name="Rekono"
-        )
+        return pyotp.totp.TOTP(user.secret).provisioning_uri(user.email, issuer_name="Rekono")
 
     def verify_mfa(self, otp: str, user: Any) -> bool:
         return pyotp.TOTP(user.secret).verify(otp)
@@ -278,9 +264,7 @@ class User(AbstractUser, BaseEncrypted):
         validators=[FutureDatetimeValidator(code="otp_expiration")],
     )
 
-    _mfa_key = models.TextField(
-        max_length=40, blank=True, null=True, db_column="mfa_key"
-    )
+    _mfa_key = models.TextField(max_length=40, blank=True, null=True, db_column="mfa_key")
     mfa = models.BooleanField(default=False)
 
     notification_scope = models.TextField(  # User notification preferences

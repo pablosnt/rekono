@@ -43,9 +43,9 @@ class OSINT(TriageFinding):
             "title": f"{self.data_type} found using OSINT techniques",
             "description": self.data,
             "severity": Severity.MEDIUM,
-            "date": (
-                self.executions.order_by("-end").first().end or timezone.now()
-            ).strftime(DefectDojoSettings.objects.first().date_format),
+            "date": (self.executions.order_by("-end").first().end or timezone.now()).strftime(
+                DefectDojoSettings.objects.first().date_format
+            ),
         }
 
     def __str__(self) -> str:
@@ -57,9 +57,7 @@ class Host(Finding):
     domain = models.TextField(max_length=500, blank=True, null=True)
     # OS full specification
     os = models.TextField(max_length=250, blank=True, null=True)
-    os_type = models.TextField(
-        max_length=10, choices=HostOS.choices, default=HostOS.OTHER
-    )
+    os_type = models.TextField(max_length=10, choices=HostOS.choices, default=HostOS.OTHER)
     # Geolocation
     country = models.TextField(max_length=100, blank=True, null=True)
     city = models.TextField(max_length=100, blank=True, null=True)
@@ -67,7 +65,7 @@ class Host(Finding):
     longitude = models.FloatField(blank=True, null=True)
 
     unique_fields = ["ip"]
-    filters = [Finding.Filter(TargetType, "ip", lambda a: Target.get_type(a))]
+    filters = [Finding.Filter(TargetType, "ip", processor=lambda a: Target.get_type(a))]
 
     def parse(self, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
         return {
@@ -79,13 +77,11 @@ class Host(Finding):
     def defectdojo(self) -> dict[str, Any]:
         return {
             "title": "Host discovered",
-            "description": " - ".join(
-                [field for field in [self.ip, self.os_type] if field]
-            ),
+            "description": " - ".join([field for field in [self.ip, self.os_type] if field]),
             "severity": Severity.INFO,
-            "date": (
-                self.executions.order_by("-end").first().end or timezone.now()
-            ).strftime(DefectDojoSettings.objects.first().date_format),
+            "date": (self.executions.order_by("-end").first().end or timezone.now()).strftime(
+                DefectDojoSettings.objects.first().date_format
+            ),
         }
 
     def __str__(self) -> str:
@@ -93,16 +89,10 @@ class Host(Finding):
 
 
 class Port(Finding):
-    host = models.ForeignKey(
-        Host, related_name="port", on_delete=models.DO_NOTHING, blank=True, null=True
-    )
+    host = models.ForeignKey(Host, related_name="port", on_delete=models.DO_NOTHING, blank=True, null=True)
     port = models.IntegerField()  # Port number
-    status = models.TextField(
-        max_length=15, choices=PortStatus.choices, default=PortStatus.OPEN
-    )
-    protocol = models.TextField(
-        max_length=5, choices=Protocol.choices, blank=True, null=True
-    )
+    status = models.TextField(max_length=15, choices=PortStatus.choices, default=PortStatus.OPEN)
+    protocol = models.TextField(max_length=5, choices=Protocol.choices, blank=True, null=True)
     service = models.TextField(max_length=50, blank=True, null=True)
 
     unique_fields = ["host", "port", "protocol"]
@@ -112,11 +102,7 @@ class Port(Finding):
     ]
 
     def parse(self, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
-        ports = (
-            [self.port]
-            if not accumulated
-            else accumulated.get(InputKeyword.PORTS.name.lower(), []) + [self.port]
-        )
+        ports = [self.port] if not accumulated else accumulated.get(InputKeyword.PORTS.name.lower(), []) + [self.port]
         output = {
             InputKeyword.PORT.name.lower(): self.port,
             InputKeyword.PORTS.name.lower(): ports,
@@ -127,9 +113,7 @@ class Port(Finding):
                 {
                     InputKeyword.TARGET.name.lower(): f"{self.host.ip}:{self.port}",
                     InputKeyword.HOST.name.lower(): self.host.ip,
-                    InputKeyword.URL.name.lower(): self._get_url(
-                        self.host.ip, self.port
-                    ),
+                    InputKeyword.URL.name.lower(): self._get_url(self.host.ip, self.port),
                 }
             )
         return output
@@ -138,13 +122,11 @@ class Port(Finding):
         description = f"Port: {self.port}\nStatus: {self.status}\nProtocol: {self.protocol}\nService: {self.service}"
         return {
             "title": "Port discovered",
-            "description": (
-                f"Host: {self.host.ip}\n{description}" if self.host else description
-            ),
+            "description": (f"Host: {self.host.ip}\n{description}" if self.host else description),
             "severity": Severity.INFO,
-            "date": (
-                self.executions.order_by("-end").first().end or timezone.now()
-            ).strftime(DefectDojoSettings.objects.first().date_format),
+            "date": (self.executions.order_by("-end").first().end or timezone.now()).strftime(
+                DefectDojoSettings.objects.first().date_format
+            ),
         }
 
     def __str__(self) -> str:
@@ -152,9 +134,7 @@ class Port(Finding):
 
 
 class Path(Finding):
-    port = models.ForeignKey(
-        Port, related_name="path", on_delete=models.DO_NOTHING, blank=True, null=True
-    )
+    port = models.ForeignKey(Port, related_name="path", on_delete=models.DO_NOTHING, blank=True, null=True)
     path = models.TextField(max_length=500)
     # Status received for that path. Probably HTTP status
     status = models.IntegerField(blank=True, null=True)
@@ -176,12 +156,10 @@ class Path(Finding):
                 value += "/"
         return value
 
-    def filter(self, input: Any, target: Target = None) -> bool:
+    def filter(self, input: Any, target: Target | None = None) -> bool:
         filter = super().filter(input, target)
         if self.port:
-            target_port = TargetPort.objects.filter(
-                target=target, port=self.port.port
-            ).first()
+            target_port = TargetPort.objects.filter(target=target, port=self.port.port).first()
             if target_port and target_port.path:
                 filter = filter and self._clean_comparison_path(self.path).startswith(
                     self._clean_comparison_path(target_port.path)
@@ -193,9 +171,7 @@ class Path(Finding):
         output = (
             {
                 **self.port.parse(accumulated),
-                InputKeyword.URL.name.lower(): self._get_url(
-                    self.port.host.ip, self.port.port, path
-                ),
+                InputKeyword.URL.name.lower(): self._get_url(self.port.host.ip, self.port.port, path),
             }
             if self.port
             else {}
@@ -208,9 +184,7 @@ class Path(Finding):
     def defectdojo_endpoint(self, target: Target) -> dict[str, Any]:
         return {
             "protocol": self.port.service if self.port else None,
-            "host": (
-                self.port.host.ip if self.port and self.port.host else target.target
-            ),
+            "host": (self.port.host.ip if self.port and self.port.host else target.target),
             "port": self.port.port if self.port else None,
             "path": self.path,
         }
@@ -228,9 +202,9 @@ class Path(Finding):
             "title": "Path discovered",
             "description": description,
             "severity": Severity.INFO,
-            "date": (
-                self.executions.order_by("-end").first().end or timezone.now()
-            ).strftime(DefectDojoSettings.objects.first().date_format),
+            "date": (self.executions.order_by("-end").first().end or timezone.now()).strftime(
+                DefectDojoSettings.objects.first().date_format
+            ),
         }
 
     def __str__(self) -> str:
@@ -251,9 +225,7 @@ class Technology(Finding):
     reference = models.TextField(max_length=250, blank=True, null=True)
 
     unique_fields = ["port", "name", "version"]
-    filters = [
-        Finding.Filter(str, "name", contains=True, processor=lambda n: n.lower())
-    ]
+    filters = [Finding.Filter(str, "name", contains=True, processor=lambda n: n.lower())]
 
     def parse(self, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
         """Get useful information from this instance to be used in tool execution as argument.
@@ -275,17 +247,13 @@ class Technology(Finding):
         description = f"Technology: {self.name}\nVersion: {self.version}"
         return {
             "title": f"Technology {self.name} detected",
-            "description": (
-                f"{description}\nDetails: {self.description}"
-                if self.description
-                else description
-            ),
+            "description": (f"{description}\nDetails: {self.description}" if self.description else description),
             "severity": Severity.LOW,
             "cwe": 200,  # CWE-200: Exposure of Sensitive Information to Unauthorized Actor
             "references": self.reference,
-            "date": (
-                self.executions.order_by("-end").first().end or timezone.now()
-            ).strftime(DefectDojoSettings.objects.first().date_format),
+            "date": (self.executions.order_by("-end").first().end or timezone.now()).strftime(
+                DefectDojoSettings.objects.first().date_format
+            ),
         }
 
     def __str__(self) -> str:
@@ -324,14 +292,12 @@ class Credential(TriageFinding):
     def defectdojo(self) -> dict[str, Any]:
         return {
             "title": "Credentials exposure",
-            "description": " - ".join(
-                [field for field in [self.email, self.username, self.secret] if field]
-            ),
+            "description": " - ".join([field for field in [self.email, self.username, self.secret] if field]),
             "cwe": 200,  # CWE-200: Exposure of Sensitive Information to Unauthorized Actor
             "severity": Severity.HIGH,
-            "date": (
-                self.executions.order_by("-end").first().end or timezone.now()
-            ).strftime(DefectDojoSettings.objects.first().date_format),
+            "date": (self.executions.order_by("-end").first().end or timezone.now()).strftime(
+                DefectDojoSettings.objects.first().date_format
+            ),
         }
 
     def __str__(self) -> str:
@@ -387,9 +353,9 @@ class Vulnerability(TriageFinding):
             "cve": self.cve,
             "cwe": int(self.cwe.split("-", 1)[1]) if self.cwe else None,
             "references": self.reference,
-            "date": (
-                self.executions.order_by("-end").first().end or timezone.now()
-            ).strftime(DefectDojoSettings.objects.first().date_format),
+            "date": (self.executions.order_by("-end").first().end or timezone.now()).strftime(
+                DefectDojoSettings.objects.first().date_format
+            ),
         }
 
     def __str__(self) -> str:
@@ -429,13 +395,11 @@ class Exploit(TriageFinding):
         return {
             "title": f"Exploit {self.edb_id} found" if self.edb_id else "Exploit found",
             "description": self.title,
-            "severity": (
-                self.vulnerability.severity if self.vulnerability else Severity.MEDIUM
-            ),
+            "severity": (self.vulnerability.severity if self.vulnerability else Severity.MEDIUM),
             "references": self.reference,
-            "date": (
-                self.executions.order_by("-end").first().end or timezone.now()
-            ).strftime(DefectDojoSettings.objects.first().date_format),
+            "date": (self.executions.order_by("-end").first().end or timezone.now()).strftime(
+                DefectDojoSettings.objects.first().date_format
+            ),
         }
 
     def __str__(self) -> str:

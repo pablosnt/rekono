@@ -21,27 +21,13 @@ from tasks.models import Task
 
 class Note(BaseLike):
     project = models.ForeignKey(Project, related_name="notes", on_delete=models.CASCADE)
-    target = models.ForeignKey(
-        Target, related_name="notes", on_delete=models.CASCADE, null=True, blank=True
-    )
-    task = models.ForeignKey(
-        Task, related_name="notes", on_delete=models.CASCADE, null=True, blank=True
-    )
-    execution = models.ForeignKey(
-        Execution, related_name="notes", on_delete=models.CASCADE, null=True, blank=True
-    )
-    osint = models.ForeignKey(
-        OSINT, related_name="notes", on_delete=models.CASCADE, null=True, blank=True
-    )
-    host = models.ForeignKey(
-        Host, related_name="notes", on_delete=models.CASCADE, null=True, blank=True
-    )
-    port = models.ForeignKey(
-        Port, related_name="notes", on_delete=models.CASCADE, null=True, blank=True
-    )
-    path = models.ForeignKey(
-        Path, related_name="notes", on_delete=models.CASCADE, null=True, blank=True
-    )
+    target = models.ForeignKey(Target, related_name="notes", on_delete=models.CASCADE, null=True, blank=True)
+    task = models.ForeignKey(Task, related_name="notes", on_delete=models.CASCADE, null=True, blank=True)
+    execution = models.ForeignKey(Execution, related_name="notes", on_delete=models.CASCADE, null=True, blank=True)
+    osint = models.ForeignKey(OSINT, related_name="notes", on_delete=models.CASCADE, null=True, blank=True)
+    host = models.ForeignKey(Host, related_name="notes", on_delete=models.CASCADE, null=True, blank=True)
+    port = models.ForeignKey(Port, related_name="notes", on_delete=models.CASCADE, null=True, blank=True)
+    path = models.ForeignKey(Path, related_name="notes", on_delete=models.CASCADE, null=True, blank=True)
     credential = models.ForeignKey(
         Credential,
         related_name="notes",
@@ -70,14 +56,10 @@ class Note(BaseLike):
         null=True,
         blank=True,
     )
-    title = models.TextField(
-        max_length=200, validators=[Validator(Regex.NAME.value, code="title")]
-    )
+    title = models.TextField(max_length=200, validators=[Validator(Regex.NAME.value, code="title")])
     body = models.TextField(blank=True, null=True)
     tags = TaggableManager()
-    owner = models.ForeignKey(
-        AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True
-    )
+    owner = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True)
     public = models.BooleanField(default=False)
     forked_from = models.ForeignKey(
         "Note",

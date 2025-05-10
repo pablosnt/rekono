@@ -11,12 +11,8 @@ from targets.models import Target
 
 
 class StatsSerializer(Serializer):
-    project = PrimaryKeyRelatedField(
-        many=False, write_only=True, required=False, queryset=Project.objects.all()
-    )
-    target = PrimaryKeyRelatedField(
-        many=False, write_only=True, required=False, queryset=Target.objects.all()
-    )
+    project = PrimaryKeyRelatedField(many=False, write_only=True, required=False, queryset=Project.objects.all())
+    target = PrimaryKeyRelatedField(many=False, write_only=True, required=False, queryset=Target.objects.all())
     model = BaseModel
     min_date = datetime.now() - timedelta(days=24 * 30)
     top = 5
@@ -33,31 +29,21 @@ class StatsSerializer(Serializer):
         db_model = self._get_model(model)
         project_field = db_model.get_project_field()
         filters = {
-            (
-                f"{project_field}__members__id" if project_field else "members__id"
-            ): self.context.get("request").user.id
+            (f"{project_field}__members__id" if project_field else "members__id"): self.context.get("request").user.id
         }
         if self.validated_data.get("target"):
-            filters[project_field.split("__project")[0]] = self.validated_data.get(
-                "target"
-            )
+            filters[project_field.split("__project")[0]] = self.validated_data.get("target")
         elif self.validated_data.get("project"):
             filters[project_field] = self.validated_data.get("project")
         return db_model.objects.filter(**filters)
 
-    def _serialize(
-        self, serializer_class: Any, queryset: QuerySet, many: bool = True
-    ) -> Any:
+    def _serialize(self, serializer_class: Any, queryset: QuerySet, many: bool = True) -> Any:
         return serializer_class(queryset, many=many, context=self.context).data
 
-    def _get_serialized_evolution(
-        self, serializer_class: Any, model: type[BaseModel] | None = None
-    ) -> Any:
+    def _get_serialized_evolution(self, serializer_class: Any, model: type[BaseModel] | None = None) -> Any:
         return self._serialize(serializer_class, self._get_evolution(model))
 
-    def _get_evolution(
-        self, model: type[BaseModel] | None = None
-    ) -> list[dict[str, Any]]:
+    def _get_evolution(self, model: type[BaseModel] | None = None) -> list[dict[str, Any]]:
         db_model = self._get_model(model)
         return [
             self._get_date_evolution(date, self._get_date_count(date, db_model))

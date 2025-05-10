@@ -76,9 +76,7 @@ class InviteUserSerializer(ModelSerializer):
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         attrs = super().validate(attrs)
         if not SMTP().is_available():
-            raise ValidationError(
-                "SMTP client is not available to send the invitation", code="smtp"
-            )
+            raise ValidationError("SMTP client is not available to send the invitation", code="smtp")
         return attrs
 
     def create(self, validated_data: dict[str, Any]) -> User:
@@ -90,9 +88,7 @@ class InviteUserSerializer(ModelSerializer):
         Returns:
             User: Created instance
         """
-        return User.objects.invite_user(
-            validated_data["email"], Role(validated_data["role"])
-        )
+        return User.objects.invite_user(validated_data["email"], Role(validated_data["role"]))
 
 
 class UpdateRoleSerializer(Serializer):
@@ -274,9 +270,7 @@ class ResetPasswordSerializer(PasswordSerializer, OTPSerializer):
         Returns:
             User: Instance after apply changes
         """
-        return User.objects.reset_password(
-            self.validated_data.get("user"), self.validated_data.get("password")
-        )
+        return User.objects.reset_password(self.validated_data.get("user"), self.validated_data.get("password"))
 
 
 class RequestPasswordResetSerializer(Serializer):
@@ -295,9 +289,7 @@ class RequestPasswordResetSerializer(Serializer):
             )
 
     def save(self, **kwargs: Any) -> None:
-        threading.Thread(
-            target=self._save_in_thread, args=(self.validated_data.get("email"),)
-        ).start()
+        threading.Thread(target=self._save_in_thread, args=(self.validated_data.get("email"),)).start()
         return None
 
 

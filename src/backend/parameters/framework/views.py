@@ -10,7 +10,6 @@ from security.authorization.permissions import (
 
 
 class InputParameterViewSet(BaseViewSet):
-
     queryset = None
     permission_classes = [
         IsAuthenticated,

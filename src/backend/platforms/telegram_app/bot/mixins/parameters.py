@@ -19,37 +19,25 @@ class InputMixin(BaseMixin):
     @sync_to_async
     def _get_keyboard_async(self, user: User) -> list[InlineKeyboardButton]:
         return [
-            InlineKeyboardButton(
-                " - ".join([v for v in i.parse().values() if v]), callback_data=i.id
-            )
-            for i in self.model.objects.filter(
-                tasks__target__project__members=user
-            ).all()
+            InlineKeyboardButton(" - ".join([v for v in i.parse().values() if v]), callback_data=i.id)
+            for i in self.model.objects.filter(tasks__target__project__members=user).all()
         ] + [InlineKeyboardButton("Define one", callback_data=None)]
 
 
 class InputTechnologyMixin(InputMixin):
     model = InputTechnology
 
-    async def _ask_for_input_technology(
-        self, update: Update, context: CallbackContext
-    ) -> int:
+    async def _ask_for_input_technology(self, update: Update, context: CallbackContext) -> int:
         chat = await self._get_active_telegram_chat(update)
         tool = self._get_context_value(context, Context.TOOL)
         if not chat or not tool:
             return ConversationHandler.END
         if not await self._queryset_exists_async(
-            Input.objects.filter(
-                argument__tool=tool, type__name=InputTypeName.TECHNOLOGY
-            )
+            Input.objects.filter(argument__tool=tool, type__name=InputTypeName.TECHNOLOGY)
         ):
-            return await self._go_to_next_state(
-                update, context, self._get_next_state(self._create_input_technology)
-            )
+            return await self._go_to_next_state(update, context, self._get_next_state(self._create_input_technology))
         if not await self._queryset_exists_async(
-            InputTechnology.objects.filter(
-                tasks__target__project__members=chat.user
-            ).exists()
+            InputTechnology.objects.filter(tasks__target__project__members=chat.user).exists()
         ):
             return await self._go_to_next_state(
                 update,
@@ -67,14 +55,9 @@ class InputTechnologyMixin(InputMixin):
             "Choose technology to use as input parameter",
             reply_markup=InlineKeyboardMarkup([[item] for item in keyboard]),
         )
-        return await self._go_to_next_state(
-            update, context, self._get_next_state(self._ask_for_input_technology)
-        )
+        return await self._go_to_next_state(update, context, self._get_next_state(self._ask_for_input_technology))
 
-    async def _save_input_technology(
-        self, update: Update, context: CallbackContext
-    ) -> int:
-
+    async def _save_input_technology(self, update: Update, context: CallbackContext) -> int:
         return (
             await self._go_to_next_state(
                 update,
@@ -100,9 +83,7 @@ class InputTechnologyMixin(InputMixin):
             )
         )
 
-    async def _create_input_technology(
-        self, update: Update, context: CallbackContext
-    ) -> int:
+    async def _create_input_technology(self, update: Update, context: CallbackContext) -> int:
         if not update.effective_message or not update.effective_message.text:
             return ConversationHandler.END
         name = update.effective_message.text
@@ -131,25 +112,17 @@ class InputTechnologyMixin(InputMixin):
 class InputVulnerabilityMixin(InputMixin):
     model = InputVulnerability
 
-    async def _ask_for_input_vulnerability(
-        self, update: Update, context: CallbackContext
-    ) -> int:
+    async def _ask_for_input_vulnerability(self, update: Update, context: CallbackContext) -> int:
         chat = await self._get_active_telegram_chat(update)
         tool = self._get_context_value(context, Context.TOOL)
         if not chat or not tool:
             return ConversationHandler.END
         if not await self._queryset_exists_async(
-            Input.objects.filter(
-                argument__tool=tool, type__name=InputTypeName.VULNERABILITY
-            )
+            Input.objects.filter(argument__tool=tool, type__name=InputTypeName.VULNERABILITY)
         ):
-            return await self._go_to_next_state(
-                update, context, self._get_next_state(self._create_input_vulnerability)
-            )
+            return await self._go_to_next_state(update, context, self._get_next_state(self._create_input_vulnerability))
         if not await self._queryset_exists_async(
-            InputVulnerability.objects.filter(
-                tasks__target__project__members=chat.user
-            ).exists()
+            InputVulnerability.objects.filter(tasks__target__project__members=chat.user).exists()
         ):
             return await self._go_to_next_state(
                 update,
@@ -167,13 +140,9 @@ class InputVulnerabilityMixin(InputMixin):
             "Choose vulnerability to use as input parameter",
             reply_markup=InlineKeyboardMarkup([[item] for item in keyboard]),
         )
-        return await self._go_to_next_state(
-            update, context, self._get_next_state(self._ask_for_input_vulnerability)
-        )
+        return await self._go_to_next_state(update, context, self._get_next_state(self._ask_for_input_vulnerability))
 
-    async def _save_input_vulnerability(
-        self, update: Update, context: CallbackContext
-    ) -> int:
+    async def _save_input_vulnerability(self, update: Update, context: CallbackContext) -> int:
         return (
             await self._go_to_next_state(
                 update,
@@ -199,17 +168,13 @@ class InputVulnerabilityMixin(InputMixin):
             )
         )
 
-    async def _create_input_vulnerability(
-        self, update: Update, context: CallbackContext
-    ) -> int:
+    async def _create_input_vulnerability(self, update: Update, context: CallbackContext) -> int:
         next_state, instance = await self._create(
             update,
             context,
             InputVulnerabilitySerializer,
             {
-                "cve": (
-                    update.effective_message.text if update.effective_message else None
-                ),
+                "cve": (update.effective_message.text if update.effective_message else None),
             },
             self._get_previous_state(self._create_input_vulnerability),
             self._get_next_state(self._create_input_vulnerability),

@@ -49,11 +49,7 @@ class JwtAuthentication:
 class LoginSerializer(JwtAuthentication, TokenObtainSerializer):
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         super().validate(attrs)
-        return (
-            {"mfa": str(self.__class__.get_mfa_required_token(self.user))}
-            if self.user.mfa
-            else self._login()
-        )
+        return {"mfa": str(self.__class__.get_mfa_required_token(self.user))} if self.user.mfa else self._login()
 
 
 class BaseMfaRequiredSerializer(Serializer):
@@ -76,9 +72,7 @@ class SendMfaEmailSerializer(BaseMfaRequiredSerializer):
     token = CharField(required=False)
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
-        is_authenticated = IsAuthenticated().has_permission(
-            self.context.get("request"), None
-        )
+        is_authenticated = IsAuthenticated().has_permission(self.context.get("request"), None)
         if not is_authenticated and not attrs.get("token"):
             raise ValidationError("Token is required", code="token")
         elif is_authenticated:
@@ -88,9 +82,7 @@ class SendMfaEmailSerializer(BaseMfaRequiredSerializer):
     def save(self, **kwargs: Any) -> User:
         SMTP().mfa(
             self.user,
-            User.objects.setup_otp(
-                self.user, {"minutes": CONFIG.mfa_expiration_minutes}
-            ),
+            User.objects.setup_otp(self.user, {"minutes": CONFIG.mfa_expiration_minutes}),
         )
         return self.user
 

@@ -33,9 +33,7 @@ class FindingsQueue(BaseQueue):
 
     def enqueue(self, execution: Execution, findings: list[Finding]) -> Job:
         job = super().enqueue(execution=execution, findings=findings)
-        logger.info(
-            f"[Findings] {len(findings)} findings from execution {execution.id} have been enqueued"
-        )
+        logger.info(f"[Findings] {len(findings)} findings from execution {execution.id} have been enqueued")
         return job
 
     @staticmethod
@@ -59,19 +57,13 @@ class FindingsQueue(BaseQueue):
             for finding in findings:
                 if settings.auto_fix_findings and finding.is_fixed:
                     finding.__class__.objects.remove_fix(finding)
-                for alert in (
-                    execution.task.target.project.alerts.filter(enabled=True)
-                    .order_by("-item")
-                    .all()
-                ):
+                for alert in execution.task.target.project.alerts.filter(enabled=True).order_by("-item").all():
                     if alert.must_be_triggered(execution, finding):
                         for platform in notifications:
                             platform.process_alert(alert, finding)
                         break
         if settings.auto_fix_findings:
-            same_executions = Execution.objects.filter(
-                hash=execution.hash, status=Status.COMPLETED
-            )
+            same_executions = Execution.objects.filter(hash=execution.hash, status=Status.COMPLETED)
             for finding_type in [
                 OSINT,
                 Host,

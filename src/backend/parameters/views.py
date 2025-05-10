@@ -10,7 +10,6 @@ from parameters.serializers import (
 
 
 class InputTechnologyViewSet(InputParameterViewSet):
-
     queryset = InputTechnology.objects.all()
     serializer_class = InputTechnologySerializer
     filterset_class = InputTechnologyFilter
@@ -20,7 +19,6 @@ class InputTechnologyViewSet(InputParameterViewSet):
 
 
 class InputVulnerabilityViewSet(InputParameterViewSet):
-
     queryset = InputVulnerability.objects.all()
     serializer_class = InputVulnerabilitySerializer
     filterset_class = InputVulnerabilityFilter

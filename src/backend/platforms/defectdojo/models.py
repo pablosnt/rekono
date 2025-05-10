@@ -35,12 +35,8 @@ class DefectDojoSettings(BaseEncrypted):
         blank=True,
         null=True,
     )
-    test_type = models.TextField(
-        max_length=200, validators=[Validator(Regex.NAME.value, code="test_type")]
-    )
-    test = models.TextField(
-        max_length=200, validators=[Validator(Regex.NAME.value, code="test")]
-    )
+    test_type = models.TextField(max_length=200, validators=[Validator(Regex.NAME.value, code="test_type")])
+    test = models.TextField(max_length=200, validators=[Validator(Regex.NAME.value, code="test")])
     date_format = models.TextField(max_length=15)
     datetime_format = models.TextField(max_length=15)
 
@@ -51,9 +47,7 @@ class DefectDojoSettings(BaseEncrypted):
 
 
 class DefectDojoSync(BaseModel):
-    project = models.OneToOneField(
-        Project, related_name="defectdojo_sync", on_delete=models.CASCADE
-    )
+    project = models.OneToOneField(Project, related_name="defectdojo_sync", on_delete=models.CASCADE)
     product_type_id = models.IntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(999999999)],
     )
@@ -77,15 +71,9 @@ class DefectDojoSync(BaseModel):
 
 
 class DefectDojoTargetSync(BaseModel):
-    defectdojo_sync = models.ForeignKey(
-        DefectDojoSync, related_name="target_syncs", on_delete=models.CASCADE
-    )
-    target = models.OneToOneField(
-        Target, related_name="defectdojo_sync", on_delete=models.CASCADE
-    )
-    engagement_id = models.IntegerField(
-        validators=[MinValueValidator(1), MaxValueValidator(999999999)]
-    )
+    defectdojo_sync = models.ForeignKey(DefectDojoSync, related_name="target_syncs", on_delete=models.CASCADE)
+    target = models.OneToOneField(Target, related_name="defectdojo_sync", on_delete=models.CASCADE)
+    engagement_id = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(999999999)])
 
     def __str__(self) -> str:
         return f"{self.defectdojo_sync.__str__()} - {self.target.target} - {self.engagement_id}"

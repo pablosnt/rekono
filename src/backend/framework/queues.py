@@ -77,9 +77,7 @@ class BaseQueue:
         executions: list[dict[int, list[BaseInput]]] = [{0: []}]
         input_types_used = set()
         findings_by_type = BaseQueue._get_findings_by_type(findings)
-        for index, input_type, source in [
-            (0, t, list(f)) for t, f in (findings_by_type or {}).items() if f
-        ] + [
+        for index, input_type, source in [(0, t, list(f)) for t, f in (findings_by_type or {}).items() if f] + [
             (i + 1, None, p)
             for i, p in enumerate(
                 [
@@ -96,19 +94,13 @@ class BaseQueue:
                 input_type = source[0].get_input_type()
                 if input_type in input_types_used:
                     continue
-            tool_input = (
-                Input.objects.filter(argument__tool=tool, type=input_type)
-                .order_by("order")
-                .first()
-            )
+            tool_input = Input.objects.filter(argument__tool=tool, type=input_type).order_by("order").first()
             if not tool_input:
                 continue
             filtered_base_inputs = [bi for bi in source if bi.filter(tool_input)]
             if not filtered_base_inputs:
                 continue
-            related_input_types = [
-                i for i in input_type.get_related_input_types() if i in findings_by_type
-            ]
+            related_input_types = [i for i in input_type.get_related_input_types() if i in findings_by_type]
             for execution_index, execution in enumerate(copy.deepcopy(executions)):
                 if not executions[execution_index].get(index):
                     executions[execution_index][index] = []
@@ -119,8 +111,7 @@ class BaseQueue:
                         base_inputs.extend(
                             bi
                             for bi in filtered_base_inputs
-                            if getattr(bi, related_input_type.name.lower())
-                            in execution[index]
+                            if getattr(bi, related_input_type.name.lower()) in execution[index]
                             and bi not in base_inputs
                         )
                     if not base_inputs:

@@ -31,16 +31,11 @@ class BaseExecutor:
     def __init__(self, execution: Execution) -> None:
         self.execution = execution
         self.intensity = (
-            Intensity.objects.filter(
-                tool=execution.configuration.tool, value__lte=execution.task.intensity
-            )
+            Intensity.objects.filter(tool=execution.configuration.tool, value__lte=execution.task.intensity)
             .order_by("-value")
             .first()
         )
-        self.report = (
-            CONFIG.reports
-            / f'{str(uuid.uuid4())}.{execution.configuration.tool.output_format or "txt"}'
-        )
+        self.report = CONFIG.reports / f"{str(uuid.uuid4())}.{execution.configuration.tool.output_format or 'txt'}"
         self.arguments: list[str] = []
         self.environment: dict[str, Any] = {}
         self.findings_used_in_execution: dict[Any, BaseInput] = {}
@@ -71,9 +66,7 @@ class BaseExecutor:
             ),
             "command": self.execution.configuration.tool.command,
             "intensity": self.intensity.argument,
-            "output": (
-                self.report if self.execution.configuration.tool.output_format else ""
-            ),
+            "output": (self.report if self.execution.configuration.tool.output_format else ""),
         }
         for argument in self.execution.configuration.tool.arguments.all():
             for argument_input in argument.inputs.all().order_by("order"):
@@ -86,9 +79,7 @@ class BaseExecutor:
                     + list(
                         Authentication.objects.filter(
                             target_port__target=self.execution.task.target,
-                            target_port__port__in=[
-                                p.port for p in findings if isinstance(p, Port)
-                            ],
+                            target_port__port__in=[p.port for p in findings if isinstance(p, Port)],
                         ).all()
                     )
                     + [self.execution.task.target]
@@ -96,27 +87,17 @@ class BaseExecutor:
                     + [p.authentication for p in target_ports]
                     + list(input_vulnerabilities)
                     + list(input_technologies)
-                    + list(
-                        HttpHeader.objects.filter(
-                            target__isnull=True, user__isnull=True
-                        ).all()
-                    )
+                    + list(HttpHeader.objects.filter(target__isnull=True, user__isnull=True).all())
                     + list(self.execution.task.executor.http_headers.all())
                     + list(self.execution.task.target.http_headers.all())
                 ):
-                    is_fallback = input_fallback and isinstance(
-                        base_input, input_fallback
-                    )
+                    is_fallback = input_fallback and isinstance(base_input, input_fallback)
                     if is_fallback and parsed_data:
                         break
                     is_model = input_model and isinstance(base_input, input_model)
-                    if (is_model or is_fallback) and base_input.filter(
-                        argument_input, self.execution.task.target
-                    ):
+                    if (is_model or is_fallback) and base_input.filter(argument_input, self.execution.task.target):
                         parsed_data = base_input.parse(parsed_data)
-                        self.findings_used_in_execution[base_input.__class__] = (
-                            base_input
-                        )
+                        self.findings_used_in_execution[base_input.__class__] = base_input
                         if isinstance(base_input, Authentication):
                             self.authentication = base_input
                         if not argument.multiple:
@@ -133,9 +114,7 @@ class BaseExecutor:
                                     InputKeyword.HEADER_VALUE.name.lower(): v,
                                 }
                             )
-                            for k, v in parsed_data.get(
-                                InputKeyword.HEADERS.name.lower(), {}
-                            ).items()
+                            for k, v in parsed_data.get(InputKeyword.HEADERS.name.lower(), {}).items()
                         ]
                     )
                 else:
@@ -143,9 +122,7 @@ class BaseExecutor:
             elif not argument.required:
                 parameters[argument.name] = ""
             else:
-                raise RuntimeError(
-                    f"Argument '{argument.name}' is required to execute tool '{argument.tool.name}'"
-                )
+                raise RuntimeError(f"Argument '{argument.name}' is required to execute tool '{argument.tool.name}'")
         return [
             a.replace('"', "")
             for a in re.findall(
@@ -183,9 +160,7 @@ class BaseExecutor:
             for definition in self.arguments[:index]:
                 if "=" in definition:
                     variable, value = definition.split("=", 1)
-                    environment[variable] = (
-                        value.strip().replace("'", "").replace('"', "")
-                    )
+                    environment[variable] = value.strip().replace("'", "").replace('"', "")
             self.arguments = self.arguments[index:]
         settings = Settings.objects.first()
         for proxy in model_to_dict(Settings).keys():
@@ -211,10 +186,7 @@ class BaseExecutor:
                 else None
             ),
         )
-        if (
-            not self.execution.configuration.tool.ignore_exit_code
-            and process.returncode > 0
-        ):
+        if not self.execution.configuration.tool.ignore_exit_code and process.returncode > 0:
             raise RuntimeError(process.stderr.decode("utf-8"))
         return process.stdout.decode("utf-8")
 
@@ -261,16 +233,10 @@ class BaseExecutor:
         self.execution.hash = hash(
             " ".join(
                 [f"{k}={v}" for k, v in self.environment.items()]
-                + [
-                    a
-                    for a in self.arguments
-                    if str(self.report).lower() not in a.lower()
-                ]
+                + [a for a in self.arguments if str(self.report).lower() not in a.lower()]
             ).lower()
         )
-        self.execution.save(
-            update_fields=["status", "end", "output_file", "output_plain", "hash"]
-        )
+        self.execution.save(update_fields=["status", "end", "output_file", "output_plain", "hash"])
         self._on_task_end()
 
     def execute(
@@ -305,14 +271,10 @@ class BaseExecutor:
         try:
             output = "" if CONFIG.testing else self._run(self.environment)
         except (RuntimeError, Exception) as error:
-            logger.error(
-                f"[Tool] {self.execution.configuration.tool.name} execution finish with errors"
-            )
+            logger.error(f"[Tool] {self.execution.configuration.tool.name} execution finish with errors")
             self._on_error(str(error))
             self._after_running()
             return
         self._after_running()
         self._on_completed(output)
-        logger.info(
-            f"[Tool] {self.execution.configuration.tool.name} execution has been completed"
-        )
+        logger.info(f"[Tool] {self.execution.configuration.tool.name} execution has been completed")

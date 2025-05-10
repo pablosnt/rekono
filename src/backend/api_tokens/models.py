@@ -21,21 +21,15 @@ class ApiToken(Token, BaseModel):
         related_name="api_tokens",
         on_delete=models.CASCADE,
     )
-    expiration = models.DateTimeField(
-        blank=True, null=True, validators=[FutureDatetimeValidator(code="expiration")]
-    )
+    expiration = models.DateTimeField(blank=True, null=True, validators=[FutureDatetimeValidator(code="expiration")])
 
     class Meta:
-        constraints = [
-            models.UniqueConstraint(fields=["name", "user"], name="unique_api_token")
-        ]
+        constraints = [models.UniqueConstraint(fields=["name", "user"], name="unique_api_token")]
 
     @classmethod
     def generate_key(cls):
         key = Token.generate_key()
-        return (
-            Token.generate_key() if ApiToken.objects.filter(key=key).exists() else key
-        )
+        return Token.generate_key() if ApiToken.objects.filter(key=key).exists() else key
 
     def __str__(self) -> str:
         return f"{self.user.__str__()} - {self.name}"

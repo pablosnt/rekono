@@ -1,78 +1,79 @@
-name: Desktop UI
-on:
-  workflow_dispatch:
-    inputs:
-      backend:
-        description: 'Backend URL to connect Desktop UI'
-        required: true
-        default: 'https://127.0.0.1'
-  pull_request:
-    paths:
-      - 'src/frontend/**'
+# TODO
+# name: Desktop UI
+# on:
+#   workflow_dispatch:
+#     inputs:
+#       backend:
+#         description: 'Backend URL to connect Desktop UI'
+#         required: true
+#         default: 'https://127.0.0.1'
+#   pull_request:
+#     paths:
+#       - 'src/frontend/**'
 
-jobs:
-  desktop-ui:
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - os: ubuntu-latest
-            extension: deb
-          - os: macos-latest
-            extension: dmg
-          - os: windows-latest
-            extension: exe
-    runs-on: ${{ matrix.os }}
-    env:
-      DEB_FILENAME: RekonoUI
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+# jobs:
+#   desktop-ui:
+#     strategy:
+#       fail-fast: false
+#       matrix:
+#         include:
+#           - os: ubuntu-latest
+#             extension: deb
+#           - os: macos-latest
+#             extension: dmg
+#           - os: windows-latest
+#             extension: exe
+#     runs-on: ${{ matrix.os }}
+#     env:
+#       DEB_FILENAME: RekonoUI
+#     steps:
+#       - name: Checkout
+#         uses: actions/checkout@v4
+#         with:
+#           fetch-depth: 0
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 16
+#       - uses: actions/setup-node@v4
+#         with:
+#           node-version: 16
       
-      - name: Configure backend URL
-        if: github.event_name == 'workflow_dispatch'
-        shell: python
-        working-directory: src/frontend
-        # nosemgrep: yaml.github-actions.security.run-shell-injection.run-shell-injection
-        run: |
-          import re
-          import sys
-          urlregex = r'https?://[\w/:.]+'
-          match = re.match(urlregex, '${{ github.event.inputs.backend }}')
-          if match.group(0) == '${{ github.event.inputs.backend }}':
-            with open('.env.production', 'w') as env_production:
-              env_production.write('VUE_APP_DESKTOP_BACKEND_URL=${{ github.event.inputs.backend }}')
-          else:
-            print('Invalid URL format')
-            sys.exit(1)
+#       - name: Configure backend URL
+#         if: github.event_name == 'workflow_dispatch'
+#         shell: python
+#         working-directory: src/frontend
+#         # nosemgrep: yaml.github-actions.security.run-shell-injection.run-shell-injection
+#         run: |
+#           import re
+#           import sys
+#           urlregex = r'https?://[\w/:.]+'
+#           match = re.match(urlregex, '${{ github.event.inputs.backend }}')
+#           if match.group(0) == '${{ github.event.inputs.backend }}':
+#             with open('.env.production', 'w') as env_production:
+#               env_production.write('VUE_APP_DESKTOP_BACKEND_URL=${{ github.event.inputs.backend }}')
+#           else:
+#             print('Invalid URL format')
+#             sys.exit(1)
 
-      - name: Install dependencies
-        working-directory: src/frontend
-        run: npm install .
+#       - name: Install dependencies
+#         working-directory: src/frontend
+#         run: npm install .
       
-      - name: Generate Desktop UI
-        working-directory: src/frontend
-        run: npm run electron:build
+#       - name: Generate Desktop UI
+#         working-directory: src/frontend
+#         run: npm run electron:build
       
-      - name: Change DEB filename
-        if: matrix.os != 'windows-latest'
-        working-directory: src/frontend/dist_electron
-        run: mv *.${{ matrix.extension }} $DEB_FILENAME.${{ matrix.extension }}
+#       - name: Change DEB filename
+#         if: matrix.os != 'windows-latest'
+#         working-directory: src/frontend/dist_electron
+#         run: mv *.${{ matrix.extension }} $DEB_FILENAME.${{ matrix.extension }}
       
-      - name: Change DEB filename
-        if: matrix.os == 'windows-latest'
-        working-directory: src/frontend/dist_electron
-        run: ren *.${{ matrix.extension }} ${{ env.DEB_FILENAME }}.${{ matrix.extension }}
+#       - name: Change DEB filename
+#         if: matrix.os == 'windows-latest'
+#         working-directory: src/frontend/dist_electron
+#         run: ren *.${{ matrix.extension }} ${{ env.DEB_FILENAME }}.${{ matrix.extension }}
       
-      - name: Upload Desktop UI as GitHub artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ env.DEB_FILENAME }}_${{ matrix.os }}
-          path: src/frontend/dist_electron/${{ env.DEB_FILENAME }}.${{ matrix.extension }}
-          if-no-files-found: warn
+#       - name: Upload Desktop UI as GitHub artifact
+#         uses: actions/upload-artifact@v4
+#         with:
+#           name: ${{ env.DEB_FILENAME }}_${{ matrix.os }}
+#           path: src/frontend/dist_electron/${{ env.DEB_FILENAME }}.${{ matrix.extension }}
+#           if-no-files-found: warn

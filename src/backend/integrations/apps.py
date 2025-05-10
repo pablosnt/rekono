@@ -12,8 +12,6 @@ class IntegrationsConfig(BaseApp, AppConfig):
     def _load_fixtures(self, **kwargs: Any) -> None:
         from integrations.models import Integration
 
-        disabled_integrations = Integration.objects.filter(enabled=False).values_list(
-            "id", flat=True
-        )
+        disabled_integrations = Integration.objects.filter(enabled=False).values_list("id", flat=True)
         super()._load_fixtures(**kwargs)
         Integration.objects.filter(id__in=disabled_integrations).update(enabled=False)

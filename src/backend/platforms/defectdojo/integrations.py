@@ -31,9 +31,7 @@ class DefectDojo(BaseIntegration):
             Severity.CRITICAL: "S5",
         }
 
-    def _request(
-        self, method: Callable, url: str, json: bool = True, **kwargs: Any
-    ) -> Any:
+    def _request(self, method: Callable, url: str, json: bool = True, **kwargs: Any) -> Any:
         return super()._request(
             method,
             f"{self.settings.server}/api/v2{url}",
@@ -76,9 +74,7 @@ class DefectDojo(BaseIntegration):
             data={"name": name, "description": description},
         )
 
-    def create_product(
-        self, product_type: int, name: str, description: str, tags: list[str]
-    ) -> dict[str, Any]:
+    def create_product(self, product_type: int, name: str, description: str, tags: list[str]) -> dict[str, Any]:
         return self._request(
             self.session.post,
             "/products/",
@@ -90,9 +86,7 @@ class DefectDojo(BaseIntegration):
             },
         )
 
-    def create_engagement(
-        self, product: int, name: str, description: str, tags: list[str]
-    ) -> dict[str, Any]:
+    def create_engagement(self, product: int, name: str, description: str, tags: list[str]) -> dict[str, Any]:
         start = timezone.now()
         end = start + timedelta(days=7)
         return self._request(
@@ -117,9 +111,7 @@ class DefectDojo(BaseIntegration):
             data={"name": name, "tags": tags, "dynamic_tool": True},
         )
 
-    def _create_test(
-        self, test_type: int, engagement: int, title: str, description: str
-    ) -> dict[str, Any]:
+    def _create_test(self, test_type: int, engagement: int, title: str, description: str) -> dict[str, Any]:
         return self._request(
             self.session.post,
             "/tests/",
@@ -133,9 +125,7 @@ class DefectDojo(BaseIntegration):
             },
         )
 
-    def _create_endpoint(
-        self, product: int, endpoint: Path, target: Target
-    ) -> Optional[dict[str, Any]]:
+    def _create_endpoint(self, product: int, endpoint: Path, target: Target) -> Optional[dict[str, Any]]:
         try:
             return self._request(
                 self.session.post,
@@ -158,9 +148,7 @@ class DefectDojo(BaseIntegration):
             },
         )
 
-    def _import_scan(
-        self, engagement: int, execution: Execution, tags: list[str]
-    ) -> dict[str, Any]:
+    def _import_scan(self, engagement: int, execution: Execution, tags: list[str]) -> dict[str, Any]:
         with open(execution.output_file, "r") as report:
             return self._request(
                 self.session.post,
@@ -180,9 +168,7 @@ class DefectDojo(BaseIntegration):
             engagement_id = sync.engagement_id
             product_id = sync.defectdojo_sync.product_id
         else:
-            project_sync = DefectDojoSync.objects.filter(
-                project=execution.task.target.project
-            )
+            project_sync = DefectDojoSync.objects.filter(project=execution.task.target.project)
             if project_sync.exists():
                 sync = project_sync.first()
                 product_id = sync.product_id
@@ -208,9 +194,7 @@ class DefectDojo(BaseIntegration):
             and execution.output_file is not None
             and PathFile(execution.output_file).is_file()
         ):
-            new_import = self._import_scan(
-                engagement_id, execution, [self.settings.tag]
-            )
+            new_import = self._import_scan(engagement_id, execution, [self.settings.tag])
             execution.defectdojo_test_id = new_import.get("test_id")
             execution.save(update_fields=["defectdojo_test_id"])
         else:
@@ -218,9 +202,7 @@ class DefectDojo(BaseIntegration):
             for finding in findings:
                 if isinstance(finding, Path) and finding.type == PathType.ENDPOINT:
                     if finding.defectdojo_id is None:
-                        new_endpoint = self._create_endpoint(
-                            product_id, finding, execution.task.target
-                        )
+                        new_endpoint = self._create_endpoint(product_id, finding, execution.task.target)
                         if new_endpoint is not None:
                             finding.defectdojo_id = new_endpoint.get("id")
                 else:

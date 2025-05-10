@@ -33,17 +33,11 @@ class FindingManager(models.Manager):
                     if filter
                     else {current_input_type.name.lower(): finding}
                 )
-                new_related_findings = (
-                    input_type.get_model_class().objects.filter(**query_filter).all()
-                )
+                new_related_findings = input_type.get_model_class().objects.filter(**query_filter).all()
                 if new_related_findings:
                     related_findings.extend(new_related_findings)
                     for new_related_finding in new_related_findings:
-                        related_findings.extend(
-                            self._get_related_findings(
-                                new_related_finding, filter, input_type
-                            )
-                        )
+                        related_findings.extend(self._get_related_findings(new_related_finding, filter, input_type))
         return related_findings
 
     def _update_finding_fix_data(
@@ -76,9 +70,7 @@ class FindingManager(models.Manager):
             fixed_by=fixed_by,
         )
 
-    def fix(
-        self, findings: Any | models.QuerySet, fixed_by: Optional[Any] = None
-    ) -> Any | models.QuerySet:
+    def fix(self, findings: Any | models.QuerySet, fixed_by: Optional[Any] = None) -> Any | models.QuerySet:
         if not findings:
             return findings
         args = {
@@ -150,9 +142,7 @@ class Finding(BaseInput):
 
 
 class TriageFinding(Finding):
-    triage_status = models.TextField(
-        max_length=15, choices=TriageStatus.choices, default=TriageStatus.UNTRIAGED
-    )
+    triage_status = models.TextField(max_length=15, choices=TriageStatus.choices, default=TriageStatus.UNTRIAGED)
     triage_comment = models.TextField(
         max_length=300,
         validators=[Validator(Regex.TEXT.value, code="triage_comment")],

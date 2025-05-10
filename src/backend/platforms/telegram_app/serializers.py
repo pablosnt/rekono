@@ -65,9 +65,7 @@ class TelegramChatSerializer(ModelSerializer):
         validated_data["telegram_chat"].otp = None
         validated_data["telegram_chat"].otp_expiration = None
         validated_data["telegram_chat"].user = validated_data["user"]
-        validated_data["telegram_chat"].save(
-            update_fields=["otp", "otp_expiration", "user"]
-        )
+        validated_data["telegram_chat"].save(update_fields=["otp", "otp_expiration", "user"])
         SMTP().telegram_linked_notification(validated_data["user"])
         Telegram().welcome_message(validated_data["user"])
         logger.info(

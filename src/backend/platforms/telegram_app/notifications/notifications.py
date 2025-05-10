@@ -28,9 +28,7 @@ class Telegram(BaseNotification, BaseTelegram):
             if hasattr(user, "telegram_chat"):
                 self._send_message(user.telegram_chat, message)
 
-    def _notify_execution(
-        self, users: list[User], execution: Execution, findings: list[Finding]
-    ) -> None:
+    def _notify_execution(self, users: list[User], execution: Execution, findings: list[Finding]) -> None:
         texts_by_type: dict[Any, list[str]] = {}
         for finding in findings:
             if finding.__class__ not in texts_by_type:
@@ -74,16 +72,12 @@ class Telegram(BaseNotification, BaseTelegram):
             users,
             HEADER.format(
                 icon=FINDINGS[finding.__class__].get("icon", ""),
-                title=ALERTS.get(alert.mode, "").format(
-                    finding=finding.__class__.__name__.lower()
-                ),
+                title=ALERTS.get(alert.mode, "").format(finding=finding.__class__.__name__.lower()),
                 details=FINDINGS[finding.__class__]
                 .get("template", "")
                 .format(
                     **{
-                        k: self._escape(
-                            str(v) if not isinstance(v, Finding) else v.__str__()
-                        )
+                        k: self._escape(str(v) if not isinstance(v, Finding) else v.__str__())
                         for k, v in model_to_dict(finding).items()
                     }
                 ),

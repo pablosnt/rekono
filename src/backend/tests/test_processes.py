@@ -32,12 +32,8 @@ class ProcessTest(ApiTest):
             },
             endpoint="{endpoint}1/",
         ),
-        ApiTestCase(
-            ["admin1", "admin2", "auditor1", "auditor2"], "post", 400, invalid_process1
-        ),
-        ApiTestCase(
-            ["admin1", "admin2", "auditor1", "auditor2"], "post", 400, invalid_process2
-        ),
+        ApiTestCase(["admin1", "admin2", "auditor1", "auditor2"], "post", 400, invalid_process1),
+        ApiTestCase(["admin1", "admin2", "auditor1", "auditor2"], "post", 400, invalid_process2),
         ApiTestCase(
             ["admin1"],
             "post",
@@ -51,9 +47,7 @@ class ProcessTest(ApiTest):
                 "likes": 0,
             },
         ),
-        ApiTestCase(
-            ["admin1", "admin2", "auditor1", "auditor2"], "post", 400, process1
-        ),
+        ApiTestCase(["admin1", "admin2", "auditor1", "auditor2"], "post", 400, process1),
         ApiTestCase(
             ["admin1", "admin2", "auditor1", "auditor2"],
             "get",
@@ -81,9 +75,7 @@ class ProcessTest(ApiTest):
                 "likes": 0,
             },
         ),
-        ApiTestCase(
-            ["admin1", "admin2", "auditor1", "auditor2"], "post", 400, process2
-        ),
+        ApiTestCase(["admin1", "admin2", "auditor1", "auditor2"], "post", 400, process2),
         ApiTestCase(
             ["admin1", "admin2", "auditor1", "auditor2"],
             "get",
@@ -141,9 +133,7 @@ class ProcessTest(ApiTest):
             endpoint="{endpoint}9/",
         ),
         ApiTestCase(["reader1", "reader2"], "post", 403, endpoint="{endpoint}8/like/"),
-        ApiTestCase(
-            ["reader1", "reader2"], "delete", 403, endpoint="{endpoint}9/like/"
-        ),
+        ApiTestCase(["reader1", "reader2"], "delete", 403, endpoint="{endpoint}9/like/"),
         ApiTestCase(
             ["admin1", "admin2", "auditor1", "auditor2"],
             "get",
@@ -209,9 +199,7 @@ class ProcessTest(ApiTest):
             403,
             endpoint="{endpoint}8/",
         ),
-        ApiTestCase(
-            ["auditor2", "reader1", "reader2"], "delete", 403, endpoint="{endpoint}9/"
-        ),
+        ApiTestCase(["auditor2", "reader1", "reader2"], "delete", 403, endpoint="{endpoint}9/"),
         ApiTestCase(["admin2"], "delete", 204, endpoint="{endpoint}8/"),
         ApiTestCase(
             ["admin1", "admin2", "auditor1", "auditor2"],

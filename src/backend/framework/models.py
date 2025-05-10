@@ -32,9 +32,7 @@ class BaseModel(models.Model):
     def _get_related_class(self, package: str, name: str) -> Any:
         try:
             # nosemgrep: python.lang.security.audit.non-literal-import.non-literal-import
-            module = importlib.import_module(
-                f'{package.lower()}.{name.lower().replace(" ", "_").replace("-", "_")}'
-            )
+            module = importlib.import_module(f"{package.lower()}.{name.lower().replace(' ', '_').replace('-', '_')}")
             cls = getattr(
                 module,
                 name[0].upper() + name[1:].lower().replace(" ", "").replace("-", ""),
@@ -65,8 +63,7 @@ class BaseEncrypted(BaseModel):
                 if self._encryptor
                 else getattr(self, self._encrypted_field)
             )
-            if hasattr(self, self._encrypted_field)
-            and getattr(self, self._encrypted_field)
+            if hasattr(self, self._encrypted_field) and getattr(self, self._encrypted_field)
             else None
         )
 
@@ -76,11 +73,7 @@ class BaseEncrypted(BaseModel):
             setattr(
                 self,
                 self._encrypted_field,
-                (
-                    self._encryptor.encrypt(value)
-                    if self._encryptor and value is not None
-                    else value
-                ),
+                (self._encryptor.encrypt(value) if self._encryptor and value is not None else value),
             )
 
 
@@ -137,9 +130,7 @@ class BaseInput(BaseModel):
             elif port == 443:
                 protocols = ["https"]
         for protocol in protocols:  # For each protocol
-            url_to_test = schema.format(
-                protocol=protocol, host=host, port=port, endpoint=endpoint
-            )
+            url_to_test = schema.format(protocol=protocol, host=host, port=port, endpoint=endpoint)
             try:
                 # nosemgrep: python.requests.security.disabled-cert-validation.disabled-cert-validation
                 requests.get(url_to_test, timeout=5, verify=False)  # nosec
@@ -148,13 +139,9 @@ class BaseInput(BaseModel):
                 continue
         return None
 
-    def _compare_filter(
-        self, filter: Any, value: Any, negative: bool = False, contains: bool = False
-    ) -> bool:
+    def _compare_filter(self, filter: Any, value: Any, negative: bool = False, contains: bool = False) -> bool:
         comparison = lambda f, v: f == v if not contains else f in v  # noqa: E731
-        return (
-            comparison(filter, value) if not negative else not comparison(filter, value)
-        )
+        return comparison(filter, value) if not negative else not comparison(filter, value)
 
     def filter(self, argument_input: Any, target: Any = None) -> bool:
         """Check if this instance is valid based on input filter.
@@ -184,9 +171,7 @@ class BaseInput(BaseModel):
                         if (
                             issubclass(filter.type, models.TextChoices)
                             and self._compare_filter(
-                                cast(models.TextChoices, filter.type)[
-                                    match_value.upper()
-                                ],
+                                cast(models.TextChoices, filter.type)[match_value.upper()],
                                 field_value,
                                 negative,
                             )
@@ -228,9 +213,7 @@ class BaseInput(BaseModel):
         from input_types.models import InputType
 
         reference = f"{self._meta.app_label}.{self._meta.model_name}"
-        return InputType.objects.filter(
-            Q(model=reference) | Q(fallback_model=reference)
-        ).first()
+        return InputType.objects.filter(Q(model=reference) | Q(fallback_model=reference)).first()
 
 
 class BaseLike(BaseModel):

@@ -10,12 +10,12 @@ class Gitleaks(BaseParser):
             self.create_finding(
                 Credential,
                 secret=finding.get("Match"),
-                context=f'/.git/ : {finding.get("File")} -> Line {finding.get("StartLine")}',
+                context=f"/.git/ : {finding.get('File')} -> Line {finding.get('StartLine')}",
             )
             if finding.get("Email") and finding.get("Email") not in emails:
                 emails.add(finding.get("Email"))
                 self.create_finding(
                     Credential,
                     email=finding.get("Email"),
-                    context=f'/.git/ : Email of the commit author {finding.get("Author")}',
+                    context=f"/.git/ : Email of the commit author {finding.get('Author')}",
                 )

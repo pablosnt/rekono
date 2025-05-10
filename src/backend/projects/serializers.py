@@ -92,8 +92,6 @@ class ProjectMemberSerializer(Serializer):
         """
         user = get_object_or_404(User, pk=validated_data.get("user"), is_active=True)
         instance.members.add(user)
-        for alert in Alert.objects.filter(
-            project=instance, subscribe_all_members=True, enabled=True
-        ).all():
+        for alert in Alert.objects.filter(project=instance, subscribe_all_members=True, enabled=True).all():
             alert.subscribers.add(user)
         return instance

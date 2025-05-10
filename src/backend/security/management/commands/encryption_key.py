@@ -18,9 +18,7 @@ class BaseEncryptionKeyCommand:
         new_encryption_key = Encryptor.generate_encryption_key()
         return Encryptor(new_encryption_key), new_encryption_key
 
-    def _replace_encrypted_values(
-        self, new_value_processor: Callable, old_value_processor: Callable
-    ) -> None:
+    def _replace_encrypted_values(self, new_value_processor: Callable, old_value_processor: Callable) -> None:
         for model in apps.get_models():
             if not issubclass(model, BaseEncrypted):
                 continue
@@ -36,6 +34,4 @@ class BaseEncryptionKeyCommand:
 
     def _configure_encryption_key(self, new_encryption_key: str) -> None:
         CONFIG.encryption_key = new_encryption_key
-        CONFIG._update_config_in_file(
-            Property.ENCRYPTION_KEY.value[1], new_encryption_key
-        )
+        CONFIG._update_config_in_file(Property.ENCRYPTION_KEY.value[1], new_encryption_key)

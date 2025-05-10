@@ -74,9 +74,7 @@ class UserViewSet(BaseViewSet):
     def _create(self, serializer: Serializer, request: Request) -> Response:
         serializer = self._is_valid(serializer, request)
         return Response(
-            self.get_serializer(
-                instance=serializer.create(serializer.validated_data)
-            ).data,
+            self.get_serializer(instance=serializer.create(serializer.validated_data)).data,
             status=status.HTTP_201_CREATED,
         )
 
@@ -111,12 +109,8 @@ class UserViewSet(BaseViewSet):
         User.objects.send_invitation(user)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @extend_schema(
-        request=RequestPasswordResetSerializer, responses={200: None}, methods=["POST"]
-    )
-    @extend_schema(
-        request=ResetPasswordSerializer, responses={200: None}, methods=["PUT"]
-    )
+    @extend_schema(request=RequestPasswordResetSerializer, responses={200: None}, methods=["POST"])
+    @extend_schema(request=ResetPasswordSerializer, responses={200: None}, methods=["PUT"])
     @action(
         detail=False,
         methods=["POST", "PUT"],
@@ -125,11 +119,7 @@ class UserViewSet(BaseViewSet):
     )
     def reset_password(self, request: Request, *args, **kwargs) -> Response:
         serializer = self._is_valid(
-            (
-                RequestPasswordResetSerializer
-                if request.method.lower() == "post"
-                else ResetPasswordSerializer
-            ),
+            (RequestPasswordResetSerializer if request.method.lower() == "post" else ResetPasswordSerializer),
             request,
         )
         serializer.save()
@@ -140,9 +130,7 @@ class UserViewSet(BaseViewSet):
         instance = self._get_object_if_not_current_user(request)
         serializer = self._is_valid(UpdateRoleSerializer, request)
         return Response(
-            self.get_serializer(
-                instance=serializer.update(instance, serializer.validated_data)
-            ).data,
+            self.get_serializer(instance=serializer.update(instance, serializer.validated_data)).data,
             status=status.HTTP_200_OK,
         )
 
@@ -168,9 +156,7 @@ class UserViewSet(BaseViewSet):
         """
         instance = self._get_object_if_not_current_user(request)
         User.objects.enable_user(instance)
-        return Response(
-            self.get_serializer(instance=instance).data, status=status.HTTP_200_OK
-        )
+        return Response(self.get_serializer(instance=instance).data, status=status.HTTP_200_OK)
 
 
 class BaseProfileViewSet(GenericViewSet):
@@ -216,9 +202,7 @@ class MfaViewSet(BaseProfileViewSet):
     @action(detail=False, methods=["POST"])
     def register(self, request: Request, *args, **kwargs) -> Response:
         if request.user.mfa:
-            return Response(
-                {"mfa": "MFA is already enabled"}, status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({"mfa": "MFA is already enabled"}, status=status.HTTP_400_BAD_REQUEST)
         return Response(
             RegisterMfaSerializer(
                 {"url": User.objects.register_mfa(request.user)},
@@ -248,8 +232,6 @@ class MfaViewSet(BaseProfileViewSet):
     @action(detail=False, methods=["POST"])
     def disable(self, request: Request) -> Response:
         if not request.user.mfa:
-            return Response(
-                {"mfa": "MFA is already disabled"}, status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({"mfa": "MFA is already disabled"}, status=status.HTTP_400_BAD_REQUEST)
         self._update_mfa(request, DisableMfaSerializer)
         return self._get(request)

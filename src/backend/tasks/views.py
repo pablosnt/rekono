@@ -70,9 +70,7 @@ class TaskViewSet(BaseViewSet):
         """
         task = self.get_object()
         has_executions = task.executions.exists()
-        running_executions = task.executions.filter(
-            status__in=[Status.REQUESTED, Status.RUNNING]
-        ).all()
+        running_executions = task.executions.filter(status__in=[Status.REQUESTED, Status.RUNNING]).all()
         if not running_executions and has_executions:
             logger.warning(f"[Task] Task {task.id} can't be cancelled")
             return Response(
@@ -114,12 +112,8 @@ class TaskViewSet(BaseViewSet):
             Response: HTTP response
         """
         task = self.get_object()
-        if task.executions.filter(
-            status__in=[Status.REQUESTED, Status.RUNNING]
-        ).exists():
-            return Response(
-                {"task": "Task is still running"}, status=status.HTTP_400_BAD_REQUEST
-            )
+        if task.executions.filter(status__in=[Status.REQUESTED, Status.RUNNING]).exists():
+            return Response({"task": "Task is still running"}, status=status.HTTP_400_BAD_REQUEST)
         new_task = Task.objects.create(
             target=task.target,
             process=task.process,

@@ -150,9 +150,7 @@ class UserTest(ApiTest):
             expected=[],
             endpoint="{endpoint}?no_project=1",
         ),
-        ApiTestCase(
-            ["auditor1", "auditor2", "reader1", "reader2"], "post", 403, invitation1
-        ),
+        ApiTestCase(["auditor1", "auditor2", "reader1", "reader2"], "post", 403, invitation1),
         ApiTestCase(["admin1", "admin2"], "post", 400, invalid_invitation),
         ApiTestCase(
             ["admin1"],
@@ -249,9 +247,7 @@ class UserTest(ApiTest):
         ApiTestCase(["admin2"], "delete", 403, endpoint="{endpoint}2/"),
         ApiTestCase(["admin1", "reader2"], "delete", 204, endpoint="{endpoint}2/"),
         ApiTestCase(["admin2"], "get", 401),
-        ApiTestCase(
-            ["auditor1", "auditor2", "reader1"], "get", 403, endpoint="{endpoint}2/"
-        ),
+        ApiTestCase(["auditor1", "auditor2", "reader1"], "get", 403, endpoint="{endpoint}2/"),
         ApiTestCase(
             ["admin1", "reader2"],
             "get",
@@ -341,13 +337,9 @@ class UserTest(ApiTest):
             data={"username": self.admin1.username, "password": self.admin1.username},
         )
         self.assertEqual(200, response.status_code)
-        authenticated_client = self._get_api_client(
-            self._get_content(response.content)["access"]
-        )
+        authenticated_client = self._get_api_client(self._get_content(response.content)["access"])
 
-        self.assertEqual(
-            400, authenticated_client.post(self.endpoint, data=invitation1).status_code
-        )
+        self.assertEqual(400, authenticated_client.post(self.endpoint, data=invitation1).status_code)
 
     @mock.patch("platforms.mail.notifications.SMTP.is_available", lambda self: True)
     def test_invite_and_create(self) -> None:
@@ -357,28 +349,20 @@ class UserTest(ApiTest):
             data={"username": self.admin1.username, "password": self.admin1.username},
         )
         self.assertEqual(200, response.status_code)
-        authenticated_client = self._get_api_client(
-            self._get_content(response.content)["access"]
-        )
+        authenticated_client = self._get_api_client(self._get_content(response.content)["access"])
 
-        self.assertEqual(
-            201, authenticated_client.post(self.endpoint, data=invitation1).status_code
-        )
+        self.assertEqual(201, authenticated_client.post(self.endpoint, data=invitation1).status_code)
         new_user = User.objects.get(email=invitation1["email"])
         otp = User.objects.setup_otp(new_user)
 
         self.assertEqual(
             403,
-            authenticated_client.post(
-                f"{self.endpoint}signup/", data={"otp": otp, **user1}
-            ).status_code,
+            authenticated_client.post(f"{self.endpoint}signup/", data={"otp": otp, **user1}).status_code,
         )
 
         self.assertEqual(
             401,
-            client.post(
-                f"{self.endpoint}signup/", data={"otp": "invalid otp", **user1}
-            ).status_code,
+            client.post(f"{self.endpoint}signup/", data={"otp": "invalid otp", **user1}).status_code,
         )
 
         for invalid_user in [
@@ -391,18 +375,14 @@ class UserTest(ApiTest):
         ]:
             self.assertEqual(
                 400,
-                client.post(
-                    f"{self.endpoint}signup/", data={"otp": otp, **invalid_user}
-                ).status_code,
+                client.post(f"{self.endpoint}signup/", data={"otp": otp, **invalid_user}).status_code,
             )
 
         new_user.is_active = True
         new_user.save(update_fields=["is_active"])
         self.assertEqual(
             401,
-            client.post(
-                f"{self.endpoint}signup/", data={"otp": otp, **user1}
-            ).status_code,
+            client.post(f"{self.endpoint}signup/", data={"otp": otp, **user1}).status_code,
         )
 
         new_user.is_active = None
@@ -426,9 +406,7 @@ class UserTest(ApiTest):
             data={"username": user1["username"], "password": new_valid_password},
         )
         self.assertEqual(200, response.status_code)
-        authenticated_client = self._get_api_client(
-            self._get_content(response.content)["access"]
-        )
+        authenticated_client = self._get_api_client(self._get_content(response.content)["access"])
 
         self.assertEqual(200, authenticated_client.get(self.profile).status_code)
 
@@ -508,9 +486,7 @@ class Profile(ApiTest):
 
     def setUp(self) -> None:
         super().setUp()
-        self.admin1_telegram_chat = TelegramChat.objects.create(
-            user=cast(User, self.admin1), chat_id=1
-        )
+        self.admin1_telegram_chat = TelegramChat.objects.create(user=cast(User, self.admin1), chat_id=1)
 
     def test_cases(self) -> None:
         self.assertEqual(
@@ -519,16 +495,12 @@ class Profile(ApiTest):
         )
         super().test_cases()
         # Linked Telegram Chats are removed after a password change
-        self.assertFalse(
-            hasattr(User.objects.get(pk=cast(User, self.admin1).id), "telegram_chat")
-        )
+        self.assertFalse(hasattr(User.objects.get(pk=cast(User, self.admin1).id), "telegram_chat"))
 
     def test_notification_scope(self) -> None:
         self._setup_tasks_and_executions()
         notification = SMTP()
-        users_to_notify = list(
-            notification._get_users_to_notify_execution(self.execution1)
-        )
+        users_to_notify = list(notification._get_users_to_notify_execution(self.execution1))
         self.assertEqual(1, len(users_to_notify))
         self.assertEqual(self.admin1, users_to_notify[0])
 
@@ -536,9 +508,7 @@ class Profile(ApiTest):
             user_not_executor.notification_scope = Notification.ALL_EXECUTIONS
             user_not_executor.save(update_fields=["notification_scope"])
 
-        users_to_notify = list(
-            notification._get_users_to_notify_execution(self.execution1)
-        )
+        users_to_notify = list(notification._get_users_to_notify_execution(self.execution1))
         self.assertEqual(3, len(users_to_notify))
         self.assertEqual(self.admin1, users_to_notify[0])
         self.assertEqual(self.auditor1, users_to_notify[1])
@@ -546,9 +516,7 @@ class Profile(ApiTest):
 
         self.admin1.notification_scope = Notification.DISABLED
         self.admin1.save(update_fields=["notification_scope"])
-        users_to_notify = list(
-            notification._get_users_to_notify_execution(self.execution1)
-        )
+        users_to_notify = list(notification._get_users_to_notify_execution(self.execution1))
         self.assertEqual(2, len(users_to_notify))
         self.assertEqual(self.auditor1, users_to_notify[0])
         self.assertEqual(self.reader1, users_to_notify[1])
@@ -567,22 +535,16 @@ class ResetPasswordTest(ApiTest):
             data={"username": self.admin1.username, "password": self.admin1.username},
         )
         self.assertEqual(200, response.status_code)
-        authenticated_client = self._get_api_client(
-            self._get_content(response.content)["access"]
-        )
+        authenticated_client = self._get_api_client(self._get_content(response.content)["access"])
 
         self.assertEqual(
             403,
-            authenticated_client.post(
-                self.endpoint, data={"email": self.admin1.email}
-            ).status_code,
+            authenticated_client.post(self.endpoint, data={"email": self.admin1.email}).status_code,
         )
 
         self.assertEqual(
             200,
-            client.post(
-                self.endpoint, data={"email": "notfound@rekono.com"}
-            ).status_code,
+            client.post(self.endpoint, data={"email": "notfound@rekono.com"}).status_code,
         )
 
         self.assertEqual(
@@ -638,7 +600,5 @@ class ResetPasswordTest(ApiTest):
         self.assertEqual(200, response.status_code)
         self.assertEqual(
             200,
-            self._get_api_client(self._get_content(response.content)["access"])
-            .get(self.profile)
-            .status_code,
+            self._get_api_client(self._get_content(response.content)["access"]).get(self.profile).status_code,
         )

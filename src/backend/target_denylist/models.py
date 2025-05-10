@@ -6,9 +6,7 @@ from security.validators.input_validator import Regex, Validator
 
 
 class TargetDenylist(BaseModel):
-    target = models.TextField(
-        unique=True, max_length=100, validators=[Validator(Regex.TARGET_REGEX.value)]
-    )
+    target = models.TextField(unique=True, max_length=100, validators=[Validator(Regex.TARGET_REGEX.value)])
     default = models.BooleanField(default=False)
 
     def __str__(self) -> str:

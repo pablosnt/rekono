@@ -47,9 +47,7 @@ class ExecutionTest(ApiTest):
                 },
             ],
         ),
-        ApiTestCase(
-            ["admin2", "auditor2", "reader2"], "get", 404, endpoint="{endpoint}3/"
-        ),
+        ApiTestCase(["admin2", "auditor2", "reader2"], "get", 404, endpoint="{endpoint}3/"),
         ApiTestCase(
             ["admin1", "auditor1", "reader1"],
             "get",

@@ -81,10 +81,7 @@ class ProcessSerializer(TaggitSerializer, LikeSerializer):
         return {
             "required": instance.steps.filter(
                 Q(**params)
-                & (
-                    Q(configuration__tool__arguments__required=True)
-                    | Q(configuration__tool__name="Gobuster")
-                )
+                & (Q(configuration__tool__arguments__required=True) | Q(configuration__tool__name="Gobuster"))
             ).exists(),
             "supported": instance.steps.filter(**params).exists(),
         }

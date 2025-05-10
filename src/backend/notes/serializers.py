@@ -72,9 +72,7 @@ class NoteSerializer(TaggitSerializer, LikeSerializer):
                 attrs[value] = None
             attrs["project"] = cast(BaseModel, attrs.get(data_links[0])).get_project()
         if not attrs.get("project"):
-            raise ValidationError(
-                "A relationship with a project entity is needed", code="project"
-            )
+            raise ValidationError("A relationship with a project entity is needed", code="project")
         return attrs
 
     def update(self, instance: Note, validated_data: dict[str, Any]) -> Note:
@@ -83,7 +81,5 @@ class NoteSerializer(TaggitSerializer, LikeSerializer):
             validated_data["public"] = True
         new_instance = super().update(instance, validated_data)
         if unlink_forks:
-            Note.objects.filter(public=False, forked_from=instance).update(
-                forked_from=None
-            )
+            Note.objects.filter(public=False, forked_from=instance).update(forked_from=None)
         return new_instance

@@ -23,8 +23,7 @@ class Gitleaks(BaseExecutor):
                 Vulnerability,
                 name="Git source code exposure",
                 description=(
-                    "Source code is exposed in the endpoint /.git/ and "
-                    "it's possible to dump it as a git repository"
+                    "Source code is exposed in the endpoint /.git/ and it's possible to dump it as a git repository"
                 ),
                 severity=Severity.HIGH,
                 # CWE-527: Exposure of Version-Control Repository to an Unauthorized Control Sphere

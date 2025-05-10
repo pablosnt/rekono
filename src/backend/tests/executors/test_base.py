@@ -110,9 +110,7 @@ class ToolExecutorTest(RekonoTest):
             [
                 self.host,
                 self.port,
-                self._create_finding(
-                    Port, {**self.raw_findings[Port], "port": 443}, self.execution
-                ),
+                self._create_finding(Port, {**self.raw_findings[Port], "port": 443}, self.execution),
                 self.technology,
                 self.vulnerability,
             ],
@@ -161,7 +159,5 @@ class ToolExecutorTest(RekonoTest):
     @mock.patch("framework.models.BaseInput._get_url", get_url)
     def test_get_arguments_missing_one_required_finding(self) -> None:
         self.assertFalse(
-            self.executor.check_arguments(
-                [self.osint, self.host, self.port, self.technology], [], [], [], []
-            )
+            self.executor.check_arguments([self.osint, self.host, self.port, self.technology], [], [], [], [])
         )

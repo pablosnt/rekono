@@ -85,9 +85,7 @@ class RekonoTest(TestCase):
             self.users[role].append(getattr(self, username))
 
     def _setup_project(self) -> None:
-        self.project, _ = Project.objects.get_or_create(
-            name="test", description="test", owner=self.admin1
-        )
+        self.project, _ = Project.objects.get_or_create(name="test", description="test", owner=self.admin1)
         self.project.tags.add("test")
         for user in [self.admin1, self.auditor1, self.reader1]:
             self.project.members.add(user)
@@ -108,9 +106,7 @@ class RekonoTest(TestCase):
             version_argument="--version",
         )
         for index, value in enumerate(IntensityEnum):
-            Intensity.objects.create(
-                tool=self.fake_tool, argument=f"-i {index}", value=value
-            )
+            Intensity.objects.create(tool=self.fake_tool, argument=f"-i {index}", value=value)
         self.fake_configuration = Configuration.objects.create(
             name="fake",
             tool=self.fake_tool,
@@ -161,21 +157,15 @@ class RekonoTest(TestCase):
 
     def _setup_task_user_provided_entities(self) -> None:
         self._setup_target()
-        self.target_port = TargetPort.objects.create(
-            target=self.target, port=80, path="/login.php"
-        )
+        self.target_port = TargetPort.objects.create(target=self.target, port=80, path="/login.php")
         self.authentication = Authentication.objects.create(
             name="root",
             secret="root",
             type=AuthenticationType.TOKEN,
             target_port=self.target_port,
         )
-        self.input_vulnerability = InputVulnerability.objects.create(
-            cve="CVE-2023-2222"
-        )
-        self.input_technology = InputTechnology.objects.create(
-            name="Joomla", version="2.0.0"
-        )
+        self.input_vulnerability = InputVulnerability.objects.create(cve="CVE-2023-2222")
+        self.input_technology = InputTechnology.objects.create(name="Joomla", version="2.0.0")
         path = self.data_dir / "wordlists" / "endpoints_wordlist.txt"
         self.wordlist = Wordlist.objects.create(
             name="test",
@@ -220,18 +210,10 @@ class RekonoTest(TestCase):
             output_file=report_filename,
         )
 
-    def _create_finding(
-        self, model: Any, data: dict[str, Any], execution: Execution = None
-    ) -> Finding:
+    def _create_finding(self, model: Any, data: dict[str, Any], execution: Execution = None) -> Finding:
         new_finding = model.objects.create(
             **{
-                k: (
-                    getattr(self, k)
-                    if isinstance(v, int)
-                    and hasattr(self, k)
-                    and getattr(self, k).id == v
-                    else v
-                )
+                k: (getattr(self, k) if isinstance(v, int) and hasattr(self, k) and getattr(self, k).id == v else v)
                 for k, v in data.items()
             }
         )
@@ -322,12 +304,8 @@ class ApiTest(RekonoTest):
     def _get_object(self) -> Any:
         return None
 
-    def _get_api_client(
-        self, access: Optional[str] = None, token: Optional[str] = None
-    ):
-        client = (
-            APIClient(HTTP_AUTHORIZATION=f"Bearer {access}") if access else APIClient()
-        )
+    def _get_api_client(self, access: Optional[str] = None, token: Optional[str] = None):
+        client = APIClient(HTTP_AUTHORIZATION=f"Bearer {access}") if access else APIClient()
         return APIClient(HTTP_AUTHORIZATION=f"Token {token}") if token else client
 
     def _get_content(self, raw: Any) -> dict[str, Any]:
@@ -369,9 +347,7 @@ class ToolTest(RekonoTest):
             self.task.wordlists.set([self.wordlist])
             self.task.input_technologies.set([self.input_technology])
             self.task.input_vulnerabilities.set([self.input_vulnerability])
-            self.execution = Execution.objects.create(
-                task=self.task, configuration=self.configuration
-            )
+            self.execution = Execution.objects.create(task=self.task, configuration=self.configuration)
 
     def _metadata(self) -> dict[str, Any]:
         return {

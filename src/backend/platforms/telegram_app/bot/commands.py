@@ -82,9 +82,7 @@ class Start(BaseCommand):
         telegram_chat, plain_otp = await self._update_or_create_telegram_chat_async(
             update.effective_chat.id  # type: ignore
         )
-        logger.info(
-            f"[Security] New login request using the Telegram bot from the chat {telegram_chat.chat_id}"
-        )
+        logger.info(f"[Security] New login request using the Telegram bot from the chat {telegram_chat.chat_id}")
         await self._reply(
             update,
             """
@@ -95,9 +93,7 @@ Link this chat with your Rekono account by adding the following token to your Re
 `{otp}`
 
 Then, type /help to start hacking\. Enjoy\!
-""".format(
-                otp=plain_otp
-            ),
+""".format(otp=plain_otp),
         )
 
 
@@ -150,9 +146,7 @@ class ShowProject(SelectionCommands):
                 f"💼 _Project_   *{self._escape(project.name)}*",
             )
         else:
-            await self._reply(
-                update, "No selected project\. Use the command /selectproject"
-            )
+            await self._reply(update, "No selected project\. Use the command /selectproject")
 
 
 class ClearProject(SelectionCommands):

@@ -34,24 +34,12 @@ class UserFilter(FilterSet):
         except Project.DoesNotExist:
             return False
 
-    def filter_project_members(
-        self, queryset: QuerySet, name: str, value: int
-    ) -> QuerySet:
-        return (
-            queryset.filter(projects__id=value)
-            if self._check_project_membership(value)
-            else queryset.none()
-        )
+    def filter_project_members(self, queryset: QuerySet, name: str, value: int) -> QuerySet:
+        return queryset.filter(projects__id=value) if self._check_project_membership(value) else queryset.none()
 
-    def filter_no_project_members(
-        self, queryset: QuerySet, name: str, value: int
-    ) -> QuerySet:
+    def filter_no_project_members(self, queryset: QuerySet, name: str, value: int) -> QuerySet:
         return (
-            queryset.exclude(
-                id__in=User.objects.filter(projects__id=value).values_list(
-                    "id", flat=True
-                )
-            )
+            queryset.exclude(id__in=User.objects.filter(projects__id=value).values_list("id", flat=True))
             if self._check_project_membership(value)
             else queryset.none()
         )

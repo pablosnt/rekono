@@ -81,9 +81,7 @@ class TechnologyFilter(FindingFilter):
 
 class CredentialFilter(TriageFindingFilter):
     port = ModelChoiceFilter(queryset=Port.objects.all(), field_name="technology__port")
-    host = ModelChoiceFilter(
-        queryset=Host.objects.all(), field_name="technology__port__host"
-    )
+    host = ModelChoiceFilter(queryset=Host.objects.all(), field_name="technology__port__host")
 
     class Meta:
         model = Credential

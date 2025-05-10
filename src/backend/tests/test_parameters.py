@@ -46,11 +46,7 @@ class ParameterTest(ApiTest):
                     {
                         "target_id": 1,
                         "process_id": 1,
-                        (
-                            "input_technologies"
-                            if self.model == InputTechnology
-                            else "input_vulnerabilities"
-                        ): [1],
+                        ("input_technologies" if self.model == InputTechnology else "input_vulnerabilities"): [1],
                     },
                     endpoint="/api/tasks/",
                 ),
@@ -67,11 +63,7 @@ class ParameterTest(ApiTest):
                     {
                         "target_id": 1,
                         "configuration_id": 1,
-                        (
-                            "input_technologies"
-                            if self.model == InputTechnology
-                            else "input_vulnerabilities"
-                        ): [1],
+                        ("input_technologies" if self.model == InputTechnology else "input_vulnerabilities"): [1],
                     },
                     endpoint="/api/tasks/",
                 ),
@@ -91,11 +83,7 @@ class ParameterTest(ApiTest):
                         # 27: Metasploit (per CVE)
                         "configuration_id": 26 if self.model == InputTechnology else 27,
                         "intensity": Intensity.SNEAKY.name.capitalize(),
-                        (
-                            "input_technologies"
-                            if self.model == InputTechnology
-                            else "input_vulnerabilities"
-                        ): [1],
+                        ("input_technologies" if self.model == InputTechnology else "input_vulnerabilities"): [1],
                     },
                     endpoint="/api/tasks/",
                 ),

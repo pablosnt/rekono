@@ -16,8 +16,6 @@ class Command(BaseCommand, BaseEncryptionKeyCommand):
         if not CONFIG.encryption_key:
             logger.error("Encryption key is not configured yet")
             sys.exit(1)
-        self._replace_encrypted_values(
-            lambda v: v, self._get_current_encryptor().decrypt
-        )
+        self._replace_encrypted_values(lambda v: v, self._get_current_encryptor().decrypt)
         self._configure_encryption_key(None)
         logger.info(f"Encryption key has been removed from {CONFIG.config_file}")

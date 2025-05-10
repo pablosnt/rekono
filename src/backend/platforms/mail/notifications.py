@@ -41,13 +41,7 @@ class SMTP(BaseNotification):
         os.environ["SSL_CERT_FILE"] = certifi.where()
 
     def is_available(self) -> bool:
-        if (
-            not self.backend
-            or not self.settings
-            or not self.settings.host
-            or not self.settings.port
-            or CONFIG.testing
-        ):
+        if not self.backend or not self.settings or not self.settings.host or not self.settings.port or CONFIG.testing:
             return False
         try:
             self.backend.open()
@@ -56,15 +50,11 @@ class SMTP(BaseNotification):
         except Exception:
             return False
 
-    def _send_messages(
-        self, users: list[Any], subject: str, template_path: str, data: dict[str, Any]
-    ) -> None:
+    def _send_messages(self, users: list[Any], subject: str, template_path: str, data: dict[str, Any]) -> None:
         if not self.backend or not self.is_available():
             return
         try:
-            message = EmailMultiAlternatives(
-                subject, "", "Rekono <noreply@rekono.com>", [u.email for u in users]
-            )
+            message = EmailMultiAlternatives(subject, "", "Rekono <noreply@rekono.com>", [u.email for u in users])
             template = get_template(template_path)
             message.attach_alternative(
                 # nosemgrep: python.flask.security.xss.audit.direct-use-of-jinja2.direct-use-of-jinja2
@@ -84,15 +74,11 @@ class SMTP(BaseNotification):
         background: bool = True,
     ) -> None:
         if background:
-            threading.Thread(
-                target=self._send_messages, args=(users, subject, template, data)
-            ).start()
+            threading.Thread(target=self._send_messages, args=(users, subject, template, data)).start()
         else:
             self._send_messages(users, subject, template, data)
 
-    def _notify_execution(
-        self, users: list[Any], execution: Execution, findings: list[Finding]
-    ) -> None:
+    def _notify_execution(self, users: list[Any], execution: Execution, findings: list[Finding]) -> None:
         findings_by_class: dict[Any, list[Finding]] = {}
         for finding in findings:
             if findings.__class__.__name__.lower() not in findings_by_class:

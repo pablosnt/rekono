@@ -36,9 +36,7 @@ class HackTricks(BaseIntegration):
                 "sqlsrv",
                 "msql",
             ],
-            f"{self.url}pentesting-web/sql-injection/mysql-injection/index.html": [
-                "mysql-cm-agent"
-            ],
+            f"{self.url}pentesting-web/sql-injection/mysql-injection/index.html": ["mysql-cm-agent"],
             f"{self.url}pentesting-web/web-vulnerabilities-methodology.html": [
                 "http",
                 "https",
@@ -65,9 +63,7 @@ class HackTricks(BaseIntegration):
                 "vpnz",
                 "isakmp",
             ],
-            f"{self.services_base_url}pentesting-mssql-microsoft-sql-server/index.html": [
-                "rsqlserver"
-            ],
+            f"{self.services_base_url}pentesting-mssql-microsoft-sql-server/index.html": ["rsqlserver"],
             "ftp": ["ftps", "ftp-data", "ftps-data", "via-ftp", "sftp", "ftp-agent"],
             "dns": ["domain"],
             "smb": ["microsoft-ds", "netbios-ssn"],
@@ -83,10 +79,7 @@ class HackTricks(BaseIntegration):
 
     def _get_all_hacktricks_links(self) -> list[str]:
         return [
-            url[0].text
-            for url in parser.fromstring(
-                self._request(self.session.get, self.sitemap_url, json=False).text
-            )
+            url[0].text for url in parser.fromstring(self._request(self.session.get, self.sitemap_url, json=False).text)
         ]
 
     def _get_mapped_value_for_service(self, service: str) -> Optional[str]:
@@ -123,8 +116,7 @@ class HackTricks(BaseIntegration):
                                             p
                                             for p in link_parts
                                             if p.lower().strip() in service_comparator
-                                            or p.lower().strip()
-                                            in service_comparator.replace("-", "")
+                                            or p.lower().strip() in service_comparator.replace("-", "")
                                             or service_comparator in p
                                         ]
                                     )

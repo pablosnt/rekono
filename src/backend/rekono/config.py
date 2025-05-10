@@ -37,9 +37,7 @@ class RekonoConfig:
         with self.config_file.open("r") as file:
             self._config_properties = yaml.safe_load(file)
         for property in Property:
-            if not hasattr(self, property.name.lower()) or not getattr(
-                self, property.name.lower()
-            ):
+            if not hasattr(self, property.name.lower()) or not getattr(self, property.name.lower()):
                 setattr(self, property.name.lower(), self._get_config(property))
         if not self.pdf_report_template:
             default_filename = "pdf-report.html"
@@ -51,11 +49,7 @@ class RekonoConfig:
 
     def _get_home(self) -> Path:
         home_from_config = Path(self._get_config(Property.REKONO_HOME))
-        return (
-            home_from_config
-            if home_from_config.is_dir()
-            else self.base_dir.parent.parent
-        )
+        return home_from_config if home_from_config.is_dir() else self.base_dir.parent.parent
 
     def _get_config_file(self) -> Path:
         for filename in [

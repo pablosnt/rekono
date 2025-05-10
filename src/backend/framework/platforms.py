@@ -87,9 +87,8 @@ class BaseNotification(BasePlatform):
 
     def _get_users_to_notify_execution(self, execution: Execution) -> list[Any]:
         users = set()
-        if (
-            execution.task.executor.notification_scope != Notification.DISABLED
-            and getattr(execution.task.executor, self.enable_field)
+        if execution.task.executor.notification_scope != Notification.DISABLED and getattr(
+            execution.task.executor, self.enable_field
         ):
             users.add(execution.task.executor)
         users.update(
@@ -105,9 +104,7 @@ class BaseNotification(BasePlatform):
     def _get_users_to_notify_alert(self, alert: Alert) -> list[Any]:
         return alert.subscribers.filter(**{self.enable_field: True}).all()
 
-    def _notify_execution(
-        self, users: list[Any], execution: Execution, findings: list[Finding]
-    ) -> None:
+    def _notify_execution(self, users: list[Any], execution: Execution, findings: list[Finding]) -> None:
         pass
 
     def _notify_alert(self, users: list[Any], alert: Alert, finding: Finding) -> None:
@@ -122,6 +119,4 @@ class BaseNotification(BasePlatform):
     def process_alert(self, alert: Alert, finding: Finding) -> None:
         if not self.is_available():
             return
-        self._notify_alert(
-            alert.subscribers.filter(**{self.enable_field: True}).all(), alert, finding
-        )
+        self._notify_alert(alert.subscribers.filter(**{self.enable_field: True}).all(), alert, finding)

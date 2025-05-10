@@ -56,21 +56,15 @@ class ApiTokenTest(ApiTest):
             200,
             expected=[api_token1],
         ),
-        ApiTestCase(
-            ["admin1"], "get", 200, expected=api_token1, endpoint=f"{endpoint}1/"
-        ),
+        ApiTestCase(["admin1"], "get", 200, expected=api_token1, endpoint=f"{endpoint}1/"),
         ApiTestCase(
             ["admin2", "auditor1", "auditor2", "reader1", "reader2"],
             "get",
             404,
             endpoint=f"{endpoint}1/",
         ),
-        ApiTestCase(
-            ["auditor1"], "get", 200, expected=api_token1, endpoint=f"{endpoint}3/"
-        ),
-        ApiTestCase(
-            ["reader1"], "get", 200, expected=api_token1, endpoint=f"{endpoint}5/"
-        ),
+        ApiTestCase(["auditor1"], "get", 200, expected=api_token1, endpoint=f"{endpoint}3/"),
+        ApiTestCase(["reader1"], "get", 200, expected=api_token1, endpoint=f"{endpoint}5/"),
         ApiTestCase(
             ["admin2", "auditor1", "auditor2", "reader1", "reader2"],
             "delete",

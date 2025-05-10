@@ -26,9 +26,7 @@ class LikeFilter(FilterSet):
 
 
 class MultipleFieldFilterSet(FilterSet):
-    def multiple_field_filter(
-        self, queryset: QuerySet, name: str, value: Any
-    ) -> QuerySet:
+    def multiple_field_filter(self, queryset: QuerySet, name: str, value: Any) -> QuerySet:
         query = Q()
         for field in self.filters[name].fields:
             query |= Q(**{field: value})

@@ -50,9 +50,7 @@ class AuthenticationTest(ApiTest):
         ),
         ApiTestCase(["admin1", "auditor1"], "post", 400, invalid_authentication1),
         ApiTestCase(["admin1", "auditor1"], "post", 400, invalid_authentication2),
-        ApiTestCase(
-            ["admin2", "auditor2", "reader1", "reader2"], "post", 403, authentication
-        ),
+        ApiTestCase(["admin2", "auditor2", "reader1", "reader2"], "post", 403, authentication),
         ApiTestCase(
             ["admin1"],
             "post",
@@ -86,9 +84,7 @@ class AuthenticationTest(ApiTest):
             endpoint="{endpoint}1/",
         ),
         ApiTestCase(["admin2", "auditor2", "reader2"], "get", 200, expected=[]),
-        ApiTestCase(
-            ["admin2", "auditor2", "reader2"], "get", 404, endpoint="{endpoint}1/"
-        ),
+        ApiTestCase(["admin2", "auditor2", "reader2"], "get", 404, endpoint="{endpoint}1/"),
         ApiTestCase(["reader1", "reader2"], "delete", 403, endpoint="{endpoint}1/"),
         ApiTestCase(["admin2", "auditor2"], "delete", 404, endpoint="{endpoint}1/"),
         ApiTestCase(["auditor1"], "delete", 204, endpoint="{endpoint}1/"),
@@ -110,9 +106,7 @@ class AuthenticationTest(ApiTest):
     def setUp(self) -> None:
         super().setUp()
         self._setup_target()
-        self.target_port = TargetPort.objects.create(
-            target=self.target, port=80, path=None
-        )
+        self.target_port = TargetPort.objects.create(target=self.target, port=80, path=None)
         TargetPort.objects.create(target=self.target, port=22, path=None)
         TargetPort.objects.create(target=self.target, port=443, path=None)
 

@@ -234,12 +234,8 @@ class ReportingTest(ApiTest):
                     404,
                     endpoint=f"{self.endpoint}3/download/",
                 ),
-                ApiTestCase(
-                    ["auditor2", "reader2"], "delete", 404, endpoint="{endpoint}1/"
-                ),
-                ApiTestCase(
-                    ["auditor1", "reader1"], "delete", 403, endpoint="{endpoint}1/"
-                ),
+                ApiTestCase(["auditor2", "reader2"], "delete", 404, endpoint="{endpoint}1/"),
+                ApiTestCase(["auditor1", "reader1"], "delete", 403, endpoint="{endpoint}1/"),
                 ApiTestCase(["admin1"], "delete", 204, endpoint="{endpoint}1/"),
                 ApiTestCase(["admin1"], "delete", 204, endpoint="{endpoint}2/"),
                 ApiTestCase(["reader1"], "delete", 204, endpoint="{endpoint}3/"),
@@ -300,9 +296,7 @@ class ReportingTest(ApiTest):
 
     def test_str(self) -> None:
         if self.format:
-            self.expected_str = (
-                f"{self.project.name} - {self.format.value} - {self.admin1.email}"
-            )
+            self.expected_str = f"{self.project.name} - {self.format.value} - {self.admin1.email}"
             super().test_str()
 
     def _get_object(self) -> Any:
@@ -333,9 +327,7 @@ class PdfReportTest(ReportingTest):
 
     def setUp(self) -> None:
         super().setUp()
-        Target.objects.create(
-            project=self.project, target="10.10.10.15", type=TargetType.PRIVATE_IP
-        )
+        Target.objects.create(project=self.project, target="10.10.10.15", type=TargetType.PRIVATE_IP)
 
 
 class PdfReportWithoutFindingsTest(ApiTest):
