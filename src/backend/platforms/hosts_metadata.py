@@ -1,9 +1,11 @@
-from framework.platforms import BaseIntegration
-from findings.models import Host
 import socket
-from targets.models import Target
-from targets.enums import TargetType
+
 import geocoder
+
+from findings.models import Host
+from framework.platforms import BaseIntegration
+from targets.enums import TargetType
+from targets.models import Target
 
 
 class HostsMetadata(BaseIntegration):
@@ -23,7 +25,7 @@ class HostsMetadata(BaseIntegration):
                 ]:
                     try:
                         finding.domain = socket.gethostbyaddr(finding.ip)[0]
-                    except Exception:
+                    except Exception:  # nosec
                         pass
                 if ip_type == TargetType.PUBLIC_IP and not all(
                     [finding.country, finding.city, finding.latitude, finding.longitude]
