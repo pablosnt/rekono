@@ -30,6 +30,7 @@ jobs:
         run: uv python install
       
       - name: Install dependencies
+        working-directory: src/backend
         if: ${{ steps.changes.outputs.backend == 'true' || github.event_name != 'pull_request' }}
         run: uv sync --locked
 

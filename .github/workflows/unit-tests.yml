@@ -32,6 +32,7 @@ jobs:
         run: uv python install
       
       - name: Install dependencies
+        working-directory: src/backend
         run: uv sync --locked
 
       - name: Run unit tests
