@@ -37,17 +37,14 @@ jobs:
       - name: Ruff
         if: ${{ steps.changes.outputs.backend == 'true' || github.event_name != 'pull_request' }}
         working-directory: src/backend
-        continue-on-error: true
         run: uvx ruff format --check
       
       - name: PyType
-        if: ${{ steps.changes.outputs.backend == 'true' || github.event_name != 'pull_request' }}
-        continue-on-error: true
+        if: ${{ (steps.changes.outputs.backend == 'true' || github.event_name != 'pull_request') && !cancelled() }}
         run: uvx pytype src/backend
       
       - name: Flake8
-        if: ${{ steps.changes.outputs.backend == 'true' || github.event_name != 'pull_request' }}
-        continue-on-error: true
+        if: ${{ (steps.changes.outputs.backend == 'true' || github.event_name != 'pull_request') && !cancelled() }}
         run: uvx flake8 --ignore=E203,E501,W503,W605 src/backend
 
   frontend:
@@ -75,10 +72,9 @@ jobs:
       - name: ESLint
         if: ${{ steps.changes.outputs.frontend == 'true' || github.event_name != 'pull_request' }}
         working-directory: src/frontend/
-        continue-on-error: true
         run: npm run eslint
       
       - name: Prettier
-        if: ${{ steps.changes.outputs.frontend == 'true' || github.event_name != 'pull_request' }}
+        if: ${{ (steps.changes.outputs.frontend == 'true' || github.event_name != 'pull_request') && !cancelled() }}
         working-directory: src/frontend/
         run: npm run prettier
