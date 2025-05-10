@@ -41,7 +41,8 @@ jobs:
       
       - name: PyType
         if: ${{ (steps.changes.outputs.backend == 'true' || github.event_name != 'pull_request') && !cancelled() }}
-        run: uvx pytype src/backend
+        working-directory: src/backend
+        run: uvx pytype --keep-going .
       
       - name: Flake8
         if: ${{ (steps.changes.outputs.backend == 'true' || github.event_name != 'pull_request') && !cancelled() }}
