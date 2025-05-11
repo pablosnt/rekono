@@ -1,6 +1,7 @@
 from typing import Any
 
 from django.db import models
+
 from framework.enums import InputKeyword
 from framework.models import BaseInput
 from rekono.settings import AUTH_USER_MODEL
@@ -35,6 +36,7 @@ class HttpHeader(BaseInput):
     )
 
     filters = [BaseInput.Filter(type=str, field="key")]
+    project_field = "target__project"
 
     class Meta:
         constraints = [
@@ -68,7 +70,3 @@ class HttpHeader(BaseInput):
     def __str__(self) -> str:
         parent = self.target or self.user
         return f"{parent.__str__()} - {self.key}" if parent else self.key
-
-    @classmethod
-    def get_project_field(cls) -> str:
-        return "target__project"

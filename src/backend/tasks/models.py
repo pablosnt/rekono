@@ -1,5 +1,6 @@
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+
 from framework.models import BaseModel
 from parameters.models import InputTechnology, InputVulnerability
 from processes.models import Process
@@ -47,6 +48,8 @@ class Task(BaseModel):
     input_technologies = models.ManyToManyField(InputTechnology, related_name="tasks", blank=True)
     input_vulnerabilities = models.ManyToManyField(InputVulnerability, related_name="tasks", blank=True)
 
+    project_field = "target__project"
+
     def __str__(self) -> str:
         """Instance representation in text format.
 
@@ -54,7 +57,3 @@ class Task(BaseModel):
             str: String value that identifies this instance
         """
         return f"{self.target.__str__()} - {(self.process or self.configuration).__str__()}"
-
-    @classmethod
-    def get_project_field(cls) -> str:
-        return "target__project"

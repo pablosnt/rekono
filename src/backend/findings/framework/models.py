@@ -127,16 +127,13 @@ class Finding(BaseInput):
     hacktricks_link = models.TextField(max_length=300, blank=True, null=True)
     objects = FindingManager()
     unique_fields: list[str] = []
+    project_field = "executions__task__target__project"
 
     class Meta:
         abstract = True
 
     def get_project(self) -> Project:
         return self.executions.first().task.target.project
-
-    @classmethod
-    def get_project_field(cls) -> str:
-        return "executions__task__target__project"
 
     def defectdojo(self) -> dict[str, Any]:
         return {}  # pragma: no cover

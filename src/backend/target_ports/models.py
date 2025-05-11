@@ -2,6 +2,7 @@ from typing import Any
 
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+
 from framework.enums import InputKeyword
 from framework.models import BaseInput
 from security.validators.input_validator import Regex, Validator
@@ -23,6 +24,7 @@ class TargetPort(BaseInput):
     )
 
     filters = [BaseInput.Filter(type=int, field="port")]
+    project_field = "target__project"
 
     class Meta:
         constraints = [models.UniqueConstraint(fields=["target", "port"], name="unique_target_port")]
@@ -57,7 +59,3 @@ class TargetPort(BaseInput):
             str: String value that identifies this instance
         """
         return f"{self.target.__str__()} - {self.port}"
-
-    @classmethod
-    def get_project_field(cls) -> str:
-        return "target__project"

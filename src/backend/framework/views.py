@@ -49,7 +49,7 @@ class BaseViewSet(ModelViewSet):
             if model == Project:
                 members_field = "members"
             else:
-                project_field = model.get_project_field()
+                project_field = model.project_field
                 if project_field:
                     members_field = f"{project_field}__members"
         if members_field:
@@ -72,7 +72,7 @@ class BaseViewSet(ModelViewSet):
     def perform_create(self, serializer: Serializer) -> None:
         model = self._get_model()
         if model:
-            project = self._get_project_from_data(model.get_project_field() or "", serializer.validated_data)
+            project = self._get_project_from_data(model.project_field, serializer.validated_data)
             if project and self.request.user not in project.members.all():
                 raise PermissionDenied()
         if self.owner_field and model and hasattr(model, self.owner_field):

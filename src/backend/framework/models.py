@@ -11,11 +11,13 @@ from security.cryptography.encryption import Encryptor
 
 
 class BaseModel(models.Model):
+    project_field = ""
+
     class Meta:
         abstract = True
 
     def get_project(self) -> Any | list[Any]:
-        filter_field = self.__class__.get_project_field()
+        filter_field = self.__class__.project_field
         if filter_field:
             project = self
             for field in filter_field.split("__"):
@@ -25,10 +27,6 @@ class BaseModel(models.Model):
                     return None
             return project
         return None
-
-    @classmethod
-    def get_project_field(cls) -> str:
-        return ""
 
     def _get_related_class(self, package: str, name: str) -> Any:
         try:

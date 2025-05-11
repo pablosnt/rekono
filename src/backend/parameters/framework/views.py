@@ -1,6 +1,7 @@
 from django.db.models import QuerySet
-from framework.views import BaseViewSet
 from rest_framework.permissions import IsAuthenticated
+
+from framework.views import BaseViewSet
 from security.authorization.permissions import (
     ProjectMemberPermission,
     RekonoModelPermission,
@@ -22,6 +23,6 @@ class InputParameterViewSet(BaseViewSet):
         model = self._get_model()
         return (
             (self.queryset if self.queryset is not None else model.objects.none())
-            .filter(**{f"{model.get_project_field()}__members": self.request.user})
+            .filter(**{f"{model.project_field}__members": self.request.user})
             .distinct()
         )

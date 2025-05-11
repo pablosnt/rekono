@@ -3,10 +3,11 @@ from typing import Any
 
 from django.db.models import Count, QuerySet
 from django.db.models.functions import TruncDate
+from rest_framework.serializers import PrimaryKeyRelatedField, Serializer
+
 from executions.models import Execution
 from framework.models import BaseModel
 from projects.models import Project
-from rest_framework.serializers import PrimaryKeyRelatedField, Serializer
 from targets.models import Target
 
 
@@ -27,7 +28,7 @@ class StatsSerializer(Serializer):
 
     def _get_queryset(self, model: type[BaseModel] | None = None) -> QuerySet:
         db_model = self._get_model(model)
-        project_field = db_model.get_project_field()
+        project_field = db_model.project_field
         filters = {
             (f"{project_field}__members__id" if project_field else "members__id"): self.context.get("request").user.id
         }

@@ -1,6 +1,7 @@
-from alerts.enums import AlertItem, AlertMode
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+
+from alerts.enums import AlertItem, AlertMode
 from executions.models import Execution
 from findings.enums import PortStatus, TriageStatus
 from findings.models import (
@@ -34,6 +35,8 @@ class Alert(BaseModel):
     subscribe_all_members = models.BooleanField(default=False)
     owner = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True)
     subscribers = models.ManyToManyField(AUTH_USER_MODEL, related_name="alerts", blank=True)
+
+    project_field = "project"
 
     class Meta:
         constraints = [
@@ -91,10 +94,6 @@ class Alert(BaseModel):
         if self.value:
             values.append(self.value)
         return " - ".join(values)
-
-    @classmethod
-    def get_project_field(cls) -> str:
-        return "project"
 
     def must_be_triggered(self, execution: Execution, finding: Finding) -> bool:
         data = self.mapping[self.item]

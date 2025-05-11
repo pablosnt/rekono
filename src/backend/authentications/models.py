@@ -1,8 +1,9 @@
 import base64
 from typing import Any
 
-from authentications.enums import AuthenticationType
 from django.db import models
+
+from authentications.enums import AuthenticationType
 from framework.enums import InputKeyword
 from framework.models import BaseEncrypted, BaseInput
 from security.validators.input_validator import Regex, Validator
@@ -36,6 +37,7 @@ class Authentication(BaseInput, BaseEncrypted):
 
     filters = [BaseInput.Filter(type=AuthenticationType, field="type")]
     _encrypted_field = "_secret"
+    project_field = "target_port__target__project"
 
     def get_token(self) -> str:
         return (
@@ -69,7 +71,3 @@ class Authentication(BaseInput, BaseEncrypted):
             str: String value that identifies this instance
         """
         return (f"{self.target_port.__str__()} - " if self.target_port else "") + self.name
-
-    @classmethod
-    def get_project_field(cls) -> str:
-        return "target_port__target__project"

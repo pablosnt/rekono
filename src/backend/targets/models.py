@@ -6,6 +6,7 @@ from typing import Any
 
 from django.core.exceptions import ValidationError
 from django.db import models
+
 from framework.enums import InputKeyword
 from framework.models import BaseInput
 from projects.models import Project
@@ -24,6 +25,7 @@ class Target(BaseInput):
     type = models.TextField(max_length=10, choices=TargetType.choices)
 
     filters = [BaseInput.Filter(type=TargetType, field="type")]
+    project_field = "project"
 
     class Meta:
         constraints = [models.UniqueConstraint(fields=["project", "target"], name="unique_target")]
@@ -93,7 +95,3 @@ class Target(BaseInput):
             str: String value that identifies this instance
         """
         return self.target
-
-    @classmethod
-    def get_project_field(cls) -> str:
-        return "project"
