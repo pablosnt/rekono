@@ -64,7 +64,7 @@ class NvdNistTest(RekonoTest):
         cwe: str | None = "CWE-200",
         description: str = "description",
     ) -> None:
-        self.nvdnist.process_findings(self.execution3, [self.vulnerability])
+        self.nvdnist.process_finding(self.execution3, self.vulnerability)
         self.assertEqual(reference, self.vulnerability.reference)
         self.assertEqual(cwe, self.vulnerability.cwe)
         self.assertEqual(description, self.vulnerability.description)

@@ -15,6 +15,8 @@ logger = logging.getLogger()
 
 
 class CveCrowd(BaseIntegration):
+    finding_types = [Vulnerability]
+
     def __init__(self) -> None:
         self.settings = CveCrowdSettings.objects.first()
         self.url = "https://api.cvecrowd.com/api/v1/cves"
@@ -43,16 +45,20 @@ class CveCrowd(BaseIntegration):
             except Exception:  # nosec
                 pass
 
-    def _process_findings(self, execution: Execution, findings: list[Finding]) -> None:
-        if not self.settings.execute_per_execution:
-            return
+    def _process_finding(self, execution: Execution, finding: Vulnerability) -> None:
+        finding.trending = True
+        finding.save(update_fields=["trending"])
+
+    def is_finding_processable(self, finding: Finding) -> bool:
         self._get_trending_cves()
         if not self.trending_cves:
-            return
-        for finding in findings:
-            if isinstance(finding, Vulnerability) and finding.cve is not None and finding.cve in self.trending_cves:
-                finding.trending = True
-                finding.save(update_fields=["trending"])
+            return False
+        return (
+            super().is_finding_processable(finding)
+            and self.settings.execute_per_execution
+            and finding.cve is not None
+            and finding.cve in self.trending_cves
+        )
 
     def monitor(self) -> None:
         self._get_trending_cves()

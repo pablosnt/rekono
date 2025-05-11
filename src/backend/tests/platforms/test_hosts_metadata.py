@@ -1,5 +1,5 @@
-from tests.framework import RekonoTest
 from platforms.hosts_metadata import HostsMetadata
+from tests.framework import RekonoTest
 
 
 class HostsMetadataTest(RekonoTest):
@@ -10,7 +10,7 @@ class HostsMetadataTest(RekonoTest):
 
     def _test_integration(self, expected: list[tuple[str, str | None]]) -> None:
         client = HostsMetadata()
-        client.process_findings(self.execution1, [self.host])
+        client.process_finding(self.execution1, self.host)
         for field, value in expected:
             self.assertEqual(getattr(self.host, field), value)
 

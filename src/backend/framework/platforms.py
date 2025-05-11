@@ -3,11 +3,12 @@ from typing import Any, Callable
 from urllib.parse import urlparse
 
 import requests
+from requests.adapters import HTTPAdapter, Retry
+
 from alerts.models import Alert
 from executions.models import Execution
 from findings.framework.models import Finding
 from integrations.models import Integration
-from requests.adapters import HTTPAdapter, Retry
 from users.enums import Notification
 
 logger = logging.getLogger()
@@ -17,9 +18,13 @@ class BasePlatform:
     def is_available(self) -> bool:
         return True
 
+    def process_findings(self, execution: Execution, findings: list[Finding]) -> None:
+        pass
+
 
 class BaseIntegration(BasePlatform):
     url = ""
+    finding_types = []  # If empty, all findings are processed
 
     def __init__(self) -> None:
         self.session = self._create_session(self.url)
@@ -57,13 +62,20 @@ class BaseIntegration(BasePlatform):
     def is_enabled(self) -> bool:
         return self.integration.enabled if self.integration else False
 
-    def _process_findings(self, execution: Execution, findings: list[Finding]) -> None:
+    def _process_finding(self, execution: Execution, finding: Finding) -> None:
         pass
 
-    def process_findings(self, execution: Execution, findings: list[Finding]) -> None:
-        if not self.is_enabled():
+    def process_finding(self, execution: Execution, finding: Finding) -> None:
+        if not self.is_enabled() or not self.is_finding_processable(finding):
             return
-        self._process_findings(execution, findings)
+        self._process_finding(execution, finding)
+
+    def is_finding_processable(self, finding: Finding) -> bool:
+        return finding.__class__ in self.finding_types or len(self.finding_types) == 0
+
+    def process_findings(self, execution: Execution, findings: list[Finding]) -> None:
+        for finding in findings:
+            self.process_finding(execution, finding)
 
 
 class BaseNotification(BasePlatform):

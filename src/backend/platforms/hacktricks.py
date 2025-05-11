@@ -8,6 +8,8 @@ from framework.platforms import BaseIntegration
 
 
 class HackTricks(BaseIntegration):
+    finding_types = [Host, Port, Technology]
+
     def __init__(self) -> None:
         super().__init__()
         self.sitemap_url = "https://www.hacktricks.wiki/sitemap.xml"
@@ -87,52 +89,51 @@ class HackTricks(BaseIntegration):
                 return mapped_value
         return None
 
-    def _process_findings(self, execution: Execution, findings: list[Finding]) -> None:
-        for finding in findings:
-            hacktricks_link = None
-            if isinstance(finding, Host) and finding.os_type in self.host_type_mapping:
-                hacktricks_link = self.host_type_mapping[finding.os_type]
-            elif isinstance(finding, Port) and finding.service:
-                service_comparator = finding.service.lower().strip()
-                mapped_value = self._get_mapped_value_for_service(service_comparator)
-                if self.url in (mapped_value or ""):
-                    hacktricks_link = mapped_value
-                elif mapped_value:
-                    service_comparator = mapped_value
-                if not hacktricks_link:
-                    for link in self.all_links:
-                        if self.services_base_url not in link:
-                            continue
-                        comparator = link.replace(self.services_base_url, "").strip()
-                        link_parts = comparator.split("-")
-                        if "/" not in comparator and (
-                            service_comparator in link_parts
-                            or (
-                                str(finding.port) in link_parts
-                                and (
-                                    len(
-                                        [
-                                            p
-                                            for p in link_parts
-                                            if p.lower().strip() in service_comparator
-                                            or p.lower().strip() in service_comparator.replace("-", "")
-                                            or service_comparator in p
-                                        ]
-                                    )
-                                    > 0
+    def _process_finding(self, execution: Execution, finding: Finding) -> None:
+        hacktricks_link = None
+        if isinstance(finding, Host) and finding.os_type in self.host_type_mapping:
+            hacktricks_link = self.host_type_mapping[finding.os_type]
+        elif isinstance(finding, Port) and finding.service:
+            service_comparator = finding.service.lower().strip()
+            mapped_value = self._get_mapped_value_for_service(service_comparator)
+            if self.url in (mapped_value or ""):
+                hacktricks_link = mapped_value
+            elif mapped_value:
+                service_comparator = mapped_value
+            if not hacktricks_link:
+                for link in self.all_links:
+                    if self.services_base_url not in link:
+                        continue
+                    comparator = link.replace(self.services_base_url, "").strip()
+                    link_parts = comparator.split("-")
+                    if "/" not in comparator and (
+                        service_comparator in link_parts
+                        or (
+                            str(finding.port) in link_parts
+                            and (
+                                len(
+                                    [
+                                        p
+                                        for p in link_parts
+                                        if p.lower().strip() in service_comparator
+                                        or p.lower().strip() in service_comparator.replace("-", "")
+                                        or service_comparator in p
+                                    ]
                                 )
+                                > 0
                             )
-                        ):
-                            hacktricks_link = link
-                            break
-            elif isinstance(finding, Technology):
-                for base in [self.services_base_url, self.web_base_url]:
-                    for link in self.all_links:
-                        if base in link and finding.name.lower() in link.lower():
-                            hacktricks_link = link
-                            break
-                    if hacktricks_link:
+                        )
+                    ):
+                        hacktricks_link = link
                         break
-            if hacktricks_link:
-                finding.hacktricks_link = hacktricks_link
-                finding.save(update_fields=["hacktricks_link"])
+        elif isinstance(finding, Technology):
+            for base in [self.services_base_url, self.web_base_url]:
+                for link in self.all_links:
+                    if base in link and finding.name.lower() in link.lower():
+                        hacktricks_link = link
+                        break
+                if hacktricks_link:
+                    break
+        if hacktricks_link:
+            finding.hacktricks_link = hacktricks_link
+            finding.save(update_fields=["hacktricks_link"])
