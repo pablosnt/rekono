@@ -2,9 +2,10 @@ import os
 import shutil
 import sys
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import yaml
+
 from rekono.properties import Property
 from security.cryptography.encryption import Encryptor
 
@@ -21,7 +22,7 @@ class RekonoConfig:
         self.generated_reports = self.reports / "generated"
         self.wordlists = self.home / "wordlists"
         self.logs = self.home / "logs"
-        self.pdf_report_template: Optional[Path] = None
+        self.pdf_report_template: Path | None = None
         for path in [
             self.home,
             self.reports,
@@ -81,7 +82,7 @@ class RekonoConfig:
             value = str(value).lower() == "true"
         return value
 
-    def _get_config_from_file(self, property: str) -> Optional[Any]:
+    def _get_config_from_file(self, property: str) -> Any | None:
         properties = self._config_properties
         for key in property.split("."):
             if key not in properties or not properties.get(key):

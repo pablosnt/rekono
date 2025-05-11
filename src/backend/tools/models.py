@@ -2,9 +2,10 @@ import re
 import shutil
 import subprocess  # nosec
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from django.db import models
+
 from framework.models import BaseLike, BaseModel
 from input_types.models import InputType
 from rekono.settings import CONFIG
@@ -53,7 +54,7 @@ class Tool(BaseLike):
             update_fields.append("version")
         self.save(update_fields=update_fields)
 
-    def _parse_version(self) -> Optional[str]:
+    def _parse_version(self) -> str | None:
         version_regex = r"(?!m)[a-z]?[\d]+\.[\d]+\.?[\d]*-?[a-z]*"
         if self.version_argument:
             process = subprocess.run(  # nosec

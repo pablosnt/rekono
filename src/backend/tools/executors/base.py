@@ -4,11 +4,12 @@ import re
 import subprocess  # nosec
 import uuid
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
-from authentications.models import Authentication
 from django.forms.models import model_to_dict
 from django.utils import timezone
+
+from authentications.models import Authentication
 from executions.enums import Status
 from executions.models import Execution
 from findings.framework.models import Finding
@@ -39,7 +40,7 @@ class BaseExecutor:
         self.arguments: list[str] = []
         self.environment: dict[str, Any] = {}
         self.findings_used_in_execution: dict[Any, BaseInput] = {}
-        self.authentication: Optional[Authentication] = None
+        self.authentication: Authentication | None = None
 
     def _get_arguments(
         self,

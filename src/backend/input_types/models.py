@@ -1,7 +1,8 @@
-from typing import Optional, Self
+from typing import Self
 
 from django.apps import apps
 from django.db import models
+
 from framework.models import BaseInput, BaseModel
 from input_types.enums import InputTypeName
 
@@ -33,8 +34,7 @@ class InputType(BaseModel):
         app_label, model_name = reference.split(".", 1)
         return apps.get_model(app_label=app_label, model_name=model_name)
 
-    # TODO: Replace Optional syntax by | None
-    def get_model_class(self) -> Optional[BaseInput]:
+    def get_model_class(self) -> BaseInput | None:
         """Get related model from 'model' reference.
 
         Returns:
@@ -42,7 +42,7 @@ class InputType(BaseModel):
         """
         return self._get_class_from_reference(self.model)
 
-    def get_fallback_model_class(self) -> Optional[BaseInput]:
+    def get_fallback_model_class(self) -> BaseInput | None:
         """Get callback model from 'fallback_model' reference.
 
         Returns:

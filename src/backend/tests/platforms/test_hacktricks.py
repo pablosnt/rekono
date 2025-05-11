@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any
 from unittest import mock
 
 from findings.framework.models import Finding
@@ -24,13 +24,13 @@ class HackTricksTest(RekonoTest):
         self._setup_findings(self.execution1)
 
     @mock.patch("platforms.hacktricks.HackTricks._get_all_hacktricks_links", links)
-    def _test_integration(self, expected: dict[Finding, Optional[str]]) -> None:
+    def _test_integration(self, expected: dict[Finding, str | None]) -> None:
         client = HackTricks()
         client.process_findings(self.execution1, expected.keys())
         for finding, expected_link in expected.items():
             self.assertEqual(expected_link, finding.hacktricks_link)
 
-    def _get_expected(self) -> dict[Finding, Optional[str]]:
+    def _get_expected(self) -> dict[Finding, str | None]:
         return {
             self.host: f"{base_url}linux-hardening/privilege-escalation/index.html",
             self.port: f"{base_url}pentesting-web/web-vulnerabilities-methodology.html",

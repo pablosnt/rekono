@@ -2,11 +2,13 @@ import hashlib
 import json
 import shutil
 from pathlib import Path as PathFile
-from typing import Any, Optional
+from typing import Any
+
+from django.test import TestCase
+from rest_framework.test import APIClient
 
 from authentications.enums import AuthenticationType
 from authentications.models import Authentication
-from django.test import TestCase
 from executions.enums import Status
 from executions.models import Execution
 from findings.enums import (
@@ -34,7 +36,6 @@ from parameters.models import InputTechnology, InputVulnerability
 from processes.models import Process, Step
 from projects.models import Project
 from rekono.settings import CONFIG
-from rest_framework.test import APIClient
 from security.authorization.roles import Role
 from target_ports.models import TargetPort
 from targets.enums import TargetType
@@ -304,7 +305,7 @@ class ApiTest(RekonoTest):
     def _get_object(self) -> Any:
         return None
 
-    def _get_api_client(self, access: Optional[str] = None, token: Optional[str] = None):
+    def _get_api_client(self, access: str | None = None, token: str | None = None):
         client = APIClient(HTTP_AUTHORIZATION=f"Bearer {access}") if access else APIClient()
         return APIClient(HTTP_AUTHORIZATION=f"Token {token}") if token else client
 

@@ -1,10 +1,11 @@
 import importlib
-from typing import Any, Callable, Optional, cast
+from typing import Any, Callable, cast
 
 import requests
 import urllib3
 from django.db import models
 from django.db.models import Q
+
 from rekono.settings import AUTH_USER_MODEL, CONFIG
 from security.cryptography.encryption import Encryptor
 
@@ -89,7 +90,7 @@ class BaseInput(BaseModel):
             type: type,
             field: str,
             contains: bool = False,
-            processor: Optional[Callable] = None,
+            processor: Callable | None = None,
         ) -> None:
             self.type = type
             self.field = field
@@ -104,10 +105,10 @@ class BaseInput(BaseModel):
     def _get_url(
         self,
         host: str,
-        port: Optional[int] = None,
+        port: int | None = None,
         endpoint: str = "",
         protocols: list[str] = ["http", "https"],
-    ) -> Optional[str]:
+    ) -> str | None:
         """Get a HTTP or HTTPS URL from host, port and endpoint.
 
         Args:
@@ -117,7 +118,7 @@ class BaseInput(BaseModel):
             protocols (list[str], optional): Protocol list to check. Defaults to ['http', 'https'].
 
         Returns:
-            Optional[str]: [description]
+            str | None: [description]
         """
         urllib3.disable_warnings(category=urllib3.exceptions.InsecureRequestWarning)
         if endpoint.startswith("/"):

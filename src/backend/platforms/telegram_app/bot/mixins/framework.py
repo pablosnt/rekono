@@ -1,16 +1,17 @@
 import logging
-from typing import Any, Callable, Optional
+from typing import Any, Callable
 
 from asgiref.sync import sync_to_async
 from django.db import IntegrityError
 from django.db.models import QuerySet
+from rest_framework.serializers import Serializer
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram.ext import CallbackContext, ConversationHandler
+
 from platforms.telegram_app.bot.commands import Cancel
 from platforms.telegram_app.bot.enums import Context
 from platforms.telegram_app.bot.framework import BaseTelegramBot
 from platforms.telegram_app.models import TelegramChat
-from rest_framework.serializers import Serializer
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
-from telegram.ext import CallbackContext, ConversationHandler
 
 logger = logging.getLogger()
 
@@ -166,7 +167,7 @@ class BaseMixin(BaseTelegramBot):
         previous_state: int,
         next_state: int,
         chat: TelegramChat = None,
-    ) -> tuple[int, Optional[Any]]:
+    ) -> tuple[int, Any | None]:
         chat = chat or await self._get_active_telegram_chat(update)
         if not chat or not update.effective_message:
             return ConversationHandler.END, None

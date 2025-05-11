@@ -1,15 +1,16 @@
 import json
-from typing import Any, Optional
+from typing import Any
 
 import defusedxml.ElementTree as parser
 from django.db.models.fields.related_descriptors import ReverseManyToOneDescriptor
 from django.db.models.query_utils import DeferredAttribute
+
 from findings.framework.models import Finding
 from tools.executors.base import BaseExecutor
 
 
 class BaseParser:
-    def __init__(self, executor: BaseExecutor, output: Optional[str] = None) -> None:
+    def __init__(self, executor: BaseExecutor, output: str | None = None) -> None:
         self.executor = executor
         self.output = output
         self.report = (
@@ -80,7 +81,7 @@ class BaseParser:
                 return report.readlines()
         return []
 
-    def _protect_value(self, value: Optional[str]) -> Optional[str]:
+    def _protect_value(self, value: str | None) -> str | None:
         if not value:
             return value
         if self.executor.authentication:

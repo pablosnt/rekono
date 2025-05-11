@@ -1,6 +1,5 @@
-from typing import Optional
-
 import defusedxml.ElementTree as parser
+
 from executions.models import Execution
 from findings.enums import HostOS
 from findings.framework.models import Finding
@@ -82,7 +81,7 @@ class HackTricks(BaseIntegration):
             url[0].text for url in parser.fromstring(self._request(self.session.get, self.sitemap_url, json=False).text)
         ]
 
-    def _get_mapped_value_for_service(self, service: str) -> Optional[str]:
+    def _get_mapped_value_for_service(self, service: str) -> str | None:
         for mapped_value, services in self.services_mapping.items():
             if service in services:
                 return mapped_value

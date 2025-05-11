@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any
 from unittest import mock
 
 from findings.enums import Severity
@@ -60,8 +60,8 @@ class NvdNistTest(RekonoTest):
     def _test(
         self,
         severity: Severity,
-        reference: Optional[str] = None,
-        cwe: Optional[str] = "CWE-200",
+        reference: str | None = None,
+        cwe: str | None = "CWE-200",
         description: str = "description",
     ) -> None:
         self.nvdnist.process_findings(self.execution3, [self.vulnerability])

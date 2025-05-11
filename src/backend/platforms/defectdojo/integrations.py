@@ -1,9 +1,11 @@
 from datetime import timedelta
 from pathlib import Path as PathFile
-from typing import Any, Callable, Optional
+from typing import Any, Callable
 
 import requests
 from django.utils import timezone
+from requests.exceptions import HTTPError
+
 from executions.models import Execution
 from findings.enums import PathType, Severity
 from findings.framework.models import Finding
@@ -14,7 +16,6 @@ from platforms.defectdojo.models import (
     DefectDojoSync,
     DefectDojoTargetSync,
 )
-from requests.exceptions import HTTPError
 from targets.models import Target
 
 
@@ -125,7 +126,7 @@ class DefectDojo(BaseIntegration):
             },
         )
 
-    def _create_endpoint(self, product: int, endpoint: Path, target: Target) -> Optional[dict[str, Any]]:
+    def _create_endpoint(self, product: int, endpoint: Path, target: Target) -> dict[str, Any] | None:
         try:
             return self._request(
                 self.session.post,

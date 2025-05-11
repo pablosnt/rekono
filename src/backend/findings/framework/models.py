@@ -1,7 +1,8 @@
-from typing import Any, Optional
+from typing import Any
 
 from django.db import models
 from django.utils import timezone
+
 from executions.models import Execution
 from findings.enums import TriageStatus
 from framework.models import BaseInput
@@ -15,8 +16,8 @@ class FindingManager(models.Manager):
     def _get_related_findings(
         self,
         finding: Any,
-        filter: Optional[dict[str, Any]] = None,
-        input_type: Optional[InputType] = None,
+        filter: dict[str, Any] | None = None,
+        input_type: InputType | None = None,
     ) -> list[Any]:
         related_findings = []
         current_input_type = (
@@ -44,9 +45,9 @@ class FindingManager(models.Manager):
         self,
         finding: Any,
         is_fixed: bool,
-        auto_fixed: Optional[bool] = False,
-        fixed_date: Optional[timezone.datetime] = None,
-        fixed_by: Optional[Any] = None,
+        auto_fixed: bool | None = False,
+        fixed_date: timezone.datetime | None = None,
+        fixed_by: Any | None = None,
     ) -> Any:
         finding.is_fixed = is_fixed
         finding.auto_fixed = auto_fixed
@@ -60,8 +61,8 @@ class FindingManager(models.Manager):
         queryset: models.QuerySet,
         is_fixed: bool,
         auto_fixed: bool,
-        fixed_date: Optional[timezone.datetime] = None,
-        fixed_by: Optional[Any] = None,
+        fixed_date: timezone.datetime | None = None,
+        fixed_by: Any | None = None,
     ) -> Any:
         return queryset.update(
             is_fixed=is_fixed,
@@ -70,7 +71,7 @@ class FindingManager(models.Manager):
             fixed_by=fixed_by,
         )
 
-    def fix(self, findings: Any | models.QuerySet, fixed_by: Optional[Any] = None) -> Any | models.QuerySet:
+    def fix(self, findings: Any | models.QuerySet, fixed_by: Any | None = None) -> Any | models.QuerySet:
         if not findings:
             return findings
         args = {
@@ -90,7 +91,7 @@ class FindingManager(models.Manager):
                 self._update_finding_fix_data(related_finding, **args)
         return updated_finding
 
-    def remove_fix(self, finding: Any, fixed_by: Optional[Any] = None) -> Any:
+    def remove_fix(self, finding: Any, fixed_by: Any | None = None) -> Any:
         original_fixed_by = finding.fixed_by
         updated_finding = self._update_finding_fix_data(finding, False)
         if fixed_by:
