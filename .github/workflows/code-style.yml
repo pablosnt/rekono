@@ -5,36 +5,9 @@ on:
 
 jobs:
   backend:
+    name: Backend Style
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - tool: black
-            arguments: --check src/backend/
-            working_directory: .
-          - tool: mypy
-            arguments: --namespace-packages --package backend --install-types --non-interactive --ignore-missing-imports --exclude migrations/
-            working_directory: ./src
-          - tool: flake8
-            arguments: --ignore=E203,E501,W503,W605 src/backend
-            working_directory: .
-    name: ${{ matrix.tool }}
-    steps:      
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      
-      - uses: actions/setup-python@v5
-        with:
-          python-version: 3.13
-      
-      - name: Install Python dependencies
-        run: |
-          python -m pip install -U pip
-          python -m pip install -r src/backend/requirements-dev.txt
-      
+    steps:
       - uses: dorny/paths-filter@3c49e64ca26115121162fb767bc6af9e8d059f1a
         id: changes
         with:
@@ -42,38 +15,67 @@ jobs:
             backend:
               - 'src/backend/**'
 
-      - name: Check
-        working-directory: ${{ matrix.working_directory }}
-        if: ${{ steps.changes.outputs.backend == 'true' || github.event_name != 'pull_request' }}
-        run: ${{ matrix.tool }} ${{ matrix.arguments }}
-
-  frontend:
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - script: eslint
-          - script: prettier
-    name: ${{ matrix.script }}
-    steps:
       - name: Checkout
+        if: ${{ steps.changes.outputs.backend == 'true' || github.event_name != 'pull_request' }}
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: Install UV
+        if: ${{ steps.changes.outputs.backend == 'true' || github.event_name != 'pull_request' }}
+        uses: astral-sh/setup-uv@v6
+        with:
+          activate-environment: true
+          python-version: 3.12.0 # Required by pytype
       
-      - name: Install NPM dependencies
-        working-directory: src/frontend
-        run: npm install .
+      - name: Install dependencies
+        working-directory: src/backend
+        if: ${{ steps.changes.outputs.backend == 'true' || github.event_name != 'pull_request' }}
+        run: uv sync --locked
+
+      - name: Ruff
+        if: ${{ steps.changes.outputs.backend == 'true' || github.event_name != 'pull_request' }}
+        working-directory: src/backend
+        run: uvx ruff format --check
       
+      - name: PyType
+        if: ${{ (steps.changes.outputs.backend == 'true' || github.event_name != 'pull_request') && !cancelled() }}
+        working-directory: src/backend
+        run: uvx pytype --keep-going --disable "import-error,pyi-error" .
+      
+      - name: Flake8
+        if: ${{ (steps.changes.outputs.backend == 'true' || github.event_name != 'pull_request') && !cancelled() }}
+        working-directory: src/backend
+        run: uvx flake8 .
+
+  frontend:
+    name: Frontend Style
+    runs-on: ubuntu-latest
+    steps:
       - uses: dorny/paths-filter@3c49e64ca26115121162fb767bc6af9e8d059f1a
         id: changes
         with:
           filters: |
             frontend:
               - 'src/frontend/**'
+
+      - name: Checkout
+        if: ${{ steps.changes.outputs.frontend == 'true' || github.event_name != 'pull_request' }}
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       
-      - name: Check
+      - name: Install NPM dependencies
+        if: ${{ steps.changes.outputs.frontend == 'true' || github.event_name != 'pull_request' }}
+        working-directory: src/frontend
+        run: npm install .
+      
+      - name: ESLint
+        if: ${{ steps.changes.outputs.frontend == 'true' || github.event_name != 'pull_request' }}
         working-directory: src/frontend/
-        if: ${{ steps.changes.outputs.frontend == 'true' || github.event_name != 'pull_request' }} 
-        run: npm run ${{ matrix.script }}
+        run: npm run eslint
+      
+      - name: Prettier
+        if: ${{ (steps.changes.outputs.frontend == 'true' || github.event_name != 'pull_request') && !cancelled() }}
+        working-directory: src/frontend/
+        run: npm run prettier

@@ -119,9 +119,7 @@ class WordlistTest(ApiTest):
             endpoint="{endpoint}30/",
         ),
         ApiTestCase(["reader1", "reader2"], "post", 403, endpoint="{endpoint}29/like/"),
-        ApiTestCase(
-            ["reader1", "reader2"], "delete", 403, endpoint="{endpoint}30/like/"
-        ),
+        ApiTestCase(["reader1", "reader2"], "delete", 403, endpoint="{endpoint}30/like/"),
         ApiTestCase(
             ["admin1", "admin2", "auditor1", "auditor2"],
             "get",
@@ -190,9 +188,7 @@ class WordlistTest(ApiTest):
             403,
             endpoint="{endpoint}29/",
         ),
-        ApiTestCase(
-            ["reader1", "reader2", "auditor2"], "delete", 403, endpoint="{endpoint}30/"
-        ),
+        ApiTestCase(["reader1", "reader2", "auditor2"], "delete", 403, endpoint="{endpoint}30/"),
         ApiTestCase(["admin2"], "delete", 204, endpoint="{endpoint}29/"),
         ApiTestCase(["auditor1"], "delete", 204, endpoint="{endpoint}30/"),
         ApiTestCase(

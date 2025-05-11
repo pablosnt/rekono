@@ -63,17 +63,11 @@ class ReportingViewSet(BaseViewSet):
     http_method_names = ["get", "post", "delete"]
     owner_field = "user"
 
-    def _get_project_from_data(
-        self, project_field: str, data: dict[str, Any]
-    ) -> Optional[Project]:
+    def _get_project_from_data(self, project_field: str, data: dict[str, Any]) -> Optional[Project]:
         return (
             cast(Task, data.get("task")).target.project
             if data.get("task")
-            else (
-                cast(Target, data.get("target")).project
-                if data.get("target")
-                else data.get("project")
-            )
+            else (cast(Target, data.get("target")).project if data.get("target") else data.get("project"))
         )
 
     def get_queryset(self) -> QuerySet:
@@ -92,20 +86,13 @@ class ReportingViewSet(BaseViewSet):
         )
 
     def get_serializer_class(self) -> Serializer:
-        return (
-            CreateReportSerializer
-            if self.request.method == "POST"
-            else super().get_serializer_class()
-        )
+        return CreateReportSerializer if self.request.method == "POST" else super().get_serializer_class()
 
     @extend_schema(request=CreateReportSerializer, responses=ReportSerializer)
     def create(self, request: Request, *args: Any, **kwargs: Any):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        findings: (
-            tuple[dict[int, Any], dict[int, list[int]], list[int]]
-            | dict[type[Finding], list[Finding]]
-        ) = {}
+        findings: tuple[dict[int, Any], dict[int, list[int]], list[int]] | dict[type[Finding], list[Finding]] = {}
         if serializer.validated_data["format"] == ReportFormat.PDF:
             findings = self._get_findings_to_pdf_report(serializer)
             count = sum([len(q) for i in findings[0].values() for q in i.values()])
@@ -121,11 +108,7 @@ class ReportingViewSet(BaseViewSet):
         threading.Thread(
             target=self._create_report_file,
             args=(serializer.instance,)
-            + (
-                (findings[0], findings[1], findings[2])
-                if isinstance(findings, tuple)
-                else (findings,)
-            ),
+            + ((findings[0], findings[1], findings[2]) if isinstance(findings, tuple) else (findings,)),
         ).start()
         return Response(
             self.get_serializer(instance=serializer.instance).data,
@@ -154,9 +137,7 @@ class ReportingViewSet(BaseViewSet):
                 ReportStatus.PENDING: "Report is not available yet",
                 ReportStatus.ERROR: "Report generation failed",
             }
-            return Response(
-                {"report": messages[report.status]}, status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({"report": messages[report.status]}, status=status.HTTP_400_BAD_REQUEST)
         path = CONFIG.generated_reports / (report.path or "")
         if not report.path or not path.is_file():
             return Response(status=status.HTTP_404_NOT_FOUND)
@@ -167,9 +148,7 @@ class ReportingViewSet(BaseViewSet):
             status=status.HTTP_200_OK,
         )
 
-    def _get_findings_to_report(
-        self, serializer: ReportSerializer
-    ) -> dict[type[Finding], list[Finding]]:
+    def _get_findings_to_report(self, serializer: ReportSerializer) -> dict[type[Finding], list[Finding]]:
         findings = {}
         models = importlib.import_module("findings.models")
         for finding_type in serializer.validated_finding_types:
@@ -183,8 +162,7 @@ class ReportingViewSet(BaseViewSet):
             if model == Vulnerability:
                 query = query.order_by("-severity")
             findings[model.__name__.lower()] = [
-                {k: v for k, v in model_to_dict(f).items() if k != "executions"}
-                for f in query
+                {k: v for k, v in model_to_dict(f).items() if k != "executions"} for f in query
             ]
         return findings
 
@@ -197,10 +175,7 @@ class ReportingViewSet(BaseViewSet):
         for target in (
             serializer.validated_data.get("project").targets.all()
             if serializer.validated_data.get("project")
-            else [
-                serializer.validated_data.get("target")
-                or serializer.validated_data.get("task").target
-            ]
+            else [serializer.validated_data.get("target") or serializer.validated_data.get("task").target]
         ):
             target_filter = {"executions__task__target": target}
             stats_by_target[target.id] = [0] * len(Severity)
@@ -261,9 +236,7 @@ class ReportingViewSet(BaseViewSet):
                         )
                         .all(),
                     }
-                    for host in Host.objects.filter(
-                        **{**target_filter, **serializer.validated_filter}
-                    )
+                    for host in Host.objects.filter(**{**target_filter, **serializer.validated_filter})
                 ],
             }
             if (
@@ -288,9 +261,7 @@ class ReportingViewSet(BaseViewSet):
 
     def _create_report_file(self, report: Report, *findings: Any) -> None:
         filename = f"{str(uuid.uuid4())}.{report.format.lower()}"
-        success = getattr(self, f"_{report.format.lower()}_report")(
-            filename, report, *findings
-        )
+        success = getattr(self, f"_{report.format.lower()}_report")(filename, report, *findings)
         if success:
             report.path = filename
             report.status = ReportStatus.READY
@@ -330,9 +301,7 @@ class ReportingViewSet(BaseViewSet):
         root = ET.Element("findings")
         for finding_type, finding_list in findings.items():
             for finding in finding_list:
-                root.append(
-                    self._dict_to_xml(ET.Element(finding_type.lower()), finding)
-                )
+                root.append(self._dict_to_xml(ET.Element(finding_type.lower()), finding))
         ET.indent(root, space="\t")
         with (CONFIG.generated_reports / filename).open("w") as filepath:
             filepath.write(ET.tostring(root, encoding="unicode"))
@@ -357,12 +326,7 @@ class ReportingViewSet(BaseViewSet):
     ) -> bool:
         template = get_template(CONFIG.pdf_report_template).render(
             {
-                "project": report.project
-                or (
-                    report.target.project
-                    if report.target
-                    else report.task.target.project
-                ),
+                "project": report.project or (report.target.project if report.target else report.task.target.project),
                 "targets": (
                     (report.project.targets.all() if not CONFIG.testing else [])
                     if report.project
@@ -374,7 +338,5 @@ class ReportingViewSet(BaseViewSet):
             }
         )
         with (CONFIG.generated_reports / filename).open("wb") as filepath:
-            pisa_status = pisa.CreatePDF(
-                template, dest=filepath, link_callback=self._pdf_static_content
-            )
+            pisa_status = pisa.CreatePDF(template, dest=filepath, link_callback=self._pdf_static_content)
         return not pisa_status.err

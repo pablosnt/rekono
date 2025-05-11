@@ -47,15 +47,9 @@ class NoteViewSet(LikeViewSet):
     )
     http_method_names = ["get", "post", "put", "delete"]
 
-    def _get_project_from_data(
-        self, project_field: str, data: dict[str, Any]
-    ) -> Optional[Project]:
+    def _get_project_from_data(self, project_field: str, data: dict[str, Any]) -> Optional[Project]:
         data_links = [link for link in reversed(links) if data.get(link)]
-        return (
-            cast(BaseModel, data.get(data_links[0])).get_project()
-            if len(data_links) > 0
-            else None
-        )
+        return cast(BaseModel, data.get(data_links[0])).get_project() if len(data_links) > 0 else None
 
     def get_queryset(self) -> QuerySet:
         return (
@@ -97,7 +91,5 @@ class NoteViewSet(LikeViewSet):
                 forked_from=note,
             )
             fork.tags.set(note.tags.all())
-            return Response(
-                self.get_serializer(instance=fork).data, status=HTTP_201_CREATED
-            )
+            return Response(self.get_serializer(instance=fork).data, status=HTTP_201_CREATED)
         return Response(status=HTTP_404_NOT_FOUND)

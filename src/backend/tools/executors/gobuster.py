@@ -14,9 +14,7 @@ class Gobuster(BaseExecutor):
         input_technologies: list[InputTechnology],
         wordlists: list[Wordlist],
     ) -> list[str]:
-        arguments = super()._get_arguments(
-            findings, target_ports, input_vulnerabilities, input_technologies, wordlists
-        )
+        arguments = super()._get_arguments(findings, target_ports, input_vulnerabilities, input_technologies, wordlists)
         if "--url" not in arguments and "--domain" not in arguments:
             raise RuntimeError(
                 f"Argument 'url' or 'domain' is required to execute tool '{self.execution.configuration.tool.name}'"

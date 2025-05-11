@@ -29,9 +29,7 @@ class BaseViewSet(ModelViewSet):
             if cls and hasattr(cls, "Meta") and hasattr(cls.Meta, "model"):
                 return cls.Meta.model
 
-    def _get_project_from_data(
-        self, project_field: str, data: dict[str, Any]
-    ) -> Optional[Project]:
+    def _get_project_from_data(self, project_field: str, data: dict[str, Any]) -> Optional[Project]:
         fields = project_field.split("__")
         if not fields:
             return None
@@ -73,9 +71,7 @@ class BaseViewSet(ModelViewSet):
     def perform_create(self, serializer: Serializer) -> None:
         model = self._get_model()
         if model:
-            project = self._get_project_from_data(
-                model.get_project_field() or "", serializer.validated_data
-            )
+            project = self._get_project_from_data(model.get_project_field() or "", serializer.validated_data)
             if project and self.request.user not in project.members.all():
                 raise PermissionDenied()
         if self.owner_field and model and hasattr(model, self.owner_field):

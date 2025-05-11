@@ -42,9 +42,7 @@ class StatsView(APIView):
 
     @extend_schema(parameters=[StatsSerializer])
     def get(self, request: Request) -> Response:
-        serializer = self.serializer_class(
-            data=request.query_params, context={"request": request}
-        )
+        serializer = self.serializer_class(data=request.query_params, context={"request": request})
         serializer.is_valid(raise_exception=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 

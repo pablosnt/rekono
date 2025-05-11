@@ -32,11 +32,7 @@ class CveCrowd(BaseIntegration):
         return super()._request(method, url, json, **kwargs)
 
     def _get_trending_cves(self) -> None:
-        if (
-            self.integration.enabled
-            and self.settings.secret
-            and len(self.trending_cves) == 0
-        ):
+        if self.integration.enabled and self.settings.secret and len(self.trending_cves) == 0:
             try:
                 self.trending_cves = self._request(
                     self.session.get,
@@ -54,11 +50,7 @@ class CveCrowd(BaseIntegration):
         if not self.trending_cves:
             return
         for finding in findings:
-            if (
-                isinstance(finding, Vulnerability)
-                and finding.cve is not None
-                and finding.cve in self.trending_cves
-            ):
+            if isinstance(finding, Vulnerability) and finding.cve is not None and finding.cve in self.trending_cves:
                 finding.trending = True
                 finding.save(update_fields=["trending"])
 
@@ -68,19 +60,11 @@ class CveCrowd(BaseIntegration):
             logger.warn("[CVE Crowd] No trending CVEs found")
             return
         already_trending_queryset = Vulnerability.objects.filter(trending=True).all()
-        already_trending_cves = list(
-            already_trending_queryset.values_list("cve", flat=True)
-        )
-        already_trending_queryset.exclude(cve__in=self.trending_cves).update(
-            trending=False
-        )
-        Vulnerability.objects.filter(trending=False, cve__in=self.trending_cves).update(
-            trending=True
-        )
+        already_trending_cves = list(already_trending_queryset.values_list("cve", flat=True))
+        already_trending_queryset.exclude(cve__in=self.trending_cves).update(trending=False)
+        Vulnerability.objects.filter(trending=False, cve__in=self.trending_cves).update(trending=True)
         notified_vulnerabilities: list[int] = []
-        for alert in Alert.objects.filter(
-            item=AlertItem.CVE, mode=AlertMode.MONITOR, enabled=True
-        ).all():
+        for alert in Alert.objects.filter(item=AlertItem.CVE, mode=AlertMode.MONITOR, enabled=True).all():
             vulnerabilities = (
                 Vulnerability.objects.filter(
                     executions__task__target__project=alert.project,

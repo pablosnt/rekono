@@ -134,9 +134,7 @@ class ActivityStatsSerializer(StatsSerializer):
             .order_by("-max_start")[: self.top],
         )
 
-    def get_latest_vulnerabilities(
-        self, instance: Any
-    ) -> VulnerabilitySerializer(many=True):
+    def get_latest_vulnerabilities(self, instance: Any) -> VulnerabilitySerializer(many=True):
         return self._serialize(
             VulnerabilitySerializer,
             self._get_queryset(Vulnerability)
@@ -164,9 +162,7 @@ class ActivityStatsSerializer(StatsSerializer):
                     vulnerabilities_count=Count(
                         "targets__tasks__executions__vulnerability",
                         distinct=True,
-                        filter=~Q(
-                            targets__tasks__executions__vulnerability__triage_status=TriageStatus.FALSE_POSITIVE
-                        )
+                        filter=~Q(targets__tasks__executions__vulnerability__triage_status=TriageStatus.FALSE_POSITIVE)
                         & Q(targets__tasks__executions__vulnerability__is_fixed=False),
                     )
                 )
@@ -176,8 +172,7 @@ class ActivityStatsSerializer(StatsSerializer):
                     "-tasks_count",
                     "-targets_count",
                 )[: self.top]
-                if self.validated_data.get("project") is None
-                and self.validated_data.get("target") is None
+                if self.validated_data.get("project") is None and self.validated_data.get("target") is None
                 else Project.objects.none()
             ),
         )
@@ -197,17 +192,13 @@ class HostsStatsSerializer(StatsSerializer):
                 fixed_port_vulnerability=Count(
                     "port__vulnerability",
                     distinct=True,
-                    filter=~Q(
-                        port__vulnerability__triage_status=TriageStatus.FALSE_POSITIVE
-                    )
+                    filter=~Q(port__vulnerability__triage_status=TriageStatus.FALSE_POSITIVE)
                     & Q(port__vulnerability__is_fixed=True),
                 ),
                 fixed_technology_vulnerability=Count(
                     "port__technology__vulnerability",
                     distinct=True,
-                    filter=~Q(
-                        port__vulnerability__triage_status=TriageStatus.FALSE_POSITIVE
-                    )
+                    filter=~Q(port__vulnerability__triage_status=TriageStatus.FALSE_POSITIVE)
                     & Q(port__vulnerability__is_fixed=True),
                 ),
             )
@@ -219,18 +210,14 @@ class HostsStatsSerializer(StatsSerializer):
                             f"port_vulnerability_{severity.name.lower()}": Count(
                                 "port__vulnerability",
                                 distinct=True,
-                                filter=~Q(
-                                    port__vulnerability__triage_status=TriageStatus.FALSE_POSITIVE
-                                )
+                                filter=~Q(port__vulnerability__triage_status=TriageStatus.FALSE_POSITIVE)
                                 & Q(port__vulnerability__is_fixed=False)
                                 & Q(port__vulnerability__severity=severity),
                             ),
                             f"technology_vulnerability_{severity.name.lower()}": Count(
                                 "port__technology__vulnerability",
                                 distinct=True,
-                                filter=~Q(
-                                    port__vulnerability__triage_status=TriageStatus.FALSE_POSITIVE
-                                )
+                                filter=~Q(port__vulnerability__triage_status=TriageStatus.FALSE_POSITIVE)
                                 & Q(port__vulnerability__is_fixed=False)
                                 & Q(port__vulnerability__severity=severity),
                             ),
@@ -245,9 +232,7 @@ class HostsStatsSerializer(StatsSerializer):
                     k: v
                     for item in [
                         {
-                            f"vulnerabilities_{severity.name.lower()}": F(
-                                f"port_vulnerability_{severity.name.lower()}"
-                            )
+                            f"vulnerabilities_{severity.name.lower()}": F(f"port_vulnerability_{severity.name.lower()}")
                             + F(f"technology_vulnerability_{severity.name.lower()}")
                         }
                         for severity in Severity
@@ -256,14 +241,8 @@ class HostsStatsSerializer(StatsSerializer):
                 }
             )
             .annotate(
-                vulnerabilities=sum(
-                    [
-                        F(f"vulnerabilities_{severity.name.lower()}")
-                        for severity in Severity
-                    ]
-                ),
-                fixed_vulnerabilities=F("fixed_port_vulnerability")
-                + F("fixed_technology_vulnerability"),
+                vulnerabilities=sum([F(f"vulnerabilities_{severity.name.lower()}") for severity in Severity]),
+                fixed_vulnerabilities=F("fixed_port_vulnerability") + F("fixed_technology_vulnerability"),
             )
             .values(
                 "id",
@@ -281,15 +260,12 @@ class HostsStatsSerializer(StatsSerializer):
                     **{
                         k: v
                         for k, v in item.items()
-                        if k
-                        in ["id", "address", "vulnerabilities", "fixed_vulnerabilities"]
+                        if k in ["id", "address", "vulnerabilities", "fixed_vulnerabilities"]
                     },
                     "vulnerabilities_per_severity": [
                         {
                             "severity": severity.name,
-                            "count": item.get(
-                                f"vulnerabilities_{severity.name.lower()}"
-                            ),
+                            "count": item.get(f"vulnerabilities_{severity.name.lower()}"),
                         }
                         for severity in Severity
                         if item.get(f"vulnerabilities_{severity.name.lower()}")
@@ -319,9 +295,7 @@ class HostsStatsSerializer(StatsSerializer):
             .order_by("-count"),
         )
 
-    def get_technologies_distribution(
-        self, instance: Any
-    ) -> TechnologyCount(many=True):
+    def get_technologies_distribution(self, instance: Any) -> TechnologyCount(many=True):
         return self._serialize(
             TechnologyCount,
             self._get_queryset(Technology)
@@ -373,15 +347,11 @@ class VulnerabilityStatsSerializer(StatsSerializer):
     def _get_vulnerabilities(self, fixed: bool) -> QuerySet:
         if not self._current_vulnerabilities:
             self._current_vulnerabilities = (
-                self._get_queryset()
-                .filter(is_fixed=False)
-                .exclude(triage_status=TriageStatus.FALSE_POSITIVE)
+                self._get_queryset().filter(is_fixed=False).exclude(triage_status=TriageStatus.FALSE_POSITIVE)
             )
         if not self._fixed_vulnerabilities:
             self._fixed_vulnerabilities = (
-                self._get_queryset()
-                .filter(is_fixed=True)
-                .exclude(triage_status=TriageStatus.FALSE_POSITIVE)
+                self._get_queryset().filter(is_fixed=True).exclude(triage_status=TriageStatus.FALSE_POSITIVE)
             )
         return self._fixed_vulnerabilities if fixed else self._current_vulnerabilities
 
@@ -394,22 +364,14 @@ class VulnerabilityStatsSerializer(StatsSerializer):
         )
         return (
             round(
-                (
-                    self._get_vulnerabilities(True)
-                    .exclude(triage_status=TriageStatus.WONT_FIX)
-                    .count()
-                    / all
-                )
-                * 100,
+                (self._get_vulnerabilities(True).exclude(triage_status=TriageStatus.WONT_FIX).count() / all) * 100,
                 2,
             )
             if all
             else 0.0
         )
 
-    def get_fix_progress_per_severity(
-        self, instance: Any
-    ) -> SeverityProgress(many=True):
+    def get_fix_progress_per_severity(self, instance: Any) -> SeverityProgress(many=True):
         return self._serialize(
             SeverityProgress,
             self._get_queryset()
@@ -483,18 +445,13 @@ class VulnerabilityStatsSerializer(StatsSerializer):
     def _get_severity_distribution(self, fixed: bool) -> SeverityCount(many=True):
         return self._serialize(
             SeverityCount,
-            self._get_vulnerabilities(fixed)
-            .values("severity")
-            .annotate(count=Count("severity"))
-            .order_by("-severity"),
+            self._get_vulnerabilities(fixed).values("severity").annotate(count=Count("severity")).order_by("-severity"),
         )
 
     def get_severity_distribution(self, instance: Any) -> SeverityCount(many=True):
         return self._get_severity_distribution(False)
 
-    def get_fixed_severity_distribution(
-        self, instance: Any
-    ) -> SeverityCount(many=True):
+    def get_fixed_severity_distribution(self, instance: Any) -> SeverityCount(many=True):
         return self._get_severity_distribution(True)
 
 
@@ -537,11 +494,7 @@ class TriagingStatsSerializer(StatsSerializer):
         fps = 0
         for model in [OSINT, Credential, Vulnerability, Exploit]:
             all += self._get_queryset(model).count()
-            fps += (
-                self._get_queryset(model)
-                .filter(triage_status=TriageStatus.FALSE_POSITIVE)
-                .count()
-            )
+            fps += self._get_queryset(model).filter(triage_status=TriageStatus.FALSE_POSITIVE).count()
         return round((fps / all) * 100, 2) if all > 0 else 0.0
 
     def get_distribution(self, instance: Any) -> TriageStatusCount(many=True):
@@ -549,8 +502,7 @@ class TriagingStatsSerializer(StatsSerializer):
         for model in [OSINT, Credential, Vulnerability, Exploit]:
             distribution.update(
                 {
-                    i["triage_status"]: distribution.get(i["triage_status"], 0)
-                    + i.get("count", 0)
+                    i["triage_status"]: distribution.get(i["triage_status"], 0) + i.get("count", 0)
                     for i in self._get_queryset(model)
                     .filter(is_fixed=False)
                     .values("triage_status")

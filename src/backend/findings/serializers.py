@@ -137,9 +137,7 @@ class VulnerabilitySerializer(TriageFindingSerializer):
             "exploit",
         )
 
-    def update(
-        self, instance: Vulnerability, validated_data: dict[str, Any]
-    ) -> Vulnerability:
+    def update(self, instance: Vulnerability, validated_data: dict[str, Any]) -> Vulnerability:
         instance = super().update(instance, validated_data)
         if instance.triage_status == TriageStatus.FALSE_POSITIVE:
             instance.exploit.all().update(

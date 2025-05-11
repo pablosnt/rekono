@@ -138,9 +138,7 @@ class FindingTest(ApiTest):
                                 "is_fixed": False,
                                 **{
                                     k: str(v) if isinstance(v, Severity) else v
-                                    for k, v in self.raw_findings[
-                                        finding.__class__
-                                    ].items()
+                                    for k, v in self.raw_findings[finding.__class__].items()
                                 },
                             }
                         ],
@@ -180,9 +178,7 @@ class FindingTest(ApiTest):
                                 "is_fixed": True,
                                 **{
                                     k: str(v) if isinstance(v, Severity) else v
-                                    for k, v in self.raw_findings[
-                                        finding.__class__
-                                    ].items()
+                                    for k, v in self.raw_findings[finding.__class__].items()
                                 },
                             }
                         ],
@@ -222,9 +218,7 @@ class FindingTest(ApiTest):
                                 "is_fixed": False,
                                 **{
                                     k: str(v) if isinstance(v, Severity) else v
-                                    for k, v in self.raw_findings[
-                                        finding.__class__
-                                    ].items()
+                                    for k, v in self.raw_findings[finding.__class__].items()
                                 },
                             }
                         ],
@@ -303,9 +297,7 @@ class TriageFindingTest(ApiTest):
                                 ),
                                 **{
                                     k: str(v) if isinstance(v, Severity) else v
-                                    for k, v in self.raw_findings[
-                                        finding.__class__
-                                    ].items()
+                                    for k, v in self.raw_findings[finding.__class__].items()
                                 },
                             }
                         ],
@@ -325,9 +317,7 @@ class TriageFindingTest(ApiTest):
                                 ),
                                 **{
                                     k: str(v) if isinstance(v, Severity) else v
-                                    for k, v in self.raw_findings[
-                                        finding.__class__
-                                    ].items()
+                                    for k, v in self.raw_findings[finding.__class__].items()
                                 },
                             }
                         ],
@@ -400,15 +390,9 @@ class OSINTTest(ApiTest):
     anonymous_allowed = None
     cases = [
         ApiTestCase(["admin1", "admin2", "auditor1", "auditor2"], "post", 405),
-        ApiTestCase(
-            ["reader1", "reader2"], "post", 403, endpoint="{endpoint}2/target/"
-        ),
-        ApiTestCase(
-            ["admin2", "auditor2"], "post", 404, endpoint="{endpoint}2/target/"
-        ),
-        ApiTestCase(
-            ["admin1", "auditor1"], "post", 400, endpoint="{endpoint}1/target/"
-        ),
+        ApiTestCase(["reader1", "reader2"], "post", 403, endpoint="{endpoint}2/target/"),
+        ApiTestCase(["admin2", "auditor2"], "post", 404, endpoint="{endpoint}2/target/"),
+        ApiTestCase(["admin1", "auditor1"], "post", 400, endpoint="{endpoint}1/target/"),
         ApiTestCase(
             ["auditor1"],
             "post",
@@ -420,9 +404,7 @@ class OSINTTest(ApiTest):
             },
             endpoint="{endpoint}2/target/",
         ),
-        ApiTestCase(
-            ["admin2", "auditor2", "reader2"], "get", 404, endpoint="/api/targets/2/"
-        ),
+        ApiTestCase(["admin2", "auditor2", "reader2"], "get", 404, endpoint="/api/targets/2/"),
         ApiTestCase(
             ["admin1", "auditor1", "reader1"],
             "get",

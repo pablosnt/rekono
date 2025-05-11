@@ -42,13 +42,8 @@ class Tool(BaseLike):
             and (
                 (not self.script and not self.script_directory_property)
                 or (
-                    Path(
-                        getattr(CONFIG, self.script_directory_property.lower())
-                    ).is_dir()
-                    and (
-                        Path(getattr(CONFIG, self.script_directory_property.lower()))
-                        / self.script
-                    ).is_file()
+                    Path(getattr(CONFIG, self.script_directory_property.lower())).is_dir()
+                    and (Path(getattr(CONFIG, self.script_directory_property.lower())) / self.script).is_file()
                 )
             )
         )
@@ -70,7 +65,7 @@ class Tool(BaseLike):
                 version = re.search(
                     version_regex,
                     # zaproxy returns the Java version at the first line
-                    re.sub("java version [^\s]*", "", output),
+                    re.sub(r"java version [^\s]*", "", output),
                     flags=re.IGNORECASE,
                 )
                 if version:
@@ -89,9 +84,7 @@ class Tool(BaseLike):
 class Intensity(BaseModel):
     tool = models.ForeignKey(Tool, related_name="intensities", on_delete=models.CASCADE)
     argument = models.TextField(max_length=50, default="", blank=True)
-    value = models.IntegerField(
-        choices=IntensityEnum.choices, default=IntensityEnum.NORMAL
-    )
+    value = models.IntegerField(choices=IntensityEnum.choices, default=IntensityEnum.NORMAL)
 
     def __str__(self) -> str:
         """Instance representation in text format.
@@ -104,19 +97,13 @@ class Intensity(BaseModel):
 
 class Configuration(BaseModel):
     name = models.TextField(max_length=30)
-    tool = models.ForeignKey(
-        Tool, related_name="configurations", on_delete=models.CASCADE
-    )
+    tool = models.ForeignKey(Tool, related_name="configurations", on_delete=models.CASCADE)
     arguments = models.TextField(max_length=250, default="", blank=True)
     stage = models.IntegerField(choices=Stage.choices)
     default = models.BooleanField(default=False)
 
     class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=["tool", "name"], name="unique_configuration"
-            )
-        ]
+        constraints = [models.UniqueConstraint(fields=["tool", "name"], name="unique_configuration")]
 
     def __str__(self) -> str:
         """Instance representation in text format.
@@ -135,9 +122,7 @@ class Argument(BaseModel):
     multiple = models.BooleanField(default=False)  # Accepts multiple BaseInputs or not
 
     class Meta:
-        constraints = [
-            models.UniqueConstraint(fields=["tool", "name"], name="unique_argument")
-        ]
+        constraints = [models.UniqueConstraint(fields=["tool", "name"], name="unique_argument")]
 
     def __str__(self) -> str:
         """Instance representation in text format.
@@ -149,17 +134,13 @@ class Argument(BaseModel):
 
 
 class Input(BaseModel):
-    argument = models.ForeignKey(
-        Argument, related_name="inputs", on_delete=models.CASCADE
-    )
+    argument = models.ForeignKey(Argument, related_name="inputs", on_delete=models.CASCADE)
     type = models.ForeignKey(InputType, related_name="inputs", on_delete=models.CASCADE)
     filter = models.TextField(max_length=250, blank=True, null=True)
     order = models.IntegerField(default=1)
 
     class Meta:
-        constraints = [
-            models.UniqueConstraint(fields=["argument", "order"], name="unique_input")
-        ]
+        constraints = [models.UniqueConstraint(fields=["argument", "order"], name="unique_input")]
 
     def __str__(self) -> str:
         """Instance representation in text format.
@@ -171,19 +152,11 @@ class Input(BaseModel):
 
 
 class Output(BaseModel):
-    configuration = models.ForeignKey(
-        Configuration, related_name="outputs", on_delete=models.CASCADE
-    )
-    type = models.ForeignKey(
-        InputType, related_name="outputs", on_delete=models.CASCADE
-    )
+    configuration = models.ForeignKey(Configuration, related_name="outputs", on_delete=models.CASCADE)
+    type = models.ForeignKey(InputType, related_name="outputs", on_delete=models.CASCADE)
 
     class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=["configuration", "type"], name="unique_output"
-            )
-        ]
+        constraints = [models.UniqueConstraint(fields=["configuration", "type"], name="unique_output")]
 
     def __str__(self) -> str:
         """Instance representation in text format.

@@ -45,23 +45,15 @@ class SecurityTest(ApiTest):
         # Try to refresh tokens using an invalid refresh token
         self.assertEqual(
             401,
-            authenticated_client.post(
-                self.refresh, data={"refresh": "invalid refresh token"}
-            ).status_code,
+            authenticated_client.post(self.refresh, data={"refresh": "invalid refresh token"}).status_code,
         )
 
         # Refresh tokens
-        response = authenticated_client.post(
-            self.refresh, data={"refresh": first_authentication["refresh"]}
-        )
+        response = authenticated_client.post(self.refresh, data={"refresh": first_authentication["refresh"]})
         self.assertEqual(200, response.status_code)
         second_authentication = self._get_content(response.content)
-        self.assertNotEqual(
-            first_authentication["access"], second_authentication["access"]
-        )
-        self.assertNotEqual(
-            first_authentication["refresh"], second_authentication["refresh"]
-        )
+        self.assertNotEqual(first_authentication["access"], second_authentication["access"])
+        self.assertNotEqual(first_authentication["refresh"], second_authentication["refresh"])
         authenticated_client = self._get_api_client(second_authentication["access"])
 
         # Get admin1's profile using the new access token
@@ -74,17 +66,13 @@ class SecurityTest(ApiTest):
         # Logout
         self.assertEqual(
             200,
-            authenticated_client.post(
-                self.logout, {"refresh": second_authentication["refresh"]}
-            ).status_code,
+            authenticated_client.post(self.logout, {"refresh": second_authentication["refresh"]}).status_code,
         )
 
         # Try to refresh tokens after logout
         self.assertEqual(
             401,
-            authenticated_client.post(
-                self.refresh, data={"refresh": second_authentication["refresh"]}
-            ).status_code,
+            authenticated_client.post(self.refresh, data={"refresh": second_authentication["refresh"]}).status_code,
         )
 
     def test_api_authentication(self) -> None:
@@ -94,9 +82,7 @@ class SecurityTest(ApiTest):
             data={"username": self.admin1.username, "password": self.admin1.username},
         )
         self.assertEqual(200, response.status_code)
-        access_client = self._get_api_client(
-            self._get_content(response.content)["access"]
-        )
+        access_client = self._get_api_client(self._get_content(response.content)["access"])
 
         # Create API token
         response = access_client.post(
@@ -107,9 +93,7 @@ class SecurityTest(ApiTest):
             },
         )
         self.assertEqual(201, response.status_code)
-        api_client = self._get_api_client(
-            token=self._get_content(response.content)["key"]
-        )
+        api_client = self._get_api_client(token=self._get_content(response.content)["key"])
         time.sleep(3)
 
         # Try to get admin1's profile using an expired token
@@ -136,16 +120,12 @@ class SecurityTest(ApiTest):
 
         # MFA endpoints are not callable by using an API token
         for mfa_endpoint in ["register", "enable", "disable"]:
-            self.assertEqual(
-                401, api_client.post(f"{self.mfa_user}{mfa_endpoint}/").status_code
-            )
+            self.assertEqual(401, api_client.post(f"{self.mfa_user}{mfa_endpoint}/").status_code)
 
         # Remove API token
         self.assertEqual(
             204,
-            api_client.delete(
-                f"{self.api_tokens}{api_token_content['id']}/"
-            ).status_code,
+            api_client.delete(f"{self.api_tokens}{api_token_content['id']}/").status_code,
         )
 
         # Try to get admin1's profile using the removed API token
@@ -159,9 +139,7 @@ class SecurityTest(ApiTest):
             data={"username": self.admin1.username, "password": self.admin1.username},
         )
         self.assertEqual(200, response.status_code)
-        access_client = self._get_api_client(
-            self._get_content(response.content)["access"]
-        )
+        access_client = self._get_api_client(self._get_content(response.content)["access"])
 
         # Check current profile
         response = access_client.get(self.profile)
@@ -171,42 +149,30 @@ class SecurityTest(ApiTest):
         # Before registering MFA, it can't be enabled
         self.assertEqual(
             400,
-            access_client.post(
-                f"{self.mfa_user}enable/", data={"mfa": "111111"}
-            ).status_code,
+            access_client.post(f"{self.mfa_user}enable/", data={"mfa": "111111"}).status_code,
         )
 
         # Register MFA app
-        self.assertEqual(
-            200, access_client.post(f"{self.mfa_user}register/").status_code
-        )
+        self.assertEqual(200, access_client.post(f"{self.mfa_user}register/").status_code)
         # Invalid MFA
         self.assertEqual(
             401,
-            access_client.post(
-                f"{self.mfa_user}enable/", data={"mfa": "1111111"}
-            ).status_code,
+            access_client.post(f"{self.mfa_user}enable/", data={"mfa": "1111111"}).status_code,
         )
         # Valid MFA
         self.admin1 = User.objects.get(pk=self.admin1.id)
         mfa_otp = pyotp.TOTP(self.admin1.secret)
-        response = access_client.post(
-            f"{self.mfa_user}enable/", data={"mfa": mfa_otp.now()}
-        )
+        response = access_client.post(f"{self.mfa_user}enable/", data={"mfa": mfa_otp.now()})
         self.assertEqual(200, response.status_code)
         self.assertTrue(self._get_content(response.content).get("mfa"))
 
         # After enabling MFA, it can't be registered again
-        self.assertEqual(
-            400, access_client.post(f"{self.mfa_user}register/").status_code
-        )
+        self.assertEqual(400, access_client.post(f"{self.mfa_user}register/").status_code)
 
         # After enabling MFA, it can't be enabled again
         self.assertEqual(
             400,
-            access_client.post(
-                f"{self.mfa_user}enable/", data={"mfa": mfa_otp.now()}
-            ).status_code,
+            access_client.post(f"{self.mfa_user}enable/", data={"mfa": mfa_otp.now()}).status_code,
         )
 
         # Login with MFA app
@@ -218,27 +184,19 @@ class SecurityTest(ApiTest):
         content = self._get_content(response.content)
         self.assertIsNotNone(content.get("mfa"))
         # Partial authenticated token is not valid to access API
-        self.assertEqual(
-            401, self._get_api_client(content.get("mfa")).get(self.profile).status_code
-        )
+        self.assertEqual(401, self._get_api_client(content.get("mfa")).get(self.profile).status_code)
         # Invalid token
         self.assertEqual(
             401,
-            anonymous_client.post(
-                self.mfa_login, data={"token": "invalid JWT", "mfa": mfa_otp.now()}
-            ).status_code,
+            anonymous_client.post(self.mfa_login, data={"token": "invalid JWT", "mfa": mfa_otp.now()}).status_code,
         )
         # Invalid MFA
         self.assertEqual(
             401,
-            anonymous_client.post(
-                self.mfa_login, data={"token": content.get("mfa"), "mfa": "1111111"}
-            ).status_code,
+            anonymous_client.post(self.mfa_login, data={"token": content.get("mfa"), "mfa": "1111111"}).status_code,
         )
         # Valid token and MFA
-        response = anonymous_client.post(
-            self.mfa_login, data={"token": content.get("mfa"), "mfa": mfa_otp.now()}
-        )
+        response = anonymous_client.post(self.mfa_login, data={"token": content.get("mfa"), "mfa": mfa_otp.now()})
         self.assertEqual(200, response.status_code)
         content = self._get_content(response.content)
         self.assertIsNotNone(content.get("access"))
@@ -254,38 +212,26 @@ class SecurityTest(ApiTest):
         content = self._get_content(response.content)
         self.assertIsNotNone(content.get("mfa"))
         # Partial authenticated token is not valid to access API
-        self.assertEqual(
-            401, self._get_api_client(content.get("mfa")).get(self.profile).status_code
-        )
+        self.assertEqual(401, self._get_api_client(content.get("mfa")).get(self.profile).status_code)
         # Request MFA via email
-        self.assertEqual(
-            400, anonymous_client.post(f"{self.mfa_login}email/").status_code
-        )
+        self.assertEqual(400, anonymous_client.post(f"{self.mfa_login}email/").status_code)
         self.assertEqual(
             204,
-            anonymous_client.post(
-                f"{self.mfa_login}email/", data={"token": content.get("mfa")}
-            ).status_code,
+            anonymous_client.post(f"{self.mfa_login}email/", data={"token": content.get("mfa")}).status_code,
         )
         plain_otp = User.objects.setup_otp(self.admin1)
         # Invalid token
         self.assertEqual(
             401,
-            anonymous_client.post(
-                self.mfa_login, data={"token": "invalid JWT", "mfa": plain_otp}
-            ).status_code,
+            anonymous_client.post(self.mfa_login, data={"token": "invalid JWT", "mfa": plain_otp}).status_code,
         )
         # Invalid MFA
         self.assertEqual(
             401,
-            anonymous_client.post(
-                self.mfa_login, data={"token": content.get("mfa"), "mfa": "1111111"}
-            ).status_code,
+            anonymous_client.post(self.mfa_login, data={"token": content.get("mfa"), "mfa": "1111111"}).status_code,
         )
         # Valid token and MFA
-        response = anonymous_client.post(
-            self.mfa_login, data={"token": content.get("mfa"), "mfa": plain_otp}
-        )
+        response = anonymous_client.post(self.mfa_login, data={"token": content.get("mfa"), "mfa": plain_otp})
         self.assertEqual(200, response.status_code)
         content = self._get_content(response.content)
         self.assertIsNotNone(content.get("access"))
@@ -298,14 +244,10 @@ class SecurityTest(ApiTest):
         # Invalid MFA
         self.assertEqual(
             401,
-            access_client.post(
-                f"{self.mfa_user}disable/", data={"mfa": "1111111"}
-            ).status_code,
+            access_client.post(f"{self.mfa_user}disable/", data={"mfa": "1111111"}).status_code,
         )
         # Valid MFA
-        response = access_client.post(
-            f"{self.mfa_user}disable/", data={"mfa": plain_otp}
-        )
+        response = access_client.post(f"{self.mfa_user}disable/", data={"mfa": plain_otp})
         self.assertEqual(200, response.status_code)
         self.assertFalse(self._get_content(response.content).get("mfa"))
 
@@ -315,9 +257,7 @@ class SecurityTest(ApiTest):
         # After disabling MFA, it can't be disabled again
         self.assertEqual(
             400,
-            access_client.post(
-                f"{self.mfa_user}disable/", data={"mfa": plain_otp}
-            ).status_code,
+            access_client.post(f"{self.mfa_user}disable/", data={"mfa": plain_otp}).status_code,
         )
 
         # After disabling MFA, login again
@@ -326,8 +266,6 @@ class SecurityTest(ApiTest):
             data={"username": self.admin1.username, "password": self.admin1.username},
         )
         self.assertEqual(200, response.status_code)
-        response = self._get_api_client(
-            self._get_content(response.content)["access"]
-        ).get(self.profile)
+        response = self._get_api_client(self._get_content(response.content)["access"]).get(self.profile)
         self.assertEqual(200, response.status_code)
         self.assertFalse(self._get_content(response.content).get("mfa"))

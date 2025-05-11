@@ -32,9 +32,7 @@ class TasksQueue(BaseQueue):
                 task=task,
                 on_success=self._scheduled_callback,
             )
-            logger.info(
-                f"[Task] Task {task.id} will be enqueued at {task.scheduled_at}"
-            )
+            logger.info(f"[Task] Task {task.id} will be enqueued at {task.scheduled_at}")
         else:
             task.enqueued_at = timezone.now()
             job = queue.enqueue(
@@ -70,9 +68,7 @@ class TasksQueue(BaseQueue):
         )
         executions_queue = ExecutionsQueue()
         for parameters in executions or [{}]:
-            execution = Execution.objects.create(
-                task=task, configuration=task.configuration
-            )
+            execution = Execution.objects.create(task=task, configuration=task.configuration)
             executions_queue.enqueue(
                 execution,
                 [],
@@ -91,32 +87,22 @@ class TasksQueue(BaseQueue):
                 max_output=Max("configuration__outputs__type__id"),
             )
             .filter(process=task.process)
-            .order_by(
-                "configuration__stage", "max_input", "max_output", "configuration__id"
-            )
+            .order_by("configuration__stage", "max_input", "max_output", "configuration__id")
         )
         executions_queue = ExecutionsQueue()
         for step in steps:
             item = {
                 "step": step,
-                "inputs": InputType.objects.filter(
-                    inputs__argument__tool=step.configuration.tool
-                ).distinct(),
-                "outputs": InputType.objects.filter(
-                    outputs__configuration=step.configuration
-                ).distinct(),
+                "inputs": InputType.objects.filter(inputs__argument__tool=step.configuration.tool).distinct(),
+                "outputs": InputType.objects.filter(outputs__configuration=step.configuration).distinct(),
                 "dependencies": [],
                 "jobs": [],
             }
-            if Intensity.objects.filter(
-                tool=step.configuration.tool, value__lte=task.intensity
-            ).exists():
+            if Intensity.objects.filter(tool=step.configuration.tool, value__lte=task.intensity).exists():
                 for execution_job in plan:
                     for output in execution_job.get("outputs", []):
                         if output in item.get("inputs", []):
-                            if execution_job["step"].id not in [
-                                d["step"].id for d in item["dependencies"]
-                            ]:
+                            if execution_job["step"].id not in [d["step"].id for d in item["dependencies"]]:
                                 item["dependencies"].append(execution_job)
                             break
                 plan.append(item)
@@ -137,9 +123,7 @@ class TasksQueue(BaseQueue):
                 task.wordlists.all(),
             )
             for parameters in executions or [{}]:
-                execution = Execution.objects.create(
-                    task=task, configuration=execution_job["step"].configuration
-                )
+                execution = Execution.objects.create(task=task, configuration=execution_job["step"].configuration)
                 execution_job["jobs"].append(
                     executions_queue.enqueue(
                         execution,
@@ -148,16 +132,12 @@ class TasksQueue(BaseQueue):
                         parameters.get(2, []),
                         parameters.get(3, []),
                         parameters.get(4, []),
-                        dependencies=sum(
-                            [d["jobs"] for d in execution_job["dependencies"]], []
-                        ),
+                        dependencies=sum([d["jobs"] for d in execution_job["dependencies"]], []),
                     )
                 )
 
     @staticmethod
-    def _scheduled_callback(
-        job: Any, connection: Any, result: Task, *args: Any, **kwargs: Any
-    ) -> None:
+    def _scheduled_callback(job: Any, connection: Any, result: Task, *args: Any, **kwargs: Any) -> None:
         if result and result.repeat_in and result.repeat_time_unit:
             new_task = Task.objects.create(
                 target=result.target,
@@ -165,8 +145,7 @@ class TasksQueue(BaseQueue):
                 configuration=result.configuration,
                 intensity=result.intensity,
                 executor=result.user,
-                scheduled_at=result.enqueued_at
-                + timedelta(**{result.repeat_time_unit.lower(): result.repeat_in}),
+                scheduled_at=result.enqueued_at + timedelta(**{result.repeat_time_unit.lower(): result.repeat_in}),
                 repeat_in=result.repeat_in,
                 repeat_time_unit=result.repeat_time_unit,
             )

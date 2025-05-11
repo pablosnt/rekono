@@ -54,16 +54,12 @@ class Authentication(BaseInput, BaseEncrypted):
             dict[str, Any]: Useful information for tool executions, including accumulated if setted
         """
         return {
-            InputKeyword.COOKIE_NAME.name.lower(): (
-                self.name if self.type == AuthenticationType.COOKIE else None
-            ),
+            InputKeyword.COOKIE_NAME.name.lower(): (self.name if self.type == AuthenticationType.COOKIE else None),
             InputKeyword.SECRET.name.lower(): self.secret,
             InputKeyword.CREDENTIAL_TYPE.name.lower(): self.type,
             InputKeyword.CREDENTIAL_TYPE_LOWER.name.lower(): self.type.lower(),
             InputKeyword.TOKEN.name.lower(): self.get_token(),
-            InputKeyword.USERNAME.name.lower(): (
-                self.name if self.type == AuthenticationType.BASIC else None
-            ),
+            InputKeyword.USERNAME.name.lower(): (self.name if self.type == AuthenticationType.BASIC else None),
         }
 
     def __str__(self) -> str:
@@ -72,9 +68,7 @@ class Authentication(BaseInput, BaseEncrypted):
         Returns:
             str: String value that identifies this instance
         """
-        return (
-            f"{self.target_port.__str__()} - " if self.target_port else ""
-        ) + self.name
+        return (f"{self.target_port.__str__()} - " if self.target_port else "") + self.name
 
     @classmethod
     def get_project_field(cls) -> str:

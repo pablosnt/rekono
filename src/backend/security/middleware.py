@@ -1,3 +1,4 @@
+# pytype: disable=attribute-error
 import logging
 from dataclasses import dataclass
 from typing import Any, Optional
@@ -75,9 +76,7 @@ class SecurityMiddleware:
         response["Allow"] = "GET, POST, PUT, DELETE, OPTIONS"
         return response
 
-    def _add_security_headers(
-        self, request: HttpRequest, response: Response
-    ) -> Response:
+    def _add_security_headers(self, request: HttpRequest, response: Response) -> Response:
         for header, value in SECURITY_HEADERS.items():
             if header == "Referrer-Policy" and request.path.startswith("/admin"):
                 value = "strict-origin"
@@ -112,11 +111,7 @@ class SecurityMiddleware:
         forwarded_address = self._get_forwarded_address(request)
         if forwarded_address:
             request.META["REMOTE_ADDR"] = forwarded_address
-        response = (
-            self.get_response(request)
-            if request.method != "OPTIONS"
-            else self._http_options(request)
-        )
+        response = self.get_response(request) if request.method != "OPTIONS" else self._http_options(request)
         response = self._add_security_headers(request, response)
         self._log_request_and_response(request, response)
         return response

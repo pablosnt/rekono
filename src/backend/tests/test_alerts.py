@@ -70,9 +70,7 @@ class AlertTest(ApiTest):
             ],
         ),
         ApiTestCase(["admin2", "auditor2", "reader2"], "get", 200, expected=[]),
-        ApiTestCase(
-            ["auditor1", "reader1"], "post", 403, endpoint="{endpoint}1/enable/"
-        ),
+        ApiTestCase(["auditor1", "reader1"], "post", 403, endpoint="{endpoint}1/enable/"),
         ApiTestCase(["admin1"], "post", 400, endpoint="{endpoint}1/enable/"),
         ApiTestCase(
             ["admin1"],
@@ -120,9 +118,7 @@ class AlertTest(ApiTest):
         ),
         ApiTestCase(["auditor1", "reader1"], "delete", 403, endpoint="{endpoint}1/"),
         ApiTestCase(["admin1"], "delete", 204, endpoint="{endpoint}1/"),
-        ApiTestCase(
-            ["admin1", "auditor1", "reader1"], "post", 400, invalid_filter_alert
-        ),
+        ApiTestCase(["admin1", "auditor1", "reader1"], "post", 400, invalid_filter_alert),
         ApiTestCase(
             ["auditor1"],
             "post",
@@ -167,12 +163,8 @@ class AlertTest(ApiTest):
                 },
             ],
         ),
-        ApiTestCase(
-            ["admin1", "reader1"], "post", 204, endpoint="{endpoint}2/subscription/"
-        ),
-        ApiTestCase(
-            ["admin1", "reader1"], "post", 400, endpoint="{endpoint}2/subscription/"
-        ),
+        ApiTestCase(["admin1", "reader1"], "post", 204, endpoint="{endpoint}2/subscription/"),
+        ApiTestCase(["admin1", "reader1"], "post", 400, endpoint="{endpoint}2/subscription/"),
         ApiTestCase(
             ["admin1", "auditor1", "reader1"],
             "get",
@@ -215,9 +207,7 @@ class AlertTest(ApiTest):
                 },
             ],
         ),
-        ApiTestCase(
-            ["reader1"], "put", 403, {"value": "http"}, endpoint="{endpoint}2/"
-        ),
+        ApiTestCase(["reader1"], "put", 403, {"value": "http"}, endpoint="{endpoint}2/"),
         ApiTestCase(
             ["auditor1"],
             "put",
@@ -363,9 +353,7 @@ class AlertTest(ApiTest):
                 True,
             ),
         ]:
-            self.assertEqual(
-                expected, alert.must_be_triggered(self.execution3, finding)
-            )
+            self.assertEqual(expected, alert.must_be_triggered(self.execution3, finding))
 
 
 new_monitor = {"hour_span": 48}

@@ -30,13 +30,9 @@ class BaseTelegramBot(BaseTelegram):
                 raise Exception("User is not authenticated")
 
     def _is_valid_update(self, update: Update) -> bool:
-        return (
-            update.effective_chat is not None and update.effective_message is not None
-        )
+        return update.effective_chat is not None and update.effective_message is not None
 
-    async def _reply(
-        self, update: Update, message: str, reply_markup: Any = None
-    ) -> None:
+    async def _reply(self, update: Update, message: str, reply_markup: Any = None) -> None:
         if self._is_valid_update(update):
             await update.effective_message.reply_text(  # type: ignore
                 message, reply_markup=reply_markup, parse_mode=ParseMode.MARKDOWN_V2
@@ -45,9 +41,7 @@ class BaseTelegramBot(BaseTelegram):
     def _get_context_value(self, context: CallbackContext, key: str) -> Any:
         return (context.chat_data or {}).get(key)
 
-    def _add_context_value(
-        self, context: CallbackContext, key: str, value: Any
-    ) -> None:
+    def _add_context_value(self, context: CallbackContext, key: str, value: Any) -> None:
         if context.chat_data:
             context.chat_data[key] = value
 
@@ -62,17 +56,13 @@ class BaseTelegramBot(BaseTelegram):
 
     @sync_to_async
     def _get_active_telegram_chat_async(self, chat_id: int) -> TelegramChat:
-        return TelegramChat.objects.filter(
-            chat_id=chat_id, user__is_active=True
-        ).first()
+        return TelegramChat.objects.filter(chat_id=chat_id, user__is_active=True).first()
 
     @sync_to_async
     def _is_auditor_async(self, telegram_chat: TelegramChat) -> bool:
         return telegram_chat.is_auditor()
 
-    async def _get_active_telegram_chat(
-        self, update: Update, require_auditor: bool = True
-    ) -> TelegramChat:
+    async def _get_active_telegram_chat(self, update: Update, require_auditor: bool = True) -> TelegramChat:
         if self.chat:
             return self.chat
         if self._is_valid_update(update):
@@ -92,8 +82,6 @@ class BaseTelegramBot(BaseTelegram):
                     f"[Security] User {self.chat.user.id} isn't authorized to use Telegram bot",
                     extra={"user": self.chat.user},
                 )
-                await self._reply(
-                    update, "You are not authorized to perform this action"
-                )
+                await self._reply(update, "You are not authorized to perform this action")
                 self.chat = None
             return self.chat

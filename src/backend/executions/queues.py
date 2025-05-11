@@ -69,9 +69,7 @@ class ExecutionsQueue(BaseQueue):
         input_technologies: list[InputTechnology],
         wordlists: list[Wordlist],
     ) -> tuple[Execution, list[Finding]]:
-        executor: BaseExecutor = execution.configuration.tool.get_executor_class()(
-            execution
-        )
+        executor: BaseExecutor = execution.configuration.tool.get_executor_class()(execution)
         current_job = rq.get_current_job()
         if not findings and current_job and current_job._dependency_ids:
             logger.info(
@@ -101,12 +99,8 @@ class ExecutionsQueue(BaseQueue):
                 wordlists,
                 current_job,
             ).values()
-        executor.execute(
-            findings, target_ports, input_vulnerabilities, input_technologies, wordlists
-        )
-        parser: BaseParser = execution.configuration.tool.get_parser_class()(
-            executor, execution.output_plain
-        )
+        executor.execute(findings, target_ports, input_vulnerabilities, input_technologies, wordlists)
+        parser: BaseParser = execution.configuration.tool.get_parser_class()(executor, execution.output_plain)
         parser.parse()
         FindingsQueue().enqueue(execution, parser.findings)
         return execution, parser.findings
@@ -139,13 +133,9 @@ class ExecutionsQueue(BaseQueue):
                 input_technologies,
                 wordlists,
             )
-            if executor.check_arguments(
-                e.get(0, []), e.get(1, []), e.get(2, []), e.get(3, []), e.get(4, [])
-            )
+            if executor.check_arguments(e.get(0, []), e.get(1, []), e.get(2, []), e.get(3, []), e.get(4, []))
         ]
-        logger.info(
-            f"[Execution] New {len(executions) - 1} executions from previous findings"
-        )
+        logger.info(f"[Execution] New {len(executions) - 1} executions from previous findings")
         new_jobs = []
         for execution in executions[1:]:
             logger.info("NEW EXECUTION " + str(execution))

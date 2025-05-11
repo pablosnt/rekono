@@ -66,9 +66,7 @@ class IsAuditor(BasePermission):
         Returns:
             bool: Indicate if user is authorized to make this request or not
         """
-        return request.user.groups.filter(
-            name__in=[str(Role.AUDITOR), str(Role.ADMIN)]
-        ).exists()
+        return request.user.groups.filter(name__in=[str(Role.AUDITOR), str(Role.ADMIN)]).exists()
 
 
 class ProjectMemberPermission(BasePermission):
@@ -130,10 +128,7 @@ class OwnerPermission(BasePermission):
         return (
             not instance
             or request.method == "GET"
-            or (
-                hasattr(instance, owner_field)
-                and getattr(instance, owner_field) == request.user
-            )
+            or (hasattr(instance, owner_field) and getattr(instance, owner_field) == request.user)
             or (allow_admin and IsAdmin().has_permission(request, view))
         )
 

@@ -1,0 +1,41 @@
+[project]
+name = "rekono"
+version = "2.0.0"
+description = "Pentesting automation platform that combines hacking tools to complete security assessments"
+readme = "../../README.md"
+requires-python = ">=3.11,<4.0"
+dependencies = [
+    "certifi==2025.4.26",
+    "cryptography==44.0.3",
+    "defusedxml==0.7.1",
+    "django==5.2.1",
+    "django-filter==25.1",
+    "django-rq==3.0.1",
+    "django-taggit==6.1.0",
+    "djangorestframework==3.16.0",
+    "djangorestframework-simplejwt==5.5.0",
+    "drf-spectacular==0.28.0",
+    "geocoder==1.38.1",
+    "psycopg2-binary==2.9.10",
+    "pycryptodome==3.22.0",
+    "pyjwt==2.9.0",
+    "pyotp==2.9.0",
+    "python-libnmap==0.7.3",
+    "python-magic==0.4.27",
+    "python-telegram-bot[job-queue]==22.0",
+    "pyyaml==6.0.2",
+    "requests==2.32.3",
+    "rq==2.3.2",
+    "stringcase==1.2.0",
+    "tornado==6.4.2",
+    "xhtml2pdf==0.2.17",
+]
+
+[dependency-groups]
+dev = [
+    "coverage>=7.8.0"
+]
+
+[tool.ruff]
+line-length = 120
+indent-width = 4

@@ -12,8 +12,6 @@ class Smbmap(BaseParser):
                 self.create_finding(
                     Path,
                     path=share[0],
-                    extra_info=(
-                        f"[{share[1]}] {share[2]}" if len(share) >= 3 else share[1]
-                    ),
+                    extra_info=(f"[{share[1]}] {share[2]}" if len(share) >= 3 else share[1]),
                     type=PathType.SHARE,
                 )

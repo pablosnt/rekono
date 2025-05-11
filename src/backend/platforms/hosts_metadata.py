@@ -1,13 +1,14 @@
-from framework.platforms import BaseIntegration
-from findings.models import Host
 import socket
-from targets.models import Target
-from targets.enums import TargetType
+
 import geocoder
+
+from findings.models import Host
+from framework.platforms import BaseIntegration
+from targets.enums import TargetType
+from targets.models import Target
 
 
 class HostsMetadata(BaseIntegration):
-
     def __init__(self):
         pass
 
@@ -24,7 +25,7 @@ class HostsMetadata(BaseIntegration):
                 ]:
                     try:
                         finding.domain = socket.gethostbyaddr(finding.ip)[0]
-                    except Exception:
+                    except Exception:  # nosec
                         pass
                 if ip_type == TargetType.PUBLIC_IP and not all(
                     [finding.country, finding.city, finding.latitude, finding.longitude]
@@ -34,6 +35,4 @@ class HostsMetadata(BaseIntegration):
                         finding.country = geocode.country
                         finding.city = geocode.city
                         finding.latitude, finding.longitude = geocode.latlng
-                finding.save(
-                    update_fields=["domain", "country", "city", "latitude", "longitude"]
-                )
+                finding.save(update_fields=["domain", "country", "city", "latitude", "longitude"])

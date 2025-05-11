@@ -23,19 +23,13 @@ class BaseMixin(BaseTelegramBot):
 
     def _get_next_state(self, method: Callable) -> int:
         current_state = self._get_current_state(method)
-        return (
-            ConversationHandler.END
-            if current_state == len(self._states_methods) - 1
-            else current_state + 1
-        )
+        return ConversationHandler.END if current_state == len(self._states_methods) - 1 else current_state + 1
 
     def _get_previous_state(self, method: Callable) -> int:
         current_state = self._get_current_state(method)
         return current_state if current_state == 0 else current_state - 1
 
-    async def _go_to_next_state(
-        self, update: Update, context: CallbackContext, next_state: int
-    ) -> int:
+    async def _go_to_next_state(self, update: Update, context: CallbackContext, next_state: int) -> int:
         if next_state != ConversationHandler.END and (
             self._states_methods[next_state].__name__.startswith("_ask_for_")
             or self._states_methods[next_state].__name__.startswith("_reply")
@@ -56,30 +50,15 @@ class BaseMixin(BaseTelegramBot):
         return model.objects.get(pk=pk)
 
     @sync_to_async
-    def _get_keyboard_from_queryset_async(
-        self, queryset: QuerySet, attribute: str
-    ) -> QuerySet:
-        return [
-            InlineKeyboardButton(getattr(i, attribute), callback_data=i.id)
-            for i in queryset.order_by(attribute)
-        ]
+    def _get_keyboard_from_queryset_async(self, queryset: QuerySet, attribute: str) -> QuerySet:
+        return [InlineKeyboardButton(getattr(i, attribute), callback_data=i.id) for i in queryset.order_by(attribute)]
 
     @sync_to_async
-    def _save_serializer_async(
-        self, serializer: Serializer
-    ) -> tuple[Any | None, dict[str, Any]]:
+    def _save_serializer_async(self, serializer: Serializer) -> tuple[Any | None, dict[str, Any]]:
         try:
-            return (
-                (serializer.save(), {})
-                if serializer.is_valid()
-                else (None, serializer.errors)
-            )
+            return (serializer.save(), {}) if serializer.is_valid() else (None, serializer.errors)
         except IntegrityError:
-            return None, {
-                serializer.Meta.model.__name__.lower(): [
-                    "This entity already exists in the database"
-                ]
-            }
+            return None, {serializer.Meta.model.__name__.lower(): ["This entity already exists in the database"]}
 
     async def _ask(
         self,
@@ -102,10 +81,7 @@ class BaseMixin(BaseTelegramBot):
                 update,
                 message,
                 reply_markup=InlineKeyboardMarkup(
-                    [
-                        keyboard[item : item + options_per_row]
-                        for item in range(0, len(keyboard), options_per_row)
-                    ]
+                    [keyboard[item : item + options_per_row] for item in range(0, len(keyboard), options_per_row)]
                 ),
             )
             return next_state
@@ -122,17 +98,12 @@ class BaseMixin(BaseTelegramBot):
         chat = chat or await self._get_active_telegram_chat(update)
         if not chat:
             return ConversationHandler.END
-        keyboard = [
-            InlineKeyboardButton(v.capitalize(), callback_data=v) for v in values
-        ]
+        keyboard = [InlineKeyboardButton(v.capitalize(), callback_data=v) for v in values]
         await self._reply(
             update,
             message,
             reply_markup=InlineKeyboardMarkup(
-                [
-                    keyboard[item : item + options_per_row]
-                    for item in range(0, len(keyboard), options_per_row)
-                ]
+                [keyboard[item : item + options_per_row] for item in range(0, len(keyboard), options_per_row)]
             ),
         )
         return next_state
@@ -148,13 +119,9 @@ class BaseMixin(BaseTelegramBot):
     ) -> int:
         chat = chat or await self._get_active_telegram_chat(update)
         if chat and update.callback_query and update.callback_query.data:
-            entity = await self._get_model_instance_async(
-                model, int(update.callback_query.data)
-            )
+            entity = await self._get_model_instance_async(model, int(update.callback_query.data))
             self._add_context_value(context, context_key, entity)
-            await update.callback_query.answer(
-                f"{model.__name__} {update.callback_query.data} has been selected"
-            )
+            await update.callback_query.answer(f"{model.__name__} {update.callback_query.data} has been selected")
             return next_state
         elif update.callback_query:
             await update.callback_query.answer()
@@ -172,17 +139,13 @@ class BaseMixin(BaseTelegramBot):
         chat = chat or await self._get_active_telegram_chat(update)
         if chat and update.callback_query and update.callback_query.data:
             self._add_context_value(context, context_key, update.callback_query.data)
-            await update.callback_query.answer(
-                f"{name} {update.callback_query.data} has been selected"
-            )
+            await update.callback_query.answer(f"{name} {update.callback_query.data} has been selected")
             return next_state
         elif update.callback_query:
             await update.callback_query.answer()
         return ConversationHandler.END
 
-    def _build_error_message_from_serializer_errors(
-        self, serializer_errors: dict[str, Any]
-    ) -> str:
+    def _build_error_message_from_serializer_errors(self, serializer_errors: dict[str, Any]) -> str:
         return "*ERRORS*\n" + "\n".join(
             [
                 f"_{field.replace('_', '')}_    {self._escape(messages[0])}"
@@ -190,12 +153,8 @@ class BaseMixin(BaseTelegramBot):
             ]
         )
 
-    async def _ask_for_new_attribute(
-        self, update: Update, model_name: str, attribute: str, next_state: int
-    ) -> int:
-        await self._reply(
-            update, f"Type the {attribute} value for the new {model_name}"
-        )
+    async def _ask_for_new_attribute(self, update: Update, model_name: str, attribute: str, next_state: int) -> int:
+        await self._reply(update, f"Type the {attribute} value for the new {model_name}")
         return next_state
 
     async def _create(
@@ -213,9 +172,7 @@ class BaseMixin(BaseTelegramBot):
             return ConversationHandler.END, None
         if (update.effective_message.text or "").lower() == "/cancel":
             return await Cancel()._execute_command(update, context), None
-        instance, errors = await self._save_serializer_async(
-            serializer_class(data=data)
-        )
+        instance, errors = await self._save_serializer_async(serializer_class(data=data))
         if not instance:
             next_state = previous_state
             logger.info(

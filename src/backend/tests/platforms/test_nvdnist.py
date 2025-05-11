@@ -36,15 +36,11 @@ def _success(impact_value: dict[str, Any]) -> dict[str, Any]:
 
 
 def success_cvss_3(*args: Any, **kwargs: Any) -> dict[str, Any]:
-    return _success(
-        {"cvssMetricV31": [{"type": "Primary", "cvssData": {"baseScore": 9}}]}
-    )
+    return _success({"cvssMetricV31": [{"type": "Primary", "cvssData": {"baseScore": 9}}]})
 
 
 def success_cvss_2(*args: Any, **kwargs: Any) -> dict[str, Any]:
-    return _success(
-        {"cvssMetricV2": [{"type": "Primary", "cvssData": {"baseScore": 8}}]}
-    )
+    return _success({"cvssMetricV2": [{"type": "Primary", "cvssData": {"baseScore": 8}}]})
 
 
 def not_found(*args: Any, **kwargs: Any) -> dict:
@@ -83,9 +79,7 @@ class NvdNistTest(RekonoTest):
 
     @mock.patch("platforms.nvdnist.integrations.NvdNist._request", success_cvss_2)
     def test_integration_cvss_2(self) -> None:
-        self._test(
-            Severity.HIGH, self.nvdnist.reference.format(cve=self.vulnerability.cve)
-        )
+        self._test(Severity.HIGH, self.nvdnist.reference.format(cve=self.vulnerability.cve))
 
     @mock.patch("platforms.nvdnist.integrations.NvdNist._request", not_found)
     def test_integration_not_found(self) -> None:
@@ -107,9 +101,7 @@ class NvdNistSettingsTest(ApiTest):
             200,
             expected={"id": 1, "api_token": None},
         ),
-        ApiTestCase(
-            ["auditor1", "auditor2", "reader1", "reader2"], "put", 403, new_settings
-        ),
+        ApiTestCase(["auditor1", "auditor2", "reader1", "reader2"], "put", 403, new_settings),
         # ApiTestCase(["admin1", "admin2"], "put", 400, invalid_settings),
         ApiTestCase(
             ["admin1", "admin2"],

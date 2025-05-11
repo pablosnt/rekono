@@ -31,7 +31,7 @@ class Wordlist(BaseInput, BaseLike):
 
     filters = [BaseInput.Filter(type=WordlistType, field="type")]
 
-    def filter(self, input: Any, target: Target = None) -> bool:
+    def filter(self, input: Any, target: Target | None = None) -> bool:
         """Check if this instance is valid based on input filter.
 
         Args:

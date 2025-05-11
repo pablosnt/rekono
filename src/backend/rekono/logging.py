@@ -18,11 +18,7 @@ class LoggingFilter(logging.Filter):
             # Record with request data
             record.source_ip = record.request.META.get("REMOTE_ADDR")
             record.user = "anonymous"  # Anonymous user by default
-            if (
-                hasattr(record.request, "user")
-                and record.request.user
-                and record.request.user.id
-            ):
+            if hasattr(record.request, "user") and record.request.user and record.request.user.id:
                 # Authenticated request
                 record.user = record.request.user.id
         else:

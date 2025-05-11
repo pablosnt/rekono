@@ -42,9 +42,7 @@ class ApiTestCase(RekonoTestCase):
         )
         return content.get("access"), content.get("refresh")
 
-    def _check_response_content(
-        self, expected: dict[str, Any], response: dict[str, Any]
-    ) -> None:
+    def _check_response_content(self, expected: dict[str, Any], response: dict[str, Any]) -> None:
         for key, value in expected.items():
             if isinstance(value, dict):
                 self._check_response_content(value, response.get(key, {}))
@@ -101,11 +99,7 @@ class ToolTestCase(RekonoTestCase):
         executor.arguments = executor_arguments
         parser = execution.configuration.tool.get_parser_class()(
             executor,
-            (
-                report.read_text()
-                if not execution.configuration.tool.output_format
-                else None
-            ),
+            (report.read_text() if not execution.configuration.tool.output_format else None),
         )
         if execution.configuration.tool.output_format:
             parser.report = report
@@ -123,9 +117,7 @@ class ToolTestCase(RekonoTestCase):
         if self.expected:
             for index, finding in enumerate(parser.findings):
                 expected = self.expected[index]
-                self.tc.assertTrue(
-                    isinstance(finding, expected.get("model", Type[None]))
-                )
+                self.tc.assertTrue(isinstance(finding, expected.get("model", Type[None])))
                 for field, value in expected.items():
                     if field != "model":
                         self.tc.assertEqual(value, getattr(finding, field))

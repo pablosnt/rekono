@@ -27,12 +27,13 @@ class InputType(BaseModel):
         """
         return self.name
 
-    def _get_class_from_reference(self, reference: str) -> BaseInput:
+    def _get_class_from_reference(self, reference: str) -> BaseInput | None:
         if not reference:
             return None
         app_label, model_name = reference.split(".", 1)
         return apps.get_model(app_label=app_label, model_name=model_name)
 
+    # TODO: Replace Optional syntax by | None
     def get_model_class(self) -> Optional[BaseInput]:
         """Get related model from 'model' reference.
 
@@ -62,9 +63,7 @@ class InputType(BaseModel):
         if model:
             for field in model._meta.get_fields():  # For each model field
                 # Check if field is a ForeignKey to a BaseInput model
-                if field.__class__ == models.ForeignKey and issubclass(
-                    field.related_model, BaseInput
-                ):
+                if field.__class__ == models.ForeignKey and issubclass(field.related_model, BaseInput):
                     # Search InputType by model
                     related_type = InputType.objects.filter(
                         model=f"{field.related_model._meta.app_label}.{field.related_model._meta.model_name}"
