@@ -1,7 +1,9 @@
+from enum import Enum  # https://github.com/google/pytype/issues/1048
+
 from django.db import models
 
 
-class Role(models.TextChoices):
+class Role(models.TextChoices, Enum):
     """User role names."""
 
     ADMIN = "Admin"

@@ -1,9 +1,10 @@
+from enum import Enum  # https://github.com/google/pytype/issues/1048
 from typing import Any
 
 from django.db import models
 
 
-class Severity(models.IntegerChoices):
+class Severity(models.IntegerChoices, Enum):
     INFO = 1
     LOW = 2
     MEDIUM = 3
@@ -14,7 +15,7 @@ class Severity(models.IntegerChoices):
         return self.name.capitalize()
 
 
-class OSINTDataType(models.TextChoices):
+class OSINTDataType(models.TextChoices, Enum):
     IP = "IP"
     DOMAIN = "Domain"
     VHOST = "VHOST"
@@ -25,7 +26,7 @@ class OSINTDataType(models.TextChoices):
     PASSWORD = "Password"
 
 
-class HostOS(models.TextChoices):
+class HostOS(models.TextChoices, Enum):
     LINUX = "Linux"
     WINDOWS = "Windows"
     MACOS = "MacOS"
@@ -36,24 +37,24 @@ class HostOS(models.TextChoices):
     OTHER = "Other"
 
 
-class PortStatus(models.TextChoices):
+class PortStatus(models.TextChoices, Enum):
     OPEN = "Open"
     OPEN_FILTERED = "Open - Filtered"
     FILTERED = "Filtered"
     CLOSED = "Closed"
 
 
-class Protocol(models.TextChoices):
+class Protocol(models.TextChoices, Enum):
     UDP = "UDP"
     TCP = "TCP"
 
 
-class PathType(models.TextChoices):
+class PathType(models.TextChoices, Enum):
     ENDPOINT = "ENDPOINT"
     SHARE = "SHARE"
 
 
-class TriageStatus(models.TextChoices):
+class TriageStatus(models.TextChoices, Enum):
     FALSE_POSITIVE = "False Positive"
     TRUE_POSITIVE = "True Positive"
     WONT_FIX = "Won't Fix"

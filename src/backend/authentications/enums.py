@@ -1,7 +1,9 @@
+from enum import Enum  # https://github.com/google/pytype/issues/1048
+
 from django.db import models
 
 
-class AuthenticationType(models.TextChoices):
+class AuthenticationType(models.TextChoices, Enum):
     """Supported authentication types."""
 
     BASIC = "Basic"

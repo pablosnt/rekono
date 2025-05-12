@@ -1,7 +1,9 @@
+from enum import Enum  # https://github.com/google/pytype/issues/1048
+
 from django.db import models
 
 
-class TimeUnit(models.TextChoices):
+class TimeUnit(models.TextChoices, Enum):
     """Time units supported for Task scheduling and repeating configuration."""
 
     MINUTES = "Minutes"

@@ -1,9 +1,11 @@
+from enum import Enum  # https://github.com/google/pytype/issues/1048
+
 from django.db import models
 
 # Create your enums here.
 
 
-class Intensity(models.IntegerChoices):
+class Intensity(models.IntegerChoices, Enum):
     SNEAKY = 1  # Softest
     LOW = 2
     NORMAL = 3
@@ -11,7 +13,7 @@ class Intensity(models.IntegerChoices):
     INSANE = 5  # Hardest
 
 
-class Stage(models.IntegerChoices):
+class Stage(models.IntegerChoices, Enum):
     OSINT = 1
     ENUMERATION = 2
     VULNERABILITIES = 3
