@@ -24,8 +24,8 @@ class ApiTestCase(RekonoTestCase):
     executors: list[str]
     method: str
     status_code: int
-    data: dict[str, Any] = None
-    expected: dict[str, Any] = None
+    data: dict[str, Any] | None = None
+    expected: dict[str, Any] | None = None
     endpoint: str = "{endpoint}"
     format: str = "json"
 
