@@ -2,13 +2,14 @@ import logging
 from typing import Any
 
 from asgiref.sync import sync_to_async
+from telegram import Update
+from telegram.ext import CallbackContext, CommandHandler, ConversationHandler
+
 from platforms.telegram_app.bot.enums import Context, Section
 from platforms.telegram_app.bot.framework import BaseTelegramBot
 from platforms.telegram_app.models import TelegramChat
 from rekono.settings import DESCRIPTION
 from security.cryptography.hashing import hash
-from telegram import Update
-from telegram.ext import CallbackContext, CommandHandler, ConversationHandler
 from users.models import User
 
 logger = logging.getLogger()
@@ -65,7 +66,7 @@ class Start(BaseCommand):
     allow_readers = True
 
     @sync_to_async
-    def _update_or_create_telegram_chat_async(self, chat_id: int) -> TelegramChat:
+    def _update_or_create_telegram_chat_async(self, chat_id: int) -> tuple[TelegramChat | str]:
         plain_otp = User.objects.generate_otp(TelegramChat)
         telegram_chat, _ = TelegramChat.objects.update_or_create(
             defaults={
@@ -79,9 +80,7 @@ class Start(BaseCommand):
 
     async def _execute_command(self, update: Update, context: CallbackContext) -> None:
         await super()._execute_command(update, context)
-        telegram_chat, plain_otp = await self._update_or_create_telegram_chat_async(
-            update.effective_chat.id  # type: ignore
-        )
+        telegram_chat, plain_otp = await self._update_or_create_telegram_chat_async(update.effective_chat.id)
         logger.info(f"[Security] New login request using the Telegram bot from the chat {telegram_chat.chat_id}")
         await self._reply(
             update,
@@ -115,7 +114,7 @@ class Logout(BaseCommand):
 
     async def _execute_command(self, update: Update, context: CallbackContext) -> None:
         await super()._execute_command(update, context)
-        await self._logout_user_in_telegram_async(update.effective_chat.id)  # type: ignore
+        await self._logout_user_in_telegram_async(update.effective_chat.id)
         await self._reply(update, "Bye\!")
 
 

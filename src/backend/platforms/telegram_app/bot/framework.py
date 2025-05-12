@@ -35,7 +35,7 @@ class BaseTelegramBot(BaseTelegram):
 
     async def _reply(self, update: Update, message: str, reply_markup: Any = None) -> None:
         if self._is_valid_update(update):
-            await update.effective_message.reply_text(  # type: ignore
+            await update.effective_message.reply_text(
                 message, reply_markup=reply_markup, parse_mode=ParseMode.MARKDOWN_V2
             )
 
@@ -67,13 +67,9 @@ class BaseTelegramBot(BaseTelegram):
         if self.chat:
             return self.chat
         if self._is_valid_update(update):
-            self.chat = await self._get_active_telegram_chat_async(
-                update.effective_chat.id  # type: ignore
-            )
+            self.chat = await self._get_active_telegram_chat_async(update.effective_chat.id)
             if not self.chat:
-                logger.error(
-                    f"[Security] Unauthenticated Telegram bot request from chat {update.effective_chat.id}"  # type: ignore
-                )
+                logger.error(f"[Security] Unauthenticated Telegram bot request from chat {update.effective_chat.id}")
                 await self._reply(
                     update,
                     "You have to link this chat to your Rekono account before using the Telegram Bot\. Use the command /start",
