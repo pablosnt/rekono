@@ -22,7 +22,7 @@ class BaseTelegramBot(BaseTelegram):
     def get_name(self) -> str:
         return self.__class__.__name__.lower()
 
-    async def _execute_command(self, update: Update, context: CallbackContext) -> None:
+    async def _execute_command(self, update: Update, context: CallbackContext) -> int | None:
         if not self._is_valid_update(update):
             raise Exception("Invalid update")
         if not self.allow_readers:
