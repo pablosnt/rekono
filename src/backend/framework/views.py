@@ -40,7 +40,7 @@ class BaseViewSet(ModelViewSet):
                 data = getattr(data, field)
             else:  # pragma: no cover
                 return None
-        return data
+        return data if isinstance(data, Project) else None
 
     def get_queryset(self) -> QuerySet:
         model = self._get_model()
