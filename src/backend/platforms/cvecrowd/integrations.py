@@ -1,4 +1,5 @@
 import logging
+from typing import Any, Callable
 
 from alerts.enums import AlertItem, AlertMode
 from alerts.models import Alert
@@ -30,8 +31,15 @@ class CveCrowd(BaseIntegration):
         return False
 
     # Needed to mock the method for unit testing
-    def _request(self, method, url, json=True, **kwargs):
-        return super()._request(method, url, json, **kwargs)
+    def _request(
+        self,
+        method: Callable,
+        url: str,
+        json: bool = True,
+        trigger_exception: bool = True,
+        **kwargs: Any,
+    ) -> Any:
+        return super()._request(method, url, json, trigger_exception, **kwargs)
 
     def _get_trending_cves(self) -> None:
         if self.integration.enabled and self.settings.secret and len(self.trending_cves) == 0:
