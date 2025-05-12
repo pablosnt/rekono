@@ -42,9 +42,9 @@ class BaseTelegramBot(BaseTelegram):
     def _get_context_value(self, context: CallbackContext, key: str) -> Any:
         return (context.chat_data or {}).get(key)
 
-    def _add_context_value(self, context: CallbackContext, key: str, value: Any) -> None:
+    def _add_context_value(self, context: CallbackContext, key: Context, value: Any) -> None:
         if context.chat_data:
-            context.chat_data[key] = value
+            context.chat_data[key.value] = value
 
     def _remove_context_value(self, context: CallbackContext, key: Context) -> None:
         if context.chat_data and key.value in context.chat_data:

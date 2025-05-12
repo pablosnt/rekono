@@ -70,7 +70,7 @@ class BaseMixin(BaseTelegramBot):
         message: str,
         not_found_message: str,
         next_state: int,
-        chat: TelegramChat = None,
+        chat: TelegramChat | None = None,
     ) -> int:
         chat = chat or await self._get_active_telegram_chat(update)
         if not chat or not await self._is_queryset_async(queryset):
@@ -94,7 +94,7 @@ class BaseMixin(BaseTelegramBot):
         options_per_row: int,
         message: str,
         next_state: int,
-        chat: TelegramChat = None,
+        chat: TelegramChat | None = None,
     ) -> int:
         chat = chat or await self._get_active_telegram_chat(update)
         if not chat:
@@ -116,7 +116,7 @@ class BaseMixin(BaseTelegramBot):
         context_key: Context,
         model: Any,
         next_state: int,
-        chat: TelegramChat = None,
+        chat: TelegramChat | None = None,
     ) -> int:
         chat = chat or await self._get_active_telegram_chat(update)
         if chat and update.callback_query and update.callback_query.data:
@@ -135,7 +135,7 @@ class BaseMixin(BaseTelegramBot):
         context_key: Context,
         name: str,
         next_state: int,
-        chat: TelegramChat = None,
+        chat: TelegramChat | None = None,
     ) -> int:
         chat = chat or await self._get_active_telegram_chat(update)
         if chat and update.callback_query and update.callback_query.data:
@@ -166,8 +166,8 @@ class BaseMixin(BaseTelegramBot):
         data: dict[str, Any],
         previous_state: int,
         next_state: int,
-        chat: TelegramChat = None,
-    ) -> tuple[int, Any | None]:
+        chat: TelegramChat | None = None,
+    ) -> tuple[int | None, Any | None]:
         chat = chat or await self._get_active_telegram_chat(update)
         if not chat or not update.effective_message:
             return ConversationHandler.END, None
