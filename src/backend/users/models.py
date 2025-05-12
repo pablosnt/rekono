@@ -44,7 +44,7 @@ class RekonoUserManager(UserManager):
         # pytype: enable=attribute-error
         return timezone.now() + timedelta(**time)
 
-    def assign_role(self, user: Any, role: Role) -> None:
+    def assign_role(self, user: Any, role: Role) -> Any:
         """Initialize user, assigning it a role and creating its API token.
 
         Args:

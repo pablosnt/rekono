@@ -30,7 +30,7 @@ class CveCrowd(BaseIntegration):
         return False
 
     # Needed to mock the method for unit testing
-    def _request(method, url, json=True, **kwargs):
+    def _request(self, method, url, json=True, **kwargs):
         return super()._request(method, url, json, **kwargs)
 
     def _get_trending_cves(self) -> None:
