@@ -66,9 +66,7 @@ class BaseParser:
     def _parse_standard_output(self) -> None:
         pass
 
-    def _load_report_as_json(
-        self, default: dict[str, Any] | list[dict[str, Any]] = {}
-    ) -> dict[str, Any] | list[dict[str, Any]]:
+    def _load_report_as_json(self, default: dict[str, Any] | list[dict[str, Any]] = {}) -> Any:
         if self.report:
             with self.report.open("r", encoding="utf-8") as report:
                 return json.load(report)

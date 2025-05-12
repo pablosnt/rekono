@@ -22,7 +22,7 @@ class BaseViewSet(ModelViewSet):
     http_method_names = ["get", "post", "put", "delete"]
     owner_field = "owner"
 
-    def _get_model(self) -> BaseModel:
+    def _get_model(self) -> BaseModel | None:
         for cls in [
             self.get_serializer_class(),
             self.filterset_class if hasattr(self, "filterset_class") else None,
