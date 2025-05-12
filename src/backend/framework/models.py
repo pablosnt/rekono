@@ -142,7 +142,7 @@ class BaseInput(BaseModel):
         return None
 
     def _compare_filter(self, filter: Any, value: Any, negative: bool = False, contains: bool = False) -> bool:
-        comparison = lambda f, v: f == v if not contains else f in v  # noqa: E731
+        comparison = lambda f, v: f == v if not contains else f in v
         return comparison(filter, value) if not negative else not comparison(filter, value)
 
     def filter(self, argument_input: Any, target: Any = None) -> bool:
