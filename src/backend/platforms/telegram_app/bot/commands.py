@@ -19,7 +19,7 @@ class BaseCommand(CommandHandler, BaseTelegramBot):
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(command=self.get_name(), callback=self.execute_command)
 
-    async def execute_command(self, update: Update, context: CallbackContext) -> None:
+    async def execute_command(self, update: Update, context: CallbackContext) -> None | int:
         try:
             await self._execute_command(update, context)
         except Exception:  # nosec
