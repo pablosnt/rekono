@@ -9,6 +9,8 @@ from tools.executors.base import BaseExecutor
 
 
 class Gitleaks(BaseExecutor):
+    git_directory_dumped = False
+
     def _run(self, environment: dict[str, Any] = os.environ.copy()) -> str:
         self.git_directory_dumped = False
         target_url = environment.get("GIT_DUMPER_TARGET_URL", "")

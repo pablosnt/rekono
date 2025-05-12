@@ -1,9 +1,14 @@
 from findings.enums import Severity
 from findings.models import Credential, Vulnerability
+from tools.executors.gitleaks import Gitleaks as GitleaksExecutor
 from tools.parsers.base import BaseParser
 
 
 class Gitleaks(BaseParser):
+    def __init__(self, executor, output=None):
+        super().__init__(executor, output)
+        self.executor: GitleaksExecutor = executor
+
     def _parse_report(self) -> None:
         if self.executor.git_directory_dumped:
             self.create_finding(
