@@ -30,7 +30,7 @@ class Validator(RegexValidator):
         regex: Any | None,
         message: Any | None = "Provided value contains disallowed characters",
         code: str | None = None,
-        inverse_match: bool | None = ...,
+        inverse_match: bool | None = None,
         flags: RegexFlag | None = None,
         deny_injections: bool = False,
     ) -> None:

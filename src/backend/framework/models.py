@@ -141,9 +141,11 @@ class BaseInput(BaseModel):
                 continue
         return None
 
+    def _compare(self, filter: str, value: str, contains: bool) -> bool:
+        return filter == value if not contains else filter in value
+
     def _compare_filter(self, filter: Any, value: Any, negative: bool = False, contains: bool = False) -> bool:
-        comparison = lambda f, v: f == v if not contains else f in v
-        return comparison(filter, value) if not negative else not comparison(filter, value)
+        return self._compare(filter, value, contains) if not negative else not self._compare(filter, value, contains)
 
     def filter(self, argument_input: Any, target: Any = None) -> bool:
         """Check if this instance is valid based on input filter.
