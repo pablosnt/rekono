@@ -17,7 +17,9 @@ class Gitleaks(BaseExecutor):
         if target_url[-1] != "/":
             target_url += "/"
         target_url += ".git/"
+        # pytype: disable=attribute-error
         gitdumper_directory = Path(CONFIG.gittools_dir) / "Dumper"
+        # pytype: enable=attribute-error
         run_directory = CONFIG.reports / str(uuid.uuid4())
         process = subprocess.run(  # nosec
             ["bash", gitdumper_directory, "gitdumper.sh", target_url, run_directory],
