@@ -149,7 +149,7 @@ class ReportingViewSet(BaseViewSet):
             status=status.HTTP_200_OK,
         )
 
-    def _get_findings_to_report(self, serializer: ReportSerializer) -> dict[type[Finding], list[Finding]]:
+    def _get_findings_to_report(self, serializer: ReportSerializer) -> dict[type[Finding], list[dict[str, Any]]]:
         findings = {}
         models = importlib.import_module("findings.models")
         for finding_type in serializer.validated_finding_types:

@@ -211,7 +211,7 @@ class RekonoTest(TestCase):
             output_file=report_filename,
         )
 
-    def _create_finding(self, model: Any, data: dict[str, Any], execution: Execution = None) -> Finding:
+    def _create_finding(self, model: Any, data: dict[str, Any], execution: Execution | None = None) -> Finding:
         new_finding = model.objects.create(
             **{
                 k: (getattr(self, k) if isinstance(v, int) and hasattr(self, k) and getattr(self, k).id == v else v)
