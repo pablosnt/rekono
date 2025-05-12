@@ -7,7 +7,7 @@ from tools.parsers.base import BaseParser
 
 class Dirsearch(BaseParser):
     def _parse_report(self) -> None:
-        data = self._load_report_as_json()
+        data = self._load_report_as_json_dict()
         for item in data.get("results", []):
             if isinstance(list(item.values())[0], list):
                 for finding_list in item.values():

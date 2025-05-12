@@ -21,7 +21,7 @@ class Sslyze(BaseParser):
         return super().create_finding(finding_type, **fields)
 
     def _parse_report(self) -> None:
-        data = self._load_report_as_json()
+        data = self._load_report_as_json_dict()
         for item in data.get("server_scan_results", []) or []:
             result = item.get("scan_commands_results", item["scan_result"])
             if not result:

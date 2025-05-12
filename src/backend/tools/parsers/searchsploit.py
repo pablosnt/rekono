@@ -4,7 +4,7 @@ from tools.parsers.base import BaseParser
 
 class Searchsploit(BaseParser):
     def _parse_report(self) -> None:
-        data = self._load_report_as_json()
+        data = self._load_report_as_json_dict()
         for exploit in data.get("RESULTS_EXPLOIT") or []:
             edb_id = exploit.get("EDB-ID")
             self.create_finding(

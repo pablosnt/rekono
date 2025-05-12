@@ -66,11 +66,19 @@ class BaseParser:
     def _parse_standard_output(self) -> None:
         pass
 
-    def _load_report_as_json(self, default: dict[str, Any] | list[dict[str, Any]] = {}) -> Any:
+    def _load_report_as_json(self) -> dict[str, Any] | list[dict[str, Any]] | None:
         if self.report:
             with self.report.open("r", encoding="utf-8") as report:
                 return json.load(report)
-        return default
+        return None
+
+    def _load_report_as_json_dict(self) -> dict[str, Any]:
+        data = self._load_report_as_json()
+        return data if data and isinstance(data, dict) else {}
+
+    def _load_report_as_json_list(self) -> list[dict[str, Any]]:
+        data = self._load_report_as_json()
+        return data if data and isinstance(data, list) else []
 
     def _load_report_as_xml(self) -> Any:
         return parser.parse(self.report).getroot()
