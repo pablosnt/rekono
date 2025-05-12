@@ -22,7 +22,7 @@ class Gitleaks(BaseParser):
                 cwe="CWE-527",
                 reference="https://iosentrix.com/blog/git-source-code-disclosure-vulnerability/",
             )
-        data = self._load_report_as_json()
+        data = self._load_report_as_json(default=[])
         emails = set()
         for finding in data:
             self.create_finding(
