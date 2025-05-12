@@ -2,13 +2,14 @@ import logging
 from typing import Any
 
 from django.utils import timezone
+from rest_framework import status
+from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.serializers import ModelSerializer, SerializerMethodField
+
 from framework.fields import ProtectedSecretField
 from platforms.mail.notifications import SMTP
 from platforms.telegram_app.models import TelegramChat, TelegramSettings
 from platforms.telegram_app.notifications.notifications import Telegram
-from rest_framework import status
-from rest_framework.exceptions import AuthenticationFailed
-from rest_framework.serializers import ModelSerializer, SerializerMethodField
 from security.cryptography.hashing import hash
 from security.validators.input_validator import Regex, Validator
 
@@ -29,7 +30,7 @@ class TelegramSettingsSerializer(ModelSerializer):
         model = TelegramSettings
         fields = ("id", "token", "bot", "is_available")
 
-    def get_bot(self, instance: TelegramSettings) -> str:
+    def get_bot(self, instance: TelegramSettings) -> str | None:
         telegram = Telegram()
         telegram.initialize()
         return telegram.get_bot_name()
