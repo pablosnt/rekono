@@ -9,7 +9,7 @@ from tools.parsers.base import BaseParser
 class Sslscan(BaseParser):
     technologies: list[Technology] = []
 
-    def create_finding(self, finding_type: Finding, **fields: Any) -> Finding:
+    def create_finding(self, finding_type: type[Finding], **fields: Any) -> Finding:
         if finding_type == Vulnerability and not fields.get("technology") and fields.get("sslversion"):
             search = [t for t in self.technologies if f"{t.name}v{t.version}" == fields.get("sslversion")]
             fields["technology"] = search[0] if search else None

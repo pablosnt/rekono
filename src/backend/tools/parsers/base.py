@@ -23,7 +23,7 @@ class BaseParser:
         )
         self.findings: list[Finding] = []
 
-    def create_finding(self, finding_type: Finding, **fields: Any) -> Finding:
+    def create_finding(self, finding_type: type[Finding], **fields: Any) -> Finding:
         for (
             finding_type_used,
             finding_used,

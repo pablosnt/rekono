@@ -13,7 +13,7 @@ class Sslyze(BaseParser):
 
     generic_tech: Technology | None = None
 
-    def create_finding(self, finding_type: Finding, **fields: Any) -> Finding:
+    def create_finding(self, finding_type: type[Finding], **fields: Any) -> Finding:
         if finding_type == Vulnerability and not fields.get("technology"):
             if not self.generic_tech:
                 self.generic_tech = super().create_finding(Technology, name="Generic TLS")
