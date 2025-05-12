@@ -36,6 +36,16 @@ class Authentication(BaseInput, BaseEncrypted):
     )
 
     filters = [BaseInput.Filter(type=AuthenticationType, field="type")]
+    parse_mapping = {
+        InputKeyword.COOKIE_NAME: lambda instance: (
+            instance.name if instance.type == AuthenticationType.COOKIE else None
+        ),
+        InputKeyword.SECRET: "secret",
+        InputKeyword.CREDENTIAL_TYPE: "type",
+        InputKeyword.CREDENTIAL_TYPE_LOWER: lambda instance: instance.type.lower(),
+        InputKeyword.TOKEN: lambda instance: instance.get_token(),
+        InputKeyword.USERNAME: lambda instance: (instance.name if instance.type == AuthenticationType.BASIC else None),
+    }
     _encrypted_field = "_secret"
     project_field = "target_port__target__project"
 
@@ -45,24 +55,6 @@ class Authentication(BaseInput, BaseEncrypted):
             if self.type == AuthenticationType.BASIC
             else self.secret
         )
-
-    def parse(self, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
-        """Get useful information from this instance to be used in tool execution as argument.
-
-        Args:
-            accumulated (dict[str, Any], optional): Information from other instances of the same type. Defaults to {}.
-
-        Returns:
-            dict[str, Any]: Useful information for tool executions, including accumulated if setted
-        """
-        return {
-            InputKeyword.COOKIE_NAME.name.lower(): (self.name if self.type == AuthenticationType.COOKIE else None),
-            InputKeyword.SECRET.name.lower(): self.secret,
-            InputKeyword.CREDENTIAL_TYPE.name.lower(): self.type,
-            InputKeyword.CREDENTIAL_TYPE_LOWER.name.lower(): self.type.lower(),
-            InputKeyword.TOKEN.name.lower(): self.get_token(),
-            InputKeyword.USERNAME.name.lower(): (self.name if self.type == AuthenticationType.BASIC else None),
-        }
 
     def __str__(self) -> str:
         """Instance representation in text format.

@@ -36,6 +36,7 @@ class HttpHeader(BaseInput):
     )
 
     filters = [BaseInput.Filter(type=str, field="key")]
+    parse_mapping = {InputKeyword.HEADERS: lambda instance: {instance.key: instance.value}}
     project_field = "target__project"
 
     class Meta:
@@ -58,14 +59,6 @@ class HttpHeader(BaseInput):
                 condition=models.Q(user__isnull=True),
             ),
         ]
-
-    def parse(self, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
-        return {
-            InputKeyword.HEADERS.name.lower(): {
-                **accumulated.get(InputKeyword.HEADERS.name.lower(), {}),
-                self.key: self.value,
-            }
-        }
 
     def __str__(self) -> str:
         parent = self.target or self.user

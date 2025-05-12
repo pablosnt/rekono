@@ -6,6 +6,7 @@ import urllib3
 from django.db import models
 from django.db.models import Q
 
+from framework.enums import InputKeyword
 from rekono.settings import AUTH_USER_MODEL, CONFIG
 from security.cryptography.encryption import Encryptor
 
@@ -96,6 +97,8 @@ class BaseInput(BaseModel):
             self.processor = processor
 
     filters: list[Filter] = []
+    parse_mapping: dict[InputKeyword, str | Callable | dict[str, str]] = {}
+    parse_dependencies: list[str] = []
 
     def _clean_path(self, value: str) -> str:
         return f"/{value}" if len(value) > 1 and value[0] != "/" else value
@@ -196,17 +199,33 @@ class BaseInput(BaseModel):
         return False
 
     def parse(self, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
-        """Get useful information from this instance to be used in tool execution as argument.
-
-        To be implemented by subclasses.
-
-        Args:
-            accumulated (dict[str, Any], optional): Information from other instances of the same type. Defaults to {}.
-
-        Returns:
-            dict[str, Any]: Useful information for tool executions, including accumulated if setted
-        """
-        return {}  # pragma: no cover
+        result = {}
+        for dependency in self.parse_dependencies:
+            if (
+                hasattr(self, dependency)
+                and getattr(self, dependency)
+                and isinstance(getattr(self, dependency), BaseInput)
+            ):
+                result.update(dependency.parse(accumulated))
+        for keyword, map in self.parse_mapping.items():
+            value = (
+                getattr(self, map)
+                if isinstance(map, str) and hasattr(self, map)
+                else (map(self) if isinstance(map, Callable) else map)
+            )
+            if value is None:
+                continue
+            key = keyword.name.lower()
+            current_value = accumulated.get(key)
+            if current_value is not None:
+                if isinstance(current_value, list):
+                    result[key] = accumulated.get(key, []) + (value if isinstance(value, list) else [value])
+                    continue
+                elif isinstance(current_value, dict):
+                    result[key] = {**accumulated.get(key, {}), **value}
+                    continue
+            result[key] = value
+        return result
 
     def get_input_type(self) -> Any:
         from input_types.models import InputType

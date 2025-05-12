@@ -24,33 +24,28 @@ class TargetPort(BaseInput):
     )
 
     filters = [BaseInput.Filter(type=int, field="port")]
+    parse_mapping = {
+        InputKeyword.TARGET: lambda instance: instance.target.target,
+        InputKeyword.HOST: lambda instance: instance.target.target,
+        InputKeyword.PORT: "port",
+        InputKeyword.PORTS: lambda instance: [instance.port],
+        InputKeyword.ENDPOINT: lambda instance: instance._clean_path(instance.path),
+        InputKeyword.URL: lambda instance: instance._get_url(
+            instance.target.target, instance.port, instance._clean_path(path)
+        ),
+    }
+    parse_dependencies = ["authentication"]
     project_field = "target__project"
 
     class Meta:
         constraints = [models.UniqueConstraint(fields=["target", "port"], name="unique_target_port")]
 
     def parse(self, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
-        """Get useful information from this instance to be used in tool execution as argument.
-
-        Args:
-            accumulated (dict[str, Any], optional): Information from other instances of the same type. Defaults to {}.
-
-        Returns:
-            dict[str, Any]: Useful information for tool executions, including accumulated if setted
-        """
-        output = self.authentication.parse(accumulated) if self.authentication else {}
-        ports = (accumulated or {}).get(InputKeyword.PORTS.name.lower(), []) + [self.port]
-        path = self._clean_path(self.path)
-        return {
-            **output,
-            InputKeyword.TARGET.name.lower(): self.target.target,
-            InputKeyword.HOST.name.lower(): self.target.target,
-            InputKeyword.PORT.name.lower(): self.port,
-            InputKeyword.PORTS.name.lower(): ports,
-            InputKeyword.ENDPOINT.name.lower(): self._clean_path(path),
-            InputKeyword.PORTS_COMMAS.name.lower(): ",".join([str(p) for p in ports]),
-            InputKeyword.URL.name.lower(): self._get_url(self.target.target, self.port, path),
-        }
+        output = super().parse(accumulated)
+        output[InputKeyword.PORTS_COMMAS.name.lower()] = ",".join(
+            [str(p) for p in output.get(InputKeyword.PORTS_COMMAS.name.lower()) or []]
+        )
+        return output
 
     def __str__(self) -> str:
         """Instance representation in text format.
