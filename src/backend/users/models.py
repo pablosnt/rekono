@@ -39,7 +39,9 @@ class RekonoUserManager(UserManager):
             return self.generate_otp(model)
         return otp
 
+    # pytype: disable=attribute-error
     def get_otp_expiration_time(self, time: dict[str, int] = {"hours": CONFIG.otp_expiration_hours}) -> datetime:
+        # pytype: enable=attribute-error
         return timezone.now() + timedelta(**time)
 
     def assign_role(self, user: Any, role: Role) -> None:
