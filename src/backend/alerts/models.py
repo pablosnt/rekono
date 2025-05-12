@@ -108,9 +108,9 @@ class Alert(BaseModel):
         if self.mode == AlertMode.NEW.value:
             return not finding.executions.exclude(id=execution.id).exists()
         elif self.mode == AlertMode.FILTER.value:
-            return getattr(finding, data[AlertMode.FILTER.value].lower()) == self.value.lower()
+            return getattr(finding, str(data.get(AlertMode.FILTER.value, "")).lower()) == self.value.lower()
         else:
-            return getattr(finding, data[AlertMode.MONITOR.value].lower()) is True
+            return getattr(finding, str(data.get(AlertMode.MONITOR.value, "")).lower()) is True
 
 
 class MonitorSettings(BaseModel):
