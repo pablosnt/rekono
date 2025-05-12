@@ -32,7 +32,14 @@ class DefectDojo(BaseIntegration):
             Severity.CRITICAL: "S5",
         }
 
-    def _request(self, method: Callable, url: str, json: bool = True, **kwargs: Any) -> Any:
+    def _request(
+        self,
+        method: Callable,
+        url: str,
+        json: bool = True,
+        trigger_exception: bool = True,
+        **kwargs: Any,
+    ) -> Any:
         return super()._request(
             method,
             f"{self.settings.server}/api/v2{url}",
