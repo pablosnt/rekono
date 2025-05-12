@@ -1,5 +1,3 @@
-from typing import Any
-
 from django.db import models
 
 from framework.enums import InputKeyword

@@ -206,7 +206,7 @@ class BaseInput(BaseModel):
                 and getattr(self, dependency)
                 and isinstance(getattr(self, dependency), BaseInput)
             ):
-                result.update(dependency.parse(accumulated))
+                result.update(getattr(self, dependency).parse(accumulated))
         for keyword, map in self.parse_mapping.items():
             value = (
                 getattr(self, map)

@@ -31,7 +31,7 @@ class TargetPort(BaseInput):
         InputKeyword.PORTS: lambda instance: [instance.port],
         InputKeyword.ENDPOINT: lambda instance: instance._clean_path(instance.path),
         InputKeyword.URL: lambda instance: instance._get_url(
-            instance.target.target, instance.port, instance._clean_path(path)
+            instance.target.target, instance.port, instance._clean_path(instance.path)
         ),
     }
     parse_dependencies = ["authentication"]

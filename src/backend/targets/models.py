@@ -2,7 +2,6 @@ import ipaddress
 import logging
 import re
 import socket
-from typing import Any
 
 from django.core.exceptions import ValidationError
 from django.db import models
