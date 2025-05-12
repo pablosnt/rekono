@@ -29,7 +29,7 @@ class Gitleaks(BaseExecutor):
             capture_output=True,
             cwd=run_directory,
         )
-        for path in self.run_directory.iterdir():
+        for path in run_directory.iterdir():
             if path.stem != ".git" or path.is_file():
                 self.git_directory_dumped = True
                 break

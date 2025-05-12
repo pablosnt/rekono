@@ -9,7 +9,7 @@ from tools.executors.base import BaseExecutor
 
 class Cmseek(BaseExecutor):
     def _after_running(self) -> None:
-        result_path = Path("Result") / urlparse(self.arguments(self.arguments.index("-u") + 1)).hostname / "cms.json"
+        result_path = Path("Result") / urlparse(self.arguments[self.arguments.index("-u") + 1]).hostname / "cms.json"
         for report in [
             result_path,
             Path(CONFIG.cmseek_dir) / result_path,

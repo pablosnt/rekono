@@ -17,7 +17,7 @@ class Cmseek(BaseParser):
             base_url = base_url.replace(parser.path, "/")
         cms = self.create_finding(
             Technology,
-            name=data.get("cms_name").strip(),
+            name=data.get("cms_name", "").strip(),
             version=version.strip() if version is not None else None,
             description="CMS",
             reference=(data.get("cms_url", "").strip() if data.get("cms_url") else data.get("cms_url")),
