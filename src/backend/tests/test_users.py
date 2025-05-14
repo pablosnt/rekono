@@ -9,6 +9,8 @@ from tests.framework import ApiTest
 from users.enums import Notification
 from users.models import User
 
+# pytype: disable=wrong-arg-types
+
 invitation1 = {"email": "test1@rekono.com", "role": Role.READER.value}
 invitation2 = {"email": "test2@rekono.com", "role": Role.AUDITOR.value}
 invalid_invitation = {"email": "invalid email", "role": Role.ADMIN.value}

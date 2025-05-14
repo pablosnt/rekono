@@ -5,6 +5,8 @@ from tests.cases import ApiTestCase
 from tests.framework import ApiTest
 from tools.enums import Intensity
 
+# pytype: disable=wrong-arg-types
+
 
 class ParameterTest(ApiTest):
     model = None

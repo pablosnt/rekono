@@ -5,6 +5,9 @@ from api_tokens.models import ApiToken
 from tests.cases import ApiTestCase
 from tests.framework import ApiTest
 
+# pytype: disable=wrong-arg-types
+
+
 api_token1 = {
     "name": "test1",
     "expiration": (datetime.now() + timedelta(days=365)).isoformat() + "Z",

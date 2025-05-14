@@ -4,6 +4,8 @@ from executions.enums import Status
 from tests.cases import ApiTestCase
 from tests.framework import ApiTest
 
+# pytype: disable=wrong-arg-types
+
 
 class ExecutionTest(ApiTest):
     endpoint = "/api/executions/"

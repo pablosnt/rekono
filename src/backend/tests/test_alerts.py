@@ -5,6 +5,8 @@ from alerts.models import Alert, MonitorSettings
 from tests.cases import ApiTestCase
 from tests.framework import ApiTest
 
+# pytype: disable=wrong-arg-types
+
 new_alert = {
     "project": 1,
     "item": AlertItem.HOST.value,

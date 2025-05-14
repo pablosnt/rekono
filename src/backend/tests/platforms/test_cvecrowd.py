@@ -10,6 +10,8 @@ from platforms.cvecrowd.models import CveCrowdSettings
 from tests.cases import ApiTestCase
 from tests.framework import ApiTest, RekonoTest
 
+# pytype: disable=wrong-arg-types
+
 
 def success(*args: Any, **kwargs: Any) -> list[str]:
     return ["CVE-2020-1111", "CVE-2021-1112", "CVE-2022-1113"]

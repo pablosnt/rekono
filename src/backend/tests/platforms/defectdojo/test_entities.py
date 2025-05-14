@@ -11,6 +11,8 @@ from tests.platforms.defectdojo.mock import (
     return_true,
 )
 
+# pytype: disable=wrong-arg-types
+
 
 class DefectDojoEntitiesTest(ApiTest):
     endpoint = "/api/defect-dojo/"

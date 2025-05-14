@@ -6,6 +6,8 @@ from tests.cases import ApiTestCase
 from tests.framework import ApiTest
 from tests.platforms.defectdojo.mock import return_true
 
+# pytype: disable=wrong-arg-types
+
 sync1 = {"project": 1, "product_type_id": 1, "product_id": 1, "engagement_id": 1}
 sync2 = {"project": 1, "product_type_id": 1, "product_id": 1, "engagement_id": None}
 

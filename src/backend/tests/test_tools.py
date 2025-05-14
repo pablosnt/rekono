@@ -5,6 +5,8 @@ from tests.framework import ApiTest
 from tools.enums import Intensity as IntensityEnum
 from tools.models import Argument, Configuration, Input, Intensity, Output, Tool
 
+# pytype: disable=wrong-arg-types
+
 nmap = "Nmap"
 the_harvester = "theHarvester"
 

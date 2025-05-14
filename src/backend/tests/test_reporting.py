@@ -7,6 +7,8 @@ from targets.models import Target
 from tests.cases import ApiTestCase
 from tests.framework import ApiTest
 
+# pytype: disable=wrong-arg-types
+
 
 class ReportingTest(ApiTest):
     endpoint = "/api/reports/"

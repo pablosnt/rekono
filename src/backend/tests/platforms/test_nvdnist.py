@@ -8,6 +8,8 @@ from platforms.nvdnist.models import NvdNistSettings
 from tests.cases import ApiTestCase
 from tests.framework import ApiTest, RekonoTest
 
+# pytype: disable=wrong-arg-types
+
 success = {
     "vulnerabilities": [
         {

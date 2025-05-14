@@ -2,6 +2,8 @@ from projects.models import Project
 from tests.cases import ApiTestCase
 from tests.framework import ApiTest
 
+# pytype: disable=wrong-arg-types
+
 project1 = {"name": "test1", "description": "test1", "tags": ["test"]}
 new_project1 = {"name": "new test1", "description": "test1", "tags": ["test"]}
 project2 = {"name": "test2", "description": "test2", "tags": ["test"]}

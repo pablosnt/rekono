@@ -14,6 +14,8 @@ from tests.platforms.defectdojo.mock import (
     return_true,
 )
 
+# pytype: disable=wrong-arg-types
+
 sync: dict[str, Any] = {
     "project": 1,
     "product_type_id": 1,
