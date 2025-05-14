@@ -20,7 +20,7 @@ class TargetPortMixin(BaseMixin):
             ),
         )
 
-    async def _create_target_port(self, update: Update, context: CallbackContext) -> int:
+    async def _create_target_port(self, update: Update, context: CallbackContext) -> int | None:
         if not update.effective_message or not update.effective_message.text:
             return ConversationHandler.END
         if update.effective_message.text.lower() == "/cancel":
