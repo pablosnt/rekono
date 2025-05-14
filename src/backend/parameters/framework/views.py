@@ -11,7 +11,7 @@ from security.authorization.permissions import (
 
 
 class InputParameterViewSet(BaseViewSet):
-    queryset = QuerySet.none()
+    queryset = None
     permission_classes = [
         IsAuthenticated,
         RekonoModelPermission,
@@ -20,9 +20,4 @@ class InputParameterViewSet(BaseViewSet):
     http_method_names = ["get", "post"]
 
     def get_queryset(self) -> QuerySet:
-        model = self._get_model()
-        return (
-            self.queryset.filter(**{f"{model.project_field}__members": self.request.user}).distinct()
-            if model is not None
-            else QuerySet.none()
-        )
+        return self.queryset.filter(**{f"{self._get_model().project_field}__members": self.request.user}).distinct()
