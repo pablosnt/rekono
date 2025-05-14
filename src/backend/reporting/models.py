@@ -1,4 +1,5 @@
 from django.db import models
+
 from framework.models import BaseModel
 from projects.models import Project
 from rekono.settings import AUTH_USER_MODEL
@@ -21,4 +22,4 @@ class Report(BaseModel):
         return (self.task or self.target or self.project).get_project()
 
     def __str__(self) -> str:
-        return f"{(self.task or self.target or self.project).__str__()} - {self.format} - {self.user.__str__()}"
+        return f"{(self.task or self.target or self.project).__str__()} - {self.format.value} - {self.user.__str__()}"

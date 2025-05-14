@@ -216,7 +216,7 @@ class BaseInput(BaseModel):
                 else (map(self) if isinstance(map, Callable) else map)
             )
             if value is None:
-                continue
+                value = ""
             key = keyword.name.lower()
             current_value = accumulated.get(key)
             if current_value is not None:
