@@ -26,7 +26,7 @@ class HackTricksTest(RekonoTest):
     @mock.patch("platforms.hacktricks.HackTricks._get_all_hacktricks_links", links)
     def _test_integration(self, expected: dict[Finding, str | None]) -> None:
         client = HackTricks()
-        client.process_findings(self.execution1, expected.keys())
+        client.process_findings(self.execution1, list(expected.keys()))
         for finding, expected_link in expected.items():
             self.assertEqual(expected_link, finding.hacktricks_link)
 
