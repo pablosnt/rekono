@@ -462,7 +462,7 @@ class VulnerabilityEvolutionSerializer(StatsSerializer):
     def get_evolution(self, instance: Any) -> DateSeverityCount(many=True):
         return self._get_serialized_evolution(DateSeverityCount)
 
-    def _get_evolution(self, model: type[BaseModel] | None = None) -> list[dict[str, Any]]:
+    def _get_evolution(self, model: type[BaseModel] | None = None) -> list[Any]:
         return list(sum(super()._get_evolution(model), []))
 
     def _get_date_evolution(self, date: date, count: Any) -> Any:

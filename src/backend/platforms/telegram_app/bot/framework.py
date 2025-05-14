@@ -39,8 +39,8 @@ class BaseTelegramBot(BaseTelegram):
                 message, reply_markup=reply_markup, parse_mode=ParseMode.MARKDOWN_V2
             )
 
-    def _get_context_value(self, context: CallbackContext, key: str) -> Any:
-        return (context.chat_data or {}).get(key)
+    def _get_context_value(self, context: CallbackContext, key: Context) -> Any:
+        return (context.chat_data or {}).get(key.value)
 
     def _add_context_value(self, context: CallbackContext, key: Context, value: Any) -> None:
         if context.chat_data:
