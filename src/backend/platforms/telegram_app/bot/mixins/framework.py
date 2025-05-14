@@ -17,25 +17,31 @@ logger = logging.getLogger()
 
 
 class BaseMixin(BaseTelegramBot):
+    @property
+    def _mixin_states(self) -> list:
+        return [] if not hasattr(self, "_states_methods") else getattr(self, "_states_methods")
+
     def _get_current_state(self, method: Callable) -> int:
-        if not hasattr(self, "_states_methods"):
-            return ConversationHandler.END
-        return self._states_methods.index(method)
+        return self._mixin_states.index(method) if len(self._mixin_states) > 0 else ConversationHandler.END
 
     def _get_next_state(self, method: Callable) -> int:
         current_state = self._get_current_state(method)
-        return ConversationHandler.END if current_state == len(self._states_methods) - 1 else current_state + 1
+        return ConversationHandler.END if current_state == len(self._mixin_states) - 1 else current_state + 1
 
     def _get_previous_state(self, method: Callable) -> int:
         current_state = self._get_current_state(method)
         return current_state if current_state == 0 else current_state - 1
 
     async def _go_to_next_state(self, update: Update, context: CallbackContext, next_state: int) -> int:
-        if next_state != ConversationHandler.END and (
-            self._states_methods[next_state].__name__.startswith("_ask_for_")
-            or self._states_methods[next_state].__name__.startswith("_reply")
+        if (
+            next_state != ConversationHandler.END
+            and len(self._mixin_states) > 0
+            and (
+                self._mixin_states[next_state].__name__.startswith("_ask_for_")
+                or self._mixin_states[next_state].__name__.startswith("_reply")
+            )
         ):
-            return await self._states_methods[next_state](update, context)
+            return await self._mixin_states[next_state](update, context)
         return next_state
 
     @sync_to_async
