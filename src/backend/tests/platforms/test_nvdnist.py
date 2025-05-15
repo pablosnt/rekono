@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any
 from unittest import mock
 
 from findings.enums import Severity
@@ -7,6 +7,8 @@ from platforms.nvdnist.integrations import NvdNist
 from platforms.nvdnist.models import NvdNistSettings
 from tests.cases import ApiTestCase
 from tests.framework import ApiTest, RekonoTest
+
+# pytype: disable=wrong-arg-types
 
 success = {
     "vulnerabilities": [
@@ -60,11 +62,11 @@ class NvdNistTest(RekonoTest):
     def _test(
         self,
         severity: Severity,
-        reference: Optional[str] = None,
-        cwe: Optional[str] = "CWE-200",
+        reference: str | None = None,
+        cwe: str | None = "CWE-200",
         description: str = "description",
     ) -> None:
-        self.nvdnist.process_findings(self.execution3, [self.vulnerability])
+        self.nvdnist.process_finding(self.execution3, self.vulnerability)
         self.assertEqual(reference, self.vulnerability.reference)
         self.assertEqual(cwe, self.vulnerability.cwe)
         self.assertEqual(description, self.vulnerability.description)

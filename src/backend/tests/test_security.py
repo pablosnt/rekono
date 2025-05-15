@@ -3,9 +3,12 @@ from datetime import datetime, timedelta
 
 import pyotp
 from django.utils import timezone
+
 from tests.cases import ApiTestCase
 from tests.framework import ApiTest
 from users.models import User
+
+# pytype: disable=wrong-arg-types
 
 
 class SecurityTest(ApiTest):

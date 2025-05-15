@@ -1,18 +1,19 @@
-from typing import Any, Optional, cast
+from typing import Any, cast
 
 from django.db.models import Q, QuerySet
 from drf_spectacular.utils import extend_schema
+from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.request import Request
+from rest_framework.response import Response
+from rest_framework.status import HTTP_201_CREATED, HTTP_404_NOT_FOUND
+
 from framework.models import BaseModel
 from framework.views import LikeViewSet
 from notes.filters import NoteFilter
 from notes.models import Note
 from notes.serializers import NoteSerializer, links
 from projects.models import Project
-from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.request import Request
-from rest_framework.response import Response
-from rest_framework.status import HTTP_201_CREATED, HTTP_404_NOT_FOUND
 from security.authorization.permissions import (
     OwnerPermission,
     ProjectMemberPermission,
@@ -47,7 +48,7 @@ class NoteViewSet(LikeViewSet):
     )
     http_method_names = ["get", "post", "put", "delete"]
 
-    def _get_project_from_data(self, project_field: str, data: dict[str, Any]) -> Optional[Project]:
+    def _get_project_from_data(self, project_field: str, data: dict[str, Any]) -> Project | None:
         data_links = [link for link in reversed(links) if data.get(link)]
         return cast(BaseModel, data.get(data_links[0])).get_project() if len(data_links) > 0 else None
 

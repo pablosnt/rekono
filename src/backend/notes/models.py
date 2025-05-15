@@ -1,4 +1,6 @@
 from django.db import models
+from taggit.managers import TaggableManager
+
 from executions.models import Execution
 from findings.models import (
     OSINT,
@@ -14,7 +16,6 @@ from framework.models import BaseLike
 from projects.models import Project
 from rekono.settings import AUTH_USER_MODEL
 from security.validators.input_validator import Regex, Validator
-from taggit.managers import TaggableManager
 from targets.models import Target
 from tasks.models import Task
 
@@ -71,6 +72,8 @@ class Note(BaseLike):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    project_field = "project"
+
     def __str__(self) -> str:
         value = ""
         for item in [self.target, self.project]:
@@ -78,7 +81,3 @@ class Note(BaseLike):
                 value = f"{item.__str__()} - "
                 break
         return f"{value}{self.title}"
-
-    @classmethod
-    def get_project_field(cls) -> str:
-        return "project"

@@ -4,12 +4,13 @@ import threading
 from typing import Any
 
 import certifi
-from alerts.enums import AlertMode
-from alerts.models import Alert
 from django.core.mail import EmailMultiAlternatives
 from django.core.mail.backends.smtp import EmailBackend
 from django.template.loader import get_template
 from django.utils import timezone
+
+from alerts.enums import AlertMode
+from alerts.models import Alert
 from executions.models import Execution
 from findings.framework.models import Finding
 from framework.platforms import BaseNotification
@@ -57,8 +58,10 @@ class SMTP(BaseNotification):
             message = EmailMultiAlternatives(subject, "", "Rekono <noreply@rekono.com>", [u.email for u in users])
             template = get_template(template_path)
             message.attach_alternative(
+                # pytype: disable=attribute-error
                 # nosemgrep: python.flask.security.xss.audit.direct-use-of-jinja2.direct-use-of-jinja2
                 template.render({**data, "rekono_url": CONFIG.frontend_url}),
+                # pytype: enable=attribute-error
                 "text/html",
             )
             self.backend.send_messages([message])

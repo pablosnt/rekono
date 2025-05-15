@@ -2,10 +2,10 @@ import ipaddress
 import logging
 import re
 import socket
-from typing import Any
 
 from django.core.exceptions import ValidationError
 from django.db import models
+
 from framework.enums import InputKeyword
 from framework.models import BaseInput
 from projects.models import Project
@@ -24,6 +24,12 @@ class Target(BaseInput):
     type = models.TextField(max_length=10, choices=TargetType.choices)
 
     filters = [BaseInput.Filter(type=TargetType, field="type")]
+    parse_mapping = {
+        InputKeyword.TARGET: "target",
+        InputKeyword.HOST: "target",
+        InputKeyword.URL: lambda instance: instance._get_url(instance.target),
+    }
+    project_field = "project"
 
     class Meta:
         constraints = [models.UniqueConstraint(fields=["project", "target"], name="unique_target")]
@@ -71,21 +77,6 @@ class Target(BaseInput):
             params={"value": target},
         )
 
-    def parse(self, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
-        """Get useful information from this instance to be used in tool execution as argument.
-
-        Args:
-            accumulated (dict[str, Any], optional): Information from other instances of the same type. Defaults to {}.
-
-        Returns:
-            dict[str, Any]: Useful information for tool executions, including accumulated if setted
-        """
-        return {
-            InputKeyword.TARGET.name.lower(): self.target,
-            InputKeyword.HOST.name.lower(): self.target,
-            InputKeyword.URL.name.lower(): self._get_url(self.target),
-        }
-
     def __str__(self) -> str:
         """Instance representation in text format.
 
@@ -93,7 +84,3 @@ class Target(BaseInput):
             str: String value that identifies this instance
         """
         return self.target
-
-    @classmethod
-    def get_project_field(cls) -> str:
-        return "project"

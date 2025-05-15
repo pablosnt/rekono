@@ -2,6 +2,7 @@ from typing import Any
 
 from django.db import models
 from django.utils import timezone
+
 from findings.enums import (
     HostOS,
     OSINTDataType,
@@ -26,17 +27,14 @@ class OSINT(TriageFinding):
     source = models.TextField(max_length=50, blank=True, null=True)
 
     unique_fields = ["data", "data_type"]
+    parse_mapping = {
+        InputKeyword.TARGET: "data",
+        InputKeyword.HOST: "data",
+        InputKeyword.URL: lambda instance: instance._get_url(instance.data),
+    }
 
     def parse(self, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
-        return (
-            {
-                InputKeyword.TARGET.name.lower(): self.data,
-                InputKeyword.HOST.name.lower(): self.data,
-                InputKeyword.URL.name.lower(): self._get_url(self.data),
-            }
-            if self.data_type in [OSINTDataType.IP, OSINTDataType.DOMAIN]
-            else {}
-        )
+        return super().parse(accumulated) if self.data_type in [OSINTDataType.IP, OSINTDataType.DOMAIN] else {}
 
     def defectdojo(self) -> dict[str, Any]:
         return {
@@ -66,13 +64,11 @@ class Host(Finding):
 
     unique_fields = ["ip"]
     filters = [Finding.Filter(TargetType, "ip", processor=lambda a: Target.get_type(a))]
-
-    def parse(self, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
-        return {
-            InputKeyword.TARGET.name.lower(): self.ip,
-            InputKeyword.HOST.name.lower(): self.ip,
-            InputKeyword.URL.name.lower(): self._get_url(self.ip),
-        }
+    parse_mapping = {
+        InputKeyword.TARGET: "ip",
+        InputKeyword.HOST: "ip",
+        InputKeyword.URL: lambda instance: instance._get_url(instance.ip),
+    }
 
     def defectdojo(self) -> dict[str, Any]:
         return {
@@ -96,18 +92,17 @@ class Port(Finding):
     service = models.TextField(max_length=50, blank=True, null=True)
 
     unique_fields = ["host", "port", "protocol"]
+    parse_mapping = {InputKeyword.PORT: "port", InputKeyword.PORTS: lambda instance: [instance.port]}
     filters = [
         Finding.Filter(int, "port"),
         Finding.Filter(str, "service", contains=True, processor=lambda s: s.lower()),
     ]
 
     def parse(self, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
-        ports = [self.port] if not accumulated else accumulated.get(InputKeyword.PORTS.name.lower(), []) + [self.port]
-        output = {
-            InputKeyword.PORT.name.lower(): self.port,
-            InputKeyword.PORTS.name.lower(): ports,
-            InputKeyword.PORTS_COMMAS.name.lower(): ",".join([str(p) for p in ports]),
-        }
+        output = super().parse(accumulated)
+        output[InputKeyword.PORTS_COMMAS.name.lower()] = ",".join(
+            [str(p) for p in output.get(InputKeyword.PORTS.name.lower()) or []]
+        )
         if self.host:
             output.update(
                 {
@@ -148,6 +143,15 @@ class Path(Finding):
         Finding.Filter(int, "status"),
         Finding.Filter(str, "path", contains=True, processor=lambda p: p.lower()),
     ]
+    parse_mapping = {
+        InputKeyword.ENDPOINT: lambda instance: instance._clean_path(instance.path),
+        InputKeyword.URL: lambda instance: instance._get_url(
+            instance.port.host.ip, instance.port.port, instance._clean_path(instance.path)
+        )
+        if instance.port and instance.port.host
+        else None,
+    }
+    parse_dependencies = ["port"]
 
     def _clean_comparison_path(self, value: str) -> str:
         if len(value) > 1:
@@ -165,21 +169,6 @@ class Path(Finding):
                     self._clean_comparison_path(target_port.path)
                 )
         return filter
-
-    def parse(self, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
-        path = self._clean_path(self.path)
-        output = (
-            {
-                **self.port.parse(accumulated),
-                InputKeyword.URL.name.lower(): self._get_url(self.port.host.ip, self.port.port, path),
-            }
-            if self.port
-            else {}
-        )
-        return {
-            **output,
-            InputKeyword.ENDPOINT.name.lower(): path,
-        }
 
     def defectdojo_endpoint(self, target: Target) -> dict[str, Any]:
         return {
@@ -226,22 +215,8 @@ class Technology(Finding):
 
     unique_fields = ["port", "name", "version"]
     filters = [Finding.Filter(str, "name", contains=True, processor=lambda n: n.lower())]
-
-    def parse(self, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
-        """Get useful information from this instance to be used in tool execution as argument.
-
-        Args:
-            accumulated (dict[str, Any], optional): Information from other instances of the same type. Defaults to {}.
-
-        Returns:
-            dict[str, Any]: Useful information for tool executions, including accumulated if setted
-        """
-        output = {InputKeyword.TECHNOLOGY.name.lower(): self.name}
-        if self.version:
-            output.update({InputKeyword.VERSION.name.lower(): self.version})
-        if self.port:
-            output.update(self.port.parse(accumulated))
-        return output
+    parse_mapping = {InputKeyword.TECHNOLOGY: "name", InputKeyword.VERSION: "version"}
+    parse_dependencies = ["port"]
 
     def defectdojo(self) -> dict[str, Any]:
         description = f"Technology: {self.name}\nVersion: {self.version}"
@@ -277,17 +252,8 @@ class Credential(TriageFinding):
     context = models.TextField(max_length=300, blank=True, null=True)
 
     unique_fields = ["technology", "email", "username", "secret"]
-
-    def parse(self, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
-        output = self.technology.parse(accumulated) if self.technology else {}
-        for key, field in [
-            (InputKeyword.EMAIL.name.lower(), self.email),
-            (InputKeyword.USERNAME.name.lower(), self.username),
-            (InputKeyword.SECRET.name.lower(), self.secret),
-        ]:
-            if field:
-                output[key] = field
-        return output
+    parse_mapping = {InputKeyword.EMAIL: "email", InputKeyword.USERNAME: "username", InputKeyword.SECRET: "secret"}
+    parse_dependencies = ["technology"]
 
     def defectdojo(self) -> dict[str, Any]:
         return {
@@ -336,14 +302,8 @@ class Vulnerability(TriageFinding):
         Finding.Filter(str, "cve", contains=True, processor=lambda c: c.lower()),
         Finding.Filter(str, "cwe", contains=True, processor=lambda c: c.lower()),
     ]
-
-    def parse(self, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
-        output = {InputKeyword.CVE.name.lower(): self.cve}
-        if self.technology:
-            output.update(self.technology.parse(accumulated))
-        elif self.port:
-            output.update(self.port.parse(accumulated))
-        return output
+    parse_mapping = {InputKeyword.CVE: "cve"}
+    parse_dependencies = ["technology", "port"]
 
     def defectdojo(self) -> dict[str, Any]:
         return {
@@ -382,14 +342,8 @@ class Exploit(TriageFinding):
     reference = models.TextField(max_length=250, blank=True, null=True)
 
     unique_fields = ["vulnerability", "technology", "edb_id", "reference"]
-
-    def parse(self, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
-        output = {InputKeyword.EXPLOIT.name.lower(): self.title}
-        if self.vulnerability:
-            output.update(self.vulnerability.parse(accumulated))
-        elif self.technology:
-            output.update(self.technology.parse(accumulated))
-        return output
+    parse_mapping = {InputKeyword.EXPLOIT: "title"}
+    parse_dependencies = ["vulnerability", "technology"]
 
     def defectdojo(self) -> dict[str, Any]:
         return {

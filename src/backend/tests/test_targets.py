@@ -3,6 +3,8 @@ from targets.models import Target
 from tests.cases import ApiTestCase
 from tests.framework import ApiTest
 
+# pytype: disable=wrong-arg-types
+
 target1 = {"project": 1, "target": "10.10.10.10"}
 target2 = {"project": 1, "target": "scanme.nmap.org"}
 target3 = {"project": 1, "target": "10.10.10.1-24"}

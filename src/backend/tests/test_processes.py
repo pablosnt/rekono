@@ -4,6 +4,8 @@ from processes.models import Process, Step
 from tests.cases import ApiTestCase
 from tests.framework import ApiTest
 
+# pytype: disable=wrong-arg-types
+
 first_process_name = "All tools"
 
 process1 = {"name": "test1", "description": "test", "tags": ["test"]}

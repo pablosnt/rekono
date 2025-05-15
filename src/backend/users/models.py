@@ -1,18 +1,19 @@
 import logging
 from datetime import datetime, timedelta
-from typing import Any, Optional, cast
+from typing import Any, cast
 
 import pyotp
 from django.contrib.auth.models import AbstractUser, Group, UserManager
 from django.db import models
 from django.utils import timezone
-from framework.models import BaseEncrypted
-from platforms.mail.notifications import SMTP
-from rekono.settings import CONFIG
 from rest_framework_simplejwt.token_blacklist.models import (
     BlacklistedToken,
     OutstandingToken,
 )
+
+from framework.models import BaseEncrypted
+from platforms.mail.notifications import SMTP
+from rekono.settings import CONFIG
 from security.authentication.api import ApiToken
 from security.authorization.roles import Role
 from security.cryptography.hashing import hash
@@ -38,10 +39,12 @@ class RekonoUserManager(UserManager):
             return self.generate_otp(model)
         return otp
 
+    # pytype: disable=attribute-error
     def get_otp_expiration_time(self, time: dict[str, int] = {"hours": CONFIG.otp_expiration_hours}) -> datetime:
+        # pytype: enable=attribute-error
         return timezone.now() + timedelta(**time)
 
-    def assign_role(self, user: Any, role: Role) -> None:
+    def assign_role(self, user: Any, role: Role) -> Any:
         """Initialize user, assigning it a role and creating its API token.
 
         Args:
@@ -161,15 +164,15 @@ class RekonoUserManager(UserManager):
     def _update_otp(
         self,
         user: Any,
-        otp: Optional[str] = None,
-        otp_expiration: Optional[datetime] = None,
+        otp: str | None = None,
+        otp_expiration: datetime | None = None,
     ) -> Any:
         user.otp = otp
         user.otp_expiration = otp_expiration
         user.save(update_fields=["otp", "otp_expiration"])
         return user
 
-    def setup_otp(self, user: Any, time: Optional[dict[str, int]] = None) -> str:
+    def setup_otp(self, user: Any, time: dict[str, int] | None = None) -> str:
         plain_otp = self.generate_otp()
         user = self._update_otp(
             user,
@@ -181,7 +184,7 @@ class RekonoUserManager(UserManager):
     def remove_otp(self, user: Any) -> Any:
         return self._update_otp(user)
 
-    def verify_otp(self, otp: str, user: Optional[Any] = None) -> bool:
+    def verify_otp(self, otp: str, user: Any | None = None) -> bool:
         filter = {"otp": hash(otp), "otp_expiration__gt": timezone.now()}
         if user:
             filter["id"] = user.id

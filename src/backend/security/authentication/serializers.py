@@ -2,9 +2,6 @@ import logging
 from typing import Any
 
 from django.core.exceptions import ValidationError
-from framework.serializers import MfaSerializer
-from platforms.mail.notifications import SMTP
-from rekono.settings import CONFIG
 from rest_framework import status
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.permissions import IsAuthenticated
@@ -14,6 +11,10 @@ from rest_framework_simplejwt.serializers import (
     TokenObtainSerializer,
 )
 from rest_framework_simplejwt.token_blacklist.models import OutstandingToken
+
+from framework.serializers import MfaSerializer
+from platforms.mail.notifications import SMTP
+from rekono.settings import CONFIG
 from security.authentication.tokens import MfaRequiredToken
 from security.authorization.roles import Role
 from users.models import User
@@ -82,7 +83,9 @@ class SendMfaEmailSerializer(BaseMfaRequiredSerializer):
     def save(self, **kwargs: Any) -> User:
         SMTP().mfa(
             self.user,
+            # pytype: disable=attribute-error
             User.objects.setup_otp(self.user, {"minutes": CONFIG.mfa_expiration_minutes}),
+            # pytype: enable=attribute-error
         )
         return self.user
 

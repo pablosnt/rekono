@@ -4,6 +4,8 @@ from target_denylist.models import TargetDenylist
 from tests.cases import ApiTestCase
 from tests.framework import ApiTest
 
+# pytype: disable=wrong-arg-types
+
 default_denylist_1 = {"id": 1, "default": True, "target": "127.0.0.1"}
 target_denylist1 = {"target": "rekono.com"}
 target_denylist2 = {"target": ".*\.rekono\.com"}

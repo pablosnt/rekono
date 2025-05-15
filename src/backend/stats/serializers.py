@@ -2,10 +2,18 @@
 from datetime import date
 from typing import Any
 
-from django.db.models import Count, ExpressionWrapper, F
+from django.db.models import Count, ExpressionWrapper, F, Max, Min, Q, QuerySet
 from django.db.models import FloatField as Float
-from django.db.models import Max, Min, Q, QuerySet
 from django.db.models.functions import TruncDate
+from rest_framework.serializers import (
+    CharField,
+    DateField,
+    FloatField,
+    IntegerField,
+    Serializer,
+    SerializerMethodField,
+)
+
 from findings.enums import Severity, TriageStatus
 from findings.models import (
     OSINT,
@@ -21,14 +29,6 @@ from framework.fields import IntegerChoicesField
 from framework.models import BaseModel
 from projects.models import Project
 from projects.serializers import ProjectSerializer
-from rest_framework.serializers import (
-    CharField,
-    DateField,
-    FloatField,
-    IntegerField,
-    Serializer,
-    SerializerMethodField,
-)
 from stats.framework.serializers import StatsSerializer
 from tasks.models import Task
 from tasks.serializers import TaskSerializer
@@ -462,13 +462,13 @@ class VulnerabilityEvolutionSerializer(StatsSerializer):
     def get_evolution(self, instance: Any) -> DateSeverityCount(many=True):
         return self._get_serialized_evolution(DateSeverityCount)
 
-    def _get_evolution(self, model: BaseModel | None = None) -> list[dict[str, Any]]:
-        return sum(super()._get_evolution(model), [])
+    def _get_evolution(self, model: type[BaseModel] | None = None) -> list[Any]:
+        return list(sum(super()._get_evolution(model), []))
 
     def _get_date_evolution(self, date: date, count: Any) -> Any:
         return [{"date": date, **item} for item in count]
 
-    def _get_date_count(self, date: date, model: BaseModel) -> Any:
+    def _get_date_count(self, date: date, model: type[BaseModel]) -> Any:
         return [
             {
                 "severity": severity,

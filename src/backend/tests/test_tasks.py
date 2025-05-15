@@ -5,6 +5,8 @@ from tests.cases import ApiTestCase
 from tests.framework import ApiTest
 from tools.enums import Intensity
 
+# pytype: disable=wrong-arg-types
+
 task1 = {
     "target_id": 1,
     "configuration_id": 1,

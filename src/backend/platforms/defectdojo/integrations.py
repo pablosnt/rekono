@@ -1,9 +1,11 @@
 from datetime import timedelta
 from pathlib import Path as PathFile
-from typing import Any, Callable, Optional
+from typing import Any, Callable
 
 import requests
 from django.utils import timezone
+from requests.exceptions import HTTPError
+
 from executions.models import Execution
 from findings.enums import PathType, Severity
 from findings.framework.models import Finding
@@ -14,7 +16,6 @@ from platforms.defectdojo.models import (
     DefectDojoSync,
     DefectDojoTargetSync,
 )
-from requests.exceptions import HTTPError
 from targets.models import Target
 
 
@@ -31,7 +32,14 @@ class DefectDojo(BaseIntegration):
             Severity.CRITICAL: "S5",
         }
 
-    def _request(self, method: Callable, url: str, json: bool = True, **kwargs: Any) -> Any:
+    def _request(
+        self,
+        method: Callable,
+        url: str,
+        json: bool = True,
+        trigger_exception: bool = True,
+        **kwargs: Any,
+    ) -> Any:
         return super()._request(
             method,
             f"{self.settings.server}/api/v2{url}",
@@ -125,7 +133,7 @@ class DefectDojo(BaseIntegration):
             },
         )
 
-    def _create_endpoint(self, product: int, endpoint: Path, target: Target) -> Optional[dict[str, Any]]:
+    def _create_endpoint(self, product: int, endpoint: Path, target: Target) -> dict[str, Any] | None:
         try:
             return self._request(
                 self.session.post,
@@ -161,7 +169,7 @@ class DefectDojo(BaseIntegration):
                 files={"file": report},
             )
 
-    def _process_findings(self, execution: Execution, findings: list[Finding]) -> None:
+    def process_findings(self, execution: Execution, findings: list[Finding]) -> None:
         target_sync = DefectDojoTargetSync.objects.filter(target=execution.task.target)
         if target_sync.exists():
             sync = target_sync.first()

@@ -1,7 +1,8 @@
 from typing import Any
 
-from alerts.models import Alert
 from django.forms.models import model_to_dict
+
+from alerts.models import Alert
 from executions.models import Execution
 from findings.framework.models import Finding
 from framework.platforms import BaseNotification
@@ -99,5 +100,7 @@ class Telegram(BaseNotification, BaseTelegram):
     def report_created(self, report: Any) -> None:
         self._notify_if_enabled(
             [report.user],
+            # pytype: disable=attribute-error
             f"{report.format.upper()} report with ID {report.id} from {f'project {report.project.name}' if report.project else (f'target {report.target.target}' if report.target else f'task {report.task.id}')} has been created and it's available to download it [here]({CONFIG.frontend_url}/#/projects/{report.get_project().id}/reports)",
+            # pytype: enable=attribute-error
         )

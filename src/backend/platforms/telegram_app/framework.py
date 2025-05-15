@@ -1,12 +1,13 @@
 import asyncio
 import logging
-from typing import Any, Optional
+from typing import Any
 
-from platforms.telegram_app.models import TelegramChat, TelegramSettings
 from telegram.constants import ParseMode
 from telegram.error import Forbidden, InvalidToken, NetworkError
 from telegram.ext import Application
 from telegram.helpers import escape_markdown
+
+from platforms.telegram_app.models import TelegramChat, TelegramSettings
 
 logger = logging.getLogger()
 
@@ -17,7 +18,7 @@ class BaseTelegram:
         self.app = self.initialize()
         self.date_format = "%Y-%m-%d %H:%M:%S"
 
-    def initialize(self) -> Optional[Application]:
+    def initialize(self) -> Application | None:
         self.app = self._get_app()
         if self.app and self.app.bot:
             try:
@@ -29,7 +30,7 @@ class BaseTelegram:
     def get_bot_name(self) -> str | None:
         return self.app.bot.username if self.app and self.app.bot else None
 
-    def _get_app(self) -> Optional[Application]:
+    def _get_app(self) -> Application | None:
         if self.settings and self.settings.secret:
             try:
                 return Application.builder().token(self.settings.secret).post_init(self._post_init).build()

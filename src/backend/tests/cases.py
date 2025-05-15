@@ -1,13 +1,14 @@
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Optional, Type
+from typing import Any, Type
 
-from authentications.models import Authentication
 from django.db import transaction
 from django.test import TestCase
-from executions.models import Execution
 from rest_framework.test import APIClient
+
+from authentications.models import Authentication
+from executions.models import Execution
 from tools.parsers.base import BaseParser
 
 
@@ -23,8 +24,8 @@ class ApiTestCase(RekonoTestCase):
     executors: list[str]
     method: str
     status_code: int
-    data: Optional[dict[str, Any]] = None
-    expected: Optional[dict[str, Any]] = None
+    data: dict[str, Any] | None = None
+    expected: dict[str, Any] | None = None
     endpoint: str = "{endpoint}"
     format: str = "json"
 
@@ -67,7 +68,11 @@ class ApiTestCase(RekonoTestCase):
                     data=self.data,
                     format=self.format,
                 )
-                self.tc.assertEqual(self.status_code, response.status_code)
+                try:
+                    self.tc.assertEqual(self.status_code, response.status_code)
+                except Exception as ex:
+                    input(response.content)
+                    raise ex
                 if self.expected is not None:
                     content = json.loads((response.content or "{}".encode()).decode())
                     if isinstance(self.expected, dict):
@@ -84,7 +89,7 @@ class ApiTestCase(RekonoTestCase):
 @dataclass
 class ToolTestCase(RekonoTestCase):
     report: str
-    expected: Optional[list[dict[str, Any]]] = None
+    expected: list[dict[str, Any]] | None = None
 
     def _get_parser(
         self,

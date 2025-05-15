@@ -6,6 +6,7 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+
 from security.authentication.serializers import (
     MfaLoginSerializer,
     SendMfaEmailSerializer,
@@ -14,7 +15,7 @@ from security.authorization.permissions import IsNotAuthenticated
 
 
 class LoginView(TokenObtainPairView):
-    permission_classes = [IsNotAuthenticated]  # type: ignore
+    permission_classes = [IsNotAuthenticated]
     throttle_scope = "login"
 
 
@@ -24,7 +25,7 @@ class MfaLoginView(LoginView):
 
 
 class SendEmailMfaView(GenericAPIView):
-    permission_classes = []  # type: ignore
+    permission_classes = []
     throttle_scope = "mfa"
 
     @extend_schema(request=SendMfaEmailSerializer, responses={204: None})

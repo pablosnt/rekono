@@ -1,5 +1,6 @@
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+
 from framework.models import BaseEncrypted, BaseModel
 from projects.models import Project
 from security.validators.input_validator import Regex, Validator
@@ -62,12 +63,10 @@ class DefectDojoSync(BaseModel):
         null=True,
     )
 
+    project_field = "project"
+
     def __str__(self) -> str:
         return f"{self.project.__str__()} - {self.product_type_id} - {self.product_id}{f' - {self.engagement_id}' if self.engagement_id else ''}"
-
-    @classmethod
-    def get_project_field(cls) -> str:
-        return "project"
 
 
 class DefectDojoTargetSync(BaseModel):
@@ -75,9 +74,7 @@ class DefectDojoTargetSync(BaseModel):
     target = models.OneToOneField(Target, related_name="defectdojo_sync", on_delete=models.CASCADE)
     engagement_id = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(999999999)])
 
+    project_field = "defectdojo_sync__project"
+
     def __str__(self) -> str:
         return f"{self.defectdojo_sync.__str__()} - {self.target.target} - {self.engagement_id}"
-
-    @classmethod
-    def get_project_field(cls) -> str:
-        return "defectdojo_sync__project"  # pragma: no cover

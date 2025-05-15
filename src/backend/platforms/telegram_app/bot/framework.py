@@ -2,12 +2,13 @@ import logging
 from typing import Any
 
 from asgiref.sync import sync_to_async
-from platforms.telegram_app.bot.enums import Context
-from platforms.telegram_app.framework import BaseTelegram
-from platforms.telegram_app.models import TelegramChat
 from telegram import Update
 from telegram.constants import ParseMode
 from telegram.ext import CallbackContext
+
+from platforms.telegram_app.bot.enums import Context
+from platforms.telegram_app.framework import BaseTelegram
+from platforms.telegram_app.models import TelegramChat
 
 logger = logging.getLogger()
 
@@ -21,7 +22,7 @@ class BaseTelegramBot(BaseTelegram):
     def get_name(self) -> str:
         return self.__class__.__name__.lower()
 
-    async def _execute_command(self, update: Update, context: CallbackContext) -> None:
+    async def _execute_command(self, update: Update, context: CallbackContext) -> int | None:
         if not self._is_valid_update(update):
             raise Exception("Invalid update")
         if not self.allow_readers:
@@ -34,20 +35,20 @@ class BaseTelegramBot(BaseTelegram):
 
     async def _reply(self, update: Update, message: str, reply_markup: Any = None) -> None:
         if self._is_valid_update(update):
-            await update.effective_message.reply_text(  # type: ignore
+            await update.effective_message.reply_text(
                 message, reply_markup=reply_markup, parse_mode=ParseMode.MARKDOWN_V2
             )
 
-    def _get_context_value(self, context: CallbackContext, key: str) -> Any:
-        return (context.chat_data or {}).get(key)
+    def _get_context_value(self, context: CallbackContext, key: Context) -> Any:
+        return (context.chat_data or {}).get(key.value)
 
-    def _add_context_value(self, context: CallbackContext, key: str, value: Any) -> None:
+    def _add_context_value(self, context: CallbackContext, key: Context, value: Any) -> None:
         if context.chat_data:
-            context.chat_data[key] = value
+            context.chat_data[key.value] = value
 
-    def _remove_context_value(self, context: CallbackContext, key: str) -> None:
-        if context.chat_data and key in context.chat_data:
-            context.chat_data.pop(key)
+    def _remove_context_value(self, context: CallbackContext, key: Context) -> None:
+        if context.chat_data and key.value in context.chat_data:
+            context.chat_data.pop(key.value)
 
     def _remove_all_context_values(self, context: CallbackContext) -> None:
         for key in Context:
@@ -62,17 +63,13 @@ class BaseTelegramBot(BaseTelegram):
     def _is_auditor_async(self, telegram_chat: TelegramChat) -> bool:
         return telegram_chat.is_auditor()
 
-    async def _get_active_telegram_chat(self, update: Update, require_auditor: bool = True) -> TelegramChat:
+    async def _get_active_telegram_chat(self, update: Update, require_auditor: bool = True) -> TelegramChat | None:
         if self.chat:
             return self.chat
         if self._is_valid_update(update):
-            self.chat = await self._get_active_telegram_chat_async(
-                update.effective_chat.id  # type: ignore
-            )
+            self.chat = await self._get_active_telegram_chat_async(update.effective_chat.id)
             if not self.chat:
-                logger.error(
-                    f"[Security] Unauthenticated Telegram bot request from chat {update.effective_chat.id}"  # type: ignore
-                )
+                logger.error(f"[Security] Unauthenticated Telegram bot request from chat {update.effective_chat.id}")
                 await self._reply(
                     update,
                     "You have to link this chat to your Rekono account before using the Telegram Bot\. Use the command /start",

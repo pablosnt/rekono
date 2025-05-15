@@ -1,13 +1,14 @@
 # pytype: disable=attribute-error
 import logging
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any
 
-from rekono.settings import CONFIG
 from rest_framework import status
 from rest_framework.renderers import JSONRenderer
 from rest_framework.request import HttpRequest
 from rest_framework.response import Response
+
+from rekono.settings import CONFIG
 
 logger = logging.getLogger()
 
@@ -61,7 +62,7 @@ class SecurityMiddleware:
 
     get_response: Any
 
-    def _get_forwarded_address(self, request: HttpRequest) -> Optional[str]:
+    def _get_forwarded_address(self, request: HttpRequest) -> str | None:
         x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
         if x_forwarded_for and CONFIG.trusted_proxy:
             return x_forwarded_for.split(",", 1)[0]

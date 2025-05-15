@@ -1,10 +1,8 @@
-from typing import Any, Optional
+from typing import Any
 
 from django.core.exceptions import PermissionDenied
 from django.db.models import Count, QuerySet
 from drf_spectacular.utils import extend_schema
-from framework.models import BaseModel
-from projects.models import Project
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
@@ -12,6 +10,9 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.serializers import Serializer
 from rest_framework.viewsets import ModelViewSet
+
+from framework.models import BaseModel
+from projects.models import Project
 from security.authorization.permissions import IsAuditor
 
 
@@ -21,15 +22,16 @@ class BaseViewSet(ModelViewSet):
     http_method_names = ["get", "post", "put", "delete"]
     owner_field = "owner"
 
-    def _get_model(self) -> BaseModel:
+    def _get_model(self) -> type[BaseModel]:
         for cls in [
             self.get_serializer_class(),
             self.filterset_class if hasattr(self, "filterset_class") else None,
         ]:
             if cls and hasattr(cls, "Meta") and hasattr(cls.Meta, "model"):
                 return cls.Meta.model
+        return BaseModel
 
-    def _get_project_from_data(self, project_field: str, data: dict[str, Any]) -> Optional[Project]:
+    def _get_project_from_data(self, project_field: str, data: dict[str, Any]) -> Project | None:
         fields = project_field.split("__")
         if not fields:
             return None
@@ -39,18 +41,17 @@ class BaseViewSet(ModelViewSet):
                 data = getattr(data, field)
             else:  # pragma: no cover
                 return None
-        return data
+        return data if isinstance(data, Project) else None
 
     def get_queryset(self) -> QuerySet:
         model = self._get_model()
         members_field = None
-        if model:
-            if model == Project:
-                members_field = "members"
-            else:
-                project_field = model.get_project_field()
-                if project_field:
-                    members_field = f"{project_field}__members"
+        if model == Project:
+            members_field = "members"
+        else:
+            project_field = model.project_field
+            if project_field:
+                members_field = f"{project_field}__members"
         if members_field:
             if self.request.user.id:
                 project_filter = {members_field: self.request.user}
@@ -70,10 +71,9 @@ class BaseViewSet(ModelViewSet):
 
     def perform_create(self, serializer: Serializer) -> None:
         model = self._get_model()
-        if model:
-            project = self._get_project_from_data(model.get_project_field() or "", serializer.validated_data)
-            if project and self.request.user not in project.members.all():
-                raise PermissionDenied()
+        project = self._get_project_from_data(model.project_field, serializer.validated_data)
+        if project and self.request.user not in project.members.all():
+            raise PermissionDenied()
         if self.owner_field and model and hasattr(model, self.owner_field):
             parameters = {self.owner_field: self.request.user}
             serializer.save(**parameters)

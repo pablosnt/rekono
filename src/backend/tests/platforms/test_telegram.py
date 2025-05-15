@@ -6,6 +6,8 @@ from tests.cases import ApiTestCase
 from tests.framework import ApiTest
 from users.models import User
 
+# pytype: disable=wrong-arg-types
+
 token = {"token": "any_valid_telegram_token"}
 invalid_token = {"token": "invalid;token"}
 expected = {"id": 1, "bot": None, "is_available": False}

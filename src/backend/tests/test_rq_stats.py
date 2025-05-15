@@ -1,6 +1,7 @@
 from tests.cases import ApiTestCase
 from tests.framework import ApiTest
 
+# pytype: disable=wrong-arg-types
 # TODO: Tests for all /api/stats/ endpoints
 
 

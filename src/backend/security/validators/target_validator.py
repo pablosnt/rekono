@@ -5,6 +5,7 @@ from typing import Any
 
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
+
 from target_denylist.models import TargetDenylist
 
 
@@ -47,7 +48,7 @@ class TargetValidator(RegexValidator):
                 (ipaddress.IPv6Address, ipaddress.IPv6Network),
             ]:
                 try:
-                    if address_class(value) in network_class(denied_value):  # type: ignore
+                    if address_class(value) in network_class(denied_value):
                         raise ValidationError(
                             "Target belongs to a network that is disallowed by policy",
                             code="target",

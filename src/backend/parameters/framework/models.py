@@ -5,13 +5,10 @@ from projects.models import Project
 
 
 class InputParameter(BaseInput):
+    project_field = "tasks__target__project"
+
     class Meta:
         abstract = True
 
     def get_project(self) -> list[Project]:
         return [task.get_project() for task in self.tasks.all()]
-
-    # TODO: Move to an attribute?
-    @classmethod
-    def get_project_field(cls) -> str:
-        return "tasks__target__project"

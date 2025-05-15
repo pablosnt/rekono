@@ -7,7 +7,7 @@ from tools.parsers.base import BaseParser
 
 class Cmseek(BaseParser):
     def _parse_report(self) -> None:
-        data = self._load_report_as_json()
+        data = self._load_report_as_json_dict()
         if not data.get("cms_name") or not data.get("cms_id"):
             return
         version = data.get(f"{data.get('cms_id')}_version") or data.get(f"{data.get('cms_name')}_version")
@@ -17,7 +17,7 @@ class Cmseek(BaseParser):
             base_url = base_url.replace(parser.path, "/")
         cms = self.create_finding(
             Technology,
-            name=data.get("cms_name").strip(),
+            name=data.get("cms_name", "").strip(),
             version=version.strip() if version is not None else None,
             description="CMS",
             reference=(data.get("cms_url", "").strip() if data.get("cms_url") else data.get("cms_url")),

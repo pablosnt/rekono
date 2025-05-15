@@ -1,6 +1,5 @@
-from typing import Any
-
 from django.db import models
+
 from framework.enums import InputKeyword
 from framework.models import BaseInput
 from parameters.framework.models import InputParameter
@@ -24,21 +23,7 @@ class InputTechnology(InputParameter):
     )
 
     filters = [BaseInput.Filter(type=str, field="name", contains=True)]
-
-    # TODO: Move to just a mapping?
-    def parse(self, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
-        """Get useful information from this instance to be used in tool execution as argument.
-
-        Args:
-            accumulated (dict[str, Any], optional): Information from other instances of the same type. Defaults to {}.
-
-        Returns:
-            dict[str, Any]: Useful information for tool executions, including accumulated if setted
-        """
-        return {
-            InputKeyword.TECHNOLOGY.name.lower(): self.name,
-            InputKeyword.VERSION.name.lower(): self.version or "",
-        }
+    parse_mapping = {InputKeyword.TECHNOLOGY: "name", InputKeyword.VERSION: "version"}
 
     def __str__(self) -> str:
         """Instance representation in text format.
@@ -61,17 +46,7 @@ class InputVulnerability(InputParameter):
         BaseInput.Filter(type=str, field="cve", processor=lambda v: "cve"),
         BaseInput.Filter(type=str, field="cve", processor=lambda v: v.lower()),
     ]
-
-    def parse(self, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
-        """Get useful information from this instance to be used in tool execution as argument.
-
-        Args:
-            accumulated (dict[str, Any], optional): Information from other instances of the same type. Defaults to {}.
-
-        Returns:
-            dict[str, Any]: Useful information for tool executions, including accumulated if setted
-        """
-        return {InputKeyword.CVE.name.lower(): self.cve}
+    parse_mapping = {InputKeyword.CVE: "cve"}
 
     def __str__(self) -> str:
         """Instance representation in text format.

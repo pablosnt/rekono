@@ -10,6 +10,8 @@ target = {**data, "target": 1}
 user = {**data, "user": 4}
 invalid_data = {**data, "key": "User;Agent", "value": "Fire;fox"}
 
+# pytype: disable=wrong-arg-types
+
 
 class HttpHeaderTest(ApiTest):
     endpoint = "/api/http-headers/"

@@ -1,6 +1,7 @@
-from alerts.enums import AlertItem, AlertMode
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+
+from alerts.enums import AlertItem, AlertMode
 from executions.models import Execution
 from findings.enums import PortStatus, TriageStatus
 from findings.models import (
@@ -34,6 +35,8 @@ class Alert(BaseModel):
     subscribe_all_members = models.BooleanField(default=False)
     owner = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True)
     subscribers = models.ManyToManyField(AUTH_USER_MODEL, related_name="alerts", blank=True)
+
+    project_field = "project"
 
     class Meta:
         constraints = [
@@ -92,10 +95,6 @@ class Alert(BaseModel):
             values.append(self.value)
         return " - ".join(values)
 
-    @classmethod
-    def get_project_field(cls) -> str:
-        return "project"
-
     def must_be_triggered(self, execution: Execution, finding: Finding) -> bool:
         data = self.mapping[self.item]
         if (
@@ -109,9 +108,9 @@ class Alert(BaseModel):
         if self.mode == AlertMode.NEW.value:
             return not finding.executions.exclude(id=execution.id).exists()
         elif self.mode == AlertMode.FILTER.value:
-            return getattr(finding, data.get(AlertMode.FILTER.value, "").lower()) == self.value.lower()
+            return getattr(finding, str(data.get(AlertMode.FILTER.value, "")).lower()) == self.value.lower()
         else:
-            return getattr(finding, data.get(AlertMode.MONITOR.value, "").lower()) is True
+            return getattr(finding, str(data.get(AlertMode.MONITOR.value, "")).lower()) is True
 
 
 class MonitorSettings(BaseModel):

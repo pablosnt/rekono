@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any
 
 from findings.enums import Severity
 from findings.models import Finding, Technology, Vulnerability
@@ -11,9 +11,9 @@ class Sslyze(BaseParser):
         "tls": ["1.0", "1.1", "1.2", "1.3"],
     }
 
-    generic_tech: Optional[Technology] = None
+    generic_tech: Technology | None = None
 
-    def create_finding(self, finding_type: Finding, **fields: Any) -> Finding:
+    def create_finding(self, finding_type: type[Finding], **fields: Any) -> Finding:
         if finding_type == Vulnerability and not fields.get("technology"):
             if not self.generic_tech:
                 self.generic_tech = super().create_finding(Technology, name="Generic TLS")
@@ -21,7 +21,7 @@ class Sslyze(BaseParser):
         return super().create_finding(finding_type, **fields)
 
     def _parse_report(self) -> None:
-        data = self._load_report_as_json()
+        data = self._load_report_as_json_dict()
         for item in data.get("server_scan_results", []) or []:
             result = item.get("scan_commands_results", item["scan_result"])
             if not result:

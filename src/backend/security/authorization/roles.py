@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models.enums import Choices
 
 
 class Role(models.TextChoices):
@@ -7,6 +8,9 @@ class Role(models.TextChoices):
     ADMIN = "Admin"
     AUDITOR = "Auditor"
     READER = "Reader"
+
+
+Role: type[Choices] = Role  # https://github.com/google/pytype/issues/1048
 
 
 ROLES = {

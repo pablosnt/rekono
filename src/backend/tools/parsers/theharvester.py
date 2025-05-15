@@ -20,7 +20,7 @@ class Theharvester(BaseParser):
     }
 
     def _parse_report(self) -> None:
-        data = self._load_report_as_json()
+        data = self._load_report_as_json_dict()
         for the_harvester_type, items in data.items():
             for item in items:
                 self.create_finding(OSINT, data=item, data_type=self.data_types[the_harvester_type])

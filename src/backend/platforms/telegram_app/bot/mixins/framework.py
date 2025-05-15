@@ -1,40 +1,47 @@
 import logging
-from typing import Any, Callable, Optional
+from typing import Any, Callable
 
 from asgiref.sync import sync_to_async
 from django.db import IntegrityError
 from django.db.models import QuerySet
+from rest_framework.serializers import Serializer
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram.ext import CallbackContext, ConversationHandler
+
 from platforms.telegram_app.bot.commands import Cancel
 from platforms.telegram_app.bot.enums import Context
 from platforms.telegram_app.bot.framework import BaseTelegramBot
 from platforms.telegram_app.models import TelegramChat
-from rest_framework.serializers import Serializer
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
-from telegram.ext import CallbackContext, ConversationHandler
 
 logger = logging.getLogger()
 
 
 class BaseMixin(BaseTelegramBot):
+    @property
+    def _mixin_states(self) -> list:
+        return [] if not hasattr(self, "_states_methods") else getattr(self, "_states_methods")
+
     def _get_current_state(self, method: Callable) -> int:
-        if not hasattr(self, "_states_methods"):
-            return ConversationHandler.END
-        return self._states_methods.index(method)
+        return self._mixin_states.index(method) if len(self._mixin_states) > 0 else ConversationHandler.END
 
     def _get_next_state(self, method: Callable) -> int:
         current_state = self._get_current_state(method)
-        return ConversationHandler.END if current_state == len(self._states_methods) - 1 else current_state + 1
+        return ConversationHandler.END if current_state == len(self._mixin_states) - 1 else current_state + 1
 
     def _get_previous_state(self, method: Callable) -> int:
         current_state = self._get_current_state(method)
         return current_state if current_state == 0 else current_state - 1
 
     async def _go_to_next_state(self, update: Update, context: CallbackContext, next_state: int) -> int:
-        if next_state != ConversationHandler.END and (
-            self._states_methods[next_state].__name__.startswith("_ask_for_")
-            or self._states_methods[next_state].__name__.startswith("_reply")
+        if (
+            next_state != ConversationHandler.END
+            and len(self._mixin_states) > 0
+            and (
+                self._mixin_states[next_state].__name__.startswith("_ask_for_")
+                or self._mixin_states[next_state].__name__.startswith("_reply")
+            )
         ):
-            return await self._states_methods[next_state](update, context)
+            return await self._mixin_states[next_state](update, context)
         return next_state
 
     @sync_to_async
@@ -69,7 +76,7 @@ class BaseMixin(BaseTelegramBot):
         message: str,
         not_found_message: str,
         next_state: int,
-        chat: TelegramChat = None,
+        chat: TelegramChat | None = None,
     ) -> int:
         chat = chat or await self._get_active_telegram_chat(update)
         if not chat or not await self._is_queryset_async(queryset):
@@ -93,7 +100,7 @@ class BaseMixin(BaseTelegramBot):
         options_per_row: int,
         message: str,
         next_state: int,
-        chat: TelegramChat = None,
+        chat: TelegramChat | None = None,
     ) -> int:
         chat = chat or await self._get_active_telegram_chat(update)
         if not chat:
@@ -115,7 +122,7 @@ class BaseMixin(BaseTelegramBot):
         context_key: Context,
         model: Any,
         next_state: int,
-        chat: TelegramChat = None,
+        chat: TelegramChat | None = None,
     ) -> int:
         chat = chat or await self._get_active_telegram_chat(update)
         if chat and update.callback_query and update.callback_query.data:
@@ -134,7 +141,7 @@ class BaseMixin(BaseTelegramBot):
         context_key: Context,
         name: str,
         next_state: int,
-        chat: TelegramChat = None,
+        chat: TelegramChat | None = None,
     ) -> int:
         chat = chat or await self._get_active_telegram_chat(update)
         if chat and update.callback_query and update.callback_query.data:
@@ -165,8 +172,8 @@ class BaseMixin(BaseTelegramBot):
         data: dict[str, Any],
         previous_state: int,
         next_state: int,
-        chat: TelegramChat = None,
-    ) -> tuple[int, Optional[Any]]:
+        chat: TelegramChat | None = None,
+    ) -> tuple[int | None, Any | None]:
         chat = chat or await self._get_active_telegram_chat(update)
         if not chat or not update.effective_message:
             return ConversationHandler.END, None

@@ -4,7 +4,7 @@ import importlib
 import json
 import threading
 import uuid
-from typing import Any, Optional, cast
+from typing import Any, cast
 from xml.etree import ElementTree as ET  # nosec
 
 from django.db.models import Q, QuerySet
@@ -12,6 +12,14 @@ from django.forms.models import model_to_dict
 from django.http import FileResponse
 from django.template.loader import get_template
 from drf_spectacular.utils import OpenApiResponse, extend_schema
+from rest_framework import status
+from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.request import Request
+from rest_framework.response import Response
+from rest_framework.serializers import Serializer
+from xhtml2pdf import pisa
+
 from findings.enums import Severity
 from findings.framework.models import Finding
 from findings.models import (
@@ -32,16 +40,9 @@ from reporting.enums import FindingName, ReportFormat, ReportStatus
 from reporting.filters import ReportFilter
 from reporting.models import Report
 from reporting.serializers import CreateReportSerializer, ReportSerializer
-from rest_framework import status
-from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.request import Request
-from rest_framework.response import Response
-from rest_framework.serializers import Serializer
 from security.authorization.permissions import OwnerPermission, RekonoModelPermission
 from targets.models import Target
 from tasks.models import Task
-from xhtml2pdf import pisa
 
 
 class ReportingViewSet(BaseViewSet):
@@ -63,7 +64,7 @@ class ReportingViewSet(BaseViewSet):
     http_method_names = ["get", "post", "delete"]
     owner_field = "user"
 
-    def _get_project_from_data(self, project_field: str, data: dict[str, Any]) -> Optional[Project]:
+    def _get_project_from_data(self, project_field: str, data: dict[str, Any]) -> Project | None:
         return (
             cast(Task, data.get("task")).target.project
             if data.get("task")
@@ -148,7 +149,7 @@ class ReportingViewSet(BaseViewSet):
             status=status.HTTP_200_OK,
         )
 
-    def _get_findings_to_report(self, serializer: ReportSerializer) -> dict[type[Finding], list[Finding]]:
+    def _get_findings_to_report(self, serializer: ReportSerializer) -> dict[type[Finding], list[dict[str, Any]]]:
         findings = {}
         models = importlib.import_module("findings.models")
         for finding_type in serializer.validated_finding_types:

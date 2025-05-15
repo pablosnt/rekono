@@ -5,6 +5,8 @@ from target_ports.models import TargetPort
 from tests.cases import ApiTestCase
 from tests.framework import ApiTest
 
+# pytype: disable=wrong-arg-types
+
 target_port1 = {"target": 1, "port": 80, "path": "/webapp/"}
 target_port2 = {"target": 1, "port": 22}
 authentication = {

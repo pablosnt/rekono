@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import Any
 
 from django.db import models
+
 from framework.enums import InputKeyword
 from framework.models import BaseInput, BaseLike
 from rekono.settings import AUTH_USER_MODEL
@@ -25,11 +26,10 @@ class Wordlist(BaseInput, BaseLike):
     # Number of entries in the wordlist file
     size = models.IntegerField(blank=True, null=True)
     # User that created the wordlist
-    owner = models.ForeignKey(
-        AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True
-    )
+    owner = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True)
 
     filters = [BaseInput.Filter(type=WordlistType, field="type")]
+    parse_mapping = {InputKeyword.WORDLIST: "path"}
 
     def filter(self, input: Any, target: Target | None = None) -> bool:
         """Check if this instance is valid based on input filter.
@@ -42,23 +42,10 @@ class Wordlist(BaseInput, BaseLike):
         """
         check = Path(self.path).is_file()  # Check if wordlist file exists
         if check and self.checksum:  # If checksum exists
-            check = check and FileHandler().validate_filepath_checksum(
-                self.path, self.checksum
-            )
+            check = check and FileHandler().validate_filepath_checksum(self.path, self.checksum)
         if input.filter:  # If input filter is established
             return super().filter(input, target) and check
         return check
-
-    def parse(self, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
-        """Get useful information from this instance to be used in tool execution as argument.
-
-        Args:
-            accumulated (dict[str, Any], optional): Information from other instances of the same type. Defaults to {}.
-
-        Returns:
-            dict[str, Any]: Useful information for tool executions, including accumulated if setted
-        """
-        return {InputKeyword.WORDLIST.name.lower(): self.path}
 
     def __str__(self) -> str:
         """Instance representation in text format.

@@ -1,4 +1,5 @@
 import logging
+from typing import Any, Callable
 
 from alerts.enums import AlertItem, AlertMode
 from alerts.models import Alert
@@ -15,6 +16,8 @@ logger = logging.getLogger()
 
 
 class CveCrowd(BaseIntegration):
+    finding_types = [Vulnerability]
+
     def __init__(self) -> None:
         self.settings = CveCrowdSettings.objects.first()
         self.url = "https://api.cvecrowd.com/api/v1/cves"
@@ -28,8 +31,15 @@ class CveCrowd(BaseIntegration):
         return False
 
     # Needed to mock the method for unit testing
-    def _request(method, url, json=True, **kwargs):
-        return super()._request(method, url, json, **kwargs)
+    def _request(
+        self,
+        method: Callable,
+        url: str,
+        json: bool = True,
+        trigger_exception: bool = True,
+        **kwargs: Any,
+    ) -> Any:
+        return super()._request(method, url, json, trigger_exception, **kwargs)
 
     def _get_trending_cves(self) -> None:
         if self.integration.enabled and self.settings.secret and len(self.trending_cves) == 0:
@@ -43,16 +53,20 @@ class CveCrowd(BaseIntegration):
             except Exception:  # nosec
                 pass
 
-    def _process_findings(self, execution: Execution, findings: list[Finding]) -> None:
-        if not self.settings.execute_per_execution:
-            return
+    def _process_finding(self, execution: Execution, finding: Vulnerability) -> None:
+        finding.trending = True
+        finding.save(update_fields=["trending"])
+
+    def is_finding_processable(self, finding: Finding) -> bool:
         self._get_trending_cves()
         if not self.trending_cves:
-            return
-        for finding in findings:
-            if isinstance(finding, Vulnerability) and finding.cve is not None and finding.cve in self.trending_cves:
-                finding.trending = True
-                finding.save(update_fields=["trending"])
+            return False
+        return (
+            super().is_finding_processable(finding)
+            and self.settings.execute_per_execution
+            and finding.cve is not None
+            and finding.cve in self.trending_cves
+        )
 
     def monitor(self) -> None:
         self._get_trending_cves()

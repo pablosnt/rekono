@@ -6,6 +6,8 @@ from target_ports.models import TargetPort
 from tests.cases import ApiTestCase
 from tests.framework import ApiTest
 
+# pytype: disable=wrong-arg-types
+
 authentication = {
     "name": "admin",
     "secret": "admin",

@@ -6,6 +6,8 @@ from tests.framework import ApiTest
 from wordlists.enums import WordlistType
 from wordlists.models import Wordlist
 
+# pytype: disable=wrong-arg-types
+
 # Wordlists paths
 data_dir = ApiTest.data_dir / "wordlists"
 endpoints_path = data_dir / "endpoints_wordlist.txt"

@@ -4,6 +4,8 @@ from notes.models import Note
 from tests.cases import ApiTestCase
 from tests.framework import ApiTest
 
+# pytype: disable=wrong-arg-types
+
 private_note = {
     "project": 1,
     "target": None,

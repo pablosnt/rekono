@@ -1,4 +1,5 @@
 from django.db import models
+
 from executions.enums import Status
 from framework.models import BaseModel
 from tasks.models import Task
@@ -25,6 +26,8 @@ class Execution(BaseModel):
     hash = models.TextField(max_length=128, blank=True, null=True)
     defectdojo_test_id = models.IntegerField(blank=True, null=True)
 
+    project_field = "task__target__project"
+
     def __str__(self) -> str:
         """Instance representation in text format.
 
@@ -32,7 +35,3 @@ class Execution(BaseModel):
             str: String value that identifies this instance
         """
         return f"{self.task.__str__()}{f' - {self.configuration.__str__()}' if self.task.process else ''}"
-
-    @classmethod
-    def get_project_field(cls) -> str:
-        return "task__target__project"
