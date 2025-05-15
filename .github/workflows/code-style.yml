@@ -5,7 +5,7 @@ on:
 
 jobs:
   backend:
-    name: Backend Style
+    name: Backend
     runs-on: ubuntu-latest
     steps:
       - uses: dorny/paths-filter@3c49e64ca26115121162fb767bc6af9e8d059f1a
@@ -38,18 +38,18 @@ jobs:
         working-directory: src/backend
         run: uvx ruff format --check
       
-      - name: PyType
-        if: ${{ (steps.changes.outputs.backend == 'true' || github.event_name != 'pull_request') && !cancelled() }}
-        working-directory: src/backend
-        run: uvx pytype --disable "import-error,pyi-error,invalid-annotation" --keep-going .
-      
       - name: Flake8
         if: ${{ (steps.changes.outputs.backend == 'true' || github.event_name != 'pull_request') && !cancelled() }}
         working-directory: src/backend
         run: uvx flake8 .
+      
+      - name: PyType
+        if: ${{ (steps.changes.outputs.backend == 'true' || github.event_name != 'pull_request') && !cancelled() }}
+        working-directory: src/backend
+        run: uvx pytype --disable "import-error,pyi-error,invalid-annotation" --keep-going .
 
   frontend:
-    name: Frontend Style
+    name: Frontend
     runs-on: ubuntu-latest
     steps:
       - uses: dorny/paths-filter@3c49e64ca26115121162fb767bc6af9e8d059f1a

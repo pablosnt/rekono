@@ -169,7 +169,7 @@ class DefectDojo(BaseIntegration):
                 files={"file": report},
             )
 
-    def _process_findings(self, execution: Execution, findings: list[Finding]) -> None:
+    def process_findings(self, execution: Execution, findings: list[Finding]) -> None:
         target_sync = DefectDojoTargetSync.objects.filter(target=execution.task.target)
         if target_sync.exists():
             sync = target_sync.first()
