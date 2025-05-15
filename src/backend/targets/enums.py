@@ -1,6 +1,5 @@
-# from enum import Enum  # https://github.com/google/pytype/issues/1048
-
 from django.db import models
+from django.db.models.enums import Choices
 
 
 class TargetType(models.TextChoices):
@@ -11,3 +10,6 @@ class TargetType(models.TextChoices):
     NETWORK = "Network"
     IP_RANGE = "IP range"
     DOMAIN = "Domain"
+
+
+TargetType: type[Choices] = TargetType  # https://github.com/google/pytype/issues/1048

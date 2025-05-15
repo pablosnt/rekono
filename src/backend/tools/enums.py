@@ -1,6 +1,5 @@
-# from enum import Enum  # https://github.com/google/pytype/issues/1048
-
 from django.db import models
+from django.db.models.enums import Choices
 
 # Create your enums here.
 
@@ -19,3 +18,8 @@ class Stage(models.IntegerChoices):
     VULNERABILITIES = 3
     SERVICES = 4
     EXPLOITATION = 5
+
+
+# https://github.com/google/pytype/issues/1048
+Intensity: type[Choices] = Intensity
+Stage: type[Stage] = Stage

@@ -1,6 +1,5 @@
-# from enum import Enum  # https://github.com/google/pytype/issues/1048
-
 from django.db import models
+from django.db.models.enums import Choices
 
 
 class WordlistType(models.TextChoices):
@@ -8,3 +7,6 @@ class WordlistType(models.TextChoices):
 
     ENDPOINT = "Endpoint"
     SUBDOMAIN = "Subdomain"
+
+
+WordlistType: type[Choices] = WordlistType  # https://github.com/google/pytype/issues/1048

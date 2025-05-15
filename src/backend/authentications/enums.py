@@ -1,6 +1,5 @@
-# from enum import Enum  # https://github.com/google/pytype/issues/1048
-
 from django.db import models
+from django.db.models.enums import Choices
 
 
 class AuthenticationType(models.TextChoices):
@@ -13,3 +12,6 @@ class AuthenticationType(models.TextChoices):
     JWT = "JWT"
     NTLM = "NTLM"
     TOKEN = "Token"
+
+
+AuthenticationType: type[Choices] = AuthenticationType  # https://github.com/google/pytype/issues/1048

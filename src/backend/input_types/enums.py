@@ -1,6 +1,5 @@
-# from enum import Enum  # https://github.com/google/pytype/issues/1048
-
 from django.db.models import TextChoices
+from django.db.models.enums import Choices
 
 
 class InputTypeName(TextChoices):
@@ -15,3 +14,6 @@ class InputTypeName(TextChoices):
     WORDLIST = "Wordlist"
     AUTHENTICATION = "Authentication"
     HTTP_HEADER = "Http Header"
+
+
+InputTypeName: type[Choices] = InputTypeName  # https://github.com/google/pytype/issues/1048

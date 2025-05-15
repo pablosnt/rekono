@@ -1,6 +1,5 @@
-# from enum import Enum  # https://github.com/google/pytype/issues/1048
-
 from django.db.models import TextChoices
+from django.db.models.enums import Choices
 
 
 class FindingName(TextChoices):
@@ -24,3 +23,9 @@ class ReportStatus(TextChoices):
     READY = "Ready"
     PENDING = "Pending"
     ERROR = "Error"
+
+
+# https://github.com/google/pytype/issues/1048
+FindingName: type[Choices] = FindingName
+ReportFormat: type[Choices] = ReportFormat
+ReportStatus: type[Choices] = ReportStatus

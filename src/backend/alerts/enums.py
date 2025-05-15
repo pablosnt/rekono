@@ -1,6 +1,5 @@
-# from enum import Enum  # https://github.com/google/pytype/issues/1048
-
 from django.db.models import TextChoices
+from django.db.models.enums import Choices
 
 
 class AlertItem(TextChoices):
@@ -18,3 +17,8 @@ class AlertMode(TextChoices):
     NEW = "New"
     FILTER = "Filter"
     MONITOR = "Monitor"
+
+
+# https://github.com/google/pytype/issues/1048
+AlertItem: type[Choices] = AlertItem
+AlertMode: type[Choices] = AlertMode

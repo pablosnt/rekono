@@ -1,7 +1,7 @@
-# from enum import Enum  # https://github.com/google/pytype/issues/1048
 from typing import Any
 
 from django.db import models
+from django.db.models.enums import Choices
 
 
 class Severity(models.IntegerChoices):
@@ -59,3 +59,12 @@ class TriageStatus(models.TextChoices):
     TRUE_POSITIVE = "True Positive"
     WONT_FIX = "Won't Fix"
     UNTRIAGED = "Untriaged"
+
+
+# https://github.com/google/pytype/issues/1048
+Severity: type[Choices] = Severity
+OSINTDataType: type[Choices] = OSINTDataType
+HostOS: type[Choices] = HostOS
+PortStatus: type[Choices] = PortStatus
+Protocol: type[Choices] = Protocol
+TriageStatus: type[Choices] = TriageStatus
