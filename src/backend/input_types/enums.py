@@ -1,9 +1,9 @@
-from enum import Enum  # https://github.com/google/pytype/issues/1048
+# from enum import Enum  # https://github.com/google/pytype/issues/1048
 
 from django.db.models import TextChoices
 
 
-class InputTypeName(TextChoices, Enum):
+class InputTypeName(TextChoices):
     OSINT = "OSINT"
     HOST = "Host"
     PORT = "Port"

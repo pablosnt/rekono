@@ -1,10 +1,10 @@
-from enum import Enum  # https://github.com/google/pytype/issues/1048
+# from enum import Enum  # https://github.com/google/pytype/issues/1048
 from typing import Any
 
 from django.db import models
 
 
-class Severity(models.IntegerChoices, Enum):
+class Severity(models.IntegerChoices):
     INFO = 1
     LOW = 2
     MEDIUM = 3
@@ -15,7 +15,7 @@ class Severity(models.IntegerChoices, Enum):
         return self.name.capitalize()
 
 
-class OSINTDataType(models.TextChoices, Enum):
+class OSINTDataType(models.TextChoices):
     IP = "IP"
     DOMAIN = "Domain"
     VHOST = "VHOST"
@@ -26,7 +26,7 @@ class OSINTDataType(models.TextChoices, Enum):
     PASSWORD = "Password"
 
 
-class HostOS(models.TextChoices, Enum):
+class HostOS(models.TextChoices):
     LINUX = "Linux"
     WINDOWS = "Windows"
     MACOS = "MacOS"
@@ -37,24 +37,24 @@ class HostOS(models.TextChoices, Enum):
     OTHER = "Other"
 
 
-class PortStatus(models.TextChoices, Enum):
+class PortStatus(models.TextChoices):
     OPEN = "Open"
     OPEN_FILTERED = "Open - Filtered"
     FILTERED = "Filtered"
     CLOSED = "Closed"
 
 
-class Protocol(models.TextChoices, Enum):
+class Protocol(models.TextChoices):
     UDP = "UDP"
     TCP = "TCP"
 
 
-class PathType(models.TextChoices, Enum):
+class PathType(models.TextChoices):
     ENDPOINT = "ENDPOINT"
     SHARE = "SHARE"
 
 
-class TriageStatus(models.TextChoices, Enum):
+class TriageStatus(models.TextChoices):
     FALSE_POSITIVE = "False Positive"
     TRUE_POSITIVE = "True Positive"
     WONT_FIX = "Won't Fix"

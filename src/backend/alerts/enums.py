@@ -1,9 +1,9 @@
-from enum import Enum  # https://github.com/google/pytype/issues/1048
+# from enum import Enum  # https://github.com/google/pytype/issues/1048
 
 from django.db.models import TextChoices
 
 
-class AlertItem(TextChoices, Enum):
+class AlertItem(TextChoices):
     OSINT = "OSINT"
     HOST = "Host"
     OPEN_PORT = "Open Port"
@@ -14,7 +14,7 @@ class AlertItem(TextChoices, Enum):
     CVE = "CVE"
 
 
-class AlertMode(TextChoices, Enum):
+class AlertMode(TextChoices):
     NEW = "New"
     FILTER = "Filter"
     MONITOR = "Monitor"

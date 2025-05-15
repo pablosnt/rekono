@@ -1,9 +1,9 @@
-from enum import Enum  # https://github.com/google/pytype/issues/1048
+# from enum import Enum  # https://github.com/google/pytype/issues/1048
 
 from django.db.models import TextChoices
 
 
-class FindingName(TextChoices, Enum):
+class FindingName(TextChoices):
     OSINT = "OSINT"
     HOST = "Host"
     PORT = "Port"
@@ -14,13 +14,13 @@ class FindingName(TextChoices, Enum):
     EXPLOIT = "Exploit"
 
 
-class ReportFormat(TextChoices, Enum):
+class ReportFormat(TextChoices):
     JSON = "json"
     XML = "xml"
     PDF = "pdf"
 
 
-class ReportStatus(TextChoices, Enum):
+class ReportStatus(TextChoices):
     READY = "Ready"
     PENDING = "Pending"
     ERROR = "Error"
