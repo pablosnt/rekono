@@ -43,7 +43,7 @@ class TargetPort(BaseInput):
     def parse(self, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
         output = super().parse(accumulated)
         output[InputKeyword.PORTS_COMMAS.name.lower()] = ",".join(
-            [str(p) for p in output.get(InputKeyword.PORTS_COMMAS.name.lower()) or []]
+            [str(p) for p in output.get(InputKeyword.PORTS.name.lower()) or []]
         )
         return output
 
