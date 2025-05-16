@@ -11,7 +11,7 @@ on:
     types: [published]
 
 env:
-  VERSION: ${{ github.event_name == 'release' && github.event.release.name || "dev" }}
+  VERSION: ${{ github.event_name == 'release' && github.event.release.name || 'dev' }}
   FAIL: ${{ github.event_name == 'release' && 0 || 1 }}
 
 jobs:
