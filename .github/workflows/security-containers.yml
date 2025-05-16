@@ -24,7 +24,7 @@ jobs:
         include:
           - name: Backend
             dockerfile: docker/Dockerfile.backend
-            tag: ${{ secrets.DOCKER_USER }}/rekono-backend
+            image: ${{ secrets.DOCKER_USER }}/rekono-backend
           # TODO: Evaluate dependencies between the images, if any
           # - name: Frontend
           #   dockerfile: docker/Dockerfile.frontend
@@ -46,19 +46,19 @@ jobs:
           fetch-depth: 0
       
       - name: Build image
-        run: docker build --build-arg REKONO_VERSION=$VERSION --file ${{ matrix.dockerfile }} --tag ${{ matrix.tag }} .
+        run: docker build --build-arg REKONO_VERSION=$VERSION --file ${{ matrix.dockerfile }} --tag ${{ matrix.image }} .
 
       - name: Trivy
         uses: aquasecurity/trivy-action@91713af97dc80187565512baba96e4364e983601
         with:
-          image-ref: ${{ matrix.tag }}
+          image-ref: ${{ matrix.image }}
           format: table
           exit-code: ${{ env.FAIL }}
       
       - name: Dockle
         uses: goodwithtech/dockle-action@426396fd1cd8feecee31992a6d1482dde8e26515
         with:
-          image: ${{ matrix.tag }}
+          image: ${{ matrix.image }}
           format: json
           output: dockle.json
           exit-code: ${{ env.FAIL }}
@@ -76,10 +76,10 @@ jobs:
         if: ${{ github.event_name == 'release' }}
         run: |
           docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }}
-          docker tag ${{ matrix.tag }} ${{ matrix.tag }}:${{ github.event.release.name }}
-          docker push ${{ matrix.tag }}:${{ github.event.release.name }}
-          docker tag ${{ matrix.tag }} ${{ matrix.tag }}:latest
-          docker push ${{ matrix.tag }}:latest
+          docker tag ${{ matrix.image }} ${{ secrets.DOCKER_USER }}/${{ matrix.image }}:${{ github.event.release.name }}
+          docker push ${{ secrets.DOCKER_USER }}/${{ matrix.image }}:${{ github.event.release.name }}
+          docker tag ${{ matrix.image }} ${{ secrets.DOCKER_USER }}/${{ matrix.image }}:latest
+          docker push ${{ secrets.DOCKER_USER }}/${{ matrix.image }}:latest
           docker logout
 
   desktop:
