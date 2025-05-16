@@ -24,7 +24,7 @@ jobs:
         include:
           - name: Backend
             dockerfile: docker/Dockerfile.backend
-            image: ${{ secrets.DOCKER_USER }}/rekono-backend
+            image: rekono-backend
           # TODO: Evaluate dependencies between the images, if any
           # - name: Frontend
           #   dockerfile: docker/Dockerfile.frontend
