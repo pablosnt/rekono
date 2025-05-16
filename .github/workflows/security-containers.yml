@@ -79,7 +79,7 @@ jobs:
           docker tag ${{ matrix.tag }} ${{ matrix.tag }}:${{ github.event.release.name }}
           docker push ${{ matrix.tag }}:${{ github.event.release.name }}
           docker tag ${{ matrix.tag }} ${{ matrix.tag }}:latest
-          docker push ${{ secrets.DOCKER_USER }}/rekono:latest
+          docker push ${{ matrix.tag }}:latest
           docker logout
 
   desktop:
