@@ -49,14 +49,14 @@ jobs:
         run: docker build --build-arg REKONO_VERSION=$VERSION --file ${{ matrix.dockerfile }} --tag ${{ matrix.image }} .
 
       - name: Trivy
-        uses: aquasecurity/trivy-action@91713af97dc80187565512baba96e4364e983601
+        uses: aquasecurity/trivy-action@v0
         with:
           image-ref: ${{ matrix.image }}
           format: table
           exit-code: ${{ env.FAIL }}
       
       - name: Dockle
-        uses: goodwithtech/dockle-action@426396fd1cd8feecee31992a6d1482dde8e26515
+        uses: goodwithtech/dockle-action@e30e6af832aad6ea7dca2a248d31a85eab6dbd68
         with:
           image: ${{ matrix.image }}
           format: json
@@ -83,10 +83,6 @@ jobs:
           docker logout
 
   desktop:
-    # TODO: Repeat the process for rekono-cli
-    # TODO: Verify allowed GitHub actions from third parties
-    # TODO: Verify development environments configuration
-    # TODO: Update all the GitHub actions used!
     name: Debian Desktop
     runs-on: ubuntu-latest
     environment: gitlab

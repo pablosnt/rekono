@@ -10,7 +10,7 @@ jobs:
     environment: github
     steps:
       - name: Legitify
-        uses: Legit-Labs/legitify@038aa49473a6974a3ef79f6c76b949b689d23282
+        uses: Legit-Labs/legitify@v1
         with:
           github_token: ${{ secrets.ADMIN_PAT }}
           analyze_self_only: true
@@ -24,7 +24,7 @@ jobs:
     environment: github
     steps:
       - name: Chain Bench
-        uses: aquasecurity/chain-bench-action@cd35ac2e4470006fc9bbbbcd6c328edb61b72332
+        uses: aquasecurity/chain-bench-action@v1
         with:
           repository-url: ${{ github.server_url }}/${{ github.repository }}
           github-token: ${{ secrets.ADMIN_PAT }}
