@@ -1,3 +1,4 @@
+# pytype: disable=attribute-error
 """
 Django settings for rekono project.
 
@@ -11,7 +12,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from datetime import timedelta
-from typing import Any, Dict
+from typing import Any
 
 from rekono.config import RekonoConfig
 
@@ -19,9 +20,7 @@ from rekono.config import RekonoConfig
 # Rekono basic information                                                     #
 ################################################################################
 
-DESCRIPTION = (
-    "Pentesting automation platform that combines hacking tools to complete assessments"
-)
+DESCRIPTION = "Pentesting automation platform that combines hacking tools to complete security assessments"
 VERSION = "2.0.0"
 
 
@@ -61,15 +60,16 @@ INSTALLED_APPS = [
     "integrations",
     "notes",
     "platforms.cvecrowd",
-    "platforms.defect_dojo",
+    "platforms.defectdojo",
     "platforms.mail",
+    "platforms.nvdnist",
     "platforms.telegram_app",
     "parameters",
     "projects",
     "reporting",
     "security",
     "settings",
-    "target_blacklist",
+    "target_denylist",
     "target_ports",
     "targets",
     "tasks",
@@ -161,7 +161,7 @@ SIMPLE_JWT = {
     "ISSUER": "Rekono",
 }
 
-LOGGING: Dict[str, Any] = {
+LOGGING: dict[str, Any] = {
     "version": 1,
     # Disable default Django logging system to avoid noise
     "disable_existing_loggers": False,
@@ -205,7 +205,7 @@ LOGGING: Dict[str, Any] = {
 ################################################################################
 
 # nosemgrep: python.django.security.audit.django-rest-framework.missing-throttle-config.missing-throttle-config
-REST_FRAMEWORK: Dict[str, Any] = {
+REST_FRAMEWORK: dict[str, Any] = {
     "DEFAULT_METADATA_CLASS": None,
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_FILTER_BACKENDS": [
@@ -277,9 +277,7 @@ SPECTACULAR_SETTINGS = {
 
 if CONFIG.testing:
     # In memory database for testing
-    DATABASES = {
-        "default": {"ENGINE": "django.db.backends.sqlite3", "NAME": ":memory:"}
-    }
+    DATABASES = {"default": {"ENGINE": "django.db.backends.sqlite3", "NAME": ":memory:"}}
 else:
     # Production database
     DATABASES = {  # pragma: no cover

@@ -4,6 +4,8 @@ from platforms.mail.models import SMTPSettings
 from tests.cases import ApiTestCase
 from tests.framework import ApiTest
 
+# pytype: disable=wrong-arg-types
+
 config = {
     "host": "smtp.rekono.com",
     "port": 587,

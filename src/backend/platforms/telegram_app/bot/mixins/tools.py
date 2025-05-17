@@ -40,17 +40,13 @@ class ToolMixin(BaseMixin):
 
 
 class ConfigurationMixin(BaseMixin):
-    async def _ask_for_configuration(
-        self, update: Update, context: CallbackContext
-    ) -> int:
+    async def _ask_for_configuration(self, update: Update, context: CallbackContext) -> int:
         return await self._go_to_next_state(
             update,
             context,
             await self._ask(
                 update,
-                Configuration.objects.filter(
-                    tool=self._get_context_value(context, Context.TOOL)
-                ),
+                Configuration.objects.filter(tool=self._get_context_value(context, Context.TOOL)),
                 "name",
                 2,
                 "Choose configuration",
@@ -59,9 +55,7 @@ class ConfigurationMixin(BaseMixin):
             ),
         )
 
-    async def _save_configuration(
-        self, update: Update, context: CallbackContext
-    ) -> int:
+    async def _save_configuration(self, update: Update, context: CallbackContext) -> int:
         return await self._go_to_next_state(
             update,
             context,
@@ -78,15 +72,11 @@ class ConfigurationMixin(BaseMixin):
 class IntensityMixin(BaseMixin):
     @sync_to_async
     def _get_tool_intensities_async(self, tool: Tool) -> QuerySet:
-        return [
-            Intensity(i.value).name for i in tool.intensities.order_by("value").all()
-        ]
+        return [Intensity(i.value).name for i in tool.intensities.order_by("value").all()]
 
     async def _ask_for_intensity(self, update: Update, context: CallbackContext) -> int:
         tool = self._get_context_value(context, Context.TOOL)
-        values = (
-            await self._get_tool_intensities_async(tool) if tool else Intensity.names
-        )
+        values = await self._get_tool_intensities_async(tool) if tool else Intensity.names
         values.reverse()
         return await self._go_to_next_state(
             update,

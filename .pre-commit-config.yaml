@@ -3,16 +3,24 @@ repos:
       hooks:
           - id: mypy
             name: mypy
-            entry: mypy
+            entry: sh -c 'cd src/; mypy --namespace-packages --package backend --install-types --non-interactive --ignore-missing-imports --exclude migrations/ --exclude env/'
             language: python
             types: [python]
             require_serial: true
             verbose: true
-    - repo: https://github.com/gitleaks/gitleaks
-      rev: v8.17.0
+          - id: eslint
+            name: eslint
+            entry: sh -c 'cd src/frontend; npm run eslint:fix; npm run eslint'
+            language: system
+          - id: prettier
+            name: prettier
+            entry: sh -c 'cd src/frontend; npm run prettier:fix; npm run prettier'
+            language: system
+    - repo: https://github.com/gitleaks/gitleaks.git
+      rev: v8.18.2
       hooks:
         - id: gitleaks
     - repo: https://github.com/python/black.git
-      rev: 23.7.0
+      rev: 24.4.2
       hooks:
         - id: black

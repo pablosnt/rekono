@@ -11,9 +11,7 @@ class AuthenticationMixin(BaseMixin):
     no_authentication = "None"
     new_port_command = "newport"
 
-    async def _ask_for_authentication_type(
-        self, update: Update, context: CallbackContext
-    ) -> int:
+    async def _ask_for_authentication_type(self, update: Update, context: CallbackContext) -> int:
         values = AuthenticationType.values
         current_command = self._get_context_value(context, Context.COMMAND)
         if current_command and current_command.lower() == self.new_port_command:
@@ -30,9 +28,7 @@ class AuthenticationMixin(BaseMixin):
             ),
         )
 
-    async def _save_authentication_type(
-        self, update: Update, context: CallbackContext
-    ) -> int:
+    async def _save_authentication_type(self, update: Update, context: CallbackContext) -> int:
         if (
             update.callback_query
             and update.callback_query.data
@@ -56,9 +52,7 @@ class AuthenticationMixin(BaseMixin):
                 ),
             )
 
-    async def _ask_for_new_authentication(
-        self, update: Update, context: CallbackContext
-    ) -> int:
+    async def _ask_for_new_authentication(self, update: Update, context: CallbackContext) -> int:
         return await self._go_to_next_state(
             update,
             context,
@@ -70,9 +64,7 @@ class AuthenticationMixin(BaseMixin):
             ),
         )
 
-    async def _create_authentication(
-        self, update: Update, context: CallbackContext
-    ) -> int:
+    async def _create_authentication(self, update: Update, context: CallbackContext) -> int:
         if not update.effective_message or not update.effective_message.text:
             return ConversationHandler.END
         name = update.effective_message.text

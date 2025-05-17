@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models.enums import Choices
 
 
 class TimeUnit(models.TextChoices):
@@ -8,3 +9,6 @@ class TimeUnit(models.TextChoices):
     HOURS = "Hours"
     DAYS = "Days"
     WEEKS = "Weeks"
+
+
+TimeUnit: type[Choices] = TimeUnit  # https://github.com/google/pytype/issues/1048

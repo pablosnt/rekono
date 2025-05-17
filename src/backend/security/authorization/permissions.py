@@ -1,9 +1,10 @@
-from typing import Any, Dict
+from typing import Any
 
 from alerts.models import Alert
 from notes.models import Note
 from platforms.telegram_app.models import TelegramChat
 from processes.models import Process, Step
+from projects.models import Project
 from reporting.models import Report
 from rest_framework.permissions import BasePermission, DjangoModelPermissions
 from rest_framework.request import Request
@@ -65,9 +66,7 @@ class IsAuditor(BasePermission):
         Returns:
             bool: Indicate if user is authorized to make this request or not
         """
-        return request.user.groups.filter(
-            name__in=[str(Role.AUDITOR), str(Role.ADMIN)]
-        ).exists()
+        return request.user.groups.filter(name__in=[str(Role.AUDITOR), str(Role.ADMIN)]).exists()
 
 
 class ProjectMemberPermission(BasePermission):
@@ -85,14 +84,21 @@ class ProjectMemberPermission(BasePermission):
             bool: Indicate if user is authorized to make this request or not
         """
         project = obj.get_project()
-        return not project or request.user in project.members.all()
+        output = (
+            not project
+            or (isinstance(project, Project) and request.user in project.members.all())
+            or any([p for p in project if request.user in p.members.all()])
+        )
+        if not output:
+            pass
+        return output
 
 
 class OwnerPermission(BasePermission):
     """Check if current user can access an object based on HTTP method and creator user."""
 
     # By default: instance returns the same object, allow_admin is True and owner_field is owner
-    mapping: Dict[Any, Dict[str, Any]] = {
+    mapping: dict[Any, dict[str, Any]] = {
         Wordlist: {},
         Process: {},
         Step: {
@@ -122,10 +128,7 @@ class OwnerPermission(BasePermission):
         return (
             not instance
             or request.method == "GET"
-            or (
-                hasattr(instance, owner_field)
-                and getattr(instance, owner_field) == request.user
-            )
+            or (hasattr(instance, owner_field) and getattr(instance, owner_field) == request.user)
             or (allow_admin and IsAdmin().has_permission(request, view))
         )
 

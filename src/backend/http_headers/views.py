@@ -28,13 +28,9 @@ class HttpHeaderViewSet(BaseViewSet):
     http_method_names = ["get", "put", "post", "delete"]
 
     def get_queryset(self) -> QuerySet:
-        return self.queryset.filter(
-            Q(user=self.request.user) | Q(user__isnull=True)
-        ).filter(Q(target__project__members=self.request.user) | Q(target__isnull=True))
+        return self.queryset.filter(Q(user=self.request.user) | Q(user__isnull=True)).filter(
+            Q(target__project__members=self.request.user) | Q(target__isnull=True)
+        )
 
     def get_serializer_class(self) -> Serializer:
-        return (
-            SimpleHttpHeaderSerializer
-            if self.request.method == "PUT"
-            else super().get_serializer_class()
-        )
+        return SimpleHttpHeaderSerializer if self.request.method == "PUT" else super().get_serializer_class()

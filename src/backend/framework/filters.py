@@ -1,4 +1,4 @@
-from typing import Any, List
+from typing import Any
 
 from django.db.models import Q, QuerySet
 from django_filters.rest_framework import FilterSet, filters
@@ -26,9 +26,7 @@ class LikeFilter(FilterSet):
 
 
 class MultipleFieldFilterSet(FilterSet):
-    def multiple_field_filter(
-        self, queryset: QuerySet, name: str, value: Any
-    ) -> QuerySet:
+    def multiple_field_filter(self, queryset: QuerySet, name: str, value: Any) -> QuerySet:
         query = Q()
         for field in self.filters[name].fields:
             query |= Q(**{field: value})
@@ -36,7 +34,7 @@ class MultipleFieldFilterSet(FilterSet):
 
 
 class MultipleFieldFilter(filters.Filter):
-    def __init__(self, fields: List[str], **kwargs: Any) -> None:
+    def __init__(self, fields: list[str], **kwargs: Any) -> None:
         kwargs["method"] = "multiple_field_filter"
         super().__init__(**kwargs)
         self.fields = fields
@@ -47,8 +45,4 @@ class MultipleNumberFilter(MultipleFieldFilter, filters.NumberFilter):
 
 
 class MultipleCharFilter(MultipleFieldFilter, filters.CharFilter):
-    pass
-
-
-class MultipleModelChoiceFilter(MultipleFieldFilter, filters.ModelChoiceFilter):
     pass

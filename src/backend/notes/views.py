@@ -1,25 +1,24 @@
-from typing import Any, Dict, Optional, cast
+from typing import Any, cast
 
 from django.db.models import Q, QuerySet
 from drf_spectacular.utils import extend_schema
-from framework.views import LikeViewSet
-from notes.filters import NoteFilter
-from notes.models import Note
-from notes.serializers import NoteSerializer
-from projects.models import Project
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
-from rest_framework.status import HTTP_201_CREATED
+from rest_framework.status import HTTP_201_CREATED, HTTP_404_NOT_FOUND
+
+from framework.models import BaseModel
+from framework.views import LikeViewSet
+from notes.filters import NoteFilter
+from notes.models import Note
+from notes.serializers import NoteSerializer, links
+from projects.models import Project
 from security.authorization.permissions import (
     OwnerPermission,
     ProjectMemberPermission,
     RekonoModelPermission,
 )
-from targets.models import Target
-
-# Create your views here.
 
 
 class NoteViewSet(LikeViewSet):
@@ -33,24 +32,25 @@ class NoteViewSet(LikeViewSet):
         OwnerPermission,
     ]
     search_fields = ["title", "body"]
-    ordering_fields = [
-        "id",
-        "project",
-        "target",
-        "title",
-        "tags",
-        "owner",
-        "created_at",
-        "updated_at",
-    ]
+    ordering_fields = (
+        [
+            "id",
+        ]
+        + links
+        + [
+            "title",
+            "tags",
+            "owner",
+            "created_at",
+            "updated_at",
+            "likes_count",
+        ]
+    )
     http_method_names = ["get", "post", "put", "delete"]
 
-    def _get_project_from_data(
-        self, project_field: str, data: Dict[str, Any]
-    ) -> Optional[Project]:
-        return data.get("project") or (
-            cast(Target, data.get("target")).project if data.get("target") else None
-        )
+    def _get_project_from_data(self, project_field: str, data: dict[str, Any]) -> Project | None:
+        data_links = [link for link in reversed(links) if data.get(link)]
+        return cast(BaseModel, data.get(data_links[0])).get_project() if len(data_links) > 0 else None
 
     def get_queryset(self) -> QuerySet:
         return (
@@ -81,14 +81,16 @@ class NoteViewSet(LikeViewSet):
     )
     def fork(self, request: Request, pk: str) -> Response:
         note = self.get_object()
-        fork = Note.objects.create(
-            project=note.project,
-            target=note.target,
-            title=note.title,
-            body=note.body,
-            owner=self.request.user,
-            public=False,
-            forked_from=note,
-        )
-        fork.tags.set(note.tags.all())
-        return Response(NoteSerializer(fork).data, status=HTTP_201_CREATED)
+        if note.public and note.owner.id != self.request.user.id:
+            fork = Note.objects.create(
+                project=note.project,
+                target=note.target,
+                title=note.title,
+                body=note.body,
+                owner=self.request.user,
+                public=False,
+                forked_from=note,
+            )
+            fork.tags.set(note.tags.all())
+            return Response(self.get_serializer(instance=fork).data, status=HTTP_201_CREATED)
+        return Response(status=HTTP_404_NOT_FOUND)

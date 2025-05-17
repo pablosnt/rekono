@@ -8,9 +8,7 @@ from target_ports.models import TargetPort
 class TargetPortFilter(FilterSet):
     """FilterSet to filter and sort Target Port entities."""
 
-    project = ModelChoiceFilter(
-        queryset=Project.objects.all(), field_name="target__project"
-    )
+    project = ModelChoiceFilter(queryset=Project.objects.all(), field_name="target__project")
 
     class Meta:
         """FilterSet metadata."""

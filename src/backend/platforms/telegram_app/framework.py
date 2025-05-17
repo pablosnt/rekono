@@ -1,9 +1,9 @@
 import asyncio
 import logging
-from typing import Any, Optional
+from typing import Any
 
 from telegram.constants import ParseMode
-from telegram.error import Forbidden, InvalidToken
+from telegram.error import Forbidden, InvalidToken, NetworkError
 from telegram.ext import Application
 from telegram.helpers import escape_markdown
 
@@ -18,7 +18,7 @@ class BaseTelegram:
         self.app = self.initialize()
         self.date_format = "%Y-%m-%d %H:%M:%S"
 
-    def initialize(self) -> Optional[Application]:
+    def initialize(self) -> Application | None:
         self.app = self._get_app()
         if self.app and self.app.bot:
             try:
@@ -27,18 +27,13 @@ class BaseTelegram:
                 self._handle_invalid_token()
         return self.app
 
-    def get_bot_name(self) -> str:
+    def get_bot_name(self) -> str | None:
         return self.app.bot.username if self.app and self.app.bot else None
 
-    def _get_app(self) -> Optional[Application]:
+    def _get_app(self) -> Application | None:
         if self.settings and self.settings.secret:
             try:
-                return (
-                    Application.builder()
-                    .token(self.settings.secret)
-                    .post_init(self._post_init)
-                    .build()
-                )
+                return Application.builder().token(self.settings.secret).post_init(self._post_init).build()
             except (InvalidToken, Forbidden):
                 self._handle_invalid_token()
         return None
@@ -46,18 +41,19 @@ class BaseTelegram:
     async def _post_init(self, application: Application) -> None:
         pass
 
-    def _send_message(
-        self, chat: TelegramChat, message: str, reply_markup: Any = None
-    ) -> None:
+    def _send_message(self, chat: TelegramChat, message: str, reply_markup: Any = None) -> None:
         if self.app and self.app.bot:
-            asyncio.run(
-                self.app.bot.send_message(
-                    chat.chat_id,
-                    text=message,
-                    reply_markup=reply_markup,
-                    parse_mode=ParseMode.MARKDOWN_V2,
+            try:
+                asyncio.run(
+                    self.app.bot.send_message(
+                        chat.chat_id,
+                        message,
+                        parse_mode=ParseMode.MARKDOWN_V2,
+                        reply_markup=reply_markup,
+                    )
                 )
-            )
+            except NetworkError:
+                pass
 
     def _escape(self, value: str) -> str:
         return escape_markdown(value, version=2)

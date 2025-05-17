@@ -6,6 +6,8 @@ from tests.framework import ApiTest
 from wordlists.enums import WordlistType
 from wordlists.models import Wordlist
 
+# pytype: disable=wrong-arg-types
+
 # Wordlists paths
 data_dir = ApiTest.data_dir / "wordlists"
 endpoints_path = data_dir / "endpoints_wordlist.txt"
@@ -36,7 +38,6 @@ class WordlistTest(ApiTest):
                 "id": 1,
                 "name": first_wordlist_name,
                 "type": WordlistType.ENDPOINT,
-                "size": None,
                 "owner": None,
                 "liked": False,
                 "likes": 0,
@@ -120,9 +121,7 @@ class WordlistTest(ApiTest):
             endpoint="{endpoint}30/",
         ),
         ApiTestCase(["reader1", "reader2"], "post", 403, endpoint="{endpoint}29/like/"),
-        ApiTestCase(
-            ["reader1", "reader2"], "delete", 403, endpoint="{endpoint}30/like/"
-        ),
+        ApiTestCase(["reader1", "reader2"], "delete", 403, endpoint="{endpoint}30/like/"),
         ApiTestCase(
             ["admin1", "admin2", "auditor1", "auditor2"],
             "get",
@@ -191,9 +190,7 @@ class WordlistTest(ApiTest):
             403,
             endpoint="{endpoint}29/",
         ),
-        ApiTestCase(
-            ["reader1", "reader2", "auditor2"], "delete", 403, endpoint="{endpoint}30/"
-        ),
+        ApiTestCase(["reader1", "reader2", "auditor2"], "delete", 403, endpoint="{endpoint}30/"),
         ApiTestCase(["admin2"], "delete", 204, endpoint="{endpoint}29/"),
         ApiTestCase(["auditor1"], "delete", 204, endpoint="{endpoint}30/"),
         ApiTestCase(

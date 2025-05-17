@@ -1,13 +1,10 @@
-from typing import Any
+from typing import Self
 
 from django.db import models
-from taggit.managers import TaggableManager
-
 from framework.models import BaseModel
 from rekono.settings import AUTH_USER_MODEL
 from security.validators.input_validator import Regex, Validator
-
-# Create your models here.
+from taggit.managers import TaggableManager
 
 
 class Project(BaseModel):
@@ -18,17 +15,11 @@ class Project(BaseModel):
         unique=True,
         validators=[Validator(Regex.NAME.value, code="name")],
     )
-    description = models.TextField(
-        max_length=300, validators=[Validator(Regex.TEXT.value, code="description")]
-    )
+    description = models.TextField(max_length=300, validators=[Validator(Regex.TEXT.value, code="description")])
     # User that created the project
-    owner = models.ForeignKey(
-        AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True
-    )
+    owner = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True)
     # Relation with all users that belong to the project
-    members = models.ManyToManyField(
-        AUTH_USER_MODEL, related_name="projects", blank=True
-    )
+    members = models.ManyToManyField(AUTH_USER_MODEL, related_name="projects", blank=True)
     tags = TaggableManager()  # Project tags
 
     def __str__(self) -> str:
@@ -39,7 +30,7 @@ class Project(BaseModel):
         """
         return self.name
 
-    def get_project(self) -> Any:
+    def get_project(self) -> Self:
         """Get the related project for the instance. This will be used for authorization purposes.
 
         Returns:

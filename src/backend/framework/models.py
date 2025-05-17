@@ -1,20 +1,24 @@
 import importlib
-from typing import Any, Callable, Dict, List, Optional, cast
+from typing import Any, Callable, cast
 
 import requests
 import urllib3
 from django.db import models
 from django.db.models import Q
+
+from framework.enums import InputKeyword
 from rekono.settings import AUTH_USER_MODEL, CONFIG
 from security.cryptography.encryption import Encryptor
 
 
 class BaseModel(models.Model):
+    project_field = ""
+
     class Meta:
         abstract = True
 
-    def get_project(self) -> Any:
-        filter_field = self.__class__.get_project_field()
+    def get_project(self) -> Any | list[Any]:
+        filter_field = self.__class__.project_field
         if filter_field:
             project = self
             for field in filter_field.split("__"):
@@ -23,17 +27,12 @@ class BaseModel(models.Model):
                 else:
                     return None
             return project
-
-    @classmethod
-    def get_project_field(cls) -> str:
-        return ""
+        return None
 
     def _get_related_class(self, package: str, name: str) -> Any:
         try:
             # nosemgrep: python.lang.security.audit.non-literal-import.non-literal-import
-            module = importlib.import_module(
-                f'{package.lower()}.{name.lower().replace(" ", "_").replace("-", "_")}'
-            )
+            module = importlib.import_module(f"{package.lower()}.{name.lower().replace(' ', '_').replace('-', '_')}")
             cls = getattr(
                 module,
                 name[0].upper() + name[1:].lower().replace(" ", "").replace("-", ""),
@@ -57,15 +56,14 @@ class BaseEncrypted(BaseModel):
     _encrypted_field = "_secret"
 
     @property
-    def secret(self) -> str:
+    def secret(self) -> str | None:
         return (
             (
                 self._encryptor.decrypt(getattr(self, self._encrypted_field))
                 if self._encryptor
                 else getattr(self, self._encrypted_field)
             )
-            if hasattr(self, self._encrypted_field)
-            and getattr(self, self._encrypted_field)
+            if hasattr(self, self._encrypted_field) and getattr(self, self._encrypted_field)
             else None
         )
 
@@ -75,9 +73,7 @@ class BaseEncrypted(BaseModel):
             setattr(
                 self,
                 self._encrypted_field,
-                self._encryptor.encrypt(value)
-                if self._encryptor and value is not None
-                else value,
+                (self._encryptor.encrypt(value) if self._encryptor and value is not None else value),
             )
 
 
@@ -93,14 +89,16 @@ class BaseInput(BaseModel):
             type: type,
             field: str,
             contains: bool = False,
-            processor: Optional[Callable] = None,
+            processor: Callable | None = None,
         ) -> None:
             self.type = type
             self.field = field
             self.contains = contains
             self.processor = processor
 
-    filters: List[Filter] = []
+    filters: list[Filter] = []
+    parse_mapping: dict[InputKeyword, str | Callable | dict[str, str]] = {}
+    parse_dependencies: list[str] = []
 
     def _clean_path(self, value: str) -> str:
         return f"/{value}" if len(value) > 1 and value[0] != "/" else value
@@ -108,20 +106,20 @@ class BaseInput(BaseModel):
     def _get_url(
         self,
         host: str,
-        port: Optional[int] = None,
+        port: int | None = None,
         endpoint: str = "",
-        protocols: List[str] = ["http", "https"],
-    ) -> Optional[str]:
+        protocols: list[str] = ["http", "https"],
+    ) -> str | None:
         """Get a HTTP or HTTPS URL from host, port and endpoint.
 
         Args:
             host (str): Host to include in the URL
             port (int, optional): Port to include in the URL. Defaults to None.
             endpoint (str, optional): Endpoint to include in the URL. Defaults to ''.
-            protocols (List[str], optional): Protocol list to check. Defaults to ['http', 'https'].
+            protocols (list[str], optional): Protocol list to check. Defaults to ['http', 'https'].
 
         Returns:
-            Optional[str]: [description]
+            str | None: [description]
         """
         urllib3.disable_warnings(category=urllib3.exceptions.InsecureRequestWarning)
         if endpoint.startswith("/"):
@@ -134,30 +132,26 @@ class BaseInput(BaseModel):
             elif port == 443:
                 protocols = ["https"]
         for protocol in protocols:  # For each protocol
-            url_to_test = schema.format(
-                protocol=protocol, host=host, port=port, endpoint=endpoint
-            )
+            url_to_test = schema.format(protocol=protocol, host=host, port=port, endpoint=endpoint)
             try:
                 # nosemgrep: python.requests.security.disabled-cert-validation.disabled-cert-validation
-                requests.get(url_to_test, timeout=5, verify=False)  # nosec
+                requests.get(url_to_test, timeout=5, verify=False)
                 return url_to_test
-            except Exception:  # nosec
+            except Exception:
                 continue
         return None
 
-    def _compare_filter(
-        self, filter: Any, value: Any, negative: bool = False, contains: bool = False
-    ) -> bool:
-        comparison = lambda f, v: f == v if not contains else f in v  # noqa: E731
-        return (
-            comparison(filter, value) if not negative else not comparison(filter, value)
-        )
+    def _compare(self, filter: str, value: str, contains: bool) -> bool:
+        return filter == value if not contains else filter in value
+
+    def _compare_filter(self, filter: Any, value: Any, negative: bool = False, contains: bool = False) -> bool:
+        return self._compare(filter, value, contains) if not negative else not self._compare(filter, value, contains)
 
     def filter(self, argument_input: Any, target: Any = None) -> bool:
         """Check if this instance is valid based on input filter.
 
         Args:
-            input (Any): Tool input whose filter will be applied
+            input (any): Tool input whose filter will be applied
 
         Returns:
             bool: Indicate if this instance match the input filter or not
@@ -181,9 +175,7 @@ class BaseInput(BaseModel):
                         if (
                             issubclass(filter.type, models.TextChoices)
                             and self._compare_filter(
-                                cast(models.TextChoices, filter.type)[
-                                    match_value.upper()
-                                ],
+                                cast(models.TextChoices, filter.type)[match_value.upper()],
                                 field_value,
                                 negative,
                             )
@@ -208,26 +200,40 @@ class BaseInput(BaseModel):
                         return True
         return False
 
-    def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
-        """Get useful information from this instance to be used in tool execution as argument.
-
-        To be implemented by subclasses.
-
-        Args:
-            accumulated (Dict[str, Any], optional): Information from other instances of the same type. Defaults to {}.
-
-        Returns:
-            Dict[str, Any]: Useful information for tool executions, including accumulated if setted
-        """
-        return {}  # pragma: no cover
+    def parse(self, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
+        result = {}
+        for dependency in self.parse_dependencies:
+            if (
+                hasattr(self, dependency)
+                and getattr(self, dependency)
+                and isinstance(getattr(self, dependency), BaseInput)
+            ):
+                result.update(getattr(self, dependency).parse(accumulated))
+        for keyword, map in self.parse_mapping.items():
+            value = (
+                getattr(self, map)
+                if isinstance(map, str) and hasattr(self, map)
+                else (map(self) if isinstance(map, Callable) else map)
+            )
+            if value is None:
+                value = ""
+            key = keyword.name.lower()
+            current_value = accumulated.get(key)
+            if current_value is not None:
+                if isinstance(current_value, list):
+                    result[key] = accumulated.get(key, []) + (value if isinstance(value, list) else [value])
+                    continue
+                elif isinstance(current_value, dict):
+                    result[key] = {**accumulated.get(key, {}), **value}
+                    continue
+            result[key] = value
+        return result
 
     def get_input_type(self) -> Any:
         from input_types.models import InputType
 
         reference = f"{self._meta.app_label}.{self._meta.model_name}"
-        return InputType.objects.filter(
-            Q(model=reference) | Q(fallback_model=reference)
-        ).first()
+        return InputType.objects.filter(Q(model=reference) | Q(fallback_model=reference)).first()
 
 
 class BaseLike(BaseModel):

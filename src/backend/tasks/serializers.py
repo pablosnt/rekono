@@ -1,21 +1,25 @@
-from typing import Any, Dict, cast
+import math
+from typing import Any, cast
 
 from django.core.exceptions import ValidationError
+from executions.enums import Status
+from framework.serializers import RelatedNotesSerializer
+from input_types.enums import InputTypeName
 from processes.models import Process
 from processes.serializers import SimpleProcessSerializer
-from rest_framework.serializers import ModelSerializer, PrimaryKeyRelatedField
+from rest_framework.serializers import PrimaryKeyRelatedField, SerializerMethodField
 from targets.models import Target
 from targets.serializers import SimpleTargetSerializer
 from tasks.models import Task
 from tasks.queues import TasksQueue
 from tools.enums import Intensity as IntensityEnum
 from tools.fields import IntegerChoicesField
-from tools.models import Configuration, Intensity
+from tools.models import Configuration, Input, Intensity
 from tools.serializers import ConfigurationSerializer
 from users.serializers import SimpleUserSerializer
 
 
-class TaskSerializer(ModelSerializer):
+class TaskSerializer(RelatedNotesSerializer):
     target_id = PrimaryKeyRelatedField(
         many=False,
         write_only=True,
@@ -42,6 +46,8 @@ class TaskSerializer(ModelSerializer):
     configuration = ConfigurationSerializer(many=False, read_only=True)
     intensity = IntegerChoicesField(model=IntensityEnum, required=False)
     executor = SimpleUserSerializer(many=False, read_only=True)
+    status = SerializerMethodField(read_only=True)
+    progress = SerializerMethodField(read_only=True)
 
     class Meta:
         model = Task
@@ -63,7 +69,13 @@ class TaskSerializer(ModelSerializer):
             "start",
             "end",
             "wordlists",
+            "input_technologies",
+            "input_vulnerabilities",
             "executions",
+            "notes",
+            "reports",
+            "status",
+            "progress",
         )
         read_only_fields = (
             "executor",
@@ -72,9 +84,44 @@ class TaskSerializer(ModelSerializer):
             "start",
             "end",
             "executions",
+            "notes",
+            "reports",
+            "status",
+            "progress",
         )
 
-    def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
+    def get_status(self, instance: Any) -> str:
+        for status in [Status.RUNNING, Status.CANCELLED, Status.ERROR]:
+            if instance.executions.filter(status=status).count() > 0:
+                return status
+        if instance.executions.count() == 0:
+            return Status.REQUESTED
+        elif instance.executions.exclude(status__in=[Status.COMPLETED, Status.SKIPPED]).count() == 0:
+            return Status.COMPLETED
+        return Status.REQUESTED
+
+    def get_progress(self, instance: Any) -> int:
+        total = instance.executions.count()
+        return (
+            math.ceil(
+                (
+                    instance.executions.filter(
+                        status__in=[
+                            Status.ERROR,
+                            Status.COMPLETED,
+                            Status.SKIPPED,
+                            Status.CANCELLED,
+                        ]
+                    ).count()
+                    / total
+                )
+                * 100
+            )
+            if total > 0
+            else 0
+        )
+
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         if not attrs.get("intensity"):
             attrs["intensity"] = IntensityEnum.NORMAL
         if attrs.get("configuration"):
@@ -84,11 +131,22 @@ class TaskSerializer(ModelSerializer):
                 value=attrs.get("intensity"),
             ).exists():
                 raise ValidationError(
-                    f'Invalid intensity {attrs["intensity"]} for tool {cast(Configuration, attrs.get("configuration")).tool.name}',
+                    f"Invalid intensity {attrs['intensity']} for tool {cast(Configuration, attrs.get('configuration')).tool.name}",
                     code="intensity",
                 )
+            for input_type, field in [
+                (InputTypeName.TECHNOLOGY, "input_technologies"),
+                (InputTypeName.VULNERABILITY, "input_vulnerabilities"),
+            ]:
+                if not Input.objects.filter(
+                    argument__tool=cast(Configuration, attrs.get("configuration")).tool,
+                    type__name=input_type,
+                ):
+                    attrs[field] = []
         elif attrs.get("process"):
             attrs["configuration"] = None
+            attrs["input_technologies"] = []
+            attrs["input_vulnerabilities"] = []
         else:
             raise ValidationError(
                 {
@@ -101,11 +159,11 @@ class TaskSerializer(ModelSerializer):
             attrs["repeat_time_unit"] = None
         return super().validate(attrs)
 
-    def create(self, validated_data: Dict[str, Any]) -> Task:
+    def create(self, validated_data: dict[str, Any]) -> Task:
         """Create instance from validated data.
 
         Args:
-            validated_data (Dict[str, Any]): Validated data
+            validated_data (dict[str, Any]): Validated data
 
         Returns:
             Task: Created instance

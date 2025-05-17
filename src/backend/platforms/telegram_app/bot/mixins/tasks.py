@@ -1,18 +1,15 @@
-from telegram import Update
-from telegram.ext import CallbackContext, ConversationHandler
-
 from platforms.telegram_app.bot.enums import Context
 from platforms.telegram_app.bot.mixins.framework import BaseMixin
 from tasks.serializers import TaskSerializer
+from telegram import Update
+from telegram.ext import CallbackContext, ConversationHandler
 
 
 class TaskMixin(BaseMixin):
     yes = "👍 Yes"
     no = "👎 No"
 
-    async def _ask_for_task_confirmation(
-        self, update: Update, context: CallbackContext
-    ) -> int:
+    async def _ask_for_task_confirmation(self, update: Update, context: CallbackContext) -> int:
         project = self._get_context_value(context, Context.PROJECT)
         target = self._get_context_value(context, Context.TARGET)
         process = self._get_context_value(context, Context.PROCESS)
@@ -31,9 +28,12 @@ The following task will be executed:
 
 💼 _Project_   *{self._escape(project.name) if project else None}*
 🎯 _Target_    *{self._escape(target.target) if target else None}*
-{f'🔄 _Process_   *{self._escape(process.name)}*' if process else
-f'''🛠 _Tool_       *{self._escape(tool.name)}*
-⚙️ _Configuration_  *{self._escape(configuration.name)}*'''}
+{
+                    f"🔄 _Process_   *{self._escape(process.name)}*"
+                    if process
+                    else f'''🛠 _Tool_       *{self._escape(tool.name)}*
+⚙️ _Configuration_  *{self._escape(configuration.name)}*'''
+                }
 🔊 _Intensity_ *{self._escape(intensity)}*
 
 Are you sure?
@@ -51,13 +51,15 @@ Are you sure?
                 process = self._get_context_value(context, Context.PROCESS)
                 configuration = self._get_context_value(context, Context.CONFIGURATION)
                 wordlist = self._get_context_value(context, Context.WORDLIST)
+                input_technology = self._get_context_value(context, Context.INPUT_TECHNOLOGY)
+                input_vulnerability = self._get_context_value(context, Context.INPUT_VULNERABILITY)
                 data = {
                     "target_id": target.id if target else None,
-                    "intensity": self._get_context_value(
-                        context, Context.INTENSITY
-                    ).capitalize(),
+                    "intensity": self._get_context_value(context, Context.INTENSITY).capitalize(),
                     "executor": chat.user,
                     "wordlists": [wordlist.id] if wordlist else [],
+                    "input_technologies": ([input_technology.id] if input_technology else []),
+                    "input_vulnerabilities": ([input_vulnerability.id] if input_vulnerability else []),
                 }
                 if process:
                     data["process_id"] = process.id
@@ -74,9 +76,7 @@ Are you sure?
                 )
                 if instance:
                     self._remove_all_context_values(context)
-                    await self._reply(
-                        update, f"✅ Task {instance.id} created successfully\!"
-                    )
+                    await self._reply(update, f"✅ Task {instance.id} created successfully\!")
             else:
                 self._remove_all_context_values(context)
                 await self._reply(update, "❌ Task has been cancelled")

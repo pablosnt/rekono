@@ -13,16 +13,14 @@ class Theharvester(BaseParser):
         "trello_urls": OSINTDataType.URL,
         "interesting_urls": OSINTDataType.URL,
         "emails": OSINTDataType.EMAIL,
-        "linkedin_links": OSINTDataType.LINK,
+        "linkedin_links": OSINTDataType.URL,
         "asns": OSINTDataType.ASN,
         "twitter_people": OSINTDataType.USER,
         "linkedin_people": OSINTDataType.USER,
     }
 
     def _parse_report(self) -> None:
-        data = self._load_report_as_json()
+        data = self._load_report_as_json_dict()
         for the_harvester_type, items in data.items():
             for item in items:
-                self.create_finding(
-                    OSINT, data=item, data_type=self.data_types[the_harvester_type]
-                )
+                self.create_finding(OSINT, data=item, data_type=self.data_types[the_harvester_type])

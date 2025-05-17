@@ -24,12 +24,8 @@ class GobusterExecutorTest(RekonoTest):
         )
 
     def _setup_executor(self, target: str) -> None:
-        self.target = Target.objects.create(
-            project=self.project, target=target, type=Target.get_type(target)
-        )
-        self.configuration = Configuration.objects.get(
-            tool__name="Gobuster", default=True
-        )
+        self.target = Target.objects.create(project=self.project, target=target, type=Target.get_type(target))
+        self.configuration = Configuration.objects.get(tool__name="Gobuster", default=True)
         self.task = Task.objects.create(
             target=self.target,
             configuration=self.configuration,
@@ -42,13 +38,9 @@ class GobusterExecutorTest(RekonoTest):
         )
         self.executor = self.configuration.tool.get_executor_class()(self.execution)
 
-    def _test_check_arguments(
-        self, target: str, wordlist: Wordlist, expected: bool
-    ) -> None:
+    def _test_check_arguments(self, target: str, wordlist: Wordlist, expected: bool) -> None:
         self._setup_executor(target)
-        self.assertEqual(
-            expected, self.executor.check_arguments([], [], [], [], [wordlist])
-        )
+        self.assertEqual(expected, self.executor.check_arguments([], [], [], [], [wordlist]))
 
     def test_check_arguments_no_domain_target(self) -> None:
         self._test_check_arguments("10.10.10.10", self.subdomains_wordlist, False)

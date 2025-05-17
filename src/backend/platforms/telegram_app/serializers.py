@@ -1,14 +1,15 @@
 import logging
-from typing import Any, Dict
+from typing import Any
 
 from django.utils import timezone
+from rest_framework import status
+from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.serializers import ModelSerializer, SerializerMethodField
+
 from framework.fields import ProtectedSecretField
 from platforms.mail.notifications import SMTP
 from platforms.telegram_app.models import TelegramChat, TelegramSettings
 from platforms.telegram_app.notifications.notifications import Telegram
-from rest_framework import status
-from rest_framework.exceptions import AuthenticationFailed
-from rest_framework.serializers import ModelSerializer, SerializerMethodField
 from security.cryptography.hashing import hash
 from security.validators.input_validator import Regex, Validator
 
@@ -18,8 +19,8 @@ logger = logging.getLogger()
 class TelegramSettingsSerializer(ModelSerializer):
     token = ProtectedSecretField(
         Validator(Regex.SECRET.value, code="password").__call__,
-        write_only=True,
-        required=True,
+        required=False,
+        allow_null=True,
         source="secret",
     )
     bot = SerializerMethodField(read_only=True)
@@ -29,7 +30,7 @@ class TelegramSettingsSerializer(ModelSerializer):
         model = TelegramSettings
         fields = ("id", "token", "bot", "is_available")
 
-    def get_bot(self, instance: TelegramSettings) -> str:
+    def get_bot(self, instance: TelegramSettings) -> str | None:
         telegram = Telegram()
         telegram.initialize()
         return telegram.get_bot_name()
@@ -49,7 +50,7 @@ class TelegramChatSerializer(ModelSerializer):
         read_only_fields = ("user",)
         extra_kwargs = {"otp": {"write_only": True}}
 
-    def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         attrs = super().validate(attrs)
         try:
             attrs["telegram_chat"] = TelegramChat.objects.get(
@@ -61,13 +62,11 @@ class TelegramChatSerializer(ModelSerializer):
             raise AuthenticationFailed(code=status.HTTP_401_UNAUTHORIZED)
         return attrs
 
-    def create(self, validated_data: Dict[str, Any]) -> TelegramChat:
+    def create(self, validated_data: dict[str, Any]) -> TelegramChat:
         validated_data["telegram_chat"].otp = None
         validated_data["telegram_chat"].otp_expiration = None
         validated_data["telegram_chat"].user = validated_data["user"]
-        validated_data["telegram_chat"].save(
-            update_fields=["otp", "otp_expiration", "user"]
-        )
+        validated_data["telegram_chat"].save(update_fields=["otp", "otp_expiration", "user"])
         SMTP().telegram_linked_notification(validated_data["user"])
         Telegram().welcome_message(validated_data["user"])
         logger.info(

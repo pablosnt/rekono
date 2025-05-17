@@ -1,0 +1,9 @@
+[flake8]
+exclude =
+    .venv
+    migrations
+ignore =
+    E203
+    E501
+    W503
+    W605

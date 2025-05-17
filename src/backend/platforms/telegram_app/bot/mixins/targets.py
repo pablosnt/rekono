@@ -14,9 +14,7 @@ class TargetMixin(BaseMixin):
             context,
             await self._ask(
                 update,
-                Target.objects.filter(
-                    project=self._get_context_value(context, Context.PROJECT)
-                ).all(),
+                Target.objects.filter(project=self._get_context_value(context, Context.PROJECT)).all(),
                 "target",
                 3,
                 "Choose target",
@@ -38,9 +36,7 @@ class TargetMixin(BaseMixin):
             ),
         )
 
-    async def _ask_for_new_target(
-        self, update: Update, context: CallbackContext
-    ) -> int:
+    async def _ask_for_new_target(self, update: Update, context: CallbackContext) -> int:
         return await self._go_to_next_state(
             update,
             context,
@@ -60,9 +56,7 @@ class TargetMixin(BaseMixin):
             TargetSerializer,
             {
                 "project": project.id if project else None,
-                "target": update.effective_message.text
-                if update.effective_message
-                else None,
+                "target": (update.effective_message.text if update.effective_message else None),
             },
             self._get_previous_state(self._create_target),
             self._get_next_state(self._create_target),

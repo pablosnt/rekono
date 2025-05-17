@@ -38,19 +38,11 @@ class AlertViewSet(BaseViewSet):
     http_method_names = ["get", "post", "put", "delete"]
 
     def get_serializer_class(self) -> Serializer:
-        return (
-            EditAlertSerializer
-            if self.request.method == "PUT"
-            else super().get_serializer_class()
-        )
+        return EditAlertSerializer if self.request.method == "PUT" else super().get_serializer_class()
 
     def get_queryset(self) -> QuerySet:
         queryset = super().get_queryset()
-        return (
-            queryset.filter(enabled=True).all()
-            if self.request.method == "PUT"
-            else queryset
-        )
+        return queryset.filter(enabled=True).all() if self.request.method == "PUT" else queryset
 
     @extend_schema(request=None, responses={204: None})
     @action(
@@ -62,30 +54,25 @@ class AlertViewSet(BaseViewSet):
             ProjectMemberPermission,
         ],
     )
-    def suscription(self, request: Request, pk: str) -> Response:
+    def subscription(self, request: Request, pk: str) -> Response:
         alert = self.get_object()
         for method, expected_exists, error, operation in [
             (
                 "POST",
                 False,
-                "You are already suscribed to this alert",
-                alert.suscribers.add,
+                "You are already subscribed to this alert",
+                alert.subscribers.add,
             ),
             (
                 "DELETE",
                 True,
-                "You are already not suscribed to this alert",
-                alert.suscribers.remove,
+                "You are already not subscribed to this alert",
+                alert.subscribers.remove,
             ),
         ]:
             if request.method == method:
-                if (
-                    alert.suscribers.filter(id=request.user.id).exists()
-                    is not expected_exists
-                ):
-                    return Response(
-                        {"suscribe": error}, status=status.HTTP_400_BAD_REQUEST
-                    )
+                if alert.subscribers.filter(id=request.user.id).exists() is not expected_exists:
+                    return Response({"subscribe": error}, status=status.HTTP_400_BAD_REQUEST)
                 operation(request.user)
                 break
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -106,10 +93,7 @@ class AlertViewSet(BaseViewSet):
                     )
                 alert.enabled = new_value
                 alert.save(update_fields=["enabled"])
-                return Response(
-                    AlertSerializer(alert, context={"request": request}).data,
-                    status=status.HTTP_200_OK,
-                )
+                return Response(self.get_serializer(instance=alert).data, status=status.HTTP_200_OK)
 
 
 class MonitorSettingsViewSet(BaseViewSet):

@@ -21,7 +21,7 @@ class NucleiTest(ToolTest):
                     "model": Technology,
                     "name": "Apache Detection: Apache/2.4.25 (Debian)",
                     "version": None,
-                    "description": "Some Apache servers have the version on the response header. The OpenSSL version can be also obtained",  # noqa: E501
+                    "description": "Some Apache servers have the version on the response header. The OpenSSL version can be also obtained",
                     "reference": None,
                 },
                 {
@@ -43,7 +43,7 @@ class NucleiTest(ToolTest):
                 {
                     "model": Vulnerability,
                     "name": "HTTP Missing Security Headers: access-control-allow-headers",
-                    "description": "This template searches for missing HTTP security headers. The impact of these missing headers can vary.",  # noqa: E501
+                    "description": "This template searches for missing HTTP security headers. The impact of these missing headers can vary.",
                     "severity": Severity.INFO,
                     "cve": None,
                     "cwe": None,
@@ -77,7 +77,7 @@ class NucleiTest(ToolTest):
                 {
                     "model": Vulnerability,
                     "name": "phpinfo Disclosure: 7.0.30",
-                    "description": 'A "PHP Info" page was found. The output of the phpinfo() command can reveal detailed PHP environment information.',  # noqa: E501
+                    "description": 'A "PHP Info" page was found. The output of the phpinfo() command can reveal detailed PHP environment information.',
                     "severity": Severity.LOW,
                     "cve": None,
                     "cwe": None,
@@ -86,7 +86,7 @@ class NucleiTest(ToolTest):
                 {
                     "model": Vulnerability,
                     "name": "README.md file disclosure",
-                    "description": "Internal documentation file often used in projects which can contain sensitive information.",  # noqa: E501
+                    "description": "Internal documentation file often used in projects which can contain sensitive information.",
                     "severity": Severity.INFO,
                     "cve": None,
                     "cwe": None,

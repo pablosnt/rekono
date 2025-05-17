@@ -37,7 +37,6 @@ class ExecutionViewSet(BaseViewSet):
     ordering_fields = [
         "id",
         "task",
-        "group",
         "configuration",
         "configuration__tool",
         "creation",
@@ -58,9 +57,7 @@ class ExecutionViewSet(BaseViewSet):
     def download_report(self, request: Request, pk: str) -> FileResponse:
         execution = self.get_object()
         if execution.status != Status.COMPLETED:
-            return Response(
-                {"execution": "Execution is not completed"}, status=HTTP_400_BAD_REQUEST
-            )
+            return Response({"execution": "Execution is not completed"}, status=HTTP_400_BAD_REQUEST)
         path = CONFIG.reports / (execution.output_file or "")
         if not execution.output_file or not path.is_file():
             return Response(status=HTTP_404_NOT_FOUND)

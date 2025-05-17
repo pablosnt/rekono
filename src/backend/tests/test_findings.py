@@ -1,4 +1,5 @@
-from django.db import models
+from rest_framework.test import APIClient
+
 from findings.enums import (
     HostOS,
     OSINTDataType,
@@ -17,10 +18,11 @@ from findings.models import (
     Technology,
     Vulnerability,
 )
-from rest_framework.test import APIClient
 from targets.enums import TargetType
 from tests.cases import ApiTestCase
 from tests.framework import ApiTest
+
+# pytype: disable=wrong-arg-types
 
 findings_data = {
     OSINT: (
@@ -36,7 +38,7 @@ findings_data = {
         {
             "title": "Host discovered",
             "description": f"10.10.10.10 - {HostOS.LINUX.value}",
-            "severity": Severity.INFO.value,
+            "severity": Severity.INFO,
         },
         "10.10.10.10",
         "/api/hosts/",
@@ -138,12 +140,8 @@ class FindingTest(ApiTest):
                                 "id": 1,
                                 "is_fixed": False,
                                 **{
-                                    k: v
-                                    if not isinstance(v, models.TextChoices)
-                                    else v.value
-                                    for k, v in self.raw_findings[
-                                        finding.__class__
-                                    ].items()
+                                    k: str(v) if isinstance(v, Severity) else v
+                                    for k, v in self.raw_findings[finding.__class__].items()
                                 },
                             }
                         ],
@@ -182,12 +180,8 @@ class FindingTest(ApiTest):
                                 "id": 1,
                                 "is_fixed": True,
                                 **{
-                                    k: v
-                                    if not isinstance(v, models.TextChoices)
-                                    else v.value
-                                    for k, v in self.raw_findings[
-                                        finding.__class__
-                                    ].items()
+                                    k: str(v) if isinstance(v, Severity) else v
+                                    for k, v in self.raw_findings[finding.__class__].items()
                                 },
                             }
                         ],
@@ -226,12 +220,8 @@ class FindingTest(ApiTest):
                                 "id": 1,
                                 "is_fixed": False,
                                 **{
-                                    k: v
-                                    if not isinstance(v, models.TextChoices)
-                                    else v.value
-                                    for k, v in self.raw_findings[
-                                        finding.__class__
-                                    ].items()
+                                    k: str(v) if isinstance(v, Severity) else v
+                                    for k, v in self.raw_findings[finding.__class__].items()
                                 },
                             }
                         ],
@@ -251,19 +241,19 @@ class FindingTest(ApiTest):
         for _, _, endpoint in findings_data.values():
             self.assertEqual(401, APIClient().get(endpoint).status_code)
 
-    def test_defect_dojo(self) -> None:
+    def test_defectdojo(self) -> None:
         for finding in self.findings:
-            parsed = finding.defect_dojo()
+            parsed = finding.defectdojo()
             for key, value in findings_data[finding.__class__][0].items():
                 self.assertEqual(value, parsed[key])
-        defect_dojo_endpoint = {
+        defectdojo_endpoint = {
             "protocol": "http",
             "host": "10.10.10.10",
             "port": 80,
             "path": "/index.php",
         }
-        parsed = self.path.defect_dojo_endpoint(self.target)
-        for key, value in defect_dojo_endpoint.items():
+        parsed = self.path.defectdojo_endpoint(self.target)
+        for key, value in defectdojo_endpoint.items():
             self.assertEqual(value, parsed[key])
 
 
@@ -303,16 +293,14 @@ class TriageFindingTest(ApiTest):
                         expected=[
                             {
                                 "id": 1,
-                                "triage_status": TriageStatus.FALSE_POSITIVE.value
-                                if isinstance(finding, Exploit)
-                                else TriageStatus.UNTRIAGED.value,
+                                "triage_status": (
+                                    TriageStatus.FALSE_POSITIVE.value
+                                    if isinstance(finding, Exploit)
+                                    else TriageStatus.UNTRIAGED.value
+                                ),
                                 **{
-                                    k: v
-                                    if not isinstance(v, models.TextChoices)
-                                    else v.value
-                                    for k, v in self.raw_findings[
-                                        finding.__class__
-                                    ].items()
+                                    k: str(v) if isinstance(v, Severity) else v
+                                    for k, v in self.raw_findings[finding.__class__].items()
                                 },
                             }
                         ],
@@ -325,16 +313,14 @@ class TriageFindingTest(ApiTest):
                         expected=[
                             {
                                 "id": 1,
-                                "triage_status": TriageStatus.FALSE_POSITIVE.value
-                                if isinstance(finding, Exploit)
-                                else TriageStatus.UNTRIAGED.value,
+                                "triage_status": (
+                                    TriageStatus.FALSE_POSITIVE.value
+                                    if isinstance(finding, Exploit)
+                                    else TriageStatus.UNTRIAGED.value
+                                ),
                                 **{
-                                    k: v
-                                    if not isinstance(v, models.TextChoices)
-                                    else v.value
-                                    for k, v in self.raw_findings[
-                                        finding.__class__
-                                    ].items()
+                                    k: str(v) if isinstance(v, Severity) else v
+                                    for k, v in self.raw_findings[finding.__class__].items()
                                 },
                             }
                         ],
@@ -370,9 +356,7 @@ class TriageFindingTest(ApiTest):
                             "id": 1,
                             **self.false_positive,
                             **{
-                                k: v
-                                if not isinstance(v, models.TextChoices)
-                                else v.value
+                                k: str(v) if isinstance(v, Severity) else v
                                 for k, v in self.raw_findings[finding.__class__].items()
                             },
                         },
@@ -394,9 +378,7 @@ class TriageFindingTest(ApiTest):
                             "id": 1,
                             **self.true_positive,
                             **{
-                                k: v
-                                if not isinstance(v, models.TextChoices)
-                                else v.value
+                                k: str(v) if isinstance(v, Severity) else v
                                 for k, v in self.raw_findings[finding.__class__].items()
                             },
                         },
@@ -411,15 +393,9 @@ class OSINTTest(ApiTest):
     anonymous_allowed = None
     cases = [
         ApiTestCase(["admin1", "admin2", "auditor1", "auditor2"], "post", 405),
-        ApiTestCase(
-            ["reader1", "reader2"], "post", 403, endpoint="{endpoint}2/target/"
-        ),
-        ApiTestCase(
-            ["admin2", "auditor2"], "post", 404, endpoint="{endpoint}2/target/"
-        ),
-        ApiTestCase(
-            ["admin1", "auditor1"], "post", 400, endpoint="{endpoint}1/target/"
-        ),
+        ApiTestCase(["reader1", "reader2"], "post", 403, endpoint="{endpoint}2/target/"),
+        ApiTestCase(["admin2", "auditor2"], "post", 404, endpoint="{endpoint}2/target/"),
+        ApiTestCase(["admin1", "auditor1"], "post", 400, endpoint="{endpoint}1/target/"),
         ApiTestCase(
             ["auditor1"],
             "post",
@@ -431,9 +407,7 @@ class OSINTTest(ApiTest):
             },
             endpoint="{endpoint}2/target/",
         ),
-        ApiTestCase(
-            ["admin2", "auditor2", "reader2"], "get", 404, endpoint="/api/targets/2/"
-        ),
+        ApiTestCase(["admin2", "auditor2", "reader2"], "get", 404, endpoint="/api/targets/2/"),
         ApiTestCase(
             ["admin1", "auditor1", "reader1"],
             "get",

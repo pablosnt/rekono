@@ -1,4 +1,4 @@
-from typing import Any, List
+from typing import Any
 
 from django.core import management
 from django.core.management.commands import loaddata
@@ -23,11 +23,8 @@ class BaseApp:
                         return  # pragma: no cover
             management.call_command(
                 loaddata.Command(),
-                *(
-                    self.fixtures_path / fixture
-                    for fixture in sorted(self.fixtures_path.rglob("*.json"))
-                )
+                *(self.fixtures_path / fixture for fixture in sorted(self.fixtures_path.rglob("*.json"))),
             )
 
-    def _get_models(self) -> List[Any]:
+    def _get_models(self) -> list[Any]:
         return []  # pragma: no cover

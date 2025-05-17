@@ -1,7 +1,8 @@
-from typing import List, Optional, Self
+from typing import Self
 
 from django.apps import apps
 from django.db import models
+
 from framework.models import BaseInput, BaseModel
 from input_types.enums import InputTypeName
 
@@ -27,13 +28,13 @@ class InputType(BaseModel):
         """
         return self.name
 
-    def _get_class_from_reference(self, reference: str) -> BaseInput:
+    def _get_class_from_reference(self, reference: str) -> BaseInput | None:
         if not reference:
             return None
         app_label, model_name = reference.split(".", 1)
         return apps.get_model(app_label=app_label, model_name=model_name)
 
-    def get_model_class(self) -> Optional[BaseInput]:
+    def get_model_class(self) -> BaseInput | None:
         """Get related model from 'model' reference.
 
         Returns:
@@ -41,7 +42,7 @@ class InputType(BaseModel):
         """
         return self._get_class_from_reference(self.model)
 
-    def get_fallback_model_class(self) -> Optional[BaseInput]:
+    def get_fallback_model_class(self) -> BaseInput | None:
         """Get callback model from 'fallback_model' reference.
 
         Returns:
@@ -49,22 +50,20 @@ class InputType(BaseModel):
         """
         return self._get_class_from_reference(self.fallback_model)
 
-    def get_related_input_types(self) -> List[Self]:
+    def get_related_input_types(self) -> list[Self]:
         """Get relations between the different input types.
 
         Returns:
-            Dict[InputType, List[InputType]]: Dict with a list of related input types for each input type
+            dict[InputType, list[InputType]]: dict with a list of related input types for each input type
         """
-        relations: List[InputType] = []
+        relations: list[InputType] = []
         if not self.relationships:
             return relations
         model = self.get_model_class()
         if model:
             for field in model._meta.get_fields():  # For each model field
                 # Check if field is a ForeignKey to a BaseInput model
-                if field.__class__ == models.ForeignKey and issubclass(
-                    field.related_model, BaseInput
-                ):
+                if field.__class__ == models.ForeignKey and issubclass(field.related_model, BaseInput):
                     # Search InputType by model
                     related_type = InputType.objects.filter(
                         model=f"{field.related_model._meta.app_label}.{field.related_model._meta.model_name}"

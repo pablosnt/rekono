@@ -5,6 +5,8 @@ from tests.framework import ApiTest
 from tools.enums import Intensity as IntensityEnum
 from tools.models import Argument, Configuration, Input, Intensity, Output, Tool
 
+# pytype: disable=wrong-arg-types
+
 nmap = "Nmap"
 the_harvester = "theHarvester"
 
@@ -81,9 +83,7 @@ class ToolTest(ApiTest):
             },
             endpoint="{endpoint}3/",
         ),
-        ApiTestCase(
-            ["reader1", "reader2"], "delete", 403, endpoint="{endpoint}1/like/"
-        ),
+        ApiTestCase(["reader1", "reader2"], "delete", 403, endpoint="{endpoint}1/like/"),
         ApiTestCase(
             ["admin1", "admin2", "auditor1", "auditor2"],
             "delete",

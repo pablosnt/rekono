@@ -1,12 +1,14 @@
+# pytype: disable=attribute-error
 import logging
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any
 
-from rekono.settings import CONFIG
 from rest_framework import status
 from rest_framework.renderers import JSONRenderer
 from rest_framework.request import HttpRequest
 from rest_framework.response import Response
+
+from rekono.settings import CONFIG
 
 logger = logging.getLogger()
 
@@ -60,7 +62,7 @@ class SecurityMiddleware:
 
     get_response: Any
 
-    def _get_forwarded_address(self, request: HttpRequest) -> Optional[str]:
+    def _get_forwarded_address(self, request: HttpRequest) -> str | None:
         x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
         if x_forwarded_for and CONFIG.trusted_proxy:
             return x_forwarded_for.split(",", 1)[0]
@@ -75,9 +77,7 @@ class SecurityMiddleware:
         response["Allow"] = "GET, POST, PUT, DELETE, OPTIONS"
         return response
 
-    def _add_security_headers(
-        self, request: HttpRequest, response: Response
-    ) -> Response:
+    def _add_security_headers(self, request: HttpRequest, response: Response) -> Response:
         for header, value in SECURITY_HEADERS.items():
             if header == "Referrer-Policy" and request.path.startswith("/admin"):
                 value = "strict-origin"
@@ -112,11 +112,7 @@ class SecurityMiddleware:
         forwarded_address = self._get_forwarded_address(request)
         if forwarded_address:
             request.META["REMOTE_ADDR"] = forwarded_address
-        response = (
-            self.get_response(request)
-            if request.method != "OPTIONS"
-            else self._http_options(request)
-        )
+        response = self.get_response(request) if request.method != "OPTIONS" else self._http_options(request)
         response = self._add_security_headers(request, response)
         self._log_request_and_response(request, response)
         return response

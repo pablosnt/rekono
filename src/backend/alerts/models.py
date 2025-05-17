@@ -1,6 +1,7 @@
-from alerts.enums import AlertItem, AlertMode
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+
+from alerts.enums import AlertItem, AlertMode
 from executions.models import Execution
 from findings.enums import PortStatus, TriageStatus
 from findings.models import (
@@ -21,13 +22,9 @@ from security.validators.input_validator import Regex, Validator
 
 
 class Alert(BaseModel):
-    project = models.ForeignKey(
-        Project, related_name="alerts", on_delete=models.CASCADE
-    )
+    project = models.ForeignKey(Project, related_name="alerts", on_delete=models.CASCADE)
     item = models.TextField(max_length=15, choices=AlertItem.choices)
-    mode = models.TextField(
-        max_length=7, choices=AlertMode.choices, default=AlertMode.NEW
-    )
+    mode = models.TextField(max_length=7, choices=AlertMode.choices, default=AlertMode.NEW)
     value = models.TextField(
         max_length=100,
         validators=[Validator(Regex.NAME.value, code="filter_value")],
@@ -35,13 +32,11 @@ class Alert(BaseModel):
         null=True,
     )
     enabled = models.BooleanField(default=True)
-    suscribe_all_members = models.BooleanField(default=False)
-    owner = models.ForeignKey(
-        AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True
-    )
-    suscribers = models.ManyToManyField(
-        AUTH_USER_MODEL, related_name="alerts", blank=True
-    )
+    subscribe_all_members = models.BooleanField(default=False)
+    owner = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True)
+    subscribers = models.ManyToManyField(AUTH_USER_MODEL, related_name="alerts", blank=True)
+
+    project_field = "project"
 
     class Meta:
         constraints = [
@@ -62,7 +57,7 @@ class Alert(BaseModel):
         AlertItem.HOST.value: {
             "model": Host,
             AlertMode.NEW.value: True,
-            AlertMode.FILTER.value: "address",
+            AlertMode.FILTER.value: "ip",
         },
         AlertItem.OPEN_PORT.value: {
             "model": Port,
@@ -100,19 +95,12 @@ class Alert(BaseModel):
             values.append(self.value)
         return " - ".join(values)
 
-    @classmethod
-    def get_project_field(cls) -> str:
-        return "project"
-
     def must_be_triggered(self, execution: Execution, finding: Finding) -> bool:
         data = self.mapping[self.item]
         if (
             not isinstance(finding, data["model"])
             or finding.is_fixed
-            or (
-                hasattr(finding, "triage_status")
-                and finding.triage_status == TriageStatus.FALSE_POSITIVE
-            )
+            or (hasattr(finding, "triage_status") and finding.triage_status == TriageStatus.FALSE_POSITIVE)
             or not data.get(self.mode)
             or (data.get("filter") and not data["filter"](finding))
         ):
@@ -120,22 +108,15 @@ class Alert(BaseModel):
         if self.mode == AlertMode.NEW.value:
             return not finding.executions.exclude(id=execution.id).exists()
         elif self.mode == AlertMode.FILTER.value:
-            return (
-                getattr(finding, data.get(AlertMode.FILTER.value, "").lower())
-                == self.value.lower()
-            )
+            return getattr(finding, str(data.get(AlertMode.FILTER.value, "")).lower()) == self.value.lower()
         else:
-            return (
-                getattr(finding, data.get(AlertMode.MONITOR.value, "").lower()) is True
-            )
+            return getattr(finding, str(data.get(AlertMode.MONITOR.value, "")).lower()) is True
 
 
 class MonitorSettings(BaseModel):
     rq_job_id = models.TextField(max_length=50, blank=True, null=True)
     last_monitor = models.DateTimeField(blank=True, null=True)
-    hour_span = models.IntegerField(
-        default=7, validators=[MinValueValidator(24), MaxValueValidator(168)]
-    )
+    hour_span = models.IntegerField(default=24, validators=[MinValueValidator(24), MaxValueValidator(168)])
 
     def __str__(self) -> str:
         return f"Last monitor was at {self.last_monitor}. Next one in {self.hour_span} hours"
