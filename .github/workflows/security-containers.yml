@@ -82,8 +82,9 @@ jobs:
           docker push ${{ secrets.DOCKER_USER }}/${{ matrix.image }}:latest
           docker logout
 
-  desktop:
-    name: Debian Desktop
+  release:
+    name: Kali Release
+    if: ${{ github.event_name == 'release' }}
     runs-on: ubuntu-latest
     environment: gitlab
     needs: docker-images
