@@ -49,7 +49,7 @@ jobs:
         run: docker build --build-arg REKONO_VERSION=$VERSION --file ${{ matrix.dockerfile }} --tag ${{ matrix.image }} .
 
       - name: Trivy
-        uses: aquasecurity/trivy-action@v0
+        uses: aquasecurity/trivy-action@0.30.0
         with:
           image-ref: ${{ matrix.image }}
           format: table
