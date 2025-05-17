@@ -10,7 +10,7 @@ jobs:
     environment: github
     steps:
       - name: Legitify
-        uses: Legit-Labs/legitify@v1.0.11
+        uses: Legit-Labs/legitify@v038aa49473a6974a3ef79f6c76b949b689d23282
         with:
           github_token: ${{ secrets.ADMIN_PAT }}
           analyze_self_only: true
