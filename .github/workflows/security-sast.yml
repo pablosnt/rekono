@@ -16,9 +16,7 @@ jobs:
           fetch-depth: 0
       
       - name: Semgrep
-        run: semgrep ci --no-suppress-errors --json -o semgrep.json
-        env:
-          SEMGREP_APP_TOKEN: rekono
+        run: semgrep scan --config=auto --error --json -o semgrep.json .
       
       - name: Upload report as GitHub artifact
         if: ${{ !cancelled() }}
