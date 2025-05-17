@@ -26,7 +26,7 @@ class HostsMetadata(BaseIntegration):
         ]:
             try:
                 finding.domain = socket.gethostbyaddr(finding.ip)[0]
-            except Exception:  # nosec
+            except Exception:
                 pass
         if ip_type == TargetType.PUBLIC_IP and not all(
             [finding.country, finding.city, finding.latitude, finding.longitude]

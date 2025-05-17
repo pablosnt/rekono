@@ -5,7 +5,7 @@ import json
 import threading
 import uuid
 from typing import Any, cast
-from xml.etree import ElementTree as ET  # nosec
+from xml.etree import ElementTree as ET
 
 from django.db.models import Q, QuerySet
 from django.forms.models import model_to_dict

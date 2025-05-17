@@ -22,7 +22,7 @@ class BaseCommand(CommandHandler, BaseTelegramBot):
     async def execute_command(self, update: Update, context: CallbackContext) -> None | int:
         try:
             await self._execute_command(update, context)
-        except Exception:  # nosec
+        except Exception:
             pass
 
 

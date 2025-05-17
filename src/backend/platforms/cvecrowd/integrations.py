@@ -50,7 +50,7 @@ class CveCrowd(BaseIntegration):
                     headers={"Authorization": f"Bearer {self.settings.secret}"},
                     params={"days": self.settings.trending_span_days},
                 )
-            except Exception:  # nosec
+            except Exception:
                 pass
 
     def _process_finding(self, execution: Execution, finding: Vulnerability) -> None:

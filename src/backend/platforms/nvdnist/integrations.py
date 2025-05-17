@@ -50,7 +50,7 @@ class NvdNist(BaseIntegration):
     def _process_finding(self, execution: Execution, finding: Vulnerability) -> None:
         try:
             data = self._get_cve(finding.cve)
-        except Exception:  # nosec
+        except Exception:
             return
         if len(data.get("vulnerabilities", []) or []) == 0:
             return

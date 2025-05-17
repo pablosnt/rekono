@@ -135,9 +135,9 @@ class BaseInput(BaseModel):
             url_to_test = schema.format(protocol=protocol, host=host, port=port, endpoint=endpoint)
             try:
                 # nosemgrep: python.requests.security.disabled-cert-validation.disabled-cert-validation
-                requests.get(url_to_test, timeout=5, verify=False)  # nosec
+                requests.get(url_to_test, timeout=5, verify=False)
                 return url_to_test
-            except Exception:  # nosec
+            except Exception:
                 continue
         return None
 

@@ -1,6 +1,6 @@
 import re
 import shutil
-import subprocess  # nosec
+import subprocess
 from pathlib import Path
 from typing import Any
 
@@ -57,7 +57,7 @@ class Tool(BaseLike):
     def _parse_version(self) -> str | None:
         version_regex = r"(?!m)[a-z]?[\d]+\.[\d]+\.?[\d]*-?[a-z]*"
         if self.version_argument:
-            process = subprocess.run(  # nosec
+            process = subprocess.run(
                 [i for i in [self.command, self.script, self.version_argument] if i],
                 capture_output=True,
             )

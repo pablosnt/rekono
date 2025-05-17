@@ -1,5 +1,5 @@
 import os
-import subprocess  # nosec
+import subprocess
 import uuid
 from pathlib import Path
 from typing import Any
@@ -21,12 +21,12 @@ class Gitleaks(BaseExecutor):
         gitdumper_directory = Path(CONFIG.gittools_dir) / "Dumper"
         # pytype: enable=attribute-error
         run_directory = CONFIG.reports / str(uuid.uuid4())
-        process = subprocess.run(  # nosec
+        process = subprocess.run(
             ["bash", gitdumper_directory, "gitdumper.sh", target_url, run_directory],
             capture_output=True,
             cwd=gitdumper_directory,
         )
-        subprocess.run(  # nosec
+        subprocess.run(
             ["git", "checkout", "--", "."],
             capture_output=True,
             cwd=run_directory,
