@@ -1,7 +1,7 @@
 import logging
 import os
 import re
-import subprocess  # nosec
+import subprocess
 import uuid
 from pathlib import Path
 from typing import Any
@@ -174,7 +174,7 @@ class BaseExecutor:
 
     def _run(self, environment: dict[str, Any] = os.environ.copy()) -> str:
         logger.info(f"[Tool] Running: {' '.join(self.arguments)}")
-        process = subprocess.run(  # nosec
+        process = subprocess.run(
             self.arguments,
             capture_output=True,
             env=environment,

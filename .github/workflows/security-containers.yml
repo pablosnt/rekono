@@ -1,149 +1,161 @@
-# TODO
-# name: Containers
-# on:
-#   workflow_dispatch:
-#   pull_request:
-#     paths:
-#       - 'docker/**'
-#       - 'docker-compose.yml'
+# TODO: Rename file to containers.yml. Keep it as it is for now, to execute the workflow before reaching main
+name: Containers
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'docker/**'
+      - 'docker-compose.yml'
+      - 'src/**'
+  release:
+    types: [published]
 
-# jobs:
-#   docker-compose:
-#     name: Docker Compose
-#     runs-on: ubuntu-latest
-#     steps:
-#       - name: Checkout
-#         uses: actions/checkout@v4
-#         with:
-#           fetch-depth: 0
-      
-#       - name: Build Docker images
-#         run: docker-compose build
-      
-#       - name: Scan Nginx image with Trivy
-#         continue-on-error: true
-#         uses: aquasecurity/trivy-action@91713af97dc80187565512baba96e4364e983601
-#         with:
-#           image-ref: rekono-nginx
-#           format: table
-#           exit-code: 1
-      
-#       - name: Scan Nginx image with Dockle
-#         continue-on-error: true
-#         uses: goodwithtech/dockle-action@426396fd1cd8feecee31992a6d1482dde8e26515
-#         with:
-#           image: rekono-nginx
-#           format: json
-#           output: rekono-nginx-dockle.json
-#           exit-code: 1
-#           exit-level: warn
-      
-#       - name: Scan Kali image with Trivy
-#         continue-on-error: true
-#         uses: aquasecurity/trivy-action@91713af97dc80187565512baba96e4364e983601
-#         with:
-#           image-ref: rekono-kali
-#           format: table
-#           exit-code: 1
-      
-#       - name: Scan Kali image with Dockle
-#         continue-on-error: true
-#         uses: goodwithtech/dockle-action@426396fd1cd8feecee31992a6d1482dde8e26515
-#         with:
-#           image: rekono-kali
-#           format: json
-#           output: rekono-kali-dockle.json
-#           exit-code: 1
-#           exit-level: warn
-      
-#       - name: Scan Backend image with Trivy
-#         continue-on-error: true
-#         uses: aquasecurity/trivy-action@91713af97dc80187565512baba96e4364e983601
-#         with:
-#           image-ref: rekono-backend
-#           format: table
-#           exit-code: 1
-      
-#       - name: Scan Backend image with Dockle
-#         continue-on-error: true
-#         uses: goodwithtech/dockle-action@426396fd1cd8feecee31992a6d1482dde8e26515
-#         with:
-#           image: rekono-backend
-#           format: json
-#           output: rekono-backend-dockle.json
-#           exit-code: 1
-#           exit-level: warn
-      
-#       - name: Scan Frontend image with Trivy
-#         continue-on-error: true
-#         uses: aquasecurity/trivy-action@91713af97dc80187565512baba96e4364e983601
-#         with:
-#           image-ref: rekono-frontend
-#           format: table
-#           exit-code: 1
-      
-#       - name: Scan Frontend image with Dockle
-#         continue-on-error: true
-#         uses: goodwithtech/dockle-action@426396fd1cd8feecee31992a6d1482dde8e26515
-#         with:
-#           image: rekono-frontend
-#           format: json
-#           output: rekono-frontend-dockle.json
-#           exit-code: 1
-#           exit-level: warn
+env:
+  VERSION: ${{ github.event_name == 'release' && github.event.release.name || 'dev' }}
+  FAIL: ${{ github.event_name == 'release' && 0 || 1 }}
 
-#       - name: Upload reports as GitHub artifact
-#         uses: actions/upload-artifact@v4
-#         with:
-#           name: dockle
-#           path: "*-dockle.json"
-#           if-no-files-found: warn
-
-#   debian-image:
-#     name: Debian Image
-#     runs-on: ubuntu-latest
-#     steps:
-#       - name: Checkout
-#         uses: actions/checkout@v4
-#         with:
-#           fetch-depth: 0
+jobs:
+  docker-images:
+    runs-on: ubuntu-latest
+    environment: docker-hub
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Backend
+            dockerfile: docker/Dockerfile.backend
+            image: rekono-backend
+          # TODO: Evaluate dependencies between the images, if any
+          # - name: Frontend
+          #   dockerfile: docker/Dockerfile.frontend
+          #   tag: ${{ secrets.DOCKER_USER }}/rekono-frontend
+          # - name: Kali
+          #   dockerfile: docker/Dockerfile.kali
+          #   tag: ${{ secrets.DOCKER_USER }}/rekono-kali
+          # - name: Nginx
+          #   dockerfile: docker/nginx/Dockerfile
+          #   tag: ${{ secrets.DOCKER_USER }}/rekono-nginx
+          # - name: Kaboxer
+          #   dockerfile: docker/debian/Dockerfile
+          #   tag: ${{ secrets.DOCKER_USER }}/rekono
+    name: ${{ matrix.name }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       
-#       - uses: actions/setup-node@v4
-#         with:
-#           node-version: 16
+      - name: Build image
+        run: docker build --build-arg REKONO_VERSION=$VERSION --file ${{ matrix.dockerfile }} --tag ${{ matrix.image }} .
+
+      - name: Trivy
+        uses: aquasecurity/trivy-action@0.30.0
+        with:
+          image-ref: ${{ matrix.image }}
+          format: table
+          exit-code: ${{ env.FAIL }}
       
-#       - name: Install dependencies
-#         working-directory: src/frontend
-#         run: npm install .
-    
-#       - name: Generate Desktop app
-#         working-directory: src/frontend
-#         run: npm run electron:build
+      - name: Dockle
+        uses: goodwithtech/dockle-action@e30e6af832aad6ea7dca2a248d31a85eab6dbd68
+        with:
+          image: ${{ matrix.image }}
+          format: json
+          output: dockle.json
+          exit-code: ${{ env.FAIL }}
+          exit-level: warn
 
-#       - name: Build Docker image
-#         run: docker build --build-arg REKONO_VERSION=dev --file docker/debian/Dockerfile --tag rekono-debian .
+      - name: Upload Dockle report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.name }}
+          path: ${{ matrix.name }}-dockle.json
+          if-no-files-found: warn
 
-#       - name: Scan Debian image with Trivy
-#         continue-on-error: true
-#         uses: aquasecurity/trivy-action@91713af97dc80187565512baba96e4364e983601
-#         with:
-#           image-ref: rekono-debian
-#           format: table
-#           exit-code: 1
+      - name: Push image to Docker Hub
+        if: ${{ github.event_name == 'release' }}
+        run: |
+          docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }}
+          docker tag ${{ matrix.image }} ${{ secrets.DOCKER_USER }}/${{ matrix.image }}:${{ github.event.release.name }}
+          docker push ${{ secrets.DOCKER_USER }}/${{ matrix.image }}:${{ github.event.release.name }}
+          docker tag ${{ matrix.image }} ${{ secrets.DOCKER_USER }}/${{ matrix.image }}:latest
+          docker push ${{ secrets.DOCKER_USER }}/${{ matrix.image }}:latest
+          docker logout
+
+  kali-release:
+    name: Kali Release
+    if: ${{ github.event_name == 'release' }}
+    runs-on: ubuntu-latest
+    environment: gitlab
+    needs: docker-images
+    steps:
+      - name: Checkout GitLab repository
+        run: git clone https://gitlab.com/pablosnt/rekono.git rekono-kbx
+
+      - name: Update debian/changelog
+        working-directory: rekono-kbx/debian
+        shell: python
+        run: |
+          import pytz
+          from datetime import datetime
+          with open('changelog', 'r') as changelog:
+            old_changes = changelog.read()
+          tz = pytz.timezone('Europe/Madrid')
+          d = tz.localize(datetime.now())
+          change_time = d.strftime('%a, %d %b %Y %H:%M:%S %z')
+          new_changes = f'rekono-kbx (${{ github.event.release.name }}) kali-dev; urgency=medium\n\n  * Update Rekono version to ${{ github.event.release.name }}.\n\n -- Pablo Santiago López <${{ secrets.GITLAB_EMAIL }}>  {change_time}\n\n'
+          with open('changelog', 'w') as changelog:
+            changelog.write(new_changes + old_changes)
       
-#       - name: Scan Debian image with Dockle
-#         continue-on-error: true
-#         uses: goodwithtech/dockle-action@426396fd1cd8feecee31992a6d1482dde8e26515
-#         with:
-#           image: rekono-debian
-#           format: json
-#           output: dockle.json
-#           exit-code: 1
-#           exit-level: warn
+      - name: Commit changes to GitLab
+        working-directory: rekono-kbx
+        run: |
+          git config user.name 'Pablo Santiago'
+          git config user.email '${{ secrets.GITLAB_EMAIL }}'
+          git checkout -b release/${{ github.event.release.name }}
+          git add .
+          git commit -m "Update Rekono version to ${{ github.event.release.name }}"
+          git config credential.helper '!f() { sleep 1; echo "username=${{ secrets.GITLAB_USER }}"; echo "password=${{ secrets.GITLAB_TOKEN }}"; }; f'
+          git push --set-upstream origin release/${{ github.event.release.name }}
+      
+      - name: GitLab merge request
+        shell: python
+        env:
+          GITLAB_PROJECT_ID: 45783845
+        run: |
+          import requests
+          headers = {
+            'PRIVATE-TOKEN': '${{ secrets.GITLAB_TOKEN }}'
+          }
+          data = {
+            'title': 'Update Rekono version to ${{ github.event.release.name }}',
+            'source_branch': 'release/${{ github.event.release.name }}',
+            'target_branch': 'kali/master',
+          }
+          response = requests.post('https://gitlab.com/api/v4/projects/${{ env.GITLAB_PROJECT_ID }}/merge_requests', data=data, headers=headers)
+          if response.status_code != 201:
+            print(response.text)
+          response.raise_for_status()
 
-#       - name: Upload report as GitHub artifact
-#         uses: actions/upload-artifact@v4
-#         with:
-#           name: rekono-debian
-#           path: dockle.json
-#           if-no-files-found: warn
+      - name: GitLab issue in Kali Linux repository
+        shell: python
+        env:
+          GITLAB_PROJECT_ID: 48406619
+        run: |
+          import requests
+          headers = {
+            'PRIVATE-TOKEN': '${{ secrets.GITLAB_TOKEN }}'
+          }
+          data = {
+            'title': 'New Rekono version ${{ github.event.release.name }}',
+            'description': '''Please, upgrade the `rekono-kbx` Kali Linux package to the latest version `${{ github.event.release.name }}`.
+
+            New version details:
+            - [GitHub release](https://github.com/pablosnt/rekono/releases/tag/${{ github.event.release.name }})
+            - [Rekono changelog](https://github.com/pablosnt/rekono/blob/main/CHANGELOG.md)
+
+            Thank you very much!
+            ''',
+          }
+          response = requests.post('https://gitlab.com/api/v4/projects/${{ env.GITLAB_PROJECT_ID }}/issues', data=data, headers=headers)
+          response.raise_for_status()

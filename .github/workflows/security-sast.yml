@@ -4,88 +4,24 @@ on:
   pull_request:
 
 jobs:
-  gitleaks:
-    name: GitLeaks
+  semgrep:
+    name: Semgrep
     runs-on: ubuntu-latest
+    container:
+      image: semgrep/semgrep:latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
-      - uses: gitleaks/gitleaks-action@9c66aa96d2700e2b6aa0f9f7021ae6e5cc7a4375
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITLEAKS_NOTIFY_USER_LIST: "@pablosnt"
-
-  sast:
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - name: Semgrep Backend
-            tool: semgrep
-            version: latest
-            path: src/backend
-            report: semgrep-backend.json
-            arguments: --config=auto --error --json
-          - name: Semgrep CICD
-            tool: semgrep
-            version: latest
-            path: .github/workflows
-            report: semgrep-cicd.json
-            arguments: --config=auto --error --json
-          - name: Bandit
-            tool: bandit
-            version: latest
-            path: src/backend
-            report: bandit.json
-            arguments: -r --skip=B105,B106 -f json
-          - name: Njsscan
-            tool: njsscan
-            version: latest
-            path: src/frontend
-            report: njsscan.json
-            arguments: --exit-warning --json
-    name: ${{ matrix.name }}
-    steps:
-      - uses: dorny/paths-filter@3c49e64ca26115121162fb767bc6af9e8d059f1a
-        id: changes
-        name: Path filter
-        with:
-          filters: |
-            path:
-              - '${{ matrix.path }}/**'
-
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Install UV
-        if: ${{ steps.changes.outputs.path == 'true' }}
-        uses: astral-sh/setup-uv@v6
-        with:
-          activate-environment: true
-
-      - name: Installation
-        if: ${{ matrix.version == 'latest' && (steps.changes.outputs.path == 'true' || github.event_name != 'pull_request') }}
-        run: uv tool install ${{ matrix.tool }}
       
-      - name: Installation
-        if: ${{ matrix.version != 'latest' && (steps.changes.outputs.path == 'true' || github.event_name != 'pull_request') }}
-        run: uv tool install ${{ matrix.tool }}==${{ matrix.version }}
-      
-      - name: Scan
-        if: ${{ steps.changes.outputs.path == 'true' || github.event_name != 'pull_request' }}
-        run: uvx ${{ matrix.tool }} ${{ matrix.arguments }} -o ${{ matrix.report }} ${{ matrix.path }}
+      - name: Semgrep
+        run: semgrep scan --config=auto --error --json -o semgrep.json .
       
       - name: Upload report as GitHub artifact
-        if: ${{ !cancelled() && (steps.changes.outputs.path == 'true' || github.event_name != 'pull_request') }}
+        if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.name }}
-          path: ${{ matrix.report }}
+          name: Semgrep
+          path: semgrep.json
           if-no-files-found: warn
-      
