@@ -25,12 +25,12 @@ jobs:
           - name: Frontend
             dockerfile: docker/Dockerfile.frontend
             tag: rekono-frontend
+          - name: Nginx
+            dockerfile: docker/nginx/Dockerfile
+            tag: rekono-nginx
           # - name: Kali
           #   dockerfile: docker/Dockerfile.kali
           #   tag: ${{ secrets.DOCKER_USER }}/rekono-kali
-          # - name: Nginx
-          #   dockerfile: docker/nginx/Dockerfile
-          #   tag: ${{ secrets.DOCKER_USER }}/rekono-nginx
           # - name: Kaboxer
           #   dockerfile: docker/debian/Dockerfile
           #   tag: ${{ secrets.DOCKER_USER }}/rekono
