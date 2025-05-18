@@ -64,7 +64,7 @@ jobs:
 
       - name: Check Rekono version
         working-directory: src/backend/rekono
-        run: echo "REKONO_VERSION=$(grep -oP '^VERSION = "\K[^"]+' settings.py)" >> "$GITHUB_ENV"
+        run: echo "REKONO_VERSION=$(grep -oP '^VERSION = "\K[^"]+' settings.py | head -1)" >> "$GITHUB_ENV"
 
       - name: Build and push unstable
         uses: docker/build-push-action@v6
