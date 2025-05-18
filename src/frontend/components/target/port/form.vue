@@ -3,7 +3,7 @@
     <v-container fluid>
       <v-row justify="space-around" dense>
         <v-col cols="5">
-          <VNumberInput
+          <v-number-input
             v-model="port"
             class="mt-2"
             control-variant="split"
@@ -39,7 +39,6 @@
 </template>
 
 <script setup lang="ts">
-import { VNumberInput } from "vuetify/labs/VNumberInput";
 const props = defineProps({
   api: {
     type: Object,
