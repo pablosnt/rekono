@@ -89,8 +89,7 @@ jobs:
           push: true
           sbom: true
           provenance: true
-          build-args:
-            - REKONO_VERSION: ${{ github.event.release.name }}
+          build-args: REKONO_VERSION=${{ github.event.release.name }}
 
       - name: Trivy
         uses: aquasecurity/trivy-action@0.30.0
