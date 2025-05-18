@@ -5,27 +5,28 @@ COPY src/backend/ /code
 # Explicitly install python in order to export it to the next stage
 RUN uv python install --managed-python --install-dir /tmp/python && \
     # Save python environment
-    mkdir -p /opt/python/ && \
-    mv /tmp/python/cpython-$(python --version | awk '{print $2}')-linux-x86_64-gnu/* /opt/python/ && \
-    # Install dependencies
-    uv sync --no-dev --locked --project /code --python /opt/python/bin/python  && \
-    # Script to initialize database
-    echo "uv run manage.py migrate" > /code/initializer.sh && \
-    echo "uv run manage.py createsuperuser --no-input" >> /code/initializer.sh && \
-    chmod +x /code/initializer.sh && \
-    # Download packages needed in order to export them to the next stage
     apt update && \
+    apt install jq -y --no-install-recommends && \
+    mkdir -p /opt/python/ && \
+    mv /tmp/python/$(uv python list --only-installed --output-format json | jq -c '.[0].key' | sed 's/"//g')/* /opt/python/ && \
+    # Install python dependencies
+    uv sync --no-dev --locked --project /code --python /opt/python/bin/python  && \
+    # Download debian dependencies to export them to the next stage
     apt install apt-rdepends -y --no-install-recommends && \
     apt download $(apt-rdepends libpq-dev build-essential libmagic-dev | grep -v "^ " | grep -v "^libc-dev$") && \
     mkdir -p /dpkg && \
     for package in *.deb; do \
         dpkg-deb --extract $package /dpkg || exit 1; \
     done && \
-    apt remove apt-rdepends -y && \
+    apt remove apt-rdepends jq -y && \
     apt autoremove -y && \
     apt clean -y && \
     apt autoclean -y && \
-    rm -rf /var/lib/apt/lists/*
+    rm -rf /var/lib/apt/lists/* && \
+    # Define script to initialize database
+    echo "uv run manage.py migrate" > /code/initializer.sh && \
+    echo "uv run manage.py createsuperuser --no-input" >> /code/initializer.sh && \
+    chmod +x /code/initializer.sh
 
 
 FROM gcr.io/distroless/base-debian12:nonroot AS base
