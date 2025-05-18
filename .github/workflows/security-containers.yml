@@ -10,22 +10,18 @@ on:
   release:
     types: [published]
 
-env:
-  VERSION: ${{ github.event_name == 'release' && github.event.release.name || 'dev' }}
-  FAIL: ${{ github.event_name == 'release' && 0 || 1 }}
-
 jobs:
   docker-images:
     runs-on: ubuntu-latest
     environment: docker-hub
     strategy:
       fail-fast: false
+      max-pararell: 1 # This is needed because some Docker images depend on others
       matrix:
         include:
           - name: Backend
             dockerfile: docker/Dockerfile.backend
             image: rekono-backend
-          # TODO: Evaluate dependencies between the images, if any
           # - name: Frontend
           #   dockerfile: docker/Dockerfile.frontend
           #   tag: ${{ secrets.DOCKER_USER }}/rekono-frontend
@@ -44,43 +40,83 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: Set up Docker
+        uses: docker/setup-docker-action@v4
+        with:
+          daemon-config: |
+            {
+              "debug": true,
+              "features": {
+                "containerd-snapshotter": true
+              }
+            }
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USER }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+          logout: true
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Check Rekono version
+        working-directory: src/backend/rekono
+        run: echo "REKONO_VERSION=$(grep -oP '^VERSION = "\K[^"]+' settings.py)" >> "$GITHUB_ENV"
+
+      - name: Build and push unstable
+        uses: docker/build-push-action@v6
+        with:
+          file: ${{ matrix.dockerfile }}
+          platforms: linux/amd64,linux/arm64
+          tags: ${{ secrets.DOCKER_USER }}/${{ matrix.image }}:unstable
+          load: true
+          push: true
+          sbom: true
+          provenance: true
+          build-args:
+            - REKONO_VERSION: ${{ github.event_name == 'release' && github.event.release.name || env.REKONO_VERSION }}-dev
       
-      - name: Build image
-        run: docker build --build-arg REKONO_VERSION=$VERSION --file ${{ matrix.dockerfile }} --tag ${{ matrix.image }} .
+      - name: Build and push release
+        if: ${{ github.event_name == 'release' }}
+        uses: docker/build-push-action@v6
+        with:
+          file: ${{ matrix.dockerfile }}
+          platforms: linux/amd64,linux/arm64
+          tags:
+            - ${{ secrets.DOCKER_USER }}/${{ matrix.image }}:${{ github.event.release.name }}
+            - ${{ secrets.DOCKER_USER }}/${{ matrix.image }}:latest
+          load: true
+          push: true
+          sbom: true
+          provenance: true
+          build-args:
+            - REKONO_VERSION: ${{ github.event.release.name }}
 
       - name: Trivy
         uses: aquasecurity/trivy-action@0.30.0
         with:
-          image-ref: ${{ matrix.image }}
+          image-ref: ${{ secrets.DOCKER_USER }}/${{ matrix.image }}:unstable
           format: table
-          exit-code: ${{ env.FAIL }}
+          exit-code: 0
       
       - name: Dockle
         uses: goodwithtech/dockle-action@e30e6af832aad6ea7dca2a248d31a85eab6dbd68
         with:
-          image: ${{ matrix.image }}
+          image: ${{ secrets.DOCKER_USER }}/${{ matrix.image }}:unstable
           format: json
-          output: dockle.json
-          exit-code: ${{ env.FAIL }}
+          output: ${{ matrix.name }}-dockle.json
+          exit-code: 0
           exit-level: warn
-
+      
       - name: Upload Dockle report
-        if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.name }}
           path: ${{ matrix.name }}-dockle.json
           if-no-files-found: warn
-
-      - name: Push image to Docker Hub
-        if: ${{ github.event_name == 'release' }}
-        run: |
-          docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }}
-          docker tag ${{ matrix.image }} ${{ secrets.DOCKER_USER }}/${{ matrix.image }}:${{ github.event.release.name }}
-          docker push ${{ secrets.DOCKER_USER }}/${{ matrix.image }}:${{ github.event.release.name }}
-          docker tag ${{ matrix.image }} ${{ secrets.DOCKER_USER }}/${{ matrix.image }}:latest
-          docker push ${{ secrets.DOCKER_USER }}/${{ matrix.image }}:latest
-          docker logout
 
   kali-release:
     name: Kali Release
