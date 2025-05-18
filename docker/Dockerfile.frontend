@@ -1,28 +1,16 @@
-FROM node:19.6.1-alpine
+FROM node:22.15.1-bookworm-slim AS build
 
-# Environment
-ENV NODE_OPTIONS --openssl-legacy-provider
-
-# Install requirements
-RUN apk update && \
-    apk add curl && \
-    npm install -g serve && \
-    # Initialize directory
-    mkdir /code
-
-# Source code
 COPY src/frontend /code
 WORKDIR /code
 
-# Install frontend dependencies
-RUN npm install && \
-    npx browserslist@latest --update-db && \
-    npm run build && \
-    # System user
-    adduser --disabled-password rekono && \
-    chown -R rekono /code
+RUN npm install && npm run build
 
-# Final system configuration
-USER rekono
+
+FROM gcr.io/distroless/nodejs22-debian12:nonroot AS base
+
+COPY --from=build --chown=65532:65532 /code/.output /code
+
+WORKDIR /code
 EXPOSE 3000
-ENTRYPOINT ["serve", "-s", "dist"]
+
+CMD ["server/index.mjs"]
