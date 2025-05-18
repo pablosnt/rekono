@@ -22,9 +22,9 @@ jobs:
           - name: Backend
             dockerfile: docker/Dockerfile.backend
             image: rekono-backend
-          # - name: Frontend
-          #   dockerfile: docker/Dockerfile.frontend
-          #   tag: ${{ secrets.DOCKER_USER }}/rekono-frontend
+          - name: Frontend
+            dockerfile: docker/Dockerfile.frontend
+            tag: rekono-frontend
           # - name: Kali
           #   dockerfile: docker/Dockerfile.kali
           #   tag: ${{ secrets.DOCKER_USER }}/rekono-kali
