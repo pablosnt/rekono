@@ -16,7 +16,7 @@ jobs:
     environment: docker-hub
     strategy:
       fail-fast: false
-      max-pararell: 1 # This is needed because some Docker images depend on others
+      max-parallel: 1 # This is needed because some Docker images depend on others
       matrix:
         include:
           - name: Backend
