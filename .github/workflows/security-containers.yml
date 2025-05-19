@@ -16,18 +16,20 @@ jobs:
     environment: docker-hub
     strategy:
       fail-fast: false
-      max-parallel: 1 # This is needed because some Docker images depend on others
       matrix:
         include:
           - name: Backend
-            dockerfile: docker/Dockerfile.backend
+            dockerfile: docker/Dockerfile
             image: rekono-backend
+            target: backend
           - name: Frontend
-            dockerfile: docker/Dockerfile.frontend
+            dockerfile: docker/Dockerfile
             tag: rekono-frontend
+            target: frontend
           - name: Nginx
             dockerfile: docker/nginx/Dockerfile
             tag: rekono-nginx
+            target: null
           # - name: Kali
           #   dockerfile: docker/Dockerfile.kali
           #   tag: ${{ secrets.DOCKER_USER }}/rekono-kali
@@ -71,6 +73,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           file: ${{ matrix.dockerfile }}
+          target: ${{ matrix.target }}
           platforms: linux/amd64,linux/arm64
           tags: ${{ secrets.DOCKER_USER }}/${{ matrix.image }}:unstable
           load: true
@@ -84,6 +87,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           file: ${{ matrix.dockerfile }}
+          target: ${{ matrix.target }}
           platforms: linux/amd64,linux/arm64
           tags: ${{ secrets.DOCKER_USER }}/${{ matrix.image }}:${{ github.event.release.name }},${{ secrets.DOCKER_USER }}/${{ matrix.image }}:latest,${{ secrets.DOCKER_USER }}/${{ matrix.image }}:unstable
           load: true

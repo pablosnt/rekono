@@ -1,4 +1,4 @@
-FROM ghcr.io/astral-sh/uv:python3.13-bookworm-slim AS build
+FROM ghcr.io/astral-sh/uv:python3.13-bookworm-slim AS build-backend
 
 COPY src/backend/ /code
 
@@ -29,16 +29,34 @@ RUN uv python install --managed-python --install-dir /tmp/python && \
     chmod +x /code/initializer.sh
 
 
-FROM gcr.io/distroless/base-debian12:nonroot AS base
+FROM node:22.15.1-bookworm-slim AS build-frontend
+
+COPY src/frontend /code
+WORKDIR /code
+
+RUN npm install && npm run build
+
+
+FROM gcr.io/distroless/base-debian12:nonroot AS backend
 
 ENV PATH=/opt/python/bin:$PATH
 ENV REKONO_HOME=/rekono
 
 COPY --chown=65532:65532 config.yaml /rekono/
-COPY --from=build --chown=65532:65532 /code /code
-COPY --from=build /dpkg /
-COPY --from=build /opt/python /opt/python
-COPY --from=build /usr/local/bin/uv /bin/
+COPY --from=build-backend --chown=65532:65532 /code /code
+COPY --from=build-backend /dpkg /
+COPY --from=build-backend /opt/python /opt/python
+COPY --from=build-backend /usr/local/bin/uv /bin/
 
 WORKDIR /code
 EXPOSE 8000
+
+
+FROM gcr.io/distroless/nodejs22-debian12:nonroot AS frontend
+
+COPY --from=build-frontend --chown=65532:65532 /code/.output /code
+
+WORKDIR /code
+EXPOSE 3000
+
+CMD ["server/index.mjs"]
