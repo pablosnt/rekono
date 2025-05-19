@@ -24,18 +24,18 @@ jobs:
             target: backend
           - name: Frontend
             dockerfile: docker/Dockerfile
-            tag: rekono-frontend
+            image: rekono-frontend
             target: frontend
           - name: Nginx
             dockerfile: docker/nginx/Dockerfile
-            tag: rekono-nginx
+            image: rekono-nginx
             target: null
           # - name: Kali
           #   dockerfile: docker/Dockerfile.kali
-          #   tag: ${{ secrets.DOCKER_USER }}/rekono-kali
+          #   image: ${{ secrets.DOCKER_USER }}/rekono-worker
           # - name: Kaboxer
           #   dockerfile: docker/debian/Dockerfile
-          #   tag: ${{ secrets.DOCKER_USER }}/rekono
+          #   image: ${{ secrets.DOCKER_USER }}/rekono
     name: ${{ matrix.name }}
     steps:
       - name: Checkout
