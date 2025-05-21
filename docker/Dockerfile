@@ -49,6 +49,8 @@ WORKDIR /code
 
 RUN npm install && \
     npm run build && \
+    # Add curl to the final image in order to perform healthcheck when needed
+    apt update && \
     apt install --download-only --reinstall -y --no-install-recommends curl && \
     mkdir -p /dpkg && \
     for package in /var/cache/apt/archives/*.deb; do dpkg-deb -xv $package /dpkg; done && \
@@ -107,5 +109,3 @@ FROM backend AS worker
 
 COPY --from=build-python-tools --chown=65532:65532 /opt /opt
 COPY --from=build-kali-tools --chown=65532:65532 /dpkg /
-# TODO: Try to grant these capabilities to the container with --cap-add https://docs.docker.com/engine/containers/run/#runtime-privilege-and-linux-capabilities
-# RUN setcap cap_net_raw,cap_net_admin,cap_net_bind_service+eip /usr/bin/nmap
