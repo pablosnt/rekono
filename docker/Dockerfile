@@ -12,7 +12,7 @@ RUN uv python install --managed-python --install-dir /tmp/python && \
     # Install python dependencies
     uv sync --no-dev --locked --project /code --python /opt/python/bin/python  && \
     # Download debian dependencies to export them to the next stage
-    apt install --download-only --reinstall -y --no-install-recommends libpq-dev build-essential libmagic-dev && \
+    apt install --download-only --reinstall -y --no-install-recommends curl libpq-dev build-essential libmagic-dev && \
     mkdir -p /dpkg && \
     for package in /var/cache/apt/archives/*.deb; do dpkg-deb -xv $package /dpkg; done && \
     apt autoremove -y && \
@@ -47,12 +47,22 @@ FROM node:22.15.1-bookworm-slim AS build-frontend
 COPY src/frontend /code
 WORKDIR /code
 
-RUN npm install && npm run build
+RUN npm install && \
+    npm run build && \
+    apt install --download-only --reinstall -y --no-install-recommends curl && \
+    mkdir -p /dpkg && \
+    for package in /var/cache/apt/archives/*.deb; do dpkg-deb -xv $package /dpkg; done && \
+    apt autoremove -y && \
+    apt clean -y && \
+    apt autoclean -y && \
+    rm -rf /var/lib/apt/lists/* && \
+    rm -rf /var/cache/apt/*
 
 
 FROM gcr.io/distroless/nodejs22-debian12:nonroot AS frontend
 
 COPY --from=build-frontend --chown=65532:65532 /code/.output /code
+COPY --from=build-frontend /dpkg /
 
 WORKDIR /code
 EXPOSE 3000
