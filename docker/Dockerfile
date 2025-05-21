@@ -12,29 +12,19 @@ RUN uv python install --managed-python --install-dir /tmp/python && \
     # Install python dependencies
     uv sync --no-dev --locked --project /code --python /opt/python/bin/python  && \
     # Download debian dependencies to export them to the next stage
-    apt install apt-rdepends -y --no-install-recommends && \
-    apt download $(apt-rdepends libpq-dev build-essential libmagic-dev | grep -v "^ " | grep -v "^libc-dev$") && \
+    apt install --download-only --reinstall -y --no-install-recommends libpq-dev build-essential libmagic-dev && \
     mkdir -p /dpkg && \
-    for package in *.deb; do \
-        dpkg-deb --extract $package /dpkg || exit 1; \
-    done && \
-    apt remove apt-rdepends jq -y && \
+    for package in /var/cache/apt/archives/*.deb; do dpkg-deb -xv $package /dpkg; done && \
     apt autoremove -y && \
     apt clean -y && \
     apt autoclean -y && \
     rm -rf /var/lib/apt/lists/* && \
+    rm -rf /var/cache/apt/* && \
     # Define script to initialize database
+    # TODO: Test it. This is not going to work without sh
     echo "uv run manage.py migrate" > /code/initializer.sh && \
     echo "uv run manage.py createsuperuser --no-input" >> /code/initializer.sh && \
     chmod +x /code/initializer.sh
-
-
-FROM node:22.15.1-bookworm-slim AS build-frontend
-
-COPY src/frontend /code
-WORKDIR /code
-
-RUN npm install && npm run build
 
 
 FROM gcr.io/distroless/base-debian12:nonroot AS backend
@@ -52,6 +42,14 @@ WORKDIR /code
 EXPOSE 8000
 
 
+FROM node:22.15.1-bookworm-slim AS build-frontend
+
+COPY src/frontend /code
+WORKDIR /code
+
+RUN npm install && npm run build
+
+
 FROM gcr.io/distroless/nodejs22-debian12:nonroot AS frontend
 
 COPY --from=build-frontend --chown=65532:65532 /code/.output /code
@@ -60,3 +58,44 @@ WORKDIR /code
 EXPOSE 3000
 
 CMD ["server/index.mjs"]
+
+
+FROM build-backend AS build-python-tools
+
+RUN uv tool install emailfinder && \
+    uv tool install ssh-audit && \
+    apt update && \
+    apt install git -y --no-install-recommends && \
+    mkdir -p /opt && \
+    git clone https://github.com/fullhunt/log4j-scan.git /opt/log4j-scan && \
+    git clone https://github.com/fullhunt/spring4shell-scan.git /opt/spring4shell-scan && \
+    git clone https://github.com/internetwache/GitTools.git /opt/GitTools && \
+    apt remove git -y && \
+    apt autoremove -y && \
+    apt clean -y && \
+    apt autoclean -y && \
+    rm -rf /var/lib/apt/lists/* && \
+    rm -rf /var/cache/apt/* && \
+    uv pip install --system -r /opt/log4j-scan/requirements.txt && \
+    uv pip install --system -r /opt/spring4shell-scan/requirements.txt
+
+
+FROM kalilinux/kali-last-release:latest AS build-kali-tools
+
+RUN apt update && \
+    apt install --download-only --reinstall -y --no-install-recommends nmap dirsearch theharvester nikto sslscan sslyze cmseek zaproxy exploitdb metasploit-framework emailharvester joomscan gitleaks smbmap nuclei gobuster seclists dirb && \
+    mkdir -p /dpkg && \
+    for package in /var/cache/apt/archives/*.deb; do dpkg-deb -xv $package /dpkg; done && \
+    apt autoremove -y && \
+    apt clean -y && \
+    apt autoclean -y && \
+    rm -rf /var/lib/apt/lists/* && \
+    rm -rf /var/cache/apt/*
+
+
+FROM backend AS worker
+
+COPY --from=build-python-tools --chown=65532:65532 /opt /opt
+COPY --from=build-kali-tools --chown=65532:65532 /dpkg /
+# TODO: Try to grant these capabilities to the container with --cap-add https://docs.docker.com/engine/containers/run/#runtime-privilege-and-linux-capabilities
+# RUN setcap cap_net_raw,cap_net_admin,cap_net_bind_service+eip /usr/bin/nmap

@@ -30,12 +30,10 @@ jobs:
             dockerfile: docker/nginx/Dockerfile
             image: rekono-nginx
             target: null
-          # - name: Kali
-          #   dockerfile: docker/Dockerfile.kali
-          #   image: ${{ secrets.DOCKER_USER }}/rekono-worker
-          # - name: Kaboxer
-          #   dockerfile: docker/debian/Dockerfile
-          #   image: ${{ secrets.DOCKER_USER }}/rekono
+          - name: Worker
+            dockerfile: docker/Dockerfile
+            image: rekono-worker
+            target: worker
     name: ${{ matrix.name }}
     steps:
       - name: Checkout
