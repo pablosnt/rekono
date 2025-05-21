@@ -20,4 +20,6 @@ reports/
 wordlists/
 logs/
 src/backend/tests/*
-src/frontend/node_modules/*
+node_modules/
+.nuxt/
+.prettierigonre

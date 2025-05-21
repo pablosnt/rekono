@@ -22,7 +22,7 @@
         <v-container fluid>
           <v-row v-if="step === 1" justify="space-between" align="center">
             <v-col cols="4">
-              <VNumberInput
+              <v-number-input
                 v-model="productType"
                 control-variant="split"
                 label="Product type ID"
@@ -52,7 +52,7 @@
 
           <v-row v-if="step === 2" justify="space-between" align="center">
             <v-col cols="4">
-              <VNumberInput
+              <v-number-input
                 v-model="product"
                 control-variant="split"
                 label="Product ID"
@@ -96,7 +96,7 @@
           </v-row>
           <v-row v-if="step === 3" justify="space-between" align="center">
             <v-col cols="4">
-              <VNumberInput
+              <v-number-input
                 v-model="engagement"
                 control-variant="split"
                 label="Engagement ID"
@@ -150,7 +150,6 @@
 </template>
 
 <script setup lang="ts">
-import { VNumberInput } from "vuetify/labs/VNumberInput";
 const props = defineProps({
   api: Object,
   project: Object,
