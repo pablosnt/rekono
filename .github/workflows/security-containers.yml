@@ -34,8 +34,14 @@ jobs:
             dockerfile: docker/Dockerfile
             image: rekono-worker
             target: worker
+            # Docker image is very large and we need some extra GB to complete the build
+            clean-disk: true
     name: ${{ matrix.name }}
     steps:
+      - name: Free disk space
+        if: ${{ matrix.clean-disk == true }}
+        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be
+      
       - name: Checkout
         uses: actions/checkout@v4
         with:
