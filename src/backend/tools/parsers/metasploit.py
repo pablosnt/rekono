@@ -9,4 +9,5 @@ class Metasploit(BaseParser):
             if line.strip() and line.strip().startswith(str(entry)):
                 entry += 1
                 data = [i.strip() for i in line.strip().split("  ") if i]
-                self.create_finding(Exploit, title=data[-1], reference=data[1])
+                if not data[1].startswith("\_"):
+                    self.create_finding(Exploit, title=data[-1], reference=data[1])

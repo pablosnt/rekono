@@ -292,10 +292,10 @@ class Vulnerability(TriageFinding):
     severity = models.IntegerField(choices=Severity.choices, default=Severity.MEDIUM)
     cve = models.TextField(max_length=20, blank=True, null=True)
     cwe = models.TextField(max_length=20, blank=True, null=True)
-    osvdb = models.TextField(max_length=20, blank=True, null=True)
     reference = models.TextField(max_length=250, blank=True, null=True)
     trending = models.BooleanField(default=False)
 
+    # TODO: This might be different per finding depending on the tool?
     unique_fields = ["technology", "port", "name", "cve"]
     filters = [
         Finding.Filter(Severity, "severity"),

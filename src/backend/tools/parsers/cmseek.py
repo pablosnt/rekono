@@ -20,7 +20,7 @@ class Cmseek(BaseParser):
             name=data.get("cms_name", "").strip(),
             version=version.strip() if version is not None else None,
             description="CMS",
-            reference=(data.get("cms_url", "").strip() if data.get("cms_url") else data.get("cms_url")),
+            reference=(data.get("cms_url", "").strip() if data.get("cms_url") else None),
         )
         for key, value in data.items():
             if key in [

@@ -32,7 +32,6 @@ venv.bak/
 # Envionment
 .DS_Store
 .vscode/
-reports/
 wordlists/
 logs/
 /src/backend/tests/home/

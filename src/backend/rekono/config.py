@@ -14,7 +14,7 @@ class RekonoConfig:
     def __init__(self) -> None:
         self.testing = "test" in sys.argv
         self.base_dir = Path(__file__).resolve().parent.parent
-        self.home = self._get_home()
+        self.home = self._get_home().absolute()
         self.config_file = self._get_config_file()
         if self.testing:
             self.home = self.base_dir / "tests" / "home"
