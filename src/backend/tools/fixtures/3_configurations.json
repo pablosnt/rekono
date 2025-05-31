@@ -423,7 +423,7 @@
         "fields": {
             "tool": 18,
             "name": "All templates",
-            "arguments": "{url} {authentication} {cookie} {headers} -json -output {output}",
+            "arguments": "{url} {authentication} {cookie} {headers} -jsonl -output {output}",
             "stage": 4,
             "default": true
         }
