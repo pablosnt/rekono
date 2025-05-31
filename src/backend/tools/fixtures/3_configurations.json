@@ -335,7 +335,7 @@
         "fields": {
             "tool": 13,
             "name": "Search emails",
-            "arguments": "{target} -s {output}",
+            "arguments": "{target} --exclude ask --save {output}",
             "stage": 1,
             "default": true
         }
