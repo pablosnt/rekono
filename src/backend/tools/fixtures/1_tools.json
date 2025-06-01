@@ -368,7 +368,7 @@
             "command": "gobuster",
             "script": null,
             "script_directory_property": null,
-            "run_directory_property": "LOG4J_SCAN_DIR",
+            "run_directory_property": null,
             "ignore_exit_code": false,
             "is_installed": false,
             "version": null,
