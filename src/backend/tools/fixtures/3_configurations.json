@@ -335,7 +335,7 @@
         "fields": {
             "tool": 13,
             "name": "Search emails",
-            "arguments": "{target} -s {output}",
+            "arguments": "{target} --exclude ask --save {output}",
             "stage": 1,
             "default": true
         }
@@ -368,7 +368,7 @@
         "fields": {
             "tool": 16,
             "name": "SSH scan",
-            "arguments": "{host} {port} --batch",
+            "arguments": "{host} {port} --no-colors --skip-rate-test -jj > {output}",
             "stage": 4,
             "default": true
         }
@@ -378,21 +378,10 @@
         "pk": 35,
         "fields": {
             "tool": 17,
-            "name": "List shares",
+            "name": "list shares",
             "arguments": "{host} {port} {authentication}",
             "stage": 4,
             "default": true
-        }
-    },
-    {
-        "model": "tools.configuration",
-        "pk": 36,
-        "fields": {
-            "tool": 17,
-            "name": "List shares and directories recursively",
-            "arguments": "{host} {port} -R {authentication}",
-            "stage": 4,
-            "default": false
         }
     },
     {
@@ -423,7 +412,7 @@
         "fields": {
             "tool": 18,
             "name": "All templates",
-            "arguments": "{url} {authentication} {cookie} {headers} -json -output {output}",
+            "arguments": "{url} {authentication} {cookie} {headers} -jsonl -output {output}",
             "stage": 4,
             "default": true
         }

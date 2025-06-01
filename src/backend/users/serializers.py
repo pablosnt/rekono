@@ -1,9 +1,10 @@
 import logging
-from typing import Any, Dict
+import threading
+from typing import Any
 
 from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
 from framework.serializers import MfaSerializer
-from http_headers.serializers import SimpleHttpHeaderSerializer
 from platforms.mail.notifications import SMTP
 from platforms.telegram_app.notifications.notifications import Telegram
 from rest_framework import status
@@ -52,7 +53,7 @@ class UserSerializer(ModelSerializer):
             str: Role name assigned to the user
         """
         role = instance.groups.first()
-        return role.name if role else None
+        return role.name if role else Role.READER.value
 
 
 class SimpleUserSerializer(UserSerializer):
@@ -72,18 +73,22 @@ class InviteUserSerializer(ModelSerializer):
         model = User
         fields = ("email", "role")
 
-    def create(self, validated_data: Dict[str, Any]) -> User:
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
+        attrs = super().validate(attrs)
+        if not SMTP().is_available():
+            raise ValidationError("SMTP client is not available to send the invitation", code="smtp")
+        return attrs
+
+    def create(self, validated_data: dict[str, Any]) -> User:
         """Create instance from validated data.
 
         Args:
-            validated_data (Dict[str, Any]): Validated data
+            validated_data (dict[str, Any]): Validated data
 
         Returns:
             User: Created instance
         """
-        return User.objects.invite_user(
-            validated_data["email"], Role(validated_data["role"])
-        )
+        return User.objects.invite_user(validated_data["email"], Role(validated_data["role"]))
 
 
 class UpdateRoleSerializer(Serializer):
@@ -91,12 +96,12 @@ class UpdateRoleSerializer(Serializer):
 
     role = ChoiceField(choices=Role.choices, required=True, write_only=True)
 
-    def update(self, instance: User, validated_data: Dict[str, Any]) -> User:
+    def update(self, instance: User, validated_data: dict[str, Any]) -> User:
         """Update instance from validated data.
 
         Args:
             instance (User): Instance to update
-            validated_data (Dict[str, Any]): Validated data
+            validated_data (dict[str, Any]): Validated data
 
         Returns:
             User: Updated instance
@@ -106,8 +111,6 @@ class UpdateRoleSerializer(Serializer):
 
 class ProfileSerializer(UserSerializer):
     """Serializer to manage user profile via API."""
-
-    http_headers = SimpleHttpHeaderSerializer(many=True, read_only=True)
 
     class Meta:
         model = User
@@ -125,7 +128,6 @@ class ProfileSerializer(UserSerializer):
             "notification_scope",
             "email_notifications",
             "telegram_notifications",
-            "http_headers",
         )
         read_only_fields = (
             "username",
@@ -135,7 +137,6 @@ class ProfileSerializer(UserSerializer):
             "mfa",
             "role",
             "telegram_chat",
-            "http_headers",
         )
 
 
@@ -144,7 +145,7 @@ class PasswordSerializer(UserSerializer):
         model = User
         fields = ("password",)
 
-    def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         attrs = super().validate(attrs)
         validate_password(attrs.get("password"))
         return attrs
@@ -155,7 +156,7 @@ class OTPSerializer(UserSerializer):
         model = User
         fields = ("otp",)
 
-    def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         attrs = super().validate(attrs)
         user = User.objects.verify_otp(attrs.get("otp"))
         if not user:
@@ -177,29 +178,29 @@ class CreateUserSerializer(OTPSerializer, PasswordSerializer):
             "otp",
         )
 
-    def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         """Validate the provided data before use it.
 
         Args:
-            attrs (Dict[str, Any]): Provided data
+            attrs (dict[str, Any]): Provided data
 
         Raises:
             ValidationError: Raised if provided data is invalid
              AuthenticationFailed: Raised if OTP is invalid
 
         Returns:
-            Dict[str, Any]: Data after validation process
+            dict[str, Any]: Data after validation process
         """
         attrs = super().validate(attrs)
         if attrs["user"].is_active is not None:
             raise AuthenticationFailed(code=status.HTTP_401_UNAUTHORIZED)
         return attrs
 
-    def create(self, validated_data: Dict[str, Any]) -> User:
+    def create(self, validated_data: dict[str, Any]) -> User:
         """Create instance from validated data.
 
         Args:
-            validated_data (Dict[str, Any]): Validated data
+            validated_data (dict[str, Any]): Validated data
 
         Returns:
             User: Created instance
@@ -225,29 +226,29 @@ class UpdatePasswordSerializer(PasswordSerializer):
             "old_password",
         )
 
-    def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         """Validate the provided data before use it.
 
         Args:
-            attrs (Dict[str, Any]): Provided data
+            attrs (dict[str, Any]): Provided data
 
         Raises:
             ValidationError: Raised if provided data is invalid
             AuthenticationFailed: Raised if old password is invalid
 
         Returns:
-            Dict[str, Any]: Data after validation process
+            dict[str, Any]: Data after validation process
         """
         if not self.instance.check_password(attrs.get("old_password")):
             raise AuthenticationFailed(code=status.HTTP_401_UNAUTHORIZED)
         return super().validate(attrs)
 
-    def update(self, instance: User, validated_data: Dict[str, Any]) -> User:
+    def update(self, instance: User, validated_data: dict[str, Any]) -> User:
         """Update instance from validated data.
 
         Args:
             instance (User): Instance to update
-            validated_data (Dict[str, Any]): Validated data
+            validated_data (dict[str, Any]): Validated data
 
         Returns:
             User: Updated instance
@@ -269,9 +270,7 @@ class ResetPasswordSerializer(PasswordSerializer, OTPSerializer):
         Returns:
             User: Instance after apply changes
         """
-        return User.objects.reset_password(
-            self.validated_data.get("user"), self.validated_data.get("password")
-        )
+        return User.objects.reset_password(self.validated_data.get("user"), self.validated_data.get("password"))
 
 
 class RequestPasswordResetSerializer(Serializer):
@@ -279,23 +278,18 @@ class RequestPasswordResetSerializer(Serializer):
 
     email = EmailField(max_length=150, required=True)
 
-    def save(self, **kwargs: Any) -> User:
-        """Save changes in instance.
-
-        Returns:
-            User: Instance after apply changes
-        """
-        user = User.objects.filter(
-            email=self.validated_data.get("email"), is_active=True
-        ).first()
-        if user:
+    def _save_in_thread(self, email: str) -> None:
+        user = User.objects.filter(email=email, is_active=True).first()
+        if email and user:
             otp = User.objects.setup_otp(user)
             SMTP().reset_password(user, otp)
             logger.info(
                 f"[User] User {user.id} requested a password reset",
                 extra={"user": user.id},
             )
-            return user
+
+    def save(self, **kwargs: Any) -> None:
+        threading.Thread(target=self._save_in_thread, args=(self.validated_data.get("email"),)).start()
         return None
 
 

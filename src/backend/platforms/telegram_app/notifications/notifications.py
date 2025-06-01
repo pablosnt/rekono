@@ -1,7 +1,8 @@
-from typing import Any, Dict, List
+from typing import Any
+
+from django.forms.models import model_to_dict
 
 from alerts.models import Alert
-from django.forms.models import model_to_dict
 from executions.models import Execution
 from findings.framework.models import Finding
 from framework.platforms import BaseNotification
@@ -23,15 +24,13 @@ class Telegram(BaseNotification, BaseTelegram):
         self.initialize()
         return bool(self.settings.secret and self.app and self.app.bot)
 
-    def _notify(self, users: List[Any], message: str) -> None:
+    def _notify(self, users: list[Any], message: str) -> None:
         for user in users:
             if hasattr(user, "telegram_chat"):
                 self._send_message(user.telegram_chat, message)
 
-    def _notify_execution(
-        self, users: List[User], execution: Execution, findings: List[Finding]
-    ) -> None:
-        texts_by_type: Dict[Any, List[str]] = {}
+    def _notify_execution(self, users: list[User], execution: Execution, findings: list[Finding]) -> None:
+        texts_by_type: dict[Any, list[str]] = {}
         for finding in findings:
             if finding.__class__ not in texts_by_type:
                 texts_by_type[finding.__class__] = []
@@ -69,21 +68,17 @@ class Telegram(BaseNotification, BaseTelegram):
         )
         self._notify(users, message)
 
-    def _notify_alert(self, users: List[User], alert: Alert, finding: Finding) -> None:
+    def _notify_alert(self, users: list[User], alert: Alert, finding: Finding) -> None:
         self._notify(
             users,
             HEADER.format(
                 icon=FINDINGS[finding.__class__].get("icon", ""),
-                title=ALERTS.get(alert.mode, "").format(
-                    finding=finding.__class__.__name__.lower()
-                ),
+                title=ALERTS.get(alert.mode, "").format(finding=finding.__class__.__name__.lower()),
                 details=FINDINGS[finding.__class__]
                 .get("template", "")
                 .format(
                     **{
-                        k: self._escape(
-                            str(v) if not isinstance(v, Finding) else v.__str__()
-                        )
+                        k: self._escape(str(v) if not isinstance(v, Finding) else v.__str__())
                         for k, v in model_to_dict(finding).items()
                     }
                 ),
@@ -105,5 +100,7 @@ class Telegram(BaseNotification, BaseTelegram):
     def report_created(self, report: Any) -> None:
         self._notify_if_enabled(
             [report.user],
+            # pytype: disable=attribute-error
             f"{report.format.upper()} report with ID {report.id} from {f'project {report.project.name}' if report.project else (f'target {report.target.target}' if report.target else f'task {report.task.id}')} has been created and it's available to download it [here]({CONFIG.frontend_url}/#/projects/{report.get_project().id}/reports)",
+            # pytype: enable=attribute-error
         )

@@ -2,9 +2,10 @@ import os
 import shutil
 import sys
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import yaml
+
 from rekono.properties import Property
 from security.cryptography.encryption import Encryptor
 
@@ -13,7 +14,7 @@ class RekonoConfig:
     def __init__(self) -> None:
         self.testing = "test" in sys.argv
         self.base_dir = Path(__file__).resolve().parent.parent
-        self.home = self._get_home()
+        self.home = self._get_home().absolute()
         self.config_file = self._get_config_file()
         if self.testing:
             self.home = self.base_dir / "tests" / "home"
@@ -21,7 +22,7 @@ class RekonoConfig:
         self.generated_reports = self.reports / "generated"
         self.wordlists = self.home / "wordlists"
         self.logs = self.home / "logs"
-        self.pdf_report_template: Optional[Path] = None
+        self.pdf_report_template: Path | None = None
         for path in [
             self.home,
             self.reports,
@@ -37,9 +38,7 @@ class RekonoConfig:
         with self.config_file.open("r") as file:
             self._config_properties = yaml.safe_load(file)
         for property in Property:
-            if not hasattr(self, property.name.lower()) or not getattr(
-                self, property.name.lower()
-            ):
+            if not hasattr(self, property.name.lower()) or not getattr(self, property.name.lower()):
                 setattr(self, property.name.lower(), self._get_config(property))
         if not self.pdf_report_template:
             default_filename = "pdf-report.html"
@@ -51,11 +50,7 @@ class RekonoConfig:
 
     def _get_home(self) -> Path:
         home_from_config = Path(self._get_config(Property.REKONO_HOME))
-        return (
-            home_from_config
-            if home_from_config.is_dir()
-            else self.base_dir.parent.parent
-        )
+        return home_from_config if home_from_config.is_dir() else self.base_dir.parent.parent
 
     def _get_config_file(self) -> Path:
         for filename in [
@@ -87,7 +82,7 @@ class RekonoConfig:
             value = str(value).lower() == "true"
         return value
 
-    def _get_config_from_file(self, property: str) -> Optional[Any]:
+    def _get_config_from_file(self, property: str) -> Any | None:
         properties = self._config_properties
         for key in property.split("."):
             if key not in properties or not properties.get(key):

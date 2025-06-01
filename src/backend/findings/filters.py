@@ -1,4 +1,5 @@
 from django_filters.filters import ModelChoiceFilter
+
 from findings.framework.filters import FindingFilter, TriageFindingFilter
 from findings.models import (
     OSINT,
@@ -29,9 +30,12 @@ class HostFilter(FindingFilter):
         model = Host
         fields = {
             **FindingFilter.Meta.fields.copy(),
-            "address": ["exact", "icontains"],
+            "ip": ["exact", "icontains"],
+            "domain": ["exact", "icontains"],
             "os": ["exact", "icontains"],
             "os_type": ["exact"],
+            "country": ["exact", "icontains"],
+            "city": ["exact", "icontains"],
         }
 
 
@@ -73,15 +77,12 @@ class TechnologyFilter(FindingFilter):
             "name": ["exact", "icontains"],
             "version": ["exact", "icontains"],
             "description": ["exact", "icontains"],
-            "related_to": ["exact"],
         }
 
 
 class CredentialFilter(TriageFindingFilter):
     port = ModelChoiceFilter(queryset=Port.objects.all(), field_name="technology__port")
-    host = ModelChoiceFilter(
-        queryset=Host.objects.all(), field_name="technology__port__host"
-    )
+    host = ModelChoiceFilter(queryset=Host.objects.all(), field_name="technology__port__host")
 
     class Meta:
         model = Credential
@@ -112,7 +113,6 @@ class VulnerabilityFilter(TriageFindingFilter):
             "severity": ["exact"],
             "cve": ["exact", "contains"],
             "cwe": ["exact", "contains"],
-            "osvdb": ["exact", "contains"],
             "trending": ["exact"],
         }
 
@@ -159,7 +159,6 @@ class ExploitFilter(TriageFindingFilter):
             "vulnerability__severity": ["exact"],
             "vulnerability__cve": ["exact"],
             "vulnerability__cwe": ["exact"],
-            "vulnerability__osvdb": ["exact"],
             "title": ["exact", "icontains"],
             "edb_id": ["exact"],
             "reference": ["exact", "icontains"],

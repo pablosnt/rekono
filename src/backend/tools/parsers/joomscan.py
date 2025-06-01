@@ -1,4 +1,3 @@
-from typing import Set
 from urllib.parse import urlparse
 
 from findings.enums import PathType, Severity
@@ -11,22 +10,17 @@ class Joomscan(BaseParser):
         technology = None
         vulnerability_name = None
         endpoints = set(["/"])
-        backups: Set[str] = set()
-        configurations: Set[str] = set()
-        path_disclosure: Set[str] = set()
-        directory_listing: Set[str] = set()
-        host = urlparse(
-            self.executor.arguments[self.executor.arguments.index("-u") + 1]
-        ).hostname
+        backups: set[str] = set()
+        configurations: set[str] = set()
+        path_disclosure: set[str] = set()
+        directory_listing: set[str] = set()
+        host = urlparse(self.executor.arguments[self.executor.arguments.index("-u") + 1]).hostname
         lines = self.output.split("\n")
         for index, line in enumerate(lines):
             data = line.strip()
             if not data:
                 continue
-            if (
-                "[++] Joomla" in data
-                and lines[index - 1] == "[+] Detecting Joomla Version"
-            ):
+            if "[++] Joomla" in data and lines[index - 1] == "[+] Detecting Joomla Version":
                 version = data.replace("[++] Joomla ", "").strip()
                 technology = self.create_finding(
                     Technology,
@@ -36,9 +30,7 @@ class Joomscan(BaseParser):
                     reference="https://www.joomla.org/",
                 )
             elif "CVE : " in data:
-                vulnerability_name = (
-                    lines[index - 1].replace("[++]", "").replace("Joomla!", "").strip()
-                )
+                vulnerability_name = lines[index - 1].replace("[++]", "").replace("Joomla!", "").strip()
                 for cve in data.replace("CVE : ", "").strip().split(","):
                     self.create_finding(
                         Vulnerability,
@@ -52,11 +44,7 @@ class Joomscan(BaseParser):
                     Exploit,
                     technology=technology,
                     title=vulnerability_name,
-                    edb_id=int(
-                        link.split("https://www.exploit-db.com/exploits/", 1)[
-                            1
-                        ].replace("/", "")
-                    ),
+                    edb_id=int(link.split("https://www.exploit-db.com/exploits/", 1)[1].replace("/", "")),
                     reference=link,
                 )
             elif "Debug mode Enabled" in data:
@@ -89,7 +77,7 @@ class Joomscan(BaseParser):
             ("Configuration files found", configurations, Severity.MEDIUM, "CWE-497"),
             # CWE-497: Exposure of Sensitive System Information to an Unauthorized Control Sphere
             ("Full path disclosure", path_disclosure, Severity.LOW, "CWE-497"),
-            # CWE-548: Exposure of Information Through Directory Listing
+            # CWE-548: Exposure of Information Through Directory listing
             ("Directory listing", directory_listing, Severity.LOW, "CWE-548"),
         ]:
             if paths:

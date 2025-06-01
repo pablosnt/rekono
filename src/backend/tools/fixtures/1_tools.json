@@ -15,7 +15,7 @@
             "output_format": "xml",
             "reference": "https://nmap.org/",
             "icon": "https://www.kali.org/tools/nmap/images/nmap-logo.svg",
-            "defect_dojo_scan_type": "Nmap Scan"
+            "defectdojo_scan_type": "Nmap Scan"
         }
     },
     {
@@ -33,8 +33,8 @@
             "version_argument": "--version",
             "output_format": "json",
             "reference": "https://github.com/maurosoria/dirsearch",
-            "icon": "https://raw.githubusercontent.com/maurosoria/dirsearch/master/static/logo.png",
-            "defect_dojo_scan_type": null
+            "icon": "https://www.kali.org/tools/dirsearch/images/dirsearch-logo.svg",
+            "defectdojo_scan_type": null
         }
     },
     {
@@ -49,11 +49,11 @@
             "ignore_exit_code": false,
             "is_installed": false,
             "version": null,
-            "version_argument": "--version",
+            "version_argument": "--help",
             "output_format": "json",
             "reference": "https://github.com/laramies/theHarvester",
             "icon": "https://www.kali.org/tools/theharvester/images/theharvester-logo.svg",
-            "defect_dojo_scan_type": null
+            "defectdojo_scan_type": null
         }
     },
     {
@@ -72,7 +72,7 @@
             "output_format": "xml",
             "reference": "https://github.com/sullo/nikto",
             "icon": "https://www.kali.org/tools/nikto/images/nikto-logo.svg",
-            "defect_dojo_scan_type": "Nikto Scan"
+            "defectdojo_scan_type": "Nikto Scan"
         }
     },
     {
@@ -91,7 +91,7 @@
             "output_format": "xml",
             "reference": "https://github.com/rbsec/sslscan",
             "icon": "https://www.kali.org/tools/sslscan/images/sslscan-logo.svg",
-            "defect_dojo_scan_type": "Sslscan"
+            "defectdojo_scan_type": "Sslscan"
         }
     },
     {
@@ -110,7 +110,7 @@
             "output_format": "json",
             "reference": "https://nabla-c0d3.github.io/sslyze/documentation/",
             "icon": "https://www.kali.org/tools/sslyze/images/sslyze-logo.svg",
-            "defect_dojo_scan_type": "SSLyze Scan (JSON)"
+            "defectdojo_scan_type": "SSLyze Scan (JSON)"
         }
     },
     {
@@ -128,8 +128,8 @@
             "version_argument": "--version",
             "output_format": "json",
             "reference": "https://github.com/Tuhinshubhra/CMSeeK/",
-            "icon": "https://camo.githubusercontent.com/b1864e58e861aa4e938d17d4a50ae1a4bedec9cdb9e8b7ce7ac80a1b5cc711ed/68747470733a2f2f692e696d6775722e636f6d2f35565973316d322e706e67",
-            "defect_dojo_scan_type": null
+            "icon": null,
+            "defectdojo_scan_type": null
         }
     },
     {
@@ -148,7 +148,7 @@
             "output_format": "xml",
             "reference": "https://www.zaproxy.org/",
             "icon": "https://www.kali.org/tools/zaproxy/images/zaproxy-logo.svg",
-            "defect_dojo_scan_type": "ZAP Scan"
+            "defectdojo_scan_type": "ZAP Scan"
         }
     },
     {
@@ -167,7 +167,7 @@
             "output_format": "json",
             "reference": "https://www.exploit-db.com/searchsploit",
             "icon": "https://www.kali.org/tools/exploitdb/images/exploitdb-logo.svg",
-            "defect_dojo_scan_type": null
+            "defectdojo_scan_type": null
         }
     },
     {
@@ -186,7 +186,7 @@
             "output_format": null,
             "reference": "https://www.metasploit.com/",
             "icon": "https://www.kali.org/tools/metasploit-framework/images/metasploit-framework-logo.svg",
-            "defect_dojo_scan_type": null
+            "defectdojo_scan_type": null
         }
     },
     {
@@ -205,7 +205,7 @@
             "output_format": null,
             "reference": "https://github.com/fullhunt/log4j-scan",
             "icon": "https://fullhunt.io/static/theme/images/logo/favicon.ico",
-            "defect_dojo_scan_type": null
+            "defectdojo_scan_type": null
         }
     },
     {
@@ -224,7 +224,7 @@
             "output_format": null,
             "reference": "https://github.com/Josue87/EmailFinder",
             "icon": null,
-            "defect_dojo_scan_type": null
+            "defectdojo_scan_type": null
         }
     },
     {
@@ -243,7 +243,7 @@
             "output_format": "txt",
             "reference": "https://github.com/maldevel/EmailHarvester",
             "icon": null,
-            "defect_dojo_scan_type": null
+            "defectdojo_scan_type": null
         }
     },
     {
@@ -261,8 +261,8 @@
             "version_argument": "--version",
             "output_format": null,
             "reference": "https://github.com/OWASP/joomscan",
-            "icon": "https://raw.githubusercontent.com/rezasp/Trash/master/joomscan.png",
-            "defect_dojo_scan_type": null
+            "icon": "https://owasp.org/www--site-theme/favicon.ico",
+            "defectdojo_scan_type": null
         }
     },
     {
@@ -277,11 +277,11 @@
             "ignore_exit_code": true,
             "is_installed": false,
             "version": null,
-            "version_argument": null,
+            "version_argument": "version",
             "output_format": "json",
             "reference": "https://github.com/zricethezav/gitleaks",
             "icon": "https://gitleaks.io/favicon.ico",
-            "defect_dojo_scan_type": "Gitleaks Scan"
+            "defectdojo_scan_type": "Gitleaks Scan"
         }
     },
     {
@@ -297,10 +297,10 @@
             "is_installed": false,
             "version": null,
             "version_argument": "--help",
-            "output_format": null,
+            "output_format": "json",
             "reference": "https://github.com/jtesta/ssh-audit",
             "icon": null,
-            "defect_dojo_scan_type": null
+            "defectdojo_scan_type": null
         }
     },
     {
@@ -315,11 +315,11 @@
             "ignore_exit_code": false,
             "is_installed": false,
             "version": null,
-            "version_argument": null,
-            "output_format": null,
+            "version_argument": "--help",
+            "output_format": "csv",
             "reference": "https://github.com/ShawnDEvans/smbmap",
-            "icon": null,
-            "defect_dojo_scan_type": null
+            "icon": "https://www.kali.org/tools/smbmap/images/smbmap-logo.svg",
+            "defectdojo_scan_type": null
         }
     },
     {
@@ -337,8 +337,8 @@
             "version_argument": "--version",
             "output_format": "json",
             "reference": "https://nuclei.projectdiscovery.io",
-            "icon": "https://nuclei.projectdiscovery.io/static/favicon.png",
-            "defect_dojo_scan_type": "Nuclei Scan"
+            "icon": "https://avatars.githubusercontent.com/u/50994705?s=200&v=4",
+            "defectdojo_scan_type": "Nuclei Scan"
         }
     },
     {
@@ -357,7 +357,7 @@
             "output_format": null,
             "reference": "https://github.com/fullhunt/spring4shell-scan",
             "icon": "https://fullhunt.io/static/theme/images/logo/favicon.ico",
-            "defect_dojo_scan_type": null
+            "defectdojo_scan_type": null
         }
     },
     {
@@ -368,15 +368,15 @@
             "command": "gobuster",
             "script": null,
             "script_directory_property": null,
-            "run_directory_property": "LOG4J_SCAN_DIR",
+            "run_directory_property": null,
             "ignore_exit_code": false,
             "is_installed": false,
             "version": null,
             "version_argument": "version",
             "output_format": "txt",
             "reference": "https://github.com/OJ/gobuster",
-            "icon": null,
-            "defect_dojo_scan_type": null
+            "icon": "https://www.kali.org/tools/gobuster/images/gobuster-logo.svg",
+            "defectdojo_scan_type": null
         }
     }
 ]

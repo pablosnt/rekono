@@ -1,74 +1,49 @@
 {
-  "name": "rekono",
-  "version": "1.6.1",
-  "description": "Rekono is an automation platform that combines different hacking tools to complete pentesting processes",
+  "name": "frontend",
+  "version": "2.0.0",
+  "description": "Pentesting automation platform that combines hacking tools to complete security assessments",
   "author": "Pablo Santiago López <rekono.project@gmail.com>",
   "homepage": "https://github.com/pablosnt/rekono",
   "private": true,
+  "type": "module",
   "scripts": {
-    "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint",
-    "electron:build": "vue-cli-service electron:build",
-    "electron:serve": "vue-cli-service electron:serve",
-    "postinstall": "electron-builder install-app-deps",
-    "postuninstall": "electron-builder install-app-deps"
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "eslint": "eslint .",
+    "eslint:fix": "eslint . --fix",
+    "prettier": "prettier . --check",
+    "prettier:fix": "prettier --write --list-different ."
   },
-  "main": "background.js",
   "dependencies": {
-    "axios": "^0.27.2",
-    "bootstrap": "^4.5.3",
-    "bootstrap-vue": "^2.21.2",
-    "chart.js": "^2.9.4",
-    "core-js": "^3.25.2",
-    "jwt-decode": "^3.1.2",
-    "moment": "^2.29.4",
-    "sass": "^1.55.0",
-    "v-clipboard": "^2.2.3",
-    "vue": "^2.7.10",
-    "vue-awesome": "^4.5.0",
-    "vue-chartjs": "^3.5.1",
-    "vue-router": "^3.6.5",
-    "vuex": "^3.6.2"
+    "@mdi/font": "^7.4.47",
+    "@nuxt/image": "^1.10.0",
+    "@pinia/nuxt": "^0.11.0",
+    "apexcharts": "^4.7.0",
+    "highlight.js": "^11.11.1",
+    "jwt-decode": "^4.0.0",
+    "markdown-it-emoji": "^3.0.0",
+    "markdown-it-mark": "^4.0.0",
+    "nuxt": "^3.17.2",
+    "pinia": "^3.0.2",
+    "qr-code-styling": "^1.9.2",
+    "vue": "^3.5.13",
+    "vue-router": "^4.5.1",
+    "vue3-apexcharts": "^1.8.0",
+    "vue3-toastify": "^0.2.8"
   },
   "devDependencies": {
-    "@vue/cli-plugin-babel": "~4.5.0",
-    "@vue/cli-plugin-eslint": "~4.5.0",
-    "@vue/cli-service": "~4.5.0",
-    "babel-eslint": "^10.1.0",
-    "electron": "^13.0.0",
-    "electron-devtools-installer": "^3.2.0",
-    "eslint": "^6.7.2",
-    "eslint-plugin-vue": "^6.2.2",
-    "sass-loader": "^10.0.5",
-    "vue-cli-plugin-electron-builder": "~2.1.1",
-    "vue-template-compiler": "^2.6.11"
-  },
-  "overrides": {
-    "vue-cli-plugin-electron-builder": {
-      "electron-builder": "^23.0.3"
-    },
-    "@vue/cli-shared-utils": {
-      "@achrinza/node-ipc": "^9.2.6"
-    }
-  },
-  "eslintConfig": {
-    "root": true,
-    "env": {
-      "node": true
-    },
-    "extends": [
-      "plugin:vue/essential",
-      "eslint:recommended"
-    ],
-    "parserOptions": {
-      "parser": "babel-eslint"
-    },
-    "rules": {}
-  },
-  "browserslist": [
-    "> 1%",
-    "last 2 versions",
-    "not dead"
-  ]
+    "@iconify/vue": "^5.0.0",
+    "@nuxt/eslint": "^1.3.0",
+    "eslint": "^9.26.0",
+    "eslint-config-prettier": "^10.1.5",
+    "eslint-plugin-prettier": "^5.4.0",
+    "markdown-it": "^14.1.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3",
+    "vite-plugin-vuetify": "^2.1.1",
+    "vuetify": "^3.8.4"
+  }
 }

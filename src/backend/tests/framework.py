@@ -2,11 +2,13 @@ import hashlib
 import json
 import shutil
 from pathlib import Path as PathFile
-from typing import Any, Dict, List, Optional
+from typing import Any
+
+from django.test import TestCase
+from rest_framework.test import APIClient
 
 from authentications.enums import AuthenticationType
 from authentications.models import Authentication
-from django.test import TestCase
 from executions.enums import Status
 from executions.models import Execution
 from findings.enums import (
@@ -34,7 +36,6 @@ from parameters.models import InputTechnology, InputVulnerability
 from processes.models import Process, Step
 from projects.models import Project
 from rekono.settings import CONFIG
-from rest_framework.test import APIClient
 from security.authorization.roles import Role
 from target_ports.models import TargetPort
 from targets.enums import TargetType
@@ -52,7 +53,7 @@ from wordlists.models import Wordlist
 
 class RekonoTest(TestCase):
     data_dir = PathFile(__file__).resolve().parent / "data"
-    cases: List[RekonoTestCase] = []
+    cases: list[RekonoTestCase] = []
 
     def _create_user(self, username: str, role: Role) -> User:
         new_user = User.objects.create(
@@ -68,7 +69,7 @@ class RekonoTest(TestCase):
         return new_user
 
     def setUp(self) -> None:
-        self.users: Dict[Role, List[User]] = {
+        self.users: dict[Role, list[User]] = {
             Role.ADMIN: [],
             Role.AUDITOR: [],
             Role.READER: [],
@@ -85,9 +86,7 @@ class RekonoTest(TestCase):
             self.users[role].append(getattr(self, username))
 
     def _setup_project(self) -> None:
-        self.project, _ = Project.objects.get_or_create(
-            name="test", description="test", owner=self.admin1
-        )
+        self.project, _ = Project.objects.get_or_create(name="test", description="test", owner=self.admin1)
         self.project.tags.add("test")
         for user in [self.admin1, self.auditor1, self.reader1]:
             self.project.members.add(user)
@@ -108,9 +107,7 @@ class RekonoTest(TestCase):
             version_argument="--version",
         )
         for index, value in enumerate(IntensityEnum):
-            Intensity.objects.create(
-                tool=self.fake_tool, argument=f"-i {index}", value=value
-            )
+            Intensity.objects.create(tool=self.fake_tool, argument=f"-i {index}", value=value)
         self.fake_configuration = Configuration.objects.create(
             name="fake",
             tool=self.fake_tool,
@@ -161,21 +158,15 @@ class RekonoTest(TestCase):
 
     def _setup_task_user_provided_entities(self) -> None:
         self._setup_target()
-        self.target_port = TargetPort.objects.create(
-            target=self.target, port=80, path="/login.php"
-        )
+        self.target_port = TargetPort.objects.create(target=self.target, port=80, path="/login.php")
         self.authentication = Authentication.objects.create(
             name="root",
             secret="root",
             type=AuthenticationType.TOKEN,
             target_port=self.target_port,
         )
-        self.input_vulnerability = InputVulnerability.objects.create(
-            target=self.target, cve="CVE-2023-2222"
-        )
-        self.input_technology = InputTechnology.objects.create(
-            target=self.target, name="Joomla", version="2.0.0"
-        )
+        self.input_vulnerability = InputVulnerability.objects.create(cve="CVE-2023-2222")
+        self.input_technology = InputTechnology.objects.create(name="Joomla", version="2.0.0")
         path = self.data_dir / "wordlists" / "endpoints_wordlist.txt"
         self.wordlist = Wordlist.objects.create(
             name="test",
@@ -220,14 +211,10 @@ class RekonoTest(TestCase):
             output_file=report_filename,
         )
 
-    def _create_finding(
-        self, model: Any, data: Dict[str, Any], execution: Execution = None
-    ) -> Finding:
+    def _create_finding(self, model: Any, data: dict[str, Any], execution: Execution | None = None) -> Finding:
         new_finding = model.objects.create(
             **{
-                k: getattr(self, k)
-                if isinstance(v, int) and hasattr(self, k) and getattr(self, k).id == v
-                else v
+                k: (getattr(self, k) if isinstance(v, int) and hasattr(self, k) and getattr(self, k).id == v else v)
                 for k, v in data.items()
             }
         )
@@ -241,10 +228,9 @@ class RekonoTest(TestCase):
                 "data": "admin",
                 "data_type": OSINTDataType.USER,
                 "source": "Google",
-                "reference": "https://any.com",
             },
             Host: {
-                "address": "10.10.10.10",
+                "ip": "10.10.10.10",
                 "os": "some type of Linux",
                 "os_type": HostOS.LINUX,
             },
@@ -298,7 +284,7 @@ class RekonoTest(TestCase):
             setattr(self, finding_model.__name__.lower(), new_finding)
             self.findings.append(new_finding)
 
-    def _metadata(self) -> Dict[str, Any]:
+    def _metadata(self) -> dict[str, Any]:
         return {}
 
     def test_cases(self) -> None:
@@ -319,18 +305,14 @@ class ApiTest(RekonoTest):
     def _get_object(self) -> Any:
         return None
 
-    def _get_api_client(
-        self, access: Optional[str] = None, token: Optional[str] = None
-    ):
-        client = (
-            APIClient(HTTP_AUTHORIZATION=f"Bearer {access}") if access else APIClient()
-        )
+    def _get_api_client(self, access: str | None = None, token: str | None = None):
+        client = APIClient(HTTP_AUTHORIZATION=f"Bearer {access}") if access else APIClient()
         return APIClient(HTTP_AUTHORIZATION=f"Token {token}") if token else client
 
-    def _get_content(self, raw: Any) -> Dict[str, Any]:
+    def _get_content(self, raw: Any) -> dict[str, Any]:
         return json.loads((raw or "{}".encode()).decode())
 
-    def _metadata(self) -> Dict[str, Any]:
+    def _metadata(self) -> dict[str, Any]:
         return {"endpoint": self.endpoint}
 
     def test_str(self) -> None:
@@ -350,7 +332,7 @@ class ToolTest(RekonoTest):
     tool_name = ""
     execution = None
     authentication = None
-    executor_arguments: List[str] = []
+    executor_arguments: list[str] = []
 
     def setUp(self) -> None:
         if self.tool_name:
@@ -363,11 +345,12 @@ class ToolTest(RekonoTest):
                 configuration=self.configuration,
                 intensity=IntensityEnum.NORMAL,
             )
-            self.execution = Execution.objects.create(
-                task=self.task, configuration=self.configuration
-            )
+            self.task.wordlists.set([self.wordlist])
+            self.task.input_technologies.set([self.input_technology])
+            self.task.input_vulnerabilities.set([self.input_vulnerability])
+            self.execution = Execution.objects.create(task=self.task, configuration=self.configuration)
 
-    def _metadata(self) -> Dict[str, Any]:
+    def _metadata(self) -> dict[str, Any]:
         return {
             "execution": self.execution,
             "authentication": self.authentication,

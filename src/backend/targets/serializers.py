@@ -1,7 +1,7 @@
-from typing import Any, Dict
+from typing import Any
 
-from http_headers.serializers import SimpleHttpHeaderSerializer
-from platforms.defect_dojo.serializers import DefectDojoTargetSyncSerializer
+from framework.serializers import RelatedNotesSerializer
+from platforms.defectdojo.serializers import DefectDojoTargetSyncSerializer
 from rest_framework.serializers import ModelSerializer
 from targets.models import Target
 
@@ -14,11 +14,10 @@ class SimpleTargetSerializer(ModelSerializer):
         fields = ("id", "project", "target", "type")
 
 
-class TargetSerializer(ModelSerializer):
+class TargetSerializer(RelatedNotesSerializer):
     """Serializer to manage targets via API."""
 
-    defect_dojo_sync = DefectDojoTargetSyncSerializer(many=False, read_only=True)
-    http_headers = SimpleHttpHeaderSerializer(many=True, read_only=True)
+    defectdojo_sync = DefectDojoTargetSyncSerializer(many=False, read_only=True)
 
     class Meta:
         model = Target
@@ -28,32 +27,28 @@ class TargetSerializer(ModelSerializer):
             "target",
             "type",
             "target_ports",
-            "input_technologies",
-            "input_vulnerabilities",
             "tasks",
-            "defect_dojo_sync",
+            "defectdojo_sync",
             "notes",
-            "http_headers",
+            "reports",
         )
         read_only_fields = (
             "type",
             "target_ports",
-            "input_technologies",
-            "input_vulnerabilities",
             "tasks",
-            "defect_dojo_sync",
+            "defectdojo_sync",
+            "reports",
             "notes",
-            "http_headers",
         )
 
-    def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         """Validate the provided data before use it.
 
         Args:
-            attrs (Dict[str, Any]): Provided data
+            attrs (dict[str, Any]): Provided data
 
         Returns:
-            Dict[str, Any]: Data after validation process
+            dict[str, Any]: Data after validation process
         """
         attrs = super().validate(attrs)
         attrs["type"] = Target.get_type(attrs["target"])

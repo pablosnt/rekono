@@ -1,5 +1,4 @@
 import copy
-from typing import List
 
 from executions.enums import Status
 from executions.models import Execution
@@ -24,12 +23,12 @@ class BaseQueueTest(QueueTest):
         super().setUp()
         self._setup_fake_tool()
 
-    def _setup_multiple_findings(self, create_ports_and_paths: bool) -> List[Finding]:
+    def _setup_multiple_findings(self, create_ports_and_paths: bool) -> list[Finding]:
         findings = []
         for host_index in range(1, self.number_of_hosts + 1):
             new_host = self._create_finding(
                 Host,
-                {"address": f"10.10.10.{host_index}", "os_type": HostOS.LINUX},
+                {"ip": f"10.10.10.{host_index}", "os_type": HostOS.LINUX},
                 self.execution,
             )
             setattr(self, f"host{host_index}", new_host)
@@ -60,17 +59,13 @@ class BaseQueueTest(QueueTest):
                             },
                             self.execution,
                         )
-                        setattr(
-                            self, f"path{host_index}{port_index}{path_index}", new_path
-                        )
+                        setattr(self, f"path{host_index}{port_index}{path_index}", new_path)
                         findings.append(new_path)
         return findings
 
     def test_calculate_executions_from_findings(self) -> None:
         findings = self._setup_multiple_findings(True)
-        executions = self.queue._calculate_executions(
-            self.fake_tool, findings, [], [], [], []
-        )
+        executions = self.queue._calculate_executions(self.fake_tool, findings, [], [], [], [])
         expected = []
         last_expected = []
         for host_index in range(1, self.number_of_hosts + 1):
@@ -85,22 +80,15 @@ class BaseQueueTest(QueueTest):
                     if port_index == 1 and path_index == 1:
                         continue
                     new_item = copy.deepcopy(item)
-                    new_item[0].append(
-                        getattr(self, f"path{host_index}{port_index}{path_index}")
-                    )
+                    new_item[0].append(getattr(self, f"path{host_index}{port_index}{path_index}"))
                     last_expected.append(new_item)
         self.assertEqual(expected + last_expected, executions)
 
     def test_calculate_executions_from_only_hosts(self) -> None:
         findings = self._setup_multiple_findings(False)
-        executions = self.queue._calculate_executions(
-            self.fake_tool, findings, [], [], [], []
-        )
+        executions = self.queue._calculate_executions(self.fake_tool, findings, [], [], [], [])
         self.assertEqual(
-            [
-                {0: [getattr(self, f"host{h}")]}
-                for h in range(1, self.number_of_hosts + 1)
-            ],
+            [{0: [getattr(self, f"host{h}")]} for h in range(1, self.number_of_hosts + 1)],
             executions,
         )
 
@@ -111,19 +99,10 @@ class BaseQueueTest(QueueTest):
         vulnerabilities = [self.input_vulnerability]
         technologies = [self.input_technology]
         for index in range(1, number_of_entities + 1):
-            target_ports.append(
-                TargetPort.objects.create(
-                    target=self.target, port=self.target_port.port + index
-                )
-            )
-            vulnerabilities.append(
-                InputVulnerability.objects.create(
-                    target=self.target, cve=self.input_vulnerability.cve + f"{index}"
-                )
-            )
+            target_ports.append(TargetPort.objects.create(target=self.target, port=self.target_port.port + index))
+            vulnerabilities.append(InputVulnerability.objects.create(cve=self.input_vulnerability.cve + f"{index}"))
             technologies.append(
                 InputTechnology.objects.create(
-                    target=self.target,
                     name=self.input_technology.name + f"{index}",
                     version=self.input_technology.version,
                 )
@@ -167,7 +146,7 @@ class TasksQueueTest(QueueTest):
         (34, 2, None),  # SSH Audit
         (24, 2, None),  # CMSeeK
         (33, 2, None),  # GitDumper & GitLeaks
-        (36, 2, None),  # SMB Map
+        (35, 2, None),  # SMB Map
         (25, 2, None),  # ZAP
         (15, 2, 2),  # Dirsearch
         (48, 2, 2),  # Gobuster
@@ -194,27 +173,22 @@ class TasksQueueTest(QueueTest):
         self.assertEqual(task_id, execution.task.id)
         self.assertEqual(execution_id, execution.id)
         self.assertEqual(configuration_id, execution.configuration.id)
-        self.assertEqual(group, execution.group)
         self.assertEqual(status, execution.status)
         self.assertIsNone(execution.start)
 
     def test_tool_task(self) -> None:
         configuration = Configuration.objects.get(tool__id=1, default=True)
-        task = Task.objects.create(
-            target=self.target, configuration=configuration, intensity=Intensity.INSANE
-        )
+        task = Task.objects.create(target=self.target, configuration=configuration, intensity=Intensity.INSANE)
         task.wordlists.add(self.wordlist)
+        task.input_technologies.add(self.input_technology)
+        task.input_vulnerabilities.add(self.input_vulnerability)
         self.queue._consume_tool_task(task)
         self.assertEqual(1, Execution.objects.count())
-        self._validate_execution(
-            Execution.objects.get(pk=1), task.id, 1, configuration.id, 1
-        )
+        self._validate_execution(Execution.objects.get(pk=1), task.id, 1, configuration.id, 1)
 
     def _test_process_task(self, intensity: Intensity) -> None:
         process = Process.objects.get(pk=1)
-        self.task = Task.objects.create(
-            target=self.target, process=process, intensity=intensity
-        )
+        self.task = Task.objects.create(target=self.target, process=process, intensity=intensity)
         self.task.wordlists.add(self.wordlist)
         self.queue._consume_process_task(self.task)
         self.assertEqual(
@@ -227,18 +201,10 @@ class TasksQueueTest(QueueTest):
         for intensity, group_index in [(Intensity.INSANE, 1), (Intensity.SNEAKY, 2)]:
             self._test_process_task(intensity)
             for configuration_id, group in [
-                (e[0], e[group_index])
-                for e in self.expected_executions
-                if e[group_index] is None
-            ] + [
-                (e[0], e[group_index])
-                for e in self.expected_executions
-                if e[group_index] is not None
-            ]:
+                (e[0], e[group_index]) for e in self.expected_executions if e[group_index] is None
+            ] + [(e[0], e[group_index]) for e in self.expected_executions if e[group_index] is not None]:
                 self._validate_execution(
-                    Execution.objects.get(
-                        task=self.task, configuration__id=configuration_id
-                    ),
+                    Execution.objects.get(task=self.task, configuration__id=configuration_id),
                     self.task.id,
                     execution_id,
                     configuration_id,

@@ -1,8 +1,7 @@
 import logging
-from typing import Callable, Tuple
+from typing import Callable
 
 from django.apps import apps
-
 from framework.models import BaseEncrypted
 from rekono.properties import Property
 from rekono.settings import CONFIG
@@ -15,13 +14,11 @@ class BaseEncryptionKeyCommand:
     def _get_current_encryptor(self) -> Encryptor:
         return Encryptor(CONFIG.encryption_key)
 
-    def _get_new_encryptor(self) -> Tuple[Encryptor, str]:
+    def _get_new_encryptor(self) -> tuple[Encryptor, str]:
         new_encryption_key = Encryptor.generate_encryption_key()
         return Encryptor(new_encryption_key), new_encryption_key
 
-    def _replace_encrypted_values(
-        self, new_value_processor: Callable, old_value_processor: Callable
-    ) -> None:
+    def _replace_encrypted_values(self, new_value_processor: Callable, old_value_processor: Callable) -> None:
         for model in apps.get_models():
             if not issubclass(model, BaseEncrypted):
                 continue
@@ -37,6 +34,4 @@ class BaseEncryptionKeyCommand:
 
     def _configure_encryption_key(self, new_encryption_key: str) -> None:
         CONFIG.encryption_key = new_encryption_key
-        CONFIG._update_config_in_file(
-            Property.ENCRYPTION_KEY.value[1], new_encryption_key
-        )
+        CONFIG._update_config_in_file(Property.ENCRYPTION_KEY.value[1], new_encryption_key)

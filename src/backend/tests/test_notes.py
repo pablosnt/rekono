@@ -4,9 +4,21 @@ from notes.models import Note
 from tests.cases import ApiTestCase
 from tests.framework import ApiTest
 
+# pytype: disable=wrong-arg-types
+
 private_note = {
     "project": 1,
     "target": None,
+    "task": None,
+    "execution": None,
+    "osint": None,
+    "host": None,
+    "port": None,
+    "path": None,
+    "credential": None,
+    "technology": None,
+    "vulnerability": None,
+    "exploit": None,
     "title": "Title",
     "body": "Important things to remember",
     "tags": ["test"],
@@ -15,10 +27,9 @@ private_note = {
 public_note = {
     **private_note,
     "public": True,
-    "project": None,
     "target": 1,
 }
-invalid_note = {**private_note, "body": "Invalid;content"}
+invalid_note = {**private_note, "title": "Invalid;content"}
 
 
 class NoteTest(ApiTest):
@@ -31,12 +42,8 @@ class NoteTest(ApiTest):
             200,
             expected=[],
         ),
-        ApiTestCase(
-            ["admin2", "auditor2", "reader1", "reader2"], "post", 403, private_note
-        ),
-        ApiTestCase(
-            ["admin2", "auditor2", "reader1", "reader2"], "post", 403, public_note
-        ),
+        ApiTestCase(["admin2", "auditor2", "reader1", "reader2"], "post", 403, private_note),
+        ApiTestCase(["admin2", "auditor2", "reader1", "reader2"], "post", 403, public_note),
         ApiTestCase(["admin1", "auditor1"], "post", 400, invalid_note),
         ApiTestCase(
             ["admin1"],
@@ -160,13 +167,9 @@ class NoteTest(ApiTest):
                 },
             ],
         ),
-        ApiTestCase(
-            ["admin2", "auditor1", "auditor2"], "delete", 404, endpoint="{endpoint}1/"
-        ),
+        ApiTestCase(["admin2", "auditor1", "auditor2"], "delete", 404, endpoint="{endpoint}1/"),
         ApiTestCase(["reader1", "reader2"], "delete", 403, endpoint="{endpoint}1/"),
-        ApiTestCase(
-            ["admin1", "reader1", "reader2"], "delete", 403, endpoint="{endpoint}2/"
-        ),
+        ApiTestCase(["admin1", "reader1", "reader2"], "delete", 403, endpoint="{endpoint}2/"),
         ApiTestCase(["auditor1"], "delete", 204, endpoint="{endpoint}2/"),
         ApiTestCase(["admin1"], "delete", 204, endpoint="{endpoint}3/"),
         ApiTestCase(
@@ -188,9 +191,7 @@ class NoteTest(ApiTest):
             public_note,
             endpoint="{endpoint}1/",
         ),
-        ApiTestCase(
-            ["reader1", "reader2"], "put", 403, public_note, endpoint="{endpoint}1/"
-        ),
+        ApiTestCase(["reader1", "reader2"], "put", 403, public_note, endpoint="{endpoint}1/"),
         ApiTestCase(
             ["admin1"],
             "put",
@@ -205,9 +206,7 @@ class NoteTest(ApiTest):
             },
             endpoint="{endpoint}1/",
         ),
-        ApiTestCase(
-            ["admin2", "auditor2", "reader2"], "get", 404, endpoint="{endpoint}1/"
-        ),
+        ApiTestCase(["admin2", "auditor2", "reader2"], "get", 404, endpoint="{endpoint}1/"),
         ApiTestCase(
             ["admin1", "auditor1", "reader1"],
             "get",
@@ -222,9 +221,7 @@ class NoteTest(ApiTest):
             endpoint="{endpoint}1/",
         ),
         ApiTestCase(["admin2", "auditor2"], "delete", 404, endpoint="{endpoint}1/"),
-        ApiTestCase(
-            ["auditor1", "reader1", "reader2"], "delete", 403, endpoint="{endpoint}1/"
-        ),
+        ApiTestCase(["auditor1", "reader1", "reader2"], "delete", 403, endpoint="{endpoint}1/"),
         ApiTestCase(["admin1"], "delete", 204, endpoint="{endpoint}1/"),
         ApiTestCase(
             ["admin1", "admin2", "auditor1", "auditor2", "reader1", "reader2"],

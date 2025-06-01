@@ -1,0 +1,29 @@
+<template>
+  <BaseMenu
+    :options="[
+      {
+        title: 'Information',
+        icon: 'mdi-account',
+        to: '/profile/information',
+      },
+      {
+        title: 'Security',
+        icon: 'mdi-lock',
+        to: '/profile/security',
+      },
+      {
+        title: 'Rekono Bot',
+        icon: 'mdi-robot',
+        to: '/profile/bot',
+      },
+      {
+        title: 'HTTP Headers',
+        icon: 'mdi-web',
+        to: '/profile/http-headers',
+        auditor: true,
+      },
+    ]"
+  >
+    <slot />
+  </BaseMenu>
+</template>

@@ -1,0 +1,318 @@
+export function useApi(
+  endpoint: string,
+  authentication: boolean = true,
+  entity?: string,
+) {
+  const config = useRuntimeConfig();
+  const alert = useAlert();
+
+  const defaultHeaders = {
+    Accept: "application/json",
+  };
+
+  const default_size = 24;
+  const max_size = 1000;
+  let total = 0;
+
+  function url(endpoint: string): string {
+    const currentEndpoint = config.backendRootPath
+      ? config.backendRootPath + endpoint
+      : endpoint;
+    if (config.backendUrl) {
+      const url = new URL(config.backendUrl);
+      url.pathname = currentEndpoint;
+      return url.href;
+    }
+    return currentEndpoint;
+  }
+
+  function headers(authentication: boolean, extraHeaders?: object): object {
+    const tokens = useTokens();
+    const currentHeaders = defaultHeaders;
+    const token = tokens.get().access;
+    if (authentication) {
+      if (!token) {
+        forwardToLogin();
+      }
+      currentHeaders.Authorization = `Bearer ${token}`;
+    }
+    return Object.assign({}, currentHeaders, extraHeaders);
+  }
+
+  function parseErrorMessage(
+    error: object,
+    include_field: boolean = true,
+  ): string {
+    const firstValue = Object.values(error.data)[0];
+    const value = Array.isArray(firstValue) ? firstValue[0] : firstValue;
+    const field = Object.keys(error.data)[0];
+    const body = `${value.charAt(0).toUpperCase()}${value.slice(1)}`;
+    return field !== "non_field_errors" && include_field
+      ? `${field}: ${body}`
+      : body;
+  }
+
+  function request(
+    endpoint: string,
+    options: object = {},
+    extraPath?: string,
+    extraHeaders?: object,
+    raw?: boolean = false,
+  ): Promise {
+    endpoint = extraPath ? `${endpoint}${extraPath}` : endpoint;
+    return (
+      raw ? $fetch.raw(url(endpoint), options) : $fetch(url(endpoint), options)
+    ).catch((error) => {
+      let message = "Unexpected error";
+      switch (error.statusCode) {
+        case 400: {
+          message = parseErrorMessage(error);
+          break;
+        }
+        case 401:
+          if (
+            endpoint.includes("/api/security/refresh/") ||
+            (error.data.detail &&
+              error.data.detail === "Incorrect authentication credentials." &&
+              (endpoint.includes("/api/profile/mfa/enable/") ||
+                endpoint.includes("/api/profile/mfa/disable/") ||
+                endpoint.includes("/api/telegram/link/") ||
+                endpoint.includes("/api/profile/update-password/")))
+          ) {
+            return Promise.reject(error);
+          } else if (authentication) {
+            const refreshing = refreshStore();
+            if (refreshing.refreshing) {
+              function wait(): Promise {
+                return new Promise((resolve, reject) => {
+                  setTimeout(() => {
+                    if (refreshing.refreshing) {
+                      return wait();
+                    }
+                    options.headers = headers(authentication, extraHeaders);
+                    request(endpoint, options, undefined, extraHeaders)
+                      .then((response) => resolve(response))
+                      .catch((error) => reject(error));
+                  }, 500);
+                });
+              }
+              return wait();
+            } else {
+              return refresh().then(() => {
+                options.headers = headers(authentication, extraHeaders);
+                return request(endpoint, options, undefined, extraHeaders);
+              });
+            }
+          } else {
+            message = "Invalid credentials";
+          }
+          break;
+        case 403:
+          message = "You are not authorized to perform this operation";
+          break;
+        case 404:
+          message =
+            endpoint.includes("/api/reports/") && options.method === "POST"
+              ? parseErrorMessage(error, false)
+              : "Resource not found";
+          break;
+        case 429:
+          message = "Too many requests";
+          break;
+      }
+      if (message) {
+        alert(message, "error");
+      }
+      return Promise.reject(error);
+    });
+  }
+
+  function forwardToLogin(): Promise {
+    const tokens = useTokens();
+    const refreshing = refreshStore();
+    const user = userStore();
+    tokens.remove();
+    user.logout();
+    if (refreshing.refreshing) {
+      refreshing.change();
+    }
+    return navigateTo("/login");
+  }
+
+  function refresh(): Promise {
+    const tokens = useTokens();
+    const refreshing = refreshStore();
+    refreshing.change();
+    const refresh = tokens.get().refresh;
+    if (!refresh) {
+      forwardToLogin();
+    } else {
+      return request("/api/security/refresh/", {
+        method: "POST",
+        headers: headers(true, {}, refreshing, tokens),
+        body: { refresh: refresh },
+      })
+        .then((response) => {
+          tokens.remove();
+          tokens.save(response);
+          refreshing.change();
+          return Promise.resolve();
+        })
+        .catch(() => {
+          forwardToLogin();
+          return Promise.reject();
+        });
+    }
+  }
+
+  async function download(
+    id?: number,
+    extraPath?: string,
+    extraHeaders?: object,
+  ): Promise {
+    const options = {
+      method: "GET",
+      headers: headers(authentication, extraHeaders),
+      responseType: "blob",
+    };
+    return request(
+      id ? `${endpoint}${id}/` : endpoint,
+      options,
+      extraPath,
+      extraHeaders,
+      true,
+    ).then((response) => {
+      const a = document.createElement("a");
+      a.href = window.URL.createObjectURL(response._data);
+      a.download = response.headers
+        .get("content-disposition")
+        .replace('attachment; filename="', "")
+        .replace('"', "");
+      a.click();
+    });
+  }
+
+  function get(
+    id?: number,
+    extraPath?: string,
+    extraHeaders?: object,
+  ): Promise {
+    const options = {
+      method: "GET",
+      headers: headers(authentication, extraHeaders),
+    };
+    return request(
+      id ? `${endpoint}${id}/` : endpoint,
+      options,
+      extraPath,
+      extraHeaders,
+    ).then((response) => {
+      return Promise.resolve(response);
+    });
+  }
+
+  function list(
+    params: object = {},
+    all: boolean = false,
+    page: number = 1,
+    extraPath?: string,
+    extraHeaders?: object,
+    items: Array<object> = [],
+  ): Promise {
+    const size = all ? max_size : default_size;
+    return request(
+      endpoint,
+      {
+        method: "GET",
+        headers: headers(authentication, extraHeaders),
+        params: Object.assign({}, params, { page: page, limit: size }),
+      },
+      extraPath,
+      extraHeaders,
+    ).then((response) => {
+      total = response.count;
+      if (all) {
+        items = items.concat(response.results);
+        if (page * size < total) {
+          return list(params, all, page + 1, extraPath, extraHeaders, items);
+        }
+      } else {
+        items = response.results;
+      }
+      return Promise.resolve({ items: items, total: total });
+    });
+  }
+
+  function create(
+    body: object,
+    id?: number,
+    extraPath?: string,
+    extraHeaders?: object,
+  ): Promise {
+    return request(
+      id ? `${endpoint}${id}/` : endpoint,
+      {
+        method: "POST",
+        headers: headers(authentication, extraHeaders),
+        body: body,
+      },
+      extraPath,
+      extraHeaders,
+    ).then((response) => {
+      if (response) {
+        if (entity && !extraPath) {
+          alert(
+            `New ${entity.toLowerCase()} has been successfully created`,
+            "success",
+          );
+        }
+      }
+      return Promise.resolve(response);
+    });
+  }
+
+  function update(
+    body: object,
+    id?: number,
+    extraPath?: string,
+    extraHeaders?: object,
+  ): Promise {
+    return request(
+      id ? `${endpoint}${id}/` : endpoint,
+      {
+        method: "PUT",
+        headers: headers(authentication, extraHeaders),
+        body: body,
+      },
+      extraPath,
+      extraHeaders,
+    ).then((response) => {
+      if (response) {
+        if (entity && !extraPath) {
+          alert(`${entity} has been successfully updated`, "success");
+        }
+      }
+      return Promise.resolve(response);
+    });
+  }
+
+  function remove(
+    id?: number,
+    extraPath?: string,
+    extraHeaders?: object,
+  ): Promise {
+    return request(
+      id ? `${endpoint}${id}/` : endpoint,
+      { method: "DELETE", headers: headers(authentication, extraHeaders) },
+      extraPath,
+      extraHeaders,
+    ).then(() => {
+      if (entity && !extraPath) {
+        alert(`${entity} has been deleted`, "warning");
+      }
+      return Promise.resolve();
+    });
+  }
+
+  return { download, get, list, create, update, remove, default_size, entity };
+}

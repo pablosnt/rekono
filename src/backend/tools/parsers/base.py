@@ -1,15 +1,16 @@
 import json
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import defusedxml.ElementTree as parser
 from django.db.models.fields.related_descriptors import ReverseManyToOneDescriptor
 from django.db.models.query_utils import DeferredAttribute
+
 from findings.framework.models import Finding
 from tools.executors.base import BaseExecutor
 
 
 class BaseParser:
-    def __init__(self, executor: BaseExecutor, output: Optional[str] = None) -> None:
+    def __init__(self, executor: BaseExecutor, output: str | None = None) -> None:
         self.executor = executor
         self.output = output
         self.report = (
@@ -20,9 +21,9 @@ class BaseParser:
             and executor.report.stat().st_size > 0
             else None
         )
-        self.findings: List[Finding] = []
+        self.findings: list[Finding] = []
 
-    def create_finding(self, finding_type: Finding, **fields: Any) -> Finding:
+    def create_finding(self, finding_type: type[Finding], **fields: Any) -> Finding:
         for (
             finding_type_used,
             finding_used,
@@ -65,18 +66,30 @@ class BaseParser:
     def _parse_standard_output(self) -> None:
         pass
 
-    def _load_report_as_json(self) -> Dict[str, Any]:
-        with open(self.report, "r", encoding="utf-8") as report:
-            return json.load(report)
+    def _load_report_as_json(self) -> dict[str, Any] | list[dict[str, Any]] | None:
+        if self.report:
+            with self.report.open("r", encoding="utf-8") as report:
+                return json.load(report)
+        return None
+
+    def _load_report_as_json_dict(self) -> dict[str, Any]:
+        data = self._load_report_as_json()
+        return data if data and isinstance(data, dict) else {}
+
+    def _load_report_as_json_list(self) -> list[dict[str, Any]]:
+        data = self._load_report_as_json()
+        return data if data and isinstance(data, list) else []
 
     def _load_report_as_xml(self) -> Any:
         return parser.parse(self.report).getroot()
 
-    def _load_report_by_lines(self) -> List[str]:
-        with open(self.report, "r", encoding="utf-8") as report:
-            return report.readlines()
+    def _load_report_by_lines(self) -> list[str]:
+        if self.report:
+            with self.report.open("r", encoding="utf-8") as report:
+                return report.readlines()
+        return []
 
-    def _protect_value(self, value: Optional[str]) -> Optional[str]:
+    def _protect_value(self, value: str | None) -> str | None:
         if not value:
             return value
         if self.executor.authentication:
@@ -91,12 +104,8 @@ class BaseParser:
         ).strip()
 
     def _protect_execution(self) -> None:
-        self.executor.execution.output_plain = self._protect_value(
-            self.executor.execution.output_plain
-        )
-        self.executor.execution.output_error = self._protect_value(
-            self.executor.execution.output_error
-        )
+        self.executor.execution.output_plain = self._protect_value(self.executor.execution.output_plain)
+        self.executor.execution.output_error = self._protect_value(self.executor.execution.output_error)
         if self.report and self.report.is_file():
             with self.report.open("r") as read_report:
                 data = read_report.read()

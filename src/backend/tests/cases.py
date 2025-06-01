@@ -1,13 +1,14 @@
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Type
+from typing import Any, Type
 
-from authentications.models import Authentication
 from django.db import transaction
 from django.test import TestCase
-from executions.models import Execution
 from rest_framework.test import APIClient
+
+from authentications.models import Authentication
+from executions.models import Execution
 from tools.parsers.base import BaseParser
 
 
@@ -20,15 +21,15 @@ class RekonoTestCase:
 
 @dataclass
 class ApiTestCase(RekonoTestCase):
-    executors: List[str]
+    executors: list[str]
     method: str
     status_code: int
-    data: Optional[Dict[str, Any]] = None
-    expected: Optional[Dict[str, Any]] = None
+    data: dict[str, Any] | None = None
+    expected: dict[str, Any] | None = None
     endpoint: str = "{endpoint}"
     format: str = "json"
 
-    def _login(self, username: str, password: str) -> Tuple[str, str]:
+    def _login(self, username: str, password: str) -> tuple[str, str]:
         content = json.loads(
             (
                 APIClient()
@@ -42,15 +43,16 @@ class ApiTestCase(RekonoTestCase):
         )
         return content.get("access"), content.get("refresh")
 
-    def _check_response_content(
-        self, expected: Dict[str, Any], response: Dict[str, Any]
-    ) -> None:
+    def _check_response_content(self, expected: dict[str, Any], response: dict[str, Any]) -> None:
         for key, value in expected.items():
             if isinstance(value, dict):
                 self._check_response_content(value, response.get(key, {}))
+            elif isinstance(value, list):
+                self.tc.assertEqual(len(value), len(response.get(key, [])))
+                if len(value) > 0 and isinstance(value[0], dict):
+                    for index, item in enumerate(value):
+                        self._check_response_content(item, response.get(key, [])[index])
             else:
-                if isinstance(value, list):
-                    self.tc.assertEqual(len(value), len(response.get(key, [])))
                 self.tc.assertEqual(value, response.get(key))
 
     def test_case(self, *args: Any, **kwargs: Any) -> None:
@@ -66,7 +68,11 @@ class ApiTestCase(RekonoTestCase):
                     data=self.data,
                     format=self.format,
                 )
-                self.tc.assertEqual(self.status_code, response.status_code)
+                try:
+                    self.tc.assertEqual(self.status_code, response.status_code)
+                except Exception as ex:
+                    input(response.content)
+                    raise ex
                 if self.expected is not None:
                     content = json.loads((response.content or "{}".encode()).decode())
                     if isinstance(self.expected, dict):
@@ -83,13 +89,13 @@ class ApiTestCase(RekonoTestCase):
 @dataclass
 class ToolTestCase(RekonoTestCase):
     report: str
-    expected: Optional[List[Dict[str, Any]]] = None
+    expected: list[dict[str, Any]] | None = None
 
     def _get_parser(
         self,
         execution: Execution,
         authentication: Authentication,
-        executor_arguments: List[str],
+        executor_arguments: list[str],
         reports: Path,
     ) -> BaseParser:
         report = reports / self.report
@@ -98,9 +104,7 @@ class ToolTestCase(RekonoTestCase):
         executor.arguments = executor_arguments
         parser = execution.configuration.tool.get_parser_class()(
             executor,
-            report.read_text()
-            if not execution.configuration.tool.output_format
-            else None,
+            (report.read_text() if not execution.configuration.tool.output_format else None),
         )
         if execution.configuration.tool.output_format:
             parser.report = report
@@ -118,9 +122,7 @@ class ToolTestCase(RekonoTestCase):
         if self.expected:
             for index, finding in enumerate(parser.findings):
                 expected = self.expected[index]
-                self.tc.assertTrue(
-                    isinstance(finding, expected.get("model", Type[None]))
-                )
+                self.tc.assertEqual(finding.__class__, expected.get("model", Type[None]))
                 for field, value in expected.items():
                     if field != "model":
                         self.tc.assertEqual(value, getattr(finding, field))

@@ -1,20 +1,16 @@
-from typing import Any, Dict
-
 from django.db import models
+
 from framework.enums import InputKeyword
 from framework.models import BaseInput
+from parameters.framework.models import InputParameter
 from security.validators.input_validator import Regex, Validator
-from targets.models import Target
 
 # Create your models here.
 
 
-class InputTechnology(BaseInput):
+class InputTechnology(InputParameter):
     """Input technology model."""
 
-    target = models.ForeignKey(
-        Target, related_name="input_technologies", on_delete=models.CASCADE
-    )
     name = models.TextField(
         max_length=100,
         validators=[Validator(Regex.NAME.value, code="name", deny_injections=True)],
@@ -27,28 +23,7 @@ class InputTechnology(BaseInput):
     )
 
     filters = [BaseInput.Filter(type=str, field="name", contains=True)]
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=["target", "name"], name="unique_input_technology"
-            )
-        ]
-
-    def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
-        """Get useful information from this instance to be used in tool execution as argument.
-
-        Args:
-            accumulated (Dict[str, Any], optional): Information from other instances of the same type. Defaults to {}.
-
-        Returns:
-            Dict[str, Any]: Useful information for tool executions, including accumulated if setted
-        """
-        output = self.target.parse(accumulated)
-        output[InputKeyword.TECHNOLOGY.name.lower()] = self.name
-        if self.version:
-            output[InputKeyword.VERSION.name.lower()] = self.version
-        return output
+    parse_mapping = {InputKeyword.TECHNOLOGY: "name", InputKeyword.VERSION: "version"}
 
     def __str__(self) -> str:
         """Instance representation in text format.
@@ -56,19 +31,12 @@ class InputTechnology(BaseInput):
         Returns:
             str: String value that identifies this instance
         """
-        return f"{self.target.__str__()} - {self.name}{f' - {self.version}' if self.version else ''}"
-
-    @classmethod
-    def get_project_field(cls) -> str:
-        return "target__project"
+        return f"{self.name} - {self.version}" if self.version else self.name
 
 
-class InputVulnerability(BaseInput):
+class InputVulnerability(InputParameter):
     """Input vulnerability model."""
 
-    target = models.ForeignKey(
-        Target, related_name="input_vulnerabilities", on_delete=models.CASCADE
-    )
     cve = models.TextField(
         max_length=20,
         validators=[Validator(Regex.CVE.value, code="cve", deny_injections=True)],
@@ -78,27 +46,7 @@ class InputVulnerability(BaseInput):
         BaseInput.Filter(type=str, field="cve", processor=lambda v: "cve"),
         BaseInput.Filter(type=str, field="cve", processor=lambda v: v.lower()),
     ]
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=["target", "cve"], name="unique_input_vulnerability"
-            )
-        ]
-
-    def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
-        """Get useful information from this instance to be used in tool execution as argument.
-
-        Args:
-            accumulated (Dict[str, Any], optional): Information from other instances of the same type. Defaults to {}.
-
-        Returns:
-            Dict[str, Any]: Useful information for tool executions, including accumulated if setted
-        """
-        return {
-            **self.target.parse(accumulated),
-            InputKeyword.CVE.name.lower(): self.cve,
-        }
+    parse_mapping = {InputKeyword.CVE: "cve"}
 
     def __str__(self) -> str:
         """Instance representation in text format.
@@ -106,8 +54,4 @@ class InputVulnerability(BaseInput):
         Returns:
             str: String value that identifies this instance
         """
-        return f"{self.target.__str__()} - {self.cve}"
-
-    @classmethod
-    def get_project_field(cls) -> str:
-        return "target__project"
+        return self.cve

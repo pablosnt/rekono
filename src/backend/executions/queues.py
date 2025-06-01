@@ -1,5 +1,4 @@
 import logging
-from typing import Dict, List, Tuple
 
 import rq
 from django.utils import timezone
@@ -26,12 +25,12 @@ class ExecutionsQueue(BaseQueue):
     def enqueue(
         self,
         execution: Execution,
-        findings: List[Finding],
-        target_ports: List[TargetPort],
-        input_vulnerabilities: List[InputVulnerability],
-        input_technologies: List[InputTechnology],
-        wordlists: List[Wordlist],
-        dependencies: List[Job] = [],
+        findings: list[Finding],
+        target_ports: list[TargetPort],
+        input_vulnerabilities: list[InputVulnerability],
+        input_technologies: list[InputTechnology],
+        wordlists: list[Wordlist],
+        dependencies: list[Job] = [],
         at_front: bool = False,
     ) -> Job:
         job = self._get_queue().enqueue(
@@ -64,17 +63,28 @@ class ExecutionsQueue(BaseQueue):
     @job("executions")
     def consume(
         execution: Execution,
-        findings: List[Finding],
-        target_ports: List[TargetPort],
-        input_vulnerabilities: List[InputVulnerability],
-        input_technologies: List[InputTechnology],
-        wordlists: List[Wordlist],
-    ) -> Tuple[Execution, List[Finding]]:
-        executor: BaseExecutor = execution.configuration.tool.get_executor_class()(
-            execution
-        )
+        findings: list[Finding],
+        target_ports: list[TargetPort],
+        input_vulnerabilities: list[InputVulnerability],
+        input_technologies: list[InputTechnology],
+        wordlists: list[Wordlist],
+    ) -> tuple[Execution, list[Finding]]:
+        executor: BaseExecutor = execution.configuration.tool.get_executor_class()(execution)
         current_job = rq.get_current_job()
         if not findings and current_job and current_job._dependency_ids:
+            logger.info(
+                "BEFORE "
+                + str(
+                    ExecutionsQueue._get_findings_from_dependencies(
+                        executor,
+                        target_ports,
+                        input_vulnerabilities,
+                        input_technologies,
+                        wordlists,
+                        current_job,
+                    )
+                )
+            )
             (
                 findings,
                 target_ports,
@@ -89,12 +99,8 @@ class ExecutionsQueue(BaseQueue):
                 wordlists,
                 current_job,
             ).values()
-        executor.execute(
-            findings, target_ports, input_vulnerabilities, input_technologies, wordlists
-        )
-        parser: BaseParser = execution.configuration.tool.get_parser_class()(
-            executor, execution.output_plain
-        )
+        executor.execute(findings, target_ports, input_vulnerabilities, input_technologies, wordlists)
+        parser: BaseParser = execution.configuration.tool.get_parser_class()(executor, execution.output_plain)
         parser.parse()
         FindingsQueue().enqueue(execution, parser.findings)
         return execution, parser.findings
@@ -102,14 +108,15 @@ class ExecutionsQueue(BaseQueue):
     @staticmethod
     def _get_findings_from_dependencies(
         executor: BaseExecutor,
-        target_ports: List[TargetPort],
-        input_vulnerabilities: List[InputVulnerability],
-        input_technologies: List[InputTechnology],
-        wordlists: List[Wordlist],
+        target_ports: list[TargetPort],
+        input_vulnerabilities: list[InputVulnerability],
+        input_technologies: list[InputTechnology],
+        wordlists: list[Wordlist],
         current_job: Job,
-    ) -> Dict[int, List[BaseInput]]:
+    ) -> dict[int, list[BaseInput]]:
         findings = []
-        queue = ExecutionsQueue._get_queue()
+        self = ExecutionsQueue()
+        queue = self._get_queue()
         for dependency_id in current_job._dependency_ids:
             dependency = queue.fetch_job(dependency_id)
             if dependency and dependency.result:
@@ -126,21 +133,17 @@ class ExecutionsQueue(BaseQueue):
                 input_technologies,
                 wordlists,
             )
-            if executor.check_arguments(
-                e.get(0, []), e.get(1, []), e.get(2, []), e.get(3, []), e.get(4, [])
-            )
+            if executor.check_arguments(e.get(0, []), e.get(1, []), e.get(2, []), e.get(3, []), e.get(4, []))
         ]
-        logger.info(
-            f"[Execution] New {len(executions) - 1} executions from previous findings"
-        )
+        logger.info(f"[Execution] New {len(executions) - 1} executions from previous findings")
         new_jobs = []
         for execution in executions[1:]:
+            logger.info("NEW EXECUTION " + str(execution))
             new_execution = Execution.objects.create(
                 task=executor.execution.task,
                 configuration=executor.execution.configuration,
-                group=executor.execution.group,
             )
-            job = queue.enqueue(
+            job = self.enqueue(
                 new_execution,
                 execution.get(0, []),
                 execution.get(1, []),
@@ -152,16 +155,16 @@ class ExecutionsQueue(BaseQueue):
             )
             new_jobs.append(job.id)
         if new_jobs:
-            instance = ExecutionsQueue()
+            logger.info("NEW JOB " + str(new_jobs))
             registry = DeferredJobRegistry(queue=queue)
             for pending_job_id in registry.get_job_ids():
                 pending_job = queue.fetch_job(pending_job_id)
                 if pending_job and current_job.id in pending_job._dependency_ids:
                     dependencies = pending_job._dependency_ids
                     meta = pending_job.get_meta()
-                    instance.cancel_job(pending_job_id)
-                    instance.delete_job(pending_job_id)
-                    instance.enqueue(
+                    self.cancel_job(pending_job_id)
+                    self.delete_job(pending_job_id)
+                    self.enqueue(
                         meta["execution"],
                         [],
                         meta["target_ports"],
@@ -170,4 +173,5 @@ class ExecutionsQueue(BaseQueue):
                         meta["wordlists"],
                         dependencies=dependencies + new_jobs,
                     )
+        logger.info("TOTAL EXECUTIONS " + str(executions))
         return executions[0] if executions else {}

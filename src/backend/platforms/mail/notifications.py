@@ -1,15 +1,16 @@
 import logging
 import os
 import threading
-from typing import Any, Dict, List
+from typing import Any
 
 import certifi
-from alerts.enums import AlertMode
-from alerts.models import Alert
 from django.core.mail import EmailMultiAlternatives
 from django.core.mail.backends.smtp import EmailBackend
 from django.template.loader import get_template
 from django.utils import timezone
+
+from alerts.enums import AlertMode
+from alerts.models import Alert
 from executions.models import Execution
 from findings.framework.models import Finding
 from framework.platforms import BaseNotification
@@ -41,12 +42,7 @@ class SMTP(BaseNotification):
         os.environ["SSL_CERT_FILE"] = certifi.where()
 
     def is_available(self) -> bool:
-        if (
-            not self.settings
-            or not self.settings.host
-            or not self.settings.port
-            or CONFIG.testing
-        ):
+        if not self.backend or not self.settings or not self.settings.host or not self.settings.port or CONFIG.testing:
             return False
         try:
             self.backend.open()
@@ -55,19 +51,17 @@ class SMTP(BaseNotification):
         except Exception:
             return False
 
-    def _send_messages(
-        self, users: List[Any], subject: str, template_path: str, data: Dict[str, Any]
-    ) -> None:
-        if not self.is_available():
+    def _send_messages(self, users: list[Any], subject: str, template_path: str, data: dict[str, Any]) -> None:
+        if not self.backend or not self.is_available():
             return
         try:
-            message = EmailMultiAlternatives(
-                subject, "", "Rekono <noreply@rekono.com>", [u.email for u in users]
-            )
+            message = EmailMultiAlternatives(subject, "", "Rekono <noreply@rekono.com>", [u.email for u in users])
             template = get_template(template_path)
             message.attach_alternative(
+                # pytype: disable=attribute-error
                 # nosemgrep: python.flask.security.xss.audit.direct-use-of-jinja2.direct-use-of-jinja2
                 template.render({**data, "rekono_url": CONFIG.frontend_url}),
+                # pytype: enable=attribute-error
                 "text/html",
             )
             self.backend.send_messages([message])
@@ -76,23 +70,19 @@ class SMTP(BaseNotification):
 
     def _notify(
         self,
-        users: List[Any],
+        users: list[Any],
         subject: str,
         template: str,
-        data: Dict[str, Any],
+        data: dict[str, Any],
         background: bool = True,
     ) -> None:
         if background:
-            threading.Thread(
-                target=self._send_messages, args=(users, subject, template, data)
-            ).start()
+            threading.Thread(target=self._send_messages, args=(users, subject, template, data)).start()
         else:
             self._send_messages(users, subject, template, data)
 
-    def _notify_execution(
-        self, users: List[Any], execution: Execution, findings: List[Finding]
-    ) -> None:
-        findings_by_class: Dict[Any, List[Finding]] = {}
+    def _notify_execution(self, users: list[Any], execution: Execution, findings: list[Finding]) -> None:
+        findings_by_class: dict[Any, list[Finding]] = {}
         for finding in findings:
             if findings.__class__.__name__.lower() not in findings_by_class:
                 findings_by_class[findings.__class__.__name__.lower()] = []
@@ -108,10 +98,10 @@ class SMTP(BaseNotification):
             background=False,
         )
 
-    def _notify_alert(self, users: List[Any], alert: Alert, finding: Finding) -> None:
+    def _notify_alert(self, users: list[Any], alert: Alert, finding: Finding) -> None:
         subjects = {
             AlertMode.NEW: f"New {finding.__class__.__name__.lower()} detected",
-            AlertMode.FILTER.value: f"New {finding.__class__.__name__.lower()} matches alert criteria",
+            AlertMode.FILTER.value: f"New {finding.__class__.__name__.lower()} matches alert criterion",
             AlertMode.MONITOR.value: "New trending CVE",
         }
         self._notify(

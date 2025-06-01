@@ -1,9 +1,15 @@
-from rest_framework.serializers import ModelSerializer, PrimaryKeyRelatedField
-from taggit.serializers import TaggitSerializer
+from typing import Any
 
+from django.db.models import Q
 from framework.fields import TagField
 from framework.serializers import LikeSerializer
 from processes.models import Process, Step
+from rest_framework.serializers import (
+    ModelSerializer,
+    PrimaryKeyRelatedField,
+    SerializerMethodField,
+)
+from taggit.serializers import TaggitSerializer
 from tools.models import Configuration
 from tools.serializers import ConfigurationSerializer
 from users.serializers import SimpleUserSerializer
@@ -54,6 +60,7 @@ class ProcessSerializer(TaggitSerializer, LikeSerializer):
     steps = SimpleStepSerializer(read_only=True, many=True)
     owner = SimpleUserSerializer(many=False, read_only=True)
     tags = TagField()
+    wordlists = SerializerMethodField(read_only=True)
 
     class Meta:
         model = Process
@@ -66,4 +73,15 @@ class ProcessSerializer(TaggitSerializer, LikeSerializer):
             "likes",
             "steps",
             "tags",
+            "wordlists",
         )
+
+    def get_wordlists(self, instance: Any) -> dict[str, bool]:
+        params = {"configuration__tool__arguments__inputs__type__name": "Wordlist"}
+        return {
+            "required": instance.steps.filter(
+                Q(**params)
+                & (Q(configuration__tool__arguments__required=True) | Q(configuration__tool__name="Gobuster"))
+            ).exists(),
+            "supported": instance.steps.filter(**params).exists(),
+        }

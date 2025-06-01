@@ -1,0 +1,162 @@
+{
+    "info": {
+        "args": "dirsearch.py -u http://10.10.10.10 -o src/backend/tests/data/reports/dirsearch/2025-default.json --format=json",
+        "time": "Sat May 31 12:24:50 2025"
+    },
+    "results": [
+        {
+            "content-length": 277,
+            "content-type": "text/html",
+            "redirect": null,
+            "status": 403,
+            "url": "http://10.10.10.10:80/.ht_wsr.txt"
+        },
+        {
+            "content-length": 277,
+            "content-type": "text/html",
+            "redirect": null,
+            "status": 403,
+            "url": "http://10.10.10.10:80/.htaccess.sample"
+        },
+        {
+            "content-length": 277,
+            "content-type": "text/html",
+            "redirect": null,
+            "status": 403,
+            "url": "http://10.10.10.10:80/.htaccess_orig"
+        },
+        {
+            "content-length": 277,
+            "content-type": "text/html",
+            "redirect": null,
+            "status": 403,
+            "url": "http://10.10.10.10:80/.htaccess.bak1"
+        },
+        {
+            "content-length": 277,
+            "content-type": "text/html",
+            "redirect": null,
+            "status": 403,
+            "url": "http://10.10.10.10:80/.htaccess_sc"
+        },
+        {
+            "content-length": 277,
+            "content-type": "text/html",
+            "redirect": null,
+            "status": 403,
+            "url": "http://10.10.10.10:80/.htaccess.save"
+        },
+        {
+            "content-length": 277,
+            "content-type": "text/html",
+            "redirect": null,
+            "status": 403,
+            "url": "http://10.10.10.10:80/.htaccess.orig"
+        },
+        {
+            "content-length": 277,
+            "content-type": "text/html",
+            "redirect": null,
+            "status": 403,
+            "url": "http://10.10.10.10:80/.htaccess_extra"
+        },
+        {
+            "content-length": 277,
+            "content-type": "text/html",
+            "redirect": null,
+            "status": 403,
+            "url": "http://10.10.10.10:80/.htm"
+        },
+        {
+            "content-length": 277,
+            "content-type": "text/html",
+            "redirect": null,
+            "status": 403,
+            "url": "http://10.10.10.10:80/.htaccessBAK"
+        },
+        {
+            "content-length": 277,
+            "content-type": "text/html",
+            "redirect": null,
+            "status": 403,
+            "url": "http://10.10.10.10:80/.httr-oauth"
+        },
+        {
+            "content-length": 277,
+            "content-type": "text/html",
+            "redirect": null,
+            "status": 403,
+            "url": "http://10.10.10.10:80/.htaccessOLD2"
+        },
+        {
+            "content-length": 277,
+            "content-type": "text/html",
+            "redirect": null,
+            "status": 403,
+            "url": "http://10.10.10.10:80/.html"
+        },
+        {
+            "content-length": 277,
+            "content-type": "text/html",
+            "redirect": null,
+            "status": 403,
+            "url": "http://10.10.10.10:80/.htaccessOLD"
+        },
+        {
+            "content-length": 277,
+            "content-type": "text/html",
+            "redirect": null,
+            "status": 403,
+            "url": "http://10.10.10.10:80/.htpasswds"
+        },
+        {
+            "content-length": 277,
+            "content-type": "text/html",
+            "redirect": null,
+            "status": 403,
+            "url": "http://10.10.10.10:80/.htpasswd_test"
+        },
+        {
+            "content-length": 277,
+            "content-type": "text/html",
+            "redirect": null,
+            "status": 403,
+            "url": "http://10.10.10.10:80/.php"
+        },
+        {
+            "content-length": 1691,
+            "content-type": "text/html",
+            "redirect": null,
+            "status": 200,
+            "url": "http://10.10.10.10:80/assets/"
+        },
+        {
+            "content-length": 313,
+            "content-type": "text/html",
+            "redirect": "http://10.10.10.10/assets/",
+            "status": 301,
+            "url": "http://10.10.10.10:80/assets"
+        },
+        {
+            "content-length": 33560,
+            "content-type": "text/html",
+            "redirect": null,
+            "status": 200,
+            "url": "http://10.10.10.10:80/index.html"
+        },
+        {
+            "content-length": 277,
+            "content-type": "text/html",
+            "redirect": null,
+            "status": 403,
+            "url": "http://10.10.10.10:80/server-status"
+        },
+        {
+            "content-length": 277,
+            "content-type": "text/html",
+            "redirect": null,
+            "status": 403,
+            "url": "http://10.10.10.10:80/server-status/"
+        }
+    ]
+}

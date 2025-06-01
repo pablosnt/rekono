@@ -1,10 +1,7 @@
 import logging
-from typing import Any, Dict
+from typing import Any
 
 from django.core.exceptions import ValidationError
-from framework.serializers import MfaSerializer
-from platforms.mail.notifications import SMTP
-from rekono.settings import CONFIG
 from rest_framework import status
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.permissions import IsAuthenticated
@@ -14,6 +11,10 @@ from rest_framework_simplejwt.serializers import (
     TokenObtainSerializer,
 )
 from rest_framework_simplejwt.token_blacklist.models import OutstandingToken
+
+from framework.serializers import MfaSerializer
+from platforms.mail.notifications import SMTP
+from rekono.settings import CONFIG
 from security.authentication.tokens import MfaRequiredToken
 from security.authorization.roles import Role
 from users.models import User
@@ -24,7 +25,7 @@ logger = logging.getLogger()
 class JwtAuthentication:
     user: User = None
 
-    def _login(self) -> Dict[str, str]:
+    def _login(self) -> dict[str, str]:
         User.objects.invalidate_all_tokens(self.user)
         token = self.__class__.get_token(self.user)
         SMTP().login_notification(self.user)
@@ -47,19 +48,15 @@ class JwtAuthentication:
 
 
 class LoginSerializer(JwtAuthentication, TokenObtainSerializer):
-    def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         super().validate(attrs)
-        return (
-            {"mfa": str(self.__class__.get_mfa_required_token(self.user))}
-            if self.user.mfa
-            else self._login()
-        )
+        return {"mfa": str(self.__class__.get_mfa_required_token(self.user))} if self.user.mfa else self._login()
 
 
 class BaseMfaRequiredSerializer(Serializer):
     token = CharField()
 
-    def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         attrs = super().validate(attrs)
         if attrs.get("token"):
             try:
@@ -75,10 +72,8 @@ class BaseMfaRequiredSerializer(Serializer):
 class SendMfaEmailSerializer(BaseMfaRequiredSerializer):
     token = CharField(required=False)
 
-    def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
-        is_authenticated = IsAuthenticated().has_permission(
-            self.context.get("request"), None
-        )
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
+        is_authenticated = IsAuthenticated().has_permission(self.context.get("request"), None)
         if not is_authenticated and not attrs.get("token"):
             raise ValidationError("Token is required", code="token")
         elif is_authenticated:
@@ -86,15 +81,17 @@ class SendMfaEmailSerializer(BaseMfaRequiredSerializer):
         return super().validate(attrs)
 
     def save(self, **kwargs: Any) -> User:
-        mfa = User.objects.setup_otp(
-            self.user, {"minutes": CONFIG.mfa_expiration_minutes}
+        SMTP().mfa(
+            self.user,
+            # pytype: disable=attribute-error
+            User.objects.setup_otp(self.user, {"minutes": CONFIG.mfa_expiration_minutes}),
+            # pytype: enable=attribute-error
         )
-        SMTP().mfa(self.user, mfa)
         return self.user
 
 
 class MfaLoginSerializer(MfaSerializer, BaseMfaRequiredSerializer, JwtAuthentication):
-    def validate(self, attrs: Dict[str, Any]) -> Dict[str, Any]:
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         super().validate(attrs)
         if self.user.otp:
             User.objects.remove_otp(self.user)

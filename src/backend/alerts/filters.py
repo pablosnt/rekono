@@ -12,5 +12,5 @@ class AlertFilter(FilterSet):
             "value": ["exact", "icontains"],
             "enabled": ["exact"],
             "owner": ["exact"],
-            "suscribers": ["exact"],
+            "subscribers": ["exact"],
         }
