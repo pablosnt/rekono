@@ -90,9 +90,11 @@ jobs:
       - name: Install
         run: |
           apt update
-          if [[ "${{ matrix.install }}" == "python3"* ]]
+          if [[ "${{ matrix.install }}" == *"python3"* ]]
           then
             apt install python3-dev python3-pip -y
+            # Needed to avoid dirsearch errors
+            python3 -m pip install setuptools --break-system-packages
           fi
           ${{ matrix.install }}
       
