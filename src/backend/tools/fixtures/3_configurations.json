@@ -386,17 +386,6 @@
     },
     {
         "model": "tools.configuration",
-        "pk": 36,
-        "fields": {
-            "tool": 17,
-            "name": "list shares and directories recursively",
-            "arguments": "{host} {port} -R {authentication}",
-            "stage": 4,
-            "default": false
-        }
-    },
-    {
-        "model": "tools.configuration",
         "pk": 37,
         "fields": {
             "tool": 1,

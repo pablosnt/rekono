@@ -1,0 +1,3 @@
+Host,Share,Privs,Comment
+10.10.10.10,shared,READ_WRITE,
+10.10.10.10,IPC$,NO_ACCESS,IPC Service (Samba 4.5.4)

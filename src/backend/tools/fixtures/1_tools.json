@@ -315,8 +315,8 @@
             "ignore_exit_code": false,
             "is_installed": false,
             "version": null,
-            "version_argument": null,
-            "output_format": null,
+            "version_argument": "--help",
+            "output_format": "csv",
             "reference": "https://github.com/ShawnDEvans/smbmap",
             "icon": "https://www.kali.org/tools/smbmap/images/smbmap-logo.svg",
             "defectdojo_scan_type": null
