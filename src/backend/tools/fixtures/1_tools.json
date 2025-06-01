@@ -297,7 +297,7 @@
             "is_installed": false,
             "version": null,
             "version_argument": "--help",
-            "output_format": null,
+            "output_format": "json",
             "reference": "https://github.com/jtesta/ssh-audit",
             "icon": null,
             "defectdojo_scan_type": null

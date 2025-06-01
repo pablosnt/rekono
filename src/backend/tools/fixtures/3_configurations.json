@@ -368,7 +368,7 @@
         "fields": {
             "tool": 16,
             "name": "SSH scan",
-            "arguments": "{host} {port} --batch",
+            "arguments": "{host} {port} --no-colors --skip-rate-test -jj > {output}",
             "stage": 4,
             "default": true
         }
