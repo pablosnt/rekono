@@ -6,7 +6,9 @@ on:
 
 jobs:
   latest-version:
-    runs-on: kalilinux/kali-last-release:latest
+    runs-on: ubuntu-latest
+    container:
+      image: kalilinux/kali-last-release:latest
     strategy:
       fail-fast: false
       matrix:
