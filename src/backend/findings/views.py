@@ -1,4 +1,9 @@
 from drf_spectacular.utils import extend_schema
+from rest_framework import status
+from rest_framework.decorators import action
+from rest_framework.request import Request
+from rest_framework.response import Response
+
 from findings.enums import OSINTDataType
 from findings.filters import (
     CredentialFilter,
@@ -31,10 +36,6 @@ from findings.serializers import (
     TechnologySerializer,
     VulnerabilitySerializer,
 )
-from rest_framework import status
-from rest_framework.decorators import action
-from rest_framework.request import Request
-from rest_framework.response import Response
 from targets.serializers import TargetSerializer
 
 # Create your views here.
@@ -126,17 +127,8 @@ class VulnerabilityViewSet(TriageFindingViewSet):
     queryset = Vulnerability.objects.all()
     serializer_class = VulnerabilitySerializer
     filterset_class = VulnerabilityFilter
-    search_fields = ["name", "description", "cve", "cwe", "osvdb"]
-    ordering_fields = [
-        "id",
-        "technology",
-        "port",
-        "name",
-        "severity",
-        "cve",
-        "cwe",
-        "osvdb",
-    ]
+    search_fields = ["name", "description", "cve", "cwe"]
+    ordering_fields = ["id", "technology", "port", "name", "severity", "cve", "cwe"]
 
 
 class ExploitViewSet(TriageFindingViewSet):

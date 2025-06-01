@@ -122,7 +122,7 @@ class ToolTestCase(RekonoTestCase):
         if self.expected:
             for index, finding in enumerate(parser.findings):
                 expected = self.expected[index]
-                self.tc.assertTrue(isinstance(finding, expected.get("model", Type[None])))
+                self.tc.assertEqual(finding.__class__, expected.get("model", Type[None]))
                 for field, value in expected.items():
                     if field != "model":
                         self.tc.assertEqual(value, getattr(finding, field))

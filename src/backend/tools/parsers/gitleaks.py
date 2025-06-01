@@ -35,5 +35,5 @@ class Gitleaks(BaseParser):
                 self.create_finding(
                     Credential,
                     email=finding.get("Email"),
-                    context=f"/.git/ : Email of the commit author {finding.get('Author')}",
+                    context=f"/.git/ : Author of the commit {finding.get('Commit')} whose name is {finding.get('Author')}",
                 )

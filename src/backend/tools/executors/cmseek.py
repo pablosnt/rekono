@@ -9,7 +9,11 @@ from tools.executors.base import BaseExecutor
 
 class Cmseek(BaseExecutor):
     def _after_running(self) -> None:
-        result_path = Path("Result") / urlparse(self.arguments[self.arguments.index("-u") + 1]).hostname / "cms.json"
+        result_path = (
+            Path("Result")
+            / urlparse(self.arguments[self.arguments.index("-u") + 1]).netloc.replace(":", "_")
+            / "cms.json"
+        )
         for report in [
             result_path,
             # pytype: disable=attribute-error

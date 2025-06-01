@@ -1,9 +1,10 @@
 import re
 from typing import Any
 
+from libnmap.parser import NmapParser
+
 from findings.enums import HostOS, PathType, PortStatus, Protocol, Severity
 from findings.models import Credential, Host, Path, Port, Technology, Vulnerability
-from libnmap.parser import NmapParser
 from security.validators.input_validator import Regex
 from tools.parsers.base import BaseParser
 
@@ -84,7 +85,6 @@ class Nmap(BaseParser):
                         severity=Severity.CRITICAL,
                         # CWE-78: Improper Neutralization of Special Elements used in an OS Command ('OS Command Injection')
                         cwe="CWE-78",
-                        osvdb="OSVDB-69562",
                     )
                 case "ftp-vsftpd-backdoor":
                     self.create_finding(
