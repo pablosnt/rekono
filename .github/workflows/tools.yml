@@ -83,6 +83,9 @@ jobs:
             command: gitleaks version
             expected: v8.26.0 # Usually returns "version is set by build process"
     name: ${{ matrix.name }} version
+    defaults:
+      run:
+        shell: bash
     steps:
       - name: Install
         run: |
