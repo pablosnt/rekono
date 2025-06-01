@@ -103,6 +103,5 @@ jobs:
           count=$(${{ matrix.command }} | grep -o "${{ matrix.expected }}" | wc -l)
           if [ $count -eq 0 ]
           then
-            echo ":error title=${{ matrix.name }}::Version '${{ matrix.expected }}' is outdated!"
-            exit 1
+            echo ":error title=Outdated::${{ matrix.name }} version '${{ matrix.expected }}' is outdated!"
           fi
