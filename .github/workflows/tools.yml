@@ -48,7 +48,7 @@ jobs:
             expected: 2.16.1
           - name: Metasploit
             install: apt install metasploit-framework -y
-            command: msfconsole --version
+            command: msfconsole --version 2>&1
             expected: 6.4.64-dev
           - name: EmailFinder
             install: python3 -m pip install emailfinder --break-system-packages
@@ -64,7 +64,7 @@ jobs:
             expected: 0.0.7
           - name: Nuclei
             install: apt install nuclei -y
-            command: nuclei --version
+            command: nuclei --version 2>&1
             expected: v3.4.4
           - name: Gobuster
             install: apt install gobuster -y
@@ -78,10 +78,10 @@ jobs:
             install: apt install smbmap -y
             command: smbmap --help
             expected: v1.10.7
-          # - name: GitLeaks
-          #   install: apt install gitleaks -y
-          #   command: gitleaks version
-          #   expected: v8.26.0 # Usually returns "version is set by build process"
+          - name: GitLeaks
+            install: apt install gitleaks -y
+            command: gitleaks version 
+            expected: v8.26.0 # Usually returns "version is set by build process"
     name: ${{ matrix.name }} version
     defaults:
       run:
