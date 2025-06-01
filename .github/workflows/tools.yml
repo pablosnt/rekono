@@ -19,7 +19,7 @@ jobs:
             command: nmap --version
             expected: 7.95
           - name: Dirsearch
-            install: apt install dirsearch -y
+            install: apt install python3-dev dirsearch -y
             command: dirsearch --version
             expected: v0.4.3
           - name: theHarvester
@@ -98,11 +98,9 @@ jobs:
       
       - name: Check version
         run: |
-          version=$(${{ matrix.command }})
-          count=$(echo $version | grep -o "${{ matrix.expected }}" | wc -l)
+          count=$(${{ matrix.command }} | grep -o "${{ matrix.expected }}" | wc -l)
           if [ $count -eq 0 ]
           then
             echo "${{ matrix.name }} version '${{ matrix.expected }}' is outdated!"
-            echo $version
             exit 1
           fi
