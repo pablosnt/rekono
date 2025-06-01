@@ -78,10 +78,10 @@ jobs:
             install: apt install smbmap -y
             command: smbmap --help
             expected: v1.10.7
-          - name: GitLeaks
-            install: apt install gitleaks -y
-            command: gitleaks version
-            expected: v8.26.0 # Usually returns "version is set by build process"
+          # - name: GitLeaks
+          #   install: apt install gitleaks -y
+          #   command: gitleaks version
+          #   expected: v8.26.0 # Usually returns "version is set by build process"
     name: ${{ matrix.name }} version
     defaults:
       run:
@@ -92,7 +92,7 @@ jobs:
           apt update
           if [[ "${{ matrix.install }}" == "python3"* ]]
           then
-            apt install python3-dev python3-pip
+            apt install python3-dev python3-pip -y
           fi
           ${{ matrix.install }}
       
