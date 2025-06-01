@@ -98,7 +98,7 @@ jobs:
       - name: Check version
         run: |
           version=$(${{ matrix.command }})
-          count=$($version | grep -o "${{ matrix.expected }}" | wc -l)
+          count=$(echo $version | grep -o "${{ matrix.expected }}" | wc -l)
           if [ $count -eq 0 ]
           then
             echo "${{ matrix.name }} version '${{ matrix.expected }}' is outdated!"
