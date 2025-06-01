@@ -13,7 +13,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # Uncheckable: searchsploit, spring4shell-scan, log4j-scan
+          # Uncheckable: gitleaks, searchsploit, spring4shell-scan, log4j-scan
           - name: Nmap
             install: apt install nmap -y
             command: nmap --version
@@ -78,10 +78,6 @@ jobs:
             install: apt install smbmap -y
             command: smbmap --help
             expected: v1.10.7
-          - name: GitLeaks
-            install: apt install gitleaks -y
-            command: gitleaks version 
-            expected: v8.26.0 # Usually returns "version is set by build process"
     name: ${{ matrix.name }} version
     defaults:
       run:
@@ -100,10 +96,8 @@ jobs:
       
       - name: Check version
         run: |
-          ${{ matrix.command }}
           count=$(${{ matrix.command }} | grep -o "${{ matrix.expected }}" | wc -l)
-          echo $count
           if [ $count -eq 0 ]
           then
-            echo ":error title=Outdated::${{ matrix.name }} version '${{ matrix.expected }}' is outdated!"
+            exit 1
           fi
