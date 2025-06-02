@@ -48,7 +48,7 @@
           <v-container fluid>
             <v-row justify="center">
               <v-col cols="5">
-                <VNumberInput
+                <v-number-input
                   v-model="monitor.hour_span"
                   control-variant="split"
                   label="Hours Lapse"
@@ -80,7 +80,7 @@
                       :tooltip="`Last monitor was on ${new Date(monitor.last_monitor).toDateString()}`"
                     />
                   </template>
-                </VNumberInput>
+                </v-number-input>
               </v-col>
             </v-row>
           </v-container>
@@ -91,7 +91,6 @@
 </template>
 
 <script setup lang="ts">
-import { VNumberInput } from "vuetify/labs/VNumberInput";
 definePageMeta({ layout: false });
 const iApi = useApi("/api/integrations/", true);
 const integrations = ref([]);

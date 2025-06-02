@@ -16,7 +16,7 @@ dependencies = [
     "djangorestframework-simplejwt==5.5.0",
     "drf-spectacular==0.28.0",
     "geocoder==1.38.1",
-    "psycopg2-binary==2.9.10",
+    "psycopg[binary,pool]==3.2.9",
     "pycryptodome==3.22.0",
     "pyjwt==2.9.0",
     "pyotp==2.9.0",

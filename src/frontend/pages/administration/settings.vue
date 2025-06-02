@@ -20,7 +20,7 @@
           <v-col cols="4">
             <BaseSection class="mt-5" title="Security" icon="mdi-lock">
               <div class="text-center mr-10 ml-10">
-                <VNumberInput
+                <v-number-input
                   v-model="settings.max_uploaded_file_mb"
                   control-variant="split"
                   label="Max Upload File Size (MB)"
@@ -93,7 +93,6 @@
 </template>
 
 <script setup lang="ts">
-import { VNumberInput } from "vuetify/labs/VNumberInput";
 definePageMeta({ layout: false });
 const validate = useValidation();
 const valid = ref(true);
