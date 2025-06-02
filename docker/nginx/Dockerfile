@@ -9,7 +9,9 @@ RUN apk update && \
     chmod +x /usr/local/bin/entrypoint.sh && \
     chown -R nginx:nginx /var/cache/nginx && \
     chown -R nginx:nginx /var/log/nginx && \
-    chown -R nginx:nginx /etc/nginx
+    chown -R nginx:nginx /etc/nginx && \
+    touch /run/nginx.pid && \
+    chown nginx:nginx /run/nginx.pid
 
 USER nginx
 EXPOSE 80 443

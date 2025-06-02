@@ -6,7 +6,6 @@ on:
     paths:
       - 'docker/**'
       - 'docker-compose.yml'
-      - 'src/**'
   release:
     types: [published]
 

@@ -12,7 +12,7 @@ RUN uv python install --managed-python --install-dir /tmp/python && \
     # Install python dependencies
     uv sync --no-dev --locked --project /code --python /opt/python/bin/python  && \
     # Download debian dependencies to export them to the next stage
-    apt install --download-only --reinstall -y --no-install-recommends curl libpq-dev build-essential libmagic-dev && \
+    apt install --download-only --reinstall -y --no-install-recommends libpq-dev libmagic1 libgcc1 && \
     mkdir -p /dpkg && \
     for package in /var/cache/apt/archives/*.deb; do dpkg-deb -xv $package /dpkg; done && \
     apt autoremove -y && \
@@ -20,11 +20,7 @@ RUN uv python install --managed-python --install-dir /tmp/python && \
     apt autoclean -y && \
     rm -rf /var/lib/apt/lists/* && \
     rm -rf /var/cache/apt/* && \
-    # Define script to initialize database
-    # TODO: Test it. This is not going to work without sh
-    echo "uv run manage.py migrate" > /code/initializer.sh && \
-    echo "uv run manage.py createsuperuser --no-input" >> /code/initializer.sh && \
-    chmod +x /code/initializer.sh
+    mkdir -p /rekono
 
 
 FROM gcr.io/distroless/base-debian12:nonroot AS backend
@@ -32,11 +28,12 @@ FROM gcr.io/distroless/base-debian12:nonroot AS backend
 ENV PATH=/opt/python/bin:$PATH
 ENV REKONO_HOME=/rekono
 
-COPY --chown=65532:65532 config.yaml /rekono/
+COPY --from=build-backend --chown=65532:65532 --chmod=660 /rekono /rekono
 COPY --from=build-backend --chown=65532:65532 /code /code
 COPY --from=build-backend /dpkg /
 COPY --from=build-backend /opt/python /opt/python
 COPY --from=build-backend /usr/local/bin/uv /bin/
+COPY --from=busybox:stable /bin/wget /usr/bin/wget
 
 WORKDIR /code
 EXPOSE 8000
@@ -46,29 +43,16 @@ FROM node:22.15.1-bookworm-slim AS build-frontend
 
 COPY src/frontend /code
 WORKDIR /code
-
 RUN npm install && \
-    npm run build && \
-    # Add curl to the final image in order to perform healthcheck when needed
-    apt update && \
-    apt install --download-only --reinstall -y --no-install-recommends curl && \
-    mkdir -p /dpkg && \
-    for package in /var/cache/apt/archives/*.deb; do dpkg-deb -xv $package /dpkg; done && \
-    apt autoremove -y && \
-    apt clean -y && \
-    apt autoclean -y && \
-    rm -rf /var/lib/apt/lists/* && \
-    rm -rf /var/cache/apt/*
+    npm run build
 
 
 FROM gcr.io/distroless/nodejs22-debian12:nonroot AS frontend
 
-COPY --from=build-frontend --chown=65532:65532 /code/.output /code
-COPY --from=build-frontend /dpkg /
-
-WORKDIR /code
+COPY --from=build-frontend --chown=65532:65532 /code/.output/ /app
+COPY --from=busybox:stable /bin/wget /usr/bin/wget
+WORKDIR /app
 EXPOSE 3000
-
 CMD ["server/index.mjs"]
 
 
