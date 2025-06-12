@@ -20,7 +20,7 @@
           />
         </v-col>
         <v-col cols="4">
-          <VNumberInput
+          <v-number-input
             v-model="port"
             hide-details
             hide-spin-buttons
@@ -86,7 +86,6 @@
 </template>
 
 <script setup lang="ts">
-import { VNumberInput } from "vuetify/labs/VNumberInput";
 const props = defineProps({
   api: Object,
   data: Object,
