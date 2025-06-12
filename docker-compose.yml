@@ -45,7 +45,6 @@ services:
     container_name: initializer
     volumes:
       - rekono:/rekono
-      - ./config.yaml:/rekono/config.yaml
     networks:
       - internal
     depends_on:
@@ -55,7 +54,6 @@ services:
       - RKN_DB_HOST=postgres
       - RKN_DB_USER=postgres
       - RKN_DB_PASSWORD=postgres
-      - REKONO_HOME=/rekono
       - DJANGO_SUPERUSER_EMAIL=${RKN_EMAIL:-rekono@rekono.com}
       - DJANGO_SUPERUSER_USERNAME=${RKN_USERNAME:-rekono}
       - DJANGO_SUPERUSER_PASSWORD=${RKN_PASSWORD:-rekono}
@@ -67,43 +65,41 @@ services:
     hostname: tasks-worker
     volumes:
       - rekono:/rekono
-      - ./config.yaml:/rekono/config.yaml
     networks:
       - internal
     depends_on:
-      - initializer
-      - redis
+      redis:
+        condition: service_healthy
+      initializer:
+        condition: service_completed_successfully
     environment:
       - RKN_DB_HOST=postgres
       - RKN_DB_USER=postgres
       - RKN_DB_PASSWORD=postgres
       - RKN_RQ_HOST=redis
-      - REKONO_HOME=/rekono
 
-  executions-worker:
-    restart: always
-    image: pablosnt/rekono-worker:unstable
-    command: uv run --no-dev manage.py rqworker executions
-    hostname: executions-worker
-    volumes:
-      - rekono:/rekono
-      - ./config.yaml:/rekono/config.yaml
-    networks:
-      - internal
-      - external
-    cap_add:
-      - NET_ADMIN
-      - NET_RAW
-      - NET_BIND_SERVICE
-    depends_on:
-      - initializer
-      - redis
-    environment:
-      - RKN_DB_HOST=postgres
-      - RKN_DB_USER=postgres
-      - RKN_DB_PASSWORD=postgres
-      - RKN_RQ_HOST=redis
-      - REKONO_HOME=/rekono
+  # executions-worker:
+  #   restart: always
+  #   image: pablosnt/rekono-worker:unstable
+  #   command: uv run --no-dev manage.py rqworker executions
+  #   hostname: executions-worker
+  #   volumes:
+  #     - rekono:/rekono
+  #   networks:
+  #     - internal
+  #     - external
+  #   cap_add:
+  #     - NET_ADMIN
+  #     - NET_RAW
+  #     - NET_BIND_SERVICE
+  #   depends_on:
+  #     - initializer
+  #     - redis
+  #   environment:
+  #     - RKN_DB_HOST=postgres
+  #     - RKN_DB_USER=postgres
+  #     - RKN_DB_PASSWORD=postgres
+  #     - RKN_RQ_HOST=redis
 
   findings-worker:
     restart: always
@@ -112,19 +108,19 @@ services:
     hostname: findings-worker
     volumes:
       - rekono:/rekono
-      - ./config.yaml:/rekono/config.yaml
     networks:
       - internal
       - external
     depends_on:
-      - initializer
-      - redis
+      redis:
+        condition: service_healthy
+      initializer:
+        condition: service_completed_successfully
     environment:
       - RKN_DB_HOST=postgres
       - RKN_DB_USER=postgres
       - RKN_DB_PASSWORD=postgres
       - RKN_RQ_HOST=redis
-      - REKONO_HOME=/rekono
     
   monitor-worker:
     restart: always
@@ -133,19 +129,19 @@ services:
     hostname: monitor-worker
     volumes:
       - rekono:/rekono
-      - ./config.yaml:/rekono/config.yaml
     networks:
       - internal
       - external
     depends_on:
-      - initializer
-      - redis
+      redis:
+        condition: service_healthy
+      initializer:
+        condition: service_completed_successfully
     environment:
       - RKN_DB_HOST=postgres
       - RKN_DB_USER=postgres
       - RKN_DB_PASSWORD=postgres
       - RKN_RQ_HOST=redis
-      - REKONO_HOME=/rekono
 
   telegram-bot:
     restart: always
@@ -155,19 +151,19 @@ services:
     container_name: telegram-bot
     volumes:
       - rekono:/rekono
-      - ./config.yaml:/rekono/config.yaml
     networks:
       - internal
       - external
     depends_on:
-      - initializer
-      - redis
+      redis:
+        condition: service_healthy
+      initializer:
+        condition: service_completed_successfully
     environment:
       - RKN_DB_HOST=postgres
       - RKN_DB_USER=postgres
       - RKN_DB_PASSWORD=postgres
       - RKN_RQ_HOST=redis
-      - REKONO_HOME=/rekono
   
   backend:
     restart: always
@@ -185,7 +181,6 @@ services:
       - 8000
     volumes:
       - rekono:/rekono
-      - ./config.yaml:/rekono/config.yaml
     networks:
       - internal
     depends_on:
@@ -200,7 +195,6 @@ services:
       - RKN_RQ_HOST=redis
       - RKN_TRUSTED_PROXY=true
       - RKN_ALLOWED_HOSTS=*
-      - REKONO_HOME=/rekono
   
   frontend:
     restart: always
@@ -227,8 +221,7 @@ services:
       - 80:80
       - 443:443
     volumes:
-      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./docker/nginx/tls/:/etc/nginx/tls/
+      - nginx:/etc/nginx/tls/
     depends_on:
       backend:
         condition: service_healthy
@@ -240,6 +233,7 @@ services:
 
 volumes:
   postgres:
+  nginx:
   rekono:
 
 networks:

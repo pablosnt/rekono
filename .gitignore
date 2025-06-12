@@ -46,10 +46,6 @@ yarn-error.log*
 .nuxt/
 .output/
 
-# Docker TLS configuration
-*.key
-*.crt
-
 # Debian package
 *.desktop
 rekono-kbx
