@@ -492,7 +492,7 @@
               </v-row>
               <v-row justify="space-around" dense>
                 <v-col cols="4">
-                  <VNumberInput
+                  <v-number-input
                     v-model="monitor"
                     control-variant="split"
                     label="Time"
@@ -538,7 +538,6 @@
 
 <script setup lang="ts">
 import { VTimePicker } from "vuetify/labs/VTimePicker";
-import { VNumberInput } from "vuetify/labs/VNumberInput";
 const props = defineProps({
   project: { type: Object, required: false, default: null },
   target: { type: Object, required: false, default: null },

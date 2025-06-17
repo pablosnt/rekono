@@ -30,6 +30,7 @@ class RekonoConfig:
             self.wordlists,
             self.logs,
         ]:
+            # TODO: Reports, generated reports and wordlists must be created when they are going to be used
             path.mkdir(exist_ok=True)
         if self.testing:
             shutil.copy(self.config_file, self.home)

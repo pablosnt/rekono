@@ -22,21 +22,23 @@ class Gitleaks(BaseExecutor):
         # pytype: enable=attribute-error
         run_directory = CONFIG.reports / str(uuid.uuid4())
         process = subprocess.run(
-            ["bash", gitdumper_directory, "gitdumper.sh", target_url, run_directory],
+            ["bash", "gitdumper.sh", target_url, run_directory],
             capture_output=True,
             cwd=gitdumper_directory,
         )
-        subprocess.run(
-            ["git", "checkout", "--", "."],
-            capture_output=True,
-            cwd=run_directory,
-        )
-        for path in run_directory.iterdir():
-            if path.stem != ".git" or path.is_file():
-                self.git_directory_dumped = True
-                break
+        if run_directory.is_dir():
+            subprocess.run(
+                ["git", "checkout", "--", "."],
+                capture_output=True,
+                cwd=run_directory,
+            )
+            for path in run_directory.iterdir():
+                if path.stem != ".git" or path.is_file():
+                    self.git_directory_dumped = True
+                    break
         if self.git_directory_dumped:
             return super()._run(environment)
-        if process.returncode > 0:
-            raise RuntimeError(process.stderr.decode("utf-8"))
-        return process.stdout.decode("utf-8")
+        else:
+            if process.returncode > 0:
+                raise RuntimeError(process.stderr.decode("utf-8"))
+            return "No git repository exposed"

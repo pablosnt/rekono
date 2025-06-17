@@ -36,17 +36,14 @@ wordlists/
 logs/
 /src/backend/tests/home/
 
-# Vue.JS
+# Vue.js and Nuxt
 node_modules/
 dist_electron/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .nuxt/
-
-# Docker TLS configuration
-*.key
-*.crt
+.output/
 
 # Debian package
 *.desktop
