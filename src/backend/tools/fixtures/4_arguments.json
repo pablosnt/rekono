@@ -115,7 +115,7 @@
         "fields": {
             "tool": 9,
             "name": "technology",
-            "argument": "-c {technology} {version}",
+            "argument": "{technology} {version}",
             "required": true,
             "multiple": false
         }
@@ -336,7 +336,7 @@
             "tool": 18,
             "name": "authentication",
             "argument": "-header 'Authorization:{credential_type} {token}'",
-            "required": true,
+            "required": false,
             "multiple": false
         }
     },
