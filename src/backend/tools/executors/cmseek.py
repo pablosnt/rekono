@@ -17,5 +17,5 @@ class Cmseek(BaseExecutor):
             # pytype: enable=attribute-error
         ]:
             if report.is_file():
-                report.rename(self.report)
+                shutil.move(report, self.report)
                 shutil.rmtree(pathlib.Path(report).parent)
