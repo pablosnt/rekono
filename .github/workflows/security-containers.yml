@@ -67,9 +67,13 @@ jobs:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
-      - name: Check Rekono version
+      - name: Get metadata
+        id: metadata
         working-directory: src/backend/rekono
-        run: echo "REKONO_VERSION=$(grep -oP '^VERSION = "\K[^"]+' settings.py | head -1)" >> "$GITHUB_ENV"
+        run: |
+          REKONO_VERSION=$(grep -oP '^VERSION = "\K[^"]+' settings.py | head -1)
+          echo "version=$REKONO_VERSION" >> "$GITHUB_OUTPUT"
+          echo "date=$(date --rfc-3339=seconds)" >> "$GITHUB_OUTPUT"
 
       - name: Build and push unstable
         if: ${{ github.event_name != 'release' }}
@@ -83,7 +87,10 @@ jobs:
           push: true
           sbom: true
           provenance: true
-          build-args: REKONO_VERSION=${{ env.REKONO_VERSION }}-dev
+          build-args: |
+            LABEL_CREATED=${{ steps.metadata.outputs.date }}
+            LABEL_VERSION=${{ steps.metadata.outputs.version }}-dev
+            LABEL_REVISION=${{ github.sha }}
       
       - name: Build and push release
         if: ${{ github.event_name == 'release' }}
@@ -97,7 +104,10 @@ jobs:
           push: true
           sbom: true
           provenance: true
-          build-args: REKONO_VERSION=${{ github.event.release.name }}
+          build-args: |
+            LABEL_CREATED=${{ steps.metadata.outputs.date }}
+            LABEL_VERSION=${{ github.event.release.name }}
+            LABEL_REVISION=${{ github.sha }}
 
       - name: Trivy
         uses: aquasecurity/trivy-action@0.30.0
