@@ -174,22 +174,30 @@ class BaseExecutor:
 
     def _run(self, environment: dict[str, Any] = os.environ.copy()) -> str:
         logger.info(f"[Tool] Running: {' '.join(self.arguments)}")
-        process = subprocess.run(
-            self.arguments,
-            capture_output=True,
-            env=environment,
-            cwd=(
-                getattr(
-                    CONFIG,
-                    self.execution.configuration.tool.run_directory_property.lower(),
-                )
-                if self.execution.configuration.tool.run_directory_property
-                else None
-            ),
+        stdout = (
+            self.report
+            if self.execution.configuration.tool.output_format
+            and not any([arg for arg in self.arguments if str(self.report) in arg])
+            else None
         )
+        pwd = (
+            getattr(CONFIG, self.execution.configuration.tool.run_directory_property.lower())
+            if self.execution.configuration.tool.run_directory_property
+            else None
+        )
+        if stdout:
+            with self.report.open("w") as _stdout:
+                process = subprocess.run(self.arguments, capture_output=False, stdout=_stdout, env=environment, cwd=pwd)
+            output = ""
+            if self.report.is_file():
+                with self.report.open("r") as _stdout:
+                    output = _stdout.read()
+        else:
+            process = subprocess.run(self.arguments, capture_output=True, env=environment, cwd=pwd)
+            output = process.stdout.decode("utf-8")
         if not self.execution.configuration.tool.ignore_exit_code and process.returncode > 0:
             raise RuntimeError(process.stderr.decode("utf-8"))
-        return process.stdout.decode("utf-8")
+        return output
 
     def _after_running(self) -> None:
         pass

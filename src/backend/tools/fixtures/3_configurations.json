@@ -280,7 +280,7 @@
         "fields": {
             "tool": 9,
             "name": "Search by technology",
-            "arguments": "{technology} --json > {output}",
+            "arguments": "{technology} --json",
             "stage": 5,
             "default": true
         }
@@ -378,7 +378,7 @@
         "pk": 35,
         "fields": {
             "tool": 17,
-            "name": "list shares",
+            "name": "List shares",
             "arguments": "{host} {port} {authentication}",
             "stage": 4,
             "default": true
@@ -389,7 +389,7 @@
         "pk": 36,
         "fields": {
             "tool": 17,
-            "name": "list shares and directories recursively",
+            "name": "List shares and directories recursively",
             "arguments": "{host} {port} -R {authentication}",
             "stage": 4,
             "default": false
@@ -423,7 +423,7 @@
         "fields": {
             "tool": 18,
             "name": "All templates",
-            "arguments": "{url} {authentication} {cookie} {headers} -json -output {output}",
+            "arguments": "{url} {authentication} {cookie} {headers} -jsonl -output {output}",
             "stage": 4,
             "default": true
         }
@@ -434,7 +434,7 @@
         "fields": {
             "tool": 18,
             "name": "Automatic technology detection",
-            "arguments": "{url} -automatic-scan {authentication} {cookie} {headers} -json -output {output}",
+            "arguments": "{url} -automatic-scan {authentication} {cookie} {headers} -jsonl -output {output}",
             "stage": 4,
             "default": false
         }
@@ -445,7 +445,7 @@
         "fields": {
             "tool": 18,
             "name": "CVE templates",
-            "arguments": "{url} -tags cve {authentication} {cookie} {headers} -json -output {output}",
+            "arguments": "{url} -tags cve {authentication} {cookie} {headers} -jsonl -output {output}",
             "stage": 4,
             "default": false
         }
