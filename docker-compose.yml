@@ -40,7 +40,7 @@ services:
 
   initializer:
     restart: 'no'
-    image: pablosnt/rekono-backend:unstable
+    image: pablosnt/rekono-worker:unstable
     command: uv run --no-dev python -c "import os; os.system('uv run --no-dev manage.py migrate'); os.system('uv run --no-dev manage.py createsuperuser --no-input')"
     container_name: initializer
     volumes:
@@ -78,28 +78,30 @@ services:
       - RKN_DB_PASSWORD=postgres
       - RKN_RQ_HOST=redis
 
-  # executions-worker:
-  #   restart: always
-  #   image: pablosnt/rekono-worker:unstable
-  #   command: uv run --no-dev manage.py rqworker executions
-  #   hostname: executions-worker
-  #   volumes:
-  #     - rekono:/rekono
-  #   networks:
-  #     - internal
-  #     - external
-  #   cap_add:
-  #     - NET_ADMIN
-  #     - NET_RAW
-  #     - NET_BIND_SERVICE
-  #   depends_on:
-  #     - initializer
-  #     - redis
-  #   environment:
-  #     - RKN_DB_HOST=postgres
-  #     - RKN_DB_USER=postgres
-  #     - RKN_DB_PASSWORD=postgres
-  #     - RKN_RQ_HOST=redis
+  executions-worker:
+    restart: always
+    image: pablosnt/rekono-worker:unstable
+    command: uv run --no-dev manage.py rqworker executions
+    hostname: executions-worker
+    volumes:
+      - rekono:/rekono
+    networks:
+      - internal
+      - external
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+      - NET_BIND_SERVICE
+    depends_on:
+      redis:
+        condition: service_healthy
+      initializer:
+        condition: service_completed_successfully
+    environment:
+      - RKN_DB_HOST=postgres
+      - RKN_DB_USER=postgres
+      - RKN_DB_PASSWORD=postgres
+      - RKN_RQ_HOST=redis
 
   findings-worker:
     restart: always
@@ -183,6 +185,7 @@ services:
       - rekono:/rekono
     networks:
       - internal
+      - external
     depends_on:
       redis:
         condition: service_healthy
