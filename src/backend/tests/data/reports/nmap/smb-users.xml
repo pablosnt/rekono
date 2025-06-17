@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE nmaprun>
 <?xml-stylesheet href="file:///usr/bin/../share/nmap/nmap.xsl" type="text/xsl"?>
-<!-- Nmap 7.92 scan initiated Sat Mar 19 18:14:58 2022 as: nmap -sV -A -p 445 -&#45;script smb-enum-users,smb-enum-shares -oX /home/kali/Desktop/smb-users.xml 10.10.10.10 -->
-<nmaprun scanner="nmap" args="nmap -sV -A -p 445 -&#45;script smb-enum-users,smb-enum-shares -oX /home/kali/Desktop/smb-users.xml 10.10.10.10" start="1647710098" startstr="Sat Mar 19 18:14:58 2022" version="7.92" xmloutputversion="1.05">
+<!-- Nmap 7.92 scan initiated Sat Mar 19 18:14:58 2022 as: nmap -sV -A -p 445 -&#45;script smb-enum-users,smb-enum-shares -oX src/backend/tests/data/reports/nmap/smb-users.xml 10.10.10.10 -->
+<nmaprun scanner="nmap" args="nmap -sV -A -p 445 -&#45;script smb-enum-users,smb-enum-shares -oX src/backend/tests/data/reports/nmap/smb-users.xml 10.10.10.10" start="1647710098" startstr="Sat Mar 19 18:14:58 2022" version="7.92" xmloutputversion="1.05">
 <scaninfo type="syn" protocol="tcp" numservices="1" services="445"/>
 <verbose level="0"/>
 <debugging level="0"/>

@@ -124,7 +124,7 @@
         "pk": 16,
         "fields": {
             "process": 1,
-            "configuration": 36
+            "configuration": 35
         }
     },
     {
@@ -329,14 +329,6 @@
     },
     {
         "model": "processes.step",
-        "pk": 42,
-        "fields": {
-            "process": 5,
-            "configuration": 36
-        }
-    },
-    {
-        "model": "processes.step",
         "pk": 43,
         "fields": {
             "process": 5,
@@ -492,7 +484,7 @@
         "pk": 62,
         "fields": {
             "process": 7,
-            "configuration": 36
+            "configuration": 35
         }
     },
     {

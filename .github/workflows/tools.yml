@@ -1,0 +1,103 @@
+name: Tools
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * *'
+
+jobs:
+  latest-version:
+    runs-on: ubuntu-latest
+    container:
+      image: kalilinux/kali-last-release:latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Uncheckable: gitleaks, searchsploit, spring4shell-scan, log4j-scan
+          - name: Nmap
+            install: apt install nmap -y
+            command: nmap --version
+            expected: 7.95
+          - name: Dirsearch
+            install: apt install python3-dev dirsearch -y
+            command: dirsearch --version
+            expected: v0.4.3
+          - name: theHarvester
+            install: apt install theharvester -y
+            command: theHarvester --help
+            expected: 4.8.0
+          - name: Nikto
+            install: apt install nikto -y
+            command: nikto -Version
+            expected: 2.5.0
+          - name: Sslscan
+            install: apt install sslscan -y
+            command: sslscan --version
+            expected: 2.1.5
+          - name: SSLyze
+            install: apt install sslyze -y
+            command: sslyze --help
+            expected: 6.1.0
+          - name: CMSeeK
+            install: apt install cmseek -y
+            command: cmseek --version
+            expected: 1.1.3
+          - name: ZAP
+            install: apt install zaproxy -y
+            command: zaproxy -version
+            expected: 2.16.1
+          - name: Metasploit
+            install: apt install metasploit-framework -y
+            command: msfconsole --version 2>&1
+            expected: 6.4.64-dev
+          - name: EmailFinder
+            install: python3 -m pip install emailfinder --break-system-packages
+            command: emailfinder --version
+            expected: 0.3.0b
+          - name: EmailHarvester
+            install: apt install emailharvester -y
+            command: emailharvester --help
+            expected: 1.3.2
+          - name: JoomScan
+            install: apt install joomscan -y
+            command: joomscan --version
+            expected: 0.0.7
+          - name: Nuclei
+            install: apt install nuclei -y
+            command: nuclei --version 2>&1
+            expected: v3.4.4
+          - name: Gobuster
+            install: apt install gobuster -y
+            command: gobuster version
+            expected: 3.6
+          - name: SSH Audit
+            install: python3 -m pip install ssh-audit --break-system-packages
+            command: ssh-audit --help
+            expected: v3.3.0
+          - name: SMBMap
+            install: apt install smbmap -y
+            command: smbmap --help
+            expected: v1.10.7
+    name: ${{ matrix.name }} version
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Install
+        run: |
+          apt update
+          if [[ "${{ matrix.install }}" == *"python3"* ]]
+          then
+            apt install python3-dev python3-pip -y
+            # Needed to avoid dirsearch errors
+            python3 -m pip install setuptools --break-system-packages
+          fi
+          ${{ matrix.install }}
+      
+      - name: Check version
+        run: |
+          count=$(${{ matrix.command }} | grep -o "${{ matrix.expected }}" | wc -l)
+          if [ $count -eq 0 ]
+          then
+            exit 1
+          fi

@@ -17,7 +17,7 @@ class GitleaksTest(ToolTest):
                 {
                     "model": Credential,
                     "email": "git@asdf.com",
-                    "context": "/.git/ : Email of the commit author ASDF",
+                    "context": "/.git/ : Author of the commit 9f1468c79df2cf13c66041692ca7f044a27a874b whose name is ASDF",
                 },
                 {
                     "model": Credential,

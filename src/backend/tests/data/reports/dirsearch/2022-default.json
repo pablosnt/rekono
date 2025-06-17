@@ -1,6 +1,6 @@
 {
     "info": {
-        "args": "dirsearch.py -u http://10.10.10.10 -o /home/kali/Desktop/testing/dirsearch/default.json --format=json",
+        "args": "dirsearch.py -u http://10.10.10.10 -o src/backend/tests/data/reports/dirsearch/2022-default.json --format=json",
         "time": "Fri Feb 18 16:49:03 2022"
     },
     "results": [
