@@ -27,7 +27,7 @@ export default defineNuxtConfig({
         "X-Frame-Options": "DENY",
         "X-Powered-By": "",
       },
-      proxy: import.meta.dev ? {
+      proxy: process.env.NODE_ENV === 'development' ? {
         "/api/": {
           target: "http://127.0.0.1:8000",
           changeOrigin: true,
