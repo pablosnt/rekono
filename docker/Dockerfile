@@ -54,8 +54,8 @@ LABEL org.opencontainers.image.licenses=$LABEL_LICENSES
 LABEL org.opencontainers.image.title="Rekono Backend"
 LABEL org.opencontainers.image.description="Rekono backend image based on a distroless debian image"
 
-ENV PATH /opt/python/bin:$PATH
-ENV REKONO_HOME /rekono
+ENV PATH=/opt/python/bin:$PATH
+ENV REKONO_HOME=/rekono
 
 COPY --from=build-backend --chown=65532:65532 /rekono /rekono
 COPY --from=build-backend --chown=65532:65532 /code /code
@@ -130,8 +130,8 @@ LABEL org.opencontainers.image.licenses=$LABEL_LICENSES
 LABEL org.opencontainers.image.title="Rekono Worker"
 LABEL org.opencontainers.image.description="Rekono worker image based on Kali Linux that includes all the hacking tools supported by Rekono"
 
-ENV PATH /opt/python/bin:$PATH
-ENV REKONO_HOME /rekono
+ENV PATH=/opt/python/bin:$PATH
+ENV REKONO_HOME=/rekono
 
 COPY --from=build-backend /opt/python /opt/python
 COPY --from=build-backend /usr/local/bin/uv /bin/
