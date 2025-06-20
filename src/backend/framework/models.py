@@ -160,6 +160,7 @@ class BaseInput(BaseModel):
             return True
         filter_value = argument_input.filter
         for split, or_condition in [(" or ", True), (" and ", False)]:
+            # If no conditions, use 'and' by default
             if split not in filter_value and or_condition:
                 continue
             for match_value in filter_value.split(split):
@@ -175,15 +176,13 @@ class BaseInput(BaseModel):
                         if (
                             issubclass(filter.type, models.TextChoices)
                             and self._compare_filter(
-                                cast(models.TextChoices, filter.type)[match_value.upper()],
-                                field_value,
-                                negative,
+                                match_value.upper(), cast(models.TextChoices, filter.type)(field_value).name, negative
                             )
                         ) or (
-                            hasattr(self, match_value)
+                            filter.type in [str, int]
                             and self._compare_filter(
-                                filter.type(getattr(self, match_value)),
-                                field_value,
+                                str(match_value).strip().lower(),
+                                str(field_value).strip().lower(),
                                 negative,
                                 filter.contains,
                             )

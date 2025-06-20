@@ -3,12 +3,13 @@ import logging
 from typing import Any
 
 import django_rq
+from rq.job import Job
+from rq.queue import Queue
+
 from findings.framework.models import Finding
 from framework.models import BaseInput
 from input_types.models import InputType
 from parameters.models import InputTechnology, InputVulnerability
-from rq.job import Job
-from rq.queue import Queue
 from target_ports.models import TargetPort
 from tools.models import Input, Tool
 from wordlists.models import Wordlist
@@ -77,7 +78,7 @@ class BaseQueue:
         executions: list[dict[int, list[BaseInput]]] = [{0: []}]
         input_types_used = set()
         findings_by_type = BaseQueue._get_findings_by_type(findings)
-        for index, input_type, source in [(0, t, list(f)) for t, f in (findings_by_type or {}).items() if f] + [
+        for index, input_type, source in [(0, t, list(f)) for t, f in (findings_by_type or {}).items()] + [
             (i + 1, None, p)
             for i, p in enumerate(
                 [
