@@ -202,8 +202,8 @@
         "pk": 19,
         "fields": {
             "tool": 3,
-            "name": "All available sources",
-            "arguments": "{target} -b all -f {output}",
+            "name": "Simple scan",
+            "arguments": "{target} -b all -f {output} --quiet",
             "stage": 1,
             "default": true
         }
@@ -213,8 +213,8 @@
         "pk": 20,
         "fields": {
             "tool": 3,
-            "name": "Google & Duckduckgo & Bing & Linkedin & Twitter",
-            "arguments": "{target} -b google,duckduckgo,bing,linkedin,linkedin_links,twitter -f {output}",
+            "name": "DNS lookup & Domain take over & Virtual hosts",
+            "arguments": "{target} -b all -f {output} --quiet --dns-lookup --take-over --virtual-host",
             "stage": 1,
             "default": false
         }
