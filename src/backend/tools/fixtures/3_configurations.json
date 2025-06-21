@@ -280,7 +280,7 @@
         "fields": {
             "tool": 9,
             "name": "Search by technology",
-            "arguments": "{technology} --json",
+            "arguments": "{technology} --json --disable-colour",
             "stage": 5,
             "default": true
         }
@@ -524,6 +524,17 @@
             "name": "Light scan",
             "arguments": "{url} {intensity} --follow-redirect --batch --light-scan",
             "stage": 4,
+            "default": false
+        }
+    },
+    {
+        "model": "tools.configuration",
+        "pk": 50,
+        "fields": {
+            "tool": 9,
+            "name": "Search by CVE",
+            "arguments": "{cve} --json --disable-colour",
+            "stage": 5,
             "default": false
         }
     }

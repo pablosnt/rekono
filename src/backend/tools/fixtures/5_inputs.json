@@ -608,5 +608,15 @@
             "filter": null,
             "order": 1
         }
+    },
+    {
+        "model": "tools.input",
+        "pk": 62,
+        "fields": {
+            "argument": 47,
+            "type": 6,
+            "filter": "cve",
+            "order": 1
+        }
     }
 ]
