@@ -257,7 +257,7 @@
         "pk": 24,
         "fields": {
             "tool": 7,
-            "name": "CMS scan",
+            "name": "Deep scan",
             "arguments": "{url} {intensity} --follow-redirect --batch",
             "stage": 4,
             "default": true
@@ -512,6 +512,17 @@
             "tool": 20,
             "name": "Endpoints enumeration",
             "arguments": "dir {url} {endpoint_wordlist} {basic_auth} {token_auth} {cookie} {headers} {intensity} --no-tls-validation --no-color --no-progress --quiet --output {output}",
+            "stage": 4,
+            "default": false
+        }
+    },
+    {
+        "model": "tools.configuration",
+        "pk": 49,
+        "fields": {
+            "tool": 7,
+            "name": "Light scan",
+            "arguments": "{url} {intensity} --follow-redirect --batch --light-scan",
             "stage": 4,
             "default": false
         }
