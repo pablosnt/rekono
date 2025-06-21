@@ -51,5 +51,8 @@ yarn-error.log*
 rekono-kbx
 *.kaboxer.yaml
 
+# Tools paths
+Result/
+
 # Temporal ignore
 migrations/

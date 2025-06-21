@@ -236,7 +236,7 @@
         "fields": {
             "tool": 5,
             "name": "SSL/TLS analysis",
-            "arguments": "--xml={output} {intensity} {target}",
+            "arguments": "--no-colour --xml={output} {intensity} {target}",
             "stage": 4,
             "default": true
         }
