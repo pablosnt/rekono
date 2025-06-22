@@ -463,33 +463,11 @@
     },
     {
         "model": "tools.configuration",
-        "pk": 44,
-        "fields": {
-            "tool": 19,
-            "name": "SpringShell RCE (CVE-2022-22965) with WAF bypass",
-            "arguments": "{script} {url} --waf-bypass",
-            "stage": 4,
-            "default": false
-        }
-    },
-    {
-        "model": "tools.configuration",
-        "pk": 45,
-        "fields": {
-            "tool": 19,
-            "name": "Spring Cloud RCE (CVE-2022-22963) with WAF bypass",
-            "arguments": "{script} {url} --waf-bypass --test-CVE-2022-22963",
-            "stage": 4,
-            "default": false
-        }
-    },
-    {
-        "model": "tools.configuration",
         "pk": 46,
         "fields": {
             "tool": 20,
             "name": "Subdomains enumeration",
-            "arguments": "dns {target} {subdomain_wordlist} {intensity} --wildcard --show-ips --no-color --no-progress --quiet --output {output}",
+            "arguments": "dns {target} {subdomain_wordlist} {intensity} --wildcard --show-ips --no-color --no-progress --output {output}",
             "stage": 1,
             "default": true
         }
@@ -500,7 +478,7 @@
         "fields": {
             "tool": 20,
             "name": "VHOST enumeration",
-            "arguments": "vhost {target_url} {subdomain_wordlist} {basic_auth} {token_auth} {cookie} {headers} {intensity} --append-domain --no-tls-validation --no-color --no-progress --quiet --output {output}",
+            "arguments": "vhost {target_url} {subdomain_wordlist} {basic_auth} {token_auth} {cookie} {headers} {intensity} --append-domain --no-tls-validation --no-color --no-progress --output {output}",
             "stage": 2,
             "default": false
         }
@@ -511,7 +489,7 @@
         "fields": {
             "tool": 20,
             "name": "Endpoints enumeration",
-            "arguments": "dir {url} {endpoint_wordlist} {basic_auth} {token_auth} {cookie} {headers} {intensity} --no-tls-validation --no-color --no-progress --quiet --output {output}",
+            "arguments": "dir {url} {endpoint_wordlist} {basic_auth} {token_auth} {cookie} {headers} {intensity} --no-tls-validation --no-color --no-progress --output {output}",
             "stage": 4,
             "default": false
         }
