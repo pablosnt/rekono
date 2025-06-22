@@ -721,22 +721,6 @@
     },
     {
         "model": "tools.output",
-        "pk": 92,
-        "fields": {
-            "configuration": 44,
-            "type": 6
-        }
-    },
-    {
-        "model": "tools.output",
-        "pk": 93,
-        "fields": {
-            "configuration": 45,
-            "type": 6
-        }
-    },
-    {
-        "model": "tools.output",
         "pk": 94,
         "fields": {
             "configuration": 46,
