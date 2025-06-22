@@ -197,7 +197,7 @@
             "command": "python3",
             "script": "log4j-scan.py",
             "script_directory_property": "LOG4J_SCAN_DIR",
-            "run_directory_property": null,
+            "run_directory_property": "LOG4J_SCAN_DIR",
             "ignore_exit_code": false,
             "is_installed": false,
             "version": null,
