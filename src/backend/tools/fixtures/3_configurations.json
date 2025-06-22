@@ -445,7 +445,7 @@
         "fields": {
             "tool": 19,
             "name": "SpringShell RCE (CVE-2022-22965)",
-            "arguments": "{script} {url}",
+            "arguments": "{script} {url} --waf-bypass",
             "stage": 4,
             "default": true
         }
@@ -456,7 +456,7 @@
         "fields": {
             "tool": 19,
             "name": "Spring Cloud RCE (CVE-2022-22963)",
-            "arguments": "{script} {url} --test-CVE-2022-22963",
+            "arguments": "{script} {url} --test-CVE-2022-22963 --waf-bypass",
             "stage": 4,
             "default": false
         }
