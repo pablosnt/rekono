@@ -4,9 +4,6 @@ from typing import Any
 
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
-from framework.serializers import MfaSerializer
-from platforms.mail.notifications import SMTP
-from platforms.telegram_app.notifications.notifications import Telegram
 from rest_framework import status
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.fields import SerializerMethodField
@@ -18,6 +15,10 @@ from rest_framework.serializers import (
     Serializer,
     URLField,
 )
+
+from framework.serializers import MfaSerializer
+from platforms.mail.notifications import SMTP
+from platforms.telegram_app.notifications.notifications import Telegram
 from security.authorization.roles import Role
 from users.models import User
 

@@ -1,12 +1,13 @@
 from typing import Any, cast
 
+from rest_framework.fields import ValidationError
+from rest_framework.serializers import SerializerMethodField
+from taggit.serializers import TaggitSerializer
+
 from framework.fields import TagField
 from framework.models import BaseModel
 from framework.serializers import LikeSerializer
 from notes.models import Note
-from rest_framework.fields import ValidationError
-from rest_framework.serializers import SerializerMethodField
-from taggit.serializers import TaggitSerializer
 from users.serializers import SimpleUserSerializer
 
 links = [

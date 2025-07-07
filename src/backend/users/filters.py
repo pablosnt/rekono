@@ -1,6 +1,7 @@
 from django.db.models import QuerySet
 from django_filters.filters import CharFilter, NumberFilter
 from django_filters.rest_framework import FilterSet
+
 from projects.models import Project
 from users.models import User
 

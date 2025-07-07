@@ -1,7 +1,8 @@
+from rest_framework.serializers import ModelSerializer, SerializerMethodField
+
 from framework.fields import ProtectedSecretField
 from platforms.nvdnist.integrations import NvdNist
 from platforms.nvdnist.models import NvdNistSettings
-from rest_framework.serializers import ModelSerializer, SerializerMethodField
 from security.validators.input_validator import Regex, Validator
 
 

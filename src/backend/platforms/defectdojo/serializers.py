@@ -3,14 +3,6 @@ from typing import Any, cast
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.shortcuts import get_object_or_404
-from framework.fields import ProtectedSecretField
-from platforms.defectdojo.integrations import DefectDojo
-from platforms.defectdojo.models import (
-    DefectDojoSettings,
-    DefectDojoSync,
-    DefectDojoTargetSync,
-)
-from projects.models import Project
 from rest_framework.serializers import (
     CharField,
     IntegerField,
@@ -19,6 +11,15 @@ from rest_framework.serializers import (
     Serializer,
     SerializerMethodField,
 )
+
+from framework.fields import ProtectedSecretField
+from platforms.defectdojo.integrations import DefectDojo
+from platforms.defectdojo.models import (
+    DefectDojoSettings,
+    DefectDojoSync,
+    DefectDojoTargetSync,
+)
+from projects.models import Project
 from security.validators.input_validator import Regex, Validator
 
 

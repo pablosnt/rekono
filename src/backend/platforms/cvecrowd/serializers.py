@@ -1,7 +1,8 @@
+from rest_framework.serializers import ModelSerializer, SerializerMethodField
+
 from framework.fields import ProtectedSecretField
 from platforms.cvecrowd.integrations import CveCrowd
 from platforms.cvecrowd.models import CveCrowdSettings
-from rest_framework.serializers import ModelSerializer, SerializerMethodField
 from security.validators.input_validator import Regex, Validator
 
 

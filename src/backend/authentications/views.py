@@ -1,8 +1,9 @@
+from rest_framework.permissions import IsAuthenticated
+
 from authentications.filters import AuthenticationFilter
 from authentications.models import Authentication
 from authentications.serializers import AuthenticationSerializer
 from framework.views import BaseViewSet
-from rest_framework.permissions import IsAuthenticated
 from security.authorization.permissions import (
     ProjectMemberPermission,
     RekonoModelPermission,

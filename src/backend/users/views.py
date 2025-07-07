@@ -3,8 +3,6 @@ from typing import Any
 
 from django.core.exceptions import PermissionDenied
 from drf_spectacular.utils import extend_schema
-from framework.views import BaseViewSet
-from platforms.mail.notifications import SMTP
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
@@ -13,6 +11,9 @@ from rest_framework.response import Response
 from rest_framework.serializers import Serializer
 from rest_framework.viewsets import GenericViewSet
 from rest_framework_simplejwt.authentication import JWTAuthentication
+
+from framework.views import BaseViewSet
+from platforms.mail.notifications import SMTP
 from security.authorization.permissions import (
     IsAdmin,
     IsNotAuthenticated,

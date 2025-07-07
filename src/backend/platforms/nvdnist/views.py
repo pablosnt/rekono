@@ -1,7 +1,8 @@
+from rest_framework.permissions import IsAuthenticated
+
 from framework.views import BaseViewSet
 from platforms.nvdnist.models import NvdNistSettings
 from platforms.nvdnist.serializers import NvdNistSettingsSerializer
-from rest_framework.permissions import IsAuthenticated
 from security.authorization.permissions import RekonoModelPermission
 
 

@@ -9,6 +9,7 @@ from rest_framework.serializers import (
     Serializer,
     SerializerMethodField,
 )
+
 from users.models import User
 
 
