@@ -302,20 +302,9 @@
         "fields": {
             "tool": 11,
             "name": "Log4Shell (CVE-2021-44228)",
-            "arguments": "{script} {url} --dns-callback-provider dnslog.cn --run-all-tests",
+            "arguments": "{script} {url} --dns-callback-provider dnslog.cn --run-all-tests --wait-time 30 --waf-bypass",
             "stage": 4,
             "default": true
-        }
-    },
-    {
-        "model": "tools.configuration",
-        "pk": 29,
-        "fields": {
-            "tool": 11,
-            "name": "Log4Shell (CVE-2021-44228) with WAF bypass",
-            "arguments": "{script} {url} --dns-callback-provider dnslog.cn --run-all-tests --waf-bypass",
-            "stage": 4,
-            "default": false
         }
     },
     {
@@ -379,7 +368,7 @@
         "fields": {
             "tool": 17,
             "name": "List shares",
-            "arguments": "{host} {port} {authentication}",
+            "arguments": "{host} {port} {authentication} --no-color --no-update --csv {output}",
             "stage": 4,
             "default": true
         }
@@ -444,21 +433,10 @@
         "pk": 42,
         "fields": {
             "tool": 19,
-            "name": "SpringShell RCE (CVE-2022-22965)",
-            "arguments": "{script} {url} --waf-bypass",
-            "stage": 4,
-            "default": true
-        }
-    },
-    {
-        "model": "tools.configuration",
-        "pk": 43,
-        "fields": {
-            "tool": 19,
-            "name": "Spring Cloud RCE (CVE-2022-22963)",
+            "name": "Spring Shell (CVE-2022-22965 & CVE-2022-22963)",
             "arguments": "{script} {url} --test-CVE-2022-22963 --waf-bypass",
             "stage": 4,
-            "default": false
+            "default": true
         }
     },
     {
