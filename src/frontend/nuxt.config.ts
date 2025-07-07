@@ -21,18 +21,22 @@ export default defineNuxtConfig({
       headers: {
         "Cache-Control": "no-store",
         // TODO: Update this and the Nginx configuration
-        'Content-Security-Policy-Report-Only': "default-src 'none'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; connect-src 'self'; img-src 'self' data: www.kali.org raw.githubusercontent.com camo.githubusercontent.com fullhunt.io gitleaks.io nuclei.projectdiscovery.io www.lunasec.io; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'",
+        "Content-Security-Policy-Report-Only":
+          "default-src 'none'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; connect-src 'self'; img-src 'self' data: www.kali.org raw.githubusercontent.com camo.githubusercontent.com fullhunt.io gitleaks.io nuclei.projectdiscovery.io www.lunasec.io; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'",
         "Referrer-Policy": "no-referrer",
         "X-Content-Type-Options": "nosniff",
         "X-Frame-Options": "DENY",
         "X-Powered-By": "",
       },
-      proxy: process.env.NODE_ENV === 'development' ? {
-        "/api/": {
-          target: "http://127.0.0.1:8000",
-          changeOrigin: true,
-        },
-      } : {},
+      proxy:
+        process.env.NODE_ENV === "development"
+          ? {
+              "/api/": {
+                target: "http://127.0.0.1:8000",
+                changeOrigin: true,
+              },
+            }
+          : {},
     },
   },
   modules: [
