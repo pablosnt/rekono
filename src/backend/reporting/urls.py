@@ -1,5 +1,6 @@
-from reporting.views import ReportingViewSet
 from rest_framework.routers import SimpleRouter
+
+from reporting.views import ReportingViewSet
 
 # Register your views here.
 

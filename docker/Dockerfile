@@ -54,8 +54,8 @@ LABEL org.opencontainers.image.licenses=$LABEL_LICENSES
 LABEL org.opencontainers.image.title="Rekono Backend"
 LABEL org.opencontainers.image.description="Rekono backend image based on a distroless debian image"
 
-ENV PATH /opt/python/bin:$PATH
-ENV REKONO_HOME /rekono
+ENV PATH=/opt/python/bin:$PATH
+ENV REKONO_HOME=/rekono
 
 COPY --from=build-backend --chown=65532:65532 /rekono /rekono
 COPY --from=build-backend --chown=65532:65532 /code /code
@@ -130,8 +130,8 @@ LABEL org.opencontainers.image.licenses=$LABEL_LICENSES
 LABEL org.opencontainers.image.title="Rekono Worker"
 LABEL org.opencontainers.image.description="Rekono worker image based on Kali Linux that includes all the hacking tools supported by Rekono"
 
-ENV PATH /opt/python/bin:$PATH
-ENV REKONO_HOME /rekono
+ENV PATH=/opt/python/bin:$PATH
+ENV REKONO_HOME=/rekono
 
 COPY --from=build-backend /opt/python /opt/python
 COPY --from=build-backend /usr/local/bin/uv /bin/
@@ -161,7 +161,10 @@ RUN apt update && \
     git clone https://github.com/fullhunt/spring4shell-scan.git /opt/spring4shell-scan && \
     git clone https://github.com/internetwache/GitTools.git /opt/GitTools && \
     uv pip install -r /opt/log4j-scan/requirements.txt && \
-    uv pip install -r /opt/spring4shell-scan/requirements.txt && \    
+    uv pip install -r /opt/spring4shell-scan/requirements.txt && \
+    # Update tool resources
+    nuclei -update-templates && \
+    searchsploit --update || true && \
     # Rootless user
     useradd --uid 65532 --create-home rekono && \
     chown -R rekono:rekono /opt && \

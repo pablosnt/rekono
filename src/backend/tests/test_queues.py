@@ -142,7 +142,6 @@ class TasksQueueTest(QueueTest):
         (22, 2, 2),  # Sslscan
         (23, 2, None),  # SSLyze
         (28, 2, None),  # Log4Shell Scan
-        (29, 2, None),  # Log4Shell Scan
         (34, 2, None),  # SSH Audit
         (24, 2, None),  # CMSeeK
         (33, 2, None),  # GitDumper & GitLeaks

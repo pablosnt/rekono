@@ -32,7 +32,7 @@ class ExecutionTest(ApiTest):
                     "task": 1,
                     "configuration": {
                         "id": 19,
-                        "name": "All available sources",
+                        "name": "Simple scan",
                         "tool": {"id": 3, "name": "theHarvester"},
                     },
                     "status": Status.RUNNING.value,
@@ -42,7 +42,7 @@ class ExecutionTest(ApiTest):
                     "task": 1,
                     "configuration": {
                         "id": 19,
-                        "name": "All available sources",
+                        "name": "Simple scan",
                         "tool": {"id": 3, "name": "theHarvester"},
                     },
                     "status": Status.COMPLETED.value,

@@ -1,15 +1,16 @@
 from typing import Any
 
 from django.core.exceptions import ValidationError
-from findings.enums import TriageStatus
-from projects.serializers import ProjectSerializer
-from reporting.enums import FindingName, ReportFormat
-from reporting.models import Report
 from rest_framework.serializers import (
     BooleanField,
     ModelSerializer,
     MultipleChoiceField,
 )
+
+from findings.enums import TriageStatus
+from projects.serializers import ProjectSerializer
+from reporting.enums import FindingName, ReportFormat
+from reporting.models import Report
 from targets.serializers import SimpleTargetSerializer
 from tasks.serializers import TaskSerializer
 from users.serializers import SimpleUserSerializer

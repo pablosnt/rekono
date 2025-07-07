@@ -1,5 +1,6 @@
 from django.urls import include, path
 from rest_framework.routers import SimpleRouter
+
 from users.views import MfaViewSet, ProfileViewSet, UserViewSet
 
 # Register your views here.

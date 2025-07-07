@@ -37,7 +37,9 @@ jobs:
       - name: Ruff
         if: ${{ steps.changes.outputs.backend == 'true' || github.event_name != 'pull_request' }}
         working-directory: src/backend
-        run: uvx ruff format --check
+        run: |
+          uvx ruff format --check
+          uvx ruff check
       
       - name: Flake8
         if: ${{ (steps.changes.outputs.backend == 'true' || github.event_name != 'pull_request') && !cancelled() }}

@@ -59,14 +59,15 @@ class Tool(BaseLike):
         if self.version_argument:
             process = subprocess.run(
                 [i for i in [self.command, self.script, self.version_argument] if i],
-                capture_output=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
             )
             if process.returncode == 0:
-                output = (process.stdout or process.stderr).decode("utf-8")
                 version = re.search(
                     version_regex,
                     # zaproxy returns the Java version at the first line
-                    re.sub(r"java version [^\s]*", "", output),
+                    re.sub(r"java version [^\s]*", "", process.stdout),
                     flags=re.IGNORECASE,
                 )
                 if version:

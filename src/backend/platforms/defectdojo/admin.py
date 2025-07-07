@@ -1,4 +1,5 @@
 from django.contrib import admin
+
 from platforms.defectdojo.models import (
     DefectDojoSettings,
     DefectDojoSync,

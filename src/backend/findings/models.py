@@ -156,7 +156,9 @@ class Path(Finding):
     def _clean_comparison_path(self, value: str) -> str:
         if len(value) > 1:
             value = self._clean_path(value)
-            if value[-1] != "/":
+            if value is None:
+                value = "/"
+            elif value[-1] != "/":
                 value += "/"
         return value
 
@@ -295,7 +297,6 @@ class Vulnerability(TriageFinding):
     reference = models.TextField(max_length=250, blank=True, null=True)
     trending = models.BooleanField(default=False)
 
-    # TODO: This might be different per finding depending on the tool?
     unique_fields = ["technology", "port", "name", "cve"]
     filters = [
         Finding.Filter(Severity, "severity"),

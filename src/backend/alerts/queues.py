@@ -2,12 +2,13 @@ import logging
 from datetime import timedelta
 from typing import Any
 
-from alerts.models import MonitorSettings
 from django.utils import timezone
 from django_rq import job
+from rq.job import Job
+
+from alerts.models import MonitorSettings
 from framework.queues import BaseQueue
 from platforms.cvecrowd.integrations import CveCrowd
-from rq.job import Job
 
 logger = logging.getLogger()
 

@@ -1,5 +1,6 @@
-from framework.views import BaseViewSet
 from rest_framework.permissions import IsAuthenticated
+
+from framework.views import BaseViewSet
 from security.authorization.permissions import (
     ProjectMemberPermission,
     RekonoModelPermission,

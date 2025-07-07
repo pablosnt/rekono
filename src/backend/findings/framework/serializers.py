@@ -1,6 +1,7 @@
 from typing import Any
 
 from django.utils import timezone
+
 from executions.serializers import SimpleExecutionSerializer
 from findings.models import OSINT, Host
 from framework.serializers import RelatedNotesSerializer

@@ -105,13 +105,12 @@ class BaseParser:
 
     def _protect_execution(self) -> None:
         self.executor.execution.output_plain = self._protect_value(self.executor.execution.output_plain)
-        self.executor.execution.output_error = self._protect_value(self.executor.execution.output_error)
         if self.report and self.report.is_file():
             with self.report.open("r") as read_report:
                 data = read_report.read()
             with self.report.open("w") as write_report:
                 write_report.write(self._protect_value(data))
-        self.executor.execution.save(update_fields=["output_plain", "output_error"])
+        self.executor.execution.save(update_fields=["output_plain"])
 
     def parse(self) -> None:
         if self.report:

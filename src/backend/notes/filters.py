@@ -1,4 +1,5 @@
 from django_filters.filters import BooleanFilter, CharFilter
+
 from framework.filters import LikeFilter, MultipleFieldFilterSet, MultipleNumberFilter
 from notes.models import Note
 

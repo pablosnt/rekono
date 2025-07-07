@@ -116,7 +116,7 @@
             "tool": 9,
             "name": "technology",
             "argument": "{technology} {version}",
-            "required": true,
+            "required": false,
             "multiple": false
         }
     },
@@ -503,6 +503,17 @@
             "argument": "--headers '{header_key}: {header_value}'",
             "required": false,
             "multiple": true
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 47,
+        "fields": {
+            "tool": 9,
+            "name": "cve",
+            "argument": "--cve {cve}",
+            "required": false,
+            "multiple": false
         }
     }
 ]

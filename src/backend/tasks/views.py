@@ -4,16 +4,18 @@ from typing import Any
 import django_rq
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema
-from executions.enums import Status
-from executions.queues import ExecutionsQueue
-from framework.views import BaseViewSet
-from rekono.settings import CONFIG
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rq.command import send_stop_job_command
+from rq.exceptions import NoSuchJobError
+
+from executions.enums import Status
+from executions.queues import ExecutionsQueue
+from framework.views import BaseViewSet
+from rekono.settings import CONFIG
 from security.authorization.permissions import (
     ProjectMemberPermission,
     RekonoModelPermission,
@@ -85,7 +87,10 @@ class TaskViewSet(BaseViewSet):
         for execution in running_executions:
             if not CONFIG.testing:  # pragma: no cover
                 if execution.status == Status.RUNNING:
-                    send_stop_job_command(connection, execution.rq_job_id)
+                    try:
+                        send_stop_job_command(connection, execution.rq_job_id)
+                    except NoSuchJobError:
+                        pass
                 else:
                     self.executions_queue.cancel_job(execution.rq_job_id)
             logger.info(f"[Execution] Execution {execution.id} has been cancelled")

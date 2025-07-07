@@ -1,3 +1,12 @@
+from django.db.models import QuerySet
+from drf_spectacular.utils import extend_schema
+from rest_framework import status
+from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.request import Request
+from rest_framework.response import Response
+from rest_framework.serializers import Serializer
+
 from alerts.filters import AlertFilter
 from alerts.models import Alert, MonitorSettings
 from alerts.serializers import (
@@ -5,15 +14,7 @@ from alerts.serializers import (
     EditAlertSerializer,
     MonitorSettingsSerializer,
 )
-from django.db.models import QuerySet
-from drf_spectacular.utils import extend_schema
 from framework.views import BaseViewSet
-from rest_framework import status
-from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.request import Request
-from rest_framework.response import Response
-from rest_framework.serializers import Serializer
 from security.authorization.permissions import (
     OwnerPermission,
     ProjectMemberPermission,

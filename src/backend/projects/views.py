@@ -1,14 +1,15 @@
 from drf_spectacular.utils import extend_schema
-from framework.views import BaseViewSet
-from projects.filters import ProjectFilter
-from projects.models import Project
-from projects.serializers import ProjectMemberSerializer, ProjectSerializer
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
+
+from framework.views import BaseViewSet
+from projects.filters import ProjectFilter
+from projects.models import Project
+from projects.serializers import ProjectMemberSerializer, ProjectSerializer
 from security.authorization.permissions import (
     ProjectMemberPermission,
     RekonoModelPermission,

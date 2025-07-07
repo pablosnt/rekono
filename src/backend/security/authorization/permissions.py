@@ -1,14 +1,15 @@
 from typing import Any
 
+from rest_framework.permissions import BasePermission, DjangoModelPermissions
+from rest_framework.request import Request
+from rest_framework.views import View
+
 from alerts.models import Alert
 from notes.models import Note
 from platforms.telegram_app.models import TelegramChat
 from processes.models import Process, Step
 from projects.models import Project
 from reporting.models import Report
-from rest_framework.permissions import BasePermission, DjangoModelPermissions
-from rest_framework.request import Request
-from rest_framework.views import View
 from security.authorization.roles import Role
 from wordlists.models import Wordlist
 

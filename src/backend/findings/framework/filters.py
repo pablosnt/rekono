@@ -1,4 +1,5 @@
 from django_filters.filters import ModelMultipleChoiceFilter
+
 from findings.models import OSINT
 from framework.filters import MultipleFieldFilterSet
 from projects.models import Project

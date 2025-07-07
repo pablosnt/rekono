@@ -32,6 +32,7 @@ venv.bak/
 # Envionment
 .DS_Store
 .vscode/
+reports/
 wordlists/
 logs/
 /src/backend/tests/home/
@@ -49,6 +50,9 @@ yarn-error.log*
 *.desktop
 rekono-kbx
 *.kaboxer.yaml
+
+# Tools paths
+Result/
 
 # Temporal ignore
 migrations/

@@ -17,7 +17,6 @@ class Execution(BaseModel):
     configuration = models.ForeignKey(Configuration, on_delete=models.CASCADE, blank=True, null=True)
     output_file = models.TextField(max_length=50, blank=True, null=True)
     output_plain = models.TextField(blank=True, null=True)
-    output_error = models.TextField(blank=True, null=True)
     skipped_reason = models.TextField(blank=True, null=True)
     status = models.TextField(max_length=10, choices=Status.choices, default=Status.REQUESTED)
     enqueued_at = models.DateTimeField(blank=True, null=True)

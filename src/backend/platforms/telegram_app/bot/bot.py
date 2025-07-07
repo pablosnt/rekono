@@ -3,6 +3,10 @@ import logging
 import time
 from warnings import filterwarnings
 
+from telegram.error import Forbidden, InvalidToken
+from telegram.ext import Application
+from telegram.warnings import PTBUserWarning
+
 from platforms.telegram_app.bot.commands import (
     ClearProject,
     Help,
@@ -22,9 +26,6 @@ from platforms.telegram_app.bot.conversations import (
 )
 from platforms.telegram_app.framework import BaseTelegram
 from platforms.telegram_app.models import TelegramSettings
-from telegram.error import Forbidden, InvalidToken
-from telegram.ext import Application
-from telegram.warnings import PTBUserWarning
 
 filterwarnings(action="ignore", message=r".*CallbackQueryHandler", category=PTBUserWarning)
 

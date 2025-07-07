@@ -1,5 +1,6 @@
-from platforms.cvecrowd.views import CveCrowdSettingsViewSet
 from rest_framework.routers import SimpleRouter
+
+from platforms.cvecrowd.views import CveCrowdSettingsViewSet
 
 # Register your views here.
 

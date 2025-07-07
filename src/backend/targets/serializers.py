@@ -1,8 +1,9 @@
 from typing import Any
 
+from rest_framework.serializers import ModelSerializer
+
 from framework.serializers import RelatedNotesSerializer
 from platforms.defectdojo.serializers import DefectDojoTargetSyncSerializer
-from rest_framework.serializers import ModelSerializer
 from targets.models import Target
 
 

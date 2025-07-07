@@ -1,4 +1,7 @@
 from asgiref.sync import sync_to_async
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram.ext import CallbackContext, ConversationHandler
+
 from input_types.enums import InputTypeName
 from parameters.models import InputTechnology, InputVulnerability
 from parameters.serializers import (
@@ -7,8 +10,6 @@ from parameters.serializers import (
 )
 from platforms.telegram_app.bot.enums import Context
 from platforms.telegram_app.bot.mixins.framework import BaseMixin
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
-from telegram.ext import CallbackContext, ConversationHandler
 from tools.models import Input
 from users.models import User
 

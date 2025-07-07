@@ -1,5 +1,6 @@
-from rekono.settings import SIMPLE_JWT
 from rest_framework_simplejwt.tokens import BlacklistMixin, Token
+
+from rekono.settings import SIMPLE_JWT
 
 
 class MfaRequiredToken(BlacklistMixin, Token):

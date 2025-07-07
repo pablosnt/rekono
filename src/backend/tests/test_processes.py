@@ -233,7 +233,7 @@ expected_step1 = {
 
 class StepTest(ApiTest):
     endpoint = "/api/steps/"
-    expected_str = f"{first_process_name} - theHarvester - All available sources"
+    expected_str = f"{first_process_name} - theHarvester - Simple scan"
     cases = [
         ApiTestCase(["reader1", "reader2"], "get", 403),
         ApiTestCase(

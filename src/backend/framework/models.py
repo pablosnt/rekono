@@ -100,14 +100,14 @@ class BaseInput(BaseModel):
     parse_mapping: dict[InputKeyword, str | Callable | dict[str, str]] = {}
     parse_dependencies: list[str] = []
 
-    def _clean_path(self, value: str) -> str:
-        return f"/{value}" if len(value) > 1 and value[0] != "/" else value
+    def _clean_path(self, value: str | None) -> str | None:
+        return f"/{value}" if value and len(value) > 1 and value[0] != "/" else value
 
     def _get_url(
         self,
         host: str,
         port: int | None = None,
-        endpoint: str = "",
+        endpoint: str | None = None,
         protocols: list[str] = ["http", "https"],
     ) -> str | None:
         """Get a HTTP or HTTPS URL from host, port and endpoint.
@@ -122,6 +122,8 @@ class BaseInput(BaseModel):
             str | None: [description]
         """
         urllib3.disable_warnings(category=urllib3.exceptions.InsecureRequestWarning)
+        if endpoint is None:
+            endpoint = ""
         if endpoint.startswith("/"):
             endpoint = endpoint[1:]
         schema = "{protocol}://{host}/{endpoint}"
@@ -160,6 +162,7 @@ class BaseInput(BaseModel):
             return True
         filter_value = argument_input.filter
         for split, or_condition in [(" or ", True), (" and ", False)]:
+            # If no conditions, use 'and' by default
             if split not in filter_value and or_condition:
                 continue
             for match_value in filter_value.split(split):
@@ -175,15 +178,13 @@ class BaseInput(BaseModel):
                         if (
                             issubclass(filter.type, models.TextChoices)
                             and self._compare_filter(
-                                cast(models.TextChoices, filter.type)[match_value.upper()],
-                                field_value,
-                                negative,
+                                match_value.upper(), cast(models.TextChoices, filter.type)(field_value).name, negative
                             )
                         ) or (
-                            hasattr(self, match_value)
+                            filter.type in [str, int]
                             and self._compare_filter(
-                                filter.type(getattr(self, match_value)),
-                                field_value,
+                                str(match_value).strip().lower(),
+                                str(field_value).strip().lower(),
                                 negative,
                                 filter.contains,
                             )

@@ -1,10 +1,11 @@
 from typing import Any
 
-from alerts.enums import AlertMode
-from alerts.models import Alert, MonitorSettings
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
+
+from alerts.enums import AlertMode
+from alerts.models import Alert, MonitorSettings
 from users.serializers import SimpleUserSerializer
 
 

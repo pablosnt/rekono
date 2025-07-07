@@ -159,7 +159,7 @@
         "fields": {
             "tool": 2,
             "name": "Standard wordlist",
-            "arguments": "{url} {intensity} -o {output} --format=json {headers} {wordlist} {authentication} {cookie}",
+            "arguments": "{url} {intensity} -o {output} --format=json --crawl --no-color --quiet-mode {headers} {wordlist} {authentication} {cookie}",
             "stage": 4,
             "default": true
         }
@@ -170,7 +170,7 @@
         "fields": {
             "tool": 2,
             "name": "Wordlist with extensions",
-            "arguments": "{url} {intensity} -o {output} --format=json --force-extensions {headers} {wordlist} {authentication} {cookie}",
+            "arguments": "{url} {intensity} -o {output} --format=json --crawl --no-color --quiet-mode --force-extensions {headers} {wordlist} {authentication} {cookie}",
             "stage": 4,
             "default": false
         }
@@ -181,7 +181,7 @@
         "fields": {
             "tool": 2,
             "name": "Recursive",
-            "arguments": "{url} {intensity} -o {output} --format=json --force-recursive --recursion-depth=10 {headers} {wordlist} {authentication} {cookie}",
+            "arguments": "{url} {intensity} -o {output} --format=json --crawl --no-color --quiet-mode --recursive --max-recursion-depth=10 {headers} {wordlist} {authentication} {cookie}",
             "stage": 4,
             "default": false
         }
@@ -192,7 +192,7 @@
         "fields": {
             "tool": 2,
             "name": "Deep recursive",
-            "arguments": "{url} {intensity} -o {output} --format=json --force-recursive --depth-recursive --recursion-depth=10 {headers} {wordlist} {authentication} {cookie}",
+            "arguments": "{url} {intensity} -o {output} --format=json --crawl --no-color --quiet-mode --deep-recursive --max-recursion-depth=10 {headers} {wordlist} {authentication} {cookie}",
             "stage": 4,
             "default": false
         }
@@ -202,8 +202,8 @@
         "pk": 19,
         "fields": {
             "tool": 3,
-            "name": "All available sources",
-            "arguments": "{target} -b all -f {output}",
+            "name": "Simple scan",
+            "arguments": "{target} -b all -f {output} --quiet",
             "stage": 1,
             "default": true
         }
@@ -213,8 +213,8 @@
         "pk": 20,
         "fields": {
             "tool": 3,
-            "name": "Google & Duckduckgo & Bing & Linkedin & Twitter",
-            "arguments": "{target} -b google,duckduckgo,bing,linkedin,linkedin_links,twitter -f {output}",
+            "name": "DNS lookup & Domain take over & Virtual hosts",
+            "arguments": "{target} -b all -f {output} --quiet --dns-lookup --take-over --virtual-host",
             "stage": 1,
             "default": false
         }
@@ -236,7 +236,7 @@
         "fields": {
             "tool": 5,
             "name": "SSL/TLS analysis",
-            "arguments": "--xml={output} {intensity} {target}",
+            "arguments": "--no-colour --xml={output} {intensity} {target}",
             "stage": 4,
             "default": true
         }
@@ -257,7 +257,7 @@
         "pk": 24,
         "fields": {
             "tool": 7,
-            "name": "CMS scan",
+            "name": "Deep scan",
             "arguments": "{url} {intensity} --follow-redirect --batch",
             "stage": 4,
             "default": true
@@ -269,7 +269,7 @@
         "fields": {
             "tool": 8,
             "name": "Active scan",
-            "arguments": "{authentication} {cookie} {command} -cmd {url} -quickprogress -quickout {output}",
+            "arguments": "{authentication} {cookie} {command} -cmd {url} -silent -notel -quickout {output}",
             "stage": 4,
             "default": true
         }
@@ -280,7 +280,7 @@
         "fields": {
             "tool": 9,
             "name": "Search by technology",
-            "arguments": "{technology} --json",
+            "arguments": "{technology} --json --disable-colour",
             "stage": 5,
             "default": true
         }
@@ -302,20 +302,9 @@
         "fields": {
             "tool": 11,
             "name": "Log4Shell (CVE-2021-44228)",
-            "arguments": "{script} {url} --dns-callback-provider dnslog.cn --run-all-tests",
+            "arguments": "{script} {url} --dns-callback-provider dnslog.cn --run-all-tests --wait-time 30 --waf-bypass",
             "stage": 4,
             "default": true
-        }
-    },
-    {
-        "model": "tools.configuration",
-        "pk": 29,
-        "fields": {
-            "tool": 11,
-            "name": "Log4Shell (CVE-2021-44228) with WAF bypass",
-            "arguments": "{script} {url} --dns-callback-provider dnslog.cn --run-all-tests --waf-bypass",
-            "stage": 4,
-            "default": false
         }
     },
     {
@@ -368,7 +357,7 @@
         "fields": {
             "tool": 16,
             "name": "SSH scan",
-            "arguments": "{host} {port} --no-colors --skip-rate-test -jj > {output}",
+            "arguments": "{host} {port} --no-colors --skip-rate-test -jj",
             "stage": 4,
             "default": true
         }
@@ -379,7 +368,7 @@
         "fields": {
             "tool": 17,
             "name": "List shares",
-            "arguments": "{host} {port} {authentication}",
+            "arguments": "{host} {port} {authentication} --no-color --no-update --csv {output}",
             "stage": 4,
             "default": true
         }
@@ -412,7 +401,7 @@
         "fields": {
             "tool": 18,
             "name": "All templates",
-            "arguments": "{url} {authentication} {cookie} {headers} -jsonl -output {output}",
+            "arguments": "{url} {authentication} {cookie} {headers} -follow-redirects -no-color -jsonl-export {output}",
             "stage": 4,
             "default": true
         }
@@ -423,7 +412,7 @@
         "fields": {
             "tool": 18,
             "name": "Automatic technology detection",
-            "arguments": "{url} -automatic-scan {authentication} {cookie} {headers} -jsonl -output {output}",
+            "arguments": "{url} -automatic-scan {authentication} {cookie} {headers} -follow-redirects -no-color -jsonl-export {output}",
             "stage": 4,
             "default": false
         }
@@ -434,7 +423,7 @@
         "fields": {
             "tool": 18,
             "name": "CVE templates",
-            "arguments": "{url} -tags cve {authentication} {cookie} {headers} -jsonl -output {output}",
+            "arguments": "{url} -tags cve {authentication} {cookie} {headers} -follow-redirects -no-color -jsonl-export {output}",
             "stage": 4,
             "default": false
         }
@@ -444,43 +433,10 @@
         "pk": 42,
         "fields": {
             "tool": 19,
-            "name": "SpringShell RCE (CVE-2022-22965)",
-            "arguments": "{script} {url}",
+            "name": "Spring Shell (CVE-2022-22965 & CVE-2022-22963)",
+            "arguments": "{script} {url} --test-CVE-2022-22963 --waf-bypass",
             "stage": 4,
             "default": true
-        }
-    },
-    {
-        "model": "tools.configuration",
-        "pk": 43,
-        "fields": {
-            "tool": 19,
-            "name": "Spring Cloud RCE (CVE-2022-22963)",
-            "arguments": "{script} {url} --test-CVE-2022-22963",
-            "stage": 4,
-            "default": false
-        }
-    },
-    {
-        "model": "tools.configuration",
-        "pk": 44,
-        "fields": {
-            "tool": 19,
-            "name": "SpringShell RCE (CVE-2022-22965) with WAF bypass",
-            "arguments": "{script} {url} --waf-bypass",
-            "stage": 4,
-            "default": false
-        }
-    },
-    {
-        "model": "tools.configuration",
-        "pk": 45,
-        "fields": {
-            "tool": 19,
-            "name": "Spring Cloud RCE (CVE-2022-22963) with WAF bypass",
-            "arguments": "{script} {url} --waf-bypass --test-CVE-2022-22963",
-            "stage": 4,
-            "default": false
         }
     },
     {
@@ -489,7 +445,7 @@
         "fields": {
             "tool": 20,
             "name": "Subdomains enumeration",
-            "arguments": "dns {target} {subdomain_wordlist} {intensity} --wildcard --show-ips --no-color --no-progress --quiet --output {output}",
+            "arguments": "dns {target} {subdomain_wordlist} {intensity} --wildcard --show-ips --no-color --no-progress --output {output}",
             "stage": 1,
             "default": true
         }
@@ -500,7 +456,7 @@
         "fields": {
             "tool": 20,
             "name": "VHOST enumeration",
-            "arguments": "vhost {target_url} {subdomain_wordlist} {basic_auth} {token_auth} {cookie} {headers} {intensity} --append-domain --no-tls-validation --no-color --no-progress --quiet --output {output}",
+            "arguments": "vhost {target_url} {subdomain_wordlist} {basic_auth} {token_auth} {cookie} {headers} {intensity} --append-domain --no-tls-validation --no-color --no-progress --output {output}",
             "stage": 2,
             "default": false
         }
@@ -511,8 +467,30 @@
         "fields": {
             "tool": 20,
             "name": "Endpoints enumeration",
-            "arguments": "dir {url} {endpoint_wordlist} {basic_auth} {token_auth} {cookie} {headers} {intensity} --no-tls-validation --no-color --no-progress --quiet --output {output}",
+            "arguments": "dir {url} {endpoint_wordlist} {basic_auth} {token_auth} {cookie} {headers} {intensity} --no-tls-validation --no-color --no-progress --output {output}",
             "stage": 4,
+            "default": false
+        }
+    },
+    {
+        "model": "tools.configuration",
+        "pk": 49,
+        "fields": {
+            "tool": 7,
+            "name": "Light scan",
+            "arguments": "{url} {intensity} --follow-redirect --batch --light-scan",
+            "stage": 4,
+            "default": false
+        }
+    },
+    {
+        "model": "tools.configuration",
+        "pk": 50,
+        "fields": {
+            "tool": 9,
+            "name": "Search by CVE",
+            "arguments": "{cve} --json --disable-colour",
+            "stage": 5,
             "default": false
         }
     }

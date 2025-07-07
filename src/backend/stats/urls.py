@@ -1,4 +1,5 @@
 from django.urls import path
+
 from stats.views import (
     ActivityStatsView,
     HostEvolutionView,

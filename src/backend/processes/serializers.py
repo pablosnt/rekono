@@ -1,15 +1,16 @@
 from typing import Any
 
 from django.db.models import Q
-from framework.fields import TagField
-from framework.serializers import LikeSerializer
-from processes.models import Process, Step
 from rest_framework.serializers import (
     ModelSerializer,
     PrimaryKeyRelatedField,
     SerializerMethodField,
 )
 from taggit.serializers import TaggitSerializer
+
+from framework.fields import TagField
+from framework.serializers import LikeSerializer
+from processes.models import Process, Step
 from tools.models import Configuration
 from tools.serializers import ConfigurationSerializer
 from users.serializers import SimpleUserSerializer
