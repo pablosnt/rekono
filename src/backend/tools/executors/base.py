@@ -174,7 +174,7 @@ class BaseExecutor:
         pass
 
     @cached_property
-    def _execution_directory(self) -> Path:
+    def _execution_directory(self) -> Path | None:
         return (
             getattr(CONFIG, self.execution.configuration.tool.run_directory_property.lower())
             if self.execution.configuration.tool.run_directory_property
