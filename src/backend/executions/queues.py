@@ -3,14 +3,15 @@ import logging
 import rq
 from django.utils import timezone
 from django_rq import job
+from rq.job import Job
+from rq.registry import DeferredJobRegistry
+
 from executions.models import Execution
 from findings.framework.models import Finding
 from findings.queues import FindingsQueue
 from framework.models import BaseInput
 from framework.queues import BaseQueue
 from parameters.models import InputTechnology, InputVulnerability
-from rq.job import Job
-from rq.registry import DeferredJobRegistry
 from target_ports.models import TargetPort
 from tools.executors.base import BaseExecutor
 from tools.parsers.base import BaseParser
@@ -72,33 +73,19 @@ class ExecutionsQueue(BaseQueue):
         executor: BaseExecutor = execution.configuration.tool.get_executor_class()(execution)
         current_job = rq.get_current_job()
         if not findings and current_job and current_job._dependency_ids:
-            logger.info(
-                "BEFORE "
-                + str(
-                    ExecutionsQueue._get_findings_from_dependencies(
-                        executor,
-                        target_ports,
-                        input_vulnerabilities,
-                        input_technologies,
-                        wordlists,
-                        current_job,
-                    )
-                )
-            )
-            (
-                findings,
-                target_ports,
-                input_vulnerabilities,
-                input_technologies,
-                wordlists,
-            ) = ExecutionsQueue._get_findings_from_dependencies(
+            _execution = ExecutionsQueue._get_findings_from_dependencies(
                 executor,
                 target_ports,
                 input_vulnerabilities,
                 input_technologies,
                 wordlists,
                 current_job,
-            ).values()
+            )
+            findings = _execution.get(0, [])
+            target_ports = _execution.get(1, [])
+            input_vulnerabilities = _execution.get(2, [])
+            input_technologies = _execution.get(3, [])
+            wordlists = _execution.get(4, [])
         executor.execute(findings, target_ports, input_vulnerabilities, input_technologies, wordlists)
         parser: BaseParser = execution.configuration.tool.get_parser_class()(executor, execution.output_plain)
         parser.parse()
@@ -173,5 +160,4 @@ class ExecutionsQueue(BaseQueue):
                         meta["wordlists"],
                         dependencies=dependencies + new_jobs,
                     )
-        logger.info("TOTAL EXECUTIONS " + str(executions))
         return executions[0] if executions else {}

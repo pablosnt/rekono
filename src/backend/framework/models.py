@@ -107,7 +107,7 @@ class BaseInput(BaseModel):
         self,
         host: str,
         port: int | None = None,
-        endpoint: str = "",
+        endpoint: str | None = None,
         protocols: list[str] = ["http", "https"],
     ) -> str | None:
         """Get a HTTP or HTTPS URL from host, port and endpoint.
@@ -122,6 +122,8 @@ class BaseInput(BaseModel):
             str | None: [description]
         """
         urllib3.disable_warnings(category=urllib3.exceptions.InsecureRequestWarning)
+        if endpoint is None:
+            endpoint = ""
         if endpoint.startswith("/"):
             endpoint = endpoint[1:]
         schema = "{protocol}://{host}/{endpoint}"
