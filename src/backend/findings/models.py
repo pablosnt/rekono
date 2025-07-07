@@ -156,7 +156,9 @@ class Path(Finding):
     def _clean_comparison_path(self, value: str) -> str:
         if len(value) > 1:
             value = self._clean_path(value)
-            if value[-1] != "/":
+            if value is None:
+                value = "/"
+            elif value[-1] != "/":
                 value += "/"
         return value
 
