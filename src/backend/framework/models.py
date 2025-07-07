@@ -100,8 +100,8 @@ class BaseInput(BaseModel):
     parse_mapping: dict[InputKeyword, str | Callable | dict[str, str]] = {}
     parse_dependencies: list[str] = []
 
-    def _clean_path(self, value: str) -> str:
-        return f"/{value}" if len(value) > 1 and value[0] != "/" else value
+    def _clean_path(self, value: str | None) -> str | None:
+        return f"/{value}" if value and len(value) > 1 and value[0] != "/" else value
 
     def _get_url(
         self,

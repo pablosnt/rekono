@@ -295,7 +295,6 @@ class Vulnerability(TriageFinding):
     reference = models.TextField(max_length=250, blank=True, null=True)
     trending = models.BooleanField(default=False)
 
-    # TODO: This might be different per finding depending on the tool?
     unique_fields = ["technology", "port", "name", "cve"]
     filters = [
         Finding.Filter(Severity, "severity"),

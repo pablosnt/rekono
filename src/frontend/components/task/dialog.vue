@@ -48,7 +48,7 @@
             :color="step === 3 ? 'red' : undefined"
           />
           <v-stepper-item
-            v-if="selectedTool && selectedTool.require_input_technology"
+            v-if="selectedTool && selectedTool.input_technologies.supported"
             title="Technologies"
             :value="4"
             :icon="`${enums.findings.Technology.icon} mdi-18px`"
@@ -56,7 +56,7 @@
             :color="step === 4 ? 'red' : undefined"
           />
           <v-stepper-item
-            v-if="selectedTool && selectedTool.require_input_vulnerability"
+            v-if="selectedTool && selectedTool.input_vulnerabilities.supported"
             title="Vulnerabilities"
             :value="5"
             :icon="`${enums.findings.Vulnerability.icon} mdi-18px`"
@@ -658,12 +658,12 @@ function selectTool(): void {
     ) {
       getWordlists();
     }
-    if (selectedTool.value.require_input_technology) {
+    if (selectedTool.value.input_technologies.supported) {
       technologyApi
         .list({}, true)
         .then((response) => (technologies.value = response.items));
     }
-    if (selectedTool.value.require_input_vulnerability) {
+    if (selectedTool.value.input_vulnerabilities.supported) {
       vulnerabilityApi
         .list({}, true)
         .then((response) => (vulnerabilities.value = response.items));
@@ -734,10 +734,10 @@ function isValid(): boolean {
       .wordlists.required ||
       selectedWordlists.value.length > 0) &&
     (!selectedTool.value ||
-      !selectedTool.value.require_input_technology ||
+      !selectedTool.value.input_technologies.required ||
       selectedTechnologies.value.length > 0) &&
     (!selectedTool.value ||
-      !selectedTool.value.require_input_vulnerability ||
+      !selectedTool.value.input_vulnerabilities.required ||
       selectedVulnerabilities.value.length > 0)
   );
 }

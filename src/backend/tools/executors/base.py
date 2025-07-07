@@ -85,7 +85,7 @@ class BaseExecutor:
                     )
                     + [self.execution.task.target]
                     + list(target_ports)
-                    + [p.authentication for p in target_ports]
+                    + [p.authentication for p in target_ports if hasattr(p, "authentication")]
                     + list(input_vulnerabilities)
                     + list(input_technologies)
                     + list(HttpHeader.objects.filter(target__isnull=True, user__isnull=True).all())
