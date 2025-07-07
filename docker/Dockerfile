@@ -161,7 +161,10 @@ RUN apt update && \
     git clone https://github.com/fullhunt/spring4shell-scan.git /opt/spring4shell-scan && \
     git clone https://github.com/internetwache/GitTools.git /opt/GitTools && \
     uv pip install -r /opt/log4j-scan/requirements.txt && \
-    uv pip install -r /opt/spring4shell-scan/requirements.txt && \    
+    uv pip install -r /opt/spring4shell-scan/requirements.txt && \
+    # Update tool resources
+    nuclei -update-templates && \
+    searchsploit --update || true && \
     # Rootless user
     useradd --uid 65532 --create-home rekono && \
     chown -R rekono:rekono /opt && \
