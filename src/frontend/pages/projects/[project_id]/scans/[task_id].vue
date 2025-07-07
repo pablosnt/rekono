@@ -326,11 +326,7 @@
           variant="outlined"
           bg-color="grey-darken-4"
           rows="30"
-          :value="
-            expandExecution.output_error
-              ? expandExecution.output_error
-              : expandExecution.output_plain
-          "
+          :value="expandExecution.output_plain"
           readonly
         />
       </BaseDialog>

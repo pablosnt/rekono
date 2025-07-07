@@ -3,6 +3,7 @@ import os
 import re
 import subprocess
 import uuid
+from functools import cached_property
 from pathlib import Path
 from typing import Any
 
@@ -172,7 +173,15 @@ class BaseExecutor:
     def _before_running(self) -> None:
         pass
 
-    def _run(self, environment: dict[str, Any] = os.environ.copy()) -> str:
+    @cached_property
+    def _execution_directory(self) -> Path:
+        return (
+            getattr(CONFIG, self.execution.configuration.tool.run_directory_property.lower())
+            if self.execution.configuration.tool.run_directory_property
+            else None
+        )
+
+    def _run(self, environment: dict[str, Any] = os.environ.copy()) -> None:
         logger.info(f"[Tool] Running: {' '.join(self.arguments)}")
         stdout = (
             self.report
@@ -180,24 +189,32 @@ class BaseExecutor:
             and not any([arg for arg in self.arguments if str(self.report) in arg])
             else None
         )
-        pwd = (
-            getattr(CONFIG, self.execution.configuration.tool.run_directory_property.lower())
-            if self.execution.configuration.tool.run_directory_property
-            else None
-        )
         if stdout:
             with self.report.open("w") as _stdout:
-                process = subprocess.run(self.arguments, capture_output=False, stdout=_stdout, env=environment, cwd=pwd)
+                process = subprocess.run(self.arguments, stdout=_stdout, env=environment, cwd=self._execution_directory)
             output = ""
             if self.report.is_file():
-                with self.report.open("r") as _stdout:
-                    output = _stdout.read()
+                with self.report.open("r") as _output:
+                    output = _output.read()
         else:
-            process = subprocess.run(self.arguments, capture_output=True, env=environment, cwd=pwd)
-            output = process.stdout.decode("utf-8")
+            process = subprocess.run(
+                self.arguments,
+                env=environment,
+                cwd=self._execution_directory,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+            )
+            output = process.stdout
+        if self.execution.configuration.tool.output_format and self.report.is_file():
+            self.execution.output_file = self.report
+        # Remove ANSI colors from tool outputs
+        self.execution.output_plain = re.sub(r"(\x9B|\x1B\[)[\d]*[ -\/]*[@-~]", "", output, flags=re.IGNORECASE)
+        self.execution.save(update_fields=["output_plain", "output_file"])
         if not self.execution.configuration.tool.ignore_exit_code and process.returncode > 0:
-            raise RuntimeError(process.stderr.decode("utf-8"))
-        return output
+            self._on_error()
+        else:
+            self._on_completed()
 
     def _after_running(self) -> None:
         pass
@@ -225,27 +242,22 @@ class BaseExecutor:
         self.execution.save(update_fields=["status", "end", "skipped_reason"])
         self._on_task_end()
 
-    def _on_error(self, error: str) -> None:
-        if error:
-            self.execution.output_error = error
+    def _on_error(self) -> None:
         self.execution.status = Status.ERROR
         self.execution.end = timezone.now()
-        self.execution.save(update_fields=["output_error", "status", "end"])
+        self.execution.save(update_fields=["status", "end"])
         self._on_task_end()
 
-    def _on_completed(self, output: str) -> None:
+    def _on_completed(self) -> None:
         self.execution.status = Status.COMPLETED
         self.execution.end = timezone.now()
-        if self.execution.configuration.tool.output_format and self.report.is_file():
-            self.execution.output_file = self.report
-        self.execution.output_plain = output
         self.execution.hash = hash(
             " ".join(
                 [f"{k}={v}" for k, v in self.environment.items()]
                 + [a for a in self.arguments if str(self.report).lower() not in a.lower()]
             ).lower()
         )
-        self.execution.save(update_fields=["status", "end", "output_file", "output_plain", "hash"])
+        self.execution.save(update_fields=["status", "end", "hash"])
         self._on_task_end()
 
     def execute(
@@ -259,9 +271,9 @@ class BaseExecutor:
         self._on_start()
         self.execution.configuration.tool.update_status()
         if not self.execution.configuration.tool.is_installed:
-            message = f"[Tool] Tool {self.execution.configuration.tool.name} is not installed in the system. This execution has been skipped"
-            logger.error(message)
-            self._on_skip(message)
+            self._on_skip(
+                f"[Tool] Tool {self.execution.configuration.tool.name} is not installed in the system. This execution has been skipped"
+            )
             return
         try:
             self.arguments = self._get_arguments(
@@ -278,12 +290,13 @@ class BaseExecutor:
         self.environment = self._get_environment()
         self._before_running()
         try:
-            output = "" if CONFIG.testing else self._run(self.environment)
-        except (RuntimeError, Exception) as error:
+            if not CONFIG.testing:
+                self._run(self.environment)
+        except (RuntimeError, Exception):
             logger.error(f"[Tool] {self.execution.configuration.tool.name} execution finish with errors")
-            self._on_error(str(error))
+            self._on_error()
             self._after_running()
             return
         self._after_running()
-        self._on_completed(output)
+        self._on_completed()
         logger.info(f"[Tool] {self.execution.configuration.tool.name} execution has been completed")

@@ -1,5 +1,6 @@
-from executions.models import Execution
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
+
+from executions.models import Execution
 from tools.serializers import ConfigurationSerializer
 
 
@@ -14,7 +15,6 @@ class ExecutionSerializer(ModelSerializer):
             "task",
             "configuration",
             "output_plain",
-            "output_error",
             "skipped_reason",
             "has_report",
             "status",
