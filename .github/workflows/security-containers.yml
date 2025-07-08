@@ -36,9 +36,10 @@ jobs:
             # Docker image is very large and we need some extra GB to complete the build
             clean-disk: true
     name: ${{ matrix.name }}
-    run:
-      shell: bash
-      working-directory: /mnt
+    defaults:
+      run:
+        shell: bash
+        working-directory: /mnt
     steps:
       - name: Free disk space
         if: ${{ matrix.clean-disk == true }}
