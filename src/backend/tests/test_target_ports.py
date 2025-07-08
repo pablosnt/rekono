@@ -5,6 +5,8 @@ from target_ports.models import TargetPort
 from tests.cases import ApiTestCase
 from tests.framework import ApiTest
 
+# pytype: disable=wrong-arg-types
+
 target_port1 = {"target": 1, "port": 80, "path": "/webapp/"}
 target_port2 = {"target": 1, "port": 22}
 authentication = {
@@ -27,9 +29,7 @@ class TargetPortTest(ApiTest):
             200,
             expected=[],
         ),
-        ApiTestCase(
-            ["admin2", "auditor2", "reader1", "reader2"], "post", 403, target_port1
-        ),
+        ApiTestCase(["admin2", "auditor2", "reader1", "reader2"], "post", 403, target_port1),
         ApiTestCase(["admin1", "auditor1"], "post", 400, invalid_target_port1),
         ApiTestCase(["admin1", "auditor1"], "post", 400, invalid_target_port2),
         ApiTestCase(
@@ -54,9 +54,7 @@ class TargetPortTest(ApiTest):
             expected={"id": 1, "authentication": None, **target_port1},
             endpoint="{endpoint}1/",
         ),
-        ApiTestCase(
-            ["admin2", "auditor2", "reader2"], "get", 404, endpoint="{endpoint}1/"
-        ),
+        ApiTestCase(["admin2", "auditor2", "reader2"], "get", 404, endpoint="{endpoint}1/"),
         ApiTestCase(
             ["auditor1"],
             "post",
@@ -95,9 +93,7 @@ class TargetPortTest(ApiTest):
             },
             endpoint="{endpoint}2/",
         ),
-        ApiTestCase(
-            ["admin2", "auditor2", "reader2"], "get", 404, endpoint="{endpoint}2/"
-        ),
+        ApiTestCase(["admin2", "auditor2", "reader2"], "get", 404, endpoint="{endpoint}2/"),
         ApiTestCase(
             ["admin1", "auditor1", "reader1"],
             "get",

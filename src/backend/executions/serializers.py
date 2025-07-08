@@ -13,16 +13,30 @@ class ExecutionSerializer(ModelSerializer):
         fields = (
             "id",
             "task",
-            "group",
             "configuration",
             "output_plain",
-            "output_error",
             "skipped_reason",
             "has_report",
             "status",
             "start",
             "end",
+            "osint",
+            "host",
+            "port",
+            "path",
+            "technology",
+            "credential",
+            "vulnerability",
+            "exploit",
         )
 
     def get_has_report(self, instance: Execution) -> bool:
         return instance.output_file is not None
+
+
+class SimpleExecutionSerializer(ModelSerializer):
+    configuration = ConfigurationSerializer(many=False, read_only=True)
+
+    class Meta:
+        model = Execution
+        fields = ("id", "task", "configuration", "status", "start", "end")

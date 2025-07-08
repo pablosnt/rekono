@@ -3,6 +3,8 @@ from targets.models import Target
 from tests.cases import ApiTestCase
 from tests.framework import ApiTest
 
+# pytype: disable=wrong-arg-types
+
 target1 = {"project": 1, "target": "10.10.10.10"}
 target2 = {"project": 1, "target": "scanme.nmap.org"}
 target3 = {"project": 1, "target": "10.10.10.1-24"}
@@ -79,9 +81,7 @@ class TargetTest(ApiTest):
             endpoint="{endpoint}2/",
         ),
         ApiTestCase(["admin2", "auditor2", "reader2"], "get", 200, expected=[]),
-        ApiTestCase(
-            ["admin2", "auditor2", "reader2"], "get", 404, endpoint="{endpoint}1/"
-        ),
+        ApiTestCase(["admin2", "auditor2", "reader2"], "get", 404, endpoint="{endpoint}1/"),
         ApiTestCase(["reader1", "reader2"], "delete", 403, endpoint="{endpoint}1/"),
         ApiTestCase(["admin2", "auditor2"], "delete", 404, endpoint="{endpoint}1/"),
         ApiTestCase(["auditor1"], "delete", 204, endpoint="{endpoint}1/"),

@@ -1,5 +1,6 @@
-from alerts.models import Alert
 from django_filters.rest_framework import FilterSet
+
+from alerts.models import Alert
 
 
 class AlertFilter(FilterSet):
@@ -12,5 +13,5 @@ class AlertFilter(FilterSet):
             "value": ["exact", "icontains"],
             "enabled": ["exact"],
             "owner": ["exact"],
-            "suscribers": ["exact"],
+            "subscribers": ["exact"],
         }

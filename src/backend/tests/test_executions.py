@@ -4,6 +4,8 @@ from executions.enums import Status
 from tests.cases import ApiTestCase
 from tests.framework import ApiTest
 
+# pytype: disable=wrong-arg-types
+
 
 class ExecutionTest(ApiTest):
     endpoint = "/api/executions/"
@@ -30,7 +32,7 @@ class ExecutionTest(ApiTest):
                     "task": 1,
                     "configuration": {
                         "id": 19,
-                        "name": "All available sources",
+                        "name": "Simple scan",
                         "tool": {"id": 3, "name": "theHarvester"},
                     },
                     "status": Status.RUNNING.value,
@@ -40,16 +42,14 @@ class ExecutionTest(ApiTest):
                     "task": 1,
                     "configuration": {
                         "id": 19,
-                        "name": "All available sources",
+                        "name": "Simple scan",
                         "tool": {"id": 3, "name": "theHarvester"},
                     },
                     "status": Status.COMPLETED.value,
                 },
             ],
         ),
-        ApiTestCase(
-            ["admin2", "auditor2", "reader2"], "get", 404, endpoint="{endpoint}3/"
-        ),
+        ApiTestCase(["admin2", "auditor2", "reader2"], "get", 404, endpoint="{endpoint}3/"),
         ApiTestCase(
             ["admin1", "auditor1", "reader1"],
             "get",

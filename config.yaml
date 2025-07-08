@@ -5,7 +5,7 @@ database:
   port: 5432
   user: null
 frontend:
-  url: https://127.0.0.1
+  url: https://localhost
 rootpath: null
 rq:
   host: 127.0.0.1

@@ -1,5 +1,5 @@
 import re
-from typing import Any, List
+from typing import Any
 
 from libnmap.parser import NmapParser
 
@@ -16,14 +16,8 @@ class Nmap(BaseParser):
             if not nmap_host.is_up():
                 continue
             os_detection = nmap_host.os_match_probabilities()
-            selected_os = (
-                max(os_detection, key=lambda o: o.accuracy) if os_detection else None
-            )
-            selected_class = (
-                max(selected_os.osclasses, key=lambda c: c.accuracy)
-                if selected_os
-                else None
-            )
+            selected_os = max(os_detection, key=lambda o: o.accuracy) if os_detection else None
+            selected_class = max(selected_os.osclasses, key=lambda c: c.accuracy) if selected_os else None
             os_type = HostOS.OTHER
             if selected_class:
                 try:
@@ -31,7 +25,10 @@ class Nmap(BaseParser):
                 except KeyError:
                     pass
             host = self.create_finding(
-                Host, address=nmap_host.address, os=selected_os.name, os_type=os_type
+                Host,
+                ip=nmap_host.address,
+                os=selected_os.name if selected_os else None,
+                os_type=os_type,
             )
             for service in nmap_host.services:
                 port = self.create_finding(
@@ -43,10 +40,7 @@ class Nmap(BaseParser):
                     service=service.service,
                 )
                 technologies = []
-                if (
-                    "product" in service.service_dict
-                    and "version" in service.service_dict
-                ):
+                if "product" in service.service_dict and "version" in service.service_dict:
                     technology = self.create_finding(
                         Technology,
                         port=port,
@@ -59,20 +53,12 @@ class Nmap(BaseParser):
             if nmap_host.scripts_results:
                 self._parse_nse_scripts(nmap_host.scripts_results, technologies)
 
-    def _parse_nse_scripts(
-        self, results: Any, technologies: List[Technology] | Technology
-    ) -> None:
-        technology = (
-            technologies if isinstance(technologies, Technology) else technologies[0]
-        )
+    def _parse_nse_scripts(self, results: Any, technologies: list[Technology] | Technology) -> None:
+        technology = technologies if isinstance(technologies, Technology) else technologies[0]
         smb_technologies = (
             [technologies]
             if isinstance(technologies, Technology)
-            else [
-                t
-                for t in technologies
-                if t.port.service in ["microsoft-ds", "netbios-ssn"]
-            ]
+            else [t for t in technologies if t.port.service in ["microsoft-ds", "netbios-ssn"]]
         )
         smb_technology = smb_technologies[0] if smb_technologies else None
         for script in results:
@@ -99,7 +85,6 @@ class Nmap(BaseParser):
                         severity=Severity.CRITICAL,
                         # CWE-78: Improper Neutralization of Special Elements used in an OS Command ('OS Command Injection')
                         cwe="CWE-78",
-                        osvdb="OSVDB-69562",
                     )
                 case "ftp-vsftpd-backdoor":
                     self.create_finding(
@@ -152,7 +137,13 @@ class Nmap(BaseParser):
                         name="SAMBA Remote Code Execution from Writable Share",
                         cve="CVE-2017-7494",
                     )
-                case "smb2-vuln-uptime" | "smb-vuln-ms06-025" | "smb-vuln-ms07-029" | "smb-vuln-ms10-061" | "smb-vuln-ms17-010":
+                case (
+                    "smb2-vuln-uptime"
+                    | "smb-vuln-ms06-025"
+                    | "smb-vuln-ms07-029"
+                    | "smb-vuln-ms10-061"
+                    | "smb-vuln-ms17-010"
+                ):
                     self._parse_nse_vulners(script, smb_technology)
                 case "smb-enum-users":
                     for line in script.get("output").split("\n"):
@@ -174,10 +165,10 @@ class Nmap(BaseParser):
                                 port=smb_technology.port if smb_technology else None,
                                 path=path,
                                 extra_info=(
-                                    f'{fields.get("Comment") or ""} '
-                                    f'Type: {fields.get("Type")} '
+                                    f"{fields.get('Comment') or ''} "
+                                    f"Type: {fields.get('Type')} "
                                     f"Anonymous access: {anonymous} "
-                                    f'Current access: {fields.get("Current user access")}'
+                                    f"Current access: {fields.get('Current user access')}"
                                 ).strip(),
                                 type=PathType.SHARE,
                             )
@@ -187,15 +178,13 @@ class Nmap(BaseParser):
                                     technology=smb_technology,
                                     name="Anonymous SMB",
                                     description=f"Anonymous access is allowed to the SMB share {path}",
-                                    severity=Severity.CRITICAL
-                                    if "WRITE" in anonymous
-                                    else Severity.HIGH,
+                                    severity=(Severity.CRITICAL if "WRITE" in anonymous else Severity.HIGH),
                                     # CWE-287: Improper Authentication
                                     cwe="CWE-287",
                                 )
                 case "smb-protocols":
                     if smb_technology:
-                        smb_technology.description = f'Protocols: {", ".join([p.split("[dangerous", 1)[0].strip() for p in script.get("elements", {}).get("dialects", {}).get(None)])}'
+                        smb_technology.description = f"Protocols: {', '.join([p.split('[dangerous', 1)[0].strip() for p in script.get('elements', {}).get('dialects', {}).get(None)])}"
                         smb_technology.save(update_fields=["description"])
                 case _:
                     self._parse_nse_vulners(script, technology)
@@ -205,6 +194,4 @@ class Nmap(BaseParser):
         for cve in re.findall(Regex.CVE.value, script.get("output", "")):
             if cve not in cves:
                 cves.add(cve)
-                self.create_finding(
-                    Vulnerability, technology=technology, name=cve, cve=cve
-                )
+                self.create_finding(Vulnerability, technology=technology, name=cve, cve=cve)

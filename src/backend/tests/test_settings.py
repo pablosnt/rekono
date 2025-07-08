@@ -4,6 +4,8 @@ from settings.models import Settings
 from tests.cases import ApiTestCase
 from tests.framework import ApiTest
 
+# pytype: disable=wrong-arg-types
+
 settings = {
     "max_uploaded_file_mb": 512,
     "all_proxy": None,

@@ -1,5 +1,5 @@
 import base64
-from typing import Any, Dict, List
+from typing import Any
 from unittest import mock
 
 from authentications.enums import AuthenticationType
@@ -24,7 +24,7 @@ class ToolExecutorTest(RekonoTest):
         self.osint.save(update_fields=["data", "data_type"])
         self.executor = self.fake_tool.get_executor_class()(self.execution)
 
-    def _test_environment(self, expected: Dict[str, Any]) -> None:
+    def _test_environment(self, expected: dict[str, Any]) -> None:
         environment = self.executor._get_environment()
         for key, value in expected.items():
             self.assertIsNotNone(environment.get(key))
@@ -59,11 +59,11 @@ class ToolExecutorTest(RekonoTest):
     def _success_get_arguments(
         self,
         expected: str,
-        findings: List[Finding],
-        target_ports: List[TargetPort] = [],
-        input_vulnerabilities: List[InputVulnerability] = [],
-        input_technologies: List[InputTechnology] = [],
-        wordlists: List[Wordlist] = [],
+        findings: list[Finding],
+        target_ports: list[TargetPort] = [],
+        input_vulnerabilities: list[InputVulnerability] = [],
+        input_technologies: list[InputTechnology] = [],
+        wordlists: list[Wordlist] = [],
     ) -> None:
         arguments = self.executor._get_arguments(
             findings, target_ports, input_vulnerabilities, input_technologies, wordlists
@@ -110,9 +110,7 @@ class ToolExecutorTest(RekonoTest):
             [
                 self.host,
                 self.port,
-                self._create_finding(
-                    Port, {**self.raw_findings[Port], "port": 443}, self.execution
-                ),
+                self._create_finding(Port, {**self.raw_findings[Port], "port": 443}, self.execution),
                 self.technology,
                 self.vulnerability,
             ],
@@ -161,7 +159,5 @@ class ToolExecutorTest(RekonoTest):
     @mock.patch("framework.models.BaseInput._get_url", get_url)
     def test_get_arguments_missing_one_required_finding(self) -> None:
         self.assertFalse(
-            self.executor.check_arguments(
-                [self.osint, self.host, self.port, self.technology], [], [], [], []
-            )
+            self.executor.check_arguments([self.osint, self.host, self.port, self.technology], [], [], [], [])
         )

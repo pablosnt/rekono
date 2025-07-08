@@ -1,6 +1,5 @@
-from typing import Any, Dict
-
 from django.db import models
+
 from framework.enums import InputKeyword
 from framework.models import BaseInput
 from rekono.settings import AUTH_USER_MODEL
@@ -35,43 +34,30 @@ class HttpHeader(BaseInput):
     )
 
     filters = [BaseInput.Filter(type=str, field="key")]
+    parse_mapping = {InputKeyword.HEADERS: lambda instance: {instance.key: instance.value}}
+    project_field = "target__project"
 
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=["target", "user", "key"],
-                name="unique_http_headers_1",
-                condition=models.Q(user__isnull=False, target__isnull=False),
+                "key",
+                name="unique_http_headers",
+                condition=models.Q(user__isnull=True, target__isnull=True),
             ),
             models.UniqueConstraint(
-                fields=["user", "key"],
+                "user",
+                "key",
                 name="unique_http_headers_2",
                 condition=models.Q(target__isnull=True),
             ),
             models.UniqueConstraint(
-                fields=["target", "key"],
+                "target",
+                "key",
                 name="unique_http_headers_3",
                 condition=models.Q(user__isnull=True),
             ),
-            models.UniqueConstraint(
-                fields=["key"],
-                name="unique_http_headers_4",
-                condition=models.Q(user__isnull=True, target__isnull=True),
-            ),
         ]
-
-    def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
-        return {
-            InputKeyword.HEADERS.name.lower(): {
-                **accumulated.get(InputKeyword.HEADERS.name.lower(), {}),
-                self.key: self.value,
-            }
-        }
 
     def __str__(self) -> str:
         parent = self.target or self.user
         return f"{parent.__str__()} - {self.key}" if parent else self.key
-
-    @classmethod
-    def get_project_field(cls) -> str:
-        return "target__project"

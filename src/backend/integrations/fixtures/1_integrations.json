@@ -5,9 +5,10 @@
         "fields": {
             "key": "defectdojo",
             "name": "Defect-Dojo",
-            "description": "Vulnerability management platform to which Rekono findings will be imported when synchronization is enabled at project level",
+            "description": "Vulnerability management platform where Rekono will import findings when synchronization is enabled at project level",
             "enabled": true,
-            "reference": "https://www.defectdojo.com/"
+            "reference": "https://www.defectdojo.com/",
+            "icon": "https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/master/docs/static/favicons/apple-touch-icon.png"
         }
     },
     {
@@ -18,7 +19,8 @@
             "name": "NVD NIST",
             "description": "National Vulnerability Database from which Rekono will get CVE information to aggregate findings information",
             "enabled": true,
-            "reference": "https://nvd.nist.gov/"
+            "reference": "https://nvd.nist.gov/",
+            "icon": "https://nvd.nist.gov/site-media/images/favicons/favicon-32x32.png"
         }
     },
     {
@@ -27,9 +29,10 @@
         "fields": {
             "key": "hacktricks",
             "name": "HackTricks",
-            "description": "Wiki that includes an extensive documentation about hacking techniques and tricks, and whose resources will be added as findings references by Rekono",
+            "description": "Wiki that includes extensive documentation about hacking techniques and tricks, and whose resources will be linked by Rekono",
             "enabled": true,
-            "reference": "https://book.hacktricks.xyz/"
+            "reference": "https://book.hacktricks.xyz/",
+            "icon": "https://raw.githubusercontent.com/HackTricks-wiki/hacktricks/master/.gitbook/assets/HACKTRICKS-logo.svg"
         }
     },
     {
@@ -38,9 +41,10 @@
         "fields": {
             "key": "cvecrowd",
             "name": "CVE Crowd",
-            "description": "Platform that identifies the most trending CVEs at the moment based on their impact on social networks, and whose API will be used by Rekono to check if the CVEs detected on the targets are trending or not",
+            "description": "Platform that identifies the most trending CVEs at the moment based on their impact on social networks, and whose data will be used by Rekono to check if the CVEs detected on the targets are trending or not",
             "enabled": true,
-            "reference": "https://cvecrowd.com/"
+            "reference": "https://cvecrowd.com/",
+            "icon": "https://cvecrowd.com/icon-small-crowd.svg"
         }
     }
 ]

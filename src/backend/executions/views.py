@@ -1,16 +1,17 @@
 from django.http import FileResponse
 from drf_spectacular.utils import OpenApiResponse, extend_schema
+from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.request import Request
+from rest_framework.response import Response
+from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND
+
 from executions.enums import Status
 from executions.filters import ExecutionFilter
 from executions.models import Execution
 from executions.serializers import ExecutionSerializer
 from framework.views import BaseViewSet
 from rekono.settings import CONFIG
-from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.request import Request
-from rest_framework.response import Response
-from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND
 from security.authorization.permissions import (
     ProjectMemberPermission,
     RekonoModelPermission,
@@ -37,7 +38,6 @@ class ExecutionViewSet(BaseViewSet):
     ordering_fields = [
         "id",
         "task",
-        "group",
         "configuration",
         "configuration__tool",
         "creation",
@@ -58,9 +58,7 @@ class ExecutionViewSet(BaseViewSet):
     def download_report(self, request: Request, pk: str) -> FileResponse:
         execution = self.get_object()
         if execution.status != Status.COMPLETED:
-            return Response(
-                {"execution": "Execution is not completed"}, status=HTTP_400_BAD_REQUEST
-            )
+            return Response({"execution": "Execution is not completed"}, status=HTTP_400_BAD_REQUEST)
         path = CONFIG.reports / (execution.output_file or "")
         if not execution.output_file or not path.is_file():
             return Response(status=HTTP_404_NOT_FOUND)

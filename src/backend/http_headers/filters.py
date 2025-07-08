@@ -1,13 +1,12 @@
 from django_filters.filters import ModelChoiceFilter
 from django_filters.rest_framework import FilterSet
+
 from http_headers.models import HttpHeader
 from projects.models import Project
 
 
 class HttpHeaderFilter(FilterSet):
-    project = ModelChoiceFilter(
-        queryset=Project.objects.all(), field_name="target__project"
-    )
+    project = ModelChoiceFilter(queryset=Project.objects.all(), field_name="target__project")
 
     class Meta:
         model = HttpHeader

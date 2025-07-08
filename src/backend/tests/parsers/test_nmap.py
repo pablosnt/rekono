@@ -12,7 +12,7 @@ class NmapTest(ToolTest):
             [
                 {
                     "model": Host,
-                    "address": "10.10.10.10",
+                    "ip": "10.10.10.10",
                     "os": "Linux 3.2 - 4.9",
                     "os_type": HostOS.LINUX,
                 },
@@ -362,7 +362,7 @@ class NmapTest(ToolTest):
             [
                 {
                     "model": Host,
-                    "address": "10.10.10.10",
+                    "ip": "10.10.10.10",
                     "os": "Apple macOS 10.13 (High Sierra) - 10.15 (Catalina) or iOS 11.0 - 13.4 (Darwin 17.0.0 - 19.2.0)",
                     "os_type": HostOS.IOS,
                 },
@@ -394,7 +394,7 @@ class NmapTest(ToolTest):
             [
                 {
                     "model": Host,
-                    "address": "10.10.10.10",
+                    "ip": "10.10.10.10",
                     "os": "Apple macOS 10.13 (High Sierra) - 10.15 (Catalina) or iOS 11.0 - 13.4 (Darwin 17.0.0 - 19.2.0)",
                     "os_type": HostOS.IOS,
                 },
@@ -448,7 +448,7 @@ class NmapTest(ToolTest):
             [
                 {
                     "model": Host,
-                    "address": "10.10.10.10",
+                    "ip": "10.10.10.10",
                     "os": "Apple macOS 10.13 (High Sierra) - 10.15 (Catalina) or iOS 11.0 - 13.4 (Darwin 17.0.0 - 19.2.0)",
                     "os_type": HostOS.IOS,
                 },

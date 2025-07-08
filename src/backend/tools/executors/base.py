@@ -1,14 +1,16 @@
 import logging
 import os
 import re
-import subprocess  # nosec
+import subprocess
 import uuid
+from functools import cached_property
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
-from authentications.models import Authentication
 from django.forms.models import model_to_dict
 from django.utils import timezone
+
+from authentications.models import Authentication
 from executions.enums import Status
 from executions.models import Execution
 from findings.framework.models import Finding
@@ -18,6 +20,7 @@ from framework.models import BaseInput
 from http_headers.models import HttpHeader
 from parameters.models import InputTechnology, InputVulnerability
 from rekono.settings import CONFIG
+from security.cryptography.hashing import hash
 from settings.models import Settings
 from target_ports.models import TargetPort
 from tools.models import Intensity
@@ -30,89 +33,73 @@ class BaseExecutor:
     def __init__(self, execution: Execution) -> None:
         self.execution = execution
         self.intensity = (
-            Intensity.objects.filter(
-                tool=execution.configuration.tool, value__lte=execution.task.intensity
-            )
+            Intensity.objects.filter(tool=execution.configuration.tool, value__lte=execution.task.intensity)
             .order_by("-value")
             .first()
         )
-        self.report = (
-            CONFIG.reports
-            / f'{str(uuid.uuid4())}.{execution.configuration.tool.output_format or "txt"}'
-        )
-        self.arguments: List[str] = []
-        self.findings_used_in_execution: Dict[Any, BaseInput] = {}
-        self.authentication: Optional[Authentication] = None
+        self.report = CONFIG.reports / f"{str(uuid.uuid4())}.{execution.configuration.tool.output_format or 'txt'}"
+        self.arguments: list[str] = []
+        self.environment: dict[str, Any] = {}
+        self.findings_used_in_execution: dict[Any, BaseInput] = {}
+        self.authentication: Authentication | None = None
 
     def _get_arguments(
         self,
-        findings: List[Finding],
-        target_ports: List[TargetPort],
-        input_vulnerabilities: List[InputVulnerability],
-        input_technologies: List[InputTechnology],
-        wordlists: List[Wordlist],
-    ) -> List[str]:
+        findings: list[Finding],
+        target_ports: list[TargetPort],
+        input_vulnerabilities: list[InputVulnerability],
+        input_technologies: list[InputTechnology],
+        wordlists: list[Wordlist],
+    ) -> list[str]:
         parameters = {
             "script": (
-                Path(
-                    getattr(
-                        CONFIG,
-                        self.execution.configuration.tool.script_directory_property.lower(),
+                (
+                    Path(
+                        getattr(
+                            CONFIG,
+                            self.execution.configuration.tool.script_directory_property.lower(),
+                        )
                     )
+                    / self.execution.configuration.tool.script
                 )
-                / self.execution.configuration.tool.script
-            )
-            if self.execution.configuration.tool.script_directory_property
-            and self.execution.configuration.tool.script
-            else "",
+                if self.execution.configuration.tool.script_directory_property
+                and self.execution.configuration.tool.script
+                else ""
+            ),
             "command": self.execution.configuration.tool.command,
             "intensity": self.intensity.argument,
-            "output": self.report
-            if self.execution.configuration.tool.output_format
-            else "",
+            "output": (self.report if self.execution.configuration.tool.output_format else ""),
         }
         for argument in self.execution.configuration.tool.arguments.all():
             for argument_input in argument.inputs.all().order_by("order"):
                 input_model = argument_input.type.get_model_class()
                 input_fallback = argument_input.type.get_fallback_model_class()
-                parsed_data: Dict[str, Any] = {}
+                parsed_data: dict[str, Any] = {}
                 for base_input in (
                     findings
                     + list(wordlists)
                     + list(
                         Authentication.objects.filter(
                             target_port__target=self.execution.task.target,
-                            target_port__port__in=[
-                                p.port for p in findings if isinstance(p, Port)
-                            ],
+                            target_port__port__in=[p.port for p in findings if isinstance(p, Port)],
                         ).all()
                     )
                     + [self.execution.task.target]
                     + list(target_ports)
-                    + [p.authentication for p in target_ports]
+                    + [p.authentication for p in target_ports if hasattr(p, "authentication")]
                     + list(input_vulnerabilities)
                     + list(input_technologies)
-                    + list(
-                        HttpHeader.objects.filter(
-                            target__isnull=True, user__isnull=True
-                        ).all()
-                    )
+                    + list(HttpHeader.objects.filter(target__isnull=True, user__isnull=True).all())
                     + list(self.execution.task.executor.http_headers.all())
                     + list(self.execution.task.target.http_headers.all())
                 ):
-                    is_fallback = input_fallback and isinstance(
-                        base_input, input_fallback
-                    )
+                    is_fallback = input_fallback and isinstance(base_input, input_fallback)
                     if is_fallback and parsed_data:
                         break
                     is_model = input_model and isinstance(base_input, input_model)
-                    if (is_model or is_fallback) and base_input.filter(
-                        argument_input, self.execution.task.target
-                    ):
+                    if (is_model or is_fallback) and base_input.filter(argument_input, self.execution.task.target):
                         parsed_data = base_input.parse(parsed_data)
-                        self.findings_used_in_execution[
-                            base_input.__class__
-                        ] = base_input
+                        self.findings_used_in_execution[base_input.__class__] = base_input
                         if isinstance(base_input, Authentication):
                             self.authentication = base_input
                         if not argument.multiple:
@@ -129,9 +116,7 @@ class BaseExecutor:
                                     InputKeyword.HEADER_VALUE.name.lower(): v,
                                 }
                             )
-                            for k, v in parsed_data.get(
-                                InputKeyword.HEADERS.name.lower(), {}
-                            ).items()
+                            for k, v in parsed_data.get(InputKeyword.HEADERS.name.lower(), {}).items()
                         ]
                     )
                 else:
@@ -139,9 +124,7 @@ class BaseExecutor:
             elif not argument.required:
                 parameters[argument.name] = ""
             else:
-                raise RuntimeError(
-                    f"Argument '{argument.name}' is required to execute tool '{argument.tool.name}'"
-                )
+                raise RuntimeError(f"Argument '{argument.name}' is required to execute tool '{argument.tool.name}'")
         return [
             a.replace('"', "")
             for a in re.findall(
@@ -152,11 +135,11 @@ class BaseExecutor:
 
     def check_arguments(
         self,
-        findings: List[Finding],
-        target_ports: List[TargetPort],
-        input_vulnerabilities: List[InputVulnerability],
-        input_technologies: List[InputTechnology],
-        wordlists: List[Wordlist],
+        findings: list[Finding],
+        target_ports: list[TargetPort],
+        input_vulnerabilities: list[InputVulnerability],
+        input_technologies: list[InputTechnology],
+        wordlists: list[Wordlist],
     ) -> bool:
         try:
             self._get_arguments(
@@ -170,7 +153,7 @@ class BaseExecutor:
         except RuntimeError:
             return False
 
-    def _get_environment(self) -> Dict[str, Any]:
+    def _get_environment(self) -> dict[str, Any]:
         environment = os.environ.copy()
         if self.execution.configuration.tool.command not in self.arguments:
             self.arguments.insert(0, self.execution.configuration.tool.command)
@@ -179,9 +162,7 @@ class BaseExecutor:
             for definition in self.arguments[:index]:
                 if "=" in definition:
                     variable, value = definition.split("=", 1)
-                    environment[variable] = (
-                        value.strip().replace("'", "").replace('"', "")
-                    )
+                    environment[variable] = value.strip().replace("'", "").replace('"', "")
             self.arguments = self.arguments[index:]
         settings = Settings.objects.first()
         for proxy in model_to_dict(Settings).keys():
@@ -192,31 +173,56 @@ class BaseExecutor:
     def _before_running(self) -> None:
         pass
 
-    def _run(self, environment: Dict[str, Any] = os.environ.copy()) -> str:
-        logger.info(f"[Tool] Running: {' '.join(self.arguments)}")
-        process = subprocess.run(  # nosec
-            self.arguments,
-            capture_output=True,
-            env=environment,
-            cwd=getattr(
-                CONFIG, self.execution.configuration.tool.run_directory_property.lower()
-            )
+    @cached_property
+    def _execution_directory(self) -> Path | None:
+        return (
+            getattr(CONFIG, self.execution.configuration.tool.run_directory_property.lower())
             if self.execution.configuration.tool.run_directory_property
-            else None,
+            else None
         )
-        if (
-            not self.execution.configuration.tool.ignore_exit_code
-            and process.returncode > 0
-        ):
-            raise RuntimeError(process.stderr.decode("utf-8"))
-        return process.stdout.decode("utf-8")
+
+    def _run(self, environment: dict[str, Any] = os.environ.copy()) -> None:
+        logger.info(f"[Tool] Running: {' '.join(self.arguments)}")
+        stdout = (
+            self.report
+            if self.execution.configuration.tool.output_format
+            and not any([arg for arg in self.arguments if str(self.report) in arg])
+            else None
+        )
+        if stdout:
+            with self.report.open("w") as _stdout:
+                process = subprocess.run(self.arguments, stdout=_stdout, env=environment, cwd=self._execution_directory)
+            output = ""
+            if self.report.is_file():
+                with self.report.open("r") as _output:
+                    output = _output.read()
+        else:
+            process = subprocess.run(
+                self.arguments,
+                env=environment,
+                cwd=self._execution_directory,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+            )
+            output = process.stdout
+        if self.execution.configuration.tool.output_format and self.report.is_file():
+            self.execution.output_file = self.report
+        # Remove ANSI colors from tool outputs
+        self.execution.output_plain = re.sub(r"(\x9B|\x1B\[)[\d]*[ -\/]*[@-~]", "", output, flags=re.IGNORECASE)
+        self.execution.save(update_fields=["output_plain", "output_file"])
+        if not self.execution.configuration.tool.ignore_exit_code and process.returncode > 0:
+            self._on_error()
+        else:
+            self._on_completed()
 
     def _after_running(self) -> None:
         pass
 
     def _on_start(self) -> None:
+        self.execution.status = Status.RUNNING
         self.execution.start = timezone.now()
-        self.execution.save(update_fields=["start"])
+        self.execution.save(update_fields=["start", "status"])
         if not self.execution.task.start:
             self.execution.task.start = timezone.now()
             self.execution.task.save(update_fields=["start"])
@@ -236,39 +242,38 @@ class BaseExecutor:
         self.execution.save(update_fields=["status", "end", "skipped_reason"])
         self._on_task_end()
 
-    def _on_error(self, error: str) -> None:
-        if error:
-            self.execution.output_error = error
+    def _on_error(self) -> None:
         self.execution.status = Status.ERROR
         self.execution.end = timezone.now()
-        self.execution.save(update_fields=["output_error", "status", "end"])
+        self.execution.save(update_fields=["status", "end"])
         self._on_task_end()
 
-    def _on_completed(self, output: str) -> None:
+    def _on_completed(self) -> None:
         self.execution.status = Status.COMPLETED
         self.execution.end = timezone.now()
-        if self.execution.configuration.tool.output_format and self.report.is_file():
-            self.execution.output_file = self.report
-        self.execution.output_plain = output
-        self.execution.save(
-            update_fields=["status", "end", "output_file", "output_plain"]
+        self.execution.hash = hash(
+            " ".join(
+                [f"{k}={v}" for k, v in self.environment.items()]
+                + [a for a in self.arguments if str(self.report).lower() not in a.lower()]
+            ).lower()
         )
+        self.execution.save(update_fields=["status", "end", "hash"])
         self._on_task_end()
 
     def execute(
         self,
-        findings: List[Finding],
-        target_ports: List[TargetPort],
-        input_vulnerabilities: List[InputVulnerability],
-        input_technologies: List[InputTechnology],
-        wordlists: List[Wordlist],
+        findings: list[Finding],
+        target_ports: list[TargetPort],
+        input_vulnerabilities: list[InputVulnerability],
+        input_technologies: list[InputTechnology],
+        wordlists: list[Wordlist],
     ) -> None:
         self._on_start()
         self.execution.configuration.tool.update_status()
         if not self.execution.configuration.tool.is_installed:
-            message = f"[Tool] Tool {self.execution.configuration.tool.name} is not installed in the system. This execution has been skipped"
-            logger.error(message)
-            self._on_skip(message)
+            self._on_skip(
+                f"[Tool] Tool {self.execution.configuration.tool.name} is not installed in the system. This execution has been skipped"
+            )
             return
         try:
             self.arguments = self._get_arguments(
@@ -282,19 +287,16 @@ class BaseExecutor:
             logger.error(f"[Tool] {str(error)}")
             self._on_skip(str(error))
             return
-        environment = self._get_environment()
+        self.environment = self._get_environment()
         self._before_running()
         try:
-            output = "" if CONFIG.testing else self._run(environment)
-        except (RuntimeError, Exception) as error:
-            logger.error(
-                f"[Tool] {self.execution.configuration.tool.name} execution finish with errors"
-            )
-            self._on_error(str(error))
+            if not CONFIG.testing:
+                self._run(self.environment)
+        except (RuntimeError, Exception):
+            logger.error(f"[Tool] {self.execution.configuration.tool.name} execution finish with errors")
+            self._on_error()
             self._after_running()
             return
         self._after_running()
-        self._on_completed(output)
-        logger.info(
-            f"[Tool] {self.execution.configuration.tool.name} execution has been completed"
-        )
+        self._on_completed()
+        logger.info(f"[Tool] {self.execution.configuration.tool.name} execution has been completed")

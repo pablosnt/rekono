@@ -1,4 +1,4 @@
-from typing import Any, Callable, List
+from typing import Any, Callable
 
 from telegram import Update
 from telegram.ext import (
@@ -32,7 +32,7 @@ from platforms.telegram_app.bot.mixins.wordlists import WordlistMixin
 
 
 class BaseConversation(ConversationHandler, BaseTelegramBot):
-    _states_methods: List[Callable] = []
+    _states_methods: list[Callable] = []
     first_state = 0
 
     def __init__(self, **kwargs: Any) -> None:
@@ -40,9 +40,11 @@ class BaseConversation(ConversationHandler, BaseTelegramBot):
             entry_points=[CommandHandler(self.get_name(), self._save_command_name)],
             states={
                 index: [
-                    MessageHandler(filters.TEXT, state_method)
-                    if state_method.__name__.startswith("_create_")
-                    else CallbackQueryHandler(state_method)
+                    (
+                        MessageHandler(filters.TEXT, state_method)
+                        if state_method.__name__.startswith("_create_")
+                        else CallbackQueryHandler(state_method)
+                    )
                 ]
                 for index, state_method in enumerate(self._states_methods)
             },
@@ -68,9 +70,7 @@ class BaseConversationFromProject(BaseConversation, ProjectMixin):
         return (
             await super()._ask_for_project(update, context)
             if not self._get_context_value(context, Context.PROJECT)
-            else await self._go_to_next_state(
-                update, context, self._get_next_state(self._save_project)
-            )
+            else await self._go_to_next_state(update, context, self._get_next_state(self._save_project))
         )
 
 
@@ -88,9 +88,7 @@ class NewTarget(BaseConversationFromProject, TargetMixin):
         super().__init__(**kwargs)
 
 
-class NewPort(
-    BaseConversationFromProject, TargetMixin, TargetPortMixin, AuthenticationMixin
-):
+class NewPort(BaseConversationFromProject, TargetMixin, TargetPortMixin, AuthenticationMixin):
     help = "Create new target port"
     section = Section.TARGETS
 
@@ -111,40 +109,6 @@ class NewPort(
         super().__init__(**kwargs)
 
 
-class NewTechnology(BaseConversationFromProject, TargetMixin, InputTechnologyMixin):
-    help = "Create new input technology"
-    section = Section.TARGETS
-
-    def __init__(self, **kwargs: Any) -> None:
-        self._states_methods = [
-            self._ask_for_project,
-            self._save_project,
-            self._ask_for_target,
-            self._save_target,
-            self._ask_for_new_technology,
-            self._create_input_technology,
-        ]
-        super().__init__(**kwargs)
-
-
-class NewVulnerability(
-    BaseConversationFromProject, TargetMixin, InputVulnerabilityMixin
-):
-    help = "Create new input vulnerability"
-    section = Section.TARGETS
-
-    def __init__(self, **kwargs: Any) -> None:
-        self._states_methods = [
-            self._ask_for_project,
-            self._save_project,
-            self._ask_for_target,
-            self._save_target,
-            self._ask_for_new_vulnerability,
-            self._create_input_vulnerability,
-        ]
-        super().__init__(**kwargs)
-
-
 class Tool(
     BaseConversationFromProject,
     TargetMixin,
@@ -152,6 +116,8 @@ class Tool(
     ConfigurationMixin,
     IntensityMixin,
     WordlistMixin,
+    InputTechnologyMixin,
+    InputVulnerabilityMixin,
     TaskMixin,
 ):
     help = "Execute a tool"
@@ -171,6 +137,12 @@ class Tool(
             self._save_intensity,
             self._ask_for_wordlist,
             self._save_wordlist,
+            self._ask_for_input_technology,
+            self._save_input_technology,
+            self._create_input_technology,
+            self._ask_for_input_vulnerability,
+            self._save_input_vulnerability,
+            self._create_input_vulnerability,
             self._ask_for_task_confirmation,
             self._new_task,
         ]

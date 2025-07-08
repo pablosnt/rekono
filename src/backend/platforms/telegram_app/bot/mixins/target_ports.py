@@ -8,9 +8,7 @@ from target_ports.serializers import TargetPortSerializer
 
 
 class TargetPortMixin(BaseMixin):
-    async def _ask_for_new_target_port(
-        self, update: Update, context: CallbackContext
-    ) -> int:
+    async def _ask_for_new_target_port(self, update: Update, context: CallbackContext) -> int:
         return await self._go_to_next_state(
             update,
             context,
@@ -22,9 +20,7 @@ class TargetPortMixin(BaseMixin):
             ),
         )
 
-    async def _create_target_port(
-        self, update: Update, context: CallbackContext
-    ) -> int:
+    async def _create_target_port(self, update: Update, context: CallbackContext) -> int | None:
         if not update.effective_message or not update.effective_message.text:
             return ConversationHandler.END
         if update.effective_message.text.lower() == "/cancel":
@@ -33,9 +29,7 @@ class TargetPortMixin(BaseMixin):
             port = int(update.effective_message.text)
         except ValueError:
             self._reply(update, "Port must be a valid number")
-            return await self._go_to_next_state(
-                update, context, self._get_previous_state(self._create_target_port)
-            )
+            return await self._go_to_next_state(update, context, self._get_previous_state(self._create_target_port))
         target = self._get_context_value(context, Context.TARGET)
         next_state, instance = await self._create(
             update,
@@ -61,6 +55,4 @@ class TargetPortMixin(BaseMixin):
                 f"New target port *{target_port.port}* has been created in target *{self._escape(target_port.target.target)}*",
             )
         self._remove_all_context_values(context)
-        return await self._go_to_next_state(
-            update, context, self._get_next_state(self._reply_summary)
-        )
+        return await self._go_to_next_state(update, context, self._get_next_state(self._reply_summary))

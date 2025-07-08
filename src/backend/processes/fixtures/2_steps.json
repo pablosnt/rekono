@@ -89,14 +89,6 @@
     },
     {
         "model": "processes.step",
-        "pk": 12,
-        "fields": {
-            "process": 1,
-            "configuration": 29
-        }
-    },
-    {
-        "model": "processes.step",
         "pk": 13,
         "fields": {
             "process": 1,
@@ -124,7 +116,7 @@
         "pk": 16,
         "fields": {
             "process": 1,
-            "configuration": 36
+            "configuration": 35
         }
     },
     {
@@ -205,14 +197,6 @@
         "fields": {
             "process": 2,
             "configuration": 28
-        }
-    },
-    {
-        "model": "processes.step",
-        "pk": 27,
-        "fields": {
-            "process": 2,
-            "configuration": 29
         }
     },
     {
@@ -325,14 +309,6 @@
         "fields": {
             "process": 5,
             "configuration": 37
-        }
-    },
-    {
-        "model": "processes.step",
-        "pk": 42,
-        "fields": {
-            "process": 5,
-            "configuration": 36
         }
     },
     {
@@ -457,14 +433,6 @@
     },
     {
         "model": "processes.step",
-        "pk": 58,
-        "fields": {
-            "process": 7,
-            "configuration": 29
-        }
-    },
-    {
-        "model": "processes.step",
         "pk": 59,
         "fields": {
             "process": 7,
@@ -492,7 +460,7 @@
         "pk": 62,
         "fields": {
             "process": 7,
-            "configuration": 36
+            "configuration": 35
         }
     },
     {

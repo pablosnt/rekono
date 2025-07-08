@@ -1,12 +1,13 @@
 from typing import Any
 
 from drf_spectacular.utils import extend_schema
-from framework.views import BaseViewSet
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
+
+from framework.views import BaseViewSet
 from security.authorization.permissions import (
     ProjectMemberPermission,
     RekonoModelPermission,
@@ -46,9 +47,7 @@ class FindingViewSet(BaseViewSet):
             else:
                 finding.__class__.objects.remove_fix(finding, request.user)
         if bad_request:
-            return Response(
-                {"finding": bad_request}, status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({"finding": bad_request}, status=status.HTTP_400_BAD_REQUEST)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 

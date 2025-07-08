@@ -27,9 +27,7 @@ from platforms.telegram_app.bot.conversations import (
 from platforms.telegram_app.framework import BaseTelegram
 from platforms.telegram_app.models import TelegramSettings
 
-filterwarnings(
-    action="ignore", message=r".*CallbackQueryHandler", category=PTBUserWarning
-)
+filterwarnings(action="ignore", message=r".*CallbackQueryHandler", category=PTBUserWarning)
 
 logger = logging.getLogger()
 
@@ -65,9 +63,7 @@ class TelegramBot(BaseTelegram):
         first_iteration = True
         while not self.settings or not self.settings.secret:
             if first_iteration:
-                logger.info(
-                    "[Telegram Bot] Waiting while Telegram token is not configured"
-                )
+                logger.info("[Telegram Bot] Waiting while Telegram token is not configured")
                 first_iteration = False
             time.sleep(sleep_time)
             self.settings = TelegramSettings.objects.first()

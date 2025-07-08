@@ -1,7 +1,8 @@
 from typing import Any
 
-from alerts.queues import MonitorQueue
 from django.core.management.base import BaseCommand
+
+from alerts.queues import MonitorQueue
 
 
 class Command(BaseCommand):

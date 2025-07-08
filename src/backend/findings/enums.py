@@ -1,21 +1,26 @@
+from typing import Any
+
 from django.db import models
+from django.db.models.enums import Choices
 
 
-class Severity(models.TextChoices):
-    INFO = "Info"
-    LOW = "Low"
-    MEDIUM = "Medium"
-    HIGH = "High"
-    CRITICAL = "Critical"
+class Severity(models.IntegerChoices):
+    INFO = 1
+    LOW = 2
+    MEDIUM = 3
+    HIGH = 4
+    CRITICAL = 5
+
+    def __str__(self) -> Any:
+        return self.name.capitalize()
 
 
 class OSINTDataType(models.TextChoices):
     IP = "IP"
     DOMAIN = "Domain"
     VHOST = "VHOST"
-    URL = "Url"
+    URL = "URL"
     EMAIL = "Email"
-    LINK = "Link"
     ASN = "ASN"
     USER = "Username"
     PASSWORD = "Password"
@@ -54,3 +59,12 @@ class TriageStatus(models.TextChoices):
     TRUE_POSITIVE = "True Positive"
     WONT_FIX = "Won't Fix"
     UNTRIAGED = "Untriaged"
+
+
+# https://github.com/google/pytype/issues/1048
+Severity: type[Choices] = Severity
+OSINTDataType: type[Choices] = OSINTDataType
+HostOS: type[Choices] = HostOS
+PortStatus: type[Choices] = PortStatus
+Protocol: type[Choices] = Protocol
+TriageStatus: type[Choices] = TriageStatus

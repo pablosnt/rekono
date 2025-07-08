@@ -1,11 +1,12 @@
-from framework.fields import ProtectedSecretField
-from platforms.cvecrowd.integrations import CVECrowd
-from platforms.cvecrowd.models import CVECrowdSettings
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
+
+from framework.fields import ProtectedSecretField
+from platforms.cvecrowd.integrations import CveCrowd
+from platforms.cvecrowd.models import CveCrowdSettings
 from security.validators.input_validator import Regex, Validator
 
 
-class CVECrowdSettingsSerializer(ModelSerializer):
+class CveCrowdSettingsSerializer(ModelSerializer):
     api_token = ProtectedSecretField(
         validators=[Validator(Regex.SECRET.value, code="api_token")],
         required=False,
@@ -15,7 +16,7 @@ class CVECrowdSettingsSerializer(ModelSerializer):
     is_available = SerializerMethodField(read_only=True)
 
     class Meta:
-        model = CVECrowdSettings
+        model = CveCrowdSettings
         fields = (
             "id",
             "trending_span_days",
@@ -24,5 +25,5 @@ class CVECrowdSettingsSerializer(ModelSerializer):
             "is_available",
         )
 
-    def get_is_available(self, instance: CVECrowdSettings) -> bool:
-        return CVECrowd().is_available()
+    def get_is_available(self, instance: CveCrowdSettings) -> bool:
+        return CveCrowd().is_available()

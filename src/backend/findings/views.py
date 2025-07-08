@@ -1,4 +1,9 @@
 from drf_spectacular.utils import extend_schema
+from rest_framework import status
+from rest_framework.decorators import action
+from rest_framework.request import Request
+from rest_framework.response import Response
+
 from findings.enums import OSINTDataType
 from findings.filters import (
     CredentialFilter,
@@ -31,10 +36,6 @@ from findings.serializers import (
     TechnologySerializer,
     VulnerabilitySerializer,
 )
-from rest_framework import status
-from rest_framework.decorators import action
-from rest_framework.request import Request
-from rest_framework.response import Response
 from targets.serializers import TargetSerializer
 
 # Create your views here.
@@ -65,12 +66,16 @@ class OSINTViewSet(TriageFindingViewSet):
             OSINTDataType.DOMAIN,
         ]:
             serializer = TargetSerializer(
-                data={"project": osint.get_project().id, "target": osint.data}
+                data={"project": osint.get_project().id, "target": osint.data},
+                context={"request": request},
             )
             serializer.is_valid(raise_exception=True)
-            target = serializer.create(serializer.validated_data)
             return Response(
-                TargetSerializer(target).data, status=status.HTTP_201_CREATED
+                TargetSerializer(
+                    instance=serializer.create(serializer.validated_data),
+                    context={"request": request},
+                ).data,
+                status=status.HTTP_201_CREATED,
             )
         return Response(
             {"data_type": "Target creation is not available for this OSINT data type"},
@@ -82,8 +87,8 @@ class HostViewSet(FindingViewSet):
     queryset = Host.objects.all()
     serializer_class = HostSerializer
     filterset_class = HostFilter
-    search_fields = ["address", "os"]
-    ordering_fields = ["id", "address", "os_type"]
+    search_fields = ["ip", "domain", "os", "country", "city"]
+    ordering_fields = ["id", "ip", "domain", "os_type", "country"]
 
 
 class PortViewSet(FindingViewSet):
@@ -122,17 +127,8 @@ class VulnerabilityViewSet(TriageFindingViewSet):
     queryset = Vulnerability.objects.all()
     serializer_class = VulnerabilitySerializer
     filterset_class = VulnerabilityFilter
-    search_fields = ["name", "description", "cve", "cwe", "osvdb"]
-    ordering_fields = [
-        "id",
-        "technology",
-        "port",
-        "name",
-        "severity",
-        "cve",
-        "cwe",
-        "osvdb",
-    ]
+    search_fields = ["name", "description", "cve", "cwe"]
+    ordering_fields = ["id", "technology", "port", "name", "severity", "cve", "cwe"]
 
 
 class ExploitViewSet(TriageFindingViewSet):

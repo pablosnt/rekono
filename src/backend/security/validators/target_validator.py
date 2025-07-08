@@ -5,7 +5,8 @@ from typing import Any
 
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
-from target_blacklist.models import TargetBlacklist
+
+from target_denylist.models import TargetDenylist
 
 
 class TargetValidator(RegexValidator):
@@ -23,17 +24,15 @@ class TargetValidator(RegexValidator):
     def __call__(self, value: str | None) -> None:
         super().__call__(value)
         if not value:
-            raise ValidationError(
-                "Target is required", code=self.code, params={"value": value}
-            )
-        blacklist = TargetBlacklist.objects.all().values_list("target", flat=True)
-        if value in blacklist:
+            raise ValidationError("Target is required", code=self.code, params={"value": value})
+        denylist = TargetDenylist.objects.all().values_list("target", flat=True)
+        if value in denylist:
             raise ValidationError(
                 "Target is disallowed by policy",
                 code=self.code,
                 params={"value": value},
             )
-        for denied_value in blacklist:
+        for denied_value in denylist:
             try:
                 match = re.fullmatch(denied_value, value)
             except Exception:
@@ -49,7 +48,7 @@ class TargetValidator(RegexValidator):
                 (ipaddress.IPv6Address, ipaddress.IPv6Network),
             ]:
                 try:
-                    if address_class(value) in network_class(denied_value):  # type: ignore
+                    if address_class(value) in network_class(denied_value):
                         raise ValidationError(
                             "Target belongs to a network that is disallowed by policy",
                             code="target",

@@ -44,7 +44,7 @@ _Source_        {source}
     Host: {
         "icon": "🖥",
         "template": """
-_Address_   *{address}*
+_Address_   *{ip}*
 _OS_        {os}
 _OS type_   {os_type}
 """,
@@ -111,6 +111,6 @@ _Reference_         {reference}
 
 ALERTS = {
     AlertMode.NEW.value: "[ALERT] New {finding} detected",
-    AlertMode.FILTER.value: "[ALERT] New {finding} matches the criteria",
+    AlertMode.FILTER.value: "[ALERT] New {finding} matches the criterion",
     AlertMode.MONITOR.value: "[ALERT] New trending CVE 🔥",
 }

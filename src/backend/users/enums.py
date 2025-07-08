@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models.enums import Choices
 
 
 class Notification(models.TextChoices):
@@ -9,3 +10,6 @@ class Notification(models.TextChoices):
     MY_EXECUTIONS = "Only my executions"
     # Notifications with all executions made in user projects
     ALL_EXECUTIONS = "All executions"
+
+
+Notification: type[Choices] = Notification  # https://github.com/google/pytype/issues/1048

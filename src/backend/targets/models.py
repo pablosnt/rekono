@@ -2,7 +2,6 @@ import ipaddress
 import logging
 import re
 import socket
-from typing import Any, Dict
 
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -20,20 +19,20 @@ logger = logging.getLogger()
 
 
 class Target(BaseInput):
-    project = models.ForeignKey(
-        Project, related_name="targets", on_delete=models.CASCADE
-    )
-    target = models.TextField(
-        max_length=100, validators=[TargetValidator(Regex.TARGET.value)]
-    )
+    project = models.ForeignKey(Project, related_name="targets", on_delete=models.CASCADE)
+    target = models.TextField(max_length=100, validators=[TargetValidator(Regex.TARGET.value)])
     type = models.TextField(max_length=10, choices=TargetType.choices)
 
     filters = [BaseInput.Filter(type=TargetType, field="type")]
+    parse_mapping = {
+        InputKeyword.TARGET: "target",
+        InputKeyword.HOST: "target",
+        InputKeyword.URL: lambda instance: instance._get_url(instance.target),
+    }
+    project_field = "project"
 
     class Meta:
-        constraints = [
-            models.UniqueConstraint(fields=["project", "target"], name="unique_target")
-        ]
+        constraints = [models.UniqueConstraint(fields=["project", "target"], name="unique_target")]
 
     @staticmethod
     def get_type(target: str) -> str:
@@ -78,21 +77,6 @@ class Target(BaseInput):
             params={"value": target},
         )
 
-    def parse(self, accumulated: Dict[str, Any] = {}) -> Dict[str, Any]:
-        """Get useful information from this instance to be used in tool execution as argument.
-
-        Args:
-            accumulated (Dict[str, Any], optional): Information from other instances of the same type. Defaults to {}.
-
-        Returns:
-            Dict[str, Any]: Useful information for tool executions, including accumulated if setted
-        """
-        return {
-            InputKeyword.TARGET.name.lower(): self.target,
-            InputKeyword.HOST.name.lower(): self.target,
-            InputKeyword.URL.name.lower(): self._get_url(self.target),
-        }
-
     def __str__(self) -> str:
         """Instance representation in text format.
 
@@ -100,7 +84,3 @@ class Target(BaseInput):
             str: String value that identifies this instance
         """
         return self.target
-
-    @classmethod
-    def get_project_field(cls) -> str:
-        return "project"

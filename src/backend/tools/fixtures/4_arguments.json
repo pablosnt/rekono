@@ -115,8 +115,8 @@
         "fields": {
             "tool": 9,
             "name": "technology",
-            "argument": "-c {technology} {version}",
-            "required": true,
+            "argument": "{technology} {version}",
+            "required": false,
             "multiple": false
         }
     },
@@ -148,7 +148,7 @@
         "fields": {
             "tool": 12,
             "name": "target",
-            "argument": "-d {target}",
+            "argument": "--domain {target}",
             "required": true,
             "multiple": false
         }
@@ -336,7 +336,7 @@
             "tool": 18,
             "name": "authentication",
             "argument": "-header 'Authorization:{credential_type} {token}'",
-            "required": true,
+            "required": false,
             "multiple": false
         }
     },
@@ -503,6 +503,17 @@
             "argument": "--headers '{header_key}: {header_value}'",
             "required": false,
             "multiple": true
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 47,
+        "fields": {
+            "tool": 9,
+            "name": "cve",
+            "argument": "--cve {cve}",
+            "required": false,
+            "multiple": false
         }
     }
 ]
