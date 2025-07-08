@@ -41,7 +41,7 @@ services:
   initializer:
     restart: 'no'
     image: pablosnt/rekono-worker:unstable
-    command: uv run --no-dev python -c "import os; os.system('uv run --no-dev manage.py migrate'); os.system('uv run --no-dev manage.py createsuperuser --no-input')"
+    command: bash /entrypoints/initilizer.sh
     container_name: initializer
     volumes:
       - rekono:/rekono
@@ -82,7 +82,7 @@ services:
   executions-worker:
     restart: always
     image: pablosnt/rekono-worker:unstable
-    command: uv run --no-dev manage.py rqworker executions
+    command: bash /entrypoints/executions-worker.sh
     hostname: executions-worker
     volumes:
       - rekono:/rekono

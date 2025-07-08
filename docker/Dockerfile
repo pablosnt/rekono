@@ -162,13 +162,21 @@ RUN apt update && \
     git clone https://github.com/internetwache/GitTools.git /opt/GitTools && \
     uv pip install -r /opt/log4j-scan/requirements.txt && \
     uv pip install -r /opt/spring4shell-scan/requirements.txt && \
-    # Update tool resources
-    nuclei -update-templates && \
-    searchsploit --update || true && \
+    # Initializer script
+    mkdir -p /entrypoints && \
+    echo "uv run --no-dev manage.py migrate" > /entrypoints/initilizer.sh && \
+    echo "uv run --no-dev manage.py createsuperuser --no-input" >> /entrypoints/initilizer.sh && \
+    chmod +x /entrypoints/initilizer.sh && \
+    # Executions worker script
+    echo "nuclei -update-templates" > /entrypoints/executions-worker.sh && \
+    echo "searchsploit --update || true" >> /entrypoints/executions-worker.sh && \
+    echo "uv run --no-dev manage.py rqworker executions" >> /entrypoints/executions-worker.sh && \
+    chmod +x /entrypoints/executions-worker.sh && \
     # Rootless user
     useradd --uid 65532 --create-home rekono && \
     chown -R rekono:rekono /opt && \
     chown -R rekono:rekono /code && \
+    chown -R rekono:rekono /entrypoints && \
     chown -R rekono:rekono /usr/share/cmseek && \
     chown -R rekono:rekono /usr/share/seclists && \
     chown -R rekono:rekono /usr/share/dirb/wordlists
