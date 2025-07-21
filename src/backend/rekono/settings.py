@@ -224,7 +224,7 @@ REST_FRAMEWORK: dict[str, Any] = {
         "security.authorization.permissions.ProjectMemberPermission",
         "security.authorization.permissions.OwnerPermission",
     ],
-    "EXCEPTION_HANDLER": "framework.exceptions.exceptions_handler",
+    "EXCEPTION_HANDLER": "framework.exceptions.handler",
 }
 if not CONFIG.testing:
     # Rate limit only for production
