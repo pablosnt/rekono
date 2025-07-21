@@ -1,26 +1,15 @@
 from typing import Any
 
 from django.db.models import Q, QuerySet
-from django_filters.rest_framework import FilterSet, filters
+from django_filters.rest_framework import FilterSet
+from django_filters.rest_framework.filters import BooleanFilter, Filter, NumberFilter
 
 
 class LikeFilter(FilterSet):
-    """Filter that allows queryset filtering based on current user likes."""
-
     # Indicate if user likes or not the entities
-    like = filters.BooleanFilter(method="get_liked_items")
+    like = BooleanFilter(method="get_liked_items")
 
     def get_liked_items(self, queryset: QuerySet, name: str, value: bool) -> QuerySet:
-        """Filter queryset based on current user likes.
-
-        Args:
-            queryset (QuerySet): Queryset to be filtered
-            name (str): Field name. Not used in this case
-            value (bool): Indicate if current user likes or not the entities
-
-        Returns:
-            QuerySet: Queryset filtered by the current user likes
-        """
         liked = {"liked_by": self.request.user}
         return queryset.filter(Q(**liked) if value else ~Q(**liked)).all()
 
@@ -33,16 +22,16 @@ class MultipleFieldFilterSet(FilterSet):
         return queryset.filter(query)
 
 
-class MultipleFieldFilter(filters.Filter):
+class MultipleFieldFilter(Filter):
     def __init__(self, fields: list[str], **kwargs: Any) -> None:
         kwargs["method"] = "multiple_field_filter"
         super().__init__(**kwargs)
         self.fields = fields
 
 
-class MultipleNumberFilter(MultipleFieldFilter, filters.NumberFilter):
+class MultipleNumberFilter(MultipleFieldFilter, NumberFilter):
     pass
 
 
-class MultipleCharFilter(MultipleFieldFilter, filters.CharFilter):
+class MultipleCharFilter(MultipleFieldFilter, CharFilter):
     pass

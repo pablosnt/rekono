@@ -2,8 +2,6 @@ from enum import Enum
 
 
 class InputKeyword(Enum):
-    """list of keywords that can be included in tool argument patterns to include BaseInput data."""
-
     TARGET = 1
     HOST = 2
     PORT = 3
