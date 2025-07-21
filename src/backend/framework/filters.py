@@ -2,7 +2,7 @@ from typing import Any
 
 from django.db.models import Q, QuerySet
 from django_filters.rest_framework import FilterSet
-from django_filters.rest_framework.filters import BooleanFilter, Filter, NumberFilter
+from django_filters.rest_framework.filters import BooleanFilter, CharFilter, Filter, NumberFilter
 
 
 class LikeFilter(FilterSet):
