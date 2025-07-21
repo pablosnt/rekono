@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Any
 
 from django.core import management
@@ -6,18 +7,19 @@ from django.db.models.signals import post_migrate
 
 
 class BaseApp:
-    fixtures_path = None
-    skip_if_model_exists = False
+    fixtures_path = Path(__file__).resolve().parent / "fixtures"
+    skip_fixtures_if_model_exists = False
 
     def ready(self) -> None:
         """Run code as soon as the registry is fully populated."""
         # Configure fixtures to be loaded after migration
         if self.fixtures_path:
-            post_migrate.connect(self._load_fixtures, sender=self)
+            post_migrate.connect(self.load_fixtures, sender=self)
 
-    def _load_fixtures(self, **kwargs: Any) -> None:
-        if self.fixtures_path:
-            if self.skip_if_model_exists:
+    def load_fixtures(self, **kwargs: Any) -> None:
+        if self.fixtures_path and self.fixtures_path.is_dir():
+            # TODO: Some models have to be updated without affecting existing data. For example, processes, wordlists or tools.
+            if self.skip_fixtures_if_model_exists:
                 for model in self._get_models():
                     if model and model.objects.exists():
                         return  # pragma: no cover
@@ -27,4 +29,6 @@ class BaseApp:
             )
 
     def _get_models(self) -> list[Any]:
+        # Models can't be defined in a variable because the first time migrate command is executed, models don't exist yet.
+        # They only can be imported from a post_migrate signal
         return []  # pragma: no cover

@@ -11,11 +11,9 @@ class UsersConfig(BaseApp, AppConfig):
     name = "users"
 
     def ready(self) -> None:
-        """Run code as soon as the registry is fully populated."""
         post_migrate.connect(self.initialize_user_groups, sender=self)
 
     def initialize_user_groups(self, **kwargs: Any) -> None:
-        """Initialize user groups in database."""
         group_model = kwargs["apps"].get_model(app_label="auth", model_name="group")
         permission_model = kwargs["apps"].get_model(app_label="auth", model_name="permission")
         groups = {}
