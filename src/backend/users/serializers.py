@@ -16,9 +16,9 @@ from rest_framework.serializers import (
     URLField,
 )
 
-from framework.serializers import MfaSerializer
 from platforms.mail.notifications import SMTP
 from platforms.telegram_app.notifications.notifications import Telegram
+from security.authentication.serializers import MfaSerializer
 from security.authorization.roles import Role
 from users.models import User
 

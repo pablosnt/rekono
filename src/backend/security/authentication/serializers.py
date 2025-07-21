@@ -12,7 +12,6 @@ from rest_framework_simplejwt.serializers import (
 )
 from rest_framework_simplejwt.token_blacklist.models import OutstandingToken
 
-from framework.serializers import MfaSerializer
 from platforms.mail.notifications import SMTP
 from rekono.settings import CONFIG
 from security.authentication.tokens import MfaRequiredToken
@@ -53,7 +52,21 @@ class LoginSerializer(JwtAuthentication, TokenObtainSerializer):
         return {"mfa": str(self.__class__.get_mfa_required_token(self.user))} if self.user.mfa else self._login()
 
 
-class BaseMfaRequiredSerializer(Serializer):
+class MfaSerializer(Serializer):
+    mfa = CharField(max_length=200, required=True, write_only=True)
+    validator = User.objects.verify_mfa_or_otp
+
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
+        attrs = super().validate(attrs)
+        if not self.validator(
+            attrs.get("mfa"),
+            (self.user if hasattr(self, "user") and getattr(self, "user") else self.context.get("request").user),
+        ):
+            raise AuthenticationFailed(code=status.HTTP_401_UNAUTHORIZED)
+        return attrs
+
+
+class MfaRequiredSerializer(Serializer):
     token = CharField()
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
@@ -69,7 +82,7 @@ class BaseMfaRequiredSerializer(Serializer):
         return attrs
 
 
-class SendMfaEmailSerializer(BaseMfaRequiredSerializer):
+class SendMfaEmailSerializer(MfaRequiredSerializer):
     token = CharField(required=False)
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
@@ -81,16 +94,13 @@ class SendMfaEmailSerializer(BaseMfaRequiredSerializer):
         return super().validate(attrs)
 
     def save(self, **kwargs: Any) -> User:
-        SMTP().mfa(
-            self.user,
-            # pytype: disable=attribute-error
-            User.objects.setup_otp(self.user, {"minutes": CONFIG.mfa_expiration_minutes}),
-            # pytype: enable=attribute-error
-        )
+        # pytype: disable=attribute-error
+        SMTP().mfa(self.user, User.objects.setup_otp(self.user, {"minutes": CONFIG.mfa_expiration_minutes}))
+        # pytype: enable=attribute-error
         return self.user
 
 
-class MfaLoginSerializer(MfaSerializer, BaseMfaRequiredSerializer, JwtAuthentication):
+class MfaLoginSerializer(MfaSerializer, MfaRequiredSerializer, JwtAuthentication):
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         super().validate(attrs)
         if self.user.otp:

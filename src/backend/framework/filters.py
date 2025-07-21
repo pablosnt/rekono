@@ -24,9 +24,9 @@ class MultipleFieldFilterSet(FilterSet):
 
 class MultipleFieldFilter(Filter):
     def __init__(self, fields: list[str], **kwargs: Any) -> None:
+        self.fields = fields
         kwargs["method"] = "multiple_field_filter"
         super().__init__(**kwargs)
-        self.fields = fields
 
 
 class MultipleNumberFilter(MultipleFieldFilter, NumberFilter):
