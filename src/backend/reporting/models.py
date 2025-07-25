@@ -1,3 +1,5 @@
+from functools import cached_property
+
 from django.db import models
 
 from framework.models import BaseModel
@@ -18,8 +20,9 @@ class Report(BaseModel):
     user = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True)
     date = models.DateTimeField(auto_now_add=True)
 
-    def get_project(self) -> Project:
-        return (self.task or self.target or self.project).get_project()
+    @cached_property
+    def parent_project(self) -> Project:
+        return (self.task or self.target or self.project).parent_project
 
     def __str__(self) -> str:
         return f"{(self.task or self.target or self.project).__str__()} - {self.format.value} - {self.user.__str__()}"

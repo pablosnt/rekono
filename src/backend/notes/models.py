@@ -72,7 +72,7 @@ class Note(BaseLike):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    project_field = "project"
+   _project_field = "project"
 
     def __str__(self) -> str:
         value = ""

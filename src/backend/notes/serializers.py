@@ -71,7 +71,7 @@ class NoteSerializer(TaggitSerializer, LikeSerializer):
         if len(data_links) > 0:
             for value in [link for link in links if link != data_links[0]]:
                 attrs[value] = None
-            attrs["project"] = cast(BaseModel, attrs.get(data_links[0])).get_project()
+            attrs["project"] = cast(BaseModel, attrs.get(data_links[0])).parent_project
         if not attrs.get("project"):
             raise ValidationError("A relationship with a project entity is needed", code="project")
         return attrs

@@ -1,4 +1,4 @@
-import importlib
+from functools import cached_property
 from typing import Any, Callable, cast
 
 import requests
@@ -12,13 +12,14 @@ from security.cryptography.encryption import Encryptor
 
 
 class BaseModel(models.Model):
-    project_field = ""
+    _project_field = ""
 
     class Meta:
         abstract = True
 
-    def get_project(self) -> Any | list[Any]:
-        filter_field = self.__class__.project_field
+    @cached_property
+    def parent_project(self) -> Any | list[Any] | None:
+        filter_field = self.__class__._project_field
         if filter_field:
             project = self
             for field in filter_field.split("__"):
@@ -28,21 +29,6 @@ class BaseModel(models.Model):
                     return None
             return project
         return None
-
-    def _get_related_class(self, package: str, name: str) -> Any:
-        try:
-            # nosemgrep: python.lang.security.audit.non-literal-import.non-literal-import
-            module = importlib.import_module(f"{package.lower()}.{name.lower().replace(' ', '_').replace('-', '_')}")
-            cls = getattr(
-                module,
-                name[0].upper() + name[1:].lower().replace(" ", "").replace("-", ""),
-            )
-        except (AttributeError, ModuleNotFoundError):
-            # nosemgrep: python.lang.security.audit.non-literal-import.non-literal-import
-            module = importlib.import_module(f"{package}.base")
-            type = package.split(".")[-1][:-1]
-            cls = getattr(module, f"Base{type[0].upper() + type[1:].lower()}")
-        return cls
 
     def __str__(self) -> str:
         return self.__class__.__name__
@@ -78,8 +64,6 @@ class BaseEncrypted(BaseModel):
 
 
 class BaseInput(BaseModel):
-    """Class to be extended by all the objects that can be used in tool executions as argument."""
-
     class Meta:
         abstract = True
 
@@ -96,35 +80,53 @@ class BaseInput(BaseModel):
             self.contains = contains
             self.processor = processor
 
-    filters: list[Filter] = []
-    parse_mapping: dict[InputKeyword, str | Callable | dict[str, str]] = {}
-    parse_dependencies: list[str] = []
+        def filter(self, condition: str, value: Any, is_negative: bool = False) -> bool:
+            if self.processor:
+                value = self.processor(value)
+            try:
+                return (
+                    issubclass(self.type, models.TextChoices)
+                    and self._compare(condition.upper(), cast(models.TextChoices, filter.type)(value).name, is_negative)
+                ) or (
+                    filter.type in [str, int]
+                    and self._compare(
+                        str(condition).strip().lower(), str(value).strip().lower(), is_negative, self.contains
+                    )
+                )
+            except (ValueError, KeyError):
+                return False
 
-    def _clean_path(self, value: str | None) -> str | None:
+        def _compare(self, filter: Any, value: Any, negative: bool = False, contains: bool = False) -> bool:
+            return self._assert(filter, value, contains) if not negative else not self._assert(filter, value, contains)
+
+        def _assert(self, filter: str, value: str, contains: bool) -> bool:
+            return filter == value if not contains else filter in value
+
+    _filters: list[Filter] = []
+    _parse_mapping: dict[InputKeyword, str | Callable | dict[str, str]] = {}
+    _parse_dependencies: list[str] = []
+
+    @cached_property
+    def input_type(self) -> Any:
+        from input_types.models import InputType
+
+        reference = f"{self._meta.app_label}.{self._meta.model_name}"
+        return InputType.objects.filter(Q(model=reference) | Q(fallback_model=reference)).first()
+
+    def clean_path(self, value: str | None) -> str | None:
         return f"/{value}" if value and len(value) > 1 and value[0] != "/" else value
 
-    def _get_url(
+    def get_url(
         self,
         host: str,
         port: int | None = None,
         endpoint: str | None = None,
         protocols: list[str] = ["http", "https"],
     ) -> str | None:
-        """Get a HTTP or HTTPS URL from host, port and endpoint.
-
-        Args:
-            host (str): Host to include in the URL
-            port (int, optional): Port to include in the URL. Defaults to None.
-            endpoint (str, optional): Endpoint to include in the URL. Defaults to ''.
-            protocols (list[str], optional): Protocol list to check. Defaults to ['http', 'https'].
-
-        Returns:
-            str | None: [description]
-        """
         urllib3.disable_warnings(category=urllib3.exceptions.InsecureRequestWarning)
         if endpoint is None:
             endpoint = ""
-        if endpoint.startswith("/"):
+        elif endpoint.startswith("/"):
             endpoint = endpoint[1:]
         schema = "{protocol}://{host}/{endpoint}"
         if port:
@@ -143,78 +145,46 @@ class BaseInput(BaseModel):
                 continue
         return None
 
-    def _compare(self, filter: str, value: str, contains: bool) -> bool:
-        return filter == value if not contains else filter in value
-
-    def _compare_filter(self, filter: Any, value: Any, negative: bool = False, contains: bool = False) -> bool:
-        return self._compare(filter, value, contains) if not negative else not self._compare(filter, value, contains)
-
     def filter(self, argument_input: Any, target: Any = None) -> bool:
-        """Check if this instance is valid based on input filter.
-
-        Args:
-            input (any): Tool input whose filter will be applied
-
-        Returns:
-            bool: Indicate if this instance match the input filter or not
-        """
         if not argument_input.filter:
             return True
-        filter_value = argument_input.filter
-        for split, or_condition in [(" or ", True), (" and ", False)]:
-            # If no conditions, use 'and' by default
-            if split not in filter_value and or_condition:
-                continue
-            for match_value in filter_value.split(split):
-                negative = match_value.startswith("!")
-                if negative:
-                    match_value = match_value[1:]
-                for filter in self.filters:
-                    and_condition = False
-                    field_value = getattr(self, filter.field)
-                    if filter.processor:
-                        field_value = filter.processor(field_value)
-                    try:
-                        if (
-                            issubclass(filter.type, models.TextChoices)
-                            and self._compare_filter(
-                                match_value.upper(), cast(models.TextChoices, filter.type)(field_value).name, negative
-                            )
-                        ) or (
-                            filter.type in [str, int]
-                            and self._compare_filter(
-                                str(match_value).strip().lower(),
-                                str(field_value).strip().lower(),
-                                negative,
-                                filter.contains,
-                            )
-                        ):
-                            if or_condition:
-                                return True
-                            else:
-                                and_condition = True
-                        elif not or_condition:
-                            return False
-                    except (ValueError, KeyError):
-                        continue
-                    if not or_condition and and_condition:
+        if " or " in argument_input.filter:
+            operator = " or "
+            is_or = True
+        else:
+            operator = " and "
+            is_or = False
+        conclusion = True
+        for condition in argument_input.filter.split(operator):
+            is_negative = condition.startswith("!")
+            if is_negative:
+                condition = condition[1:]
+            filter_conclusion = False
+            for filter in self._filters:
+                _conclusion = filter.filter(condition, getattr(self, filter.field), is_negative)
+                if _conclusion:
+                    if is_or:
                         return True
-        return False
+                    else:
+                        filter_conclusion = True
+                        break
+            conclusion = conclusion and filter_conclusion
+        return conclusion
 
     def parse(self, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
         result = {}
-        for dependency in self.parse_dependencies:
+        for dependency in self._parse_dependencies:
             if (
                 hasattr(self, dependency)
                 and getattr(self, dependency)
                 and isinstance(getattr(self, dependency), BaseInput)
             ):
                 result.update(getattr(self, dependency).parse(accumulated))
-        for keyword, map in self.parse_mapping.items():
+        for keyword, field_or_function in self._parse_mapping.items():
             value = (
-                getattr(self, map)
-                if isinstance(map, str) and hasattr(self, map)
-                else (map(self) if isinstance(map, Callable) else map)
+                getattr(self, field_or_function)
+                if isinstance(field_or_function, str) and hasattr(self, field_or_function)
+                else (field_or_function(self) if isinstance(field_or_function, Callable) else field_or_function)
             )
             if value is None:
                 value = ""
@@ -224,22 +194,14 @@ class BaseInput(BaseModel):
                 if isinstance(current_value, list):
                     result[key] = accumulated.get(key, []) + (value if isinstance(value, list) else [value])
                     continue
-                elif isinstance(current_value, dict):
+                elif isinstance(current_value, dict) and isinstance(value, dict):
                     result[key] = {**accumulated.get(key, {}), **value}
                     continue
             result[key] = value
         return result
 
-    def get_input_type(self) -> Any:
-        from input_types.models import InputType
-
-        reference = f"{self._meta.app_label}.{self._meta.model_name}"
-        return InputType.objects.filter(Q(model=reference) | Q(fallback_model=reference)).first()
-
 
 class BaseLike(BaseModel):
-    """Common and abstract LikeBase model, to define common fields for all models that user can like."""
-
     liked_by = models.ManyToManyField(AUTH_USER_MODEL, related_name="liked_%(class)s")
 
     class Meta:

@@ -25,7 +25,7 @@ class Execution(BaseModel):
     hash = models.TextField(max_length=128, blank=True, null=True)
     defectdojo_test_id = models.IntegerField(blank=True, null=True)
 
-    project_field = "task__target__project"
+   _project_field = "task__target__project"
 
     def __str__(self) -> str:
         """Instance representation in text format.

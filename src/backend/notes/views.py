@@ -50,7 +50,7 @@ class NoteViewSet(LikeViewSet):
 
     def _get_project_from_data(self, project_field: str, data: dict[str, Any]) -> Project | None:
         data_links = [link for link in reversed(links) if data.get(link)]
-        return cast(BaseModel, data.get(data_links[0])).get_project() if len(data_links) > 0 else None
+        return cast(BaseModel, data.get(data_links[0])).parent_project if len(data_links) > 0 else None
 
     def get_queryset(self) -> QuerySet:
         return (

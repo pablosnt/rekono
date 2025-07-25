@@ -66,7 +66,7 @@ class OSINTViewSet(TriageFindingViewSet):
             OSINTDataType.DOMAIN,
         ]:
             serializer = TargetSerializer(
-                data={"project": osint.get_project().id, "target": osint.data},
+                data={"project": osint.parent_project.id, "target": osint.data},
                 context={"request": request},
             )
             serializer.is_valid(raise_exception=True)

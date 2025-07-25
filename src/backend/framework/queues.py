@@ -54,7 +54,7 @@ class BaseQueue:
     ) -> dict[InputType, list[Finding]]:
         findings_by_type = {}
         for finding in findings:
-            input_type = finding.get_input_type()
+            input_type = finding.input_type
             if input_type not in findings_by_type:
                 findings_by_type[input_type] = [finding]
             else:
@@ -92,7 +92,7 @@ class BaseQueue:
             if not source:
                 continue
             if not input_type:
-                input_type = source[0].get_input_type()
+                input_type = source[0].input_type
                 if input_type in input_types_used:
                     continue
             for tool_input in Input.objects.filter(argument__tool=tool, type=input_type).order_by("order"):

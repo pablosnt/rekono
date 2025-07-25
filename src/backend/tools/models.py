@@ -1,3 +1,4 @@
+import importlib
 import re
 import shutil
 import subprocess
@@ -29,6 +30,21 @@ class Tool(BaseLike):
     reference = models.TextField(max_length=250, blank=True, null=True)
     icon = models.TextField(max_length=250, blank=True, null=True)
     defectdojo_scan_type = models.TextField(max_length=100, blank=True, null=True)
+
+    def _get_related_class(self, package: str, name: str) -> Any:
+        try:
+            # nosemgrep: python.lang.security.audit.non-literal-import.non-literal-import
+            module = importlib.import_module(f"{package.lower()}.{name.lower().replace(' ', '_').replace('-', '_')}")
+            cls = getattr(
+                module,
+                name[0].upper() + name[1:].lower().replace(" ", "").replace("-", ""),
+            )
+        except (AttributeError, ModuleNotFoundError):
+            # nosemgrep: python.lang.security.audit.non-literal-import.non-literal-import
+            module = importlib.import_module(f"{package}.base")
+            type = package.split(".")[-1][:-1]
+            cls = getattr(module, f"Base{type[0].upper() + type[1:].lower()}")
+        return cls
 
     def get_parser_class(self) -> Any:
         return self._get_related_class("tools.parsers", self.name)

@@ -36,7 +36,7 @@ class Alert(BaseModel):
     owner = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True)
     subscribers = models.ManyToManyField(AUTH_USER_MODEL, related_name="alerts", blank=True)
 
-    project_field = "project"
+   _project_field = "project"
 
     class Meta:
         constraints = [

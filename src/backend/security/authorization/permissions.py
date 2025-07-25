@@ -84,7 +84,7 @@ class ProjectMemberPermission(BasePermission):
         Returns:
             bool: Indicate if user is authorized to make this request or not
         """
-        project = obj.get_project()
+        project = obj.parent_project
         output = (
             not project
             or (isinstance(project, Project) and request.user in project.members.all())

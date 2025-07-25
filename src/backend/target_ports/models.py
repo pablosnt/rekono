@@ -23,19 +23,19 @@ class TargetPort(BaseInput):
         null=True,
     )
 
-    filters = [BaseInput.Filter(type=int, field="port")]
-    parse_mapping = {
+    _filters = [BaseInput.Filter(type=int, field="port")]
+    _parse_mapping = {
         InputKeyword.TARGET: lambda instance: instance.target.target,
         InputKeyword.HOST: lambda instance: instance.target.target,
         InputKeyword.PORT: "port",
         InputKeyword.PORTS: lambda instance: [instance.port],
-        InputKeyword.ENDPOINT: lambda instance: instance._clean_path(instance.path),
-        InputKeyword.URL: lambda instance: instance._get_url(
-            instance.target.target, instance.port, instance._clean_path(instance.path)
+        InputKeyword.ENDPOINT: lambda instance: instance.clean_path(instance.path),
+        InputKeyword.URL: lambda instance: instance.get_url(
+            instance.target.target, instance.port, instance.clean_path(instance.path)
         ),
     }
-    parse_dependencies = ["authentication"]
-    project_field = "target__project"
+    _parse_dependencies = ["authentication"]
+    _project_field = "target__project"
 
     class Meta:
         constraints = [models.UniqueConstraint(fields=["target", "port"], name="unique_target_port")]

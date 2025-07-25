@@ -11,7 +11,6 @@ class BaseApp:
     skip_fixtures_if_model_exists = False
 
     def ready(self) -> None:
-        """Run code as soon as the registry is fully populated."""
         # Configure fixtures to be loaded after migration
         if self.fixtures_path:
             post_migrate.connect(self.load_fixtures, sender=self)
@@ -29,6 +28,6 @@ class BaseApp:
             )
 
     def _get_models(self) -> list[Any]:
-        # Models can't be defined in a variable because the first time migrate command is executed, models don't exist yet.
-        # They only can be imported from a post_migrate signal
+        # Models can't be defined in a variable because the first time that the migrate command is executed,
+        # models don't exist yet. They only can be imported from a post_migrate signal
         return []  # pragma: no cover

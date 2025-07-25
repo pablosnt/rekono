@@ -48,7 +48,7 @@ class Task(BaseModel):
     input_technologies = models.ManyToManyField(InputTechnology, related_name="tasks", blank=True)
     input_vulnerabilities = models.ManyToManyField(InputVulnerability, related_name="tasks", blank=True)
 
-    project_field = "target__project"
+   _project_field = "target__project"
 
     def __str__(self) -> str:
         """Instance representation in text format.

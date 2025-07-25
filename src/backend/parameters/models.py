@@ -22,8 +22,8 @@ class InputTechnology(InputParameter):
         null=True,
     )
 
-    filters = [BaseInput.Filter(type=str, field="name", contains=True)]
-    parse_mapping = {InputKeyword.TECHNOLOGY: "name", InputKeyword.VERSION: "version"}
+    _filters = [BaseInput.Filter(type=str, field="name", contains=True)]
+    _parse_mapping = {InputKeyword.TECHNOLOGY: "name", InputKeyword.VERSION: "version"}
 
     def __str__(self) -> str:
         """Instance representation in text format.
@@ -42,11 +42,11 @@ class InputVulnerability(InputParameter):
         validators=[Validator(Regex.CVE.value, code="cve", deny_injections=True)],
     )
 
-    filters = [
+    _filters = [
         BaseInput.Filter(type=str, field="cve", processor=lambda v: "cve"),
         BaseInput.Filter(type=str, field="cve", processor=lambda v: v.lower()),
     ]
-    parse_mapping = {InputKeyword.CVE: "cve"}
+    _parse_mapping = {InputKeyword.CVE: "cve"}
 
     def __str__(self) -> str:
         """Instance representation in text format.

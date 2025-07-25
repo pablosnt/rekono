@@ -28,7 +28,7 @@ class StatsSerializer(Serializer):
 
     def _get_queryset(self, model: type[BaseModel] | None = None) -> QuerySet:
         db_model = self._get_model(model)
-        project_field = db_model.project_field
+        project_field = db_model._project_field
         filters = {
             (f"{project_field}__members__id" if project_field else "members__id"): self.context.get("request").user.id
         }

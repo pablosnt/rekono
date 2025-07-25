@@ -34,8 +34,8 @@ class Authentication(BaseInput, BaseEncrypted):
         on_delete=models.CASCADE,
     )
 
-    filters = [BaseInput.Filter(type=AuthenticationType, field="type")]
-    parse_mapping = {
+    _filters = [BaseInput.Filter(type=AuthenticationType, field="type")]
+    _parse_mapping = {
         InputKeyword.COOKIE_NAME: lambda instance: (
             instance.name if instance.type == AuthenticationType.COOKIE else None
         ),
@@ -46,7 +46,7 @@ class Authentication(BaseInput, BaseEncrypted):
         InputKeyword.USERNAME: lambda instance: (instance.name if instance.type == AuthenticationType.BASIC else None),
     }
     _encrypted_field = "_secret"
-    project_field = "target_port__target__project"
+   _project_field = "target_port__target__project"
 
     def get_token(self) -> str:
         return (

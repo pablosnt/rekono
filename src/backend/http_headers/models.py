@@ -33,9 +33,9 @@ class HttpHeader(BaseInput):
         validators=[Validator(Regex.TEXT.value, code="value", deny_injections=True)],
     )
 
-    filters = [BaseInput.Filter(type=str, field="key")]
-    parse_mapping = {InputKeyword.HEADERS: lambda instance: {instance.key: instance.value}}
-    project_field = "target__project"
+    _filters = [BaseInput.Filter(type=str, field="key")]
+    _parse_mapping = {InputKeyword.HEADERS: lambda instance: {instance.key: instance.value}}
+   _project_field = "target__project"
 
     class Meta:
         constraints = [

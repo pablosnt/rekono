@@ -20,4 +20,4 @@ class InputParameterViewSet(BaseViewSet):
     http_method_names = ["get", "post"]
 
     def get_queryset(self) -> QuerySet:
-        return self.queryset.filter(**{f"{self._get_model().project_field}__members": self.request.user}).distinct()
+        return self.queryset.filter(**{f"{self._get_model()._project_field}__members": self.request.user}).distinct()
