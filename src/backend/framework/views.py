@@ -1,3 +1,4 @@
+from functools import cached_property
 from typing import Any
 
 from django.core.exceptions import PermissionDenied
@@ -22,7 +23,8 @@ class BaseViewSet(ModelViewSet):
     http_method_names = ["get", "post", "put", "delete"]
     owner_field = "owner"
 
-    def _get_model(self) -> type[BaseModel]:
+    @cached_property
+    def linked_model(self) -> type[BaseModel]:
         for cls in [
             self.get_serializer_class(),
             self.filterset_class if hasattr(self, "filterset_class") else None,
@@ -44,18 +46,15 @@ class BaseViewSet(ModelViewSet):
         return data if isinstance(data, Project) else None
 
     def get_queryset(self) -> QuerySet:
-        model = self._get_model()
         members_field = None
-        if model == Project:
+        if self.linked_model == Project:
             members_field = "members"
-        else:
-            project_field = model._project_field
-            if project_field:
-                members_field = f"{project_field}__members"
+        elif self.linked_model._project_field:
+            members_field = f"{self.linked_model._project_field}__members"
         if members_field:
             if self.request.user.id:
-                project_filter = {members_field: self.request.user}
-                return super().get_queryset().filter(**project_filter).distinct()
+                # Read authorization based on project membership
+                return super().get_queryset().filter(**{members_field: self.request.user}).distinct()
             else:  # pragma: no cover
                 return None
         return super().get_queryset().distinct()
@@ -65,18 +64,18 @@ class BaseViewSet(ModelViewSet):
             *args,
             **{
                 **kwargs,
+                # Pass original request to serializers
                 "context": {**kwargs.get("context", {}), "request": self.request},
             },
         )
 
     def perform_create(self, serializer: Serializer) -> None:
-        model = self._get_model()
-        project = self._get_project_from_data(model._project_field, serializer.validated_data)
+        project = self._get_project_from_data(self.linked_model._project_field, serializer.validated_data)
+        # Check project membership before creating related entities
         if project and self.request.user not in project.members.all():
             raise PermissionDenied()
-        if self.owner_field and model and hasattr(model, self.owner_field):
-            parameters = {self.owner_field: self.request.user}
-            serializer.save(**parameters)
+        if self.owner_field and self.linked_model and hasattr(self.linked_model, self.owner_field):
+            serializer.save(**{self.owner_field: self.request.user})
             return
         super().perform_create(serializer)
 
@@ -88,36 +87,19 @@ class BaseViewSet(ModelViewSet):
 
 
 class LikeViewSet(BaseViewSet):
-    """Base ViewSet that includes the like and dislike features."""
-
     def get_queryset(self) -> QuerySet:
-        """Get the model queryset. It's required for allow the access to the likes count by the child ViewSets.
-
-        Returns:
-            QuerySet: Model queryset
-        """
         return super().get_queryset().annotate(likes_count=Count("liked_by"))
 
     @extend_schema(request=None, responses={204: None})
-    # Permission classes are overrided to IsAuthenticated and IsAuditor, because currently only Tools, Processes and
-    # Wordlists can be liked, and auditors and admins are the only ones that can see this resources.
-    # Permission classes should be overrided here, because if not, the standard permissions would be applied, and not
-    # all auditors can make POST requests to resources like these.
+    # Permission classes are overwritten to IsAuthenticated and IsAuditor, because only Tools, Processes and Wordlists
+    # can be liked. Administrators and auditors can read these resources, but not all the auditors can make POST
+    # requests, according to the default permissions.
     @action(
         detail=True,
         methods=["POST", "DELETE"],
         permission_classes=[IsAuthenticated, IsAuditor],
     )
     def like(self, request: Request, pk: str) -> Response:
-        """Mark an instance as liked by the current user.
-
-        Args:
-            request (Request): Received HTTP request
-            pk (str): Instance Id
-
-        Returns:
-            Response: HTTP Response
-        """
         if request.method == "POST":
             self.get_object().liked_by.add(request.user)
         else:
