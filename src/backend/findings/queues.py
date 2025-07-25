@@ -42,21 +42,22 @@ class FindingsQueue(BaseQueue):
     def consume(execution: Execution, findings: list[Finding]) -> None:
         settings = Settings.objects.first()
         if findings:
+            integrations = [DefectDojo(), NvdNist(), HackTricks(), CveCrowd(), HostsMetadata()]
             notifications = [SMTP(), Telegram()]
-            integrations_per_execution = [DefectDojo()]
-            integrations_per_finding = [NvdNist(), HackTricks(), CveCrowd(), HostsMetadata()]
             for finding in findings:
                 if settings.auto_fix_findings and finding.is_fixed:
                     finding.__class__.objects.remove_fix(finding)
-                for integration in integrations_per_finding:
+                for integration in integrations:
+                    if integration.run_per_execution:
+                        continue
                     integration.process_finding(execution, finding)
                 for alert in execution.task.target.project.alerts.filter(enabled=True).order_by("-item").all():
                     if alert.must_be_triggered(execution, finding):
                         for platform in notifications:
                             platform.process_alert(alert, finding)
                         break
-            for notification in integrations_per_execution + notifications:
-                notification.process_findings(execution, findings)
+            for platform in [i for i in integrations if i.run_per_execution] + notifications:
+                platform.process_findings(execution, findings)
         if settings.auto_fix_findings:
             same_executions = Execution.objects.filter(hash=execution.hash, status=Status.COMPLETED)
             for finding_type in [

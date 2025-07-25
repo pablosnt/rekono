@@ -1,4 +1,5 @@
 import logging
+from functools import cached_property
 from typing import Any, Callable
 from urllib.parse import urlparse
 
@@ -15,6 +16,9 @@ logger = logging.getLogger()
 
 
 class BasePlatform:
+    def is_enabled(self) -> bool:
+        return True
+
     def is_available(self) -> bool:
         return True
 
@@ -25,20 +29,29 @@ class BasePlatform:
 class BaseIntegration(BasePlatform):
     url = ""
     finding_types = []  # If empty, all findings are processed
+    run_per_execution = False
 
-    def __init__(self) -> None:
-        self.session = self._create_session(self.url)
-        self.integration = Integration.objects.get(key=self.__class__.__name__.lower())
+    @cached_property
+    def integration(self) -> Integration:
+        return Integration.objects.get(key=self.__class__.__name__.lower())
 
-    def _create_session(self, url: str) -> requests.Session:
+    @cached_property
+    def session(self) -> requests.Session:
         session = requests.Session()
-        retries = Retry(
-            total=10,
-            backoff_factor=1,
-            status_forcelist=[429, 500, 502, 503, 504, 599],
+        session.mount(
+            f"{urlparse(self.url).scheme}://",
+            HTTPAdapter(
+                max_retries=Retry(
+                    total=10,
+                    backoff_factor=1,
+                    status_forcelist=[429, 500, 502, 503, 504, 599],
+                )
+            ),
         )
-        session.mount(f"{urlparse(url).scheme}://", HTTPAdapter(max_retries=retries))
         return session
+
+    def is_enabled(self) -> bool:
+        return self.integration.enabled if self.integration else False
 
     def _request(
         self,
@@ -59,8 +72,8 @@ class BaseIntegration(BasePlatform):
             response.raise_for_status()
         return response.json() if json else response
 
-    def is_enabled(self) -> bool:
-        return self.integration.enabled if self.integration else False
+    def is_finding_processable(self, finding: Finding) -> bool:
+        return finding.__class__ in self.finding_types or len(self.finding_types) == 0
 
     def _process_finding(self, execution: Execution, finding: Finding) -> None:
         pass
@@ -69,9 +82,6 @@ class BaseIntegration(BasePlatform):
         if not self.is_enabled() or not self.is_finding_processable(finding):
             return
         self._process_finding(execution, finding)
-
-    def is_finding_processable(self, finding: Finding) -> bool:
-        return finding.__class__ in self.finding_types or len(self.finding_types) == 0
 
     def process_findings(self, execution: Execution, findings: list[Finding]) -> None:
         for finding in findings:
@@ -113,20 +123,19 @@ class BaseNotification(BasePlatform):
         )
         return list(users)
 
-    def _get_users_to_notify_alert(self, alert: Alert) -> list[Any]:
-        return alert.subscribers.filter(**{self.enable_field: True}).all()
-
     def _notify_execution(self, users: list[Any], execution: Execution, findings: list[Finding]) -> None:
-        pass
-
-    def _notify_alert(self, users: list[Any], alert: Alert, finding: Finding) -> None:
         pass
 
     def process_findings(self, execution: Execution, findings: list[Finding]) -> None:
         if not self.is_available():
             return
-        users = self._get_users_to_notify_execution(execution)
-        self._notify_execution(users, execution, findings)
+        self._notify_execution(self._get_users_to_notify_execution(execution), execution, findings)
+
+    def _get_users_to_notify_alert(self, alert: Alert) -> list[Any]:
+        return alert.subscribers.filter(**{self.enable_field: True}).all()
+
+    def _notify_alert(self, users: list[Any], alert: Alert, finding: Finding) -> None:
+        pass
 
     def process_alert(self, alert: Alert, finding: Finding) -> None:
         if not self.is_available():

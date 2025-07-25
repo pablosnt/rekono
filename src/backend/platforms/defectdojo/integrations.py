@@ -20,6 +20,8 @@ from targets.models import Target
 
 
 class DefectDojo(BaseIntegration):
+    run_per_execution = True
+
     def __init__(self) -> None:
         self.settings = DefectDojoSettings.objects.first()
         self.url = self.settings.server

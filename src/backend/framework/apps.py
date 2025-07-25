@@ -17,7 +17,9 @@ class BaseApp:
 
     def load_fixtures(self, **kwargs: Any) -> None:
         if self.fixtures_path and self.fixtures_path.is_dir():
-            # TODO: Some models have to be updated without affecting existing data. For example, processes, wordlists or tools.
+            # TODO: Force updates always: Tools
+            # TODO: Update default ones, while keeping custom user data: wordlists, processes
+            # We will have to handle the custom user data, to remove references to old tools
             if self.skip_fixtures_if_model_exists:
                 for model in self._get_models():
                     if model and model.objects.exists():
