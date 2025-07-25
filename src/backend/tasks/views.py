@@ -1,4 +1,3 @@
-import logging
 from typing import Any
 
 import django_rq
@@ -26,8 +25,6 @@ from tasks.queues import TasksQueue
 from tasks.serializers import TaskSerializer
 
 # Create your views here.
-
-logger = logging.getLogger()
 
 
 class TaskViewSet(BaseViewSet):
@@ -74,7 +71,7 @@ class TaskViewSet(BaseViewSet):
         has_executions = task.executions.exists()
         running_executions = task.executions.filter(status__in=[Status.REQUESTED, Status.RUNNING]).all()
         if not running_executions and has_executions:
-            logger.warning(f"[Task] Task {task.id} can't be cancelled")
+            self.logger.warning(f"[Task] Task {task.id} can't be cancelled")
             return Response(
                 {"task": f"Task {task.id} can't be cancelled"},
                 status=status.HTTP_400_BAD_REQUEST,
@@ -82,7 +79,7 @@ class TaskViewSet(BaseViewSet):
         if task.rq_job_id:
             self.tasks_queue.cancel_job(task.rq_job_id)
             self.tasks_queue.delete_job(task.rq_job_id)
-            logger.info(f"[Task] Task {task.id} has been cancelled")
+            self.logger.info(f"[Task] Task {task.id} has been cancelled")
         connection = django_rq.get_connection("executions")
         for execution in running_executions:
             if not CONFIG.testing:  # pragma: no cover
@@ -93,7 +90,7 @@ class TaskViewSet(BaseViewSet):
                         pass
                 else:
                     self.executions_queue.cancel_job(execution.rq_job_id)
-            logger.info(f"[Execution] Execution {execution.id} has been cancelled")
+            self.logger.info(f"[Execution] Execution {execution.id} has been cancelled")
             execution.status = Status.CANCELLED
             execution.end = timezone.now()
             execution.save(update_fields=["status", "end"])

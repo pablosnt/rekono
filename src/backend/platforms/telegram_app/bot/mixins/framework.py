@@ -1,4 +1,3 @@
-import logging
 from typing import Any, Callable
 
 from asgiref.sync import sync_to_async
@@ -12,8 +11,6 @@ from platforms.telegram_app.bot.commands import Cancel
 from platforms.telegram_app.bot.enums import Context
 from platforms.telegram_app.bot.framework import BaseTelegramBot
 from platforms.telegram_app.models import TelegramChat
-
-logger = logging.getLogger()
 
 
 class BaseMixin(BaseTelegramBot):
@@ -182,7 +179,7 @@ class BaseMixin(BaseTelegramBot):
         instance, errors = await self._save_serializer_async(serializer_class(data=data))
         if not instance:
             next_state = previous_state
-            logger.info(
+            self.logger.info(
                 f"[TelegramBot] Attempt of {serializer_class.Meta.model.__name__.lower()} creation with invalid data",
                 extra={"user": chat.user.id},
             )
@@ -191,7 +188,7 @@ class BaseMixin(BaseTelegramBot):
                 self._build_error_message_from_serializer_errors(errors),
             )
         else:
-            logger.info(
+            self.logger.info(
                 f"[TelegramBot] New {serializer_class.Meta.model.__name__.lower()} {instance.id} has been created",
                 extra={"user": chat.user.id},
             )

@@ -1,4 +1,3 @@
-import logging
 from typing import Any
 
 from asgiref.sync import sync_to_async
@@ -9,8 +8,6 @@ from telegram.ext import CallbackContext
 from platforms.telegram_app.bot.enums import Context
 from platforms.telegram_app.framework import BaseTelegram
 from platforms.telegram_app.models import TelegramChat
-
-logger = logging.getLogger()
 
 
 class BaseTelegramBot(BaseTelegram):
@@ -69,13 +66,15 @@ class BaseTelegramBot(BaseTelegram):
         if self._is_valid_update(update):
             self.chat = await self._get_active_telegram_chat_async(update.effective_chat.id)
             if not self.chat:
-                logger.error(f"[Security] Unauthenticated Telegram bot request from chat {update.effective_chat.id}")
+                self.logger.error(
+                    f"[Security] Unauthenticated Telegram bot request from chat {update.effective_chat.id}"
+                )
                 await self._reply(
                     update,
                     "You have to link this chat to your Rekono account before using the Telegram Bot\. Use the command /start",
                 )
             elif require_auditor and not await self._is_auditor_async(self.chat):
-                logger.error(
+                self.logger.error(
                     f"[Security] User {self.chat.user.id} isn't authorized to use Telegram bot",
                     extra={"user": self.chat.user},
                 )

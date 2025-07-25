@@ -1,4 +1,3 @@
-import logging
 import threading
 from typing import Any
 
@@ -21,8 +20,6 @@ from platforms.telegram_app.notifications.notifications import Telegram
 from security.authentication.serializers import MfaSerializer
 from security.authorization.roles import Role
 from users.models import User
-
-logger = logging.getLogger()
 
 
 class UserSerializer(ModelSerializer):
@@ -284,7 +281,7 @@ class RequestPasswordResetSerializer(Serializer):
         if email and user:
             otp = User.objects.setup_otp(user)
             SMTP().reset_password(user, otp)
-            logger.info(
+            self.logger.info(
                 f"[User] User {user.id} requested a password reset",
                 extra={"user": user.id},
             )

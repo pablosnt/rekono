@@ -1,5 +1,4 @@
 # pytype: disable=attribute-error
-import logging
 from dataclasses import dataclass
 from typing import Any
 
@@ -8,9 +7,8 @@ from rest_framework.renderers import JSONRenderer
 from rest_framework.request import HttpRequest
 from rest_framework.response import Response
 
+from framework.logging import LoggingEntity
 from rekono.settings import CONFIG
-
-logger = logging.getLogger()
 
 CSP = {
     "/admin": (
@@ -57,7 +55,7 @@ SECURITY_HEADERS = {
 
 
 @dataclass
-class SecurityMiddleware:
+class SecurityMiddleware(LoggingEntity):
     """Security middleware that manages all HTTP requests and responses."""
 
     get_response: Any
@@ -90,11 +88,11 @@ class SecurityMiddleware:
         return response
 
     def _log_request_and_response(self, request: HttpRequest, response: Response):
-        logger_level = logger.info
+        logger_level = self.logger.info
         if response.status_code >= 400 and response.status_code < 500:
-            logger_level = logger.warning  # Warning level for 4XX error responses
+            logger_level = self.logger.warning  # Warning level for 4XX error responses
         elif response.status_code >= 500:  # pragma: no cover
-            logger_level = logger.error  # Error level for 5XX error responses
+            logger_level = self.logger.error  # Error level for 5XX error responses
         logger_level(
             f"{request.method} {request.get_full_path()} > HTTP {response.status_code}",
             extra={"request": request, "response": response},

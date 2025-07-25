@@ -1,5 +1,4 @@
 import asyncio
-import logging
 from typing import Any
 
 from telegram.constants import ParseMode
@@ -7,12 +6,11 @@ from telegram.error import Forbidden, InvalidToken, NetworkError
 from telegram.ext import Application
 from telegram.helpers import escape_markdown
 
+from framework.logging import LoggingEntity
 from platforms.telegram_app.models import TelegramChat, TelegramSettings
 
-logger = logging.getLogger()
 
-
-class BaseTelegram:
+class BaseTelegram(LoggingEntity):
     def __init__(self) -> None:
         self.settings = TelegramSettings.objects.first()
         self.app = self.initialize()
@@ -63,4 +61,4 @@ class BaseTelegram:
         self.settings.save(update_fields=["_token"])
         self.app = None
         if log_error:
-            logger.error("[Telegram] Authentication error")
+            self.logger.error("[Telegram] Authentication error")

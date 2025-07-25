@@ -1,4 +1,3 @@
-import logging
 from datetime import timedelta
 from typing import Any
 
@@ -9,8 +8,6 @@ from rq.job import Job
 from alerts.models import MonitorSettings
 from framework.queues import BaseQueue
 from platforms.cvecrowd.integrations import CveCrowd
-
-logger = logging.getLogger()
 
 
 class MonitorQueue(BaseQueue):
@@ -26,7 +23,7 @@ class MonitorQueue(BaseQueue):
     @staticmethod
     @job("monitor")
     def consume() -> None:
-        logger.info("[Monitor] Monitor job has started")
+        BaseQueue.logger.info("[Monitor] Monitor job has started")
         settings = MonitorSettings.objects.first()
         settings.last_monitor = timezone.now()
         settings.save(update_fields=["last_monitor"])

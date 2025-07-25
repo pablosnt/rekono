@@ -1,5 +1,4 @@
 import copy
-import logging
 from typing import Any
 
 import django_rq
@@ -7,6 +6,7 @@ from rq.job import Job
 from rq.queue import Queue
 
 from findings.framework.models import Finding
+from framework.logging import LoggingEntity
 from framework.models import BaseInput
 from input_types.models import InputType
 from parameters.models import InputTechnology, InputVulnerability
@@ -14,10 +14,8 @@ from target_ports.models import TargetPort
 from tools.models import Input, Tool
 from wordlists.models import Wordlist
 
-logger = logging.getLogger()
 
-
-class BaseQueue:
+class BaseQueue(LoggingEntity):
     name = ""
 
     def _get_queue(self) -> Queue:
@@ -32,13 +30,13 @@ class BaseQueue:
     def cancel_job(self, job_id: str) -> None:
         job = self._fetch_job(job_id)
         if job:
-            logger.info(f"[{self.name}] Job {job_id} has been cancelled")
+            self.logger.info(f"[{self.name}] Job {job_id} has been cancelled")
             job.cancel()
 
     def delete_job(self, job_id: str) -> None:
         job = self._fetch_job(job_id)
         if job:
-            logger.info(f"[{self.name}] Job {job_id} has been deleted")
+            self.logger.info(f"[{self.name}] Job {job_id} has been deleted")
             job.delete()
 
     def enqueue(self, *args: Any, **kwargs: Any) -> Job:

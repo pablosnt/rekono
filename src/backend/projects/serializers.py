@@ -1,4 +1,3 @@
-import logging
 from typing import Any
 
 from django.db import transaction
@@ -15,8 +14,6 @@ from projects.models import Project
 from targets.serializers import SimpleTargetSerializer
 from users.models import User
 from users.serializers import SimpleUserSerializer
-
-logger = logging.getLogger()
 
 
 class ProjectSerializer(TaggitSerializer, RelatedNotesSerializer):

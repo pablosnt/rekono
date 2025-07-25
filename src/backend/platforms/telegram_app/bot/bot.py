@@ -1,5 +1,4 @@
 import asyncio
-import logging
 import time
 from warnings import filterwarnings
 
@@ -28,8 +27,6 @@ from platforms.telegram_app.framework import BaseTelegram
 from platforms.telegram_app.models import TelegramSettings
 
 filterwarnings(action="ignore", message=r".*CallbackQueryHandler", category=PTBUserWarning)
-
-logger = logging.getLogger()
 
 
 class TelegramBot(BaseTelegram):
@@ -63,7 +60,7 @@ class TelegramBot(BaseTelegram):
         first_iteration = True
         while not self.settings or not self.settings.secret:
             if first_iteration:
-                logger.info("[Telegram Bot] Waiting while Telegram token is not configured")
+                self.logger.info("[Telegram Bot] Waiting while Telegram token is not configured")
                 first_iteration = False
             time.sleep(sleep_time)
             self.settings = TelegramSettings.objects.first()

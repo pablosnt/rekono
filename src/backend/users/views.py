@@ -1,4 +1,3 @@
-import logging
 from typing import Any
 
 from django.core.exceptions import PermissionDenied
@@ -36,8 +35,6 @@ from users.serializers import (
 )
 
 # Create your views here.
-
-logger = logging.getLogger()
 
 
 class UserViewSet(BaseViewSet):

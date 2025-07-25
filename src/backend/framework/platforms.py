@@ -1,4 +1,3 @@
-import logging
 from functools import cached_property
 from typing import Any, Callable
 from urllib.parse import urlparse
@@ -9,13 +8,12 @@ from requests.adapters import HTTPAdapter, Retry
 from alerts.models import Alert
 from executions.models import Execution
 from findings.framework.models import Finding
+from framework.logging import LoggingEntity
 from integrations.models import Integration
 from users.enums import Notification
 
-logger = logging.getLogger()
 
-
-class BasePlatform:
+class BasePlatform(LoggingEntity):
     def is_enabled(self) -> bool:
         return True
 
@@ -65,7 +63,7 @@ class BaseIntegration(BasePlatform):
             response = method(url, **kwargs)
         except requests.exceptions.ConnectionError:
             response = method(url, **kwargs)
-        logger.info(
+        self.logger.info(
             f"[{self.__class__.__name__}] {method.__name__.upper()} {urlparse(url).path} > HTTP {response.status_code}"
         )
         if trigger_exception:

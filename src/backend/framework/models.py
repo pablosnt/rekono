@@ -3,15 +3,15 @@ from typing import Any, Callable, cast
 
 import requests
 import urllib3
-from django.db import models
-from django.db.models import Q
+from django.db.models import ManyToManyField, Model, Q, TextChoices
 
 from framework.enums import InputKeyword
+from framework.logging import LoggingEntity
 from rekono.settings import AUTH_USER_MODEL, CONFIG
 from security.cryptography.encryption import Encryptor
 
 
-class BaseModel(models.Model):
+class BaseModel(Model, LoggingEntity):
     _project_field = ""
 
     class Meta:
@@ -85,8 +85,8 @@ class BaseInput(BaseModel):
                 value = self.processor(value)
             try:
                 return (
-                    issubclass(self.type, models.TextChoices)
-                    and self._compare(condition.upper(), cast(models.TextChoices, filter.type)(value).name, is_negative)
+                    issubclass(self.type, TextChoices)
+                    and self._compare(condition.upper(), cast(TextChoices, filter.type)(value).name, is_negative)
                 ) or (
                     filter.type in [str, int]
                     and self._compare(
@@ -202,7 +202,7 @@ class BaseInput(BaseModel):
 
 
 class BaseLike(BaseModel):
-    liked_by = models.ManyToManyField(AUTH_USER_MODEL, related_name="liked_%(class)s")
+    liked_by = ManyToManyField(AUTH_USER_MODEL, related_name="liked_%(class)s")
 
     class Meta:
         abstract = True

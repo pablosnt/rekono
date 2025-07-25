@@ -1,5 +1,4 @@
 import ipaddress
-import logging
 import re
 import socket
 
@@ -14,8 +13,6 @@ from security.validators.target_validator import TargetValidator
 from targets.enums import TargetType
 
 # Create your models here.
-
-logger = logging.getLogger()
 
 
 class Target(BaseInput):
@@ -69,7 +66,7 @@ class Target(BaseInput):
             return TargetType.DOMAIN
         except socket.gaierror:
             pass
-        logger.warning(f"[Security] Invalid target {target}")
+        BaseInput.logger.warning(f"[Security] Invalid target {target}")
         # Target is invalid or target type is not supported
         raise ValidationError(
             "Invalid target. IP address, IP range or domain is required",

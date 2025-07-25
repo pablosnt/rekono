@@ -1,4 +1,3 @@
-import logging
 from typing import Any
 
 from django.core.exceptions import ValidationError
@@ -12,23 +11,22 @@ from rest_framework_simplejwt.serializers import (
 )
 from rest_framework_simplejwt.token_blacklist.models import OutstandingToken
 
+from framework.logging import LoggingEntity
 from platforms.mail.notifications import SMTP
 from rekono.settings import CONFIG
 from security.authentication.tokens import MfaRequiredToken
 from security.authorization.roles import Role
 from users.models import User
 
-logger = logging.getLogger()
 
-
-class JwtAuthentication:
+class JwtAuthentication(LoggingEntity):
     user: User = None
 
     def _login(self) -> dict[str, str]:
         User.objects.invalidate_all_tokens(self.user)
         token = self.__class__.get_token(self.user)
         SMTP().login_notification(self.user)
-        logger.info(
+        self.logger.info(
             f"[Security] User {self.user.id} has logged in",
             extra={"user": self.user.id},
         )

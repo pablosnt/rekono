@@ -1,4 +1,3 @@
-import logging
 from typing import Any
 
 from django.utils import timezone
@@ -7,16 +6,15 @@ from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
 
 from framework.fields import ProtectedSecretField
+from framework.logging import LoggingEntity
 from platforms.mail.notifications import SMTP
 from platforms.telegram_app.models import TelegramChat, TelegramSettings
 from platforms.telegram_app.notifications.notifications import Telegram
 from security.cryptography.hashing import hash
 from security.validators.input_validator import Regex, Validator
 
-logger = logging.getLogger()
 
-
-class TelegramSettingsSerializer(ModelSerializer):
+class TelegramSettingsSerializer(ModelSerializer, LoggingEntity):
     token = ProtectedSecretField(
         Validator(Regex.SECRET.value, code="password").__call__,
         required=False,
@@ -39,7 +37,7 @@ class TelegramSettingsSerializer(ModelSerializer):
         return Telegram().is_available()
 
 
-class TelegramChatSerializer(ModelSerializer):
+class TelegramChatSerializer(ModelSerializer, LoggingEntity):
     class Meta:
         model = TelegramChat
         fields = (
@@ -69,7 +67,7 @@ class TelegramChatSerializer(ModelSerializer):
         validated_data["telegram_chat"].save(update_fields=["otp", "otp_expiration", "user"])
         SMTP().telegram_linked_notification(validated_data["user"])
         Telegram().welcome_message(validated_data["user"])
-        logger.info(
+        self.logger.info(
             f"[Security] User {validated_data['user'].id} has logged in the Telegram bot",
             extra={"user": validated_data["user"].id},
         )

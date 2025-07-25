@@ -1,4 +1,3 @@
-import logging
 from typing import Any, Callable
 
 from alerts.enums import AlertItem, AlertMode
@@ -11,8 +10,6 @@ from framework.platforms import BaseIntegration
 from platforms.cvecrowd.models import CveCrowdSettings
 from platforms.mail.notifications import SMTP
 from platforms.telegram_app.notifications.notifications import Telegram
-
-logger = logging.getLogger()
 
 
 class CveCrowd(BaseIntegration):
@@ -71,7 +68,7 @@ class CveCrowd(BaseIntegration):
     def monitor(self) -> None:
         self._get_trending_cves()
         if not self.trending_cves:
-            logger.warn("[CVE Crowd] No trending CVEs found")
+            self.logger.warning("[CVE Crowd] No trending CVEs found")
             return
         already_trending_queryset = Vulnerability.objects.filter(trending=True).all()
         already_trending_cves = list(already_trending_queryset.values_list("cve", flat=True))
@@ -91,7 +88,7 @@ class CveCrowd(BaseIntegration):
                 .exclude(id__in=notified_vulnerabilities)
                 .all()
             )
-            logger.info(
+            self.logger.info(
                 f"[CVE Crowd] New {vulnerabilities.count()} trending vulnerabilities found in project {alert.project.id}"
             )
             for vulnerability in vulnerabilities:

@@ -1,4 +1,3 @@
-import logging
 import os
 import threading
 from typing import Any
@@ -16,8 +15,6 @@ from findings.framework.models import Finding
 from framework.platforms import BaseNotification
 from platforms.mail.models import SMTPSettings
 from rekono.settings import CONFIG
-
-logger = logging.getLogger()
 
 
 class SMTP(BaseNotification):
@@ -66,7 +63,7 @@ class SMTP(BaseNotification):
             )
             self.backend.send_messages([message])
         except Exception as ex:
-            logger.error(f"[Mail] Error sending email message: {str(ex)}")
+            self.logger.error(f"[Mail] Error sending email message: {str(ex)}")
 
     def _notify(
         self,

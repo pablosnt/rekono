@@ -1,4 +1,3 @@
-import logging
 import os
 import re
 import subprocess
@@ -16,6 +15,7 @@ from executions.models import Execution
 from findings.framework.models import Finding
 from findings.models import Port
 from framework.enums import InputKeyword
+from framework.logging import LoggingEntity
 from framework.models import BaseInput
 from http_headers.models import HttpHeader
 from parameters.models import InputTechnology, InputVulnerability
@@ -26,10 +26,8 @@ from target_ports.models import TargetPort
 from tools.models import Intensity
 from wordlists.models import Wordlist
 
-logger = logging.getLogger()
 
-
-class BaseExecutor:
+class BaseExecutor(LoggingEntity):
     def __init__(self, execution: Execution) -> None:
         self.execution = execution
         self.intensity = (
@@ -182,7 +180,7 @@ class BaseExecutor:
         )
 
     def _run(self, environment: dict[str, Any] = os.environ.copy()) -> None:
-        logger.info(f"[Tool] Running: {' '.join(self.arguments)}")
+        self.logger.info(f"[Tool] Running: {' '.join(self.arguments)}")
         stdout = (
             self.report
             if self.execution.configuration.tool.output_format
@@ -233,7 +231,7 @@ class BaseExecutor:
         ).exists():
             self.execution.task.end = timezone.now()
             self.execution.task.save(update_fields=["end"])
-            logger.info(f"[Task] Task {self.execution.task.id} has finished")
+            self.logger.info(f"[Task] Task {self.execution.task.id} has finished")
 
     def _on_skip(self, reason: str) -> None:
         self.execution.status = Status.SKIPPED
@@ -284,7 +282,7 @@ class BaseExecutor:
                 wordlists,
             )
         except RuntimeError as error:
-            logger.error(f"[Tool] {str(error)}")
+            self.logger.error(f"[Tool] {str(error)}")
             self._on_skip(str(error))
             return
         self.environment = self._get_environment()
@@ -293,10 +291,10 @@ class BaseExecutor:
             if not CONFIG.testing:
                 self._run(self.environment)
         except (RuntimeError, Exception):
-            logger.error(f"[Tool] {self.execution.configuration.tool.name} execution finish with errors")
+            self.logger.error(f"[Tool] {self.execution.configuration.tool.name} execution finish with errors")
             self._on_error()
             self._after_running()
             return
         self._after_running()
         self._on_completed()
-        logger.info(f"[Tool] {self.execution.configuration.tool.name} execution has been completed")
+        self.logger.info(f"[Tool] {self.execution.configuration.tool.name} execution has been completed")

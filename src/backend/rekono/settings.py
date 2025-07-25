@@ -172,7 +172,7 @@ LOGGING: dict[str, Any] = {
     },
     "filters": {
         "rekono": {
-            "()": "rekono.logging.LoggingFilter",  # Custom logging filter
+            "()": "framework.logging.LoggingFilter",  # Custom logging filter
         }
     },
     "handlers": {

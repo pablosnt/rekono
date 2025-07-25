@@ -1,4 +1,3 @@
-import logging
 from datetime import datetime, timedelta
 from typing import Any, cast
 
@@ -11,6 +10,7 @@ from rest_framework_simplejwt.token_blacklist.models import (
     OutstandingToken,
 )
 
+from framework.logging import LoggingEntity
 from framework.models import BaseEncrypted
 from platforms.mail.notifications import SMTP
 from rekono.settings import CONFIG
@@ -27,10 +27,8 @@ from users.enums import Notification
 
 # Create your models here.
 
-logger = logging.getLogger()
 
-
-class RekonoUserManager(UserManager):
+class RekonoUserManager(UserManager, LoggingEntity):
     """Manager for the User model."""
 
     def generate_otp(self, model: Any = None) -> str:
@@ -54,7 +52,7 @@ class RekonoUserManager(UserManager):
         group = Group.objects.get(name=role.value)  # Get user group related to the role
         user.groups.clear()  # Clean user groups
         user.groups.set([group])  # Set user group
-        logger.info(f"[User] Role {role} has been assigned to user {user.id}")
+        self.logger.info(f"[User] Role {role} has been assigned to user {user.id}")
         return user
 
     def send_invitation(self, user: Any) -> None:
@@ -78,7 +76,7 @@ class RekonoUserManager(UserManager):
         user = User.objects.create(email=email, is_active=None)
         self.assign_role(user, role)
         self.send_invitation(user)
-        logger.info(f"[User] User {user.id} has been invited with role {role}")
+        self.logger.info(f"[User] User {user.id} has been invited with role {role}")
         return user
 
     def create_user(self, user: Any, username: str, first_name: str, last_name: str, password: str) -> Any:
@@ -101,7 +99,7 @@ class RekonoUserManager(UserManager):
                 "otp_expiration",
             ]
         )
-        logger.info(
+        self.logger.info(
             f"[User] User {user.id} has been created",
             extra={"user": user.id},
         )
@@ -121,7 +119,7 @@ class RekonoUserManager(UserManager):
         extra_fields["is_active"] = True
         user = super().create_superuser(username, email, password, **extra_fields)
         self.assign_role(user, cast(Role, Role.ADMIN))
-        logger.info(f"[User] Superuser {user.id} has been created")
+        self.logger.info(f"[User] Superuser {user.id} has been created")
         return user
 
     def enable_user(self, user: Any) -> Any:
@@ -139,7 +137,7 @@ class RekonoUserManager(UserManager):
         user.is_active = True
         user.save(update_fields=["otp", "otp_expiration", "is_active"])
         SMTP().enable_user_account(user, plain_otp)
-        logger.info(f"[User] User {user.id} has been enabled")
+        self.logger.info(f"[User] User {user.id} has been enabled")
         return user
 
     def disable_user(self, user: Any) -> Any:
@@ -158,7 +156,7 @@ class RekonoUserManager(UserManager):
         user.projects.clear()  # Clear its projects
         user.save(update_fields=["otp", "otp_expiration", "is_active"])
         ApiToken.objects.filter(user=user).delete()
-        logger.info(f"[User] User {user.id} has been disabled")
+        self.logger.info(f"[User] User {user.id} has been disabled")
         return user
 
     def _update_otp(
@@ -194,7 +192,7 @@ class RekonoUserManager(UserManager):
         # nosemgrep: python.django.security.audit.unvalidated-password.unvalidated-password
         user.set_password(password)
         user.save(update_fields=["password"])
-        logger.info(
+        self.logger.info(
             f"[Security] User {user.id} changed his password",
             extra={"user": user.id},
         )

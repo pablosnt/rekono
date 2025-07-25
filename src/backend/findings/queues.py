@@ -1,5 +1,3 @@
-import logging
-
 from django_rq import job
 from rq.job import Job
 
@@ -26,15 +24,13 @@ from platforms.nvdnist.integrations import NvdNist
 from platforms.telegram_app.notifications.notifications import Telegram
 from settings.models import Settings
 
-logger = logging.getLogger()
-
 
 class FindingsQueue(BaseQueue):
     name = "findings"
 
     def enqueue(self, execution: Execution, findings: list[Finding]) -> Job:
         job = super().enqueue(execution=execution, findings=findings)
-        logger.info(f"[Findings] {len(findings)} findings from execution {execution.id} have been enqueued")
+        self.logger.info(f"[Findings] {len(findings)} findings from execution {execution.id} have been enqueued")
         return job
 
     @staticmethod

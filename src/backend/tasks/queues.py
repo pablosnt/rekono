@@ -1,4 +1,3 @@
-import logging
 from datetime import timedelta
 from typing import Any
 
@@ -17,8 +16,6 @@ from tasks.models import Task
 from tools.enums import Intensity as IntensityValue
 from tools.models import Intensity
 
-logger = logging.getLogger()
-
 
 class TasksQueue(BaseQueue):
     name = "tasks"
@@ -33,7 +30,7 @@ class TasksQueue(BaseQueue):
                 task=task,
                 on_success=self._scheduled_callback,
             )
-            logger.info(f"[Task] Task {task.id} will be enqueued at {task.scheduled_at}")
+            self.logger.info(f"[Task] Task {task.id} will be enqueued at {task.scheduled_at}")
         else:
             task.enqueued_at = timezone.now()
             job = queue.enqueue(
@@ -41,7 +38,7 @@ class TasksQueue(BaseQueue):
                 task=task,
                 on_success=self._scheduled_callback,
             )
-            logger.info(f"[Task] Task {task.id} has been enqueued")
+            self.logger.info(f"[Task] Task {task.id} has been enqueued")
         task.rq_job_id = job.id
         task.save(update_fields=["enqueued_at", "rq_job_id"])
         return job
@@ -160,6 +157,6 @@ class TasksQueue(BaseQueue):
                 task=result,
                 on_success=instance._scheduled_callback,
             )
-            logger.info(f"[Task] Scheduled task {result.id} has been enqueued again")
+            BaseQueue.logger.info(f"[Task] Scheduled task {result.id} has been enqueued again")
             new_task.rq_job_id = job.id
             new_task.save(update_fields=["rq_job_id"])

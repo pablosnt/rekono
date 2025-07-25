@@ -1,5 +1,3 @@
-import logging
-
 import rq
 from django.utils import timezone
 from django_rq import job
@@ -16,8 +14,6 @@ from target_ports.models import TargetPort
 from tools.executors.base import BaseExecutor
 from tools.parsers.base import BaseParser
 from wordlists.models import Wordlist
-
-logger = logging.getLogger()
 
 
 class ExecutionsQueue(BaseQueue):
@@ -46,7 +42,7 @@ class ExecutionsQueue(BaseQueue):
             depends_on=dependencies,
             at_front=at_front,
         )
-        logger.info(
+        self.logger.info(
             f"[Execution] Execution {execution.id} ({execution.configuration.tool.name} - "
             f"{execution.configuration.name}) has been enqueued"
         )
@@ -122,10 +118,10 @@ class ExecutionsQueue(BaseQueue):
             )
             if executor.check_arguments(e.get(0, []), e.get(1, []), e.get(2, []), e.get(3, []), e.get(4, []))
         ]
-        logger.info(f"[Execution] New {len(executions) - 1} executions from previous findings")
+        BaseQueue.logger.info(f"[Execution] New {len(executions) - 1} executions from previous findings")
         new_jobs = []
         for execution in executions[1:]:
-            logger.info("NEW EXECUTION " + str(execution))
+            BaseQueue.logger.info("NEW EXECUTION " + str(execution))
             new_execution = Execution.objects.create(
                 task=executor.execution.task,
                 configuration=executor.execution.configuration,
@@ -142,7 +138,7 @@ class ExecutionsQueue(BaseQueue):
             )
             new_jobs.append(job.id)
         if new_jobs:
-            logger.info("NEW JOB " + str(new_jobs))
+            BaseQueue.logger.info("NEW JOB " + str(new_jobs))
             registry = DeferredJobRegistry(queue=queue)
             for pending_job_id in registry.get_job_ids():
                 pending_job = queue.fetch_job(pending_job_id)

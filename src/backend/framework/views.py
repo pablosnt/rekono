@@ -12,12 +12,13 @@ from rest_framework.response import Response
 from rest_framework.serializers import Serializer
 from rest_framework.viewsets import ModelViewSet
 
+from framework.logging import LoggingEntity
 from framework.models import BaseModel
 from projects.models import Project
 from security.authorization.permissions import IsAuditor
 
 
-class BaseViewSet(ModelViewSet):
+class BaseViewSet(ModelViewSet, LoggingEntity):
     ordering = ["-id"]
     # Required to remove PATCH method
     http_method_names = ["get", "post", "put", "delete"]

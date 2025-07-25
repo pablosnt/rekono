@@ -1,10 +1,10 @@
-import logging
 from typing import Any
 
 from asgiref.sync import sync_to_async
 from telegram import Update
 from telegram.ext import CallbackContext, CommandHandler, ConversationHandler
 
+from framework.logging import LoggingEntity
 from platforms.telegram_app.bot.enums import Context, Section
 from platforms.telegram_app.bot.framework import BaseTelegramBot
 from platforms.telegram_app.models import TelegramChat
@@ -12,10 +12,8 @@ from rekono.settings import DESCRIPTION
 from security.cryptography.hashing import hash
 from users.models import User
 
-logger = logging.getLogger()
 
-
-class BaseCommand(CommandHandler, BaseTelegramBot):
+class BaseCommand(CommandHandler, BaseTelegramBot, LoggingEntity):
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(command=self.get_name(), callback=self.execute_command)
 
@@ -81,7 +79,7 @@ class Start(BaseCommand):
     async def _execute_command(self, update: Update, context: CallbackContext) -> int | None:
         await super()._execute_command(update, context)
         telegram_chat, plain_otp = await self._update_or_create_telegram_chat_async(update.effective_chat.id)
-        logger.info(f"[Security] New login request using the Telegram bot from the chat {telegram_chat.chat_id}")
+        self.logger.info(f"[Security] New login request using the Telegram bot from the chat {telegram_chat.chat_id}")
         await self._reply(
             update,
             """
@@ -106,7 +104,7 @@ class Logout(BaseCommand):
         chat = TelegramChat.objects.filter(chat_id=chat_id).first()
         if chat:
             if chat.user:
-                logger.info(
+                self.logger.info(
                     f"[Security] User {chat.user.id} has logged out from the Telegram bot",
                     extra={"user": chat.user},
                 )

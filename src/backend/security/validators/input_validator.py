@@ -1,4 +1,3 @@
-import logging
 import re
 from enum import Enum
 from re import RegexFlag
@@ -8,7 +7,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from django.utils import timezone
 
-logger = logging.getLogger()
+from framework.logging import LoggingEntity
 
 
 class Regex(Enum):
@@ -24,7 +23,7 @@ class Regex(Enum):
     INJECTION = r"[;\"'&<>$]+"
 
 
-class Validator(RegexValidator):
+class Validator(RegexValidator, LoggingEntity):
     def __init__(
         self,
         regex: Any | None,
@@ -44,7 +43,7 @@ class Validator(RegexValidator):
         invalid_input = not bool(regex_matches) if self.inverse_match else bool(regex_matches)
         is_injection = bool(re.findall(Regex.INJECTION.value, value)) if self.deny_injections else False
         if invalid_input or is_injection:
-            logger.warning(f"[Security] Value '{value}' doesn't match the allowed regex")
+            self.logger.warning(f"[Security] Value '{value}' doesn't match the allowed regex")
             raise ValidationError(self.message, code=self.code, params={"value": value})
 
 
