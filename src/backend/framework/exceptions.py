@@ -1,3 +1,5 @@
+"""This module defines custom exception classes."""
+
 from typing import Any
 
 from django.db.utils import IntegrityError

@@ -1,3 +1,5 @@
+"""This module contains common view logic and API endpoints."""
+
 from functools import cached_property
 from typing import Any
 

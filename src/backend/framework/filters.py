@@ -1,3 +1,5 @@
+"""This module implements filtering utilities."""
+
 from typing import Any
 
 from django.db.models import Q, QuerySet

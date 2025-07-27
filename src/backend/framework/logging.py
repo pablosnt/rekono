@@ -1,3 +1,5 @@
+"""This module defines logging utilities."""
+
 import logging
 from typing import Any
 

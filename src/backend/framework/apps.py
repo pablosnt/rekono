@@ -1,3 +1,5 @@
+"""This module provides base classes for Django applications."""
+
 from pathlib import Path
 from typing import Any
 

@@ -1,3 +1,5 @@
+"""This module provides platform integration logic and related utilities."""
+
 from functools import cached_property
 from typing import Any, Callable
 from urllib.parse import urlparse

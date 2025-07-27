@@ -1,3 +1,5 @@
+"""This module contains common enumerations."""
+
 from enum import Enum
 
 

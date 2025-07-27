@@ -1,3 +1,5 @@
+"""This module defines the core database models and ORM logic."""
+
 from dataclasses import dataclass
 from functools import cached_property
 from typing import Any, Callable, cast

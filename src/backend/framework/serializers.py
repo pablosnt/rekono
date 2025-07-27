@@ -1,3 +1,5 @@
+"""This module provides common serializers."""
+
 from typing import Any
 
 from django.db.models import Q

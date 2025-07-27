@@ -1,3 +1,5 @@
+"""This module defines custom serializer fields."""
+
 from typing import Any, Callable
 
 from django.core.exceptions import ValidationError

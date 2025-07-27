@@ -1,3 +1,5 @@
+"""This module provides queue management and task scheduling utilities."""
+
 import copy
 from dataclasses import dataclass
 from functools import cached_property
