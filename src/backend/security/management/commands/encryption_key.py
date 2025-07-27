@@ -31,5 +31,4 @@ class BaseEncryptionKeyCommand:
                     entity.save(update_fields=[entity._encrypted_field])
 
     def _configure_encryption_key(self, new_encryption_key: str) -> None:
-        CONFIG.encryption_key = new_encryption_key
-        CONFIG._update_config_in_file(Property.ENCRYPTION_KEY.value[1], new_encryption_key)
+        CONFIG._encryption_key.update(CONFIG, new_encryption_key)
