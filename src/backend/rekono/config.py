@@ -1,4 +1,6 @@
 """
+Rekono configuration management.
+
 Configuration management for the Rekono platform, including environment
 variable handling, YAML config file parsing, and property management for
 application settings.
@@ -22,6 +24,8 @@ from security.cryptography.random import generate_random_value
 @dataclass
 class Property:
     """
+    Rekono configuration property.
+
     Represents a configuration property that can be loaded from environment
     variables, files, or defaults.
 
@@ -37,7 +41,7 @@ class Property:
 
     def read(self, file_config: dict[str, Any] = {}) -> Any:
         """
-        Reads the property value from environment, file, or default.
+        Read the property value from environment, file, or default.
 
         Args:
             file_config (dict[str, Any]): The configuration loaded from file.
@@ -45,9 +49,12 @@ class Property:
         Returns:
             Any: The resolved property value.
         """
+        # Priority: environment variable > config file > default value
         value = self.default
         if self.env and os.getenv(self.env):
             value = os.getenv(self.env)
+            # If the default is a list, try to split the env value using common
+            # separators
             if isinstance(self.default, list):
                 list_value = []
                 for separator in [" ", ",", ";"]:
@@ -56,6 +63,7 @@ class Property:
                         break
                 value = list_value or [value]
         elif self.file and file_config:
+            # Traverse nested config dict using dot-separated path
             found = True
             value_from_file = file_config
             for key in file_config.split("."):
@@ -65,13 +73,14 @@ class Property:
                 value_from_file = value_from_file.get(key, {})
             if found:
                 value = value_from_file
+        # Convert to bool if needed
         if isinstance(self.default, bool) and not isinstance(value, bool):
             value = str(value).lower() == "true"
         return value
 
     def update(self, rekono_config: "RekonoConfig", value: Any) -> dict[str, Any]:
         """
-        Updates the property value in the Rekono config file.
+        Update the property value in the Rekono config file.
 
         Args:
             rekono_config (RekonoConfig): The RekonoConfig instance.
@@ -80,14 +89,17 @@ class Property:
         Returns:
             dict[str, Any]: The updated configuration dictionary.
         """
+        # Deep copy the config to avoid mutating the original
         config = deepcopy(rekono_config.config_from_file)
         config_iterator = config
         property_path = self.file.split(".")
         for index, key in enumerate(property_path):
             is_last_path = index + 1 == len(property_path)
+            # Traverse or create nested dictionaries as needed
             if key not in config_iterator or is_last_path:
                 config_iterator[key] = value if is_last_path else {}
             config_iterator = config_iterator[key]
+        # Write the updated config back to YAML
         with rekono_config.config_file.open("w") as _file:
             yaml.dump(config, _file, default_flow_style=False)
 
@@ -138,6 +150,8 @@ class RekonoConfig:
         Returns:
             Path: The home directory path.
         """
+        # Use the environment or config value if it exists and is a directory,
+        # otherwise fall back to the parent of the backend directory
         home_value = Path(self._home.read())
         return home_value if home_value.is_dir() else self.base_dir.parent.parent
 
@@ -149,6 +163,7 @@ class RekonoConfig:
         Returns:
             Path: The working home directory.
         """
+        # In test mode, use a dedicated test home directory
         return self._initialize_directory(self.base_dir / "tests" / "home" if self.testing else self.pro_home)
 
     @cached_property
@@ -159,6 +174,7 @@ class RekonoConfig:
         Returns:
             Path: The config file path.
         """
+        # Search for the first config file that exists in the home directory
         for filename in [
             "config.yaml",
             "config.yml",
@@ -178,6 +194,7 @@ class RekonoConfig:
         Returns:
             Path: The config file path.
         """
+        # In test mode, copy the config file to the test home directory
         if self.testing:
             shutil.copy(self.pro_config_file, self.home)
             return self.home / self.pro_config_file.name
@@ -191,6 +208,7 @@ class RekonoConfig:
         Returns:
             dict[str, Any]: The loaded configuration dictionary.
         """
+        # Loads YAML from disk every time this property is accessed
         with self.config_file.open("r") as file:
             return yaml.safe_load(file)
 
@@ -202,6 +220,7 @@ class RekonoConfig:
         Returns:
             Path: The reports directory path.
         """
+        # Ensure the reports directory exists
         return self._initialize_directory(self.home / "reports")
 
     @property
@@ -212,6 +231,7 @@ class RekonoConfig:
         Returns:
             Path: The generated reports directory path.
         """
+        # Ensure the generated reports directory exists
         return self._initialize_directory(self.reports / "generated")
 
     @property
@@ -222,6 +242,7 @@ class RekonoConfig:
         Returns:
             Path: The wordlists directory path.
         """
+        # Ensure the wordlists directory exists
         return self._initialize_directory(self.home / "wordlists")
 
     @property
@@ -232,6 +253,7 @@ class RekonoConfig:
         Returns:
             Path: The logs directory path.
         """
+        # Ensure the logs directory exists
         return self._initialize_directory(self.home / "logs")
 
     @property
@@ -493,7 +515,7 @@ class RekonoConfig:
 
     def _initialize_directory(self, path: Path) -> Path:
         """
-        Ensures the directory exists at the given path.
+        Ensure the directory exists at the given path.
 
         Args:
             path (Path): The directory path to initialize.
@@ -501,5 +523,6 @@ class RekonoConfig:
         Returns:
             Path: The initialized directory path.
         """
+        # Create the directory if it does not exist
         path.mkdir(exist_ok=True)
         return path
