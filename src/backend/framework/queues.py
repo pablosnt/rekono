@@ -197,6 +197,7 @@ class BaseQueue(LoggingEntity):
                 findings_by_type[finding.input_type] = [finding]
             else:
                 findings_by_type[finding.input_type].append(finding)
+        # Sort findings by the number of related input types (to prioritize those with fewer dependencies)
         return dict(
             sorted(
                 findings_by_type.items(),
@@ -231,8 +232,10 @@ class BaseQueue(LoggingEntity):
             separate executions.
         """
         input_types_used = set()
+        # Start with a single empty execution batch
         executions: list[dict[int, list[BaseInput]]] = [ExecutionParametersToEnqueue()]
         findings_by_type = BaseQueue._get_findings_by_type(findings)
+        # Iterate over all input sources (findings, ports, vulnerabilities, etc.)
         for field, source in [("findings", _findings) for _findings in findings_by_type.values()] + [
             ("target_ports", target_ports),
             ("input_vulnerabilities", input_vulnerabilities),
@@ -242,15 +245,20 @@ class BaseQueue(LoggingEntity):
             if not source:
                 continue
             input_type = source[0].input_type
+            # Avoid processing the same input type more than once
             if input_type in input_types_used:
                 continue
+            # For each tool input that matches the input type, ordered by priority order
             for tool_input in Input.objects.filter(argument__tool=tool, type=input_type).order_by("order"):
+                # Filter base inputs according to the tool input's filter logic
                 filtered_base_inputs = [bi for bi in source if bi.filter(tool_input)]
                 if not filtered_base_inputs:
                     continue
+                # Find related input types (dependencies) for this input type
                 related_input_types = [i for i in input_type.get_related_input_types() if i in findings_by_type]
                 for execution_index, execution in enumerate(copy.deepcopy(executions)):
                     base_inputs = filtered_base_inputs.copy()
+                    # If this is a finding and has related input types, only include those related to the current execution
                     if field == "findings" and related_input_types:
                         base_inputs = []
                         for related_input_type in related_input_types:
@@ -263,9 +271,11 @@ class BaseQueue(LoggingEntity):
                         if not base_inputs:
                             continue
                     input_types_used.add(input_type)
+                    # If the tool argument allows multiple values, extend the execution batch
                     if tool_input.argument.multiple:
                         executions[execution_index].extend(base_inputs)
                     else:
+                        # For single-value arguments, create a new execution batch for each additional value
                         original_execution = copy.deepcopy(execution)
                         executions[execution_index].append(field, base_inputs[0])
                         for base_input in base_inputs[1:]:

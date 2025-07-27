@@ -162,19 +162,23 @@ class BaseInput(BaseModel):
             Returns:
                 True if the filter condition is met, False otherwise.
             """
+            # If a processor is defined, preprocess the value before filtering
             if self.processor:
                 value = self.processor(value)
             try:
+                # If the filter type is a Django TextChoices enum, compare by name
                 return (
                     issubclass(self.type, TextChoices)
-                    and self._compare(expected.upper(), cast(TextChoices, filter.type)(value).name, is_negative)
+                    and self._compare(expected.upper(), cast(TextChoices, self.type)(value).name, is_negative)
                 ) or (
-                    filter.type in [str, int]
+                    # For string or integer types, compare as lowercased strings
+                    self.type in [str, int]
                     and self._compare(
                         str(expected).strip().lower(), str(value).strip().lower(), is_negative, self.contains
                     )
                 )
             except (ValueError, KeyError):
+                # If conversion fails, the filter does not match
                 return False
 
         def _compare(self, expected: str, value: str, negative: bool = False, contains: bool = False) -> bool:
@@ -315,6 +319,7 @@ class BaseInput(BaseModel):
             filter_conclusion = False
             # Try each configured filter against this condition
             for filter in self._filters:
+                # Each filter is responsible for checking if the condition matches
                 _conclusion = filter.filter(condition, getattr(self, filter.field), is_negative)
                 if _conclusion:
                     # For OR operations: return immediately on first match
