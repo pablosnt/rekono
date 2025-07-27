@@ -1,4 +1,6 @@
 import copy
+from dataclasses import dataclass
+from functools import cached_property
 from typing import Any
 
 import django_rq
@@ -15,32 +17,70 @@ from tools.models import Input, Tool
 from wordlists.models import Wordlist
 
 
+@dataclass
+class ExecutionParametersToEnqueue:
+    findings: list[Finding] = []
+    target_ports: list[TargetPort] = []
+    input_vulnerabilities: list[InputVulnerability] = []
+    input_technologies: list[InputTechnology] = []
+    wordlists: list[Wordlist] = []
+
+    def append(self, field: str, value: BaseInput) -> None:
+        setattr(self, field, getattr(self, field) + [value])
+
+    def extend(self, field: str, values: list[BaseInput]) -> None:
+        setattr(self, field, getattr(self, field) + values)
+
+    def __eq__(self, other: Any) -> bool:
+        if not isinstance(other, ExecutionParametersToEnqueue):
+            return False
+        return (
+            self.findings == other.findings
+            and self.target_ports == other.target_ports
+            and self.input_vulnerabilities == other.input_vulnerabilities
+            and self.input_technologies == other.input_technologies
+            and self.wordlists == other.wordlists
+        )
+
+    def __hash__(self) -> int:
+        return hash(
+            (
+                tuple(self.findings),
+                tuple(self.target_ports),
+                tuple(self.input_vulnerabilities),
+                tuple(self.input_technologies),
+                tuple(self.wordlists),
+            )
+        )
+
+
 class BaseQueue(LoggingEntity):
     name = ""
 
-    def _get_queue(self) -> Queue:
+    @cached_property
+    def queue(self) -> Queue:
         return django_rq.get_queue(self.name)
 
-    def _fetch_job(self, job_id: str) -> Job | None:
+    def fetch_job(self, job_id: str) -> Job | None:
         try:
-            return self._get_queue().fetch_job(job_id)
+            return self.queue.fetch_job(job_id)
         except Exception:
             return None
 
     def cancel_job(self, job_id: str) -> None:
-        job = self._fetch_job(job_id)
+        job = self.fetch_job(job_id)
         if job:
             self.logger.info(f"[{self.name}] Job {job_id} has been cancelled")
             job.cancel()
 
     def delete_job(self, job_id: str) -> None:
-        job = self._fetch_job(job_id)
+        job = self.fetch_job(job_id)
         if job:
             self.logger.info(f"[{self.name}] Job {job_id} has been deleted")
             job.delete()
 
     def enqueue(self, *args: Any, **kwargs: Any) -> Job:
-        return self._get_queue().enqueue(self.consume, *args, **kwargs)
+        return self.queue.enqueue(self.consume, *args, **kwargs)
 
     @staticmethod
     def consume(**kwargs: Any) -> Any:
@@ -52,11 +92,10 @@ class BaseQueue(LoggingEntity):
     ) -> dict[InputType, list[Finding]]:
         findings_by_type = {}
         for finding in findings:
-            input_type = finding.input_type
-            if input_type not in findings_by_type:
-                findings_by_type[input_type] = [finding]
+            if finding.input_type not in findings_by_type:
+                findings_by_type[finding.input_type] = [finding]
             else:
-                findings_by_type[input_type].append(finding)
+                findings_by_type[finding.input_type].append(finding)
         return dict(
             sorted(
                 findings_by_type.items(),
@@ -65,65 +104,55 @@ class BaseQueue(LoggingEntity):
         )
 
     @staticmethod
-    def _calculate_executions(
+    def calculate_executions(
         tool: Tool,
         findings: list[Finding],
         target_ports: list[TargetPort],
         input_vulnerabilities: list[InputVulnerability],
         input_technologies: list[InputTechnology],
         wordlists: list[Wordlist],
-    ) -> list[dict[int, list[BaseInput]]]:
-        executions: list[dict[int, list[BaseInput]]] = [{0: []}]
+    ) -> list[ExecutionParametersToEnqueue]:
         input_types_used = set()
+        executions: list[dict[int, list[BaseInput]]] = [ExecutionParametersToEnqueue()]
         findings_by_type = BaseQueue._get_findings_by_type(findings)
-        for index, input_type, source in [(0, t, list(f)) for t, f in (findings_by_type or {}).items()] + [
-            (i + 1, None, p)
-            for i, p in enumerate(
-                [
-                    target_ports,
-                    input_vulnerabilities,
-                    input_technologies,
-                    wordlists,
-                ]
-            )
+        for field, source in [("findings", _findings) for _findings in findings_by_type.values()] + [
+            ("target_ports", target_ports),
+            ("input_vulnerabilities", input_vulnerabilities),
+            ("input_technologies", input_technologies),
+            ("wordlists", wordlists),
         ]:
             if not source:
                 continue
-            if not input_type:
-                input_type = source[0].input_type
-                if input_type in input_types_used:
-                    continue
+            input_type = source[0].input_type
+            if input_type in input_types_used:
+                continue
             for tool_input in Input.objects.filter(argument__tool=tool, type=input_type).order_by("order"):
                 filtered_base_inputs = [bi for bi in source if bi.filter(tool_input)]
                 if not filtered_base_inputs:
                     continue
                 related_input_types = [i for i in input_type.get_related_input_types() if i in findings_by_type]
                 for execution_index, execution in enumerate(copy.deepcopy(executions)):
-                    if not executions[execution_index].get(index):
-                        executions[execution_index][index] = []
                     base_inputs = filtered_base_inputs.copy()
-                    if index == 0 and related_input_types:
+                    if field == "findings" and related_input_types:
                         base_inputs = []
                         for related_input_type in related_input_types:
                             base_inputs.extend(
                                 bi
                                 for bi in filtered_base_inputs
-                                if getattr(bi, related_input_type.name.lower()) in execution[index]
+                                if getattr(bi, related_input_type.name.lower()) in execution.findings
                                 and bi not in base_inputs
                             )
                         if not base_inputs:
                             continue
                     input_types_used.add(input_type)
                     if tool_input.argument.multiple:
-                        executions[execution_index][index].extend(base_inputs)
+                        executions[execution_index].extend(base_inputs)
                     else:
                         original_execution = copy.deepcopy(execution)
-                        executions[execution_index][index].append(base_inputs[0])
+                        executions[execution_index].append(field, base_inputs[0])
                         for base_input in base_inputs[1:]:
-                            executions.append(copy.deepcopy(original_execution))
-                            if not executions[-1].get(index):
-                                executions[-1][index] = [base_input]
-                            else:
-                                executions[-1][index].append(base_input)
+                            new_execution = copy.deepcopy(original_execution)
+                            new_execution.append(field, base_input)
+                            executions.append(new_execution)
                 break  # One valid input type is enough
         return executions

@@ -5,6 +5,7 @@ from executions.models import Execution
 from findings.enums import HostOS, PathType, PortStatus, Protocol
 from findings.framework.models import Finding
 from findings.models import Host, Path, Port
+from framework.queues import ExecutionParametersToEnqueue
 from parameters.models import InputTechnology, InputVulnerability
 from processes.models import Process, Step
 from target_ports.models import TargetPort
@@ -65,31 +66,33 @@ class BaseQueueTest(QueueTest):
 
     def test_calculate_executions_from_findings(self) -> None:
         findings = self._setup_multiple_findings(True)
-        executions = self.queue._calculate_executions(self.fake_tool, findings, [], [], [], [])
-        expected = []
-        last_expected = []
+        expected = last_expected = []
         for host_index in range(1, self.number_of_hosts + 1):
-            item = {0: [getattr(self, f"host{host_index}")]}
+            item = ExecutionParametersToEnqueue(findings=[getattr(self, f"host{host_index}")])
             for port_index in range(1, self.number_of_ports_per_host + 1):
-                item[0].append(getattr(self, f"port{host_index}{port_index}"))
+                item.append("findings", getattr(self, f"port{host_index}{port_index}"))
             new_item = copy.deepcopy(item)
-            new_item[0].append(getattr(self, f"path{host_index}11"))
+            new_item.append("findings", getattr(self, f"path{host_index}11"))
             expected.append(new_item)
             for port_index in range(1, self.number_of_ports_per_host + 1):
                 for path_index in range(1, self.number_of_paths_per_port + 1):
                     if port_index == 1 and path_index == 1:
                         continue
                     new_item = copy.deepcopy(item)
-                    new_item[0].append(getattr(self, f"path{host_index}{port_index}{path_index}"))
+                    new_item.append("findings", getattr(self, f"path{host_index}{port_index}{path_index}"))
                     last_expected.append(new_item)
-        self.assertEqual(expected + last_expected, executions)
+        self.assertEqual(
+            expected + last_expected, self.queue.calculate_executions(self.fake_tool, findings, [], [], [], [])
+        )
 
     def test_calculate_executions_from_only_hosts(self) -> None:
-        findings = self._setup_multiple_findings(False)
-        executions = self.queue._calculate_executions(self.fake_tool, findings, [], [], [], [])
+        findings = self._setup_multiple_findings(True)
         self.assertEqual(
-            [{0: [getattr(self, f"host{h}")]} for h in range(1, self.number_of_hosts + 1)],
-            executions,
+            [
+                ExecutionParametersToEnqueue(findings=[getattr(self, f"host{h}")])
+                for h in range(1, self.number_of_hosts + 1)
+            ],
+            self.queue.calculate_executions(self.fake_tool, findings, [], [], [], []),
         )
 
     def test_calculate_executions_user_provided_entities(self) -> None:
@@ -103,11 +106,10 @@ class BaseQueueTest(QueueTest):
             vulnerabilities.append(InputVulnerability.objects.create(cve=self.input_vulnerability.cve + f"{index}"))
             technologies.append(
                 InputTechnology.objects.create(
-                    name=self.input_technology.name + f"{index}",
-                    version=self.input_technology.version,
+                    name=self.input_technology.name + f"{index}", version=self.input_technology.version
                 )
             )
-        executions = self.queue._calculate_executions(
+        executions = self.queue.calculate_executions(
             self.fake_tool,
             [],
             target_ports,
@@ -115,20 +117,19 @@ class BaseQueueTest(QueueTest):
             technologies,
             [self.wordlist],
         )
-        expected = []
-        last_exected = []
-        base_item = {0: [], 1: target_ports, 4: [self.wordlist]}
+        expected = last_expected = []
+        base_item = ExecutionParametersToEnqueue(findings=[], target_ports=target_ports, wordlists=[self.wordlist])
         for vulnerability in vulnerabilities:
             item = copy.deepcopy(base_item)
-            item[2] = [vulnerability]
+            item.append("input_vulnerabilities", vulnerability)
             new_item = copy.deepcopy(item)
-            new_item[3] = [technologies[0]]
-            expected.append(dict(sorted(copy.deepcopy(new_item).items())))
+            new_item.append("input_technologies", technologies[0])
+            expected.append(new_item)
             for technology in technologies[1:]:
                 new_item = copy.deepcopy(item)
-                new_item[3] = [technology]
-                last_exected.append(dict(sorted(copy.deepcopy(new_item).items())))
-        self.assertEqual(expected + last_exected, executions)
+                new_item.append("input_technologies", technology)
+                last_expected.append(new_item)
+        self.assertEqual(expected + last_expected, executions)
 
 
 class TasksQueueTest(QueueTest):

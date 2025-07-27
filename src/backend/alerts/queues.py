@@ -15,7 +15,7 @@ class MonitorQueue(BaseQueue):
 
     def enqueue(self, **kwargs: Any) -> Job:
         settings = MonitorSettings.objects.first()
-        job = self._get_queue().enqueue(self.consume, on_success=self._scheduled_callback)
+        job = self.queue.enqueue(self.consume, on_success=self._scheduled_callback)
         settings.rq_job_id = job.id
         settings.save(update_fields=["rq_job_id"])
         return job
@@ -34,7 +34,7 @@ class MonitorQueue(BaseQueue):
     def _scheduled_callback(job: Any, connection: Any, *args: Any, **kwargs: Any) -> None:
         settings = MonitorSettings.objects.first()
         instance = MonitorQueue()
-        job = instance._get_queue().enqueue_at(
+        job = instance.queue().enqueue_at(
             settings.last_monitor + timedelta(hours=settings.hour_span),
             instance.consume,
             on_success=instance._scheduled_callback,

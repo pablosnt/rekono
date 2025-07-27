@@ -8,7 +8,7 @@ from executions.models import Execution
 from findings.framework.models import Finding
 from findings.queues import FindingsQueue
 from framework.models import BaseInput
-from framework.queues import BaseQueue
+from framework.queues import BaseQueue, ExecutionParametersToEnqueue
 from parameters.models import InputTechnology, InputVulnerability
 from target_ports.models import TargetPort
 from tools.executors.base import BaseExecutor
@@ -30,7 +30,7 @@ class ExecutionsQueue(BaseQueue):
         dependencies: list[Job] = [],
         at_front: bool = False,
     ) -> Job:
-        job = self._get_queue().enqueue(
+        job = self.queue().enqueue(
             self.consume,
             execution=execution,
             findings=findings,
@@ -77,12 +77,12 @@ class ExecutionsQueue(BaseQueue):
                 wordlists,
                 current_job,
             )
-            findings = _execution.get(0, [])
-            target_ports = _execution.get(1, [])
-            input_vulnerabilities = _execution.get(2, [])
-            input_technologies = _execution.get(3, [])
-            wordlists = _execution.get(4, [])
-        executor.execute(findings, target_ports, input_vulnerabilities, input_technologies, wordlists)
+            findings = _execution.findings
+            target_ports = _execution.target_ports
+            input_vulnerabilities = _execution.input_vulnerabilities
+            input_technologies = _execution.input_technologies
+            wordlists = _execution.wordlists
+        executor.execute(_execution.findings, target_ports, input_vulnerabilities, input_technologies, wordlists)
         parser: BaseParser = execution.configuration.tool.get_parser_class()(executor, execution.output_plain)
         parser.parse()
         FindingsQueue().enqueue(execution, parser.findings)
@@ -96,19 +96,21 @@ class ExecutionsQueue(BaseQueue):
         input_technologies: list[InputTechnology],
         wordlists: list[Wordlist],
         current_job: Job,
-    ) -> dict[int, list[BaseInput]]:
+    ) -> ExecutionParametersToEnqueue:
         findings = []
         self = ExecutionsQueue()
-        queue = self._get_queue()
+        queue = self.queue()
         for dependency_id in current_job._dependency_ids:
             dependency = queue.fetch_job(dependency_id)
             if dependency and dependency.result:
                 findings.extend(dependency.result[1])
         if not findings:
-            return {}
+            return ExecutionParametersToEnqueue(
+                findings, target_ports, input_vulnerabilities, input_technologies, wordlists
+            )
         executions = [
             e
-            for e in ExecutionsQueue._calculate_executions(
+            for e in ExecutionsQueue.calculate_executions(
                 executor.execution.configuration.tool,
                 findings,
                 target_ports,
@@ -116,29 +118,29 @@ class ExecutionsQueue(BaseQueue):
                 input_technologies,
                 wordlists,
             )
-            if executor.check_arguments(e.get(0, []), e.get(1, []), e.get(2, []), e.get(3, []), e.get(4, []))
+            if executor.check_arguments(
+                e.findings, e.target_ports, e.input_vulnerabilities, e.input_technologies, e.wordlists
+            )
         ]
         BaseQueue.logger.info(f"[Execution] New {len(executions) - 1} executions from previous findings")
         new_jobs = []
         for execution in executions[1:]:
-            BaseQueue.logger.info("NEW EXECUTION " + str(execution))
             new_execution = Execution.objects.create(
                 task=executor.execution.task,
                 configuration=executor.execution.configuration,
             )
             job = self.enqueue(
                 new_execution,
-                execution.get(0, []),
-                execution.get(1, []),
-                execution.get(2, []),
-                execution.get(3, []),
-                execution.get(4, []),
+                execution.findings,
+                execution.target_ports,
+                execution.input_vulnerabilities,
+                execution.input_technologies,
+                execution.wordlists,
                 # At queue start, because it could be a dependency of next jobs
                 at_front=True,
             )
             new_jobs.append(job.id)
         if new_jobs:
-            BaseQueue.logger.info("NEW JOB " + str(new_jobs))
             registry = DeferredJobRegistry(queue=queue)
             for pending_job_id in registry.get_job_ids():
                 pending_job = queue.fetch_job(pending_job_id)
@@ -156,4 +158,10 @@ class ExecutionsQueue(BaseQueue):
                         meta["wordlists"],
                         dependencies=dependencies + new_jobs,
                     )
-        return executions[0] if executions else {}
+        return (
+            executions[0]
+            if executions
+            else ExecutionParametersToEnqueue(
+                findings, target_ports, input_vulnerabilities, input_technologies, wordlists
+            )
+        )

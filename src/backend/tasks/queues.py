@@ -21,7 +21,7 @@ class TasksQueue(BaseQueue):
     name = "tasks"
 
     def enqueue(self, task: Task) -> Job:
-        queue = self._get_queue()
+        queue = self.queue()
         if task.scheduled_at:
             task.enqueued_at = task.scheduled_at
             job = queue.enqueue_at(
@@ -56,7 +56,7 @@ class TasksQueue(BaseQueue):
 
     @staticmethod
     def _consume_tool_task(task: Task) -> None:
-        executions = TasksQueue._calculate_executions(
+        executions = TasksQueue.calculate_executions(
             task.configuration.tool,
             [],
             task.target.target_ports.all(),
@@ -65,15 +65,15 @@ class TasksQueue(BaseQueue):
             task.wordlists.all(),
         )
         executions_queue = ExecutionsQueue()
-        for parameters in executions or [{}]:
+        for parameters in executions:
             execution = Execution.objects.create(task=task, configuration=task.configuration)
             executions_queue.enqueue(
                 execution,
-                [],
-                parameters.get(1, []),
-                parameters.get(2, []),
-                parameters.get(3, []),
-                parameters.get(4, []),
+                parameters.findings,
+                parameters.target_ports,
+                parameters.input_vulnerabilities,
+                parameters.input_technologies,
+                parameters.wordlists,
             )
 
     @staticmethod
@@ -112,7 +112,7 @@ class TasksQueue(BaseQueue):
                     skipped_reason=f"Tool {step.configuration.tool.name} can't be executed with intensity {IntensityValue(task.intensity).name.capitalize()}",
                 )
         for execution_job in plan:
-            executions = TasksQueue._calculate_executions(
+            executions = TasksQueue.calculate_executions(
                 execution_job["step"].configuration.tool,
                 [],
                 task.target.target_ports.all(),
@@ -120,16 +120,16 @@ class TasksQueue(BaseQueue):
                 task.input_technologies.all(),
                 task.wordlists.all(),
             )
-            for parameters in executions or [{}]:
+            for parameters in executions:
                 execution = Execution.objects.create(task=task, configuration=execution_job["step"].configuration)
                 execution_job["jobs"].append(
                     executions_queue.enqueue(
                         execution,
-                        parameters.get(0, []),
-                        parameters.get(1, []),
-                        parameters.get(2, []),
-                        parameters.get(3, []),
-                        parameters.get(4, []),
+                        parameters.findings,
+                        parameters.target_ports,
+                        parameters.input_vulnerabilities,
+                        parameters.input_technologies,
+                        parameters.wordlists,
                         dependencies=sum([d["jobs"] for d in execution_job["dependencies"]], []),
                     )
                 )
@@ -151,7 +151,7 @@ class TasksQueue(BaseQueue):
             new_task.input_technologies.set(result.input_technologies.all())
             new_task.input_vulnerabilities.set(result.input_vulnerabilities.all())
             instance = TasksQueue()
-            job = instance._get_queue().enqueue_at(
+            job = instance.queue().enqueue_at(
                 result.enqueued_at,
                 instance.consume,
                 task=result,
