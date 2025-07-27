@@ -2,6 +2,13 @@ from enum import Enum
 
 
 class InputKeyword(Enum):
+    """Enumeration of keywords that can be used on command templates.
+
+    This enum defines the standard keywords used for identifying and
+    categorizing different types of input data that will be used as part
+    of tool executions.
+    """
+
     TARGET = 1
     HOST = 2
     PORT = 3

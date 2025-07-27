@@ -19,6 +19,19 @@ from wordlists.models import Wordlist
 
 @dataclass
 class ExecutionParametersToEnqueue:
+    """Data class for organizing execution parameters to be enqueued.
+
+    This class holds collections of different input types that will be
+    processed together in a job execution.
+
+    Attributes:
+        findings: List of findings to process.
+        target_ports: List of target ports to process.
+        input_vulnerabilities: List of input vulnerabilities to process.
+        input_technologies: List of input technologies to process.
+        wordlists: List of wordlists to process.
+    """
+
     findings: list[Finding] = []
     target_ports: list[TargetPort] = []
     input_vulnerabilities: list[InputVulnerability] = []
@@ -26,12 +39,32 @@ class ExecutionParametersToEnqueue:
     wordlists: list[Wordlist] = []
 
     def append(self, field: str, value: BaseInput) -> None:
+        """Append a single value to a specific field.
+
+        Args:
+            field: The field name to append to.
+            value: The value to append.
+        """
         setattr(self, field, getattr(self, field) + [value])
 
     def extend(self, field: str, values: list[BaseInput]) -> None:
+        """Extend a field with multiple values.
+
+        Args:
+            field: The field name to extend.
+            values: List of values to add.
+        """
         setattr(self, field, getattr(self, field) + values)
 
     def __eq__(self, other: Any) -> bool:
+        """Check equality with another ExecutionParametersToEnqueue instance.
+
+        Args:
+            other: The object to compare with.
+
+        Returns:
+            True if all fields are equal, False otherwise.
+        """
         if not isinstance(other, ExecutionParametersToEnqueue):
             return False
         return (
@@ -43,6 +76,11 @@ class ExecutionParametersToEnqueue:
         )
 
     def __hash__(self) -> int:
+        """Generate hash for this instance.
+
+        Returns:
+            Hash value based on all field contents.
+        """
         return hash(
             (
                 tuple(self.findings),
@@ -55,41 +93,102 @@ class ExecutionParametersToEnqueue:
 
 
 class BaseQueue(LoggingEntity):
+    """Base class for queue management and job execution.
+
+    This abstract base class provides functionality for managing RQ queues,
+    enqueueing jobs, and processing execution parameters. It includes
+    methods for job lifecycle management and execution calculation.
+
+    Attributes:
+        name (str): The name of the queue to use.
+    """
+
     name = ""
 
     @cached_property
     def queue(self) -> Queue:
+        """Get the RQ queue instance.
+
+        Returns:
+            The RQ Queue instance for this queue name.
+        """
         return django_rq.get_queue(self.name)
 
     def fetch_job(self, job_id: str) -> Job | None:
+        """Fetch a job by its ID.
+
+        Args:
+            job_id: The unique identifier of the job.
+
+        Returns:
+            The Job instance if found, None otherwise.
+        """
         try:
             return self.queue.fetch_job(job_id)
         except Exception:
             return None
 
     def cancel_job(self, job_id: str) -> None:
+        """Cancel a running job.
+
+        Args:
+            job_id: The unique identifier of the job to cancel.
+        """
         job = self.fetch_job(job_id)
         if job:
             self.logger.info(f"[{self.name}] Job {job_id} has been cancelled")
             job.cancel()
 
     def delete_job(self, job_id: str) -> None:
+        """Delete a job from the queue.
+
+        Args:
+            job_id: The unique identifier of the job to delete.
+        """
         job = self.fetch_job(job_id)
         if job:
             self.logger.info(f"[{self.name}] Job {job_id} has been deleted")
             job.delete()
 
     def enqueue(self, *args: Any, **kwargs: Any) -> Job:
+        """Enqueue a job for execution.
+
+        Args:
+            *args: Positional arguments for the job.
+            **kwargs: Keyword arguments for the job.
+
+        Returns:
+            The enqueued Job instance.
+        """
         return self.queue.enqueue(self.consume, *args, **kwargs)
 
     @staticmethod
     def consume(**kwargs: Any) -> Any:
+        """Consume method to be implemented by subclasses.
+
+        This method should be overridden by subclasses to define
+        the actual job execution logic.
+
+        Args:
+            **kwargs: Job parameters.
+
+        Returns:
+            Job execution result.
+        """
         pass
 
     @staticmethod
     def _get_findings_by_type(
         findings: list[Finding],
     ) -> dict[InputType, list[Finding]]:
+        """Group findings by their input type.
+
+        Args:
+            findings: List of findings to group.
+
+        Returns:
+            Dictionary mapping input types to lists of findings.
+        """
         findings_by_type = {}
         for finding in findings:
             if finding.input_type not in findings_by_type:
@@ -112,6 +211,23 @@ class BaseQueue(LoggingEntity):
         input_technologies: list[InputTechnology],
         wordlists: list[Wordlist],
     ) -> list[ExecutionParametersToEnqueue]:
+        """Calculate execution parameters for a tool.
+
+        This method determines how to split the input data into separate
+        executions based on tool configuration and input relationships.
+
+        Args:
+            tool: The tool to calculate executions for.
+            findings: List of findings to process.
+            target_ports: List of target ports to process.
+            input_vulnerabilities: List of input vulnerabilities to process.
+            input_technologies: List of input technologies to process.
+            wordlists: List of wordlists to process.
+
+        Returns:
+            List of ExecutionParametersToEnqueue instances representing
+            separate executions.
+        """
         input_types_used = set()
         executions: list[dict[int, list[BaseInput]]] = [ExecutionParametersToEnqueue()]
         findings_by_type = BaseQueue._get_findings_by_type(findings)

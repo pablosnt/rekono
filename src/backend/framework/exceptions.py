@@ -8,6 +8,18 @@ from rest_framework.views import exception_handler
 
 
 def handler(exc: Exception, context: dict[str, Any]) -> Response:
+    """Handle exceptions for the REST framework.
+
+    This handler provides custom error responses for specific exception types,
+    particularly database integrity errors and unique constraint violations.
+
+    Args:
+        exc: The exception that was raised.
+        context: Context dictionary containing request and view information.
+
+    Returns:
+        Custom Response object with appropriate error details.
+    """
     if exc.__class__ in [UniqueViolation, IntegrityError]:
         response = Response({"constraint": ["This object already exists"]}, status=HTTP_400_BAD_REQUEST)
     else:
