@@ -1,3 +1,9 @@
+"""Django REST framework views for alert management.
+
+This module contains the ViewSet classes that provide REST API endpoints
+for managing alerts and monitoring settings.
+"""
+
 from django.db.models import QuerySet
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
@@ -7,6 +13,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.serializers import Serializer
 
+from alerts.enums import AlertMode
 from alerts.filters import AlertFilter
 from alerts.models import Alert, MonitorSettings
 from alerts.serializers import (
@@ -21,10 +28,23 @@ from security.authorization.permissions import (
     RekonoModelPermission,
 )
 
-# Create your views here.
-
 
 class AlertViewSet(BaseViewSet):
+    """ViewSet for managing alert configurations.
+
+    Provides REST API endpoints for creating, reading, updating, and deleting
+    alert configurations. Also includes custom actions for subscription
+    management and enabling/disabling alerts.
+
+    Attributes:
+        queryset: All Alert objects
+        serializer_class: Default serializer for alert operations
+        filterset_class: Filter class for querying alerts
+        permission_classes: Required permissions for access
+        search_fields: Fields that can be searched
+        ordering_fields: Fields that can be used for ordering
+    """
+
     queryset = Alert.objects.all()
     serializer_class = AlertSerializer
     filterset_class = AlertFilter
@@ -35,15 +55,27 @@ class AlertViewSet(BaseViewSet):
         OwnerPermission,
     ]
     search_fields = ["value"]
-    ordering_fields = ["id", "item", "mode"]
-    http_method_names = ["get", "post", "put", "delete"]
+    ordering_fields = ["id", "project", "item", "mode", "owner"]
 
     def get_serializer_class(self) -> Serializer:
+        """Get the appropriate serializer class based on the request method.
+
+        Returns:
+            EditAlertSerializer for PUT requests, otherwise the default serializer.
+        """
         return EditAlertSerializer if self.request.method == "PUT" else super().get_serializer_class()
 
     def get_queryset(self) -> QuerySet:
+        """Get the queryset for this view.
+
+        For PUT requests, filters to only enabled filter-mode alerts.
+        Otherwise returns all alerts.
+
+        Returns:
+            Filtered queryset based on request method.
+        """
         queryset = super().get_queryset()
-        return queryset.filter(enabled=True).all() if self.request.method == "PUT" else queryset
+        return queryset.filter(enabled=True, mode=AlertMode.FILTER).all() if self.request.method == "PUT" else queryset
 
     @extend_schema(request=None, responses={204: None})
     @action(
@@ -56,48 +88,75 @@ class AlertViewSet(BaseViewSet):
         ],
     )
     def subscription(self, request: Request, pk: str) -> Response:
+        """Manage user subscription to an alert.
+
+        POST: Subscribe the current user to the alert
+        DELETE: Unsubscribe the current user from the alert
+
+        Args:
+            request: The HTTP request object
+            pk: Primary key of the alert
+
+        Returns:
+            HTTP 204 on success, HTTP 400 with error message on failure
+        """
         alert = self.get_object()
-        for method, expected_exists, error, operation in [
-            (
-                "POST",
-                False,
-                "You are already subscribed to this alert",
-                alert.subscribers.add,
-            ),
-            (
-                "DELETE",
-                True,
-                "You are already not subscribed to this alert",
-                alert.subscribers.remove,
-            ),
-        ]:
-            if request.method == method:
-                if alert.subscribers.filter(id=request.user.id).exists() is not expected_exists:
-                    return Response({"subscribe": error}, status=status.HTTP_400_BAD_REQUEST)
-                operation(request.user)
-                break
+        is_subscribed = alert.subscribers.filter(id=request.user.id).exists()
+        if request.method == "POST":
+            if is_subscribed:
+                return Response(
+                    {"subscribe": "You are already subscribed to this alert"}, status=status.HTTP_400_BAD_REQUEST
+                )
+            alert.subscribers.add(request.user)
+        else:
+            if not is_subscribed:
+                return Response(
+                    {"subscribe": "You are not subscribed to this alert"}, status=status.HTTP_400_BAD_REQUEST
+                )
+            alert.subscribers.remove(request.user)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @extend_schema(request=None, responses={200: AlertSerializer})
     @action(detail=True, methods=["POST", "DELETE"])
     def enable(self, request: Request, pk: str) -> Response:
+        """Enable or disable an alert.
+
+        POST: Enable the alert
+        DELETE: Disable the alert
+
+        Args:
+            request: The HTTP request object
+            pk: Primary key of the alert
+
+        Returns:
+            HTTP 200 with alert data on success, HTTP 400 with error message on failure
+        """
         alert = self.get_object()
-        for method, new_value, operation in [
-            ("POST", True, "enabled"),
-            ("DELETE", False, "disabled"),
-        ]:
-            if request.method == method:
-                if alert.enabled == new_value:
-                    return Response(
-                        {"enable": f"This alert is already {operation}"},
-                        status=status.HTTP_400_BAD_REQUEST,
-                    )
-                alert.enabled = new_value
-                alert.save(update_fields=["enabled"])
-                return Response(self.get_serializer(instance=alert).data, status=status.HTTP_200_OK)
+        if request.method == "POST":
+            if alert.enabled:
+                return Response({"enable": "This alert is already enabled"}, status=status.HTTP_400_BAD_REQUEST)
+            alert.enabled = True
+        else:
+            if not alert.enabled:
+                return Response({"enable": "This alert is already disabled"}, status=status.HTTP_400_BAD_REQUEST)
+            alert.enabled = False
+        alert.save(update_fields=["enabled"])
+        return Response(self.get_serializer(instance=alert).data, status=status.HTTP_200_OK)
 
 
 class MonitorSettingsViewSet(BaseViewSet):
+    """ViewSet for managing monitoring settings.
+
+    Provides REST API endpoints for viewing and updating monitoring
+    configuration settings.
+
+    Attributes:
+        queryset: All MonitorSettings objects
+        serializer_class: Serializer for monitor settings
+        permission_classes: Required permissions for access
+        http_method_names: Allowed HTTP methods (GET, PUT only)
+    """
+
     queryset = MonitorSettings.objects.all()
     serializer_class = MonitorSettingsSerializer
     permission_classes = [IsAuthenticated, RekonoModelPermission]
