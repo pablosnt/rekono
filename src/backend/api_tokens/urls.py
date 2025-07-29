@@ -1,3 +1,5 @@
+"""URL routing for API token endpoints."""
+
 from rest_framework.routers import SimpleRouter
 
 from api_tokens.views import ApiTokenViewSet
