@@ -3,7 +3,6 @@ from typing import Callable
 from django.apps import apps
 
 from framework.models import BaseEncrypted
-from rekono.properties import Property
 from rekono.settings import CONFIG
 from security.cryptography.encryption import Encryptor
 

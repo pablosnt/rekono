@@ -1,4 +1,3 @@
-# pytype: disable=attribute-error
 from dataclasses import dataclass
 from typing import Any
 

@@ -23,14 +23,6 @@ class BasePlatform(LoggingEntity):
     availability and processing findings.
     """
 
-    def is_enabled(self) -> bool:
-        """Check if the platform is enabled.
-
-        Returns:
-            True if the platform is enabled, False otherwise.
-        """
-        return True
-
     def is_available(self) -> bool:
         """Check if the platform is available for use.
 

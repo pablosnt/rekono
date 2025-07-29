@@ -92,9 +92,7 @@ class SendMfaEmailSerializer(MfaRequiredSerializer):
         return super().validate(attrs)
 
     def save(self, **kwargs: Any) -> User:
-        # pytype: disable=attribute-error
         SMTP().mfa(self.user, User.objects.setup_otp(self.user, {"minutes": CONFIG.mfa_expiration_minutes}))
-        # pytype: enable=attribute-error
         return self.user
 
 

@@ -55,10 +55,8 @@ class SMTP(BaseNotification):
             message = EmailMultiAlternatives(subject, "", "Rekono <noreply@rekono.com>", [u.email for u in users])
             template = get_template(template_path)
             message.attach_alternative(
-                # pytype: disable=attribute-error
                 # nosemgrep: python.flask.security.xss.audit.direct-use-of-jinja2.direct-use-of-jinja2
                 template.render({**data, "rekono_url": CONFIG.frontend_url}),
-                # pytype: enable=attribute-error
                 "text/html",
             )
             self.backend.send_messages([message])

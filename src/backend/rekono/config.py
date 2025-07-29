@@ -41,7 +41,7 @@ class Property:
 
     def read(self, file_config: dict[str, Any] = {}) -> Any:
         """
-        Read the property value from environment, file, or default.
+        Reads the property value from environment, file, or default.
 
         Args:
             file_config (dict[str, Any]): The configuration loaded from file.
@@ -51,8 +51,9 @@ class Property:
         """
         # Priority: environment variable > config file > default value
         value = self.default
-        if self.env and os.getenv(self.env):
-            value = os.getenv(self.env)
+        env_value = os.getenv(self.env)
+        if self.env and env_value:
+            value = env_value
             # If the default is a list, try to split the env value using common
             # separators
             if isinstance(self.default, list):
@@ -66,7 +67,7 @@ class Property:
             # Traverse nested config dict using dot-separated path
             found = True
             value_from_file = file_config
-            for key in file_config.split("."):
+            for key in self.file.split("."):
                 if key not in file_config:
                     found = False
                     break
@@ -78,16 +79,13 @@ class Property:
             value = str(value).lower() == "true"
         return value
 
-    def update(self, rekono_config: "RekonoConfig", value: Any) -> dict[str, Any]:
+    def update(self, rekono_config: "RekonoConfig", value: Any) -> None:
         """
-        Update the property value in the Rekono config file.
+        Updates the property value in the Rekono config file.
 
         Args:
             rekono_config (RekonoConfig): The RekonoConfig instance.
             value (Any): The new value to set.
-
-        Returns:
-            dict[str, Any]: The updated configuration dictionary.
         """
         # Deep copy the config to avoid mutating the original
         config = deepcopy(rekono_config.config_from_file)
@@ -267,7 +265,7 @@ class RekonoConfig:
         return Encryptor.generate_encryption_key() if self.testing else self._encryption_key.read(self.config_from_file)
 
     @property
-    def pdf_report_template(self) -> Path:
+    def pdf_report_template(self) -> Path | None:
         """
         Returns the path to the PDF report template.
 
@@ -282,6 +280,7 @@ class RekonoConfig:
             filepath = path / default_filename
             if filepath.is_file():
                 return filepath
+        return None
 
     @property
     def frontend_url(self) -> str:
@@ -515,7 +514,7 @@ class RekonoConfig:
 
     def _initialize_directory(self, path: Path) -> Path:
         """
-        Ensure the directory exists at the given path.
+        Ensures the directory exists at the given path.
 
         Args:
             path (Path): The directory path to initialize.

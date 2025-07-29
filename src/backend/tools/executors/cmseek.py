@@ -14,12 +14,7 @@ class Cmseek(BaseExecutor):
             / urlparse(self.arguments[self.arguments.index("-u") + 1]).netloc.replace(":", "_")
             / "cms.json"
         )
-        for report in [
-            result_path,
-            # pytype: disable=attribute-error
-            Path(CONFIG.cmseek_dir) / result_path,
-            # pytype: enable=attribute-error
-        ]:
+        for report in [result_path, Path(CONFIG.cmseek_dir) / result_path]:
             if report.is_file():
                 shutil.move(report, self.report)
                 shutil.rmtree(pathlib.Path(report).parent)
