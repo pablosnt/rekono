@@ -7,7 +7,6 @@ from rq.registry import DeferredJobRegistry
 from executions.models import Execution
 from findings.framework.models import Finding
 from findings.queues import FindingsQueue
-from framework.models import BaseInput
 from framework.queues import BaseQueue, ExecutionParametersToEnqueue
 from parameters.models import InputTechnology, InputVulnerability
 from target_ports.models import TargetPort
@@ -30,7 +29,7 @@ class ExecutionsQueue(BaseQueue):
         dependencies: list[Job] = [],
         at_front: bool = False,
     ) -> Job:
-        job = self.queue().enqueue(
+        job = self.queue.enqueue(
             self.consume,
             execution=execution,
             findings=findings,
@@ -99,9 +98,8 @@ class ExecutionsQueue(BaseQueue):
     ) -> ExecutionParametersToEnqueue:
         findings = []
         self = ExecutionsQueue()
-        queue = self.queue()
         for dependency_id in current_job._dependency_ids:
-            dependency = queue.fetch_job(dependency_id)
+            dependency = self.queue.fetch_job(dependency_id)
             if dependency and dependency.result:
                 findings.extend(dependency.result[1])
         if not findings:
@@ -141,9 +139,9 @@ class ExecutionsQueue(BaseQueue):
             )
             new_jobs.append(job.id)
         if new_jobs:
-            registry = DeferredJobRegistry(queue=queue)
+            registry = DeferredJobRegistry(queue=self.queue)
             for pending_job_id in registry.get_job_ids():
-                pending_job = queue.fetch_job(pending_job_id)
+                pending_job = self.fetch_job(pending_job_id)
                 if pending_job and current_job.id in pending_job._dependency_ids:
                     dependencies = pending_job._dependency_ids
                     meta = pending_job.get_meta()

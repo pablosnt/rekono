@@ -233,7 +233,7 @@ class BaseQueue(LoggingEntity):
         """
         input_types_used = set()
         # Start with a single empty execution batch
-        executions: list[dict[int, list[BaseInput]]] = [ExecutionParametersToEnqueue()]
+        executions = [ExecutionParametersToEnqueue()]
         findings_by_type = BaseQueue._get_findings_by_type(findings)
         # Iterate over all input sources (findings, ports, vulnerabilities, etc.)
         for field, source in [("findings", _findings) for _findings in findings_by_type.values()] + [
@@ -273,7 +273,7 @@ class BaseQueue(LoggingEntity):
                     input_types_used.add(input_type)
                     # If the tool argument allows multiple values, extend the execution batch
                     if tool_input.argument.multiple:
-                        executions[execution_index].extend(base_inputs)
+                        executions[execution_index].extend(field, base_inputs)
                     else:
                         # For single-value arguments, create a new execution batch for each additional value
                         original_execution = copy.deepcopy(execution)

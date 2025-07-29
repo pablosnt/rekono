@@ -21,10 +21,9 @@ class TasksQueue(BaseQueue):
     name = "tasks"
 
     def enqueue(self, task: Task) -> Job:
-        queue = self.queue()
         if task.scheduled_at:
             task.enqueued_at = task.scheduled_at
-            job = queue.enqueue_at(
+            job = self.queue.enqueue_at(
                 task.scheduled_at,
                 self.consume,
                 task=task,
@@ -33,7 +32,7 @@ class TasksQueue(BaseQueue):
             self.logger.info(f"[Task] Task {task.id} will be enqueued at {task.scheduled_at}")
         else:
             task.enqueued_at = timezone.now()
-            job = queue.enqueue(
+            job = self.queue.enqueue(
                 self.consume,
                 task=task,
                 on_success=self._scheduled_callback,
@@ -150,12 +149,12 @@ class TasksQueue(BaseQueue):
             new_task.wordlists.set(result.wordlists.all())
             new_task.input_technologies.set(result.input_technologies.all())
             new_task.input_vulnerabilities.set(result.input_vulnerabilities.all())
-            instance = TasksQueue()
-            job = instance.queue().enqueue_at(
+            self = TasksQueue()
+            job = self.queue.enqueue_at(
                 result.enqueued_at,
-                instance.consume,
+                self.consume,
                 task=result,
-                on_success=instance._scheduled_callback,
+                on_success=self._scheduled_callback,
             )
             BaseQueue.logger.info(f"[Task] Scheduled task {result.id} has been enqueued again")
             new_task.rq_job_id = job.id
