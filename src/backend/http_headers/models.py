@@ -35,7 +35,7 @@ class HttpHeader(BaseInput):
 
     _filters = [BaseInput.Filter(type=str, field="key")]
     _parse_mapping = {InputKeyword.HEADERS: lambda instance: {instance.key: instance.value}}
-   _project_field = "target__project"
+    _project_field = "target__project"
 
     class Meta:
         constraints = [

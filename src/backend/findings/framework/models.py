@@ -1,3 +1,4 @@
+from functools import cached_property
 from typing import Any
 
 from django.db import models
@@ -10,7 +11,7 @@ from input_types.models import InputType
 from projects.models import Project
 from rekono.settings import AUTH_USER_MODEL
 from security.validators.input_validator import Regex, Validator
-from functools import cached_property
+
 
 class FindingManager(models.Manager):
     def _get_related_findings(
@@ -127,7 +128,7 @@ class Finding(BaseInput):
     hacktricks_link = models.TextField(max_length=300, blank=True, null=True)
     objects = FindingManager()
     unique_fields: list[str] = []
-   _project_field = "executions__task__target__project"
+    _project_field = "executions__task__target__project"
 
     class Meta:
         abstract = True

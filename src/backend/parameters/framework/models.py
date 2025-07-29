@@ -1,12 +1,13 @@
+from functools import cached_property
+
 from framework.models import BaseInput
 from projects.models import Project
-from functools import cached_property
 
 # Create your models here.
 
 
 class InputParameter(BaseInput):
-   _project_field = "tasks__target__project"
+    _project_field = "tasks__target__project"
 
     class Meta:
         abstract = True

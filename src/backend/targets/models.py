@@ -26,7 +26,7 @@ class Target(BaseInput):
         InputKeyword.HOST: "target",
         InputKeyword.URL: lambda instance: instance.get_url(instance.target),
     }
-   _project_field = "project"
+    _project_field = "project"
 
     class Meta:
         constraints = [models.UniqueConstraint(fields=["project", "target"], name="unique_target")]

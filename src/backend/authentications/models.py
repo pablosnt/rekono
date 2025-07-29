@@ -46,7 +46,7 @@ class Authentication(BaseInput, BaseEncrypted):
         InputKeyword.USERNAME: lambda instance: (instance.name if instance.type == AuthenticationType.BASIC else None),
     }
     _encrypted_field = "_secret"
-   _project_field = "target_port__target__project"
+    _project_field = "target_port__target__project"
 
     def get_token(self) -> str:
         return (
