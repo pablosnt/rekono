@@ -1,3 +1,10 @@
+"""Background job queue management for executions.
+
+This module provides queue management functionality for security tool executions,
+handling job queuing, dependency management, and result processing for
+background execution of security testing tools.
+"""
+
 import rq
 from django.utils import timezone
 from django_rq import job
@@ -16,6 +23,16 @@ from wordlists.models import Wordlist
 
 
 class ExecutionsQueue(BaseQueue):
+    """Queue manager for security tool executions.
+
+    This class manages the background execution of security tools using
+    Redis Queue (RQ). It handles job queuing, dependency management,
+    and result processing for security testing workflows.
+
+    Attributes:
+        name (str): The name of the queue ('executions').
+    """
+
     name = "executions"
 
     def enqueue(
@@ -29,6 +46,21 @@ class ExecutionsQueue(BaseQueue):
         dependencies: list[Job] = [],
         at_front: bool = False,
     ) -> Job:
+        """Enqueue an execution job for background processing.
+
+        Args:
+            execution: The execution instance to queue.
+            findings: List of findings to process.
+            target_ports: List of target ports to scan.
+            input_vulnerabilities: List of input vulnerabilities.
+            input_technologies: List of input technologies.
+            wordlists: List of wordlists to use.
+            dependencies: List of job dependencies.
+            at_front: Whether to add the job at the front of the queue.
+
+        Returns:
+            Job: The queued job instance.
+        """
         job = self.queue.enqueue(
             self.consume,
             execution=execution,
@@ -65,6 +97,23 @@ class ExecutionsQueue(BaseQueue):
         input_technologies: list[InputTechnology],
         wordlists: list[Wordlist],
     ) -> tuple[Execution, list[Finding]]:
+        """Process an execution job.
+
+        This method is the main job consumer that executes security tools
+        and processes their results. It handles dependency resolution and
+        result parsing.
+
+        Args:
+            execution: The execution instance to process.
+            findings: List of findings to process.
+            target_ports: List of target ports to scan.
+            input_vulnerabilities: List of input vulnerabilities.
+            input_technologies: List of input technologies.
+            wordlists: List of wordlists to use.
+
+        Returns:
+            tuple: A tuple containing the execution and list of findings.
+        """
         executor: BaseExecutor = execution.configuration.tool.get_executor_class()(execution)
         current_job = rq.get_current_job()
         if not findings and current_job and current_job._dependency_ids:
@@ -76,12 +125,15 @@ class ExecutionsQueue(BaseQueue):
                 wordlists,
                 current_job,
             )
-            findings = _execution.findings
-            target_ports = _execution.target_ports
-            input_vulnerabilities = _execution.input_vulnerabilities
-            input_technologies = _execution.input_technologies
-            wordlists = _execution.wordlists
-        executor.execute(_execution.findings, target_ports, input_vulnerabilities, input_technologies, wordlists)
+            executor.execute(
+                _execution.findings,
+                _execution.target_ports,
+                _execution.input_vulnerabilities,
+                _execution.input_technologies,
+                _execution.wordlists,
+            )
+        else:
+            executor.execute(findings, target_ports, input_vulnerabilities, input_technologies, wordlists)
         parser: BaseParser = execution.configuration.tool.get_parser_class()(executor, execution.output_plain)
         parser.parse()
         FindingsQueue().enqueue(execution, parser.findings)
@@ -96,16 +148,38 @@ class ExecutionsQueue(BaseQueue):
         wordlists: list[Wordlist],
         current_job: Job,
     ) -> ExecutionParametersToEnqueue:
+        """Get findings from job dependencies and create new executions.
+
+        This method processes job dependencies to extract findings and
+        create new executions based on those findings.
+
+        Args:
+            executor: The executor instance.
+            target_ports: List of target ports.
+            input_vulnerabilities: List of input vulnerabilities.
+            input_technologies: List of input technologies.
+            wordlists: List of wordlists.
+            current_job: The current job being processed.
+
+        Returns:
+            ExecutionParametersToEnqueue: Parameters for the next execution.
+        """
         findings = []
         self = ExecutionsQueue()
+        # Extract findings from all dependency jobs to enable tool chaining
+        # Each dependency job returns (execution, findings) tuple, so we take findings[1]
         for dependency_id in current_job._dependency_ids:
             dependency = self.queue.fetch_job(dependency_id)
             if dependency and dependency.result:
                 findings.extend(dependency.result[1])
+        # If no findings from dependencies, return only one execution with original parameters
         if not findings:
             return ExecutionParametersToEnqueue(
                 findings, target_ports, input_vulnerabilities, input_technologies, wordlists
             )
+        # Calculate new executions based on findings from dependencies
+        # This enables automatic tool chaining where findings from one tool
+        # trigger executions of other tools
         executions = [
             e
             for e in ExecutionsQueue.calculate_executions(
@@ -121,6 +195,8 @@ class ExecutionsQueue(BaseQueue):
             )
         ]
         BaseQueue.logger.info(f"[Execution] New {len(executions) - 1} executions from previous findings")
+        # Create new execution records and queue jobs for additional executions
+        # executions[0] is the current execution, executions[1:] are new ones
         new_jobs = []
         for execution in executions[1:]:
             new_execution = Execution.objects.create(
@@ -138,6 +214,8 @@ class ExecutionsQueue(BaseQueue):
                 at_front=True,
             )
             new_jobs.append(job.id)
+        # Update pending jobs that depend on current_job to include new dependencies
+        # This ensures proper dependency chain for tool chaining workflows
         if new_jobs:
             registry = DeferredJobRegistry(queue=self.queue)
             for pending_job_id in registry.get_job_ids():
@@ -145,6 +223,7 @@ class ExecutionsQueue(BaseQueue):
                 if pending_job and current_job.id in pending_job._dependency_ids:
                     dependencies = pending_job._dependency_ids
                     meta = pending_job.get_meta()
+                    # Cancel and recreate the pending job with updated dependencies
                     self.cancel_job(pending_job_id)
                     self.delete_job(pending_job_id)
                     self.enqueue(
@@ -156,6 +235,8 @@ class ExecutionsQueue(BaseQueue):
                         meta["wordlists"],
                         dependencies=dependencies + new_jobs,
                     )
+        # Return the first execution (current one) if available, otherwise fallback
+        # to original parameters
         return (
             executions[0]
             if executions

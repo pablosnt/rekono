@@ -1,3 +1,10 @@
+"""Django REST framework views for execution models.
+
+This module provides REST API views for execution records, including
+list, retrieve operations and report download functionality with proper
+authentication and authorization controls.
+"""
+
 from django.http import FileResponse
 from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework.decorators import action
@@ -17,10 +24,25 @@ from security.authorization.permissions import (
     RekonoModelPermission,
 )
 
-# Create your views here.
-
 
 class ExecutionViewSet(BaseViewSet):
+    """ViewSet for Execution model operations.
+
+    This ViewSet provides REST API endpoints for managing execution
+    records with proper filtering, searching, and ordering capabilities.
+    It enforces authentication and project-based authorization, and
+    provides report download functionality for completed executions.
+
+    Attributes:
+        queryset: QuerySet for Execution model instances.
+        serializer_class: Serializer class for Execution model.
+        filterset_class: Filter class for query filtering.
+        permission_classes: List of permission classes for access control.
+        search_fields: Fields available for text search.
+        ordering_fields: Fields available for result ordering.
+        http_method_names: Allowed HTTP methods for this ViewSet.
+    """
+
     queryset = Execution.objects.all()
     serializer_class = ExecutionSerializer
     filterset_class = ExecutionFilter
@@ -56,6 +78,21 @@ class ExecutionViewSet(BaseViewSet):
     )
     @action(detail=True, methods=["GET"], url_path="report", url_name="report")
     def download_report(self, request: Request, pk: str) -> FileResponse:
+        """Download execution report file.
+
+        This action allows users to download the output report file
+        for a completed execution. Only completed executions can
+        have downloadable reports.
+
+        Args:
+            request: The HTTP request object.
+            pk: The primary key of the execution.
+
+        Returns:
+            FileResponse: The report file as a downloadable response,
+                or an error response if the execution is not completed
+                or the file doesn't exist.
+        """
         execution = self.get_object()
         if execution.status != Status.COMPLETED:
             return Response({"execution": "Execution is not completed"}, status=HTTP_400_BAD_REQUEST)
