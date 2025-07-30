@@ -9,6 +9,13 @@ class ApiTokenFilter(FilterSet):
     """FilterSet to filter API token entities by name and expiration."""
 
     class Meta:
+        """Meta configuration for the ApiTokenFilter.
+
+        Attributes:
+            model: The ApiToken model to filter.
+            fields: Dictionary defining available filters and their lookup types.
+        """
+
         model = ApiToken
         fields = {
             "name": ["exact", "icontains"],

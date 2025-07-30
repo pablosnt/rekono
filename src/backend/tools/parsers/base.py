@@ -95,7 +95,7 @@ class BaseParser:
         if self.executor.authentication:
             for sensitive_value in [
                 self.executor.authentication.secret,
-                self.executor.authentication.get_token(),
+                self.executor.authentication.token,
             ]:
                 value = value.replace(sensitive_value, "*****")
         return value.replace(

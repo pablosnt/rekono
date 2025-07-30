@@ -12,6 +12,13 @@ class ApiTokenSerializer(ModelSerializer):
     """Serializer for displaying API token information."""
 
     class Meta:
+        """Meta configuration for the ApiTokenSerializer.
+
+        Attributes:
+            model: The ApiToken model to serialize.
+            fields: Tuple of field names to include in serialization.
+        """
+
         model = ApiToken
         fields = ("id", "name", "expiration")
 
@@ -20,6 +27,14 @@ class CreateApiTokenSerializer(ModelSerializer):
     """Serializer for creating new API tokens, including key generation and hashing."""
 
     class Meta:
+        """Meta configuration for the CreateApiTokenSerializer.
+
+        Attributes:
+            model: The ApiToken model to serialize.
+            fields: Tuple of field names to include in serialization.
+            read_only_fields: Fields that cannot be modified during creation.
+        """
+
         model = ApiToken
         fields = ("id", "key", "name", "expiration")
         read_only_fields = ("key",)

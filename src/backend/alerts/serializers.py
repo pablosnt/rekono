@@ -31,6 +31,15 @@ class AlertSerializer(ModelSerializer):
     owner = SimpleUserSerializer(many=False, read_only=True)
 
     class Meta:
+        """Meta configuration for the AlertSerializer.
+
+        Attributes:
+            model: The Alert model to serialize.
+            fields: Tuple of field names to include in serialization.
+            read_only_fields: Fields that cannot be modified during serialization.
+            extra_kwargs: Additional keyword arguments for field configuration.
+        """
+
         model = Alert
         fields = (
             "id",
@@ -109,6 +118,14 @@ class EditAlertSerializer(AlertSerializer):
     """
 
     class Meta:
+        """Meta configuration for the EditAlertSerializer.
+
+        Attributes:
+            model: The Alert model to serialize.
+            fields: Tuple of field names to include in serialization.
+            read_only_fields: Fields that cannot be modified during updates.
+        """
+
         model = Alert
         fields = (
             "id",
@@ -141,6 +158,14 @@ class MonitorSettingsSerializer(ModelSerializer):
     """
 
     class Meta:
+        """Meta configuration for the MonitorSettingsSerializer.
+
+        Attributes:
+            model: The MonitorSettings model to serialize.
+            fields: Tuple of field names to include in serialization.
+            read_only_fields: Fields that cannot be modified during serialization.
+        """
+
         model = MonitorSettings
         fields = ("id", "last_monitor", "hour_span")
         read_only_fields = ("id", "last_monitor")
