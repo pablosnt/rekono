@@ -102,18 +102,19 @@ class AlertViewSet(BaseViewSet):
         """
         alert = self.get_object()
         is_subscribed = alert.subscribers.filter(id=request.user.id).exists()
+        bad_request = None
         if request.method == "POST":
             if is_subscribed:
-                return Response(
-                    {"subscribe": "You are already subscribed to this alert"}, status=status.HTTP_400_BAD_REQUEST
-                )
-            alert.subscribers.add(request.user)
+                bad_request = "You are already subscribed to this alert"
+            else:
+                alert.subscribers.add(request.user)
         else:
             if not is_subscribed:
-                return Response(
-                    {"subscribe": "You are not subscribed to this alert"}, status=status.HTTP_400_BAD_REQUEST
-                )
-            alert.subscribers.remove(request.user)
+                bad_request = "You are not subscribed to this alert"
+            else:
+                alert.subscribers.remove(request.user)
+        if bad_request:
+            return Response({"subscribe": bad_request}, status=status.HTTP_400_BAD_REQUEST)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @extend_schema(request=None, responses={200: AlertSerializer})
@@ -132,14 +133,19 @@ class AlertViewSet(BaseViewSet):
             HTTP 200 with alert data on success, HTTP 400 with error message on failure
         """
         alert = self.get_object()
+        bad_request = None
         if request.method == "POST":
             if alert.enabled:
-                return Response({"enable": "This alert is already enabled"}, status=status.HTTP_400_BAD_REQUEST)
-            alert.enabled = True
+                bad_request = "This alert is already enabled"
+            else:
+                alert.enabled = True
         else:
             if not alert.enabled:
-                return Response({"enable": "This alert is already disabled"}, status=status.HTTP_400_BAD_REQUEST)
-            alert.enabled = False
+                bad_request = "This alert is already disabled"
+            else:
+                alert.enabled = False
+        if bad_request:
+            return Response({"enable": bad_request}, status=status.HTTP_400_BAD_REQUEST)
         alert.save(update_fields=["enabled"])
         return Response(self.get_serializer(instance=alert).data, status=status.HTTP_200_OK)
 

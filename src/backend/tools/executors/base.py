@@ -70,8 +70,6 @@ class BaseExecutor(LoggingEntity):
         }
         for argument in self.execution.configuration.tool.arguments.all():
             for argument_input in argument.inputs.all().order_by("order"):
-                input_model = argument_input.type.get_model_class()
-                input_fallback = argument_input.type.get_fallback_model_class()
                 parsed_data: dict[str, Any] = {}
                 for base_input in (
                     findings
@@ -91,10 +89,14 @@ class BaseExecutor(LoggingEntity):
                     + list(self.execution.task.executor.http_headers.all())
                     + list(self.execution.task.target.http_headers.all())
                 ):
-                    is_fallback = input_fallback and isinstance(base_input, input_fallback)
+                    is_fallback = argument_input.type.fallback_model_class and isinstance(
+                        base_input, argument_input.type.fallback_model_class
+                    )
                     if is_fallback and parsed_data:
                         break
-                    is_model = input_model and isinstance(base_input, input_model)
+                    is_model = argument_input.type.model_class and isinstance(
+                        base_input, argument_input.type.model_class
+                    )
                     if (is_model or is_fallback) and base_input.filter(argument_input, self.execution.task.target):
                         parsed_data = base_input.parse(parsed_data)
                         self.findings_used_in_execution[base_input.__class__] = base_input
