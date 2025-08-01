@@ -1,3 +1,12 @@
+"""Input types module for defining and managing different types of input models.
+
+This module provides the InputType model which defines the different types of
+input data that can be used as arguments in tool executions. It manages the
+relationships between input types and their corresponding Django models, enabling
+dynamic discovery and validation of input data.
+"""
+
+from functools import cached_property
 from typing import Self
 
 from django.apps import apps
@@ -6,11 +15,25 @@ from django.db import models
 from framework.models import BaseInput, BaseModel
 from input_types.enums import InputTypeName
 
-# Create your models here.
-
 
 class InputType(BaseModel):
-    """Input type model, related to each object type that can be included in a tool argument."""
+    """Input type model for defining different types of input models used in tool argument  s.
+
+    This model represents the different categories of input models that can be provided
+    to tools during execution. Each input type is associated with a specific Django
+    model that handles the actual data storage and processing.
+
+    The model supports both primary and fallback model references, allowing for
+    flexible data handling when the primary model is not available. It also tracks
+    whether relationships should be calculated for this input type.
+
+    Attributes:
+        name: The name of the input type (e.g., 'OSINT', 'HOST', 'PORT').
+        model: Reference to the primary Django model in 'app.Model' format.
+        fallback_model: Reference to a fallback Django model when primary is unavailable.
+        relationships: Whether this input type should be included in relationship
+            calculations.
+    """
 
     name = models.TextField(max_length=15, choices=InputTypeName.choices)
     # Related model name in 'app.Model' format. It can be a reference to a Finding
@@ -21,50 +44,72 @@ class InputType(BaseModel):
     relationships = models.BooleanField(default=True)
 
     def __str__(self) -> str:
-        """Instance representation in text format.
+        """Return string representation of the input type.
 
         Returns:
-            str: String value that identifies this instance
+            The name of the input type.
         """
         return self.name
 
     def _get_class_from_reference(self, reference: str) -> BaseInput | None:
+        """Get a Django model class from a string reference.
+
+        This helper method converts a string reference in 'app.Model' format
+        to the actual Django model class. It's used internally by other
+        methods to resolve model references.
+
+        Args:
+            reference: String reference in 'app.Model' format.
+
+        Returns:
+            The Django model class if found, None otherwise.
+        """
         if not reference:
             return None
         app_label, model_name = reference.split(".", 1)
         return apps.get_model(app_label=app_label, model_name=model_name)
 
-    def get_model_class(self) -> BaseInput | None:
-        """Get related model from 'model' reference.
+    @cached_property
+    def model_class(self) -> BaseInput | None:
+        """Get the primary model class associated with this input type.
 
         Returns:
-            BaseInput: Related model of the input type
+            The primary Django model class if defined, None otherwise.
         """
         return self._get_class_from_reference(self.model)
 
-    def get_fallback_model_class(self) -> BaseInput | None:
-        """Get callback model from 'fallback_model' reference.
+    @cached_property
+    def fallback_model_class(self) -> BaseInput | None:
+        """Get the fallback model class associated with this input type.
 
         Returns:
-            BaseInput: Callback model of the input type
+            The fallback Django model class if defined, None otherwise.
         """
         return self._get_class_from_reference(self.fallback_model)
 
-    def get_related_input_types(self) -> list[Self]:
-        """Get relations between the different input types.
+    @cached_property
+    def related_input_types(self) -> list[Self]:
+        """Get all input types that are related to this input type through foreign keys.
+
+        This method analyzes the primary model's fields to find foreign key relationships
+        to other BaseInput models. It then looks up the corresponding InputType instances
+        for those related models.
+
+        The method only processes relationships if the 'relationships' flag is True,
+        allowing for performance optimization when relationship calculation is not needed.
 
         Returns:
-            dict[InputType, list[InputType]]: dict with a list of related input types for each input type
+            List of InputType instances that are related to this input type.
         """
         relations: list[InputType] = []
         if not self.relationships:
             return relations
-        model = self.get_model_class()
-        if model:
-            for field in model._meta.get_fields():  # For each model field
+        if self.model_class:
+            # Iterate through all fields in the model to find foreign key relationships
+            for field in self.model_class._meta.get_fields():
                 # Check if field is a ForeignKey to a BaseInput model
                 if field.__class__ == models.ForeignKey and issubclass(field.related_model, BaseInput):
-                    # Search InputType by model
+                    # Search InputType by model reference
                     related_type = InputType.objects.filter(
                         model=f"{field.related_model._meta.app_label}.{field.related_model._meta.model_name}"
                     )
