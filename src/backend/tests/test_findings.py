@@ -243,7 +243,7 @@ class FindingTest(ApiTest):
 
     def test_defectdojo(self) -> None:
         for finding in self.findings:
-            parsed = finding.defectdojo()
+            parsed = finding.defectdojo_finding()
             for key, value in findings_data[finding.__class__][0].items():
                 self.assertEqual(value, parsed[key])
         defectdojo_endpoint = {

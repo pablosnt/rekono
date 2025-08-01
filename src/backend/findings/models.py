@@ -1,7 +1,19 @@
+"""Django models for security findings.
+
+This module defines the core data models for representing security findings
+discovered during security assessments. Each model represents a different type
+of security-related information, from basic host discovery to detailed
+vulnerability information.
+
+The models follow a hierarchical structure where findings can be related to
+each other (e.g., a Port belongs to a Host, a Vulnerability can be associated
+with a Technology or Port). This allows for comprehensive security analysis
+and reporting.
+"""
+
 from typing import Any
 
 from django.db import models
-from django.utils import timezone
 
 from findings.enums import (
     HostOS,
@@ -13,15 +25,23 @@ from findings.enums import (
 )
 from findings.framework.models import Finding, TriageFinding
 from framework.enums import InputKeyword
-from platforms.defectdojo.models import DefectDojoSettings
 from target_ports.models import TargetPort
 from targets.enums import TargetType
 from targets.models import Target
 
-# Create your models here.
-
 
 class OSINT(TriageFinding):
+    """Open Source Intelligence findings.
+
+    Represents information discovered through open source intelligence
+    gathering techniques, such as IP addresses, domains, emails, etc.
+
+    Attributes:
+        data: The actual OSINT data discovered (IP, domain, email, etc.)
+        data_type: The type of OSINT data (IP, Domain, Email, etc.)
+        source: The source where this OSINT data was found
+    """
+
     data = models.TextField(max_length=250)
     data_type = models.TextField(max_length=10, choices=OSINTDataType.choices)
     source = models.TextField(max_length=50, blank=True, null=True)
@@ -32,25 +52,47 @@ class OSINT(TriageFinding):
         InputKeyword.HOST: "data",
         InputKeyword.URL: lambda instance: instance.get_url(instance.data),
     }
+    _defectdojo_finding_mapping = {
+        "title": lambda instance: f"{instance.data_type} found using OSINT techniques",
+        "description": lambda instance: "\n".join(
+            [f"{k}: {v}" for k, v in [("Data", instance.data), ("Source", instance.source)] if v]
+        ),
+        "severity": Severity.MEDIUM,
+    }
 
     def parse(self, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
+        """Parse OSINT data for further processing.
+
+        Only IP and Domain OSINT data types can be parsed to be
+        used from tool executions.
+
+        Args:
+            accumulated: Previously accumulated parsing data.
+
+        Returns:
+            Dictionary with parsed data for target creation.
+        """
         return super().parse(accumulated) if self.data_type in [OSINTDataType.IP, OSINTDataType.DOMAIN] else {}
-
-    def defectdojo(self) -> dict[str, Any]:
-        return {
-            "title": f"{self.data_type} found using OSINT techniques",
-            "description": self.data,
-            "severity": Severity.MEDIUM,
-            "date": (self.executions.order_by("-end").first().end or timezone.now()).strftime(
-                DefectDojoSettings.objects.first().date_format
-            ),
-        }
-
-    def __str__(self) -> str:
-        return self.data
 
 
 class Host(Finding):
+    """Discovered network hosts.
+
+    Represents network hosts discovered during security assessments,
+    including their IP addresses, domain names, operating systems,
+    and geolocation information.
+
+    Attributes:
+        ip: The IP address of the discovered host
+        domain: Associated domain name (if any)
+        os: Full operating system specification
+        os_type: Categorized operating system type
+        country: Country where the host is located
+        city: City where the host is located
+        latitude: Geographic latitude coordinate
+        longitude: Geographic longitude coordinate
+    """
+
     ip = models.TextField(max_length=30)
     domain = models.TextField(max_length=500, blank=True, null=True)
     # OS full specification
@@ -69,22 +111,42 @@ class Host(Finding):
         InputKeyword.HOST: "ip",
         InputKeyword.URL: lambda instance: instance.get_url(instance.ip),
     }
-
-    def defectdojo(self) -> dict[str, Any]:
-        return {
-            "title": "Host discovered",
-            "description": " - ".join([field for field in [self.ip, self.os_type] if field]),
-            "severity": Severity.INFO,
-            "date": (self.executions.order_by("-end").first().end or timezone.now()).strftime(
-                DefectDojoSettings.objects.first().date_format
-            ),
-        }
-
-    def __str__(self) -> str:
-        return self.ip
+    _defectdojo_finding_mapping = {
+        "title": "Host discovered",
+        "description": lambda instance: "\n".join(
+            [
+                f"{k}: {v}"
+                for k, v in [
+                    ("IP", instance.ip),
+                    ("Domain", instance.domain),
+                    ("OS type", instance.os_type),
+                    ("OS", instance.os),
+                    ("Country", instance.country),
+                    ("City", instance.city),
+                    ("Latitude", instance.latitude),
+                    ("Longitude", instance.longitude),
+                ]
+                if v
+            ]
+        ),
+        "severity": Severity.INFO,
+    }
 
 
 class Port(Finding):
+    """Network ports discovered on hosts.
+
+    Represents network ports found on discovered hosts, including
+    their status, protocol, and associated services.
+
+    Attributes:
+        host: The host this port belongs to
+        port: The port number
+        status: Current status of the port (open, closed, filtered, etc.)
+        protocol: Transport protocol (TCP/UDP)
+        service: Service running on this port (if identified)
+    """
+
     host = models.ForeignKey(Host, related_name="port", on_delete=models.DO_NOTHING, blank=True, null=True)
     port = models.IntegerField()  # Port number
     status = models.TextField(max_length=15, choices=PortStatus.choices, default=PortStatus.OPEN)
@@ -93,12 +155,40 @@ class Port(Finding):
 
     unique_fields = ["host", "port", "protocol"]
     _parse_mapping = {InputKeyword.PORT: "port", InputKeyword.PORTS: lambda instance: [instance.port]}
+    _defectdojo_finding_mapping = {
+        "title": "Port discovered",
+        "description": lambda instance: "\n".join(
+            [
+                f"{k}: {v}"
+                for k, v in [
+                    ("Host", instance.host.ip if instance.host else None),
+                    ("Port", instance.port),
+                    ("Status", instance.status),
+                    ("Protocol", instance.protocol),
+                    ("Service", instance.service),
+                ]
+                if v
+            ]
+        ),
+        "severity": Severity.INFO,
+    }
     _filters = [
         Finding.Filter(int, "port"),
         Finding.Filter(str, "service", contains=True, processor=lambda s: s.lower()),
     ]
 
     def parse(self, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
+        """Parse port information for further processing.
+
+        Parse port information to enable more detailed
+        port-specific analysis and targeting.
+
+        Args:
+            accumulated: Previously accumulated parsing data.
+
+        Returns:
+            Dictionary with parsed port data.
+        """
         output = super().parse(accumulated)
         output[InputKeyword.PORTS_COMMAS.name.lower()] = ",".join(
             [str(p) for p in output.get(InputKeyword.PORTS.name.lower()) or []]
@@ -113,22 +203,21 @@ class Port(Finding):
             )
         return output
 
-    def defectdojo(self) -> dict[str, Any]:
-        description = f"Port: {self.port}\nStatus: {self.status}\nProtocol: {self.protocol}\nService: {self.service}"
-        return {
-            "title": "Port discovered",
-            "description": (f"Host: {self.host.ip}\n{description}" if self.host else description),
-            "severity": Severity.INFO,
-            "date": (self.executions.order_by("-end").first().end or timezone.now()).strftime(
-                DefectDojoSettings.objects.first().date_format
-            ),
-        }
-
-    def __str__(self) -> str:
-        return f"{f'{self.host.__str__()} - ' if self.host else ''}{self.port}"
-
 
 class Path(Finding):
+    """Paths discovered on services.
+
+    Represents web paths, API endpoints, or file shares discovered
+    during web application scanning or directory enumeration.
+
+    Attributes:
+        port: The port/service where this path was discovered
+        path: The actual path or endpoint
+        status: HTTP status code or response status
+        extra_info: Additional information about the path
+        type: Type of path (endpoint or share)
+    """
+
     port = models.ForeignKey(Port, related_name="path", on_delete=models.DO_NOTHING, blank=True, null=True)
     path = models.TextField(max_length=500)
     # Status received for that path. Probably HTTP status
@@ -152,8 +241,42 @@ class Path(Finding):
         else None,
     }
     _parse_dependencies = ["port"]
+    _defectdojo_finding_mapping = {
+        "title": "Path discovered",
+        "description": lambda instance: "\n".join(
+            [
+                f"{k}: {v}"
+                for k, v in [
+                    ("Host", instance.port.host.ip if instance.port and instance.port.host else None),
+                    ("Port", instance.port.port if instance.port else None),
+                    ("Path", instance.path),
+                    ("Type", instance.type),
+                    ("Status", instance.status),
+                    ("Info", instance.extra_info),
+                ]
+                if v
+            ]
+        ),
+        "severity": Severity.INFO,
+    }
+    _defectdojo_endpoint_mapping = {
+        "protocol": lambda instance, target: instance.port.service if instance.port else None,
+        "host": lambda instance, target: instance.port.host.ip
+        if instance.port and instance.port.host
+        else target.target,
+        "port": lambda instance, target: instance.port.port if instance.port else None,
+        "path": "path",
+    }
 
     def _clean_comparison_path(self, value: str) -> str:
+        """Clean a path value for comparison operations.
+
+        Args:
+            value: The path value to clean.
+
+        Returns:
+            Cleaned path string for comparison.
+        """
         if len(value) > 1:
             value = self.clean_path(value)
             if value is None:
@@ -163,46 +286,43 @@ class Path(Finding):
         return value
 
     def filter(self, input: Any, target: Target | None = None) -> bool:
+        """Filter paths based on input criteria.
+
+        Overrides the base filter method to filter paths based on
+        target port paths.
+
+        Args:
+            input: The input value to filter against.
+            target: Optional target for context.
+
+        Returns:
+            True if the path matches the filter criteria.
+        """
         filter = super().filter(input, target)
         if self.port:
             target_port = TargetPort.objects.filter(target=target, port=self.port.port).first()
             if target_port and target_port.path:
+                # If there is a target por with path, only paths within it will be considered
                 filter = filter and self._clean_comparison_path(self.path).startswith(
                     self._clean_comparison_path(target_port.path)
                 )
         return filter
 
-    def defectdojo_endpoint(self, target: Target) -> dict[str, Any]:
-        return {
-            "protocol": self.port.service if self.port else None,
-            "host": (self.port.host.ip if self.port and self.port.host else target.target),
-            "port": self.port.port if self.port else None,
-            "path": self.path,
-        }
-
-    def defectdojo(self) -> dict[str, Any]:
-        description = f"Path: {self.path}\nType: {self.type}"
-        for key, value in [("Status", self.status), ("Info", self.extra_info)]:
-            if value:
-                description = f"{description}\n{key}: {value}"
-        if self.port:
-            description = f"Port: {self.port.port}\n{description}"
-            if self.port.host:
-                description = f"Host: {self.port.host.ip}\n{description}"
-        return {
-            "title": "Path discovered",
-            "description": description,
-            "severity": Severity.INFO,
-            "date": (self.executions.order_by("-end").first().end or timezone.now()).strftime(
-                DefectDojoSettings.objects.first().date_format
-            ),
-        }
-
-    def __str__(self) -> str:
-        return f"{f'{self.port.__str__()} - ' if self.port else ''}{self.path}"
-
 
 class Technology(Finding):
+    """Technologies discovered on services.
+
+    Represents software technologies, frameworks, and applications
+    discovered during service enumeration and fingerprinting.
+
+    Attributes:
+        port: The port where this technology was discovered
+        name: Name of the technology
+        version: Version of the technology (if identified)
+        description: Additional description or details
+        reference: Reference link or documentation
+    """
+
     port = models.ForeignKey(
         Port,
         related_name="technology",
@@ -219,26 +339,29 @@ class Technology(Finding):
     _filters = [Finding.Filter(str, "name", contains=True, processor=lambda n: n.lower())]
     _parse_mapping = {InputKeyword.TECHNOLOGY: "name", InputKeyword.VERSION: "version"}
     _parse_dependencies = ["port"]
-
-    def defectdojo(self) -> dict[str, Any]:
-        description = f"Technology: {self.name}\nVersion: {self.version}"
-        return {
-            "title": f"Technology {self.name} detected",
-            "description": (f"{description}\nDetails: {self.description}" if self.description else description),
-            "severity": Severity.LOW,
-            "cwe": 200,  # CWE-200: Exposure of Sensitive Information to Unauthorized Actor
-            "references": self.reference,
-            "date": (self.executions.order_by("-end").first().end or timezone.now()).strftime(
-                DefectDojoSettings.objects.first().date_format
-            ),
-        }
-
-    def __str__(self) -> str:
-        return f"{f'{self.port.__str__()} - ' if self.port else ''}{self.name}"
+    _defectdojo_finding_mapping = {
+        "title": lambda instance: f"Technology {instance.name} detected",
+        "description": lambda instance: (f"{instance.description}\n\n" if instance.description else "")
+        + "\n".join([f"{k}: {v}" for k, v in [("Technology", instance.name), ("Version", instance.version)] if v]),
+        "severity": Severity.LOW,
+        "cwe": 200,  # CWE-200: Exposure of Sensitive Information to Unauthorized Actor
+        "references": "reference",
+    }
 
 
 class Credential(TriageFinding):
-    """Credential model."""
+    """Credentials discovered during security assessments.
+
+    Represents usernames, passwords, API keys, and other authentication
+    credentials found during security testing.
+
+    Attributes:
+        technology: The technology where credentials were found
+        email: Email address (if applicable)
+        username: Username or account identifier
+        secret: Password, API key, or other secret
+        context: Additional context about where/how credentials were found
+    """
 
     technology = models.ForeignKey(
         Technology,
@@ -256,25 +379,43 @@ class Credential(TriageFinding):
     unique_fields = ["technology", "email", "username", "secret"]
     _parse_mapping = {InputKeyword.EMAIL: "email", InputKeyword.USERNAME: "username", InputKeyword.SECRET: "secret"}
     _parse_dependencies = ["technology"]
-
-    def defectdojo(self) -> dict[str, Any]:
-        return {
-            "title": "Credentials exposure",
-            "description": " - ".join([field for field in [self.email, self.username, self.secret] if field]),
-            "cwe": 200,  # CWE-200: Exposure of Sensitive Information to Unauthorized Actor
-            "severity": Severity.HIGH,
-            "date": (self.executions.order_by("-end").first().end or timezone.now()).strftime(
-                DefectDojoSettings.objects.first().date_format
-            ),
-        }
-
-    def __str__(self) -> str:
-        values = [self.technology.__str__()] if self.technology else []
-        values += [field for field in [self.email, self.username, self.secret] if field]
-        return " - ".join(values)
+    _defectdojo_finding_mapping = {
+        "title": "Credentials exposure",
+        "description": lambda instance: "\n".join(
+            [
+                f"{k}: {v}"
+                for k, v in [
+                    ("Technology", instance.technology.name if instance.technology else None),
+                    ("Email", instance.email),
+                    ("Username", instance.username),
+                    ("Secret", instance.secret),
+                ]
+                if v
+            ]
+        ),
+        "cwe": 200,  # CWE-200: Exposure of Sensitive Information to Unauthorized Actor
+        "severity": Severity.HIGH,
+    }
 
 
 class Vulnerability(TriageFinding):
+    """Security vulnerabilities discovered during assessments.
+
+    Represents security vulnerabilities found in applications, services,
+    or systems.
+
+    Attributes:
+        technology: The technology where the vulnerability was found
+        port: The port where the vulnerability was discovered
+        name: Name or title of the vulnerability
+        description: Detailed description of the vulnerability
+        severity: Severity level of the vulnerability
+        cve: CVE identifier (if applicable)
+        cwe: CWE identifier (if applicable)
+        reference: Reference link or documentation
+        trending: Whether this vulnerability is currently trending
+    """
+
     technology = models.ForeignKey(
         Technology,
         related_name="vulnerability",
@@ -305,25 +446,30 @@ class Vulnerability(TriageFinding):
     ]
     _parse_mapping = {InputKeyword.CVE: "cve"}
     _parse_dependencies = ["technology", "port"]
-
-    def defectdojo(self) -> dict[str, Any]:
-        return {
-            "title": self.name,
-            "description": self.description,
-            "severity": self.severity,
-            "cve": self.cve,
-            "cwe": int(self.cwe.split("-", 1)[1]) if self.cwe else None,
-            "references": self.reference,
-            "date": (self.executions.order_by("-end").first().end or timezone.now()).strftime(
-                DefectDojoSettings.objects.first().date_format
-            ),
-        }
-
-    def __str__(self) -> str:
-        return f"{f'{(self.technology or self.port).__str__()} - ' if self.technology or self.port else ''}{self.name}{f' - {self.cve}' if self.cve else ''}"
+    _defectdojo_finding_mapping = {
+        "title": "name",
+        "description": "description",
+        "severity": "severity",
+        "cve": "cve",
+        "cwe": lambda instance: int(instance.cwe.split("-", 1)[1]) if instance.cwe else None,
+        "references": "reference",
+    }
 
 
 class Exploit(TriageFinding):
+    """Exploits available for vulnerabilities.
+
+    Represents exploit code, proof-of-concept scripts, or exploit
+    references available for discovered vulnerabilities or technologies.
+
+    Attributes:
+        vulnerability: The vulnerability this exploit targets
+        technology: The technology this exploit affects
+        title: Title or name of the exploit
+        edb_id: Exploit-DB identifier (if available)
+        reference: Reference link to the exploit
+    """
+
     vulnerability = models.ForeignKey(
         Vulnerability,
         related_name="exploit",
@@ -345,22 +491,9 @@ class Exploit(TriageFinding):
     unique_fields = ["vulnerability", "technology", "edb_id", "reference"]
     _parse_mapping = {InputKeyword.EXPLOIT: "title"}
     _parse_dependencies = ["vulnerability", "technology"]
-
-    def defectdojo(self) -> dict[str, Any]:
-        return {
-            "title": f"Exploit {self.edb_id} found" if self.edb_id else "Exploit found",
-            "description": self.title,
-            "severity": (self.vulnerability.severity if self.vulnerability else Severity.MEDIUM),
-            "references": self.reference,
-            "date": (self.executions.order_by("-end").first().end or timezone.now()).strftime(
-                DefectDojoSettings.objects.first().date_format
-            ),
-        }
-
-    def __str__(self) -> str:
-        """Instance representation in text format.
-
-        Returns:
-            str: String value that identifies this instance
-        """
-        return f"{f'{(self.vulnerability or self.technology).__str__()} - ' if self.vulnerability or self.technology else ''}{self.title}"
+    _defectdojo_finding_mapping = {
+        "title": lambda instance: f"Exploit {instance.edb_id} found" if instance.edb_id else "Exploit found",
+        "description": "title",
+        "severity": lambda instance: instance.vulnerability.severity if instance.vulnerability else Severity.MEDIUM,
+        "references": "reference",
+    }

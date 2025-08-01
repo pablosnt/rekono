@@ -1,3 +1,10 @@
+"""Django admin configuration for findings models.
+
+This module registers all finding models with the Django admin interface,
+allowing administrators to view and manage security findings through
+the Django admin panel.
+"""
+
 from django.contrib import admin
 
 from findings.models import (
@@ -10,8 +17,6 @@ from findings.models import (
     Technology,
     Vulnerability,
 )
-
-# Register your models here.
 
 admin.site.register(OSINT)
 admin.site.register(Host)

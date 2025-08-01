@@ -146,7 +146,7 @@ class DefectDojo(BaseIntegration):
             return None
 
     def _create_finding(self, test: int, finding: Finding) -> dict[str, Any]:
-        data = finding.defectdojo()
+        data = finding.defectdojo_finding()
         return self._request(
             self.session.post,
             "/findings/",

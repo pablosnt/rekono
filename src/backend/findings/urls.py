@@ -1,3 +1,8 @@
+"""URL routing configuration for findings API endpoints.
+
+This module defines the REST API routes for all finding types.
+"""
+
 from rest_framework.routers import SimpleRouter
 
 from findings.views import (
@@ -10,8 +15,6 @@ from findings.views import (
     TechnologyViewSet,
     VulnerabilityViewSet,
 )
-
-# Register your views here.
 
 router = SimpleRouter()
 router.register("osint", OSINTViewSet)
