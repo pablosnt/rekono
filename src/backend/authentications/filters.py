@@ -1,8 +1,7 @@
 """Django REST framework filters for authentication models.
 
-This module provides filtering capabilities for authentication records,
-allowing users to filter authentication data by various criteria such
-as target, project, target port, name, and type.
+Provides filtering capabilities for authentication records by target,
+project, target port, name, and authentication type.
 """
 
 from django_filters.filters import ModelChoiceFilter
@@ -16,14 +15,12 @@ from targets.models import Target
 class AuthenticationFilter(FilterSet):
     """Filter set for Authentication model.
 
-    This class provides filtering capabilities for authentication records,
-    allowing filtering by target, project, target port, name, and type.
+    Provides filtering capabilities for authentication records by various
+    criteria including target, project, port, name, and type.
 
     Attributes:
-        target (ModelChoiceFilter): Filter by target associated with the
-            authentication record.
-        project (ModelChoiceFilter): Filter by project associated with the
-            authentication record.
+        target (ModelChoiceFilter): Filter by associated target
+        project (ModelChoiceFilter): Filter by associated project
     """
 
     target = ModelChoiceFilter(queryset=Target.objects.all(), field_name="target_port__target")
@@ -33,8 +30,8 @@ class AuthenticationFilter(FilterSet):
         """Meta configuration for the AuthenticationFilter.
 
         Attributes:
-            model: The Authentication model to filter.
-            fields: Dictionary defining available filters and their lookup types.
+            model (Model): The Authentication model to filter
+            fields (dict): Available filters and their lookup types
         """
 
         model = Authentication

@@ -1,8 +1,7 @@
 """Django REST framework serializers for authentication models.
 
-This module provides serialization and deserialization capabilities for
-authentication records, including proper handling of sensitive data
-with validation and protection.
+Provides serialization for authentication records with secure handling
+of sensitive credential data using protected fields and validation.
 """
 
 from rest_framework.serializers import ModelSerializer
@@ -15,13 +14,11 @@ from security.validators.input_validator import Regex, Validator
 class AuthenticationSerializer(ModelSerializer):
     """Serializer for Authentication model.
 
-    This serializer handles the conversion of Authentication model instances
-    to and from JSON format, with special handling for the secret field
-    using ProtectedSecretField for enhanced security.
+    Handles serialization of Authentication instances with secure handling
+    of the secret field using ProtectedSecretField for enhanced security.
 
     Attributes:
-        secret (ProtectedSecretField): Protected field for handling
-            authentication secrets with validation.
+        secret (ProtectedSecretField): Protected field for credential secrets
     """
 
     secret = ProtectedSecretField(
@@ -34,8 +31,8 @@ class AuthenticationSerializer(ModelSerializer):
         """Meta configuration for the AuthenticationSerializer.
 
         Attributes:
-            model: The Authentication model to serialize.
-            fields: Tuple of field names to include in serialization.
+            model (Model): The Authentication model to serialize
+            fields (tuple): Field names to include in serialization
         """
 
         model = Authentication

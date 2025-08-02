@@ -1,8 +1,7 @@
 """Django REST framework views for authentication models.
 
-This module provides REST API views for authentication records, including
-list, create, retrieve, update, and delete operations with proper
-authentication and authorization controls.
+Provides REST API views for authentication records with CRUD operations
+and proper authentication and authorization controls.
 """
 
 from rest_framework.permissions import IsAuthenticated
@@ -20,18 +19,18 @@ from security.authorization.permissions import (
 class AuthenticationViewSet(BaseViewSet):
     """ViewSet for Authentication model CRUD operations.
 
-    This ViewSet provides REST API endpoints for managing authentication
-    records with proper filtering, searching, and ordering capabilities.
-    It enforces authentication and project-based authorization.
+    Provides REST API endpoints for managing authentication records with
+    filtering, searching, and ordering capabilities. Enforces project-based
+    authorization and user authentication.
 
     Attributes:
-        queryset: QuerySet for Authentication model instances.
-        serializer_class: Serializer class for Authentication model.
-        filterset_class: Filter class for query filtering.
-        permission_classes: List of permission classes for access control.
-        search_fields: Fields available for text search.
-        ordering_fields: Fields available for result ordering.
-        http_method_names: Allowed HTTP methods for this ViewSet.
+        queryset (QuerySet): Authentication model instances
+        serializer_class (Serializer): Serializer for Authentication model
+        filterset_class (FilterSet): Filter class for query filtering
+        permission_classes (list): Required permissions for access control
+        search_fields (list): Fields available for text search
+        ordering_fields (list): Fields available for result ordering
+        http_method_names (list): Allowed HTTP methods (GET, POST, DELETE)
     """
 
     queryset = Authentication.objects.all()

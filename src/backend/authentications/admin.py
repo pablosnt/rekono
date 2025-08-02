@@ -1,8 +1,7 @@
 """Django admin configuration for authentication models.
 
-This module configures the Django admin interface for authentication-related
-models, allowing administrators to manage authentication records through
-the Django admin panel.
+Configures Django admin interface for authentication models, allowing
+administrative management of authentication records.
 """
 
 from django.contrib import admin

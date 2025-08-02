@@ -1,9 +1,8 @@
 """Authentication models for Rekono.
 
-This module defines the Authentication model which stores encrypted authentication
-credentials for various authentication types (Basic, Bearer, Cookie, Digest,
-JWT, NTLM, Token). The model includes validation, encryption, and parsing
-capabilities for integration with security testing tools.
+Defines the Authentication model for storing encrypted authentication credentials.
+Supports multiple authentication types with validation, encryption, and parsing
+capabilities for security testing tool integration.
 """
 
 import base64
@@ -20,20 +19,32 @@ from target_ports.models import TargetPort
 class Authentication(BaseInput, BaseEncrypted):
     """Authentication model for storing encrypted credentials.
 
-    This model represents authentication credentials used for security testing
-    and penetration testing. It supports multiple authentication types and
-    provides encryption for sensitive data, validation for input fields, and
-    parsing capabilities for integration with testing tools.
+    Represents authentication credentials for security testing with support for
+    multiple authentication types, automatic encryption, and validation.
+
+    Security Features:
+        - Automatic encryption for sensitive credential data
+        - Input validation with injection prevention
+        - Project-scoped access control
+        - Integration with security testing tools
 
     Attributes:
-        name (TextField): The name/username for the authentication credential.
-            Optional field with validation for name format and injection prevention.
-        _secret (TextField): The encrypted secret/password/token for authentication.
-            Stored in database as 'secret' column with validation and encryption.
-        type (TextField): The type of authentication (Basic, Bearer, Cookie, etc.).
-            Choices defined by AuthenticationType enum.
-        target_port (OneToOneField): The target port this authentication is
-            associated with. One-to-one relationship with TargetPort model.
+        name (TextField): Username/name for authentication (optional, max 100 chars)
+        _secret (TextField): Encrypted password/token (stored as 'secret', max 500 chars)
+        type (TextField): Authentication type from AuthenticationType enum
+        target_port (OneToOneField): Associated target port (one-to-one relationship)
+
+    Example:
+        Create basic authentication:
+        
+        ```python
+        auth = Authentication.objects.create(
+            name="admin",
+            secret="password123",
+            type=AuthenticationType.BASIC,
+            target_port=target_port
+        )
+        ```
     """
 
     name = models.TextField(
@@ -77,11 +88,11 @@ class Authentication(BaseInput, BaseEncrypted):
     def token(self) -> str:
         """Generate authentication token based on type.
 
-        For Basic authentication, returns base64 encoded username:password.
+        For Basic auth, returns base64 encoded username:password.
         For other types, returns the secret directly.
 
         Returns:
-            str: The authentication token formatted according to the type.
+            str: Formatted authentication token
         """
         return (
             base64.b64encode(f"{self.name}:{self.secret}".encode()).decode()
@@ -93,7 +104,6 @@ class Authentication(BaseInput, BaseEncrypted):
         """String representation of the authentication record.
 
         Returns:
-            str: String in format "target_port - name" or just "name" if no
-                target port is associated.
+            str: String in format "target_port - name" or just "name"
         """
         return (f"{self.target_port.__str__()} - " if self.target_port else "") + self.name
