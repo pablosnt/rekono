@@ -1,8 +1,22 @@
 """Django models for alert management and monitoring.
 
-This module contains the database models for the alerts system, including
-the main Alert model for configuration and MonitorSettings for automated
-monitoring jobs.
+This module provides the core data models for Rekono's alerting system,
+which enables security teams to receive real-time notifications about security findings.
+The alerting system supports multiple notification modes and flexible filtering
+capabilities to reduce noise and focus on relevant threats.
+
+Key Components:
+    Alert: Configurable alert rules that trigger notifications based on finding types,
+           discovery modes, and custom filters. Supports project-level alerting with
+           fine-grained subscriber management.
+    MonitorSettings: Configuration for automated background monitoring jobs that
+                    periodically check for trending vulnerabilities and security events.
+
+Architecture:
+    The alerting system uses a mapping-based approach where each alert item type
+    (OSINT, hosts, ports, etc.) is mapped to specific Django models and supported
+    alert modes. This design allows for type-safe alert processing and easy extension
+    for new finding types.
 """
 
 from django.core.validators import MaxValueValidator, MinValueValidator
@@ -27,22 +41,38 @@ from security.validators.input_validator import Regex, Validator
 
 
 class Alert(BaseModel):
-    """Model for configuring and managing alerts.
+    """Model for configuring security alert rules.
 
-    This model represents an alert configuration that can trigger notifications
-    based on different types of findings and conditions. Alerts can be configured
-    for various item types (OSINT, hosts, ports, etc.) and different modes
-    (new findings, filtered findings, monitoring).
+    Represents an alert configuration that triggers notifications when specific
+    security findings are discovered. Supports multiple trigger modes and filtering
+    criteria to ensure relevant notifications.
+
+    Alert Modes:
+        NEW: Triggers when a finding is discovered for the first time
+        FILTER: Triggers when a finding matches specific criteria (e.g., CVE, service)
+        MONITOR: Triggers based on dynamic conditions like trending vulnerabilities
 
     Attributes:
-        project: The project this alert belongs to
-        item: The type of finding this alert monitors
-        mode: How the alert should trigger (new, filter, monitor)
-        value: Optional filter value for specific criteria
-        enabled: Whether this alert is currently active
-        subscribe_all_members: Whether to auto-subscribe all project members
-        owner: The user who created this alert
-        subscribers: Users subscribed to receive notifications for this alert
+        project (ForeignKey): The project this alert belongs to
+        item (TextField): The type of finding to monitor (from AlertItem enum)
+        mode (TextField): How the alert triggers (from AlertMode enum)
+        value (TextField): Optional filter value for FILTER mode alerts
+        enabled (BooleanField): Whether this alert is currently active
+        subscribe_all_members (BooleanField): Auto-subscribe all project members
+        owner (ForeignKey): The user who created this alert
+        subscribers (ManyToManyField): Users subscribed to receive notifications
+
+    Example:
+        Create an alert for new CVEs in a project:
+
+        ```python
+        Alert.objects.create(
+            project=my_project,
+            item=AlertItem.CVE,
+            mode=AlertMode.NEW,
+            owner=request.user
+        )
+        ```
     """
 
     project = models.ForeignKey(Project, related_name="alerts", on_delete=models.CASCADE)
@@ -128,7 +158,7 @@ class Alert(BaseModel):
         """Return string representation of the alert.
 
         Returns:
-            A string in format "project - mode - item - value".
+            str: A string in format "project - mode - item - value".
         """
         values = [self.project.__str__(), self.mode, self.item]
         if self.value:
@@ -138,12 +168,18 @@ class Alert(BaseModel):
     def must_be_triggered(self, execution: Execution, finding: Finding) -> bool:
         """Determine if this alert should be triggered for a given finding.
 
+        Evaluates whether a finding should trigger this alert based on:
+        - Finding type matches alert item type
+        - Finding is not fixed or marked as false positive
+        - Alert mode conditions are met (NEW/FILTER/MONITOR)
+        - Custom filter functions pass (if defined)
+
         Args:
-            execution: The execution that produced the finding
-            finding: The finding to evaluate against this alert
+            execution (Execution): The execution that produced the finding
+            finding (Finding): The finding to evaluate against this alert
 
         Returns:
-            True if the alert should be triggered, False otherwise
+            bool: True if the alert should be triggered, False otherwise
         """
         _mode = AlertMode(self.mode)
         data = self.mapping[AlertItem(self.item)]
@@ -172,15 +208,28 @@ class Alert(BaseModel):
 
 
 class MonitorSettings(BaseModel):
-    """Model for configuring automated monitoring jobs.
+    """Model for configuring automated threat intelligence monitoring.
 
-    This model stores configuration for background monitoring tasks that
-    periodically check for trending vulnerabilities and security events.
+    Manages configuration for background monitoring jobs that periodically query
+    external threat intelligence sources.
+    Follows a singleton pattern - only one instance should exist.
+
+    The monitoring system schedules itself using RQ jobs and triggers MONITOR
+    mode alerts when needed.
 
     Attributes:
-        rq_job_id: ID of the current monitoring job in the queue
-        last_monitor: Timestamp of the last monitoring run
-        hour_span: Hours between monitoring runs (24-168 hours)
+        rq_job_id (TextField): ID of the current scheduled monitoring job
+        last_monitor (DateTimeField): Timestamp of the last monitoring execution
+        hour_span (IntegerField): Hours between monitoring runs (24-168 hours)
+
+    Example:
+        Configure monitoring to run every 48 hours:
+
+        ```python
+        settings = MonitorSettings.objects.first()
+        settings.hour_span = 48
+        settings.save()
+        ```
     """
 
     rq_job_id = models.TextField(max_length=50, blank=True, null=True)
@@ -191,6 +240,6 @@ class MonitorSettings(BaseModel):
         """Return string representation of monitor settings.
 
         Returns:
-            A string describing the last monitor time and next scheduled run.
+            str: Description of last monitor time and next scheduled run
         """
         return f"Last monitor was at {self.last_monitor}. Next one in {self.hour_span} hours"

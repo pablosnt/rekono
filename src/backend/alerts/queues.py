@@ -1,7 +1,7 @@
 """Background job queues for alert monitoring.
 
-This module contains the queue classes and job functions for handling
-background monitoring tasks, including trending vulnerability monitoring.
+Queue classes and job functions for handling background monitoring tasks.
+Includes trending vulnerability monitoring and automated job scheduling.
 """
 
 from datetime import timedelta
@@ -19,11 +19,12 @@ from platforms.cvecrowd.integrations import CveCrowd
 class MonitorQueue(BaseQueue):
     """Queue for managing monitoring background jobs.
 
-    Handles the scheduling and execution of periodic monitoring tasks
-    that check for trending vulnerabilities and security events.
+    Handles scheduling and execution of periodic monitoring tasks that check
+    for trending vulnerabilities and security events. Uses RQ for job management
+    with automatic rescheduling.
 
     Attributes:
-        name: The name of the monitoring queue
+        name (str): The name of the monitoring queue
     """
 
     name = "monitor"
@@ -31,13 +32,14 @@ class MonitorQueue(BaseQueue):
     def enqueue(self, **kwargs: Any) -> Job:
         """Enqueue a monitoring job.
 
-        Creates and schedules a monitoring job.
+        Creates and schedules a monitoring job, updating the settings with
+        the new job ID for tracking.
 
         Args:
-            **kwargs: Additional keyword arguments for job configuration
+            **kwargs (Any): Additional keyword arguments for job configuration
 
         Returns:
-            The created RQ job instance
+            Job: The created RQ job instance
         """
         settings = MonitorSettings.objects.first()
         job = self.queue.enqueue(self.consume, on_success=self._scheduled_callback)
@@ -50,8 +52,9 @@ class MonitorQueue(BaseQueue):
     def consume() -> None:
         """Execute the monitoring job.
 
-        Runs the monitoring process, updating the last monitor timestamp
-        and checking all configured monitoring platforms for updates.
+        Runs the monitoring process by updating the last monitor timestamp
+        and checking all configured monitoring platforms for threat intelligence
+        updates.
         """
         BaseQueue.logger.info("[Monitor] Monitor job has started")
         settings = MonitorSettings.objects.first()
@@ -64,14 +67,14 @@ class MonitorQueue(BaseQueue):
     def _scheduled_callback(job: Any, connection: Any, *args: Any, **kwargs: Any) -> None:
         """Callback function executed after monitoring job completion.
 
-        Schedules the next monitoring job based on the configured hour span
-        and updates the monitor settings with the new job ID.
+        Automatically schedules the next monitoring job based on the configured
+        hour span, creating a self-sustaining monitoring loop.
 
         Args:
-            job: The completed RQ job instance
-            connection: The RQ connection object
-            *args: Additional positional arguments
-            **kwargs: Additional keyword arguments
+            job (Any): The completed RQ job instance
+            connection (Any): The RQ connection object
+            *args (Any): Additional positional arguments
+            **kwargs (Any): Additional keyword arguments
         """
         settings = MonitorSettings.objects.first()
         # Although this is a static method, we instantiate MonitorQueue to access the queue instance.

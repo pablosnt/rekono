@@ -1,7 +1,7 @@
 """Management command to trigger the monitor system for alerts.
 
-This module defines a Django management command that enqueues a background
-monitoring job for the alerts system.
+Defines a Django management command that enqueues a background monitoring
+job for the alerts system.
 """
 
 from typing import Any
@@ -14,7 +14,8 @@ from alerts.queues import MonitorQueue
 class Command(BaseCommand):
     """Django management command to trigger the monitor system.
 
-    This command enqueues a background monitoring job using the MonitorQueue.
+    Enqueues a background monitoring job using the MonitorQueue for manual
+    monitoring execution or system initialization.
     """
 
     help = "Trigger monitor system"
@@ -22,10 +23,11 @@ class Command(BaseCommand):
     def handle(self, *args: Any, **options: Any) -> None:
         """Handle the management command execution.
 
-        Enqueues a monitoring job for the alerts system.
+        Enqueues a monitoring job for the alerts system to check for
+        security events or updates.
 
         Args:
-            *args: Positional arguments passed to the command.
-            **options: Keyword options passed to the command.
+            *args (Any): Positional arguments passed to the command
+            **options (Any): Keyword options passed to the command
         """
         MonitorQueue().enqueue()

@@ -1,7 +1,7 @@
 """Enums for alert configuration and management.
 
-This module defines the enumeration classes used throughout the alerts system
-to specify alert types, modes, and other configuration options.
+Defines enumeration classes for alert types, modes, and configuration options
+used throughout the alerts system.
 """
 
 from django.db.models import TextChoices
@@ -11,18 +11,17 @@ from django.db.models.enums import Choices
 class AlertItem(TextChoices):
     """Enumeration of alert item types.
 
-    Defines the different types of findings that can trigger alerts in the
-    Rekono platform.
+    Defines the types of security findings that can trigger alerts.
 
     Attributes:
-        OSINT: Open Source Intelligence findings
-        HOST: Host discovery findings
-        OPEN_PORT: Open port findings
-        SERVICE: Service detection findings
-        TECHNOLOGY: Technology identification findings
-        CREDENTIAL: Credential discovery findings
-        VULNERABILITY: General vulnerability findings
-        CVE: Common Vulnerabilities and Exposures findings
+        OSINT (str): Open Source Intelligence findings
+        HOST (str): Host discovery findings
+        OPEN_PORT (str): Open port findings
+        SERVICE (str): Service detection findings
+        TECHNOLOGY (str): Technology identification findings
+        CREDENTIAL (str): Credential discovery findings
+        VULNERABILITY (str): General vulnerability findings
+        CVE (str): Common Vulnerabilities and Exposures findings
     """
 
     OSINT = "OSINT"
@@ -36,14 +35,14 @@ class AlertItem(TextChoices):
 
 
 class AlertMode(TextChoices):
-    """Enumeration of alert modes.
+    """Enumeration of alert trigger modes.
 
-    Defines the different ways alerts can be configured to trigger.
+    Defines how alerts can be configured to trigger based on findings.
 
     Attributes:
-        NEW: Alert triggers when a new finding is discovered
-        FILTER: Alert triggers when a finding matches specific criteria
-        MONITOR: Alert triggers for monitoring trending or status changes
+        NEW (str): Alert triggers when a new finding is discovered
+        FILTER (str): Alert triggers when a finding matches specific criteria
+        MONITOR (str): Alert triggers for trending or status changes
     """
 
     NEW = "New"

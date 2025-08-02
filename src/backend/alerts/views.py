@@ -1,7 +1,8 @@
 """Django REST framework views for alert management.
 
-This module contains the ViewSet classes that provide REST API endpoints
-for managing alerts and monitoring settings.
+Provides REST API endpoints for managing alerts and monitoring settings.
+Includes ViewSets for CRUD operations and custom actions for subscription
+management and alert enabling/disabling.
 """
 
 from django.db.models import QuerySet
@@ -32,17 +33,20 @@ from security.authorization.permissions import (
 class AlertViewSet(BaseViewSet):
     """ViewSet for managing alert configurations.
 
-    Provides REST API endpoints for creating, reading, updating, and deleting
-    alert configurations. Also includes custom actions for subscription
-    management and enabling/disabling alerts.
+    Provides REST API endpoints for alert CRUD operations plus custom actions
+    for subscription management and enabling/disabling alerts.
+
+    Custom Actions:
+        subscription: Subscribe/unsubscribe users to alerts
+        enable: Enable/disable specific alerts
 
     Attributes:
-        queryset: All Alert objects
-        serializer_class: Default serializer for alert operations
-        filterset_class: Filter class for querying alerts
-        permission_classes: Required permissions for access
-        search_fields: Fields that can be searched
-        ordering_fields: Fields that can be used for ordering
+        queryset (QuerySet): All Alert objects
+        serializer_class (Serializer): Default serializer for alert operations
+        filterset_class (FilterSet): Filter class for querying alerts
+        permission_classes (list): Required permissions for access
+        search_fields (list): Fields that can be searched
+        ordering_fields (list): Fields that can be used for ordering
     """
 
     queryset = Alert.objects.all()
@@ -61,7 +65,7 @@ class AlertViewSet(BaseViewSet):
         """Get the appropriate serializer class based on the request method.
 
         Returns:
-            EditAlertSerializer for PUT requests, otherwise the default serializer.
+            Serializer: EditAlertSerializer for PUT requests, AlertSerializer otherwise
         """
         return EditAlertSerializer if self.request.method == "PUT" else super().get_serializer_class()
 
@@ -72,7 +76,7 @@ class AlertViewSet(BaseViewSet):
         Otherwise returns all alerts.
 
         Returns:
-            Filtered queryset based on request method.
+            QuerySet: Filtered queryset based on request method
         """
         queryset = super().get_queryset()
         return queryset.filter(enabled=True, mode=AlertMode.FILTER).all() if self.request.method == "PUT" else queryset
@@ -94,11 +98,11 @@ class AlertViewSet(BaseViewSet):
         DELETE: Unsubscribe the current user from the alert
 
         Args:
-            request: The HTTP request object
-            pk: Primary key of the alert
+            request (Request): The HTTP request object
+            pk (str): Primary key of the alert
 
         Returns:
-            HTTP 204 on success, HTTP 400 with error message on failure
+            Response: HTTP 204 on success, HTTP 400 with error message on failure
         """
         alert = self.get_object()
         is_subscribed = alert.subscribers.filter(id=request.user.id).exists()
@@ -126,11 +130,11 @@ class AlertViewSet(BaseViewSet):
         DELETE: Disable the alert
 
         Args:
-            request: The HTTP request object
-            pk: Primary key of the alert
+            request (Request): The HTTP request object
+            pk (str): Primary key of the alert
 
         Returns:
-            HTTP 200 with alert data on success, HTTP 400 with error message on failure
+            Response: HTTP 200 with alert data on success, HTTP 400 with error on failure
         """
         alert = self.get_object()
         bad_request = None
@@ -154,13 +158,13 @@ class MonitorSettingsViewSet(BaseViewSet):
     """ViewSet for managing monitoring settings.
 
     Provides REST API endpoints for viewing and updating monitoring
-    configuration settings.
+    configuration settings. Supports GET and PUT operations only.
 
     Attributes:
-        queryset: All MonitorSettings objects
-        serializer_class: Serializer for monitor settings
-        permission_classes: Required permissions for access
-        http_method_names: Allowed HTTP methods (GET, PUT only)
+        queryset (QuerySet): All MonitorSettings objects
+        serializer_class (Serializer): Serializer for monitor settings
+        permission_classes (list): Required permissions for access
+        http_method_names (list): Allowed HTTP methods (GET, PUT only)
     """
 
     queryset = MonitorSettings.objects.all()

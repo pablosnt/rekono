@@ -1,4 +1,5 @@
 """Management commands package for alerts app.
 
-This package contains custom Django management commands for the alerts app.
+Contains custom Django management commands for the alerts app,
+including the monitor command for triggering background jobs.
 """

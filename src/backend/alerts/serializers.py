@@ -1,7 +1,7 @@
 """Django REST framework serializers for alert management.
 
-This module contains the serializer classes used for converting alert and
-monitoring settings models to/from JSON for API operations.
+Serializer classes for converting alert and monitoring settings models
+to/from JSON for API operations. Includes validation logic and computed fields.
 """
 
 from typing import Any
@@ -18,13 +18,12 @@ from users.serializers import SimpleUserSerializer
 class AlertSerializer(ModelSerializer):
     """Serializer for Alert model.
 
-    Handles serialization and deserialization of Alert objects for API
-    operations. Includes computed fields for subscription status and
-    owner information.
+    Handles serialization and deserialization of Alert objects for API operations.
+    Includes computed fields and validation logic for alert creation.
 
     Attributes:
-        subscribed: Computed field indicating if current user is subscribed
-        owner: Serialized user information for the alert owner
+        subscribed (SerializerMethodField): Whether current user is subscribed
+        owner (SimpleUserSerializer): Serialized user information for alert owner
     """
 
     subscribed = SerializerMethodField(read_only=True)
@@ -34,10 +33,10 @@ class AlertSerializer(ModelSerializer):
         """Meta configuration for the AlertSerializer.
 
         Attributes:
-            model: The Alert model to serialize.
-            fields: Tuple of field names to include in serialization.
-            read_only_fields: Fields that cannot be modified during serialization.
-            extra_kwargs: Additional keyword arguments for field configuration.
+            model (Model): The Alert model to serialize
+            fields (tuple): Field names to include in serialization
+            read_only_fields (tuple): Fields that cannot be modified
+            extra_kwargs (dict): Additional field configuration
         """
 
         model = Alert
@@ -60,23 +59,24 @@ class AlertSerializer(ModelSerializer):
         """Get whether the current user is subscribed to this alert.
 
         Args:
-            instance: The Alert instance being serialized
+            instance (Alert): The Alert instance being serialized
 
         Returns:
-            True if the current user is subscribed, False otherwise
+            bool: True if the current user is subscribed, False otherwise
         """
         return instance.subscribers.filter(pk=self.context.get("request").user.id).exists()
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         """Validate the alert data.
 
-        Ensures that filter mode alerts have a value specified.
+        Ensures that filter mode alerts have a value specified and sets
+        the alert as enabled by default.
 
         Args:
-            attrs: The attributes to validate
+            attrs (dict): The attributes to validate
 
         Returns:
-            The validated attributes
+            dict: The validated attributes
 
         Raises:
             ValidationError: If filter mode is selected without a value
@@ -91,14 +91,14 @@ class AlertSerializer(ModelSerializer):
     def create(self, validated_data: dict[str, Any]) -> Alert:
         """Create a new alert instance.
 
-        Creates the alert and handles subscription setup based on the
-        subscribe_all_members flag.
+        Creates the alert and handles subscription setup. If subscribe_all_members
+        is True, all project members are subscribed; otherwise only the owner.
 
         Args:
-            validated_data: The validated data for creating the alert
+            validated_data (dict): The validated data for creating the alert
 
         Returns:
-            The created Alert instance
+            Alert: The created Alert instance
         """
         alert = super().create(validated_data)
         # If subscribe_all_members is set, subscribe all project members to the alert.
@@ -113,17 +113,17 @@ class AlertSerializer(ModelSerializer):
 class EditAlertSerializer(AlertSerializer):
     """Serializer for editing existing alerts.
 
-    A specialized version of AlertSerializer that restricts which fields
-    can be modified during updates.
+    Specialized version of AlertSerializer that restricts which fields
+    can be modified during updates. Only allows value field modifications.
     """
 
     class Meta:
         """Meta configuration for the EditAlertSerializer.
 
         Attributes:
-            model: The Alert model to serialize.
-            fields: Tuple of field names to include in serialization.
-            read_only_fields: Fields that cannot be modified during updates.
+            model (Model): The Alert model to serialize
+            fields (tuple): Field names to include in serialization
+            read_only_fields (tuple): Fields that cannot be modified during updates
         """
 
         model = Alert
@@ -154,16 +154,16 @@ class MonitorSettingsSerializer(ModelSerializer):
     """Serializer for MonitorSettings model.
 
     Handles serialization and deserialization of MonitorSettings objects
-    for API operations.
+    for API operations. Provides read-only access to monitoring state.
     """
 
     class Meta:
         """Meta configuration for the MonitorSettingsSerializer.
 
         Attributes:
-            model: The MonitorSettings model to serialize.
-            fields: Tuple of field names to include in serialization.
-            read_only_fields: Fields that cannot be modified during serialization.
+            model (Model): The MonitorSettings model to serialize
+            fields (tuple): Field names to include in serialization
+            read_only_fields (tuple): Fields that cannot be modified
         """
 
         model = MonitorSettings

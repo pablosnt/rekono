@@ -1,6 +1,6 @@
 """Django app configuration for alerts module.
 
-This module contains the Django app configuration for the alerts application,
+Contains the Django app configuration for the alerts application,
 including model registration and fixture handling.
 """
 
@@ -14,12 +14,12 @@ from framework.apps import BaseApp
 class AlertsConfig(BaseApp, AppConfig):
     """Django app configuration for alerts.
 
-    Configures the alerts Django application, including model registration
+    Configures the alerts Django application with model registration
     and fixture loading behavior.
 
     Attributes:
-        name: The name of the Django app
-        skip_fixtures_if_model_exists: Whether to skip fixtures if models exist
+        name (str): The name of the Django app
+        skip_fixtures_if_model_exists (bool): Skip fixtures if models exist
     """
 
     name = "alerts"
@@ -29,7 +29,7 @@ class AlertsConfig(BaseApp, AppConfig):
         """Get the models that should be registered with this app.
 
         Returns:
-            List of model classes to register
+            list[Any]: Model classes to register for fixture loading
         """
         from alerts.models import MonitorSettings
 
