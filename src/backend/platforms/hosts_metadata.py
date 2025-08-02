@@ -12,20 +12,16 @@ from targets.models import Target
 class HostsMetadata(BaseIntegration):
     finding_types = [Host]
 
-    def __init__(self):
-        pass
-
     def is_enabled(self) -> bool:
         return True
 
     def _process_finding(self, execution: Execution, finding: Finding) -> None:
         ip_type = Target.get_type(finding.ip)
-        if finding.domain is None and ip_type in [
-            TargetType.PRIVATE_IP,
-            TargetType.PUBLIC_IP,
-        ]:
+        update = []
+        if finding.domain is None and ip_type in [TargetType.PRIVATE_IP, TargetType.PUBLIC_IP]:
             try:
                 finding.domain = socket.gethostbyaddr(finding.ip)[0]
+                update.append("domain")
             except Exception:
                 pass
         if ip_type == TargetType.PUBLIC_IP and not all(
@@ -36,4 +32,6 @@ class HostsMetadata(BaseIntegration):
                 finding.country = geocode.country
                 finding.city = geocode.city
                 finding.latitude, finding.longitude = geocode.latlng
-        finding.save(update_fields=["domain", "country", "city", "latitude", "longitude"])
+                update.extend(["country", "city", "latitude", "longitude"])
+        if update:
+            finding.save(update_fields=update)
