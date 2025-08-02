@@ -7,8 +7,6 @@ from targets.models import Target
 
 
 class InputTechnologyFilter(FilterSet):
-    """FilterSet to filter and sort input Technology entities."""
-
     project = ModelChoiceFilter(queryset=Project.objects.all(), field_name="task__target__project")
     target = ModelChoiceFilter(queryset=Target.objects.all(), field_name="task__targett")
 
@@ -22,8 +20,6 @@ class InputTechnologyFilter(FilterSet):
 
 
 class InputVulnerabilityFilter(FilterSet):
-    """FilterSet to filter and sort input Vulnerability entities."""
-
     project = ModelChoiceFilter(queryset=Project.objects.all(), field_name="tasks__target__project")
     target = ModelChoiceFilter(queryset=Target.objects.all(), field_name="tasks__targett")
 

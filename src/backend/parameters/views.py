@@ -6,8 +6,6 @@ from parameters.serializers import (
     InputVulnerabilitySerializer,
 )
 
-# Create your views here.
-
 
 class InputTechnologyViewSet(InputParameterViewSet):
     queryset = InputTechnology.objects.all()
