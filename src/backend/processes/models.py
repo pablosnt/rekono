@@ -6,8 +6,6 @@ from rekono.settings import AUTH_USER_MODEL
 from security.validators.input_validator import Regex, Validator
 from tools.models import Configuration
 
-# Create your models here.
-
 
 class Process(BaseLike):
     name = models.TextField(
@@ -21,11 +19,6 @@ class Process(BaseLike):
     tags = TaggableManager()
 
     def __str__(self) -> str:
-        """Instance representation in text format.
-
-        Returns:
-            str: String value that identifies this instance
-        """
         return self.name
 
 
@@ -43,9 +36,4 @@ class Step(BaseModel):
         constraints = [models.UniqueConstraint(fields=["process", "configuration"], name="unique_step")]
 
     def __str__(self) -> str:
-        """Instance representation in text format.
-
-        Returns:
-            str: String value that identifies this instance
-        """
         return f"{self.process.__str__()} - {self.configuration.__str__()}"

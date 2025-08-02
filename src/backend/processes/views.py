@@ -6,8 +6,6 @@ from processes.models import Process, Step
 from processes.serializers import ProcessSerializer, StepSerializer
 from security.authorization.permissions import OwnerPermission, RekonoModelPermission
 
-# Create your views here.
-
 
 class ProcessViewSet(LikeViewSet):
     queryset = Process.objects.all()
