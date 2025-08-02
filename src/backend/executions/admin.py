@@ -1,8 +1,7 @@
 """Django admin configuration for execution models.
 
-This module configures the Django admin interface for execution-related
-models, allowing administrators to monitor and manage execution records
-through the Django admin panel.
+Configures Django admin interface for execution models, allowing
+administrative monitoring and management of execution records.
 """
 
 from django.contrib import admin

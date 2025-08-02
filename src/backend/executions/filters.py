@@ -1,8 +1,7 @@
 """Django REST framework filters for execution models.
 
-This module provides filtering capabilities for execution records,
-allowing users to filter execution data by various criteria such
-as target, project, process, tool, stage, intensity, and executor.
+Provides filtering capabilities for execution records by target, project,
+process, tool, stage, intensity, and executor criteria.
 """
 
 from django_filters.filters import ChoiceFilter, ModelChoiceFilter
@@ -20,18 +19,17 @@ from users.models import User
 class ExecutionFilter(FilterSet):
     """Filter set for Execution model.
 
-    This class provides filtering capabilities for execution records,
-    allowing filtering by target, project, process, tool, stage,
-    intensity, executor, and various time-based criteria.
+    Provides filtering capabilities for execution records by target, project,
+    process, tool, stage, intensity, executor, and time-based criteria.
 
     Attributes:
-        target (ModelChoiceFilter): Filter by target associated with the execution.
-        project (ModelChoiceFilter): Filter by project associated with the execution.
-        process (ModelChoiceFilter): Filter by process associated with the execution.
-        tool (ModelChoiceFilter): Filter by tool used in the execution.
-        stage (ChoiceFilter): Filter by execution stage.
-        intensity (ChoiceFilter): Filter by execution intensity level.
-        executor (ModelChoiceFilter): Filter by user who executed the task.
+        target (ModelChoiceFilter): Filter by associated target
+        project (ModelChoiceFilter): Filter by associated project
+        process (ModelChoiceFilter): Filter by associated process
+        tool (ModelChoiceFilter): Filter by tool used in execution
+        stage (ChoiceFilter): Filter by execution stage
+        intensity (ChoiceFilter): Filter by execution intensity level
+        executor (ModelChoiceFilter): Filter by user who executed the task
     """
 
     target = ModelChoiceFilter(queryset=Target.objects.all(), field_name="task__target")
@@ -46,8 +44,8 @@ class ExecutionFilter(FilterSet):
         """Meta configuration for the ExecutionFilter.
 
         Attributes:
-            model: The Execution model to filter.
-            fields: Dictionary defining available filters and their lookup types.
+            model (Model): The Execution model to filter
+            fields (dict): Available filters and their lookup types
         """
 
         model = Execution

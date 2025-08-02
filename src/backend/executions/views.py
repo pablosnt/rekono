@@ -1,8 +1,7 @@
 """Django REST framework views for execution models.
 
-This module provides REST API views for execution records, including
-list, retrieve operations and report download functionality with proper
-authentication and authorization controls.
+Provides REST API views for execution records including list, retrieve
+operations and report download functionality with proper security controls.
 """
 
 from django.http import FileResponse
@@ -28,19 +27,21 @@ from security.authorization.permissions import (
 class ExecutionViewSet(BaseViewSet):
     """ViewSet for Execution model operations.
 
-    This ViewSet provides REST API endpoints for managing execution
-    records with proper filtering, searching, and ordering capabilities.
-    It enforces authentication and project-based authorization, and
-    provides report download functionality for completed executions.
+    Provides REST API endpoints for execution records with filtering, searching,
+    and ordering capabilities. Includes report download functionality for
+    completed executions.
+
+    Custom Actions:
+        download_report: Download execution output files for completed executions
 
     Attributes:
-        queryset: QuerySet for Execution model instances.
-        serializer_class: Serializer class for Execution model.
-        filterset_class: Filter class for query filtering.
-        permission_classes: List of permission classes for access control.
-        search_fields: Fields available for text search.
-        ordering_fields: Fields available for result ordering.
-        http_method_names: Allowed HTTP methods for this ViewSet.
+        queryset (QuerySet): Execution model instances
+        serializer_class (Serializer): Serializer for Execution model
+        filterset_class (FilterSet): Filter class for query filtering
+        permission_classes (list): Required permissions for access control
+        search_fields (list): Fields available for text search
+        ordering_fields (list): Fields available for result ordering
+        http_method_names (list): Allowed HTTP methods (GET only)
     """
 
     queryset = Execution.objects.all()
@@ -80,18 +81,15 @@ class ExecutionViewSet(BaseViewSet):
     def download_report(self, request: Request, pk: str) -> FileResponse:
         """Download execution report file.
 
-        This action allows users to download the output report file
-        for a completed execution. Only completed executions can
-        have downloadable reports.
+        Allows downloading output report files for completed executions.
+        Only executions with COMPLETED status can have downloadable reports.
 
         Args:
-            request: The HTTP request object.
-            pk: The primary key of the execution.
+            request (Request): The HTTP request object
+            pk (str): Primary key of the execution
 
         Returns:
-            FileResponse: The report file as a downloadable response,
-                or an error response if the execution is not completed
-                or the file doesn't exist.
+            FileResponse: Report file download or error response
         """
         execution = self.get_object()
         if execution.status != Status.COMPLETED:

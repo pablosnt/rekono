@@ -1,8 +1,7 @@
 """Django REST framework serializers for execution models.
 
-This module provides serialization and deserialization capabilities for
-execution records, including detailed and simplified views of execution
-data for API consumption.
+Provides serialization for execution records including detailed and simplified
+views with nested configuration data and computed fields.
 """
 
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
@@ -14,15 +13,12 @@ from tools.serializers import ConfigurationSerializer
 class ExecutionSerializer(ModelSerializer):
     """Serializer for Execution model with detailed information.
 
-    This serializer provides comprehensive serialization of execution
-    records, including nested configuration data and computed fields
-    for API responses.
+    Provides comprehensive serialization including nested configuration data,
+    finding relationships, and computed fields for API responses.
 
     Attributes:
-        configuration (ConfigurationSerializer): Nested serializer for
-            tool configuration details.
-        has_report (SerializerMethodField): Computed field indicating
-            if the execution has an output report file.
+        configuration (ConfigurationSerializer): Nested tool configuration details
+        has_report (SerializerMethodField): Whether execution has output report file
     """
 
     configuration = ConfigurationSerializer(many=False, read_only=True)
@@ -32,8 +28,8 @@ class ExecutionSerializer(ModelSerializer):
         """Meta configuration for the ExecutionSerializer.
 
         Attributes:
-            model: The Execution model to serialize.
-            fields: Tuple of field names to include in serialization.
+            model (Model): The Execution model to serialize
+            fields (tuple): Field names to include in serialization
         """
 
         model = Execution
@@ -61,10 +57,10 @@ class ExecutionSerializer(ModelSerializer):
         """Check if the execution has an output report file.
 
         Args:
-            instance: The execution instance to check.
+            instance (Execution): The execution instance to check
 
         Returns:
-            bool: True if the execution has an output file, False otherwise.
+            bool: True if execution has output file, False otherwise
         """
         return instance.output_file is not None
 
@@ -72,13 +68,11 @@ class ExecutionSerializer(ModelSerializer):
 class SimpleExecutionSerializer(ModelSerializer):
     """Simplified serializer for Execution model.
 
-    This serializer provides a minimal view of execution records,
-    including only essential fields for list views and basic
-    information display.
+    Provides minimal view of execution records with only essential fields
+    for list views and basic information display.
 
     Attributes:
-        configuration (ConfigurationSerializer): Nested serializer for
-            tool configuration details.
+        configuration (ConfigurationSerializer): Nested tool configuration details
     """
 
     configuration = ConfigurationSerializer(many=False, read_only=True)
@@ -87,8 +81,8 @@ class SimpleExecutionSerializer(ModelSerializer):
         """Meta configuration for the SimpleExecutionSerializer.
 
         Attributes:
-            model: The Execution model to serialize.
-            fields: Tuple of field names to include in serialization.
+            model (Model): The Execution model to serialize
+            fields (tuple): Field names to include in serialization
         """
 
         model = Execution

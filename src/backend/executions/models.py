@@ -1,8 +1,7 @@
 """Execution models for Rekono.
 
-This module defines the Execution model which tracks the lifecycle of security
-tool executions, including status tracking, timing information, and result
-management for security testing workflows.
+Defines the Execution model for tracking security tool execution lifecycle
+including status tracking, timing information, and result management.
 """
 
 from django.db import models
@@ -16,24 +15,38 @@ from tools.models import Configuration
 class Execution(BaseModel):
     """Execution model for tracking security tool runs.
 
-    This model represents a single execution of a security tool within
-    the Rekono platform. It tracks the complete lifecycle from queuing
-    to completion, including status updates, timing information, and
-    result management.
+    Represents a single execution of a security tool with complete lifecycle
+    tracking from queuing to completion, including status updates, timing
+    information, and result management.
+
+    Execution Lifecycle:
+        REQUESTED -> RUNNING -> COMPLETED/ERROR/CANCELLED
+        REQUESTED -> SKIPPED (if dependencies not met)
 
     Attributes:
-        task (ForeignKey): The task that triggered this execution.
-        rq_job_id (TextField): Redis Queue job identifier for background processing.
-        configuration (ForeignKey): The tool configuration used for this execution.
-        output_file (TextField): Path to the execution output file.
-        output_plain (TextField): Plain text output from the tool execution.
-        skipped_reason (TextField): Reason why the execution was skipped.
-        status (TextField): Current status of the execution.
-        enqueued_at (DateTimeField): When the execution was queued.
-        start (DateTimeField): When the execution started.
-        end (DateTimeField): When the execution completed.
-        hash (TextField): Hash of the execution for deduplication.
-        defectdojo_test_id (IntegerField): ID of the test in DefectDojo.
+        task (ForeignKey): The task that triggered this execution
+        rq_job_id (TextField): Redis Queue job identifier for background processing
+        configuration (ForeignKey): The tool configuration used for execution
+        output_file (TextField): Path to the execution output file (max 50 chars)
+        output_plain (TextField): Plain text output from the tool execution
+        skipped_reason (TextField): Reason why execution was skipped
+        status (TextField): Current execution status (from Status enum)
+        enqueued_at (DateTimeField): When the execution was queued
+        start (DateTimeField): When the execution started processing
+        end (DateTimeField): When the execution completed
+        hash (TextField): Execution hash for deduplication (max 128 chars)
+        defectdojo_test_id (IntegerField): DefectDojo integration test ID
+
+    Example:
+        Create and track an execution:
+        
+        ```python
+        execution = Execution.objects.create(
+            task=task,
+            configuration=tool_config,
+            status=Status.REQUESTED
+        )
+        ```
     """
 
     task = models.ForeignKey(Task, related_name="executions", on_delete=models.CASCADE, blank=True, null=True)
@@ -55,7 +68,6 @@ class Execution(BaseModel):
         """String representation of the execution record.
 
         Returns:
-            str: String in format "task - configuration" or just "task" if no
-                process is associated.
+            str: String in format "task - configuration" or just "task"
         """
         return f"{self.task.__str__()}{f' - {self.configuration.__str__()}' if self.task.process else ''}"

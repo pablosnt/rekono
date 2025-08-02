@@ -1,8 +1,7 @@
 """Background job queue management for executions.
 
-This module provides queue management functionality for security tool executions,
-handling job queuing, dependency management, and result processing for
-background execution of security testing tools.
+Provides queue management for security tool executions including job queuing,
+dependency management, and result processing for background execution workflows.
 """
 
 import rq
@@ -25,12 +24,11 @@ from wordlists.models import Wordlist
 class ExecutionsQueue(BaseQueue):
     """Queue manager for security tool executions.
 
-    This class manages the background execution of security tools using
-    Redis Queue (RQ). It handles job queuing, dependency management,
-    and result processing for security testing workflows.
+    Manages background execution of security tools using Redis Queue (RQ)
+    with job queuing, dependency management, and result processing capabilities.
 
     Attributes:
-        name (str): The name of the queue ('executions').
+        name (str): The name of the queue ('executions')
     """
 
     name = "executions"
@@ -48,18 +46,21 @@ class ExecutionsQueue(BaseQueue):
     ) -> Job:
         """Enqueue an execution job for background processing.
 
+        Queues a security tool execution with all necessary parameters and
+        dependencies for background processing.
+
         Args:
-            execution: The execution instance to queue.
-            findings: List of findings to process.
-            target_ports: List of target ports to scan.
-            input_vulnerabilities: List of input vulnerabilities.
-            input_technologies: List of input technologies.
-            wordlists: List of wordlists to use.
-            dependencies: List of job dependencies.
-            at_front: Whether to add the job at the front of the queue.
+            execution (Execution): The execution instance to queue
+            findings (list[Finding]): Findings to process
+            target_ports (list[TargetPort]): Target ports to scan
+            input_vulnerabilities (list[InputVulnerability]): Input vulnerabilities
+            input_technologies (list[InputTechnology]): Input technologies
+            wordlists (list[Wordlist]): Wordlists to use
+            dependencies (list[Job]): Job dependencies for execution order
+            at_front (bool): Whether to prioritize this job in the queue
 
         Returns:
-            Job: The queued job instance.
+            Job: The queued RQ job instance
         """
         job = self.queue.enqueue(
             self.consume,
@@ -99,20 +100,19 @@ class ExecutionsQueue(BaseQueue):
     ) -> tuple[Execution, list[Finding]]:
         """Process an execution job.
 
-        This method is the main job consumer that executes security tools
-        and processes their results. It handles dependency resolution and
-        result parsing.
+        Main job consumer that executes security tools and processes results.
+        Handles dependency resolution, tool execution, and result parsing.
 
         Args:
-            execution: The execution instance to process.
-            findings: List of findings to process.
-            target_ports: List of target ports to scan.
-            input_vulnerabilities: List of input vulnerabilities.
-            input_technologies: List of input technologies.
-            wordlists: List of wordlists to use.
+            execution (Execution): The execution instance to process
+            findings (list[Finding]): Findings to process
+            target_ports (list[TargetPort]): Target ports to scan
+            input_vulnerabilities (list[InputVulnerability]): Input vulnerabilities
+            input_technologies (list[InputTechnology]): Input technologies
+            wordlists (list[Wordlist]): Wordlists to use
 
         Returns:
-            tuple: A tuple containing the execution and list of findings.
+            tuple[Execution, list[Finding]]: Execution and resulting findings
         """
         executor: BaseExecutor = execution.configuration.tool.get_executor_class()(execution)
         current_job = rq.get_current_job()
@@ -150,19 +150,19 @@ class ExecutionsQueue(BaseQueue):
     ) -> ExecutionParametersToEnqueue:
         """Get findings from job dependencies and create new executions.
 
-        This method processes job dependencies to extract findings and
-        create new executions based on those findings.
+        Processes job dependencies to extract findings and create new executions
+        for tool chaining workflows based on dependency results.
 
         Args:
-            executor: The executor instance.
-            target_ports: List of target ports.
-            input_vulnerabilities: List of input vulnerabilities.
-            input_technologies: List of input technologies.
-            wordlists: List of wordlists.
-            current_job: The current job being processed.
+            executor (BaseExecutor): The executor instance
+            target_ports (list[TargetPort]): Target ports
+            input_vulnerabilities (list[InputVulnerability]): Input vulnerabilities
+            input_technologies (list[InputTechnology]): Input technologies
+            wordlists (list[Wordlist]): Wordlists
+            current_job (Job): The current job being processed
 
         Returns:
-            ExecutionParametersToEnqueue: Parameters for the next execution.
+            ExecutionParametersToEnqueue: Parameters for the next execution
         """
         findings = []
         self = ExecutionsQueue()

@@ -1,7 +1,7 @@
 """URL configuration for execution API endpoints.
 
-This module defines the URL routing for execution-related REST API
-endpoints, providing access to execution records and report downloads.
+Defines URL routing for execution REST API endpoints including
+execution records and report download functionality.
 """
 
 from rest_framework.routers import SimpleRouter
