@@ -9,11 +9,12 @@ from framework.platforms import BaseIntegration
 
 class HackTricks(BaseIntegration):
     finding_types = [Host, Port, Technology]
+    sitemap_url = "https://www.hacktricks.wiki/sitemap.xml"
+    url = "https://book.hacktricks.wiki/en/"
 
     def __init__(self) -> None:
         super().__init__()
-        self.sitemap_url = "https://www.hacktricks.wiki/sitemap.xml"
-        self.url = "https://book.hacktricks.wiki/en/"
+        # TODO: Unit test to ensure all these custom URLs are still alive
         self.services_base_url = f"{self.url}network-services-pentesting/"
         self.web_base_url = f"{self.url}pentesting-web/"
         self.host_type_mapping = {
@@ -78,16 +79,22 @@ class HackTricks(BaseIntegration):
         }
         self.all_links = self._get_all_hacktricks_links()
 
+    # Separation in method needed for unit tests mocking
     def _get_all_hacktricks_links(self) -> list[str]:
         return [
             url[0].text for url in parser.fromstring(self._request(self.session.get, self.sitemap_url, json=False).text)
         ]
 
-    def _get_mapped_value_for_service(self, service: str) -> str | None:
+    def _get_mapped_value_for_service(self, service: str) -> tuple[str | None, str | None]:
+        value = None
         for mapped_value, services in self.services_mapping.items():
             if service in services:
-                return mapped_value
-        return None
+                value = mapped_value
+                break
+        if self.url in (value or ""):
+            return value, None
+        else:
+            return None, value
 
     def _process_finding(self, execution: Execution, finding: Finding) -> None:
         hacktricks_link = None
@@ -95,32 +102,25 @@ class HackTricks(BaseIntegration):
             hacktricks_link = self.host_type_mapping[finding.os_type]
         elif isinstance(finding, Port) and finding.service:
             service_comparator = finding.service.lower().strip()
-            mapped_value = self._get_mapped_value_for_service(service_comparator)
-            if self.url in (mapped_value or ""):
-                hacktricks_link = mapped_value
-            elif mapped_value:
-                service_comparator = mapped_value
+            hacktricks_link, service_comparator = self._get_mapped_value_for_service(service_comparator)
             if not hacktricks_link:
                 for link in self.all_links:
                     if self.services_base_url not in link:
                         continue
-                    comparator = link.replace(self.services_base_url, "").strip()
-                    link_parts = comparator.split("-")
-                    if "/" not in comparator and (
-                        service_comparator in link_parts
+                    url_service_path = link.replace(self.services_base_url, "").strip()
+                    url_service_parts = url_service_path.split("-")
+                    if "/" not in url_service_path and (
+                        service_comparator in url_service_parts
                         or (
-                            str(finding.port) in link_parts
-                            and (
-                                len(
-                                    [
-                                        p
-                                        for p in link_parts
-                                        if p.lower().strip() in service_comparator
-                                        or p.lower().strip() in service_comparator.replace("-", "")
-                                        or service_comparator in p
-                                    ]
-                                )
-                                > 0
+                            str(finding.port) in url_service_parts
+                            and any(
+                                [
+                                    p
+                                    for p in url_service_parts
+                                    if p.lower().strip() in service_comparator
+                                    or p.lower().strip() in service_comparator.replace("-", "")
+                                    or service_comparator in p
+                                ]
                             )
                         )
                     ):
