@@ -5,8 +5,6 @@ from projects.models import Project
 
 
 class ProjectFilter(FilterSet):
-    """FilterSet to filter Project entities."""
-
     tag = CharFilter(field_name="tags__name")
     defectdojo_product_type = NumberFilter(field_name="defectdojo_sync__product_type_id")
     defectdojo_product = NumberFilter(field_name="defectdojo_sync__product_id")
