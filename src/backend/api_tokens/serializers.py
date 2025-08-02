@@ -1,4 +1,8 @@
-"""Serializers for API token models, including creation and display logic."""
+"""Serializers for API token models with secure key handling.
+
+Provides serialization for API tokens including secure key generation,
+hashing, and proper display/creation logic.
+"""
 
 from typing import Any
 
@@ -9,14 +13,18 @@ from security.cryptography.hashing import hash
 
 
 class ApiTokenSerializer(ModelSerializer):
-    """Serializer for displaying API token information."""
+    """Serializer for displaying API token information.
+
+    Handles serialization of API token data for display purposes.
+    Excludes the actual key for security reasons.
+    """
 
     class Meta:
         """Meta configuration for the ApiTokenSerializer.
 
         Attributes:
-            model: The ApiToken model to serialize.
-            fields: Tuple of field names to include in serialization.
+            model (Model): The ApiToken model to serialize
+            fields (tuple): Field names to include in serialization
         """
 
         model = ApiToken
@@ -24,15 +32,19 @@ class ApiTokenSerializer(ModelSerializer):
 
 
 class CreateApiTokenSerializer(ModelSerializer):
-    """Serializer for creating new API tokens, including key generation and hashing."""
+    """Serializer for creating new API tokens with secure key handling.
+
+    Handles token creation including automatic key generation, hashing for storage,
+    and returning the plain key only once during creation.
+    """
 
     class Meta:
         """Meta configuration for the CreateApiTokenSerializer.
 
         Attributes:
-            model: The ApiToken model to serialize.
-            fields: Tuple of field names to include in serialization.
-            read_only_fields: Fields that cannot be modified during creation.
+            model (Model): The ApiToken model to serialize
+            fields (tuple): Field names to include in serialization
+            read_only_fields (tuple): Fields that cannot be modified during creation
         """
 
         model = ApiToken
@@ -42,15 +54,14 @@ class CreateApiTokenSerializer(ModelSerializer):
     def save(self, **kwargs: Any) -> ApiToken:
         """Save a new API token with a generated and hashed key.
 
-        Store the hashed key in the database, but return the plain key to
-        the caller. This ensures the plain key is only shown once and
-        never stored in plaintext.
+        Generates a unique key, hashes it for database storage, but returns
+        the plain key for one-time display to the user.
 
         Args:
-            **kwargs: Additional keyword arguments for saving.
+            **kwargs (Any): Additional keyword arguments for saving
 
         Returns:
-            ApiToken: The created API token instance with the plain key set.
+            ApiToken: The created API token instance with plain key attached
         """
         plain_key = ApiToken.generate_key()
         self.validated_data["key"] = hash(plain_key)

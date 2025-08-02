@@ -1,4 +1,8 @@
-"""Views for managing API tokens via REST API endpoints."""
+"""Views for managing API tokens via REST API endpoints.
+
+Provides REST API endpoints for API token CRUD operations with user-scoped
+access and proper authentication controls.
+"""
 
 from django.db.models import QuerySet
 from rest_framework.permissions import IsAuthenticated
@@ -13,7 +17,21 @@ from framework.views import BaseViewSet
 
 
 class ApiTokenViewSet(BaseViewSet):
-    """ViewSet for listing, creating, and deleting API tokens for the authenticated user."""
+    """ViewSet for managing API tokens for the authenticated user.
+
+    Provides GET, POST, and DELETE operations for user-owned API tokens
+    with filtering, searching, and ordering capabilities.
+
+    Attributes:
+        queryset (QuerySet): All ApiToken objects
+        serializer_class (Serializer): Default serializer for API tokens
+        filterset_class (FilterSet): Filter class for token queries
+        permission_classes (list): Required permissions for access
+        http_method_names (list): Allowed HTTP methods
+        search_fields (list): Fields available for text search
+        ordering_fields (list): Fields available for result ordering
+        owner_field (str): Field used for ownership filtering
+    """
 
     queryset = ApiToken.objects.all()
     serializer_class = ApiTokenSerializer
@@ -28,7 +46,7 @@ class ApiTokenViewSet(BaseViewSet):
         """Return queryset filtered to API tokens owned by the current user.
 
         Returns:
-            QuerySet: The filtered queryset for the current user.
+            QuerySet: API tokens filtered to the authenticated user
         """
         return super().get_queryset().filter(user=self.request.user).all()
 
@@ -36,6 +54,6 @@ class ApiTokenViewSet(BaseViewSet):
         """Return the serializer class based on the request method.
 
         Returns:
-            Serializer: The serializer class to use.
+            Serializer: CreateApiTokenSerializer for POST, ApiTokenSerializer otherwise
         """
         return CreateApiTokenSerializer if self.request.method == "POST" else super().get_serializer_class()

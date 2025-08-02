@@ -1,4 +1,8 @@
-"""Models for API tokens, including custom token logic and validation."""
+"""Models for API tokens with secure generation and validation.
+
+Provides the ApiToken model for managing user API tokens with security features
+including unique key generation, expiration validation, and proper constraints.
+"""
 
 from django.db import models
 from rest_framework.authtoken.models import Token
@@ -13,9 +17,28 @@ from security.validators.input_validator import (
 
 
 class ApiToken(Token, BaseModel):
-    """Model representing an API token for a user.
+    """Model representing a secure API token for user authentication.
 
-    Inherits from Django REST Framework's Token and a custom BaseModel. Includes fields for key, name, user, and expiration.
+    Extends Django REST Framework's Token model with additional security features
+    including named tokens, expiration dates, and unique key generation.
+
+    Attributes:
+        key (CharField): Unique 128-character token identifier
+        name (TextField): User-defined name for the token (max 100 chars)
+        user (ForeignKey): The user who owns this token
+        expiration (DateTimeField): Optional token expiration date
+
+    Example:
+        Create a new API token:
+        
+        ```python
+        from datetime import datetime, timedelta
+        token = ApiToken.objects.create(
+            name="My API Token",
+            user=user,
+            expiration=datetime.now() + timedelta(days=30)
+        )
+        ```
     """
 
     key = models.CharField(max_length=128, unique=True)
@@ -37,8 +60,11 @@ class ApiToken(Token, BaseModel):
     def generate_key(cls):
         """Generate a unique API token key.
 
+        Recursively generates keys until a unique one is found to prevent
+        collisions in the database.
+
         Returns:
-            str: A unique token key string.
+            str: A unique 40-character hexadecimal token key
         """
         key = Token.generate_key()
         return cls.generate_key() if ApiToken.objects.filter(key=key).exists() else key
@@ -47,6 +73,6 @@ class ApiToken(Token, BaseModel):
         """Return a string representation of the API token.
 
         Returns:
-            str: The user and token name.
+            str: String in format "username - token_name"
         """
         return f"{self.user.__str__()} - {self.name}"
