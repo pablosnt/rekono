@@ -1,9 +1,8 @@
-"""Background job queue processing for findings.
+"""Background job queue processing for security findings.
 
-This module handles the asynchronous processing of security findings
-through background job queues. It manages the integration with external
-platforms, notifications, and automatic fixing of findings based on
-execution results.
+Handles asynchronous processing of security findings through background job
+queues including external platform integration, notifications, and automatic
+finding lifecycle management.
 """
 
 from backend.framework.platforms import BaseIntegration
@@ -35,11 +34,11 @@ from settings.models import Settings
 
 
 class FindingsQueue(BaseQueue):
-    """Background job queue for processing security findings.
+    """Background job queue for asynchronous findings processing.
 
-    Handles the asynchronous processing of findings discovered during
-    security assessments, including integration with external platforms,
-    notifications, and automatic fixing of findings.
+    Manages background processing of security findings including external
+    platform integrations, alert notifications, and automatic finding
+    lifecycle management with Redis Queue (RQ) backend.
     """
 
     name = "findings"
@@ -51,11 +50,11 @@ class FindingsQueue(BaseQueue):
         processing and logs the enqueue operation.
 
         Args:
-            execution: The execution that produced the findings.
-            findings: List of findings to process.
+            execution (Execution): Execution that produced the findings.
+            findings (list[Finding]): List of findings to process.
 
         Returns:
-            The queued job object.
+            Job: Queued job object for tracking.
         """
         job = super().enqueue(execution=execution, findings=findings)
         self.logger.info(f"[Findings] {len(findings)} findings from execution {execution.id} have been enqueued")
@@ -64,17 +63,21 @@ class FindingsQueue(BaseQueue):
     @staticmethod
     @job("findings")
     def consume(execution: Execution, findings: list[Finding]) -> None:
-        """Process findings in the background.
+        """Process findings through background job workflow.
 
-        Handles the main processing logic for findings, including:
-        - Integration with external platforms (DefectDojo, NVD, etc.)
-        - Sending notifications via email and Telegram
-        - Automatic fixing of findings based on settings
-        - Processing alerts for enabled project alerts
+        Executes complete findings processing pipeline including external
+        platform integrations, alert notifications, and automatic fixing
+        based on system settings and project configuration.
+
+        Processing Steps:
+            - External platform integration (DefectDojo, NVD, HackTricks, etc.)
+            - Alert notification dispatch (SMTP, Telegram)
+            - Automatic finding lifecycle management
+            - Cross-execution finding correlation and fixing
 
         Args:
-            execution: The execution that produced the findings.
-            findings: List of findings to process.
+            execution (Execution): Source execution for the findings.
+            findings (list[Finding]): List of findings to process.
         """
         settings = Settings.objects.first()
         if findings:

@@ -1,9 +1,8 @@
-"""Base models for the findings framework.
+"""Base model classes for findings framework architecture.
 
-This module provides the foundational model classes for the findings system,
-including the base Finding and TriageFinding models that all specific
-finding types inherit from. It also includes the FindingManager for
-handling finding-specific operations like fixing and removing fixes.
+Provides foundational model classes including Finding and TriageFinding
+that all specific finding types inherit from, along with FindingManager
+for specialized operations like fixing and relationship management.
 """
 
 from functools import cached_property
@@ -32,25 +31,26 @@ from targets.models import Target
 
 
 class FindingManager(Manager):
-    """Manager for Finding models with specialized operations.
+    """Custom manager for Finding models with specialized operations.
 
-    Provides methods for handling finding-specific operations like
-    fixing findings, removing fixes, and managing related findings.
+    Extends Django's Manager to provide finding-specific operations including
+    fixing/unfixing findings, managing related finding relationships, and
+    handling automatic finding lifecycle management.
     """
 
     def _get_related_findings(self, finding: "Finding", **kwargs: Any) -> list[Any]:
-        """Get all findings related to a given finding.
+        """Get all findings related to a given finding through input relationships.
 
-        Recursively traverses the relationship tree to find all findings
-        that are related to the given finding through input type
-        relationships.
+        Recursively traverses the relationship tree to identify all findings
+        connected to the specified finding through input type relationships
+        for automatic fixing propagation.
 
         Args:
-            finding: The finding to find related findings for.
-            **kwargs: Additional filter criteria.
+            finding (Finding): Source finding to find relationships for.
+            **kwargs (Any): Additional filter criteria for related findings.
 
         Returns:
-            List of related findings.
+            list[Any]: List of related findings in the relationship tree.
         """
         related_findings = []
         for input_type in finding.input_type.related_input_types:
@@ -64,17 +64,17 @@ class FindingManager(Manager):
         return related_findings
 
     def fix(self, findings: Any | QuerySet, fixed_by: Any | None = None) -> Any | QuerySet:
-        """Mark findings as fixed.
+        """Mark findings as fixed with automatic relationship handling.
 
-        Marks findings as fixed and automatically fixes related findings
-        that were auto-fixed when the original finding was fixed.
+        Marks findings as fixed and automatically propagates the fix status
+        to related findings with proper tracking of manual vs automatic fixes.
 
         Args:
-            findings: Single finding or queryset of findings to fix.
-            fixed_by: User who fixed the findings (None for auto-fix).
+            findings (Any | QuerySet): Single finding or queryset to fix.
+            fixed_by (Any | None): User who fixed the findings, None for auto-fix.
 
         Returns:
-            The fixed finding(s).
+            Any | QuerySet: The fixed finding(s) with updated status.
         """
         if not findings:
             return findings
@@ -102,17 +102,17 @@ class FindingManager(Manager):
         return findings
 
     def remove_fix(self, finding: Any, fixed_by: Any | None = None) -> Any:
-        """Remove the fixed status from a finding.
+        """Remove fixed status from finding with relationship cleanup.
 
-        Removes the fixed status from a finding and handles related
-        findings that were auto-fixed when the original finding was fixed.
+        Removes the fixed status from a finding and handles cleanup of
+        related findings that were automatically fixed as a consequence.
 
         Args:
-            finding: The finding to remove fix from.
-            fixed_by: User who removed the fix (None for auto-remove).
+            finding (Any): Finding to remove fix status from.
+            fixed_by (Any | None): User removing the fix, None for auto-remove.
 
         Returns:
-            The finding with fix removed.
+            Any: Finding instance with fix status removed.
         """
         if fixed_by:
             # Remove auto-fix from related findings that were auto-fixed
@@ -133,20 +133,20 @@ class FindingManager(Manager):
 
 
 class Finding(BaseInput):
-    """Base model for all security findings.
+    """Abstract base model for all security findings.
 
-    Abstract base class that provides common functionality for all
-    finding types, including fixing status, DefectDojo integration,
-    and relationship management.
+    Provides common functionality for all finding types including fixing status
+    tracking, DefectDojo integration, relationship management, and automatic
+    lifecycle operations with execution history.
 
     Attributes:
-        executions: Many-to-many relationship with executions.
-        is_fixed: Whether the finding has been marked as fixed.
-        auto_fixed: Whether the finding was automatically fixed.
-        fixed_date: When the finding was fixed.
-        fixed_by: User who fixed the finding.
-        defectdojo_id: ID in DefectDojo platform.
-        hacktricks_link: Link to HackTricks documentation.
+        executions (ManyToManyField): Related executions that discovered this finding.
+        is_fixed (BooleanField): Whether finding has been marked as fixed (default: False).
+        auto_fixed (BooleanField): Whether finding was automatically fixed (default: False).
+        fixed_date (DateTimeField): Timestamp when finding was fixed (optional).
+        fixed_by (ForeignKey): User who fixed the finding (optional).
+        defectdojo_id (IntegerField): DefectDojo platform identifier (optional).
+        hacktricks_link (TextField): HackTricks documentation link (optional, max 300 chars).
     """
 
     executions = ManyToManyField(Execution, related_name="%(class)s")
@@ -170,22 +170,26 @@ class Finding(BaseInput):
     def parent_project(self) -> Project:
         """Get the parent project for this finding.
 
+        Retrieves the project context through the execution relationship
+        for access control and organizational purposes.
+
         Returns:
-            The project that this finding belongs to.
+            Project: Parent project containing this finding.
         """
         return self.executions.first().task.target.project
 
     def _apply_defectdojo_mapping(self, mapping: dict[str, Any], target: Target | None = None) -> dict[str, Any]:
-        """Apply DefectDojo mapping to the finding.
+        """Apply DefectDojo field mapping to finding data.
 
-        Parses the fiding data, according to the mapping dictionary.
+        Processes finding data according to DefectDojo mapping configuration
+        supporting both static values and callable transformations.
 
         Args:
-            mapping: The mapping dictionary to apply.
-            target: Optional target for context.
+            mapping (dict[str, Any]): Field mapping configuration dictionary.
+            target (Target | None): Optional target for context-aware mapping.
 
         Returns:
-            Processed mapping dictionary.
+            dict[str, Any]: Processed data dictionary for DefectDojo integration.
         """
         data = {}
         for key, value in mapping.items():
@@ -199,45 +203,54 @@ class Finding(BaseInput):
         return data
 
     def defectdojo_finding(self) -> dict[str, Any]:
-        """Generate DefectDojo finding data.
+        """Generate DefectDojo finding data for platform integration.
+
+        Creates formatted finding data suitable for DefectDojo platform
+        integration using the configured finding mapping.
 
         Returns:
-            Dictionary with DefectDojo finding data.
+            dict[str, Any]: DefectDojo-formatted finding data.
         """
         return self._apply_defectdojo_mapping(self._defectdojo_finding_mapping)
 
     def defectdojo_endpoint(self, target: Target) -> dict[str, Any]:
-        """Generate DefectDojo endpoint data.
+        """Generate DefectDojo endpoint data for platform integration.
+
+        Creates formatted endpoint data suitable for DefectDojo platform
+        integration using the configured endpoint mapping.
 
         Args:
-            target: The target for the endpoint.
+            target (Target): Target context for endpoint configuration.
 
         Returns:
-            Dictionary with DefectDojo endpoint data.
+            dict[str, Any]: DefectDojo-formatted endpoint data.
         """
         return self._apply_defectdojo_mapping(self._defectdojo_endpoint_mapping, target)
 
     def __str__(self) -> str:
         """String representation of the finding.
 
+        Generates human-readable string using unique field values
+        for finding identification and display purposes.
+
         Returns:
-            String representation of the finding.
+            str: Formatted string representation of the finding.
         """
         return " - ".join([field.__str__() for field in self.unique_fields if field])
 
 
 class TriageFinding(Finding):
-    """Base model for findings that support triage.
+    """Abstract base model for findings requiring triage workflow.
 
-    Extends the base Finding model to add triage functionality,
-    allowing findings to be marked as false positives, true positives,
-    or won't fix with comments and tracking.
+    Extends Finding to add triage functionality enabling findings to be
+    classified as false positives, true positives, or won't fix with
+    detailed tracking and audit trails.
 
     Attributes:
-        triage_status: Current triage status of the finding.
-        triage_comment: Comment explaining the triage decision.
-        triage_date: When the finding was triaged.
-        triage_by: User who performed the triage.
+        triage_status (TextField): Current triage status from TriageStatus enum (default: UNTRIAGED, max 15 chars).
+        triage_comment (TextField): Comment explaining triage decision (optional, max 300 chars).
+        triage_date (DateTimeField): Timestamp when finding was triaged (optional).
+        triage_by (ForeignKey): User who performed the triage operation (optional).
     """
 
     triage_status = TextField(max_length=15, choices=TriageStatus.choices, default=TriageStatus.UNTRIAGED)

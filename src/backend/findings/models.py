@@ -1,14 +1,8 @@
-"""Django models for security findings.
+"""Models for security findings discovered during assessments.
 
-This module defines the core data models for representing security findings
-discovered during security assessments. Each model represents a different type
-of security-related information, from basic host discovery to detailed
-vulnerability information.
-
-The models follow a hierarchical structure where findings can be related to
-each other (e.g., a Port belongs to a Host, a Vulnerability can be associated
-with a Technology or Port). This allows for comprehensive security analysis
-and reporting.
+Defines data models representing security findings including hosts, vulnerabilities,
+credentials, and exploits. Models follow hierarchical relationships enabling
+comprehensive security analysis, triage workflows, and automated reporting.
 """
 
 from typing import Any
@@ -31,15 +25,29 @@ from targets.models import Target
 
 
 class OSINT(TriageFinding):
-    """Open Source Intelligence findings.
+    """Model representing Open Source Intelligence findings from reconnaissance.
 
-    Represents information discovered through open source intelligence
-    gathering techniques, such as IP addresses, domains, emails, etc.
+    Represents data discovered through passive reconnaissance and Open Source Intelligence
+    (OSINT) techniques. These findings serve as the foundation for target enumeration
+    and serve as input for further active reconnaissance phases. The model supports
+    various data types including network identifiers, credentials, and organizational
+    information discovered from public sources.
 
     Attributes:
-        data: The actual OSINT data discovered (IP, domain, email, etc.)
-        data_type: The type of OSINT data (IP, Domain, Email, etc.)
-        source: The source where this OSINT data was found
+        data (TextField): The discovered OSINT data content (max 250 characters)
+        data_type (TextField): Classification from OSINTDataType enum (max 10 characters)
+        source (TextField): Discovery source or platform identifier (optional, max 50 characters)
+
+    Example:
+        Create an OSINT finding for a discovered domain:
+
+        ```python
+        osint = OSINT.objects.create(
+            data="example.com",
+            data_type=OSINTDataType.DOMAIN,
+            source="DNS enumeration"
+        )
+        ```
     """
 
     data = models.TextField(max_length=250)
@@ -61,44 +69,57 @@ class OSINT(TriageFinding):
     }
 
     def parse(self, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
-        """Parse OSINT data for further processing.
+        """Parse OSINT data for tool execution input.
 
-        Only IP and Domain OSINT data types can be parsed to be
-        used from tool executions.
+        Processes IP and Domain OSINT data types for use as tool execution
+        targets, filtering out non-targetable data types.
 
         Args:
-            accumulated: Previously accumulated parsing data.
+            accumulated (dict[str, Any]): Previously accumulated parsing data.
 
         Returns:
-            Dictionary with parsed data for target creation.
+            dict[str, Any]: Parsed data for target creation, empty for non-targetable types.
         """
         return super().parse(accumulated) if self.data_type in [OSINTDataType.IP, OSINTDataType.DOMAIN] else {}
 
 
 class Host(Finding):
-    """Discovered network hosts.
+    """Model representing network hosts discovered during reconnaissance and scanning.
 
-    Represents network hosts discovered during security assessments,
-    including their IP addresses, domain names, operating systems,
-    and geolocation information.
+    Represents network hosts identified during active and passive reconnaissance phases.
+    Each host record contains network identifiers, system information, and geolocation
+    data essential for asset inventory and attack surface mapping. Hosts serve as the
+    foundation for port scanning, service enumeration, and vulnerability assessment.
 
     Attributes:
-        ip: The IP address of the discovered host
-        domain: Associated domain name (if any)
-        os: Full operating system specification
-        os_type: Categorized operating system type
-        country: Country where the host is located
-        city: City where the host is located
-        latitude: Geographic latitude coordinate
-        longitude: Geographic longitude coordinate
+        ip (TextField): IPv4 or IPv6 address identifier (max 30 characters)
+        domain (TextField): Associated domain name or hostname (optional, max 500 characters)
+        os (TextField): Detailed operating system identification (optional, max 250 characters)
+        os_type (TextField): OS family classification from HostOS enum (default: OTHER, max 10 characters)
+        country (TextField): Geolocation country name (optional, max 100 characters)
+        city (TextField): Geolocation city name (optional, max 100 characters)
+        latitude (FloatField): Geographic latitude coordinate (optional)
+        longitude (FloatField): Geographic longitude coordinate (optional)
+
+    Example:
+        Create a host finding with geolocation data:
+
+        ```python
+        host = Host.objects.create(
+            ip="192.168.1.100",
+            domain="server.example.com",
+            os="Ubuntu 20.04.3 LTS",
+            os_type=HostOS.LINUX,
+            country="United States",
+            city="San Francisco"
+        )
+        ```
     """
 
     ip = models.TextField(max_length=30)
     domain = models.TextField(max_length=500, blank=True, null=True)
-    # OS full specification
     os = models.TextField(max_length=250, blank=True, null=True)
     os_type = models.TextField(max_length=10, choices=HostOS.choices, default=HostOS.OTHER)
-    # Geolocation
     country = models.TextField(max_length=100, blank=True, null=True)
     city = models.TextField(max_length=100, blank=True, null=True)
     latitude = models.FloatField(blank=True, null=True)
@@ -134,21 +155,37 @@ class Host(Finding):
 
 
 class Port(Finding):
-    """Network ports discovered on hosts.
+    """Model representing network services discovered during port scanning and enumeration.
 
-    Represents network ports found on discovered hosts, including
-    their status, protocol, and associated services.
+    Represents network ports and associated services identified during active reconnaissance
+    and port scanning operations. Port findings form the foundation for service enumeration,
+    vulnerability scanning, and application-layer security testing. Each port record contains
+    network service information, protocol details, and connection status essential for
+    attack surface analysis and security assessment planning.
 
     Attributes:
-        host: The host this port belongs to
-        port: The port number
-        status: Current status of the port (open, closed, filtered, etc.)
-        protocol: Transport protocol (TCP/UDP)
-        service: Service running on this port (if identified)
+        host (ForeignKey): Parent host where port was discovered (optional relationship)
+        port (IntegerField): Network port number in range 1-65535
+        status (TextField): Port scan status from PortStatus enum (default: OPEN, max 15 characters)
+        protocol (TextField): Transport protocol from Protocol enum (optional, max 5 characters)
+        service (TextField): Identified service name or banner information (optional, max 50 characters)
+
+    Example:
+        Create a port finding for an identified web service:
+
+        ```python
+        port = Port.objects.create(
+            host=host_instance,
+            port=443,
+            status=PortStatus.OPEN,
+            protocol=Protocol.TCP,
+            service="https"
+        )
+        ```
     """
 
     host = models.ForeignKey(Host, related_name="port", on_delete=models.DO_NOTHING, blank=True, null=True)
-    port = models.IntegerField()  # Port number
+    port = models.IntegerField()
     status = models.TextField(max_length=15, choices=PortStatus.choices, default=PortStatus.OPEN)
     protocol = models.TextField(max_length=5, choices=Protocol.choices, blank=True, null=True)
     service = models.TextField(max_length=50, blank=True, null=True)
@@ -178,16 +215,16 @@ class Port(Finding):
     ]
 
     def parse(self, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
-        """Parse port information for further processing.
+        """Parse port data for tool execution targeting.
 
-        Parse port information to enable more detailed
-        port-specific analysis and targeting.
+        Generates target specifications combining host and port information
+        for detailed service-specific security analysis.
 
         Args:
-            accumulated: Previously accumulated parsing data.
+            accumulated (dict[str, Any]): Previously accumulated parsing data.
 
         Returns:
-            Dictionary with parsed port data.
+            dict[str, Any]: Port-specific target data including host:port combinations.
         """
         output = super().parse(accumulated)
         output[InputKeyword.PORTS_COMMAS.name.lower()] = ",".join(
@@ -205,17 +242,32 @@ class Port(Finding):
 
 
 class Path(Finding):
-    """Paths discovered on services.
+    """Model representing web paths and endpoints discovered during application reconnaissance.
 
-    Represents web paths, API endpoints, or file shares discovered
-    during web application scanning or directory enumeration.
+    Represents discoverable web resources including API endpoints, directory paths, file
+    shares, and hidden resources found during web application security testing. Path
+    findings enable comprehensive attack surface mapping for web applications and provide
+    entry points for authentication bypass, privilege escalation, and data exposure testing.
 
     Attributes:
-        port: The port/service where this path was discovered
-        path: The actual path or endpoint
-        status: HTTP status code or response status
-        extra_info: Additional information about the path
-        type: Type of path (endpoint or share)
+        port (ForeignKey): Network service where path was discovered (optional relationship)
+        path (TextField): URL path or endpoint location (max 500 characters)
+        status (IntegerField): HTTP response status code from server (optional)
+        extra_info (TextField): Additional discovery metadata or context (optional, max 100 characters)
+        type (TextField): Resource classification from PathType enum (default: ENDPOINT)
+
+    Example:
+        Create a path finding for an API endpoint:
+
+        ```python
+        path = Path.objects.create(
+            port=web_port,
+            path="/api/v1/users",
+            status=200,
+            type=PathType.ENDPOINT,
+            extra_info="JSON API endpoint"
+        )
+        ```
     """
 
     port = models.ForeignKey(Port, related_name="path", on_delete=models.DO_NOTHING, blank=True, null=True)
@@ -269,13 +321,13 @@ class Path(Finding):
     }
 
     def _clean_comparison_path(self, value: str) -> str:
-        """Clean a path value for comparison operations.
+        """Normalize path value for comparison operations.
 
         Args:
-            value: The path value to clean.
+            value (str): Raw path string to normalize.
 
         Returns:
-            Cleaned path string for comparison.
+            str: Normalized path with consistent trailing slash.
         """
         if len(value) > 1:
             value = self.clean_path(value)
@@ -286,17 +338,17 @@ class Path(Finding):
         return value
 
     def filter(self, input: Any, target: Target | None = None) -> bool:
-        """Filter paths based on input criteria.
+        """Filter paths against target port path restrictions.
 
-        Overrides the base filter method to filter paths based on
-        target port paths.
+        Applies additional filtering for paths within target port scope
+        when target port paths are configured.
 
         Args:
-            input: The input value to filter against.
-            target: Optional target for context.
+            input (Any): Filter criteria to match against.
+            target (Target | None): Target context for scope validation.
 
         Returns:
-            True if the path matches the filter criteria.
+            bool: True if path matches criteria and scope restrictions.
         """
         filter = super().filter(input, target)
         if self.port:
@@ -310,17 +362,32 @@ class Path(Finding):
 
 
 class Technology(Finding):
-    """Technologies discovered on services.
+    """Model representing software technologies discovered during service fingerprinting.
 
-    Represents software technologies, frameworks, and applications
-    discovered during service enumeration and fingerprinting.
+    Represents software technologies, frameworks, and applications identified through
+    active and passive fingerprinting techniques. Technology findings provide the
+    foundation for vulnerability assessment, exploit selection, and attack vector
+    identification by mapping the software stack running on discovered services.
 
     Attributes:
-        port: The port where this technology was discovered
-        name: Name of the technology
-        version: Version of the technology (if identified)
-        description: Additional description or details
-        reference: Reference link or documentation
+        port (ForeignKey): Network service where technology was identified (optional relationship)
+        name (TextField): Technology or software name identifier (max 100 characters)
+        version (TextField): Software version string or build information (optional, max 100 characters)
+        description (TextField): Detailed technology information and context (optional, max 200 characters)
+        reference (TextField): Documentation links or vendor information (optional, max 250 characters)
+
+    Example:
+        Create a technology finding for a web server:
+
+        ```python
+        technology = Technology.objects.create(
+            port=web_port,
+            name="Apache HTTP Server",
+            version="2.4.41",
+            description="Open-source web server software",
+            reference="https://httpd.apache.org/"
+        )
+        ```
     """
 
     port = models.ForeignKey(
@@ -350,17 +417,31 @@ class Technology(Finding):
 
 
 class Credential(TriageFinding):
-    """Credentials discovered during security assessments.
+    """Model representing authentication credentials exposed during security assessment.
 
-    Represents usernames, passwords, API keys, and other authentication
-    credentials found during security testing.
+    Represents discovered usernames, passwords, API keys, tokens, and other authentication
+    secrets found through credential harvesting, exposure detection, and security testing.
+    Credential findings represent high-risk security exposures that enable unauthorized
+    access, privilege escalation, and lateral movement within target environments.
 
     Attributes:
-        technology: The technology where credentials were found
-        email: Email address (if applicable)
-        username: Username or account identifier
-        secret: Password, API key, or other secret
-        context: Additional context about where/how credentials were found
+        technology (ForeignKey): Source technology where credentials were exposed (optional relationship)
+        email (TextField): Associated email address or account identifier (optional, max 100 characters)
+        username (TextField): Account username or login identifier (optional, max 100 characters)
+        secret (TextField): Password, API key, token, or authentication secret (optional, max 300 characters)
+        context (TextField): Discovery method, location, or additional context (optional, max 300 characters)
+
+    Example:
+        Create a credential finding from configuration analysis:
+
+        ```python
+        credential = Credential.objects.create(
+            technology=database_tech,
+            username="admin",
+            secret="password123",
+            context="Found in config.php file"
+        )
+        ```
     """
 
     technology = models.ForeignKey(
@@ -399,21 +480,38 @@ class Credential(TriageFinding):
 
 
 class Vulnerability(TriageFinding):
-    """Security vulnerabilities discovered during assessments.
+    """Model representing security vulnerabilities identified during assessment.
 
-    Represents security vulnerabilities found in applications, services,
-    or systems.
+    Represents confirmed security vulnerabilities discovered through automated scanning,
+    manual testing, and code analysis. Vulnerability findings include industry-standard
+    classifications, severity ratings, and trending indicators to support risk-based
+    prioritization and remediation planning within enterprise security programs.
 
     Attributes:
-        technology: The technology where the vulnerability was found
-        port: The port where the vulnerability was discovered
-        name: Name or title of the vulnerability
-        description: Detailed description of the vulnerability
-        severity: Severity level of the vulnerability
-        cve: CVE identifier (if applicable)
-        cwe: CWE identifier (if applicable)
-        reference: Reference link or documentation
-        trending: Whether this vulnerability is currently trending
+        technology (ForeignKey): Vulnerable technology component (optional relationship)
+        port (ForeignKey): Network service where vulnerability was identified (optional relationship)
+        name (TextField): Vulnerability name or identifier (max 50 characters)
+        description (TextField): Detailed technical vulnerability description (optional)
+        severity (IntegerField): Risk severity level from Severity enum (default: MEDIUM)
+        cve (TextField): Common Vulnerabilities and Exposures identifier (optional, max 20 characters)
+        cwe (TextField): Common Weakness Enumeration classification (optional, max 20 characters)
+        reference (TextField): Security advisory or documentation links (optional, max 250 characters)
+        trending (BooleanField): Active exploitation or trending status indicator (default: False)
+
+    Example:
+        Create a vulnerability finding with CVE mapping:
+
+        ```python
+        vulnerability = Vulnerability.objects.create(
+            technology=web_server,
+            name="Remote Code Execution",
+            description="Buffer overflow in HTTP request parsing",
+            severity=Severity.CRITICAL,
+            cve="CVE-2021-12345",
+            cwe="CWE-120",
+            trending=True
+        )
+        ```
     """
 
     technology = models.ForeignKey(
@@ -457,17 +555,31 @@ class Vulnerability(TriageFinding):
 
 
 class Exploit(TriageFinding):
-    """Exploits available for vulnerabilities.
+    """Model representing available exploits for vulnerabilities and technologies.
 
-    Represents exploit code, proof-of-concept scripts, or exploit
-    references available for discovered vulnerabilities or technologies.
+    Represents publicly available exploit code, proof-of-concept scripts, and exploit
+    references that target identified vulnerabilities and technologies. Exploit findings
+    enable security teams to assess real-world impact potential and prioritize remediation
+    efforts based on weaponized threat availability and exploitation complexity.
 
     Attributes:
-        vulnerability: The vulnerability this exploit targets
-        technology: The technology this exploit affects
-        title: Title or name of the exploit
-        edb_id: Exploit-DB identifier (if available)
-        reference: Reference link to the exploit
+        vulnerability (ForeignKey): Target vulnerability for this exploit (optional relationship)
+        technology (ForeignKey): Affected technology component (optional relationship)
+        title (TextField): Exploit name or descriptive title (max 100 characters)
+        edb_id (IntegerField): Exploit Database unique identifier (optional)
+        reference (TextField): Exploit source URL or documentation link (optional, max 250 characters)
+
+    Example:
+        Create an exploit finding linked to a vulnerability:
+
+        ```python
+        exploit = Exploit.objects.create(
+            vulnerability=rce_vuln,
+            title="Remote Command Execution via Buffer Overflow",
+            edb_id=12345,
+            reference="https://www.exploit-db.com/exploits/12345"
+        )
+        ```
     """
 
     vulnerability = models.ForeignKey(

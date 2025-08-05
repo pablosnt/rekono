@@ -1,22 +1,26 @@
-"""Enums for findings module.
+"""Enumeration definitions for security findings categorization.
 
-This module contains the enums used to categorize and prioritize security
-findings discovered during security assessments. It includes severity levels,
-OSINT data types, host operating systems, port statuses, protocols, path types,
-and triage statuses.
+Provides enumeration classes for categorizing and prioritizing security findings
+discovered during assessments, including severity levels, data types, status values,
+and triage classifications.
 """
-
-from typing import Any
 
 from django.db import models
 from django.db.models.enums import Choices
 
 
 class Severity(models.IntegerChoices):
-    """Severity levels for security findings.
+    """Security finding severity levels for risk prioritization.
 
-    Represents the criticality of security findings from informational
-    to critical, used for prioritization and reporting.
+    Defines criticality levels from informational to critical for
+    prioritizing security findings and generating reports.
+
+    Attributes:
+        INFO (int): Informational findings with no immediate security impact
+        LOW (int): Low severity findings with minimal risk
+        MEDIUM (int): Medium severity findings requiring attention
+        HIGH (int): High severity findings requiring immediate attention
+        CRITICAL (int): Critical severity findings requiring urgent response
     """
 
     INFO = 1
@@ -25,20 +29,30 @@ class Severity(models.IntegerChoices):
     HIGH = 4
     CRITICAL = 5
 
-    def __str__(self) -> Any:
+    def __str__(self) -> str:
         """Return the severity level as a string.
 
         Returns:
-            str: The severity level as a string
+            str: Capitalized severity level name.
         """
         return self.name.capitalize()
 
 
 class OSINTDataType(models.TextChoices):
-    """Types of OSINT (Open Source Intelligence) data.
+    """Open Source Intelligence data type classifications.
 
-    Defines the different categories of information that can be discovered
-    through open source intelligence gathering techniques.
+    Categories of information discoverable through OSINT techniques
+    including network identifiers, credentials, and organizational data.
+
+    Attributes:
+        IP (str): IP address identifiers
+        DOMAIN (str): Domain name identifiers
+        VHOST (str): Virtual host identifiers
+        URL (str): URL resources and endpoints
+        EMAIL (str): Email address identifiers
+        ASN (str): Autonomous System Number identifiers
+        USER (str): Username credentials
+        PASSWORD (str): Password credentials
     """
 
     IP = "IP"
@@ -52,10 +66,20 @@ class OSINTDataType(models.TextChoices):
 
 
 class HostOS(models.TextChoices):
-    """Operating system types for discovered hosts.
+    """Host operating system type classifications.
 
-    Categorizes the operating system running on discovered hosts
-    for better analysis and reporting.
+    Categorizes operating systems running on discovered hosts
+    for security analysis and reporting purposes.
+
+    Attributes:
+        LINUX (str): Linux-based operating systems
+        WINDOWS (str): Microsoft Windows operating systems
+        MACOS (str): Apple macOS operating systems
+        IOS (str): Apple iOS mobile operating systems
+        ANDROID (str): Google Android mobile operating systems
+        SOLARIS (str): Oracle Solaris operating systems
+        FREEBSD (str): FreeBSD operating systems
+        OTHER (str): Other or unidentified operating systems
     """
 
     LINUX = "Linux"
@@ -69,10 +93,16 @@ class HostOS(models.TextChoices):
 
 
 class PortStatus(models.TextChoices):
-    """Network port status values.
+    """Network port scan status classifications.
 
-    Represents the state of network ports discovered during scanning,
-    indicating whether they are open, closed, filtered, etc.
+    Defines the state of network ports discovered during scanning
+    operations for service enumeration and security assessment.
+
+    Attributes:
+        OPEN (str): Port is open and accepting connections
+        OPEN_FILTERED (str): Port appears open but may be filtered
+        FILTERED (str): Port is filtered by firewall or security device
+        CLOSED (str): Port is closed and not accepting connections
     """
 
     OPEN = "Open"
@@ -82,9 +112,13 @@ class PortStatus(models.TextChoices):
 
 
 class Protocol(models.TextChoices):
-    """Network protocols.
+    """Network transport layer protocol types.
 
-    Defines the transport layer protocols used for network communication.
+    Defines supported transport protocols for network service identification.
+
+    Attributes:
+        UDP (str): User Datagram Protocol for connectionless communication
+        TCP (str): Transmission Control Protocol for reliable communication
     """
 
     UDP = "UDP"
@@ -92,10 +126,14 @@ class Protocol(models.TextChoices):
 
 
 class PathType(models.TextChoices):
-    """Types of web paths or endpoints.
+    """Web path and resource type classifications.
 
-    Categorizes discovered web paths as either API endpoints or file shares
-    for better organization and analysis.
+    Categorizes discovered web resources as API endpoints or file shares
+    for targeted security analysis.
+
+    Attributes:
+        ENDPOINT (str): Web API endpoints and application paths
+        SHARE (str): File shares and directory resources
     """
 
     ENDPOINT = "ENDPOINT"
@@ -103,10 +141,16 @@ class PathType(models.TextChoices):
 
 
 class TriageStatus(models.TextChoices):
-    """Status values for finding triage process.
+    """Finding triage workflow status classifications.
 
-    Represents the current state of a finding in the triage workflow,
-    indicating whether it has been reviewed and what action was taken.
+    Represents the review state of security findings in the triage process
+    for false positive elimination and confirmation.
+
+    Attributes:
+        FALSE_POSITIVE (str): Finding determined to be a false positive
+        TRUE_POSITIVE (str): Finding confirmed as a legitimate security issue
+        WONT_FIX (str): Legitimate finding but marked as won't fix
+        UNTRIAGED (str): Finding has not been reviewed in triage process
     """
 
     FALSE_POSITIVE = "False Positive"

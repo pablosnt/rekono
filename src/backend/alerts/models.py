@@ -47,11 +47,6 @@ class Alert(BaseModel):
     security findings are discovered. Supports multiple trigger modes and filtering
     criteria to ensure relevant notifications.
 
-    Alert Modes:
-        NEW: Triggers when a finding is discovered for the first time
-        FILTER: Triggers when a finding matches specific criteria (e.g., CVE, service)
-        MONITOR: Triggers based on dynamic conditions like trending vulnerabilities
-
     Attributes:
         project (ForeignKey): The project this alert belongs to
         item (TextField): The type of finding to monitor (from AlertItem enum)

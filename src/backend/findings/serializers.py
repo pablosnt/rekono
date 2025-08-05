@@ -1,10 +1,8 @@
-"""Django REST framework serializers for findings models.
+"""Serializers for findings models and REST API data conversion.
 
-This module provides serializer classes for all finding types, handling
-the conversion between Django model instances and JSON data for the
-REST API. Each serializer extends the base finding serializers to
-provide standardized functionality while allowing for custom behavior
-specific to each finding type.
+Provides serializer classes for all finding types handling conversion
+between Django model instances and JSON data with validation, field
+configuration, and custom update logic.
 """
 
 from typing import Any
@@ -25,22 +23,22 @@ from framework.fields import IntegerChoicesField
 
 
 class OSINTSerializer(TriageFindingSerializer):
-    """Serializer for OSINT findings.
+    """Serializer for Open Source Intelligence findings.
 
-    Handles serialization and deserialization of Open Source Intelligence
-    findings, including data, data type, and source information.
+    Handles JSON conversion for OSINT findings with data validation
+    and read-only field configuration for API responses.
     """
 
     class Meta:
-        """Meta class for OSINT serializer.
+        """Meta configuration for OSINTSerializer.
 
-        This class defines the fields and metadata for the OSINT serializer.
-        It extends the base TriageFindingSerializer and adds the fields
-        for data, data type, and source.
+        Defines field inclusion and read-only restrictions for OSINT
+        findings serialization extending TriageFindingSerializer.
 
         Attributes:
-            model: The Django model class for OSINT findings.
-            fields: The fields to include in the serializer.
+            model (type): OSINT model class.
+            fields (tuple): Included serializer fields.
+            read_only_fields (tuple): Fields restricted from modification.
         """
 
         model = OSINT
@@ -53,23 +51,21 @@ class OSINTSerializer(TriageFindingSerializer):
 
 
 class PortSerializer(FindingSerializer):
-    """Serializer for port findings.
+    """Serializer for network port findings.
 
-    Handles serialization and deserialization of network port findings,
-    including host, port number, status, protocol, and service information.
+    Handles JSON conversion for network port findings with nested
+    relationship serialization for comprehensive port data.
     """
 
     class Meta:
-        """Meta class for Port serializer.
+        """Meta configuration for PortSerializer.
 
-        This class defines the fields and metadata for the Port serializer.
-        It extends the base FindingSerializer and adds the fields
-        for host, port, status, protocol, service, path, technology,
-        and vulnerability.
+        Defines field inclusion for port findings serialization
+        with nested relationships for complete port information.
 
         Attributes:
-            model: The Django model class for port findings.
-            fields: The fields to include in the serializer.
+            model (type): Port model class.
+            fields (tuple): Included serializer fields with relationships.
         """
 
         model = Port
@@ -86,25 +82,26 @@ class PortSerializer(FindingSerializer):
 
 
 class HostSerializer(FindingSerializer):
-    """Serializer for host findings.
+    """Serializer for network host findings.
 
-    Handles serialization and deserialization of network host findings,
-    including IP, domain, OS, geolocation, and related port information.
+    Handles JSON conversion for network host findings with nested
+    port relationship serialization for complete host inventory.
+
+    Attributes:
+        port (PortSerializer): Nested port relationships (read-only)
     """
 
     port = PortSerializer(many=True, read_only=True)
 
     class Meta:
-        """Meta class for Host serializer.
+        """Meta configuration for HostSerializer.
 
-        This class defines the fields and metadata for the Host serializer.
-        It extends the base FindingSerializer and adds the fields
-        for ip, domain, os, os_type, country, city, latitude, longitude,
-        and port.
+        Defines field inclusion for host findings serialization
+        including geolocation and nested port relationships.
 
         Attributes:
-            model: The Django model class for host findings.
-            fields: The fields to include in the serializer.
+            model (type): Host model class.
+            fields (tuple): Included serializer fields with port relations.
         """
 
         model = Host
@@ -122,22 +119,21 @@ class HostSerializer(FindingSerializer):
 
 
 class PathSerializer(FindingSerializer):
-    """Serializer for path findings.
+    """Serializer for web path findings.
 
-    Handles serialization and deserialization of web path findings,
-    including port, path, status, and type information.
+    Handles JSON conversion for web path findings with endpoint
+    and file share classification for web application analysis.
     """
 
     class Meta:
-        """Meta class for Path serializer.
+        """Meta configuration for PathSerializer.
 
-        This class defines the fields and metadata for the Path serializer.
-        It extends the base FindingSerializer and adds the fields
-        for port, path, status, extra_info, and type.
+        Defines field inclusion for path findings serialization
+        with HTTP status and resource type classification.
 
         Attributes:
-            model: The Django model class for path findings.
-            fields: The fields to include in the serializer.
+            model (type): Path model class.
+            fields (tuple): Included serializer fields for web paths.
         """
 
         model = Path
@@ -153,20 +149,20 @@ class PathSerializer(FindingSerializer):
 class CredentialSerializer(TriageFindingSerializer):
     """Serializer for credential findings.
 
-    Handles serialization and deserialization of credential findings,
-    including technology, email, username, and secret information.
+    Handles JSON conversion for credential findings with read-only
+    restrictions for sensitive authentication data protection.
     """
 
     class Meta:
-        """Meta class for Credential serializer.
+        """Meta configuration for CredentialSerializer.
 
-        This class defines the fields and metadata for the Credential serializer.
-        It extends the base TriageFindingSerializer and adds the fields
-        for technology, email, username, secret, and context.
+        Defines field inclusion and read-only restrictions for credential
+        findings to prevent unauthorized modification of sensitive data.
 
         Attributes:
-            model: The Django model class for credential findings.
-            fields: The fields to include in the serializer.
+            model (type): Credential model class.
+            fields (tuple): Included serializer fields for credentials.
+            read_only_fields (tuple): Protected credential data fields.
         """
 
         model = Credential
@@ -189,24 +185,24 @@ class CredentialSerializer(TriageFindingSerializer):
 class TechnologySerializer(FindingSerializer):
     """Serializer for technology findings.
 
-    Handles serialization and deserialization of technology findings,
-    including port, name, version, description, and related credential
-    information.
+    Handles JSON conversion for technology findings with nested
+    credential relationship serialization for technology stack analysis.
+
+    Attributes:
+        credential (CredentialSerializer): Nested credential relationships
     """
 
     credential = CredentialSerializer(many=True, read_only=True)
 
     class Meta:
-        """Meta class for Technology serializer.
+        """Meta configuration for TechnologySerializer.
 
-        This class defines the fields and metadata for the Technology serializer.
-        It extends the base FindingSerializer and adds the fields
-        for port, name, version, description, reference, credential,
-        vulnerability, and exploit.
+        Defines field inclusion for technology findings serialization
+        with nested relationships for comprehensive technology information.
 
         Attributes:
-            model: The Django model class for technology findings.
-            fields: The fields to include in the serializer.
+            model (type): Technology model class.
+            fields (tuple): Included serializer fields with nested relations.
         """
 
         model = Technology
@@ -225,24 +221,25 @@ class TechnologySerializer(FindingSerializer):
 class VulnerabilitySerializer(TriageFindingSerializer):
     """Serializer for vulnerability findings.
 
-    Handles serialization and deserialization of vulnerability findings,
-    including technology, port, name, description, severity, CVE/CWE,
-    and related exploit information.
+    Handles JSON conversion for vulnerability findings with severity
+    field handling and automatic exploit triage on status updates.
+
+    Attributes:
+        severity (IntegerChoicesField): Severity level choice field
     """
 
     severity = IntegerChoicesField(model=Severity, required=False)
 
     class Meta:
-        """Meta class for Vulnerability serializer.
+        """Meta configuration for VulnerabilitySerializer.
 
-        This class defines the fields and metadata for the Vulnerability serializer.
-        It extends the base TriageFindingSerializer and adds the fields
-        for port, technology, name, description, severity, cve, cwe,
-        reference, trending, and exploit.
+        Defines field inclusion and read-only restrictions for vulnerability
+        findings with CVE/CWE mapping and severity classification.
 
         Attributes:
-            model: The Django model class for vulnerability findings.
-            fields: The fields to include in the serializer.
+            model (type): Vulnerability model class.
+            fields (tuple): Included serializer fields for vulnerabilities.
+            read_only_fields (tuple): Protected vulnerability data fields.
         """
 
         model = Vulnerability
@@ -272,26 +269,29 @@ class VulnerabilitySerializer(TriageFindingSerializer):
         )
 
     def update(self, instance: Vulnerability, validated_data: dict[str, Any]) -> Vulnerability:
-        """Update vulnerability instance with validated data.
+        """Update vulnerability with automatic exploit triage handling.
 
-        Handles the update of vulnerability findings, ensuring proper
-        handling of severity field and related data. Also automatically
-        triages related exploits when the vulnerability is marked as
-        false positive.
+        Updates vulnerability findings and automatically triages related
+        exploits when vulnerability triage status changes.
 
         Args:
-            instance: The vulnerability instance to update.
-            validated_data: The validated data for the update.
+            instance (Vulnerability): Vulnerability instance to update.
+            validated_data (dict[str, Any]): Validated update data.
 
         Returns:
-            Updated vulnerability instance.
+            Vulnerability: Updated vulnerability with triage propagation.
         """
-        update_triaged_exploits = instance.triage_status != validated_data.get("triage_status")
+        update_triaged_exploits = (
+            instance.triage_status != validated_data.get("triage_status")
+        )
         instance = super().update(instance, validated_data)
         if update_triaged_exploits:
             instance.exploit.all().update(
                 triage_status=instance.triage_status,
-                triage_comment="Automatically triaged after triaging the related vulnerability as a false positive",
+                triage_comment=(
+                    "Automatically triaged after triaging the related "
+                    "vulnerability as a false positive"
+                ),
                 triage_by=instance.triage_by,
                 triage_date=instance.triage_date,
             )
@@ -301,20 +301,20 @@ class VulnerabilitySerializer(TriageFindingSerializer):
 class ExploitSerializer(TriageFindingSerializer):
     """Serializer for exploit findings.
 
-    Handles serialization and deserialization of exploit findings,
-    including vulnerability, technology, title, EDB ID, and reference information.
+    Handles JSON conversion for exploit findings with read-only
+    restrictions for exploit database references and links.
     """
 
     class Meta:
-        """Meta class for Exploit serializer.
+        """Meta configuration for ExploitSerializer.
 
-        This class defines the fields and metadata for the Exploit serializer.
-        It extends the base TriageFindingSerializer and adds the fields
-        for vulnerability, technology, title, edb_id, and reference.
+        Defines field inclusion and read-only restrictions for exploit
+        findings to prevent modification of exploit database references.
 
         Attributes:
-            model: The Django model class for exploit findings.
-            fields: The fields to include in the serializer.
+            model (type): Exploit model class.
+            fields (tuple): Included serializer fields for exploits.
+            read_only_fields (tuple): Protected exploit reference fields.
         """
 
         model = Exploit

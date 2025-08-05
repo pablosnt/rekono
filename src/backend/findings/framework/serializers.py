@@ -1,10 +1,8 @@
-"""Base serializers for findings framework.
+"""Base serializer classes for findings framework REST API.
 
-This module provides the foundational serializer classes for the findings system,
-including FindingSerializer and TriageFindingSerializer that all specific
-finding serializers inherit from. These provide standardized functionality
-for serializing finding data including execution history, fixing status,
-and triage information.
+Provides foundational serializer classes including FindingSerializer and
+TriageFindingSerializer that all specific finding serializers inherit from
+with standardized functionality for execution history and status tracking.
 """
 
 from typing import Any
@@ -18,17 +16,32 @@ from users.serializers import SimpleUserSerializer
 
 
 class FindingSerializer(RelatedNotesSerializer):
-    """Base serializer for all finding types.
+    """Base serializer for all finding types with execution tracking.
 
-    Provides standardized serialization for finding data including
-    execution history, fixing status, and related notes. All specific
-    finding serializers should inherit from this class.
+    Provides standardized JSON serialization for finding data including
+    execution history, fixing status, and DefectDojo integration with
+    proper field restrictions and nested relationships.
+
+    Attributes:
+        executions (SimpleExecutionSerializer): Nested execution history (read-only)
+        fixed_by (SimpleUserSerializer): User who fixed the finding (read-only)
     """
 
     executions = SimpleExecutionSerializer(many=True, read_only=True)
     fixed_by = SimpleUserSerializer(many=False, read_only=True)
 
     class Meta:
+        """Meta configuration for FindingSerializer.
+
+        Defines model reference, included fields, and read-only restrictions
+        for base finding serialization. Uses Host as default model reference.
+
+        Attributes:
+            model (type): Default model class (overridden by subclasses)
+            fields (tuple): Field names to include in serialization
+            read_only_fields (tuple): Fields restricted from modification
+        """
+
         model = Host  # It's needed to define a non-abstract model as default. It will be overwritten
         fields = (
             "id",
@@ -54,15 +67,30 @@ class FindingSerializer(RelatedNotesSerializer):
 
 
 class TriageFindingSerializer(FindingSerializer):
-    """Base serializer for findings that require triage.
+    """Base serializer for findings requiring triage workflow.
 
-    Extends FindingSerializer to add triage functionality, including
-    triage status, comments, and tracking information.
+    Extends FindingSerializer to add triage functionality including
+    status classification, comments, and audit tracking with automatic
+    timestamp and user attribution.
+
+    Attributes:
+        triage_by (SimpleUserSerializer): User who performed triage (read-only)
     """
 
     triage_by = SimpleUserSerializer(many=False, read_only=True)
 
     class Meta:
+        """Meta configuration for TriageFindingSerializer.
+
+        Extends FindingSerializer.Meta to include triage-specific fields
+        with automatic timestamp and user tracking.
+
+        Attributes:
+            model (type): Default model class (OSINT, overridden by subclasses)
+            fields (tuple): Field names including triage fields from parent
+            read_only_fields (tuple): Fields restricted from modification including triage metadata
+        """
+
         model = OSINT  # It's needed to define a non-abstract model as default. It will be overwritten
         fields = FindingSerializer.Meta.fields + (
             "triage_status",
@@ -76,16 +104,16 @@ class TriageFindingSerializer(FindingSerializer):
         )
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
-        """Validate and prepare triage data.
+        """Validate triage data with automatic metadata assignment.
 
-        Automatically sets the triage date and user when triage
-        information is being updated.
+        Validates triage information and automatically assigns timestamp
+        and user attribution for audit trail and tracking purposes.
 
         Args:
-            attrs: The attributes to validate.
+            attrs (dict[str, Any]): Attributes to validate and process.
 
         Returns:
-            Validated attributes with triage metadata added.
+            dict[str, Any]: Validated attributes with triage metadata added.
         """
         attrs = super().validate(attrs)
         attrs["triage_date"] = timezone.now()

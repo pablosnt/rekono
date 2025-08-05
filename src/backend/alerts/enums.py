@@ -50,8 +50,7 @@ class AlertMode(TextChoices):
     MONITOR = "Monitor"
 
 
-# The following assignments are a workaround for a known issue with Google Pytype static analysis.
+# Type annotation workaround for pytype compatibility
 # See: https://github.com/google/pytype/issues/1048
-# Without these, Pytype may not recognize the TextChoices subclasses as valid Choices types.
 AlertItem: type[Choices] = AlertItem
 AlertMode: type[Choices] = AlertMode

@@ -1,5 +1,6 @@
-"""Framework subpackage for findings system.
+"""Base framework for findings system architecture.
 
-Provides base classes and utilities that all finding types inherit from,
-ensuring consistency across the findings system while allowing customization.
+Provides foundational classes and utilities for all finding types ensuring
+consistent behavior across the findings system with standardized operations
+for triage, fixing, serialization, and API interactions.
 """

@@ -1,8 +1,8 @@
-"""Django admin configuration for findings models.
+"""Django admin interface configuration for findings models.
 
-This module registers all finding models with the Django admin interface,
-allowing administrators to view and manage security findings through
-the Django admin panel.
+Registers all security finding models with the Django admin interface
+providing administrators with comprehensive access to view, search, and
+manage discovered security findings with bulk operations and filtering.
 """
 
 from django.contrib import admin

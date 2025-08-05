@@ -1,9 +1,8 @@
-"""Base ViewSet classes for findings framework.
+"""Base ViewSet classes for findings framework REST API.
 
-This module provides the foundational ViewSet classes for the findings system,
-including FindingViewSet and TriageFindingViewSet that all specific
-finding ViewSets inherit from. These provide standardized functionality
-for handling finding operations like fixing and triaging.
+Provides foundational ViewSet classes including FindingViewSet and
+TriageFindingViewSet that all specific finding ViewSets inherit from
+with standardized functionality for fixing and triage operations.
 """
 
 from typing import Any
@@ -23,11 +22,18 @@ from security.authorization.permissions import (
 
 
 class FindingViewSet(BaseViewSet):
-    """Base ViewSet for all finding types.
+    """Base ViewSet for all finding types with fixing capabilities.
 
-    Provides standardized functionality for finding operations including
-    fixing and unfixing findings. Extends BaseViewSet to add finding-specific
-    behavior while maintaining security and permission controls.
+    Provides standardized REST API functionality for finding operations
+    including fixing/unfixing with proper permission controls and
+    project-level access restrictions.
+
+    Custom Actions:
+        fix: Fix or unfix findings with proper status tracking
+
+    Attributes:
+        permission_classes (list): Required permissions for finding access
+        http_method_names (list): Allowed HTTP methods for finding operations
     """
 
     permission_classes = [
@@ -40,36 +46,56 @@ class FindingViewSet(BaseViewSet):
 
     @extend_schema(exclude=True)
     def create(self, request: Request, *args, **kwargs):
-        """Disable creation of findings through API.
+        """Disable manual finding creation through API.
 
-        Findings are created automatically by tool executions,
-        not manually through the API.
+        Findings are created exclusively through automated tool executions
+        and cannot be manually created via API endpoints.
+
+        Args:
+            request (Request): HTTP request object.
+            *args: Variable length argument list.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Response: Method not allowed response.
         """
         return self._method_not_allowed("POST")  # pragma: no cover
 
     @extend_schema(exclude=True)
     def destroy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        """Disable deletion of findings through API.
+        """Disable direct finding deletion through API.
 
-        Findings are managed through fixing/unfixing operations,
-        not direct deletion.
+        Findings are managed through fixing/unfixing lifecycle operations
+        rather than direct deletion to preserve audit trails.
+
+        Args:
+            request (Request): HTTP request object.
+            *args (Any): Variable length argument list.
+            **kwargs (Any): Arbitrary keyword arguments.
+
+        Returns:
+            Response: Method not allowed response.
         """
         return self._method_not_allowed("DELETE")  # pragma: no cover
 
     @extend_schema(request=None, responses={204: None})
     @action(detail=True, methods=["POST", "DELETE"])
     def fix(self, request: Request, pk: str) -> Response:
-        """Fix or unfix a finding.
+        """Fix or unfix a finding with status tracking.
 
-        POST: Mark the finding as fixed by the current user.
-        DELETE: Remove the fixed status if it was manually fixed.
+        Handles finding lifecycle management through fix/unfix operations
+        with proper user attribution and relationship propagation.
+
+        HTTP Methods:
+            POST: Mark finding as fixed by current user.
+            DELETE: Remove fixed status if manually fixed.
 
         Args:
-            request: The HTTP request object.
-            pk: Primary key of the finding to fix/unfix.
+            request (Request): HTTP request object with user context.
+            pk (str): Primary key of the finding to modify.
 
         Returns:
-            Response indicating success or error.
+            Response: Success (204) or error (400) response.
         """
         finding = self.get_object()
         bad_request = None
@@ -89,11 +115,14 @@ class FindingViewSet(BaseViewSet):
 
 
 class TriageFindingViewSet(FindingViewSet):
-    """Base ViewSet for findings that support triage.
+    """Base ViewSet for findings requiring triage workflow.
 
-    Extends FindingViewSet to add triage functionality, allowing
-    findings to be marked as false positives, true positives, or
-    won't fix with comments and tracking.
+    Extends FindingViewSet to add triage functionality enabling findings
+    to be classified as false positives, true positives, or won't fix
+    with detailed tracking and audit capabilities.
+
+    Attributes:
+        http_method_names (list): Allowed HTTP methods including PUT for triage operations
     """
 
     # "put" method is needed for triaging
