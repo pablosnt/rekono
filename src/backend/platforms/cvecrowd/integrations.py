@@ -1,3 +1,4 @@
+from functools import cached_property
 from typing import Any, Callable
 
 from alerts.enums import AlertItem, AlertMode
@@ -14,16 +15,24 @@ from platforms.telegram_app.notifications.notifications import Telegram
 
 class CveCrowd(BaseIntegration):
     finding_types = [Vulnerability]
+    settings = CveCrowdSettings.objects.first()
+    url = "https://api.cvecrowd.com/api/v1/cves"
 
-    def __init__(self) -> None:
-        self.settings = CveCrowdSettings.objects.first()
-        self.url = "https://api.cvecrowd.com/api/v1/cves"
-        self.trending_cves: list[str] = []
-        super().__init__()
+    @cached_property
+    def trending_cves(self) -> list[str]:
+        if self.integration.enabled and self.settings.secret:
+            try:
+                self.trending_cves = self._request(
+                    self.session.get,
+                    self.url,
+                    headers={"Authorization": f"Bearer {self.settings.secret}"},
+                    params={"days": self.settings.trending_span_days},
+                )
+            except Exception:
+                pass
 
     def is_available(self) -> bool:
         if self.settings.secret:
-            self._get_trending_cves()
             return len(self.trending_cves) > 0
         return False
 
@@ -38,24 +47,11 @@ class CveCrowd(BaseIntegration):
     ) -> Any:
         return super()._request(method, url, json, trigger_exception, **kwargs)
 
-    def _get_trending_cves(self) -> None:
-        if self.integration.enabled and self.settings.secret and len(self.trending_cves) == 0:
-            try:
-                self.trending_cves = self._request(
-                    self.session.get,
-                    self.url,
-                    headers={"Authorization": f"Bearer {self.settings.secret}"},
-                    params={"days": self.settings.trending_span_days},
-                )
-            except Exception:
-                pass
-
     def _process_finding(self, execution: Execution, finding: Vulnerability) -> None:
         finding.trending = True
         finding.save(update_fields=["trending"])
 
     def is_finding_processable(self, finding: Finding) -> bool:
-        self._get_trending_cves()
         if not self.trending_cves:
             return False
         return (
@@ -66,14 +62,13 @@ class CveCrowd(BaseIntegration):
         )
 
     def monitor(self) -> None:
-        self._get_trending_cves()
         if not self.trending_cves:
             self.logger.warning("[CVE Crowd] No trending CVEs found")
             return
-        already_trending_queryset = Vulnerability.objects.filter(trending=True).all()
-        already_trending_cves = list(already_trending_queryset.values_list("cve", flat=True))
-        already_trending_queryset.exclude(cve__in=self.trending_cves).update(trending=False)
+        already_trending_cves = list(Vulnerability.objects.filter(trending=True).all().values_list("cve", flat=True))
+        Vulnerability.objects.filter(trending=True).exclude(cve__in=self.trending_cves).update(trending=False)
         Vulnerability.objects.filter(trending=False, cve__in=self.trending_cves).update(trending=True)
+        notifications = [SMTP(), Telegram()]
         notified_vulnerabilities: list[int] = []
         for alert in Alert.objects.filter(item=AlertItem.CVE, mode=AlertMode.MONITOR, enabled=True).all():
             vulnerabilities = (
@@ -94,5 +89,5 @@ class CveCrowd(BaseIntegration):
             for vulnerability in vulnerabilities:
                 if alert.must_be_triggered(None, vulnerability):
                     notified_vulnerabilities.append(vulnerability.id)
-                    for platform in [SMTP, Telegram]:
-                        platform().process_alert(alert, vulnerability)
+                    for platform in notifications:
+                        platform.process_alert(alert, vulnerability)

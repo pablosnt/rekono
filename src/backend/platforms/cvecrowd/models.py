@@ -4,8 +4,6 @@ from django.db import models
 from framework.models import BaseEncrypted
 from security.validators.input_validator import Regex, Validator
 
-# Create your models here.
-
 
 class CveCrowdSettings(BaseEncrypted):
     _api_token = models.TextField(
