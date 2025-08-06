@@ -1,9 +1,12 @@
-"""
-Rekono configuration management.
+"""Configuration management system for Rekono platform.
 
-Configuration management for the Rekono platform, including environment
-variable handling, YAML config file parsing, and property management for
-application settings.
+This module provides a comprehensive configuration management system that supports
+multiple configuration sources including environment variables, YAML files, and
+default values with intelligent precedence handling and validation.
+
+The system manages all aspects of Rekono configuration including database connections,
+security settings, external service integrations, file system paths, and tool-specific
+parameters with automatic directory initialization and type conversion.
 """
 
 import os
@@ -23,16 +26,27 @@ from security.cryptography.random import generate_random_value
 
 @dataclass
 class Property:
-    """
-    Rekono configuration property.
+    """Configuration property with multiple source support.
 
-    Represents a configuration property that can be loaded from environment
-    variables, files, or defaults.
+    Represents a single configuration property that can be sourced from
+    environment variables, configuration files, or default values with
+    intelligent type conversion and precedence handling.
 
     Attributes:
-        env (str | None): The environment variable name.
-        file (str | None): The dot-separated path in the config file.
-        default (Any): The default value if not set elsewhere.
+        env (str | None): Environment variable name for this property.
+        file (str | None): Dot-separated path in configuration file (e.g., 'database.host').
+        default (Any): Default value when no other sources are available.
+
+    Example:
+        Create a database host property:
+
+        ```python
+        db_host = Property(
+            env="RKN_DB_HOST",
+            file="database.host",
+            default="127.0.0.1"
+        )
+        ```
     """
 
     env: str | None = None
@@ -40,14 +54,21 @@ class Property:
     default: Any = None
 
     def read(self, file_config: dict[str, Any] = {}) -> Any:
-        """
-        Reads the property value from environment, file, or default.
+        """Read property value from configured sources.
+
+        Resolves the property value using the following precedence:
+        1. Environment variable (highest priority)
+        2. Configuration file value
+        3. Default value (lowest priority)
+
+        Includes intelligent type conversion for boolean values and list
+        parsing from environment variables using common separators.
 
         Args:
-            file_config (dict[str, Any]): The configuration loaded from file.
+            file_config (dict[str, Any]): Dictionary containing configuration file data.
 
         Returns:
-            Any: The resolved property value.
+            Any: The resolved configuration value with appropriate type conversion.
         """
         # Priority: environment variable > config file > default value
         value = self.default
@@ -80,12 +101,15 @@ class Property:
         return value
 
     def update(self, rekono_config: "RekonoConfig", value: Any) -> None:
-        """
-        Updates the property value in the Rekono config file.
+        """Update configuration file with new property value.
+
+        Updates the configuration file on disk with the new value while
+        preserving the existing structure and other configuration values.
+        Creates nested dictionaries as needed for dot-separated paths.
 
         Args:
-            rekono_config (RekonoConfig): The RekonoConfig instance.
-            value (Any): The new value to set.
+            rekono_config (RekonoConfig): RekonoConfig instance for file access.
+            value (Any): New value to store in the configuration file.
         """
         # Deep copy the config to avoid mutating the original
         config = deepcopy(rekono_config.config_from_file)
@@ -103,10 +127,55 @@ class Property:
 
 
 class RekonoConfig:
-    """
-    Main configuration handler for the Rekono platform.
+    """Main configuration manager for Rekono platform.
 
-    Loads and manages all application settings, YAML config files, and default values.
+    Provides centralized configuration management with support for multiple
+    configuration sources, automatic directory initialization, and type-safe
+    property access for all Rekono subsystems.
+
+    The configuration system supports both production and testing modes with
+    separate directory structures and automatic test environment isolation.
+    All sensitive configuration values support multiple source options with
+    intelligent precedence handling.
+
+    Attributes:
+        testing (bool): Flag indicating if running in test mode.
+        base_dir (Path): Base directory path for the application.
+        _home (Property): Home directory configuration property.
+        _encryption_key (Property): Encryption key configuration property.
+        _pdf_report_template (Property): PDF report template path property.
+        _frotend_url (Property): Frontend URL configuration property.
+        _root_path (Property): Application root path configuration property.
+        _secret_key (Property): Django secret key configuration property.
+        _allowed_hosts (Property): Allowed hosts list configuration property.
+        _trusted_proxy (Property): Trusted proxy flag configuration property.
+        _otp_expiration_hours (Property): OTP expiration time configuration property.
+        _mfa_expiration_minutes (Property): MFA expiration time configuration property.
+        _db_name (Property): Database name configuration property.
+        _db_user (Property): Database username configuration property.
+        _db_password (Property): Database password configuration property.
+        _db_host (Property): Database host configuration property.
+        _db_port (Property): Database port configuration property.
+        _rq_host (Property): Redis Queue host configuration property.
+        _rq_port (Property): Redis Queue port configuration property.
+        _smtp_host (Property): SMTP server host configuration property.
+        _smtp_port (Property): SMTP server port configuration property.
+        _smtp_user (Property): SMTP username configuration property.
+        _smtp_password (Property): SMTP password configuration property.
+        _smtp_tls (Property): SMTP TLS flag configuration property.
+        _cmseek_dir (Property): CMSeek tool directory configuration property.
+        _log4j_scan_dir (Property): Log4j scanner directory configuration property.
+        _spring4shell_scan_dir (Property): Spring4Shell scanner directory configuration property.
+        _gittools_dir (Property): GitTools directory configuration property.
+
+    Example:
+        Access database configuration:
+
+        ```python
+        config = RekonoConfig()
+        db_host = config.db_host
+        db_port = config.db_port
+        ```
     """
 
     testing = "test" in sys.argv
@@ -142,11 +211,11 @@ class RekonoConfig:
 
     @cached_property
     def pro_home(self) -> Path:
-        """
-        Returns the Rekono home directory path.
+        """Get production home directory path.
 
         Returns:
-            Path: The home directory path.
+            Path: Path to the production home directory, falling back to
+            parent directory structure if configured path doesn't exist.
         """
         # Use the environment or config value if it exists and is a directory,
         # otherwise fall back to the parent of the backend directory
@@ -155,30 +224,26 @@ class RekonoConfig:
 
     @property
     def home(self) -> Path:
-        """
-        Returns the working home directory, using a test directory if in testing mode.
+        """Get current home directory path.
 
         Returns:
-            Path: The working home directory.
+            Path: Path to the appropriate home directory (test or production).
         """
         # In test mode, use a dedicated test home directory
         return self._initialize_directory(self.base_dir / "tests" / "home" if self.testing else self.pro_home)
 
     @cached_property
     def pro_config_file(self) -> Path:
-        """
-        Finds and returns the main Rekono config file path.
+        """Get production configuration file path.
+
+        Searches for the first existing configuration file using standard
+        naming conventions in the home directory.
 
         Returns:
-            Path: The config file path.
+            Path: Path to the first found configuration file.
         """
         # Search for the first config file that exists in the home directory
-        for filename in [
-            "config.yaml",
-            "config.yml",
-            "rekono.yaml",
-            "rekono.yml",
-        ]:
+        for filename in ["config.yaml", "config.yml", "rekono.yaml", "rekono.yml"]:
             path = self.pro_home / filename
             if path.is_file():
                 break
@@ -186,11 +251,10 @@ class RekonoConfig:
 
     @cached_property
     def config_file(self) -> Path:
-        """
-        Returns the config file path, copying to a test location if in testing mode.
+        """Get current configuration file path.
 
         Returns:
-            Path: The config file path.
+            Path: Path to the appropriate configuration file (test or production).
         """
         # In test mode, copy the config file to the test home directory
         if self.testing:
@@ -200,11 +264,10 @@ class RekonoConfig:
 
     @property
     def config_from_file(self) -> dict[str, Any]:
-        """
-        Loads and returns the configuration from the YAML config file.
+        """Load configuration data from YAML file.
 
         Returns:
-            dict[str, Any]: The loaded configuration dictionary.
+            dict[str, Any]: Dictionary containing all configuration data from the YAML file.
         """
         # Loads YAML from disk every time this property is accessed
         with self.config_file.open("r") as file:
@@ -212,65 +275,62 @@ class RekonoConfig:
 
     @property
     def reports(self) -> Path:
-        """
-        Returns the reports directory path, creating it if necessary.
+        """Get reports directory path.
 
         Returns:
-            Path: The reports directory path.
+            Path: Path to the reports directory, creating it if necessary.
         """
         # Ensure the reports directory exists
         return self._initialize_directory(self.home / "reports")
 
     @property
     def generated_reports(self) -> Path:
-        """
-        Returns the generated reports directory path, creating it if necessary.
+        """Get generated reports directory path.
 
         Returns:
-            Path: The generated reports directory path.
+            Path: Path to the generated reports subdirectory, creating it if necessary.
         """
         # Ensure the generated reports directory exists
         return self._initialize_directory(self.reports / "generated")
 
     @property
     def wordlists(self) -> Path:
-        """
-        Returns the wordlists directory path, creating it if necessary.
+        """Get wordlists directory path.
 
         Returns:
-            Path: The wordlists directory path.
+            Path: Path to the wordlists directory, creating it if necessary.
         """
         # Ensure the wordlists directory exists
         return self._initialize_directory(self.home / "wordlists")
 
     @property
     def logs(self) -> Path:
-        """
-        Returns the logs directory path, creating it if necessary.
+        """Get logs directory path.
 
         Returns:
-            Path: The logs directory path.
+            Path: Path to the logs directory, creating it if necessary.
         """
         # Ensure the logs directory exists
         return self._initialize_directory(self.home / "logs")
 
     @property
     def encryption_key(self) -> str:
-        """
-        Returns the encryption key, generating a new one if in testing mode.
+        """Get encryption key for sensitive data protection.
 
         Returns:
-            str: The encryption key.
+            str: Encryption key string, generating a new one for testing mode.
         """
         return Encryptor.generate_encryption_key() if self.testing else self._encryption_key.read(self.config_from_file)
 
     @property
     def pdf_report_template(self) -> Path | None:
-        """
-        Returns the path to the PDF report template.
+        """Get PDF report template file path.
+
+        Searches for PDF report template in configured location or
+        default locations within the application structure.
 
         Returns:
-            Path: The PDF report template path.
+            Path | None: Path to the PDF report template file, or None if not found.
         """
         template = self._pdf_report_template.read(self.config_from_file)
         if template:
@@ -284,240 +344,216 @@ class RekonoConfig:
 
     @property
     def frontend_url(self) -> str:
-        """
-        Returns the frontend URL.
+        """Get frontend application URL.
 
         Returns:
-            str: The frontend URL.
+            str: Base URL for the Rekono frontend application.
         """
         return self._frotend_url.read(self.config_from_file)
 
     @property
     def root_path(self) -> str:
-        """
-        Returns the root path for the application.
+        """Get application root path.
 
         Returns:
-            str: The root path.
+            str: Root path prefix for the application.
         """
         return self._root_path.read(self.config_from_file)
 
     @property
     def secret_key(self) -> str:
-        """
-        Returns the secret key for the application.
+        """Get Django secret key.
 
         Returns:
-            str: The secret key.
+            str: Secret key for Django cryptographic operations.
         """
         return self._secret_key.read(self.config_from_file)
 
     @property
     def allowed_hosts(self) -> list[str]:
-        """
-        Returns the list of allowed hosts.
+        """Get allowed host names for Django.
 
         Returns:
-            list[str]: The allowed hosts.
+            list[str]: List of allowed host names for HTTP requests.
         """
         return self._allowed_hosts.read(self.config_from_file)
 
     @property
     def trusted_proxy(self) -> bool:
-        """
-        Returns whether a trusted proxy is enabled.
+        """Get trusted proxy configuration.
 
         Returns:
-            bool: True if trusted proxy is enabled, else False.
+            bool: True if running behind a trusted proxy, False otherwise.
         """
         return self._trusted_proxy.read(self.config_from_file)
 
     @property
     def otp_expiration_hours(self) -> int:
-        """
-        Returns the OTP expiration time in hours.
+        """Get OTP expiration time in hours.
 
         Returns:
-            int: OTP expiration in hours.
+            int: Number of hours before OTP tokens expire.
         """
         return self._otp_expiration_hours.read(self.config_from_file)
 
     @property
     def mfa_expiration_minutes(self) -> int:
-        """
-        Returns the MFA expiration time in minutes.
+        """Get MFA expiration time in minutes.
 
         Returns:
-            int: MFA expiration in minutes.
+            int: Number of minutes before MFA tokens expire.
         """
         return self._mfa_expiration_minutes.read(self.config_from_file)
 
     @property
     def db_name(self) -> str:
-        """
-        Returns the database name.
+        """Get database name.
 
         Returns:
-            str: The database name.
+            str: PostgreSQL database name.
         """
         return self._db_name.read(self.config_from_file)
 
     @property
     def db_user(self) -> str:
-        """
-        Returns the database user.
+        """Get database username.
 
         Returns:
-            str: The database user.
+            str: PostgreSQL database username.
         """
         return self._db_user.read(self.config_from_file)
 
     @property
     def db_password(self) -> str:
-        """
-        Returns the database password.
+        """Get database password.
 
         Returns:
-            str: The database password.
+            str: PostgreSQL database password.
         """
         return self._db_password.read(self.config_from_file)
 
     @property
     def db_host(self) -> str:
-        """
-        Returns the database host.
+        """Get database host.
 
         Returns:
-            str: The database host.
+            str: PostgreSQL database host address.
         """
         return self._db_host.read(self.config_from_file)
 
     @property
     def db_port(self) -> int:
-        """
-        Returns the database port.
+        """Get database port.
 
         Returns:
-            int: The database port.
+            int: PostgreSQL database port number.
         """
         return self._db_port.read(self.config_from_file)
 
     @property
     def rq_host(self) -> str:
-        """
-        Returns the Redis queue host.
+        """Get Redis Queue host.
 
         Returns:
-            str: The Redis queue host.
+            str: Redis host address for background job processing.
         """
         return self._rq_host.read(self.config_from_file)
 
     @property
     def rq_port(self) -> int:
-        """
-        Returns the Redis queue port.
+        """Get Redis Queue port.
 
         Returns:
-            int: The Redis queue port.
+            int: Redis port number for background job processing.
         """
         return self._rq_port.read(self.config_from_file)
 
     @property
     def smtp_host(self) -> str:
-        """
-        Returns the SMTP host.
+        """Get SMTP server host.
 
         Returns:
-            str: The SMTP host.
+            str: SMTP server hostname for email delivery.
         """
         return self._smtp_host.read(self.config_from_file)
 
     @property
     def smtp_port(self) -> int:
-        """
-        Returns the SMTP port.
+        """Get SMTP server port.
 
         Returns:
-            int: The SMTP port.
+            int: SMTP server port number for email delivery.
         """
         return self._smtp_port.read(self.config_from_file)
 
     @property
     def smtp_user(self) -> str:
-        """
-        Returns the SMTP user.
+        """Get SMTP username.
 
         Returns:
-            str: The SMTP user.
+            str: SMTP authentication username for email delivery.
         """
         return self._smtp_user.read(self.config_from_file)
 
     @property
     def smtp_password(self) -> str:
-        """
-        Returns the SMTP password.
+        """Get SMTP password.
 
         Returns:
-            str: The SMTP password.
+            str: SMTP authentication password for email delivery.
         """
         return self._smtp_password.read(self.config_from_file)
 
     @property
     def smtp_tls(self) -> bool:
-        """
-        Returns whether SMTP TLS is enabled.
+        """Get SMTP TLS configuration.
 
         Returns:
-            bool: True if SMTP TLS is enabled, else False.
+            bool: True if SMTP should use TLS encryption, False otherwise.
         """
         return self._smtp_tls.read(self.config_from_file)
 
     @property
     def cmseek_dir(self) -> str:
-        """
-        Returns the directory for CMSeek tool results.
+        """Get CMSeek tool directory.
 
         Returns:
-            str: The CMSeek directory.
+            str: Path to CMSeek tool installation directory.
         """
         return self._cmseek_dir.read(self.config_from_file)
 
     @property
     def log4j_scan_dir(self) -> str:
-        """
-        Returns the directory for Log4j scan tool.
+        """Get Log4j scanner directory.
 
         Returns:
-            str: The Log4j scan directory.
+            str: Path to Log4j vulnerability scanner installation directory.
         """
         return self._log4j_scan_dir.read(self.config_from_file)
 
     @property
     def spring4shell_scan_dir(self) -> str:
-        """
-        Returns the directory for Spring4Shell scan tool.
+        """Get Spring4Shell scanner directory.
 
         Returns:
-            str: The Spring4Shell scan directory.
+            str: Path to Spring4Shell vulnerability scanner installation directory.
         """
         return self._spring4shell_scan_dir.read(self.config_from_file)
 
     @property
     def gittools_dir(self) -> str:
-        """
-        Returns the directory for GitTools.
+        """Get GitTools directory.
 
         Returns:
-            str: The GitTools directory.
+            str: Path to GitTools installation directory.
         """
         return self._gittools_dir.read(self.config_from_file)
 
     def _initialize_directory(self, path: Path) -> Path:
-        """
-        Ensures the directory exists at the given path.
+        """Initialize directory by creating it if it doesn't exist.
 
         Args:
-            path (Path): The directory path to initialize.
+            path (Path): Path to the directory to initialize.
 
         Returns:
             Path: The initialized directory path.
