@@ -1,10 +1,3 @@
-"""Filters for the notes app.
-
-This module provides Django REST Framework filters for the Note model,
-enabling advanced query filtering and search capabilities for note data
-with complex relationship-based filtering.
-"""
-
 from django_filters.filters import BooleanFilter, CharFilter
 
 from framework.filters import LikeFilter, MultipleFieldFilterSet, MultipleNumberFilter
@@ -12,20 +5,6 @@ from notes.models import Note
 
 
 class NoteFilter(LikeFilter, MultipleFieldFilterSet):
-    """FilterSet for the Note model with advanced relationship filtering.
-
-    This filter set provides comprehensive filtering capabilities for Note
-    instances through the API. It supports filtering by direct fields as well
-    as complex relationship-based filtering that can traverse multiple model
-    relationships to find notes based on related entities.
-
-    Attributes:
-        related_target: Filter notes by target relationships through multiple paths.
-        related_task: Filter notes by task relationships through multiple paths.
-        tag: Filter notes by tag names.
-        is_fork: Filter notes that are forks (have a forked_from relationship).
-    """
-
     # Complex filter that searches for notes related to a target through
     # multiple relationship paths, including indirect relationships through
     # executions and tasks
@@ -69,17 +48,6 @@ class NoteFilter(LikeFilter, MultipleFieldFilterSet):
     is_fork = BooleanFilter(field_name="forked_from", lookup_expr="isnull", exclude=True)
 
     class Meta:
-        """Meta configuration for the NoteFilter.
-
-        This inner class defines the filter's configuration, specifying
-        which model to filter and which fields support which types of
-        filtering operations.
-
-        Attributes:
-            model: The Django model class to filter (Note).
-            fields: Dictionary mapping field names to list of filter types.
-        """
-
         model = Note
         fields = {
             "project": ["exact"],

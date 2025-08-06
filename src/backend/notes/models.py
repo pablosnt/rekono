@@ -1,12 +1,3 @@
-"""Note models for managing user annotations and documentation in Rekono.
-
-This module provides the Note model which allows users to create annotations,
-documentation, and comments on various entities within the Rekono system.
-Notes can be attached to projects, targets, tasks, executions, and various
-finding types, supporting a flexible annotation system with tagging and
-forking capabilities.
-"""
-
 from django.db import models
 from taggit.managers import TaggableManager
 
@@ -30,44 +21,6 @@ from tasks.models import Task
 
 
 class Note(BaseLike):
-    """Model for user-created notes and annotations.
-
-    This model represents user-created notes that can be attached to various
-    entities within the Rekono system. Notes support rich content with titles,
-    bodies, tags, and can be made public or private. They also support forking
-    functionality, allowing users to create copies of public notes.
-
-    Notes can be associated with multiple entity types through optional foreign
-    key relationships. Only one entity relationship should be active at a time,
-    and the system automatically determines the project context from the related
-    entity.
-
-    The model inherits from BaseLike, providing like/unlike functionality for
-    social features.
-
-    Attributes:
-        project: The project this note belongs to (required).
-        target: Optional target this note is associated with.
-        task: Optional task this note is associated with.
-        execution: Optional execution this note is associated with.
-        osint: Optional OSINT finding this note is associated with.
-        host: Optional host finding this note is associated with.
-        port: Optional port finding this note is associated with.
-        path: Optional path finding this note is associated with.
-        credential: Optional credential finding this note is associated with.
-        technology: Optional technology finding this note is associated with.
-        vulnerability: Optional vulnerability finding this note is associated with.
-        exploit: Optional exploit finding this note is associated with.
-        title: The note's title (max 200 characters, validated).
-        body: The note's content body (optional).
-        tags: Tags associated with the note (using django-taggit).
-        owner: The user who created the note.
-        public: Whether the note is publicly visible to project members.
-        forked_from: Reference to the original note if this is a fork.
-        created_at: Timestamp when the note was created.
-        updated_at: Timestamp when the note was last updated.
-    """
-
     project = models.ForeignKey(Project, related_name="notes", on_delete=models.CASCADE)
     target = models.ForeignKey(Target, related_name="notes", on_delete=models.CASCADE, null=True, blank=True)
     task = models.ForeignKey(Task, related_name="notes", on_delete=models.CASCADE, null=True, blank=True)
@@ -122,14 +75,6 @@ class Note(BaseLike):
     _project_field = "project"
 
     def __str__(self) -> str:
-        """Return string representation of the note.
-
-        Creates a descriptive string by combining the target, project, and title
-        in a readable format, filtering out any None values.
-
-        Returns:
-            A string representation in format "target - project - title".
-        """
         item = next(
             iter(
                 [
