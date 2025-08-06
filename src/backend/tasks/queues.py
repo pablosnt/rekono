@@ -9,7 +9,7 @@ from rq.job import Job
 from executions.enums import Status
 from executions.models import Execution
 from executions.queues import ExecutionsQueue
-from framework.queues import BaseQueue
+from framework.queues import BaseScanQueue
 from input_types.models import InputType
 from processes.models import Step
 from tasks.models import Task
@@ -17,7 +17,7 @@ from tools.enums import Intensity as IntensityValue
 from tools.models import Intensity
 
 
-class TasksQueue(BaseQueue):
+class TasksQueue(BaseScanQueue):
     name = "tasks"
 
     def enqueue(self, task: Task) -> Job:

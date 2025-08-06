@@ -1,4 +1,8 @@
-"""This module provides base classes for Django applications."""
+"""Django app configuration utilities for Rekono framework.
+
+Provides base app class with automatic fixture loading capabilities
+for Django applications in the Rekono platform.
+"""
 
 from pathlib import Path
 from typing import Any
@@ -9,38 +13,37 @@ from django.db.models.signals import post_migrate
 
 
 class BaseApp:
-    """Base class for Django applications with fixture loading capabilities.
+    """Base Django application configuration with fixture loading capabilities.
 
-    This abstract base class provides functionality for automatically loading
-    fixtures after database migrations. It includes configuration options
-    for fixture paths and loading behavior.
+    Provides automatic loading of fixture files after database migrations
+    for consistent data initialization across Django applications.
 
     Attributes:
         fixtures_path (Path): Path to the fixtures directory.
-        skip_fixtures_if_model_exists (bool): Whether to skip loading if models exist.
+        skip_fixtures_if_model_exists (bool): Whether to skip loading if data exists.
     """
 
     fixtures_path = Path(__file__).resolve().parent / "fixtures"
     skip_fixtures_if_model_exists = False
 
     def ready(self) -> None:
-        """Configure the application when Django is ready.
+        """Configure the application after Django starts.
 
-        Sets up the post_migrate signal to automatically load fixtures
-        after database migrations are completed.
+        Sets up post-migration signal to automatically load fixtures
+        if the fixtures directory exists.
         """
         # Configure fixtures to be loaded after migration
         if self.fixtures_path and self.fixtures_path.is_dir():
             post_migrate.connect(self.load_fixtures, sender=self)
 
     def load_fixtures(self, **kwargs: Any) -> None:
-        """Load fixtures from the configured fixtures directory.
+        """Load fixture files into the database.
 
-        Automatically loads all JSON fixtures found in the fixtures_path
-        directory. Can be configured to skip loading if models already exist.
+        Called automatically after migrations to populate the database
+        with initial data. Respects skip_fixtures_if_model_exists setting.
 
         Args:
-            **kwargs: Additional arguments from the post_migrate signal.
+            **kwargs (Any): Signal arguments from post_migrate.
         """
         if self.fixtures_path and self.fixtures_path.is_dir():
             # TODO: Force updates always: Tools
@@ -56,13 +59,14 @@ class BaseApp:
             )
 
     def _get_models(self) -> list[Any]:
-        """Get the models for this application.
-
-        This method should be overridden by subclasses to return the list
-        of models that should be checked before loading fixtures.
+        """Get model classes for existence checking.
 
         Returns:
-            List of model classes for this application.
+            list[Any]: List of model classes to check for existing data.
+
+        Note:
+            This method should be overridden by subclasses to return
+            the relevant model classes for the application.
         """
         # Models can't be defined in a variable because the first time that the migrate command is executed,
         # models don't exist yet. They only can be imported from a post_migrate signal

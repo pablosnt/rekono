@@ -1,4 +1,8 @@
-"""This module contains common view logic and API endpoints."""
+"""Django REST framework views for Rekono's core framework.
+
+Provides base ViewSet classes with integrated security controls, project-level
+access control, and standardized CRUD operations for all Rekono API endpoints.
+"""
 
 from functools import cached_property
 from typing import Any
@@ -21,16 +25,22 @@ from security.authorization.permissions import IsAuditor
 
 
 class BaseViewSet(ModelViewSet, LoggingEntity):
-    """Base viewset that provides common functionality for all API viewsets.
+    """Base ViewSet providing standardized REST API operations with security controls.
 
-    This abstract base class extends Django REST Framework's ModelViewSet and
-    LoggingEntity to provide project-based authorization, automatic owner
-    assignment, and logging capabilities.
+    Extends Django REST Framework's ModelViewSet with integrated logging,
+    project-level access control, and ownership management. All API ViewSets
+    in Rekono inherit from this base class to ensure consistent behavior.
+
+    Security Features:
+        - Project-level access control through membership validation
+        - Automatic ownership assignment for created objects
+        - Permission-based method restrictions
+        - Integrated audit logging for all operations
 
     Attributes:
-        ordering (list): Default ordering for queryset results.
+        ordering (list): Default ordering for query results.
         http_method_names (list): Allowed HTTP methods (excludes PATCH).
-        owner_field (str): Field name for automatic owner assignment.
+        owner_field (str): Field name for ownership assignment.
     """
 
     ordering = ["-id"]
@@ -40,13 +50,10 @@ class BaseViewSet(ModelViewSet, LoggingEntity):
 
     @cached_property
     def linked_model(self) -> type[BaseModel]:
-        """Get the model class linked to this viewset.
-
-        Determines the model by examining the serializer class or filterset class.
-        Falls back to BaseModel if no model can be determined.
+        """Get the model class associated with this ViewSet.
 
         Returns:
-            The model class associated with this viewset.
+            type[BaseModel]: The model class from serializer or filterset metadata.
         """
         for cls in [
             self.get_serializer_class(),
@@ -57,17 +64,14 @@ class BaseViewSet(ModelViewSet, LoggingEntity):
         return BaseModel
 
     def _get_project_from_data(self, project_field: str, data: dict[str, Any]) -> Project | None:
-        """Extract project from request data using field path.
-
-        Traverses the project field path in the data to find the associated
-        project instance.
+        """Extract project instance from nested data structure.
 
         Args:
-            project_field: double-underscore-separated field path to the project.
-            data: Request data dictionary.
+            project_field (str): Field path to the project (e.g., "target__project").
+            data (dict[str, Any]): The data dictionary to traverse.
 
         Returns:
-            The project instance if found, None otherwise.
+            Project | None: The project instance or None if not found.
         """
         fields = project_field.split("__")
         if not fields:
@@ -81,14 +85,13 @@ class BaseViewSet(ModelViewSet, LoggingEntity):
         return data if isinstance(data, Project) else None
 
     def get_queryset(self) -> QuerySet:
-        """Get the filtered queryset based on project membership.
+        """Get filtered queryset with project-level access control.
 
-        Filters the queryset to only include objects that belong to projects
-        where the current user is a member. If the model is not project-linked,
-        returns the full queryset.
+        Applies project membership filtering to ensure users only access
+        resources from projects they belong to.
 
         Returns:
-            Filtered queryset based on user's project membership.
+            QuerySet: Filtered queryset based on project membership.
         """
         members_field = None
         if self.linked_model == Project:
@@ -106,15 +109,12 @@ class BaseViewSet(ModelViewSet, LoggingEntity):
     def get_serializer(self, *args: Any, **kwargs: Any) -> Serializer:
         """Get serializer instance with request context.
 
-        Ensures the original request is passed to the serializer context
-        for use in serializer methods.
-
         Args:
-            *args: Positional arguments for serializer.
-            **kwargs: Keyword arguments for serializer.
+            *args (Any): Positional arguments for serializer.
+            **kwargs (Any): Keyword arguments for serializer.
 
         Returns:
-            Serializer instance with request context.
+            Serializer: Configured serializer instance with request context.
         """
         return self.get_serializer_class()(
             *args,
@@ -126,16 +126,13 @@ class BaseViewSet(ModelViewSet, LoggingEntity):
         )
 
     def perform_create(self, serializer: Serializer) -> None:
-        """Perform object creation with authorization checks.
-
-        Checks project membership before creating related entities and
-        automatically assigns the current user as owner if configured.
+        """Perform object creation with ownership and permission validation.
 
         Args:
-            serializer: The serializer instance with validated data.
+            serializer (Serializer): The serializer instance for creation.
 
         Raises:
-            PermissionDenied: If user is not a member of the project.
+            PermissionDenied: If user is not a member of the associated project.
         """
         project = self._get_project_from_data(self.linked_model._project_field, serializer.validated_data)
         # Check project membership before creating related entities
@@ -147,13 +144,13 @@ class BaseViewSet(ModelViewSet, LoggingEntity):
         super().perform_create(serializer)
 
     def _method_not_allowed(self, method: str) -> Response:
-        """Return a standardized method not allowed response.
+        """Generate method not allowed response.
 
         Args:
-            method: The HTTP method that was not allowed.
+            method (str): The HTTP method that was attempted.
 
         Returns:
-            HTTP 405 response with error details.
+            Response: HTTP 405 Method Not Allowed response.
         """
         return Response(
             {"detail": f'Method "{method.upper()}" not allowed.'},
@@ -162,17 +159,23 @@ class BaseViewSet(ModelViewSet, LoggingEntity):
 
 
 class LikeViewSet(BaseViewSet):
-    """Viewset for likeable entities with like/unlike functionality.
+    """ViewSet for models with like/favorite functionality.
 
-    Extends BaseViewSet to provide like/unlike actions for entities that
-    support user likes. Includes automatic like count annotation.
+    Extends BaseViewSet with like management capabilities for user-interactive
+    content such as tools, processes, and wordlists.
+
+    Custom Actions:
+        like: Add or remove likes from authenticated users
+
+    Attributes:
+        Inherits all BaseViewSet attributes with like count annotations.
     """
 
     def get_queryset(self) -> QuerySet:
-        """Get queryset with like count annotation.
+        """Get queryset annotated with like counts.
 
         Returns:
-            Queryset annotated with the count of users who liked each entity.
+            QuerySet: Base queryset with likes_count annotation.
         """
         return super().get_queryset().annotate(likes_count=Count("liked_by"))
 
@@ -186,20 +189,20 @@ class LikeViewSet(BaseViewSet):
         permission_classes=[IsAuthenticated, IsAuditor],
     )
     def like(self, request: Request, pk: str) -> Response:
-        """Like or unlike an entity.
+        """Add or remove like from the current user.
 
-        POST request adds the current user to the entity's liked_by list.
-        DELETE request removes the current user from the entity's liked_by list.
+        POST: Add like from current user
+        DELETE: Remove like from current user
 
         Args:
-            request: The HTTP request object.
-            pk: Primary key of the entity to like/unlike.
+            request (Request): The HTTP request object.
+            pk (str): Primary key of the object to like/unlike.
 
         Returns:
-            HTTP 204 No Content response on success.
+            Response: HTTP 204 No Content on success.
         """
         if request.method == "POST":
-            self.get_object().liked_by.add(request.user)
+            self.get_object_or_404().liked_by.add(request.user)
         else:
-            self.get_object().liked_by.remove(request.user)
+            self.get_object_or_404().liked_by.remove(request.user)
         return Response(status=status.HTTP_204_NO_CONTENT)

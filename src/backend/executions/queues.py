@@ -13,7 +13,7 @@ from rq.registry import DeferredJobRegistry
 from executions.models import Execution
 from findings.framework.models import Finding
 from findings.queues import FindingsQueue
-from framework.queues import BaseQueue, ExecutionParametersToEnqueue
+from framework.queues import BaseScanQueue, ExecutionParametersToEnqueue
 from parameters.models import InputTechnology, InputVulnerability
 from target_ports.models import TargetPort
 from tools.executors.base import BaseExecutor
@@ -21,7 +21,7 @@ from tools.parsers.base import BaseParser
 from wordlists.models import Wordlist
 
 
-class ExecutionsQueue(BaseQueue):
+class ExecutionsQueue(BaseScanQueue):
     """Queue manager for security tool executions.
 
     Manages background execution of security tools using Redis Queue (RQ)

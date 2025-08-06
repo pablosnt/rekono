@@ -1,28 +1,34 @@
-"""This module defines logging utilities."""
+"""Logging infrastructure and utilities for Rekono framework.
+
+Provides enhanced logging capabilities with request tracking,
+user identification, and audit trail functionality.
+"""
 
 import logging
 from typing import Any
 
 
 class LoggingFilter(logging.Filter):
-    """Custom logging filter that adds request context to log records.
+    """Custom logging filter for enriching log records with request context.
 
-    This filter enhances log records with source IP address and user information
-    extracted from Django request objects. It handles both authenticated and
-    anonymous requests.
+    Adds user identification and source IP information to log records
+    for comprehensive audit trails and security monitoring.
+
+    Attributes:
+        Inherits all attributes from logging.Filter.
     """
 
     def filter(self, record: Any) -> bool:
-        """Filter and enhance log records with request context.
+        """Enrich log records with user and request context information.
 
-        Adds source_ip and user fields to the log record based on request
-        information. Handles both records with and without request data.
+        Adds source_ip and user attributes to log records for comprehensive
+        audit trails and security monitoring.
 
         Args:
-            record: The log record to process.
+            record (Any): The log record to enrich.
 
         Returns:
-            Always returns True to allow all records through.
+            bool: Always True to allow all records through.
         """
         if hasattr(record, "request"):
             # Record with request data
@@ -39,13 +45,20 @@ class LoggingFilter(logging.Filter):
 
 
 class LoggingEntity:
-    """Mixin class that provides logging capabilities to other classes.
+    """Mixin class providing logging capabilities to other classes.
 
-    This class provides a shared logger instance that can be used by
-    any class that inherits from it.
+    Provides a standardized logger instance for classes that need
+    logging functionality throughout the Rekono platform.
 
     Attributes:
-        logger: Shared logging.Logger instance for the application.
+        logger (Logger): Python logger instance for this entity.
+
+    Example:
+        ```python
+        class MyClass(LoggingEntity):
+            def process(self):
+                self.logger.info("Processing started")
+        ```
     """
 
     logger = logging.getLogger()

@@ -1,4 +1,9 @@
-"""This module defines the core database models and ORM logic."""
+"""Django models for Rekono's core framework infrastructure.
+
+Provides base model classes with security features, encryption support, and
+common functionality used across all Rekono modules. Includes project-level
+access control, input parsing capabilities, and secure field handling.
+"""
 
 from dataclasses import dataclass
 from functools import cached_property
@@ -15,31 +20,56 @@ from security.cryptography.encryption import Encryptor
 
 
 class BaseModel(Model, LoggingEntity):
-    """Base model class that provides common functionality for all models.
+    """Abstract base model providing common functionality for all Rekono models.
 
-    This abstract base class extends Django's Model and LoggingEntity to provide
-    project-based filtering and logging capabilities. It includes a mechanism
-    to link models to projects through a configurable field path.
+    Extends Django's Model class with logging capabilities and project-level access
+    control. All models in Rekono inherit from this base class to ensure consistent
+    behavior and security enforcement across the platform.
+
+    Security Features:
+        - Project-level access control through _project_field configuration
+        - Integration with logging infrastructure for audit trails
+        - Standardized string representation for debugging and logging
 
     Attributes:
-        _project_field (str): Field path to the related project model.
-                             Used for project-based filtering and authorization.
+        _project_field (str): Field path to the associated project for access control.
+                             Empty string indicates no project association.
+
+    Example:
+        Create a model with project association:
+
+        ```python
+        class MyModel(BaseModel):
+            _project_field = "target__project"
+            name = models.CharField(max_length=100)
+        ```
     """
 
     _project_field = ""
 
     class Meta:
+        """Django Meta class configuration for BaseModel.
+
+        Configures BaseModel as an abstract base class that provides common
+        functionality without creating its own database table.
+
+        Attributes:
+            abstract (bool): Marks this model as abstract (no database table).
+        """
+
         abstract = True
 
     @cached_property
     def parent_project(self) -> Any | list[Any] | None:
-        """Get the parent project for this model instance.
+        """Get the project associated with this model instance.
 
-        Traverses the project field path to find the associated project.
-        If no project field is configured or the path is invalid, returns None.
+        Traverses the field path specified in _project_field to locate the
+        associated project object. This enables project-level access control
+        and permission enforcement.
 
         Returns:
-            The parent project instance, list of projects, or None if not found.
+            Any | list[Any] | None: The associated project object, list of projects,
+                                   or None if no project association exists.
         """
         filter_field = self.__class__._project_field
         if filter_field:
@@ -53,27 +83,56 @@ class BaseModel(Model, LoggingEntity):
         return None
 
     def __str__(self) -> str:
-        """Return string representation of the model.
+        """Return string representation of the model instance.
 
         Returns:
-            The class name of the model.
+            str: The class name of the model instance.
         """
         return self.__class__.__name__
 
 
 class BaseEncrypted(BaseModel):
-    """Base model for encrypted data storage.
+    """Abstract base model providing encryption capabilities for sensitive data.
 
-    This abstract base class provides encryption/decryption capabilities
-    for sensitive data fields. It automatically handles encryption on save
-    and decryption on retrieval.
+    Extends BaseModel with automatic encryption and decryption of sensitive fields.
+    Uses AES encryption when encryption keys are configured, providing transparent
+    data protection for sensitive information like passwords and tokens.
+
+    Security Features:
+        - Automatic AES encryption for sensitive data fields
+        - Transparent encryption/decryption through property accessors
+        - Secure key management integration
+        - Fallback to plain text when encryption is not configured
 
     Attributes:
-        _encryptor (Encryptor): Encryption utility instance.
-        _encrypted_field (str): Name of the field containing encrypted data.
+        _encryptor (Encryptor | None): The encryption instance for secure operations.
+        _encrypted_field (str): Name of the database field storing encrypted data.
+
+    Example:
+        Create a model with encrypted secret field:
+
+        ```python
+        class SecretModel(BaseEncrypted):
+            _secret = models.TextField(db_column="secret")
+            _encrypted_field = "_secret"
+
+        # Usage
+        model = SecretModel()
+        model.secret = "sensitive_data"  # Automatically encrypted
+        plain_text = model.secret  # Automatically decrypted
+        ```
     """
 
     class Meta:
+        """Django Meta class configuration for BaseEncrypted.
+
+        Configures BaseEncrypted as an abstract base class that extends
+        BaseModel with encryption capabilities without creating its own table.
+
+        Attributes:
+            abstract (bool): Marks this model as abstract (no database table).
+        """
+
         abstract = True
 
     _encryptor = Encryptor(CONFIG.encryption_key) if CONFIG.encryption_key else None
@@ -81,13 +140,13 @@ class BaseEncrypted(BaseModel):
 
     @property
     def secret(self) -> str | None:
-        """Get the decrypted secret value.
+        """Get the decrypted value of the encrypted field.
 
-        Automatically decrypts the stored secret value when accessed.
-        If no encryption key is configured, returns the raw value.
+        Automatically decrypts the stored encrypted value using the configured
+        encryptor. Returns None if the field is empty or encryption is not configured.
 
         Returns:
-            The decrypted secret string or None if not set.
+            str | None: The decrypted secret value or None if empty.
         """
         return (
             (
@@ -101,13 +160,14 @@ class BaseEncrypted(BaseModel):
 
     @secret.setter
     def secret(self, value: str) -> None:
-        """Set and encrypt the secret value.
+        """Set the encrypted field with automatic encryption.
 
-        Automatically encrypts the value before storing it in the database.
-        If no encryption key is configured, stores the raw value.
+        Automatically encrypts the provided value using the configured encryptor
+        before storing it in the database field. Falls back to plain text storage
+        when encryption is not configured.
 
         Args:
-            value: The secret string to encrypt and store.
+            value (str): The plain text value to encrypt and store.
         """
         if hasattr(self, self._encrypted_field):
             setattr(
@@ -118,32 +178,60 @@ class BaseEncrypted(BaseModel):
 
 
 class BaseInput(BaseModel):
-    """Base model for input data processing and filtering.
+    """Abstract base model for input data used in security tool execution.
 
-    This abstract base class provides functionality for processing, filtering,
-    and parsing data to be used as part of tool executions.
+    Provides parsing and filtering capabilities for various input types used by
+    security tools. Supports complex filtering logic, URL generation and validation, and data
+    transformation for tool integration.
 
     Attributes:
-        _filters (list[Filter]): List of filter configurations for this input type.
-        _parse_mapping (dict): Mapping of input keywords to field names or functions.
-        _parse_dependencies (list[str]): List of dependent fields that must be parsed first.
+        _filters (list[Filter]): List of Filter instances for input validation.
+        _parse_mapping (dict): Mapping of InputKeyword to field names or functions.
+        _parse_dependencies (list[str]): List of dependent fields to parse first.
+
+    Example:
+        Create an input model with filtering:
+
+        ```python
+        class PortInput(BaseInput):
+            port = models.IntegerField()
+            service = models.CharField(max_length=50)
+
+            _filters = [
+                BaseInput.Filter(type=str, field="service", contains=True)
+            ]
+            _parse_mapping = {
+                InputKeyword.PORT: "port",
+                InputKeyword.TARGET: lambda instance: f"{instance.host}:{instance.port}"
+            }
+        ```
     """
 
     class Meta:
+        """Django Meta class configuration for BaseInput.
+
+        Configures BaseInput as an abstract base class for input data models
+        used in security tool execution without creating its own table.
+
+        Attributes:
+            abstract (bool): Marks this model as abstract (no database table).
+        """
+
         abstract = True
 
     @dataclass
     class Filter:
-        """Filter configuration for input data validation and processing.
+        """Filter configuration for input validation and processing.
 
-        This inner class defines how input data should be filtered based on
-        type, field, and custom processing logic.
+        Defines how input values should be filtered and validated based on
+        tool argument requirements. Supports type checking, string matching,
+        and custom processing functions.
 
         Attributes:
-            type (type): The expected data type for this filter.
-            field (str): The field name to filter on.
-            contains (bool): Whether to use contains matching instead of exact matching.
-            processor (Callable): Optional function to process the value before filtering.
+            type (type): The expected data type for validation.
+            field (str): The model field name to validate against.
+            contains (bool): Whether to use substring matching instead of exact matching.
+            processor (Callable[[Any], Any] | None): Optional preprocessing function.
         """
 
         type: type
@@ -152,15 +240,18 @@ class BaseInput(BaseModel):
         processor: Callable[[Any], Any] | None = None
 
         def filter(self, expected: str, value: Any, is_negative: bool = False) -> bool:
-            """Apply the filter to a value.
+            """Apply the filter to validate an input value.
+
+            Performs validation based on the filter configuration, supporting
+            type conversion, negation, and custom processing.
 
             Args:
-                expected: The expected value to compare.
-                value: The value to filter against.
-                is_negative: Whether this is a negative filter (NOT condition).
+                expected (str): The expected value to match against.
+                value (Any): The actual value to validate.
+                is_negative (bool): Whether to negate the filter result.
 
             Returns:
-                True if the filter condition is met, False otherwise.
+                bool: True if the value passes the filter, False otherwise.
             """
             # If a processor is defined, preprocess the value before filtering
             if self.processor:
@@ -182,33 +273,19 @@ class BaseInput(BaseModel):
                 return False
 
         def _compare(self, expected: str, value: str, negative: bool = False, contains: bool = False) -> bool:
-            """Compare filter condition with value.
+            """Compare expected and actual values with optional negation.
 
             Args:
-                expected: The expected value to compare.
-                value: The value to compare against.
-                negative: Whether this is a negative comparison.
-                contains: Whether to use contains matching.
+                expected (str): The expected value.
+                value (str): The actual value.
+                negative (bool): Whether to negate the comparison result.
+                contains (bool): Whether to use substring matching.
 
             Returns:
-                True if the comparison condition is met.
+                bool: The comparison result, optionally negated.
             """
-            return (
-                self._assert(expected, value, contains) if not negative else not self._assert(expected, value, contains)
-            )
-
-        def _assert(self, expected: str, value: str, contains: bool) -> bool:
-            """Assert the comparison between filter and value.
-
-            Args:
-                expected: The expected value to compare.
-                value: The value to compare against.
-                contains: Whether to use contains matching.
-
-            Returns:
-                True if the assertion passes.
-            """
-            return expected == value if not contains else expected in value
+            conclusion = expected == value if not contains else expected in value
+            return conclusion if not negative else not conclusion
 
     _filters: list[Filter] = []
     _parse_mapping: dict[InputKeyword, str | Callable | dict[str, str]] = {}
@@ -216,10 +293,13 @@ class BaseInput(BaseModel):
 
     @cached_property
     def input_type(self) -> Any:
-        """Get the input type configuration for this model.
+        """Get the InputType associated with this model.
+
+        Looks up the InputType based on the model's app label and model name,
+        supporting both primary and fallback model references.
 
         Returns:
-            The InputType instance associated with this model.
+            Any: The associated InputType instance or None if not found.
         """
         from input_types.models import InputType
 
@@ -227,16 +307,13 @@ class BaseInput(BaseModel):
         return InputType.objects.filter(Q(model=reference) | Q(fallback_model=reference)).first()
 
     def clean_path(self, value: str | None) -> str | None:
-        """Clean and normalize a path string.
-
-        Ensures the path starts with a forward slash if it's not empty
-        and doesn't already start with one.
+        """Normalize a path string by ensuring it starts with a forward slash.
 
         Args:
-            value: The path string to clean.
+            value (str | None): The path string to normalize.
 
         Returns:
-            The cleaned path string or None if input is None.
+            str | None: The normalized path with leading slash or None if empty.
         """
         return f"/{value}" if value and len(value) > 1 and value[0] != "/" else value
 
@@ -247,19 +324,20 @@ class BaseInput(BaseModel):
         endpoint: str | None = None,
         protocols: list[str] = ["http", "https"],
     ) -> str | None:
-        """Generate and validate a URL for the given host and parameters.
+        """Construct and validate a URL with automatic protocol detection.
 
-        Attempts to connect to the host using different protocols and ports
-        to find a working URL. Disables SSL warnings during testing.
+        Attempts to construct a valid URL by testing different protocols and
+        validating connectivity. Returns the first working URL or None if
+        no valid URL can be constructed.
 
         Args:
-            host: The hostname or IP address.
-            port: The port number (optional).
-            endpoint: The endpoint path (optional).
-            protocols: List of protocols to try (default: http, https).
+            host (str): The hostname or IP address.
+            port (int | None): The port number (optional).
+            endpoint (str | None): The endpoint path (optional).
+            protocols (list[str]): List of protocols to test (default: ["http", "https"]).
 
         Returns:
-            The first working URL found, or None if none work.
+            str | None: A valid URL string or None if no working URL found.
         """
         urllib3.disable_warnings(category=urllib3.exceptions.InsecureRequestWarning)
         if endpoint is None:
@@ -284,17 +362,18 @@ class BaseInput(BaseModel):
         return None
 
     def filter(self, argument_input: Any, target: Any = None) -> bool:
-        """Filter this input based on argument input conditions.
+        """Apply complex filtering logic based on tool argument requirements.
 
-        Applies complex filtering logic using AND/OR operators and
-        the configured filters for this input type.
+        Processes filter strings with AND/OR logic and negation support.
+        Supports complex conditions like "condition1 and condition2" or
+        "condition1 or condition2", and negative conditions prefixed with "!".
 
         Args:
-            argument_input: The argument input containing filter conditions.
-            target: Optional target object for additional filtering context.
+            argument_input (Any): The tool argument input with filter configuration.
+            target (Any): Optional target context for filtering (used in subclasses implementation).
 
         Returns:
-            True if the input passes all filter conditions.
+            bool: True if the input passes all filter conditions, False otherwise.
         """
         if not argument_input.filter:
             return True
@@ -335,16 +414,21 @@ class BaseInput(BaseModel):
         return conclusion
 
     def parse(self, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
-        """Parse this input into a standardized format.
+        """Parse input data into a format suitable for tool execution.
 
-        Processes the input according to the configured mapping and dependencies,
-        accumulating results with other parsed inputs.
+        Processes the input data according to the configured parse mapping,
+        handling dependencies and accumulation strategies. Supports various
+        data types including lists, dictionaries, and scalar values.
 
         Args:
-            accumulated: Dictionary of already parsed inputs to merge with.
+            accumulated (dict[str, Any]): Previously accumulated parsing data.
 
         Returns:
-            Dictionary containing the parsed input data.
+            dict[str, Any]: Parsed data ready for tool execution.
+
+        Note:
+            Dependencies are parsed first to ensure required data is available
+            when processing the main parsing mappings.
         """
         result = {}
         # Process dependencies first - these must be parsed before current input
@@ -389,16 +473,40 @@ class BaseInput(BaseModel):
 
 
 class BaseLike(BaseModel):
-    """Base model for likeable entities.
+    """Abstract base model providing like/favorite functionality.
 
-    This abstract base class provides functionality for entities that can be
-    liked by users. It includes a many-to-many relationship with users.
+    Enables users to like or favorite model instances through a many-to-many
+    relationship. Commonly used for findings, notes, and other user-interactive
+    content to track user preferences and engagement.
 
     Attributes:
-        liked_by: Many-to-many field linking to users who liked this entity.
+        liked_by (ManyToManyField): Users who have liked this instance.
+
+    Example:
+        Create a likeable model:
+
+        ```python
+        class LikeableContent(BaseLike):
+            title = models.CharField(max_length=200)
+            content = models.TextField()
+
+        # Usage
+        content = LikeableContent.objects.get(id=1)
+        content.liked_by.add(user)  # User likes the content
+        is_liked = content.liked_by.filter(id=user.id).exists()
+        ```
     """
 
     liked_by = ManyToManyField(AUTH_USER_MODEL, related_name="liked_%(class)s")
 
     class Meta:
+        """Django Meta class configuration for BaseLike.
+
+        Configures BaseLike as an abstract base class that provides like/favorite
+        functionality without creating its own database table.
+
+        Attributes:
+            abstract (bool): Marks this model as abstract (no database table).
+        """
+
         abstract = True

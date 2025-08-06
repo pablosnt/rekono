@@ -1,19 +1,29 @@
-"""This module provides pagination utilities."""
+
+"""Pagination configuration for Django REST framework API endpoints.
+
+Provides standardized pagination settings for consistent API responses
+across all Rekono endpoints.
+"""
 
 from rest_framework.pagination import PageNumberPagination
 
 
 class Pagination(PageNumberPagination):
-    """Custom pagination configuration for API responses.
+    """Standard pagination configuration for Rekono API endpoints.
 
-    This class provides standardized pagination settings for the API,
-    including page size limits and query parameter names.
+    Provides consistent pagination behavior across all API endpoints
+    with configurable page sizes and reasonable defaults.
 
     Attributes:
         page_query_param (str): Query parameter name for page number.
         page_size_query_param (str): Query parameter name for page size.
         page_size (int): Default number of items per page.
-        max_page_size (int): Maximum number of items per page.
+        max_page_size (int): Maximum allowed items per page.
+
+    Example:
+        API Usage:
+        - GET /api/items/?page=2&limit=50
+        - Returns page 2 with 50 items per page (if within max limit)
     """
 
     page_query_param = "page"

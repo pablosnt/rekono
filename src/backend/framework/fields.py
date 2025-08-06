@@ -1,4 +1,9 @@
-"""This module defines custom serializer fields."""
+
+"""Custom serializer fields for Django REST framework.
+
+Provides specialized field types for tags, protected secrets, and
+integer choices with enhanced security and API documentation features.
+"""
 
 from typing import Any, Callable
 
@@ -11,10 +16,16 @@ from taggit.serializers import TagListSerializerField
 
 @extend_schema_field({"type": "array", "items": {"type": "string"}})
 class TagField(TagListSerializerField):
-    """Custom tag field with OpenAPI schema extension.
+    """Serializer field for tag lists with proper OpenAPI documentation.
 
-    This field extends TagListSerializerField to provide proper OpenAPI
-    documentation for tag arrays.
+    Extends TagListSerializerField with enhanced OpenAPI schema definitions
+    for automatic API documentation generation.
+
+    Example:
+        ```python
+        class MySerializer(ModelSerializer):
+            tags = TagField()
+        ```
     """
 
     pass
@@ -22,13 +33,27 @@ class TagField(TagListSerializerField):
 
 @extend_schema_field(OpenApiTypes.STR)
 class ProtectedSecretField(Field):
-    """Field for handling sensitive data with protection.
+    """Serializer field for protected secret values.
 
-    This field provides functionality for handling secret/sensitive data
-    with automatic masking in serialization and optional validation.
+    Provides secure handling of sensitive data by masking values in responses
+    while allowing secure input validation and storage.
+
+    Security Features:
+        - Output values are masked with asterisks
+        - Input validation through custom validator functions
+        - No exposure of actual secret values in API responses
 
     Attributes:
-        validator (Callable): Optional validation function for the secret value.
+        validator (Callable | None): Optional validation function for input values.
+
+    Example:
+        ```python
+        class AuthSerializer(ModelSerializer):
+            password = ProtectedSecretField(
+                validator=lambda x: len(x) >= 8,
+                write_only=True
+            )
+        ```
     """
 
     def __init__(
@@ -48,17 +73,17 @@ class ProtectedSecretField(Field):
         """Initialize the protected secret field.
 
         Args:
-            validator: Optional validation function for the secret value.
-            read_only: Whether the field is read-only.
-            write_only: Whether the field is write-only.
-            required: Whether the field is required.
-            source: The source attribute name.
-            label: The field label.
-            help_text: Help text for the field.
-            style: The field style.
-            error_messages: Custom error messages.
-            validators: Additional validators.
-            allow_null: Whether null values are allowed.
+            validator (Callable | None): Optional validation function for input values.
+            read_only (bool): Whether the field is read-only.
+            write_only (bool): Whether the field is write-only.
+            required (bool | None): Whether the field is required.
+            source (str | None): Source attribute name.
+            label (str | None): Human-readable label.
+            help_text (str | None): Help text for documentation.
+            style (dict | None): Styling information.
+            error_messages (dict | None): Custom error messages.
+            validators (list | None): Additional validators.
+            allow_null (bool): Whether null values are allowed.
         """
         self.validator = validator
         super().__init__(
@@ -75,28 +100,28 @@ class ProtectedSecretField(Field):
         )
 
     def to_representation(self, value: str) -> str:
-        """Convert the field value to its representation.
+        """Convert internal value to external representation.
 
         Masks the secret value with asterisks for security.
 
         Args:
-            value: The secret value to represent.
+            value (str): The internal secret value.
 
         Returns:
-            Masked representation of the secret value.
+            str: Masked representation with asterisks.
         """
         return "*" * len(value)
 
     def to_internal_value(self, value: str) -> str:
-        """Convert the input value to internal format.
+        """Convert external representation to internal value.
 
-        Validates the value if a validator is configured.
+        Validates the input value using the configured validator if present.
 
         Args:
-            value: The input value to process.
+            value (str): The input value to validate and store.
 
         Returns:
-            The validated secret value.
+            str: The validated internal value.
 
         Raises:
             ValidationError: If validation fails.
@@ -108,21 +133,27 @@ class ProtectedSecretField(Field):
 
 @extend_schema_field(OpenApiTypes.STR)
 class IntegerChoicesField(Field):
-    """Field for handling integer choice enums.
+    """Serializer field for integer-based choice fields.
 
-    This field provides serialization and deserialization for integer
-    choice enums, converting between integer values and string names.
+    Converts between integer values stored in the database and
+    human-readable string representations for API responses.
 
     Attributes:
-        model: The choice enum class to use for conversion.
+        model (Any): The choice model/enum class for value conversion.
+
+    Example:
+        ```python
+        class StatusSerializer(ModelSerializer):
+            status = IntegerChoicesField(model=StatusEnum)
+        ```
     """
 
     def __init__(self, model: Any, **kwargs: Any):
         """Initialize the integer choices field.
 
         Args:
-            model: The choice enum class to use for conversion.
-            **kwargs: Additional field configuration.
+            model (Any): The choice model/enum class for conversions.
+            **kwargs (Any): Additional field arguments.
         """
         self.model = model
         super().__init__(**kwargs)
@@ -131,24 +162,24 @@ class IntegerChoicesField(Field):
         """Convert integer value to string representation.
 
         Args:
-            value: The integer value to convert.
+            value (int): The integer choice value.
 
         Returns:
-            The capitalized name of the choice enum value.
+            str: Capitalized string representation of the choice.
         """
         return self.model(value).name.capitalize()
 
     def to_internal_value(self, data: str) -> int:
-        """Convert string input to integer value.
+        """Convert string representation to integer value.
 
         Args:
-            data: The string input to convert.
+            data (str): The string choice representation.
 
         Returns:
-            The integer value of the choice enum.
+            int: The corresponding integer value.
 
         Raises:
-            ValidationError: If the input is not a valid choice.
+            ValidationError: If the string value is not valid.
         """
         try:
             return self.model[data.upper()].value

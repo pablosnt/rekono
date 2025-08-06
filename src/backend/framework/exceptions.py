@@ -1,4 +1,9 @@
-"""This module defines custom exception classes."""
+
+"""Exception handling utilities for Django REST framework.
+
+Provides custom exception handlers for database integrity errors
+and other common exceptions in the Rekono platform.
+"""
 
 from typing import Any
 
@@ -10,17 +15,21 @@ from rest_framework.views import exception_handler
 
 
 def handler(exc: Exception, context: dict[str, Any]) -> Response:
-    """Handle exceptions for the REST framework.
+    """Custom exception handler for Django REST framework.
 
-    This handler provides custom error responses for specific exception types,
-    particularly database integrity errors and unique constraint violations.
+    Provides user-friendly error messages for database integrity violations
+    and falls back to the default DRF exception handler for other exceptions.
 
     Args:
-        exc: The exception that was raised.
-        context: Context dictionary containing request and view information.
+        exc (Exception): The exception that was raised.
+        context (dict[str, Any]): Context information about the request.
 
     Returns:
-        Custom Response object with appropriate error details.
+        Response: HTTP response with appropriate error message and status code.
+
+    Note:
+        Converts database integrity errors (unique violations) into
+        user-friendly 400 Bad Request responses.
     """
     if exc.__class__ in [UniqueViolation, IntegrityError]:
         response = Response({"constraint": ["This object already exists"]}, status=HTTP_400_BAD_REQUEST)

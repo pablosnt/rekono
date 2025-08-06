@@ -1,4 +1,9 @@
-"""This module provides platform integration logic and related utilities."""
+"""Platform integration classes for external security tools and services.
+
+Provides base classes for integrating with external platforms such as
+vulnerability management systems, notification services, and threat
+intelligence platforms.
+"""
 
 from functools import cached_property
 from typing import Any, Callable
@@ -16,42 +21,49 @@ from users.enums import Notification
 
 
 class BasePlatform(LoggingEntity):
-    """Base class for platform integrations and notifications.
+    """Base class for external platform integrations.
 
-    This abstract base class provides common functionality for platform
-    integrations and notification systems. It includes methods for checking
-    availability and processing findings.
+    Provides common interface for all external platform integrations
+    including availability checks and findings processing.
+
+    Attributes:
+        Inherits logger from LoggingEntity.
     """
 
     def is_available(self) -> bool:
-        """Check if the platform is available for use.
+        """Check if the platform integration is available.
 
         Returns:
-            True if the platform is available, False otherwise.
+            bool: True if the platform is available, False otherwise.
         """
         return True
 
     def process_findings(self, execution: Execution, findings: list[Finding]) -> None:
-        """Process findings through this platform.
+        """Process findings from an execution.
 
         Args:
-            execution: The execution context.
-            findings: List of findings to process.
+            execution (Execution): The execution that generated the findings.
+            findings (list[Finding]): List of findings to process.
         """
         pass
 
 
 class BaseIntegration(BasePlatform):
-    """Base class for external platform integrations.
+    """Base class for external service integrations.
 
-    This abstract base class provides functionality for integrating with
-    external platforms and APIs. It includes HTTP session management,
-    retry logic, and finding processing capabilities.
+    Extends BasePlatform with HTTP session management, authentication,
+    and finding filtering capabilities for external API integrations.
+
+    Security Features:
+        - Authenticated HTTP sessions with retry logic
+        - Request logging and error handling
+        - Finding type filtering for selective processing
+        - Integration enable/disable controls
 
     Attributes:
-        url (str): Base URL for the integration API.
-        finding_types (list): List of finding types this integration processes.
-        run_per_execution (bool): Whether to run per execution or per finding.
+        url (str): Base URL for the external service.
+        finding_types (list): List of Finding types to process (empty = all).
+        run_per_execution (bool): Whether to run once per execution or per finding.
     """
 
     url = ""
@@ -60,19 +72,19 @@ class BaseIntegration(BasePlatform):
 
     @cached_property
     def integration(self) -> Integration:
-        """Get the integration configuration.
+        """Get the Integration model instance for this platform.
 
         Returns:
-            The Integration instance for this platform.
+            Integration: The integration configuration object.
         """
         return Integration.objects.get(key=self.__class__.__name__.lower())
 
     @cached_property
     def session(self) -> requests.Session:
-        """Get HTTP session with retry configuration.
+        """Get configured HTTP session with retry logic.
 
         Returns:
-            Configured requests.Session with retry logic.
+            requests.Session: Configured session with retry adapter.
         """
         session = requests.Session()
         session.mount(
@@ -91,7 +103,7 @@ class BaseIntegration(BasePlatform):
         """Check if the integration is enabled.
 
         Returns:
-            True if the integration is enabled, False otherwise.
+            bool: True if integration exists and is enabled, False otherwise.
         """
         return self.integration.enabled if self.integration else False
 
@@ -103,17 +115,17 @@ class BaseIntegration(BasePlatform):
         trigger_exception: bool = True,
         **kwargs: Any,
     ) -> Any:
-        """Make HTTP request with retry logic and logging.
+        """Make HTTP request with logging and error handling.
 
         Args:
-            method: HTTP method function (GET, POST, etc.).
-            url: URL to request.
-            json: Whether to return JSON response.
-            trigger_exception: Whether to raise exceptions on HTTP errors.
-            **kwargs: Additional arguments for the request.
+            method (Callable): HTTP method function (get, post, etc.).
+            url (str): Request URL.
+            json (bool): Whether to parse response as JSON.
+            trigger_exception (bool): Whether to raise HTTP exceptions.
+            **kwargs (Any): Additional request arguments.
 
         Returns:
-            Response data (JSON if json=True, Response object otherwise).
+            Any: Response data (JSON dict or Response object).
         """
         try:
             response = method(url, **kwargs)
@@ -127,42 +139,45 @@ class BaseIntegration(BasePlatform):
         return response.json() if json else response
 
     def is_finding_processable(self, finding: Finding) -> bool:
-        """Check if a finding can be processed by this integration.
+        """Check if a finding should be processed by this integration.
 
         Args:
-            finding: The finding to check.
+            finding (Finding): The finding to check.
 
         Returns:
-            True if the finding can be processed, False otherwise.
+            bool: True if finding should be processed, False otherwise.
         """
         return finding.__class__ in self.finding_types or len(self.finding_types) == 0
 
     def _process_finding(self, execution: Execution, finding: Finding) -> None:
-        """Process a single finding (to be implemented by subclasses).
+        """Process a single finding (implementation specific).
 
         Args:
-            execution: The execution context.
-            finding: The finding to process.
+            execution (Execution): The execution that generated the finding.
+            finding (Finding): The finding to process.
+
+        Note:
+            This method should be overridden by concrete implementations.
         """
         pass
 
     def process_finding(self, execution: Execution, finding: Finding) -> None:
-        """Process a finding if enabled and processable.
+        """Process a finding with enable and type checks.
 
         Args:
-            execution: The execution context.
-            finding: The finding to process.
+            execution (Execution): The execution that generated the finding.
+            finding (Finding): The finding to process.
         """
         if not self.is_enabled() or not self.is_finding_processable(finding):
             return
         self._process_finding(execution, finding)
 
     def process_findings(self, execution: Execution, findings: list[Finding]) -> None:
-        """Process multiple findings.
+        """Process multiple findings from an execution.
 
         Args:
-            execution: The execution context.
-            findings: List of findings to process.
+            execution (Execution): The execution that generated the findings.
+            findings (list[Finding]): List of findings to process.
         """
         if not self.is_enabled():
             return
@@ -171,57 +186,65 @@ class BaseIntegration(BasePlatform):
 
 
 class BaseNotification(BasePlatform):
-    """Base class for notification systems.
+    """Base class for notification platform integrations.
 
-    This abstract base class provides functionality for sending notifications
-    to users about executions and alerts. It includes user filtering and
-    notification scope management.
+    Provides notification capabilities for executions and alerts through
+    various channels like email, Telegram, or other messaging platforms.
+
+    User Management:
+        - Per-user notification preferences via enable_field
+        - Execution-based notifications with scope filtering
+        - Alert-based notifications for subscribers
+        - Availability checks before sending notifications
 
     Attributes:
-        enable_field (str): User field name that controls notification enablement.
+        enable_field (str): User model field name controlling notification enablement.
     """
 
     enable_field = ""
 
     def is_enabled(self, user: Any) -> bool:
-        """Check if notifications are enabled for a user.
+        """Check if notifications are enabled for a specific user.
 
         Args:
-            user: The user to check.
+            user (Any): The user to check notification preferences for.
 
         Returns:
-            True if notifications are enabled for the user.
+            bool: True if notifications are enabled for the user, False otherwise.
         """
         return getattr(user, self.enable_field)
 
     def _notify(self, users: list[Any], *args: Any, **kwargs: Any) -> None:
-        """Send notification to users (to be implemented by subclasses).
+        """Send notifications to users (implementation specific).
 
         Args:
-            users: List of users to notify.
-            *args: Additional positional arguments.
-            **kwargs: Additional keyword arguments.
+            users (list[Any]): List of users to notify.
+            *args (Any): Additional notification arguments.
+            **kwargs (Any): Additional notification keyword arguments.
+
+        Note:
+            This method should be overridden by concrete implementations.
         """
         pass
 
     def _notify_if_available(self, users: list[Any], *args: Any, **kwargs: Any) -> None:
-        """Send notification if platform is available.
+        """Send notifications if the platform is available.
 
         Args:
-            users: List of users to notify.
-            *args: Additional positional arguments.
-            **kwargs: Additional keyword arguments.
+            users (list[Any]): List of users to notify.
+            *args (Any): Additional notification arguments.
+            **kwargs (Any): Additional notification keyword arguments.
         """
         if self.is_available():
             self._notify(users, *args, **kwargs)
 
     def _notify_if_enabled(self, users: list[Any], *args: Any, **kwargs: Any) -> None:
-        """Send notification to enabled users if platform is available.
+        """Send notifications only to users who have notifications enabled.
 
         Args:
-            users: List of users to check and notify.
-            *args: Additional positional arguments.
-            **kwargs: Additional keyword arguments.
+            users (list[Any]): List of users to potentially notify.
+            *args (Any): Additional notification arguments.
+            **kwargs (Any): Additional notification keyword arguments.
         """
         if self.is_available():
             for user in users:
@@ -229,13 +252,16 @@ class BaseNotification(BasePlatform):
                     self._notify([user], *args, **kwargs)
 
     def _get_users_to_notify_execution(self, execution: Execution) -> list[Any]:
-        """Get users to notify about an execution.
+        """Get list of users to notify about an execution.
+
+        Includes the task executor and project members based on their
+        notification preferences and scope settings.
 
         Args:
-            execution: The execution to notify about.
+            execution (Execution): The execution to notify about.
 
         Returns:
-            List of users who should be notified.
+            list[Any]: List of users who should be notified.
         """
         users = set()
         if execution.task.executor.notification_scope != Notification.DISABLED and getattr(
@@ -253,12 +279,15 @@ class BaseNotification(BasePlatform):
         return list(users)
 
     def _notify_execution(self, users: list[Any], execution: Execution, findings: list[Finding]) -> None:
-        """Send execution notification to users (to be implemented by subclasses).
+        """Send execution notifications to users (implementation specific).
 
         Args:
-            users: List of users to notify.
-            execution: The execution to notify about.
-            findings: List of findings from the execution.
+            users (list[Any]): List of users to notify.
+            execution (Execution): The completed execution.
+            findings (list[Finding]): Findings from the execution.
+
+        Note:
+            This method should be overridden by concrete implementations.
         """
         pass
 
@@ -266,40 +295,43 @@ class BaseNotification(BasePlatform):
         """Process findings by sending execution notifications.
 
         Args:
-            execution: The execution context.
-            findings: List of findings to process.
+            execution (Execution): The execution that generated the findings.
+            findings (list[Finding]): List of findings from the execution.
         """
         if not self.is_available():
             return
         self._notify_execution(self._get_users_to_notify_execution(execution), execution, findings)
 
     def _get_users_to_notify_alert(self, alert: Alert) -> list[Any]:
-        """Get users to notify about an alert.
+        """Get list of users to notify about an alert.
 
         Args:
-            alert: The alert to notify about.
+            alert (Alert): The alert that was triggered.
 
         Returns:
-            List of users who should be notified.
+            list[Any]: Alert subscribers who have notifications enabled.
         """
         return alert.subscribers.filter(**{self.enable_field: True}).all()
 
     def _notify_alert(self, users: list[Any], alert: Alert, finding: Finding) -> None:
-        """Send alert notification to users (to be implemented by subclasses).
+        """Send alert notifications to users (implementation specific).
 
         Args:
-            users: List of users to notify.
-            alert: The alert to notify about.
-            finding: The finding that triggered the alert.
+            users (list[Any]): List of users to notify.
+            alert (Alert): The alert that was triggered.
+            finding (Finding): The finding that triggered the alert.
+
+        Note:
+            This method should be overridden by concrete implementations.
         """
         pass
 
     def process_alert(self, alert: Alert, finding: Finding) -> None:
-        """Process alert by sending notifications to subscribers.
+        """Process an alert by sending notifications to subscribers.
 
         Args:
-            alert: The alert to process.
-            finding: The finding that triggered the alert.
+            alert (Alert): The alert that was triggered.
+            finding (Finding): The finding that triggered the alert.
         """
         if not self.is_available():
             return

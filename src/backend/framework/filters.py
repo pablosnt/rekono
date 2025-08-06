@@ -1,4 +1,8 @@
-"""This module implements filtering utilities."""
+"""Custom filter classes for Django REST framework API endpoints.
+
+Provides specialized filter implementations for like functionality
+and multiple field filtering capabilities.
+"""
 
 from typing import Any
 
@@ -8,53 +12,50 @@ from django_filters.rest_framework.filters import BooleanFilter, CharFilter, Fil
 
 
 class LikeFilter(FilterSet):
-    """Filter set for likeable entities.
+    """Filter for models with like/favorite functionality.
 
-    This filter set provides filtering capabilities for entities that can be
-    liked by users. It includes a boolean filter to show only liked or
-    unliked entities.
+    Provides filtering based on whether the current user has liked
+    the objects in the queryset.
 
     Attributes:
-        like (BooleanFilter): Filter to show only liked or unliked entities.
+        like (BooleanFilter): Filter for liked/unliked objects.
     """
 
     # Indicate if user likes or not the entities
     like = BooleanFilter(method="get_liked_items")
 
     def get_liked_items(self, queryset: QuerySet, name: str, value: bool) -> QuerySet:
-        """Filter queryset by like status.
+        """Filter queryset based on user's like status.
 
         Args:
-            queryset: The base queryset to filter.
-            name: The filter field name.
-            value: True to show only liked items, False for unliked.
+            queryset (QuerySet): The base queryset to filter.
+            name (str): The filter field name (unused).
+            value (bool): True to get liked items, False for unliked items.
 
         Returns:
-            Filtered queryset based on like status.
+            QuerySet: Filtered queryset based on like status.
         """
         liked = {"liked_by": self.request.user}
         return queryset.filter(Q(**liked) if value else ~Q(**liked)).all()
 
 
 class MultipleFieldFilterSet(FilterSet):
-    """Base filter set for multiple field filtering.
+    """FilterSet with support for multiple field filtering.
 
-    This abstract base class provides functionality for filtering across
-    multiple fields using a single filter value.
+    Base FilterSet class that provides the ability to filter across
+    multiple fields with a single filter parameter.
     """
 
     def multiple_field_filter(self, queryset: QuerySet, name: str, value: Any) -> QuerySet:
-        """Filter queryset across multiple fields.
-
-        Applies the filter value to all configured fields using OR logic.
+        """Filter queryset across multiple fields with OR logic.
 
         Args:
-            queryset: The base queryset to filter.
-            name: The filter field name.
-            value: The value to search for across multiple fields.
+            queryset (QuerySet): The base queryset to filter.
+            name (str): The filter name containing the field list.
+            value (Any): The value to search for in all specified fields.
 
         Returns:
-            Filtered queryset matching any of the configured fields.
+            QuerySet: Filtered queryset matching value in any specified field.
         """
         query = Q()
         for field in self.filters[name].fields:
@@ -63,10 +64,10 @@ class MultipleFieldFilterSet(FilterSet):
 
 
 class MultipleFieldFilter(Filter):
-    """Filter that searches across multiple fields.
+    """Base filter for searching across multiple fields.
 
-    This filter applies a single value to multiple database fields
-    using OR logic.
+    Allows filtering a queryset by searching for a value across
+    multiple model fields using OR logic.
 
     Attributes:
         fields (list[str]): List of field names to search across.
@@ -76,10 +77,11 @@ class MultipleFieldFilter(Filter):
         """Initialize the multiple field filter.
 
         Args:
-            fields: List of field names to search across.
-            **kwargs: Additional filter configuration.
+            fields (list[str]): List of field names to search across.
+            **kwargs (Any): Additional filter arguments.
         """
         self.fields = fields
+        # Method defined in MultipleFieldFilterSet
         kwargs["method"] = "multiple_field_filter"
         super().__init__(**kwargs)
 
@@ -87,16 +89,30 @@ class MultipleFieldFilter(Filter):
 class MultipleNumberFilter(MultipleFieldFilter, NumberFilter):
     """Multiple field filter for numeric values.
 
-    Extends MultipleFieldFilter to handle numeric field filtering.
+    Combines MultipleFieldFilter with NumberFilter to enable
+    searching for numeric values across multiple fields.
+
+    Example:
+        ```python
+        class MyFilterSet(MultipleFieldFilterSet):
+            port_search = MultipleNumberFilter(fields=["port", "target_port"])
+        ```
     """
 
     pass
 
 
 class MultipleCharFilter(MultipleFieldFilter, CharFilter):
-    """Multiple field filter for character values.
+    """Multiple field filter for character/string values.
 
-    Extends MultipleFieldFilter to handle character field filtering.
+    Combines MultipleFieldFilter with CharFilter to enable
+    searching for string values across multiple fields.
+
+    Example:
+        ```python
+        class MyFilterSet(MultipleFieldFilterSet):
+            name_search = MultipleCharFilter(fields=["name", "title", "description"])
+        ```
     """
 
     pass
