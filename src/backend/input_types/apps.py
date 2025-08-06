@@ -1,8 +1,7 @@
-"""Django app configuration for the input_types app.
+"""Django app configuration for input_types module.
 
-This module defines the Django app configuration for the input_types
-application, extending the base app configuration with input type specific
-functionality.
+Contains the Django app configuration for the input_types application,
+including base app functionality integration.
 """
 
 from django.apps import AppConfig
@@ -11,11 +10,12 @@ from framework.apps import BaseApp
 
 
 class InputTypesConfig(BaseApp, AppConfig):
-    """Django app configuration for the input_types application.
+    """Django app configuration for input_types.
 
-    This configuration class extends both Django's AppConfig and the project's
-    BaseApp to provide input type specific functionality and integration with
-    the project's base app features.
+    Configures the input_types Django application with BaseApp functionality.
+
+    Attributes:
+        name (str): The name of the Django app.
     """
 
     name = "input_types"
