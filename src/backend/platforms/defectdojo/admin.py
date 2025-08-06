@@ -6,8 +6,6 @@ from platforms.defectdojo.models import (
     DefectDojoTargetSync,
 )
 
-# Register your models here.
-
 admin.register(DefectDojoSettings)
 admin.register(DefectDojoSync)
 admin.register(DefectDojoTargetSync)

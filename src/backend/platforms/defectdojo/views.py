@@ -18,8 +18,6 @@ from security.authorization.permissions import (
     RekonoModelPermission,
 )
 
-# Create your views here.
-
 
 class DefectDojoSettingsViewSet(BaseViewSet):
     queryset = DefectDojoSettings.objects.all()
@@ -51,8 +49,7 @@ class DefectDojoEntityViewSet(BaseViewSet):
             return Response({"id": response.get("id")}, status=status.HTTP_201_CREATED)
         except Exception:
             return Response(
-                {"defect-dojo": "Error creating instance on Defect-Dojo"},
-                status=status.HTTP_400_BAD_REQUEST,
+                {"defect-dojo": "Error creating instance on Defect-Dojo"}, status=status.HTTP_400_BAD_REQUEST
             )
 
 

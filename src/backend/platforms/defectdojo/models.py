@@ -6,8 +6,6 @@ from projects.models import Project
 from security.validators.input_validator import Regex, Validator
 from targets.models import Target
 
-# Create your models here.
-
 
 class DefectDojoSettings(BaseEncrypted):
     server = models.TextField(
@@ -66,7 +64,13 @@ class DefectDojoSync(BaseModel):
     _project_field = "project"
 
     def __str__(self) -> str:
-        return f"{self.project.__str__()} - {self.product_type_id} - {self.product_id}{f' - {self.engagement_id}' if self.engagement_id else ''}"
+        return " - ".join(
+            [
+                value.__str__()
+                for value in [self.project, self.product_type_id, self.product_id, self.engagement_id]
+                if value
+            ]
+        )
 
 
 class DefectDojoTargetSync(BaseModel):
@@ -77,4 +81,4 @@ class DefectDojoTargetSync(BaseModel):
     _project_field = "defectdojo_sync__project"
 
     def __str__(self) -> str:
-        return f"{self.defectdojo_sync.__str__()} - {self.target.target} - {self.engagement_id}"
+        return " - ".join([self.defectdojo_sync.__str__(), self.target.target, self.engagement_id])

@@ -1,4 +1,5 @@
 from datetime import timedelta
+from functools import cached_property
 from pathlib import Path as PathFile
 from typing import Any, Callable
 
@@ -21,18 +22,18 @@ from targets.models import Target
 
 class DefectDojo(BaseIntegration):
     run_per_execution = True
+    settings = DefectDojoSettings.objects.first()
+    severity_mapping = {
+        Severity.INFO: "S0",
+        Severity.LOW: "S1",
+        Severity.MEDIUM: "S3",
+        Severity.HIGH: "S4",
+        Severity.CRITICAL: "S5",
+    }
 
-    def __init__(self) -> None:
-        self.settings = DefectDojoSettings.objects.first()
-        self.url = self.settings.server
-        super().__init__()
-        self.severity_mapping = {
-            Severity.INFO: "S0",
-            Severity.LOW: "S1",
-            Severity.MEDIUM: "S3",
-            Severity.HIGH: "S4",
-            Severity.CRITICAL: "S5",
-        }
+    @cached_property
+    def url(self) -> str:
+        return self.settings.server
 
     def _request(
         self,
@@ -46,6 +47,7 @@ class DefectDojo(BaseIntegration):
             method,
             f"{self.settings.server}/api/v2{url}",
             json,
+            trigger_exception,
             **{
                 **kwargs,
                 "headers": {
@@ -59,11 +61,6 @@ class DefectDojo(BaseIntegration):
     def is_available(self) -> bool:
         if not self.settings.server or not self.settings.secret:
             return False
-        if "/api/v2" in self.settings.server:
-            self.settings.server = self.settings.server.replace("/api/v2", "")
-        if self.settings.server[-1] == "/":
-            self.settings.server = self.settings.server[:-1]
-        self.settings.save(update_fields=["server"])
         try:
             self._request(requests.get, "/test_types/", timeout=5)
             return True
@@ -78,22 +75,13 @@ class DefectDojo(BaseIntegration):
             return False
 
     def create_product_type(self, name: str, description: str) -> dict[str, Any]:
-        return self._request(
-            self.session.post,
-            "/product_types/",
-            data={"name": name, "description": description},
-        )
+        return self._request(self.session.post, "/product_types/", data={"name": name, "description": description})
 
     def create_product(self, product_type: int, name: str, description: str, tags: list[str]) -> dict[str, Any]:
         return self._request(
             self.session.post,
             "/products/",
-            data={
-                "tags": tags,
-                "name": name,
-                "description": description,
-                "prod_type": product_type,
-            },
+            data={"tags": tags, "name": name, "description": description, "prod_type": product_type},
         )
 
     def create_engagement(self, product: int, name: str, description: str, tags: list[str]) -> dict[str, Any]:
@@ -115,13 +103,10 @@ class DefectDojo(BaseIntegration):
         )
 
     def _create_test_type(self, name: str, tags: list[str]) -> dict[str, Any]:
-        return self._request(
-            self.session.post,
-            "/test_types/",
-            data={"name": name, "tags": tags, "dynamic_tool": True},
-        )
+        return self._request(self.session.post, "/test_types/", data={"name": name, "tags": tags, "dynamic_tool": True})
 
     def _create_test(self, test_type: int, engagement: int, title: str, description: str) -> dict[str, Any]:
+        datetime = timezone.now().strftime(self.settings.datetime_format)
         return self._request(
             self.session.post,
             "/tests/",
@@ -130,23 +115,22 @@ class DefectDojo(BaseIntegration):
                 "test_type": test_type,
                 "title": title,
                 "description": description,
-                "target_start": timezone.now().strftime(self.settings.datetime_format),
-                "target_end": timezone.now().strftime(self.settings.datetime_format),
+                "target_start": datetime,
+                "target_end": datetime,
             },
         )
 
     def _create_endpoint(self, product: int, endpoint: Path, target: Target) -> dict[str, Any] | None:
         try:
             return self._request(
-                self.session.post,
-                "/endpoints/",
-                data={**endpoint.defectdojo_endpoint(target), "product": product},
+                self.session.post, "/endpoints/", data={**endpoint.defectdojo_endpoint(target), "product": product}
             )
         except HTTPError:
             return None
 
     def _create_finding(self, test: int, finding: Finding) -> dict[str, Any]:
         data = finding.defectdojo_finding()
+        # TODO: close_old findings?
         return self._request(
             self.session.post,
             "/findings/",
@@ -160,6 +144,7 @@ class DefectDojo(BaseIntegration):
 
     def _import_scan(self, engagement: int, execution: Execution, tags: list[str]) -> dict[str, Any]:
         with open(execution.output_file, "r") as report:
+            # TODO: close_old findings?
             return self._request(
                 self.session.post,
                 "/import-scan/",
@@ -179,26 +164,23 @@ class DefectDojo(BaseIntegration):
             product_id = sync.defectdojo_sync.product_id
         else:
             project_sync = DefectDojoSync.objects.filter(project=execution.task.target.project)
-            if project_sync.exists():
-                sync = project_sync.first()
-                product_id = sync.product_id
-                if sync.engagement_id:
-                    engagement_id = sync.engagement_id
-                else:
-                    new_engagement = self.create_engagement(
-                        product_id,
-                        execution.task.target.target,
-                        f"Rekono assessment for {execution.task.target.target}",
-                        [self.settings.tag] if self.settings.tag else [],
-                    )
-                    new_sync = DefectDojoTargetSync.objects.create(
-                        defectdojo_sync=sync,
-                        target=execution.task.target,
-                        engagement_id=new_engagement.get("id"),
-                    )
-                    engagement_id = new_sync.engagement_id
-            else:
+            if not project_sync.exists():
                 return
+            sync = project_sync.first()
+            product_id = sync.product_id
+            if sync.engagement_id:
+                engagement_id = sync.engagement_id
+            else:
+                new_engagement = self.create_engagement(
+                    product_id,
+                    execution.task.target.target,
+                    f"Rekono assessment for {execution.task.target.target}",
+                    [self.settings.tag] if self.settings.tag else [],
+                )
+                new_sync = DefectDojoTargetSync.objects.create(
+                    defectdojo_sync=sync, target=execution.task.target, engagement_id=new_engagement.get("id")
+                )
+                engagement_id = new_sync.engagement_id
         if (
             execution.configuration.tool.defectdojo_scan_type
             and execution.output_file is not None
@@ -211,6 +193,8 @@ class DefectDojo(BaseIntegration):
             test_id = None
             for finding in findings:
                 if isinstance(finding, Path) and finding.type == PathType.ENDPOINT:
+                    # TODO: They won't be imported again? So, it will be different to import from file?
+                    # Is it for being an endpoint instead of a finding?
                     if finding.defectdojo_id is None:
                         new_endpoint = self._create_endpoint(product_id, finding, execution.task.target)
                         if new_endpoint is not None:
@@ -219,16 +203,12 @@ class DefectDojo(BaseIntegration):
                     if not test_id:
                         if not self.settings.test_type_id:
                             new_test_type = self._create_test_type(
-                                self.settings.test_type,
-                                [self.settings.tag] if self.settings.tag else [],
+                                self.settings.test_type, [self.settings.tag] if self.settings.tag else []
                             )
                             self.settings.test_type_id = new_test_type.get("id")
                             self.settings.save(update_fields=["test_type_id"])
                         new_test = self._create_test(
-                            self.settings.test_type_id,
-                            engagement_id,
-                            self.settings.test,
-                            self.settings.test,
+                            self.settings.test_type_id, engagement_id, self.settings.test, self.settings.test
                         )
                         test_id = new_test.get("id")
                     if test_id:

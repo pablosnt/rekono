@@ -23,7 +23,11 @@ from projects.models import Project
 from security.validators.input_validator import Regex, Validator
 
 
-class DefectDojoSettingsSerializer(ModelSerializer):
+class DefectDojoClientMixin:
+    client = DefectDojo()
+
+
+class DefectDojoSettingsSerializer(DefectDojoClientMixin, ModelSerializer):
     api_token = ProtectedSecretField(
         Validator(Regex.SECRET.value, code="api_token").__call__,
         required=False,
@@ -46,24 +50,21 @@ class DefectDojoSettingsSerializer(ModelSerializer):
         )
 
     def get_is_available(self, instance: DefectDojoSettings) -> bool:
-        return DefectDojo().is_available()
-
-
-class BaseDefectDojoSerializer(Serializer):
-    _client = None
-
-    @property
-    def client(self) -> DefectDojo:
-        if not self._client:
-            self._client = DefectDojo()
-        return self._client
+        return self.client.is_available()
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
+        attrs = super().validate(attrs)
+        if "/api/v2" in attrs["server"]:
+            attrs["server"] = attrs["server"].replace("/api/v2", "")
+        if attrs["server"][-1] == "/":
+            attrs["server"] = attrs["server"][:-1]
+        return attrs
+
+
+class BaseDefectDojoSerializer(DefectDojoClientMixin, Serializer):
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         if not self.client.is_available():
-            raise ValidationError(
-                "Defect-Dojo integration is not configured",
-                code="defect-dojo",
-            )
+            raise ValidationError("Defect-Dojo integration is not configured", code="defect-dojo")
         attrs = super().validate(attrs)
         for entity in ["product_type", "product", "engagement"]:
             value = attrs.get(f"{entity}_id") or attrs.get(entity)
@@ -148,9 +149,7 @@ class DefectDojoProductSerializer(BaseDefectDojoSerializer):
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         attrs = super().validate(attrs)
         attrs["project"] = get_object_or_404(
-            Project,
-            id=cast(Project, attrs.get("project_id")).id,
-            members=self.context.get("request").user.id,
+            Project, id=cast(Project, attrs.get("project_id")).id, members=self.context.get("request").user.id
         )
         return attrs
 
