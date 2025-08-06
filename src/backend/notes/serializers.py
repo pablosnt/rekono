@@ -1,3 +1,10 @@
+"""Django REST framework serializers for notes management.
+
+Serializer classes for converting note models to/from JSON for API operations.
+Includes validation logic for entity relationships, forking behavior, and
+collaborative features with tag support.
+"""
+
 from typing import Any, cast
 
 from rest_framework.fields import ValidationError
@@ -29,11 +36,31 @@ links = [
 
 
 class NoteSerializer(TaggitSerializer, LikeSerializer):
+    """Serializer for Note model with collaborative features.
+
+    Handles serialization and deserialization of Note objects for API operations.
+    Includes validation logic for entity relationships, forking behavior, and
+    tag management with computed fields for fork status.
+
+    Attributes:
+        owner (SimpleUserSerializer): Serialized user information for note owner
+        tags (TagField): Tag field for note categorization
+        forked (SerializerMethodField): Whether current user has forked this note
+    """
+
     owner = SimpleUserSerializer(many=False, read_only=True)
     tags = TagField()
     forked = SerializerMethodField(read_only=True)
 
     class Meta:
+        """Meta configuration for the NoteSerializer.
+
+        Attributes:
+            model (Model): The Note model to serialize
+            fields (tuple): Field names to include in serialization
+            read_only_fields (tuple): Fields that cannot be modified via API
+        """
+
         model = Note
         fields = (
             ("id",)
@@ -65,14 +92,35 @@ class NoteSerializer(TaggitSerializer, LikeSerializer):
         )
 
     def get_forked(self, instance: Any) -> bool:
+        """Check if the current user has forked this note.
+
+        Args:
+            instance (Note): The note instance being serialized
+
+        Returns:
+            bool: True if the current user has forked this note, False otherwise
+        """
         return instance.forks.filter(owner=self.context.get("request").user).exists()
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
+        """Validate note data and ensure single entity association.
+
+        Ensures that a note is associated with exactly one entity and automatically
+        sets the project context based on the associated entity.
+
+        Args:
+            attrs (dict[str, Any]): Validated field data
+
+        Returns:
+            dict[str, Any]: Validated and processed field data
+
+        Raises:
+            ValidationError: If no project context can be determined
+        """
         attrs = super().validate(attrs)
         # Find the first (most specific) entity relationship in the data
         # Reverse order ensures we get the most specific entity first
         data_links = [link for link in reversed(links) if attrs.get(link)]
-
         if len(data_links) > 0:
             # Clear all other entity relationships to ensure only one is active
             for link in links:
@@ -86,6 +134,21 @@ class NoteSerializer(TaggitSerializer, LikeSerializer):
         return attrs
 
     def update(self, instance: Note, validated_data: dict[str, Any]) -> Note:
+        """Update note instance with validation for project changes and fork behavior.
+
+        Enforces project immutability and handles fork unlinking when notes become private.
+        Ensures forked notes maintain proper visibility behavior.
+
+        Args:
+            instance (Note): The note instance being updated
+            validated_data (dict[str, Any]): The validated update data
+
+        Returns:
+            Note: The updated note instance
+
+        Raises:
+            ValidationError: If attempting to change the project of an existing note
+        """
         if instance.project != validated_data.get("project"):
             raise ValidationError("You are not allowed to change the project of a note", code="project")
         # Forked notes cannot be made private - they must remain public
