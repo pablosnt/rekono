@@ -1,8 +1,7 @@
-"""Django REST framework views for HTTP header models.
+"""HTTP Headers API views for security testing configuration management.
 
-This module provides REST API views for HTTP header records, including
-list, create, retrieve, update, and delete operations with proper
-authentication and authorization controls.
+Provides RESTful API endpoints for managing HTTP headers used in security
+testing operations with proper access control and data isolation.
 """
 
 from django.db.models import Q, QuerySet
@@ -12,7 +11,7 @@ from rest_framework.serializers import Serializer
 from framework.views import BaseViewSet
 from http_headers.filters import HttpHeaderFilter
 from http_headers.models import HttpHeader
-from http_headers.serializers import HttpHeaderSerializer, SimpleHttpHeaderSerializer
+from http_headers.serializers import HttpHeaderSerializer, UpdateHttpHeaderSerializer
 from security.authorization.permissions import (
     ProjectMemberPermission,
     RekonoModelPermission,
@@ -20,21 +19,21 @@ from security.authorization.permissions import (
 
 
 class HttpHeaderViewSet(BaseViewSet):
-    """ViewSet for HttpHeader model CRUD operations.
+    """ViewSet for HTTP header management with multi-scope access control.
 
-    This ViewSet provides REST API endpoints for managing HTTP header
-    records with proper filtering, searching, and ordering capabilities.
-    It enforces authentication and project-based authorization, with
-    custom queryset filtering for user-specific access control.
+    Provides complete CRUD operations for HTTP headers used in security testing
+    with proper isolation between global, user-specific, and target-specific
+    headers. Ensures users can only access their own headers or headers from
+    projects they are members of.
 
     Attributes:
-        queryset: QuerySet for HttpHeader model instances.
-        serializer_class: Serializer class for HttpHeader model.
-        filterset_class: Filter class for query filtering.
-        permission_classes: List of permission classes for access control.
-        search_fields: Fields available for text search.
-        ordering_fields: Fields available for result ordering.
-        http_method_names: Allowed HTTP methods for this ViewSet.
+        queryset (QuerySet): Base queryset for all HTTP headers
+        serializer_class (type): Primary serializer for HTTP header data
+        filterset_class (type): Filter class for header querying
+        permission_classes (list): Required permissions for API access
+        search_fields (list): Fields available for text search
+        ordering_fields (list): Fields available for result ordering
+        http_method_names (list): Allowed HTTP methods for the viewset
     """
 
     queryset = HttpHeader.objects.all()
@@ -50,17 +49,19 @@ class HttpHeaderViewSet(BaseViewSet):
     http_method_names = ["get", "put", "post", "delete"]
 
     def get_queryset(self) -> QuerySet:
-        """Get filtered queryset based on user permissions.
+        """Get filtered queryset with proper access control.
 
-        This method implements custom filtering to ensure users can only
-        access HTTP headers they own or headers associated with targets
-        they have access to through project membership.
+        Filters HTTP headers to ensure users can only access:
+        - Their own user-specific headers
+        - Global headers (user=None, target=None)
+        - Target-specific headers from projects they're members of
+
+        This ensures proper data isolation and prevents unauthorized
+        access to other users' header configurations.
 
         Returns:
-            QuerySet: Filtered queryset containing only accessible headers.
+            QuerySet: Filtered queryset of accessible HTTP headers.
         """
-        # Filter to show only user's own headers or headers from projects they're members of
-        # This ensures proper data isolation and access control
         return self.queryset.filter(Q(user=self.request.user) | Q(user__isnull=True)).filter(
             Q(target__project__members=self.request.user) | Q(target__isnull=True)
         )
@@ -68,9 +69,15 @@ class HttpHeaderViewSet(BaseViewSet):
     def get_serializer_class(self) -> Serializer:
         """Get appropriate serializer class based on HTTP method.
 
+        Uses different serializers for different operations to optimize
+        API performance and provide appropriate field restrictions.
+
         Returns:
-            Serializer: The appropriate serializer class for the request.
+            Serializer: UpdateHttpHeaderSerializer for PUT operations,
+                       HttpHeaderSerializer for other operations.
+
+        Note:
+            PUT operations use simplified serializer to reduce payload size
+            and improve update performance for header modifications.
         """
-        # Use simplified serializer for PUT operations (updates)
-        # Use full serializer for other operations
-        return SimpleHttpHeaderSerializer if self.request.method == "PUT" else super().get_serializer_class()
+        return UpdateHttpHeaderSerializer if self.request.method == "PUT" else super().get_serializer_class()

@@ -1,8 +1,7 @@
-"""Django REST framework filters for HTTP header models.
+"""HTTP Headers filters for advanced API querying.
 
-This module provides filtering capabilities for HTTP header records,
-allowing users to filter HTTP header data by various criteria such
-as project, target, user, key, and value.
+Provides filtering capabilities for HTTP headers with support for
+project-based filtering and field-specific search operations.
 """
 
 from django_filters.filters import ModelChoiceFilter
@@ -13,19 +12,31 @@ from projects.models import Project
 
 
 class HttpHeaderFilter(FilterSet):
-    """Filter set for HttpHeader model.
+    """FilterSet for HTTP header querying and filtering.
 
-    This class provides filtering capabilities for HTTP header records,
-    allowing filtering by project, target, user, key, and value.
+    Provides comprehensive filtering capabilities for HTTP headers
+    including project-based filtering, exact matches, and text searches
+    to enable efficient header management and discovery.
 
     Attributes:
-        project (ModelChoiceFilter): Filter by project associated with the
-            HTTP header record.
+        project (ModelChoiceFilter): Filter headers by associated project
     """
 
-    project = ModelChoiceFilter(queryset=Project.objects.all(), field_name="target__project")
+    project = ModelChoiceFilter(
+        queryset=Project.objects.all(), field_name="target__project", help_text="Filter headers by associated project"
+    )
 
     class Meta:
+        """Meta configuration for HttpHeaderFilter.
+
+        Defines the model and available filter fields with their
+        supported lookup types for comprehensive header querying.
+
+        Attributes:
+            model (type): HttpHeader model class
+            fields (dict): Field names mapped to supported lookups
+        """
+
         model = HttpHeader
         fields = {
             "target": ["exact", "isnull"],
