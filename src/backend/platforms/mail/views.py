@@ -5,8 +5,6 @@ from platforms.mail.models import SMTPSettings
 from platforms.mail.serializers import SMTPSettingsSerializer
 from security.authorization.permissions import RekonoModelPermission
 
-# Create your views here.
-
 
 class SMTPSettingsViewSet(BaseViewSet):
     queryset = SMTPSettings.objects.all()

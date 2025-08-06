@@ -8,10 +8,7 @@ from security.validators.input_validator import Regex, Validator
 
 class SMTPSettingsSerializer(ModelSerializer):
     password = ProtectedSecretField(
-        Validator(Regex.SECRET.value, code="password").__call__,
-        required=False,
-        allow_null=True,
-        source="secret",
+        Validator(Regex.SECRET.value, code="password").__call__, required=False, allow_null=True, source="secret"
     )
     is_available = SerializerMethodField(read_only=True)
 

@@ -1,5 +1,6 @@
 import os
 import threading
+from functools import cached_property
 from typing import Any
 
 import certifi
@@ -19,10 +20,12 @@ from rekono.settings import CONFIG
 
 class SMTP(BaseNotification):
     enable_field = "email_notifications"
+    settings = SMTPSettings.objects.first()
+    datetime_format = "%Y-%m-%d %H:%M %Z"
 
-    def __init__(self) -> None:
-        self.settings = SMTPSettings.objects.first()
-        self.backend = (
+    @cached_property
+    def backend(self) -> EmailBackend:
+        return (
             EmailBackend(
                 host=self.settings.host,
                 port=self.settings.port,
@@ -34,7 +37,9 @@ class SMTP(BaseNotification):
             if self.settings
             else None
         )
-        self.datetime_format = "%Y-%m-%d %H:%M %Z"
+
+    def __init__(self) -> None:
+        super().__init__(self)
         # The trusted certificates must be defined
         os.environ["SSL_CERT_FILE"] = certifi.where()
 
@@ -49,16 +54,13 @@ class SMTP(BaseNotification):
             return False
 
     def _send_messages(self, users: list[Any], subject: str, template_path: str, data: dict[str, Any]) -> None:
-        if not self.backend or not self.is_available():
+        if not self.is_available():
             return
         try:
             message = EmailMultiAlternatives(subject, "", "Rekono <noreply@rekono.com>", [u.email for u in users])
             template = get_template(template_path)
-            message.attach_alternative(
-                # nosemgrep: python.flask.security.xss.audit.direct-use-of-jinja2.direct-use-of-jinja2
-                template.render({**data, "rekono_url": CONFIG.frontend_url}),
-                "text/html",
-            )
+            # nosemgrep: python.flask.security.xss.audit.direct-use-of-jinja2.direct-use-of-jinja2
+            message.attach_alternative(template.render({**data, "rekono_url": CONFIG.frontend_url}), "text/html")
             self.backend.send_messages([message])
         except Exception as ex:
             self.logger.error(f"[Mail] Error sending email message: {str(ex)}")
@@ -86,57 +88,41 @@ class SMTP(BaseNotification):
             users,
             f"[Rekono] {execution.configuration.tool.name} execution completed",
             "execution_notification.html",
-            {
-                "execution": execution,
-                **findings_by_class,
-            },
-            background=False,
+            {"execution": execution, **findings_by_class},
+            background=False,  # This is called from findings queue which is already asynchronous
         )
 
     def _notify_alert(self, users: list[Any], alert: Alert, finding: Finding) -> None:
+        # TODO: AlertMode.X.value changed to AlertMode.X. Verify that it works!
         subjects = {
             AlertMode.NEW: f"New {finding.__class__.__name__.lower()} detected",
-            AlertMode.FILTER.value: f"New {finding.__class__.__name__.lower()} matches alert criterion",
-            AlertMode.MONITOR.value: "New trending CVE",
+            AlertMode.FILTER: f"New {finding.__class__.__name__.lower()} matches alert criterion",
+            AlertMode.MONITOR: "New trending CVE",
         }
         self._notify(
             users,
             f"[Rekono] {subjects[alert.mode]}",
             "alert_notification.html",
             {"alert": alert, "finding": finding},
-            background=False,
+            background=False,  # This is called from findings queue which is already asynchronous
         )
 
     def invite_user(self, user: Any, otp: str) -> None:
-        self._notify_if_available(
-            [user],
-            "Welcome to Rekono",
-            "user_invitation.html",
-            {"user": user, "user_otp": otp},
-        )
+        self._notify_if_available([user], "Welcome to Rekono", "user_invitation.html", {"user": user, "user_otp": otp})
 
     def reset_password(self, user: Any, otp: str) -> None:
         self._notify_if_available(
-            [user],
-            "Reset Rekono password",
-            "user_password_reset.html",
-            {"user": user, "user_otp": otp},
+            [user], "Reset Rekono password", "user_password_reset.html", {"user": user, "user_otp": otp}
         )
 
     def mfa(self, user: Any, otp: str) -> None:
         self._notify_if_available(
-            [user],
-            "[Rekono] One Time Password",
-            "user_mfa.html",
-            {"user": user, "user_otp": otp},
+            [user], "[Rekono] One Time Password", "user_mfa.html", {"user": user, "user_otp": otp}
         )
 
     def enable_user_account(self, user: Any, otp: str) -> None:
         self._notify_if_available(
-            [user],
-            "Rekono user enabled",
-            "user_enable_account.html",
-            {"user": user, "user_otp": otp},
+            [user], "Rekono user enabled", "user_enable_account.html", {"user": user, "user_otp": otp}
         )
 
     def login_notification(self, user: Any) -> None:
@@ -157,8 +143,5 @@ class SMTP(BaseNotification):
 
     def report_created(self, report: Any) -> None:
         self._notify_if_enabled(
-            [report.user],
-            f"{report.format.upper()} report is ready",
-            "report_created.html",
-            {"report": report},
+            [report.user], f"{report.format.upper()} report is ready", "report_created.html", {"report": report}
         )

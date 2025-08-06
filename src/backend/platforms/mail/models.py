@@ -4,27 +4,14 @@ from django.db import models
 from framework.models import BaseEncrypted
 from security.validators.input_validator import Regex, Validator
 
-# Create your models here.
-
 
 class SMTPSettings(BaseEncrypted):
-    host = models.TextField(
-        max_length=100,
-        validators=[Validator(Regex.TARGET.value)],
-        blank=True,
-        null=True,
-    )
+    host = models.TextField(max_length=100, validators=[Validator(Regex.TARGET.value)], blank=True, null=True)
     port = models.IntegerField(
-        validators=[MinValueValidator(0), MaxValueValidator(65535)],
-        blank=True,
-        null=True,
-        default=587,
+        validators=[MinValueValidator(0), MaxValueValidator(65535)], blank=True, null=True, default=587
     )
     username = models.TextField(
-        max_length=100,
-        validators=[Validator(Regex.NAME.value, code="name")],
-        null=True,
-        blank=True,
+        max_length=100, validators=[Validator(Regex.NAME.value, code="name")], null=True, blank=True
     )
     _password = models.TextField(
         max_length=200,
@@ -38,4 +25,4 @@ class SMTPSettings(BaseEncrypted):
     _encrypted_field = "_password"
 
     def __str__(self) -> str:
-        return f"{self.host}:{self.port}"
+        return f"{self.host}:{self.port}" if self.host and self.port else "None"
