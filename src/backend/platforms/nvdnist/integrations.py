@@ -1,3 +1,10 @@
+"""NVD NIST vulnerability intelligence platform integration.
+
+Provides integration with the National Vulnerability Database (NVD) for
+automated vulnerability enrichment, CVSS scoring, and security intelligence
+gathering during security assessments.
+"""
+
 from typing import Any
 
 from executions.models import Execution
@@ -9,6 +16,27 @@ from platforms.nvdnist.models import NvdNistSettings
 
 
 class NvdNist(BaseIntegration):
+    """Integration class for NVD NIST vulnerability intelligence platform.
+
+    Provides automated vulnerability enrichment by querying the National
+    Vulnerability Database API for detailed CVE information, CVSS scores,
+    CWE classifications, and vulnerability descriptions.
+
+    Processing Features:
+        - Automated CVE data retrieval and parsing
+        - CVSS score mapping to Rekono severity levels
+        - CWE code extraction and classification
+        - Vulnerability description and reference updates
+        - API token authentication for enhanced rate limits
+
+    Attributes:
+        finding_types (list): List of finding types processed by this integration
+        settings (NvdNistSettings): Configuration instance for API credentials
+        url (str): NVD API endpoint URL template for CVE queries
+        reference (str): NVD vulnerability detail page URL template
+        cvss_mapping (dict): CVSS score ranges mapped to Rekono severity levels
+    """
+
     finding_types = [Vulnerability]
     settings = NvdNistSettings.objects.first()
     url = "https://services.nvd.nist.gov/rest/json/cves/2.0?cveId={cve}"
@@ -23,6 +51,14 @@ class NvdNist(BaseIntegration):
 
     @property
     def is_api_token_available(self) -> bool:
+        """Check if NVD API token is configured and functional.
+
+        Tests the API token by making a request to retrieve information
+        for a known CVE (Log4Shell) to validate authentication and connectivity.
+
+        Returns:
+            bool: True if API token is valid and functional, False otherwise
+        """
         if self.settings.secret is None:
             return False
         try:
@@ -33,11 +69,32 @@ class NvdNist(BaseIntegration):
             return False
 
     def _get_cve(self, cve: str) -> dict[str, Any]:
+        """Retrieve CVE information from NVD API.
+
+        Makes authenticated or unauthenticated requests to the NVD API
+        based on available API token configuration.
+
+        Args:
+            cve (str): CVE identifier to retrieve information for
+
+        Returns:
+            dict[str, Any]: JSON response containing CVE details and metadata
+        """
         if self.settings.secret is not None:
             return self._request(self.session.get, self.url.format(cve=cve), headers={"apiKey": self.settings.secret})
         return self._request(self.session.get, self.url.format(cve=cve))
 
     def _process_finding(self, execution: Execution, finding: Vulnerability) -> None:
+        """Process and enrich vulnerability finding with NVD data.
+
+        Retrieves detailed vulnerability information from NVD API and updates
+        the finding with enhanced data including descriptions, CVSS scores,
+        CWE classifications, and official references.
+
+        Args:
+            execution (Execution): The execution context for this processing
+            finding (Vulnerability): The vulnerability finding to enrich
+        """
         try:
             data = self._get_cve(finding.cve)
         except Exception:
@@ -102,4 +159,15 @@ class NvdNist(BaseIntegration):
         finding.save(update_fields=update)
 
     def is_finding_processable(self, finding: Finding) -> bool:
+        """Determine if a finding can be processed by this integration.
+
+        Validates that the finding is a processable vulnerability type
+        with a valid CVE identifier for NVD API queries.
+
+        Args:
+            finding (Finding): The finding to evaluate for processing
+
+        Returns:
+            bool: True if finding has CVE and can be processed, False otherwise
+        """
         return super().is_finding_processable(finding) and finding.cve is not None
