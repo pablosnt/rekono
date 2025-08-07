@@ -1,4 +1,3 @@
-
 """Django settings configuration for Rekono security testing platform.
 
 This module contains the comprehensive Django settings configuration for the Rekono

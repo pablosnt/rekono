@@ -42,7 +42,7 @@ class Validator(RegexValidator, LoggingEntity):
         regex_matches = re.fullmatch(self.regex, value)
         if (
             (self.inverse_match and not bool(regex_matches))
-            or (not self.inverse_match and bool(regex_matches(regex_matches)))
+            or (not self.inverse_match and bool(regex_matches))
             or (self.deny_injections and bool(re.findall(Regex.INJECTION.value, value)))
         ):
             self.logger.warning(f"[Security] Value '{value}' doesn't match the allowed regex")

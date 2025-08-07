@@ -1,4 +1,3 @@
-
 """Django REST framework serializers for Rekono's core framework.
 
 Provides base serializer classes with like functionality and note relationships

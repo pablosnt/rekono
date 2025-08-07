@@ -1,4 +1,3 @@
-
 """Django admin configuration for HTTP headers management.
 
 Provides administrative interface for HTTP header management

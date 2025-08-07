@@ -1,4 +1,3 @@
-
 """Django admin configuration for integrations module.
 
 Registers Integration model with Django admin interface for

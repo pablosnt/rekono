@@ -1,4 +1,3 @@
-
 """Django app configuration for HTTP headers module.
 
 Provides app configuration with fixture loading capabilities

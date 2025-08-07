@@ -1,4 +1,3 @@
-
 """Exception handling utilities for Django REST framework.
 
 Provides custom exception handlers for database integrity errors

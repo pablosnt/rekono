@@ -1,4 +1,3 @@
-
 """Django REST framework views for integration management.
 
 Provides REST API endpoints for managing third-party integrations.

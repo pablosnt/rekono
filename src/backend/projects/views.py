@@ -39,6 +39,7 @@ class ProjectViewSet(BaseViewSet):
         search_fields (list): Fields available for text search
         ordering_fields (list): Fields available for result ordering
     """
+
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
     filterset_class = ProjectFilter

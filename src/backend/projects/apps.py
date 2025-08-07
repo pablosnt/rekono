@@ -18,4 +18,5 @@ class ProjectsConfig(BaseApp, AppConfig):
     Attributes:
         name (str): The application name identifier for Django registration
     """
+
     name = "projects"

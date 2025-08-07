@@ -13,7 +13,7 @@ from target_denylist.models import TargetDenylist
 class TargetValidator(RegexValidator):
     def __init__(
         self,
-        regex: "Regex" = None,
+        regex: Any = None,
         message: Any | None = None,
         code: str | None = "target",
         inverse_match: bool | None = False,

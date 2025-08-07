@@ -1,4 +1,3 @@
-
 """URL configuration for integrations REST API endpoints.
 
 Defines URL patterns for integration management API using Django REST framework

@@ -281,17 +281,12 @@ class VulnerabilitySerializer(TriageFindingSerializer):
         Returns:
             Vulnerability: Updated vulnerability with triage propagation.
         """
-        update_triaged_exploits = (
-            instance.triage_status != validated_data.get("triage_status")
-        )
+        update_triaged_exploits = instance.triage_status != validated_data.get("triage_status")
         instance = super().update(instance, validated_data)
         if update_triaged_exploits:
             instance.exploit.all().update(
                 triage_status=instance.triage_status,
-                triage_comment=(
-                    "Automatically triaged after triaging the related "
-                    "vulnerability as a false positive"
-                ),
+                triage_comment=("Automatically triaged after triaging the related vulnerability as a false positive"),
                 triage_by=instance.triage_by,
                 triage_date=instance.triage_date,
             )

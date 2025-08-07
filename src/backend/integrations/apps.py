@@ -1,4 +1,3 @@
-
 """Django application configuration for integrations module.
 
 Configures the integrations application with custom fixture loading logic

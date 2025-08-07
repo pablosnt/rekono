@@ -156,6 +156,6 @@ class TasksQueue(BaseScanQueue):
                 task=result,
                 on_success=self._scheduled_callback,
             )
-            BaseQueue.logger.info(f"[Task] Scheduled task {result.id} has been enqueued again")
+            BaseScanQueue.logger.info(f"[Task] Scheduled task {result.id} has been enqueued again")
             new_task.rq_job_id = job.id
             new_task.save(update_fields=["rq_job_id"])

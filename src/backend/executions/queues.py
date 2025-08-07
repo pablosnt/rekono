@@ -194,7 +194,7 @@ class ExecutionsQueue(BaseScanQueue):
                 e.findings, e.target_ports, e.input_vulnerabilities, e.input_technologies, e.wordlists
             )
         ]
-        BaseQueue.logger.info(f"[Execution] New {len(executions) - 1} executions from previous findings")
+        BaseScanQueue.logger.info(f"[Execution] New {len(executions) - 1} executions from previous findings")
         # Create new execution records and queue jobs for additional executions
         # executions[0] is the current execution, executions[1:] are new ones
         new_jobs = []

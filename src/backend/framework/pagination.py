@@ -1,4 +1,3 @@
-
 """Pagination configuration for Django REST framework API endpoints.
 
 Provides standardized pagination settings for consistent API responses

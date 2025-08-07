@@ -79,7 +79,12 @@ class NvdNist(BaseIntegration):
                     "cvssMetricV2",
                 ]:
                     for cvss in cvss_metrics.get(cvss_version_field) or sum(
-                        [list(items) for key, items in cvss_metrics.items() if key.lower().startswith(field)], []
+                        [
+                            list(items)
+                            for key, items in cvss_metrics.items()
+                            if key.lower().startswith(cvss_version_field)
+                        ],
+                        [],
                     ):
                         if cvss.get("type", "").lower() == type:
                             base_score = cvss.get("cvssData", {}).get("baseScore")

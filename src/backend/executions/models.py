@@ -39,7 +39,7 @@ class Execution(BaseModel):
 
     Example:
         Create and track an execution:
-        
+
         ```python
         execution = Execution.objects.create(
             task=task,

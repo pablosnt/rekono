@@ -32,6 +32,7 @@ class ProjectSerializer(TaggitSerializer, RelatedNotesSerializer):
         tags (TagField): Project organizational tags with tagging support
         defectdojo_sync (DefectDojoSyncSerializer): DefectDojo integration configuration
     """
+
     targets = SimpleTargetSerializer(read_only=True, many=True)
     owner = SimpleUserSerializer(many=False, read_only=True)
     tags = TagField()  # Tags
@@ -45,6 +46,7 @@ class ProjectSerializer(TaggitSerializer, RelatedNotesSerializer):
             fields (tuple): Field names to include in serialization
             read_only_fields (tuple): Fields that cannot be modified
         """
+
         model = Project
         fields = (
             "id",

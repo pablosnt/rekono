@@ -1,4 +1,3 @@
-
 """Custom serializer fields for Django REST framework.
 
 Provides specialized field types for tags, protected secrets, and
