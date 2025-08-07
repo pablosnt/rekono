@@ -17,5 +17,4 @@ Security:
     - Administrative permission controls for integration management
     - Secure configuration storage for integration credentials
     - Input validation and sanitization for integration parameters
-    - Audit trails for integration configuration changes
 """

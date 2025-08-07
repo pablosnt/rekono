@@ -24,5 +24,4 @@ Security:
     - Project-level access control and permission enforcement
     - Secure file handling for execution outputs and reports
     - Input validation and sanitization for execution parameters
-    - Audit trails for execution monitoring and compliance
 """

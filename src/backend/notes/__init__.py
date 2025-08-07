@@ -25,5 +25,4 @@ Security:
     - Project-level access control and permission enforcement
     - User-based ownership and privacy controls for sensitive documentation
     - Input validation and sanitization for all note content
-    - Audit trails for note creation, modification, and sharing activities
 """

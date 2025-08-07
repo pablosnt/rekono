@@ -1,3 +1,18 @@
+"""Django models for input parameters in security tool execution.
+
+This module provides the concrete implementation of input parameter models used
+in security testing workflows. Input parameters serve as configurable data inputs
+for security tools and can be associated with tasks to provide context-specific
+testing parameters. The system supports technology specifications and vulnerability
+references with validation and parsing capabilities.
+
+Architecture:
+    Both parameter types extend the InputParameter base model and implement specific
+    field configurations, validation rules, and parsing mappings for integration with
+    security testing tools. The models include filtering capabilities and deduplication
+    logic to ensure data consistency and efficient parameter management.
+"""
+
 from django.db import models
 
 from framework.enums import InputKeyword
@@ -7,6 +22,30 @@ from security.validators.input_validator import Regex, Validator
 
 
 class InputTechnology(InputParameter):
+    """Model representing technology parameters for security tool execution.
+
+    Represents software and hardware technology specifications that serve as input
+    parameters for security testing tools. Technology parameters include name and
+    version information and are used for targeted security assessments, compatibility
+    testing, and technology-specific vulnerability scanning workflows.
+
+    Attributes:
+        name (TextField): Technology name with injection prevention validation (max 100 chars)
+        version (TextField): Optional technology version with validation (max 100 chars)
+
+    Example:
+        Create a technology parameter for Apache web server:
+
+        ```python
+        tech_param = InputTechnology.objects.create(
+            name="Apache",
+            version="2.4.41"
+        )
+        # Associate with a task for project context
+        task.input_technologies.add(tech_param)
+        ```
+    """
+
     name = models.TextField(
         max_length=100,
         validators=[Validator(Regex.NAME.value, code="name", deny_injections=True)],
@@ -22,10 +61,37 @@ class InputTechnology(InputParameter):
     _parse_mapping = {InputKeyword.TECHNOLOGY: "name", InputKeyword.VERSION: "version"}
 
     def __str__(self) -> str:
+        """Return string representation of the technology parameter.
+
+        Returns:
+            str: Technology name with version if available, otherwise just the name
+        """
         return f"{self.name} - {self.version}" if self.version else self.name
 
 
 class InputVulnerability(InputParameter):
+    """Model representing vulnerability parameters for security tool execution.
+
+    Represents vulnerability references and CVE identifiers that serve as input
+    parameters for focused security testing workflows. Vulnerability parameters
+    enable targeted exploit verification, proof-of-concept testing, and
+    vulnerability-specific security assessments.
+
+    Attributes:
+        cve (TextField): CVE identifier with format validation and injection prevention (max 20 chars)
+
+    Example:
+        Create a vulnerability parameter for a specific CVE:
+
+        ```python
+        vuln_param = InputVulnerability.objects.create(
+            cve="CVE-2021-44228"
+        )
+        # Associate with a task for focused vulnerability testing
+        task.input_vulnerabilities.add(vuln_param)
+        ```
+    """
+
     cve = models.TextField(
         max_length=20,
         validators=[Validator(Regex.CVE.value, code="cve", deny_injections=True)],
@@ -38,4 +104,9 @@ class InputVulnerability(InputParameter):
     _parse_mapping = {InputKeyword.CVE: "cve"}
 
     def __str__(self) -> str:
+        """Return string representation of the vulnerability parameter.
+
+        Returns:
+            str: The CVE identifier
+        """
         return self.cve

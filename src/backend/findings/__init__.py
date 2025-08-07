@@ -27,5 +27,4 @@ Security:
     - Project-level access control and permission enforcement
     - Secure handling of sensitive credential information
     - Input validation and sanitization for all finding data
-    - Audit trails for finding lifecycle and triage decisions
 """
