@@ -101,7 +101,7 @@ class Note(BaseLike):
         Vulnerability, related_name="notes", on_delete=models.CASCADE, null=True, blank=True
     )
     exploit = models.ForeignKey(Exploit, related_name="notes", on_delete=models.CASCADE, null=True, blank=True)
-    title = models.TextField(max_length=200, validators=[Validator(Regex.NAME.value, code="title")])
+    title = models.TextField(max_length=200, validators=[Validator(Regex.NAME, code="title")])
     body = models.TextField(blank=True, null=True)
     tags = TaggableManager()
     owner = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True)

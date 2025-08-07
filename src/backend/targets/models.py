@@ -17,7 +17,7 @@ from targets.enums import TargetType
 
 class Target(BaseInput):
     project = models.ForeignKey(Project, related_name="targets", on_delete=models.CASCADE)
-    target = models.TextField(max_length=100, validators=[TargetValidator(Regex.TARGET.value)])
+    target = models.TextField(max_length=100, validators=[TargetValidator(Regex.TARGET)])
     type = models.TextField(max_length=10, choices=TargetType.choices)
 
     _filters = [BaseInput.Filter(type=TargetType, field="type")]

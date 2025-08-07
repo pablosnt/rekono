@@ -255,7 +255,7 @@ class TriageFinding(Finding):
 
     triage_status = TextField(max_length=15, choices=TriageStatus.choices, default=TriageStatus.UNTRIAGED)
     triage_comment = TextField(
-        max_length=300, validators=[Validator(Regex.TEXT.value, code="triage_comment")], blank=True, null=True
+        max_length=300, validators=[Validator(Regex.TEXT, code="triage_comment")], blank=True, null=True
     )
     triage_date = DateTimeField(blank=True, null=True)
     triage_by = ForeignKey(AUTH_USER_MODEL, related_name="triaged_%(class)s", on_delete=SET_NULL, blank=True, null=True)

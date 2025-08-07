@@ -21,11 +21,7 @@ class AuthenticationSerializer(ModelSerializer):
         secret (ProtectedSecretField): Protected field for credential secrets
     """
 
-    secret = ProtectedSecretField(
-        Validator(Regex.SECRET.value, code="secret").__call__,
-        required=True,
-        allow_null=False,
-    )
+    secret = ProtectedSecretField(Validator(Regex.SECRET, code="secret").__call__, required=True, allow_null=False)
 
     class Meta:
         """Meta configuration for the AuthenticationSerializer.

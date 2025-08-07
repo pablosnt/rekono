@@ -20,8 +20,7 @@ from typing import Any
 
 import yaml
 
-from security.cryptography.encryption import Encryptor
-from security.cryptography.random import generate_random_value
+from security.cryptography import Crypto
 
 
 @dataclass
@@ -185,7 +184,7 @@ class RekonoConfig:
     _pdf_report_template = Property(None, "reports.pdf-template", None)
     _frotend_url = Property("RKN_FRONTEND_URL", "frontend.url", "https://127.0.0.1")
     _root_path = Property("RKN_ROOT_PATH", "rootpath", None)
-    _secret_key = Property("RKN_SECRET_KEY", "security.secret-key", generate_random_value(3000))
+    _secret_key = Property("RKN_SECRET_KEY", "security.secret-key", Crypto.random(3000))
     _allowed_hosts = Property("RKN_ALLOWED_HOSTS", "security.allowed-hosts", ["localhost", "127.0.0.1", "::1"])
     _trusted_proxy = Property("RKN_TRUSTED_PROXY", None, False)
     _otp_expiration_hours = Property(None, None, 24)
@@ -320,7 +319,7 @@ class RekonoConfig:
         Returns:
             str: Encryption key string, generating a new one for testing mode.
         """
-        return Encryptor.generate_encryption_key() if self.testing else self._encryption_key.read(self.config_from_file)
+        return Crypto.generate_encryption_key() if self.testing else self._encryption_key.read(self.config_from_file)
 
     @property
     def pdf_report_template(self) -> Path | None:

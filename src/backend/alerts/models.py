@@ -74,10 +74,7 @@ class Alert(BaseModel):
     item = models.TextField(max_length=15, choices=AlertItem.choices)
     mode = models.TextField(max_length=7, choices=AlertMode.choices, default=AlertMode.NEW)
     value = models.TextField(
-        max_length=100,
-        validators=[Validator(Regex.NAME.value, code="filter_value")],
-        blank=True,
-        null=True,
+        max_length=100, validators=[Validator(Regex.NAME, code="filter_value")], blank=True, null=True
     )
     enabled = models.BooleanField(default=True)
     # Needs to be stored to automatically subscribe new project members

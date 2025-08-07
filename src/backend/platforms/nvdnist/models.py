@@ -7,7 +7,7 @@ from security.validators.input_validator import Regex, Validator
 class NvdNistSettings(BaseEncrypted):
     _api_token = models.TextField(
         max_length=50,
-        validators=[Validator(Regex.SECRET.value, code="api_token")],
+        validators=[Validator(Regex.SECRET, code="api_token")],
         null=True,
         blank=True,
         db_column="api_token",

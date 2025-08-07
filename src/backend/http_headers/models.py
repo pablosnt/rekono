@@ -71,10 +71,8 @@ class HttpHeader(BaseInput):
     user = models.ForeignKey(
         AUTH_USER_MODEL, related_name="http_headers", on_delete=models.CASCADE, blank=True, null=True
     )
-    key = models.TextField(max_length=100, validators=[Validator(Regex.NAME.value, code="key", deny_injections=True)])
-    value = models.TextField(
-        max_length=500, validators=[Validator(Regex.TEXT.value, code="value", deny_injections=True)]
-    )
+    key = models.TextField(max_length=100, validators=[Validator(Regex.NAME, code="key", deny_injections=True)])
+    value = models.TextField(max_length=500, validators=[Validator(Regex.TEXT, code="value", deny_injections=True)])
 
     _filters = [BaseInput.Filter(type=str, field="key")]
     _parse_mapping = {InputKeyword.HEADERS: lambda instance: {instance.key: instance.value}}

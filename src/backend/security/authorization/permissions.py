@@ -23,106 +23,44 @@ class RekonoModelPermission(DjangoModelPermissions):
 
 
 class IsNotAuthenticated(BasePermission):
-    """Check if current user is not authenticated."""
-
     def has_permission(self, request: Request, view: View) -> bool:
-        """Check if current user is not authenticated.
-
-        Args:
-            request (Request): HTTP request
-            view (View): View that user is accessing
-
-        Returns:
-            bool: Indicate if user is authorized to make this request or not
-        """
         return not request.user.is_authenticated
 
 
 class IsAdmin(BasePermission):
-    """Check if current user is an administrator."""
-
     def has_permission(self, request: Request, view: View) -> bool:
-        """Check if current user is an administrator.
-
-        Args:
-            request (Request): HTTP request
-            view (View): View that user is accessing
-
-        Returns:
-            bool: Indicate if user is authorized to make this request or not
-        """
-        return request.user.groups.filter(name=str(Role.ADMIN)).exists()
+        return request.user.groups.filter(name=Role.ADMIN.value).exists()
 
 
 class IsAuditor(BasePermission):
-    """Check if current user is an auditor (Admin or Auditor roles)."""
-
     def has_permission(self, request: Request, view: View) -> bool:
-        """Check if current user is an auditor (Admin or Auditor roles).
-
-        Args:
-            request (Request): HTTP request
-            view (View): View that user is accessing
-
-        Returns:
-            bool: Indicate if user is authorized to make this request or not
-        """
-        return request.user.groups.filter(name__in=[str(Role.AUDITOR), str(Role.ADMIN)]).exists()
+        return request.user.groups.filter(name__in=[Role.AUDITOR.value, Role.ADMIN.value]).exists()
 
 
 class ProjectMemberPermission(BasePermission):
-    """Check if current user can access an object based on project membership."""
-
     def has_object_permission(self, request: Request, view: View, obj: Any) -> bool:
-        """Check if current user can access some entities based on project membership.
-
-        Args:
-            request (Request): HTTP request
-            view (View): View that user is accessing
-            obj (Any): Object that user is accesing
-
-        Returns:
-            bool: Indicate if user is authorized to make this request or not
-        """
         project = obj.parent_project
-        output = (
-            not project
-            or (isinstance(project, Project) and request.user in project.members.all())
-            or any([p for p in project if request.user in p.members.all()])
-        )
-        if not output:
-            pass
-        return output
+        if project is None:
+            return True
+        else:
+            projects = [project] if isinstance(project, Project) else project
+            return any([p for p in projects if p.members.filter(id=request.user.id).exists()])
 
 
 class OwnerPermission(BasePermission):
-    """Check if current user can access an object based on HTTP method and creator user."""
-
     # By default: instance returns the same object, allow_admin is True and owner_field is owner
     mapping: dict[Any, dict[str, Any]] = {
         Wordlist: {},
         Process: {},
-        Step: {
-            "instance": lambda o: o.process,
-        },
-        Note: {
-            "allow_admin": False,
-        },
+        Step: {"instance": lambda o: o.process},
+        Note: {"allow_admin": False},
         Alert: {},
-        TelegramChat: {
-            "owner_field": "user",
-            "allow_admin": False,
-        },
+        TelegramChat: {"owner_field": "user", "allow_admin": False},
         Report: {"owner_field": "user"},
     }
 
     def _has_object_permission(
-        self,
-        request: Request,
-        view: View,
-        instance: Any,
-        owner_field: str,
-        allow_admin: bool,
+        self, request: Request, view: View, instance: Any, owner_field: str, allow_admin: bool
     ) -> bool:
         if not getattr(instance, owner_field):
             allow_admin = True
@@ -136,27 +74,13 @@ class OwnerPermission(BasePermission):
     def has_permission(self, request: Request, view: View) -> bool:
         return (
             self._has_object_permission(
-                request,
-                view,
-                Process.objects.get(pk=request.data.get("process_id")),
-                "owner",
-                True,
+                request, view, Process.objects.get(pk=request.data.get("process_id")), "owner", True
             )
             if view.__class__.__name__ == "StepViewSet" and request.method == "POST"
             else True
         )
 
     def has_object_permission(self, request: Request, view: View, obj: Any) -> bool:
-        """Check if current user can access an object based on HTTP method and creator user.
-
-        Args:
-            request (Request): HTTP request
-            view (View): View that user is accessing
-            obj (Any): Object that user is accesing
-
-        Returns:
-            bool: Indicate if user is authorized to make this request or not
-        """
         return self._has_object_permission(
             request,
             view,

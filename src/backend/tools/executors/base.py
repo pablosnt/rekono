@@ -20,7 +20,7 @@ from framework.models import BaseInput
 from http_headers.models import HttpHeader
 from parameters.models import InputTechnology, InputVulnerability
 from rekono.settings import CONFIG
-from security.cryptography.hashing import hash
+from security.cryptography import Crypto
 from settings.models import Settings
 from target_ports.models import TargetPort
 from tools.models import Intensity
@@ -251,7 +251,7 @@ class BaseExecutor(LoggingEntity):
     def _on_completed(self) -> None:
         self.execution.status = Status.COMPLETED
         self.execution.end = timezone.now()
-        self.execution.hash = hash(
+        self.execution.hash = Crypto.hash(
             " ".join(
                 [f"{k}={v}" for k, v in self.environment.items()]
                 + [a for a in self.arguments if str(self.report).lower() not in a.lower()]

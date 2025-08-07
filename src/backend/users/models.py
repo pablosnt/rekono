@@ -16,8 +16,7 @@ from platforms.mail.notifications import SMTP
 from rekono.settings import CONFIG
 from security.authentication.api import ApiToken
 from security.authorization.roles import Role
-from security.cryptography.hashing import hash
-from security.cryptography.random import generate_random_value
+from security.cryptography import Crypto
 from security.validators.input_validator import (
     FutureDatetimeValidator,
     Regex,
@@ -32,8 +31,8 @@ class RekonoUserManager(UserManager, LoggingEntity):
     """Manager for the User model."""
 
     def generate_otp(self, model: Any = None) -> str:
-        otp = hash(generate_random_value(3000))
-        if (model or User).objects.filter(otp=hash(otp)).exists():  # pragma: no cover
+        otp = Crypto.hash(Crypto.random(3000))
+        if (model or User).objects.filter(otp=Crypto.hash(otp)).exists():  # pragma: no cover
             return self.generate_otp(model)
         return otp
 
@@ -55,7 +54,7 @@ class RekonoUserManager(UserManager, LoggingEntity):
 
     def send_invitation(self, user: Any) -> None:
         plain_otp = self.generate_otp()
-        user.otp = hash(plain_otp)
+        user.otp = Crypto.hash(plain_otp)
         user.otp_expiration = self.get_otp_expiration_time()
         user.save(update_fields=["otp", "otp_expiration"])
         SMTP().invite_user(user, plain_otp)
@@ -130,7 +129,7 @@ class RekonoUserManager(UserManager, LoggingEntity):
             Any: Enabled user
         """
         plain_otp = self.generate_otp()
-        user.otp = hash(plain_otp)
+        user.otp = Crypto.hash(plain_otp)
         user.otp_expiration = self.get_otp_expiration_time()  # Set OTP expiration
         user.is_active = True
         user.save(update_fields=["otp", "otp_expiration", "is_active"])
@@ -172,7 +171,7 @@ class RekonoUserManager(UserManager, LoggingEntity):
         plain_otp = self.generate_otp()
         user = self._update_otp(
             user,
-            hash(plain_otp),
+            Crypto.hash(plain_otp),
             (self.get_otp_expiration_time(time) if time is not None else self.get_otp_expiration_time()),
         )
         return plain_otp
@@ -181,7 +180,7 @@ class RekonoUserManager(UserManager, LoggingEntity):
         return self._update_otp(user)
 
     def verify_otp(self, otp: str, user: Any | None = None) -> bool:
-        filter = {"otp": hash(otp), "otp_expiration__gt": timezone.now()}
+        filter = {"otp": Crypto.hash(otp), "otp_expiration__gt": timezone.now()}
         if user:
             filter["id"] = user.id
         return User.objects.filter(**filter).first()
@@ -234,23 +233,13 @@ class User(AbstractUser, BaseEncrypted):
 
     # Main user data
     username = models.TextField(
-        max_length=100,
-        unique=True,
-        blank=True,
-        null=True,
-        validators=[Validator(Regex.NAME.value, code="username")],
+        max_length=100, unique=True, blank=True, null=True, validators=[Validator(Regex.NAME, code="username")]
     )
     first_name = models.TextField(
-        max_length=100,
-        blank=True,
-        null=True,
-        validators=[Validator(Regex.NAME.value, code="first_name")],
+        max_length=100, blank=True, null=True, validators=[Validator(Regex.NAME, code="first_name")]
     )
     last_name = models.TextField(
-        max_length=100,
-        blank=True,
-        null=True,
-        validators=[Validator(Regex.NAME.value, code="last_name")],
+        max_length=100, blank=True, null=True, validators=[Validator(Regex.NAME, code="last_name")]
     )
     email = models.EmailField(max_length=150, unique=True)
     is_active = models.BooleanField(blank=True, null=True, default=None)

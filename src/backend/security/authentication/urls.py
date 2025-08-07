@@ -1,12 +1,7 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenBlacklistView
 
-from security.authentication.views import (
-    LoginView,
-    MfaLoginView,
-    RefreshTokenViewSet,
-    SendEmailMfaView,
-)
+from security.authentication.views import LoginView, MfaLoginView, RefreshTokenViewSet, SendEmailMfaView
 
 urlpatterns = [
     path("security/login/", LoginView.as_view(), name="login"),

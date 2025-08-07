@@ -9,6 +9,7 @@ from rest_framework.response import Response
 from framework.logging import LoggingEntity
 from rekono.settings import CONFIG
 
+# TODO: Update CSP
 CSP = {
     "/admin": (
         "default-src 'none'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; "
@@ -40,6 +41,7 @@ CSP = {
     ),
     "/api/": "default-src 'none'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'",
 }
+# TODO: Evaluate again
 SECURITY_HEADERS = {
     "Content-Security-Policy": None,
     "Server": None,
@@ -55,17 +57,15 @@ SECURITY_HEADERS = {
 
 @dataclass
 class SecurityMiddleware(LoggingEntity):
-    """Security middleware that manages all HTTP requests and responses."""
-
     get_response: Any
 
-    def _get_forwarded_address(self, request: HttpRequest) -> str | None:
+    def _get_source_ip_address(self, request: HttpRequest) -> str:
         x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
         if x_forwarded_for and CONFIG.trusted_proxy:
             return x_forwarded_for.split(",", 1)[0]
-        return None
+        return request.META["REMOTE_ADDR"]
 
-    def _http_options(self, request: HttpRequest) -> Response:
+    def _get_options_response(self, request: HttpRequest) -> Response:
         response = Response(status=status.HTTP_200_OK)
         response.accepted_renderer = JSONRenderer()
         response.accepted_media_type = "application/json"
@@ -98,18 +98,8 @@ class SecurityMiddleware(LoggingEntity):
         )
 
     def __call__(self, request: HttpRequest) -> Any:
-        """Process HTTP requests when received and return HTTP responses.
-
-        Args:
-            request (HttpRequest): HTTP request
-
-        Returns:
-            Any: HTTP response
-        """
-        forwarded_address = self._get_forwarded_address(request)
-        if forwarded_address:
-            request.META["REMOTE_ADDR"] = forwarded_address
-        response = self.get_response(request) if request.method != "OPTIONS" else self._http_options(request)
+        request.META["REMOTE_ADDR"] = self._get_source_ip_address(request)
+        response = self.get_response(request) if request.method != "OPTIONS" else self._get_options_response(request)
         response = self._add_security_headers(request, response)
         self._log_request_and_response(request, response)
         return response

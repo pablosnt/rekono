@@ -1,7 +1,9 @@
 from typing import Any
 
-from framework.serializers import LikeSerializer
 from rest_framework.serializers import FileField, ModelSerializer
+
+from framework.serializers import LikeSerializer
+from rekono.settings import CONFIG
 from security.file_handler import FileHandler
 from users.serializers import SimpleUserSerializer
 from wordlists.models import Wordlist
@@ -52,7 +54,7 @@ class WordlistSerializer(LikeSerializer):
             self.validated_data["path"],
             self.validated_data["checksum"],
             self.validated_data["size"],
-        ) = FileHandler().store_file(self.validated_data.pop("file"))
+        ) = FileHandler().store_file(CONFIG.wordlists, self.validated_data.pop("file"))
         return super().save(**kwargs)
 
 

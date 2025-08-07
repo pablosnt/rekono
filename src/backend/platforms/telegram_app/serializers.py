@@ -10,16 +10,13 @@ from framework.logging import LoggingEntity
 from platforms.mail.notifications import SMTP
 from platforms.telegram_app.models import TelegramChat, TelegramSettings
 from platforms.telegram_app.notifications.notifications import Telegram
-from security.cryptography.hashing import hash
+from security.cryptography import Crypto
 from security.validators.input_validator import Regex, Validator
 
 
 class TelegramSettingsSerializer(ModelSerializer, LoggingEntity):
     token = ProtectedSecretField(
-        Validator(Regex.SECRET.value, code="password").__call__,
-        required=False,
-        allow_null=True,
-        source="secret",
+        Validator(Regex.SECRET, code="password").__call__, required=False, allow_null=True, source="secret"
     )
     bot = SerializerMethodField(read_only=True)
     is_available = SerializerMethodField(read_only=True)
@@ -52,7 +49,7 @@ class TelegramChatSerializer(ModelSerializer, LoggingEntity):
         attrs = super().validate(attrs)
         try:
             attrs["telegram_chat"] = TelegramChat.objects.get(
-                otp=hash(attrs.get("otp")),
+                otp=Crypto.hash(attrs.get("otp")),
                 otp_expiration__gt=timezone.now(),
                 user=None,
             )

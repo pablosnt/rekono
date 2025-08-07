@@ -15,11 +15,7 @@ from security.validators.input_validator import (
 
 class TelegramSettings(BaseEncrypted):
     _token = models.TextField(
-        max_length=200,
-        validators=[Validator(Regex.SECRET.value, code="api_token")],
-        null=True,
-        blank=True,
-        db_column="token",
+        max_length=200, validators=[Validator(Regex.SECRET, code="api_token")], null=True, blank=True, db_column="token"
     )
 
     _encrypted_field = "_token"

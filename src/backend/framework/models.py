@@ -16,7 +16,7 @@ from django.db.models import ManyToManyField, Model, Q, TextChoices
 from framework.enums import InputKeyword
 from framework.logging import LoggingEntity
 from rekono.settings import AUTH_USER_MODEL, CONFIG
-from security.cryptography.encryption import Encryptor
+from security.cryptography import Crypto
 
 
 class BaseModel(Model, LoggingEntity):
@@ -105,7 +105,7 @@ class BaseEncrypted(BaseModel):
         - Fallback to plain text when encryption is not configured
 
     Attributes:
-        _encryptor (Encryptor | None): The encryption instance for secure operations.
+        _encryptor (Crypto | None): The encryption instance for secure operations.
         _encrypted_field (str): Name of the database field storing encrypted data.
 
     Example:
@@ -135,7 +135,7 @@ class BaseEncrypted(BaseModel):
 
         abstract = True
 
-    _encryptor = Encryptor(CONFIG.encryption_key) if CONFIG.encryption_key else None
+    _encryptor = Crypto(CONFIG.encryption_key) if CONFIG.encryption_key else None
     _encrypted_field = "_secret"
 
     @property

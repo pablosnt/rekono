@@ -16,12 +16,7 @@ class TargetPort(BaseInput):
 
     target = models.ForeignKey(Target, related_name="target_ports", on_delete=models.CASCADE)
     port = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(65535)])
-    path = models.TextField(
-        max_length=100,
-        validators=[Validator(Regex.PATH.value, code="path")],
-        blank=True,
-        null=True,
-    )
+    path = models.TextField(max_length=100, validators=[Validator(Regex.PATH, code="path")], blank=True, null=True)
 
     _filters = [BaseInput.Filter(type=int, field="port")]
     _parse_mapping = {

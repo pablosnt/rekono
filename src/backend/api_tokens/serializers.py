@@ -9,7 +9,7 @@ from typing import Any
 from rest_framework.serializers import ModelSerializer
 
 from api_tokens.models import ApiToken
-from security.cryptography.hashing import hash
+from security.cryptography import Crypto
 
 
 class ApiTokenSerializer(ModelSerializer):
@@ -64,7 +64,7 @@ class CreateApiTokenSerializer(ModelSerializer):
             ApiToken: The created API token instance with plain key attached
         """
         plain_key = ApiToken.generate_key()
-        self.validated_data["key"] = hash(plain_key)
+        self.validated_data["key"] = Crypto.hash(plain_key)
         api_token = super().save(**kwargs)
         api_token.key = plain_key
         return api_token

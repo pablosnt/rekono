@@ -8,7 +8,7 @@ from security.validators.input_validator import Regex, Validator
 
 class NvdNistSettingsSerializer(ModelSerializer):
     api_token = ProtectedSecretField(
-        validators=[Validator(Regex.SECRET.value, code="api_token")], required=False, allow_null=True, source="secret"
+        validators=[Validator(Regex.SECRET, code="api_token")], required=False, allow_null=True, source="secret"
     )
     is_available = SerializerMethodField(read_only=True)
 

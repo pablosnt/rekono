@@ -1,7 +1,7 @@
 from typing import Any
 
 from platforms.telegram_app.models import TelegramChat
-from security.cryptography.hashing import hash
+from security.cryptography import Crypto
 from tests.cases import ApiTestCase
 from tests.framework import ApiTest
 from users.models import User
@@ -60,7 +60,7 @@ class TelegramChatTest(ApiTest):
         for user in users:
             otp = User.objects.generate_otp(TelegramChat)
             chat = TelegramChat.objects.create(
-                otp=hash(otp),
+                otp=Crypto.hash(otp),
                 otp_expiration=User.objects.get_otp_expiration_time(),
                 chat_id=chat_id,
             )

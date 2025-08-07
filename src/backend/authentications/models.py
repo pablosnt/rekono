@@ -36,7 +36,7 @@ class Authentication(BaseInput, BaseEncrypted):
 
     Example:
         Create basic authentication:
-        
+
         ```python
         auth = Authentication.objects.create(
             name="admin",
@@ -48,14 +48,11 @@ class Authentication(BaseInput, BaseEncrypted):
     """
 
     name = models.TextField(
-        max_length=100,
-        validators=[Validator(Regex.NAME.value, code="name", deny_injections=True)],
-        null=True,
-        blank=True,
+        max_length=100, validators=[Validator(Regex.NAME, code="name", deny_injections=True)], null=True, blank=True
     )
     _secret = models.TextField(
         max_length=500,
-        validators=[Validator(Regex.SECRET.value, code="secret", deny_injections=True)],
+        validators=[Validator(Regex.SECRET, code="secret", deny_injections=True)],
         null=True,
         blank=True,
         db_column="secret",

@@ -46,15 +46,9 @@ class InputTechnology(InputParameter):
         ```
     """
 
-    name = models.TextField(
-        max_length=100,
-        validators=[Validator(Regex.NAME.value, code="name", deny_injections=True)],
-    )
+    name = models.TextField(max_length=100, validators=[Validator(Regex.NAME, code="name", deny_injections=True)])
     version = models.TextField(
-        max_length=100,
-        validators=[Validator(Regex.NAME.value, code="version", deny_injections=True)],
-        blank=True,
-        null=True,
+        max_length=100, validators=[Validator(Regex.NAME, code="version", deny_injections=True)], blank=True, null=True
     )
 
     _filters = [BaseInput.Filter(type=str, field="name", contains=True)]
@@ -92,10 +86,7 @@ class InputVulnerability(InputParameter):
         ```
     """
 
-    cve = models.TextField(
-        max_length=20,
-        validators=[Validator(Regex.CVE.value, code="cve", deny_injections=True)],
-    )
+    cve = models.TextField(max_length=20, validators=[Validator(Regex.CVE, code="cve", deny_injections=True)])
 
     _filters = [
         BaseInput.Filter(type=str, field="cve", processor=lambda v: "cve"),

@@ -30,7 +30,7 @@ class ApiToken(Token, BaseModel):
 
     Example:
         Create a new API token:
-        
+
         ```python
         from datetime import datetime, timedelta
         token = ApiToken.objects.create(
@@ -42,10 +42,7 @@ class ApiToken(Token, BaseModel):
     """
 
     key = models.CharField(max_length=128, unique=True)
-    name = models.TextField(
-        max_length=100,
-        validators=[Validator(Regex.NAME.value, code="name")],
-    )
+    name = models.TextField(max_length=100, validators=[Validator(Regex.NAME, code="name")])
     user = models.ForeignKey(
         AUTH_USER_MODEL,
         related_name="api_tokens",

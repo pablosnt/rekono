@@ -46,12 +46,8 @@ class Project(BaseModel):
         ```
     """
 
-    name = models.TextField(
-        max_length=100,
-        unique=True,
-        validators=[Validator(Regex.NAME.value, code="name")],
-    )
-    description = models.TextField(max_length=300, validators=[Validator(Regex.TEXT.value, code="description")])
+    name = models.TextField(max_length=100, unique=True, validators=[Validator(Regex.NAME, code="name")])
+    description = models.TextField(max_length=300, validators=[Validator(Regex.TEXT, code="description")])
     owner = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True)
     members = models.ManyToManyField(AUTH_USER_MODEL, related_name="projects", blank=True)
     tags = TaggableManager()  # Project tags

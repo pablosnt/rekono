@@ -15,11 +15,7 @@ from wordlists.enums import WordlistType
 
 
 class Wordlist(BaseInput, BaseLike):
-    name = models.TextField(
-        max_length=100,
-        unique=True,
-        validators=[Validator(Regex.NAME.value, code="name")],
-    )
+    name = models.TextField(max_length=100, unique=True, validators=[Validator(Regex.NAME, code="name")])
     type = models.TextField(max_length=10, choices=WordlistType.choices)
     path = models.TextField(max_length=200, unique=True)
     checksum = models.TextField(max_length=128, blank=True, null=True)

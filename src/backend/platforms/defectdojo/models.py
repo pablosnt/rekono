@@ -8,34 +8,24 @@ from targets.models import Target
 
 
 class DefectDojoSettings(BaseEncrypted):
-    server = models.TextField(
-        max_length=100,
-        validators=[Validator(Regex.TARGET.value)],
-        blank=True,
-        null=True,
-    )
+    server = models.TextField(max_length=100, validators=[Validator(Regex.TARGET)], blank=True, null=True)
     _api_token = models.TextField(
         max_length=40,
-        validators=[Validator(Regex.SECRET.value, code="api_token")],
+        validators=[Validator(Regex.SECRET, code="api_token")],
         null=True,
         blank=True,
         db_column="api_token",
     )
     tls_validation = models.BooleanField(default=True)
-    tag = models.TextField(
-        max_length=200,
-        validators=[Validator(Regex.NAME.value, code="tag")],
-        blank=True,
-        null=True,
-    )
+    tag = models.TextField(max_length=200, validators=[Validator(Regex.NAME, code="tag")], blank=True, null=True)
     # Stores Test Type ID to avoid duplicated creation
     test_type_id = models.IntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(999999999)],
         blank=True,
         null=True,
     )
-    test_type = models.TextField(max_length=200, validators=[Validator(Regex.NAME.value, code="test_type")])
-    test = models.TextField(max_length=200, validators=[Validator(Regex.NAME.value, code="test")])
+    test_type = models.TextField(max_length=200, validators=[Validator(Regex.NAME, code="test_type")])
+    test = models.TextField(max_length=200, validators=[Validator(Regex.NAME, code="test")])
     date_format = models.TextField(max_length=15)
     datetime_format = models.TextField(max_length=15)
 

@@ -9,7 +9,7 @@ from platforms.telegram_app.bot.enums import Context, Section
 from platforms.telegram_app.bot.framework import BaseTelegramBot
 from platforms.telegram_app.models import TelegramChat
 from rekono.settings import DESCRIPTION
-from security.cryptography.hashing import hash
+from security.cryptography import Crypto
 from users.models import User
 
 
@@ -69,7 +69,7 @@ class Start(BaseCommand):
         telegram_chat, _ = TelegramChat.objects.update_or_create(
             defaults={
                 "user": None,
-                "otp": hash(plain_otp),
+                "otp": Crypto.hash(plain_otp),
                 "otp_expiration": User.objects.get_otp_expiration_time(),
             },
             chat_id=chat_id,

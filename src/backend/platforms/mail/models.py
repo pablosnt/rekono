@@ -6,16 +6,14 @@ from security.validators.input_validator import Regex, Validator
 
 
 class SMTPSettings(BaseEncrypted):
-    host = models.TextField(max_length=100, validators=[Validator(Regex.TARGET.value)], blank=True, null=True)
+    host = models.TextField(max_length=100, validators=[Validator(Regex.TARGET)], blank=True, null=True)
     port = models.IntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(65535)], blank=True, null=True, default=587
     )
-    username = models.TextField(
-        max_length=100, validators=[Validator(Regex.NAME.value, code="name")], null=True, blank=True
-    )
+    username = models.TextField(max_length=100, validators=[Validator(Regex.NAME, code="name")], null=True, blank=True)
     _password = models.TextField(
         max_length=200,
-        validators=[Validator(Regex.SECRET.value, code="api_token")],
+        validators=[Validator(Regex.SECRET, code="api_token")],
         null=True,
         blank=True,
         db_column="password",

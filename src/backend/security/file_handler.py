@@ -1,5 +1,6 @@
 import hashlib
 import uuid
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -7,18 +8,13 @@ import magic
 from django.core.exceptions import ValidationError
 
 from framework.logging import LoggingEntity
-from rekono.settings import CONFIG
 from settings.models import Settings
 
 
+@dataclass
 class FileHandler(LoggingEntity):
-    def __init__(
-        self,
-        extensions: list[str] = ["txt", "text", ""],
-        mime_types: list[str] = ["text/plain"],
-    ) -> None:
-        self.allowed_extensions = extensions
-        self.allowed_mime_types = mime_types
+    allowed_extensions: list[str] = ["txt", "text", ""]
+    mime_types: list[str] = ["text/plain"]
 
     def _validate_size(self, in_memory_file: Any) -> None:
         max_mb_size = Settings.objects.first().max_uploaded_file_mb
@@ -53,8 +49,8 @@ class FileHandler(LoggingEntity):
             checksum = hashlib.sha512(file.read()).hexdigest()
             return checksum == expected_checksum
 
-    def store_file(self, in_memory_file: Any) -> tuple[str, str, int]:
-        path = CONFIG.wordlists / f"{str(uuid.uuid4())}.txt"
+    def store_file(self, directory: Path, in_memory_file: Any) -> tuple[str, str, int]:
+        path = directory / f"{str(uuid.uuid4())}.txt"
         checksum = hashlib.sha512()
         with path.open("wb+") as stored_file:
             for chunk in in_memory_file.chunks():

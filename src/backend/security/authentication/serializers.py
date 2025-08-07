@@ -5,10 +5,7 @@ from rest_framework import status
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.serializers import CharField, Serializer
-from rest_framework_simplejwt.serializers import (
-    TokenObtainPairSerializer,
-    TokenObtainSerializer,
-)
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, TokenObtainSerializer
 from rest_framework_simplejwt.token_blacklist.models import OutstandingToken
 
 from framework.logging import LoggingEntity
@@ -22,14 +19,11 @@ from users.models import User
 class JwtAuthentication(LoggingEntity):
     user: User = None
 
-    def _login(self) -> dict[str, str]:
+    def login(self) -> dict[str, str]:
         User.objects.invalidate_all_tokens(self.user)
         token = self.__class__.get_token(self.user)
         SMTP().login_notification(self.user)
-        self.logger.info(
-            f"[Security] User {self.user.id} has logged in",
-            extra={"user": self.user.id},
-        )
+        self.logger.info(f"[Security] User {self.user.id} has logged in", extra={"user": self.user.id})
         return {"access": str(token.access_token), "refresh": str(token)}
 
     @classmethod
@@ -47,7 +41,7 @@ class JwtAuthentication(LoggingEntity):
 class LoginSerializer(JwtAuthentication, TokenObtainSerializer):
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         super().validate(attrs)
-        return {"mfa": str(self.__class__.get_mfa_required_token(self.user))} if self.user.mfa else self._login()
+        return {"mfa": str(self.__class__.get_mfa_required_token(self.user))} if self.user.mfa else self.login()
 
 
 class MfaSerializer(Serializer):
@@ -101,4 +95,4 @@ class MfaLoginSerializer(MfaSerializer, MfaRequiredSerializer, JwtAuthentication
         super().validate(attrs)
         if self.user.otp:
             User.objects.remove_otp(self.user)
-        return self._login()
+        return self.login()

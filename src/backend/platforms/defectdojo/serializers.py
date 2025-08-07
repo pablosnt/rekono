@@ -29,10 +29,7 @@ class DefectDojoClientMixin:
 
 class DefectDojoSettingsSerializer(DefectDojoClientMixin, ModelSerializer):
     api_token = ProtectedSecretField(
-        Validator(Regex.SECRET.value, code="api_token").__call__,
-        required=False,
-        allow_null=True,
-        source="secret",
+        Validator(Regex.SECRET, code="api_token").__call__, required=False, allow_null=True, source="secret"
     )
     is_available = SerializerMethodField(read_only=True)
 
@@ -103,14 +100,14 @@ class DefectDojoProductTypeSerializer(BaseDefectDojoSerializer):
         required=True,
         allow_blank=False,
         max_length=100,
-        validators=[Validator(Regex.NAME.value, code="name")],
+        validators=[Validator(Regex.NAME, code="name")],
         write_only=True,
     )
     description = CharField(
         required=True,
         allow_blank=False,
         max_length=500,
-        validators=[Validator(Regex.TEXT.value, code="description")],
+        validators=[Validator(Regex.TEXT, code="description")],
         write_only=True,
     )
 
@@ -129,14 +126,14 @@ class DefectDojoProductSerializer(BaseDefectDojoSerializer):
         required=True,
         allow_blank=False,
         max_length=100,
-        validators=[Validator(Regex.NAME.value, code="name")],
+        validators=[Validator(Regex.NAME, code="name")],
         write_only=True,
     )
     description = CharField(
         required=True,
         allow_blank=False,
         max_length=500,
-        validators=[Validator(Regex.TEXT.value, code="description")],
+        validators=[Validator(Regex.TEXT, code="description")],
         write_only=True,
     )
     # Needed to add project tags to Defect-Dojo product
@@ -177,14 +174,14 @@ class DefectDojoEngagementSerializer(BaseDefectDojoSerializer):
         required=True,
         allow_blank=False,
         max_length=100,
-        validators=[Validator(Regex.NAME.value, code="name")],
+        validators=[Validator(Regex.NAME, code="name")],
         write_only=True,
     )
     description = CharField(
         required=True,
         allow_blank=False,
         max_length=500,
-        validators=[Validator(Regex.TEXT.value, code="description")],
+        validators=[Validator(Regex.TEXT, code="description")],
         write_only=True,
     )
 

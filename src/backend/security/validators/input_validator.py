@@ -26,7 +26,7 @@ class Regex(Enum):
 class Validator(RegexValidator, LoggingEntity):
     def __init__(
         self,
-        regex: Any | None,
+        regex: Regex,
         message: Any | None = "Provided value contains disallowed characters",
         code: str | None = None,
         inverse_match: bool | None = ...,  # type: ignore
@@ -34,15 +34,17 @@ class Validator(RegexValidator, LoggingEntity):
         deny_injections: bool = False,
     ) -> None:
         self.deny_injections = deny_injections
-        super().__init__(regex, message, code, inverse_match, flags)
+        super().__init__(regex.value, message, code, inverse_match, flags)
 
     def __call__(self, value: str | None) -> None:
         if not value:
             raise ValidationError("Value is required", code=self.code, params={"value": value})
         regex_matches = re.fullmatch(self.regex, value)
-        invalid_input = not bool(regex_matches) if self.inverse_match else bool(regex_matches)
-        is_injection = bool(re.findall(Regex.INJECTION.value, value)) if self.deny_injections else False
-        if invalid_input or is_injection:
+        if (
+            (self.inverse_match and not bool(regex_matches))
+            or (not self.inverse_match and bool(regex_matches(regex_matches)))
+            or (self.deny_injections and bool(re.findall(Regex.INJECTION.value, value)))
+        ):
             self.logger.warning(f"[Security] Value '{value}' doesn't match the allowed regex")
             raise ValidationError(self.message, code=self.code, params={"value": value})
 
@@ -54,39 +56,23 @@ class FutureDatetimeValidator(RegexValidator):
 
 
 class PasswordValidator:
-    """Rekono password complexity validator."""
-
     full_match = r"[A-Za-z0-9\W]{12,}"  # Full match with all requirements
     lowercase = r"[a-z]"  # At least one lowercase
     uppercase = r"[A-Z]"  # At least one uppercase
-    digits = r"[0-9]"  # At least one digit
-    symbols = r"[\W]"  # At least one symbol
+    digit = r"[0-9]"  # At least one digit
+    symbol = r"[\W]"  # At least one symbol
 
     def validate(self, password: str, user: Any = None) -> None:
-        """Validate if password match the complexity requirements.
-
-        Args:
-            password (str): Password to check
-            user (User, optional): User that is establishing the password. Defaults to None.
-
-        Raises:
-            ValidationError: Raised if password doesn't match the complexity requirements
-        """
         if not bool(re.fullmatch(self.full_match, password)):  # Full check
             raise ValidationError(self.get_help_text())
-        if not bool(re.search(self.lowercase, password)):  # Lower case check
-            raise ValidationError("Your password must contain at least 1 lowercase")
-        if not bool(re.search(self.uppercase, password)):  # Upper case check
-            raise ValidationError("Your password must contain at least 1 uppercase")
-        if not bool(re.search(self.digits, password)):  # Digits check
-            raise ValidationError("Your password must contain at least 1 digit")
-        if not bool(re.search(self.symbols, password)):  # Symbols check
-            raise ValidationError("Your password must contain at least 1 symbol")
+        for regex, char_type in [
+            (self.lowercase, "lowercase"),
+            (self.uppercase, "uppercase"),
+            (self.digit, "digit"),
+            (self.symbol, "symbol"),
+        ]:
+            if not bool(re.search(regex, password)):
+                raise ValidationError(f"Your password must contain at least 1 {char_type}")
 
     def get_help_text(self) -> str:
-        """Get help message.
-
-        Returns:
-            str: Help message
-        """
         return "Your password must contain at least 1 lowercase, 1 uppercase, 1 digit and 1 symbol"

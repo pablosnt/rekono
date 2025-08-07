@@ -7,10 +7,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
-from security.authentication.serializers import (
-    MfaLoginSerializer,
-    SendMfaEmailSerializer,
-)
+from security.authentication.serializers import MfaLoginSerializer, SendMfaEmailSerializer
 from security.authorization.permissions import IsNotAuthenticated
 
 
@@ -37,6 +34,4 @@ class SendEmailMfaView(GenericAPIView):
 
 
 class RefreshTokenViewSet(TokenRefreshView):
-    """Token ViewSet that includes the refresh access token feature."""
-
     throttle_scope = "refresh"
