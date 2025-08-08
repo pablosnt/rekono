@@ -4,8 +4,6 @@ from django.db import models
 from framework.models import BaseModel
 from security.validators.input_validator import Regex, Validator
 
-# Create your models here.
-
 
 class Settings(BaseModel):
     # Max size in MB for uploaded files
