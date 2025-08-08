@@ -12,8 +12,6 @@ from security.validators.input_validator import Regex
 from security.validators.target_validator import TargetValidator
 from targets.enums import TargetType
 
-# Create your models here.
-
 
 class Target(BaseInput):
     project = models.ForeignKey(Project, related_name="targets", on_delete=models.CASCADE)
@@ -33,17 +31,6 @@ class Target(BaseInput):
 
     @staticmethod
     def get_type(target: str) -> str:
-        """Get target type from target address.
-
-        Args:
-            target (str): Target value
-
-        Raises:
-            ValidationError: Raised if target doesn't match any supported type
-
-        Returns:
-            str: Target type associated to the target
-        """
         try:
             # Check if target is an IP address (IPv4 or IPv6)
             ip = ipaddress.ip_address(target)
@@ -75,9 +62,4 @@ class Target(BaseInput):
         )
 
     def __str__(self) -> str:
-        """Instance representation in text format.
-
-        Returns:
-            str: String value that identifies this instance
-        """
         return self.target
