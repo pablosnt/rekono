@@ -1,3 +1,10 @@
+"""URL routing configuration for DefectDojo integration REST API endpoints.
+
+Defines URL patterns and routing for DefectDojo integration management endpoints
+using Django REST framework's SimpleRouter for standardized API structure.
+Includes routes for settings, synchronization, and entity creation operations.
+"""
+
 from rest_framework.routers import SimpleRouter
 
 from platforms.defectdojo.views import (

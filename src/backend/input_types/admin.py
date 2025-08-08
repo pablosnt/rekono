@@ -8,4 +8,4 @@ from django.contrib import admin
 
 from input_types.models import InputType
 
-admin.register(InputType)
+admin.site.register(InputType)

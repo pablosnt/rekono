@@ -1,9 +1,33 @@
+"""Role definitions and permission mappings for Rekono authorization.
+
+Defines the role hierarchy and comprehensive permission mappings for all
+models and operations within the Rekono platform. This module implements
+role-based access control (RBAC) with fine-grained permissions for security,
+compliance, and operational segregation of duties.
+"""
+
 from django.db import models
 from django.db.models.enums import Choices
 
 
 class Role(models.TextChoices):
-    """User role names."""
+    """Enumeration of user roles in the Rekono platform.
+
+    Defines the hierarchical role structure for role-based access control.
+    Each role represents a different level of access and operational capability
+    within the security testing platform.
+
+    Roles:
+        ADMIN: System administrators with full access to all resources and operations.
+               Can manage users, system settings, and perform all security operations.
+        AUDITOR: Security auditors with read-write access to security data and findings.
+                Can perform security testing, manage findings, and create reports.
+        READER: Read-only users with access to security data and reports for review.
+               Can view findings, reports, and security data but cannot modify them.
+
+    Role Hierarchy:
+        Admin > Auditor > Reader (in terms of access privileges)
+    """
 
     ADMIN = "Admin"
     AUDITOR = "Auditor"
@@ -16,6 +40,31 @@ Role: type[Choices] = Role
 
 
 ROLES = {
+    """Comprehensive role-based permission mapping for all Rekono models.
+
+    Defines fine-grained permissions for each Django model based on user roles.
+    This mapping controls access to CRUD operations (Create, Read, Update, Delete)
+    for every model in the system, enabling secure role-based access control.
+
+    Permission Structure:
+        - view: Roles allowed to read/view the model instances
+        - add: Roles allowed to create new model instances  
+        - change: Roles allowed to modify existing model instances
+        - delete: Roles allowed to delete model instances
+
+    Security Principles:
+        - Principle of least privilege: Users only get minimum required access
+        - Model-specific controls: Some models have restricted access patterns
+        - Empty lists indicate no roles have that specific permission
+
+    Example:
+        "user": {
+            "view": [Role.ADMIN],      # Only admins can view users
+            "add": [Role.ADMIN],       # Only admins can create users
+            "change": [Role.ADMIN],    # Only admins can modify users
+            "delete": [Role.ADMIN]     # Only admins can delete users
+        }
+    """
     "apitoken": {
         "view": [Role.ADMIN, Role.AUDITOR, Role.READER],
         "add": [Role.ADMIN, Role.AUDITOR, Role.READER],
