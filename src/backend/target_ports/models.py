@@ -8,12 +8,8 @@ from framework.models import BaseInput
 from security.validators.input_validator import Regex, Validator
 from targets.models import Target
 
-# Create your models here.
-
 
 class TargetPort(BaseInput):
-    """Target port model."""
-
     target = models.ForeignKey(Target, related_name="target_ports", on_delete=models.CASCADE)
     port = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(65535)])
     path = models.TextField(max_length=100, validators=[Validator(Regex.PATH, code="path")], blank=True, null=True)
@@ -43,9 +39,4 @@ class TargetPort(BaseInput):
         return output
 
     def __str__(self) -> str:
-        """Instance representation in text format.
-
-        Returns:
-            str: String value that identifies this instance
-        """
         return f"{self.target.__str__()} - {self.port}"
