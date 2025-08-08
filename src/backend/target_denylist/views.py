@@ -7,8 +7,6 @@ from target_denylist.filters import TargetDenylistFilter
 from target_denylist.models import TargetDenylist
 from target_denylist.serializers import TargetDenylistSerializer
 
-# Create your views here.
-
 
 class TargetDenylistViewSet(BaseViewSet):
     queryset = TargetDenylist.objects.all()
