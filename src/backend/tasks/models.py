@@ -1,3 +1,10 @@
+"""Task models for Rekono.
+
+Defines the Task model for managing security testing task execution with scheduling,
+dependency management, and execution coordination. Supports both single tool
+execution and complex multi-step security processes.
+"""
+
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
@@ -14,6 +21,46 @@ from wordlists.models import Wordlist
 
 
 class Task(BaseModel):
+    """Model representing security testing tasks for tool and process execution.
+
+    Represents a security testing task that can execute either a single security tool
+    or a complete multi-step security process against a target. Supports advanced
+    scheduling, recurring execution, and comprehensive parameter management.
+
+    Attributes:
+        rq_job_id (TextField): Redis Queue job identifier for background processing (optional, max 50 characters)
+        target (ForeignKey): Target system for task execution
+        process (ForeignKey): Multi-step process to execute (optional, mutually exclusive with configuration)
+        configuration (ForeignKey): Single tool configuration to execute (optional, mutually exclusive with process)
+        intensity (IntegerField): Execution intensity level from Intensity enum (default: NORMAL)
+        executor (ForeignKey): User who created and owns this task (optional)
+        scheduled_at (DateTimeField): Future execution time for scheduled tasks (optional)
+        repeat_in (IntegerField): Interval value for recurring tasks (1-60, optional)
+        repeat_time_unit (TextField): Time unit for repeat interval from TimeUnit enum (optional)
+        creation (DateTimeField): Task creation timestamp (auto-generated)
+        enqueued_at (DateTimeField): When task was queued for execution (optional)
+        start (DateTimeField): Task execution start time (optional)
+        end (DateTimeField): Task execution completion time (optional)
+        wordlists (ManyToManyField): Wordlists to use during execution
+        input_technologies (ManyToManyField): Technology inputs for tool execution
+        input_vulnerabilities (ManyToManyField): Vulnerability inputs for tool execution
+
+    Example:
+        Create a scheduled tool task:
+
+        ```python
+        task = Task.objects.create(
+            target=my_target,
+            configuration=nmap_config,
+            intensity=Intensity.HIGH,
+            executor=user,
+            scheduled_at=datetime.now() + timedelta(hours=1),
+            repeat_in=24,
+            repeat_time_unit=TimeUnit.HOURS
+        )
+        ```
+    """
+
     # Job Id in the tasks queue
     rq_job_id = models.TextField(max_length=50, blank=True, null=True)
     target = models.ForeignKey(Target, related_name="tasks", on_delete=models.CASCADE)
@@ -47,4 +94,9 @@ class Task(BaseModel):
     _project_field = "target__project"
 
     def __str__(self) -> str:
+        """Return string representation of the task.
+
+        Returns:
+            str: String in format "target - process/configuration"
+        """
         return f"{self.target.__str__()} - {(self.process or self.configuration).__str__()}"
