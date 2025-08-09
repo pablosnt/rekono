@@ -21,6 +21,7 @@ class NvdnistConfig(BaseApp, AppConfig):
         name (str): Application name for Django registration
         skip_fixtures_if_model_exists (bool): Fixture loading optimization flag
     """
+
     name = "platforms.nvdnist"
     skip_fixtures_if_model_exists = True
 

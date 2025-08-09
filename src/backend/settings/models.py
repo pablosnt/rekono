@@ -51,6 +51,7 @@ class Settings(BaseModel):
         )
         ```
     """
+
     max_uploaded_file_mb = models.IntegerField(
         default=512, validators=[MinValueValidator(128), MaxValueValidator(3072)]
     )

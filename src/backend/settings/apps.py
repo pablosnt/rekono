@@ -23,6 +23,7 @@ class SettingsConfig(BaseApp, AppConfig):
         name (str): Application name identifier for Django registration.
         skip_fixtures_if_model_exists (bool): Prevents fixture loading conflicts.
     """
+
     name = "settings"
     skip_fixtures_if_model_exists = True
 

@@ -29,6 +29,7 @@ class SettingsViewSet(BaseViewSet):
         permission_classes: Authentication and model permission requirements.
         http_method_names: Restricted to GET and PUT operations for security.
     """
+
     queryset = Settings.objects.all()
     serializer_class = SettingsSerializer
     permission_classes = [IsAuthenticated, RekonoModelPermission]

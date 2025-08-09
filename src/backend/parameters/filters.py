@@ -4,7 +4,6 @@ Provides filtering capabilities for parameter API queries including
 project and target based filtering with text-based search options.
 """
 
-
 from parameters.framework.filters import InputParameterFilter
 from parameters.models import InputTechnology, InputVulnerability
 

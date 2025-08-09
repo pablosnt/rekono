@@ -17,6 +17,7 @@ class SettingsSerializer(ModelSerializer):
     REST API operations. Provides validation and secure data transformation
     for global platform configuration management.
     """
+
     class Meta:
         """Serializer metadata configuration for Settings model.
 
@@ -30,6 +31,7 @@ class SettingsSerializer(ModelSerializer):
                 Includes configuration parameters for file uploads, proxy settings,
                 and security policy controls.
         """
+
         model = Settings
         fields = (
             "id",
