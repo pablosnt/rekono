@@ -13,7 +13,6 @@ class WordlistsConfig(BaseApp, AppConfig):
     skip_fixtures_if_model_exists = True
 
     def ready(self) -> None:
-        """Run code as soon as the registry is fully populated."""
         super().ready()
         post_migrate.connect(self.update_default_wordlists_size, sender=self)
 
@@ -22,7 +21,6 @@ class WordlistsConfig(BaseApp, AppConfig):
         self.update_default_wordlists_size()
 
     def update_default_wordlists_size(self, **kwargs: Any) -> None:
-        """Update default wordlists size."""
         for wordlist in self._get_models()[0].objects.all():
             if Path(wordlist.path).is_file() and os.access(wordlist.path, os.R_OK):  # pragma: no cover
                 with open(wordlist.path, "rb+") as wordlist_file:

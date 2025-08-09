@@ -11,8 +11,6 @@ from security.validators.input_validator import Regex, Validator
 from targets.models import Target
 from wordlists.enums import WordlistType
 
-# Create your models here.
-
 
 class Wordlist(BaseInput, BaseLike):
     name = models.TextField(max_length=100, unique=True, validators=[Validator(Regex.NAME, code="name")])
@@ -28,25 +26,12 @@ class Wordlist(BaseInput, BaseLike):
     parse_mapping = {InputKeyword.WORDLIST: "path"}
 
     def filter(self, input: Any, target: Target | None = None) -> bool:
-        """Check if this instance is valid based on input filter.
-
-        Args:
-            input (Any): Tool input whose filter will be applied
-
-        Returns:
-            bool: Indicate if this instance match the input filter or not
-        """
         check = Path(self.path).is_file()  # Check if wordlist file exists
-        if check and self.checksum:  # If checksum exists
+        if check and self.checksum:  # If checksum exists, verifies it
             check = check and FileHandler().validate_filepath_checksum(self.path, self.checksum)
-        if input.filter:  # If input filter is established
+        if input.filter:
             return super().filter(input, target) and check
         return check
 
     def __str__(self) -> str:
-        """Instance representation in text format.
-
-        Returns:
-            str: String value that identifies this instance
-        """
         return self.name

@@ -3,8 +3,6 @@ from wordlists.models import Wordlist
 
 
 class WordlistFilter(LikeFilter):
-    """FilterSet to filter and sort Wordlist entities."""
-
     class Meta:
         model = Wordlist
         fields = {
