@@ -12,12 +12,8 @@ from tools.enums import Intensity
 from tools.models import Configuration
 from wordlists.models import Wordlist
 
-# Create your models here.
-
 
 class Task(BaseModel):
-    """Task model."""
-
     # Job Id in the tasks queue
     rq_job_id = models.TextField(max_length=50, blank=True, null=True)
     target = models.ForeignKey(Target, related_name="tasks", on_delete=models.CASCADE)
@@ -51,9 +47,4 @@ class Task(BaseModel):
     _project_field = "target__project"
 
     def __str__(self) -> str:
-        """Instance representation in text format.
-
-        Returns:
-            str: String value that identifies this instance
-        """
         return f"{self.target.__str__()} - {(self.process or self.configuration).__str__()}"

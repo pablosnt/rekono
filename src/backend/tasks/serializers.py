@@ -22,27 +22,15 @@ from users.serializers import SimpleUserSerializer
 
 class TaskSerializer(RelatedNotesSerializer):
     target_id = PrimaryKeyRelatedField(
-        many=False,
-        write_only=True,
-        required=True,
-        source="target",
-        queryset=Target.objects.all(),
+        many=False, write_only=True, required=True, source="target", queryset=Target.objects.all()
     )
     target = SimpleTargetSerializer(many=False, read_only=True)
     process_id = PrimaryKeyRelatedField(
-        many=False,
-        write_only=True,
-        required=False,
-        source="process",
-        queryset=Process.objects.all(),
+        many=False, write_only=True, required=False, source="process", queryset=Process.objects.all()
     )
     process = SimpleProcessSerializer(many=False, read_only=True)
     configuration_id = PrimaryKeyRelatedField(
-        many=False,
-        write_only=True,
-        required=False,
-        source="configuration",
-        queryset=Configuration.objects.all(),
+        many=False, write_only=True, required=False, source="configuration", queryset=Configuration.objects.all()
     )
     configuration = ConfigurationSerializer(many=False, read_only=True)
     intensity = IntegerChoicesField(model=IntensityEnum, required=False)
@@ -95,9 +83,10 @@ class TaskSerializer(RelatedNotesSerializer):
         for status in [Status.RUNNING, Status.CANCELLED, Status.ERROR]:
             if instance.executions.filter(status=status).count() > 0:
                 return status
-        if instance.executions.count() == 0:
-            return Status.REQUESTED
-        elif instance.executions.exclude(status__in=[Status.COMPLETED, Status.SKIPPED]).count() == 0:
+        if (
+            instance.executions.count() > 0
+            and instance.executions.exclude(status__in=[Status.COMPLETED, Status.SKIPPED]).count() == 0
+        ):
             return Status.COMPLETED
         return Status.REQUESTED
 
@@ -107,12 +96,7 @@ class TaskSerializer(RelatedNotesSerializer):
             math.ceil(
                 (
                     instance.executions.filter(
-                        status__in=[
-                            Status.ERROR,
-                            Status.COMPLETED,
-                            Status.SKIPPED,
-                            Status.CANCELLED,
-                        ]
+                        status__in=[Status.ERROR, Status.COMPLETED, Status.SKIPPED, Status.CANCELLED]
                     ).count()
                     / total
                 )
@@ -128,8 +112,7 @@ class TaskSerializer(RelatedNotesSerializer):
         if attrs.get("configuration"):
             attrs["process"] = None
             if not Intensity.objects.filter(
-                tool=cast(Configuration, attrs.get("configuration")).tool,
-                value=attrs.get("intensity"),
+                tool=cast(Configuration, attrs.get("configuration")).tool, value=attrs.get("intensity")
             ).exists():
                 raise ValidationError(
                     f"Invalid intensity {attrs['intensity']} for tool {cast(Configuration, attrs.get('configuration')).tool.name}",
@@ -140,8 +123,7 @@ class TaskSerializer(RelatedNotesSerializer):
                 (InputTypeName.VULNERABILITY, "input_vulnerabilities"),
             ]:
                 if not Input.objects.filter(
-                    argument__tool=cast(Configuration, attrs.get("configuration")).tool,
-                    type__name=input_type,
+                    argument__tool=cast(Configuration, attrs.get("configuration")).tool, type__name=input_type
                 ):
                     attrs[field] = []
         elif attrs.get("process"):
@@ -161,14 +143,6 @@ class TaskSerializer(RelatedNotesSerializer):
         return super().validate(attrs)
 
     def create(self, validated_data: dict[str, Any]) -> Task:
-        """Create instance from validated data.
-
-        Args:
-            validated_data (dict[str, Any]): Validated data
-
-        Returns:
-            Task: Created instance
-        """
         task = super().create(validated_data)
         TasksQueue().enqueue(task)
         return task

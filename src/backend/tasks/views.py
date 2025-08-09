@@ -15,33 +15,19 @@ from executions.enums import Status
 from executions.queues import ExecutionsQueue
 from framework.views import BaseViewSet
 from rekono.settings import CONFIG
-from security.authorization.permissions import (
-    ProjectMemberPermission,
-    RekonoModelPermission,
-)
+from security.authorization.permissions import ProjectMemberPermission, RekonoModelPermission
 from tasks.filters import TaskFilter
 from tasks.models import Task
 from tasks.queues import TasksQueue
 from tasks.serializers import TaskSerializer
-
-# Create your views here.
 
 
 class TaskViewSet(BaseViewSet):
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
     filterset_class = TaskFilter
-    permission_classes = [
-        IsAuthenticated,
-        RekonoModelPermission,
-        ProjectMemberPermission,
-    ]
-    search_fields = [
-        "target__target",
-        "process__name",
-        "configuration__name",
-        "configuration__tool__name",
-    ]
+    permission_classes = [IsAuthenticated, RekonoModelPermission, ProjectMemberPermission]
+    search_fields = ["target__target", "process__name", "configuration__name", "configuration__tool__name"]
     ordering_fields = [
         "id",
         "target",
@@ -59,23 +45,12 @@ class TaskViewSet(BaseViewSet):
     executions_queue = ExecutionsQueue()
 
     def destroy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        """Cancel task.
-
-        Args:
-            request (Request): Received HTTP request
-
-        Returns:
-            Response: HTTP response
-        """
-        task = self.get_object()
+        task = self.get_object_or_404()
         has_executions = task.executions.exists()
         running_executions = task.executions.filter(status__in=[Status.REQUESTED, Status.RUNNING]).all()
-        if not running_executions and has_executions:
+        if not running_executions.exists() and has_executions:
             self.logger.warning(f"[Task] Task {task.id} can't be cancelled")
-            return Response(
-                {"task": f"Task {task.id} can't be cancelled"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            return Response({"task": f"Task {task.id} can't be cancelled"}, status=status.HTTP_400_BAD_REQUEST)
         if task.rq_job_id:
             self.tasks_queue.cancel_job(task.rq_job_id)
             self.tasks_queue.delete_job(task.rq_job_id)
@@ -90,6 +65,8 @@ class TaskViewSet(BaseViewSet):
                         pass
                 else:
                     self.executions_queue.cancel_job(execution.rq_job_id)
+                # TODO: Test this:
+                self.tasks_queue.delete_job(execution.rq_job_id)
             self.logger.info(f"[Execution] Execution {execution.id} has been cancelled")
             execution.status = Status.CANCELLED
             execution.end = timezone.now()
@@ -104,16 +81,7 @@ class TaskViewSet(BaseViewSet):
     @extend_schema(request=None, responses={200: TaskSerializer})
     @action(detail=True, methods=["POST"])
     def repeat(self, request: Request, pk: str) -> Response:
-        """Repeat task execution.
-
-        Args:
-            request (Request): Received HTTP request
-            pk (str): Id of the task to repeat
-
-        Returns:
-            Response: HTTP response
-        """
-        task = self.get_object()
+        task = self.get_object_or_404()
         if task.executions.filter(status__in=[Status.REQUESTED, Status.RUNNING]).exists():
             return Response({"task": "Task is still running"}, status=status.HTTP_400_BAD_REQUEST)
         new_task = Task.objects.create(
@@ -127,7 +95,4 @@ class TaskViewSet(BaseViewSet):
         new_task.input_technologies.set(task.input_technologies.all())
         new_task.input_vulnerabilities.set(task.input_vulnerabilities.all())
         self.tasks_queue.enqueue(new_task)
-        return Response(
-            self.get_serializer(instance=new_task).data,
-            status=status.HTTP_201_CREATED,
-        )
+        return Response(self.get_serializer(instance=new_task).data, status=status.HTTP_201_CREATED)

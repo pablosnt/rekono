@@ -1,5 +1,7 @@
+from dataclasses import dataclass
 from datetime import timedelta
-from typing import Any
+from functools import cached_property
+from typing import Any, Sequence
 
 from django.db.models import Max
 from django.utils import timezone
@@ -17,26 +19,47 @@ from tools.enums import Intensity as IntensityValue
 from tools.models import Intensity
 
 
+# TODO: Test this:
+@dataclass
+class PlanJob:
+    step: Step
+    dependencies = []
+    jobs = []
+
+    @cached_property
+    def inputs(self) -> Sequence[InputType]:
+        return InputType.objects.filter(inputs__argument__tool=self.step.configuration.tool).distinct()
+
+    @cached_property
+    def outputs(self) -> Sequence[InputType]:
+        return InputType.objects.filter(outputs__configuration=self.step.configuration).distinct()
+
+    def add_dependency(self, dependency: "PlanJob") -> None:
+        self.dependencies.append(dependency)
+
+    def add_job(self, dependency: Job) -> None:
+        self.dependencies.append(dependency)
+
+    def __eq__(self, other: Any) -> bool:
+        if not isinstance(other, PlanJob):
+            return False
+        return self.step.id == other.step.id
+
+    def __hash__(self) -> int:
+        return hash(self.step.id)
+
+
 class TasksQueue(BaseScanQueue):
     name = "tasks"
 
     def enqueue(self, task: Task) -> Job:
         if task.scheduled_at:
             task.enqueued_at = task.scheduled_at
-            job = self.queue.enqueue_at(
-                task.scheduled_at,
-                self.consume,
-                task=task,
-                on_success=self._scheduled_callback,
-            )
+            job = self.queue.enqueue_at(task.scheduled_at, self.consume, task=task, on_success=self._scheduled_callback)
             self.logger.info(f"[Task] Task {task.id} will be enqueued at {task.scheduled_at}")
         else:
             task.enqueued_at = timezone.now()
-            job = self.queue.enqueue(
-                self.consume,
-                task=task,
-                on_success=self._scheduled_callback,
-            )
+            job = self.queue.enqueue(self.consume, task=task, on_success=self._scheduled_callback)
             self.logger.info(f"[Task] Task {task.id} has been enqueued")
         task.rq_job_id = job.id
         task.save(update_fields=["enqueued_at", "rq_job_id"])
@@ -77,7 +100,7 @@ class TasksQueue(BaseScanQueue):
 
     @staticmethod
     def _consume_process_task(task: Task) -> None:
-        plan: list[dict[str, Any]] = []
+        plan: list[PlanJob] = []
         steps = (
             Step.objects.annotate(
                 max_input=Max("configuration__tool__arguments__inputs__type__id"),
@@ -88,19 +111,13 @@ class TasksQueue(BaseScanQueue):
         )
         executions_queue = ExecutionsQueue()
         for step in steps:
-            item = {
-                "step": step,
-                "inputs": InputType.objects.filter(inputs__argument__tool=step.configuration.tool).distinct(),
-                "outputs": InputType.objects.filter(outputs__configuration=step.configuration).distinct(),
-                "dependencies": [],
-                "jobs": [],
-            }
+            item = PlanJob(step)
             if Intensity.objects.filter(tool=step.configuration.tool, value__lte=task.intensity).exists():
                 for execution_job in plan:
-                    for output in execution_job.get("outputs", []):
-                        if output in item.get("inputs", []):
-                            if execution_job["step"].id not in [d["step"].id for d in item["dependencies"]]:
-                                item["dependencies"].append(execution_job)
+                    for output in execution_job.outputs:
+                        if output in item.inputs:
+                            if execution_job not in item.dependencies:
+                                item.add_dependency(execution_job)
                             break
                 plan.append(item)
             else:
@@ -121,7 +138,7 @@ class TasksQueue(BaseScanQueue):
             )
             for parameters in executions:
                 execution = Execution.objects.create(task=task, configuration=execution_job["step"].configuration)
-                execution_job["jobs"].append(
+                execution_job.add_job(
                     executions_queue.enqueue(
                         execution,
                         parameters.findings,
@@ -129,7 +146,7 @@ class TasksQueue(BaseScanQueue):
                         parameters.input_vulnerabilities,
                         parameters.input_technologies,
                         parameters.wordlists,
-                        dependencies=sum([d["jobs"] for d in execution_job["dependencies"]], []),
+                        dependencies=sum([d.jobs for d in execution_job.dependencies], []),
                     )
                 )
 
@@ -151,10 +168,7 @@ class TasksQueue(BaseScanQueue):
             new_task.input_vulnerabilities.set(result.input_vulnerabilities.all())
             self = TasksQueue()
             job = self.queue.enqueue_at(
-                result.enqueued_at,
-                self.consume,
-                task=result,
-                on_success=self._scheduled_callback,
+                result.enqueued_at, self.consume, task=result, on_success=self._scheduled_callback
             )
             BaseScanQueue.logger.info(f"[Task] Scheduled task {result.id} has been enqueued again")
             new_task.rq_job_id = job.id
