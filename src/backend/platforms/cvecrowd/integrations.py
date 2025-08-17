@@ -18,7 +18,7 @@ from findings.models import Vulnerability
 from framework.platforms import BaseIntegration
 from platforms.cvecrowd.models import CveCrowdSettings
 from platforms.mail.notifications import SMTP
-from platforms.telegram_app.notifications.notifications import Telegram
+from platforms.telegram_app.notifications import Telegram
 
 
 class CveCrowd(BaseIntegration):

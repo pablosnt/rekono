@@ -33,7 +33,7 @@ from findings.models import (
 )
 from framework.views import BaseViewSet
 from platforms.mail.notifications import SMTP
-from platforms.telegram_app.notifications.notifications import Telegram
+from platforms.telegram_app.notifications import Telegram
 from projects.models import Project
 from rekono.settings import CONFIG, STATIC_URL, STATICFILES_DIRS
 from reporting.enums import FindingName, ReportFormat, ReportStatus

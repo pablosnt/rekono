@@ -1,8 +1,6 @@
 from django.db import models
 from django.db.models.enums import Choices
 
-# Create your enums here.
-
 
 class Intensity(models.IntegerChoices):
     SNEAKY = 1  # Softest
@@ -20,6 +18,7 @@ class Stage(models.IntegerChoices):
     EXPLOITATION = 5
 
 
-# https://github.com/google/pytype/issues/1048
+# Type annotation workaround for pytype compatibility
+# See: https://github.com/google/pytype/issues/1048
 Intensity: type[Choices] = Intensity
 Stage: type[Stage] = Stage

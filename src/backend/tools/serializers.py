@@ -5,22 +5,10 @@ from rest_framework.serializers import ModelSerializer, SerializerMethodField
 from framework.fields import IntegerChoicesField
 from framework.serializers import LikeSerializer
 from input_types.enums import InputTypeName
-from input_types.serializers import InputTypeSerializer
 from tools.enums import Intensity as IntensityEnum
 from tools.enums import Stage
 from tools.fields import StageField
-from tools.models import Argument, Configuration, Intensity, Output, Tool
-
-
-class OutputSerializer(ModelSerializer):
-    type = InputTypeSerializer(many=False, read_only=True)
-
-    class Meta:
-        model = Output
-        fields = (
-            "id",
-            "type",
-        )
+from tools.models import Argument, Configuration, Intensity, Tool
 
 
 class IntensitySerializer(ModelSerializer):
@@ -66,8 +54,8 @@ class ToolSerializer(LikeSerializer):
             "input_vulnerabilities",
         )
 
-    def _get_argument_requirement(self, **kwargs: Any) -> dict[str, bool]:
-        argument = Argument.objects.filter(**kwargs)
+    def _get_argument_requirement(self, tool: Tool, input_type: InputTypeName) -> dict[str, bool]:
+        argument = Argument.objects.filter(tool=tool, inputs__type__name=input_type)
         return (
             {"required": argument.first().required, "supported": True}
             if argument.exists()
@@ -75,29 +63,25 @@ class ToolSerializer(LikeSerializer):
         )
 
     def get_wordlists(self, instance: Any) -> dict[str, bool]:
-        output = self._get_argument_requirement(tool=instance, inputs__type__name=InputTypeName.WORDLIST)
+        output = self._get_argument_requirement(instance, InputTypeName.WORDLIST)
         if instance.name == "Gobuster":
+            # There are two wordlist arguments for Gobuster, one to get a
+            # subdomains wordlist and other to get an endpoints wordlist.
+            # So, none can be marked as required, but they actually are
             output["required"] = True
         return output
 
     def get_input_technologies(self, instance: Any) -> dict[str, bool]:
-        return self._get_argument_requirement(tool=instance, inputs__type__name=InputTypeName.TECHNOLOGY)
+        return self._get_argument_requirement(instance, InputTypeName.TECHNOLOGY)
 
     def get_input_vulnerabilities(self, instance: Any) -> dict[str, bool]:
-        return self._get_argument_requirement(tool=instance, inputs__type__name=InputTypeName.VULNERABILITY)
+        return self._get_argument_requirement(instance, InputTypeName.VULNERABILITY)
 
 
 class SimpleToolSerializer(ModelSerializer):
     class Meta:
         model = Tool
-        fields = (
-            "id",
-            "name",
-            "command",
-            "version",
-            "reference",
-            "icon",
-        )
+        fields = ("id", "name", "command", "version", "reference", "icon")
 
 
 class ConfigurationSerializer(SimpleConfigurationSerializer):

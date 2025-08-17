@@ -2,6 +2,7 @@ import importlib
 import re
 import shutil
 import subprocess
+from functools import cached_property
 from pathlib import Path
 from typing import Any
 
@@ -13,13 +14,12 @@ from rekono.settings import CONFIG
 from tools.enums import Intensity as IntensityEnum
 from tools.enums import Stage
 
-# Create your models here.
-
 
 class Tool(BaseLike):
     name = models.TextField(max_length=30, unique=True)
     command = models.TextField(max_length=30)
     script = models.TextField(max_length=100, blank=True, null=True)
+    # TODO: lower these default values in the fixtures
     script_directory_property = models.TextField(max_length=100, blank=True, null=True)
     run_directory_property = models.TextField(max_length=100, blank=True, null=True)
     ignore_exit_code = models.BooleanField(default=False)
@@ -46,29 +46,27 @@ class Tool(BaseLike):
             cls = getattr(module, f"Base{type[0].upper() + type[1:].lower()}")
         return cls
 
-    def get_parser_class(self) -> Any:
+    @cached_property
+    def parser_class(self) -> Any:
         return self._get_related_class("tools.parsers", self.name)
 
-    def get_executor_class(self) -> Any:
+    @cached_property
+    def executor_class(self) -> Any:
         return self._get_related_class("tools.executors", self.name)
 
     def update_status(self) -> None:
-        self.is_installed = (
-            self.command
-            and shutil.which(self.command) is not None
-            and (
-                (not self.script and not self.script_directory_property)
-                or (
-                    Path(getattr(CONFIG, self.script_directory_property.lower())).is_dir()
-                    and (Path(getattr(CONFIG, self.script_directory_property.lower())) / self.script).is_file()
-                )
-            )
-        )
-        update_fields = ["is_installed"]
-        if self.is_installed:
-            self.version = self._parse_version()
-            update_fields.append("version")
-        self.save(update_fields=update_fields)
+        self.is_installed = self._is_installed()
+        self.version = self._parse_version() if self.is_installed else None
+        self.save(update_fields=["is_installed", "version"])
+
+    def _is_installed(self) -> bool:
+        if self.command and not shutil.which(self.command):
+            return False
+        if self.script_directory_property:
+            path = Path(getattr(CONFIG, self.script_directory_property.lower()))
+            if not path.is_dir() or not (path / self.script).is_file():
+                return False
+        return True
 
     def _parse_version(self) -> str | None:
         version_regex = r"(?!m)[a-z]?[\d]+\.[\d]+\.?[\d]*-?[a-z]*"
@@ -78,6 +76,9 @@ class Tool(BaseLike):
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
                 text=True,
+                cwd=Path(getattr(CONFIG, self.script_directory_property.lower()))
+                if self.script_directory_property
+                else None,
             )
             if process.returncode == 0:
                 version = re.search(
@@ -91,11 +92,6 @@ class Tool(BaseLike):
         return None
 
     def __str__(self) -> str:
-        """Instance representation in text format.
-
-        Returns:
-            str: String value that identifies this instance
-        """
         return self.name
 
 
@@ -105,11 +101,6 @@ class Intensity(BaseModel):
     value = models.IntegerField(choices=IntensityEnum.choices, default=IntensityEnum.NORMAL)
 
     def __str__(self) -> str:
-        """Instance representation in text format.
-
-        Returns:
-            str: String value that identifies this instance
-        """
         return f"{self.tool.__str__()} - {IntensityEnum(self.value).name}"
 
 
@@ -124,11 +115,6 @@ class Configuration(BaseModel):
         constraints = [models.UniqueConstraint(fields=["tool", "name"], name="unique_configuration")]
 
     def __str__(self) -> str:
-        """Instance representation in text format.
-
-        Returns:
-            str: String value that identifies this instance
-        """
         return f"{self.tool.__str__()} - {self.name}"
 
 
@@ -137,17 +123,13 @@ class Argument(BaseModel):
     name = models.TextField(max_length=20)
     argument = models.TextField(max_length=50, default="", blank=True)
     required = models.BooleanField(default=False)
-    multiple = models.BooleanField(default=False)  # Accepts multiple BaseInputs or not
+    # Indicates if multiple BaseInputs are accepted
+    multiple = models.BooleanField(default=False)
 
     class Meta:
         constraints = [models.UniqueConstraint(fields=["tool", "name"], name="unique_argument")]
 
     def __str__(self) -> str:
-        """Instance representation in text format.
-
-        Returns:
-            str: String value that identifies this instance
-        """
         return f"{self.tool.__str__()} - {self.name}"
 
 
@@ -161,11 +143,6 @@ class Input(BaseModel):
         constraints = [models.UniqueConstraint(fields=["argument", "order"], name="unique_input")]
 
     def __str__(self) -> str:
-        """Instance representation in text format.
-
-        Returns:
-            str: String value that identifies this instance
-        """
         return f"{self.argument.__str__()} - {self.type.__str__()}"
 
 
@@ -177,9 +154,4 @@ class Output(BaseModel):
         constraints = [models.UniqueConstraint(fields=["configuration", "type"], name="unique_output")]
 
     def __str__(self) -> str:
-        """Instance representation in text format.
-
-        Returns:
-            str: String value that identifies this instance
-        """
         return f"{self.configuration.__str__()} - {self.type.__str__()}"

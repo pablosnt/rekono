@@ -2,7 +2,6 @@ import os
 import re
 import subprocess
 import uuid
-from functools import cached_property
 from pathlib import Path
 from typing import Any
 
@@ -16,7 +15,6 @@ from findings.framework.models import Finding
 from findings.models import Port
 from framework.enums import InputKeyword
 from framework.logging import LoggingEntity
-from framework.models import BaseInput
 from http_headers.models import HttpHeader
 from parameters.models import InputTechnology, InputVulnerability
 from rekono.settings import CONFIG
@@ -28,6 +26,12 @@ from wordlists.models import Wordlist
 
 
 class BaseExecutor(LoggingEntity):
+    arguments = []
+    environment = {}
+    findings_used_in_execution = {}
+    targets_used_in_execution = {}
+    authentication = None
+
     def __init__(self, execution: Execution) -> None:
         self.execution = execution
         self.intensity = (
@@ -36,12 +40,13 @@ class BaseExecutor(LoggingEntity):
             .first()
         )
         self.report = CONFIG.reports / f"{str(uuid.uuid4())}.{execution.configuration.tool.output_format or 'txt'}"
-        self.arguments: list[str] = []
-        self.environment: dict[str, Any] = {}
-        self.findings_used_in_execution: dict[Any, BaseInput] = {}
-        self.authentication: Authentication | None = None
+        self.execution_directory = (
+            getattr(CONFIG, self.execution.configuration.tool.run_directory_property.lower())
+            if self.execution.configuration.tool.run_directory_property
+            else None
+        )
 
-    def _get_arguments(
+    def get_arguments(
         self,
         findings: list[Finding],
         target_ports: list[TargetPort],
@@ -66,7 +71,7 @@ class BaseExecutor(LoggingEntity):
             ),
             "command": self.execution.configuration.tool.command,
             "intensity": self.intensity.argument,
-            "output": (self.report if self.execution.configuration.tool.output_format else ""),
+            "output": self.report if self.execution.configuration.tool.output_format else "",
         }
         for argument in self.execution.configuration.tool.arguments.all():
             for argument_input in argument.inputs.all().order_by("order"):
@@ -77,7 +82,11 @@ class BaseExecutor(LoggingEntity):
                     + list(
                         Authentication.objects.filter(
                             target_port__target=self.execution.task.target,
-                            target_port__port__in=[p.port for p in findings if isinstance(p, Port)],
+                            target_port__port__in=[
+                                f.port if isinstance(f, Port) else f.port.port
+                                for f in findings
+                                if isinstance(f, Port) or (hasattr(f, "port") and isinstance(f.port, Port))
+                            ],
                         ).all()
                     )
                     + [self.execution.task.target]
@@ -97,9 +106,14 @@ class BaseExecutor(LoggingEntity):
                     is_model = argument_input.type.model_class and isinstance(
                         base_input, argument_input.type.model_class
                     )
-                    if (is_model or is_fallback) and base_input.filter(argument_input, self.execution.task.target):
+                    if not is_model or is_fallback:
+                        continue
+                    if base_input.filter(argument_input, self.execution.task.target):
                         parsed_data = base_input.parse(parsed_data)
-                        self.findings_used_in_execution[base_input.__class__] = base_input
+                        if is_fallback:
+                            self.targets_used_in_execution[base_input.__class__] = base_input
+                        else:
+                            self.findings_used_in_execution[base_input.__class__] = base_input
                         if isinstance(base_input, Authentication):
                             self.authentication = base_input
                         if not argument.multiple:
@@ -128,8 +142,7 @@ class BaseExecutor(LoggingEntity):
         return [
             a.replace('"', "")
             for a in re.findall(
-                r'[^\s\'"]*[\'"][^\'"]+[\'"]|[^\'"\s]+',
-                self.execution.configuration.arguments.format(**parameters),
+                r'[^\s\'"]*[\'"][^\'"]+[\'"]|[^\'"\s]+', self.execution.configuration.arguments.format(**parameters)
             )
         ]
 
@@ -142,18 +155,12 @@ class BaseExecutor(LoggingEntity):
         wordlists: list[Wordlist],
     ) -> bool:
         try:
-            self._get_arguments(
-                findings,
-                target_ports,
-                input_vulnerabilities,
-                input_technologies,
-                wordlists,
-            )
+            self.get_arguments(findings, target_ports, input_vulnerabilities, input_technologies, wordlists)
             return True
         except RuntimeError:
             return False
 
-    def _get_environment(self) -> dict[str, Any]:
+    def get_environment(self) -> dict[str, Any]:
         environment = os.environ.copy()
         if self.execution.configuration.tool.command not in self.arguments:
             self.arguments.insert(0, self.execution.configuration.tool.command)
@@ -170,28 +177,22 @@ class BaseExecutor(LoggingEntity):
                 environment[proxy.upper()] = getattr(settings, proxy)
         return environment
 
-    def _before_running(self) -> None:
+    def before_running(self) -> None:
         pass
 
-    @cached_property
-    def _execution_directory(self) -> Path | None:
-        return (
-            getattr(CONFIG, self.execution.configuration.tool.run_directory_property.lower())
-            if self.execution.configuration.tool.run_directory_property
-            else None
-        )
-
-    def _run(self, environment: dict[str, Any] = os.environ.copy()) -> None:
+    def run_tool(self, environment: dict[str, Any] = os.environ.copy()) -> None:
         self.logger.info(f"[Tool] Running: {' '.join(self.arguments)}")
         stdout = (
             self.report
             if self.execution.configuration.tool.output_format
-            and not any([arg for arg in self.arguments if str(self.report) in arg])
+            and not any([str(self.report) in arg for arg in self.arguments])
             else None
         )
         if stdout:
             with self.report.open("w") as _stdout:
-                process = subprocess.run(self.arguments, stdout=_stdout, env=environment, cwd=self._execution_directory)
+                # Stderr is discarded as the stdout file will be used as stdout
+                # and report, so stderr content would break the report format
+                process = subprocess.run(self.arguments, stdout=_stdout, env=environment, cwd=self.execution_directory)
             output = ""
             if self.report.is_file():
                 with self.report.open("r") as _output:
@@ -200,7 +201,7 @@ class BaseExecutor(LoggingEntity):
             process = subprocess.run(
                 self.arguments,
                 env=environment,
-                cwd=self._execution_directory,
+                cwd=self.execution_directory,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
                 text=True,
@@ -212,14 +213,14 @@ class BaseExecutor(LoggingEntity):
         self.execution.output_plain = re.sub(r"(\x9B|\x1B\[)[\d]*[ -\/]*[@-~]", "", output, flags=re.IGNORECASE)
         self.execution.save(update_fields=["output_plain", "output_file"])
         if not self.execution.configuration.tool.ignore_exit_code and process.returncode > 0:
-            self._on_error()
+            self.on_error()
         else:
-            self._on_completed()
+            self.on_completed()
 
-    def _after_running(self) -> None:
+    def after_running(self) -> None:
         pass
 
-    def _on_start(self) -> None:
+    def on_start(self) -> None:
         self.execution.status = Status.RUNNING
         self.execution.start = timezone.now()
         self.execution.save(update_fields=["start", "status"])
@@ -227,28 +228,20 @@ class BaseExecutor(LoggingEntity):
             self.execution.task.start = timezone.now()
             self.execution.task.save(update_fields=["start"])
 
-    def _on_task_end(self) -> None:
-        if not Execution.objects.filter(
-            task=self.execution.task, status__in=[Status.REQUESTED, Status.RUNNING]
-        ).exists():
-            self.execution.task.end = timezone.now()
-            self.execution.task.save(update_fields=["end"])
-            self.logger.info(f"[Task] Task {self.execution.task.id} has finished")
-
-    def _on_skip(self, reason: str) -> None:
+    def on_skip(self, reason: str) -> None:
         self.execution.status = Status.SKIPPED
         self.execution.skipped_reason = reason
         self.execution.end = timezone.now()
         self.execution.save(update_fields=["status", "end", "skipped_reason"])
-        self._on_task_end()
+        self.on_task_end()
 
-    def _on_error(self) -> None:
+    def on_error(self) -> None:
         self.execution.status = Status.ERROR
         self.execution.end = timezone.now()
         self.execution.save(update_fields=["status", "end"])
-        self._on_task_end()
+        self.on_task_end()
 
-    def _on_completed(self) -> None:
+    def on_completed(self) -> None:
         self.execution.status = Status.COMPLETED
         self.execution.end = timezone.now()
         self.execution.hash = Crypto.hash(
@@ -258,7 +251,15 @@ class BaseExecutor(LoggingEntity):
             ).lower()
         )
         self.execution.save(update_fields=["status", "end", "hash"])
-        self._on_task_end()
+        self.on_task_end()
+
+    def on_task_end(self) -> None:
+        if not Execution.objects.filter(
+            task=self.execution.task, status__in=[Status.REQUESTED, Status.RUNNING]
+        ).exists():
+            self.execution.task.end = timezone.now()
+            self.execution.task.save(update_fields=["end"])
+            self.logger.info(f"[Task] Task {self.execution.task.id} has finished")
 
     def execute(
         self,
@@ -268,35 +269,29 @@ class BaseExecutor(LoggingEntity):
         input_technologies: list[InputTechnology],
         wordlists: list[Wordlist],
     ) -> None:
-        self._on_start()
+        self.on_start()
         self.execution.configuration.tool.update_status()
         if not self.execution.configuration.tool.is_installed:
-            self._on_skip(
-                f"[Tool] Tool {self.execution.configuration.tool.name} is not installed in the system. This execution has been skipped"
-            )
+            self.on_skip(f"Tool {self.execution.configuration.tool.name} is not installed in the system")
             return
         try:
-            self.arguments = self._get_arguments(
-                findings,
-                target_ports,
-                input_vulnerabilities,
-                input_technologies,
-                wordlists,
+            self.arguments = self.get_arguments(
+                findings, target_ports, input_vulnerabilities, input_technologies, wordlists
             )
         except RuntimeError as error:
             self.logger.error(f"[Tool] {str(error)}")
-            self._on_skip(str(error))
+            self.on_skip(str(error))
             return
-        self.environment = self._get_environment()
-        self._before_running()
+        self.environment = self.get_environment()
+        self.before_running()
         try:
             if not CONFIG.testing:
-                self._run(self.environment)
+                self.run_tool(self.environment)
         except (RuntimeError, Exception):
-            self.logger.error(f"[Tool] {self.execution.configuration.tool.name} execution finish with errors")
-            self._on_error()
-            self._after_running()
+            self.logger.error(f"[Tool] {self.execution.configuration.tool.name} execution finished with errors")
+            self.on_error()
+            self.after_running()
             return
-        self._after_running()
-        self._on_completed()
+        self.after_running()
+        self.on_completed()
         self.logger.info(f"[Tool] {self.execution.configuration.tool.name} execution has been completed")

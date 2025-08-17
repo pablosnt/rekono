@@ -11,8 +11,6 @@ from tools.filters import ConfigurationFilter, ToolFilter
 from tools.models import Configuration, Tool
 from tools.serializers import ConfigurationSerializer, ToolSerializer
 
-# Create your views here.
-
 
 class ToolViewSet(LikeViewSet):
     queryset = Tool.objects.all()
@@ -34,8 +32,6 @@ class ToolViewSet(LikeViewSet):
 
 
 class ConfigurationViewSet(BaseViewSet):
-    """Configuration ViewSet that includes: get and retrieve features."""
-
     queryset = Configuration.objects.all()
     serializer_class = ConfigurationSerializer
     filterset_class = ConfigurationFilter

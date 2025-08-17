@@ -22,10 +22,10 @@ class ToolExecutorTest(RekonoTest):
         self.osint.data = "10.10.10.11"
         self.osint.data_type = OSINTDataType.IP
         self.osint.save(update_fields=["data", "data_type"])
-        self.executor = self.fake_tool.get_executor_class()(self.execution)
+        self.executor = self.fake_tool.executor_class(self.execution)
 
     def _test_environment(self, expected: dict[str, Any]) -> None:
-        environment = self.executor._get_environment()
+        environment = self.executor.get_environment()
         for key, value in expected.items():
             self.assertIsNotNone(environment.get(key))
             self.assertEqual(value, environment.get(key))
@@ -65,7 +65,7 @@ class ToolExecutorTest(RekonoTest):
         input_technologies: list[InputTechnology] = [],
         wordlists: list[Wordlist] = [],
     ) -> None:
-        arguments = self.executor._get_arguments(
+        arguments = self.executor.get_arguments(
             findings, target_ports, input_vulnerabilities, input_technologies, wordlists
         )
         self.assertEqual(expected, " ".join(arguments))

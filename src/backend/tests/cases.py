@@ -95,10 +95,10 @@ class ToolTestCase(RekonoTestCase):
         reports: Path,
     ) -> BaseParser:
         report = reports / self.report
-        executor = execution.configuration.tool.get_executor_class()(execution)
+        executor = execution.configuration.tool.executor_class(execution)
         executor.authentication = authentication
         executor.arguments = executor_arguments
-        parser = execution.configuration.tool.get_parser_class()(
+        parser = execution.configuration.tool.parser_class(
             executor,
             (report.read_text() if not execution.configuration.tool.output_format else None),
         )

@@ -114,7 +114,7 @@ class ExecutionsQueue(BaseScanQueue):
         Returns:
             tuple[Execution, list[Finding]]: Execution and resulting findings
         """
-        executor: BaseExecutor = execution.configuration.tool.get_executor_class()(execution)
+        executor: BaseExecutor = execution.configuration.tool.executor_class(execution)
         current_job = rq.get_current_job()
         if not findings and current_job and current_job._dependency_ids:
             _execution = ExecutionsQueue._get_findings_from_dependencies(
@@ -134,7 +134,7 @@ class ExecutionsQueue(BaseScanQueue):
             )
         else:
             executor.execute(findings, target_ports, input_vulnerabilities, input_technologies, wordlists)
-        parser: BaseParser = execution.configuration.tool.get_parser_class()(executor, execution.output_plain)
+        parser: BaseParser = execution.configuration.tool.parser_class(executor, execution.output_plain)
         parser.parse()
         FindingsQueue().enqueue(execution, parser.findings)
         return execution, parser.findings

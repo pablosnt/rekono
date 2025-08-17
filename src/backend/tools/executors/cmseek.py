@@ -8,7 +8,7 @@ from tools.executors.base import BaseExecutor
 
 
 class Cmseek(BaseExecutor):
-    def _after_running(self) -> None:
+    def after_running(self) -> None:
         result_path = (
             Path("Result")
             / urlparse(self.arguments[self.arguments.index("-u") + 1]).netloc.replace(":", "_")

@@ -36,7 +36,7 @@ class GobusterExecutorTest(RekonoTest):
             configuration=self.configuration,
             status=Status.REQUESTED,
         )
-        self.executor = self.configuration.tool.get_executor_class()(self.execution)
+        self.executor = self.configuration.tool.executor_class(self.execution)
 
     def _test_check_arguments(self, target: str, wordlist: Wordlist, expected: bool) -> None:
         self._setup_executor(target)

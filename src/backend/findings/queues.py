@@ -29,7 +29,7 @@ from platforms.hacktricks import HackTricks
 from platforms.hosts_metadata import HostsMetadata
 from platforms.mail.notifications import SMTP
 from platforms.nvdnist.integrations import NvdNist
-from platforms.telegram_app.notifications.notifications import Telegram
+from platforms.telegram_app.notifications import Telegram
 from settings.models import Settings
 
 
