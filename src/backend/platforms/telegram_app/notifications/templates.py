@@ -1,22 +1,13 @@
 from alerts.enums import AlertMode
-from findings.models import (
-    OSINT,
-    Credential,
-    Exploit,
-    Host,
-    Path,
-    Port,
-    Technology,
-    Vulnerability,
-)
+from findings.models import OSINT, Credential, Exploit, Host, Path, Port, Technology, Vulnerability
 
 EXECUTION = """
 *{project}*
 
+✅ _Status_            *{status}*
 🎯 _Target_            *{target}*
 🛠 _Tool_              *{tool}*
 ⚙️ _Configuration_      {configuration}
-✅ _Status_            *{status}*
 🔜 _Start_             {start}
 🔚 _End_               {end}
 👤 _Executor_          {executor}
@@ -25,7 +16,7 @@ EXECUTION = """
 """
 
 HEADER = """
-\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
 
 {icon} *{title}*
 
@@ -45,36 +36,38 @@ _Source_        {source}
         "icon": "🖥",
         "template": """
 _Address_   *{ip}*
+_Domain_    {domain}
 _OS_        {os}
 _OS type_   {os_type}
+_Country_   {country}
+_City_      {city}
 """,
     },
     Port: {
         "icon": "📥",
         "template": """
-_Host_          {host}
 _Port_          *{port}*
+_Service_       *{service}*
 _Status_        {status}
 _Protocol_      {protocol}
-_Service_       *{service}*
+_Host_          {host}
 """,
     },
     Path: {
         "icon": "🛣",
         "template": """
-_Port_          {port}
-_Type_          {type}
 _Path_          *{path}*
+_Type_          {type}
 _Status_        {status}
-_Extra_         {extra_info}
+_Port_          {port}
 """,
     },
     Technology: {
         "icon": "🖲",
         "template": """
-_Port_          {port}
 _Name_          *{name}*
 _Version_       {version}
+_Port_          {port}
 """,
     },
     Credential: {
@@ -83,27 +76,30 @@ _Version_       {version}
 _Email_         *{email}*
 _Username_      *{username}*
 _Secret_        *{secret}*
+_Technology_    {technology}
 _Context_       {context}
 """,
     },
     Vulnerability: {
         "icon": "🐛",
         "template": """
+_Name_              *{name}*
+_CVE_               *{cve}*
+_Severity_          *{severity}*
+_CWE_               {cwe}
 _Port_              {port}
 _Technology_        {technology}
-_Name_              *{name}*
-_Description_       {description}
-_Severity_          {severity}
-_CVE_               *{cve}*
 _Reference_         {reference}
+
+{description}
 """,
     },
     Exploit: {
         "icon": "💣",
         "template": """
+_Title_             *{title}*
 _Vulnerability_     {vulnerability}
 _Technology_        {technology}
-_Title_             *{title}*
 _Reference_         {reference}
 """,
     },

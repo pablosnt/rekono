@@ -9,7 +9,7 @@ from framework.fields import ProtectedSecretField
 from framework.logging import LoggingEntity
 from platforms.mail.notifications import SMTP
 from platforms.telegram_app.models import TelegramChat, TelegramSettings
-from platforms.telegram_app.notifications.notifications import Telegram
+from platforms.telegram_app.notifications import Telegram
 from security.cryptography import Crypto
 from security.validators.input_validator import Regex, Validator
 
@@ -21,27 +21,23 @@ class TelegramSettingsSerializer(ModelSerializer, LoggingEntity):
     bot = SerializerMethodField(read_only=True)
     is_available = SerializerMethodField(read_only=True)
 
+    client = Telegram()
+
     class Meta:
         model = TelegramSettings
         fields = ("id", "token", "bot", "is_available")
 
     def get_bot(self, instance: TelegramSettings) -> str | None:
-        telegram = Telegram()
-        telegram.initialize()
-        return telegram.get_bot_name()
+        return self.client.bot_name
 
     def get_is_available(self, instance: TelegramSettings) -> bool:
-        return Telegram().is_available()
+        return self.client.is_available()
 
 
 class TelegramChatSerializer(ModelSerializer, LoggingEntity):
     class Meta:
         model = TelegramChat
-        fields = (
-            "id",
-            "otp",
-            "user",
-        )
+        fields = ("id", "otp", "user")
         read_only_fields = ("user",)
         extra_kwargs = {"otp": {"write_only": True}}
 
@@ -49,9 +45,7 @@ class TelegramChatSerializer(ModelSerializer, LoggingEntity):
         attrs = super().validate(attrs)
         try:
             attrs["telegram_chat"] = TelegramChat.objects.get(
-                otp=Crypto.hash(attrs.get("otp")),
-                otp_expiration__gt=timezone.now(),
-                user=None,
+                otp=Crypto.hash(attrs.get("otp")), otp_expiration__gt=timezone.now(), user=None
             )
         except TelegramChat.DoesNotExist:
             raise AuthenticationFailed(code=status.HTTP_401_UNAUTHORIZED)

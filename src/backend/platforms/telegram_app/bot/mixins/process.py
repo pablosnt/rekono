@@ -7,30 +7,26 @@ from processes.models import Process
 
 
 class ProcessMixin(BaseMixin):
-    async def _ask_for_process(self, update: Update, context: CallbackContext) -> int:
-        return await self._go_to_next_state(
+    async def ask_for_process(self, update: Update, context: CallbackContext) -> int:
+        self.validate_update(update)
+        return await self.go_to_next_state(
             update,
             context,
-            await self._ask(
+            await self.ask(
                 update,
                 Process.objects.all(),
                 "name",
                 2,
                 "Choose process",
                 "There are no processes\. Go to Rekono to create one",
-                self._get_next_state(self._ask_for_process),
+                self.get_next_state(self.ask_for_process),
             ),
         )
 
-    async def _save_process(self, update: Update, context: CallbackContext) -> int:
-        return await self._go_to_next_state(
+    async def save_process(self, update: Update, context: CallbackContext) -> int:
+        self.validate_update(update)
+        return await self.go_to_next_state(
             update,
             context,
-            await self._save(
-                update,
-                context,
-                Context.PROCESS,
-                Process,
-                self._get_next_state(self._save_process),
-            ),
+            await self.save(update, context, Context.PROCESS, Process, self.get_next_state(self.save_process)),
         )

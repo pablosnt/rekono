@@ -4,13 +4,7 @@ from django.db.models import Q
 from framework.models import BaseEncrypted, BaseModel
 from rekono.settings import AUTH_USER_MODEL
 from security.authorization.roles import Role
-from security.validators.input_validator import (
-    FutureDatetimeValidator,
-    Regex,
-    Validator,
-)
-
-# Create your models here.
+from security.validators.input_validator import FutureDatetimeValidator, Regex, Validator
 
 
 class TelegramSettings(BaseEncrypted):

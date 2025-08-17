@@ -2,8 +2,6 @@ from rest_framework.routers import SimpleRouter
 
 from platforms.telegram_app.views import TelegramChatViewSet, TelegramSettingsViewSet
 
-# Register your views here.
-
 router = SimpleRouter()
 router.register("telegram/settings", TelegramSettingsViewSet)
 router.register("telegram/link", TelegramChatViewSet)

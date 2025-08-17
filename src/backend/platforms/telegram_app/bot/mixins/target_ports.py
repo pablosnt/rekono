@@ -8,51 +8,50 @@ from target_ports.serializers import TargetPortSerializer
 
 
 class TargetPortMixin(BaseMixin):
-    async def _ask_for_new_target_port(self, update: Update, context: CallbackContext) -> int:
-        return await self._go_to_next_state(
+    async def ask_for_new_target_port(self, update: Update, context: CallbackContext) -> int:
+        self.validate_update(update)
+        return await self.go_to_next_state(
             update,
             context,
-            await self._ask_for_new_attribute(
-                update,
-                "target port",
-                "port",
-                self._get_next_state(self._ask_for_new_target_port),
+            await self.ask_for_new_attribute(
+                update, "target port", "port", self.get_next_state(self.ask_for_new_target_port), ç
             ),
         )
 
-    async def _create_target_port(self, update: Update, context: CallbackContext) -> int | None:
+    async def create_target_port(self, update: Update, context: CallbackContext) -> int | None:
+        self.validate_update(update)
         if not update.effective_message or not update.effective_message.text:
             return ConversationHandler.END
         if update.effective_message.text.lower() == "/cancel":
-            return await Cancel()._execute_command(update, context)
+            return await Cancel().execute_command(update, context)
         try:
             port = int(update.effective_message.text)
         except ValueError:
-            self._reply(update, "Port must be a valid number")
-            return await self._go_to_next_state(update, context, self._get_previous_state(self._create_target_port))
-        target = self._get_context_value(context, Context.TARGET)
-        next_state, instance = await self._create(
+            self.reply(update, "Port must be a valid number")
+            return await self.go_to_next_state(update, context, self.get_previous_state(self.create_target_port))
+        target = self.get_context_value(context, Context.TARGET)
+        if not target:
+            self.reply(update, "No target selected")
+            return ConversationHandler.END
+        next_state, instance = await self.create(
             update,
             context,
             TargetPortSerializer,
-            {
-                "target": target.id if target else None,
-                "port": port,
-                "path": None,
-            },
-            self._get_previous_state(self._create_target_port),
-            self._get_next_state(self._create_target_port),
+            {"target": target.id, "port": port, "path": None},
+            self.get_previous_state(self.create_target_port),
+            self.get_next_state(self.create_target_port),
         )
         if instance:
-            self._add_context_value(context, Context.TARGET_PORT, instance)
-        return await self._go_to_next_state(update, context, next_state)
+            self.add_context_value(context, Context.TARGET_PORT, instance)
+        return await self.go_to_next_state(update, context, next_state)
 
-    async def _reply_summary(self, update: Update, context: Context) -> int:
-        target_port = self._get_context_value(context, Context.TARGET_PORT)
+    async def reply_summary(self, update: Update, context: Context) -> int:
+        self.validate_update(update)
+        target_port = self.get_context_value(context, Context.TARGET_PORT)
         if target_port:
-            await self._reply(
+            await self.reply(
                 update,
-                f"New target port *{target_port.port}* has been created in target *{self._escape(target_port.target.target)}*",
+                f"New target port *{target_port.port}* has been created in target *{self.escape(target_port.target.target)}*",
             )
-        self._remove_all_context_values(context)
-        return await self._go_to_next_state(update, context, self._get_next_state(self._reply_summary))
+        self.remove_all_context_values(context)
+        return await self.go_to_next_state(update, context, self.get_next_state(self.reply_summary))

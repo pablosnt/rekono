@@ -8,8 +8,6 @@ from platforms.telegram_app.serializers import (
 )
 from security.authorization.permissions import OwnerPermission, RekonoModelPermission
 
-# Create your views here.
-
 
 class TelegramSettingsViewSet(BaseViewSet):
     queryset = TelegramSettings.objects.all()

@@ -10,75 +10,85 @@ class TaskMixin(BaseMixin):
     yes = "👍 Yes"
     no = "👎 No"
 
-    async def _ask_for_task_confirmation(self, update: Update, context: CallbackContext) -> int:
-        project = self._get_context_value(context, Context.PROJECT)
-        target = self._get_context_value(context, Context.TARGET)
-        process = self._get_context_value(context, Context.PROCESS)
-        tool = self._get_context_value(context, Context.TOOL)
-        configuration = self._get_context_value(context, Context.CONFIGURATION)
-        intensity = self._get_context_value(context, Context.INTENSITY)
-        return await self._go_to_next_state(
+    async def ask_for_task_confirmation(self, update: Update, context: CallbackContext) -> int:
+        self.validate_update(update)
+        project = self.get_context_value(context, Context.PROJECT)
+        target = self.get_context_value(context, Context.TARGET)
+        process = self.get_context_value(context, Context.PROCESS)
+        tool = self.get_context_value(context, Context.TOOL)
+        configuration = self.get_context_value(context, Context.CONFIGURATION)
+        intensity = self.get_context_value(context, Context.INTENSITY)
+        for condition, text in [
+            (project, "project"),
+            (target, "target"),
+            ((process or configuration), "process or configuration"),
+            (intensity, "intensity"),
+        ]:
+            if not condition:
+                self.reply(update, f"No {text} selected")
+                return ConversationHandler.END
+        return await self.go_to_next_state(
             update,
             context,
-            await self._ask_values(
+            await self.ask_values(
                 update,
                 [self.yes, self.no],
                 2,
                 f"""
 The following task will be executed:
 
-💼 _Project_   *{self._escape(project.name) if project else None}*
-🎯 _Target_    *{self._escape(target.target) if target else None}*
+💼 _Project_   *{self.escape(project.name)}*
+🎯 _Target_    *{self.escape(target.target)}*
 {
-                    f"🔄 _Process_   *{self._escape(process.name)}*"
+                    f"🔄 _Process_   *{self.escape(process.name)}*"
                     if process
-                    else f'''🛠 _Tool_       *{self._escape(tool.name)}*
-⚙️ _Configuration_  *{self._escape(configuration.name)}*'''
+                    else f'''🛠 _Tool_       *{self.escape(tool.name)}*
+⚙️ _Configuration_  *{self.escape(configuration.name)}*'''
                 }
-🔊 _Intensity_ *{self._escape(intensity)}*
+🔊 _Intensity_ *{self.escape(intensity)}*
 
 Are you sure?
                 """,
-                self._get_next_state(self._ask_for_task_confirmation),
+                self.get_next_state(self.ask_for_task_confirmation),
             ),
         )
 
-    async def _new_task(self, update: Update, context: CallbackContext) -> int:
-        chat = await self._get_active_telegram_chat(update)
+    async def new_task(self, update: Update, context: CallbackContext) -> int:
+        chat = await self.get_active_telegram_chat(update)
         next_state = ConversationHandler.END
         if chat and update.callback_query and update.callback_query.data:
             if update.callback_query.data == self.yes:
-                target = self._get_context_value(context, Context.TARGET)
-                process = self._get_context_value(context, Context.PROCESS)
-                configuration = self._get_context_value(context, Context.CONFIGURATION)
-                wordlist = self._get_context_value(context, Context.WORDLIST)
-                input_technology = self._get_context_value(context, Context.INPUT_TECHNOLOGY)
-                input_vulnerability = self._get_context_value(context, Context.INPUT_VULNERABILITY)
+                target = self.get_context_value(context, Context.TARGET)
+                process = self.get_context_value(context, Context.PROCESS)
+                configuration = self.get_context_value(context, Context.CONFIGURATION)
+                wordlist = self.get_context_value(context, Context.WORDLIST)
+                input_technology = self.get_context_value(context, Context.INPUT_TECHNOLOGY)
+                input_vulnerability = self.get_context_value(context, Context.INPUT_VULNERABILITY)
                 data = {
-                    "target_id": target.id if target else None,
-                    "intensity": self._get_context_value(context, Context.INTENSITY).capitalize(),
+                    "target_id": target.id,
+                    "intensity": self.get_context_value(context, Context.INTENSITY).capitalize(),
                     "executor": chat.user,
                     "wordlists": [wordlist.id] if wordlist else [],
-                    "input_technologies": ([input_technology.id] if input_technology else []),
-                    "input_vulnerabilities": ([input_vulnerability.id] if input_vulnerability else []),
+                    "input_technologies": [input_technology.id] if input_technology else [],
+                    "input_vulnerabilities": [input_vulnerability.id] if input_vulnerability else [],
                 }
                 if process:
                     data["process_id"] = process.id
                 elif configuration:
                     data["configuration_id"] = configuration.id
-                next_state, instance = await self._create(
+                next_state, instance = await self.create(
                     update,
                     context,
                     TaskSerializer,
                     data,
-                    self._get_previous_state(self._new_task),
-                    self._get_next_state(self._new_task),
+                    self.get_previous_state(self.new_task),
+                    self.get_next_state(self.new_task),
                     chat,
                 )
                 if instance:
-                    self._remove_all_context_values(context)
-                    await self._reply(update, f"✅ Task {instance.id} created successfully\!")
+                    self.remove_all_context_values(context)
+                    await self.reply(update, f"✅ Task #{instance.id} created successfully\!")
             else:
-                self._remove_all_context_values(context)
-                await self._reply(update, "❌ Task has been cancelled")
-        return await self._go_to_next_state(update, context, next_state)
+                self.remove_all_context_values(context)
+                await self.reply(update, "❌ Task has been cancelled")
+        return await self.go_to_next_state(update, context, next_state)
