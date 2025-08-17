@@ -6,14 +6,10 @@ from tools.parsers.base import BaseParser
 
 
 class Joomscan(BaseParser):
-    def _parse_standard_output(self) -> None:
-        technology = None
-        vulnerability_name = None
+    def _parse(self) -> None:
+        technology = vulnerability_name = None
         endpoints = set(["/"])
-        backups: set[str] = set()
-        configurations: set[str] = set()
-        path_disclosure: set[str] = set()
-        directory_listing: set[str] = set()
+        backups = configurations = path_disclosure = directory_listing = set()
         host = urlparse(self.executor.arguments[self.executor.arguments.index("-u") + 1]).hostname
         lines = self.output.split("\n")
         for index, line in enumerate(lines):
@@ -32,12 +28,7 @@ class Joomscan(BaseParser):
             elif "CVE : " in data:
                 vulnerability_name = lines[index - 1].replace("[++]", "").replace("Joomla!", "").strip()
                 for cve in data.replace("CVE : ", "").strip().split(","):
-                    self.create_finding(
-                        Vulnerability,
-                        technology=technology,
-                        name=vulnerability_name,
-                        cve=cve.strip(),
-                    )
+                    self.create_finding(Vulnerability, technology=technology, name=vulnerability_name, cve=cve.strip())
             elif "EDB : " in data:
                 link = data.replace("EDB : ", "").strip()
                 self.create_finding(

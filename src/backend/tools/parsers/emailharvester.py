@@ -4,9 +4,8 @@ from tools.parsers.base import BaseParser
 
 
 class Emailharvester(BaseParser):
-    def _parse_report(self) -> None:
-        with open(self.report, "r", encoding="utf-8") as report:
-            emails = report.readlines()
+    def _parse(self) -> None:
+        emails = self.load_report_by_lines()
         for email in emails:
             email = email.strip()
             if email:

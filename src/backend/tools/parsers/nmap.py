@@ -10,7 +10,7 @@ from tools.parsers.base import BaseParser
 
 
 class Nmap(BaseParser):
-    def _parse_report(self) -> None:
+    def _parse(self) -> None:
         report = NmapParser.parse_fromfile(self.report)
         for nmap_host in report.hosts:
             if not nmap_host.is_up():
@@ -25,10 +25,7 @@ class Nmap(BaseParser):
                 except KeyError:
                     pass
             host = self.create_finding(
-                Host,
-                ip=nmap_host.address,
-                os=selected_os.name if selected_os else None,
-                os_type=os_type,
+                Host, ip=nmap_host.address, os=selected_os.name if selected_os else None, os_type=os_type
             )
             for service in nmap_host.services:
                 port = self.create_finding(
@@ -88,17 +85,11 @@ class Nmap(BaseParser):
                     )
                 case "ftp-vsftpd-backdoor":
                     self.create_finding(
-                        Vulnerability,
-                        technology=technology,
-                        name="vsFTPd Backdoor",
-                        cve="CVE-2011-2523",
+                        Vulnerability, technology=technology, name="vsFTPd Backdoor", cve="CVE-2011-2523"
                     )
                 case "ftp-libopie":
                     self.create_finding(
-                        Vulnerability,
-                        technology=technology,
-                        name="OPIE off-by-one stack overflow",
-                        cve="CVE-2010-1938",
+                        Vulnerability, technology=technology, name="OPIE off-by-one stack overflow", cve="CVE-2010-1938"
                     )
                 case "ftp-vuln-cve2010-4221":
                     self.create_finding(

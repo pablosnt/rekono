@@ -19,8 +19,10 @@ class Theharvester(BaseParser):
         "linkedin_people": OSINTDataType.USER,
     }
 
-    def _parse_report(self) -> None:
-        data = self._load_report_as_json_dict()
+    def _parse(self) -> None:
+        data = self.load_json_report()
+        if not data or not isinstance(data, dict):
+            return
         for the_harvester_type, items in data.items():
             for item in items:
                 if the_harvester_type in self.data_types:

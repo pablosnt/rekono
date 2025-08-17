@@ -6,8 +6,10 @@ from tools.parsers.base import BaseParser
 
 
 class Dirsearch(BaseParser):
-    def _parse_report(self) -> None:
-        data = self._load_report_as_json_dict()
+    def _parse(self) -> None:
+        data = self.load_json_report()
+        if not data or not isinstance(data, dict):
+            return
         for item in data.get("results", []):
             if "url" in item.keys():
                 # New report format: just a list of findings

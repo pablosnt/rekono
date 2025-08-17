@@ -1,4 +1,7 @@
 import json
+from dataclasses import dataclass
+from functools import cached_property
+from pathlib import Path
 from typing import Any
 
 import defusedxml.ElementTree as parser
@@ -9,38 +12,34 @@ from findings.framework.models import Finding
 from tools.executors.base import BaseExecutor
 
 
+@dataclass
 class BaseParser:
-    def __init__(self, executor: BaseExecutor, output: str | None = None) -> None:
-        self.executor = executor
-        self.output = output
-        self.report = (
-            executor.report
-            if executor.report
-            and executor.execution.configuration.tool.output_format
-            and executor.report.is_file()
-            and executor.report.stat().st_size > 0
+    executor: BaseExecutor
+    output: str | None
+    findings = []
+
+    @cached_property
+    def report(self) -> Path:
+        return (
+            self.executor.report
+            if self.executor.report
+            and self.executor.execution.configuration.tool.output_format
+            and self.executor.report.is_file()
+            and self.executor.report.stat().st_size > 0
             else None
         )
-        self.findings: list[Finding] = []
 
     def create_finding(self, finding_type: type[Finding], **fields: Any) -> Finding:
-        for (
-            finding_type_used,
-            finding_used,
-        ) in self.executor.findings_used_in_execution.items():
+        for finding_type_used, finding_used in self.executor.findings_used_in_execution.items():
             if (
                 finding_type_used != finding_type
                 and hasattr(finding_type, finding_type_used.__name__.lower())
                 # Discard relations between findings
                 and not isinstance(
-                    getattr(finding_type, finding_type_used.__name__.lower()),
-                    ReverseManyToOneDescriptor,
+                    getattr(finding_type, finding_type_used.__name__.lower()), ReverseManyToOneDescriptor
                 )
                 # Discard standard fields: Text, Number, etc.
-                and not isinstance(
-                    getattr(finding_type, finding_type_used.__name__.lower()),
-                    DeferredAttribute,
-                )
+                and not isinstance(getattr(finding_type, finding_type_used.__name__.lower()), DeferredAttribute)
             ):
                 fields[finding_type_used.__name__.lower()] = finding_used
         unique_finding = finding_type.objects.filter(
@@ -60,30 +59,19 @@ class BaseParser:
         self.findings.append(finding)
         return finding
 
-    def _parse_report(self) -> None:
-        pass
-
-    def _parse_standard_output(self) -> None:
-        pass
-
-    def _load_report_as_json(self) -> dict[str, Any] | list[dict[str, Any]] | None:
+    def load_json_report(self) -> dict[str, Any] | list[dict[str, Any]] | None:
         if self.report:
             with self.report.open("r", encoding="utf-8") as report:
                 return json.load(report)
         return None
 
-    def _load_report_as_json_dict(self) -> dict[str, Any]:
-        data = self._load_report_as_json()
-        return data if data and isinstance(data, dict) else {}
+    def load_xml_report(self) -> Any | None:
+        try:
+            return parser.parse(self.report).getroot()
+        except Exception:
+            return None
 
-    def _load_report_as_json_list(self) -> list[dict[str, Any]]:
-        data = self._load_report_as_json()
-        return data if data and isinstance(data, list) else []
-
-    def _load_report_as_xml(self) -> Any:
-        return parser.parse(self.report).getroot()
-
-    def _load_report_by_lines(self) -> list[str]:
+    def load_report_by_lines(self) -> list[str]:
         if self.report:
             with self.report.open("r", encoding="utf-8") as report:
                 return report.readlines()
@@ -93,14 +81,10 @@ class BaseParser:
         if not value:
             return value
         if self.executor.authentication:
-            for sensitive_value in [
-                self.executor.authentication.secret,
-                self.executor.authentication.token,
-            ]:
+            for sensitive_value in [self.executor.authentication.secret, self.executor.authentication.token]:
                 value = value.replace(sensitive_value, "*****")
         return value.replace(
-            str(self.report),
-            f"output.{self.executor.execution.configuration.tool.output_format}",
+            str(self.report), f"output.{self.executor.execution.configuration.tool.output_format}"
         ).strip()
 
     def _protect_execution(self) -> None:
@@ -112,9 +96,9 @@ class BaseParser:
                 write_report.write(self._protect_value(data))
         self.executor.execution.save(update_fields=["output_plain"])
 
+    def _parse(self) -> None:
+        pass
+
     def parse(self) -> None:
-        if self.report:
-            self._parse_report()
-        elif self.output:
-            self._parse_standard_output()
+        self._parse()
         self._protect_execution()

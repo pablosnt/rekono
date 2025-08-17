@@ -7,7 +7,7 @@ from tools.parsers.base import BaseParser
 
 
 class Emailfinder(BaseParser):
-    def _parse_standard_output(self) -> None:
+    def _parse(self) -> None:
         checker = EmailField()
         for line in self.output.split("\n"):
             line = line.strip()

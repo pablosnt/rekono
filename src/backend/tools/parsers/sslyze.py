@@ -6,11 +6,7 @@ from tools.parsers.base import BaseParser
 
 
 class Sslyze(BaseParser):
-    protocol_versions = {
-        "ssl": ["2.0", "3.0"],
-        "tls": ["1.0", "1.1", "1.2", "1.3"],
-    }
-
+    protocol_versions = {"ssl": ["2.0", "3.0"], "tls": ["1.0", "1.1", "1.2", "1.3"]}
     generic_tech: Technology | None = None
 
     def create_finding(self, finding_type: type[Finding], **fields: Any) -> Finding:
@@ -20,27 +16,25 @@ class Sslyze(BaseParser):
             fields["technology"] = self.generic_tech
         return super().create_finding(finding_type, **fields)
 
-    def _parse_report(self) -> None:
-        data = self._load_report_as_json_dict()
+    def _parse(self) -> None:
+        data = self.load_json_report()
+        if not data or not isinstance(data, dict):
+            return
         for item in data.get("server_scan_results", []) or []:
             result = item.get("scan_commands_results", item["scan_result"])
             if not result:
                 continue
             for check, fields in [
                 (
-                    lambda: result["heartbleed"]["result"]["is_vulnerable_to_heartbleed"],
+                    result["heartbleed"]["result"]["is_vulnerable_to_heartbleed"],
                     {"name": "Heartbleed", "cve": "CVE-2014-0160"},
                 ),
                 (
-                    lambda: result["openssl_ccs_injection"]["result"]["is_vulnerable_to_ccs_injection"],
+                    result["openssl_ccs_injection"]["result"]["is_vulnerable_to_ccs_injection"],
                     {"name": "OpenSSL CSS Injection", "cve": "CVE-2014-0224"},
                 ),
                 (
-                    lambda: result["robot"]["result"]["robot_result"]
-                    in [
-                        "VULNERABLE_STRONG_ORACLE",
-                        "VULNERABLE_WEAK_ORACLE",
-                    ],
+                    result["robot"]["result"]["robot_result"] in ["VULNERABLE_STRONG_ORACLE", "VULNERABLE_WEAK_ORACLE"],
                     {
                         "name": "ROBOT",
                         "description": "Return Of the Bleichenbacher Oracle Threat",
@@ -51,7 +45,7 @@ class Sslyze(BaseParser):
                     },
                 ),
                 (
-                    lambda: not result["session_renegotiation"]["result"]["supports_secure_renegotiation"]
+                    not result["session_renegotiation"]["result"]["supports_secure_renegotiation"]
                     or result["session_renegotiation"]["result"]["is_vulnerable_to_client_renegotiation_dos"],
                     {
                         "name": "Insecure TLS renegotiation supported",
@@ -62,11 +56,11 @@ class Sslyze(BaseParser):
                     },
                 ),
                 (
-                    lambda: result["tls_compression"]["result"]["supports_compression"],
+                    result["tls_compression"]["result"]["supports_compression"],
                     {"name": "CRIME", "cve": "CVE-2012-4929"},
                 ),
             ]:
-                if check():
+                if check:
                     self.create_finding(Vulnerability, **fields)
             for protocol, versions in self.protocol_versions.items():
                 for version in versions:

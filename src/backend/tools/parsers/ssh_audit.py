@@ -7,8 +7,10 @@ from tools.parsers.base import BaseParser
 
 
 class Sshaudit(BaseParser):
-    def _parse_report(self):
-        data = self._load_report_as_json_dict()
+    def _parse(self):
+        data = self.load_json_report()
+        if not data or not isinstance(data, dict):
+            return
         name, version = data.get("banner", {}).get("software", "_").split("_", 1)
         technology = self.create_finding(Technology, name=name, version=version)
         cves = set([])
@@ -22,7 +24,7 @@ class Sshaudit(BaseParser):
                     self.create_finding(
                         Vulnerability,
                         technology=technology,
-                        name=f"Insecure {root} algorithm: {item.get('algorithm')}",
+                        name=f"Insecure {root.upper()} algorithm: {item.get('algorithm')}",
                         description="\n".join(notes),
                         severity=Severity.MEDIUM if "fail" in item.get("notes", {}) else Severity.LOW,
                         # CWE-326: Inadequate Encryption Strength

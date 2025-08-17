@@ -7,9 +7,8 @@ from tools.parsers.base import BaseParser
 
 
 class Nuclei(BaseParser):
-    def _parse_report(self) -> None:
-        with open(self.report, "r", encoding="utf-8") as report:
-            data = [json.loads(line) for line in report if line]
+    def _parse(self) -> None:
+        data = [json.loads(line) for line in self.load_report_by_lines()]
         for item in data:
             matcher = None
             if item.get("extracted-results", []):
@@ -18,10 +17,11 @@ class Nuclei(BaseParser):
                     matcher = result
             elif item.get("matcher-name"):
                 matcher = item.get("matcher-name")
-            name = item.get("info", {}).get("name")
-            description = item.get("info", {}).get("description")
-            reference = item.get("info", {}).get("reference", [])
-            tags = item.get("info", {}).get("tags", []) or []
+            info = item.get("info", {})
+            name = info.get("name")
+            description = info.get("description")
+            reference = info.get("reference", [])
+            tags = info.get("tags", []) or []
             """
             TODO: Don't lose information!
 
@@ -44,9 +44,9 @@ class Nuclei(BaseParser):
                     context=matcher or name,
                 )
             else:
-                severity = item.get("info", {}).get("severity")
-                cve = item.get("info", {}).get("classification", {}).get("cve-id")
-                cwe = item.get("info", {}).get("classification", {}).get("cwe-id", [])
+                severity = info.get("severity")
+                cve = info.get("classification", {}).get("cve-id")
+                cwe = info.get("classification", {}).get("cwe-id", [])
                 self.create_finding(
                     Vulnerability,
                     name=(f"{name}: {matcher}" if matcher else name).strip(),
