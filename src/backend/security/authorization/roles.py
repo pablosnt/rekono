@@ -48,7 +48,7 @@ ROLES = {
 
     Permission Structure:
         - view: Roles allowed to read/view the model instances
-        - add: Roles allowed to create new model instances  
+        - add: Roles allowed to create new model instances
         - change: Roles allowed to modify existing model instances
         - delete: Roles allowed to delete model instances
 

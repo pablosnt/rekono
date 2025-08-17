@@ -50,6 +50,7 @@ class TaskViewSet(BaseViewSet):
         tasks_queue (TasksQueue): Queue manager for task operations
         executions_queue (ExecutionsQueue): Queue manager for execution operations
     """
+
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
     filterset_class = TaskFilter

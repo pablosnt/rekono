@@ -29,6 +29,7 @@ class WordlistViewSet(LikeViewSet):
         search_fields (list): Fields available for text search
         ordering_fields (list): Fields available for result ordering
     """
+
     queryset = Wordlist.objects.all()
     serializer_class = WordlistSerializer
     filterset_class = WordlistFilter

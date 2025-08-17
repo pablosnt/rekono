@@ -46,6 +46,7 @@ class TaskSerializer(RelatedNotesSerializer):
         status (SerializerMethodField): Computed task status based on execution states
         progress (SerializerMethodField): Computed progress percentage (0-100)
     """
+
     target_id = PrimaryKeyRelatedField(
         many=False, write_only=True, required=True, source="target", queryset=Target.objects.all()
     )

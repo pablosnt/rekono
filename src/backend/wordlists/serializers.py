@@ -27,6 +27,7 @@ class WordlistSerializer(LikeSerializer):
         file (FileField): File upload field for wordlist files
         owner (SimpleUserSerializer): Serialized user information for wordlist owner
     """
+
     # Wordlist file, to allow the wordlist files upload to the server
     file = FileField(required=True, allow_empty_file=False, write_only=True)
     owner = SimpleUserSerializer(many=False, read_only=True)

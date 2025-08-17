@@ -14,7 +14,7 @@ class TargetPortMixin(BaseMixin):
             update,
             context,
             await self.ask_for_new_attribute(
-                update, "target port", "port", self.get_next_state(self.ask_for_new_target_port), ç
+                update, "target port", "port", self.get_next_state(self.ask_for_new_target_port)
             ),
         )
 

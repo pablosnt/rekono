@@ -12,7 +12,6 @@ from typing import Any, Callable
 
 import requests
 from django.utils import timezone
-from requests.exceptions import HTTPError
 
 from executions.models import Execution
 from findings.enums import PathType, Severity
