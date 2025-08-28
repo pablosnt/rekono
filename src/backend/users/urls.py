@@ -1,3 +1,9 @@
+"""URL routing configuration for user management endpoints.
+
+Defines REST API URL patterns for user administration, profile management,
+and MFA operations with appropriate ViewSet mappings.
+"""
+
 from django.urls import include, path
 from rest_framework.routers import SimpleRouter
 
