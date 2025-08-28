@@ -1,3 +1,10 @@
+"""Django REST framework serializers for tools and configurations.
+
+Provides serializer classes for tools, configurations, and intensities with
+complex computed fields, input type mappings, and nested relationship handling
+for comprehensive tool information in API responses.
+"""
+
 from typing import Any
 
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
@@ -12,22 +19,68 @@ from tools.models import Argument, Configuration, Intensity, Tool
 
 
 class IntensitySerializer(ModelSerializer):
+    """Serializer for Intensity model with enum field handling.
+
+    Handles serialization of intensity configurations with proper enum
+    conversion for intensity values.
+
+    Attributes:
+        value (IntegerChoicesField): Intensity level with enum conversion
+    """
+
     value = IntegerChoicesField(model=IntensityEnum)
 
     class Meta:
+        """Meta configuration for the IntensitySerializer.
+
+        Attributes:
+            model (type): The Intensity model to serialize
+            fields (tuple): Field names to include in serialization
+        """
+
         model = Intensity
         fields = ("id", "argument", "value")
 
 
 class SimpleConfigurationSerializer(ModelSerializer):
+    """Simplified serializer for Configuration model with stage enum handling.
+
+    Provides basic configuration information with proper stage enum conversion.
+    Used for nested relationships and list views.
+
+    Attributes:
+        stage (StageField): Execution stage with enum conversion
+    """
+
     stage = StageField(model=Stage)
 
     class Meta:
+        """Meta configuration for the SimpleConfigurationSerializer.
+
+        Attributes:
+            model (type): The Configuration model to serialize
+            fields (tuple): Field names to include in serialization
+        """
+
         model = Configuration
         fields = ("id", "name", "stage", "default")
 
 
 class ToolSerializer(LikeSerializer):
+    """Comprehensive serializer for Tool model with nested relationships and computed fields.
+
+    Provides complete tool information including intensities, configurations,
+    and input requirement analysis for wordlists, technologies, and vulnerabilities.
+    Extends LikeSerializer to include like functionality.
+
+    Attributes:
+        intensities (IntensitySerializer): Nested intensity configurations
+        configurations (SimpleConfigurationSerializer): Nested tool configurations
+        wordlists (SerializerMethodField): Wordlist requirement and support information
+        input_technologies (SerializerMethodField): Technology input requirement analysis
+        input_vulnerabilities (SerializerMethodField): Vulnerability input requirement analysis
+    """
+
     intensities = IntensitySerializer(many=True, read_only=True)
     configurations = SimpleConfigurationSerializer(many=True, read_only=True)
     wordlists = SerializerMethodField(read_only=True)
@@ -35,6 +88,13 @@ class ToolSerializer(LikeSerializer):
     input_vulnerabilities = SerializerMethodField(read_only=True)
 
     class Meta:
+        """Meta configuration for the ToolSerializer.
+
+        Attributes:
+            model (type): The Tool model to serialize
+            fields (tuple): Field names to include in serialization
+        """
+
         model = Tool
         fields = (
             "id",
@@ -55,6 +115,18 @@ class ToolSerializer(LikeSerializer):
         )
 
     def _get_argument_requirement(self, tool: Tool, input_type: InputTypeName) -> dict[str, bool]:
+        """Get argument requirement information for a specific input type.
+
+        Analyzes tool arguments to determine if a specific input type is supported
+        and whether it's required for tool execution.
+
+        Args:
+            tool (Tool): The tool instance to analyze
+            input_type (InputTypeName): The input type to check requirements for
+
+        Returns:
+            dict[str, bool]: Dictionary with 'required' and 'supported' boolean flags
+        """
         argument = Argument.objects.filter(tool=tool, inputs__type__name=input_type)
         return (
             {"required": argument.first().required, "supported": True}
@@ -63,6 +135,17 @@ class ToolSerializer(LikeSerializer):
         )
 
     def get_wordlists(self, instance: Any) -> dict[str, bool]:
+        """Get wordlist requirement information for the tool.
+
+        Analyzes wordlist input requirements with special handling for tools
+        like Gobuster that have multiple wordlist arguments.
+
+        Args:
+            instance (Tool): The tool instance being serialized
+
+        Returns:
+            dict[str, bool]: Dictionary with 'required' and 'supported' boolean flags
+        """
         output = self._get_argument_requirement(instance, InputTypeName.WORDLIST)
         if instance.name == "Gobuster":
             # There are two wordlist arguments for Gobuster, one to get a
@@ -72,21 +155,65 @@ class ToolSerializer(LikeSerializer):
         return output
 
     def get_input_technologies(self, instance: Any) -> dict[str, bool]:
+        """Get technology input requirement information for the tool.
+
+        Args:
+            instance (Tool): The tool instance being serialized
+
+        Returns:
+            dict[str, bool]: Dictionary with 'required' and 'supported' boolean flags
+        """
         return self._get_argument_requirement(instance, InputTypeName.TECHNOLOGY)
 
     def get_input_vulnerabilities(self, instance: Any) -> dict[str, bool]:
+        """Get vulnerability input requirement information for the tool.
+
+        Args:
+            instance (Tool): The tool instance being serialized
+
+        Returns:
+            dict[str, bool]: Dictionary with 'required' and 'supported' boolean flags
+        """
         return self._get_argument_requirement(instance, InputTypeName.VULNERABILITY)
 
 
 class SimpleToolSerializer(ModelSerializer):
+    """Simplified serializer for Tool model with basic information only.
+
+    Provides essential tool information for nested relationships and
+    list views where full detail is not required.
+    """
     class Meta:
+        """Meta configuration for the SimpleToolSerializer.
+
+        Attributes:
+            model (type): The Tool model to serialize
+            fields (tuple): Field names to include in serialization
+        """
+
         model = Tool
         fields = ("id", "name", "command", "version", "reference", "icon")
 
 
 class ConfigurationSerializer(SimpleConfigurationSerializer):
+    """Extended serializer for Configuration model with nested tool information.
+
+    Extends SimpleConfigurationSerializer to include nested tool details
+    for complete configuration information in API responses.
+
+    Attributes:
+        tool (SimpleToolSerializer): Nested tool information
+    """
+
     tool = SimpleToolSerializer(many=False, read_only=True)
 
     class Meta:
+        """Meta configuration for the ConfigurationSerializer.
+
+        Attributes:
+            model (type): The Configuration model to serialize
+            fields (tuple): Field names to include in serialization
+        """
+
         model = Configuration
         fields = SimpleConfigurationSerializer.Meta.fields + ("tool",)

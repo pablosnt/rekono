@@ -27,9 +27,24 @@ class SecurityConfig(BaseApp, AppConfig):
     name = "security"
 
     def ready(self) -> None:
+        """Initialize the security application when Django is ready.
+
+        Connects the post-migrate signal to initialize user groups and permissions
+        after database migrations are complete.
+        """
         post_migrate.connect(self.initialize_user_groups, sender=self)
 
     def initialize_user_groups(self, **kwargs: Any) -> None:
+        """Initialize user groups and assign permissions after database migration.
+
+        Creates Django auth groups for each security role and assigns appropriate
+        permissions based on the ROLES configuration. This ensures proper role-based
+        access control is established when the application starts.
+
+        Args:
+            **kwargs (Any): Django post-migrate signal arguments containing app
+                           registry and migration information.
+        """
         group_model = kwargs["apps"].get_model(app_label="auth", model_name="group")
         permission_model = kwargs["apps"].get_model(app_label="auth", model_name="permission")
         groups = {}

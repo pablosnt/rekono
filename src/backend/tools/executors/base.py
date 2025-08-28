@@ -1,3 +1,10 @@
+"""Base executor class for security tool execution and management.
+
+Provides the foundation for executing security tools with proper parameter
+generation, environment setup, and execution lifecycle management. All
+tool-specific executors inherit from BaseExecutor.
+"""
+
 import os
 import re
 import subprocess
@@ -26,6 +33,28 @@ from wordlists.models import Wordlist
 
 
 class BaseExecutor(LoggingEntity):
+    """Base executor class for security tool execution with comprehensive parameter management.
+
+    Handles the complete execution lifecycle of security tools including argument generation,
+    environment setup, execution control, and status tracking. Provides automatic parameter
+    mapping from available inputs and configurations with proper authentication handling.
+
+    Attributes:
+        arguments (list): Generated command-line arguments for tool execution
+        environment (dict): Environment variables for tool execution
+        findings_used_in_execution (dict): Findings used as inputs for this execution
+        targets_used_in_execution (dict): Targets used as inputs for this execution
+        authentication (Authentication | None): Authentication credentials if available
+
+    Example:
+        Execute a tool with proper parameter generation:
+
+        ```python
+        executor = SomeToolExecutor(execution)
+        executor.execute(findings, target_ports, vulns, techs, wordlists)
+        ```
+    """
+
     arguments = []
     environment = {}
     findings_used_in_execution = {}
@@ -33,6 +62,14 @@ class BaseExecutor(LoggingEntity):
     authentication = None
 
     def __init__(self, execution: Execution) -> None:
+        """Initialize the executor with execution context and configuration.
+
+        Sets up the executor with the execution instance, determines appropriate
+        intensity level, generates report file path, and configures execution directory.
+
+        Args:
+            execution (Execution): The execution instance to manage
+        """
         self.execution = execution
         self.intensity = (
             Intensity.objects.filter(tool=execution.configuration.tool, value__lte=execution.task.intensity)
@@ -54,6 +91,25 @@ class BaseExecutor(LoggingEntity):
         input_technologies: list[InputTechnology],
         wordlists: list[Wordlist],
     ) -> list[str]:
+        """Generate command-line arguments for tool execution.
+
+        Automatically maps available inputs to tool arguments based on tool configuration.
+        Processes findings, target ports, vulnerabilities, technologies, and wordlists
+        to generate properly formatted command-line arguments.
+
+        Args:
+            findings (list[Finding]): Security findings to use as inputs
+            target_ports (list[TargetPort]): Target ports to use as inputs
+            input_vulnerabilities (list[InputVulnerability]): Vulnerability parameters
+            input_technologies (list[InputTechnology]): Technology parameters
+            wordlists (list[Wordlist]): Wordlists to use as inputs
+
+        Returns:
+            list[str]: Generated command-line arguments
+
+        Raises:
+            RuntimeError: If required arguments cannot be satisfied with available inputs
+        """
         parameters = {
             "script": (
                 (
@@ -154,6 +210,21 @@ class BaseExecutor(LoggingEntity):
         input_technologies: list[InputTechnology],
         wordlists: list[Wordlist],
     ) -> bool:
+        """Check if arguments can be generated with available inputs.
+
+        Validates whether the tool can be executed with the provided inputs
+        by attempting to generate arguments without raising exceptions.
+
+        Args:
+            findings (list[Finding]): Security findings to use as inputs
+            target_ports (list[TargetPort]): Target ports to use as inputs
+            input_vulnerabilities (list[InputVulnerability]): Vulnerability parameters
+            input_technologies (list[InputTechnology]): Technology parameters
+            wordlists (list[Wordlist]): Wordlists to use as inputs
+
+        Returns:
+            bool: True if arguments can be generated, False otherwise
+        """
         try:
             self.get_arguments(findings, target_ports, input_vulnerabilities, input_technologies, wordlists)
             return True
@@ -161,6 +232,15 @@ class BaseExecutor(LoggingEntity):
             return False
 
     def get_environment(self) -> dict[str, Any]:
+        """Prepare environment variables for tool execution.
+
+        Sets up the execution environment by copying system environment variables,
+        processing tool-specific environment definitions, and configuring proxy
+        settings from global configuration.
+
+        Returns:
+            dict[str, Any]: Environment variables for tool execution
+        """
         environment = os.environ.copy()
         if self.execution.configuration.tool.command not in self.arguments:
             self.arguments.insert(0, self.execution.configuration.tool.command)
@@ -178,9 +258,22 @@ class BaseExecutor(LoggingEntity):
         return environment
 
     def before_running(self) -> None:
+        """Hook method called before tool execution.
+
+        Override this method in tool-specific executor classes to implement
+        custom pre-execution logic such as additional setup or validation.
+        """
         pass
 
     def run_tool(self, environment: dict[str, Any] = os.environ.copy()) -> None:
+        """Execute the security tool with configured arguments and environment.
+
+        Runs the tool subprocess with proper output handling, status tracking,
+        and error management. Handles both file-based and stdout-based output capture.
+
+        Args:
+            environment (dict[str, Any]): Environment variables for execution
+        """
         self.logger.info(f"[Tool] Running: {' '.join(self.arguments)}")
         stdout = (
             self.report
@@ -218,9 +311,19 @@ class BaseExecutor(LoggingEntity):
             self.on_completed()
 
     def after_running(self) -> None:
+        """Hook method called after tool execution.
+
+        Override this method in tool-specific executor classes to implement
+        custom post-execution logic such as output processing or cleanup.
+        """
         pass
 
     def on_start(self) -> None:
+        """Handle execution start event.
+
+        Updates execution status to RUNNING and sets start timestamp.
+        Also sets task start time if this is the first execution in the task.
+        """
         self.execution.status = Status.RUNNING
         self.execution.start = timezone.now()
         self.execution.save(update_fields=["start", "status"])
@@ -229,6 +332,14 @@ class BaseExecutor(LoggingEntity):
             self.execution.task.save(update_fields=["start"])
 
     def on_skip(self, reason: str) -> None:
+        """Handle execution skip event.
+
+        Updates execution status to SKIPPED with reason and end timestamp.
+        Triggers task end check.
+
+        Args:
+            reason (str): The reason why the execution was skipped
+        """
         self.execution.status = Status.SKIPPED
         self.execution.skipped_reason = reason
         self.execution.end = timezone.now()
@@ -236,12 +347,22 @@ class BaseExecutor(LoggingEntity):
         self.on_task_end()
 
     def on_error(self) -> None:
+        """Handle execution error event.
+
+        Updates execution status to ERROR and sets end timestamp.
+        Triggers task end check.
+        """
         self.execution.status = Status.ERROR
         self.execution.end = timezone.now()
         self.execution.save(update_fields=["status", "end"])
         self.on_task_end()
 
     def on_completed(self) -> None:
+        """Handle execution completion event.
+
+        Updates execution status to COMPLETED, sets end timestamp, and generates
+        execution hash for deduplication. Triggers task end check.
+        """
         self.execution.status = Status.COMPLETED
         self.execution.end = timezone.now()
         self.execution.hash = Crypto.hash(
@@ -254,6 +375,11 @@ class BaseExecutor(LoggingEntity):
         self.on_task_end()
 
     def on_task_end(self) -> None:
+        """Check and handle task completion.
+
+        Determines if the task is complete by checking if any executions
+        are still running or requested. Sets task end timestamp when complete.
+        """
         if not Execution.objects.filter(
             task=self.execution.task, status__in=[Status.REQUESTED, Status.RUNNING]
         ).exists():
@@ -269,6 +395,19 @@ class BaseExecutor(LoggingEntity):
         input_technologies: list[InputTechnology],
         wordlists: list[Wordlist],
     ) -> None:
+        """Execute the complete tool execution lifecycle.
+
+        Manages the full execution process including status updates, argument generation,
+        environment setup, tool execution, and cleanup. Handles errors and skipping
+        conditions appropriately.
+
+        Args:
+            findings (list[Finding]): Security findings to use as inputs
+            target_ports (list[TargetPort]): Target ports to use as inputs
+            input_vulnerabilities (list[InputVulnerability]): Vulnerability parameters
+            input_technologies (list[InputTechnology]): Technology parameters
+            wordlists (list[Wordlist]): Wordlists to use as inputs
+        """
         self.on_start()
         self.execution.configuration.tool.update_status()
         if not self.execution.configuration.tool.is_installed:
