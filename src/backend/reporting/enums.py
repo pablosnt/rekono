@@ -14,6 +14,7 @@ class FindingName(TextChoices):
     Defines the types of security findings that can be included in reports
     with standardized naming for consistent data processing.
     """
+
     OSINT = "OSINT"
     HOST = "Host"
     PORT = "Port"
@@ -30,6 +31,7 @@ class ReportFormat(TextChoices):
     Defines the available output formats for security report generation
     with corresponding file extensions.
     """
+
     JSON = "json"
     XML = "xml"
     PDF = "pdf"
@@ -41,6 +43,7 @@ class ReportStatus(TextChoices):
     Defines the possible status values during the report generation
     lifecycle from creation to completion.
     """
+
     READY = "Ready"
     PENDING = "Pending"
     ERROR = "Error"

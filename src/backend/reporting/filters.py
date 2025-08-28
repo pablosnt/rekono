@@ -15,6 +15,7 @@ class ReportFilter(FilterSet):
     Provides filtering capabilities for report queries including exact matches
     on key fields and date range filtering for report creation timestamps.
     """
+
     class Meta:
         """Meta configuration for the ReportFilter.
 
@@ -22,6 +23,7 @@ class ReportFilter(FilterSet):
             model (Model): The Report model to filter.
             fields (dict): Field names mapped to allowed filter operations.
         """
+
         model = Report
         fields = {
             "project": ["exact"],

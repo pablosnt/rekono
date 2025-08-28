@@ -62,6 +62,7 @@ class ReportingViewSet(BaseViewSet):
         http_method_names (list): Allowed HTTP methods (GET, POST, DELETE)
         owner_field (str): Field used for ownership-based access control
     """
+
     queryset = Report.objects.all()
     serializer_class = ReportSerializer
     filterset_class = ReportFilter

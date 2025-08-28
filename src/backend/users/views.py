@@ -54,6 +54,7 @@ class UserViewSet(BaseViewSet):
         ordering_fields (list): Fields available for result ordering
         http_method_names (list): Allowed HTTP methods
     """
+
     serializer_class = UserSerializer
     queryset = User.objects.all()
     filterset_class = UserFilter
@@ -243,6 +244,7 @@ class BaseProfileViewSet(GenericViewSet):
         serializer_class (Serializer): Default serializer for profile operations
         permission_classes (list): Required permissions for access control
     """
+
     serializer_class = ProfileSerializer
     queryset = User.objects.all()
     # Only IsAuthenticated class is required because all users can manage its profile
@@ -281,6 +283,7 @@ class ProfileViewSet(BaseProfileViewSet):
     Provides REST API endpoints for users to manage their own profile
     information and password with proper validation and security controls.
     """
+
     @action(detail=False, methods=["GET"])
     def get_profile(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         """Get current user's profile information.
@@ -333,6 +336,7 @@ class MfaViewSet(BaseProfileViewSet):
     Attributes:
         authentication_classes (list): JWT authentication required for MFA operations
     """
+
     authentication_classes = [JWTAuthentication]
 
     @extend_schema(request=None, responses={200: RegisterMfaSerializer})

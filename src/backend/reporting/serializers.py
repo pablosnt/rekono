@@ -24,6 +24,7 @@ class ReportSerializer(ModelSerializer):
     Handles serialization of Report instances with detailed nested information
     for project, target, task, and user relationships in API responses.
     """
+
     project = ProjectSerializer(read_only=True, many=False)
     target = SimpleTargetSerializer(read_only=True, many=False)
     task = TaskSerializer(read_only=True, many=False)
@@ -36,6 +37,7 @@ class ReportSerializer(ModelSerializer):
             model (Model): The Report model to serialize.
             fields (tuple): Field names to include in serialization.
         """
+
         model = Report
         fields = ("id", "project", "target", "task", "status", "format", "user", "date")
 
@@ -46,6 +48,7 @@ class CreateReportSerializer(ModelSerializer):
     Handles report creation with advanced filtering options including triage
     status filtering and finding type selection with validation logic.
     """
+
     only_true_positives = BooleanField(required=False, write_only=True)
     finding_types = MultipleChoiceField(choices=FindingName.choices, required=False, write_only=True)
     validated_filter: dict[str, Any] = {}
@@ -59,6 +62,7 @@ class CreateReportSerializer(ModelSerializer):
             fields (tuple): Field names to include in serialization.
             read_only_fields (tuple): Fields that cannot be modified during creation.
         """
+
         model = Report
         fields = ("id", "project", "target", "task", "format", "only_true_positives", "finding_types", "user")
         read_only_fields = ("user",)

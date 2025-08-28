@@ -183,6 +183,7 @@ class SimpleToolSerializer(ModelSerializer):
     Provides essential tool information for nested relationships and
     list views where full detail is not required.
     """
+
     class Meta:
         """Meta configuration for the SimpleToolSerializer.
 

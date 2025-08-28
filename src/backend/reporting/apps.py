@@ -9,4 +9,5 @@ class ReportingConfig(BaseApp, AppConfig):
     Extends BaseApp and AppConfig to provide reporting-specific
     configuration and integration with Rekono's framework.
     """
+
     name = "reporting"
