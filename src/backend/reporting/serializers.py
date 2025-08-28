@@ -1,3 +1,9 @@
+"""Django REST framework serializers for security report models.
+
+Provides serialization for report models with nested relationship data,
+validation logic for report creation, and filtering configuration.
+"""
+
 from typing import Any
 
 from django.core.exceptions import ValidationError
@@ -13,28 +19,65 @@ from users.serializers import SimpleUserSerializer
 
 
 class ReportSerializer(ModelSerializer):
+    """Serializer for Report model with nested relationship data.
+
+    Handles serialization of Report instances with detailed nested information
+    for project, target, task, and user relationships in API responses.
+    """
     project = ProjectSerializer(read_only=True, many=False)
     target = SimpleTargetSerializer(read_only=True, many=False)
     task = TaskSerializer(read_only=True, many=False)
     user = SimpleUserSerializer(read_only=True, many=False)
 
     class Meta:
+        """Meta configuration for the ReportSerializer.
+
+        Attributes:
+            model (Model): The Report model to serialize.
+            fields (tuple): Field names to include in serialization.
+        """
         model = Report
         fields = ("id", "project", "target", "task", "status", "format", "user", "date")
 
 
 class CreateReportSerializer(ModelSerializer):
+    """Serializer for creating new security reports with filtering validation.
+
+    Handles report creation with advanced filtering options including triage
+    status filtering and finding type selection with validation logic.
+    """
     only_true_positives = BooleanField(required=False, write_only=True)
     finding_types = MultipleChoiceField(choices=FindingName.choices, required=False, write_only=True)
     validated_filter: dict[str, Any] = {}
     validated_finding_types: list[FindingName] = []
 
     class Meta:
+        """Meta configuration for the CreateReportSerializer.
+
+        Attributes:
+            model (Model): The Report model to serialize.
+            fields (tuple): Field names to include in serialization.
+            read_only_fields (tuple): Fields that cannot be modified during creation.
+        """
         model = Report
         fields = ("id", "project", "target", "task", "format", "only_true_positives", "finding_types", "user")
         read_only_fields = ("user",)
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
+        """Validate report creation data and configure filtering criteria.
+
+        Processes filtering options and validates that at least one scope
+        (task, target, or project) is provided for the report.
+
+        Args:
+            attrs (dict[str, Any]): The attributes to validate
+
+        Returns:
+            dict[str, Any]: The validated attributes
+
+        Raises:
+            ValidationError: If no scope is provided for the report
+        """
         attrs = super().validate(attrs)
         self.validated_filter = {"is_fixed": False}
         self.validated_triage_filter = {}

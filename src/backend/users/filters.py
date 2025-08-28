@@ -30,6 +30,13 @@ class UserFilter(FilterSet):
     role = CharFilter(field_name="groups__name")
 
     class Meta:
+        """Meta configuration for the UserFilter.
+
+        Attributes:
+            model (Model): The User model to filter
+            fields (dict): Field names mapped to allowed filter operations
+        """
+
         model = User
         fields = {
             "username": ["exact", "icontains"],

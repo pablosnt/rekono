@@ -1,3 +1,10 @@
+"""Django REST framework views for security report generation and management.
+
+Provides REST API endpoints for report lifecycle management including creation,
+status tracking, and file download with multi-format support and background
+processing capabilities.
+"""
+
 import importlib
 import json
 import threading
@@ -36,6 +43,25 @@ from tasks.models import Task
 
 
 class ReportingViewSet(BaseViewSet):
+    """ViewSet for security report generation and management.
+
+    Provides REST API endpoints for report operations including creation with
+    background processing, status tracking, and secure file download. Supports
+    multiple output formats with advanced filtering and notification capabilities.
+
+    Custom Actions:
+        download: Download generated report files with secure access controls
+
+    Attributes:
+        queryset (QuerySet): Report model instances
+        serializer_class (Serializer): Default serializer for report operations
+        filterset_class (FilterSet): Filter class for report queries
+        permission_classes (list): Required permissions including ownership validation
+        search_fields (list): Fields available for text search
+        ordering_fields (list): Fields available for result ordering
+        http_method_names (list): Allowed HTTP methods (GET, POST, DELETE)
+        owner_field (str): Field used for ownership-based access control
+    """
     queryset = Report.objects.all()
     serializer_class = ReportSerializer
     filterset_class = ReportFilter
@@ -46,6 +72,15 @@ class ReportingViewSet(BaseViewSet):
     owner_field = "user"
 
     def _get_project_from_data(self, project_field: str, data: dict[str, Any]) -> Project | None:
+        """Extract project from request data based on scope hierarchy.
+
+        Args:
+            project_field (str): The project field name (unused in current implementation)
+            data (dict[str, Any]): Request data containing scope information
+
+        Returns:
+            Project | None: The associated project or None if not found
+        """
         return (
             cast(Task, data.get("task")).target.project
             if data.get("task")
@@ -53,6 +88,11 @@ class ReportingViewSet(BaseViewSet):
         )
 
     def get_queryset(self) -> QuerySet:
+        """Get filtered queryset based on user project membership.
+
+        Returns:
+            QuerySet: Reports filtered to only include those accessible by the current user
+        """
         return (
             (
                 super()
@@ -68,10 +108,28 @@ class ReportingViewSet(BaseViewSet):
         )
 
     def get_serializer_class(self) -> Serializer:
+        """Get appropriate serializer class based on request method.
+
+        Returns:
+            Serializer: CreateReportSerializer for POST requests, ReportSerializer otherwise
+        """
         return CreateReportSerializer if self.request.method == "POST" else super().get_serializer_class()
 
     @extend_schema(request=CreateReportSerializer, responses=ReportSerializer)
     def create(self, request: Request, *args: Any, **kwargs: Any):
+        """Create a new report with background generation processing.
+
+        Validates report parameters, processes findings data, and initiates
+        background report generation with status tracking.
+
+        Args:
+            request (Request): HTTP request containing report configuration
+            *args (Any): Additional positional arguments
+            **kwargs (Any): Additional keyword arguments
+
+        Returns:
+            Response: HTTP 201 with report instance or HTTP 404 if no findings found
+        """
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         findings: tuple[dict[int, Any], dict[int, list[int]], list[int]] | dict[type[Finding], list[Finding]] = {}
@@ -86,6 +144,16 @@ class ReportingViewSet(BaseViewSet):
         return Response(self.get_serializer(instance=serializer.instance).data, status=status.HTTP_201_CREATED)
 
     def destroy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """Delete report and associated file from storage.
+
+        Args:
+            request (Request): HTTP request object
+            *args (Any): Additional positional arguments
+            **kwargs (Any): Additional keyword arguments
+
+        Returns:
+            Response: Standard deletion response
+        """
         report = self.get_object_or_404()
         path = (CONFIG.generated_reports / report.path) if report.path else None
         if path and path.exists():
@@ -95,6 +163,15 @@ class ReportingViewSet(BaseViewSet):
     @extend_schema(request=None, responses={200: OpenApiResponse(description="Generated report file"), 404: None})
     @action(detail=True, methods=["GET"])
     def download(self, request: Request, pk: str) -> FileResponse:
+        """Download generated report file with secure access validation.
+
+        Args:
+            request (Request): HTTP request object
+            pk (str): Primary key of the report to download
+
+        Returns:
+            FileResponse: Report file download or error response for invalid status/missing file
+        """
         report = self.get_object_or_404()
         if report.status != ReportStatus.READY:
             messages = {
@@ -115,6 +192,14 @@ class ReportingViewSet(BaseViewSet):
     def _get_json_findings_by_type(
         self, serializer: ReportSerializer
     ) -> tuple[dict[type[Finding], list[dict[str, Any]]], int]:
+        """Extract findings data organized by type for JSON/XML report generation.
+
+        Args:
+            serializer (ReportSerializer): Validated report serializer with filtering criteria
+
+        Returns:
+            tuple[dict[type[Finding], list[dict[str, Any]]], int]: Findings by type and total count
+        """
         findings = {}
         count = 0
         models = importlib.import_module("findings.models")
@@ -135,6 +220,14 @@ class ReportingViewSet(BaseViewSet):
         return findings, count
 
     def _get_findings_for_pdf_report(self, serializer: ReportSerializer) -> tuple[dict[str, Any], int]:
+        """Extract hierarchical findings data with statistics for PDF report generation.
+
+        Args:
+            serializer (ReportSerializer): Validated report serializer with filtering criteria
+
+        Returns:
+            tuple[dict[str, Any], int]: Hierarchical findings with statistics and total count
+        """
         count = 0
         results = {"findings": {}, "stats": {severity.name.upper(): 0 for severity in Severity}, "stats_by_target": {}}
         for target in (
@@ -222,6 +315,12 @@ class ReportingViewSet(BaseViewSet):
         return results, count
 
     def _create_report_file(self, report: Report, *findings: Any) -> None:
+        """Generate report file in background thread with status updates.
+
+        Args:
+            report (Report): Report instance to generate file for
+            *findings (Any): Findings data for report content
+        """
         filename = f"{str(uuid.uuid4())}.{report.format.lower()}"
         success = getattr(self, f"_create_{report.format.lower()}_report")(filename, report, *findings)
         if success:
@@ -237,6 +336,16 @@ class ReportingViewSet(BaseViewSet):
     def _create_json_report(
         self, filename: str, report: Report, findings: dict[type[Finding], list[dict[str, Any]]]
     ) -> bool:
+        """Generate JSON format report file.
+
+        Args:
+            filename (str): Target filename for the report
+            report (Report): Report instance for context
+            findings (dict[type[Finding], list[dict[str, Any]]]): Findings data to serialize
+
+        Returns:
+            bool: True if generation succeeded, False on error
+        """
         try:
             with (CONFIG.generated_reports / filename).open("w") as report:
                 json.dump(findings, report, ensure_ascii=True, indent=4)
@@ -245,6 +354,15 @@ class ReportingViewSet(BaseViewSet):
             return False
 
     def _dict_to_xml(self, element: ET.Element, data: dict[str, Any]) -> ET.Element:
+        """Recursively convert dictionary data to XML elements.
+
+        Args:
+            element (ET.Element): Parent XML element to append children to
+            data (dict[str, Any]): Dictionary data to convert
+
+        Returns:
+            ET.Element: XML element with converted data as children
+        """
         for key, value in data.items():
             child = ET.Element(key)
             if isinstance(value, dict):
@@ -257,6 +375,16 @@ class ReportingViewSet(BaseViewSet):
     def _create_xml_report(
         self, filename: str, report: Report, findings: dict[type[Finding], list[dict[str, Any]]]
     ) -> bool:
+        """Generate XML format report file.
+
+        Args:
+            filename (str): Target filename for the report
+            report (Report): Report instance for context
+            findings (dict[type[Finding], list[dict[str, Any]]]): Findings data to serialize
+
+        Returns:
+            bool: True if generation succeeded, False on error
+        """
         root = ET.Element("findings")
         for finding_type, finding_list in findings.items():
             for finding in finding_list:
@@ -267,6 +395,18 @@ class ReportingViewSet(BaseViewSet):
         return True
 
     def _pdf_static_content(self, uri: str, rel: str) -> str:
+        """Resolve static file paths for PDF generation.
+
+        Callback function for xhtml2pdf to convert relative URIs to absolute paths
+        for CSS and image resources during PDF generation.
+
+        Args:
+            uri (str): Relative URI from HTML template
+            rel (str): Relationship type (unused)
+
+        Returns:
+            str: Absolute file path or original URI if not found
+        """
         # Callback function for PDF generation to resolve static file paths
         # Converts relative URIs to absolute paths so xhtml2pdf can access CSS/images
         if f"/{STATIC_URL}" in uri:
@@ -278,6 +418,16 @@ class ReportingViewSet(BaseViewSet):
         return uri
 
     def _create_pdf_report(self, filename: str, report: Report, findings: dict[str, Any]) -> bool:
+        """Generate PDF format report file with template rendering.
+
+        Args:
+            filename (str): Target filename for the report
+            report (Report): Report instance for context
+            findings (dict[str, Any]): Hierarchical findings data with statistics
+
+        Returns:
+            bool: True if generation succeeded, False on PDF creation errors
+        """
         scope = report.task or report.target or report.project
         template = get_template(CONFIG.pdf_report_template).render(
             {
