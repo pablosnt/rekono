@@ -25,7 +25,8 @@ class ReportStatus(TextChoices):
     ERROR = "Error"
 
 
-# https://github.com/google/pytype/issues/1048
+# Type annotation workaround for pytype compatibility
+# See: https://github.com/google/pytype/issues/1048
 FindingName: type[Choices] = FindingName
 ReportFormat: type[Choices] = ReportFormat
 ReportStatus: type[Choices] = ReportStatus

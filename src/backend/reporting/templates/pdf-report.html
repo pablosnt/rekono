@@ -65,7 +65,7 @@
                 <h2>Summary</h2>
                 <p class="relevant">{{ project.description|default_if_none:"" }}</p>
             </div>
-            {% if stats|join:"," != "0,0,0,0,0" %}
+            {% if stats["CRITICAL"] + stats["HIGH"] + stats["MEDIUM"] + stats["LOW"] + stats["INFO"] > 0 %}
                 <br>
                 <br>
                 <br>
@@ -73,7 +73,7 @@
                 <div>
                     <canvas type="graph" width="320" height="190">
                         {
-                                "data": [{{ stats }}],
+                                "data": [{{ stats["CRITICAL"] }}, {{ stats["HIGH"] }}, {{ stats["MEDIUM"] }}, {{ stats["LOW"] }}, {{ stats["INFO"] }}],
                                 "labels": ["Critical", "High", "Medium", "Low", "Info"],
                                 "title": {"_text": "Vulnerabilities by Severity", "x": 280, "y": 180},
                                 "type": "verticalbar",
@@ -90,14 +90,14 @@
                 <h2>{{ target.target }}</h2>
                 {% if targets|length > 1 %}
                     {% for key, items in stats_by_target.items %}
-                        {% if key == target.id and items|join:"," != "0,0,0,0,0" %}
+                        {% if key == target.id and items["CRITICAL"] + items["HIGH"] + items["MEDIUM"] + items["LOW"] + items["INFO"] > 0 %}
                             <br>
                             <br>
                             <br>
                             <br>
                             <canvas type="graph" width="320" height="190">
                                 {
-                                        "data": [{{ items }}],
+                                        "data": [{{ items["CRITICAL"] }}, {{ items["HIGH"] }}, {{ items["MEDIUM"] }}, {{ items["LOW"] }}, {{ items["INFO"] }}],
                                         "labels": ["Critical", "High", "Medium", "Low", "Info"],
                                         "title": {"_text": "Vulnerabilities by Severity", "x": 280, "y": 180},
                                         "type": "verticalbar",

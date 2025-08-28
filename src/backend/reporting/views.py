@@ -1,5 +1,3 @@
-# Create your views here.
-
 import importlib
 import json
 import threading
@@ -22,15 +20,7 @@ from xhtml2pdf import pisa
 
 from findings.enums import Severity
 from findings.framework.models import Finding
-from findings.models import (
-    OSINT,
-    Credential,
-    Exploit,
-    Host,
-    Port,
-    Technology,
-    Vulnerability,
-)
+from findings.models import OSINT, Credential, Exploit, Host, Port, Technology, Vulnerability
 from framework.views import BaseViewSet
 from platforms.mail.notifications import SMTP
 from platforms.telegram_app.notifications import Telegram
@@ -51,16 +41,7 @@ class ReportingViewSet(BaseViewSet):
     filterset_class = ReportFilter
     permission_classes = [IsAuthenticated, RekonoModelPermission, OwnerPermission]
     search_fields = ["format", "status"]
-    ordering_fields = [
-        "id",
-        "project",
-        "target",
-        "task",
-        "status",
-        "format",
-        "user",
-        "date",
-    ]
+    ordering_fields = ["id", "project", "target", "task", "status", "format", "user", "date"]
     http_method_names = ["get", "post", "delete"]
     owner_field = "user"
 
@@ -83,7 +64,7 @@ class ReportingViewSet(BaseViewSet):
                 )
             )
             if self.request.user.id
-            else None
+            else QuerySet.none()
         )
 
     def get_serializer_class(self) -> Serializer:
@@ -95,44 +76,26 @@ class ReportingViewSet(BaseViewSet):
         serializer.is_valid(raise_exception=True)
         findings: tuple[dict[int, Any], dict[int, list[int]], list[int]] | dict[type[Finding], list[Finding]] = {}
         if serializer.validated_data["format"] == ReportFormat.PDF:
-            findings = self._get_findings_to_pdf_report(serializer)
-            count = sum([len(q) for i in findings[0].values() for q in i.values()])
+            findings, count = self._get_findings_for_pdf_report(serializer)
         else:
-            findings = self._get_findings_to_report(serializer)
-            count = len(sum(findings.values(), []))
+            findings, count = self._get_json_findings_by_type(serializer)
         if count == 0:
-            return Response(
-                {"findings": "No findings found with this criterion"},
-                status=status.HTTP_404_NOT_FOUND,
-            )
+            return Response({"findings": "No findings found with this criterion"}, status=status.HTTP_404_NOT_FOUND)
         self.perform_create(serializer)
-        threading.Thread(
-            target=self._create_report_file,
-            args=(serializer.instance,)
-            + ((findings[0], findings[1], findings[2]) if isinstance(findings, tuple) else (findings,)),
-        ).start()
-        return Response(
-            self.get_serializer(instance=serializer.instance).data,
-            status=status.HTTP_201_CREATED,
-        )
+        threading.Thread(target=self._create_report_file, args=(serializer.instance, findings)).start()
+        return Response(self.get_serializer(instance=serializer.instance).data, status=status.HTTP_201_CREATED)
 
     def destroy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        report = self.get_object()
+        report = self.get_object_or_404()
         path = (CONFIG.generated_reports / report.path) if report.path else None
         if path and path.exists():
             path.unlink()
         return super().destroy(request, *args, **kwargs)
 
-    @extend_schema(
-        request=None,
-        responses={
-            200: OpenApiResponse(description="Generated report file"),
-            404: None,
-        },
-    )
+    @extend_schema(request=None, responses={200: OpenApiResponse(description="Generated report file"), 404: None})
     @action(detail=True, methods=["GET"])
     def download(self, request: Request, pk: str) -> FileResponse:
-        report = self.get_object()
+        report = self.get_object_or_404()
         if report.status != ReportStatus.READY:
             messages = {
                 ReportStatus.PENDING: "Report is not available yet",
@@ -149,8 +112,11 @@ class ReportingViewSet(BaseViewSet):
             status=status.HTTP_200_OK,
         )
 
-    def _get_findings_to_report(self, serializer: ReportSerializer) -> dict[type[Finding], list[dict[str, Any]]]:
+    def _get_json_findings_by_type(
+        self, serializer: ReportSerializer
+    ) -> tuple[dict[type[Finding], list[dict[str, Any]]], int]:
         findings = {}
+        count = 0
         models = importlib.import_module("findings.models")
         for finding_type in serializer.validated_finding_types:
             model = getattr(models, finding_type)
@@ -165,104 +131,99 @@ class ReportingViewSet(BaseViewSet):
             findings[model.__name__.lower()] = [
                 {k: v for k, v in model_to_dict(f).items() if k != "executions"} for f in query
             ]
-        return findings
+            count += query.count()
+        return findings, count
 
-    def _get_findings_to_pdf_report(
-        self, serializer: ReportSerializer
-    ) -> tuple[dict[int, Any], dict[int, list[int]], list[int]]:
-        stats = [0] * len(Severity)
-        stats_by_target = {}
-        findings_by_target = {}
+    def _get_findings_for_pdf_report(self, serializer: ReportSerializer) -> tuple[dict[str, Any], int]:
+        count = 0
+        results = {"findings": {}, "stats": {severity.name.upper(): 0 for severity in Severity}, "stats_by_target": {}}
         for target in (
-            serializer.validated_data.get("project").targets.all()
-            if serializer.validated_data.get("project")
-            else [serializer.validated_data.get("target") or serializer.validated_data.get("task").target]
+            [serializer.validated_data.get("task").target]
+            if serializer.validated_data.get("task")
+            else (
+                [serializer.validated_data.get("target")]
+                if serializer.validated_data.get("target")
+                else serializer.validated_data.get("project").targets.all()
+            )
         ):
             target_filter = {"executions__task__target": target}
-            stats_by_target[target.id] = [0] * len(Severity)
-            findings_by_target[target.id] = {
-                FindingName.OSINT.value: OSINT.objects.filter(
+            results["stats_by_target"][target.id] = {severity.name.upper(): 0 for severity in Severity}
+            _osint = OSINT.objects.filter(
+                **{**target_filter, **serializer.validated_filter, **serializer.validated_triage_filter}
+            )
+            _target_count = _osint.count()
+            _findings = {FindingName.OSINT.value: _osint.all(), FindingName.HOST.value: []}
+            for host in Host.objects.filter(**{**target_filter, **serializer.validated_filter}).all():
+                _ports = Port.objects.filter(**{**target_filter, "host": host, **serializer.validated_filter})
+                _technologies = Technology.objects.filter(
+                    **{**target_filter, "port__host": host, **serializer.validated_filter}
+                )
+                _credentials = Credential.objects.filter(
+                    **{
+                        **target_filter,
+                        "technology__port__host": host,
+                        **serializer.validated_filter,
+                        **serializer.validated_triage_filter,
+                    }
+                )
+                _vulnerabilities = (
+                    Vulnerability.objects.filter(
+                        **{
+                            **target_filter,
+                            **serializer.validated_filter,
+                            **serializer.validated_triage_filter,
+                        }
+                    )
+                    .filter(Q(technology__port__host=host) | Q(port__host=host))
+                    .order_by("-severity")
+                )
+                _exploits = Exploit.objects.filter(
                     **{
                         **target_filter,
                         **serializer.validated_filter,
                         **serializer.validated_triage_filter,
                     }
-                ).all(),
-                FindingName.HOST.value: [
+                ).filter(
+                    Q(technology__port__host=host)
+                    | Q(vulnerability__technology__port__host=host)
+                    | Q(vulnerability__port__host=host)
+                )
+                _target_count += (
+                    1  # The host finding counts
+                    + _ports.count()
+                    + _technologies.count()
+                    + _credentials.count()
+                    + _vulnerabilities.count()
+                    + _exploits.count()
+                )
+                _findings[FindingName.HOST.value].append(
                     {
                         FindingName.HOST.value: host,
-                        FindingName.PORT.value: Port.objects.filter(
-                            **{
-                                **target_filter,
-                                "host": host,
-                                **serializer.validated_filter,
-                            }
-                        ).all(),
-                        FindingName.TECHNOLOGY.value: Technology.objects.filter(
-                            **{
-                                **target_filter,
-                                "port__host": host,
-                                **serializer.validated_filter,
-                            }
-                        ).all(),
-                        FindingName.CREDENTIAL.value: Credential.objects.filter(
-                            **{
-                                **target_filter,
-                                "technology__port__host": host,
-                                **serializer.validated_filter,
-                                **serializer.validated_triage_filter,
-                            }
-                        ).all(),
-                        FindingName.VULNERABILITY.value: Vulnerability.objects.filter(
-                            **{
-                                **target_filter,
-                                **serializer.validated_filter,
-                                **serializer.validated_triage_filter,
-                            }
-                        )
-                        .filter(Q(technology__port__host=host) | Q(port__host=host))
-                        .order_by("-severity")
-                        .all(),
-                        FindingName.EXPLOIT.value: Exploit.objects.filter(
-                            **{
-                                **target_filter,
-                                **serializer.validated_filter,
-                                **serializer.validated_triage_filter,
-                            }
-                        )
-                        .filter(
-                            Q(technology__port__host=host)
-                            | Q(vulnerability__technology__port__host=host)
-                            | Q(vulnerability__port__host=host)
-                        )
-                        .all(),
+                        FindingName.PORT.value: _ports.all(),
+                        FindingName.TECHNOLOGY.value: _technologies.all(),
+                        FindingName.CREDENTIAL.value: _credentials.all(),
+                        FindingName.VULNERABILITY.value: _vulnerabilities.all(),
+                        FindingName.EXPLOIT.value: _exploits.all(),
                     }
-                    for host in Host.objects.filter(**{**target_filter, **serializer.validated_filter})
-                ],
-            }
-            if (
-                len(findings_by_target[target.id][FindingName.OSINT.value]) == 0
-                and len(findings_by_target[target.id][FindingName.HOST.value]) == 0
-            ):
-                findings_by_target.pop(target.id)
+                )
+                for vulnerability in _vulnerabilities.all():
+                    _severity = vulnerability.severity.name.upper()
+                    results["stats_by_target"][target.id][_severity] += 1
+                    results["stats"][_severity] += 1
+                for credential in _credentials.all():
+                    _severity = (Severity.HIGH if credential.secret else Severity.LOW).name.upper()
+                    results["stats_by_target"][target.id][_severity] += 1
+                    results["stats"][_severity] += 1
+            if _target_count > 0:
+                results["findings"][target.id] = _findings
+                count += _target_count
             else:
-                for host in findings_by_target[target.id][FindingName.HOST.value]:
-                    for vulnerability in host[FindingName.VULNERABILITY.value]:
-                        stats[vulnerability.severity - 1] += 1
-                        stats_by_target[target.id][vulnerability.severity - 1] += 1
-                    for credential in host[FindingName.CREDENTIAL.value]:
-                        severity = Severity.HIGH if credential.secret else Severity.LOW
-                        stats[severity - 1] += 1
-                        stats_by_target[target.id][severity - 1] += 1
-        return (
-            findings_by_target,
-            {k: list(reversed(v)) for k, v in stats_by_target.items()},
-            list(reversed(stats)),
-        )
+                results["stats_by_target"].pop(target.id)
+        return results, count
 
     def _create_report_file(self, report: Report, *findings: Any) -> None:
         filename = f"{str(uuid.uuid4())}.{report.format.lower()}"
-        success = getattr(self, f"_{report.format.lower()}_report")(filename, report, *findings)
+        success = getattr(self, f"_create_{report.format.lower()}_report")(filename, report, *findings)
         if success:
             report.path = filename
             report.status = ReportStatus.READY
@@ -273,15 +234,15 @@ class ReportingViewSet(BaseViewSet):
             report.status = ReportStatus.ERROR
             report.save(update_fields=["status"])
 
-    def _json_report(
-        self,
-        filename: str,
-        report: Report,
-        findings: dict[type[Finding], list[Finding]],
+    def _create_json_report(
+        self, filename: str, report: Report, findings: dict[type[Finding], list[dict[str, Any]]]
     ) -> bool:
-        with (CONFIG.generated_reports / filename).open("w") as filepath:
-            json.dump(findings, filepath, ensure_ascii=True, indent=4)
-        return True
+        try:
+            with (CONFIG.generated_reports / filename).open("w") as report:
+                json.dump(findings, report, ensure_ascii=True, indent=4)
+            return True
+        except Exception:
+            return False
 
     def _dict_to_xml(self, element: ET.Element, data: dict[str, Any]) -> ET.Element:
         for key, value in data.items():
@@ -293,22 +254,21 @@ class ReportingViewSet(BaseViewSet):
                 element.append(child)
         return element
 
-    def _xml_report(
-        self,
-        filename: str,
-        report: Report,
-        findings: dict[type[Finding], list[Finding]],
+    def _create_xml_report(
+        self, filename: str, report: Report, findings: dict[type[Finding], list[dict[str, Any]]]
     ) -> bool:
         root = ET.Element("findings")
         for finding_type, finding_list in findings.items():
             for finding in finding_list:
                 root.append(self._dict_to_xml(ET.Element(finding_type.lower()), finding))
         ET.indent(root, space="\t")
-        with (CONFIG.generated_reports / filename).open("w") as filepath:
-            filepath.write(ET.tostring(root, encoding="unicode"))
+        with (CONFIG.generated_reports / filename).open("w") as report:
+            report.write(ET.tostring(root, encoding="unicode"))
         return True
 
     def _pdf_static_content(self, uri: str, rel: str) -> str:
+        # Callback function for PDF generation to resolve static file paths
+        # Converts relative URIs to absolute paths so xhtml2pdf can access CSS/images
         if f"/{STATIC_URL}" in uri:
             filepath = uri.split(f"/{STATIC_URL}", 1)[1]
             for parent in [STATICFILES_DIRS[0], CONFIG.home]:
@@ -317,27 +277,19 @@ class ReportingViewSet(BaseViewSet):
                     return str(location)
         return uri
 
-    def _pdf_report(
-        self,
-        filename: str,
-        report: Report,
-        findings_by_target: dict[int, Any],
-        stats_by_target: dict[int, list[int]],
-        stats: list[int],
-    ) -> bool:
+    def _create_pdf_report(self, filename: str, report: Report, findings: dict[str, Any]) -> bool:
+        scope = report.task or report.target or report.project
         template = get_template(CONFIG.pdf_report_template).render(
             {
-                "project": report.project or (report.target.project if report.target else report.task.target.project),
-                "targets": (
-                    (report.project.targets.all() if not CONFIG.testing else [])
-                    if report.project
-                    else [report.target or report.task.target]
-                ),
-                "findings": findings_by_target,
-                "stats_by_target": stats_by_target,
-                "stats": stats,
+                "project": scope.parent_project,
+                "targets": [scope.target]
+                if isinstance(scope, Task)
+                else ([scope] if isinstance(scope, Target) else (scope.targets.all() if not CONFIG.testing else [])),
+                "findings": findings["findings"],
+                "stats_by_target": findings["stats_by_target"],
+                "stats": findings["stats"],
             }
         )
-        with (CONFIG.generated_reports / filename).open("wb") as filepath:
-            pisa_status = pisa.CreatePDF(template, dest=filepath, link_callback=self._pdf_static_content)
+        with (CONFIG.generated_reports / filename).open("wb") as report:
+            pisa_status = pisa.CreatePDF(template, dest=report, link_callback=self._pdf_static_content)
         return not pisa_status.err

@@ -25,4 +25,6 @@ class Report(BaseModel):
         return (self.task or self.target or self.project).parent_project
 
     def __str__(self) -> str:
-        return f"{(self.task or self.target or self.project).__str__()} - {self.format.value} - {self.user.__str__()}"
+        return " - ".join(
+            [(self.task or self.target or self.project).__str__(), self.format.value, self.user.__str__()]
+        )

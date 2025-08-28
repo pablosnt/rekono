@@ -1,11 +1,7 @@
 from typing import Any
 
 from django.core.exceptions import ValidationError
-from rest_framework.serializers import (
-    BooleanField,
-    ModelSerializer,
-    MultipleChoiceField,
-)
+from rest_framework.serializers import BooleanField, ModelSerializer, MultipleChoiceField
 
 from findings.enums import TriageStatus
 from projects.serializers import ProjectSerializer
@@ -35,22 +31,26 @@ class CreateReportSerializer(ModelSerializer):
 
     class Meta:
         model = Report
-        fields = (
-            "id",
-            "project",
-            "target",
-            "task",
-            "format",
-            "only_true_positives",
-            "finding_types",
-            "user",
-        )
+        fields = ("id", "project", "target", "task", "format", "only_true_positives", "finding_types", "user")
         read_only_fields = ("user",)
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         attrs = super().validate(attrs)
         self.validated_filter = {"is_fixed": False}
         self.validated_triage_filter = {}
+        only_true_positives = attrs.pop("only_true_positives", False)
+        if only_true_positives:
+            self.validated_triage_filter.update({"triage_status": TriageStatus.TRUE_POSITIVE})
+        else:
+            self.validated_triage_filter.update(
+                {
+                    "triage_status__in": [
+                        TriageStatus.UNTRIAGED,
+                        TriageStatus.WONT_FIX,
+                        TriageStatus.TRUE_POSITIVE,
+                    ]
+                }
+            )
         no_mandatory_field = True
         for field, filter_field in [
             ("task", "executions__task"),
@@ -60,25 +60,15 @@ class CreateReportSerializer(ModelSerializer):
             value = attrs.get(field)
             if value:
                 no_mandatory_field = False
+                # TODO: Why PDF is different?
                 if attrs.get("format") != ReportFormat.PDF:
                     self.validated_filter[filter_field] = value
-                only_true_positives = attrs.pop("only_true_positives", False)
-                if only_true_positives:
-                    self.validated_triage_filter.update({"triage_status": TriageStatus.TRUE_POSITIVE})
-                else:
-                    self.validated_triage_filter.update(
-                        {
-                            "triage_status__in": [
-                                TriageStatus.UNTRIAGED,
-                                TriageStatus.WONT_FIX,
-                                TriageStatus.TRUE_POSITIVE,
-                            ]
-                        }
-                    )
                 break
         if no_mandatory_field:
             raise ValidationError("At lest one task, target or project must be provided", code="report")
-        self.validated_finding_types = (
-            attrs.pop("finding_types") if "finding_types" in attrs and attrs.get("format") != ReportFormat.PDF else None
-        ) or list(FindingName)
+        # Finding types included in PDF reports are not customizable
+        if "finding_types" in attrs and attrs.get("finding_types") and attrs.get("format") != ReportFormat.PDF:
+            self.validated_finding_types = attrs.pop("finding_types")
+        else:
+            self.validated_finding_types = list(FindingName)
         return attrs
