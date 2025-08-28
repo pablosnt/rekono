@@ -13,11 +13,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from framework.views import BaseViewSet
 from platforms.mail.notifications import SMTP
-from security.authorization.permissions import (
-    IsAdmin,
-    IsNotAuthenticated,
-    RekonoModelPermission,
-)
+from security.authorization.permissions import IsAdmin, IsNotAuthenticated, RekonoModelPermission
 from users.filters import UserFilter
 from users.models import User
 from users.serializers import (
@@ -34,107 +30,81 @@ from users.serializers import (
     UserSerializer,
 )
 
-# Create your views here.
-
 
 class UserViewSet(BaseViewSet):
-    """User administration ViewSet that includes: get, retrieve, invite, role change, enable and disable features."""
-
     serializer_class = UserSerializer
     queryset = User.objects.all()
     filterset_class = UserFilter
     # Required to include the IsAdmin to the base authorization classes and remove unneeded permissions
     permission_classes = [IsAuthenticated, RekonoModelPermission, IsAdmin]
-    # Fields used to search tasks
     search_fields = ["username", "first_name", "last_name", "email"]
-    ordering_fields = [
-        "id",
-        "username",
-        "first_name",
-        "last_name",
-        "email",
-        "date_joined",
-        "last_login",
-    ]
+    ordering_fields = ["id", "username", "first_name", "last_name", "email", "date_joined", "last_login"]
     http_method_names = ["get", "post", "put", "delete"]
 
-    def _get_object_if_not_current_user(self, request) -> User:
-        instance = self.get_object()  # Get user instance
+    def get_object_if_not_current_user(self, request) -> User:
+        instance = self.get_object_or_404()
         if instance.id == request.user.id:
             raise PermissionDenied()
         return instance
 
-    def _is_valid(self, serializer: Serializer, request: Request) -> Serializer:
-        serializer = serializer(data=request.data)
+    @extend_schema(request=InviteUserSerializer, responses={201: UserSerializer})
+    def create(self, request, *args, **kwargs):
+        serializer = InviteUserSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        return serializer
-
-    def _create(self, serializer: Serializer, request: Request) -> Response:
-        serializer = self._is_valid(serializer, request)
         return Response(
             self.get_serializer(instance=serializer.create(serializer.validated_data)).data,
             status=status.HTTP_201_CREATED,
         )
 
-    @extend_schema(request=InviteUserSerializer, responses={201: UserSerializer})
-    def create(self, request, *args, **kwargs):
-        return self._create(InviteUserSerializer, request)
-
     @extend_schema(request=CreateUserSerializer, responses={201: UserSerializer})
-    @action(
-        detail=False,
-        methods=["POST"],
-        url_path="signup",
-        permission_classes=[IsNotAuthenticated],
-    )
+    @action(detail=False, methods=["POST"], url_path="signup", permission_classes=[IsNotAuthenticated])
     def create_after_invitation(self, request: Request, *args, **kwargs) -> Response:
-        return self._create(CreateUserSerializer, request)
+        serializer = CreateUserSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        return Response(
+            self.get_serializer(instance=serializer.create(serializer.validated_data)).data,
+            status=status.HTTP_201_CREATED,
+        )
 
     @extend_schema(request=None, responses={204: None})
     @action(detail=True, methods=["POST"])
     def resend(self, request: Request, pk: str) -> Response:
-        user = self.get_object()
+        user = self.get_object_or_404()
         if user.is_active is not None or user.otp is None:
-            return Response(
-                {"user": "User account has been already created"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            return Response({"user": "User account has been already created"}, status=status.HTTP_400_BAD_REQUEST)
         if not SMTP().is_available():
             return Response(
-                {"smtp": "SMTP client is not available to send the invitation"},
-                status=status.HTTP_400_BAD_REQUEST,
+                {"smtp": "SMTP client is not available to send the invitation"}, status=status.HTTP_400_BAD_REQUEST
             )
         User.objects.send_invitation(user)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @extend_schema(request=RequestPasswordResetSerializer, responses={200: None}, methods=["POST"])
     @extend_schema(request=ResetPasswordSerializer, responses={200: None}, methods=["PUT"])
-    @action(
-        detail=False,
-        methods=["POST", "PUT"],
-        url_path="reset-password",
-        permission_classes=[IsNotAuthenticated],
-    )
+    @action(detail=False, methods=["POST", "PUT"], url_path="reset-password", permission_classes=[IsNotAuthenticated])
     def reset_password(self, request: Request, *args, **kwargs) -> Response:
-        serializer = self._is_valid(
-            (RequestPasswordResetSerializer if request.method.lower() == "post" else ResetPasswordSerializer),
-            request,
+        serializer_class = (
+            RequestPasswordResetSerializer if request.method.lower() == "post" else ResetPasswordSerializer
         )
+        serializer = serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(status=status.HTTP_200_OK)
 
     @extend_schema(request=UpdateRoleSerializer, responses={201: UserSerializer})
     def update(self, request, *args, **kwargs):
-        instance = self._get_object_if_not_current_user(request)
-        serializer = self._is_valid(UpdateRoleSerializer, request)
+        instance = self.get_object_if_not_current_user(request)
+        serializer = UpdateRoleSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
         return Response(
             self.get_serializer(instance=serializer.update(instance, serializer.validated_data)).data,
             status=status.HTTP_200_OK,
         )
 
     def destroy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        instance = self._get_object_if_not_current_user(request)
+        instance = self.get_object_if_not_current_user(request)
         if instance.is_active is None:
+            # User was invited but the accout wasn't created
             super().destroy(request, *args, **kwargs)
         else:
             User.objects.disable_user(instance)
@@ -143,16 +113,7 @@ class UserViewSet(BaseViewSet):
     @extend_schema(request=None, responses={200: UserSerializer})
     @action(detail=True, methods=["POST"])
     def enable(self, request: Request, pk: str) -> Response:
-        """Enable disabled user.
-
-        Args:
-            request (Request): Received HTTP request
-            pk (str): Instance Id
-
-        Returns:
-            Response: HTTP response
-        """
-        instance = self._get_object_if_not_current_user(request)
+        instance = self.get_object_if_not_current_user(request)
         User.objects.enable_user(instance)
         return Response(self.get_serializer(instance=instance).data, status=status.HTTP_200_OK)
 
@@ -164,10 +125,7 @@ class BaseProfileViewSet(GenericViewSet):
     permission_classes = [IsAuthenticated]
 
     def _get(self, request: Request) -> Response:
-        return Response(
-            self.get_serializer(instance=request.user).data,
-            status=status.HTTP_200_OK,
-        )
+        return Response(self.get_serializer(instance=request.user).data, status=status.HTTP_200_OK)
 
     def _update(self, request: Request, serializer_class: Serializer) -> Serializer:
         serializer = serializer_class(request.user, data=request.data)
@@ -202,28 +160,20 @@ class MfaViewSet(BaseProfileViewSet):
         if request.user.mfa:
             return Response({"mfa": "MFA is already enabled"}, status=status.HTTP_400_BAD_REQUEST)
         return Response(
-            RegisterMfaSerializer(
-                {"url": User.objects.register_mfa(request.user)},
-                context={"request": request},
-            ).data,
+            RegisterMfaSerializer({"url": User.objects.register_mfa(request.user)}, context={"request": request}).data,
             status=status.HTTP_200_OK,
         )
-
-    def _update_mfa(self, request: Request, serializer: Serializer) -> None:
-        serializer = serializer(data=request.data, context={"request": request})
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
 
     @extend_schema(request=EnableMfaSerializer, responses={200: ProfileSerializer})
     @action(detail=False, methods=["POST"])
     def enable(self, request: Request) -> Response:
-        for condition, message in [
-            (request.user.mfa, "MFA is already enabled"),
-            (not request.user.secret, "MFA is not regiesterd yet"),
-        ]:
-            if condition:
-                return Response({"mfa": message}, status=status.HTTP_400_BAD_REQUEST)
-        self._update_mfa(request, EnableMfaSerializer)
+        if request.user.mfa:
+            return Response({"mfa": "MFA is already enabled"}, status=status.HTTP_400_BAD_REQUEST)
+        if not request.user.secret:
+            return Response({"mfa": "MFA is not registered yet"}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = EnableMfaSerializer(data=request.data, context={"request": request})
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
         return self._get(request)
 
     @extend_schema(request=DisableMfaSerializer, responses={200: ProfileSerializer})
@@ -231,5 +181,7 @@ class MfaViewSet(BaseProfileViewSet):
     def disable(self, request: Request) -> Response:
         if not request.user.mfa:
             return Response({"mfa": "MFA is already disabled"}, status=status.HTTP_400_BAD_REQUEST)
-        self._update_mfa(request, DisableMfaSerializer)
+        serializer = DisableMfaSerializer(data=request.data, context={"request": request})
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
         return self._get(request)
