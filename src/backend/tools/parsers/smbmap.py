@@ -17,13 +17,14 @@ class Smbmap(BaseParser):
     Extracts SMB share findings with access permissions from network share
     enumeration results. Processes CSV data to identify readable, writable,
     and inaccessible network shares.
-    
+
     Attributes:
         Inherits all attributes from BaseParser
     """
+
     def _parse(self) -> None:
         """Parse SMBMap CSV output and extract SMB share findings.
-        
+
         Processes CSV enumeration results to create Path findings for
         discovered SMB shares with access permission details.
         """

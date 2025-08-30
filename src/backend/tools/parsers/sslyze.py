@@ -17,21 +17,22 @@ class Sslyze(BaseParser):
     Extracts detailed SSL/TLS security findings including supported protocols,
     cipher suites, certificate validation issues, and known vulnerabilities
     like Heartbleed, ROBOT, and CRIME attacks.
-    
+
     Attributes:
         protocol_versions (dict): Mapping of SSL/TLS protocols to versions
         generic_tech (Technology | None): Generic TLS technology for findings
     """
+
     protocol_versions = {"ssl": ["2.0", "3.0"], "tls": ["1.0", "1.1", "1.2", "1.3"]}
     generic_tech: Technology | None = None
 
     def create_finding(self, finding_type: type[Finding], **fields: Any) -> Finding:
         """Create findings with automatic TLS technology association.
-        
+
         Args:
             finding_type (type[Finding]): Type of finding to create
             **fields (Any): Field values for the finding
-            
+
         Returns:
             Finding: Created finding instance with technology association
         """
@@ -43,7 +44,7 @@ class Sslyze(BaseParser):
 
     def _parse(self) -> None:
         """Parse SSLyze JSON output and extract SSL/TLS security findings.
-        
+
         Processes JSON scan results to create Technology and Vulnerability findings
         for comprehensive SSL/TLS security analysis.
         """

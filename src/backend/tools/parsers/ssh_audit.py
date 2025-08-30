@@ -18,13 +18,14 @@ class Sshaudit(BaseParser):
     Extracts SSH server technology and security findings including insecure
     encryption algorithms, key exchange methods, and known vulnerabilities.
     Processes comprehensive SSH configuration security analysis.
-    
+
     Attributes:
         Inherits all attributes from BaseParser
     """
+
     def _parse(self) -> None:
         """Parse SSH Audit JSON output and extract SSH security findings.
-        
+
         Processes JSON scan results to create Technology and Vulnerability findings
         for SSH server configuration and security issues.
         """

@@ -18,13 +18,14 @@ class Nuclei(BaseParser):
     Extracts vulnerability findings, technology detections, and exposed credentials
     from Nuclei template-based security scans. Handles multiple finding types based
     on template tags and metadata.
-    
+
     Attributes:
         Inherits all attributes from BaseParser
     """
+
     def _parse(self) -> None:
         """Parse Nuclei JSON output and extract security findings.
-        
+
         Processes line-delimited JSON output to create Vulnerability, Technology,
         and Credential findings based on template tags and extracted results.
         """

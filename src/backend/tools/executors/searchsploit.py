@@ -17,10 +17,11 @@ class Searchsploit(BaseExecutor):
     Handles Searchsploit execution for searching exploits and shellcodes
     in the Exploit Database. Validates that required technology or CVE
     parameters are available before execution.
-    
+
     Attributes:
         Inherits all attributes from BaseExecutor
     """
+
     def get_arguments(
         self,
         findings: list[Finding],
@@ -30,20 +31,20 @@ class Searchsploit(BaseExecutor):
         wordlists: list[Wordlist],
     ) -> list[str]:
         """Generate command-line arguments with validation for Searchsploit execution.
-        
+
         Validates that either technology or CVE parameters are available for
         meaningful exploit searches before allowing execution.
-        
+
         Args:
             findings (list[Finding]): Security findings to use as inputs
             target_ports (list[TargetPort]): Target ports to use as inputs
             input_vulnerabilities (list[InputVulnerability]): Vulnerability parameters
-            input_technologies (list[InputTechnology]): Technology parameters  
+            input_technologies (list[InputTechnology]): Technology parameters
             wordlists (list[Wordlist]): Wordlists to use as inputs
-            
+
         Returns:
             list[str]: Generated command-line arguments
-            
+
         Raises:
             RuntimeError: If neither technology nor CVE arguments are available
         """

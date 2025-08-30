@@ -1,4 +1,3 @@
-from backend.targets.models import Target
 from django.forms import DateField
 from rest_framework.serializers import CharField, FloatField, IntegerField, Serializer
 

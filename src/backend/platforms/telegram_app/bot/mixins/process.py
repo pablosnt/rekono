@@ -18,6 +18,7 @@ class ProcessMixin(BaseMixin):
     Enables conversations to display available security processes and handle
     process selection for security testing workflows.
     """
+
     async def ask_for_process(self, update: Update, context: CallbackContext) -> int:
         """Display security process selection options.
 

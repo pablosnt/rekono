@@ -17,13 +17,14 @@ class Cmseek(BaseParser):
     Extracts CMS fingerprinting results including detected technologies, versions,
     configuration files, backup files, user enumerations, and known vulnerabilities.
     Processes comprehensive CMS security analysis data.
-    
+
     Attributes:
         Inherits all attributes from BaseParser
     """
+
     def _parse(self) -> None:
         """Parse CMSeek JSON output and extract CMS security findings.
-        
+
         Processes JSON scan results to create Technology, Path, Vulnerability,
         and Credential findings from CMS detection and security analysis.
         """

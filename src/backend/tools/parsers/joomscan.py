@@ -17,13 +17,14 @@ class Joomscan(BaseParser):
     Extracts Joomla CMS security findings including version detection, CVE
     vulnerabilities, exploit references, configuration issues, and discovered
     endpoints from comprehensive Joomla security scans.
-    
+
     Attributes:
         Inherits all attributes from BaseParser
     """
+
     def _parse(self) -> None:
         """Parse JoomScan output and extract Joomla security findings.
-        
+
         Processes plain text scan results to create Technology, Vulnerability,
         Exploit, and Path findings from Joomla CMS security analysis.
         """

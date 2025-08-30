@@ -15,13 +15,14 @@ class Emailharvester(BaseParser):
     Extracts email address findings from EmailHarvester output files.
     Processes line-separated email addresses discovered during OSINT
     reconnaissance and email enumeration operations.
-    
+
     Attributes:
         Inherits all attributes from BaseParser
     """
+
     def _parse(self) -> None:
         """Parse EmailHarvester output and extract email findings.
-        
+
         Processes line-based output to create OSINT findings for
         discovered email addresses.
         """

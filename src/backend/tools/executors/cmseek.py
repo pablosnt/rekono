@@ -19,13 +19,14 @@ class Cmseek(BaseExecutor):
     Handles CMSeek execution for CMS fingerprinting and security analysis.
     Manages result file relocation from CMSeek's default output directory
     to the configured report location.
-    
+
     Attributes:
         Inherits all attributes from BaseExecutor
     """
+
     def after_running(self) -> None:
         """Handle post-execution cleanup and result file management.
-        
+
         Moves CMSeek result files from the default output directory to the
         configured report location and cleans up temporary directories.
         """

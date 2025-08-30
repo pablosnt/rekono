@@ -17,13 +17,14 @@ class Dirsearch(BaseParser):
     Extracts discovered web paths and endpoints from Dirsearch directory
     enumeration results. Supports both legacy and current JSON output formats
     with automatic format detection.
-    
+
     Attributes:
         Inherits all attributes from BaseParser
     """
+
     def _parse(self) -> None:
         """Parse Dirsearch JSON output and extract path findings.
-        
+
         Processes JSON enumeration results to create Path findings for
         discovered web directories and endpoints.
         """

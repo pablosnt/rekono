@@ -25,6 +25,7 @@ class WordlistMixin(BaseMixin):
         default_wordlist (str): Label for default wordlist option.
         tools_with_required_wordlists (list[str]): Tools that require wordlist selection.
     """
+
     default_wordlist = "Default tools wordlists"
     tools_with_required_wordlists = ["Gobuster"]
 

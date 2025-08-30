@@ -14,13 +14,14 @@ class Spring4shellscan(BaseParser):
     Detects Spring Framework vulnerability findings from Spring4Shell-Scan output
     by searching for specific vulnerability indicators. Creates vulnerability findings
     for Spring4Shell and Spring Cloud RCE detections.
-    
+
     Attributes:
         Inherits all attributes from BaseParser
     """
+
     def _parse(self) -> None:
         """Parse Spring4Shell-Scan output and extract Spring vulnerability findings.
-        
+
         Searches for Spring Framework vulnerability indicators in scan output and
         creates Vulnerability findings for confirmed detections.
         """

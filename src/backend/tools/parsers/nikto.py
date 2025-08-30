@@ -15,13 +15,14 @@ class Nikto(BaseParser):
     Extracts web application vulnerability findings and discovered endpoints
     from Nikto security scans. Processes vulnerability descriptions and
     references for comprehensive security analysis.
-    
+
     Attributes:
         Inherits all attributes from BaseParser
     """
+
     def _parse(self) -> None:
         """Parse Nikto XML output and extract security findings.
-        
+
         Processes XML scan results to create Vulnerability and Path findings
         from web application security tests.
         """

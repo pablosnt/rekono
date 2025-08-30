@@ -18,13 +18,14 @@ class Emailfinder(BaseParser):
     Extracts and validates email addresses from EmailFinder output using Django's
     built-in email validation. Creates OSINT findings for discovered email addresses
     from email enumeration and reconnaissance operations.
-    
+
     Attributes:
         Inherits all attributes from BaseParser
     """
+
     def _parse(self) -> None:
         """Parse EmailFinder output and extract email findings.
-        
+
         Processes line-based output to validate and create OSINT findings
         for discovered email addresses.
         """

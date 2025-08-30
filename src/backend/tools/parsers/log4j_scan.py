@@ -14,13 +14,14 @@ class Log4jscan(BaseParser):
     Detects Log4Shell vulnerability findings from Log4j-Scan output by searching
     for specific vulnerability indicators in the scan results. Creates vulnerability
     findings for confirmed Log4Shell detections.
-    
+
     Attributes:
         Inherits all attributes from BaseParser
     """
+
     def _parse(self) -> None:
         """Parse Log4j-Scan output and extract Log4Shell vulnerability findings.
-        
+
         Searches for Log4Shell vulnerability indicators in scan output and
         creates Vulnerability findings for confirmed detections.
         """

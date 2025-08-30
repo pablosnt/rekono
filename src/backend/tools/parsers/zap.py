@@ -17,10 +17,11 @@ class Zap(BaseParser):
     Extracts web application vulnerability findings and discovered endpoints
     from OWASP ZAP security scans. Processes vulnerability alerts with severity
     mapping and endpoint discovery for comprehensive web security analysis.
-    
+
     Attributes:
         severity_mapping (dict): Mapping between ZAP and Rekono severity levels
     """
+
     # Mapping between OWASP ZAP severity values and Rekono severity values
     severity_mapping = {
         0: Severity.INFO,
@@ -31,7 +32,7 @@ class Zap(BaseParser):
 
     def _parse(self) -> None:
         """Parse OWASP ZAP XML output and extract web security findings.
-        
+
         Processes XML scan results to create Vulnerability and Path findings
         from web application security tests.
         """
@@ -71,10 +72,10 @@ class Zap(BaseParser):
 
     def _clean(self, value: str) -> str:
         """Clean HTML-encoded text from ZAP output.
-        
+
         Args:
             value (str): HTML-encoded text to clean
-            
+
         Returns:
             str: Cleaned text with HTML entities unescaped and tags removed
         """

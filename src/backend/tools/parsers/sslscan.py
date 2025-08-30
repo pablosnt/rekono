@@ -18,19 +18,20 @@ class Sslscan(BaseParser):
     Extracts SSL/TLS security findings including supported protocols, cipher suites,
     and known vulnerabilities like Heartbleed. Associates findings with detected
     SSL/TLS technology versions for comprehensive analysis.
-    
+
     Attributes:
         technologies (list[Technology]): List of detected SSL/TLS protocol technologies
     """
+
     technologies: list[Technology] = []
 
     def create_finding(self, finding_type: type[Finding], **fields: Any) -> Finding:
         """Create findings with automatic SSL/TLS technology association.
-        
+
         Args:
             finding_type (type[Finding]): Type of finding to create
             **fields (Any): Field values for the finding
-            
+
         Returns:
             Finding: Created finding instance with technology association
         """
@@ -42,7 +43,7 @@ class Sslscan(BaseParser):
 
     def _parse(self) -> None:
         """Parse SSLScan XML output and extract SSL/TLS security findings.
-        
+
         Processes XML scan results to create Technology and Vulnerability findings
         for SSL/TLS protocols, cipher suites, and security issues.
         """

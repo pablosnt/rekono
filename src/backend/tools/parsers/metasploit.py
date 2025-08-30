@@ -14,13 +14,14 @@ class Metasploit(BaseParser):
     Extracts exploit module findings from Metasploit search results.
     Processes line-based output to identify available exploit modules
     with titles and reference paths within the Metasploit Framework.
-    
+
     Attributes:
         Inherits all attributes from BaseParser
     """
+
     def _parse(self) -> None:
         """Parse Metasploit search output and extract exploit findings.
-        
+
         Processes numbered search results to create Exploit findings for
         available Metasploit modules.
         """

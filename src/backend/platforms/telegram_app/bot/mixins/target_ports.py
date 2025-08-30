@@ -19,6 +19,7 @@ class TargetPortMixin(BaseMixin):
     Enables conversations to create new target ports with validation
     and error handling for security testing workflows.
     """
+
     async def ask_for_new_target_port(self, update: Update, context: CallbackContext) -> int:
         """Prompt user to input a new target port number.
 

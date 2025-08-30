@@ -19,15 +19,16 @@ class Gitleaks(BaseParser):
     Extracts secret detection findings including exposed credentials, API keys,
     and sensitive information from Git repositories. Handles both Git repository
     exposure vulnerabilities and individual secret findings.
-    
+
     Attributes:
         executor (GitleaksExecutor): GitLeaks-specific executor instance
     """
+
     executor: GitleaksExecutor
 
     def _parse(self) -> None:
         """Parse GitLeaks JSON output and extract secret findings.
-        
+
         Processes JSON scan results to create Vulnerability and Credential findings
         for Git repository exposure and discovered secrets.
         """
