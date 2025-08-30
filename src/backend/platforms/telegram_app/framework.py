@@ -38,7 +38,7 @@ class BaseTelegram(LoggingEntity):
         """
         self.initialize()
 
-    def initialize(self) -> Application | None:
+    def initialize(self) -> None:
         """Initialize the Telegram Bot application.
 
         Initializes the bot application if available and handles authentication errors.
@@ -46,9 +46,9 @@ class BaseTelegram(LoggingEntity):
         Returns:
             Application | None: The initialized application or None if failed.
         """
-        if self.app is not None and hasattr(self.app, "bot") and self.app.bot:
+        if self.app and self.app.bot:  # pytype: disable=attribute-error
             try:
-                asyncio.run(self.app.bot.initialize())
+                asyncio.run(self.app.bot.initialize())  # pytype: disable=attribute-error
             except (InvalidToken, Forbidden):
                 self.handle_invalid_token()
 
