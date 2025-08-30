@@ -55,7 +55,7 @@ class SMTP(BaseNotification):
     @cached_property
     def settings(self) -> SMTPSettings:
         """Get SMTP server configuration settings from database.
-        
+
         Returns:
             SMTPSettings: SMTP configuration instance or None if not configured.
         """

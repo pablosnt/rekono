@@ -32,7 +32,7 @@ class BaseTelegram(LoggingEntity):
     @cached_property
     def settings(self) -> TelegramSettings:
         """Get Telegram Bot configuration settings from database.
-        
+
         Returns:
             TelegramSettings: Telegram configuration instance or None if not configured.
         """

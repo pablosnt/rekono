@@ -40,7 +40,7 @@ class CveCrowd(BaseIntegration):
     @cached_property
     def settings(self) -> CveCrowdSettings:
         """Get CVE Crowd platform configuration settings from database.
-        
+
         Returns:
             CveCrowdSettings: Platform configuration instance or None if not configured.
         """

@@ -51,7 +51,7 @@ class NvdNist(BaseIntegration):
     @cached_property
     def settings(self) -> NvdNistSettings:
         """Get NVD NIST platform configuration settings from database.
-        
+
         Returns:
             NvdNistSettings: NVD NIST configuration instance or None if not configured.
         """

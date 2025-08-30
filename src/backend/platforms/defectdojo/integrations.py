@@ -20,7 +20,6 @@ from findings.models import Path
 from framework.platforms import BaseIntegration
 from platforms.defectdojo.models import DefectDojoSettings, DefectDojoSync, DefectDojoTargetSync
 from targets.models import Target
-from functools import cached_property
 
 
 class DefectDojo(BaseIntegration):
@@ -62,7 +61,7 @@ class DefectDojo(BaseIntegration):
     @cached_property
     def settings(self) -> DefectDojoSettings:
         """Get DefectDojo integration configuration settings from database.
-        
+
         Returns:
             DefectDojoSettings: DefectDojo configuration instance or None if not configured.
         """
