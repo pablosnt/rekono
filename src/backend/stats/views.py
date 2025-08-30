@@ -1,4 +1,4 @@
-from django.db.models import Count, ExpressionWrapper, F, FloatField, Max, Q, Sum
+from django.db.models import Count, ExpressionWrapper, F, FloatField, Max, Q
 from django_rq.utils import get_statistics
 from drf_spectacular.utils import extend_schema
 from rest_framework.permissions import IsAuthenticated
