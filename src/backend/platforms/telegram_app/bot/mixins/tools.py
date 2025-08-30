@@ -1,3 +1,9 @@
+"""Telegram Bot mixins for security tool and configuration management.
+
+Provides mixins for tool selection, configuration management, and intensity
+settings in security testing workflows through interactive conversations.
+"""
+
 from asgiref.sync import sync_to_async
 from django.db.models import QuerySet
 from telegram import Update
@@ -10,7 +16,24 @@ from tools.models import Configuration, Tool
 
 
 class ToolMixin(BaseMixin):
+    """Mixin providing security tool selection functionality.
+
+    Enables conversations to display available security tools and handle
+    tool selection for security testing operations.
+    """
+
     async def ask_for_tool(self, update: Update, context: CallbackContext) -> int:
+        """Display security tool selection options.
+
+        Shows a list of available security tools for selection in testing workflows.
+
+        Args:
+            update (Update): The Telegram update containing the user interaction.
+            context (CallbackContext): The callback context for the conversation.
+
+        Returns:
+            int: Next conversation state based on tool selection.
+        """
         self.validate_update(update)
         return await self.go_to_next_state(
             update,
@@ -21,6 +44,18 @@ class ToolMixin(BaseMixin):
         )
 
     async def save_tool(self, update: Update, context: CallbackContext) -> int:
+        """Save selected security tool to conversation context.
+
+        Processes the user's tool selection and stores it in the conversation
+        context for use in subsequent configuration steps.
+
+        Args:
+            update (Update): The Telegram update containing user selection.
+            context (CallbackContext): The callback context for the conversation.
+
+        Returns:
+            int: Next conversation state after tool selection.
+        """
         self.validate_update(update)
         return await self.go_to_next_state(
             update,
@@ -30,7 +65,24 @@ class ToolMixin(BaseMixin):
 
 
 class ConfigurationMixin(BaseMixin):
+    """Mixin providing tool configuration selection functionality.
+
+    Enables conversations to display available configurations for selected
+    security tools and handle configuration selection.
+    """
+
     async def ask_for_configuration(self, update: Update, context: CallbackContext) -> int:
+        """Display tool configuration selection options.
+
+        Shows available configurations for the selected security tool.
+
+        Args:
+            update (Update): The Telegram update containing user interaction.
+            context (CallbackContext): The callback context for the conversation.
+
+        Returns:
+            int: Next conversation state based on configuration selection.
+        """
         self.validate_update(update)
         return await self.go_to_next_state(
             update,
@@ -47,6 +99,18 @@ class ConfigurationMixin(BaseMixin):
         )
 
     async def save_configuration(self, update: Update, context: CallbackContext) -> int:
+        """Save selected tool configuration to conversation context.
+
+        Processes the user's configuration selection and stores it in the conversation
+        context for use in security testing execution.
+
+        Args:
+            update (Update): The Telegram update containing user selection.
+            context (CallbackContext): The callback context for the conversation.
+
+        Returns:
+            int: Next conversation state after configuration selection.
+        """
         self.validate_update(update)
         return await self.go_to_next_state(
             update,
@@ -58,11 +122,37 @@ class ConfigurationMixin(BaseMixin):
 
 
 class IntensityMixin(BaseMixin):
+    """Mixin providing intensity level selection functionality.
+
+    Enables conversations to display available intensity levels for selected
+    security tools and handle intensity selection.
+    """
+
     @sync_to_async
     def _get_tool_intensities_async(self, tool: Tool) -> QuerySet:
+        """Get available intensity levels for a security tool (async wrapper).
+
+        Args:
+            tool (Tool): The security tool to get intensities for.
+
+        Returns:
+            QuerySet: List of intensity level names for the tool.
+        """
         return [Intensity(i.value).name for i in tool.intensities.order_by("value").all()]
 
     async def ask_for_intensity(self, update: Update, context: CallbackContext) -> int:
+        """Display intensity level selection options.
+
+        Shows available intensity levels for the selected security tool,
+        with tool-specific intensities displayed in descending order.
+
+        Args:
+            update (Update): The Telegram update containing user interaction.
+            context (CallbackContext): The callback context for the conversation.
+
+        Returns:
+            int: Next conversation state or ConversationHandler.END if no tool selected.
+        """
         self.validate_update(update)
         tool = self.get_context_value(context, Context.TOOL)
         if not tool:
@@ -77,6 +167,18 @@ class IntensityMixin(BaseMixin):
         )
 
     async def save_intensity(self, update: Update, context: CallbackContext) -> int:
+        """Save selected intensity level to conversation context.
+
+        Processes the user's intensity selection, converts to uppercase,
+        and stores it in the conversation context for security testing execution.
+
+        Args:
+            update (Update): The Telegram update containing user selection.
+            context (CallbackContext): The callback context for the conversation.
+
+        Returns:
+            int: Next conversation state after intensity selection.
+        """
         self.validate_update(update)
         next_state = await self.go_to_next_state(
             update,

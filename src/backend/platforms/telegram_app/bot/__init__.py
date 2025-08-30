@@ -1,3 +1,9 @@
+"""Telegram Bot command handling and conversation management.
+
+Provides bot command framework, conversation workflows, and interactive
+interfaces for Rekono security testing operations through Telegram.
+"""
+
 import asyncio
 import time
 from warnings import filterwarnings
@@ -15,6 +21,17 @@ filterwarnings(action="ignore", message=r".*CallbackQueryHandler", category=PTBU
 
 
 class TelegramBot(BaseTelegram):
+    """Main Telegram Bot class for handling security testing commands and conversations.
+
+    Manages the complete lifecycle of the Telegram Bot including command registration,
+    handler setup, and polling operations. Integrates all available commands and
+    conversation workflows for interactive security testing operations.
+
+    Attributes:
+        commands (list): List of available bot command handlers including commands
+                        and conversation workflows for security testing operations.
+    """
+
     commands = [
         Start(),
         Logout(),
@@ -28,10 +45,23 @@ class TelegramBot(BaseTelegram):
     ]
 
     def __init__(self) -> None:
+        """Initialize the Telegram Bot with all available commands and help system.
+
+        Adds the Help command with references to all other commands and initializes
+        the base Telegram application framework.
+        """
         self.commands.append(Help(self.commands + [Cancel()]))
         super().__init__()
 
     async def post_init(self, application: Application) -> None:
+        """Initialize bot commands and register handlers after application startup.
+
+        Registers all command handlers with the Telegram application and sets up
+        the bot command menu for user interaction.
+
+        Args:
+            application (Application): The Telegram Bot application instance.
+        """
         bot_commands = []
         for command in self.commands:
             bot_commands.append((command.name, command.help))
@@ -39,6 +69,15 @@ class TelegramBot(BaseTelegram):
         await application.bot.set_my_commands(bot_commands)
 
     def _wait_for_token(self, sleep_time: int = 60) -> None:
+        """Wait for valid Telegram Bot token configuration before starting.
+
+        Continuously checks for a valid Telegram Bot token in settings and waits
+        if not configured. Handles token validation and application initialization.
+
+        Args:
+            sleep_time (int): Time in seconds to wait between token checks.
+                             Defaults to 60 seconds.
+        """
         self.settings = TelegramSettings.objects.first()
         if not self.settings or not self.settings.secret:
             del self.app  # Remove cached_property value, so it will be regenerated
@@ -54,6 +93,11 @@ class TelegramBot(BaseTelegram):
             self.initialize()
 
     def deploy(self) -> None:
+        """Deploy and start the Telegram Bot with polling mode.
+
+        Starts the bot polling process after ensuring valid token configuration.
+        Handles token validation errors and restarts the deployment process if needed.
+        """
         self._wait_for_token()
         if not self.app or not self.app.updater or not self.app.bot:
             return self.deploy()

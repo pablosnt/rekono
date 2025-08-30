@@ -1,3 +1,9 @@
+"""Telegram notification system for Rekono security events.
+
+Provides Telegram-based notification delivery for security events including
+execution results, alerts, and findings through Bot messaging.
+"""
+
 from typing import Any
 
 from django.forms.models import model_to_dict
@@ -13,17 +19,48 @@ from users.models import User
 
 
 class Telegram(BaseNotification, BaseTelegram):
+    """Telegram notification delivery system for security events.
+
+    Handles delivery of security notifications through Telegram Bot messaging
+    including execution results, alerts, and findings. Integrates with the
+    base notification framework to provide real-time security event delivery.
+
+    Attributes:
+        enable_field (str): User profile field name to check if notifications are enabled.
+    """
+
     enable_field = "telegram_notifications"
 
     def is_available(self) -> bool:
+        """Check if Telegram notifications are available.
+
+        Returns:
+            bool: True if bot token is configured and application is ready.
+        """
         return bool(self.settings.secret and self.app and self.app.bot)
 
     def _notify(self, users: list[Any], message: str) -> None:
+        """Send notification message to multiple users via Telegram.
+
+        Args:
+            users (list[Any]): List of users to notify.
+            message (str): Message content to send.
+        """
         for user in users:
             if hasattr(user, "telegram_chat"):
                 self.send_message(user.telegram_chat, message)
 
     def _notify_execution(self, users: list[User], execution: Execution, findings: list[Finding]) -> None:
+        """Send execution completion notification with findings summary.
+
+        Formats and sends a comprehensive execution report including tool details,
+        execution timing, and organized findings by type.
+
+        Args:
+            users (list[User]): Users to notify about the execution.
+            execution (Execution): The completed security tool execution.
+            findings (list[Finding]): List of security findings discovered.
+        """
         texts_by_type: dict[Any, list[str]] = {}
         for finding in findings:
             if finding.__class__ not in texts_by_type:
@@ -52,6 +89,13 @@ class Telegram(BaseNotification, BaseTelegram):
         self._notify(users, message)
 
     def _notify_alert(self, users: list[User], alert: Alert, finding: Finding) -> None:
+        """Send security alert notification for a specific finding.
+
+        Args:
+            users (list[User]): Users subscribed to the alert.
+            alert (Alert): The alert configuration that triggered.
+            finding (Finding): The security finding that triggered the alert.
+        """
         self._notify(
             users,
             HEADER.format(
@@ -62,6 +106,14 @@ class Telegram(BaseNotification, BaseTelegram):
         )
 
     def _format_finding(self, finding: Finding) -> str:
+        """Format a security finding for Telegram message display.
+
+        Args:
+            finding (Finding): The security finding to format.
+
+        Returns:
+            str: Formatted finding message with escaped content.
+        """
         return (
             FINDINGS[finding.__class__]
             .get("template", "")
@@ -74,14 +126,29 @@ class Telegram(BaseNotification, BaseTelegram):
         )
 
     def welcome_message(self, user: User) -> None:
+        """Send welcome message to newly linked user.
+
+        Args:
+            user (User): The user who linked their Telegram account.
+        """
         self._notify_if_available([user], f"Welcome *{self.escape(user.username)}*\! Your Rekono bot is ready")
 
     def logout_after_password_change_message(self, user: User) -> None:
+        """Notify user of logout due to password change.
+
+        Args:
+            user (User): The user whose password was changed.
+        """
         self._notify_if_available(
             [user], "Your session expired after your password change. Please, execute /start to link it again"
         )
 
     def report_created(self, report: Any) -> None:
+        """Notify user when a security report is created.
+
+        Args:
+            report (Any): The generated security report instance.
+        """
         report_target = (
             f"project {report.project.name}"
             if report.project

@@ -1,3 +1,9 @@
+"""Telegram message templates for security notifications.
+
+Defines message templates and formatting for Telegram Bot notifications
+including execution reports, findings display, and alert formatting.
+"""
+
 from alerts.enums import AlertMode
 from findings.models import OSINT, Credential, Exploit, Host, Path, Port, Technology, Vulnerability
 

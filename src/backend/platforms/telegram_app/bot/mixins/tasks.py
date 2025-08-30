@@ -1,3 +1,9 @@
+"""Telegram Bot mixin for security task execution confirmation and creation.
+
+Provides task confirmation prompts and task creation functionality for
+security testing workflows including validation and execution setup.
+"""
+
 from telegram import Update
 from telegram.ext import CallbackContext, ConversationHandler
 
@@ -7,10 +13,33 @@ from tasks.serializers import TaskSerializer
 
 
 class TaskMixin(BaseMixin):
+    """Mixin providing security task confirmation and creation functionality.
+
+    Enables conversations to display task summaries, confirm execution parameters,
+    and create security testing tasks with proper validation.
+
+    Attributes:
+        yes (str): Confirmation button text with emoji.
+        no (str): Rejection button text with emoji.
+    """
+
     yes = "👍 Yes"
     no = "👎 No"
 
     async def ask_for_task_confirmation(self, update: Update, context: CallbackContext) -> int:
+        """Display task confirmation prompt with execution summary.
+
+        Shows a comprehensive summary of the security task to be executed
+        including project, target, tool/process, and intensity settings.
+        Validates that all required parameters are present.
+
+        Args:
+            update (Update): The Telegram update containing user interaction.
+            context (CallbackContext): The callback context for the conversation.
+
+        Returns:
+            int: Next conversation state for confirmation or ConversationHandler.END.
+        """
         self.validate_update(update)
         project = self.get_context_value(context, Context.PROJECT)
         target = self.get_context_value(context, Context.TARGET)
@@ -54,6 +83,19 @@ Are you sure?
         )
 
     async def new_task(self, update: Update, context: CallbackContext) -> int:
+        """Create a new security task based on user confirmation.
+
+        Processes user confirmation and creates a security task with all
+        configured parameters including target, tool/process, intensity,
+        and optional wordlists and input parameters.
+
+        Args:
+            update (Update): The Telegram update containing user confirmation.
+            context (CallbackContext): The callback context for the conversation.
+
+        Returns:
+            int: ConversationHandler.END after task creation or cancellation.
+        """
         chat = await self.get_active_telegram_chat(update)
         next_state = ConversationHandler.END
         if chat and update.callback_query and update.callback_query.data:

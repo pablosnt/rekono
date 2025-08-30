@@ -1,3 +1,9 @@
+"""Telegram Bot mixin for project selection and management workflows.
+
+Provides project selection functionality for conversations that require
+project context including project listing, selection, and context storage.
+"""
+
 from telegram import Update
 from telegram.ext import CallbackContext, ConversationHandler
 
@@ -7,7 +13,25 @@ from projects.models import Project
 
 
 class ProjectMixin(BaseMixin):
+    """Mixin providing project selection functionality for bot conversations.
+
+    Enables conversations to display project lists and handle project selection
+    for users with appropriate permissions.
+    """
+
     async def ask_for_project(self, update: Update, context: CallbackContext) -> int:
+        """Display project selection options to the user.
+
+        Shows a list of projects that the user is a member of and allows
+        selection for use in subsequent conversation steps.
+
+        Args:
+            update (Update): The Telegram update containing the user interaction.
+            context (CallbackContext): The callback context for the conversation.
+
+        Returns:
+            int: Next conversation state or ConversationHandler.END if no chat.
+        """
         chat = await self.get_active_telegram_chat(update)
         if not chat:
             return ConversationHandler.END
@@ -27,6 +51,18 @@ class ProjectMixin(BaseMixin):
         )
 
     async def save_project(self, update: Update, context: CallbackContext) -> int:
+        """Save the selected project to conversation context.
+
+        Processes the user's project selection and stores it in the conversation
+        context for use in subsequent steps.
+
+        Args:
+            update (Update): The Telegram update containing the user selection.
+            context (CallbackContext): The callback context for the conversation.
+
+        Returns:
+            int: Next conversation state or ConversationHandler.END if no chat.
+        """
         chat = await self.get_active_telegram_chat(update)
         if not chat:
             return ConversationHandler.END

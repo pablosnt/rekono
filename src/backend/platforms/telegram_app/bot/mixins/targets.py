@@ -1,3 +1,9 @@
+"""Telegram Bot mixin for target selection and management workflows.
+
+Provides target selection and creation functionality for conversations
+that require target context including target listing, creation, and validation.
+"""
+
 from telegram import Update
 from telegram.ext import CallbackContext, ConversationHandler
 
@@ -8,7 +14,25 @@ from targets.serializers import TargetSerializer
 
 
 class TargetMixin(BaseMixin):
+    """Mixin providing target selection and creation functionality.
+
+    Enables conversations to display target lists, handle target selection,
+    and create new targets within the selected project context.
+    """
+
     async def ask_for_target(self, update: Update, context: CallbackContext) -> int:
+        """Display target selection options within the current project.
+
+        Shows a list of targets available in the selected project and allows
+        selection for use in security testing operations.
+
+        Args:
+            update (Update): The Telegram update containing the user interaction.
+            context (CallbackContext): The callback context for the conversation.
+
+        Returns:
+            int: Next conversation state based on target availability.
+        """
         self.validate_update(update)
         return await self.go_to_next_state(
             update,
@@ -25,6 +49,18 @@ class TargetMixin(BaseMixin):
         )
 
     async def save_target(self, update: Update, context: CallbackContext) -> int:
+        """Save selected target to conversation context.
+
+        Processes the user's target selection and stores it in the conversation
+        context for use in subsequent security testing operations.
+
+        Args:
+            update (Update): The Telegram update containing user selection.
+            context (CallbackContext): The callback context for the conversation.
+
+        Returns:
+            int: Next conversation state after target selection.
+        """
         self.validate_update(update)
         return await self.go_to_next_state(
             update,
@@ -33,6 +69,18 @@ class TargetMixin(BaseMixin):
         )
 
     async def ask_for_new_target(self, update: Update, context: CallbackContext) -> int:
+        """Prompt user to input a new target identifier.
+
+        Requests user to provide target identifier for target creation
+        within the selected project.
+
+        Args:
+            update (Update): The Telegram update containing user interaction.
+            context (CallbackContext): The callback context for the conversation.
+
+        Returns:
+            int: Next conversation state for target input processing.
+        """
         self.validate_update(update)
         return await self.go_to_next_state(
             update,
@@ -41,6 +89,18 @@ class TargetMixin(BaseMixin):
         )
 
     async def create_target(self, update: Update, context: CallbackContext) -> int:
+        """Create new target from user input with project validation.
+
+        Processes user input to create a target within the selected project,
+        validates project context, and displays creation confirmation.
+
+        Args:
+            update (Update): The Telegram update containing target input.
+            context (CallbackContext): The callback context for the conversation.
+
+        Returns:
+            int: Next conversation state after target creation or ConversationHandler.END.
+        """
         self.validate_update(update)
         project = self.get_context_value(context, Context.PROJECT)
         if not project:

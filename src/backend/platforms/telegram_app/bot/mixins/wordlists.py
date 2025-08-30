@@ -1,3 +1,9 @@
+"""Telegram Bot mixin for wordlist selection workflows.
+
+Provides wordlist selection functionality for conversations that require
+wordlist context including conditional wordlist requirements and default options.
+"""
+
 from asgiref.sync import sync_to_async
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import CallbackContext, ConversationHandler
@@ -10,14 +16,40 @@ from wordlists.models import Wordlist
 
 
 class WordlistMixin(BaseMixin):
+    """Mixin providing wordlist selection functionality for bot conversations.
+
+    Enables conversations to display available wordlists and handle wordlist
+    selection with conditional requirements based on selected tools or processes.
+
+    Attributes:
+        default_wordlist (str): Label for default wordlist option.
+        tools_with_required_wordlists (list[str]): Tools that require wordlist selection.
+    """
     default_wordlist = "Default tools wordlists"
     tools_with_required_wordlists = ["Gobuster"]
 
     @sync_to_async
     def _get_wordlists_keyboard_async(self) -> list[InlineKeyboardButton]:
+        """Generate keyboard buttons for available wordlists (async wrapper).
+
+        Returns:
+            list[InlineKeyboardButton]: Buttons for available wordlists.
+        """
         return [InlineKeyboardButton(f"{w.name} - {w.type}", callback_data=w.id) for w in Wordlist.objects.all()]
 
     async def ask_for_wordlist(self, update: Update, context: CallbackContext) -> int:
+        """Display wordlist selection options based on tool/process requirements.
+
+        Shows available wordlists with conditional logic for required vs optional
+        wordlist selection based on selected tools or processes.
+
+        Args:
+            update (Update): The Telegram update containing user interaction.
+            context (CallbackContext): The callback context for the conversation.
+
+        Returns:
+            int: Next conversation state or ConversationHandler.END.
+        """
         self.validate_update(update)
         tool = self.get_context_value(context, Context.TOOL)
         process = self.get_context_value(context, Context.PROCESS)
@@ -70,6 +102,18 @@ class WordlistMixin(BaseMixin):
         return await self.go_to_next_state(update, context, self.get_next_state(self.ask_for_wordlist))
 
     async def save_wordlist(self, update: Update, context: CallbackContext) -> int:
+        """Save selected wordlist to conversation context.
+
+        Processes wordlist selection including handling of default wordlist option
+        and storing selected wordlist in conversation context.
+
+        Args:
+            update (Update): The Telegram update containing wordlist selection.
+            context (CallbackContext): The callback context for the conversation.
+
+        Returns:
+            int: Next conversation state after wordlist selection.
+        """
         self.validate_update(update)
         if update.callback_query and update.callback_query.data and update.callback_query.data == self.default_wordlist:
             await update.callback_query.answer()
