@@ -5,6 +5,7 @@ automated vulnerability enrichment, CVSS scoring, and security intelligence
 gathering during security assessments.
 """
 
+from functools import cached_property
 from typing import Any
 
 from executions.models import Execution
@@ -31,14 +32,12 @@ class NvdNist(BaseIntegration):
 
     Attributes:
         finding_types (list): List of finding types processed by this integration
-        settings (NvdNistSettings): Configuration instance for API credentials
         url (str): NVD API endpoint URL template for CVE queries
         reference (str): NVD vulnerability detail page URL template
         cvss_mapping (dict): CVSS score ranges mapped to Rekono severity levels
     """
 
     finding_types = [Vulnerability]
-    settings = NvdNistSettings.objects.first()
     url = "https://services.nvd.nist.gov/rest/json/cves/2.0?cveId={cve}"
     reference = "https://nvd.nist.gov/vuln/detail/{cve}"
     cvss_mapping = {
@@ -48,6 +47,15 @@ class NvdNist(BaseIntegration):
         Severity.LOW: (2, 4),
         Severity.INFO: (0, 2),
     }
+
+    @cached_property
+    def settings(self) -> NvdNistSettings:
+        """Get NVD NIST platform configuration settings from database.
+        
+        Returns:
+            NvdNistSettings: NVD NIST configuration instance or None if not configured.
+        """
+        return NvdNistSettings.objects.first()
 
     @property
     def is_api_token_available(self) -> bool:

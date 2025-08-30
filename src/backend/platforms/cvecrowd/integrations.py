@@ -31,13 +31,20 @@ class CveCrowd(BaseIntegration):
 
     Attributes:
         finding_types (list): Supported finding types (Vulnerability only)
-        settings (CveCrowdSettings): Platform configuration settings
         url (str): CVE Crowd API endpoint URL
     """
 
     finding_types = [Vulnerability]
-    settings = CveCrowdSettings.objects.first()
     url = "https://api.cvecrowd.com/api/v1/cves"
+
+    @cached_property
+    def settings(self) -> CveCrowdSettings:
+        """Get CVE Crowd platform configuration settings from database.
+        
+        Returns:
+            CveCrowdSettings: Platform configuration instance or None if not configured.
+        """
+        return CveCrowdSettings.objects.first()
 
     @cached_property
     def trending_cves(self) -> list[str]:

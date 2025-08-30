@@ -24,12 +24,19 @@ class BaseTelegram(LoggingEntity):
     initialization, message sending, token validation, and error handling.
 
     Attributes:
-        settings (TelegramSettings): Global Telegram Bot settings instance.
         date_format (str): Standard date format for message timestamps.
     """
 
-    settings = TelegramSettings.objects.first()
     date_format = "%Y-%m-%d %H:%M:%S"
+
+    @cached_property
+    def settings(self) -> TelegramSettings:
+        """Get Telegram Bot configuration settings from database.
+        
+        Returns:
+            TelegramSettings: Telegram configuration instance or None if not configured.
+        """
+        return TelegramSettings.objects.first()
 
     def __init__(self) -> None:
         """Initialize the Telegram Bot base class.

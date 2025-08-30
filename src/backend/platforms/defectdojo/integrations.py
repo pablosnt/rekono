@@ -20,6 +20,7 @@ from findings.models import Path
 from framework.platforms import BaseIntegration
 from platforms.defectdojo.models import DefectDojoSettings, DefectDojoSync, DefectDojoTargetSync
 from targets.models import Target
+from functools import cached_property
 
 
 class DefectDojo(BaseIntegration):
@@ -46,12 +47,10 @@ class DefectDojo(BaseIntegration):
 
     Attributes:
         run_per_execution (bool): Execute integration after each tool execution
-        settings (DefectDojoSettings): DefectDojo integration configuration
         severity_mapping (dict): Mapping between Rekono and DefectDojo severity levels
     """
 
     run_per_execution = True
-    settings = DefectDojoSettings.objects.first()
     severity_mapping = {
         Severity.INFO: "S0",
         Severity.LOW: "S1",
@@ -59,6 +58,15 @@ class DefectDojo(BaseIntegration):
         Severity.HIGH: "S4",
         Severity.CRITICAL: "S5",
     }
+
+    @cached_property
+    def settings(self) -> DefectDojoSettings:
+        """Get DefectDojo integration configuration settings from database.
+        
+        Returns:
+            DefectDojoSettings: DefectDojo configuration instance or None if not configured.
+        """
+        return DefectDojoSettings.objects.first()
 
     @cached_property
     def url(self) -> str:

@@ -46,13 +46,20 @@ class SMTP(BaseNotification):
 
     Attributes:
         enable_field (str): User preference field for email notification control
-        settings (SMTPSettings): SMTP server configuration instance
         datetime_format (str): Standard datetime format for email content
     """
 
     enable_field = "email_notifications"
-    settings = SMTPSettings.objects.first()
     datetime_format = "%Y-%m-%d %H:%M %Z"
+
+    @cached_property
+    def settings(self) -> SMTPSettings:
+        """Get SMTP server configuration settings from database.
+        
+        Returns:
+            SMTPSettings: SMTP configuration instance or None if not configured.
+        """
+        return SMTPSettings.objects.first()
 
     @cached_property
     def backend(self) -> EmailBackend:
