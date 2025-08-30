@@ -229,7 +229,7 @@ class TasksQueue(BaseScanQueue):
                 )
         for execution_job in plan:
             executions = TasksQueue.calculate_executions(
-                execution_job["step"].configuration.tool,
+                execution_job.step.configuration.tool,
                 [],
                 task.target.target_ports.all(),
                 task.input_vulnerabilities.all(),
@@ -237,7 +237,7 @@ class TasksQueue(BaseScanQueue):
                 task.wordlists.all(),
             )
             for parameters in executions:
-                execution = Execution.objects.create(task=task, configuration=execution_job["step"].configuration)
+                execution = Execution.objects.create(task=task, configuration=execution_job.step.configuration)
                 execution_job.add_job(
                     executions_queue.enqueue(
                         execution,
