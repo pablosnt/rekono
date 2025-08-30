@@ -106,7 +106,7 @@ class TargetMixin(BaseMixin):
         if not project:
             self.reply(update, "No project selected")
             return ConversationHandler.END
-        next_state, instance = await self._create(
+        next_state, instance = await self.create(
             update,
             context,
             TargetSerializer,

@@ -155,7 +155,7 @@ class InputTechnologyMixin(InputMixin):
         version = None
         if name and " - " in name:
             name, version = name.split(" - ", 1)
-        next_state, instance = await self._create(
+        next_state, instance = await self.create(
             update,
             context,
             InputTechnologySerializer,
