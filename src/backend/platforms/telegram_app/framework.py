@@ -46,7 +46,7 @@ class BaseTelegram(LoggingEntity):
         Returns:
             Application | None: The initialized application or None if failed.
         """
-        if self.app and self.app.bot:
+        if self.app is not None and self.app.bot:
             try:
                 asyncio.run(self.app.bot.initialize())
             except (InvalidToken, Forbidden):

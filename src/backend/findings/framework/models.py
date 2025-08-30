@@ -117,7 +117,7 @@ class FindingManager(Manager):
         if fixed_by:
             # Remove auto-fix from related findings that were auto-fixed
             for auto_fixed_and_related_finding in self._get_related_findings(
-                finding, {"is_fixed": True, "auto_fixed": True, "fixed_by": finding.fixed_by}
+                finding, is_fixed=True, auto_fixed=True, fixed_by=finding.fixed_by
             ):
                 auto_fixed_and_related_finding.is_fixed = False
                 auto_fixed_and_related_finding.auto_fixed = False
