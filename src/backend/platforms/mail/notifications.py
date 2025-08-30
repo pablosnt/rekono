@@ -84,7 +84,7 @@ class SMTP(BaseNotification):
         Sets up the SMTP notification system with trusted SSL certificate validation
         using the certifi package to ensure secure connections to SMTP servers.
         """
-        super().__init__(self)
+        super().__init__()
         # The trusted certificates must be defined
         os.environ["SSL_CERT_FILE"] = certifi.where()
 

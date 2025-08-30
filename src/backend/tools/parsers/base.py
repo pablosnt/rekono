@@ -54,7 +54,7 @@ class BaseParser:
     findings = []
 
     @cached_property
-    def report(self) -> Path:
+    def report(self) -> Path | None:
         """Get the valid report file path if available.
 
         Returns the executor's report file path only if it exists, has content,
