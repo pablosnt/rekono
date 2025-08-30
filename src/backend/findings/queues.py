@@ -5,7 +5,6 @@ queues including external platform integration, notifications, and automatic
 finding lifecycle management.
 """
 
-from backend.framework.platforms import BaseIntegration
 from django_rq import job
 from rq.job import Job
 
