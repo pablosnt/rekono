@@ -9,6 +9,7 @@ the file lifecycle.
 import hashlib
 import uuid
 from dataclasses import dataclass
+from functools import cached_property
 from pathlib import Path
 from typing import Any
 
@@ -36,8 +37,8 @@ class FileHandler(LoggingEntity):
         - Comprehensive audit logging for security monitoring
 
     Attributes:
-        allowed_extensions (list[str]): Whitelist of permitted file extensions (default: txt, text, empty).
-        mime_types (list[str]): Whitelist of permitted MIME types (default: text/plain).
+        _allowed_extensions (list[str]): Whitelist of permitted file extensions (default: txt, text, empty).
+        _mime_types (list[str]): Whitelist of permitted MIME types (default: text/plain).
 
     Example:
         Validate and store a user-uploaded file:
@@ -49,8 +50,32 @@ class FileHandler(LoggingEntity):
         ```
     """
 
-    allowed_extensions: list[str] = ["txt", "text", ""]
-    mime_types: list[str] = ["text/plain"]
+    _allowed_extensions: list[str] | None = None
+    _mime_types: list[str] | None = None
+
+    @cached_property
+    def allowed_extensions(self) -> list[str]:
+        """Get the whitelist of permitted file extensions for upload validation.
+
+        Returns the configured allowed extensions or default whitelist if not set.
+        Used for extension-based validation to prevent upload of dangerous file types.
+
+        Returns:
+            list[str]: List of allowed file extensions including txt, text, and empty string.
+        """
+        return self._allowed_extensions if self.allowed_extensions is not None else ["txt", "text", ""]
+
+    @cached_property
+    def mime_types(self) -> list[str]:
+        """Get the whitelist of permitted MIME types for content validation.
+
+        Returns the configured allowed MIME types or default whitelist if not set.
+        Used for content-based validation to prevent MIME type spoofing attacks.
+
+        Returns:
+            list[str]: List of allowed MIME types with text/plain as default.
+        """
+        return self._mime_types if self._mime_types is not None else ["text/plain"]
 
     def _validate_size(self, in_memory_file: Any) -> None:
         """Validate uploaded file size against configured limits.

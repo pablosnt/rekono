@@ -71,8 +71,8 @@ class Property:
         """
         # Priority: environment variable > config file > default value
         value = self.default
-        env_value = os.getenv(self.env)
-        if self.env and env_value:
+        env_value = os.getenv(self.env) if self.env else None
+        if env_value:
             value = env_value
             # If the default is a list, try to split the env value using common
             # separators
@@ -313,7 +313,7 @@ class RekonoConfig:
         return self._initialize_directory(self.home / "logs")
 
     @property
-    def encryption_key(self) -> str:
+    def encryption_key(self) -> str | None:
         """Get encryption key for sensitive data protection.
 
         Returns:
