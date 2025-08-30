@@ -1,4 +1,4 @@
-from django.db.models import Count, ExpressionWrapper, F, FloatField, Max, OuterRef, Q
+from django.db.models import Count, ExpressionWrapper, F, FloatField, Max, Q, Sum
 from django_rq.utils import get_statistics
 from drf_spectacular.utils import extend_schema
 from rest_framework.permissions import IsAuthenticated
@@ -142,19 +142,17 @@ class HostVulnerabilitiesStatsViewSet(StatsViewSet):
         Host.objects.filter(is_fixed=False)
         .annotate(
             vulnerabilities=Vulnerability.objects.exclude(triage_status=TriageStatus.FALSE_POSITIVE)
-            .filter(Q(port__host__pk=OuterRef("id")) | Q(technology__port__host__pk=OuterRef("id")))
+            .filter(Q(port__host__pk=F("id")) | Q(technology__port__host__pk=F("id")))
             .values("port__host", "technology__port__host")
             .annotate(fixed=Count("id", filter=Q(is_fixed=True)), open=Count("id", filter=Q(is_fixed=False)))
-            .order_by("-open", "-fixed")
-            .first(),
+            .order_by("-open", "-fixed")[:1],
             vulnerabilities_per_severity=Vulnerability.objects.exclude(is_fixed=True)
             .exclude(triage_status=TriageStatus.FALSE_POSITIVE)
-            .filter(Q(port__host__pk=OuterRef("id")) | Q(technology__port__host__pk=OuterRef("id")))
+            .filter(Q(port__host__pk=F("id")) | Q(technology__port__host__pk=F("id")))
             .values("port__host", "technology__port__host")
             .values("severity")
-            .annotate(**{severity.name: Count("id", filter=Q(severity=severity)) for severity in Severity})
-            .order_by("-critical", "-high", "-medium", "-low", "-info")
-            .first(),
+            .annotate(**{severity.name.lower(): Count("id", filter=Q(severity=severity)) for severity in Severity})
+            .order_by("-critical", "-high", "-medium", "-low", "-info")[:1],
         )
         .values("id", "ip", "domain", "vulnerabilities", "vulnerabilities_per_severity")
         .order_by("-vulnerabilities")
@@ -246,7 +244,7 @@ class VulnerabilitySeverityStatsViewSet(StatsViewSet):
 
 class VulnerabilityEvolutionStatsViewSet(StatsViewSet):
     queryset = (
-        Host.objects.prefetch_related("executions")
+        Vulnerability.objects.prefetch_related("executions")
         .values("executions__start", "severity")
         .annotate(count=Count("executions__start", distinct=True))
         .annotate(date=F("executions__start"))
@@ -294,18 +292,22 @@ class TriagingStatsViewSet(StatsViewSet):
     # TODO: fp_rate removed. It can be calculated based on the distribution
     queryset = (
         OSINT.objects.values("triage_status")
-        .annotate(count=Count("id", distinct=True))
-        .order_by("-count")
+        .annotate(open=Count("id", distinct=True, filter=Q(is_fixed=False)))
+        .annotate(fixed=Count("id", distinct=True, filter=Q(is_fixed=True)))
         .union(
-            Credential.objects.values("triage_status").annotate(count=Count("id", distinct=True)).order_by("-count"),
-            Vulnerability.objects.values("triage_status").annotate(count=Count("id", distinct=True)).order_by("-count"),
-            Exploit.objects.values("triage_status").annotate(count=Count("id", distinct=True)).order_by("-count"),
+            Credential.objects.values("triage_status")
+            .annotate(open=Count("id", distinct=True, filter=Q(is_fixed=False)))
+            .annotate(fixed=Count("id", distinct=True, filter=Q(is_fixed=True))),
+            Vulnerability.objects.values("triage_status")
+            .annotate(open=Count("id", distinct=True, filter=Q(is_fixed=False)))
+            .annotate(fixed=Count("id", distinct=True, filter=Q(is_fixed=True))),
+            Exploit.objects.values("triage_status")
+            .annotate(open=Count("id", distinct=True, filter=Q(is_fixed=False)))
+            .annotate(fixed=Count("id", distinct=True, filter=Q(is_fixed=True))),
         )
+        # TODO: This might not work, as the open and fixed counts are done for each QuerySet of the union, but not
+        # grouped by triaged_status globally
         .values("triage_status")
-        .annotate(
-            open=Count("id", distinct=True, filter=Q(is_fixed=False)),
-            fixed=Count("id", distinct=True, filter=Q(is_fixed=True)),
-        )
         .order_by("-open")
     )
     serializer_class = TriagingStatsSerializer

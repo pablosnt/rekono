@@ -97,7 +97,7 @@ class Validator(RegexValidator, LoggingEntity):
             deny_injections (bool): Enable injection attack detection (default: False).
         """
         self.deny_injections = deny_injections
-        super().__init__(regex.value, message, code, inverse_match, flags)
+        super().__init__(regex, message, code, inverse_match, flags)
 
     def __call__(self, value: str | None) -> None:
         """Validate input value against regex pattern and injection rules.

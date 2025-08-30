@@ -71,7 +71,7 @@ class TargetValidator(RegexValidator):
             flags (RegexFlag | None): Regex compilation flags for pattern matching.
         """
         self.code = code
-        super().__init__(regex.value, message, code, inverse_match, flags)
+        super().__init__(regex, message, code, inverse_match, flags)
 
     def __call__(self, value: str | None) -> None:
         """Validate target against regex patterns and deny lists.

@@ -68,7 +68,13 @@ class BaseQueueTest(QueueTest):
         findings = self._setup_multiple_findings(True)
         expected = last_expected = []
         for host_index in range(1, self.number_of_hosts + 1):
-            item = ExecutionParametersToEnqueue(findings=[getattr(self, f"host{host_index}")])
+            item = ExecutionParametersToEnqueue(
+                findings=[getattr(self, f"host{host_index}")],
+                target_ports=[],
+                input_vulnerabilities=[],
+                input_technologies=[],
+                wordlists=[],
+            )
             for port_index in range(1, self.number_of_ports_per_host + 1):
                 item.append("findings", getattr(self, f"port{host_index}{port_index}"))
             new_item = copy.deepcopy(item)
@@ -89,7 +95,13 @@ class BaseQueueTest(QueueTest):
         findings = self._setup_multiple_findings(True)
         self.assertEqual(
             [
-                ExecutionParametersToEnqueue(findings=[getattr(self, f"host{h}")])
+                ExecutionParametersToEnqueue(
+                    findings=[getattr(self, f"host{h}")],
+                    target_ports=[],
+                    input_vulnerabilities=[],
+                    input_technologies=[],
+                    wordlists=[],
+                )
                 for h in range(1, self.number_of_hosts + 1)
             ],
             self.queue.calculate_executions(self.fake_tool, findings, [], [], [], []),
@@ -118,7 +130,13 @@ class BaseQueueTest(QueueTest):
             [self.wordlist],
         )
         expected = last_expected = []
-        base_item = ExecutionParametersToEnqueue(findings=[], target_ports=target_ports, wordlists=[self.wordlist])
+        base_item = ExecutionParametersToEnqueue(
+            findings=[],
+            target_ports=target_ports,
+            input_vulnerabilities=[],
+            input_technologies=[],
+            wordlists=[self.wordlist],
+        )
         for vulnerability in vulnerabilities:
             item = copy.deepcopy(base_item)
             item.append("input_vulnerabilities", vulnerability)

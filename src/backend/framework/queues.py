@@ -41,17 +41,20 @@ class ExecutionParametersToEnqueue:
         ```python
         params = ExecutionParametersToEnqueue(
             findings=[host_finding],
-            target_ports=[port_80, port_443]
+            target_ports=[port_80, port_443],
+            input_vulnerabilities=[],
+            input_technologies=[],
+            wordlists=[]
         )
         params.append("findings", new_finding)
         ```
     """
 
-    findings: list[Finding] = []
-    target_ports: list[TargetPort] = []
-    input_vulnerabilities: list[InputVulnerability] = []
-    input_technologies: list[InputTechnology] = []
-    wordlists: list[Wordlist] = []
+    findings: list[Finding]
+    target_ports: list[TargetPort]
+    input_vulnerabilities: list[InputVulnerability]
+    input_technologies: list[InputTechnology]
+    wordlists: list[Wordlist]
 
     def append(self, field: str, value: BaseInput) -> None:
         """Append a single value to the specified field list.
@@ -267,7 +270,7 @@ class BaseScanQueue(BaseQueue):
         """
         input_types_used = set()
         # Start with a single empty execution batch
-        executions = [ExecutionParametersToEnqueue()]
+        executions = [ExecutionParametersToEnqueue([], [], [], [], [])]
         findings_by_type = BaseScanQueue._get_findings_by_type(findings)
         # Iterate over all input sources (findings, ports, vulnerabilities, etc.)
         for field, source in [("findings", _findings) for _findings in findings_by_type.values()] + [
