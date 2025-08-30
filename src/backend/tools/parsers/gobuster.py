@@ -1,10 +1,30 @@
+"""Gobuster directory and subdomain enumeration output parser.
+
+Processes Gobuster output to extract discovered paths, subdomains, and virtual hosts
+from brute force enumeration scans.
+"""
+
 from findings.enums import OSINTDataType, PathType
 from findings.models import OSINT, Path
 from tools.parsers.base import BaseParser
 
 
 class Gobuster(BaseParser):
+    """Parser for Gobuster enumeration output files.
+
+    Extracts discovered endpoints, subdomains, and virtual hosts from Gobuster
+    brute force enumeration results. Supports multiple scan modes including
+    directory, subdomain, and VHOST enumeration.
+    
+    Attributes:
+        Inherits all attributes from BaseParser
+    """
     def _parse(self) -> None:
+        """Parse Gobuster output and extract discovery findings.
+        
+        Processes line-based output to create Path and OSINT findings for
+        discovered endpoints, subdomains, and virtual hosts.
+        """
         data = self.load_report_by_lines()
         for line in data:
             if " (Status: " in line and ") [Size: " in line:  # Endpoint format

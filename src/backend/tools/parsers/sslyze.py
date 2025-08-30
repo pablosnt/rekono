@@ -1,3 +1,9 @@
+"""SSLyze SSL/TLS security scanner output parser.
+
+Processes SSLyze JSON output to extract comprehensive SSL/TLS security findings
+including protocol vulnerabilities, cipher suite weaknesses, and certificate issues.
+"""
+
 from typing import Any
 
 from findings.enums import Severity
@@ -6,10 +12,29 @@ from tools.parsers.base import BaseParser
 
 
 class Sslyze(BaseParser):
+    """Parser for SSLyze JSON output files.
+
+    Extracts detailed SSL/TLS security findings including supported protocols,
+    cipher suites, certificate validation issues, and known vulnerabilities
+    like Heartbleed, ROBOT, and CRIME attacks.
+    
+    Attributes:
+        protocol_versions (dict): Mapping of SSL/TLS protocols to versions
+        generic_tech (Technology | None): Generic TLS technology for findings
+    """
     protocol_versions = {"ssl": ["2.0", "3.0"], "tls": ["1.0", "1.1", "1.2", "1.3"]}
     generic_tech: Technology | None = None
 
     def create_finding(self, finding_type: type[Finding], **fields: Any) -> Finding:
+        """Create findings with automatic TLS technology association.
+        
+        Args:
+            finding_type (type[Finding]): Type of finding to create
+            **fields (Any): Field values for the finding
+            
+        Returns:
+            Finding: Created finding instance with technology association
+        """
         if finding_type == Vulnerability and not fields.get("technology"):
             if not self.generic_tech:
                 self.generic_tech = super().create_finding(Technology, name="Generic TLS")
@@ -17,6 +42,11 @@ class Sslyze(BaseParser):
         return super().create_finding(finding_type, **fields)
 
     def _parse(self) -> None:
+        """Parse SSLyze JSON output and extract SSL/TLS security findings.
+        
+        Processes JSON scan results to create Technology and Vulnerability findings
+        for comprehensive SSL/TLS security analysis.
+        """
         data = self.load_json_report()
         if not data or not isinstance(data, dict):
             return

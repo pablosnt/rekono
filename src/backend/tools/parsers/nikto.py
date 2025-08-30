@@ -1,10 +1,30 @@
+"""Nikto web vulnerability scanner output parser.
+
+Processes Nikto XML output to extract web application vulnerabilities and
+endpoint discoveries from security scans.
+"""
+
 from findings.enums import PathType, Severity
 from findings.models import Path, Vulnerability
 from tools.parsers.base import BaseParser
 
 
 class Nikto(BaseParser):
+    """Parser for Nikto XML output files.
+
+    Extracts web application vulnerability findings and discovered endpoints
+    from Nikto security scans. Processes vulnerability descriptions and
+    references for comprehensive security analysis.
+    
+    Attributes:
+        Inherits all attributes from BaseParser
+    """
     def _parse(self) -> None:
+        """Parse Nikto XML output and extract security findings.
+        
+        Processes XML scan results to create Vulnerability and Path findings
+        from web application security tests.
+        """
         endpoints = set(["/"])
         root = self.load_xml_report()
         if not root:

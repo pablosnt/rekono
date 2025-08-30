@@ -1,3 +1,9 @@
+"""GitLeaks secret detection tool output parser.
+
+Processes GitLeaks JSON output to extract exposed secrets and credentials
+from Git repository dumps and source code analysis.
+"""
+
 from dataclasses import dataclass
 
 from findings.enums import Severity
@@ -8,9 +14,23 @@ from tools.parsers.base import BaseParser
 
 @dataclass
 class Gitleaks(BaseParser):
+    """Parser for GitLeaks JSON output files.
+
+    Extracts secret detection findings including exposed credentials, API keys,
+    and sensitive information from Git repositories. Handles both Git repository
+    exposure vulnerabilities and individual secret findings.
+    
+    Attributes:
+        executor (GitleaksExecutor): GitLeaks-specific executor instance
+    """
     executor: GitleaksExecutor
 
     def _parse(self) -> None:
+        """Parse GitLeaks JSON output and extract secret findings.
+        
+        Processes JSON scan results to create Vulnerability and Credential findings
+        for Git repository exposure and discovered secrets.
+        """
         if self.executor.git_directory_dumped:
             self.create_finding(
                 Vulnerability,

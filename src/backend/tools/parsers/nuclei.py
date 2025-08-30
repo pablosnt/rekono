@@ -1,3 +1,9 @@
+"""Nuclei vulnerability scanner output parser.
+
+Processes Nuclei JSON output to extract vulnerabilities, technology fingerprints,
+and credential findings from web application security scans.
+"""
+
 import json
 from typing import cast
 
@@ -7,7 +13,21 @@ from tools.parsers.base import BaseParser
 
 
 class Nuclei(BaseParser):
+    """Parser for Nuclei JSON output files.
+
+    Extracts vulnerability findings, technology detections, and exposed credentials
+    from Nuclei template-based security scans. Handles multiple finding types based
+    on template tags and metadata.
+    
+    Attributes:
+        Inherits all attributes from BaseParser
+    """
     def _parse(self) -> None:
+        """Parse Nuclei JSON output and extract security findings.
+        
+        Processes line-delimited JSON output to create Vulnerability, Technology,
+        and Credential findings based on template tags and extracted results.
+        """
         data = [json.loads(line) for line in self.load_report_by_lines()]
         for item in data:
             matcher = None

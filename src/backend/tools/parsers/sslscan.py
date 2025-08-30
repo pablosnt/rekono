@@ -1,3 +1,9 @@
+"""SSLScan SSL/TLS security scanner output parser.
+
+Processes SSLScan XML output to extract SSL/TLS protocol vulnerabilities,
+insecure cipher suites, and protocol configuration findings.
+"""
+
 from typing import Any
 
 from findings.enums import Severity
@@ -7,9 +13,27 @@ from tools.parsers.base import BaseParser
 
 
 class Sslscan(BaseParser):
+    """Parser for SSLScan XML output files.
+
+    Extracts SSL/TLS security findings including supported protocols, cipher suites,
+    and known vulnerabilities like Heartbleed. Associates findings with detected
+    SSL/TLS technology versions for comprehensive analysis.
+    
+    Attributes:
+        technologies (list[Technology]): List of detected SSL/TLS protocol technologies
+    """
     technologies: list[Technology] = []
 
     def create_finding(self, finding_type: type[Finding], **fields: Any) -> Finding:
+        """Create findings with automatic SSL/TLS technology association.
+        
+        Args:
+            finding_type (type[Finding]): Type of finding to create
+            **fields (Any): Field values for the finding
+            
+        Returns:
+            Finding: Created finding instance with technology association
+        """
         if finding_type == Vulnerability and not fields.get("technology") and fields.get("sslversion"):
             search = [t for t in self.technologies if f"{t.name}v{t.version}" == fields.get("sslversion")]
             fields["technology"] = search[0] if search else None
@@ -17,6 +41,11 @@ class Sslscan(BaseParser):
         return super().create_finding(finding_type, **fields)
 
     def _parse(self) -> None:
+        """Parse SSLScan XML output and extract SSL/TLS security findings.
+        
+        Processes XML scan results to create Technology and Vulnerability findings
+        for SSL/TLS protocols, cipher suites, and security issues.
+        """
         root = self.load_xml_report()
         if not root:
             return

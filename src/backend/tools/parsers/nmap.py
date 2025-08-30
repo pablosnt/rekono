@@ -1,3 +1,9 @@
+"""Nmap output parser for network discovery and service detection findings.
+
+Processes Nmap XML output to extract hosts, ports, services, technologies, and 
+vulnerabilities discovered during network scanning operations.
+"""
+
 import re
 from typing import Any
 
@@ -10,7 +16,21 @@ from tools.parsers.base import BaseParser
 
 
 class Nmap(BaseParser):
+    """Parser for Nmap XML output files.
+
+    Extracts network discovery findings including hosts, open ports, running services,
+    detected technologies, and security vulnerabilities from Nmap scan results.
+    Supports NSE script output parsing for enhanced vulnerability detection.
+    
+    Attributes:
+        Inherits all attributes from BaseParser
+    """
     def _parse(self) -> None:
+        """Parse Nmap XML output and extract security findings.
+        
+        Processes Nmap scan results to create Host, Port, Technology, and Vulnerability
+        findings. Handles OS detection, service fingerprinting, and NSE script results.
+        """
         report = NmapParser.parse_fromfile(self.report)
         for nmap_host in report.hosts:
             if not nmap_host.is_up():
@@ -51,6 +71,12 @@ class Nmap(BaseParser):
                 self._parse_nse_scripts(nmap_host.scripts_results, technologies)
 
     def _parse_nse_scripts(self, results: Any, technologies: list[Technology] | Technology) -> None:
+        """Parse NSE script results and extract vulnerability findings.
+        
+        Args:
+            results (Any): NSE script results from Nmap output
+            technologies (list[Technology] | Technology): Associated technology findings
+        """
         technology = technologies if isinstance(technologies, Technology) else technologies[0]
         smb_technologies = (
             [technologies]
@@ -181,6 +207,12 @@ class Nmap(BaseParser):
                     self._parse_nse_vulners(script, technology)
 
     def _parse_nse_vulners(self, script: Any, technology: Technology) -> None:
+        """Extract CVE references from NSE vulners script output.
+        
+        Args:
+            script (Any): NSE script result containing vulnerability data
+            technology (Technology): Technology finding to associate vulnerabilities with
+        """
         cves = set()
         for cve in re.findall(Regex.CVE.value, script.get("output", "")):
             if cve not in cves:

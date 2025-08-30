@@ -1,3 +1,9 @@
+"""GitLeaks executor for Git repository secret detection.
+
+Executes GitLeaks tool with Git repository dumping capabilities to extract
+secrets from exposed Git repositories and source code analysis.
+"""
+
 import os
 import subprocess
 import uuid
@@ -9,10 +15,29 @@ from tools.executors.base import BaseExecutor
 
 
 class Gitleaks(BaseExecutor):
+    """Executor for GitLeaks secret detection tool.
+
+    Handles Git repository dumping and secret scanning by first attempting to
+    dump exposed Git repositories using GitDumper, then running GitLeaks on
+    the extracted source code to find sensitive information.
+    
+    Attributes:
+        git_directory_dumped (bool): Whether Git repository was successfully dumped
+        execution_directory (Path | None): Directory where Git repository was dumped
+    """
     git_directory_dumped = False
     execution_directory = None
 
     def run_tool(self, environment: dict[str, Any] = os.environ.copy()) -> None:
+        """Execute GitLeaks with Git repository dumping.
+        
+        First attempts to dump the Git repository using GitDumper, then runs
+        GitLeaks on the extracted content if successful. Handles both scenarios
+        where Git repository is available and where it's not.
+        
+        Args:
+            environment (dict[str, Any]): Environment variables for execution
+        """
         self.git_directory_dumped = False
         target_url = environment.get("GIT_DUMPER_TARGET_URL", "")
         if target_url[-1] != "/":
