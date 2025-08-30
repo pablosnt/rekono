@@ -38,33 +38,8 @@ class Role(models.TextChoices):
 # See: https://github.com/google/pytype/issues/1048
 Role: type[Choices] = Role
 
-
+# Comprehensive role-based permission mapping for all Rekono models.
 ROLES = {
-    """Comprehensive role-based permission mapping for all Rekono models.
-
-    Defines fine-grained permissions for each Django model based on user roles.
-    This mapping controls access to CRUD operations (Create, Read, Update, Delete)
-    for every model in the system, enabling secure role-based access control.
-
-    Permission Structure:
-        - view: Roles allowed to read/view the model instances
-        - add: Roles allowed to create new model instances
-        - change: Roles allowed to modify existing model instances
-        - delete: Roles allowed to delete model instances
-
-    Security Principles:
-        - Principle of least privilege: Users only get minimum required access
-        - Model-specific controls: Some models have restricted access patterns
-        - Empty lists indicate no roles have that specific permission
-
-    Example:
-        "user": {
-            "view": [Role.ADMIN],      # Only admins can view users
-            "add": [Role.ADMIN],       # Only admins can create users
-            "change": [Role.ADMIN],    # Only admins can modify users
-            "delete": [Role.ADMIN]     # Only admins can delete users
-        }
-    """
     "apitoken": {
         "view": [Role.ADMIN, Role.AUDITOR, Role.READER],
         "add": [Role.ADMIN, Role.AUDITOR, Role.READER],
