@@ -101,7 +101,7 @@ class FindingsQueue(BaseQueue):
                             platform.process_alert(alert, finding)
             # Process findings through platforms that run per execution
             for platform in integrations + notifications:
-                if isinstance(platform, BaseIntegration) and not platform.run_per_execution:
+                if not platform.run_per_execution:
                     continue
                 platform.process_findings(execution, findings)
         # Handle automatic fixing of findings from same execution hash that are not longer detected

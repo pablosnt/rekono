@@ -27,8 +27,10 @@ class BasePlatform(LoggingEntity):
     including availability checks and findings processing.
 
     Attributes:
-        Inherits logger from LoggingEntity.
+        run_per_execution (bool): Whether to run once per execution or per finding.
     """
+
+    run_per_execution = False
 
     def is_available(self) -> bool:
         """Check if the platform integration is available.
@@ -63,12 +65,10 @@ class BaseIntegration(BasePlatform):
     Attributes:
         url (str): Base URL for the external service.
         finding_types (list): List of Finding types to process (empty = all).
-        run_per_execution (bool): Whether to run once per execution or per finding.
     """
 
     url = ""
     finding_types = []  # If empty, all findings are processed
-    run_per_execution = False
 
     @cached_property
     def integration(self) -> Integration:
@@ -199,9 +199,11 @@ class BaseNotification(BasePlatform):
 
     Attributes:
         enable_field (str): User model field name controlling notification enablement.
+        run_per_execution (bool): Whether to run once per execution or per finding.
     """
 
     enable_field = ""
+    run_per_execution = True
 
     def is_enabled(self, user: Any) -> bool:
         """Check if notifications are enabled for a specific user.
