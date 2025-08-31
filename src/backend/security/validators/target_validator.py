@@ -52,7 +52,7 @@ class TargetValidator(RegexValidator):
 
     def __init__(
         self,
-        regex: Regex = None,
+        regex: Regex,
         message: Any | None = None,
         code: str | None = "target",
         inverse_match: bool | None = False,
