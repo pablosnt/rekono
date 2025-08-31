@@ -37,7 +37,7 @@ class Telegram(BaseNotification, BaseTelegram):
         Returns:
             bool: True if bot token is configured and application is ready.
         """
-        return bool(self.settings.secret and self.app and self.app.bot)
+        return bool(self.settings and self.settings.secret and self.app and self.app.bot)
 
     def _notify(self, users: list[Any], message: str) -> None:
         """Send notification message to multiple users via Telegram.

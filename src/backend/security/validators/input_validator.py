@@ -7,7 +7,6 @@ including injection attacks and malformed input exploitation.
 """
 
 import re
-from enum import Enum
 from re import RegexFlag
 from typing import Any
 
@@ -16,38 +15,7 @@ from django.core.validators import RegexValidator
 from django.utils import timezone
 
 from framework.logging import LoggingEntity
-
-
-class Regex(Enum):
-    """Enumeration of regex patterns for input validation.
-
-    Provides a comprehensive set of regex patterns for validating different
-    types of user input across the Rekono platform. These patterns implement
-    security controls to prevent injection attacks and ensure data integrity.
-
-    Security Patterns:
-        IP_RANGE: Validates IP address ranges (e.g., 192.168.1.1-50)
-        NAME: General name fields with international character support
-        TEXT: Safe text content excluding dangerous characters
-        TARGET: Security testing target validation (IPs, domains, paths)
-        TARGET_REGEX: Extended target patterns with regex metacharacters
-        PATH: File and directory path validation
-        PATH_WITH_QUERYPARAMS: Web paths including query parameters
-        CVE: Common Vulnerabilities and Exposures identifier format
-        SECRET: Secure credential and password validation
-        INJECTION: Pattern to detect common injection attack vectors
-    """
-
-    IP_RANGE = r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}-\d{1,3}"
-    NAME = r"[\wÀ-ÿ\s\.:\-\[\]()@]{0,120}"
-    TEXT = r"[^;<>]*"
-    TARGET = r"[\w\d\.:\-/]{1,100}"
-    TARGET_REGEX = r"[\w\d\.,:\-/\*\?\+\(\)\\]{1,300}"
-    PATH = r"[\w\.\-_/\\]{0,500}"
-    PATH_WITH_QUERYPARAMS = r"[\w\.\-_/\\#?&%$]{0,500}"
-    CVE = r"CVE-\d{4}-\d{1,7}"
-    SECRET = r"[\w\s\./\-=\+,:<>¿?¡!#&$()@%\[\]\{\}\*]{1,500}"
-    INJECTION = r"[;\"'&<>$]+"
+from security.validators.enums import Regex
 
 
 class Validator(RegexValidator, LoggingEntity):
@@ -97,7 +65,10 @@ class Validator(RegexValidator, LoggingEntity):
             deny_injections (bool): Enable injection attack detection (default: False).
         """
         self.deny_injections = deny_injections
-        super().__init__(regex, message, code, inverse_match, flags)
+        # TODO: Review if this is needed for really old database migrations or the ones generated
+        # during version 2.0.0 development
+        # isinstance verification is needed to keep compatibility with old database migrations
+        super().__init__(regex.value if isinstance(regex, Regex) else regex, message, code, inverse_match, flags)
 
     def __call__(self, value: str | None) -> None:
         """Validate input value against regex pattern and injection rules.

@@ -55,7 +55,7 @@ class BaseConversation(ConversationHandler, BaseTelegramBot):
             **kwargs: Additional keyword arguments for ConversationHandler.
         """
         super().__init__(
-            entry_points=[CommandHandler(self.name, self._save_command_name)],
+            entry_points=[CommandHandler(self.command_name, self._save_command_name)],
             states={
                 index: [
                     (
@@ -91,7 +91,7 @@ class BaseConversation(ConversationHandler, BaseTelegramBot):
         Returns:
             int: The result of the first state method execution.
         """
-        self.add_context_value(context, Context.COMMAND, self.name)
+        self.add_context_value(context, Context.COMMAND, self.command_name)
         return await self.states_methods[0](update, context)
 
 

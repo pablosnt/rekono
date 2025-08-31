@@ -8,6 +8,7 @@ with proper authentication and authorization controls.
 from typing import Any
 
 from django.core.exceptions import PermissionDenied
+from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.decorators import action
@@ -64,13 +65,14 @@ class UserViewSet(BaseViewSet):
     ordering_fields = ["id", "username", "first_name", "last_name", "email", "date_joined", "last_login"]
     http_method_names = ["get", "post", "put", "delete"]
 
-    def get_object_if_not_current_user(self, request) -> User:
+    def get_object_if_not_current_user(self, request: Request, pk: str) -> User:
         """Get user object ensuring it's not the current user.
 
         Prevents users from performing administrative actions on themselves.
 
         Args:
             request (Request): The HTTP request object
+            pk (str): Primary key of the user
 
         Returns:
             User: The requested user object
@@ -78,13 +80,13 @@ class UserViewSet(BaseViewSet):
         Raises:
             PermissionDenied: If user tries to modify their own account
         """
-        instance = self.get_object_or_404()
+        instance = get_object_or_404(User, pk=pk)
         if instance.id == request.user.id:
             raise PermissionDenied()
         return instance
 
     @extend_schema(request=InviteUserSerializer, responses={201: UserSerializer})
-    def create(self, request, *args, **kwargs):
+    def create(self, request: Request, *args, **kwargs):
         """Create and invite new user account.
 
         Creates inactive user account with specified role and sends invitation
@@ -139,7 +141,7 @@ class UserViewSet(BaseViewSet):
         Returns:
             Response: HTTP 204 on success, HTTP 400 with error on failure
         """
-        user = self.get_object_or_404()
+        user = get_object_or_404(User, pk=pk)
         if user.is_active is not None or user.otp is None:
             return Response({"user": "User account has been already created"}, status=status.HTTP_400_BAD_REQUEST)
         if not SMTP().is_available():
@@ -173,7 +175,7 @@ class UserViewSet(BaseViewSet):
         return Response(status=status.HTTP_200_OK)
 
     @extend_schema(request=UpdateRoleSerializer, responses={201: UserSerializer})
-    def update(self, request, *args, **kwargs):
+    def update(self, request, pk: str, *args, **kwargs):
         """Update user role assignment.
 
         Updates the role assigned to a user account. Cannot be used on
@@ -181,11 +183,12 @@ class UserViewSet(BaseViewSet):
 
         Args:
             request (Request): HTTP request with role update data
+            pk (str): Primary key of the user
 
         Returns:
             Response: HTTP 200 with updated user data
         """
-        instance = self.get_object_if_not_current_user(request)
+        instance = self.get_object_if_not_current_user(request, pk)
         serializer = UpdateRoleSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         return Response(
@@ -193,7 +196,7 @@ class UserViewSet(BaseViewSet):
             status=status.HTTP_200_OK,
         )
 
-    def destroy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def destroy(self, request: Request, pk: str, *args: Any, **kwargs: Any) -> Response:
         """Delete or disable user account.
 
         Deletes invited users who haven't created accounts, or disables
@@ -201,11 +204,12 @@ class UserViewSet(BaseViewSet):
 
         Args:
             request (Request): The HTTP request object
+            pk (str): Primary key of the user
 
         Returns:
             Response: HTTP 204 on successful operation
         """
-        instance = self.get_object_if_not_current_user(request)
+        instance = self.get_object_if_not_current_user(request, pk)
         if instance.is_active is None:
             # User was invited but the accout wasn't created
             super().destroy(request, *args, **kwargs)
@@ -228,7 +232,7 @@ class UserViewSet(BaseViewSet):
         Returns:
             Response: HTTP 200 with enabled user data
         """
-        instance = self.get_object_if_not_current_user(request)
+        instance = self.get_object_if_not_current_user(request, pk)
         User.objects.enable_user(instance)
         return Response(self.get_serializer(instance=instance).data, status=status.HTTP_200_OK)
 

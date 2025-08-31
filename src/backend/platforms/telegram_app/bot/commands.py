@@ -33,7 +33,7 @@ class BaseCommand(CommandHandler, BaseTelegramBot, LoggingEntity):
         Args:
             **kwargs: Additional keyword arguments for the CommandHandler.
         """
-        super().__init__(command=self.name, callback=self.execute_command)
+        super().__init__(command=self.command_name, callback=self.execute_command)
 
     async def execute_command(self, update: Update, context: CallbackContext) -> None | int:
         """Execute the command with error handling.

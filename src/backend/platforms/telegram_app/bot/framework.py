@@ -36,7 +36,7 @@ class BaseTelegramBot(BaseTelegram):
     chat = None
 
     @cached_property
-    def name(self) -> str:
+    def command_name(self) -> str:
         """Get the lowercase class name as the command name.
 
         Returns:
@@ -188,5 +188,5 @@ class BaseTelegramBot(BaseTelegram):
             self.logger.error(
                 f"[Security] User {chat.user.id} isn't authorized to use Telegram bot", extra={"user": chat.user}
             )
-            await self.reply(update, f"You are not authorized to run /{self.name}")
+            await self.reply(update, f"You are not authorized to run /{self.command_name}")
         return chat

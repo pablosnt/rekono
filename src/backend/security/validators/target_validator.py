@@ -14,6 +14,7 @@ from typing import Any
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 
+from security.validators.enums import Regex
 from target_denylist.models import TargetDenylist
 
 
@@ -51,7 +52,7 @@ class TargetValidator(RegexValidator):
 
     def __init__(
         self,
-        regex: Any = None,
+        regex: Regex = None,
         message: Any | None = None,
         code: str | None = "target",
         inverse_match: bool | None = False,
@@ -71,7 +72,9 @@ class TargetValidator(RegexValidator):
             flags (RegexFlag | None): Regex compilation flags for pattern matching.
         """
         self.code = code
-        super().__init__(regex, message, code, inverse_match, flags)
+        # TODO: Same as in input_validator
+        # isinstance verification is needed to keep compatibility with old database migrations
+        super().__init__(regex.value if isinstance(regex, Regex) else regex, message, code, inverse_match, flags)
 
     def __call__(self, value: str | None) -> None:
         """Validate target against regex patterns and deny lists.

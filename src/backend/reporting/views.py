@@ -15,6 +15,7 @@ from xml.etree import ElementTree as ET
 from django.db.models import Q, QuerySet
 from django.forms.models import model_to_dict
 from django.http import FileResponse
+from django.shortcuts import get_object_or_404
 from django.template.loader import get_template
 from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework import status
@@ -144,18 +145,19 @@ class ReportingViewSet(BaseViewSet):
         threading.Thread(target=self._create_report_file, args=(serializer.instance, findings)).start()
         return Response(self.get_serializer(instance=serializer.instance).data, status=status.HTTP_201_CREATED)
 
-    def destroy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def destroy(self, request: Request, pk: str, *args: Any, **kwargs: Any) -> Response:
         """Delete report and associated file from storage.
 
         Args:
             request (Request): HTTP request object
+            pk (str): Primary key of the report to remove
             *args (Any): Additional positional arguments
             **kwargs (Any): Additional keyword arguments
 
         Returns:
             Response: Standard deletion response
         """
-        report = self.get_object_or_404()
+        report = get_object_or_404(Report, pk=pk)
         path = (CONFIG.generated_reports / report.path) if report.path else None
         if path and path.exists():
             path.unlink()
@@ -173,7 +175,7 @@ class ReportingViewSet(BaseViewSet):
         Returns:
             FileResponse: Report file download or error response for invalid status/missing file
         """
-        report = self.get_object_or_404()
+        report = get_object_or_404(Report, pk=pk)
         if report.status != ReportStatus.READY:
             messages = {
                 ReportStatus.PENDING: "Report is not available yet",

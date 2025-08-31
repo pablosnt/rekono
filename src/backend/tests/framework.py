@@ -141,9 +141,7 @@ class RekonoTest(TestCase):
             )
             for index, input_type_name in enumerate(input_type_names):
                 Input.objects.create(
-                    argument=new_argument,
-                    type=InputType.objects.get(name=input_type_name),
-                    order=index + 1,
+                    argument=new_argument, type=InputType.objects.get(name=input_type_name), order=index + 1
                 )
         self.task = Task.objects.create(
             target=self.target,

@@ -7,6 +7,7 @@ repetition functionality, and proper authentication and authorization controls.
 from typing import Any
 
 import django_rq
+from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
@@ -72,7 +73,7 @@ class TaskViewSet(BaseViewSet):
     tasks_queue = TasksQueue()
     executions_queue = ExecutionsQueue()
 
-    def destroy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def destroy(self, request: Request, pk: str, *args: Any, **kwargs: Any) -> Response:
         """Cancel and delete a task with proper cleanup of running executions.
 
         Handles task cancellation by stopping queued jobs, cancelling running
@@ -81,13 +82,14 @@ class TaskViewSet(BaseViewSet):
 
         Args:
             request (Request): The HTTP request object
+            pk (str): Primary key of the task
             *args (Any): Additional positional arguments
             **kwargs (Any): Additional keyword arguments
 
         Returns:
             Response: HTTP 204 on successful cancellation, HTTP 400 if task cannot be cancelled
         """
-        task = self.get_object_or_404()
+        task = get_object_or_404(Task, pk=pk)
         has_executions = task.executions.exists()
         running_executions = task.executions.filter(status__in=[Status.REQUESTED, Status.RUNNING]).all()
         if not running_executions.exists() and has_executions:
@@ -136,7 +138,7 @@ class TaskViewSet(BaseViewSet):
         Returns:
             Response: HTTP 201 with new task data on success, HTTP 400 if task is still running
         """
-        task = self.get_object_or_404()
+        task = get_object_or_404(Task, pk=pk)
         if task.executions.filter(status__in=[Status.REQUESTED, Status.RUNNING]).exists():
             return Response({"task": "Task is still running"}, status=status.HTTP_400_BAD_REQUEST)
         new_task = Task.objects.create(

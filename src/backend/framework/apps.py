@@ -4,6 +4,8 @@ Provides base app class with automatic fixture loading capabilities
 for Django applications in the Rekono platform.
 """
 
+import importlib
+from functools import cached_property
 from pathlib import Path
 from typing import Any
 
@@ -19,12 +21,23 @@ class BaseApp:
     for consistent data initialization across Django applications.
 
     Attributes:
-        fixtures_path (Path): Path to the fixtures directory.
         skip_fixtures_if_model_exists (bool): Whether to skip loading if data exists.
     """
 
-    fixtures_path = Path(__file__).resolve().parent / "fixtures"
     skip_fixtures_if_model_exists = False
+
+    @cached_property
+    def fixtures_path(self) -> Path:
+        """Get the path to the application's fixtures directory.
+
+        Dynamically determines the fixtures directory path based on the
+        application module location, following Django conventions.
+
+        Returns:
+            Path: Absolute path to the fixtures directory for this application.
+        """
+        module = importlib.import_module(self.__module__)
+        return Path(module.__file__).resolve().parent / "fixtures"
 
     def ready(self) -> None:
         """Configure the application after Django starts.
