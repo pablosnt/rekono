@@ -23,21 +23,20 @@ from tests.cases import ApiTestCase
 from tests.framework import ApiTest
 
 # pytype: disable=wrong-arg-types
-
 findings_data = {
     OSINT: (
         {
             "title": f"{OSINTDataType.USER.value} found using OSINT techniques",
-            "description": "admin",
+            "description": "Data: admin\nSource: Google",
             "severity": Severity.MEDIUM,
         },
-        "admin",
+        f"admin - {OSINTDataType.USER.value}",
         "/api/osint/",
     ),
     Host: (
         {
             "title": "Host discovered",
-            "description": f"10.10.10.10 - {HostOS.LINUX.value}",
+            "description": f"IP: 10.10.10.10\nOS type: {HostOS.LINUX.value}\nOS: some type of Linux",
             "severity": Severity.INFO,
         },
         "10.10.10.10",
@@ -49,7 +48,7 @@ findings_data = {
             "description": f"Host: 10.10.10.10\nPort: 80\nStatus: {PortStatus.OPEN.value}\nProtocol: {Protocol.TCP.value}\nService: http",
             "severity": Severity.INFO,
         },
-        "10.10.10.10 - 80",
+        f"10.10.10.10 - 80 - {Protocol.TCP.value}",
         "/api/ports/",
     ),
     Path: (
@@ -58,28 +57,28 @@ findings_data = {
             "description": "Host: 10.10.10.10\nPort: 80\nPath: /index.php\nType: ENDPOINT\nStatus: 200\nInfo: Main path",
             "severity": Severity.INFO,
         },
-        "10.10.10.10 - 80 - /index.php",
+        f"10.10.10.10 - 80 - {Protocol.TCP.value} - /index.php",
         "/api/paths/",
     ),
     Technology: (
         {
             "title": "Technology WordPress detected",
-            "description": "Technology: WordPress\nVersion: 1.0.0\nDetails: Typical CMS",
+            "description": "Typical CMS\n\nTechnology: WordPress\nVersion: 1.0.0",
             "severity": Severity.LOW,
             "cwe": 200,
             "references": "https://wordpress.org",
         },
-        "10.10.10.10 - 80 - WordPress",
+        f"10.10.10.10 - 80 - {Protocol.TCP.value} - WordPress - 1.0.0",
         "/api/technologies/",
     ),
     Credential: (
         {
             "title": "Credentials exposure",
-            "description": "admin@shop.com - admin - admin",
+            "description": "Technology: WordPress\nEmail: admin@shop.com\nUsername: admin\nSecret: admin",
             "cwe": 200,
             "severity": Severity.HIGH,
         },
-        "10.10.10.10 - 80 - WordPress - admin@shop.com - admin - admin",
+        f"10.10.10.10 - 80 - {Protocol.TCP.value} - WordPress - 1.0.0 - admin@shop.com - admin - admin",
         "/api/credentials/",
     ),
     Vulnerability: (
@@ -91,7 +90,7 @@ findings_data = {
             "cwe": 200,
             "references": "https://nvd.nist.gov/vuln/detail/CVE-2023-1111",
         },
-        "10.10.10.10 - 80 - WordPress - Test - CVE-2023-1111",
+        f"10.10.10.10 - 80 - {Protocol.TCP.value} - WordPress - 1.0.0 - Test - CVE-2023-1111",
         "/api/vulnerabilities/",
     ),
     Exploit: (
@@ -101,7 +100,7 @@ findings_data = {
             "severity": Severity.CRITICAL,
             "references": "https://www.exploit-db.com/exploits/1",
         },
-        "10.10.10.10 - 80 - WordPress - Test - CVE-2023-1111 - ReverseShell",
+        f"10.10.10.10 - 80 - {Protocol.TCP.value} - WordPress - 1.0.0 - Test - CVE-2023-1111 - 1 - https://www.exploit-db.com/exploits/1",
         "/api/exploits/",
     ),
 }

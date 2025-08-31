@@ -236,7 +236,7 @@ class Finding(BaseInput):
         Returns:
             str: Formatted string representation of the finding.
         """
-        return " - ".join([field.__str__() for field in self.unique_fields if field])
+        return " - ".join([getattr(self, field).__str__() for field in self.unique_fields if getattr(self, field)])
 
 
 class TriageFinding(Finding):
