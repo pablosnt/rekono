@@ -79,7 +79,7 @@ class ToolExecutorTest(RekonoTest):
             )
         )
 
-    @mock.patch("framework.models.BaseInput._get_url", get_url)
+    @mock.patch("framework.models.BaseInput.get_url", get_url)
     def test_get_arguments_only_findings(self) -> None:
         self._success_get_arguments(
             "-p 10.10.10.11 -p http://10.10.10.10:80/index.php -p 80 -p /index.php -p WordPress -p admin -p CVE-2023-1111 -p ReverseShell",
@@ -96,14 +96,14 @@ class ToolExecutorTest(RekonoTest):
             self.findings,
         )
 
-    @mock.patch("framework.models.BaseInput._get_url", get_url)
+    @mock.patch("framework.models.BaseInput.get_url", get_url)
     def test_get_arguments_only_required_findings(self) -> None:
         self._success_get_arguments(
             "-p 10.10.10.10 -p http://10.10.10.10:80/ -p 80 -p WordPress -p CVE-2023-1111",
             [self.host, self.port, self.technology, self.vulnerability],
         )
 
-    @mock.patch("framework.models.BaseInput._get_url", get_url)
+    @mock.patch("framework.models.BaseInput.get_url", get_url)
     def test_get_arguments_multiple_ports(self) -> None:
         self._success_get_arguments(
             "-p 10.10.10.10 -p http://10.10.10.10:80/ -p 80,443 -p WordPress -p CVE-2023-1111",
@@ -116,7 +116,7 @@ class ToolExecutorTest(RekonoTest):
             ],
         )
 
-    @mock.patch("framework.models.BaseInput._get_url", get_url)
+    @mock.patch("framework.models.BaseInput.get_url", get_url)
     def test_get_arguments_with_path_filter(self) -> None:
         self._setup_task_user_provided_entities()
         self._success_get_arguments(
@@ -132,7 +132,7 @@ class ToolExecutorTest(RekonoTest):
             [self.port, self.path, self.technology, self.vulnerability],
         )
 
-    @mock.patch("framework.models.BaseInput._get_url", get_url)
+    @mock.patch("framework.models.BaseInput.get_url", get_url)
     def _test_get_arguments_no_findings(self) -> None:
         self.target.target = "10.10.10.12"
         self.target.save(update_fields=["target"])
@@ -145,7 +145,7 @@ class ToolExecutorTest(RekonoTest):
             [self.wordlist],
         )
 
-    @mock.patch("framework.models.BaseInput._get_url", get_url)
+    @mock.patch("framework.models.BaseInput.get_url", get_url)
     def test_get_arguments_no_findings(self) -> None:
         self._setup_task_user_provided_entities()
         self._test_get_arguments_no_findings()
@@ -156,7 +156,7 @@ class ToolExecutorTest(RekonoTest):
     def test_get_arguments_no_base_inputs(self) -> None:
         self.assertFalse(self.executor.check_arguments([], [], [], [], []))
 
-    @mock.patch("framework.models.BaseInput._get_url", get_url)
+    @mock.patch("framework.models.BaseInput.get_url", get_url)
     def test_get_arguments_missing_one_required_finding(self) -> None:
         self.assertFalse(
             self.executor.check_arguments([self.osint, self.host, self.port, self.technology], [], [], [], [])

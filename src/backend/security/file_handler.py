@@ -63,7 +63,7 @@ class FileHandler(LoggingEntity):
         Returns:
             list[str]: List of allowed file extensions including txt, text, and empty string.
         """
-        return self._allowed_extensions if self.allowed_extensions is not None else ["txt", "text", ""]
+        return self._allowed_extensions if self._allowed_extensions is not None else ["txt", "text", ""]
 
     @cached_property
     def mime_types(self) -> list[str]:

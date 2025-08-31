@@ -141,7 +141,8 @@ class Note(BaseLike):
                     ]
                     if link
                 ]
-            )
+            ),
+            None,
         )
         if not item:
             item = self.project

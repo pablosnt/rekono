@@ -178,4 +178,4 @@ class DefectDojoTargetSync(BaseModel):
         Returns:
             str: Formatted string with project sync info, target name, and engagement ID
         """
-        return " - ".join([self.defectdojo_sync.__str__(), self.target.target, self.engagement_id])
+        return " - ".join([self.defectdojo_sync.__str__(), self.target.target, str(self.engagement_id)])

@@ -303,7 +303,7 @@ class ReportingViewSet(BaseViewSet):
                     }
                 )
                 for vulnerability in _vulnerabilities.all():
-                    _severity = vulnerability.severity.name.upper()
+                    _severity = Severity(vulnerability.severity).name.upper()
                     results["stats_by_target"][target.id][_severity] += 1
                     results["stats"][_severity] += 1
                 for credential in _credentials.all():
