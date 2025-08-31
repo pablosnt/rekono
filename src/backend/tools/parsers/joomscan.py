@@ -30,7 +30,10 @@ class Joomscan(BaseParser):
         """
         technology = vulnerability_name = None
         endpoints = set(["/"])
-        backups = configurations = path_disclosure = directory_listing = set()
+        backups = set()
+        configurations = set()
+        path_disclosure = set()
+        directory_listing = set()
         host = urlparse(self.executor.arguments[self.executor.arguments.index("-u") + 1]).hostname
         lines = self.output.split("\n")
         for index, line in enumerate(lines):

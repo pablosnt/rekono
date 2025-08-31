@@ -138,7 +138,7 @@ class GobusterTest(ToolTest):
                     "model": OSINT,
                     "data": "enquetes.example.com",
                     "data_type": OSINTDataType.VHOST,
-                    "source": "Enumeration",
+                    "source": "VHOST enumeration",
                 }
             ],
         ),
