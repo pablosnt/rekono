@@ -95,7 +95,7 @@ class Help(BaseCommand):
             if command.section != current_section:
                 current_section = command.section
                 message += f"\n*{current_section.value}*\n"
-            message += f"/{command.name} \- {self.escape(command.help)}\n"
+            message += f"/{command.command_name} \- {self.escape(command.help)}\n"
         return message
 
     async def _execute_command(self, update: Update, context: CallbackContext) -> int | None:

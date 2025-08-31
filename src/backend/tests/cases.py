@@ -94,17 +94,15 @@ class ToolTestCase(RekonoTestCase):
         executor_arguments: list[str],
         reports: Path,
     ) -> BaseParser:
-        report = reports / self.report
         executor = execution.configuration.tool.executor_class(execution)
         executor.authentication = authentication
         executor.arguments = executor_arguments
-        parser = execution.configuration.tool.parser_class(
-            executor,
-            (report.read_text() if not execution.configuration.tool.output_format else None),
-        )
         if execution.configuration.tool.output_format:
-            parser.report = report
-        return parser
+            executor.report = reports / self.report
+            output = None
+        else:
+            output = (reports / self.report).read_text()
+        return execution.configuration.tool.parser_class(executor, output)
 
     def test_case(self, *args: Any, **kwargs: Any) -> None:
         parser = self._get_parser(
@@ -113,6 +111,7 @@ class ToolTestCase(RekonoTestCase):
             kwargs["executor_arguments"],
             kwargs["reports"] / kwargs["tool"].lower().replace(" ", "_"),
         )
+        parser.findings = []
         parser.parse()
         self.tc.assertEqual(len(self.expected or []), len(parser.findings))
         if self.expected:
