@@ -53,9 +53,9 @@ class FindingManager(Manager):
             list[Any]: List of related findings in the relationship tree.
         """
         related_findings = []
-        for input_type in finding.input_type.related_input_types:
+        for input_type in finding.input_type.children_input_types:
             new_related_findings = input_type.model_class.objects.filter(
-                **{**kwargs, input_type.name.lower(): finding}
+                **{**kwargs, finding.input_type.name.lower(): finding}
             ).all()
             if new_related_findings:
                 related_findings.extend(new_related_findings)

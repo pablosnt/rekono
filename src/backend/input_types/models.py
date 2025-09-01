@@ -107,21 +107,14 @@ class InputType(BaseModel):
         return self._get_class_from_reference(self.fallback_model)
 
     @cached_property
-    def related_input_types(self) -> list[Self]:
-        """Get all input types that are related to this input type through foreign keys.
+    def parent_input_types(self) -> list[Self]:
+        return self._get_related_input_types(models.ForeignKey)
 
-        This method analyzes the primary model's fields to find foreign key relationships
-        to other BaseInput models. It then looks up the corresponding InputType instances
-        for those related models, enabling automatic discovery of input dependencies.
+    @cached_property
+    def children_input_types(self) -> list[Self]:
+        return self._get_related_input_types(models.ManyToOneRel)
 
-        The method only processes relationships if the 'relationships' flag is True,
-        allowing for performance optimization when relationship calculation is not needed
-        for specific input types.
-
-        Returns:
-            list[Self]: List of InputType instances that are related to this input type
-                       through foreign key relationships in the primary model.
-        """
+    def _get_related_input_types(self, related_field_class: type) -> list[Self]:
         relations: list[InputType] = []
         if not self.relationships:
             return relations
@@ -129,7 +122,7 @@ class InputType(BaseModel):
             # Iterate through all fields in the model to find foreign key relationships
             for field in self.model_class._meta.get_fields():
                 # Check if field is a ForeignKey to a BaseInput model
-                if field.__class__ == models.ForeignKey and issubclass(field.related_model, BaseInput):
+                if field.__class__ == related_field_class and issubclass(field.related_model, BaseInput):
                     # Search InputType by model reference
                     related_type = InputType.objects.filter(
                         model=f"{field.related_model._meta.app_label}.{field.related_model._meta.model_name}"

@@ -233,7 +233,7 @@ class BaseScanQueue(BaseQueue):
             else:
                 findings_by_type[finding.input_type].append(finding)
         # Sort findings by the number of related input types (to prioritize those with fewer dependencies)
-        return dict(sorted(findings_by_type.items(), key=lambda i: len(i[0].related_input_types)))
+        return dict(sorted(findings_by_type.items(), key=lambda i: len(i[0].children_input_types)))
 
     @staticmethod
     def calculate_executions(
@@ -292,13 +292,13 @@ class BaseScanQueue(BaseQueue):
                 if not filtered_base_inputs:
                     continue
                 # Find related input types (dependencies) for this input type
-                related_input_types = [i for i in input_type.related_input_types if i in findings_by_type]
+                parent_input_types = [i for i in input_type.parent_input_types if i in findings_by_type]
                 for execution_index, execution in enumerate(copy.deepcopy(executions)):
                     base_inputs = filtered_base_inputs.copy()
                     # If this is a finding and has related input types, only include those related to the current execution
-                    if field == "findings" and related_input_types:
+                    if field == "findings" and parent_input_types:
                         base_inputs = []
-                        for related_input_type in related_input_types:
+                        for related_input_type in parent_input_types:
                             base_inputs.extend(
                                 bi
                                 for bi in filtered_base_inputs
