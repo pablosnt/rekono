@@ -92,7 +92,6 @@ class InputType(BaseModel):
         Returns:
             BaseInput | None: The primary Django model class if defined and available,
                              None if not defined or model cannot be resolved.
-            ```
         """
         return self._get_class_from_reference(self.model)
 
@@ -108,13 +107,42 @@ class InputType(BaseModel):
 
     @cached_property
     def parent_input_types(self) -> list[Self]:
+        """Get parent input types that this input type depends on through foreign key relationships.
+
+        Identifies input types that are referenced by this input type's model through
+        ForeignKey relationships, enabling dependency tracking and workflow ordering.
+
+        Returns:
+            list[Self]: List of parent InputType instances that this input type depends on.
+        """
         return self._get_related_input_types(models.ForeignKey)
 
     @cached_property
     def children_input_types(self) -> list[Self]:
+        """Get child input types that depend on this input type through reverse foreign key relationships.
+
+        Identifies input types whose models reference this input type's model through
+        reverse ForeignKey relationships, enabling hierarchical workflow processing.
+
+        Returns:
+            list[Self]: List of child InputType instances that depend on this input type.
+        """
         return self._get_related_input_types(models.ManyToOneRel)
 
     def _get_related_input_types(self, related_field_class: type) -> list[Self]:
+        """Get related input types based on model field relationships.
+
+        Internal method that analyzes Django model fields to identify related input types
+        through specified relationship types (ForeignKey or ManyToOneRel). This enables
+        automatic discovery of input type dependencies and hierarchies.
+
+        Args:
+            related_field_class (type): The Django field class type to search for
+                                      (models.ForeignKey or models.ManyToOneRel).
+
+        Returns:
+            list[Self]: List of related InputType instances found through model relationships.
+        """
         relations: list[InputType] = []
         if not self.relationships:
             return relations
