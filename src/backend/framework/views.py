@@ -203,7 +203,7 @@ class LikeViewSet(BaseViewSet):
             Response: HTTP 204 No Content on success.
         """
         if request.method == "POST":
-            get_object_or_404(self.linked_model, pk=pk).liked_by.add(request.user)
+            get_object_or_404(self.get_queryset(), pk=pk).liked_by.add(request.user)
         else:
-            get_object_or_404(self.linked_model, pk=pk).liked_by.remove(request.user)
+            get_object_or_404(self.get_queryset(), pk=pk).liked_by.remove(request.user)
         return Response(status=status.HTTP_204_NO_CONTENT)

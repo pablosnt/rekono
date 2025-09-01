@@ -49,12 +49,16 @@ class Gobuster(BaseExecutor):
             RuntimeError: If required URL/domain or wordlist arguments are missing
         """
         arguments = super().get_arguments(findings, target_ports, input_vulnerabilities, input_technologies, wordlists)
+        print(arguments)
         if "--url" not in arguments and "--domain" not in arguments:
+            print("DOMAIN OR URL")
             raise RuntimeError(
                 f"Argument 'url' or 'domain' is required to execute tool '{self.execution.configuration.tool.name}'"
             )
         if "--wordlist" not in arguments:
+            print("WORDLIST")
             raise RuntimeError(
                 f"Argument 'wordlist' is required to execute tool '{self.execution.configuration.tool.name}'"
             )
+        print("FINE")
         return arguments

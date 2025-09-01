@@ -137,6 +137,7 @@ class BaseExecutor(LoggingEntity):
                     + list(wordlists)
                     + list(
                         Authentication.objects.filter(
+                            # TDOO: Why all the autheticatios fro the target can be used!
                             target_port__target=self.execution.task.target,
                             target_port__port__in=[
                                 f.port if isinstance(f, Port) else f.port.port

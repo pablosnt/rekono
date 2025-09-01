@@ -85,11 +85,8 @@ class OSINTViewSet(TriageFindingViewSet):
         Returns:
             Response: Created target data (201) or error message (400).
         """
-        osint = get_object_or_404(OSINT, pk=pk)
-        if osint.data_type in [
-            OSINTDataType.IP,
-            OSINTDataType.DOMAIN,
-        ]:
+        osint = get_object_or_404(self.get_queryset(), pk=pk)
+        if osint.data_type in [OSINTDataType.IP, OSINTDataType.DOMAIN]:
             serializer = TargetSerializer(
                 data={"project": osint.parent_project.id, "target": osint.data}, context={"request": request}
             )

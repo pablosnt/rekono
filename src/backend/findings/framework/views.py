@@ -36,11 +36,7 @@ class FindingViewSet(BaseViewSet):
         http_method_names (list): Allowed HTTP methods for finding operations
     """
 
-    permission_classes = [
-        IsAuthenticated,
-        RekonoModelPermission,
-        ProjectMemberPermission,
-    ]
+    permission_classes = [IsAuthenticated, RekonoModelPermission, ProjectMemberPermission]
     # "post" and "delete" are needed to allow finding fixes
     http_method_names = ["get", "post", "delete"]
 

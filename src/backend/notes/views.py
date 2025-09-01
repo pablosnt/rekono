@@ -128,7 +128,7 @@ class NoteViewSet(LikeViewSet):
             Only public notes owned by other users can be forked. Forked notes
             are always created as public and belong to the requesting user.
         """
-        note = get_object_or_404(Note, pk=pk)
+        note = get_object_or_404(self.get_queryset(), pk=pk)
         # Only allow forking of public notes that the user doesn't own
         if note.public and note.owner.id != self.request.user.id:
             # Create a new note with all the same content and relationships

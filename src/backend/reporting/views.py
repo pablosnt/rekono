@@ -157,7 +157,7 @@ class ReportingViewSet(BaseViewSet):
         Returns:
             Response: Standard deletion response
         """
-        report = get_object_or_404(Report, pk=pk)
+        report = get_object_or_404(self.get_queryset(), pk=pk)
         path = (CONFIG.generated_reports / report.path) if report.path else None
         if path and path.exists():
             path.unlink()
@@ -175,7 +175,7 @@ class ReportingViewSet(BaseViewSet):
         Returns:
             FileResponse: Report file download or error response for invalid status/missing file
         """
-        report = get_object_or_404(Report, pk=pk)
+        report = get_object_or_404(self.get_queryset(), pk=pk)
         if report.status != ReportStatus.READY:
             messages = {
                 ReportStatus.PENDING: "Report is not available yet",
