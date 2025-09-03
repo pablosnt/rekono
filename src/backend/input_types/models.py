@@ -146,7 +146,7 @@ class InputType(BaseModel):
         relations: list[InputType] = []
         if not self.relationships:
             return relations
-        if self.model_class:
+        if self.model_class is not None and hasattr(self.model_class, "_meta"):
             # Iterate through all fields in the model to find foreign key relationships
             for field in self.model_class._meta.get_fields():
                 # Check if field is a ForeignKey to a BaseInput model
