@@ -14,11 +14,12 @@ from typing import Any
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 
+from framework.logging import LoggingEntity
 from security.validators.enums import Regex
 from target_denylist.models import TargetDenylist
 
 
-class TargetValidator(RegexValidator):
+class TargetValidator(RegexValidator, LoggingEntity):
     """Validator for penetration testing targets with deny list enforcement.
 
     Validates security testing targets against both regex patterns and
@@ -53,7 +54,7 @@ class TargetValidator(RegexValidator):
     def __init__(
         self,
         regex: Regex,
-        message: Any | None = None,
+        message: Any | None = "Target is disallowed by policy",
         code: str | None = "target",
         inverse_match: bool | None = False,
         flags: RegexFlag | None = None,
@@ -92,23 +93,25 @@ class TargetValidator(RegexValidator):
         super().__call__(value)
         if not value:
             raise ValidationError("Target is required", code=self.code, params={"value": value})
-        denied_exception = ValidationError("Target is disallowed by policy", code=self.code, params={"value": value})
         denylist = TargetDenylist.objects.all().values_list("target", flat=True)
         if value in denylist:
-            raise denied_exception
+            self.logger.warning(f"[Security] Target '{value}' is denied by policy")
+            raise ValidationError(self.message, code=self.code, params={"value": value})
         for denied_value in denylist:
             try:
                 match = re.fullmatch(denied_value, value)
-                if match:
-                    raise denied_exception
             except Exception:
-                pass
+                match = None
+            if bool(match):
+                self.logger.warning(f"[Security] Target '{value}' match the denied value {denied_value}")
+                raise ValidationError(self.message, code=self.code, params={"value": value})
             for address_class, network_class in [
                 (ipaddress.IPv4Address, ipaddress.IPv4Network),
                 (ipaddress.IPv6Address, ipaddress.IPv6Network),
             ]:
                 try:
                     if address_class(value) in network_class(denied_value):
-                        raise denied_exception
+                        self.logger.warning(f"[Security] Target '{value}' belongs to the denied network {denied_value}")
+                        raise ValidationError(self.message, code=self.code, params={"value": value})
                 except ipaddress.AddressValueError:
                     pass

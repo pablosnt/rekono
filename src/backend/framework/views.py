@@ -9,7 +9,6 @@ from typing import Any
 
 from django.core.exceptions import PermissionDenied
 from django.db.models import Count, QuerySet
-from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.decorators import action
@@ -203,7 +202,7 @@ class LikeViewSet(BaseViewSet):
             Response: HTTP 204 No Content on success.
         """
         if request.method == "POST":
-            get_object_or_404(self.get_queryset(), pk=pk).liked_by.add(request.user)
+            self.get_object().liked_by.add(request.user)
         else:
-            get_object_or_404(self.get_queryset(), pk=pk).liked_by.remove(request.user)
+            self.get_object().liked_by.remove(request.user)
         return Response(status=status.HTTP_204_NO_CONTENT)

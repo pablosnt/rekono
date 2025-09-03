@@ -28,6 +28,7 @@ class Joomscan(BaseParser):
         Processes plain text scan results to create Technology, Vulnerability,
         Exploit, and Path findings from Joomla CMS security analysis.
         """
+        # TODO: Review
         technology = vulnerability_name = None
         endpoints = set(["/"])
         backups = set()

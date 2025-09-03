@@ -151,9 +151,9 @@ class NoteSerializer(TaggitSerializer, LikeSerializer):
         """
         if instance.project != validated_data.get("project"):
             raise ValidationError("You are not allowed to change the project of a note", code="project")
-        # Forked notes cannot be made private - they must remain public
-        if instance.forked_from and validated_data.get("public", False):
-            validated_data["public"] = True
+        # Forked notes cannot be made public - they must remain private
+        if instance.forked_from and validated_data.get("public", True):
+            validated_data["public"] = False
         # Track if we need to unlink forks when a note becomes private
         unlink_forks = instance.public and not validated_data.get("public", False)
         # Perform the update

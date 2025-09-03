@@ -5,7 +5,6 @@ filtering, search capabilities, and custom actions for security findings
 management through the REST API.
 """
 
-from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.decorators import action
@@ -85,7 +84,7 @@ class OSINTViewSet(TriageFindingViewSet):
         Returns:
             Response: Created target data (201) or error message (400).
         """
-        osint = get_object_or_404(self.get_queryset(), pk=pk)
+        osint = self.get_object()
         if osint.data_type in [OSINTDataType.IP, OSINTDataType.DOMAIN]:
             serializer = TargetSerializer(
                 data={"project": osint.parent_project.id, "target": osint.data}, context={"request": request}

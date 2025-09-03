@@ -163,7 +163,7 @@ class BaseExecutor(LoggingEntity):
                     is_model = argument_input.type.model_class and isinstance(
                         base_input, argument_input.type.model_class
                     )
-                    if not is_model or is_fallback:
+                    if not is_model and not is_fallback:
                         continue
                     if base_input.filter(argument_input, self.execution.task.target):
                         parsed_data = base_input.parse(parsed_data)

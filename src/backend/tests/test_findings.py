@@ -292,11 +292,7 @@ class TriageFindingTest(ApiTest):
                         expected=[
                             {
                                 "id": 1,
-                                "triage_status": (
-                                    TriageStatus.FALSE_POSITIVE.value
-                                    if isinstance(finding, Exploit)
-                                    else TriageStatus.UNTRIAGED.value
-                                ),
+                                "triage_status": TriageStatus.UNTRIAGED.value,
                                 **{
                                     k: str(v) if isinstance(v, Severity) else v
                                     for k, v in self.raw_findings[finding.__class__].items()
@@ -312,11 +308,7 @@ class TriageFindingTest(ApiTest):
                         expected=[
                             {
                                 "id": 1,
-                                "triage_status": (
-                                    TriageStatus.FALSE_POSITIVE.value
-                                    if isinstance(finding, Exploit)
-                                    else TriageStatus.UNTRIAGED.value
-                                ),
+                                "triage_status": TriageStatus.UNTRIAGED.value,
                                 **{
                                     k: str(v) if isinstance(v, Severity) else v
                                     for k, v in self.raw_findings[finding.__class__].items()

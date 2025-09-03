@@ -7,7 +7,6 @@ and collaborative features including forking and like functionality.
 from typing import Any, cast
 
 from django.db.models import Q, QuerySet
-from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
@@ -128,7 +127,7 @@ class NoteViewSet(LikeViewSet):
             Only public notes owned by other users can be forked. Forked notes
             are always created as public and belong to the requesting user.
         """
-        note = get_object_or_404(self.get_queryset(), pk=pk)
+        note = self.get_object()
         # Only allow forking of public notes that the user doesn't own
         if note.public and note.owner.id != self.request.user.id:
             # Create a new note with all the same content and relationships
@@ -148,7 +147,7 @@ class NoteViewSet(LikeViewSet):
                 title=note.title,
                 body=note.body,
                 owner=self.request.user,
-                public=True,  # Forked notes are always public
+                public=False,  # Forked notes are always private
                 forked_from=note,  # Reference to the original note
             )
             # Copy all tags from the original note

@@ -56,8 +56,8 @@ class Wordlist(BaseInput, BaseLike):
     # User that created the wordlist
     owner = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True)
 
-    filters = [BaseInput.Filter(type=WordlistType, field="type")]
-    parse_mapping = {InputKeyword.WORDLIST: "path"}
+    _filters = [BaseInput.Filter(type=WordlistType, field="type")]
+    _parse_mapping = {InputKeyword.WORDLIST: "path"}
 
     def filter(self, input: Any, target: Target | None = None) -> bool:
         """Filter wordlist availability based on file existence and integrity.

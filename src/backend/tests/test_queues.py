@@ -66,7 +66,8 @@ class BaseQueueTest(QueueTest):
 
     def test_calculate_executions_from_findings(self) -> None:
         findings = self._setup_multiple_findings(True)
-        expected = last_expected = []
+        expected = []
+        last_expected = []
         for host_index in range(1, self.number_of_hosts + 1):
             item = ExecutionParametersToEnqueue(
                 findings=[getattr(self, f"host{host_index}")],
@@ -92,19 +93,15 @@ class BaseQueueTest(QueueTest):
         )
 
     def test_calculate_executions_from_only_hosts(self) -> None:
-        findings = self._setup_multiple_findings(True)
+        hosts = self._setup_multiple_findings(False)
         self.assertEqual(
             [
                 ExecutionParametersToEnqueue(
-                    findings=[getattr(self, f"host{h}")],
-                    target_ports=[],
-                    input_vulnerabilities=[],
-                    input_technologies=[],
-                    wordlists=[],
+                    findings=[host], target_ports=[], input_vulnerabilities=[], input_technologies=[], wordlists=[]
                 )
-                for h in range(1, self.number_of_hosts + 1)
+                for host in hosts
             ],
-            self.queue.calculate_executions(self.fake_tool, findings, [], [], [], []),
+            self.queue.calculate_executions(self.fake_tool, hosts, [], [], [], []),
         )
 
     def test_calculate_executions_user_provided_entities(self) -> None:
@@ -129,7 +126,8 @@ class BaseQueueTest(QueueTest):
             technologies,
             [self.wordlist],
         )
-        expected = last_expected = []
+        expected = []
+        last_expected = []
         base_item = ExecutionParametersToEnqueue(
             findings=[],
             target_ports=target_ports,

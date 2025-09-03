@@ -15,7 +15,6 @@ from xml.etree import ElementTree as ET
 from django.db.models import Q, QuerySet
 from django.forms.models import model_to_dict
 from django.http import FileResponse
-from django.shortcuts import get_object_or_404
 from django.template.loader import get_template
 from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework import status
@@ -157,7 +156,7 @@ class ReportingViewSet(BaseViewSet):
         Returns:
             Response: Standard deletion response
         """
-        report = get_object_or_404(self.get_queryset(), pk=pk)
+        report = self.get_object()
         path = (CONFIG.generated_reports / report.path) if report.path else None
         if path and path.exists():
             path.unlink()
@@ -175,7 +174,7 @@ class ReportingViewSet(BaseViewSet):
         Returns:
             FileResponse: Report file download or error response for invalid status/missing file
         """
-        report = get_object_or_404(self.get_queryset(), pk=pk)
+        report = self.get_object()
         if report.status != ReportStatus.READY:
             messages = {
                 ReportStatus.PENDING: "Report is not available yet",

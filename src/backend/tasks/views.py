@@ -7,7 +7,6 @@ repetition functionality, and proper authentication and authorization controls.
 from typing import Any
 
 import django_rq
-from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
@@ -89,7 +88,7 @@ class TaskViewSet(BaseViewSet):
         Returns:
             Response: HTTP 204 on successful cancellation, HTTP 400 if task cannot be cancelled
         """
-        task = get_object_or_404(self.get_queryset(), pk=pk)
+        task = self.get_object()
         has_executions = task.executions.exists()
         running_executions = task.executions.filter(status__in=[Status.REQUESTED, Status.RUNNING]).all()
         if not running_executions.exists() and has_executions:
@@ -138,7 +137,7 @@ class TaskViewSet(BaseViewSet):
         Returns:
             Response: HTTP 201 with new task data on success, HTTP 400 if task is still running
         """
-        task = get_object_or_404(self.get_queryset(), pk=pk)
+        task = self.get_object()
         if task.executions.filter(status__in=[Status.REQUESTED, Status.RUNNING]).exists():
             return Response({"task": "Task is still running"}, status=status.HTTP_400_BAD_REQUEST)
         new_task = Task.objects.create(

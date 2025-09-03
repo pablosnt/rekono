@@ -98,6 +98,7 @@ class OtpManagerMixin:
         Returns:
             Any: The updated user instance.
         """
+        # TODO: Review
         user.otp = user.otp_expiration = None
         user.save(update_fields=["otp", "otp_expiration"])
         return user

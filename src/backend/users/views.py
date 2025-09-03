@@ -8,7 +8,6 @@ with proper authentication and authorization controls.
 from typing import Any
 
 from django.core.exceptions import PermissionDenied
-from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.decorators import action
@@ -80,7 +79,7 @@ class UserViewSet(BaseViewSet):
         Raises:
             PermissionDenied: If user tries to modify their own account
         """
-        instance = get_object_or_404(self.get_queryset(), pk=pk)
+        instance = self.get_object()
         if instance.id == request.user.id:
             raise PermissionDenied()
         return instance
@@ -141,7 +140,7 @@ class UserViewSet(BaseViewSet):
         Returns:
             Response: HTTP 204 on success, HTTP 400 with error on failure
         """
-        user = get_object_or_404(self.get_queryset(), pk=pk)
+        user = self.get_object()
         if user.is_active is not None or user.otp is None:
             return Response({"user": "User account has been already created"}, status=status.HTTP_400_BAD_REQUEST)
         if not SMTP().is_available():

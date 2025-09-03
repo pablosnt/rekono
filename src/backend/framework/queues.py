@@ -232,8 +232,9 @@ class BaseScanQueue(BaseQueue):
                 findings_by_type[finding.input_type] = [finding]
             else:
                 findings_by_type[finding.input_type].append(finding)
-        # Sort findings by the number of related input types (to prioritize those with fewer dependencies)
-        return dict(sorted(findings_by_type.items(), key=lambda i: len(i[0].children_input_types)))
+        # Sort findings by the input type ID to process the main findings first
+        # So in calculate_executions, Hosts will be planned first, then their Ports, then their Paths, etc.
+        return dict(sorted(findings_by_type.items(), key=lambda i: i[0].id))
 
     @staticmethod
     def calculate_executions(
@@ -294,19 +295,20 @@ class BaseScanQueue(BaseQueue):
                 # Find related input types (dependencies) for this input type
                 parent_input_types = [i for i in input_type.parent_input_types if i in findings_by_type]
                 for execution_index, execution in enumerate(copy.deepcopy(executions)):
-                    base_inputs = filtered_base_inputs.copy()
                     # If this is a finding and has related input types, only include those related to the current execution
                     if field == "findings" and parent_input_types:
                         base_inputs = []
-                        for related_input_type in parent_input_types:
+                        for parent_input_type in parent_input_types:
                             base_inputs.extend(
                                 bi
                                 for bi in filtered_base_inputs
-                                if getattr(bi, related_input_type.name.lower()) in execution.findings
+                                if getattr(bi, parent_input_type.name.lower()) in execution.findings
                                 and bi not in base_inputs
                             )
                         if not base_inputs:
                             continue
+                    else:
+                        base_inputs = filtered_base_inputs.copy()
                     input_types_used.add(input_type)
                     # If the tool argument allows multiple values, extend the execution batch
                     if tool_input.argument.multiple:
@@ -316,8 +318,7 @@ class BaseScanQueue(BaseQueue):
                         original_execution = copy.deepcopy(execution)
                         executions[execution_index].append(field, base_inputs[0])
                         for base_input in base_inputs[1:]:
-                            new_execution = copy.deepcopy(original_execution)
-                            new_execution.append(field, base_input)
-                            executions.append(new_execution)
+                            executions.append(copy.deepcopy(original_execution))
+                            executions[-1].append(field, base_input)
                 break  # One valid input type is enough
         return executions

@@ -145,15 +145,13 @@ class HackTricks(BaseIntegration):
                                           where hacktricks_url is the mapped URL or None,
                                           and service_name is the processed service name
         """
-        value = None
         for mapped_value, services in self.services_mapping.items():
             if service in services:
-                value = mapped_value
-                break
-        if self.url in (value or ""):
-            return value, None
-        else:
-            return None, value
+                if self.url in (mapped_value or ""):
+                    return mapped_value, None
+                else:
+                    return None, mapped_value
+        return None, service
 
     def _process_finding(self, execution: Execution, finding: Finding) -> None:
         """Process and enrich finding with relevant HackTricks documentation link.

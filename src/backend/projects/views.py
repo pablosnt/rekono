@@ -68,9 +68,9 @@ class ProjectViewSet(BaseViewSet):
         Raises:
             Http404: If user or project member not found
         """
-        project = get_object_or_404(self.get_queryset(), pk=pk)
+        project = self.get_object()
         if request.method == "POST":
-            member = get_object_or_404(User, pk=member_id)
+            member = get_object_or_404(User.objects.all(), pk=member_id, is_active=True)
             project.members.add(member)
             # Subscribe the new member to the default alerts
             for alert in project.alerts.filter(subscribe_all_members=True, enabled=True).all():

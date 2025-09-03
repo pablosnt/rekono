@@ -117,6 +117,7 @@ class NvdNist(BaseIntegration):
                 finding.description = description.get("value")
                 update.append("description")
                 break
+        # TODO: Review
         cwe = severity = 0
         cvss_metrics = cve_info.get("metrics", {}) or {}
         for type in ["primary", "secondary"]:

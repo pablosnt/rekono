@@ -7,7 +7,7 @@ configuration, and custom update logic.
 
 from typing import Any
 
-from findings.enums import Severity
+from findings.enums import Severity, TriageStatus
 from findings.framework.serializers import FindingSerializer, TriageFindingSerializer
 from findings.models import (
     OSINT,
@@ -281,16 +281,30 @@ class VulnerabilitySerializer(TriageFindingSerializer):
         Returns:
             Vulnerability: Updated vulnerability with triage propagation.
         """
-        update_triaged_exploits = instance.triage_status != validated_data.get("triage_status")
-        instance = super().update(instance, validated_data)
-        if update_triaged_exploits:
-            instance.exploit.all().update(
-                triage_status=instance.triage_status,
-                triage_comment=("Automatically triaged after triaging the related vulnerability as a false positive"),
-                triage_by=instance.triage_by,
-                triage_date=instance.triage_date,
+        new_instance = super().update(instance, validated_data)
+        # This is the only case of two related finding types that can be triaged
+        if instance.triage_status != new_instance.triage_status:
+            exploits_triage_comment = (
+                "Automatically triaged after triaging the related vulnerability as a false positive"
             )
-        return instance
+            if new_instance.triage_status == TriageStatus.FALSE_POSITIVE:
+                exploits_triage_status = TriageStatus.FALSE_POSITIVE
+                exploits_queryset = new_instance.exploit.all()
+            elif instance.triage_status == TriageStatus.FALSE_POSITIVE:
+                exploits_triage_status = TriageStatus.UNTRIAGED
+                exploits_queryset = new_instance.exploit.filter(
+                    triage_status=TriageStatus.FALSE_POSITIVE, triage_comment=exploits_triage_comment
+                )
+                exploits_triage_comment = (
+                    "Automatically untriaged after a triage status change on the related vulnerability"
+                )
+            exploits_queryset.update(
+                triage_status=exploits_triage_status,
+                triage_comment=exploits_triage_comment,
+                triage_by=new_instance.triage_by,
+                triage_date=new_instance.triage_date,
+            )
+        return new_instance
 
 
 class ExploitSerializer(TriageFindingSerializer):

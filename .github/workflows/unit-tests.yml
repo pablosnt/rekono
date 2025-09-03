@@ -36,7 +36,7 @@ jobs:
 
       - name: Run unit tests
         working-directory: src/backend
-        run: uv run coverage run manage.py test --parallel 20
+        run: uv run coverage run manage.py test --parallel 50
       
       - name: Check coverage
         working-directory: src/backend
