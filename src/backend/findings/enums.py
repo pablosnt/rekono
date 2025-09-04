@@ -111,6 +111,7 @@ class PortStatus(models.TextChoices):
     CLOSED = "Closed"
 
 
+# TODO: Rename to TransportProtocol
 class Protocol(models.TextChoices):
     """Network transport layer protocol types.
 

@@ -1,20 +1,19 @@
-from typing import Any
+from functools import cached_property
 
 from integrations.models import Integration
-from tests.cases import ApiTestCase
+from security.authorization.roles import Role
 from tests.framework import ApiTest
+from tests.framework.cases import ApiTestCase, PutApiTestCase
 
 # pytype: disable=wrong-arg-types
 
 
 class IntegrationTest(ApiTest):
     endpoint = "/api/integrations/"
-    expected_str = "Defect-Dojo"
+    expected_string = "Defect-Dojo"
     cases = [
         ApiTestCase(
-            ["admin1", "admin2", "auditor1", "auditor2", "reader1", "reader2"],
-            "get",
-            200,
+            [Role.ADMIN, Role.AUDITOR, Role.READER],
             expected=[
                 {"id": 4, "enabled": True},
                 {"id": 3, "enabled": True},
@@ -22,24 +21,10 @@ class IntegrationTest(ApiTest):
                 {"id": 1, "enabled": True},
             ],
         ),
+        PutApiTestCase([Role.AUDITOR, Role.READER], 403, endpoint="1"),
+        PutApiTestCase([Role.ADMIN], data={"enabled": False}, expected={"id": 1, "enabled": False}, endpoint="1"),
         ApiTestCase(
-            ["auditor1", "auditor2", "reader1", "reader2"],
-            "put",
-            403,
-            endpoint="{endpoint}1/",
-        ),
-        ApiTestCase(
-            ["admin1", "admin2"],
-            "put",
-            200,
-            {"enabled": False},
-            {"id": 1, "enabled": False},
-            endpoint="{endpoint}1/",
-        ),
-        ApiTestCase(
-            ["admin1", "admin2", "auditor1", "auditor2", "reader1", "reader2"],
-            "get",
-            200,
+            [Role.ADMIN, Role.AUDITOR, Role.READER],
             expected=[
                 {"id": 4, "enabled": True},
                 {"id": 3, "enabled": True},
@@ -49,5 +34,6 @@ class IntegrationTest(ApiTest):
         ),
     ]
 
-    def _get_object(self) -> Any:
+    @cached_property
+    def object(self) -> Integration:
         return Integration.objects.first()

@@ -1,8 +1,11 @@
-from typing import Any
+from functools import cached_property
 
 from http_headers.models import HttpHeader
-from tests.cases import ApiTestCase
+from security.authorization.roles import Role
 from tests.framework import ApiTest
+from tests.framework.cases import ApiTestCase, DeleteApiTestCase, PostApiTestCase, PutApiTestCase
+
+# pytype: disable=wrong-arg-types
 
 data = {"key": "User-Agent", "value": "Firefox", "user": None, "target": None}
 new_data = {**data, "value": "Chrome"}
@@ -10,66 +13,34 @@ target = {**data, "target": 1}
 user = {**data, "user": 4}
 invalid_data = {**data, "key": "User;Agent", "value": "Fire;fox"}
 
-# pytype: disable=wrong-arg-types
-
 
 class HttpHeaderTest(ApiTest):
     endpoint = "/api/http-headers/"
-    expected_str = "10.10.10.10 - User-Agent"
+    expected_string = "10.10.10.10 - User-Agent"
+    setup_entities = ["target"]
     cases = [
-        ApiTestCase(
-            ["admin1", "admin2", "auditor1", "auditor2", "reader1", "reader2"],
-            "get",
-            200,
-            expected=[],
-        ),
-        ApiTestCase(["admin2", "auditor2", "reader1", "reader2"], "post", 403, target),
-        ApiTestCase(["auditor1"], "post", 400, {**target, **invalid_data}),
-        ApiTestCase(["auditor1"], "post", 201, target, {"id": 1, **target}),
-        ApiTestCase(["admin1", "auditor1"], "post", 400, target),
-        ApiTestCase(["auditor1", "auditor2", "reader1", "reader2"], "post", 403, data),
-        ApiTestCase(["admin2"], "post", 201, data, {"id": 2, **data}),
-        ApiTestCase(["admin1"], "post", 400, data),
-        ApiTestCase(["admin1", "admin2", "auditor1", "reader1", "reader2"], "post", 403, user),
-        ApiTestCase(["auditor2"], "post", 201, user, {"id": 3, **user}),
-        ApiTestCase(["auditor2"], "post", 400, user),
-        ApiTestCase(["admin2"], "get", 200, expected=[{"id": 2, **data}]),
-        ApiTestCase(["auditor2"], "get", 200, expected=[{"id": 3, **user}, {"id": 2, **data}]),
-        ApiTestCase(
-            ["admin1", "auditor1"],
-            "get",
-            200,
-            expected=[{"id": 2, **data}, {"id": 1, **target}],
-        ),
-        ApiTestCase(
-            ["auditor1", "auditor2", "reader1", "reader2"],
-            "put",
-            403,
-            new_data,
-            endpoint="{endpoint}2/",
-        ),
-        ApiTestCase(
-            ["admin1", "admin2", "auditor1"],
-            "put",
-            404,
-            new_data,
-            endpoint="{endpoint}3/",
-        ),
-        ApiTestCase(["admin1"], "put", 200, new_data, {"id": 2, **new_data}, "{endpoint}2/"),
-        ApiTestCase(
-            ["admin1", "admin2", "auditor1", "auditor2"],
-            "get",
-            200,
-            expected={"id": 2, **new_data},
-            endpoint="{endpoint}2/",
-        ),
-        ApiTestCase(["auditor1"], "delete", 204, endpoint="{endpoint}1/"),
-        ApiTestCase(["admin1", "auditor1"], "get", 404, endpoint="{endpoint}1/"),
+        ApiTestCase([Role.ADMIN, Role.AUDITOR, Role.READER]),
+        PostApiTestCase(["admin2", "auditor2", Role.READER], 403, target),
+        PostApiTestCase(["auditor1"], 400, {**target, **invalid_data}),
+        PostApiTestCase(["auditor1"], data=target, expected={"id": 1, **target}),
+        PostApiTestCase(["admin1", "auditor1"], 400, target),
+        PostApiTestCase(["auditor1", "auditor2", Role.READER], 403, data),
+        PostApiTestCase(["admin2"], data=data, expected={"id": 2, **data}),
+        PostApiTestCase(["admin1"], 400, data),
+        PostApiTestCase([Role.ADMIN, "auditor1", Role.READER], 403, user),
+        PostApiTestCase(["auditor2"], data=user, expected={"id": 3, **user}),
+        PostApiTestCase(["auditor2"], 400, user),
+        ApiTestCase(["admin2"], expected=[{"id": 2, **data}]),
+        ApiTestCase(["auditor2"], expected=[{"id": 3, **user}, {"id": 2, **data}]),
+        ApiTestCase(["admin1", "auditor1"], expected=[{"id": 2, **data}, {"id": 1, **target}]),
+        PutApiTestCase([Role.AUDITOR, Role.READER], 403, new_data, endpoint="2"),
+        PutApiTestCase([Role.ADMIN, "auditor1"], 404, new_data, endpoint="3"),
+        PutApiTestCase(["admin1"], data=new_data, expected={"id": 2, **new_data}, endpoint="2"),
+        ApiTestCase([Role.ADMIN, Role.AUDITOR], expected={"id": 2, **new_data}, endpoint="2"),
+        DeleteApiTestCase(["auditor1"], endpoint="1"),
+        ApiTestCase(["admin1", "auditor1"], 404, endpoint="1"),
     ]
 
-    def setUp(self) -> None:
-        super().setUp()
-        self._setup_target()
-
-    def _get_object(self) -> Any:
+    @cached_property
+    def object(self) -> HttpHeader:
         return HttpHeader(**{**data, "target": self.target, "user": None})

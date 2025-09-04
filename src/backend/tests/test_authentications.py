@@ -1,19 +1,15 @@
-from typing import Any
+from functools import cached_property
 
 from authentications.enums import AuthenticationType
 from authentications.models import Authentication
+from security.authorization.roles import Role
 from target_ports.models import TargetPort
-from tests.cases import ApiTestCase
 from tests.framework import ApiTest
+from tests.framework.cases import ApiTestCase, DeleteApiTestCase, PostApiTestCase
 
 # pytype: disable=wrong-arg-types
 
-authentication = {
-    "name": "admin",
-    "secret": "admin",
-    "type": AuthenticationType.BASIC,
-    "target_port": 1,
-}
+authentication = {"name": "admin", "secret": "admin", "type": AuthenticationType.BASIC, "target_port": 1}
 invalid_authentication1 = {
     "name": "invalid;name",
     "secret": "admin",
@@ -26,91 +22,50 @@ invalid_authentication2 = {
     "type": AuthenticationType.BEARER,
     "target_port": 1,
 }
-invalid_authentication3 = {
-    "name": "newadmin",
-    "secret": "newadmin",
-    "type": AuthenticationType.BASIC,
-    "target_port": 1,
-}
+invalid_authentication3 = {"name": "newadmin", "secret": "newadmin", "type": AuthenticationType.BASIC, "target_port": 1}
 
 
 class AuthenticationTest(ApiTest):
     endpoint = "/api/authentications/"
-    expected_str = "10.10.10.10 - 80 - admin"
+    expected_string = "10.10.10.10 - 80 - admin"
+    setup_entities = ["target"]
     cases = [
-        ApiTestCase(
-            ["admin1", "admin2", "auditor1", "auditor2", "reader1", "reader2"],
-            "get",
-            200,
-            expected=[],
-        ),
-        ApiTestCase(
-            ["admin1", "admin2", "auditor1", "auditor2", "reader1", "reader2"],
-            "get",
-            404,
-            endpoint="{endpoint}1/",
-        ),
-        ApiTestCase(["admin1", "auditor1"], "post", 400, invalid_authentication1),
-        ApiTestCase(["admin1", "auditor1"], "post", 400, invalid_authentication2),
-        ApiTestCase(["admin2", "auditor2", "reader1", "reader2"], "post", 403, authentication),
-        ApiTestCase(
+        ApiTestCase([Role.ADMIN, Role.AUDITOR, Role.READER]),
+        ApiTestCase([Role.ADMIN, Role.AUDITOR, Role.READER], 404, endpoint="1"),
+        PostApiTestCase(["admin1", "auditor1"], 400, invalid_authentication1),
+        PostApiTestCase(["admin1", "auditor1"], 400, invalid_authentication2),
+        PostApiTestCase(["admin2", "auditor2", Role.READER], 403, authentication),
+        PostApiTestCase(
             ["admin1"],
-            "post",
-            201,
-            authentication,
-            {"id": 1, **authentication, "secret": "*" * len(authentication["secret"])},
+            data=authentication,
+            expected={"id": 1, **authentication, "secret": "*" * len(authentication["secret"])},
         ),
-        ApiTestCase(["admin1", "auditor1"], "post", 400, authentication),
-        ApiTestCase(["admin1", "auditor1"], "post", 400, invalid_authentication3),
+        PostApiTestCase(["admin1", "auditor1"], 400, authentication),
+        PostApiTestCase(["admin1", "auditor1"], 400, invalid_authentication3),
         ApiTestCase(
             ["admin1", "auditor1", "reader1"],
-            "get",
-            200,
-            expected=[
-                {
-                    "id": 1,
-                    **authentication,
-                    "secret": "*" * len(authentication["secret"]),
-                }
-            ],
+            expected=[{"id": 1, **authentication, "secret": "*" * len(authentication["secret"])}],
         ),
         ApiTestCase(
             ["admin1", "auditor1", "reader1"],
-            "get",
-            200,
-            expected={
-                "id": 1,
-                **authentication,
-                "secret": "*" * len(authentication["secret"]),
-            },
-            endpoint="{endpoint}1/",
+            expected={"id": 1, **authentication, "secret": "*" * len(authentication["secret"])},
+            endpoint="1",
         ),
-        ApiTestCase(["admin2", "auditor2", "reader2"], "get", 200, expected=[]),
-        ApiTestCase(["admin2", "auditor2", "reader2"], "get", 404, endpoint="{endpoint}1/"),
-        ApiTestCase(["reader1", "reader2"], "delete", 403, endpoint="{endpoint}1/"),
-        ApiTestCase(["admin2", "auditor2"], "delete", 404, endpoint="{endpoint}1/"),
-        ApiTestCase(["auditor1"], "delete", 204, endpoint="{endpoint}1/"),
-        ApiTestCase(["admin1"], "delete", 404, endpoint="{endpoint}1/"),
-        ApiTestCase(
-            ["admin1", "admin2", "auditor1", "auditor2", "reader1", "reader2"],
-            "get",
-            200,
-            expected=[],
-        ),
-        ApiTestCase(
-            ["admin1", "admin2", "auditor1", "auditor2", "reader1", "reader2"],
-            "get",
-            404,
-            endpoint="{endpoint}1/",
-        ),
+        ApiTestCase(["admin2", "auditor2", "reader2"]),
+        ApiTestCase(["admin2", "auditor2", "reader2"], 404, endpoint="1"),
+        DeleteApiTestCase([Role.READER], 403, endpoint="1"),
+        DeleteApiTestCase(["admin2", "auditor2"], 404, endpoint="1"),
+        DeleteApiTestCase(["auditor1"], endpoint="1"),
+        DeleteApiTestCase(["admin1"], 404, endpoint="1"),
+        ApiTestCase([Role.ADMIN, Role.AUDITOR, Role.READER]),
+        ApiTestCase([Role.ADMIN, Role.AUDITOR, Role.READER], 404, endpoint="1"),
     ]
 
     def setUp(self) -> None:
         super().setUp()
-        self._setup_target()
+        # We need a clean target_port without any related authentication
         self.target_port = TargetPort.objects.create(target=self.target, port=80, path=None)
-        TargetPort.objects.create(target=self.target, port=22, path=None)
-        TargetPort.objects.create(target=self.target, port=443, path=None)
 
-    def _get_object(self) -> Any:
+    @cached_property
+    def object(self) -> Authentication:
         return Authentication(**{**authentication, "target_port": self.target_port})

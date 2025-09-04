@@ -1,9 +1,10 @@
-from typing import Any
+from functools import cached_property
 
 from alerts.enums import AlertItem, AlertMode
 from alerts.models import Alert, MonitorSettings
-from tests.cases import ApiTestCase
+from security.authorization.roles import Role
 from tests.framework import ApiTest
+from tests.framework.cases import ApiTestCase, DeleteApiTestCase, PostApiTestCase, PutApiTestCase
 
 # pytype: disable=wrong-arg-types
 
@@ -33,21 +34,15 @@ monitor_alert = {
 
 class AlertTest(ApiTest):
     endpoint = "/api/alerts/"
-    expected_str = "test - Filter - CVE - CVE-2020-1111"
+    expected_string = "test - Filter - CVE - CVE-2020-1111"
+    setup_entities = ["findings"]
     cases = [
-        ApiTestCase(
-            ["admin1", "admin2", "auditor1", "auditor2", "reader1", "reader2"],
-            "get",
-            200,
-            expected=[],
-        ),
-        ApiTestCase(["admin2", "auditor2", "reader2"], "post", 403, new_alert),
-        ApiTestCase(
+        ApiTestCase([Role.ADMIN, Role.AUDITOR, Role.READER]),
+        PostApiTestCase(["admin2", "auditor2", "reader2"], 403, new_alert),
+        PostApiTestCase(
             ["admin1"],
-            "post",
-            201,
-            new_alert,
-            {
+            data=new_alert,
+            expected={
                 "id": 1,
                 **new_alert,
                 "subscribe_all_members": None,
@@ -58,8 +53,6 @@ class AlertTest(ApiTest):
         ),
         ApiTestCase(
             ["admin1", "auditor1", "reader1"],
-            "get",
-            200,
             expected=[
                 {
                     "id": 1,
@@ -71,12 +64,11 @@ class AlertTest(ApiTest):
                 }
             ],
         ),
-        ApiTestCase(["admin2", "auditor2", "reader2"], "get", 200, expected=[]),
-        ApiTestCase(["auditor1", "reader1"], "post", 403, endpoint="{endpoint}1/enable/"),
-        ApiTestCase(["admin1"], "post", 400, endpoint="{endpoint}1/enable/"),
-        ApiTestCase(
+        ApiTestCase(["admin2", "auditor2", "reader2"]),
+        PostApiTestCase(["auditor1", "reader1"], 403, endpoint="1/enable"),
+        PostApiTestCase(["admin1"], 400, endpoint="1/enable"),
+        DeleteApiTestCase(
             ["admin1"],
-            "delete",
             200,
             expected={
                 "id": 1,
@@ -86,12 +78,11 @@ class AlertTest(ApiTest):
                 "enabled": False,
                 "owner": {"id": 1, "username": "admin1"},
             },
-            endpoint="{endpoint}1/enable/",
+            endpoint="1/enable",
         ),
-        ApiTestCase(["admin1"], "delete", 400, endpoint="{endpoint}1/enable/"),
-        ApiTestCase(
+        DeleteApiTestCase(["admin1"], status_code=400, endpoint="1/enable"),
+        PostApiTestCase(
             ["admin1"],
-            "post",
             200,
             expected={
                 "id": 1,
@@ -101,12 +92,10 @@ class AlertTest(ApiTest):
                 "enabled": True,
                 "owner": {"id": 1, "username": "admin1"},
             },
-            endpoint="{endpoint}1/enable/",
+            endpoint="1/enable",
         ),
         ApiTestCase(
             ["admin1", "auditor1", "reader1"],
-            "get",
-            200,
             expected=[
                 {
                     "id": 1,
@@ -118,15 +107,13 @@ class AlertTest(ApiTest):
                 }
             ],
         ),
-        ApiTestCase(["auditor1", "reader1"], "delete", 403, endpoint="{endpoint}1/"),
-        ApiTestCase(["admin1"], "delete", 204, endpoint="{endpoint}1/"),
-        ApiTestCase(["admin1", "auditor1", "reader1"], "post", 400, invalid_filter_alert),
-        ApiTestCase(
+        DeleteApiTestCase(["auditor1", "reader1"], 403, endpoint="1"),
+        DeleteApiTestCase(["admin1"], endpoint="1"),
+        PostApiTestCase(["admin1", "auditor1", "reader1"], 400, invalid_filter_alert),
+        PostApiTestCase(
             ["auditor1"],
-            "post",
-            201,
-            filter_alert,
-            {
+            data=filter_alert,
+            expected={
                 "id": 2,
                 **filter_alert,
                 "subscribe_all_members": None,
@@ -137,8 +124,6 @@ class AlertTest(ApiTest):
         ),
         ApiTestCase(
             ["admin1", "reader1"],
-            "get",
-            200,
             expected=[
                 {
                     "id": 2,
@@ -147,13 +132,11 @@ class AlertTest(ApiTest):
                     "subscribed": False,
                     "enabled": True,
                     "owner": {"id": 3, "username": "auditor1"},
-                },
+                }
             ],
         ),
         ApiTestCase(
             ["auditor1"],
-            "get",
-            200,
             expected=[
                 {
                     "id": 2,
@@ -162,15 +145,13 @@ class AlertTest(ApiTest):
                     "subscribed": True,
                     "enabled": True,
                     "owner": {"id": 3, "username": "auditor1"},
-                },
+                }
             ],
         ),
-        ApiTestCase(["admin1", "reader1"], "post", 204, endpoint="{endpoint}2/subscription/"),
-        ApiTestCase(["admin1", "reader1"], "post", 400, endpoint="{endpoint}2/subscription/"),
+        PostApiTestCase(["admin1", "reader1"], 204, endpoint="2/subscription"),
+        PostApiTestCase(["admin1", "reader1"], 400, endpoint="2/subscription"),
         ApiTestCase(
             ["admin1", "auditor1", "reader1"],
-            "get",
-            200,
             expected=[
                 {
                     "id": 2,
@@ -179,25 +160,13 @@ class AlertTest(ApiTest):
                     "subscribed": True,
                     "enabled": True,
                     "owner": {"id": 3, "username": "auditor1"},
-                },
+                }
             ],
         ),
+        DeleteApiTestCase(["admin1", "auditor1", "reader1"], endpoint="2/subscription"),
+        DeleteApiTestCase(["admin1", "auditor1", "reader1"], 400, endpoint="2/subscription"),
         ApiTestCase(
             ["admin1", "auditor1", "reader1"],
-            "delete",
-            204,
-            endpoint="{endpoint}2/subscription/",
-        ),
-        ApiTestCase(
-            ["admin1", "auditor1", "reader1"],
-            "delete",
-            400,
-            endpoint="{endpoint}2/subscription/",
-        ),
-        ApiTestCase(
-            ["admin1", "auditor1", "reader1"],
-            "get",
-            200,
             expected=[
                 {
                     "id": 2,
@@ -206,16 +175,14 @@ class AlertTest(ApiTest):
                     "subscribed": False,
                     "enabled": True,
                     "owner": {"id": 3, "username": "auditor1"},
-                },
+                }
             ],
         ),
-        ApiTestCase(["reader1"], "put", 403, {"value": "http"}, endpoint="{endpoint}2/"),
-        ApiTestCase(
+        PutApiTestCase(["reader1"], 403, {"value": "http"}, endpoint="2"),
+        PutApiTestCase(
             ["auditor1"],
-            "put",
-            200,
-            {"value": "http"},
-            {
+            data={"value": "http"},
+            expected={
                 "id": 2,
                 **filter_alert,
                 "subscribe_all_members": None,
@@ -224,14 +191,12 @@ class AlertTest(ApiTest):
                 "enabled": True,
                 "owner": {"id": 3, "username": "auditor1"},
             },
-            "{endpoint}2/",
+            endpoint="2",
         ),
-        ApiTestCase(
+        PutApiTestCase(
             ["admin1"],
-            "put",
-            200,
-            {"value": "https"},
-            {
+            data={"value": "https"},
+            expected={
                 "id": 2,
                 **filter_alert,
                 "subscribe_all_members": None,
@@ -240,16 +205,14 @@ class AlertTest(ApiTest):
                 "enabled": True,
                 "owner": {"id": 3, "username": "auditor1"},
             },
-            "{endpoint}2/",
+            endpoint="2",
         ),
-        ApiTestCase(["reader1"], "delete", 403, endpoint="{endpoint}2/"),
-        ApiTestCase(["auditor1"], "delete", 204, endpoint="{endpoint}2/"),
-        ApiTestCase(
+        DeleteApiTestCase(["reader1"], 403, endpoint="2"),
+        DeleteApiTestCase(["auditor1"], endpoint="2"),
+        PostApiTestCase(
             ["reader1"],
-            "post",
-            201,
-            monitor_alert,
-            {
+            data=monitor_alert,
+            expected={
                 "id": 3,
                 **monitor_alert,
                 "subscribe_all_members": None,
@@ -260,8 +223,6 @@ class AlertTest(ApiTest):
         ),
         ApiTestCase(
             ["admin1", "auditor1"],
-            "get",
-            200,
             expected=[
                 {
                     "id": 3,
@@ -275,8 +236,6 @@ class AlertTest(ApiTest):
         ),
         ApiTestCase(
             ["reader1"],
-            "get",
-            200,
             expected=[
                 {
                     "id": 3,
@@ -285,77 +244,44 @@ class AlertTest(ApiTest):
                     "subscribed": True,
                     "enabled": True,
                     "owner": {"id": 5, "username": "reader1"},
-                },
+                }
             ],
         ),
-        ApiTestCase(["auditor1"], "delete", 403, endpoint="{endpoint}3/"),
-        ApiTestCase(["admin1"], "delete", 204, endpoint="{endpoint}3/"),
+        DeleteApiTestCase(["auditor1"], 403, endpoint="3"),
+        DeleteApiTestCase(["admin1"], endpoint="3"),
     ]
 
-    def setUp(self) -> None:
-        super().setUp()
-        self._setup_tasks_and_executions()
-        self._setup_findings(self.execution3)
-
-    def _get_object(self) -> Any:
+    @cached_property
+    def object(self) -> Alert:
         return Alert.objects.create(
-            project=self.project,
-            mode=AlertMode.FILTER,
-            item=AlertItem.CVE,
-            value="CVE-2020-1111",
+            project=self.project, mode=AlertMode.FILTER, item=AlertItem.CVE, value="CVE-2020-1111"
         )
 
     def test_must_be_triggered(self) -> None:
         for alert, finding, expected in [
             (
-                Alert.objects.create(
-                    project=self.execution3.task.target.project,
-                    mode=AlertMode.MONITOR,
-                    item=AlertItem.CVE,
-                ),
+                Alert.objects.create(project=self.project, mode=AlertMode.MONITOR, item=AlertItem.CVE),
                 self.vulnerability,
                 False,
             ),
+            (Alert.objects.create(project=self.project, mode=AlertMode.NEW, item=AlertItem.HOST), self.host, True),
             (
-                Alert.objects.create(
-                    project=self.execution3.task.target.project,
-                    mode=AlertMode.NEW,
-                    item=AlertItem.HOST,
-                ),
-                self.host,
-                True,
-            ),
-            (
-                Alert.objects.create(
-                    project=self.execution3.task.target.project,
-                    mode=AlertMode.NEW,
-                    item=AlertItem.OPEN_PORT,
-                ),
+                Alert.objects.create(project=self.project, mode=AlertMode.NEW, item=AlertItem.OPEN_PORT),
                 self.host,
                 False,
             ),
             (
-                Alert.objects.create(
-                    project=self.execution3.task.target.project,
-                    mode=AlertMode.FILTER,
-                    item=AlertItem.SERVICE,
-                    value="ssh",
-                ),
+                Alert.objects.create(project=self.project, mode=AlertMode.FILTER, item=AlertItem.SERVICE, value="ssh"),
                 self.port,
                 False,
             ),
             (
-                Alert.objects.create(
-                    project=self.execution3.task.target.project,
-                    mode=AlertMode.FILTER,
-                    item=AlertItem.SERVICE,
-                    value="http",
-                ),
+                Alert.objects.create(project=self.project, mode=AlertMode.FILTER, item=AlertItem.SERVICE, value="http"),
                 self.port,
                 True,
             ),
         ]:
-            self.assertEqual(expected, alert.must_be_triggered(self.execution3, finding))
+            self.assertEqual(expected, alert.must_be_triggered(self.selected_execution, finding))
 
 
 new_monitor = {"hour_span": 48}
@@ -365,31 +291,16 @@ invalid_monitor_2 = {"hour_span": 23}
 
 class MonitorSettingsTest(ApiTest):
     endpoint = "/api/monitor/1/"
-    expected_str = "Last monitor was at None. Next one in 24 hours"
+    expected_string = "Last monitor was at None. Next one in 24 hours"
     cases = [
-        ApiTestCase(["auditor1", "auditor2", "reader1", "reader2"], "get", 403),
-        ApiTestCase(
-            ["admin1", "admin2"],
-            "get",
-            200,
-            expected={"id": 1, "last_monitor": None, "hour_span": 24},
-        ),
-        ApiTestCase(["admin1", "admin2"], "put", 400, invalid_monitor_1),
-        ApiTestCase(["admin1", "admin2"], "put", 400, invalid_monitor_2),
-        ApiTestCase(
-            ["admin1", "admin2"],
-            "put",
-            200,
-            new_monitor,
-            expected={"id": 1, "last_monitor": None, **new_monitor},
-        ),
-        ApiTestCase(
-            ["admin1", "admin2"],
-            "get",
-            200,
-            expected={"id": 1, "last_monitor": None, **new_monitor},
-        ),
+        ApiTestCase([Role.AUDITOR, Role.READER], 403),
+        ApiTestCase([Role.ADMIN], expected={"id": 1, "last_monitor": None, "hour_span": 24}),
+        PutApiTestCase([Role.ADMIN], 400, invalid_monitor_1),
+        PutApiTestCase([Role.ADMIN], 400, invalid_monitor_2),
+        PutApiTestCase([Role.ADMIN], data=new_monitor, expected={"id": 1, "last_monitor": None, **new_monitor}),
+        ApiTestCase([Role.ADMIN], expected={"id": 1, "last_monitor": None, **new_monitor}),
     ]
 
-    def _get_object(self) -> Any:
+    @cached_property
+    def object(self) -> MonitorSettings:
         return MonitorSettings.objects.first()

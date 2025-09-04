@@ -1,92 +1,42 @@
 from datetime import datetime, timedelta
-from typing import Any
+from functools import cached_property
 
 from api_tokens.models import ApiToken
-from tests.cases import ApiTestCase
+from security.authorization.roles import Role
 from tests.framework import ApiTest
+from tests.framework.cases import ApiTestCase, DeleteApiTestCase, PostApiTestCase
 
 # pytype: disable=wrong-arg-types
 
-
-api_token1 = {
-    "name": "test1",
-    "expiration": (datetime.now() + timedelta(days=365)).isoformat() + "Z",
-}
-invalid_api_token = {
-    "name": "test;1",
-    "expiration": (datetime.now() - timedelta(days=365)).isoformat() + "Z",
-}
+expiration = (datetime.now() + timedelta(days=365)).isoformat() + "Z"
+valid_api_token = {"name": "test1", "expiration": expiration}
+invalid_api_token = {"name": "test;1", "expiration": expiration}
 
 
 class ApiTokenTest(ApiTest):
     endpoint = "/api/api-tokens/"
-    expected_str = f"admin1@rekono.com - {api_token1['name']}"
+    expected_string = f"admin1@rekono.com - {valid_api_token['name']}"
     cases = [
-        ApiTestCase(
-            ["admin1", "admin2", "auditor1", "auditor2", "reader1", "reader2"],
-            "get",
-            200,
-            expected=[],
-        ),
-        ApiTestCase(
-            ["admin1", "admin2", "auditor1", "auditor2", "reader1", "reader2"],
-            "get",
-            404,
-            endpoint=f"{endpoint}1/",
-        ),
-        ApiTestCase(
-            ["admin1", "admin2", "auditor1", "auditor2", "reader1", "reader2"],
-            "post",
-            400,
-            invalid_api_token,
-        ),
-        ApiTestCase(
-            ["admin1", "admin2", "auditor1", "auditor2", "reader1", "reader2"],
-            "post",
-            201,
-            api_token1,
-            api_token1,
-        ),
-        ApiTestCase(
-            ["admin1", "admin2", "auditor1", "auditor2", "reader1", "reader2"],
-            "post",
-            400,
-            api_token1,
-        ),
-        ApiTestCase(
-            ["admin1", "admin2", "auditor1", "auditor2", "reader1", "reader2"],
-            "get",
-            200,
-            expected=[api_token1],
-        ),
-        ApiTestCase(["admin1"], "get", 200, expected=api_token1, endpoint=f"{endpoint}1/"),
-        ApiTestCase(
-            ["admin2", "auditor1", "auditor2", "reader1", "reader2"],
-            "get",
-            404,
-            endpoint=f"{endpoint}1/",
-        ),
-        ApiTestCase(["auditor1"], "get", 200, expected=api_token1, endpoint=f"{endpoint}3/"),
-        ApiTestCase(["reader1"], "get", 200, expected=api_token1, endpoint=f"{endpoint}5/"),
-        ApiTestCase(
-            ["admin2", "auditor1", "auditor2", "reader1", "reader2"],
-            "delete",
-            404,
-            endpoint=f"{endpoint}1/",
-        ),
-        ApiTestCase(["admin1"], "delete", 204, endpoint=f"{endpoint}1/"),
-        ApiTestCase(["admin2"], "delete", 204, endpoint=f"{endpoint}2/"),
-        ApiTestCase(["auditor1"], "delete", 204, endpoint=f"{endpoint}3/"),
-        ApiTestCase(["auditor2"], "delete", 204, endpoint=f"{endpoint}4/"),
-        ApiTestCase(["reader1"], "delete", 204, endpoint=f"{endpoint}5/"),
-        ApiTestCase(["reader2"], "delete", 204, endpoint=f"{endpoint}6/"),
-        ApiTestCase(
-            ["admin1", "admin2", "auditor1", "auditor2", "reader1", "reader2"],
-            "get",
-            200,
-            expected=[],
-        ),
+        ApiTestCase([Role.ADMIN, Role.AUDITOR, Role.READER]),
+        ApiTestCase([Role.ADMIN, Role.AUDITOR, Role.READER], 404, endpoint="1"),
+        PostApiTestCase([Role.ADMIN, Role.AUDITOR, Role.READER], 400, invalid_api_token),
+        PostApiTestCase([Role.ADMIN, Role.AUDITOR, Role.READER], data=valid_api_token, expected=valid_api_token),
+        PostApiTestCase([Role.ADMIN, Role.AUDITOR, Role.READER], 400, valid_api_token),
+        ApiTestCase([Role.ADMIN, Role.AUDITOR, Role.READER], expected=[valid_api_token]),
+        ApiTestCase(["admin1"], expected=valid_api_token, endpoint="1"),
+        ApiTestCase(["admin2", Role.AUDITOR, Role.READER], 404, endpoint="1"),
+        ApiTestCase(["auditor1"], expected=valid_api_token, endpoint="3"),
+        ApiTestCase(["reader1"], expected=valid_api_token, endpoint="5"),
+        DeleteApiTestCase(["admin2", Role.AUDITOR, Role.READER], 404, endpoint="1"),
+        DeleteApiTestCase(["admin1"], endpoint="1"),
+        DeleteApiTestCase(["admin2"], endpoint="2"),
+        DeleteApiTestCase(["auditor1"], endpoint="3"),
+        DeleteApiTestCase(["auditor2"], endpoint="4"),
+        DeleteApiTestCase(["reader1"], endpoint="5"),
+        DeleteApiTestCase(["reader2"], endpoint="6"),
+        ApiTestCase([Role.ADMIN, Role.AUDITOR, Role.READER]),
     ]
 
-    def _get_object(self) -> Any:
-        return ApiToken(**{"user": self.admin1, **api_token1})
+    @cached_property
+    def object(self) -> ApiToken:
+        return ApiToken(**{"user": self.admin1, **valid_api_token})
