@@ -41,6 +41,8 @@ class TestingDataMixin:
 
     def setup_users(self) -> None:
         self.users = {r: [] for r in Role}
+        self.members = []
+        self.not_members = []
         for role in [Role.ADMIN, Role.AUDITOR, Role.READER]:
             for index in range(2):
                 username = f"{role.name.lower()}{index + 1}"
@@ -56,6 +58,10 @@ class TestingDataMixin:
                 User.objects.assign_role(new_user, role)
                 setattr(self, username, new_user)
                 self.users[role].append(new_user)
+                if index + 1 == 1:
+                    self.members.append(new_user)
+                else:
+                    self.not_members.append(new_user)
 
     def setup_project(self) -> None:
         if not hasattr(self, "users"):
@@ -160,6 +166,7 @@ class TestingDataMixin:
         self.fake_execution = Execution.objects.create(
             task=self.fake_task, configuration=self.fake_configuration, status=Status.REQUESTED
         )
+        self.selected_execution = self.fake_execution
 
     def setup_findings(self) -> None:
         if not hasattr(self, "selected_execution"):

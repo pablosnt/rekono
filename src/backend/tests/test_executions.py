@@ -14,9 +14,9 @@ class ExecutionTest(ApiTest):
     expected_string = "10.10.10.10 - Nmap - TCP ports"
     setup_entities = ["executions"]
     cases = [
-        ApiTestCase(["admin2", "auditor2", "reader2"]),
+        ApiTestCase(["not_members"]),
         ApiTestCase(
-            ["admin1", "auditor1", "reader1"],
+            ["members"],
             expected=[
                 {
                     "id": 3,
@@ -38,9 +38,9 @@ class ExecutionTest(ApiTest):
                 },
             ],
         ),
-        ApiTestCase(["admin2", "auditor2", "reader2"], 404, endpoint="3"),
+        ApiTestCase(["not_members"], 404, endpoint="3"),
         ApiTestCase(
-            ["admin1", "auditor1", "reader1"],
+            ["members"],
             expected={
                 "id": 3,
                 "task": 2,
@@ -50,10 +50,10 @@ class ExecutionTest(ApiTest):
             endpoint="3",
         ),
         ApiTestCase([Role.ADMIN, Role.AUDITOR, Role.READER], status_code=404, endpoint="1/report"),
-        ApiTestCase(["admin2", "auditor2", "reader2"], status_code=404, endpoint="2/report"),
-        ApiTestCase(["admin1", "auditor1", "reader1"], status_code=400, endpoint="2/report"),
-        ApiTestCase(["admin2", "auditor2", "reader2"], status_code=404, endpoint="3/report"),
-        ApiTestCase(["admin1", "auditor1", "reader1"], endpoint="3/report"),
+        ApiTestCase(["not_members"], status_code=404, endpoint="2/report"),
+        ApiTestCase(["members"], status_code=400, endpoint="2/report"),
+        ApiTestCase(["not_members"], status_code=404, endpoint="3/report"),
+        ApiTestCase(["members"], endpoint="3/report"),
     ]
 
     @cached_property

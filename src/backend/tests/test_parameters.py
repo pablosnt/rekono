@@ -42,10 +42,10 @@ class ParameterTest(ApiTest):
                     },
                     endpoint="/api/tasks/",
                 ),
-                ApiTestCase(["admin2", "auditor2", "reader2"]),
-                ApiTestCase(["admin1", "auditor1", "reader1"], expected=[{"id": 1, **self.valid}]),
-                ApiTestCase(["admin2", "auditor2", "reader2"], 404, endpoint="1"),
-                ApiTestCase(["admin1", "auditor1", "reader1"], expected={"id": 1, **self.valid}, endpoint="1"),
+                ApiTestCase(["not_members"]),
+                ApiTestCase(["members"], expected=[{"id": 1, **self.valid}]),
+                ApiTestCase(["not_members"], 404, endpoint="1"),
+                ApiTestCase(["members"], expected={"id": 1, **self.valid}, endpoint="1"),
                 ApiTestCase([Role.ADMIN, Role.AUDITOR, Role.READER], 404, endpoint="2"),
             ]
             if self.valid is not None and self.invalid is not None

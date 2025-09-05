@@ -38,7 +38,7 @@ class AlertTest(ApiTest):
     setup_entities = ["findings"]
     cases = [
         ApiTestCase([Role.ADMIN, Role.AUDITOR, Role.READER]),
-        PostApiTestCase(["admin2", "auditor2", "reader2"], 403, new_alert),
+        PostApiTestCase(["not_members"], 403, new_alert),
         PostApiTestCase(
             ["admin1"],
             data=new_alert,
@@ -52,7 +52,7 @@ class AlertTest(ApiTest):
             },
         ),
         ApiTestCase(
-            ["admin1", "auditor1", "reader1"],
+            ["members"],
             expected=[
                 {
                     "id": 1,
@@ -64,7 +64,7 @@ class AlertTest(ApiTest):
                 }
             ],
         ),
-        ApiTestCase(["admin2", "auditor2", "reader2"]),
+        ApiTestCase(["not_members"]),
         PostApiTestCase(["auditor1", "reader1"], 403, endpoint="1/enable"),
         PostApiTestCase(["admin1"], 400, endpoint="1/enable"),
         DeleteApiTestCase(
@@ -95,7 +95,7 @@ class AlertTest(ApiTest):
             endpoint="1/enable",
         ),
         ApiTestCase(
-            ["admin1", "auditor1", "reader1"],
+            ["members"],
             expected=[
                 {
                     "id": 1,
@@ -109,7 +109,7 @@ class AlertTest(ApiTest):
         ),
         DeleteApiTestCase(["auditor1", "reader1"], 403, endpoint="1"),
         DeleteApiTestCase(["admin1"], endpoint="1"),
-        PostApiTestCase(["admin1", "auditor1", "reader1"], 400, invalid_filter_alert),
+        PostApiTestCase(["members"], 400, invalid_filter_alert),
         PostApiTestCase(
             ["auditor1"],
             data=filter_alert,
@@ -151,7 +151,7 @@ class AlertTest(ApiTest):
         PostApiTestCase(["admin1", "reader1"], 204, endpoint="2/subscription"),
         PostApiTestCase(["admin1", "reader1"], 400, endpoint="2/subscription"),
         ApiTestCase(
-            ["admin1", "auditor1", "reader1"],
+            ["members"],
             expected=[
                 {
                     "id": 2,
@@ -163,10 +163,10 @@ class AlertTest(ApiTest):
                 }
             ],
         ),
-        DeleteApiTestCase(["admin1", "auditor1", "reader1"], endpoint="2/subscription"),
-        DeleteApiTestCase(["admin1", "auditor1", "reader1"], 400, endpoint="2/subscription"),
+        DeleteApiTestCase(["members"], endpoint="2/subscription"),
+        DeleteApiTestCase(["members"], 400, endpoint="2/subscription"),
         ApiTestCase(
-            ["admin1", "auditor1", "reader1"],
+            ["members"],
             expected=[
                 {
                     "id": 2,
@@ -231,7 +231,7 @@ class AlertTest(ApiTest):
                     "subscribed": False,
                     "enabled": True,
                     "owner": {"id": 5, "username": "reader1"},
-                },
+                }
             ],
         ),
         ApiTestCase(

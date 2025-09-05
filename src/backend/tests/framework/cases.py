@@ -7,6 +7,7 @@ from django.test import TestCase
 from rest_framework.test import APIClient
 
 from security.authorization.roles import Role
+from users.models import User
 
 # pytype: disable=attribute-error
 
@@ -67,36 +68,36 @@ class ApiTestCase(RekonoTestCase):
             )
 
     def test_case(self, test_case_number: int, test_case: TestCase, base_endpoint: str | None = None) -> None:
-        for executor_or_role in self.executors or [None]:
-            for executor in (
-                (
-                    test_case.users[executor_or_role]
-                    if isinstance(executor_or_role, Role)
-                    else [getattr(test_case, executor_or_role)]
-                )
-                if executor_or_role is not None
-                else [None]
-            ):
+        for executors_or_role in self.executors or [None]:
+            executor_list = [None]
+            if isinstance(executors_or_role, Role):
+                executor_list = test_case.users[executors_or_role]
+            elif hasattr(test_case, executors_or_role):
+                if isinstance(getattr(test_case, executors_or_role), User):
+                    executor_list = [getattr(test_case, executors_or_role)]
+                elif isinstance(getattr(test_case, executors_or_role), list):
+                    executor_list = getattr(test_case, executors_or_role)
+            for executor in executor_list:
                 with transaction.atomic():
                     client = APIClient()
                     location = f"TestCase#{test_case_number}"
                     if executor:
                         location += f" - @{executor.username}"
-                        client.force_authenticate(executor)
+                        client.force_authenticate(User.objects.get(pk=executor.id))
                     if "{endpoint}" in self.endpoint:
                         endpoint = self.endpoint.format(endpoint=base_endpoint)
                     elif base_endpoint not in self.endpoint and not self.endpoint.startswith("/api/"):
                         endpoint = base_endpoint + self.endpoint
                     else:
                         endpoint = self.endpoint
-                    if endpoint[-1] != "/":
+                    if endpoint[-1] != "/" and "?" not in endpoint:
                         endpoint += "/"
                     location += f" - {self.method.upper()} {endpoint}"
                     response = getattr(client, self.method.lower())(endpoint, data=self.data, format=self.format)
                     test_case.assertEqual(
                         self.status_code,
                         response.status_code,
-                        msg=f"[{location}] Expected status code {self.status_code} doesn't match {response.status_code}",
+                        msg=f"[{location}] Expected status code {self.status_code} doesn't match {response.status_code}: {response.content}",
                     )
                     if self.expected:
                         self.assertExpected(
@@ -129,12 +130,17 @@ class ParserTestCase(RekonoTestCase):
         executor = test_case.execution.configuration.tool.executor_class(test_case.execution)
         executor.authentication = test_case.authentication
         executor.arguments = test_case.arguments
-        reports = test_case.data_dir / test_case.execution.configuration.tool.name.lower().replace(" ", "_")
+        report = (
+            test_case.data_dir
+            / "reports"
+            / test_case.execution.configuration.tool.name.lower().replace(" ", "_")
+            / self.report
+        )
         if test_case.execution.configuration.tool.output_format:
-            executor.report = reports / self.report
+            executor.report = report
             output = None
         else:
-            output = (reports / self.report).read_text()
+            output = report.read_text()
         parser = test_case.execution.configuration.tool.parser_class(executor, output)
         parser.findings = []
         parser.parse()

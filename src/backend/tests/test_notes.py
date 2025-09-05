@@ -60,7 +60,7 @@ class NoteTest(ApiTest):
                 "owner": {"id": 3, "username": "auditor1"},
             },
         ),
-        ApiTestCase(["admin2", "auditor2", "reader2"]),
+        ApiTestCase(["not_members"]),
         ApiTestCase(
             ["admin1"],
             expected=[
@@ -131,9 +131,9 @@ class NoteTest(ApiTest):
             },
             endpoint="1",
         ),
-        ApiTestCase(["admin2", "auditor2", "reader2"], 404, endpoint="1"),
+        ApiTestCase(["not_members"], 404, endpoint="1"),
         ApiTestCase(
-            ["admin1", "auditor1", "reader1"],
+            ["members"],
             expected={
                 "id": 1,
                 **public_note,
