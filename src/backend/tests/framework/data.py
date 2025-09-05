@@ -143,7 +143,7 @@ class TestingDataMixin:
             format_pattern = "{" + pattern + "}"
             configuration_arguments.append(format_pattern)
             argument = Argument.objects.create(
-                tool=self.fake_tool, name=value, argument=f"-p {format_pattern}", required=required, multiple=multiple
+                tool=self.fake_tool, name=pattern, argument=f"-p {format_pattern}", required=required, multiple=multiple
             )
             for index, input_type_name in enumerate(input_type_names):
                 Input.objects.create(
@@ -158,6 +158,8 @@ class TestingDataMixin:
         )
 
     def setup_fake_execution(self) -> None:
+        if not hasattr(self, "target"):
+            self.setup_target()
         if not hasattr(self, "fake_configuration"):
             self.setup_fake_tool()
         self.fake_task = Task.objects.create(

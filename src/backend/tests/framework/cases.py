@@ -70,13 +70,14 @@ class ApiTestCase(RekonoTestCase):
     def test_case(self, test_case_number: int, test_case: TestCase, base_endpoint: str | None = None) -> None:
         for executors_or_role in self.executors or [None]:
             executor_list = [None]
-            if isinstance(executors_or_role, Role):
-                executor_list = test_case.users[executors_or_role]
-            elif hasattr(test_case, executors_or_role):
-                if isinstance(getattr(test_case, executors_or_role), User):
-                    executor_list = [getattr(test_case, executors_or_role)]
-                elif isinstance(getattr(test_case, executors_or_role), list):
-                    executor_list = getattr(test_case, executors_or_role)
+            if executors_or_role is not None:
+                if isinstance(executors_or_role, Role):
+                    executor_list = test_case.users[executors_or_role]
+                elif hasattr(test_case, executors_or_role):
+                    if isinstance(getattr(test_case, executors_or_role), User):
+                        executor_list = [getattr(test_case, executors_or_role)]
+                    elif isinstance(getattr(test_case, executors_or_role), list):
+                        executor_list = getattr(test_case, executors_or_role)
             for executor in executor_list:
                 with transaction.atomic():
                     client = APIClient()
@@ -97,7 +98,7 @@ class ApiTestCase(RekonoTestCase):
                     test_case.assertEqual(
                         self.status_code,
                         response.status_code,
-                        msg=f"[{location}] Expected status code {self.status_code} doesn't match {response.status_code}: {response.content}",
+                        msg=f"[{location}] Expected status code {self.status_code} doesn't match {response.status_code}{f': {response.content}' if hasattr(response, 'content') else ''}",
                     )
                     if self.expected:
                         self.assertExpected(
