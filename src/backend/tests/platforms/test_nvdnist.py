@@ -83,9 +83,7 @@ class NvdNistTest(BaseTest):
 
 
 new_settings = {"api_token": "nvd-nist-token"}
-# TODO: settings must be invalid from 50 characters in the api_token
-# However, the error is not triggered until it reaches 500 length
-invalid_settings = {"api_token": "a" * 600}
+invalid_settings = {"api_token": "a" * 51}
 
 
 class NvdNistSettingsTest(ApiTest):

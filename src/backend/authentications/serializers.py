@@ -8,7 +8,6 @@ from rest_framework.serializers import ModelSerializer
 
 from authentications.models import Authentication
 from framework.fields import ProtectedSecretField
-from security.validators.input_validator import Regex, Validator
 
 
 class AuthenticationSerializer(ModelSerializer):
@@ -21,7 +20,7 @@ class AuthenticationSerializer(ModelSerializer):
         secret (ProtectedSecretField): Protected field for credential secrets
     """
 
-    secret = ProtectedSecretField(Validator(Regex.SECRET, code="secret").__call__, required=True, allow_null=False)
+    secret = ProtectedSecretField(required=True, allow_null=False)
 
     class Meta:
         """Meta configuration for the AuthenticationSerializer.

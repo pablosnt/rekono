@@ -17,7 +17,6 @@ from platforms.mail.notifications import SMTP
 from platforms.telegram_app.models import TelegramChat, TelegramSettings
 from platforms.telegram_app.notifications import Telegram
 from security.cryptography import Crypto
-from security.validators.input_validator import Regex, Validator
 
 
 class TelegramSettingsSerializer(ModelSerializer, LoggingEntity):
@@ -33,9 +32,7 @@ class TelegramSettingsSerializer(ModelSerializer, LoggingEntity):
         client (Telegram): Telegram client instance for status checks
     """
 
-    token = ProtectedSecretField(
-        Validator(Regex.SECRET, code="password").__call__, required=False, allow_null=True, source="secret"
-    )
+    token = ProtectedSecretField(required=False, allow_null=True, source="secret")
     bot = SerializerMethodField(read_only=True)
     is_available = SerializerMethodField(read_only=True)
 

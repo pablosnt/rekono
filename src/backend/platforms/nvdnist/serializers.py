@@ -9,7 +9,6 @@ from rest_framework.serializers import ModelSerializer, SerializerMethodField
 from framework.fields import ProtectedSecretField
 from platforms.nvdnist.integrations import NvdNist
 from platforms.nvdnist.models import NvdNistSettings
-from security.validators.input_validator import Regex, Validator
 
 
 class NvdNistSettingsSerializer(ModelSerializer):
@@ -24,9 +23,7 @@ class NvdNistSettingsSerializer(ModelSerializer):
         is_available (SerializerMethodField): Computed field for API availability status
     """
 
-    api_token = ProtectedSecretField(
-        validators=[Validator(Regex.SECRET, code="api_token")], required=False, allow_null=True, source="secret"
-    )
+    api_token = ProtectedSecretField(required=False, allow_null=True, source="secret")
     is_available = SerializerMethodField(read_only=True)
     client = NvdNist()
 

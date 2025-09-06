@@ -10,7 +10,6 @@ from rest_framework.serializers import ModelSerializer, SerializerMethodField
 from framework.fields import ProtectedSecretField
 from platforms.cvecrowd.integrations import CveCrowd
 from platforms.cvecrowd.models import CveCrowdSettings
-from security.validators.input_validator import Regex, Validator
 
 
 class CveCrowdSettingsSerializer(ModelSerializer):
@@ -25,9 +24,7 @@ class CveCrowdSettingsSerializer(ModelSerializer):
         is_available (SerializerMethodField): Platform availability status
     """
 
-    api_token = ProtectedSecretField(
-        validators=[Validator(Regex.SECRET, code="api_token")], required=False, allow_null=True, source="secret"
-    )
+    api_token = ProtectedSecretField(required=False, allow_null=True, source="secret")
     is_available = SerializerMethodField(read_only=True)
     client = CveCrowd()
 

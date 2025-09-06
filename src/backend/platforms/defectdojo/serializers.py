@@ -55,9 +55,7 @@ class DefectDojoSettingsSerializer(DefectDojoClientMixin, ModelSerializer):
         is_available (SerializerMethodField): Real-time DefectDojo service availability
     """
 
-    api_token = ProtectedSecretField(
-        Validator(Regex.SECRET, code="api_token").__call__, required=False, allow_null=True, source="secret"
-    )
+    api_token = ProtectedSecretField(required=False, allow_null=True, source="secret")
     is_available = SerializerMethodField(read_only=True)
 
     class Meta:
