@@ -108,7 +108,7 @@ class ApiTestCase(RekonoTestCase):
 
 @dataclass
 class CustomApiTestCase(ApiTestCase):
-    method: str
+    method: str = "GET"
 
 
 @dataclass
