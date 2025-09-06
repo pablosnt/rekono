@@ -220,8 +220,7 @@ class DefectDojoSyncTest(ApiTest):
     cases = [
         PostApiTestCase(["admin2", "auditor2", Role.READER], 403, sync1),
         PostApiTestCase(["auditor1"], data=sync1, expected={"id": 1, **sync1}),
-        # TODO:
-        # PostApiTestCase(["admin1"], 400, data=sync1),
+        PostApiTestCase(["admin1"], 400, data=sync1),
         ApiTestCase(
             ["members"], expected={"id": 1, "defectdojo_sync": {"id": 1, **sync1}}, endpoint="/api/projects/1/"
         ),
