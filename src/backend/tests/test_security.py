@@ -8,7 +8,7 @@ from django.utils import timezone
 from rest_framework.test import APIClient
 
 from tests.framework import ApiTest
-from tests.framework.cases import ApiTestCase
+from tests.framework.cases import ApiTestCase, CustomApiTestCase
 from users.models import User
 
 # pytype: disable=wrong-arg-types
@@ -25,7 +25,7 @@ class SecurityTest(ApiTest):
 
     @cached_property
     def cases(self) -> list[ApiTestCase]:
-        return [ApiTestCase(["members", "not_members"], 200, endpoint=self.login, method="options")]
+        return [CustomApiTestCase(["members", "not_members"], endpoint=self.login, method="options")]
 
     def test_refresh_and_logout(self) -> None:
         client = APIClient()

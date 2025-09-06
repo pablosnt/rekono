@@ -25,7 +25,7 @@ class ApiTestCase(RekonoTestCase):
     expected: dict[str, Any] | None = None
     endpoint: str = "{endpoint}"
     format: str = "json"
-    method: str = "GET"
+    method = "GET"
 
     def assertExpected(
         self, location: str, test_case: TestCase, response: dict[str, Any], expected: Any | None = None, root: str = ""
@@ -106,22 +106,25 @@ class ApiTestCase(RekonoTestCase):
                         )
 
 
-# TODO: Reformat default methods
+@dataclass
+class CustomApiTestCase(ApiTestCase):
+    method: str
+
+
 @dataclass
 class PostApiTestCase(ApiTestCase):
-    method: str = "POST"
     status_code: int = 201
+    method = "POST"
 
 
-@dataclass
 class PutApiTestCase(ApiTestCase):
-    method: str = "PUT"
+    method = "PUT"
 
 
 @dataclass
 class DeleteApiTestCase(ApiTestCase):
-    method: str = "DELETE"
     status_code: int = 204
+    method = "DELETE"
 
 
 @dataclass

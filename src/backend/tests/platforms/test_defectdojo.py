@@ -5,7 +5,7 @@ from unittest import mock
 from platforms.defectdojo.integrations import DefectDojo
 from platforms.defectdojo.models import DefectDojoSettings, DefectDojoSync, DefectDojoTargetSync
 from security.authorization.roles import Role
-from tests.framework import ApiTest
+from tests.framework import ApiTest, BaseTest
 from tests.framework.cases import ApiTestCase, DeleteApiTestCase, PostApiTestCase, PutApiTestCase
 
 # pytype: disable=wrong-arg-types
@@ -48,7 +48,7 @@ def import_scan(*args: Any) -> dict[str, Any]:
 
 
 class DefectDojoEntitiesTest(ApiTest):
-    base_endpoint = "/api/defect-dojo/"
+    endpoint = "/api/defect-dojo/"
     setup_entities = ["project"]
     valid = {"name": "test", "description": "test"}
     invalid = {"name": "te;st", "description": "te;st"}
@@ -72,7 +72,7 @@ class DefectDojoEntitiesTest(ApiTest):
                 + (
                     [
                         PostApiTestCase(["admin1", "auditor1"], data=valid, expected={"id": 1}, endpoint=entity),
-                        PostApiTestCase([], 404, data=valid, endpoint=entity),
+                        PostApiTestCase(["admin2", "auditor2"], 404, valid, endpoint=entity),
                     ]
                     if "project_id" in cast(dict[str, str], valid)
                     else [PostApiTestCase([Role.ADMIN, Role.AUDITOR], data=valid, expected={"id": 1}, endpoint=entity)]
@@ -92,21 +92,21 @@ class DefectDojoEntitiesTest(ApiTest):
     def test_cases_not_available(self) -> None:
         for entity, valid, _ in self.entity_cases:
             PostApiTestCase(["admin1", "auditor1"], 400, {**valid, **self.valid}, endpoint=entity).test_case(
-                base_endpoint=self.endpoint
+                1, self, base_endpoint=self.endpoint
             )
 
     def test_anonymous_access(self) -> None:
-        base = self.base_endpoint
+        base = self.endpoint
         for entity, _, _ in self.entity_cases:
-            self.base_endpoint = f"{base}{entity}/"
+            self.endpoint = f"{base}{entity}/"
             super().test_anonymous_access()
-        self.base_endpoint = base
+        self.endpoint = base
 
 
 sync: dict[str, Any] = {"project": 1, "product_type_id": 1, "product_id": 1, "engagement_id": 1}
 
 
-class DefectDojoIntegrationTest(ApiTest):
+class DefectDojoIntegrationTest(BaseTest):
     endpoint = "/api/defect-dojo/"
     setup_entities = ["executions"]
 
@@ -176,7 +176,7 @@ invalid_settings = {
 
 
 class DefectDojoSettingsTest(ApiTest):
-    base_endpoint = "/api/defect-dojo/settings/1/"
+    endpoint = "/api/defect-dojo/settings/1/"
     expected_string = "DefectDojoSettings"
     cases = [
         ApiTestCase([Role.AUDITOR, Role.READER], 403),
@@ -214,7 +214,7 @@ sync2 = {"project": 1, "product_type_id": 1, "product_id": 1, "engagement_id": N
 
 
 class DefectDojoSyncTest(ApiTest):
-    base_endpoint = "/api/defect-dojo/sync/"
+    endpoint = "/api/defect-dojo/sync/"
     expected_string = "test - 1 - 1 - 1"
     setup_entities = ["project"]
     cases = [
@@ -222,15 +222,19 @@ class DefectDojoSyncTest(ApiTest):
         PostApiTestCase(["auditor1"], data=sync1, expected={"id": 1, **sync1}),
         # TODO:
         # PostApiTestCase(["admin1"], 400, data=sync1),
-        ApiTestCase("members", expected={"id": 1, "defectdojo_sync": {"id": 1, **sync1}}, endpoint="/api/projects/1/"),
+        ApiTestCase(
+            ["members"], expected={"id": 1, "defectdojo_sync": {"id": 1, **sync1}}, endpoint="/api/projects/1/"
+        ),
         DeleteApiTestCase([Role.READER], 403, endpoint="1/"),
         DeleteApiTestCase(["admin2", "auditor2"], 404, endpoint="1"),
         DeleteApiTestCase(["admin1"], endpoint="1"),
-        ApiTestCase("members", expected={"id": 1, "defectdojo_sync": None}, endpoint="/api/projects/1/"),
+        ApiTestCase(["members"], expected={"id": 1, "defectdojo_sync": None}, endpoint="/api/projects/1/"),
         PostApiTestCase(["admin1"], data=sync2, expected={"id": 2, **sync2}),
-        ApiTestCase("members", expected={"id": 1, "defectdojo_sync": {"id": 2, **sync2}}, endpoint="/api/projects/1/"),
+        ApiTestCase(
+            ["members"], expected={"id": 1, "defectdojo_sync": {"id": 2, **sync2}}, endpoint="/api/projects/1/"
+        ),
         DeleteApiTestCase(["auditor1"], endpoint="2"),
-        ApiTestCase("members", expected={"id": 1, "defectdojo_sync": None}, endpoint="/api/projects/1/"),
+        ApiTestCase(["members"], expected={"id": 1, "defectdojo_sync": None}, endpoint="/api/projects/1/"),
     ]
 
     @mock.patch("platforms.defectdojo.integrations.DefectDojo.is_available", return_true)
@@ -249,8 +253,5 @@ class DefectDojoTargetSyncTest(ApiTest):
 
     @cached_property
     def object(self) -> DefectDojoTargetSync:
-        return DefectDojoTargetSync.objects.create(
-            defectdojo_sync=DefectDojoSync.objects.create(**{**sync2, "project": self.project}),
-            target=self.target,
-            engagement_id=1,
-        )
+        defectdojo_sync = DefectDojoSync.objects.create(**{**sync2, "project": self.project})
+        return DefectDojoTargetSync.objects.create(defectdojo_sync=defectdojo_sync, target=self.target, engagement_id=1)
