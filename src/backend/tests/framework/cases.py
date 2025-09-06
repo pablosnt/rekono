@@ -25,7 +25,7 @@ class ApiTestCase(RekonoTestCase):
     expected: dict[str, Any] | None = None
     endpoint: str = "{endpoint}"
     format: str = "json"
-    method = "GET"
+    method: str = "GET"
 
     def assertExpected(
         self, location: str, test_case: TestCase, response: dict[str, Any], expected: Any | None = None, root: str = ""

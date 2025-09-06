@@ -72,6 +72,8 @@ class ParserTest(BaseTest):
 
 
 class QueueTest(BaseTest):
+    setup_entities = ["fake_tool"]
+
     def setUp(self):
         super().setUp()
         self.queue = TasksQueue()

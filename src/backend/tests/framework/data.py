@@ -106,6 +106,7 @@ class TestingDataMixin:
             status=Status.COMPLETED,
             output_file=report_filename,
         )
+        self.selected_execution = self.execution21
 
     def setup_target_and_task_parameters(self) -> None:
         if not hasattr(self, "target"):
@@ -172,9 +173,7 @@ class TestingDataMixin:
 
     def setup_findings(self) -> None:
         if not hasattr(self, "selected_execution"):
-            if not hasattr(self, "execution21"):
-                self.setup_executions()
-            self.selected_execution = self.execution21
+            self.setup_executions()
         self.raw_findings = {
             OSINT: {"data": "admin", "data_type": OSINTDataType.USER, "source": "Google"},
             Host: {"ip": "10.10.10.10", "os": "some type of Linux", "os_type": HostOS.LINUX},
