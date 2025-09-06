@@ -106,19 +106,21 @@ class ApiTestCase(RekonoTestCase):
                         )
 
 
+# TODO: Reformat default methods
 @dataclass
 class PostApiTestCase(ApiTestCase):
-    method = "POST"
+    method: str = "POST"
     status_code: int = 201
 
 
+@dataclass
 class PutApiTestCase(ApiTestCase):
-    method = "PUT"
+    method: str = "PUT"
 
 
 @dataclass
 class DeleteApiTestCase(ApiTestCase):
-    method = "DELETE"
+    method: str = "DELETE"
     status_code: int = 204
 
 
