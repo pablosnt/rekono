@@ -16,11 +16,20 @@ from stats.views import (
     VulnerabilityCVEStatsViewSet,
     VulnerabilityCWEStatsViewSet,
     VulnerabilityEvolutionStatsViewSet,
-    VulnerabilityFixProgressPerServerityStatsViewSet,
-    VulnerabilityFixProgressStatsViewSet,
     VulnerabilitySeverityStatsViewSet,
+    VulnerabilityStatusPerServerityStatsViewSet,
+    VulnerabilityStatusStatsViewSet,
     VulnerabilityTrendingStatsViewSet,
 )
+
+# TODO: missing:
+# stats/host-evolution
+# stats/vulnerability-evolution
+# stats/triaging
+
+# TODO: fix:
+# stats/host-vulnerabilities
+
 
 router = SimpleRouter()
 router.register("stats/latest-tasks", LatestTasksViewSet, basename="latest-tasks")
@@ -37,11 +46,11 @@ router.register("stats/vulnerability-cve", VulnerabilityCVEStatsViewSet, basenam
 router.register("stats/vulnerability-cwe", VulnerabilityCWEStatsViewSet, basename="vulnerability-cwe")
 router.register("stats/vulnerability-severity", VulnerabilitySeverityStatsViewSet, basename="vulnerability-severity")
 router.register("stats/vulnerability-evolution", VulnerabilityEvolutionStatsViewSet, basename="vulnerability-evolution")
-router.register("stats/vulnerability-fixes", VulnerabilityFixProgressStatsViewSet, basename="vulnerability-fixes")
+router.register("stats/vulnerability-status", VulnerabilityStatusStatsViewSet, basename="vulnerability-fixes")
 router.register(
-    "stats/vulnerability-fixes-per-severity",
-    VulnerabilityFixProgressPerServerityStatsViewSet,
-    basename="vulnerability-fixes-per-severity",
+    "stats/vulnerability-status-per-severity",
+    VulnerabilityStatusPerServerityStatsViewSet,
+    basename="vulnerability-status-per-severity",
 )
 router.register("stats/triaging", TriagingStatsViewSet, basename="triaging")
 

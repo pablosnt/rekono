@@ -8,7 +8,7 @@ from executions.models import Execution
 from tasks.models import Task
 from tasks.queues import TasksQueue
 from tests.framework.cases import RekonoTestCase
-from tests.framework.data import TestingDataMixin
+from tests.framework.data import StatsTestingDataMixin, TestingDataMixin
 from tools.enums import Intensity
 from tools.models import Tool
 
@@ -26,7 +26,7 @@ class BaseTest(TestCase, TestingDataMixin):
 
     def test_cases(self) -> None:
         for test_case_index, test_case in enumerate(self.cases):
-            test_case.test_case(test_case_number=test_case_index + 1, test_case=self, **self.kwargs)
+            test_case.test_case(test_case_number=test_case_index, test_case=self, **self.kwargs)
 
 
 class ApiTest(BaseTest):
@@ -77,3 +77,9 @@ class QueueTest(BaseTest):
     def setUp(self):
         super().setUp()
         self.queue = TasksQueue()
+
+
+class StatsTest(ApiTest, StatsTestingDataMixin):
+    def setUp(self):
+        super().setUp()
+        self.setup_multiple_data()

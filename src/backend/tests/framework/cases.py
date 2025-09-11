@@ -28,25 +28,21 @@ class ApiTestCase(RekonoTestCase):
     method = "GET"
 
     def assertExpected(
-        self, location: str, test_case: TestCase, response: dict[str, Any], expected: Any | None = None, root: str = ""
+        self, location: str, test_case: TestCase, response: dict[str, Any], expected: Any, root: str = ""
     ) -> None:
-        expected = expected if expected is None else self.expected
-        if expected is None:
-            return
-        if root:
-            location = f"{location} - {root}"
+        _location = f"{location} - {root}" if root else location
         if isinstance(expected, list) and not isinstance(response, list):
             response = response.get("results", [])
         test_case.assertEqual(
             type(expected),
             type(response),
-            msg=f"[{location}] Expected type '{type(expected)}' doesn't match '{type(response)}'",
+            msg=f"[{_location}] Expected type '{type(expected)}' doesn't match '{type(response)}'",
         )
         if isinstance(expected, list):
             test_case.assertEqual(
                 len(expected),
                 len(response),
-                msg=f"[{location}] Number of expected items #{len(expected)} doesn't match #{len(response)}",
+                msg=f"[{_location}] Number of expected items #{len(expected)} doesn't match #{len(response)}",
             )
             for index, item in enumerate(expected):
                 self.assertExpected(
@@ -54,17 +50,19 @@ class ApiTestCase(RekonoTestCase):
                 )
         elif isinstance(expected, dict):
             for key, value in expected.items():
+                if key not in response:
+                    raise AssertionError(f"[{_location}] Expected key '{key}' not present in API response")
                 if isinstance(value, dict) or isinstance(value, list):
                     self.assertExpected(location, test_case, response[key], value, f"{root}__{key}" if root else key)
                 else:
                     test_case.assertEqual(
                         value,
                         response[key],
-                        msg=f"[{location}] Expected '{key}' '{value}' doesn't match '{response[key]}'",
+                        msg=f"[{_location}] Expected {key} '{value}' doesn't match '{response[key]}'",
                     )
         else:
             test_case.assertEqual(
-                expected, response, msg=f"[{location}] Expected '{expected}' doesn't match '{response}'"
+                expected, response, msg=f"[{_location}] Expected '{expected}' doesn't match '{response}'"
             )
 
     def test_case(self, test_case_number: int, test_case: TestCase, base_endpoint: str | None = None) -> None:
@@ -81,7 +79,7 @@ class ApiTestCase(RekonoTestCase):
             for executor in executor_list:
                 with transaction.atomic():
                     client = APIClient()
-                    location = f"TestCase#{test_case_number}"
+                    location = f"{test_case.__class__.__name__}#{test_case_number}"
                     if executor:
                         location += f" - @{executor.username}"
                         client.force_authenticate(User.objects.get(pk=executor.id))
@@ -102,7 +100,7 @@ class ApiTestCase(RekonoTestCase):
                     )
                     if self.expected:
                         self.assertExpected(
-                            location, test_case, json.loads((response.content or "{}".encode()).decode())
+                            location, test_case, json.loads((response.content or "{}".encode()).decode()), self.expected
                         )
 
 
@@ -150,7 +148,7 @@ class ParserTestCase(RekonoTestCase):
         parser = test_case.execution.configuration.tool.parser_class(executor, output)
         parser.findings = []
         parser.parse()
-        location = f"TestCase#{test_case_number}"
+        location = f"{test_case.__class__.__name__}#{test_case_number}"
         test_case.assertEqual(
             len(self.expected or []),
             len(parser.findings),
@@ -158,17 +156,17 @@ class ParserTestCase(RekonoTestCase):
         )
         if self.expected:
             for index, finding in enumerate(parser.findings):
-                location += f" - #{index}"
+                _location = f"{location} - #{index}"
                 test_case.assertEqual(
                     finding.__class__,
                     self.expected[index].get("model", Type[None]),
-                    msg=f"[{location}] Expected finding type '{finding.__class__}' doesn't match '{self.expected[index].get('model', Type[None])}'",
+                    msg=f"[{_location}] Expected finding type '{finding.__class__.__name__}' doesn't match '{self.expected[index].get('model', Type[None])}'",
                 )
                 for field, value in self.expected[index].items():
                     if field != "model":
-                        location += f" - {finding.__class__}"
+                        __location += f" - {finding.__class__.__name__}"
                         test_case.assertEqual(
                             value,
                             getattr(finding, field),
-                            msg=f"[{location}] Expected '{field}' '{value}' doesn't match '{getattr(finding, field)}'",
+                            msg=f"[{__location}] Expected {field} '{value}' doesn't match '{getattr(finding, field)}'",
                         )

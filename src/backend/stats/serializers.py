@@ -1,5 +1,5 @@
 from django.forms import DateField
-from rest_framework.serializers import CharField, FloatField, IntegerField, Serializer
+from rest_framework.serializers import BooleanField, CharField, IntegerField, Serializer
 
 from findings.enums import Severity
 from findings.models import Host, Port, Technology, Vulnerability
@@ -36,6 +36,12 @@ class VulnerabilityCountPerStatusSerializer(Serializer):
     open = IntegerField()
 
 
+# Similar to VulnerabilityCountPerStatusSerializer, but we need to group by is_fixed from one ViewSet
+class VulnerabilityCountPerIsFixedSerializer(Serializer):
+    is_fixed = BooleanField()
+    count = IntegerField()
+
+
 class HostStatsSerializer(Serializer):
     os_type = CharField()
     count = IntegerField()
@@ -44,13 +50,13 @@ class HostStatsSerializer(Serializer):
         model = Host
 
 
-class HostVulnerabilitiesStatsSerializer(Serializer):
+class HostVulnerabilitiesStatsSerializer(
+    VulnerabilityCountPerStatusSerializer, VulnerabilityCountPerSeveritySerializer
+):
     id = IntegerField()
     ip = CharField()
     domain = CharField()
     # TODO: Adapt format in the frontend
-    vulnerabilities = VulnerabilityCountPerStatusSerializer()
-    vulnerabilities_per_severity = VulnerabilityCountPerSeveritySerializer()
 
     class Meta:
         model = Host
@@ -93,20 +99,6 @@ class VulnerabilityCWEStatsSerializer(VulnerabilityCountPerStatusSerializer):
 class VulnerabilitySeverityStatsSerializer(VulnerabilityCountPerStatusSerializer):
     severity = IntegerChoicesField(model=Severity)
 
-    class Meta:
-        model = Vulnerability
-
-
-class VulnerabilityFixProgressStatsSerializer(VulnerabilityCountPerStatusSerializer):
-    progress = FloatField()
-
-    class Meta:
-        model = Vulnerability
-
-
-class VulnerabilityFixProgressPerSeverityStatsSerializer(
-    VulnerabilityFixProgressStatsSerializer, VulnerabilitySeverityStatsSerializer
-):
     class Meta:
         model = Vulnerability
 

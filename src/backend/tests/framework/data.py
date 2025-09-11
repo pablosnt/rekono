@@ -1,6 +1,10 @@
 import hashlib
 import shutil
+from dataclasses import dataclass
+from datetime import datetime, timedelta
+from functools import cached_property
 from pathlib import Path as PathFile
+from typing import Any
 
 from authentications.enums import AuthenticationType
 from authentications.models import Authentication
@@ -73,9 +77,7 @@ class TestingDataMixin:
     def setup_target(self) -> None:
         if not hasattr(self, "project"):
             self.setup_project()
-        self.target, _ = Target.objects.get_or_create(
-            project=self.project, target="10.10.10.10", type=TargetType.PRIVATE_IP
-        )
+        self.target = Target.objects.create(project=self.project, target="10.10.10.10", type=TargetType.PRIVATE_IP)
 
     def setup_tasks(self) -> None:
         if not hasattr(self, "target"):
@@ -226,3 +228,90 @@ class TestingDataMixin:
             finding.executions.add(self.selected_execution)
             setattr(self, finding_model.__name__.lower(), finding)
             self.findings.append(finding)
+
+
+@dataclass
+class SetupProject:
+    targets_and_tasks: int = 1
+    executions_per_task: int = 1
+    _hosts_fields: list[dict[str, Any]] | None = None
+    _ports_fields: list[dict[str, Any]] | None = None
+    _technologies_fields: list[dict[str, Any]] | None = None
+    _vulnerabilities_fields: list[dict[str, Any]] | None = None
+
+    @cached_property
+    def hosts_fields(self) -> list[dict[str, Any]]:
+        return self._hosts_fields or [{"os_type": HostOS.LINUX}]
+
+    @cached_property
+    def ports_fields(self) -> list[dict[str, Any]]:
+        return self._ports_fields or [{"port": 80, "service": "http", "protocol": Protocol.TCP}]
+
+    @cached_property
+    def technologies_fields(self) -> list[dict[str, Any]]:
+        return self._technologies_fields or [{"name": "WordPress"}]
+
+    @cached_property
+    def vulnerabilities_fields(self) -> list[dict[str, Any]]:
+        return self._vulnerabilities_fields or [{"is_fixed": False}]
+
+
+class StatsTestingDataMixin:
+    # TODO: Use this approach for the TestingDataMixin?
+    data = []
+
+    def setup_multiple_data(self) -> None:
+        self.configuration = Configuration.objects.get(pk=1)
+        for index, config in enumerate(self.data):
+            self.setup_data(index + 1, config)
+
+    def setup_data(self, project_number: int, config: SetupProject) -> None:
+        project = Project.objects.create(
+            name=f"Project {project_number}",
+            description=f"Project {project_number} for testing filters",
+            owner=self.admin1,
+        )
+        project.members.set(self.members)
+        for target_index in range(config.targets_and_tasks):
+            t__index = 10 * project_number + target_index
+            target = Target.objects.create(project=project, target=f"10.10.10.{t__index}", type=TargetType.PRIVATE_IP)
+            task = Task.objects.create(
+                target=target,
+                configuration=self.configuration,
+                executor=self.auditor1,
+                start=datetime.now() - timedelta(days=t__index + 1),
+            )
+            for executions_index in range(config.executions_per_task):
+                e___index = t__index + executions_index
+                execution = Execution.objects.create(
+                    task=task, configuration=self.configuration, start=task.start - timedelta(minutes=executions_index)
+                )
+                findings = []
+                for host_fields in config.hosts_fields:
+                    host = Host.objects.create(**{"ip": f"10.10.10.{e___index}", **host_fields})
+                    findings.append(host)
+                    for port_fields in config.ports_fields:
+                        port = Port.objects.create(**{**port_fields, "host": host})
+                        findings.append(port)
+                        for technologies_index, technology_fields in enumerate(config.technologies_fields):
+                            t____index = e___index + technologies_index
+                            technology = Technology.objects.create(
+                                **{"version": f"1.0.{t____index}", **technology_fields, "port": port}
+                            )
+                            findings.append(technology)
+                            for vulnerability_index, vulnerability_fields in enumerate(config.vulnerabilities_fields):
+                                v_____index = t____index + vulnerability_index
+                                vulnerability = Vulnerability.objects.create(
+                                    **{
+                                        "severity": Severity.MEDIUM,
+                                        "name": f"Vulnerability {v_____index}",
+                                        "description": f"Vulnerability {v_____index}",
+                                        "cve": f"CVE-2025-{3000 + v_____index}",
+                                        "cwe": "CWE-200",
+                                        **vulnerability_fields,
+                                        "technology": technology,
+                                    }
+                                )
+                                findings.append(vulnerability)
+                for finding in findings:
+                    finding.executions.add(execution)
