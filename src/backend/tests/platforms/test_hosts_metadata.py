@@ -13,7 +13,7 @@ class HostsMetadataTest(BaseTest):
         self.host.ip = "8.8.8.8"
         self.client.process_finding(self.selected_execution, self.host)
         for field, value in {"domain": "dns.google", "country": "US", "city": "Mountain View"}.items():
-            self.assertEqual(getattr(self.host, field), value)
+            self.assertEqual(value, getattr(self.host, field))
 
     def test_unresolvable_private_ip(self) -> None:
         self.client.process_finding(self.selected_execution, self.host)

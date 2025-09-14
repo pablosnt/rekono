@@ -8,7 +8,6 @@ from tests.framework.cases import ApiTestCase, DeleteApiTestCase, PostApiTestCas
 # pytype: disable=wrong-arg-types
 
 first_process_name = "All tools"
-
 process1 = {"name": "test1", "description": "test", "tags": ["test"]}
 new_process1 = {"name": "new test1", "description": "test", "tags": ["test"]}
 process2 = {"name": "test2", "description": "test", "tags": ["newtest"]}

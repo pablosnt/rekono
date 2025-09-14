@@ -2,6 +2,8 @@ from security.authorization.roles import Role
 from tests.framework import ApiTest
 from tests.framework.cases import ApiTestCase
 
+# pytype: disable=wrong-arg-types
+
 
 class RQTest(ApiTest):
     endpoint = "/api/stats/rq/"

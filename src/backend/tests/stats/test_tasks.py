@@ -2,6 +2,8 @@ from tests.framework import StatsTest
 from tests.framework.cases import ApiTestCase
 from tests.framework.data import SetupProject
 
+# pytype: disable=wrong-arg-types
+
 
 class LatestTasksTest(StatsTest):
     endpoint = "/api/stats/latest-tasks/"

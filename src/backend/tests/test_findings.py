@@ -10,6 +10,7 @@ from tests.framework import ApiTest
 from tests.framework.cases import ApiTestCase, DeleteApiTestCase, PostApiTestCase, PutApiTestCase
 
 # pytype: disable=wrong-arg-types
+
 findings_data = {
     OSINT: (
         {
