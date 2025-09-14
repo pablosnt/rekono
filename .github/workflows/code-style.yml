@@ -49,7 +49,7 @@ jobs:
       - name: PyType
         if: ${{ (steps.changes.outputs.backend == 'true' || github.event_name != 'pull_request') && !cancelled() }}
         working-directory: src/backend
-        run: uvx pytype --disable "import-error,pyi-error,invalid-annotation" --keep-going .
+        run: uvx pytype --disable "import-error,pyi-error,invalid-annotation" --keep-going --jobs 50 .
 
   frontend:
     name: Frontend

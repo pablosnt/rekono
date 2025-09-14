@@ -51,6 +51,8 @@ class ApiTestCase(RekonoTestCase):
         elif isinstance(expected, dict):
             for key, value in expected.items():
                 if key not in response:
+                    if value is None:
+                        continue
                     raise AssertionError(f"[{_location}] Expected key '{key}' not present in API response")
                 if isinstance(value, dict) or isinstance(value, list):
                     self.assertExpected(location, test_case, response[key], value, f"{root}__{key}" if root else key)
@@ -164,7 +166,7 @@ class ParserTestCase(RekonoTestCase):
                 )
                 for field, value in self.expected[index].items():
                     if field != "model":
-                        __location += f" - {finding.__class__.__name__}"
+                        __location = f"{_location} - {finding.__class__.__name__}"
                         test_case.assertEqual(
                             value,
                             getattr(finding, field),

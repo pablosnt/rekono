@@ -91,7 +91,7 @@ class CveCrowdSettingsTest(ApiTest):
         ),
         PutApiTestCase([Role.AUDITOR, Role.READER], 403, new_settings),
         PutApiTestCase([Role.ADMIN], 400, invalid_settings),
-        ApiTestCase(
+        PutApiTestCase(
             [Role.ADMIN],
             data=new_settings,
             expected={

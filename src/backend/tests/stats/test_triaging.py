@@ -1,7 +1,5 @@
-from executions.models import Execution
 from findings.enums import TriageStatus
-from findings.models import Credential, Vulnerability
-from tests.framework import ApiTest, StatsTest
+from tests.framework import StatsTest
 from tests.framework.cases import ApiTestCase
 from tests.framework.data import SetupProject
 

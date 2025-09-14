@@ -89,7 +89,6 @@ class LatestViewSet(StatsViewSet):
         return queryset[: self.top_items]
 
 
-# TODO: Adapt frontend to multiple endpoints approach
 class LatestTasksViewSet(LatestViewSet):
     queryset = Task.objects.exclude(start=None)
     ordering = ["-start"]
@@ -316,7 +315,6 @@ class VulnerabilityStatusPerServerityStatsViewSet(StatsViewSet):
 
 
 class TriagingStatsViewSet(StatsViewSet):
-    # TODO: fp_rate removed. Adapt frontend to calculate it based on the distribution
     queryset = (
         OSINT.objects.values("triage_status")
         .annotate(open=Count("id", distinct=True, filter=Q(is_fixed=False)))
