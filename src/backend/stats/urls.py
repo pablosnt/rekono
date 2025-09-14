@@ -1,3 +1,9 @@
+"""URL routing configuration for statistics and analytics API endpoints.
+
+Defines URL patterns and router configuration for statistics ViewSets providing
+comprehensive analytics data through REST API endpoints.
+"""
+
 from django.urls import include, path
 from rest_framework.routers import SimpleRouter
 

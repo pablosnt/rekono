@@ -1,9 +1,11 @@
 import hashlib
 import shutil
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import timedelta
 from pathlib import Path as PathFile
 from typing import Any
+
+from django.utils import timezone
 
 from authentications.enums import AuthenticationType
 from authentications.models import Authentication
@@ -267,7 +269,7 @@ class StatsTestingDataMixin:
                 target=target,
                 configuration=self.configuration,
                 executor=self.auditor1,
-                start=datetime.now() - timedelta(days=_target_index + 1),
+                start=timezone.now() - timedelta(days=_target_index + 1),
             )
             for executions_index in range(config.executions_per_task):
                 _executions_index = _target_index + executions_index
