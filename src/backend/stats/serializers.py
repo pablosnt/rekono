@@ -1,10 +1,7 @@
 from rest_framework.serializers import BooleanField, CharField, DateField, IntegerField, Serializer
 
 from findings.enums import Severity
-from findings.models import Host, Port, Technology, Vulnerability
 from framework.fields import IntegerChoicesField
-
-# TODO: Review usage of each serializer
 
 
 class QueueStatsSerializer(Serializer):
@@ -24,7 +21,28 @@ class RQStatsSerializer(Serializer):
     monitor = QueueStatsSerializer()
 
 
-class VulnerabilityCountPerSeveritySerializer(Serializer):
+class VulnerabilityCountPerStatusSerializer(Serializer):
+    fixed = IntegerField()
+    open = IntegerField()
+
+
+class CountSerializer(Serializer):
+    count = IntegerField()
+
+
+# Similar to the previous one, but we need it to group by is_fixed
+class VulnerabilityCountPerIsFixedSerializer(CountSerializer):
+    is_fixed = BooleanField()
+
+
+class HostStatsSerializer(CountSerializer):
+    os_type = CharField()
+
+
+class HostVulnerabilitiesStatsSerializer(VulnerabilityCountPerStatusSerializer):
+    id = IntegerField()
+    ip = CharField()
+    domain = CharField()
     critical = IntegerField()
     high = IntegerField()
     medium = IntegerField()
@@ -32,53 +50,14 @@ class VulnerabilityCountPerSeveritySerializer(Serializer):
     info = IntegerField()
 
 
-class VulnerabilityCountPerStatusSerializer(Serializer):
-    fixed = IntegerField()
-    open = IntegerField()
-
-
-# Similar to VulnerabilityCountPerStatusSerializer, but we need to group by is_fixed from one ViewSet
-class VulnerabilityCountPerIsFixedSerializer(Serializer):
-    is_fixed = BooleanField()
-    count = IntegerField()
-
-
-class HostStatsSerializer(Serializer):
-    os_type = CharField()
-    count = IntegerField()
-
-    class Meta:
-        model = Host
-
-
-class HostVulnerabilitiesStatsSerializer(
-    VulnerabilityCountPerStatusSerializer, VulnerabilityCountPerSeveritySerializer
-):
-    id = IntegerField()
-    ip = CharField()
-    domain = CharField()
-    # TODO: Adapt format in the frontend
-
-    class Meta:
-        model = Host
-
-
-class PortStatsSerializer(Serializer):
+class PortStatsSerializer(CountSerializer):
     port = IntegerField()
     protocol = CharField()
     service = CharField()
-    count = IntegerField()
-
-    class Meta:
-        model = Port
 
 
-class TechnologyStatsSerializer(Serializer):
+class TechnologyStatsSerializer(CountSerializer):
     name = CharField()
-    count = IntegerField()
-
-    class Meta:
-        model = Technology
 
 
 class VulnerabilityCVEStatsSerializer(VulnerabilityCountPerStatusSerializer):
@@ -86,39 +65,22 @@ class VulnerabilityCVEStatsSerializer(VulnerabilityCountPerStatusSerializer):
     severity_value = IntegerChoicesField(model=Severity)
     link = CharField()
 
-    class Meta:
-        model = Vulnerability
-
 
 class VulnerabilityCWEStatsSerializer(VulnerabilityCountPerStatusSerializer):
     cwe = CharField()
-
-    class Meta:
-        model = Vulnerability
 
 
 class VulnerabilitySeverityStatsSerializer(VulnerabilityCountPerStatusSerializer):
     severity = IntegerChoicesField(model=Severity)
 
-    class Meta:
-        model = Vulnerability
-
 
 class TriagingStatsSerializer(VulnerabilityCountPerStatusSerializer):
     triage_status = CharField()
 
-    class Meta:
-        # TODO: Review if authorization and filters work. The QuerySet will include data from different models
-        model = Vulnerability
 
-
-class EvolutionStatsSerializer(Serializer):
+class EvolutionStatsSerializer(CountSerializer):
     date = DateField()
-    count = IntegerField()
 
 
 class EvolutionPerSeverityStatsSerializer(EvolutionStatsSerializer):
     severity = IntegerChoicesField(model=Severity)
-
-    class Meta:
-        model = Vulnerability

@@ -81,8 +81,8 @@ class StatsViewSet(BaseViewSet):
 
 
 class LatestViewSet(StatsViewSet):
-    # TODO: Review what of these stats must be limited to the first X top items
     top_items = 5
+    pagination_class = None
 
     def filter_queryset(self, queryset):
         queryset = super().filter_queryset(queryset)
@@ -144,6 +144,7 @@ class HostStatsViewSet(StatsViewSet):
     ordering = ["-count", "os_type"]
     serializer_class = HostStatsSerializer
     filterset_class = HostFilter
+    pagination_class = None
 
 
 class HostVulnerabilitiesStatsViewSet(StatsViewSet):
@@ -188,7 +189,6 @@ class HostVulnerabilitiesStatsViewSet(StatsViewSet):
 
 
 # TODO: In addition to hosts/detection-date, create stats for getting hosts exposure evolution (first detection to mitigation date/today)
-# TODO: Ignore False positives?
 class HostEvolutionStatsViewSet(StatsViewSet):
     queryset = (
         Host.objects.prefetch_related("executions")
@@ -205,7 +205,7 @@ class PortStatsViewSet(StatsViewSet):
     queryset = (
         Port.objects.filter(is_fixed=False).values("service", "protocol", "port").annotate(count=Count("service"))
     )
-    ordering = ["-count", "protocol", "service", "service"]
+    ordering = ["-count", "service", "port", "protocol"]
     serializer_class = PortStatsSerializer
     filterset_class = PortFilter
 
@@ -220,6 +220,7 @@ class TechnologyStatsViewSet(StatsViewSet):
 class VulnerabilityTrendingStatsViewSet(StatsViewSet):
     queryset = (
         Vulnerability.objects.exclude(triage_status=TriageStatus.FALSE_POSITIVE)
+        .exclude(triage_status=TriageStatus.WONT_FIX)
         .filter(trending=True)
         .exclude(cve=None)
         .annotate(link=Max("reference"))
@@ -233,9 +234,10 @@ class VulnerabilityTrendingStatsViewSet(StatsViewSet):
     filterset_class = VulnerabilityFilter
 
 
-class VulnerabilityCVEStatsViewSet(LatestViewSet):
+class VulnerabilityCVEStatsViewSet(StatsViewSet):
     queryset = (
         Vulnerability.objects.exclude(triage_status=TriageStatus.FALSE_POSITIVE)
+        .exclude(triage_status=TriageStatus.WONT_FIX)
         .exclude(cve=None)
         .annotate(link=Max("reference"))
         .annotate(severity_value=Max("severity"))
@@ -248,9 +250,10 @@ class VulnerabilityCVEStatsViewSet(LatestViewSet):
     filterset_class = VulnerabilityFilter
 
 
-class VulnerabilityCWEStatsViewSet(LatestViewSet):
+class VulnerabilityCWEStatsViewSet(StatsViewSet):
     queryset = (
         Vulnerability.objects.exclude(triage_status=TriageStatus.FALSE_POSITIVE)
+        .exclude(triage_status=TriageStatus.WONT_FIX)
         .exclude(cwe=None)
         .values("cwe")
         .annotate(open=Count("cwe", filter=Q(is_fixed=False)))
@@ -264,6 +267,7 @@ class VulnerabilityCWEStatsViewSet(LatestViewSet):
 class VulnerabilitySeverityStatsViewSet(StatsViewSet):
     queryset = (
         Vulnerability.objects.exclude(triage_status=TriageStatus.FALSE_POSITIVE)
+        .exclude(triage_status=TriageStatus.WONT_FIX)
         .values("severity")
         .annotate(open=Count("severity", filter=Q(is_fixed=False)))
         .annotate(fixed=Count("severity", filter=Q(is_fixed=True)))
@@ -271,13 +275,14 @@ class VulnerabilitySeverityStatsViewSet(StatsViewSet):
     ordering = ["-severity"]
     serializer_class = VulnerabilitySeverityStatsSerializer
     filterset_class = VulnerabilityFilter
+    pagination_class = None
 
 
 # TODO: In addition to vulns/detection-date, create stats for getting vulns exposure window (first detection to mitigation date/today)
-# TODO: Ignore False positives?
 class VulnerabilityEvolutionStatsViewSet(StatsViewSet):
     queryset = (
-        Vulnerability.objects.prefetch_related("executions")
+        Vulnerability.objects.exclude(triage_status=TriageStatus.FALSE_POSITIVE)
+        .prefetch_related("executions")
         .annotate(date=TruncDate("executions__start"))
         .values("date", "severity")
         .annotate(count=Count("date"))
@@ -287,7 +292,6 @@ class VulnerabilityEvolutionStatsViewSet(StatsViewSet):
     filterset_class = VulnerabilityFilter
 
 
-# TODO: Only filter false positives or wont fix too?
 class VulnerabilityStatusStatsViewSet(StatsViewSet):
     queryset = (
         Vulnerability.objects.exclude(triage_status=TriageStatus.FALSE_POSITIVE)
@@ -298,7 +302,7 @@ class VulnerabilityStatusStatsViewSet(StatsViewSet):
     ordering = ["is_fixed"]
     serializer_class = VulnerabilityCountPerIsFixedSerializer
     filterset_class = VulnerabilityFilter
-    pagination_class = None  # TODO: Disable pagination in all the stats endpoints?
+    pagination_class = None
 
 
 class VulnerabilityStatusPerServerityStatsViewSet(StatsViewSet):
@@ -312,6 +316,7 @@ class VulnerabilityStatusPerServerityStatsViewSet(StatsViewSet):
     ordering = ["-severity"]
     serializer_class = VulnerabilitySeverityStatsSerializer
     filterset_class = VulnerabilityFilter
+    pagination_class = None
 
 
 class TriagingStatsViewSet(StatsViewSet):
@@ -323,6 +328,7 @@ class TriagingStatsViewSet(StatsViewSet):
     ordering = []
     serializer_class = TriagingStatsSerializer
     filterset_class = OSINTFilter
+    pagination_class = None
 
     def filter_queryset(self, queryset):
         queryset = super().filter_queryset(queryset)
