@@ -11,9 +11,9 @@ class TopProjectsTest(StatsTest):
         SetupProject(1, 0),
         # Project #2 -> 1 open vulnerability x 3 executions x 2 tasks = 6 vulnerabilities
         SetupProject(
-            2, 3, _vulnerabilities_fields=[{}, {"is_fixed": True}, {"triage_status": TriageStatus.FALSE_POSITIVE}]
+            2, 3, vulnerabilities_fields=[{}, {"is_fixed": True}, {"triage_status": TriageStatus.FALSE_POSITIVE}]
         ),
         # Project #3 -> 1 open vulnerability x 1 executions x 1 tasks = 1 vulnerability
-        SetupProject(_vulnerabilities_fields=[{}, {"is_fixed": True}, {"triage_status": TriageStatus.FALSE_POSITIVE}]),
+        SetupProject(vulnerabilities_fields=[{}, {"is_fixed": True}, {"triage_status": TriageStatus.FALSE_POSITIVE}]),
     ]
     cases = [ApiTestCase(["members"], expected=[{"id": 2}, {"id": 3}, {"id": 1}]), ApiTestCase(["not_members"])]

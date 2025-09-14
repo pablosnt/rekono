@@ -24,7 +24,7 @@ class HostOSStatsTest(StatsTest):
     endpoint = "/api/stats/host-os/"
     data = [
         SetupProject(
-            _hosts_fields=[
+            hosts_fields=[
                 {"os": os, "os_type": os_type}
                 for os, os_type in [
                     ("Ubuntu 20.04 LTS", HostOS.LINUX),
@@ -39,7 +39,7 @@ class HostOSStatsTest(StatsTest):
             ]
             + [{"os": "OS discarded because it's fixed", "os_type": HostOS.LINUX, "is_fixed": True}],
         ),
-        SetupProject(_hosts_fields=[{"os": "macOS Big Sur", "os_type": HostOS.MACOS}]),
+        SetupProject(hosts_fields=[{"os": "macOS Big Sur", "os_type": HostOS.MACOS}]),
     ]
     cases = [
         ApiTestCase(
@@ -89,7 +89,7 @@ class HostVulnerabilitiesStatsTest(StatsTest):
     endpoint = "/api/stats/host-vulnerabilities/"
     data = [
         SetupProject(
-            _vulnerabilities_fields=[
+            vulnerabilities_fields=[
                 {"severity": severity}
                 for severity in (
                     [Severity.CRITICAL] * 2 + [Severity.HIGH] + [Severity.MEDIUM] * 5 + [Severity.LOW] * 10
@@ -101,7 +101,7 @@ class HostVulnerabilitiesStatsTest(StatsTest):
             ]
         ),
         SetupProject(
-            _vulnerabilities_fields=[
+            vulnerabilities_fields=[
                 {"severity": severity}
                 for severity in [Severity.CRITICAL] + [Severity.HIGH] * 3 + [Severity.MEDIUM] * 8 + [Severity.LOW] * 12
             ]

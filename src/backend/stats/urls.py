@@ -22,10 +22,6 @@ from stats.views import (
     VulnerabilityTrendingStatsViewSet,
 )
 
-# TODO: missing:
-# stats/triaging
-
-
 router = SimpleRouter()
 router.register("stats/latest-tasks", LatestTasksViewSet, basename="latest-tasks")
 router.register("stats/latest-hosts", LatestHostsViewSet, basename="latest-hosts")

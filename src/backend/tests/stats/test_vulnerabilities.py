@@ -10,7 +10,7 @@ class LatestVulnerabilitiesTest(StatsTest):
     endpoint = "/api/stats/latest-vulnerabilities/"
     data = [
         SetupProject(1, 6),
-        SetupProject(_vulnerabilities_fields=[{"is_fixed": True}, {"triage_status": TriageStatus.FALSE_POSITIVE}]),
+        SetupProject(vulnerabilities_fields=[{"is_fixed": True}, {"triage_status": TriageStatus.FALSE_POSITIVE}]),
     ]
     cases = [
         ApiTestCase(
@@ -43,7 +43,7 @@ class VulnerabilityTrendingStatsTest(StatsTest):
     endpoint = "/api/stats/vulnerability-trending/"
     data = [
         SetupProject(
-            _vulnerabilities_fields=[
+            vulnerabilities_fields=[
                 {"cve": "CVE-2025-1001", "trending": True, "severity": Severity.CRITICAL},
                 {"cve": "CVE-2025-1002", "trending": True, "severity": Severity.HIGH},
                 {"cve": "CVE-2025-1003", "trending": False, "severity": Severity.MEDIUM},
@@ -52,7 +52,7 @@ class VulnerabilityTrendingStatsTest(StatsTest):
             ]
         ),
         SetupProject(
-            _vulnerabilities_fields=[
+            vulnerabilities_fields=[
                 {"cve": "CVE-2025-2001", "trending": True, "severity": Severity.HIGH},
                 {"cve": "CVE-2025-1001", "trending": True, "severity": Severity.CRITICAL},
             ]
@@ -92,7 +92,7 @@ class VulnerabilityCVEStatsTest(StatsTest):
     endpoint = "/api/stats/vulnerability-cve/"
     data = [
         SetupProject(
-            _vulnerabilities_fields=[
+            vulnerabilities_fields=[
                 {"cve": "CVE-2025-1001"},
                 {"cve": "CVE-2025-1002"},
                 {"cve": "CVE-2025-1003"},
@@ -101,7 +101,7 @@ class VulnerabilityCVEStatsTest(StatsTest):
                 {"cve": None},
             ]
         ),
-        SetupProject(_vulnerabilities_fields=[{"cve": "CVE-2025-2001"}, {"cve": "CVE-2025-1001"}]),
+        SetupProject(vulnerabilities_fields=[{"cve": "CVE-2025-2001"}, {"cve": "CVE-2025-1001"}]),
         SetupProject(1, 0),
     ]
     cases = [
@@ -140,7 +140,7 @@ class VulnerabilityCWEStatsTest(StatsTest):
     endpoint = "/api/stats/vulnerability-cwe/"
     data = [
         SetupProject(
-            _vulnerabilities_fields=[
+            vulnerabilities_fields=[
                 {"cwe": "CWE-200"},
                 {"cwe": "CWE-79"},
                 {"cwe": "CWE-89"},
@@ -149,7 +149,7 @@ class VulnerabilityCWEStatsTest(StatsTest):
                 {"cwe": None},
             ]
         ),
-        SetupProject(_vulnerabilities_fields=[{"cwe": "CWE-22"}, {"cwe": "CWE-200"}]),
+        SetupProject(vulnerabilities_fields=[{"cwe": "CWE-22"}, {"cwe": "CWE-200"}]),
         SetupProject(1, 0),
     ]
     cases = [
@@ -188,7 +188,7 @@ class VulnerabilitySeverityStatsTest(StatsTest):
     endpoint = "/api/stats/vulnerability-severity/"
     data = [
         SetupProject(
-            _vulnerabilities_fields=[
+            vulnerabilities_fields=[
                 {"severity": Severity.CRITICAL},
                 {"severity": Severity.HIGH},
                 {"severity": Severity.MEDIUM},
@@ -200,7 +200,7 @@ class VulnerabilitySeverityStatsTest(StatsTest):
             ]
         ),
         SetupProject(
-            _vulnerabilities_fields=[
+            vulnerabilities_fields=[
                 {"severity": Severity.CRITICAL},
                 {"severity": Severity.HIGH},
                 {"severity": Severity.HIGH},
@@ -252,7 +252,7 @@ class VulnerabilityStatusStatsTest(StatsTest):
     endpoint = "/api/stats/vulnerability-status/"
     data = [
         SetupProject(
-            _vulnerabilities_fields=[
+            vulnerabilities_fields=[
                 {"severity": Severity.CRITICAL},
                 {"severity": Severity.HIGH},
                 {"severity": Severity.MEDIUM, "is_fixed": True},
@@ -261,7 +261,7 @@ class VulnerabilityStatusStatsTest(StatsTest):
             ]
         ),
         SetupProject(
-            _vulnerabilities_fields=[
+            vulnerabilities_fields=[
                 {"severity": Severity.CRITICAL},
                 {"severity": Severity.HIGH, "is_fixed": True},
                 {"severity": Severity.MEDIUM, "is_fixed": True},
@@ -290,7 +290,7 @@ class VulnerabilityStatusPerSeverityStatsTest(StatsTest):
     endpoint = "/api/stats/vulnerability-status-per-severity/"
     data = [
         SetupProject(
-            _vulnerabilities_fields=[
+            vulnerabilities_fields=[
                 {"severity": Severity.CRITICAL},
                 {"severity": Severity.CRITICAL, "is_fixed": True},
                 {"severity": Severity.HIGH},
@@ -303,7 +303,7 @@ class VulnerabilityStatusPerSeverityStatsTest(StatsTest):
             ]
         ),
         SetupProject(
-            _vulnerabilities_fields=[
+            vulnerabilities_fields=[
                 {"severity": Severity.CRITICAL, "is_fixed": True},
                 {"severity": Severity.HIGH},
                 {"severity": Severity.MEDIUM, "is_fixed": True},
@@ -352,14 +352,14 @@ class VulnerabilityEvolutionStatsTest(StatsTest):
     data = [
         SetupProject(
             3,
-            _vulnerabilities_fields=[
+            vulnerabilities_fields=[
                 {"severity": Severity.CRITICAL},
                 {"severity": Severity.MEDIUM},
                 {"severity": Severity.MEDIUM},
             ],
         ),
-        SetupProject(2, _vulnerabilities_fields=[{"severity": Severity.LOW}, {"severity": Severity.LOW}]),
-        SetupProject(_vulnerabilities_fields=[{"severity": Severity.HIGH}]),
+        SetupProject(2, vulnerabilities_fields=[{"severity": Severity.LOW}, {"severity": Severity.LOW}]),
+        SetupProject(vulnerabilities_fields=[{"severity": Severity.HIGH}]),
     ]
     cases = [
         ApiTestCase(

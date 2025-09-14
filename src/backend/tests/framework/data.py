@@ -234,26 +234,13 @@ class TestingDataMixin:
 class SetupProject:
     targets_and_tasks: int = 1
     executions_per_task: int = 1
-    _hosts_fields: list[dict[str, Any]] | None = None
-    _ports_fields: list[dict[str, Any]] | None = None
-    _technologies_fields: list[dict[str, Any]] | None = None
-    _vulnerabilities_fields: list[dict[str, Any]] | None = None
-
-    @cached_property
-    def hosts_fields(self) -> list[dict[str, Any]]:
-        return self._hosts_fields or [{"os_type": HostOS.LINUX}]
-
-    @cached_property
-    def ports_fields(self) -> list[dict[str, Any]]:
-        return self._ports_fields or [{"port": 80, "service": "http", "protocol": Protocol.TCP}]
-
-    @cached_property
-    def technologies_fields(self) -> list[dict[str, Any]]:
-        return self._technologies_fields or [{"name": "WordPress"}]
-
-    @cached_property
-    def vulnerabilities_fields(self) -> list[dict[str, Any]]:
-        return self._vulnerabilities_fields or [{"is_fixed": False}]
+    osint_fields: list[dict[str, Any]] | None = None
+    hosts_fields: list[dict[str, Any]] | None = None
+    ports_fields: list[dict[str, Any]] | None = None
+    technologies_fields: list[dict[str, Any]] | None = None
+    credentials_fields: list[dict[str, Any]] | None = None
+    vulnerabilities_fields: list[dict[str, Any]] | None = None
+    exploits_fields: list[dict[str, Any]] | None = None
 
 
 class StatsTestingDataMixin:
@@ -273,45 +260,102 @@ class StatsTestingDataMixin:
         )
         project.members.set(self.members)
         for target_index in range(config.targets_and_tasks):
-            t__index = 10 * project_number + target_index
-            target = Target.objects.create(project=project, target=f"10.10.10.{t__index}", type=TargetType.PRIVATE_IP)
+            _target_index = 10 * project_number + target_index
+            target = Target.objects.create(
+                project=project, target=f"10.10.10.{_target_index}", type=TargetType.PRIVATE_IP
+            )
             task = Task.objects.create(
                 target=target,
                 configuration=self.configuration,
                 executor=self.auditor1,
-                start=datetime.now() - timedelta(days=t__index + 1),
+                start=datetime.now() - timedelta(days=_target_index + 1),
             )
             for executions_index in range(config.executions_per_task):
-                e___index = t__index + executions_index
+                _executions_index = _target_index + executions_index
                 execution = Execution.objects.create(
                     task=task, configuration=self.configuration, start=task.start - timedelta(minutes=executions_index)
                 )
-                findings = []
-                for host_fields in config.hosts_fields:
-                    host = Host.objects.create(**{"ip": f"10.10.10.{e___index}", **host_fields})
-                    findings.append(host)
-                    for port_fields in config.ports_fields:
-                        port = Port.objects.create(**{**port_fields, "host": host})
-                        findings.append(port)
-                        for technologies_index, technology_fields in enumerate(config.technologies_fields):
-                            t____index = e___index + technologies_index
+                for osint_index, osint_fields in enumerate(
+                    config.osint_fields if config.osint_fields is not None else [{}]
+                ):
+                    _osint_index = _executions_index + osint_index
+                    osint = OSINT.objects.create(
+                        **{
+                            "data": f"admin{_osint_index}",
+                            "data_type": OSINTDataType.USER,
+                            "source": "Google",
+                            **osint_fields,
+                        }
+                    )
+                    osint.executions.add(execution)
+                for host_index, host_fields in enumerate(
+                    config.hosts_fields if config.hosts_fields is not None else [{}]
+                ):
+                    _host_index = _executions_index + host_index
+                    host = Host.objects.create(
+                        **{"ip": f"10.10.10.{_host_index}", "os_type": HostOS.LINUX, **host_fields}
+                    )
+                    host.executions.add(execution)
+                    for port_fields in config.ports_fields if config.ports_fields is not None else [{}]:
+                        port = Port.objects.create(
+                            **{"port": 80, "service": "http", "protocol": Protocol.TCP, **port_fields, "host": host}
+                        )
+                        port.executions.add(execution)
+                        for technologies_index, technology_fields in enumerate(
+                            config.technologies_fields if config.technologies_fields is not None else [{}]
+                        ):
+                            _technologies_index = _host_index + technologies_index
                             technology = Technology.objects.create(
-                                **{"version": f"1.0.{t____index}", **technology_fields, "port": port}
+                                **{
+                                    "version": f"1.0.{_technologies_index}",
+                                    "name": "WordPress",
+                                    **technology_fields,
+                                    "port": port,
+                                }
                             )
-                            findings.append(technology)
-                            for vulnerability_index, vulnerability_fields in enumerate(config.vulnerabilities_fields):
-                                v_____index = t____index + vulnerability_index
+                            technology.executions.add(execution)
+                            for credential_index, credential_fields in enumerate(
+                                config.credentials_fields if config.credentials_fields is not None else [{}]
+                            ):
+                                _credential_index = _technologies_index + credential_index
+                                credential = Credential.objects.create(
+                                    **{
+                                        "context": "Default credentials",
+                                        "email": f"admin{_credential_index}@rekono.com",
+                                        "username": f"admin{_credential_index}",
+                                        "secret": "admin",
+                                        **credential_fields,
+                                        "technology": technology,
+                                    }
+                                )
+                                credential.executions.add(execution)
+                            for vulnerability_index, vulnerability_fields in enumerate(
+                                config.vulnerabilities_fields if config.vulnerabilities_fields is not None else [{}]
+                            ):
+                                _vulnerability_index = _technologies_index + vulnerability_index
                                 vulnerability = Vulnerability.objects.create(
                                     **{
                                         "severity": Severity.MEDIUM,
-                                        "name": f"Vulnerability {v_____index}",
-                                        "description": f"Vulnerability {v_____index}",
-                                        "cve": f"CVE-2025-{3000 + v_____index}",
+                                        "name": f"Vulnerability {_vulnerability_index}",
+                                        "description": f"Vulnerability {_vulnerability_index}",
+                                        "cve": f"CVE-2025-{3000 + _vulnerability_index}",
                                         "cwe": "CWE-200",
                                         **vulnerability_fields,
                                         "technology": technology,
                                     }
                                 )
-                                findings.append(vulnerability)
-                for finding in findings:
-                    finding.executions.add(execution)
+                                vulnerability.executions.add(execution)
+                                for exploit_index, exploit_fields in enumerate(
+                                    config.exploits_fields if config.exploits_fields is not None else [{}]
+                                ):
+                                    _exploit_index = _vulnerability_index + exploit_index
+                                    exploit = Exploit.objects.create(
+                                        **{
+                                            "title": f"ReverseShell {_exploit_index}",
+                                            "edb_id": 1,
+                                            "reference": "https://www.exploit-db.com/exploits/1",
+                                            **exploit_fields,
+                                            "vulnerability": vulnerability,
+                                        }
+                                    )
+                                    exploit.executions.add(execution)

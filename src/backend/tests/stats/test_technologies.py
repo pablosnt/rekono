@@ -7,7 +7,7 @@ class TechnologyStatsTest(StatsTest):
     endpoint = "/api/stats/technology/"
     data = [
         SetupProject(
-            _technologies_fields=[
+            technologies_fields=[
                 {"name": "WordPress"},
                 {"name": "Apache"},
                 {"name": "MySQL"},
@@ -17,7 +17,7 @@ class TechnologyStatsTest(StatsTest):
             ]
         ),
         SetupProject(
-            _technologies_fields=[{"name": "WordPress"}, {"name": "Node.js"}, {"name": "React"}, {"name": "MongoDB"}]
+            technologies_fields=[{"name": "WordPress"}, {"name": "Node.js"}, {"name": "React"}, {"name": "MongoDB"}]
         ),
         SetupProject(1, 0),
     ]

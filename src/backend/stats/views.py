@@ -1,5 +1,4 @@
 from django.db.models import Count, F, Func, Max, OuterRef, Q, Subquery
-from django.db.models.fields import IntegerField
 from django.db.models.functions import TruncDate
 from django_rq.utils import get_statistics
 from drf_spectacular.utils import extend_schema
@@ -10,8 +9,15 @@ from rest_framework.status import HTTP_200_OK
 from rest_framework.views import APIView
 
 from findings.enums import Severity, TriageStatus
-from findings.filters import HostFilter, PortFilter, TechnologyFilter, VulnerabilityFilter
-from findings.framework.filters import TriageFindingFilter
+from findings.filters import (
+    CredentialFilter,
+    ExploitFilter,
+    HostFilter,
+    OSINTFilter,
+    PortFilter,
+    TechnologyFilter,
+    VulnerabilityFilter,
+)
 from findings.models import OSINT, Credential, Exploit, Host, Port, Technology, Vulnerability
 from findings.serializers import HostSerializer, VulnerabilitySerializer
 from framework.views import BaseViewSet
@@ -29,7 +35,6 @@ from stats.serializers import (
     TechnologyStatsSerializer,
     TriagingStatsSerializer,
     VulnerabilityCountPerIsFixedSerializer,
-    VulnerabilityCountPerStatusSerializer,
     VulnerabilityCVEStatsSerializer,
     VulnerabilityCWEStatsSerializer,
     VulnerabilitySeverityStatsSerializer,
@@ -311,27 +316,37 @@ class VulnerabilityStatusPerServerityStatsViewSet(StatsViewSet):
 
 
 class TriagingStatsViewSet(StatsViewSet):
-    # TODO: fp_rate removed. It can be calculated based on the distribution
+    # TODO: fp_rate removed. Adapt frontend to calculate it based on the distribution
     queryset = (
         OSINT.objects.values("triage_status")
         .annotate(open=Count("id", distinct=True, filter=Q(is_fixed=False)))
         .annotate(fixed=Count("id", distinct=True, filter=Q(is_fixed=True)))
-        .union(
-            Credential.objects.values("triage_status")
-            .annotate(open=Count("id", distinct=True, filter=Q(is_fixed=False)))
-            .annotate(fixed=Count("id", distinct=True, filter=Q(is_fixed=True))),
-            Vulnerability.objects.values("triage_status")
-            .annotate(open=Count("id", distinct=True, filter=Q(is_fixed=False)))
-            .annotate(fixed=Count("id", distinct=True, filter=Q(is_fixed=True))),
-            Exploit.objects.values("triage_status")
-            .annotate(open=Count("id", distinct=True, filter=Q(is_fixed=False)))
-            .annotate(fixed=Count("id", distinct=True, filter=Q(is_fixed=True))),
-        )
-        # TODO: This might not work, as the open and fixed counts are done for each QuerySet of the union, but not
-        # grouped by triaged_status globally
-        .values("triage_status")
     )
-    ordering = ["-open"]
+    ordering = []
     serializer_class = TriagingStatsSerializer
-    # TODO: Test this. TriageFindingFilter is linked to the OSINT model, so it might not work in a union queryset
-    filterset_class = TriageFindingFilter
+    filterset_class = OSINTFilter
+
+    def filter_queryset(self, queryset):
+        queryset = super().filter_queryset(queryset)
+        # This is needed because it's not possible no union multiple querysets
+        # and then, get counts grouped by triage_status
+        count_per_status = {item["triage_status"]: item for item in queryset}
+        for filterset_class, model in [
+            (CredentialFilter, Credential),
+            (VulnerabilityFilter, Vulnerability),
+            (ExploitFilter, Exploit),
+        ]:
+            self.filterset_class = filterset_class
+            new_queryset = super().filter_queryset(
+                model.objects.values("triage_status")
+                .annotate(open=Count("id", distinct=True, filter=Q(is_fixed=False)))
+                .annotate(fixed=Count("id", distinct=True, filter=Q(is_fixed=True)))
+            )
+            for item in new_queryset:
+                if item["triage_status"] in count_per_status:
+                    for field in ["open", "fixed"]:
+                        count_per_status[item["triage_status"]][field] += item[field]
+                else:
+                    count_per_status[item["triage_status"]] = item
+        self.filterset_class = OSINTFilter
+        return list(dict(sorted(count_per_status.items())).values())

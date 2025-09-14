@@ -4,6 +4,8 @@ from findings.enums import Severity
 from findings.models import Host, Port, Technology, Vulnerability
 from framework.fields import IntegerChoicesField
 
+# TODO: Review usage of each serializer
+
 
 class QueueStatsSerializer(Serializer):
     jobs = IntegerField()

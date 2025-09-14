@@ -8,7 +8,7 @@ class PortStatsTest(StatsTest):
     endpoint = "/api/stats/port/"
     data = [
         SetupProject(
-            _ports_fields=[
+            ports_fields=[
                 {"port": 80, "service": "http", "protocol": Protocol.TCP},
                 {"port": 443, "service": "https", "protocol": Protocol.TCP},
                 {"port": 22, "service": "ssh", "protocol": Protocol.TCP},
@@ -18,7 +18,7 @@ class PortStatsTest(StatsTest):
             ]
         ),
         SetupProject(
-            _ports_fields=[
+            ports_fields=[
                 {"port": 443, "service": "https", "protocol": Protocol.TCP},
                 {"port": 21, "service": "ftp", "protocol": Protocol.TCP},
                 {"port": 3306, "service": "mysql", "protocol": Protocol.TCP},
