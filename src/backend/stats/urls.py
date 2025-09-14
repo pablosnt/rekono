@@ -25,9 +25,6 @@ from stats.views import (
 # TODO: missing:
 # stats/triaging
 
-# TODO: fix:
-# stats/host-vulnerabilities
-
 
 router = SimpleRouter()
 router.register("stats/latest-tasks", LatestTasksViewSet, basename="latest-tasks")

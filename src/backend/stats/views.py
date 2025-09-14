@@ -1,6 +1,6 @@
-from django.db.models import Count, F, Max, OuterRef, Q, Subquery
-from django.db.models.fields import DateField
-from django.db.models.functions import Cast, TruncDate
+from django.db.models import Count, F, Func, Max, OuterRef, Q, Subquery
+from django.db.models.fields import IntegerField
+from django.db.models.functions import TruncDate
 from django_rq.utils import get_statistics
 from drf_spectacular.utils import extend_schema
 from rest_framework.permissions import IsAuthenticated
@@ -29,6 +29,7 @@ from stats.serializers import (
     TechnologyStatsSerializer,
     TriagingStatsSerializer,
     VulnerabilityCountPerIsFixedSerializer,
+    VulnerabilityCountPerStatusSerializer,
     VulnerabilityCVEStatsSerializer,
     VulnerabilityCWEStatsSerializer,
     VulnerabilitySeverityStatsSerializer,
@@ -143,37 +144,41 @@ class HostStatsViewSet(StatsViewSet):
 
 class HostVulnerabilitiesStatsViewSet(StatsViewSet):
     queryset = (
-        Host.objects.filter(is_fixed=False).values("id", "ip", "domain")
-        # .annotate(
-        #     open=Subquery(
-        #         Vulnerability.objects.exclude(triage_status=TriageStatus.FALSE_POSITIVE)
-        #         .filter(Q(port__host__pk=OuterRef("pk")) | Q(technology__port__host__pk=OuterRef("pk")))
-        #         .filter(is_fixed=False)
-        #         .count()
-        #     )
-        # )
-        # .annotate(
-        #     fixed=Subquery(
-        #         Vulnerability.objects.exclude(triage_status=TriageStatus.FALSE_POSITIVE)
-        #         .filter(Q(port__host=OuterRef("pk")) | Q(technology__port__host=OuterRef("pk")))
-        #         .filter(is_fixed=True)
-        #         .count()
-        #     )
-        # )
-        # .annotate(
-        #     **{
-        #         severity.name.lower(): Subquery(
-        #             Vulnerability.objects.exclude(is_fixed=True)
-        #             .exclude(triage_status=TriageStatus.FALSE_POSITIVE)
-        #             .filter(Q(port__host=OuterRef("pk")) | Q(technology__port__host=OuterRef("pk")))
-        #             .filter(severity=severity)
-        #             .count()
-        #         )
-        #         for severity in Severity
-        #     },
-        # )
+        Host.objects.filter(is_fixed=False)
+        .values("id", "ip", "domain")
+        .annotate(
+            open=Subquery(
+                Vulnerability.objects.exclude(triage_status=TriageStatus.FALSE_POSITIVE)
+                .filter(Q(port__host__pk=OuterRef("pk")) | Q(technology__port__host__pk=OuterRef("pk")))
+                .filter(is_fixed=False)
+                .annotate(count=Func(F("id"), function="Count"))
+                .values("count")
+            )
+        )
+        .annotate(
+            fixed=Subquery(
+                Vulnerability.objects.exclude(triage_status=TriageStatus.FALSE_POSITIVE)
+                .filter(Q(port__host=OuterRef("pk")) | Q(technology__port__host=OuterRef("pk")))
+                .filter(is_fixed=True)
+                .annotate(count=Func(F("id"), function="Count"))
+                .values("count")
+            )
+        )
+        .annotate(
+            **{
+                severity.name.lower(): Subquery(
+                    Vulnerability.objects.exclude(is_fixed=True)
+                    .exclude(triage_status=TriageStatus.FALSE_POSITIVE)
+                    .filter(Q(port__host=OuterRef("pk")) | Q(technology__port__host=OuterRef("pk")))
+                    .filter(severity=severity)
+                    .annotate(count=Func(F("id"), function="Count"))
+                    .values("count")
+                )
+                for severity in Severity
+            },
+        )
     )
-    # ordering = ["-open", "-critical", "-high", "-medium", "-low", "-info", "-fixed", "-id"]
+    ordering = ["-open", "-fixed", "-critical", "-high", "-medium", "-low", "-info", "-id"]
     serializer_class = HostVulnerabilitiesStatsSerializer
     filterset_class = HostFilter
 
