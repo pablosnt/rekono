@@ -32,10 +32,10 @@ class PortStatsTest(StatsTest):
             expected=[
                 {"service": "http", "port": 80, "protocol": Protocol.TCP.value, "count": 2},
                 {"service": "https", "port": 443, "protocol": Protocol.TCP.value, "count": 2},
+                {"service": "dns", "port": 53, "protocol": Protocol.UDP.value, "count": 1},
                 {"service": "ftp", "port": 21, "protocol": Protocol.TCP.value, "count": 1},
                 {"service": "mysql", "port": 3306, "protocol": Protocol.TCP.value, "count": 1},
                 {"service": "ssh", "port": 22, "protocol": Protocol.TCP.value, "count": 1},
-                {"service": "dns", "port": 53, "protocol": Protocol.UDP.value, "count": 1},
             ],
         ),
         ApiTestCase(["not_members"]),
@@ -43,9 +43,9 @@ class PortStatsTest(StatsTest):
             ["members"],
             expected=[
                 {"service": "http", "port": 80, "protocol": Protocol.TCP.value, "count": 2},
+                {"service": "dns", "port": 53, "protocol": Protocol.UDP.value, "count": 1},
                 {"service": "https", "port": 443, "protocol": Protocol.TCP.value, "count": 1},
                 {"service": "ssh", "port": 22, "protocol": Protocol.TCP.value, "count": 1},
-                {"service": "dns", "port": 53, "protocol": Protocol.UDP.value, "count": 1},
             ],
             endpoint="{endpoint}?project=1",
         ),
@@ -63,9 +63,9 @@ class PortStatsTest(StatsTest):
             ["members"],
             expected=[
                 {"service": "http", "port": 80, "protocol": Protocol.TCP.value, "count": 2},
+                {"service": "dns", "port": 53, "protocol": Protocol.UDP.value, "count": 1},
                 {"service": "https", "port": 443, "protocol": Protocol.TCP.value, "count": 1},
                 {"service": "ssh", "port": 22, "protocol": Protocol.TCP.value, "count": 1},
-                {"service": "dns", "port": 53, "protocol": Protocol.UDP.value, "count": 1},
             ],
             endpoint="{endpoint}?target=1",
         ),
