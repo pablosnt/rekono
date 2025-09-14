@@ -1,3 +1,5 @@
+from datetime import date, timedelta
+
 from findings.enums import Severity, TriageStatus
 from tests.framework import StatsTest
 from tests.framework.cases import ApiTestCase
@@ -342,4 +344,159 @@ class VulnerabilityStatusPerSeverityStatsTest(StatsTest):
             endpoint="{endpoint}?project=2",
         ),
         ApiTestCase(["not_members"], endpoint="{endpoint}?project=1"),
+    ]
+
+
+class VulnerabilityEvolutionStatsTest(StatsTest):
+    endpoint = "/api/stats/vulnerability-evolution/"
+    data = [
+        SetupProject(
+            3,
+            _vulnerabilities_fields=[
+                {"severity": Severity.CRITICAL},
+                {"severity": Severity.MEDIUM},
+                {"severity": Severity.MEDIUM},
+            ],
+        ),
+        SetupProject(2, _vulnerabilities_fields=[{"severity": Severity.LOW}, {"severity": Severity.LOW}]),
+        SetupProject(_vulnerabilities_fields=[{"severity": Severity.HIGH}]),
+    ]
+    cases = [
+        ApiTestCase(
+            ["members"],
+            expected=[
+                {
+                    "date": str(date.today() - timedelta(days=11)),
+                    "severity": Severity.CRITICAL.name.capitalize(),
+                    "count": 1,
+                },
+                {
+                    "date": str(date.today() - timedelta(days=11)),
+                    "severity": Severity.MEDIUM.name.capitalize(),
+                    "count": 2,
+                },
+                {
+                    "date": str(date.today() - timedelta(days=12)),
+                    "severity": Severity.CRITICAL.name.capitalize(),
+                    "count": 1,
+                },
+                {
+                    "date": str(date.today() - timedelta(days=12)),
+                    "severity": Severity.MEDIUM.name.capitalize(),
+                    "count": 2,
+                },
+                {
+                    "date": str(date.today() - timedelta(days=13)),
+                    "severity": Severity.CRITICAL.name.capitalize(),
+                    "count": 1,
+                },
+                {
+                    "date": str(date.today() - timedelta(days=13)),
+                    "severity": Severity.MEDIUM.name.capitalize(),
+                    "count": 2,
+                },
+                {
+                    "date": str(date.today() - timedelta(days=21)),
+                    "severity": Severity.LOW.name.capitalize(),
+                    "count": 2,
+                },
+                {
+                    "date": str(date.today() - timedelta(days=22)),
+                    "severity": Severity.LOW.name.capitalize(),
+                    "count": 2,
+                },
+                {
+                    "date": str(date.today() - timedelta(days=31)),
+                    "severity": Severity.HIGH.name.capitalize(),
+                    "count": 1,
+                },
+            ],
+        ),
+        ApiTestCase(["not_members"]),
+        ApiTestCase(
+            ["members"],
+            expected=[
+                {
+                    "date": str(date.today() - timedelta(days=11)),
+                    "severity": Severity.CRITICAL.name.capitalize(),
+                    "count": 1,
+                },
+                {
+                    "date": str(date.today() - timedelta(days=11)),
+                    "severity": Severity.MEDIUM.name.capitalize(),
+                    "count": 2,
+                },
+                {
+                    "date": str(date.today() - timedelta(days=12)),
+                    "severity": Severity.CRITICAL.name.capitalize(),
+                    "count": 1,
+                },
+                {
+                    "date": str(date.today() - timedelta(days=12)),
+                    "severity": Severity.MEDIUM.name.capitalize(),
+                    "count": 2,
+                },
+                {
+                    "date": str(date.today() - timedelta(days=13)),
+                    "severity": Severity.CRITICAL.name.capitalize(),
+                    "count": 1,
+                },
+                {
+                    "date": str(date.today() - timedelta(days=13)),
+                    "severity": Severity.MEDIUM.name.capitalize(),
+                    "count": 2,
+                },
+            ],
+            endpoint="{endpoint}?project=1",
+        ),
+        ApiTestCase(
+            ["members"],
+            expected=[
+                {
+                    "date": str(date.today() - timedelta(days=21)),
+                    "severity": Severity.LOW.name.capitalize(),
+                    "count": 2,
+                },
+                {
+                    "date": str(date.today() - timedelta(days=22)),
+                    "severity": Severity.LOW.name.capitalize(),
+                    "count": 2,
+                },
+            ],
+            endpoint="{endpoint}?project=2",
+        ),
+        ApiTestCase(["not_members"], endpoint="{endpoint}?project=1"),
+        ApiTestCase(
+            ["members"],
+            expected=[
+                {
+                    "date": str(date.today() - timedelta(days=11)),
+                    "severity": Severity.CRITICAL.name.capitalize(),
+                    "count": 1,
+                },
+                {
+                    "date": str(date.today() - timedelta(days=11)),
+                    "severity": Severity.MEDIUM.name.capitalize(),
+                    "count": 2,
+                },
+            ],
+            endpoint="{endpoint}?target=1",
+        ),
+        ApiTestCase(
+            ["members"],
+            expected=[
+                {
+                    "date": str(date.today() - timedelta(days=12)),
+                    "severity": Severity.CRITICAL.name.capitalize(),
+                    "count": 1,
+                },
+                {
+                    "date": str(date.today() - timedelta(days=12)),
+                    "severity": Severity.MEDIUM.name.capitalize(),
+                    "count": 2,
+                },
+            ],
+            endpoint="{endpoint}?target=2",
+        ),
+        ApiTestCase(["not_members"], endpoint="{endpoint}?target=1"),
     ]

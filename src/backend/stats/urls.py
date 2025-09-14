@@ -23,8 +23,6 @@ from stats.views import (
 )
 
 # TODO: missing:
-# stats/host-evolution
-# stats/vulnerability-evolution
 # stats/triaging
 
 # TODO: fix:

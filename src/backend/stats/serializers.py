@@ -1,5 +1,4 @@
-from django.forms import DateField
-from rest_framework.serializers import BooleanField, CharField, IntegerField, Serializer
+from rest_framework.serializers import BooleanField, CharField, DateField, IntegerField, Serializer
 
 from findings.enums import Severity
 from findings.models import Host, Port, Technology, Vulnerability

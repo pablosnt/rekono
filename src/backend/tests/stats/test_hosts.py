@@ -1,3 +1,5 @@
+from datetime import date, timedelta
+
 from findings.enums import HostOS
 from tests.framework import StatsTest
 from tests.framework.cases import ApiTestCase
@@ -134,3 +136,51 @@ class HostOSStatsTest(StatsTest):
 #         ),
 #         ApiTestCase(["not_members"], endpoint="{endpoint}?target=1"),
 #     ]
+
+
+class HostEvolutionStatsTest(StatsTest):
+    endpoint = "/api/stats/host-evolution/"
+    data = [SetupProject(3, 3), SetupProject(2, 2), SetupProject()]
+    cases = [
+        ApiTestCase(
+            ["members"],
+            expected=[
+                {"date": str(date.today() - timedelta(days=11)), "count": 3},
+                {"date": str(date.today() - timedelta(days=12)), "count": 3},
+                {"date": str(date.today() - timedelta(days=13)), "count": 3},
+                {"date": str(date.today() - timedelta(days=21)), "count": 2},
+                {"date": str(date.today() - timedelta(days=22)), "count": 2},
+                {"date": str(date.today() - timedelta(days=31)), "count": 1},
+            ],
+        ),
+        ApiTestCase(["not_members"]),
+        ApiTestCase(
+            ["members"],
+            expected=[
+                {"date": str(date.today() - timedelta(days=11)), "count": 3},
+                {"date": str(date.today() - timedelta(days=12)), "count": 3},
+                {"date": str(date.today() - timedelta(days=13)), "count": 3},
+            ],
+            endpoint="{endpoint}?project=1",
+        ),
+        ApiTestCase(
+            ["members"],
+            expected=[
+                {"date": str(date.today() - timedelta(days=21)), "count": 2},
+                {"date": str(date.today() - timedelta(days=22)), "count": 2},
+            ],
+            endpoint="{endpoint}?project=2",
+        ),
+        ApiTestCase(["not_members"], endpoint="{endpoint}?project=1"),
+        ApiTestCase(
+            ["members"],
+            expected=[{"date": str(date.today() - timedelta(days=11)), "count": 3}],
+            endpoint="{endpoint}?target=1",
+        ),
+        ApiTestCase(
+            ["members"],
+            expected=[{"date": str(date.today() - timedelta(days=12)), "count": 3}],
+            endpoint="{endpoint}?target=2",
+        ),
+        ApiTestCase(["not_members"], endpoint="{endpoint}?target=1"),
+    ]
