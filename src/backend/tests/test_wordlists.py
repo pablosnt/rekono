@@ -1,8 +1,10 @@
 from functools import cached_property
 
+from django.test import TestCase
+
 from security.authorization.roles import Role
 from settings.models import Settings
-from tests.framework import ApiTest
+from tests.framework import ApiTestNoData
 from tests.framework.cases import ApiTestCase, DeleteApiTestCase, PostApiTestCase, PutApiTestCase
 from wordlists.enums import WordlistType
 from wordlists.models import Wordlist
@@ -10,7 +12,7 @@ from wordlists.models import Wordlist
 # pytype: disable=wrong-arg-types
 
 # Wordlists paths
-data_dir = ApiTest.data_dir / "wordlists"
+data_dir = ApiTestNoData.data_dir / "wordlists"
 endpoints_path = data_dir / "endpoints_wordlist.txt"
 invalid_mime_type_path = data_dir / "invalid_mime_type.txt"
 invalid_extension_path = data_dir / "invalid_extension.pdf"
@@ -25,11 +27,9 @@ wordlist_subdomains = {"name": "test 2", "type": WordlistType.SUBDOMAIN.value}
 new_wordlist_subdomains = {"name": "new test 2", "type": WordlistType.SUBDOMAIN.value}
 
 
-class WordlistTest(ApiTest):
+class WordlistTest(ApiTestNoData, TestCase):
     endpoint = "/api/wordlists/"
     expected_string = first_wordlist_name
-    data_dir = data_dir
-    setup_entities = ["users"]
 
     @cached_property
     def cases(self) -> list[ApiTestCase]:

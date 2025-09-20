@@ -1,10 +1,13 @@
 from functools import cached_property
 
+from django.test import TestCase
+
 from authentications.enums import AuthenticationType
 from security.authorization.roles import Role
 from target_ports.models import TargetPort
 from tests.framework import ApiTest
 from tests.framework.cases import ApiTestCase, DeleteApiTestCase, PostApiTestCase
+from tests.framework.data import SetupProject
 
 # pytype: disable=wrong-arg-types
 
@@ -15,10 +18,10 @@ invalid_target_port2 = {"target": 1, "port": 443, "path": "/webapp;"}
 authentication = {"name": "admin", "secret": "admin", "type": AuthenticationType.BASIC, "target_port": 2}
 
 
-class TargetPortTest(ApiTest):
+class TargetPortTest(ApiTest, TestCase):
     endpoint = "/api/target-ports/"
     expected_string = "10.10.10.10 - 80"
-    setup_entities = ["target"]
+    data = [SetupProject(executions_per_task=0)]
     cases = [
         ApiTestCase([Role.ADMIN, Role.AUDITOR, Role.READER]),
         PostApiTestCase(["admin2", "auditor2", Role.READER], 403, target_port1),

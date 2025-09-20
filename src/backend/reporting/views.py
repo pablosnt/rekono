@@ -231,7 +231,7 @@ class ReportingViewSet(BaseViewSet):
             tuple[dict[str, Any], int]: Hierarchical findings with statistics and total count
         """
         count = 0
-        results = {"findings": {}, "stats": {severity.name.upper(): 0 for severity in Severity}, "stats_by_target": {}}
+        results = {"findings": {}, "stats": {severity.name.lower(): 0 for severity in Severity}, "stats_by_target": {}}
         for target in (
             [serializer.validated_data.get("task").target]
             if serializer.validated_data.get("task")
@@ -242,7 +242,7 @@ class ReportingViewSet(BaseViewSet):
             )
         ):
             target_filter = {"executions__task__target": target}
-            results["stats_by_target"][target.id] = {severity.name.upper(): 0 for severity in Severity}
+            results["stats_by_target"][target.id] = {severity.name.lower(): 0 for severity in Severity}
             _osint = OSINT.objects.filter(
                 **{**target_filter, **serializer.validated_filter, **serializer.validated_triage_filter}
             )
@@ -302,11 +302,11 @@ class ReportingViewSet(BaseViewSet):
                     }
                 )
                 for vulnerability in _vulnerabilities.all():
-                    _severity = Severity(vulnerability.severity).name.upper()
+                    _severity = Severity(vulnerability.severity).name.lower()
                     results["stats_by_target"][target.id][_severity] += 1
                     results["stats"][_severity] += 1
                 for credential in _credentials.all():
-                    _severity = (Severity.HIGH if credential.secret else Severity.LOW).name.upper()
+                    _severity = (Severity.HIGH if credential.secret else Severity.LOW).name.lower()
                     results["stats_by_target"][target.id][_severity] += 1
                     results["stats"][_severity] += 1
             if _target_count > 0:
@@ -443,5 +443,6 @@ class ReportingViewSet(BaseViewSet):
             }
         )
         with (CONFIG.generated_reports / filename).open("wb") as report:
+            # TODO: This is raising an exception sometimes
             pisa_status = pisa.CreatePDF(template, dest=report, link_callback=self._pdf_static_content)
         return not pisa_status.err

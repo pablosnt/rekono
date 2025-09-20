@@ -1,10 +1,12 @@
+from django.test import TestCase
+
 from findings.enums import OSINTDataType, PathType
 from findings.models import OSINT, Path
 from tests.framework import ParserTest
 from tests.framework.cases import ParserTestCase
 
 
-class GobusterTest(ParserTest):
+class GobusterTest(ParserTest, TestCase):
     tool_name = "Gobuster"
     cases = [
         ParserTestCase(

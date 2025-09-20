@@ -1,9 +1,12 @@
 from functools import cached_property
 
+from django.test import TestCase
+
 from notes.models import Note
 from security.authorization.roles import Role
 from tests.framework import ApiTest
 from tests.framework.cases import ApiTestCase, DeleteApiTestCase, PostApiTestCase, PutApiTestCase
+from tests.framework.data import SetupProject
 
 # pytype: disable=wrong-arg-types
 
@@ -29,10 +32,10 @@ public_note = {**private_note, "public": True, "target": 1}
 invalid_note = {**private_note, "title": "Invalid;content"}
 
 
-class NoteTest(ApiTest):
+class NoteTest(ApiTest, TestCase):
     endpoint = "/api/notes/"
-    expected_string = "test - Title"
-    setup_entities = ["target"]
+    expected_string = "Project 1 - Title"
+    data = [SetupProject(executions_per_task=0)]
     cases = [
         ApiTestCase([Role.ADMIN, Role.AUDITOR, Role.READER]),
         PostApiTestCase(["admin2", "auditor2", Role.READER], 403, private_note),

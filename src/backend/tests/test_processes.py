@@ -1,8 +1,10 @@
 from functools import cached_property
 
+from django.test import TestCase
+
 from processes.models import Process, Step
 from security.authorization.roles import Role
-from tests.framework import ApiTest
+from tests.framework import ApiTestNoData
 from tests.framework.cases import ApiTestCase, DeleteApiTestCase, PostApiTestCase, PutApiTestCase
 
 # pytype: disable=wrong-arg-types
@@ -16,7 +18,7 @@ invalid_process1 = {"name": "invalid ; test", "description": "test", "tags": ["t
 invalid_process2 = {"name": "test", "description": "invalid ; test", "tags": ["test"]}
 
 
-class ProcessTest(ApiTest):
+class ProcessTest(ApiTestNoData, TestCase):
     endpoint = "/api/processes/"
     expected_string = first_process_name
     cases = [
@@ -105,7 +107,7 @@ step1 = {"process_id": 8, "configuration_id": 1}
 expected_step1 = {"process": {"id": step1["process_id"]}, "configuration": {"id": step1["configuration_id"]}}
 
 
-class StepTest(ApiTest):
+class StepTest(ApiTestNoData, TestCase):
     endpoint = "/api/steps/"
     expected_string = f"{first_process_name} - theHarvester - Simple scan"
     cases = [

@@ -1,9 +1,11 @@
+import base64
 from functools import cached_property
+
+from django.test import TestCase
 
 from authentications.enums import AuthenticationType
 from authentications.models import Authentication
 from security.authorization.roles import Role
-from target_ports.models import TargetPort
 from tests.framework import ApiTest
 from tests.framework.cases import ApiTestCase, DeleteApiTestCase, PostApiTestCase
 
@@ -25,10 +27,10 @@ invalid_authentication2 = {
 invalid_authentication3 = {"name": "newadmin", "secret": "newadmin", "type": AuthenticationType.BASIC, "target_port": 1}
 
 
-class AuthenticationTest(ApiTest):
+class AuthenticationTest(ApiTest, TestCase):
     endpoint = "/api/authentications/"
     expected_string = "10.10.10.10 - 80 - admin"
-    setup_entities = ["target"]
+    target_parameters = True
     cases = [
         ApiTestCase([Role.ADMIN, Role.AUDITOR, Role.READER]),
         ApiTestCase([Role.ADMIN, Role.AUDITOR, Role.READER], 404, endpoint="1"),
@@ -58,11 +60,9 @@ class AuthenticationTest(ApiTest):
         ApiTestCase([Role.ADMIN, Role.AUDITOR, Role.READER], 404, endpoint="1"),
     ]
 
-    def setUp(self) -> None:
-        super().setUp()
-        # We need a clean target_port without any related authentication
-        self.target_port = TargetPort.objects.create(target=self.target, port=80, path=None)
-
     @cached_property
     def object(self) -> Authentication:
-        return Authentication(**{**authentication, "target_port": self.target_port})
+        return Authentication(**{**authentication, "target_port": self.targetport})
+
+    def test_token(self) -> None:
+        self.assertEqual(base64.b64encode("admin:admin".encode()).decode(), self.object.token)

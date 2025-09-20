@@ -1,9 +1,11 @@
+from django.test import TestCase
+
 from findings.models import Exploit
 from tests.framework import ParserTest
 from tests.framework.cases import ParserTestCase
 
 
-class SearchsploitTest(ParserTest):
+class SearchsploitTest(ParserTest, TestCase):
     tool_name = "SearchSploit"
     cases = [
         ParserTestCase(

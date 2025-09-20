@@ -2,11 +2,14 @@ from functools import cached_property
 from typing import Any, cast
 from unittest import mock
 
+from django.test import TestCase
+
 from platforms.defectdojo.integrations import DefectDojo
 from platforms.defectdojo.models import DefectDojoSettings, DefectDojoSync, DefectDojoTargetSync
 from security.authorization.roles import Role
-from tests.framework import ApiTest, BaseTest
+from tests.framework import ApiTest, ApiTestNoData, BaseTest
 from tests.framework.cases import ApiTestCase, DeleteApiTestCase, PostApiTestCase, PutApiTestCase
+from tests.framework.data import SetupProject
 
 # pytype: disable=wrong-arg-types
 
@@ -47,9 +50,8 @@ def import_scan(*args: Any) -> dict[str, Any]:
     return {"test_id": 1, "engagement_id": 1, "product_id": 1, "product_type_id": 1, "active": True}
 
 
-class DefectDojoEntitiesTest(ApiTest):
+class DefectDojoEntitiesTest(ApiTest, TestCase):
     endpoint = "/api/defect-dojo/"
-    setup_entities = ["project"]
     valid = {"name": "test", "description": "test"}
     invalid = {"name": "te;st", "description": "te;st"}
     entity_cases = [
@@ -106,9 +108,9 @@ class DefectDojoEntitiesTest(ApiTest):
 sync: dict[str, Any] = {"project": 1, "product_type_id": 1, "product_id": 1, "engagement_id": 1}
 
 
-class DefectDojoIntegrationTest(BaseTest):
+class DefectDojoIntegrationTest(BaseTest, TestCase):
     endpoint = "/api/defect-dojo/"
-    setup_entities = ["executions"]
+    data = [SetupProject()]
 
     @mock.patch("platforms.defectdojo.integrations.DefectDojo.is_available", return_true)
     @mock.patch("platforms.defectdojo.integrations.DefectDojo.exists", return_true)
@@ -117,10 +119,9 @@ class DefectDojoIntegrationTest(BaseTest):
         PostApiTestCase(["admin1"], data=sync, expected={"id": 1, **sync}, endpoint="sync").test_case(
             0, self, self.endpoint
         )
-        self.setup_findings()
-        self.selected_execution.output_file = self.data_dir / "reports" / "nmap" / "enumeration-vulners.xml"
-        DefectDojo().process_findings(self.selected_execution, self.findings)
-        self.assertEqual(1, self.selected_execution.defectdojo_test_id)
+        self.execution.output_file = self.data_dir / "reports" / "nmap" / "enumeration-vulners.xml"
+        DefectDojo().process_findings(self.execution, self.findings)
+        self.assertEqual(1, self.execution.defectdojo_test_id)
         for finding in self.findings:
             self.assertIsNone(finding.defectdojo_id)
 
@@ -137,13 +138,12 @@ class DefectDojoIntegrationTest(BaseTest):
             0, self, self.endpoint
         )
         self.assertFalse(DefectDojoTargetSync.objects.filter(target=self.target).exists())
-        self.setup_findings()
         integration = DefectDojo()
-        integration.process_findings(self.selected_execution, self.findings)
+        integration.process_findings(self.execution, self.findings)
         self.assertTrue(DefectDojoTargetSync.objects.filter(target=self.target).exists())
         for finding in self.findings:
             self.assertEqual(1, finding.defectdojo_id)
-        integration.process_findings(self.selected_execution, self.findings)
+        integration.process_findings(self.execution, self.findings)
         self.assertEqual(1, DefectDojoTargetSync.objects.filter(target=self.target).count())
         for finding in self.findings:
             self.assertEqual(1, finding.defectdojo_id)
@@ -175,7 +175,7 @@ invalid_settings = {
 }
 
 
-class DefectDojoSettingsTest(ApiTest):
+class DefectDojoSettingsTest(ApiTestNoData, TestCase):
     endpoint = "/api/defect-dojo/settings/1/"
     expected_string = "DefectDojoSettings"
     cases = [
@@ -213,10 +213,10 @@ sync1 = {"project": 1, "product_type_id": 1, "product_id": 1, "engagement_id": 1
 sync2 = {"project": 1, "product_type_id": 1, "product_id": 1, "engagement_id": None}
 
 
-class DefectDojoSyncTest(ApiTest):
+class DefectDojoSyncTest(ApiTest, TestCase):
     endpoint = "/api/defect-dojo/sync/"
-    expected_string = "test - 1 - 1 - 1"
-    setup_entities = ["project"]
+    expected_string = "Project 1 - 1 - 1 - 1"
+    data = [SetupProject(targets_and_tasks=0)]
     cases = [
         PostApiTestCase(["admin2", "auditor2", Role.READER], 403, sync1),
         PostApiTestCase(["auditor1"], data=sync1, expected={"id": 1, **sync1}),
@@ -246,9 +246,9 @@ class DefectDojoSyncTest(ApiTest):
         return DefectDojoSync.objects.create(**{**sync1, "project": self.project})
 
 
-class DefectDojoTargetSyncTest(ApiTest):
-    expected_string = "test - 1 - 1 - 10.10.10.10 - 1"
-    setup_entities = ["target"]
+class DefectDojoTargetSyncTest(ApiTest, TestCase):
+    expected_string = "Project 1 - 1 - 1 - 10.10.10.10 - 1"
+    data = [SetupProject(executions_per_task=0)]
 
     @cached_property
     def object(self) -> DefectDojoTargetSync:

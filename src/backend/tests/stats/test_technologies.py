@@ -1,11 +1,13 @@
-from tests.framework import StatsTest
+from django.test import TestCase
+
+from tests.framework import ApiTest
 from tests.framework.cases import ApiTestCase
 from tests.framework.data import SetupProject
 
 # pytype: disable=wrong-arg-types
 
 
-class TechnologyStatsTest(StatsTest):
+class TechnologyStatsTest(ApiTest, TestCase):
     endpoint = "/api/stats/technology/"
     data = [
         SetupProject(

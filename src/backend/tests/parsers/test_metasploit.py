@@ -1,9 +1,11 @@
+from django.test import TestCase
+
 from findings.models import Exploit
 from tests.framework import ParserTest
 from tests.framework.cases import ParserTestCase
 
 
-class MetasploitTest(ParserTest):
+class MetasploitTest(ParserTest, TestCase):
     tool_name = "Metasploit"
     cases = [
         ParserTestCase(

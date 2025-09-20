@@ -1,11 +1,13 @@
 from functools import cached_property
 
+from django.test import TestCase
+
 from security.authorization.roles import Role
 from targets.enums import TargetType
 from targets.models import Target
 from tests.framework import ApiTest
 from tests.framework.cases import ApiTestCase, DeleteApiTestCase, PostApiTestCase
-from tests.framework.data import TestingDataMixin
+from tests.framework.data import SetupProject
 
 # pytype: disable=wrong-arg-types
 
@@ -17,10 +19,10 @@ target5 = {"project": 1, "target": "8.8.8.8"}
 invalid_target = {"project": 1, "target": "domain-not-found"}
 
 
-class TargetTest(ApiTest, TestingDataMixin):
+class TargetTest(ApiTest, TestCase):
     endpoint = "/api/targets/"
     expected_string = target1.get("target")
-    setup_entities = ["project"]
+    data = [SetupProject(targets_and_tasks=0)]
     cases = [
         ApiTestCase([Role.ADMIN, Role.AUDITOR, Role.READER]),
         PostApiTestCase(["admin2", "auditor2", "reader1", "reader2"], 403, target1),
@@ -58,5 +60,4 @@ class TargetTest(ApiTest, TestingDataMixin):
 
     @cached_property
     def object(self) -> Target:
-        self.setup_target()
-        return self.target
+        return Target(**{**target1, "project": self.project})

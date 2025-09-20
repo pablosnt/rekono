@@ -3,13 +3,16 @@ from functools import cached_property
 from typing import cast
 from unittest import mock
 
+from django.test import TestCase
 from rest_framework.test import APIClient
 
+from executions.models import Execution
 from platforms.mail.notifications import SMTP
 from platforms.telegram_app.models import TelegramChat
 from security.authorization.roles import Role
-from tests.framework import ApiTest
+from tests.framework import ApiTest, ApiTestNoData
 from tests.framework.cases import ApiTestCase, DeleteApiTestCase, PostApiTestCase, PutApiTestCase
+from tests.framework.data import SetupProject
 from users.enums import Notification
 from users.models import User
 
@@ -42,10 +45,10 @@ invalid_user5 = {**user1, "password": invalid_password5}
 invalid_user6 = {**user1, "username": "test;1", "first_name": "test;1"}
 
 
-class UserTest(ApiTest):
+class UserTest(ApiTest, TestCase):
     endpoint = "/api/users/"
     expected_string = "admin1@rekono.com"
-    setup_entities = ["project"]
+    data = [SetupProject(targets_and_tasks=0)]
     cases = [
         ApiTestCase([Role.AUDITOR, Role.READER], 403),
         ApiTestCase(
@@ -205,7 +208,7 @@ class UserTest(ApiTest):
         return self.admin1
 
 
-class Profile(ApiTest):
+class ProfileTest(ApiTest, TestCase):
     endpoint = "/api/profile/"
     cases = [
         ApiTestCase(["admin1"], expected={"id": 1, "username": "admin1", "role": Role.ADMIN.value}),
@@ -251,33 +254,33 @@ class Profile(ApiTest):
         self.assertFalse(hasattr(User.objects.get(pk=cast(User, self.admin1).id), "telegram_chat"))
 
     def test_notification_scope(self) -> None:
-        self.setup_executions()
         notification = SMTP()
-        users_to_notify = list(notification._get_users_to_notify_execution(self.execution11))
+        users_to_notify = list(notification._get_users_to_notify_execution(self.execution))
         self.assertEqual(1, len(users_to_notify))
-        self.assertEqual(self.admin1, users_to_notify[0])
+        self.assertEqual(self.auditor1, users_to_notify[0])
 
-        for not_executor in [self.auditor1, self.reader1]:
+        for not_executor in [self.admin1, self.reader1]:
             not_executor.notification_scope = Notification.ALL_EXECUTIONS
             not_executor.save(update_fields=["notification_scope"])
 
-        users_to_notify = list(notification._get_users_to_notify_execution(self.execution11))
+        users_to_notify = list(notification._get_users_to_notify_execution(self.execution))
         self.assertEqual(3, len(users_to_notify))
         self.assertEqual(self.admin1, users_to_notify[0])
         self.assertEqual(self.auditor1, users_to_notify[1])
         self.assertEqual(self.reader1, users_to_notify[2])
 
-        self.admin1.notification_scope = Notification.DISABLED
-        self.admin1.save(update_fields=["notification_scope"])
-        users_to_notify = list(notification._get_users_to_notify_execution(self.execution11))
+        self.auditor1.notification_scope = Notification.DISABLED
+        self.auditor1.save(update_fields=["notification_scope"])
+        self.execution = Execution.objects.get(pk=self.execution.id)
+        users_to_notify = list(notification._get_users_to_notify_execution(self.execution))
         self.assertEqual(2, len(users_to_notify))
-        self.assertEqual(self.auditor1, users_to_notify[0])
+        self.assertEqual(self.admin1, users_to_notify[0])
         self.assertEqual(self.reader1, users_to_notify[1])
 
-        notification.process_findings(self.execution11, [])
+        notification.process_findings(self.execution, [])
 
 
-class ResetPasswordTest(ApiTest):
+class ResetPasswordTest(ApiTestNoData, TestCase):
     endpoint = "/api/users/reset-password/"
     anonymous_access_allowed = None
 

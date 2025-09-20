@@ -103,4 +103,4 @@ class Authentication(BaseInput, BaseEncrypted):
         Returns:
             str: String in format "target_port - name" or just "name"
         """
-        return (f"{self.target_port.__str__()} - " if self.target_port else "") + self.name
+        return f"{self.target_port.__str__()} - {self.name}" if self.target_port else self.name

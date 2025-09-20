@@ -1,10 +1,12 @@
+from django.test import TestCase
+
 from findings.enums import HostOS, PathType, PortStatus, Protocol, Severity
 from findings.models import Credential, Host, Path, Port, Technology, Vulnerability
 from tests.framework import ParserTest
 from tests.framework.cases import ParserTestCase
 
 
-class NmapTest(ParserTest):
+class NmapTest(ParserTest, TestCase):
     tool_name = "Nmap"
     cases = [
         ParserTestCase(

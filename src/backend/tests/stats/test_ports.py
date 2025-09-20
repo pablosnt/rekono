@@ -1,12 +1,14 @@
+from django.test import TestCase
+
 from findings.enums import Protocol
-from tests.framework import StatsTest
+from tests.framework import ApiTest
 from tests.framework.cases import ApiTestCase
 from tests.framework.data import SetupProject
 
 # pytype: disable=wrong-arg-types
 
 
-class PortStatsTest(StatsTest):
+class PortStatsTest(ApiTest, TestCase):
     endpoint = "/api/stats/port/"
     data = [
         SetupProject(

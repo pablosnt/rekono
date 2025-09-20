@@ -65,7 +65,7 @@
                 <h2>Summary</h2>
                 <p class="relevant">{{ project.description|default_if_none:"" }}</p>
             </div>
-            {% if stats["CRITICAL"] + stats["HIGH"] + stats["MEDIUM"] + stats["LOW"] + stats["INFO"] > 0 %}
+            {% if stats.critical|add:stats.high|add:stats.medium|add:stats.low|add:stats.info > 0 %}
                 <br>
                 <br>
                 <br>
@@ -73,7 +73,7 @@
                 <div>
                     <canvas type="graph" width="320" height="190">
                         {
-                                "data": [{{ stats["CRITICAL"] }}, {{ stats["HIGH"] }}, {{ stats["MEDIUM"] }}, {{ stats["LOW"] }}, {{ stats["INFO"] }}],
+                                "data": [{{ stats.critical }}, {{ stats.high }}, {{ stats.medium }}, {{ stats.low }}, {{ stats.info }}],
                                 "labels": ["Critical", "High", "Medium", "Low", "Info"],
                                 "title": {"_text": "Vulnerabilities by Severity", "x": 280, "y": 180},
                                 "type": "verticalbar",
@@ -90,14 +90,14 @@
                 <h2>{{ target.target }}</h2>
                 {% if targets|length > 1 %}
                     {% for key, items in stats_by_target.items %}
-                        {% if key == target.id and items["CRITICAL"] + items["HIGH"] + items["MEDIUM"] + items["LOW"] + items["INFO"] > 0 %}
+                        {% if key == target.id and items.critical|add:items.high|add:items.medium|add:items.low|add:items.info > 0 %}
                             <br>
                             <br>
                             <br>
                             <br>
                             <canvas type="graph" width="320" height="190">
                                 {
-                                        "data": [{{ items["CRITICAL"] }}, {{ items["HIGH"] }}, {{ items["MEDIUM"] }}, {{ items["LOW"] }}, {{ items["INFO"] }}],
+                                        "data": [{{ items.critical }}, {{ items.high }}, {{ items.medium }}, {{ items.low }}, {{ items.info }}],
                                         "labels": ["Critical", "High", "Medium", "Low", "Info"],
                                         "title": {"_text": "Vulnerabilities by Severity", "x": 280, "y": 180},
                                         "type": "verticalbar",
@@ -237,7 +237,7 @@
                                                     </tr>
                                                     <tr>
                                                         <th bgcolor="#dc3545" class="white" width="20%">Severity</th>
-                                                        <td width="60%" class="{{ v.severity.name|lower }}">{{ v.severity.name|capitalize }}</td>
+                                                        <td width="60%" class="{{ v.severity.name|lower }}">{{ v.severity.name|upper }}</td>
                                                     </tr>
                                                     <tr>
                                                         <th bgcolor="#dc3545" class="white" width="20%">CVE</th>
@@ -397,7 +397,7 @@
                                                     </tr>
                                                     <tr>
                                                         <th bgcolor="#dc3545" class="white" width="20%">Severity</th>
-                                                        <td width="60%" class="{{ v.severity.name|lower }}">{{ v.severity.name|capitalize }}</td>
+                                                        <td width="60%" class="{{ v.severity.name|lower }}">{{ v.severity.name|upper }}</td>
                                                     </tr>
                                                     <tr>
                                                         <th bgcolor="#dc3545" class="white" width="20%">CVE</th>
@@ -553,7 +553,7 @@
                                                     </tr>
                                                     <tr>
                                                         <th bgcolor="#dc3545" class="white" width="20%">Severity</th>
-                                                        <td width="60%" class="{{ v.severity.name|lower }}">{{ v.severity.name|capitalize }}</td>
+                                                        <td width="60%" class="{{ v.severity.name|lower }}">{{ v.severity.name|upper }}</td>
                                                     </tr>
                                                     <tr>
                                                         <th bgcolor="#dc3545" class="white" width="20%">CVE</th>

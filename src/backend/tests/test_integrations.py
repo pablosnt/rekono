@@ -1,14 +1,16 @@
 from functools import cached_property
 
+from django.test import TestCase
+
 from integrations.models import Integration
 from security.authorization.roles import Role
-from tests.framework import ApiTest
+from tests.framework import ApiTestNoData
 from tests.framework.cases import ApiTestCase, PutApiTestCase
 
 # pytype: disable=wrong-arg-types
 
 
-class IntegrationTest(ApiTest):
+class IntegrationTest(ApiTestNoData, TestCase):
     endpoint = "/api/integrations/"
     expected_string = "Defect-Dojo"
     cases = [

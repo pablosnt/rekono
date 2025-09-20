@@ -1,9 +1,11 @@
 from datetime import datetime, timedelta
 from functools import cached_property
 
+from django.test import TestCase
+
 from api_tokens.models import ApiToken
 from security.authorization.roles import Role
-from tests.framework import ApiTest
+from tests.framework import ApiTestNoData
 from tests.framework.cases import ApiTestCase, DeleteApiTestCase, PostApiTestCase
 
 # pytype: disable=wrong-arg-types
@@ -13,7 +15,7 @@ valid_api_token = {"name": "test1", "expiration": expiration}
 invalid_api_token = {"name": "test;1", "expiration": expiration}
 
 
-class ApiTokenTest(ApiTest):
+class ApiTokenTest(ApiTestNoData, TestCase):
     endpoint = "/api/api-tokens/"
     expected_string = f"admin1@rekono.com - {valid_api_token['name']}"
     cases = [

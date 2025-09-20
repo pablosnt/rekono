@@ -1,53 +1,36 @@
 import copy
 
+from django.test import TestCase
+
 from executions.enums import Status
 from executions.models import Execution
-from findings.enums import HostOS, PathType, PortStatus, Protocol
-from findings.models import Host, Path, Port
+from findings.models import Host
 from framework.queues import ExecutionParametersToEnqueue
 from parameters.models import InputTechnology, InputVulnerability
 from processes.models import Process, Step
 from target_ports.models import TargetPort
 from tasks.models import Task
 from tests.framework import QueueTest
+from tests.framework.data import SetupProject
 from tools.enums import Intensity as IntensityEnum
 from tools.models import Configuration, Intensity
 
 
-class BaseQueueTest(QueueTest):
-    number_of_hosts = 10
-    number_of_ports_per_host = 3
-    number_of_paths_per_port = 2
-    setup_entities = ["executions", "fake_tool", "target_and_task_parameters"]
-
-    def setUp(self):
-        super().setUp()
-        self.findings = []
-        self.hosts = []
-        for host_index in range(1, self.number_of_hosts + 1):
-            new_host = Host.objects.create(ip=f"10.10.10.{host_index}", os_type=HostOS.LINUX)
-            new_host.executions.add(self.selected_execution)
-            setattr(self, f"host{host_index}", new_host)
-            self.findings.append(new_host)
-            self.hosts.append(new_host)
-            for port_index in range(1, self.number_of_ports_per_host + 1):
-                new_port = Port.objects.create(
-                    host=new_host,
-                    port=int(f"{host_index}{port_index}"),
-                    status=PortStatus.OPEN,
-                    protocol=Protocol.TCP,
-                    service="http",
-                )
-                new_port.executions.add(self.selected_execution)
-                setattr(self, f"port{host_index}{port_index}", new_port)
-                self.findings.append(new_port)
-                for path_index in range(1, self.number_of_paths_per_port + 1):
-                    new_path = Path.objects.create(
-                        port=new_port, path=f"/{host_index}{port_index}{path_index}", status=200, type=PathType.ENDPOINT
-                    )
-                    new_path.executions.add(self.selected_execution)
-                    setattr(self, f"path{host_index}{port_index}{path_index}", new_path)
-                    self.findings.append(new_path)
+class GenericQueueTest(QueueTest, TestCase):
+    data = [
+        SetupProject(
+            osint_fields=[],
+            hosts_fields=[{}] * 10,
+            ports_fields=[{"port": 80}, {"port": 81}, {"port": 82}],
+            paths_fields=[{"path": "/index.html"}, {"path": "/login"}],
+            technologies_fields=[],
+            credentials_fields=[],
+            vulnerabilities_fields=[],
+            exploits_fields=[],
+        )
+    ]
+    target_parameters = True
+    task_parameters = True
 
     def test_calculate_executions_from_findings(self) -> None:
         # Expected:
@@ -57,19 +40,18 @@ class BaseQueueTest(QueueTest):
         # host2, port21, port22, path221
         expected = []
         last_expected = []
-        for host_index in range(1, self.number_of_hosts + 1):
-            item = ExecutionParametersToEnqueue([getattr(self, f"host{host_index}")], [], [], [], [])
-            for port_index in range(1, self.number_of_ports_per_host + 1):
-                item.append("findings", getattr(self, f"port{host_index}{port_index}"))
+        for host in Host.objects.all().order_by("id"):
+            item = ExecutionParametersToEnqueue([host], [], [], [], [])
+            for port in host.port.all():
+                item.append("findings", port)
             new_item = copy.deepcopy(item)
-            new_item.append("findings", getattr(self, f"path{host_index}11"))
+            first_path = host.port.order_by("id").first().path.order_by("id").first()
+            new_item.append("findings", first_path)
             expected.append(new_item)
-            for port_index in range(1, self.number_of_ports_per_host + 1):
-                for path_index in range(1, self.number_of_paths_per_port + 1):
-                    if port_index == 1 and path_index == 1:
-                        continue
+            for port in host.port.all().order_by("id"):
+                for path in port.path.all().exclude(pk=first_path.id).order_by("id"):
                     new_item = copy.deepcopy(item)
-                    new_item.append("findings", getattr(self, f"path{host_index}{port_index}{path_index}"))
+                    new_item.append("findings", path)
                     last_expected.append(new_item)
         self.assertEqual(
             expected + last_expected, self.queue.calculate_executions(self.fake_tool, self.findings, [], [], [], [])
@@ -79,9 +61,10 @@ class BaseQueueTest(QueueTest):
         # Expected:
         # host1
         # host2
+        hosts = Host.objects.all()
         self.assertEqual(
-            [ExecutionParametersToEnqueue([host], [], [], [], []) for host in self.hosts],
-            self.queue.calculate_executions(self.fake_tool, self.hosts, [], [], [], []),
+            [ExecutionParametersToEnqueue([host], [], [], [], []) for host in hosts],
+            self.queue.calculate_executions(self.fake_tool, hosts, [], [], [], []),
         )
 
     def test_calculate_executions_user_provided_entities(self) -> None:
@@ -91,11 +74,11 @@ class BaseQueueTest(QueueTest):
         # target, target_port1, target_port2, vulnerability1, technology2, wordlist
         # target, target_port1, target_port2, vulnerability2, technology2, wordlist
         number_of_entities = 5
-        target_ports = [self.target_port]
+        target_ports = [self.targetport]
         vulnerabilities = [self.input_vulnerability]
         technologies = [self.input_technology]
         for index in range(1, number_of_entities + 1):
-            target_ports.append(TargetPort.objects.create(target=self.target, port=self.target_port.port + index))
+            target_ports.append(TargetPort.objects.create(target=self.target, port=self.targetport.port + index))
             vulnerabilities.append(InputVulnerability.objects.create(cve=self.input_vulnerability.cve + f"{index}"))
             technologies.append(
                 InputTechnology.objects.create(
@@ -121,8 +104,10 @@ class BaseQueueTest(QueueTest):
         self.assertEqual(expected + last_expected, executions)
 
 
-class TasksQueueTest(QueueTest):
-    setup_entities = ["target_and_task_parameters"]
+class TasksQueueTest(QueueTest, TestCase):
+    target_parameters = True
+    task_parameters = True
+    data = [SetupProject(executions_per_task=0)]
 
     def test_tool_task(self) -> None:
         configuration = Configuration.objects.get(tool__id=1, default=True)

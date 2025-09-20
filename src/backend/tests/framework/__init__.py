@@ -1,43 +1,36 @@
 from functools import cached_property
 from typing import Any
 
-from django.test import TestCase
 from rest_framework.test import APIClient
 
 from executions.models import Execution
 from tasks.models import Task
 from tasks.queues import TasksQueue
 from tests.framework.cases import RekonoTestCase
-from tests.framework.data import StatsTestingDataMixin, TestingDataMixin
+from tests.framework.data import SetupProject, TestingDataMixin
 from tools.enums import Intensity
 from tools.models import Tool
 
 
-class BaseTest(TestCase, TestingDataMixin):
+class BaseTest(TestingDataMixin):
     cases: list[RekonoTestCase] = []
+    kwargs = {}
 
     def setUp(self):
         super().setUp()
         self.setup_testing_data()
-
-    @cached_property
-    def kwargs(self) -> dict[str, Any]:
-        return {}
 
     def test_cases(self) -> None:
         for test_case_index, test_case in enumerate(self.cases):
             test_case.test_case(test_case_number=test_case_index, test_case=self, **self.kwargs)
 
 
-class ApiTest(BaseTest):
+class ApiTestNoData(BaseTest):
     endpoint = ""
     expected_string = ""
     anonymous_access_allowed = False
-    setup_entities = ["users"]
 
-    @cached_property
-    def object(self) -> Any:
-        return None
+    object = None
 
     @cached_property
     def kwargs(self) -> dict[str, Any]:
@@ -52,10 +45,15 @@ class ApiTest(BaseTest):
             self.assertEqual(200 if self.anonymous_access_allowed else 401, APIClient().get(self.endpoint).status_code)
 
 
+class ApiTest(ApiTestNoData):
+    data = [SetupProject()]
+
+
 class ParserTest(BaseTest):
     tool_name = ""
-    setup_entities = ["target_and_task_parameters"]
     arguments = []
+    data = [SetupProject(executions_per_task=0)]
+    task_parameters = True
 
     def setUp(self):
         super().setUp()
@@ -72,14 +70,8 @@ class ParserTest(BaseTest):
 
 
 class QueueTest(BaseTest):
-    setup_entities = ["fake_tool"]
+    fake_tool = True
 
     def setUp(self):
         super().setUp()
         self.queue = TasksQueue()
-
-
-class StatsTest(ApiTest, StatsTestingDataMixin):
-    def setUp(self):
-        super().setUp()
-        self.setup_multiple_data()

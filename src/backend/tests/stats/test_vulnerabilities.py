@@ -1,14 +1,16 @@
 from datetime import date, timedelta
 
+from django.test import TestCase
+
 from findings.enums import Severity, TriageStatus
-from tests.framework import StatsTest
+from tests.framework import ApiTest
 from tests.framework.cases import ApiTestCase
 from tests.framework.data import SetupProject
 
 # pytype: disable=wrong-arg-types
 
 
-class LatestVulnerabilitiesTest(StatsTest):
+class LatestVulnerabilitiesTest(ApiTest, TestCase):
     endpoint = "/api/stats/latest-vulnerabilities/"
     data = [
         SetupProject(1, 6),
@@ -41,7 +43,7 @@ class LatestVulnerabilitiesTest(StatsTest):
     ]
 
 
-class VulnerabilityTrendingStatsTest(StatsTest):
+class VulnerabilityTrendingStatsTest(ApiTest, TestCase):
     endpoint = "/api/stats/vulnerability-trending/"
     data = [
         SetupProject(
@@ -90,7 +92,7 @@ class VulnerabilityTrendingStatsTest(StatsTest):
     ]
 
 
-class VulnerabilityCVEStatsTest(StatsTest):
+class VulnerabilityCVEStatsTest(ApiTest, TestCase):
     endpoint = "/api/stats/vulnerability-cve/"
     data = [
         SetupProject(
@@ -138,7 +140,7 @@ class VulnerabilityCVEStatsTest(StatsTest):
     ]
 
 
-class VulnerabilityCWEStatsTest(StatsTest):
+class VulnerabilityCWEStatsTest(ApiTest, TestCase):
     endpoint = "/api/stats/vulnerability-cwe/"
     data = [
         SetupProject(
@@ -186,7 +188,7 @@ class VulnerabilityCWEStatsTest(StatsTest):
     ]
 
 
-class VulnerabilitySeverityStatsTest(StatsTest):
+class VulnerabilitySeverityStatsTest(ApiTest, TestCase):
     endpoint = "/api/stats/vulnerability-severity/"
     data = [
         SetupProject(
@@ -250,7 +252,7 @@ class VulnerabilitySeverityStatsTest(StatsTest):
     ]
 
 
-class VulnerabilityStatusStatsTest(StatsTest):
+class VulnerabilityStatusStatsTest(ApiTest, TestCase):
     endpoint = "/api/stats/vulnerability-status/"
     data = [
         SetupProject(
@@ -288,7 +290,7 @@ class VulnerabilityStatusStatsTest(StatsTest):
     ]
 
 
-class VulnerabilityStatusPerSeverityStatsTest(StatsTest):
+class VulnerabilityStatusPerSeverityStatsTest(ApiTest, TestCase):
     endpoint = "/api/stats/vulnerability-status-per-severity/"
     data = [
         SetupProject(
@@ -349,7 +351,7 @@ class VulnerabilityStatusPerSeverityStatsTest(StatsTest):
     ]
 
 
-class VulnerabilityEvolutionStatsTest(StatsTest):
+class VulnerabilityEvolutionStatsTest(ApiTest, TestCase):
     endpoint = "/api/stats/vulnerability-evolution/"
     data = [
         SetupProject(

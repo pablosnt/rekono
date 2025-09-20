@@ -1,5 +1,7 @@
 from functools import cached_property
 
+from django.test import TestCase
+
 from reporting.enums import FindingName, ReportFormat
 from reporting.models import Report
 from security.authorization.roles import Role
@@ -7,6 +9,7 @@ from targets.enums import TargetType
 from targets.models import Target
 from tests.framework import ApiTest
 from tests.framework.cases import ApiTestCase, DeleteApiTestCase, PostApiTestCase
+from tests.framework.data import SetupProject
 
 # pytype: disable=wrong-arg-types
 
@@ -16,7 +19,6 @@ class ReportingTest(ApiTest):
     format = None
     only_true_positives = False
     finding_types: list[str] | None = [name.value for name in FindingName]
-    setup_entities = ["findings"]
 
     def test_cases(self) -> None:
         if self.format:
@@ -27,7 +29,7 @@ class ReportingTest(ApiTest):
                 ApiTestCase([Role.ADMIN, Role.AUDITOR, Role.READER]),
                 PostApiTestCase(["not_members"], 403, {**report, "project": 1}),
                 PostApiTestCase(["not_members"], 403, {**report, "target": 1}),
-                PostApiTestCase(["not_members"], 403, {**report, "task": 2}),
+                PostApiTestCase(["not_members"], 403, {**report, "task": 1}),
                 PostApiTestCase(["members"], 400, report),
                 PostApiTestCase(
                     ["admin1"],
@@ -43,11 +45,11 @@ class ReportingTest(ApiTest):
                 ),
                 PostApiTestCase(
                     ["auditor1"],
-                    data={**report, "task": 2},
+                    data={**report, "task": 1},
                     expected={
                         "id": 2,
                         "project": None,
-                        "task": 2,
+                        "task": 1,
                         "target": None,
                         "format": self.format.value,
                         "user": 3,
@@ -73,7 +75,7 @@ class ReportingTest(ApiTest):
                     ["members"],
                     expected={
                         "id": 1,
-                        "project": {"id": 1, "name": "test"},
+                        "project": {"id": 1},
                         "task": None,
                         "target": None,
                         "format": self.format.value,
@@ -86,7 +88,7 @@ class ReportingTest(ApiTest):
                     expected={
                         "id": 2,
                         "project": None,
-                        "task": {"id": 2, "target": {"id": 1}},
+                        "task": {"id": 1, "target": {"id": 1}},
                         "target": None,
                         "format": self.format.value,
                         "user": {"id": 3, "username": "auditor1"},
@@ -119,14 +121,14 @@ class ReportingTest(ApiTest):
                         {
                             "id": 2,
                             "project": None,
-                            "task": {"id": 2, "target": {"id": 1}},
+                            "task": {"id": 1, "target": {"id": 1}},
                             "target": None,
                             "format": self.format.value,
                             "user": {"id": 3, "username": "auditor1"},
                         },
                         {
                             "id": 1,
-                            "project": {"id": 1, "name": "test"},
+                            "project": {"id": 1},
                             "task": None,
                             "target": None,
                             "format": self.format.value,
@@ -164,25 +166,25 @@ class ReportingTest(ApiTest):
         return Report(format=self.format, project=self.project, user=self.admin1)
 
 
-class JsonReportTest(ReportingTest):
+class JsonReportTest(ReportingTest, TestCase):
     format = ReportFormat.JSON
 
 
-class JsonReportTruePositivesTest(ReportingTest):
+class JsonReportTruePositivesTest(ReportingTest, TestCase):
     format = ReportFormat.JSON
     only_true_positives = False
 
 
-class XmlReportTest(ReportingTest):
+class XmlReportTest(ReportingTest, TestCase):
     format = ReportFormat.XML
 
 
-class XmlReportTruePositivesTest(ReportingTest):
+class XmlReportTruePositivesTest(ReportingTest, TestCase):
     format = ReportFormat.XML
     only_true_positives = False
 
 
-class PdfReportTest(ReportingTest):
+class PdfReportTest(ReportingTest, TestCase):
     format = ReportFormat.PDF
     finding_types = None
 
@@ -191,9 +193,9 @@ class PdfReportTest(ReportingTest):
         Target.objects.create(project=self.project, target="10.10.10.15", type=TargetType.PRIVATE_IP)
 
 
-class PdfReportWithoutFindingsTest(ApiTest):
+class PdfReportWithoutFindingsTest(ApiTest, TestCase):
     endpoint = "/api/reports/"
-    setup_entities = ["executions"]
+    data = [SetupProject(executions_per_task=0)]
     cases = [
         PostApiTestCase(
             ["members"],

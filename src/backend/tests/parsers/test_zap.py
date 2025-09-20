@@ -1,10 +1,12 @@
+from django.test import TestCase
+
 from findings.enums import PathType, Severity
 from findings.models import Path, Vulnerability
 from tests.framework import ParserTest
 from tests.framework.cases import ParserTestCase
 
 
-class ZapTest(ParserTest):
+class ZapTest(ParserTest, TestCase):
     tool_name = "ZAP"
     cases = [
         ParserTestCase(

@@ -1,10 +1,12 @@
+from django.test import TestCase
+
 from findings.enums import PathType
 from findings.models import Path
 from tests.framework import ParserTest
 from tests.framework.cases import ParserTestCase
 
 
-class SmbmapTest(ParserTest):
+class SmbmapTest(ParserTest, TestCase):
     tool_name = "SMBMap"
     cases = [
         ParserTestCase(

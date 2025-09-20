@@ -1,19 +1,22 @@
 from functools import cached_property
 
+from django.test import TestCase
+
 from parameters.models import InputTechnology, InputVulnerability
 from security.authorization.roles import Role
 from tests.framework import ApiTest
 from tests.framework.cases import ApiTestCase, PostApiTestCase
+from tests.framework.data import SetupProject
 from tools.enums import Intensity
 
 # pytype: disable=wrong-arg-types
 
 
-class ParameterTest(ApiTest):
+class ParameterTest(ApiTest, TestCase):
     model = None
     valid: dict[str, str] | None = None
     invalid: dict[str, str] | None = None
-    setup_entities = ["target"]
+    data = [SetupProject(executions_per_task=0)]
 
     @cached_property
     def cases(self) -> list[ApiTestCase]:

@@ -1,9 +1,11 @@
+from django.test import TestCase
+
 from findings.models import Credential
 from tests.framework import ParserTest
 from tests.framework.cases import ParserTestCase
 
 
-class GitleaksTest(ParserTest):
+class GitleaksTest(ParserTest, TestCase):
     tool_name = "GitLeaks"
     cases = [
         ParserTestCase(

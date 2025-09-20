@@ -1,14 +1,16 @@
 from datetime import date, timedelta
 
+from django.test import TestCase
+
 from findings.enums import HostOS, Severity
-from tests.framework import StatsTest
+from tests.framework import ApiTest
 from tests.framework.cases import ApiTestCase
 from tests.framework.data import SetupProject
 
 # pytype: disable=wrong-arg-types
 
 
-class LatestHostsTest(StatsTest):
+class LatestHostsTest(ApiTest, TestCase):
     endpoint = "/api/stats/latest-hosts/"
     data = [SetupProject(2, 6)]
     cases = [
@@ -22,7 +24,7 @@ class LatestHostsTest(StatsTest):
     ]
 
 
-class HostOSStatsTest(StatsTest):
+class HostOSStatsTest(ApiTest, TestCase):
     endpoint = "/api/stats/host-os/"
     data = [
         SetupProject(
@@ -87,7 +89,7 @@ class HostOSStatsTest(StatsTest):
     ]
 
 
-class HostVulnerabilitiesStatsTest(StatsTest):
+class HostVulnerabilitiesStatsTest(ApiTest, TestCase):
     endpoint = "/api/stats/host-vulnerabilities/"
     data = [
         SetupProject(
@@ -139,7 +141,7 @@ class HostVulnerabilitiesStatsTest(StatsTest):
     ]
 
 
-class HostEvolutionStatsTest(StatsTest):
+class HostEvolutionStatsTest(ApiTest, TestCase):
     endpoint = "/api/stats/host-evolution/"
     data = [SetupProject(3, 3), SetupProject(2, 2), SetupProject()]
     cases = [

@@ -1,10 +1,12 @@
+from django.test import TestCase
+
 from findings.enums import Severity
 from findings.models import Technology, Vulnerability
 from tests.framework import ParserTest
 from tests.framework.cases import ParserTestCase
 
 
-class SshauditTest(ParserTest):
+class SshauditTest(ParserTest, TestCase):
     tool_name = "SSH Audit"
     cases = [
         ParserTestCase(

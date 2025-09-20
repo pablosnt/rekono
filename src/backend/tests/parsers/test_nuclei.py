@@ -1,10 +1,12 @@
+from django.test import TestCase
+
 from findings.enums import Severity
 from findings.models import Credential, Technology, Vulnerability
 from tests.framework import ParserTest
 from tests.framework.cases import ParserTestCase
 
 
-class NucleiTest(ParserTest):
+class NucleiTest(ParserTest, TestCase):
     tool_name = "Nuclei"
     cases = [
         ParserTestCase(

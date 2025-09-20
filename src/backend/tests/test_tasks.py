@@ -1,10 +1,14 @@
 from functools import cached_property
 
+from django.test import TestCase
+
 from executions.enums import Status
+from executions.models import Execution
 from security.authorization.roles import Role
 from tasks.models import Task
 from tests.framework import ApiTest
 from tests.framework.cases import ApiTestCase, DeleteApiTestCase, PostApiTestCase
+from tests.framework.data import SetupProject
 from tools.enums import Intensity
 
 # pytype: disable=wrong-arg-types
@@ -16,10 +20,10 @@ invalid_task2 = {"target_id": 1}
 invalid_task3 = {**task1, "configuration_id": 25, "intensity": Intensity.SNEAKY.name.capitalize()}
 
 
-class TaskTest(ApiTest):
+class TaskTest(ApiTest, TestCase):
     endpoint = "/api/tasks/"
-    expected_string = "10.10.10.10 - All tools"
-    setup_entities = ["executions"]
+    expected_string = "10.10.10.10 - Nmap - TCP ports"
+    data = [SetupProject(executions_per_task=2), SetupProject()]
     cases = [
         ApiTestCase([Role.ADMIN, Role.AUDITOR, Role.READER]),
         ApiTestCase(
@@ -27,12 +31,8 @@ class TaskTest(ApiTest):
             expected=[
                 {
                     "id": 2,
-                    "target": {"id": 1, "target": "10.10.10.10"},
-                    "configuration": {
-                        "id": 1,
-                        "tool": {"id": 1, "name": "Nmap"},
-                        "name": "TCP ports",
-                    },
+                    "target": {"id": 2, "target": "10.10.10.20"},
+                    "configuration": {"id": 1},
                     "process": None,
                     "executor": {"id": 3, "username": "auditor1"},
                     "intensity": Intensity.NORMAL.name.capitalize(),
@@ -41,9 +41,9 @@ class TaskTest(ApiTest):
                 {
                     "id": 1,
                     "target": {"id": 1, "target": "10.10.10.10"},
-                    "configuration": None,
-                    "process": {"id": 1, "name": "All tools"},
-                    "executor": {"id": 1, "username": "admin1"},
+                    "configuration": {"id": 1},
+                    "process": None,
+                    "executor": {"id": 3, "username": "auditor1"},
                     "intensity": Intensity.NORMAL.name.capitalize(),
                     "executions": [1, 2],
                 },
@@ -55,9 +55,9 @@ class TaskTest(ApiTest):
             expected={
                 "id": 1,
                 "target": {"id": 1, "target": "10.10.10.10"},
-                "configuration": None,
-                "process": {"id": 1, "name": "All tools"},
-                "executor": {"id": 1, "username": "admin1"},
+                "configuration": {"id": 1},
+                "process": None,
+                "executor": {"id": 3, "username": "auditor1"},
                 "intensity": Intensity.NORMAL.name.capitalize(),
                 "executions": [1, 2],
             },
@@ -70,13 +70,10 @@ class TaskTest(ApiTest):
             ["auditor1"],
             expected={
                 "id": 3,
-                "target": {"id": 1, "target": "10.10.10.10"},
-                "configuration": {
-                    "id": 1,
-                    "tool": {"id": 1, "name": "Nmap"},
-                    "name": "TCP ports",
-                },
+                "target": {"id": 2, "target": "10.10.10.20"},
+                "configuration": {"id": 1},
                 "process": None,
+                "executor": {"id": 3, "username": "auditor1"},
                 "intensity": Intensity.NORMAL.name.capitalize(),
             },
             endpoint="2/repeat",
@@ -86,16 +83,8 @@ class TaskTest(ApiTest):
         DeleteApiTestCase(["admin1", "auditor1"], 400, endpoint="2"),
         DeleteApiTestCase(["admin1"], endpoint="1"),
         DeleteApiTestCase(["auditor1"], 400, endpoint="1"),
-        ApiTestCase(
-            ["members"],
-            expected={"id": 1, "status": Status.COMPLETED},
-            endpoint="/api/executions/1/",
-        ),
-        ApiTestCase(
-            ["members"],
-            expected={"id": 2, "status": Status.CANCELLED},
-            endpoint="/api/executions/2/",
-        ),
+        ApiTestCase(["members"], expected={"id": 1, "status": Status.CANCELLED}, endpoint="/api/executions/1/"),
+        ApiTestCase(["members"], expected={"id": 2, "status": Status.CANCELLED}, endpoint="/api/executions/2/"),
         PostApiTestCase(["admin1", "auditor1"], 400, invalid_task1),
         PostApiTestCase(["admin1", "auditor1"], 400, invalid_task2),
         PostApiTestCase(["admin1", "auditor1"], 400, invalid_task3),
@@ -106,11 +95,7 @@ class TaskTest(ApiTest):
             expected={
                 "id": 4,
                 "target": {"id": 1, "target": "10.10.10.10"},
-                "configuration": {
-                    "id": 1,
-                    "tool": {"id": 1, "name": "Nmap"},
-                    "name": "TCP ports",
-                },
+                "configuration": {"id": 1},
                 "process": None,
                 "executor": {"id": 1, "username": "admin1"},
                 "intensity": Intensity.HARD.name.capitalize(),
@@ -130,6 +115,10 @@ class TaskTest(ApiTest):
         ),
     ]
 
+    def test_cases(self):
+        Execution.objects.filter(id=3).update(status=Status.COMPLETED)
+        super().test_cases()
+
     @cached_property
     def object(self) -> Task:
-        return self.task1
+        return self.task

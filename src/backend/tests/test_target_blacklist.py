@@ -1,9 +1,12 @@
 from functools import cached_property
 
+from django.test import TestCase
+
 from security.authorization.roles import Role
 from target_denylist.models import TargetDenylist
 from tests.framework import ApiTest
 from tests.framework.cases import ApiTestCase, DeleteApiTestCase, PostApiTestCase, PutApiTestCase
+from tests.framework.data import SetupProject
 
 # pytype: disable=wrong-arg-types
 
@@ -16,10 +19,10 @@ new_target_denylist = {"target": ".*\.new\.rekono.com"}
 invalid_denylist = {"target": "*.rekono;com"}
 
 
-class TargetDenylistTest(ApiTest):
+class TargetDenylistTest(ApiTest, TestCase):
     endpoint = "/api/target-denylist/"
     expected_string = default_denylist_1["target"]
-    setup_entities = ["project"]
+    data = [SetupProject(targets_and_tasks=0)]
     cases = [
         ApiTestCase([Role.AUDITOR, Role.READER], 403),
         ApiTestCase([Role.AUDITOR, Role.READER], 403, endpoint="1"),

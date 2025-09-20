@@ -1,10 +1,12 @@
+from django.test import TestCase
+
 from findings.enums import PathType, Severity
 from findings.models import Credential, Path, Technology, Vulnerability
 from tests.framework import ParserTest
 from tests.framework.cases import ParserTestCase
 
 
-class CmseekTest(ParserTest):
+class CmseekTest(ParserTest, TestCase):
     tool_name = "CMSeeK"
     cases = [
         ParserTestCase(

@@ -1,10 +1,12 @@
+from django.test import TestCase
+
 from findings.enums import PathType, Severity
 from findings.models import Exploit, Path, Technology, Vulnerability
 from tests.framework import ParserTest
 from tests.framework.cases import ParserTestCase
 
 
-class JoomscanTest(ParserTest):
+class JoomscanTest(ParserTest, TestCase):
     tool_name = "JoomScan"
     arguments = ["-u", "http://10.10.10.10/"]
     cases = [

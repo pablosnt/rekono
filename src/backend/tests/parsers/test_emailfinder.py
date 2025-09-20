@@ -1,10 +1,12 @@
+from django.test import TestCase
+
 from findings.enums import OSINTDataType
 from findings.models import OSINT
 from tests.framework import ParserTest
 from tests.framework.cases import ParserTestCase
 
 
-class EmailfinderTest(ParserTest):
+class EmailfinderTest(ParserTest, TestCase):
     tool_name = "EmailFinder"
     cases = [
         ParserTestCase(

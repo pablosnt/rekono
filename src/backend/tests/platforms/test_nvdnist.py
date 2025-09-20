@@ -2,13 +2,16 @@ from functools import cached_property
 from typing import Any
 from unittest import mock
 
+from django.test import TestCase
+
 from findings.enums import Severity
 from findings.models import Vulnerability
 from platforms.nvdnist.integrations import NvdNist
 from platforms.nvdnist.models import NvdNistSettings
 from security.authorization.roles import Role
-from tests.framework import ApiTest, BaseTest
+from tests.framework import ApiTestNoData, BaseTest
 from tests.framework.cases import ApiTestCase, PutApiTestCase
+from tests.framework.data import SetupProject
 
 # pytype: disable=wrong-arg-types
 
@@ -45,15 +48,15 @@ def not_found(*args: Any, **kwargs: Any) -> dict:
     raise Exception("CVE not found")
 
 
-class NvdNistTest(BaseTest):
-    setup_entities = ["executions"]
+class NvdNistTest(BaseTest, TestCase):
+    data = [SetupProject()]
 
     def setUp(self) -> None:
         super().setUp()
         self.vulnerability = Vulnerability.objects.create(
             name="test", description="test", cve="CVE-2023-1111", severity=Severity.LOW
         )
-        self.vulnerability.executions.add(self.selected_execution)
+        self.vulnerability.executions.add(self.execution)
         self.nvdnist = NvdNist()
 
     def _test(
@@ -63,7 +66,7 @@ class NvdNistTest(BaseTest):
         cwe: str | None = "CWE-200",
         description: str = "description",
     ) -> None:
-        self.nvdnist.process_finding(self.selected_execution, self.vulnerability)
+        self.nvdnist.process_finding(self.execution, self.vulnerability)
         self.assertEqual(reference, self.vulnerability.reference)
         self.assertEqual(cwe, self.vulnerability.cwe)
         self.assertEqual(description, self.vulnerability.description)
@@ -86,7 +89,7 @@ new_settings = {"api_token": "nvd-nist-token"}
 invalid_settings = {"api_token": "a" * 51}
 
 
-class NvdNistSettingsTest(ApiTest):
+class NvdNistSettingsTest(ApiTestNoData, TestCase):
     endpoint = "/api/nvdnist/1/"
     expected_string = "NVD NIST"
     cases = [

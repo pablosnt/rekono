@@ -1,12 +1,14 @@
+from django.test import TestCase
+
 from findings.enums import TriageStatus
-from tests.framework import StatsTest
+from tests.framework import ApiTest
 from tests.framework.cases import ApiTestCase
 from tests.framework.data import SetupProject
 
 # pytype: disable=wrong-arg-types
 
 
-class TopProjectsTest(StatsTest):
+class TopProjectsTest(ApiTest, TestCase):
     endpoint = "/api/stats/top-projects/"
     data = [
         # Project #1 (self.project) -> 0 vulnerabilities

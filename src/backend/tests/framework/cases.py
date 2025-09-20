@@ -22,7 +22,7 @@ class ApiTestCase(RekonoTestCase):
     executors: list[str | Role] | None = None
     status_code: int = 200
     data: dict[str, Any] | None = None
-    expected: dict[str, Any] | None = None
+    expected: dict[str, Any] | list[dict[str, Any]] | None = None
     endpoint: str = "{endpoint}"
     format: str = "json"
     method = "GET"

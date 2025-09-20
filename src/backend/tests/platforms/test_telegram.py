@@ -1,9 +1,11 @@
 from functools import cached_property
 
+from django.test import TestCase
+
 from platforms.telegram_app.models import TelegramChat
 from security.authorization.roles import Role
 from security.cryptography import Crypto
-from tests.framework import ApiTest
+from tests.framework import ApiTestNoData
 from tests.framework.cases import ApiTestCase, DeleteApiTestCase, PostApiTestCase, PutApiTestCase
 from users.models import User
 
@@ -14,7 +16,7 @@ invalid_token = {"token": "invalid;token"}
 expected = {"id": 1, "bot": None, "is_available": False}
 
 
-class TelegramSettingsTest(ApiTest):
+class TelegramSettingsTest(ApiTestNoData, TestCase):
     endpoint = "/api/telegram/settings/1/"
     cases = [
         ApiTestCase(["members", "not_members"], expected=expected),
@@ -25,7 +27,7 @@ class TelegramSettingsTest(ApiTest):
     ]
 
 
-class TelegramChatTest(ApiTest):
+class TelegramChatTest(ApiTestNoData, TestCase):
     endpoint = "/api/telegram/link/"
     expected_string = "admin1@rekono.com - 1"
     cases = [ApiTestCase(["members", "not_members"], expected={"telegram_chat": None}, endpoint="/api/profile/")]

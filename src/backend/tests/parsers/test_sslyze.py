@@ -1,10 +1,12 @@
+from django.test import TestCase
+
 from findings.enums import Severity
 from findings.models import Technology, Vulnerability
 from tests.framework import ParserTest
 from tests.framework.cases import ParserTestCase
 
 
-class SslyzeTest(ParserTest):
+class SslyzeTest(ParserTest, TestCase):
     tool_name = "SSLyze"
     cases = [
         ParserTestCase(

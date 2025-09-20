@@ -1,9 +1,11 @@
 from functools import cached_property
 
+from django.test import TestCase
+
 from alerts.enums import AlertItem, AlertMode
 from alerts.models import Alert, MonitorSettings
 from security.authorization.roles import Role
-from tests.framework import ApiTest
+from tests.framework import ApiTest, ApiTestNoData
 from tests.framework.cases import ApiTestCase, DeleteApiTestCase, PostApiTestCase, PutApiTestCase
 
 # pytype: disable=wrong-arg-types
@@ -32,10 +34,9 @@ monitor_alert = {
 }
 
 
-class AlertTest(ApiTest):
+class AlertTest(ApiTest, TestCase):
     endpoint = "/api/alerts/"
-    expected_string = "test - Filter - CVE - CVE-2020-1111"
-    setup_entities = ["findings"]
+    expected_string = "Project 1 - Filter - CVE - CVE-2020-1111"
     cases = [
         ApiTestCase([Role.ADMIN, Role.AUDITOR, Role.READER]),
         PostApiTestCase(["not_members"], 403, new_alert),
@@ -281,7 +282,7 @@ class AlertTest(ApiTest):
                 True,
             ),
         ]:
-            self.assertEqual(expected, alert.must_be_triggered(self.selected_execution, finding))
+            self.assertEqual(expected, alert.must_be_triggered(self.execution, finding))
 
 
 new_monitor = {"hour_span": 48}
@@ -289,7 +290,7 @@ invalid_monitor_1 = {"hour_span": 169}
 invalid_monitor_2 = {"hour_span": 23}
 
 
-class MonitorSettingsTest(ApiTest):
+class MonitorSettingsTest(ApiTestNoData, TestCase):
     endpoint = "/api/monitor/1/"
     expected_string = "Last monitor was at None. Next one in 24 hours"
     cases = [

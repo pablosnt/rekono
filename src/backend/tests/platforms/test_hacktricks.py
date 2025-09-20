@@ -1,8 +1,11 @@
 from typing import Any
 from unittest import mock
 
+from django.test import TestCase
+
 from platforms.hacktricks import HackTricks
 from tests.framework import BaseTest
+from tests.framework.data import SetupProject
 
 base_url = "https://book.hacktricks.wiki/en/"
 
@@ -16,8 +19,8 @@ def links(*args: Any, **kwargs: Any) -> list[str]:
     ]
 
 
-class HackTricksTest(BaseTest):
-    setup_entities = ["findings"]
+class HackTricksTest(BaseTest, TestCase):
+    data = [SetupProject()]
 
     def setUp(self):
         super().setUp()
@@ -32,7 +35,7 @@ class HackTricksTest(BaseTest):
     @mock.patch("platforms.hacktricks.HackTricks._get_all_hacktricks_links", links)
     def _assert_links(self) -> None:
         self.client = HackTricks()
-        self.client.process_findings(self.selected_execution, list(self.expected.keys()))
+        self.client.process_findings(self.execution, list(self.expected.keys()))
         for finding, expected_link in self.expected.items():
             self.assertEqual(expected_link, finding.hacktricks_link)
 

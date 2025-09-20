@@ -1,10 +1,11 @@
 from functools import cached_property
 
+from django.test import TestCase
+
 from platforms.mail.models import SMTPSettings
 from security.authorization.roles import Role
-from tests.framework import ApiTest
+from tests.framework import ApiTestNoData
 from tests.framework.cases import ApiTestCase, PutApiTestCase
-from tests.framework.data import TestingDataMixin
 
 # pytype: disable=wrong-arg-types
 
@@ -12,7 +13,7 @@ config = {"host": "smtp.rekono.com", "port": 587, "username": "rekono", "passwor
 invalid_config = {"host": "smtp;rekono.com", "port": 999999, "username": "reko;no", "password": "re;kono", "tls": True}
 
 
-class SmtpSettingsTest(ApiTest, TestingDataMixin):
+class SmtpSettingsTest(ApiTestNoData, TestCase):
     endpoint = "/api/smtp/1/"
     expected_string = f"{config['host']}:{config['port']}"
     cases = [

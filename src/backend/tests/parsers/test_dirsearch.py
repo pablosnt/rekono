@@ -1,3 +1,5 @@
+from django.test import TestCase
+
 from findings.enums import PathType
 from findings.models import Path
 from tests.framework import ParserTest
@@ -29,6 +31,6 @@ expected = [
 ]
 
 
-class DirsearchTest(ParserTest):
+class DirsearchTest(ParserTest, TestCase):
     tool_name = "Dirsearch"
     cases = [ParserTestCase("2022-default.json", expected), ParserTestCase("2025-default.json", expected)]

@@ -1,9 +1,11 @@
+from django.test import TestCase
+
 from findings.models import Vulnerability
 from tests.framework import ParserTest
 from tests.framework.cases import ParserTestCase
 
 
-class Spring4shellscanTest(ParserTest):
+class Spring4shellscanTest(ParserTest, TestCase):
     tool_name = "Spring4Shell Scan"
     cases = [
         ParserTestCase(

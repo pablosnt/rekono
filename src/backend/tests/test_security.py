@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from functools import cached_property
 
 import pyotp
+from django.test import TestCase
 from django.utils import timezone
 from rest_framework.test import APIClient
 
@@ -14,7 +15,9 @@ from users.models import User
 # pytype: disable=wrong-arg-types
 
 
-class SecurityTest(ApiTest):
+class SecurityTest(ApiTest, TestCase):
+    data = []
+    users = True
     login = "/api/security/login/"
     refresh = "/api/security/refresh/"
     logout = "/api/security/logout/"

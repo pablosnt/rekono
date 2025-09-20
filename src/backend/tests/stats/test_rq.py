@@ -1,11 +1,13 @@
+from django.test import TestCase
+
 from security.authorization.roles import Role
-from tests.framework import ApiTest
+from tests.framework import ApiTestNoData
 from tests.framework.cases import ApiTestCase
 
 # pytype: disable=wrong-arg-types
 
 
-class RQTest(ApiTest):
+class RQTest(ApiTestNoData, TestCase):
     endpoint = "/api/stats/rq/"
     cases = [
         ApiTestCase(

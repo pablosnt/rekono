@@ -1,12 +1,14 @@
 from functools import cached_property
 
+from django.test import TestCase
+
 from input_types.models import InputType
-from tests.framework import ApiTest
+from tests.framework import ApiTestNoData
 
 # pytype: disable=wrong-arg-types
 
 
-class InputTypeTest(ApiTest):
+class InputTypeTest(ApiTestNoData, TestCase):
     expected_string = "OSINT"
 
     @cached_property

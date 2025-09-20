@@ -1,8 +1,10 @@
 from functools import cached_property
 
+from django.test import TestCase
+
 from security.authorization.roles import Role
 from settings.models import Settings
-from tests.framework import ApiTest
+from tests.framework import ApiTestNoData
 from tests.framework.cases import ApiTestCase, PutApiTestCase
 
 # pytype: disable=wrong-arg-types
@@ -34,7 +36,7 @@ invalid_settings_1 = {
 invalid_settings_2 = {**invalid_settings_1, "max_uploaded_file_mb": 4096}
 
 
-class SettingsTest(ApiTest):
+class SettingsTest(ApiTestNoData, TestCase):
     endpoint = "/api/settings/"
     expected_string = "Settings"
     cases = [

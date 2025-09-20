@@ -1,8 +1,10 @@
 from functools import cached_property
 
+from django.test import TestCase
+
 from projects.models import Project
 from security.authorization.roles import Role
-from tests.framework import ApiTest
+from tests.framework import ApiTestNoData
 from tests.framework.cases import ApiTestCase, DeleteApiTestCase, PostApiTestCase, PutApiTestCase
 
 # pytype: disable=wrong-arg-types
@@ -13,7 +15,7 @@ project2 = {"name": "test2", "description": "test2", "tags": ["test"]}
 invalid_project = {"name": "invalid name;", "description": "test1", "tags": ["test"]}
 
 
-class ProjectTest(ApiTest):
+class ProjectTest(ApiTestNoData, TestCase):
     endpoint = "/api/projects/"
     expected_string = project1.get("name")
     cases = [

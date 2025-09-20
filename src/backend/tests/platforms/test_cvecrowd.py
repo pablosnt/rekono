@@ -2,6 +2,8 @@ from functools import cached_property
 from typing import Any
 from unittest import mock
 
+from django.test import TestCase
+
 from alerts.enums import AlertItem, AlertMode
 from alerts.models import Alert
 from findings.enums import Severity
@@ -9,8 +11,9 @@ from findings.models import Vulnerability
 from platforms.cvecrowd.integrations import CveCrowd
 from platforms.cvecrowd.models import CveCrowdSettings
 from security.authorization.roles import Role
-from tests.framework import ApiTest, BaseTest
+from tests.framework import ApiTestNoData, BaseTest
 from tests.framework.cases import ApiTestCase, PutApiTestCase
+from tests.framework.data import SetupProject
 
 # pytype: disable=wrong-arg-types
 
@@ -23,8 +26,8 @@ def not_found(*args: Any, **kwargs: Any) -> list[str]:
     return []
 
 
-class CveCrowdTest(BaseTest):
-    setup_entities = ["executions"]
+class CveCrowdTest(BaseTest, TestCase):
+    data = [SetupProject()]
 
     def setUp(self) -> None:
         super().setUp()
@@ -34,8 +37,8 @@ class CveCrowdTest(BaseTest):
         self.trending = Vulnerability.objects.create(
             name="trending", description="trending", cve="CVE-2022-1113", severity=Severity.HIGH
         )
-        self.not_trending.executions.add(self.selected_execution)
-        self.trending.executions.add(self.selected_execution)
+        self.not_trending.executions.add(self.execution)
+        self.trending.executions.add(self.execution)
         self.settings = CveCrowdSettings.objects.first()
         self.settings.secret = "fake-token"
         self.settings.save(update_fields=["_api_token"])
@@ -44,13 +47,13 @@ class CveCrowdTest(BaseTest):
 
     @mock.patch("platforms.cvecrowd.integrations.CveCrowd._request", success)
     def test_process_findings(self) -> None:
-        self.cvecrowd.process_findings(self.selected_execution, [self.trending, self.not_trending])
+        self.cvecrowd.process_findings(self.execution, [self.trending, self.not_trending])
         self.assertTrue(Vulnerability.objects.get(pk=self.trending.id).trending)
         self.assertFalse(Vulnerability.objects.get(pk=self.not_trending.id).trending)
 
     @mock.patch("platforms.cvecrowd.integrations.CveCrowd._request", not_found)
     def test_process_findings_not_found(self) -> None:
-        self.cvecrowd.process_findings(self.selected_execution, [self.trending, self.not_trending])
+        self.cvecrowd.process_findings(self.execution, [self.trending, self.not_trending])
         self.assertFalse(Vulnerability.objects.get(pk=self.trending.id).trending)
         self.assertFalse(Vulnerability.objects.get(pk=self.not_trending.id).trending)
 
@@ -59,7 +62,7 @@ class CveCrowdTest(BaseTest):
         self.settings.execute_per_execution = False
         self.settings.save(update_fields=["execute_per_execution"])
         self.cvecrowd = CveCrowd()
-        self.cvecrowd.process_findings(self.selected_execution, [self.trending, self.not_trending])
+        self.cvecrowd.process_findings(self.execution, [self.trending, self.not_trending])
         self.assertFalse(Vulnerability.objects.get(pk=self.trending.id).trending)
         self.assertFalse(Vulnerability.objects.get(pk=self.not_trending.id).trending)
 
@@ -80,7 +83,7 @@ new_settings = {"api_token": "cve-crowd-token", "trending_span_days": 3, "execut
 invalid_settings = {**new_settings, "trending_span_days": 10}
 
 
-class CveCrowdSettingsTest(ApiTest):
+class CveCrowdSettingsTest(ApiTestNoData, TestCase):
     endpoint = "/api/cvecrowd/1/"
     expected_string = "CVE Crowd"
     cases = [
