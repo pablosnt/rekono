@@ -9,7 +9,7 @@ from tests.framework import ApiTestNoData
 from tests.framework.cases import ApiTestCase, DeleteApiTestCase, PostApiTestCase, PutApiTestCase
 from users.models import User
 
-# pytype: disable=wrong-arg-types
+# pytype: disable=wrong-arg-types,attribute-error
 
 token = {"token": "any_valid_telegram_token"}
 invalid_token = {"token": "invalid;token"}

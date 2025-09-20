@@ -17,7 +17,7 @@ from users.models import User
 
 class SecurityTest(ApiTest, TestCase):
     data = []
-    users = True
+    users_flag = True
     login = "/api/security/login/"
     refresh = "/api/security/refresh/"
     logout = "/api/security/logout/"

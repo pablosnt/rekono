@@ -48,20 +48,20 @@ class SetupProject:
 class TestingDataMixin:
     data_dir = PathFile(__file__).resolve().parent.parent / "data"
     data = []
-    users = True
-    target_parameters = False
-    task_parameters = False
-    fake_tool = False
+    users_flag = True
+    target_parameters_flag = False
+    task_parameters_flag = False
+    fake_tool_flag = False
 
     def setup_testing_data(self) -> None:
         self.configuration = Configuration.objects.get(pk=1)
-        if self.users:
+        if self.users_flag:
             self.setup_users()
             for index, project in enumerate(self.data):
                 self.setup_project(index + 1, project)
-        if self.fake_tool:
+        if self.fake_tool_flag:
             self.setup_fake_tool()
-        if self.task_parameters:
+        if self.task_parameters_flag:
             self.setup_task_parameters()
 
     def setup_project(self, project_number: int, config: SetupProject) -> None:
@@ -76,7 +76,7 @@ class TestingDataMixin:
             target = Target.objects.create(
                 project=project, target=f"10.10.10.{_target_index}", type=TargetType.PRIVATE_IP
             )
-            if self.target_parameters:
+            if self.target_parameters_flag:
                 target_port = TargetPort.objects.create(target=target, port=80 + target_index, path=None)
                 Authentication.objects.create(
                     name=f"root{_target_index}", secret="root", type=AuthenticationType.TOKEN, target_port=target_port

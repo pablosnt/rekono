@@ -15,6 +15,8 @@ from tests.framework.data import SetupProject
 from tools.enums import Intensity as IntensityEnum
 from tools.models import Configuration, Intensity
 
+# pytype: disable=attribute-error
+
 
 class GenericQueueTest(QueueTest, TestCase):
     data = [
@@ -29,8 +31,8 @@ class GenericQueueTest(QueueTest, TestCase):
             exploits_fields=[],
         )
     ]
-    target_parameters = True
-    task_parameters = True
+    target_parameters_flag = True
+    task_parameters_flag = True
 
     def test_calculate_executions_from_findings(self) -> None:
         # Expected:
@@ -105,8 +107,8 @@ class GenericQueueTest(QueueTest, TestCase):
 
 
 class TasksQueueTest(QueueTest, TestCase):
-    target_parameters = True
-    task_parameters = True
+    target_parameters_flag = True
+    task_parameters_flag = True
     data = [SetupProject(executions_per_task=0)]
 
     def test_tool_task(self) -> None:

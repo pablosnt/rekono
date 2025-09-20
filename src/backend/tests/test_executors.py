@@ -20,6 +20,8 @@ from tools.models import Configuration
 from wordlists.enums import WordlistType
 from wordlists.models import Wordlist
 
+# pytype: disable=attribute-error
+
 
 def get_url(self, host: str, port: int | None = None, endpoint: str | None = None, *args: Any) -> str:
     return f"http://{host}" + (f":{port}" if port else "") + (endpoint or "/")
@@ -27,9 +29,9 @@ def get_url(self, host: str, port: int | None = None, endpoint: str | None = Non
 
 class ToolExecutorTest(BaseTest, TestCase):
     data = [SetupProject(osint_fields=[{"data": "10.10.10.11", "data_type": OSINTDataType.IP}])]
-    fake_tool = True
-    target_parameters = True
-    task_parameters = True
+    fake_tool_flag = True
+    target_parameters_flag = True
+    task_parameters_flag = True
 
     def setUp(self) -> None:
         super().setUp()

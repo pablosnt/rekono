@@ -30,7 +30,7 @@ invalid_authentication3 = {"name": "newadmin", "secret": "newadmin", "type": Aut
 class AuthenticationTest(ApiTest, TestCase):
     endpoint = "/api/authentications/"
     expected_string = "10.10.10.10 - 80 - admin"
-    target_parameters = True
+    target_parameters_flag = True
     cases = [
         ApiTestCase([Role.ADMIN, Role.AUDITOR, Role.READER]),
         ApiTestCase([Role.ADMIN, Role.AUDITOR, Role.READER], 404, endpoint="1"),

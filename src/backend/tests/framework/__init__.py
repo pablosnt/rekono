@@ -53,7 +53,7 @@ class ParserTest(BaseTest):
     tool_name = ""
     arguments = []
     data = [SetupProject(executions_per_task=0)]
-    task_parameters = True
+    task_parameters_flag = True
 
     def setUp(self):
         super().setUp()
@@ -70,7 +70,7 @@ class ParserTest(BaseTest):
 
 
 class QueueTest(BaseTest):
-    fake_tool = True
+    fake_tool_flag = True
 
     def setUp(self):
         super().setUp()
