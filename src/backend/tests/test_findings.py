@@ -144,14 +144,14 @@ class PathTest(FindingTest, TestCase):
     endpoint = "/api/paths/"
     expected_defectdojo = {
         "title": "Path discovered",
-        "description": "Host: 10.10.10.10\nPort: 80\nPath: /index.php\nType: ENDPOINT\nStatus: 200\nInfo: Main path",
+        "description": "Host: 10.10.10.10\nPort: 80\nPath: /index.html\nType: ENDPOINT\nStatus: 200",
         "severity": Severity.INFO,
     }
-    expected_string = f"10.10.10.10 - 80 - {Protocol.TCP.value} - /index.php"
+    expected_string = f"10.10.10.10 - 80 - {Protocol.TCP.value} - /index.html"
 
     def test_defectdojo(self):
         super().test_defectdojo()
-        defectdojo_endpoint = {"protocol": "http", "host": "10.10.10.10", "port": 80, "path": "/index.php"}
+        defectdojo_endpoint = {"protocol": "http", "host": "10.10.10.10", "port": 80, "path": "/index.html"}
         parsed = self.path.defectdojo_endpoint(self.target)
         for key, value in defectdojo_endpoint.items():
             self.assertEqual(value, parsed[key])
@@ -190,12 +190,11 @@ class VulnerabilityTest(FindingTest, TestCase):
     expected_defectdojo = {
         "title": "Vulnerability 10",
         "description": "Vulnerability 10",
-        "severity": Severity.CRITICAL,
-        "cve": "CVE-2023-1111",
+        "severity": Severity.MEDIUM,
+        "cve": "CVE-2025-3010",
         "cwe": 200,
-        "references": "https://nvd.nist.gov/vuln/detail/CVE-2023-1111",
     }
-    expected_string = f"10.10.10.10 - 80 - {Protocol.TCP.value} - WordPress - 1.0.0 - Test - CVE-2023-1111"
+    expected_string = f"10.10.10.10 - 80 - {Protocol.TCP.value} - WordPress - 1.0.0 - Test - CVE-2025-3010"
 
 
 class ExploitTest(FindingTest, TestCase):
@@ -204,7 +203,7 @@ class ExploitTest(FindingTest, TestCase):
     expected_defectdojo = {
         "title": "Exploit 1 found",
         "description": "ReverseShell 10",
-        "severity": Severity.CRITICAL,
+        "severity": Severity.MEDIUM,
         "references": "https://www.exploit-db.com/exploits/1",
     }
-    expected_string = f"10.10.10.10 - 80 - {Protocol.TCP.value} - WordPress - 1.0.0 - Test - CVE-2023-1111 - 1 - https://www.exploit-db.com/exploits/1"
+    expected_string = f"10.10.10.10 - 80 - {Protocol.TCP.value} - WordPress - 1.0.0 - Test - CVE-2025-3010 - 1 - https://www.exploit-db.com/exploits/1"

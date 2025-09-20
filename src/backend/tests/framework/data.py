@@ -140,6 +140,7 @@ class TestingDataMixin:
                                     "version": f"1.0.{_technologies_index}",
                                     "name": "WordPress",
                                     "description": "Typical CMS",
+                                    "reference": "https://wordpress.org",
                                     **technology_fields,
                                     "port": port,
                                 }

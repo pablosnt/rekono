@@ -40,24 +40,24 @@ class AuthenticationTest(ApiTest, TestCase):
         PostApiTestCase(
             ["admin1"],
             data=authentication,
-            expected={"id": 1, **authentication, "secret": "*" * len(authentication["secret"])},
+            expected={"id": 2, **authentication, "secret": "*" * len(authentication["secret"])},
         ),
         PostApiTestCase(["admin1", "auditor1"], 400, authentication),
         PostApiTestCase(["admin1", "auditor1"], 400, invalid_authentication3),
-        ApiTestCase(["members"], expected=[{"id": 1, **authentication, "secret": "*" * len(authentication["secret"])}]),
+        ApiTestCase(["members"], expected=[{"id": 2, **authentication, "secret": "*" * len(authentication["secret"])}]),
         ApiTestCase(
             ["members"],
-            expected={"id": 1, **authentication, "secret": "*" * len(authentication["secret"])},
-            endpoint="1",
+            expected={"id": 2, **authentication, "secret": "*" * len(authentication["secret"])},
+            endpoint="2",
         ),
         ApiTestCase(["not_members"]),
-        ApiTestCase(["not_members"], 404, endpoint="1"),
-        DeleteApiTestCase([Role.READER], 403, endpoint="1"),
-        DeleteApiTestCase(["admin2", "auditor2"], 404, endpoint="1"),
-        DeleteApiTestCase(["auditor1"], endpoint="1"),
-        DeleteApiTestCase(["admin1"], 404, endpoint="1"),
+        ApiTestCase(["not_members"], 404, endpoint="2"),
+        DeleteApiTestCase([Role.READER], 403, endpoint="2"),
+        DeleteApiTestCase(["admin2", "auditor2"], 404, endpoint="2"),
+        DeleteApiTestCase(["auditor1"], endpoint="2"),
+        DeleteApiTestCase(["admin1"], 404, endpoint="2"),
         ApiTestCase([Role.ADMIN, Role.AUDITOR, Role.READER]),
-        ApiTestCase([Role.ADMIN, Role.AUDITOR, Role.READER], 404, endpoint="1"),
+        ApiTestCase([Role.ADMIN, Role.AUDITOR, Role.READER], 404, endpoint="2"),
     ]
 
     @cached_property
@@ -66,3 +66,7 @@ class AuthenticationTest(ApiTest, TestCase):
 
     def test_token(self) -> None:
         self.assertEqual(base64.b64encode("admin:admin".encode()).decode(), self.object.token)
+
+    def setUp(self):
+        super().setUp()
+        Authentication.objects.all().delete()

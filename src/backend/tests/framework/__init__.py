@@ -17,7 +17,7 @@ class BaseTest(TestingDataMixin):
     kwargs = {}
 
     def setUp(self):
-        super().setUp()
+        super().setUp()  # pytype: disable=attribute-error
         self.setup_testing_data()
 
     def test_cases(self) -> None:
