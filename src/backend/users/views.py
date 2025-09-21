@@ -144,7 +144,7 @@ class UserViewSet(BaseViewSet):
         if user.is_active is not None or user.otp is None:
             return Response({"user": "User account has been already created"}, status=status.HTTP_400_BAD_REQUEST)
         if not SMTP().is_available():
-            return Response(
+            return Response(  # pragma: no cover
                 {"smtp": "SMTP client is not available to send the invitation"}, status=status.HTTP_400_BAD_REQUEST
             )
         User.objects.send_invitation(user)

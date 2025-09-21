@@ -42,4 +42,4 @@ line-length = 120
 indent-width = 4
 
 [tool.coverage.run]
-concurrency = ["multiprocessing"]
+concurrency = ["multiprocessing", "thread"]

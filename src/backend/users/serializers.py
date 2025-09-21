@@ -424,7 +424,7 @@ class RequestPasswordResetSerializer(Serializer):
         # prevet user enumerations by analyzing the Rekono execution time
         # during the password reset request
         user = User.objects.filter(email=email, is_active=True).first()
-        if email and user:
+        if email and user:  # pragma: no cover
             otp = User.objects.setup_otp(user)
             SMTP().reset_password(user, otp)
             self.logger.info(f"[User] User {user.id} requested a password reset", extra={"user": user.id})

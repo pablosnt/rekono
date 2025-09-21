@@ -160,6 +160,7 @@ class UserTest(ApiTest, TestCase):
         client = APIClient()
         client.force_authenticate(self.admin1)
         self.assertEqual(201, client.post(self.endpoint, data=invitation1).status_code)
+        self.assertEqual(204, client.post(f"{self.endpoint}7/resend/").status_code)
 
         new_user = User.objects.get(email=invitation1["email"])
         otp = User.objects.setup_otp(new_user)
@@ -194,6 +195,9 @@ class UserTest(ApiTest, TestCase):
             "/api/security/login/", data={"username": user1["username"], "password": new_valid_password}
         )
         self.assertEqual(200, response.status_code)
+
+        client.force_authenticate(self.admin1)
+        self.assertEqual(400, client.post(f"{self.endpoint}7/resend/").status_code)
 
         client.force_authenticate(new_user)
         self.assertEqual(200, client.get("/api/profile/").status_code)
