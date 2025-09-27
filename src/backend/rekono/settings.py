@@ -266,6 +266,7 @@ SPECTACULAR_SETTINGS = {
         "TargetType": "targets.enums.TargetType",
         "WordlistType": "wordlists.enums.WordlistType",
         "TimeUnit": "tasks.enums.TimeUnit",
+        "Status": "executions.enums.Status",
     },
 }
 

@@ -86,18 +86,23 @@ class BaseParser:
         Returns:
             Finding: The created or updated finding instance
         """
+        # Automatically establish relationships with other findings from the same execution
+        # This creates links between related findings (e.g., Host -> Port -> Path relationships)
         for finding_type_used, finding_used in self.executor.findings_used_in_execution.items():
             if (
                 finding_type_used != finding_type
                 and hasattr(finding_type, finding_type_used.__name__.lower())
-                # Discard relations between findings
+                # Discard relations between findings (many-to-many, reverse foreign keys)
                 and not isinstance(
                     getattr(finding_type, finding_type_used.__name__.lower()), ReverseManyToOneDescriptor
                 )
-                # Discard standard fields: Text, Number, etc.
+                # Discard standard fields: Text, Number, etc. (these are not relationships)
                 and not isinstance(getattr(finding_type, finding_type_used.__name__.lower()), DeferredAttribute)
             ):
+                # Set the relationship field to link this finding with the related finding
                 fields[finding_type_used.__name__.lower()] = finding_used
+        # Check if a finding with the same unique characteristics already exists for this target
+        # This prevents duplicate findings while allowing updates to existing ones
         unique_finding = finding_type.objects.filter(
             **{
                 **{f: fields.get(f) for f in finding_type.unique_fields},
@@ -105,12 +110,15 @@ class BaseParser:
             }
         )
         if unique_finding.exists():
+            # Update existing finding with new field values
             finding = unique_finding.first()
             for field, value in fields.items():
                 setattr(finding, field, value)
             finding.save(update_fields=fields.keys())
         else:
+            # Create new finding if no duplicate exists
             finding = finding_type.objects.create(**fields)
+        # Associate this finding with the current execution for tracking
         finding.executions.add(self.executor.execution)
         self.findings.append(finding)
         return finding

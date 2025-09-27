@@ -29,15 +29,20 @@ class Nuclei(BaseParser):
         Processes line-delimited JSON output to create Vulnerability, Technology,
         and Credential findings based on template tags and extracted results.
         """
+        # Parse each line of the JSON output as a separate finding
         data = [json.loads(line) for line in self.load_report_by_lines()]
         for item in data:
+            # Extract matcher information from Nuclei results
+            # Matcher provides specific details about what triggered the template
             matcher = None
             if item.get("extracted-results", []):
                 result = item.get("extracted-results", [])[0]
+                # Skip generic "security" results, use specific extracted data as matcher
                 if result not in ["security"]:
                     matcher = result
             elif item.get("matcher-name"):
                 matcher = item.get("matcher-name")
+            # Extract template metadata for finding classification
             info = item.get("info", {})
             name = info.get("name")
             description = info.get("description")
@@ -50,7 +55,10 @@ class Nuclei(BaseParser):
             - Matched at: we don't save in which path a vulnerability has been found
             - Remediation: save it in the vulnerability model and check if other tools provide that info
             """
+            # Classify findings based on Nuclei template tags
+            # Different tags indicate different types of security findings
             if "tech" in tags:
+                # Technology detection templates - create Technology findings
                 self.create_finding(
                     Technology,
                     name=matcher or name,
@@ -58,6 +66,7 @@ class Nuclei(BaseParser):
                     reference=reference[0] if reference else None,
                 )
             elif "default-login" in tags and item.get("meta"):
+                # Default credential detection templates - create Credential findings
                 self.create_finding(
                     Credential,
                     username=item.get("meta", {}).get("username"),
@@ -65,6 +74,8 @@ class Nuclei(BaseParser):
                     context=matcher or name,
                 )
             else:
+                # All other templates are treated as vulnerability findings
+                # Extract security classification data (severity, CVE, CWE)
                 severity = info.get("severity")
                 cve = info.get("classification", {}).get("cve-id")
                 cwe = info.get("classification", {}).get("cwe-id", [])

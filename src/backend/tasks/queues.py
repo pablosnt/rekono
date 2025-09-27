@@ -200,7 +200,10 @@ class TasksQueue(BaseScanQueue):
         Args:
             task (Task): The process task to process
         """
+        # Create execution plan for multi-step process with dependency management
         plan: list[PlanJob] = []
+        # Order steps by stage, input complexity, output complexity, and configuration ID
+        # This ensures proper execution order where simpler tools run before complex ones
         steps = (
             Step.objects.annotate(
                 max_input=Max("configuration__tool__arguments__inputs__type__id"),
@@ -210,34 +213,45 @@ class TasksQueue(BaseScanQueue):
             .order_by("configuration__stage", "max_input", "max_output", "configuration__id")
         )
         executions_queue = ExecutionsQueue()
+        # Build dependency graph for each step in the process
         for step in steps:
             item = PlanJob(step)
+            # Only include steps that can be executed at the current task intensity level
             if Intensity.objects.filter(tool=step.configuration.tool, value__lte=task.intensity).exists():
+                # Check dependencies against all previously planned jobs
+                # A dependency exists when a previous job's output matches this job's input type
                 for execution_job in plan:
                     for output in execution_job.outputs:
                         if output in item.inputs:
+                            # Add dependency to ensure proper execution order
                             if execution_job not in item.dependencies:
                                 item.add_dependency(execution_job)
-                            break
+                            break  # One matching output type is sufficient for dependency
                 plan.append(item)
             else:
+                # Skip tools that cannot run at the specified intensity level
                 Execution.objects.create(
                     task=task,
                     configuration=step.configuration,
                     status=Status.SKIPPED,
                     skipped_reason=f"Tool {step.configuration.tool.name} can't be executed with intensity {IntensityValue(task.intensity).name.capitalize()}",
                 )
+        # Execute the planned jobs with proper dependency management
         for execution_job in plan:
+            # Calculate execution parameters for this step's tool
             executions = TasksQueue.calculate_executions(
                 execution_job.step.configuration.tool,
-                [],
+                [],  # No findings from previous steps yet (will be resolved by dependencies)
                 task.target.target_ports.all(),
                 task.input_vulnerabilities.all(),
                 task.input_technologies.all(),
                 task.wordlists.all(),
             )
+            # Create and enqueue execution jobs for each parameter combination
             for parameters in executions:
                 execution = Execution.objects.create(task=task, configuration=execution_job.step.configuration)
+                # Enqueue execution with dependencies from all prerequisite jobs
+                # Dependencies ensure this execution waits for required inputs to be available
                 execution_job.add_job(
                     executions_queue.enqueue(
                         execution,
@@ -246,6 +260,7 @@ class TasksQueue(BaseScanQueue):
                         parameters.input_vulnerabilities,
                         parameters.input_technologies,
                         parameters.wordlists,
+                        # Flatten all dependency job lists into a single dependency list
                         dependencies=sum([d.jobs for d in execution_job.dependencies], []),
                     )
                 )

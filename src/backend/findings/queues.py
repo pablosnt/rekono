@@ -85,17 +85,19 @@ class FindingsQueue(BaseQueue):
             notifications = [SMTP(), Telegram()]
             # Process each finding individually
             for finding in findings:
-                # Keep finding active if auto_fix is enabled
+                # Reactivate previously fixed findings if auto-fix is enabled
+                # This ensures findings that reappear are marked as active again
                 if settings.auto_fix_findings and finding.is_fixed:
                     finding.__class__.objects.remove_fix(finding)
-                # Process through integrations
+                # Process findings through integrations that work on individual findings
                 for integration in integrations:
                     if integration.run_per_execution:
                         continue
                     integration.process_finding(execution, finding)
-                # Process alerts for the finding
+                # Check and trigger project alerts for this specific finding
                 for alert in execution.task.target.project.alerts.filter(enabled=True).order_by("-item").all():
                     if alert.must_be_triggered(execution, finding):
+                        # Send notifications through all configured notification platforms
                         for platform in notifications:
                             platform.process_alert(alert, finding)
             # Process findings through platforms that run per execution
@@ -103,9 +105,11 @@ class FindingsQueue(BaseQueue):
                 if not platform.run_per_execution:
                     continue
                 platform.process_findings(execution, findings)
-        # Handle automatic fixing of findings from same execution hash that are not longer detected
+        # Automatic fixing: mark findings as fixed if they're no longer detected in identical execution contexts
         if settings.auto_fix_findings:
             same_executions = Execution.objects.filter(hash=execution.hash, status=Status.COMPLETED)
+            # For each finding type, mark findings as fixed if they don't appear in the current execution
+            # but were found in previous executions with the same parameters
             for finding_type in [
                 OSINT,
                 Host,

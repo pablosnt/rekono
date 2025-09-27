@@ -110,6 +110,7 @@ class BaseExecutor(LoggingEntity):
         Raises:
             RuntimeError: If required arguments cannot be satisfied with available inputs
         """
+        # Initialize base parameters available to all tools (script path, command, intensity, output)
         parameters = {
             "script": (
                 (
@@ -129,9 +130,12 @@ class BaseExecutor(LoggingEntity):
             "intensity": self.intensity.argument,
             "output": self.report if self.execution.configuration.tool.output_format else "",
         }
+        # For each tool argument, find the best input source that satisfies the argument requirements
         for argument in self.execution.configuration.tool.arguments.all():
             for argument_input in argument.inputs.all().order_by("order"):
                 parsed_data: dict[str, Any] = {}
+                # Create a comprehensive list of all available input sources in priority order
+                # This includes findings, wordlists, authentications, targets, HTTP headers and user-provided parameters
                 for base_input in (
                     findings
                     + list(wordlists)
@@ -155,29 +159,40 @@ class BaseExecutor(LoggingEntity):
                     + list(self.execution.task.executor.http_headers.all())
                     + list(self.execution.task.target.http_headers.all())
                 ):
+                    # Check if this input matches the argument's fallback type (less preferred)
                     is_fallback = argument_input.type.fallback_model_class and isinstance(
                         base_input, argument_input.type.fallback_model_class
                     )
+                    # If we already have data from primary sources, skip fallback inputs
                     if is_fallback and parsed_data:
                         break
+                    # Check if this input matches the argument's primary type (preferred)
                     is_model = argument_input.type.model_class and isinstance(
                         base_input, argument_input.type.model_class
                     )
+                    # Skip inputs that don't match either primary or fallback types
                     if not is_model and not is_fallback:
                         continue
+                    # Apply input-specific filtering to ensure compatibility with tool requirements
                     if base_input.filter(argument_input, self.execution.task.target):
+                        # Parse the input data and accumulate results
                         parsed_data = base_input.parse(parsed_data)
+                        # Track which inputs are being used for this execution
                         if is_fallback:
                             self.targets_used_in_execution[base_input.__class__] = base_input
                         else:
                             self.findings_used_in_execution[base_input.__class__] = base_input
+                        # Store authentication credentials for later use
                         if isinstance(base_input, Authentication):
                             self.authentication = base_input
+                        # For single-value arguments, stop after finding the first valid input
                         if not argument.multiple:
                             break
+                # Stop searching for more argument inputs once we have valid data
                 if parsed_data:
                     break
             if parsed_data:
+                # Special handling for HTTP headers - format each header individually then join
                 if InputKeyword.HEADERS.name.lower() in parsed_data:
                     parameters[argument.name] = " ".join(
                         [
@@ -191,11 +206,14 @@ class BaseExecutor(LoggingEntity):
                         ]
                     )
                 else:
+                    # Standard parameter formatting using argument template with parsed data
                     parameters[argument.name] = argument.argument.format(**parsed_data)
             elif not argument.required:
                 parameters[argument.name] = ""
             else:
                 raise RuntimeError(f"Argument '{argument.name}' is required to execute tool '{argument.tool.name}'")
+        # Parse formatted command arguments into list, handling quoted strings properly
+        # Remove quotes from individual arguments to prevent shell escaping issues
         return [
             a.replace('"', "")
             for a in re.findall(
@@ -243,18 +261,24 @@ class BaseExecutor(LoggingEntity):
             dict[str, Any]: Environment variables for tool execution
         """
         environment = os.environ.copy()
+        # Ensure tool command is at the beginning of arguments list
         if self.execution.configuration.tool.command not in self.arguments:
             self.arguments.insert(0, self.execution.configuration.tool.command)
         else:
+            # Tool command found in arguments - extract environment variables from prefix
             index = self.arguments.index(self.execution.configuration.tool.command)
+            # Parse environment variable definitions that precede the tool command
             for definition in self.arguments[:index]:
                 if "=" in definition:
                     variable, value = definition.split("=", 1)
+                    # Clean variable value by removing quotes that might interfere with execution
                     environment[variable] = value.strip().replace("'", "").replace('"', "")
+            # Remove environment definitions from arguments, keeping only the tool command and its parameters
             self.arguments = self.arguments[index:]
         settings = Settings.objects.first()
         for proxy in model_to_dict(Settings).keys():
             if "_proxy" in proxy and getattr(settings, proxy) is not None:
+                # Add environment variables for proxy configuration
                 environment[proxy.upper()] = getattr(settings, proxy)
         return environment
 
@@ -276,6 +300,8 @@ class BaseExecutor(LoggingEntity):
             environment (dict[str, Any]): Environment variables for execution
         """
         self.logger.info(f"[Tool] Running: {' '.join(self.arguments)}")
+        # Determine output capture strategy based on tool configuration
+        # Use file-based output if tool has a specific format and report path isn't already in arguments
         stdout = (
             self.report
             if self.execution.configuration.tool.output_format
@@ -283,15 +309,19 @@ class BaseExecutor(LoggingEntity):
             else None
         )
         if stdout:
+            # File-based output: redirect tool output directly to report file
             with self.report.open("w") as _stdout:
                 # Stderr is discarded as the stdout file will be used as stdout
                 # and report, so stderr content would break the report format
                 process = subprocess.run(self.arguments, stdout=_stdout, env=environment, cwd=self.execution_directory)
+            # Read back the output for processing (ANSI cleanup, etc.)
             output = ""
             if self.report.is_file():
                 with self.report.open("r") as _output:
                     output = _output.read()
         else:
+            # Memory-based output: capture stdout/stderr in memory for immediate processing
+            # Merge stderr into stdout to capture all tool messages in one stream
             process = subprocess.run(
                 self.arguments,
                 env=environment,
@@ -301,11 +331,15 @@ class BaseExecutor(LoggingEntity):
                 text=True,
             )
             output = process.stdout
+        # Store file reference if tool produces structured output format
         if self.execution.configuration.tool.output_format and self.report.is_file():
             self.execution.output_file = self.report
-        # Remove ANSI colors from tool outputs
+        # Clean tool output by removing ANSI escape sequences (colors, formatting)
+        # This ensures consistent text processing for parsers and display
         self.execution.output_plain = re.sub(r"(\x9B|\x1B\[)[\d]*[ -\/]*[@-~]", "", output, flags=re.IGNORECASE)
         self.execution.save(update_fields=["output_plain", "output_file"])
+        # Handle execution completion based on tool exit code and configuration
+        # Some tools use non-zero exit codes for normal operation (e.g., findings detected)
         if not self.execution.configuration.tool.ignore_exit_code and process.returncode > 0:
             self.on_error()
         else:

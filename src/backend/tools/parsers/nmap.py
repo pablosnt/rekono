@@ -36,14 +36,19 @@ class Nmap(BaseParser):
         for nmap_host in report.hosts:
             if not nmap_host.is_up():
                 continue
+            # Analyze OS detection results and select the most accurate match
             os_detection = nmap_host.os_match_probabilities()
+            # Choose OS match with highest accuracy score
             selected_os = max(os_detection, key=lambda o: o.accuracy) if os_detection else None
+            # Get the most accurate OS class from the selected OS match
             selected_class = max(selected_os.osclasses, key=lambda c: c.accuracy) if selected_os else None
+            # Map Nmap OS family to our HostOS enum, defaulting to OTHER for unknown families
             os_type = HostOS.OTHER
             if selected_class:
                 try:
                     os_type = HostOS[selected_class.osfamily.upper()]
                 except KeyError:
+                    # Keep default OTHER type if OS family not recognized
                     pass
             host = self.create_finding(
                 Host, ip=nmap_host.address, os=selected_os.name if selected_os else None, os_type=os_type
@@ -58,6 +63,8 @@ class Nmap(BaseParser):
                     service=service.service,
                 )
                 technologies = []
+                # Extract technology information from service fingerprinting results
+                # Only create Technology finding if both product name and version are available
                 if "product" in service.service_dict and "version" in service.service_dict:
                     technology = self.create_finding(
                         Technology,
@@ -66,6 +73,7 @@ class Nmap(BaseParser):
                         version=service.service_dict["version"],
                     )
                     technologies.append(technology)
+                    # Process NSE scripts that provide additional vulnerability and service details
                     if service.scripts_results:
                         self._parse_nse_scripts(service.scripts_results, technology)
             if nmap_host.scripts_results:
@@ -78,13 +86,17 @@ class Nmap(BaseParser):
             results (Any): NSE script results from Nmap output
             technologies (list[Technology] | Technology): Associated technology findings
         """
+        # Normalize technology input to handle both single Technology objects and lists
         technology = technologies if isinstance(technologies, Technology) else technologies[0]
+        # Extract SMB-specific technologies for SMB-related vulnerabilities
+        # SMB services use specific service names in Nmap output
         smb_technologies = (
             [technologies]
             if isinstance(technologies, Technology)
             else [t for t in technologies if t.port.service in ["microsoft-ds", "netbios-ssn"]]
         )
         smb_technology = smb_technologies[0] if smb_technologies else None
+        # Process each NSE script result based on its ID (script type)
         for script in results:
             match script.get("id"):
                 case "vulners":
@@ -174,10 +186,14 @@ class Nmap(BaseParser):
                                 context="SMB user",
                             )
                 case "smb-enum-shares":
+                    # Process SMB share enumeration results from Nmap's smb-enum-shares script
                     for share, fields in script.get("elements", {}).items():
+                        # Skip shares that are metadata entries (contain account_used)
                         if "account_used" not in share:
+                            # Extract clean share name from UNC path format (\\server\share -> share)
                             path = share.rsplit("\\", 1)[1] if "\\" in share else share
                             anonymous = fields.get("Anonymous access")
+                            # Create a Path finding for each discovered SMB share
                             self.create_finding(
                                 Path,
                                 port=smb_technology.port if smb_technology else None,
@@ -190,6 +206,8 @@ class Nmap(BaseParser):
                                 ).strip(),
                                 type=PathType.SHARE,
                             )
+                            # Check for security issues with anonymous access to shares
+                            # READ access is high severity, WRITE access is critical
                             if "READ" in anonymous or "WRITE" in anonymous:
                                 self.create_finding(
                                     Vulnerability,

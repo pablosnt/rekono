@@ -214,13 +214,18 @@ class OwnerPermission(BasePermission):
         Returns:
             bool: True if access is permitted, False otherwise.
         """
+        # If object has no owner, allow admin override regardless of configuration
+        # This handles objects that were created without proper ownership assignment
         if not getattr(instance, owner_field):
             allow_admin = True
+        # Evaluate permission based on multiple criteria with OR logic
         return (
-            not instance
-            or request.method == "GET"
-            or (hasattr(instance, owner_field) and getattr(instance, owner_field) == request.user)
-            or (allow_admin and IsAdmin().has_permission(request, view))
+            not instance  # No instance means no restriction
+            or request.method == "GET"  # Read operations are always allowed
+            or (
+                hasattr(instance, owner_field) and getattr(instance, owner_field) == request.user
+            )  # User owns the object
+            or (allow_admin and IsAdmin().has_permission(request, view))  # Admin override if allowed
         )
 
     def has_permission(self, request: Request, view: View) -> bool:
@@ -237,12 +242,14 @@ class OwnerPermission(BasePermission):
         Returns:
             bool: True if access is permitted, False otherwise.
         """
+        # Special case: When creating a Step, check ownership of the parent Process
+        # This prevents users from adding steps to processes they don't own
         return (
             self._has_object_permission(
                 request, view, Process.objects.get(pk=request.data.get("process_id")), "owner", True
             )
             if view.__class__.__name__ == "StepViewSet" and request.method == "POST"
-            else True
+            else True  # All other operations are handled by has_object_permission
         )
 
     def has_object_permission(self, request: Request, view: View, obj: Any) -> bool:

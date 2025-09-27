@@ -114,9 +114,14 @@ class ExecutionsQueue(BaseScanQueue):
         Returns:
             tuple[Execution, list[Finding]]: Execution and resulting findings
         """
+        # Initialize the tool-specific executor for this execution
         executor: BaseExecutor = execution.configuration.tool.executor_class(execution)
         current_job = rq.get_current_job()
+        # Handle dependency resolution for tool chaining workflows
+        # If no findings provided but dependencies exist, extract findings from dependency results
         if not findings and current_job and current_job._dependency_ids:
+            # Resolve findings from completed dependency jobs and create additional executions if needed
+            # This enables automatic tool chaining where tool outputs become inputs for subsequent tools
             _execution = ExecutionsQueue._get_findings_from_dependencies(
                 executor,
                 target_ports,
@@ -125,6 +130,7 @@ class ExecutionsQueue(BaseScanQueue):
                 wordlists,
                 current_job,
             )
+            # Execute the tool with findings from dependencies
             executor.execute(
                 _execution.findings,
                 _execution.target_ports,
@@ -133,9 +139,12 @@ class ExecutionsQueue(BaseScanQueue):
                 _execution.wordlists,
             )
         else:
+            # Execute the tool with provided findings (standard execution path)
             executor.execute(findings, target_ports, input_vulnerabilities, input_technologies, wordlists)
+        # Parse the tool output to extract security findings
         parser: BaseParser = execution.configuration.tool.parser_class(executor, execution.output_plain)
         parser.parse()
+        # Queue the extracted findings for background processing (alerts, integrations, etc.)
         FindingsQueue().enqueue(execution, parser.findings)
         return execution, parser.findings
 
