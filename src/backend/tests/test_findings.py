@@ -82,6 +82,10 @@ class FindingTest(ApiTest):
             for key, value in self.expected_defectdojo.items():
                 self.assertEqual(value, parsed[key])
 
+    @cached_property
+    def object(self) -> Finding:
+        return self.model.objects.first()
+
 
 class OSINTTest(FindingTest, TestCase):
     model = OSINT
@@ -180,7 +184,7 @@ class CredentialTest(FindingTest, TestCase):
         "severity": Severity.HIGH,
     }
     expected_string = (
-        f"10.10.10.10 - 80 - {Protocol.TCP.value} - WordPress - 1.0.0 - admin10@rekono.com - admin10 - admin"
+        f"10.10.10.10 - 80 - {Protocol.TCP.value} - WordPress - 1.0.10 - admin10@rekono.com - admin10 - admin"
     )
 
 
@@ -194,7 +198,7 @@ class VulnerabilityTest(FindingTest, TestCase):
         "cve": "CVE-2025-3010",
         "cwe": 200,
     }
-    expected_string = f"10.10.10.10 - 80 - {Protocol.TCP.value} - WordPress - 1.0.0 - Test - CVE-2025-3010"
+    expected_string = f"10.10.10.10 - 80 - {Protocol.TCP.value} - WordPress - 1.0.10 - Vulnerability 10 - CVE-2025-3010"
 
 
 class ExploitTest(FindingTest, TestCase):
@@ -206,4 +210,4 @@ class ExploitTest(FindingTest, TestCase):
         "severity": Severity.MEDIUM,
         "references": "https://www.exploit-db.com/exploits/1",
     }
-    expected_string = f"10.10.10.10 - 80 - {Protocol.TCP.value} - WordPress - 1.0.0 - Test - CVE-2025-3010 - 1 - https://www.exploit-db.com/exploits/1"
+    expected_string = f"10.10.10.10 - 80 - {Protocol.TCP.value} - WordPress - 1.0.10 - Vulnerability 10 - CVE-2025-3010 - 1 - https://www.exploit-db.com/exploits/1"

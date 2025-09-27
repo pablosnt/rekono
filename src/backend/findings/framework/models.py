@@ -76,8 +76,6 @@ class FindingManager(Manager):
         Returns:
             Any | QuerySet: The fixed finding(s) with updated status.
         """
-        if not findings:
-            return findings
         if isinstance(findings, Finding):
             findings.is_fixed = True
             findings.auto_fixed = fixed_by is None

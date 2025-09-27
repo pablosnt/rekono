@@ -124,7 +124,6 @@ class BaseParser:
         if self.report:
             with self.report.open("r", encoding="utf-8") as report:
                 return json.load(report)
-        return None
 
     def load_xml_report(self) -> Any | None:
         """Load and parse XML report file using secure XML parser.

@@ -80,7 +80,6 @@ class BaseModel(Model, LoggingEntity):
                 else:
                     return None
             return project
-        return None
 
     def __str__(self) -> str:
         """Return string representation of the model instance.
@@ -268,7 +267,7 @@ class BaseInput(BaseModel):
                         str(expected).strip().lower(), str(value).strip().lower(), is_negative, self.contains
                     )
                 )
-            except (ValueError, KeyError):
+            except (ValueError, KeyError):  # pragma: no cover
                 # If conversion fails, the filter does not match
                 return False
 
@@ -359,7 +358,6 @@ class BaseInput(BaseModel):
                 return url_to_test
             except Exception:
                 continue
-        return None
 
     def filter(self, argument_input: Any, target: Any = None) -> bool:
         """Apply complex filtering logic based on tool argument requirements.

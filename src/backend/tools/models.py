@@ -197,7 +197,6 @@ class Tool(BaseLike):
                 )
                 if version:
                     return version.group()
-        return None
 
     def __str__(self) -> str:
         """Return string representation of the tool.

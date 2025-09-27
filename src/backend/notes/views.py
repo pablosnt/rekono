@@ -82,7 +82,6 @@ class NoteViewSet(LikeViewSet):
         for link in links:
             if data.get(link):
                 return cast(BaseModel, data.get(link)).parent_project
-        return None
 
     def get_queryset(self) -> QuerySet:
         """Filter queryset to show only accessible notes.
@@ -153,4 +152,4 @@ class NoteViewSet(LikeViewSet):
             # Copy all tags from the original note
             fork.tags.set(note.tags.all())
             return Response(self.get_serializer(instance=fork).data, status=HTTP_201_CREATED)
-        return Response(status=HTTP_404_NOT_FOUND)
+        return Response(status=HTTP_404_NOT_FOUND)  # TOTEST

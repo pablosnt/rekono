@@ -339,7 +339,6 @@ class RekonoConfig:
             filepath = path / default_filename
             if filepath.is_file():
                 return filepath
-        return None
 
     @property
     def frontend_url(self) -> str:

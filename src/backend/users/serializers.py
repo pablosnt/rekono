@@ -436,7 +436,6 @@ class RequestPasswordResetSerializer(Serializer):
             None: Always returns None to prevent user enumeration
         """
         threading.Thread(target=self._save_in_thread, args=(self.validated_data.get("email"),)).start()
-        return None
 
 
 class EnableMfaSerializer(MfaSerializer):
