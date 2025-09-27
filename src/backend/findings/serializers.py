@@ -281,18 +281,19 @@ class VulnerabilitySerializer(TriageFindingSerializer):
         Returns:
             Vulnerability: Updated vulnerability with triage propagation.
         """
-        new_instance = super().update(instance, validated_data)
+        original_triage_status = instance.triage_status
+        instance = super().update(instance, validated_data)
         # This is the only case of two related finding types that can be triaged
-        if instance.triage_status != new_instance.triage_status:
+        if original_triage_status != instance.triage_status:  # TOTEST
             exploits_triage_comment = (
                 "Automatically triaged after triaging the related vulnerability as a false positive"
             )
-            if new_instance.triage_status == TriageStatus.FALSE_POSITIVE:
+            if instance.triage_status == TriageStatus.FALSE_POSITIVE:
                 exploits_triage_status = TriageStatus.FALSE_POSITIVE
-                exploits_queryset = new_instance.exploit.all()
-            elif instance.triage_status == TriageStatus.FALSE_POSITIVE:
+                exploits_queryset = instance.exploit.all()
+            elif original_triage_status == TriageStatus.FALSE_POSITIVE:
                 exploits_triage_status = TriageStatus.UNTRIAGED
-                exploits_queryset = new_instance.exploit.filter(
+                exploits_queryset = instance.exploit.filter(
                     triage_status=TriageStatus.FALSE_POSITIVE, triage_comment=exploits_triage_comment
                 )
                 exploits_triage_comment = (
@@ -301,10 +302,10 @@ class VulnerabilitySerializer(TriageFindingSerializer):
             exploits_queryset.update(
                 triage_status=exploits_triage_status,
                 triage_comment=exploits_triage_comment,
-                triage_by=new_instance.triage_by,
-                triage_date=new_instance.triage_date,
+                triage_by=instance.triage_by,
+                triage_date=instance.triage_date,
             )
-        return new_instance
+        return instance
 
 
 class ExploitSerializer(TriageFindingSerializer):

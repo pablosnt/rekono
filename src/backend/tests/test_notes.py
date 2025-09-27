@@ -42,6 +42,7 @@ class NoteTest(ApiTest, TestCase):
         PostApiTestCase(["admin2", "auditor2", Role.READER], 403, public_note),
         PostApiTestCase(["admin1", "auditor1"], 400, invalid_note),
         PostApiTestCase(["admin1"], 400, {**private_note, "project": None}),
+        PostApiTestCase(["admin1"], 400, {**public_note, "project": None, "target": None}),
         PostApiTestCase(
             ["admin1"],
             data=private_note,

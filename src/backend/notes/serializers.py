@@ -120,7 +120,7 @@ class NoteSerializer(TaggitSerializer, LikeSerializer):
         attrs = super().validate(attrs)
         # Find the first (most specific) entity relationship in the data
         # Reverse order ensures we get the most specific entity first
-        data_links = [link for link in reversed(links) if attrs.get(link)]
+        data_links = [link for link in reversed(links) if attrs.get(link) is not None]
         if len(data_links) > 0:
             # Clear all other entity relationships to ensure only one is active
             for link in links:
@@ -128,9 +128,6 @@ class NoteSerializer(TaggitSerializer, LikeSerializer):
                     attrs[link] = None
             # Set project context from the active entity
             attrs["project"] = cast(BaseModel, attrs.get(data_links[0])).parent_project
-        # Ensure a project relationship exists
-        if not attrs.get("project"):
-            raise ValidationError("A relationship with a project entity is needed", code="project")
         return attrs
 
     def update(self, instance: Note, validated_data: dict[str, Any]) -> Note:
